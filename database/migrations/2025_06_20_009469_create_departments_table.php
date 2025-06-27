@@ -8,17 +8,18 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('checklist_items', function (Blueprint $table) {
+        Schema::create('departments', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('is_checked')->default(false);
-            $table->foreignId('department_id')->constrained()->onDelete('cascade');
+            $table->text('description')->nullable();
+            $table->string('email');
+            $table->foreignId('center_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('checklist_items');
+        Schema::dropIfExists('departments');
     }
 };

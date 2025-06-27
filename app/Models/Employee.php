@@ -13,7 +13,6 @@ class Employee extends Model
         'id',
         'full_name',
         'years_of_service',
-        'department_id',
         'direct_manager_id',
         'tech_manager_id',
         'national_number',

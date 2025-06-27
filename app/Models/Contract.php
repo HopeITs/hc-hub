@@ -14,6 +14,8 @@ class Contract extends Model
         'employee_id',
         'position_id',
         'contract_type_id',
+        'department_id',
+        'jobLevel_id',
         'start_date',
         'end_date',
         'terminated_at',
@@ -44,4 +46,15 @@ class Contract extends Model
     {
         return $this->hasMany(LeaveBalance::class);
     }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function jobLevel()
+    {
+        return $this->hasMany(jobLevel::class);
+    }
+
 }

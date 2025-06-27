@@ -13,7 +13,6 @@ class Department extends Model
         'id',
         'name',
         'description',
-        'grade',
         'email'
     ];
 
@@ -30,6 +29,11 @@ class Department extends Model
     public function checklistItem()
     {
         return $this->hasMany(ChecklistItem::class);
+    }
+
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class);
     }
 
 }

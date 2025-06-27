@@ -10,6 +10,7 @@ class LeaveBalance extends Model
     use HasFactory;
 
     protected $fillable = [
+        'leaveBalance_id',
         'contract_id',
         'type_id',
         'deserved',

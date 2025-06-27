@@ -12,8 +12,8 @@ class ChecklistItem extends Model
     protected $fillable = [
         'id',
         'name',
-        'is_checked',
-        'department_id'
+        'order',
+        // 'department_id'
     ];
 
     public function checklist()
@@ -21,9 +21,9 @@ class ChecklistItem extends Model
         return $this->belongsTo(Checklist::class);
     }
 
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
+    // public function department()
+    // {
+    //     return $this->belongsTo(Department::class);
+    // }
 
 }

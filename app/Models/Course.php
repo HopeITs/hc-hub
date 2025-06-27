@@ -14,9 +14,7 @@ class Course extends Model
         'employee_id',
         'title',
         'issuing_organization',
-        'provider',
-        'start_date',
-        'end_date',
+        'date',
         'is_approved'
     ];
 

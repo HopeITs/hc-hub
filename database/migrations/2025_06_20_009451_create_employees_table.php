@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->string('full_name');
             $table->integer('years_of_service')->default(0);
-            $table->foreignId('department_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('direct_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->foreignId('tech_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->string('national_number')->unique();

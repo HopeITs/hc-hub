@@ -12,10 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('title');
-            $table->string('issuing_organization')();
-            $table->string('provider')();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
+            $table->string('issuing_organization');
+            $table->date('date')->nullable();
             $table->boolean('is_approved')->default(false);
             $table->timestamps();
         });

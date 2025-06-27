@@ -13,6 +13,7 @@ class Checklist extends Model
         'id',
         'item_id',
         'employee_id',
+        'deliverable_id',
         'brand',
         'model',
         'serial',
