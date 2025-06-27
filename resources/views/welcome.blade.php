@@ -1,278 +1,6097 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en">
 
-        <title>Laravel</title>
+<head>
 
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <!-- Meta Tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | SmartHR - Advanced Bootstrap 5 Multipurpose Admin Dashboard Template for HRM, Payroll & CRM</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+    <meta name="description" content="SmartHR - An advanced Bootstrap 5 admin dashboard template for HRM and CRM. Ideal for managing employee records, payroll, attendance, recruitment, and team performance with an intuitive and responsive design. Perfect for HR teams and business managers looking to streamline workforce management.">
+    <meta name="keywords" content="HR dashboard template, HRM admin template, Bootstrap 5 HR dashboard, workforce management dashboard, employee management system, payroll dashboard, HR analytics, admin dashboard, CRM admin template, human resources management, HR admin template, team management dashboard, recruitment dashboard, employee attendance system, performance management, HR CRM, HR dashboard HTML, Bootstrap HR template, employee engagement, HR software, project management dashboard">
+    <meta name="author" content="Dreams Technologies">
+    <meta name="robots" content="index, follow">
 
-        <!-- Styles -->
-        <style>
-            /*! tailwindcss v4.0.14 | MIT License | https://tailwindcss.com */
-            @layer theme{:root,:host{--font-sans:ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--color-green-600:oklch(.627 .194 149.214);--color-gray-900:oklch(.21 .034 264.665);--color-zinc-50:oklch(.985 0 0);--color-zinc-200:oklch(.92 .004 286.32);--color-zinc-400:oklch(.705 .015 286.067);--color-zinc-500:oklch(.552 .016 285.938);--color-zinc-600:oklch(.442 .017 285.786);--color-zinc-700:oklch(.37 .013 285.805);--color-zinc-800:oklch(.274 .006 286.033);--color-zinc-900:oklch(.21 .006 285.885);--color-neutral-100:oklch(.97 0 0);--color-neutral-200:oklch(.922 0 0);--color-neutral-700:oklch(.371 0 0);--color-neutral-800:oklch(.269 0 0);--color-neutral-900:oklch(.205 0 0);--color-neutral-950:oklch(.145 0 0);--color-stone-800:oklch(.268 .007 34.298);--color-stone-950:oklch(.147 .004 49.25);--color-black:#000;--color-white:#fff;--spacing:.25rem;--container-sm:24rem;--container-md:28rem;--container-lg:32rem;--container-4xl:56rem;--text-xs:.75rem;--text-xs--line-height:calc(1/.75);--text-sm:.875rem;--text-sm--line-height:calc(1.25/.875);--text-lg:1.125rem;--text-lg--line-height:calc(1.75/1.125);--font-weight-normal:400;--font-weight-medium:500;--font-weight-semibold:600;--leading-tight:1.25;--leading-normal:1.5;--radius-sm:.25rem;--radius-md:.375rem;--radius-lg:.5rem;--radius-xl:.75rem;--aspect-video:16/9;--default-transition-duration:.15s;--default-transition-timing-function:cubic-bezier(.4,0,.2,1);--default-font-family:var(--font-sans);--default-font-feature-settings:var(--font-sans--font-feature-settings);--default-font-variation-settings:var(--font-sans--font-variation-settings);--default-mono-font-family:var(--font-mono);--default-mono-font-feature-settings:var(--font-mono--font-feature-settings);--default-mono-font-variation-settings:var(--font-mono--font-variation-settings)}}@layer base{*,:after,:before,::backdrop{box-sizing:border-box;border:0 solid;margin:0;padding:0}::file-selector-button{box-sizing:border-box;border:0 solid;margin:0;padding:0}html,:host{-webkit-text-size-adjust:100%;tab-size:4;line-height:1.5;font-family:var(--default-font-family,ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji");font-feature-settings:var(--default-font-feature-settings,normal);font-variation-settings:var(--default-font-variation-settings,normal);-webkit-tap-highlight-color:transparent}body{line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;-webkit-text-decoration:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var(--default-mono-font-family,ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace);font-feature-settings:var(--default-mono-font-feature-settings,normal);font-variation-settings:var(--default-mono-font-variation-settings,normal);font-size:1em}small{font-size:80%}sub,sup{vertical-align:baseline;font-size:75%;line-height:0;position:relative}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{vertical-align:middle;display:block}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;opacity:1;background-color:#0000;border-radius:0}::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;opacity:1;background-color:#0000;border-radius:0}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1;color:color-mix(in oklab,currentColor 50%,transparent)}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit{padding-block:0}::-webkit-datetime-edit-year-field{padding-block:0}::-webkit-datetime-edit-month-field{padding-block:0}::-webkit-datetime-edit-day-field{padding-block:0}::-webkit-datetime-edit-hour-field{padding-block:0}::-webkit-datetime-edit-minute-field{padding-block:0}::-webkit-datetime-edit-second-field{padding-block:0}::-webkit-datetime-edit-millisecond-field{padding-block:0}::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]){appearance:button}::file-selector-button{appearance:button}::-webkit-inner-spin-button{height:auto}::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}}@layer components;@layer utilities{.sr-only{clip:rect(0,0,0,0);white-space:nowrap;border-width:0;width:1px;height:1px;margin:-1px;padding:0;position:absolute;overflow:hidden}.absolute{position:absolute}.relative{position:relative}.static{position:static}.sticky{position:sticky}.inset-0{inset:calc(var(--spacing)*0)}.inset-y-\[3px\]{inset-block:3px}.start-0{inset-inline-start:calc(var(--spacing)*0)}.end-0{inset-inline-end:calc(var(--spacing)*0)}.top-0{top:calc(var(--spacing)*0)}.z-20{z-index:20}.container{width:100%}@media (width>=40rem){.container{max-width:40rem}}@media (width>=48rem){.container{max-width:48rem}}@media (width>=64rem){.container{max-width:64rem}}@media (width>=80rem){.container{max-width:80rem}}@media (width>=96rem){.container{max-width:96rem}}.mx-auto{margin-inline:auto}.my-6{margin-block:calc(var(--spacing)*6)}.-ms-8{margin-inline-start:calc(var(--spacing)*-8)}.ms-1{margin-inline-start:calc(var(--spacing)*1)}.ms-2{margin-inline-start:calc(var(--spacing)*2)}.ms-4{margin-inline-start:calc(var(--spacing)*4)}.me-1\.5{margin-inline-end:calc(var(--spacing)*1.5)}.me-2{margin-inline-end:calc(var(--spacing)*2)}.me-3{margin-inline-end:calc(var(--spacing)*3)}.me-5{margin-inline-end:calc(var(--spacing)*5)}.me-10{margin-inline-end:calc(var(--spacing)*10)}.-mt-\[4\.9rem\]{margin-top:-4.9rem}.mt-2{margin-top:calc(var(--spacing)*2)}.mt-4{margin-top:calc(var(--spacing)*4)}.mt-5{margin-top:calc(var(--spacing)*5)}.mt-6{margin-top:calc(var(--spacing)*6)}.mt-10{margin-top:calc(var(--spacing)*10)}.mt-auto{margin-top:auto}.-mb-px{margin-bottom:-1px}.mb-0\.5{margin-bottom:calc(var(--spacing)*.5)}.mb-1{margin-bottom:calc(var(--spacing)*1)}.mb-2{margin-bottom:calc(var(--spacing)*2)}.mb-4{margin-bottom:calc(var(--spacing)*4)}.mb-5{margin-bottom:calc(var(--spacing)*5)}.mb-6{margin-bottom:calc(var(--spacing)*6)}.mb-\[2px\]{margin-bottom:2px}.block{display:block}.contents{display:contents}.flex{display:flex}.grid{display:grid}.hidden{display:none}.inline-block{display:inline-block}.inline-flex{display:inline-flex}.table{display:table}.aspect-\[335\/376\]{aspect-ratio:335/376}.aspect-square{aspect-ratio:1}.aspect-video{aspect-ratio:var(--aspect-video)}.size-3\!{width:calc(var(--spacing)*3)!important;height:calc(var(--spacing)*3)!important}.size-5{width:calc(var(--spacing)*5);height:calc(var(--spacing)*5)}.size-8{width:calc(var(--spacing)*8);height:calc(var(--spacing)*8)}.size-9{width:calc(var(--spacing)*9);height:calc(var(--spacing)*9)}.size-full{width:100%;height:100%}.\!h-10{height:calc(var(--spacing)*10)!important}.h-1\.5{height:calc(var(--spacing)*1.5)}.h-2\.5{height:calc(var(--spacing)*2.5)}.h-3\.5{height:calc(var(--spacing)*3.5)}.h-7{height:calc(var(--spacing)*7)}.h-8{height:calc(var(--spacing)*8)}.h-9{height:calc(var(--spacing)*9)}.h-10{height:calc(var(--spacing)*10)}.h-14\.5{height:calc(var(--spacing)*14.5)}.h-dvh{height:100dvh}.h-full{height:100%}.min-h-screen{min-height:100vh}.min-h-svh{min-height:100svh}.w-1\.5{width:calc(var(--spacing)*1.5)}.w-2\.5{width:calc(var(--spacing)*2.5)}.w-3\.5{width:calc(var(--spacing)*3.5)}.w-8{width:calc(var(--spacing)*8)}.w-9{width:calc(var(--spacing)*9)}.w-10{width:calc(var(--spacing)*10)}.w-\[220px\]{width:220px}.w-\[448px\]{width:448px}.w-full{width:100%}.w-px{width:1px}.max-w-\[335px\]{max-width:335px}.max-w-lg{max-width:var(--container-lg)}.max-w-md{max-width:var(--container-md)}.max-w-none{max-width:none}.max-w-sm{max-width:var(--container-sm)}.flex-1{flex:1}.shrink-0{flex-shrink:0}.translate-y-0{--tw-translate-y:calc(var(--spacing)*0);translate:var(--tw-translate-x)var(--tw-translate-y)}.cursor-pointer{cursor:pointer}.auto-rows-min{grid-auto-rows:min-content}.flex-col{flex-direction:column}.flex-col-reverse{flex-direction:column-reverse}.items-center{align-items:center}.items-start{align-items:flex-start}.justify-between{justify-content:space-between}.justify-center{justify-content:center}.justify-end{justify-content:flex-end}.gap-2{gap:calc(var(--spacing)*2)}.gap-3{gap:calc(var(--spacing)*3)}.gap-4{gap:calc(var(--spacing)*4)}.gap-6{gap:calc(var(--spacing)*6)}:where(.space-y-2>:not(:last-child)){--tw-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing)*2)*var(--tw-space-y-reverse));margin-block-end:calc(calc(var(--spacing)*2)*calc(1 - var(--tw-space-y-reverse)))}:where(.space-y-3>:not(:last-child)){--tw-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing)*3)*var(--tw-space-y-reverse));margin-block-end:calc(calc(var(--spacing)*3)*calc(1 - var(--tw-space-y-reverse)))}:where(.space-y-6>:not(:last-child)){--tw-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing)*6)*var(--tw-space-y-reverse));margin-block-end:calc(calc(var(--spacing)*6)*calc(1 - var(--tw-space-y-reverse)))}:where(.space-y-\[2px\]>:not(:last-child)){--tw-space-y-reverse:0;margin-block-start:calc(2px*var(--tw-space-y-reverse));margin-block-end:calc(2px*calc(1 - var(--tw-space-y-reverse)))}:where(.space-x-0\.5>:not(:last-child)){--tw-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing)*.5)*var(--tw-space-x-reverse));margin-inline-end:calc(calc(var(--spacing)*.5)*calc(1 - var(--tw-space-x-reverse)))}:where(.space-x-1>:not(:last-child)){--tw-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing)*1)*var(--tw-space-x-reverse));margin-inline-end:calc(calc(var(--spacing)*1)*calc(1 - var(--tw-space-x-reverse)))}:where(.space-x-2>:not(:last-child)){--tw-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing)*2)*var(--tw-space-x-reverse));margin-inline-end:calc(calc(var(--spacing)*2)*calc(1 - var(--tw-space-x-reverse)))}.self-stretch{align-self:stretch}.truncate{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.overflow-hidden{overflow:hidden}.rounded-full{border-radius:3.40282e38px}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.rounded-sm{border-radius:var(--radius-sm)}.rounded-xl{border-radius:var(--radius-xl)}.rounded-ee-lg{border-end-end-radius:var(--radius-lg)}.rounded-es-lg{border-end-start-radius:var(--radius-lg)}.rounded-t-lg{border-top-left-radius:var(--radius-lg);border-top-right-radius:var(--radius-lg)}.border{border-style:var(--tw-border-style);border-width:1px}.border-r{border-right-style:var(--tw-border-style);border-right-width:1px}.border-b{border-bottom-style:var(--tw-border-style);border-bottom-width:1px}.border-\[\#19140035\]{border-color:#19140035}.border-\[\#e3e3e0\]{border-color:#e3e3e0}.border-black{border-color:var(--color-black)}.border-neutral-200{border-color:var(--color-neutral-200)}.border-transparent{border-color:#0000}.border-zinc-200{border-color:var(--color-zinc-200)}.bg-\[\#1b1b18\]{background-color:#1b1b18}.bg-\[\#FDFDFC\]{background-color:#fdfdfc}.bg-\[\#dbdbd7\]{background-color:#dbdbd7}.bg-\[\#fff2f2\]{background-color:#fff2f2}.bg-neutral-100{background-color:var(--color-neutral-100)}.bg-neutral-200{background-color:var(--color-neutral-200)}.bg-neutral-900{background-color:var(--color-neutral-900)}.bg-white{background-color:var(--color-white)}.bg-zinc-50{background-color:var(--color-zinc-50)}.bg-zinc-200{background-color:var(--color-zinc-200)}.fill-current{fill:currentColor}.stroke-gray-900\/20{stroke:color-mix(in oklab,var(--color-gray-900)20%,transparent)}.p-0{padding:calc(var(--spacing)*0)}.p-6{padding:calc(var(--spacing)*6)}.p-10{padding:calc(var(--spacing)*10)}.px-1{padding-inline:calc(var(--spacing)*1)}.px-5{padding-inline:calc(var(--spacing)*5)}.px-8{padding-inline:calc(var(--spacing)*8)}.px-10{padding-inline:calc(var(--spacing)*10)}.py-0\!{padding-block:calc(var(--spacing)*0)!important}.py-1{padding-block:calc(var(--spacing)*1)}.py-1\.5{padding-block:calc(var(--spacing)*1.5)}.py-2{padding-block:calc(var(--spacing)*2)}.py-8{padding-block:calc(var(--spacing)*8)}.ps-3{padding-inline-start:calc(var(--spacing)*3)}.ps-7{padding-inline-start:calc(var(--spacing)*7)}.pe-4{padding-inline-end:calc(var(--spacing)*4)}.pb-4{padding-bottom:calc(var(--spacing)*4)}.pb-12{padding-bottom:calc(var(--spacing)*12)}.text-center{text-align:center}.text-start{text-align:start}.text-lg{font-size:var(--text-lg);line-height:var(--tw-leading,var(--text-lg--line-height))}.text-sm{font-size:var(--text-sm);line-height:var(--tw-leading,var(--text-sm--line-height))}.text-xs{font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height))}.text-\[13px\]{font-size:13px}.leading-\[20px\]{--tw-leading:20px;line-height:20px}.leading-none{--tw-leading:1;line-height:1}.leading-normal{--tw-leading:var(--leading-normal);line-height:var(--leading-normal)}.leading-tight{--tw-leading:var(--leading-tight);line-height:var(--leading-tight)}.font-medium{--tw-font-weight:var(--font-weight-medium);font-weight:var(--font-weight-medium)}.font-normal{--tw-font-weight:var(--font-weight-normal);font-weight:var(--font-weight-normal)}.font-semibold{--tw-font-weight:var(--font-weight-semibold);font-weight:var(--font-weight-semibold)}.\!text-green-600{color:var(--color-green-600)!important}.text-\[\#1b1b18\]{color:#1b1b18}.text-\[\#706f6c\]{color:#706f6c}.text-\[\#F53003\],.text-\[\#f53003\]{color:#f53003}.text-black{color:var(--color-black)}.text-green-600{color:var(--color-green-600)}.text-stone-800{color:var(--color-stone-800)}.text-white{color:var(--color-white)}.text-zinc-400{color:var(--color-zinc-400)}.text-zinc-500{color:var(--color-zinc-500)}.text-zinc-600{color:var(--color-zinc-600)}.lowercase{text-transform:lowercase}.underline{text-decoration-line:underline}.underline-offset-4{text-underline-offset:4px}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.opacity-100{opacity:1}.shadow-\[0px_0px_1px_0px_rgba\(0\,0\,0\,0\.03\)\,0px_1px_2px_0px_rgba\(0\,0\,0\,0\.06\)\]{--tw-shadow:0px 0px 1px 0px var(--tw-shadow-color,#00000008),0px 1px 2px 0px var(--tw-shadow-color,#0000000f);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.shadow-\[inset_0px_0px_0px_1px_rgba\(26\,26\,0\,0\.16\)\]{--tw-shadow:inset 0px 0px 0px 1px var(--tw-shadow-color,#1a1a0029);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.shadow-xs{--tw-shadow:0 1px 2px 0 var(--tw-shadow-color,#0000000d);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.outline{outline-style:var(--tw-outline-style);outline-width:1px}.transition-all{transition-property:all;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));transition-duration:var(--tw-duration,var(--default-transition-duration))}.transition-opacity{transition-property:opacity;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));transition-duration:var(--tw-duration,var(--default-transition-duration))}.delay-300{transition-delay:.3s}.duration-750{--tw-duration:.75s;transition-duration:.75s}.not-has-\[nav\]\:hidden:not(:has(:is(nav))){display:none}.group-data-open\/disclosure-button\:block:is(:where(.group\/disclosure-button)[data-open] *){display:block}.group-data-open\/disclosure-button\:hidden:is(:where(.group\/disclosure-button)[data-open] *){display:none}.before\:absolute:before{content:var(--tw-content);position:absolute}.before\:start-\[0\.4rem\]:before{content:var(--tw-content);inset-inline-start:.4rem}.before\:top-0:before{content:var(--tw-content);top:calc(var(--spacing)*0)}.before\:top-1\/2:before{content:var(--tw-content);top:50%}.before\:bottom-0:before{content:var(--tw-content);bottom:calc(var(--spacing)*0)}.before\:bottom-1\/2:before{content:var(--tw-content);bottom:50%}.before\:left-\[0\.4rem\]:before{content:var(--tw-content);left:.4rem}.before\:border-l:before{content:var(--tw-content);border-left-style:var(--tw-border-style);border-left-width:1px}.before\:border-\[\#e3e3e0\]:before{content:var(--tw-content);border-color:#e3e3e0}@media (hover:hover){.hover\:border-\[\#1915014a\]:hover{border-color:#1915014a}.hover\:border-\[\#19140035\]:hover{border-color:#19140035}.hover\:border-black:hover{border-color:var(--color-black)}.hover\:bg-black:hover{background-color:var(--color-black)}.hover\:bg-zinc-800\/5:hover{background-color:color-mix(in oklab,var(--color-zinc-800)5%,transparent)}.hover\:text-zinc-800:hover{color:var(--color-zinc-800)}}.data-open\:block[data-open]{display:block}@media (width<64rem){.max-lg\:hidden{display:none}}@media (width<48rem){.max-md\:flex-col{flex-direction:column}.max-md\:pt-6{padding-top:calc(var(--spacing)*6)}}@media (width>=40rem){.sm\:w-\[350px\]{width:350px}.sm\:px-0{padding-inline:calc(var(--spacing)*0)}}@media (width>=48rem){.md\:hidden{display:none}.md\:w-\[220px\]{width:220px}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.md\:p-10{padding:calc(var(--spacing)*10)}}@media (width>=64rem){.lg\:-ms-px{margin-inline-start:-1px}.lg\:ms-0{margin-inline-start:calc(var(--spacing)*0)}.lg\:-mt-\[6\.6rem\]{margin-top:-6.6rem}.lg\:mb-0{margin-bottom:calc(var(--spacing)*0)}.lg\:mb-6{margin-bottom:calc(var(--spacing)*6)}.lg\:block{display:block}.lg\:flex{display:flex}.lg\:hidden{display:none}.lg\:aspect-auto{aspect-ratio:auto}.lg\:h-8{height:calc(var(--spacing)*8)}.lg\:w-\[438px\]{width:438px}.lg\:max-w-4xl{max-width:var(--container-4xl)}.lg\:max-w-none{max-width:none}.lg\:grow{flex-grow:1}.lg\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.lg\:flex-row{flex-direction:row}.lg\:justify-center{justify-content:center}.lg\:rounded-ss-lg{border-start-start-radius:var(--radius-lg)}.lg\:rounded-e-lg{border-start-end-radius:var(--radius-lg);border-end-end-radius:var(--radius-lg)}.lg\:rounded-e-lg\!{border-start-end-radius:var(--radius-lg)!important;border-end-end-radius:var(--radius-lg)!important}.lg\:rounded-ee-none{border-end-end-radius:0}.lg\:rounded-t-none{border-top-left-radius:0;border-top-right-radius:0}.lg\:p-8{padding:calc(var(--spacing)*8)}.lg\:p-20{padding:calc(var(--spacing)*20)}.lg\:px-0{padding-inline:calc(var(--spacing)*0)}}:where(.rtl\:space-x-reverse:where(:dir(rtl),[dir=rtl],[dir=rtl] *)>:not(:last-child)){--tw-space-x-reverse:1}@media (prefers-color-scheme:dark){.dark\:block{display:block}.dark\:hidden{display:none}.dark\:border-r{border-right-style:var(--tw-border-style);border-right-width:1px}.dark\:border-\[\#3E3E3A\]{border-color:#3e3e3a}.dark\:border-\[\#eeeeec\]{border-color:#eeeeec}.dark\:border-neutral-700{border-color:var(--color-neutral-700)}.dark\:border-neutral-800{border-color:var(--color-neutral-800)}.dark\:border-stone-800{border-color:var(--color-stone-800)}.dark\:border-zinc-700{border-color:var(--color-zinc-700)}.dark\:bg-\[\#0a0a0a\]{background-color:#0a0a0a}.dark\:bg-\[\#1D0002\]{background-color:#1d0002}.dark\:bg-\[\#3E3E3A\]{background-color:#3e3e3a}.dark\:bg-\[\#161615\]{background-color:#161615}.dark\:bg-\[\#eeeeec\]{background-color:#eeeeec}.dark\:bg-neutral-700{background-color:var(--color-neutral-700)}.dark\:bg-stone-950{background-color:var(--color-stone-950)}.dark\:bg-white\/30{background-color:color-mix(in oklab,var(--color-white)30%,transparent)}.dark\:bg-zinc-800{background-color:var(--color-zinc-800)}.dark\:bg-zinc-900{background-color:var(--color-zinc-900)}.dark\:bg-linear-to-b{--tw-gradient-position:to bottom in oklab;background-image:linear-gradient(var(--tw-gradient-stops))}.dark\:from-neutral-950{--tw-gradient-from:var(--color-neutral-950);--tw-gradient-stops:var(--tw-gradient-via-stops,var(--tw-gradient-position),var(--tw-gradient-from)var(--tw-gradient-from-position),var(--tw-gradient-to)var(--tw-gradient-to-position))}.dark\:to-neutral-900{--tw-gradient-to:var(--color-neutral-900);--tw-gradient-stops:var(--tw-gradient-via-stops,var(--tw-gradient-position),var(--tw-gradient-from)var(--tw-gradient-from-position),var(--tw-gradient-to)var(--tw-gradient-to-position))}.dark\:stroke-neutral-100\/20{stroke:color-mix(in oklab,var(--color-neutral-100)20%,transparent)}.dark\:text-\[\#1C1C1A\]{color:#1c1c1a}.dark\:text-\[\#A1A09A\]{color:#a1a09a}.dark\:text-\[\#EDEDEC\]{color:#ededec}.dark\:text-\[\#F61500\]{color:#f61500}.dark\:text-\[\#FF4433\]{color:#f43}.dark\:text-black{color:var(--color-black)}.dark\:text-white{color:var(--color-white)}.dark\:text-white\/80{color:color-mix(in oklab,var(--color-white)80%,transparent)}.dark\:text-zinc-400{color:var(--color-zinc-400)}.dark\:shadow-\[inset_0px_0px_0px_1px_\#fffaed2d\]{--tw-shadow:inset 0px 0px 0px 1px var(--tw-shadow-color,#fffaed2d);box-shadow:var(--tw-inset-shadow),var(--tw-inset-ring-shadow),var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow)}.dark\:before\:border-\[\#3E3E3A\]:before{content:var(--tw-content);border-color:#3e3e3a}@media (hover:hover){.dark\:hover\:border-\[\#3E3E3A\]:hover{border-color:#3e3e3a}.dark\:hover\:border-\[\#62605b\]:hover{border-color:#62605b}.dark\:hover\:border-white:hover{border-color:var(--color-white)}.dark\:hover\:bg-white:hover{background-color:var(--color-white)}.dark\:hover\:bg-white\/\[7\%\]:hover{background-color:color-mix(in oklab,var(--color-white)7%,transparent)}.dark\:hover\:text-white:hover{color:var(--color-white)}}}@starting-style{.starting\:translate-y-4{--tw-translate-y:calc(var(--spacing)*4);translate:var(--tw-translate-x)var(--tw-translate-y)}}@starting-style{.starting\:translate-y-6{--tw-translate-y:calc(var(--spacing)*6);translate:var(--tw-translate-x)var(--tw-translate-y)}}@starting-style{.starting\:opacity-0{opacity:0}}.\[\&\>div\>svg\]\:size-5>div>svg{width:calc(var(--spacing)*5);height:calc(var(--spacing)*5)}:where(.\[\:where\(\&\)\]\:size-4){width:calc(var(--spacing)*4);height:calc(var(--spacing)*4)}:where(.\[\:where\(\&\)\]\:size-5){width:calc(var(--spacing)*5);height:calc(var(--spacing)*5)}:where(.\[\:where\(\&\)\]\:size-6){width:calc(var(--spacing)*6);height:calc(var(--spacing)*6)}}@property --tw-translate-x{syntax:"*";inherits:false;initial-value:0}@property --tw-translate-y{syntax:"*";inherits:false;initial-value:0}@property --tw-translate-z{syntax:"*";inherits:false;initial-value:0}@property --tw-space-y-reverse{syntax:"*";inherits:false;initial-value:0}@property --tw-space-x-reverse{syntax:"*";inherits:false;initial-value:0}@property --tw-border-style{syntax:"*";inherits:false;initial-value:solid}@property --tw-leading{syntax:"*";inherits:false}@property --tw-font-weight{syntax:"*";inherits:false}@property --tw-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-shadow-color{syntax:"*";inherits:false}@property --tw-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-shadow-color{syntax:"*";inherits:false}@property --tw-ring-color{syntax:"*";inherits:false}@property --tw-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-ring-color{syntax:"*";inherits:false}@property --tw-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-ring-inset{syntax:"*";inherits:false}@property --tw-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0}@property --tw-ring-offset-color{syntax:"*";inherits:false;initial-value:#fff}@property --tw-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-outline-style{syntax:"*";inherits:false;initial-value:solid}@property --tw-duration{syntax:"*";inherits:false}@property --tw-content{syntax:"*";inherits:false;initial-value:""}@property --tw-gradient-position{syntax:"*";inherits:false}@property --tw-gradient-from{syntax:"<color>";inherits:false;initial-value:#0000}@property --tw-gradient-via{syntax:"<color>";inherits:false;initial-value:#0000}@property --tw-gradient-to{syntax:"<color>";inherits:false;initial-value:#0000}@property --tw-gradient-stops{syntax:"*";inherits:false}@property --tw-gradient-via-stops{syntax:"*";inherits:false}@property --tw-gradient-from-position{syntax:"<length-percentage>";inherits:false;initial-value:0%}@property --tw-gradient-via-position{syntax:"<length-percentage>";inherits:false;initial-value:50%}@property --tw-gradient-to-position{syntax:"<length-percentage>";inherits:false;initial-value:100%}
-        </style>
-    </head>
-    <body class="bg-[#FDFDFC] dark:bg-[#0a0a0a] text-[#1b1b18] flex p-6 lg:p-8 items-center lg:justify-center min-h-screen flex-col">
-        <header class="w-full lg:max-w-4xl max-w-[335px] text-sm mb-6 not-has-[nav]:hidden">
-            @if (Route::has('login'))
-                <nav class="flex items-center justify-end gap-4">
-                    @auth
-                        <a
-                            href="{{ url('/dashboard') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal"
-                        >
-                            Dashboard
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/apple-touch-icon.png') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('assets/img/favicon.png') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('assets/img/favicon.png') }}" type="image/x-icon">
+
+    <!-- Theme Script js -->
+    <script src="{{ asset('assets/js/theme-script.js') }}"></script>
+
+    <!-- Feather CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/icons/feather/feather.css') }}">
+
+    <!-- Tabler Icon CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/tabler-icons/tabler-icons.css') }}">
+
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/fontawesome/css/fontawesome.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/plugins/fontawesome/css/all.min.css') }}">
+
+    <!-- Datetimepicker CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/flatpickr/flatpickr.min.css') }}">
+
+    <!-- Bootstrap Tagsinput CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/bootstrap-tagsinput/bootstrap-tagsinput.css') }}">
+
+    <!-- Summernote CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/summernote/summernote-lite.min.css') }}">
+
+    <!-- Daterangepikcer CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/daterangepicker/daterangepicker.css') }}">
+
+    <!-- Flowbite CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/flowbite.min.css') }}">
+
+    <!-- Color Picker Css -->
+    <link rel="stylesheet" href="{{ asset('assets/plugins/flatpickr/flatpickr.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/plugins/@simonwep/pickr/themes/nano.min.css') }}">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{asset('assets/dist/style.css')}}">
+
+</head>
+
+<body class="antialiased bg-light text-default">
+
+<div id="global-loader">
+    <div class="page-loader"></div>
+</div>
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+
+    <!-- Header -->
+    <div class="header fixed top-0 left-0 right-0 bg-white h-[50px] border-b border-gray-200 lg:left-vertical-w">
+        <div class="main-header h-[50px]">
+
+            <div class="header-left hidden relative float-left text-center h-[50px] z-[1] media-max-md:flex">
+                <a href="index.html" class="logo">
+                    <img src="{{ asset('assets/img/logo.svg') }}" alt="Logo">
+                </a>
+                <a href="index.html" class="dark-logo">
+                    <img src="{{ asset('assets/img/logo-white.svg') }}" alt="Logo">
+                </a>
+            </div>
+
+            <a id="mobile_btn" class="mobile_btn" href="#sidebar">
+					<span class="bar-icon">
+						<span></span>
+						<span></span>
+						<span></span>
+					</span>
+            </a>
+
+            <div class="header-user px-[15px] py-4">
+                <div class="nav user-menu nav-list flex items-center justify-center h-full px-6 'media-max-md:hidden">
+
+                    <div class="me-auto flex items-center" id="header-search">
+                        <a id="toggle_btn" href="javascript:void(0);" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 text-lg leading-normal rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent me-1">
+                            <i class="ti ti-arrow-bar-to-left"></i>
                         </a>
-                    @else
-                        <a
-                            href="{{ route('login') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] text-[#1b1b18] border border-transparent hover:border-[#19140035] dark:hover:border-[#3E3E3A] rounded-sm text-sm leading-normal"
-                        >
-                            Log in
+                        <!-- Search -->
+                        <div class="flex w-[259px] relative me-1">
+                            <span class="absolute inset-y-0 start-0 flex items-center ps-2.5 pointer-events-none text-gray-400"><i class="ti ti-search"></i></span>
+                            <input type="text" class="block flex-1 border border-borderColor bg-white rounded-[5px] py-1.5 pl-7 pr-12 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:border-borderColor h-[30px] text-xs" placeholder="Search in HRMS">
+                            <span class="absolute inset-y-1/2 end-0 flex items-center me-2.5 pointer-events-none "><kbd class="bg-dark-transparent text-[10px] font-medium text-gray-500 px-[3px] py-0.5 rounded">CTRL + / </kbd></span>
+                        </div>
+                        <!-- /Search -->
+
+                        <div>
+                            <button data-dropdown-toggle="crm-dropdown" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] me-1 hover:text-gray-900 hover:bg-dark-transparent  focus:bg-dark-transparent focus:text-gray-900" type="button">
+                                <i class="ti ti-layout-grid"></i>
+                            </button>
+                            <div id="crm-dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-[5px] shadow w-55 dark:bg-gray-700">
+                                <div class="border-b border px-[20px] py-4">
+                                    <h4>CRM</h4>
+                                </div>
+                                <div class="border-b border p-[20px] pb-1">
+                                    <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-2 *:border *:border-borderColor *:bg-white *:p-2 *:rounded-md *:font-medium">
+                                        <a href="contacts.html" class="flex items-center justify-between p-2 crm-link text-gray-900 group hover:bg-primary-transparent hover:border-primary-transparent hover:text-primary mb-3">
+												<span class="flex items-center me-3">
+													<i class="ti ti-user-shield text-default me-2 group-hover:text-primary"></i>Contacts
+												</span>
+                                            <i class="ti ti-arrow-right"></i>
+                                        </a>
+                                        <a href="companies-grid.html" class="flex items-center justify-between p-2 crm-link text-gray-900 group hover:bg-primary-transparent hover:border-primary-transparent hover:text-primary mb-3">
+												<span class="flex items-center me-3">
+													<i class="ti ti-building text-default me-2 group-hover:text-primary"></i>Companies
+												</span>
+                                            <i class="ti ti-arrow-right"></i>
+                                        </a>
+                                        <a href="deals-grid.html" class="flex items-center justify-between p-2 crm-link text-gray-900 group hover:bg-primary-transparent hover:border-primary-transparent hover:text-primary mb-3">
+												<span class="flex items-center me-3">
+													<i class="ti ti-heart-handshake text-default me-2 group-hover:text-primary"></i>Deals
+												</span>
+                                            <i class="ti ti-arrow-right"></i>
+                                        </a>
+                                        <a href="leads-grid.html" class="flex items-center justify-between p-2 crm-link text-gray-900 group hover:bg-primary-transparent hover:border-primary-transparent hover:text-primary mb-3">
+												<span class="flex items-center me-3">
+													<i class="ti ti-user-check text-default me-2 group-hover:text-primary"></i>Leads
+												</span>
+                                            <i class="ti ti-arrow-right"></i>
+                                        </a>
+                                        <a href="pipeline.html" class="flex items-center justify-between p-2 crm-link text-gray-900 group hover:bg-primary-transparent hover:border-primary-transparent hover:text-primary mb-3">
+												<span class="flex items-center me-3">
+													<i class="ti ti-timeline-event-text text-default me-2 group-hover:text-primary"></i>Pipeline
+												</span>
+                                            <i class="ti ti-arrow-right"></i>
+                                        </a>
+                                        <a href="activity.html" class="flex items-center justify-between p-2 crm-link text-gray-900 group hover:bg-primary-transparent hover:border-primary-transparent hover:text-primary mb-3">
+												<span class="flex items-center me-3">
+													<i class="ti ti-activity text-default me-2 group-hover:text-primary"></i>Activities
+												</span>
+                                            <i class="ti ti-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="profile-settings.html" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent">
+                            <i class="ti ti-settings-cog"></i>
                         </a>
+                    </div>
 
-                        @if (Route::has('register'))
-                            <a
-                                href="{{ route('register') }}"
-                                class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
-                                Register
+                    <!-- Horizontal Single -->
+                    <div class="sidebar sidebar-horizontal hidden" id="horizontal-single">
+                        <div class="sidebar-menu">
+                            <div class="main-menu">
+                                <ul class="nav-menu">
+                                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3">
+                                        <span>Main</span>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="#" class="active">
+                                            <i class="ti ti-smart-home"></i><span>Dashboard</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="index.html">Admin Dashboard</a></li>
+                                            <li><a href="employee-dashboard.html" class="active">Employee Dashboard</a></li>
+                                            <li><a href="deals-dashboard.html">Deals Dashboard</a></li>
+                                            <li><a href="leads-dashboard.html">Leads Dashboard</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="#">
+                                            <i class="ti ti-user-star"></i><span>Super Admin</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="dashboard.html">Dashboard</a></li>
+                                            <li><a href="companies.html">Companies</a></li>
+                                            <li><a href="subscription.html">Subscriptions</a></li>
+                                            <li><a href="packages.html">Packages</a></li>
+                                            <li><a href="domain.html">Domain</a></li>
+                                            <li><a href="purchase-transaction.html">Purchase Transaction</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="#">
+                                            <i class="ti ti-layout-grid-add"></i><span>Applications</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="chat.html">Chat</a></li>
+                                            <li class="submenu submenu-two">
+                                                <a href="call.html">Calls<span
+                                                        class="menu-arrow inside-submenu"></span></a>
+                                                <ul>
+                                                    <li><a href="voice-call.html">Voice Call</a></li>
+                                                    <li><a href="video-call.html">Video Call</a></li>
+                                                    <li><a href="outgoing-call.html">Outgoing Call</a></li>
+                                                    <li><a href="incoming-call.html">Incoming Call</a></li>
+                                                    <li><a href="call-history.html">Call History</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="calendar.html">Calendar</a></li>
+                                            <li><a href="email.html">Email</a></li>
+                                            <li><a href="todo.html">To Do</a></li>
+                                            <li><a href="notes.html">Notes</a></li>
+                                            <li><a href="file-manager.html">File Manager</a></li>
+                                            <li><a href="kanban-view.html">Kanban</a></li>
+                                            <li><a href="invoices.html">Invoices</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="#">
+                                            <i class="ti ti-layout-board-split"></i><span>Layouts</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li>
+                                                <a href="layout-horizontal.html">
+                                                    <span>Horizontal</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-detached.html">
+                                                    <span>Detached</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-modern.html">
+                                                    <span>Modern</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-two-column.html">
+                                                    <span>Two Column </span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-hovered.html">
+                                                    <span>Hovered</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-box.html">
+                                                    <span>Boxed</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-horizontal-single.html">
+                                                    <span>Horizontal Single</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-horizontal-overlay.html">
+                                                    <span>Horizontal Overlay</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-horizontal-box.html">
+                                                    <span>Horizontal Box</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-horizontal-sidemenu.html">
+                                                    <span>Menu Aside</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-vertical-transparent.html">
+                                                    <span>Transparent</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-without-header.html">
+                                                    <span>Without Header</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-rtl.html">
+                                                    <span>RTL</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="layout-dark.html">
+                                                    <span>Dark</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="#">
+                                            <i class="ti ti-user-star"></i><span>Projects</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li>
+                                                <a href="clients-grid.html"><span>Clients</span>
+                                                </a>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Projects</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="projects-grid.html">Projects</a></li>
+                                                    <li><a href="tasks.html">Tasks</a></li>
+                                                    <li><a href="task-board.html">Task Board</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="call.html">Crm<span class="menu-arrow"></span></a>
+                                                <ul>
+                                                    <li><a href="contacts-grid.html"><span>Contacts</span></a></li>
+                                                    <li><a href="companies-grid.html"><span>Companies</span></a></li>
+                                                    <li><a href="deals-grid.html"><span>Deals</span></a></li>
+                                                    <li><a href="leads-grid.html"><span>Leads</span></a></li>
+                                                    <li><a href="pipeline.html"><span>Pipeline</span></a></li>
+                                                    <li><a href="analytics.html"><span>Analytics</span></a></li>
+                                                    <li><a href="activity.html"><span>Activities</span></a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Employees</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="employees.html">Employee Lists</a></li>
+                                                    <li><a href="employees-grid.html">Employee Grid</a></li>
+                                                    <li><a href="employee-details.html">Employee Details</a></li>
+                                                    <li><a href="departments.html">Departments</a></li>
+                                                    <li><a href="designations.html">Designations</a></li>
+                                                    <li><a href="policy.html">Policies</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Tickets</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="tickets.html">Tickets</a></li>
+                                                    <li><a href="ticket-details.html">Ticket Details</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="holidays.html"><span>Holidays</span></a></li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Attendance</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">Leaves<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="leaves.html">Leaves (Admin)</a></li>
+                                                            <li><a href="leaves-employee.html">Leave (Employee)</a></li>
+                                                            <li><a href="leave-settings.html">Leave Settings</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li><a href="attendance-admin.html">Attendance (Admin)</a></li>
+                                                    <li><a href="attendance-employee.html">Attendance (Employee)</a></li>
+                                                    <li><a href="timesheets.html">Timesheets</a></li>
+                                                    <li><a href="schedule-timing.html">Shift & Schedule</a></li>
+                                                    <li><a href="overtime.html">Overtime</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Performance</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="performance-indicator.html">Performance Indicator</a></li>
+                                                    <li><a href="performance-review.html">Performance Review</a></li>
+                                                    <li><a href="performance-appraisal.html">Performance Appraisal</a></li>
+                                                    <li><a href="goal-tracking.html">Goal List</a></li>
+                                                    <li><a href="goal-type.html">Goal Type</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Training</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="training.html">Training List</a></li>
+                                                    <li><a href="trainers.html">Trainers</a></li>
+                                                    <li><a href="training-type.html">Training Type</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="promotion.html"><span>Promotion</span></a></li>
+                                            <li><a href="resignation.html"><span>Resignation</span></a></li>
+                                            <li><a href="termination.html"><span>Termination</span></a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="#">
+                                            <i class="ti ti-user-star"></i><span>Administration</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Sales</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="estimates.html">Estimates</a></li>
+                                                    <li><a href="invoices.html">Invoices</a></li>
+                                                    <li><a href="payments.html">Payments</a></li>
+                                                    <li><a href="expenses.html">Expenses</a></li>
+                                                    <li><a href="provident-fund.html">Provident Fund</a></li>
+                                                    <li><a href="taxes.html">Taxes</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Accounting</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="categories.html">Categories</a></li>
+                                                    <li><a href="budgets.html">Budgets</a></li>
+                                                    <li><a href="budget-expenses.html">Budget Expenses</a></li>
+                                                    <li><a href="budget-revenues.html">Budget Revenues</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Payroll</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="employee-salary.html">Employee Salary</a></li>
+                                                    <li><a href="payslip.html">Payslip</a></li>
+                                                    <li><a href="payroll.html">Payroll Items</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Assets</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="assets.html">Assets</a></li>
+                                                    <li><a href="asset-categories.html">Asset Categories</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Help & Supports</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="knowledgebase.html">Knowledge Base</a></li>
+                                                    <li><a href="activity.html">Activities</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>User Management</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="users.html">Users</a></li>
+                                                    <li><a href="roles-permissions.html">Roles & Permissions</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Reports</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li><a href="expenses-report.html">Expense Report</a></li>
+                                                    <li><a href="invoice-report.html">Invoice Report</a></li>
+                                                    <li><a href="payment-report.html">Payment Report</a></li>
+                                                    <li><a href="project-report.html">Project Report</a></li>
+                                                    <li><a href="task-report.html">Task Report</a></li>
+                                                    <li><a href="user-report.html">User Report</a></li>
+                                                    <li><a href="employee-report.html">Employee Report</a></li>
+                                                    <li><a href="payslip-report.html">Payslip Report</a></li>
+                                                    <li><a href="attendance-report.html">Attendance Report</a></li>
+                                                    <li><a href="leave-report.html">Leave Report</a></li>
+                                                    <li><a href="daily-report.html">Daily Report</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Settings</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">General Settings<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="profile-settings.html">Profile</a></li>
+                                                            <li><a href="security-settings.html">Security</a></li>
+                                                            <li><a href="notification-settings.html">Notifications</a></li>
+                                                            <li><a href="connected-apps.html">Connected Apps</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">Website Settings<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="bussiness-settings.html">Business Settings</a></li>
+                                                            <li><a href="seo-settings.html">SEO Settings</a></li>
+                                                            <li><a href="localization-settings.html">Localization</a></li>
+                                                            <li><a href="prefixes.html">Prefixes</a></li>
+                                                            <li><a href="preferences.html">Preferences</a></li>
+                                                            <li><a href="performance-appraisal.html">Appearance</a></li>
+                                                            <li><a href="language.html">Language</a></li>
+                                                            <li><a href="authentication-settings.html">Authentication</a></li>
+                                                            <li><a href="ai-settings.html">AI Settings</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">App Settings<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="salary-settings.html">Salary Settings</a></li>
+                                                            <li><a href="approval-settings.html">Approval Settings</a></li>
+                                                            <li><a href="invoice-settings.html">Invoice Settings</a></li>
+                                                            <li><a href="leave-type.html">Leave Type</a></li>
+                                                            <li><a href="custom-fields.html">Custom Fields</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">System Settings<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="email-settings.html">Email Settings</a></li>
+                                                            <li><a href="email-template.html">Email Templates</a></li>
+                                                            <li><a href="sms-settings.html">SMS Settings</a></li>
+                                                            <li><a href="sms-template.html">SMS Templates</a></li>
+                                                            <li><a href="otp-settings.html">OTP</a></li>
+                                                            <li><a href="gdpr.html">GDPR Cookies</a></li>
+                                                            <li><a href="maintenance-mode.html">Maintenance Mode</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">Financial Settings<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="payment-gateways.html">Payment Gateways</a></li>
+                                                            <li><a href="tax-rates.html">Tax Rate</a></li>
+                                                            <li><a href="currencies.html">Currencies</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">Other Settings<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="custom-css.html">Custom CSS</a></li>
+                                                            <li><a href="custom-js.html">Custom JS</a></li>
+                                                            <li><a href="cronjob.html">Cronjob</a></li>
+                                                            <li><a href="storage-settings.html">Storage</a></li>
+                                                            <li><a href="ban-ip-address.html">Ban IP Address</a></li>
+                                                            <li><a href="backup.html">Backup</a></li>
+                                                            <li><a href="clear-cache.html">Clear Cache</a></li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="#">
+                                            <i class="ti ti-page-break"></i><span>Pages</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="starter.html"><span>Starter</span></a></li>
+                                            <li><a href="profile.html"><span>Profile</span></a></li>
+                                            <li><a href="gallery.html"><span>Gallery</span></a></li>
+                                            <li><a href="search-result.html"><span>Search Results</span></a></li>
+                                            <li><a href="timeline.html"><span>Timeline</span></a></li>
+                                            <li><a href="pricing.html"><span>Pricing</span></a></li>
+                                            <li><a href="coming-soon.html"><span>Coming Soon</span></a></li>
+                                            <li><a href="under-maintenance.html"><span>Under Maintenance</span></a></li>
+                                            <li><a href="under-construction.html"><span>Under Construction</span></a></li>
+                                            <li><a href="api-keys.html"><span>API Keys</span></a></li>
+                                            <li><a href="privacy-policy.html"><span>Privacy Policy</span></a></li>
+                                            <li><a href="terms-condition.html"><span>Terms & Conditions</span></a></li>
+                                            <li class="submenu">
+                                                <a href="#"><span>Content</span> <span class="menu-arrow"></span></a>
+                                                <ul>
+                                                    <li><a href="pages.html">Pages</a></li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">Blogs<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="blogs.html">All Blogs</a></li>
+                                                            <li><a href="blog-categories.html">Categories</a></li>
+                                                            <li><a href="blog-comments.html">Comments</a></li>
+                                                            <li><a href="blog-tags.html">Tags</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">Locations<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="countries.html">Countries</a></li>
+                                                            <li><a href="states.html">States</a></li>
+                                                            <li><a href="cities.html">Cities</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li><a href="testimonials.html">Testimonials</a></li>
+                                                    <li><a href="faq.html">FAQ’S</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="#">
+                                                    <span>Authentication</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);" class="">Login<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="login.html">Cover</a></li>
+                                                            <li><a href="login-2.html">Illustration</a></li>
+                                                            <li><a href="login-3.html">Basic</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);" class="">Register<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="register.html">Cover</a></li>
+                                                            <li><a href="register-2.html">Illustration</a></li>
+                                                            <li><a href="register-3.html">Basic</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu"><a href="javascript:void(0);">Forgot Password<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="forgot-password.html">Cover</a></li>
+                                                            <li><a href="forgot-password-2.html">Illustration</a></li>
+                                                            <li><a href="forgot-password-3.html">Basic</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">Reset Password<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="reset-password.html">Cover</a></li>
+                                                            <li><a href="reset-password-2.html">Illustration</a></li>
+                                                            <li><a href="reset-password-3.html">Basic</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">Email Verification<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="email-verification.html">Cover</a></li>
+                                                            <li><a href="email-verification-2.html">Illustration</a></li>
+                                                            <li><a href="email-verification-3.html">Basic</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">2 Step Verification<span class="menu-arrow"></span></a>
+                                                        <ul>
+                                                            <li><a href="two-step-verification.html">Cover</a></li>
+                                                            <li><a href="two-step-verification-2.html">Illustration</a></li>
+                                                            <li><a href="two-step-verification-3.html">Basic</a></li>
+                                                        </ul>
+                                                    </li>
+                                                    <li><a href="lock-screen.html">Lock Screen</a></li>
+                                                    <li><a href="error-404.html">404 Error</a></li>
+                                                    <li><a href="error-500.html">500 Error</a></li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu">
+                                                <a href="#">
+                                                    <span>UI Interface</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <ul>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">
+                                                            <i class="ti ti-hierarchy-2"></i>
+                                                            <span>Base UI</span>
+                                                            <span class="menu-arrow"></span>
+                                                        </a>
+                                                        <ul>
+                                                            <li>
+                                                                <a href="ui-alerts.html">Alerts</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-accordion.html">Accordion</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-avatar.html">Avatar</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-badges.html">Badges</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-borders.html">Border</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-buttons.html">Buttons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-buttons-group.html">Button Group</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-breadcrumb.html">Breadcrumb</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-cards.html">Card</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-carousel.html">Carousel</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-colors.html">Colors</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-dropdowns.html">Dropdowns</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-grid.html">Grid</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-images.html">Images</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-lightbox.html">Lightbox</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-media.html">Media</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-modals.html">Modals</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-offcanvas.html">Offcanvas</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-pagination.html">Pagination</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-popovers.html">Popovers</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-progress.html">Progress</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-spinner.html">Spinner</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-sweetalerts.html">Sweet Alerts</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-nav-tabs.html">Tabs</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-tooltips.html">Tooltips</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-typography.html">Typography</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-video.html">Video</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-sortable.html">Sortable</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-swiperjs.html">Swiperjs</a>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">
+                                                            <i class="ti ti-hierarchy-3"></i>
+                                                            <span>Advanced UI</span>
+                                                            <span class="menu-arrow"></span>
+                                                        </a>
+                                                        <ul>
+                                                            <li>
+                                                                <a href="ui-clipboard.html">Clipboard</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-drag-drop.html">Drag & Drop</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-rangeslider.html">Range Slider</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-rating.html">Rating</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-text-editor.html">Text Editor</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-counter.html">Counter</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-scrollbar.html">Scrollbar</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-stickynote.html">Sticky Note</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="ui-timeline.html">Timeline</a>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">
+                                                            <i class="ti ti-input-search"></i>
+                                                            <span>Forms</span>
+                                                            <span class="menu-arrow"></span>
+                                                        </a>
+                                                        <ul>
+                                                            <li class="submenu submenu-two">
+                                                                <a href="javascript:void(0);">Form Elements <span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                                                </a>
+                                                                <ul>
+                                                                    <li>
+                                                                        <a href="form-basic-inputs.html">Basic Inputs</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="form-checkbox-radios.html">Checkbox & Radios</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="form-input-groups.html">Input Groups</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="form-grid-gutters.html">Grid & Gutters</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="form-select.html">Form Select</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="form-mask.html">Input Masks</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="form-fileupload.html">File Uploads</a>
+                                                                    </li>
+                                                                </ul>
+                                                            </li>
+                                                            <li class="submenu submenu-two">
+                                                                <a href="javascript:void(0);">Layouts <span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                                                </a>
+                                                                <ul>
+                                                                    <li>
+                                                                        <a href="form-horizontal.html">Horizontal Form</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="form-vertical.html">Vertical Form</a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <a href="form-floating-labels.html">Floating Labels</a>
+                                                                    </li>
+                                                                </ul>
+                                                            </li>
+                                                            <li>
+                                                                <a href="form-validation.html">Form Validation</a>
+                                                            </li>
+
+                                                            <li>
+                                                                <a href="form-select2.html">Select2</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="form-wizard.html">Form Wizard</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="form-pickers.html">Form Pickers</a>
+                                                            </li>
+
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">
+                                                            <i class="ti ti-table-plus"></i>
+                                                            <span>Tables</span>
+                                                            <span class="menu-arrow"></span>
+                                                        </a>
+                                                        <ul>
+                                                            <li>
+                                                                <a href="tables-basic.html">Basic Tables </a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="data-tables.html">Data Table </a>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">
+                                                            <i class="ti ti-chart-line"></i>
+                                                            <span>Charts</span>
+                                                            <span class="menu-arrow"></span>
+                                                        </a>
+                                                        <ul>
+                                                            <li>
+                                                                <a href="chart-apex.html">Apex Charts</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="chart-c3.html">Chart C3</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="chart-js.html">Chart Js</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="chart-morris.html">Morris Charts</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="chart-flot.html">Flot Charts</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="chart-peity.html">Peity Charts</a>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">
+                                                            <i class="ti ti-icons"></i>
+                                                            <span>Icons</span>
+                                                            <span class="menu-arrow"></span>
+                                                        </a>
+                                                        <ul>
+                                                            <li>
+                                                                <a href="icon-fontawesome.html">Fontawesome Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-tabler.html">Tabler Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-bootstrap.html">Bootstrap Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-remix.html">Remix Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-feather.html">Feather Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-ionic.html">Ionic Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-material.html">Material Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-pe7.html">Pe7 Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-simpleline.html">Simpleline Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-themify.html">Themify Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-weather.html">Weather Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-typicon.html">Typicon Icons</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="icon-flag.html">Flag Icons</a>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                    <li class="submenu">
+                                                        <a href="javascript:void(0);">
+                                                            <i class="ti ti-table-plus"></i>
+                                                            <span>Maps</span>
+                                                            <span class="menu-arrow"></span>
+                                                        </a>
+                                                        <ul>
+                                                            <li>
+                                                                <a href="maps-vector.html">Vector</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="maps-leaflet.html">Leaflet</a>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="#">Documentation</a></li>
+                                            <li><a href="#">Change Log</a></li>
+                                            <li class="submenu">
+                                                <a href="javascript:void(0);"><span>Multi Level</span><span class="menu-arrow"></span></a>
+                                                <ul>
+                                                    <li><a href="javascript:void(0);">Multilevel 1</a></li>
+                                                    <li class="submenu submenu-two">
+                                                        <a href="javascript:void(0);">Multilevel 2<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                                        <ul>
+                                                            <li><a href="javascript:void(0);">Multilevel 2.1</a></li>
+                                                            <li class="submenu submenu-two submenu-three">
+                                                                <a href="javascript:void(0);">Multilevel 2.2<span class="menu-arrow inside-submenu inside-submenu-two"></span></a>
+                                                                <ul>
+                                                                    <li><a href="javascript:void(0);">Multilevel 2.2.1</a></li>
+                                                                    <li><a href="javascript:void(0);">Multilevel 2.2.2</a></li>
+                                                                </ul>
+                                                            </li>
+                                                        </ul>
+                                                    </li>
+                                                    <li><a href="javascript:void(0);">Multilevel 3</a></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /Horizontal Single -->
+
+                    <div class="flex items-center">
+                        <div class="me-1">
+                            <a href="#" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent btnFullscreen">
+                                <i class="ti ti-maximize"></i>
                             </a>
-                        @endif
-                    @endauth
-                </nav>
-            @endif
-        </header>
-        <div class="flex items-center justify-center w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
-            <main class="flex max-w-[335px] w-full flex-col-reverse lg:max-w-4xl lg:flex-row">
-                <div class="text-[13px] leading-[20px] flex-1 p-6 pb-12 lg:p-20 bg-white dark:bg-[#161615] dark:text-[#EDEDEC] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] rounded-es-lg rounded-ee-lg lg:rounded-ss-lg lg:rounded-ee-none">
-                    <h1 class="mb-1 font-medium">Let's get started</h1>
-                    <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">Laravel has an incredibly rich ecosystem. <br>We suggest starting with the following.</p>
-                    <ul class="flex flex-col mb-4 lg:mb-6">
-                        <li class="flex items-center gap-4 py-2 relative before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A] before:top-1/2 before:bottom-0 before:left-[0.4rem] before:absolute">
-                            <span class="relative py-1 bg-white dark:bg-[#161615]">
-                                <span class="flex items-center justify-center rounded-full bg-[#FDFDFC] dark:bg-[#161615] shadow-[0px_0px_1px_0px_rgba(0,0,0,0.03),0px_1px_2px_0px_rgba(0,0,0,0.06)] w-3.5 h-3.5 border dark:border-[#3E3E3A] border-[#e3e3e0]">
-                                    <span class="rounded-full bg-[#dbdbd7] dark:bg-[#3E3E3A] w-1.5 h-1.5"></span>
-                                </span>
-                            </span>
-                            <span>
-                                Read the
-                                <a href="https://laravel.com/docs" target="_blank" class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ms-1">
-                                    <span>Documentation</span>
-                                    <svg
-                                        width="10"
-                                        height="11"
-                                        viewBox="0 0 10 11"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="w-2.5 h-2.5"
-                                    >
-                                        <path
-                                            d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001"
-                                            stroke="currentColor"
-                                            stroke-linecap="square"
-                                        />
-                                    </svg>
-                                </a>
-                            </span>
-                        </li>
-                        <li class="flex items-center gap-4 py-2 relative before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A] before:bottom-1/2 before:top-0 before:start-[0.4rem] before:absolute">
-                            <span class="relative py-1 bg-white dark:bg-[#161615]">
-                                <span class="flex items-center justify-center rounded-full bg-[#FDFDFC] dark:bg-[#161615] shadow-[0px_0px_1px_0px_rgba(0,0,0,0.03),0px_1px_2px_0px_rgba(0,0,0,0.06)] w-3.5 h-3.5 border dark:border-[#3E3E3A] border-[#e3e3e0]">
-                                    <span class="rounded-full bg-[#dbdbd7] dark:bg-[#3E3E3A] w-1.5 h-1.5"></span>
-                                </span>
-                            </span>
-                            <span>
-                                Watch video tutorials at
-                                <a href="https://laracasts.com" target="_blank" class="inline-flex items-center space-x-1 font-medium underline underline-offset-4 text-[#f53003] dark:text-[#FF4433] ms-1">
-                                    <span>Laracasts</span>
-                                    <svg
-                                        width="10"
-                                        height="11"
-                                        viewBox="0 0 10 11"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class="w-2.5 h-2.5"
-                                    >
-                                        <path
-                                            d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001"
-                                            stroke="currentColor"
-                                            stroke-linecap="square"
-                                        />
-                                    </svg>
-                                </a>
-                            </span>
-                        </li>
-                    </ul>
-                    <ul class="flex gap-3 text-sm leading-normal">
-                        <li>
-                            <a href="https://cloud.laravel.com" target="_blank" class="inline-block dark:bg-[#eeeeec] dark:border-[#eeeeec] dark:text-[#1C1C1A] dark:hover:bg-white dark:hover:border-white hover:bg-black hover:border-black px-5 py-1.5 bg-[#1b1b18] rounded-sm border border-black text-white text-sm leading-normal">
-                                Deploy now
+                        </div>
+                        <div class="me-1">
+                            <button data-dropdown-toggle="app-dropdown" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent focus:bg-dark-transparent focus:text-gray-900" type="button">
+                                <i class="ti ti-layout-grid-remove"></i>
+                            </button>
+                            <div id="app-dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-[5px] shadow w-[200px]">
+                                <div class="border-b border px-[20px] py-4">
+                                    <h4>Applications</h4>
+                                </div>
+                                <div class="border-b border p-[20px]">
+                                    <a href="calendar.html" class="flex items-center text-gray-900 hover:text-primary pb-2">
+                                        <span class="inline-flex items-center justify-center size-8 rounded bg-dark-transparent me-2"><i class="ti ti-calendar text-gray-900"></i></span>Calendar
+                                    </a>
+                                    <a href="todo.html" class="flex items-center text-gray-900 hover:text-primary py-2">
+                                        <span class="inline-flex items-center justify-center size-8 rounded bg-dark-transparent me-2"><i class="ti ti-subtask text-gray-900"></i></span>To Do
+                                    </a>
+                                    <a href="notes.html" class="flex items-center text-gray-900 hover:text-primary py-2">
+                                        <span class="inline-flex items-center justify-center size-8 rounded  bg-dark-transparent me-2"><i class="ti ti-notes text-gray-900"></i></span>Notes
+                                    </a>
+                                    <a href="file-manager.html" class="flex items-center text-gray-900 hover:text-primary py-2">
+                                        <span class="inline-flex items-center justify-center size-8 rounded bg-dark-transparent me-2"><i class="ti ti-folder text-gray-900"></i></span>File Manager
+                                    </a>
+                                    <a href="kanban-view.html" class="flex items-center text-gray-900 hover:text-primary py-2">
+                                        <span class="inline-flex items-center justify-center size-8 rounded bg-dark-transparent me-2"><i class="ti ti-layout-kanban text-gray-900"></i></span>Kanban
+                                    </a>
+                                    <a href="invoices.html" class="flex items-center text-gray-900 hover:text-primary py-2 pb-0">
+                                        <span class="inline-flex items-center justify-center size-8 rounded bg-dark-transparent me-2"><i class="ti ti-file-invoice text-gray-900"></i></span>Invoices
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="me-1">
+                            <a href="chat.html" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent relative">
+                                <i class="ti ti-brand-hipchat"></i>
+                                <span class="right-1 top-0.5 absolute w-[10px] h-[10px] text-[6px] flex items-center justify-center bg-info text-white  rounded-full">5</span>
                             </a>
-                        </li>
-                    </ul>
+                        </div>
+                        <div class="me-1">
+                            <a href="email.html" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent">
+                                <i class="ti ti-mail"></i>
+                            </a>
+                        </div>
+                        <div class="me-1 notification_item">
+                            <button data-dropdown-toggle="noti-dropdown" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent focus:bg-dark-transparent focus:text-gray-900 relative" type="button">
+                                <i class="ti ti-bell"></i>
+                                <span class="right-[5px] top-[5px] absolute w-[6px] h-[6px] text-[6px] flex items-center justify-center bg-danger text-white rounded-full notification-status-dot"></span>
+                            </button>
+                            <div id="noti-dropdown" class="z-10 hidden bg-white rounded-[5px] shadow p-6 w-55 dark:bg-gray-700">
+                                <div class="flex items-center justify-between border-b border-borderColor p-0 pb-4 mb-4">
+                                    <h4 class="notification-title">Notifications (2)</h4>
+                                    <div class="flex items-center">
+                                        <a href="#" class="text-primary text-nowrap text-[15px] me-3 lh-1">Mark all as read</a>
+                                        <button id="doubleDropdownButton" data-dropdown-toggle="doubleDropdown" data-dropdown-placement="right-start" type="button" class="flex items-center w-full text-gray-900 hover:text-primary"><i class="ti ti-calendar-due me-1"></i>Today</button>
+                                        <div id="doubleDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+                                            <ul class="p-2 text-sm text-gray-900" aria-labelledby="doubleDropdownButton">
+                                                <li>
+                                                    <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Week</a>
+                                                </li>
+                                                <li>
+                                                    <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Last Week</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-gray-900 noti-content scroll-smooth h-[270px] overflow-y-auto">
+                                    <div class="border-b border-borderColor mb-4 pb-4">
+                                        <a href="activity.html">
+                                            <div class="flex">
+													<span class="flex items-center size-[45px] me-2 shrink-0">
+														<img src="{{ asset('assets/img/profiles/avatar-27.jpg') }}" alt="Profile" class="rounded">
+													</span>
+                                                <div class="grow">
+                                                    <p class="mb-1"><span class="text-title font-semibold">Shawn</span> performance in Math is below the threshold.</p>
+                                                    <span>Just Now</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="border-b border-borderColor mb-4 pb-4">
+                                        <a href="activity.html" class="pb-0">
+                                            <div class="flex">
+													<span class="flex items-center size-[45px] me-2 shrink-0">
+														<img src="{{ asset('assets/img/profiles/avatar-23.jpg') }}" alt="Profile" class="rounded">
+													</span>
+                                                <div class="grow">
+                                                    <p class="mb-1"><span class="text-title font-semibold">Sylvia</span> added appointment on 02:00 PM</p>
+                                                    <span>10 mins ago</span>
+                                                    <div
+                                                        class="flex justify-start items-center mt-1">
+                                                        <span class="btn bg-light border border-light text-gray-900 text-center py-1 px-2 hover:bg-light-900 hover:text-gray-900 text-xs leading-normal me-2">Deny</span>
+                                                        <span class="btn bg-primary border border-primary text-white text-center py-1 px-2 hover:bg-primary-900 hover:text-white text-xs leading-normal">Approve</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="border-b border-borderColor mb-4 pb-4">
+                                        <a href="activity.html">
+                                            <div class="flex">
+													<span class="flex items-center size-[45px] me-2 shrink-0">
+														<img src="{{ asset('assets/img/profiles/avatar-25.jpg') }}" alt="Profile" class="rounded">
+													</span>
+                                                <div class="grow">
+                                                    <p class="mb-1">New student record <span class="text-title font-semibold"> George</span> is created by <span class="text-title font-semibold">Teressa</span></p>
+                                                    <span>2 hrs ago</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="border-0 mb-4 pb-0">
+                                        <a href="activity.html">
+                                            <div class="flex">
+													<span class="flex items-center size-[45px] me-2 shrink-0">
+														<img src="{{ asset('assets/img/profiles/avatar-01.jpg') }}" alt="Profile" class="rounded">
+													</span>
+                                                <div class="grow">
+                                                    <p class="mb-1">A new teacher record for <span class="text-title font-semibold">Elisa</span> </p>
+                                                    <span>09:45 AM</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="flex p-0 gap-2">
+                                    <a href="#" class="btn bg-light border border-light text-gray-900 text-center hover:bg-light-900 hover:text-gray-900 w-full">Cancel</a>
+                                    <a href="activity.html" class="btn bg-primary border border-primary text-white text-center hover:bg-primary-900 hover:text-white w-full">View All</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="me-1">
+                            <button data-dropdown-toggle="profile-dropdown" class="flex items-center justify-center" type="button">
+									<span class="relative">
+										<img src="{{ asset('assets/img/profiles/avatar-12.jpg') }}" alt="Img" class="size-6 rounded-full">
+										<span class="right-0 bottom-0 absolute  w-2 h-2 bg-success border-2 border-white  rounded-full"></span>
+									</span>
+                            </button>
+                            <div id="profile-dropdown" class="z-10 hidden bg-white divide-y divide-borderColor rounded-[5px] shadow w-55">
+                                <div class="px-[20px] py-4">
+                                    <div class="flex items-center">
+												<span class="size-[45px] me-2">
+													<img src="{{ asset('assets/img/profiles/avatar-12.jpg') }}" alt="img" class="rounded-full border-2 border-gray-100">
+												</span>
+                                        <div>
+                                            <h5 class="mb-0">Kevin Larry</h5>
+                                            <p class="text-xs leading-normal text-gray-900 font-medium mb-0">warren@example.com</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ul class="p-[20px]">
+                                    <li>
+                                        <a class="inline-flex items-center text-gray-900 py-2 hover:text-primary" href="profile.html">
+                                            <i class="ti ti-user-circle me-1"></i>My Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="inline-flex items-center text-gray-900 py-2 hover:text-primary" href="bussiness-settings.html">
+                                            <i class="ti ti-settings me-1"></i>Settings
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="inline-flex items-center text-gray-900 py-2 hover:text-primary" href="security-settings.html">
+                                            <i class="ti ti-status-change me-1"></i>Status
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="inline-flex items-center text-gray-900 py-2 hover:text-primary" href="profile-settings.html">
+                                            <i class="ti ti-circle-arrow-up me-1"></i>My Account
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="inline-flex items-center text-gray-900 py-2 hover:text-primary" href="knowledgebase.html">
+                                            <i class="ti ti-question-mark me-1"></i>Knowledge Base
+                                        </a>
+                                    </li>
+                                </ul>
+                                <div class="px-[20px] py-4">
+                                    <a class="inline-flex items-center text-gray-900 py-2 hover:text-primary" href="login.html">
+                                        <i class="ti ti-login me-2"></i>Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-[#fff2f2] dark:bg-[#1D0002] relative lg:-ms-px -mb-px lg:mb-0 rounded-t-lg lg:rounded-t-none lg:rounded-e-lg! aspect-[335/376] lg:aspect-auto w-full lg:w-[438px] shrink-0 overflow-hidden">
-                    {{-- Laravel Logo --}}
-                    <svg class="w-full text-[#F53003] dark:text-[#F61500] transition-all translate-y-0 opacity-100 max-w-none duration-750 starting:opacity-0 starting:translate-y-6" viewBox="0 0 438 104" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17.2036 -3H0V102.197H49.5189V86.7187H17.2036V-3Z" fill="currentColor" />
-                        <path d="M110.256 41.6337C108.061 38.1275 104.945 35.3731 100.905 33.3681C96.8667 31.3647 92.8016 30.3618 88.7131 30.3618C83.4247 30.3618 78.5885 31.3389 74.201 33.2923C69.8111 35.2456 66.0474 37.928 62.9059 41.3333C59.7643 44.7401 57.3198 48.6726 55.5754 53.1293C53.8287 57.589 52.9572 62.274 52.9572 67.1813C52.9572 72.1925 53.8287 76.8995 55.5754 81.3069C57.3191 85.7173 59.7636 89.6241 62.9059 93.0293C66.0474 96.4361 69.8119 99.1155 74.201 101.069C78.5885 103.022 83.4247 103.999 88.7131 103.999C92.8016 103.999 96.8667 102.997 100.905 100.994C104.945 98.9911 108.061 96.2359 110.256 92.7282V102.195H126.563V32.1642H110.256V41.6337ZM108.76 75.7472C107.762 78.4531 106.366 80.8078 104.572 82.8112C102.776 84.8161 100.606 86.4183 98.0637 87.6206C95.5202 88.823 92.7004 89.4238 89.6103 89.4238C86.5178 89.4238 83.7252 88.823 81.2324 87.6206C78.7388 86.4183 76.5949 84.8161 74.7998 82.8112C73.004 80.8078 71.6319 78.4531 70.6856 75.7472C69.7356 73.0421 69.2644 70.1868 69.2644 67.1821C69.2644 64.1758 69.7356 61.3205 70.6856 58.6154C71.6319 55.9102 73.004 53.5571 74.7998 51.5522C76.5949 49.5495 78.738 47.9451 81.2324 46.7427C83.7252 45.5404 86.5178 44.9396 89.6103 44.9396C92.7012 44.9396 95.5202 45.5404 98.0637 46.7427C100.606 47.9451 102.776 49.5487 104.572 51.5522C106.367 53.5571 107.762 55.9102 108.76 58.6154C109.756 61.3205 110.256 64.1758 110.256 67.1821C110.256 70.1868 109.756 73.0421 108.76 75.7472Z" fill="currentColor" />
-                        <path d="M242.805 41.6337C240.611 38.1275 237.494 35.3731 233.455 33.3681C229.416 31.3647 225.351 30.3618 221.262 30.3618C215.974 30.3618 211.138 31.3389 206.75 33.2923C202.36 35.2456 198.597 37.928 195.455 41.3333C192.314 44.7401 189.869 48.6726 188.125 53.1293C186.378 57.589 185.507 62.274 185.507 67.1813C185.507 72.1925 186.378 76.8995 188.125 81.3069C189.868 85.7173 192.313 89.6241 195.455 93.0293C198.597 96.4361 202.361 99.1155 206.75 101.069C211.138 103.022 215.974 103.999 221.262 103.999C225.351 103.999 229.416 102.997 233.455 100.994C237.494 98.9911 240.611 96.2359 242.805 92.7282V102.195H259.112V32.1642H242.805V41.6337ZM241.31 75.7472C240.312 78.4531 238.916 80.8078 237.122 82.8112C235.326 84.8161 233.156 86.4183 230.614 87.6206C228.07 88.823 225.251 89.4238 222.16 89.4238C219.068 89.4238 216.275 88.823 213.782 87.6206C211.289 86.4183 209.145 84.8161 207.35 82.8112C205.554 80.8078 204.182 78.4531 203.236 75.7472C202.286 73.0421 201.814 70.1868 201.814 67.1821C201.814 64.1758 202.286 61.3205 203.236 58.6154C204.182 55.9102 205.554 53.5571 207.35 51.5522C209.145 49.5495 211.288 47.9451 213.782 46.7427C216.275 45.5404 219.068 44.9396 222.16 44.9396C225.251 44.9396 228.07 45.5404 230.614 46.7427C233.156 47.9451 235.326 49.5487 237.122 51.5522C238.917 53.5571 240.312 55.9102 241.31 58.6154C242.306 61.3205 242.806 64.1758 242.806 67.1821C242.805 70.1868 242.305 73.0421 241.31 75.7472Z" fill="currentColor" />
-                        <path d="M438 -3H421.694V102.197H438V-3Z" fill="currentColor" />
-                        <path d="M139.43 102.197H155.735V48.2834H183.712V32.1665H139.43V102.197Z" fill="currentColor" />
-                        <path d="M324.49 32.1665L303.995 85.794L283.498 32.1665H266.983L293.748 102.197H314.242L341.006 32.1665H324.49Z" fill="currentColor" />
-                        <path d="M376.571 30.3656C356.603 30.3656 340.797 46.8497 340.797 67.1828C340.797 89.6597 356.094 104 378.661 104C391.29 104 399.354 99.1488 409.206 88.5848L398.189 80.0226C398.183 80.031 389.874 90.9895 377.468 90.9895C363.048 90.9895 356.977 79.3111 356.977 73.269H411.075C413.917 50.1328 398.775 30.3656 376.571 30.3656ZM357.02 61.0967C357.145 59.7487 359.023 43.3761 376.442 43.3761C393.861 43.3761 395.978 59.7464 396.099 61.0967H357.02Z" fill="currentColor" />
-                    </svg>
+            </div>
 
-                    {{-- Light Mode 12 SVG --}}
-                    <svg class="w-[448px] max-w-none relative -mt-[4.9rem] -ms-8 lg:ms-0 lg:-mt-[6.6rem] dark:hidden" viewBox="0 0 440 376" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <g class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
-                            <path d="M188.263 355.73L188.595 355.73C195.441 348.845 205.766 339.761 219.569 328.477C232.93 317.193 242.978 308.205 249.714 301.511C256.34 294.626 260.867 287.358 263.296 279.708C265.725 272.058 264.565 264.121 259.816 255.896C254.516 246.716 247.062 239.352 237.454 233.805C227.957 228.067 217.908 225.198 207.307 225.198C196.927 225.197 190.136 227.97 186.934 233.516C183.621 238.872 184.726 246.331 190.247 255.894L125.647 255.891C116.371 239.825 112.395 225.481 113.72 212.858C115.265 200.235 121.559 190.481 132.602 183.596C143.754 176.52 158.607 172.982 177.159 172.983C196.594 172.984 215.863 176.523 234.968 183.6C253.961 190.486 271.299 200.241 286.98 212.864C302.661 225.488 315.14 239.833 324.416 255.899C333.03 270.817 336.841 283.918 335.847 295.203C335.075 306.487 331.376 316.336 324.75 324.751C318.346 333.167 308.408 343.494 294.936 355.734L377.094 355.737L405.917 405.656L217.087 405.649L188.263 355.73Z" fill="black" />
-                            <path d="M9.11884 226.339L-13.7396 226.338L-42.7286 176.132L43.0733 176.135L175.595 405.649L112.651 405.647L9.11884 226.339Z" fill="black" />
-                            <path d="M188.263 355.73L188.595 355.73C195.441 348.845 205.766 339.761 219.569 328.477C232.93 317.193 242.978 308.205 249.714 301.511C256.34 294.626 260.867 287.358 263.296 279.708C265.725 272.058 264.565 264.121 259.816 255.896C254.516 246.716 247.062 239.352 237.454 233.805C227.957 228.067 217.908 225.198 207.307 225.198C196.927 225.197 190.136 227.97 186.934 233.516C183.621 238.872 184.726 246.331 190.247 255.894L125.647 255.891C116.371 239.825 112.395 225.481 113.72 212.858C115.265 200.235 121.559 190.481 132.602 183.596C143.754 176.52 158.607 172.982 177.159 172.983C196.594 172.984 215.863 176.523 234.968 183.6C253.961 190.486 271.299 200.241 286.98 212.864C302.661 225.488 315.14 239.833 324.416 255.899C333.03 270.817 336.841 283.918 335.847 295.203C335.075 306.487 331.376 316.336 324.75 324.751C318.346 333.167 308.408 343.494 294.936 355.734L377.094 355.737L405.917 405.656L217.087 405.649L188.263 355.73Z" stroke="#1B1B18" stroke-width="1" />
-                            <path d="M9.11884 226.339L-13.7396 226.338L-42.7286 176.132L43.0733 176.135L175.595 405.649L112.651 405.647L9.11884 226.339Z" stroke="#1B1B18" stroke-width="1" />
-                            <path d="M204.592 327.449L204.923 327.449C211.769 320.564 222.094 311.479 235.897 300.196C249.258 288.912 259.306 279.923 266.042 273.23C272.668 266.345 277.195 259.077 279.624 251.427C282.053 243.777 280.893 235.839 276.145 227.615C270.844 218.435 263.39 211.071 253.782 205.524C244.285 199.786 234.236 196.917 223.635 196.916C213.255 196.916 206.464 199.689 203.262 205.235C199.949 210.59 201.054 218.049 206.575 227.612L141.975 227.61C132.699 211.544 128.723 197.2 130.048 184.577C131.593 171.954 137.887 162.2 148.93 155.315C160.083 148.239 174.935 144.701 193.487 144.702C212.922 144.703 232.192 148.242 251.296 155.319C270.289 162.205 287.627 171.96 303.308 184.583C318.989 197.207 331.468 211.552 340.745 227.618C349.358 242.536 353.169 255.637 352.175 266.921C351.403 278.205 347.704 288.055 341.078 296.47C334.674 304.885 324.736 315.213 311.264 327.453L393.422 327.456L422.246 377.375L233.415 377.368L204.592 327.449Z" fill="#F8B803" />
-                            <path d="M25.447 198.058L2.58852 198.057L-26.4005 147.851L59.4015 147.854L191.923 377.368L128.979 377.365L25.447 198.058Z" fill="#F8B803" />
-                            <path d="M204.592 327.449L204.923 327.449C211.769 320.564 222.094 311.479 235.897 300.196C249.258 288.912 259.306 279.923 266.042 273.23C272.668 266.345 277.195 259.077 279.624 251.427C282.053 243.777 280.893 235.839 276.145 227.615C270.844 218.435 263.39 211.071 253.782 205.524C244.285 199.786 234.236 196.917 223.635 196.916C213.255 196.916 206.464 199.689 203.262 205.235C199.949 210.59 201.054 218.049 206.575 227.612L141.975 227.61C132.699 211.544 128.723 197.2 130.048 184.577C131.593 171.954 137.887 162.2 148.93 155.315C160.083 148.239 174.935 144.701 193.487 144.702C212.922 144.703 232.192 148.242 251.296 155.319C270.289 162.205 287.627 171.96 303.308 184.583C318.989 197.207 331.468 211.552 340.745 227.618C349.358 242.536 353.169 255.637 352.175 266.921C351.403 278.205 347.704 288.055 341.078 296.47C334.674 304.885 324.736 315.213 311.264 327.453L393.422 327.456L422.246 377.375L233.415 377.368L204.592 327.449Z" stroke="#1B1B18" stroke-width="1" />
-                            <path d="M25.447 198.058L2.58852 198.057L-26.4005 147.851L59.4015 147.854L191.923 377.368L128.979 377.365L25.447 198.058Z" stroke="#1B1B18" stroke-width="1" />
-                        </g>
-                        <g style="mix-blend-mode: hard-light" class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
-                            <path d="M217.342 305.363L217.673 305.363C224.519 298.478 234.844 289.393 248.647 278.11C262.008 266.826 272.056 257.837 278.792 251.144C285.418 244.259 289.945 236.991 292.374 229.341C294.803 221.691 293.643 213.753 288.895 205.529C283.594 196.349 276.14 188.985 266.532 183.438C257.035 177.7 246.986 174.831 236.385 174.83C226.005 174.83 219.214 177.603 216.012 183.149C212.699 188.504 213.804 195.963 219.325 205.527L154.725 205.524C145.449 189.458 141.473 175.114 142.798 162.491C144.343 149.868 150.637 140.114 161.68 133.229C172.833 126.153 187.685 122.615 206.237 122.616C225.672 122.617 244.942 126.156 264.046 133.233C283.039 140.119 300.377 149.874 316.058 162.497C331.739 175.121 344.218 189.466 353.495 205.532C362.108 220.45 365.919 233.551 364.925 244.835C364.153 256.12 360.454 265.969 353.828 274.384C347.424 282.799 337.486 293.127 324.014 305.367L406.172 305.37L434.996 355.289L246.165 355.282L217.342 305.363Z" fill="#F0ACB8" />
-                            <path d="M38.197 175.972L15.3385 175.971L-13.6505 125.765L72.1515 125.768L204.673 355.282L141.729 355.279L38.197 175.972Z" fill="#F0ACB8" />
-                            <path d="M217.342 305.363L217.673 305.363C224.519 298.478 234.844 289.393 248.647 278.11C262.008 266.826 272.056 257.837 278.792 251.144C285.418 244.259 289.945 236.991 292.374 229.341C294.803 221.691 293.643 213.753 288.895 205.529C283.594 196.349 276.14 188.985 266.532 183.438C257.035 177.7 246.986 174.831 236.385 174.83C226.005 174.83 219.214 177.603 216.012 183.149C212.699 188.504 213.804 195.963 219.325 205.527L154.725 205.524C145.449 189.458 141.473 175.114 142.798 162.491C144.343 149.868 150.637 140.114 161.68 133.229C172.833 126.153 187.685 122.615 206.237 122.616C225.672 122.617 244.942 126.156 264.046 133.233C283.039 140.119 300.377 149.874 316.058 162.497C331.739 175.121 344.218 189.466 353.495 205.532C362.108 220.45 365.919 233.551 364.925 244.835C364.153 256.12 360.454 265.969 353.828 274.384C347.424 282.799 337.486 293.127 324.014 305.367L406.172 305.37L434.996 355.289L246.165 355.282L217.342 305.363Z" stroke="#1B1B18" stroke-width="1" />
-                            <path d="M38.197 175.972L15.3385 175.971L-13.6505 125.765L72.1515 125.768L204.673 355.282L141.729 355.279L38.197 175.972Z" stroke="#1B1B18" stroke-width="1" />
-                        </g>
-                        <g style="mix-blend-mode: plus-darker" class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
-                            <path d="M230.951 281.792L231.282 281.793C238.128 274.907 248.453 265.823 262.256 254.539C275.617 243.256 285.666 234.267 292.402 227.573C299.027 220.688 303.554 213.421 305.983 205.771C308.412 198.12 307.253 190.183 302.504 181.959C297.203 172.778 289.749 165.415 280.142 159.868C270.645 154.13 260.596 151.26 249.995 151.26C239.615 151.26 232.823 154.033 229.621 159.579C226.309 164.934 227.413 172.393 232.935 181.956L168.335 181.954C159.058 165.888 155.082 151.543 156.407 138.92C157.953 126.298 164.247 116.544 175.289 109.659C186.442 102.583 201.294 99.045 219.846 99.0457C239.281 99.0464 258.551 102.585 277.655 109.663C296.649 116.549 313.986 126.303 329.667 138.927C345.349 151.551 357.827 165.895 367.104 181.961C375.718 196.88 379.528 209.981 378.535 221.265C377.762 232.549 374.063 242.399 367.438 250.814C361.033 259.229 351.095 269.557 337.624 281.796L419.782 281.8L448.605 331.719L259.774 331.712L230.951 281.792Z" fill="#F3BEC7" />
-                            <path d="M51.8063 152.402L28.9479 152.401L-0.0411453 102.195L85.7608 102.198L218.282 331.711L155.339 331.709L51.8063 152.402Z" fill="#F3BEC7" />
-                            <path d="M230.951 281.792L231.282 281.793C238.128 274.907 248.453 265.823 262.256 254.539C275.617 243.256 285.666 234.267 292.402 227.573C299.027 220.688 303.554 213.421 305.983 205.771C308.412 198.12 307.253 190.183 302.504 181.959C297.203 172.778 289.749 165.415 280.142 159.868C270.645 154.13 260.596 151.26 249.995 151.26C239.615 151.26 232.823 154.033 229.621 159.579C226.309 164.934 227.413 172.393 232.935 181.956L168.335 181.954C159.058 165.888 155.082 151.543 156.407 138.92C157.953 126.298 164.247 116.544 175.289 109.659C186.442 102.583 201.294 99.045 219.846 99.0457C239.281 99.0464 258.551 102.585 277.655 109.663C296.649 116.549 313.986 126.303 329.667 138.927C345.349 151.551 357.827 165.895 367.104 181.961C375.718 196.88 379.528 209.981 378.535 221.265C377.762 232.549 374.063 242.399 367.438 250.814C361.033 259.229 351.095 269.557 337.624 281.796L419.782 281.8L448.605 331.719L259.774 331.712L230.951 281.792Z" stroke="#1B1B18" stroke-width="1" />
-                            <path d="M51.8063 152.402L28.9479 152.401L-0.0411453 102.195L85.7608 102.198L218.282 331.711L155.339 331.709L51.8063 152.402Z" stroke="#1B1B18" stroke-width="1" />
-                        </g>
-                        <g class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
-                            <path d="M188.467 355.363L188.798 355.363C195.644 348.478 205.969 339.393 219.772 328.11C233.133 316.826 243.181 307.837 249.917 301.144C253.696 297.217 256.792 293.166 259.205 288.991C261.024 285.845 262.455 282.628 263.499 279.341C265.928 271.691 264.768 263.753 260.02 255.529C254.719 246.349 247.265 238.985 237.657 233.438C228.16 227.7 218.111 224.831 207.51 224.83C197.13 224.83 190.339 227.603 187.137 233.149C183.824 238.504 184.929 245.963 190.45 255.527L125.851 255.524C116.574 239.458 112.598 225.114 113.923 212.491C114.615 206.836 116.261 201.756 118.859 197.253C122.061 191.704 126.709 187.03 132.805 183.229C143.958 176.153 158.81 172.615 177.362 172.616C196.797 172.617 216.067 176.156 235.171 183.233C254.164 190.119 271.502 199.874 287.183 212.497C302.864 225.121 315.343 239.466 324.62 255.532C333.233 270.45 337.044 283.551 336.05 294.835C335.46 303.459 333.16 311.245 329.151 318.194C327.915 320.337 326.515 322.4 324.953 324.384C318.549 332.799 308.611 343.127 295.139 355.367L377.297 355.37L406.121 405.289L217.29 405.282L188.467 355.363Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M9.32197 225.972L-13.5365 225.971L-42.5255 175.765L43.2765 175.768L175.798 405.282L112.854 405.279L9.32197 225.972Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M345.247 111.915C329.566 99.2919 312.229 89.5371 293.235 82.6512L235.167 183.228C254.161 190.114 271.498 199.869 287.179 212.492L345.247 111.915Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M382.686 154.964C373.41 138.898 360.931 124.553 345.25 111.93L287.182 212.506C302.863 225.13 315.342 239.475 324.618 255.541L382.686 154.964Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M293.243 82.6472C274.139 75.57 254.869 72.031 235.434 72.0303L177.366 172.607C196.801 172.608 216.071 176.147 235.175 183.224L293.243 82.6472Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M394.118 194.257C395.112 182.973 391.301 169.872 382.688 154.953L324.619 255.53C333.233 270.448 337.044 283.55 336.05 294.834L394.118 194.257Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M235.432 72.0311C216.88 72.0304 202.027 75.5681 190.875 82.6442L132.806 183.221C143.959 176.145 158.812 172.607 177.363 172.608L235.432 72.0311Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M265.59 124.25C276.191 124.251 286.24 127.12 295.737 132.858L237.669 233.435C228.172 227.697 218.123 224.828 207.522 224.827L265.59 124.25Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M295.719 132.859C305.326 138.406 312.78 145.77 318.081 154.95L260.013 255.527C254.712 246.347 247.258 238.983 237.651 233.436L295.719 132.859Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M387.218 217.608C391.227 210.66 393.527 202.874 394.117 194.25L336.049 294.827C335.459 303.451 333.159 311.237 329.15 318.185L387.218 217.608Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M245.211 132.577C248.413 127.03 255.204 124.257 265.584 124.258L207.516 224.835C197.136 224.834 190.345 227.607 187.143 233.154L245.211 132.577Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M318.094 154.945C322.842 163.17 324.002 171.107 321.573 178.757L263.505 279.334C265.934 271.684 264.774 263.746 260.026 255.522L318.094 154.945Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M176.925 96.6737C180.127 91.1249 184.776 86.4503 190.871 82.6499L132.803 183.227C126.708 187.027 122.059 191.702 118.857 197.25L176.925 96.6737Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M387.226 217.606C385.989 219.749 384.59 221.813 383.028 223.797L324.96 324.373C326.522 322.39 327.921 320.326 329.157 318.183L387.226 217.606Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M317.269 188.408C319.087 185.262 320.519 182.045 321.562 178.758L263.494 279.335C262.451 282.622 261.019 285.839 259.201 288.985L317.269 188.408Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M245.208 132.573C241.895 137.928 243 145.387 248.522 154.95L190.454 255.527C184.932 245.964 183.827 238.505 187.14 233.15L245.208 132.573Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M176.93 96.6719C174.331 101.175 172.686 106.255 171.993 111.91L113.925 212.487C114.618 206.831 116.263 201.752 118.862 197.249L176.93 96.6719Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M317.266 188.413C314.853 192.589 311.757 196.64 307.978 200.566L249.91 301.143C253.689 297.216 256.785 293.166 259.198 288.99L317.266 188.413Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M464.198 304.708L435.375 254.789L377.307 355.366L406.13 405.285L464.198 304.708Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M353.209 254.787C366.68 242.548 376.618 232.22 383.023 223.805L324.955 324.382C318.55 332.797 308.612 343.124 295.141 355.364L353.209 254.787Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M435.37 254.787L353.212 254.784L295.144 355.361L377.302 355.364L435.37 254.787Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M183.921 154.947L248.521 154.95L190.453 255.527L125.853 255.524L183.921 154.947Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M171.992 111.914C170.668 124.537 174.643 138.881 183.92 154.947L125.852 255.524C116.575 239.458 112.599 225.114 113.924 212.491L171.992 111.914Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M307.987 200.562C301.251 207.256 291.203 216.244 277.842 227.528L219.774 328.105C233.135 316.821 243.183 307.832 249.919 301.139L307.987 200.562Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M15.5469 75.1797L44.5359 125.386L-13.5321 225.963L-42.5212 175.756L15.5469 75.1797Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M277.836 227.536C264.033 238.82 253.708 247.904 246.862 254.789L188.794 355.366C195.64 348.481 205.965 339.397 219.768 328.113L277.836 227.536Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M275.358 304.706L464.189 304.713L406.12 405.29L217.29 405.283L275.358 304.706Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M44.5279 125.39L67.3864 125.39L9.31834 225.967L-13.5401 225.966L44.5279 125.39Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M101.341 75.1911L233.863 304.705L175.795 405.282L43.2733 175.768L101.341 75.1911ZM15.5431 75.19L-42.525 175.767L43.277 175.77L101.345 75.1932L15.5431 75.19Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M246.866 254.784L246.534 254.784L188.466 355.361L188.798 355.361L246.866 254.784Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M246.539 254.781L275.362 304.701L217.294 405.277L188.471 355.358L246.539 254.781Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M67.3906 125.391L170.923 304.698L112.855 405.275L9.32257 225.967L67.3906 125.391Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                            <path d="M170.921 304.699L233.865 304.701L175.797 405.278L112.853 405.276L170.921 304.699Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="bevel" />
-                        </g>
-                        <g style="mix-blend-mode: hard-light" class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
-                            <path d="M246.544 254.79L246.875 254.79C253.722 247.905 264.046 238.82 277.849 227.537C291.21 216.253 301.259 207.264 307.995 200.57C314.62 193.685 319.147 186.418 321.577 178.768C324.006 171.117 322.846 163.18 318.097 154.956C312.796 145.775 305.342 138.412 295.735 132.865C286.238 127.127 276.189 124.258 265.588 124.257C255.208 124.257 248.416 127.03 245.214 132.576C241.902 137.931 243.006 145.39 248.528 154.953L183.928 154.951C174.652 138.885 170.676 124.541 172 111.918C173.546 99.2946 179.84 89.5408 190.882 82.6559C202.035 75.5798 216.887 72.0421 235.439 72.0428C254.874 72.0435 274.144 75.5825 293.248 82.6598C312.242 89.5457 329.579 99.3005 345.261 111.924C360.942 124.548 373.421 138.892 382.697 154.958C391.311 169.877 395.121 182.978 394.128 194.262C393.355 205.546 389.656 215.396 383.031 223.811C376.627 232.226 366.688 242.554 353.217 254.794L435.375 254.797L464.198 304.716L275.367 304.709L246.544 254.79Z" fill="#F0ACB8" />
-                            <path d="M246.544 254.79L246.875 254.79C253.722 247.905 264.046 238.82 277.849 227.537C291.21 216.253 301.259 207.264 307.995 200.57C314.62 193.685 319.147 186.418 321.577 178.768C324.006 171.117 322.846 163.18 318.097 154.956C312.796 145.775 305.342 138.412 295.735 132.865C286.238 127.127 276.189 124.258 265.588 124.257C255.208 124.257 248.416 127.03 245.214 132.576C241.902 137.931 243.006 145.39 248.528 154.953L183.928 154.951C174.652 138.885 170.676 124.541 172 111.918C173.546 99.2946 179.84 89.5408 190.882 82.6559C202.035 75.5798 216.887 72.0421 235.439 72.0428C254.874 72.0435 274.144 75.5825 293.248 82.6598C312.242 89.5457 329.579 99.3005 345.261 111.924C360.942 124.548 373.421 138.892 382.697 154.958C391.311 169.877 395.121 182.978 394.128 194.262C393.355 205.546 389.656 215.396 383.031 223.811C376.627 232.226 366.688 242.554 353.217 254.794L435.375 254.797L464.198 304.716L275.367 304.709L246.544 254.79Z" stroke="#1B1B18" stroke-width="1" stroke-linejoin="round" />
-                        </g>
-                        <g style="mix-blend-mode: hard-light" class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
-                            <path d="M67.41 125.402L44.5515 125.401L15.5625 75.1953L101.364 75.1985L233.886 304.712L170.942 304.71L67.41 125.402Z" fill="#F0ACB8" />
-                            <path d="M67.41 125.402L44.5515 125.401L15.5625 75.1953L101.364 75.1985L233.886 304.712L170.942 304.71L67.41 125.402Z" stroke="#1B1B18" stroke-width="1" />
-                        </g>
-                    </svg>
+            <!-- Mobile Menu -->
+            <div class="dropdown mobile-user-menu">
+                <a href="javascript:void(0);" data-dropdown-toggle="mobile-dropdown"><i class="fa fa-ellipsis-v"></i></a>
+                <ul id="mobile-dropdown" class="hidden p-1 border rounded bg-white shadow-lg w-40 z-[1]">
+                    <li><a class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" href="profile.html">My Profile</a></li>
+                    <li><a class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" href="profile-settings.html">Settings</a></li>
+                    <li><a class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" href="login.html">Logout</a></li>
+                </ul>
+            </div>
+            <!-- /Mobile Menu -->
 
-                    {{-- Dark Mode 12 SVG --}}
-                    <svg class="w-[448px] max-w-none relative -mt-[4.9rem] -ms-8 lg:ms-0 lg:-mt-[6.6rem] hidden dark:block" viewBox="0 0 440 376" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <g class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
-                            <path d="M188.263 355.73L188.595 355.73C195.441 348.845 205.766 339.761 219.569 328.477C232.93 317.193 242.978 308.205 249.714 301.511C256.34 294.626 260.867 287.358 263.296 279.708C265.725 272.058 264.565 264.121 259.816 255.896C254.516 246.716 247.062 239.352 237.454 233.805C227.957 228.067 217.908 225.198 207.307 225.198C196.927 225.197 190.136 227.97 186.934 233.516C183.621 238.872 184.726 246.331 190.247 255.894L125.647 255.891C116.371 239.825 112.395 225.481 113.72 212.858C115.265 200.235 121.559 190.481 132.602 183.596C143.754 176.52 158.607 172.982 177.159 172.983C196.594 172.984 215.863 176.523 234.968 183.6C253.961 190.486 271.299 200.241 286.98 212.864C302.661 225.488 315.14 239.833 324.416 255.899C333.03 270.817 336.841 283.918 335.847 295.203C335.075 306.487 331.376 316.336 324.75 324.751C318.346 333.167 308.408 343.494 294.936 355.734L377.094 355.737L405.917 405.656L217.087 405.649L188.263 355.73Z" fill="black"/>
-                            <path d="M9.11884 226.339L-13.7396 226.338L-42.7286 176.132L43.0733 176.135L175.595 405.649L112.651 405.647L9.11884 226.339Z" fill="black"/>
-                            <path d="M188.263 355.73L188.595 355.73C195.441 348.845 205.766 339.761 219.569 328.477C232.93 317.193 242.978 308.205 249.714 301.511C256.34 294.626 260.867 287.358 263.296 279.708C265.725 272.058 264.565 264.121 259.816 255.896C254.516 246.716 247.062 239.352 237.454 233.805C227.957 228.067 217.908 225.198 207.307 225.198C196.927 225.197 190.136 227.97 186.934 233.516C183.621 238.872 184.726 246.331 190.247 255.894L125.647 255.891C116.371 239.825 112.395 225.481 113.72 212.858C115.265 200.235 121.559 190.481 132.602 183.596C143.754 176.52 158.607 172.982 177.159 172.983C196.594 172.984 215.863 176.523 234.968 183.6C253.961 190.486 271.299 200.241 286.98 212.864C302.661 225.488 315.14 239.833 324.416 255.899C333.03 270.817 336.841 283.918 335.847 295.203C335.075 306.487 331.376 316.336 324.75 324.751C318.346 333.167 308.408 343.494 294.936 355.734L377.094 355.737L405.917 405.656L217.087 405.649L188.263 355.73Z" stroke="#FF750F" stroke-width="1"/>
-                            <path d="M9.11884 226.339L-13.7396 226.338L-42.7286 176.132L43.0733 176.135L175.595 405.649L112.651 405.647L9.11884 226.339Z" stroke="#FF750F" stroke-width="1"/>
-                            <path d="M204.592 327.449L204.923 327.449C211.769 320.564 222.094 311.479 235.897 300.196C249.258 288.912 259.306 279.923 266.042 273.23C272.668 266.345 277.195 259.077 279.624 251.427C282.053 243.777 280.893 235.839 276.145 227.615C270.844 218.435 263.39 211.071 253.782 205.524C244.285 199.786 234.236 196.917 223.635 196.916C213.255 196.916 206.464 199.689 203.262 205.235C199.949 210.59 201.054 218.049 206.575 227.612L141.975 227.61C132.699 211.544 128.723 197.2 130.048 184.577C131.593 171.954 137.887 162.2 148.93 155.315C160.083 148.239 174.935 144.701 193.487 144.702C212.922 144.703 232.192 148.242 251.296 155.319C270.289 162.205 287.627 171.96 303.308 184.583C318.989 197.207 331.468 211.552 340.745 227.618C349.358 242.536 353.169 255.637 352.175 266.921C351.403 278.205 347.704 288.055 341.078 296.47C334.674 304.885 324.736 315.213 311.264 327.453L393.422 327.456L422.246 377.375L233.415 377.368L204.592 327.449Z" fill="#391800"/>
-                            <path d="M25.447 198.058L2.58852 198.057L-26.4005 147.851L59.4015 147.854L191.923 377.368L128.979 377.365L25.447 198.058Z" fill="#391800"/>
-                            <path d="M204.592 327.449L204.923 327.449C211.769 320.564 222.094 311.479 235.897 300.196C249.258 288.912 259.306 279.923 266.042 273.23C272.668 266.345 277.195 259.077 279.624 251.427C282.053 243.777 280.893 235.839 276.145 227.615C270.844 218.435 263.39 211.071 253.782 205.524C244.285 199.786 234.236 196.917 223.635 196.916C213.255 196.916 206.464 199.689 203.262 205.235C199.949 210.59 201.054 218.049 206.575 227.612L141.975 227.61C132.699 211.544 128.723 197.2 130.048 184.577C131.593 171.954 137.887 162.2 148.93 155.315C160.083 148.239 174.935 144.701 193.487 144.702C212.922 144.703 232.192 148.242 251.296 155.319C270.289 162.205 287.627 171.96 303.308 184.583C318.989 197.207 331.468 211.552 340.745 227.618C349.358 242.536 353.169 255.637 352.175 266.921C351.403 278.205 347.704 288.055 341.078 296.47C334.674 304.885 324.736 315.213 311.264 327.453L393.422 327.456L422.246 377.375L233.415 377.368L204.592 327.449Z" stroke="#FF750F" stroke-width="1"/>
-                            <path d="M25.447 198.058L2.58852 198.057L-26.4005 147.851L59.4015 147.854L191.923 377.368L128.979 377.365L25.447 198.058Z" stroke="#FF750F" stroke-width="1"/>
-                        </g>
-                        <g class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4" style="mix-blend-mode:hard-light">
-                            <path d="M217.342 305.363L217.673 305.363C224.519 298.478 234.844 289.393 248.647 278.11C262.008 266.826 272.056 257.837 278.792 251.144C285.418 244.259 289.945 236.991 292.374 229.341C294.803 221.691 293.643 213.753 288.895 205.529C283.594 196.349 276.14 188.985 266.532 183.438C257.035 177.7 246.986 174.831 236.385 174.83C226.005 174.83 219.214 177.603 216.012 183.149C212.699 188.504 213.804 195.963 219.325 205.527L154.725 205.524C145.449 189.458 141.473 175.114 142.798 162.491C144.343 149.868 150.637 140.114 161.68 133.229C172.833 126.153 187.685 122.615 206.237 122.616C225.672 122.617 244.942 126.156 264.046 133.233C283.039 140.119 300.377 149.874 316.058 162.497C331.739 175.121 344.218 189.466 353.495 205.532C362.108 220.45 365.919 233.551 364.925 244.835C364.153 256.12 360.454 265.969 353.828 274.384C347.424 282.799 337.486 293.127 324.014 305.367L406.172 305.37L434.996 355.289L246.165 355.282L217.342 305.363Z" fill="#733000"/>
-                            <path d="M38.197 175.972L15.3385 175.971L-13.6505 125.765L72.1515 125.768L204.673 355.282L141.729 355.279L38.197 175.972Z" fill="#733000"/>
-                            <path d="M217.342 305.363L217.673 305.363C224.519 298.478 234.844 289.393 248.647 278.11C262.008 266.826 272.056 257.837 278.792 251.144C285.418 244.259 289.945 236.991 292.374 229.341C294.803 221.691 293.643 213.753 288.895 205.529C283.594 196.349 276.14 188.985 266.532 183.438C257.035 177.7 246.986 174.831 236.385 174.83C226.005 174.83 219.214 177.603 216.012 183.149C212.699 188.504 213.804 195.963 219.325 205.527L154.725 205.524C145.449 189.458 141.473 175.114 142.798 162.491C144.343 149.868 150.637 140.114 161.68 133.229C172.833 126.153 187.685 122.615 206.237 122.616C225.672 122.617 244.942 126.156 264.046 133.233C283.039 140.119 300.377 149.874 316.058 162.497C331.739 175.121 344.218 189.466 353.495 205.532C362.108 220.45 365.919 233.551 364.925 244.835C364.153 256.12 360.454 265.969 353.828 274.384C347.424 282.799 337.486 293.127 324.014 305.367L406.172 305.37L434.996 355.289L246.165 355.282L217.342 305.363Z" stroke="#FF750F" stroke-width="1"/>
-                            <path d="M38.197 175.972L15.3385 175.971L-13.6505 125.765L72.1515 125.768L204.673 355.282L141.729 355.279L38.197 175.972Z" stroke="#FF750F" stroke-width="1"/>
-                        </g>
-                        <g class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
-                            <path d="M217.342 305.363L217.673 305.363C224.519 298.478 234.844 289.393 248.647 278.11C262.008 266.826 272.056 257.837 278.792 251.144C285.418 244.259 289.945 236.991 292.374 229.341C294.803 221.691 293.643 213.753 288.895 205.529C283.594 196.349 276.14 188.985 266.532 183.438C257.035 177.7 246.986 174.831 236.385 174.83C226.005 174.83 219.214 177.603 216.012 183.149C212.699 188.504 213.804 195.963 219.325 205.527L154.726 205.524C145.449 189.458 141.473 175.114 142.798 162.491C144.343 149.868 150.637 140.114 161.68 133.229C172.833 126.153 187.685 122.615 206.237 122.616C225.672 122.617 244.942 126.156 264.046 133.233C283.039 140.119 300.377 149.874 316.058 162.497C331.739 175.121 344.218 189.466 353.495 205.532C362.108 220.45 365.919 233.551 364.925 244.835C364.153 256.12 360.454 265.969 353.828 274.384C347.424 282.799 337.486 293.127 324.014 305.367L406.172 305.37L434.996 355.289L246.165 355.282L217.342 305.363Z" stroke="#FF750F" stroke-width="1"/>
-                            <path d="M38.197 175.972L15.3385 175.971L-13.6505 125.765L72.1515 125.768L204.673 355.282L141.729 355.279L38.197 175.972Z" stroke="#FF750F" stroke-width="1"/>
-                        </g>
-                        <g class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4">
-                            <path d="M188.467 355.363L188.798 355.363C195.644 348.478 205.969 339.393 219.772 328.11C233.133 316.826 243.181 307.837 249.917 301.144C253.696 297.217 256.792 293.166 259.205 288.991C261.024 285.845 262.455 282.628 263.499 279.341C265.928 271.691 264.768 263.753 260.02 255.529C254.719 246.349 247.265 238.985 237.657 233.438C228.16 227.7 218.111 224.831 207.51 224.83C197.13 224.83 190.339 227.603 187.137 233.149C183.824 238.504 184.929 245.963 190.45 255.527L125.851 255.524C116.574 239.458 112.598 225.114 113.923 212.491C114.615 206.836 116.261 201.756 118.859 197.253C122.061 191.704 126.709 187.03 132.805 183.229C143.958 176.153 158.81 172.615 177.362 172.616C196.797 172.617 216.067 176.156 235.171 183.233C254.164 190.119 271.502 199.874 287.183 212.497C302.864 225.121 315.343 239.466 324.62 255.532C333.233 270.45 337.044 283.551 336.05 294.835C335.46 303.459 333.16 311.245 329.151 318.194C327.915 320.337 326.515 322.4 324.953 324.384C318.549 332.799 308.611 343.127 295.139 355.367L377.297 355.37L406.121 405.289L217.29 405.282L188.467 355.363Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M9.32197 225.972L-13.5365 225.971L-42.5255 175.765L43.2765 175.768L175.798 405.282L112.854 405.279L9.32197 225.972Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M345.247 111.915C329.566 99.2919 312.229 89.5371 293.235 82.6512L235.167 183.228C254.161 190.114 271.498 199.869 287.179 212.492L345.247 111.915Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M382.686 154.964C373.41 138.898 360.931 124.553 345.25 111.93L287.182 212.506C302.863 225.13 315.342 239.475 324.618 255.541L382.686 154.964Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M293.243 82.6472C274.139 75.57 254.869 72.031 235.434 72.0303L177.366 172.607C196.801 172.608 216.071 176.147 235.175 183.224L293.243 82.6472Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M394.118 194.257C395.112 182.973 391.301 169.872 382.688 154.953L324.619 255.53C333.233 270.448 337.044 283.55 336.05 294.834L394.118 194.257Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M235.432 72.0311C216.88 72.0304 202.027 75.5681 190.875 82.6442L132.806 183.221C143.959 176.145 158.812 172.607 177.363 172.608L235.432 72.0311Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M265.59 124.25C276.191 124.251 286.24 127.12 295.737 132.858L237.669 233.435C228.172 227.697 218.123 224.828 207.522 224.827L265.59 124.25Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M295.719 132.859C305.326 138.406 312.78 145.77 318.081 154.95L260.013 255.527C254.712 246.347 247.258 238.983 237.651 233.436L295.719 132.859Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M387.218 217.608C391.227 210.66 393.527 202.874 394.117 194.25L336.049 294.827C335.459 303.451 333.159 311.237 329.15 318.185L387.218 217.608Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M245.211 132.577C248.413 127.03 255.204 124.257 265.584 124.258L207.516 224.835C197.136 224.834 190.345 227.607 187.143 233.154L245.211 132.577Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M318.094 154.945C322.842 163.17 324.002 171.107 321.573 178.757L263.505 279.334C265.934 271.684 264.774 263.746 260.026 255.522L318.094 154.945Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M176.925 96.6737C180.127 91.1249 184.776 86.4503 190.871 82.6499L132.803 183.227C126.708 187.027 122.059 191.702 118.857 197.25L176.925 96.6737Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M387.226 217.606C385.989 219.749 384.59 221.813 383.028 223.797L324.96 324.373C326.522 322.39 327.921 320.326 329.157 318.183L387.226 217.606Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M317.269 188.408C319.087 185.262 320.519 182.045 321.562 178.758L263.494 279.335C262.451 282.622 261.019 285.839 259.201 288.985L317.269 188.408Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M245.208 132.573C241.895 137.928 243 145.387 248.522 154.95L190.454 255.527C184.932 245.964 183.827 238.505 187.14 233.15L245.208 132.573Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M176.93 96.6719C174.331 101.175 172.686 106.255 171.993 111.91L113.925 212.487C114.618 206.831 116.263 201.752 118.862 197.249L176.93 96.6719Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M317.266 188.413C314.853 192.589 311.757 196.64 307.978 200.566L249.91 301.143C253.689 297.216 256.785 293.166 259.198 288.99L317.266 188.413Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M464.198 304.708L435.375 254.789L377.307 355.366L406.13 405.285L464.198 304.708Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M353.209 254.787C366.68 242.548 376.618 232.22 383.023 223.805L324.955 324.382C318.55 332.797 308.612 343.124 295.141 355.364L353.209 254.787Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M435.37 254.787L353.212 254.784L295.144 355.361L377.302 355.364L435.37 254.787Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M183.921 154.947L248.521 154.95L190.453 255.527L125.853 255.524L183.921 154.947Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M171.992 111.914C170.668 124.537 174.643 138.881 183.92 154.947L125.852 255.524C116.575 239.458 112.599 225.114 113.924 212.491L171.992 111.914Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M307.987 200.562C301.251 207.256 291.203 216.244 277.842 227.528L219.774 328.105C233.135 316.821 243.183 307.832 249.919 301.139L307.987 200.562Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M15.5469 75.1797L44.5359 125.386L-13.5321 225.963L-42.5212 175.756L15.5469 75.1797Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M277.836 227.536C264.033 238.82 253.708 247.904 246.862 254.789L188.794 355.366C195.64 348.481 205.965 339.397 219.768 328.113L277.836 227.536Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M275.358 304.706L464.189 304.713L406.12 405.29L217.29 405.283L275.358 304.706Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M44.5279 125.39L67.3864 125.39L9.31834 225.967L-13.5401 225.966L44.5279 125.39Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M101.341 75.1911L233.863 304.705L175.795 405.282L43.2733 175.768L101.341 75.1911ZM15.5431 75.19L-42.525 175.767L43.277 175.77L101.345 75.1932L15.5431 75.19Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M246.866 254.784L246.534 254.784L188.466 355.361L188.798 355.361L246.866 254.784Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M246.539 254.781L275.362 304.701L217.294 405.277L188.471 355.358L246.539 254.781Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M67.3906 125.391L170.923 304.698L112.855 405.275L9.32257 225.967L67.3906 125.391Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                            <path d="M170.921 304.699L233.865 304.701L175.797 405.278L112.853 405.276L170.921 304.699Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="bevel"/>
-                        </g>
-                        <g class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4" style="mix-blend-mode:hard-light">
-                            <path d="M246.544 254.79L246.875 254.79C253.722 247.905 264.046 238.82 277.849 227.537C291.21 216.253 301.259 207.264 307.995 200.57C314.62 193.685 319.147 186.418 321.577 178.768C324.006 171.117 322.846 163.18 318.097 154.956C312.796 145.775 305.342 138.412 295.735 132.865C286.238 127.127 276.189 124.258 265.588 124.257C255.208 124.257 248.416 127.03 245.214 132.576C241.902 137.931 243.006 145.39 248.528 154.953L183.928 154.951C174.652 138.885 170.676 124.541 172 111.918C173.546 99.2946 179.84 89.5408 190.882 82.6559C202.035 75.5798 216.887 72.0421 235.439 72.0428C254.874 72.0435 274.144 75.5825 293.248 82.6598C312.242 89.5457 329.579 99.3005 345.261 111.924C360.942 124.548 373.421 138.892 382.697 154.958C391.311 169.877 395.121 182.978 394.128 194.262C393.355 205.546 389.656 215.396 383.031 223.811C376.627 232.226 366.688 242.554 353.217 254.794L435.375 254.797L464.198 304.716L275.367 304.709L246.544 254.79Z" fill="#4B0600"/>
-                            <path d="M246.544 254.79L246.875 254.79C253.722 247.905 264.046 238.82 277.849 227.537C291.21 216.253 301.259 207.264 307.995 200.57C314.62 193.685 319.147 186.418 321.577 178.768C324.006 171.117 322.846 163.18 318.097 154.956C312.796 145.775 305.342 138.412 295.735 132.865C286.238 127.127 276.189 124.258 265.588 124.257C255.208 124.257 248.416 127.03 245.214 132.576C241.902 137.931 243.006 145.39 248.528 154.953L183.928 154.951C174.652 138.885 170.676 124.541 172 111.918C173.546 99.2946 179.84 89.5408 190.882 82.6559C202.035 75.5798 216.887 72.0421 235.439 72.0428C254.874 72.0435 274.144 75.5825 293.248 82.6598C312.242 89.5457 329.579 99.3005 345.261 111.924C360.942 124.548 373.421 138.892 382.697 154.958C391.311 169.877 395.121 182.978 394.128 194.262C393.355 205.546 389.656 215.396 383.031 223.811C376.627 232.226 366.688 242.554 353.217 254.794L435.375 254.797L464.198 304.716L275.367 304.709L246.544 254.79Z" stroke="#FF750F" stroke-width="1" stroke-linejoin="round"/>
-                        </g>
-                        <g class="transition-all delay-300 translate-y-0 opacity-100 duration-750 starting:opacity-0 starting:translate-y-4" style="mix-blend-mode:hard-light">
-                            <path d="M67.41 125.402L44.5515 125.401L15.5625 75.1953L101.364 75.1985L233.886 304.712L170.942 304.71L67.41 125.402Z" fill="#4B0600"/>
-                            <path d="M67.41 125.402L44.5515 125.401L15.5625 75.1953L101.364 75.1985L233.886 304.712L170.942 304.71L67.41 125.402Z" stroke="#FF750F" stroke-width="1"/>
-                        </g>
-                    </svg>
-                    <div class="absolute inset-0 rounded-t-lg lg:rounded-t-none lg:rounded-e-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]"></div>
-                </div>
-            </main>
         </div>
 
-        @if (Route::has('login'))
-            <div class="h-14.5 hidden lg:block"></div>
-        @endif
-    </body>
+    </div>
+    <!-- /Header -->
+
+    <!-- Sidebar -->
+    <div class="sidebar fixed top-0 left-0 bottom-0 w-sidebar bg-white border-r border-borderColor" id="sidebar">
+        <!-- Logo -->
+        <div class="sidebar-logo fixed h-[50px] w-sidebar pt-3 px-3">
+            <a href="index.html" class="logo logo-normal">
+                <img src="{{ asset('assets/img/logo.svg') }}" alt="Logo">
+            </a>
+            <a href="index.html" class="logo-small hidden">
+                <img src="{{ asset('assets/img/logo-small.svg') }}" alt="Logo">
+            </a>
+            <a href="index.html" class="dark-logo hidden">
+                <img src="{{ asset('assets/img/logo-white.svg') }}" alt="Logo">
+            </a>
+        </div>
+        <!-- /Logo -->
+        <div class="modern-profile hidden p-3 pb-0 ">
+            <div class="text-center rounded bg-light p-3 mb-4 user-profile flex items-center justify-center flex-col">
+                <div class="relative inline-flex items-center justify-center size-[45px] online mb-3">
+                    <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="rounded-full">
+                    <div class="absolute inline-flex items-center justify-center w-3 h-3 text-xs font-bold text-white bg-success border-2 border-white rounded-full top-8 end-0 dark:border-gray-900"></div>
+                </div>
+                <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
+                <p class="text-[10px]">System Admin</p>
+            </div>
+            <div class="sidebar-nav mb-3">
+                <ul class="nav nav-tabs nav-tabs-solid nav-tabs-rounded nav-justified bg-light p-3 rounded-[65px] flex justify-center items-center gap-3" role="tablist">
+                    <li class="nav-item py-2 px-3 bg-primary rounded-[65px]"><a class="nav-link active border-0 text-white" href="#">Menu</a></li>
+                    <li class="nav-item py-2 px-3 rounded-[65px]"><a class="nav-link border-0 text-gray-700" href="chat.html">Chats</a></li>
+                    <li class="nav-item py-2 px-3 rounded-[65px]"><a class="nav-link border-0 text-gray-700" href="email.html">Inbox</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="sidebar-header p-3 pb-0 pt-2 hidden">
+            <div class="text-center rounded bg-light p-2 mb-4 sidebar-profile flex items-center">
+                <div class="size-8 onlin">
+                    <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="rounded-full">
+                </div>
+                <div class="text-start sidebar-profile-info ms-2">
+                    <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
+                    <p class="text-[10px]">System Admin</p>
+                </div>
+            </div>
+            <div class="flex w-[220px] relative me-1 mb-4">
+                <span class="absolute inset-y-0 start-0 flex items-center ps-2.5 pointer-events-none text-gray-400"><i class="ti ti-search"></i></span>
+                <input type="text" class="block flex-1 border border-borderColor bg-white rounded-[5px] py-1.5 pl-7 pr-12 text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:border-borderColor h-[30px] text-xs" placeholder="Search in HRMS">
+                <span class="absolute inset-y-1/2 end-0 flex items-center me-2.5 pointer-events-none "><kbd class="bg-dark-transparent text-[10px] font-medium text-gray-500 px-[3px] py-0.5 rounded">CTRL + / </kbd></span>
+            </div>
+            <div class="flex items-center justify-between menu-item mb-3">
+                <div class="me-3">
+                    <a href="calendar.html" class="btn btn-menubar border border-borderColor size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent">
+                        <i class="ti ti-layout-grid-remove"></i>
+                    </a>
+                </div>
+
+                <div class="me-3 notification-item">
+                    <a href="chat.html" class="relative inline-flex items-center justify-center border border-borderColor size-[30px] p-3 text-sm font-medium text-center hover:text-gray-900 hover:bg-dark-transparent  rounded-[5px]">
+                        <i class="ti ti-brand-hipchat"></i>
+
+                        <span class="text-[6px] w-[10px] h-[10px] flex items-center justify-center text-white rounded-full absolute right-[5px] text top-[2px] z-[1] bg-info">5</span>
+                    </a>
+                </div>
+                <div class="me-3 notification-item">
+                    <a href="activity.html" class="relative inline-flex items-center justify-center border border-borderColor size-[30px] p-3 text-sm font-medium text-center hover:text-gray-900 hover:bg-dark-transparent  rounded-[5px]">
+                        <i class="ti ti-bell"></i>
+
+                        <div class="notification-status-dot w-[6px] h-[6px] rounded-full absolute right-[5px] top-[5px] z-[1] bg-danger"></div>
+                    </a>
+                </div>
+                <div class="me-0">
+                    <a href="email.html" class="btn btn-menubar border border-borderColor size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent">
+                        <i class="ti ti-message"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-inner slimscroll">
+            <div id="sidebar-menu" class="sidebar-menu">
+                <ul>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>MAIN MENU</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="active subdrop relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-smart-home text-gray-500 group-hover:text-gray-900 group-active:text-gray-900"></i>
+                                    <span class="ms-2">Dashboard</span>
+                                    <span class="ms-2 text-[10px] bg-danger rounded font-medium text-white px-1 py-0.5 inline-flex items-center">Hot</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="index.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Admin Dashboard</a></li>
+                                    <li><a href="employee-dashboard.html" class="active relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Employee Dashboard</a></li>
+                                    <li><a href="deals-dashboard.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Deals Dashboard</a></li>
+                                    <li><a href="leads-dashboard.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Leads Dashboard</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-layout-grid-add"></i><span class="ms-2">Applications</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="chat.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Chat</a></li>
+                                    <li class="submenu submenu-two">
+                                        <a href="call.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Calls<span class="menu-arrow inside-submenu absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li><a href="voice-call.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Voice Call</a></li>
+                                            <li><a href="video-call.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Video Call</a></li>
+                                            <li><a href="outgoing-call.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Outgoing Call</a></li>
+                                            <li><a href="incoming-call.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Incoming Call</a></li>
+                                            <li><a href="call-history.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Call History</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="calendar.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Calendar</a></li>
+                                    <li><a href="email.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Email</a></li>
+                                    <li><a href="todo.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">To Do</a></li>
+                                    <li><a href="notes.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Notes</a></li>
+                                    <li><a href="social-feed.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Social Feed</a></li>
+                                    <li><a href="file-manager.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">File Manager</a></li>
+                                    <li><a href="kanban-view.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Kanban</a></li>
+                                    <li><a href="invoices.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Invoices</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-user-star"></i><span class="ms-2">Super Admin</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="dashboard.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Dashboard</a></li>
+                                    <li><a href="companies.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Companies</a></li>
+                                    <li><a href="subscription.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Subscriptions</a></li>
+                                    <li><a href="packages.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Packages</a></li>
+                                    <li><a href="domain.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Domain</a></li>
+                                    <li><a href="purchase-transaction.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Purchase Transaction</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>LAYOUT</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="mb-[5px]">
+                                <a href="layout-horizontal.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-layout-navbar"></i><span class="ms-2">Horizontal</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-detached.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-details"></i><span class="ms-2">Detached</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-modern.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-layout-board-split"></i><span class="ms-2">Modern</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-two-column.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-columns-2"></i><span class="ms-2">Two Column </span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-hovered.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-column-insert-left"></i><span class="ms-2">Hovered</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-box.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-layout-align-middle"></i><span class="ms-2">Boxed</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-horizontal-single.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-layout-navbar-inactive"></i><span class="ms-2">Horizontal Single</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-horizontal-overlay.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-layout-collage"></i><span class="ms-2">Horizontal Overlay</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-horizontal-box.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-layout-board"></i><span class="ms-2">Horizontal Box</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-horizontal-sidemenu.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-table"></i><span class="ms-2">Menu Aside</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-vertical-transparent.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-layout"></i><span class="ms-2">Transparent</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-without-header.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-layout-sidebar"></i><span class="ms-2">Without Header</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-rtl.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-text-direction-rtl"></i><span class="ms-2">RTL</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="layout-dark.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-moon"></i><span class="ms-2">Dark</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>PROJECTS</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="mb-[5px]">
+                                <a href="clients-grid.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-users-group"></i><span class="ms-2">Clients</span>
+                                </a>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-box"></i><span class="ms-2">Projects</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="projects-grid.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Projects</a></li>
+                                    <li><a href="tasks.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Tasks</a></li>
+                                    <li><a href="task-board.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Task Board</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>CRM</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="mb-[5px]">
+                                <a href="contacts-grid.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-user-shield"></i><span class="ms-2">Contacts</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="companies-grid.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-building"></i><span class="ms-2">Companies</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="deals-grid.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-heart-handshake"></i><span class="ms-2">Deals</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="leads-grid.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-user-check"></i><span class="ms-2">Leads</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="pipeline.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-timeline-event-text"></i><span class="ms-2">Pipeline</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="analytics.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-graph"></i><span class="ms-2">Analytics</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="activity.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-activity"></i><span class="ms-2">Activities</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>HRM</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-users"></i><span class="ms-2">Employees</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="employees.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Employee Lists</a></li>
+                                    <li><a href="employees-grid.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Employee Grid</a></li>
+                                    <li><a href="employee-details.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Employee Details</a></li>
+                                    <li><a href="departments.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Departments</a></li>
+                                    <li><a href="designations.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Designations</a></li>
+                                    <li><a href="policy.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Policies</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-ticket"></i><span class="ms-2">Tickets</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="tickets.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Tickets</a></li>
+                                    <li><a href="ticket-details.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Ticket Details</a></li>
+                                </ul>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="holidays.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-calendar-event"></i><span class="ms-2">Holidays</span>
+                                </a>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-file-time"></i><span class="ms-2">Attendance</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Leaves<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li><a href="leaves.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Leaves (Admin)</a></li>
+                                            <li><a href="leaves-employee.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Leave (Employee)</a></li>
+                                            <li><a href="leave-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Leave Settings</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="attendance-admin.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Attendance (Admin)</a></li>
+                                    <li><a href="attendance-employee.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Attendance (Employee)</a></li>
+                                    <li><a href="timesheets.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Timesheets</a></li>
+                                    <li><a href="schedule-timing.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Shift & Schedule</a></li>
+                                    <li><a href="overtime.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Overtime</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-school"></i><span class="ms-2">Performance</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="performance-indicator.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Performance Indicator</a></li>
+                                    <li><a href="performance-review.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Performance Review</a></li>
+                                    <li><a href="performance-appraisal.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Performance Appraisal</a></li>
+                                    <li><a href="goal-tracking.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Goal List</a></li>
+                                    <li><a href="goal-type.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Goal Type</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-edit"></i><span class="ms-2">Training</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="training.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Training List</a></li>
+                                    <li><a href="trainers.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Trainers</a></li>
+                                    <li><a href="training-type.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Training Type</a></li>
+                                </ul>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="promotion.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-speakerphone"></i><span class="ms-2">Promotion</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="resignation.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-external-link"></i><span class="ms-2">Resignation</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="termination.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-circle-x"></i><span class="ms-2">Termination</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>RECRUITMENT</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="mb-[5px]">
+                                <a href="job-grid.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-timeline"></i><span class="ms-2">Jobs</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="candidates-grid.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-user-shield"></i><span class="ms-2">Candidates</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="refferals.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-ux-circle"></i><span class="ms-2">Referrals</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>FINANCE & ACCOUNTS</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-shopping-cart-dollar"></i><span class="ms-2">Sales</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="estimates.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Estimates</a></li>
+                                    <li><a href="invoices.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Invoices</a></li>
+                                    <li><a href="payments.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Payments</a></li>
+                                    <li><a href="expenses.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Expenses</a></li>
+                                    <li><a href="provident-fund.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Provident Fund</a></li>
+                                    <li><a href="taxes.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Taxes</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-file-dollar"></i><span class="ms-2">Accounting</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="categories.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Categories</a></li>
+                                    <li><a href="budgets.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Budgets</a></li>
+                                    <li><a href="budget-expenses.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Budget Expenses</a></li>
+                                    <li><a href="budget-revenues.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Budget Revenues</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-cash"></i><span class="ms-2">Payroll</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="employee-salary.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Employee Salary</a></li>
+                                    <li><a href="payslip.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Payslip</a></li>
+                                    <li><a href="payroll.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Payroll Items</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>ADMINISTRATION</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-cash"></i><span class="ms-2">Assets</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="assets.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Assets</a></li>
+                                    <li><a href="asset-categories.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Asset Categories</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-headset"></i><span class="ms-2">Help & Supports</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="knowledgebase.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Knowledge Base</a></li>
+                                    <li><a href="activity.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Activities</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-user-star"></i><span class="ms-2">User Management</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="users.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Users</a></li>
+                                    <li><a href="roles-permissions.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Roles & Permissions</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-user-star"></i><span class="ms-2">Reports</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="expenses-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Expense Report</a></li>
+                                    <li><a href="invoice-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Invoice Report</a></li>
+                                    <li><a href="payment-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Payment Report</a></li>
+                                    <li><a href="project-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Project Report</a></li>
+                                    <li><a href="task-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Task Report</a></li>
+                                    <li><a href="user-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">User Report</a></li>
+                                    <li><a href="employee-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Employee Report</a></li>
+                                    <li><a href="payslip-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Payslip Report</a></li>
+                                    <li><a href="attendance-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Attendance Report</a></li>
+                                    <li><a href="leave-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Leave Report</a></li>
+                                    <li><a href="daily-report.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Daily Report</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-settings"></i><span class="ms-2">Settings</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">General Settings<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li><a href="profile-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Profile</a></li>
+                                            <li><a href="security-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Security</a></li>
+                                            <li><a href="notification-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Notifications</a></li>
+                                            <li><a href="connected-apps.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Connected Apps</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Website Settings<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li><a href="bussiness-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Business Settings</a></li>
+                                            <li><a href="seo-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">SEO Settings</a></li>
+                                            <li><a href="localization-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Localization</a></li>
+                                            <li><a href="prefixes.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Prefixes</a></li>
+                                            <li><a href="preferences.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Preferences</a></li>
+                                            <li><a href="performance-appraisal.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Appearance</a></li>
+                                            <li><a href="language.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Language</a></li>
+                                            <li><a href="authentication-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Authentication</a></li>
+                                            <li><a href="ai-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">AI Settings</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">App Settings<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li><a href="salary-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Salary Settings</a></li>
+                                            <li><a href="approval-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Approval Settings</a></li>
+                                            <li><a href="invoice-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Invoice Settings</a></li>
+                                            <li><a href="leave-type.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Leave Type</a></li>
+                                            <li><a href="custom-fields.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Custom Fields</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">System Settings<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li><a href="email-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Email Settings</a></li>
+                                            <li><a href="email-template.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Email Templates</a></li>
+                                            <li><a href="sms-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">SMS Settings</a></li>
+                                            <li><a href="sms-template.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">SMS Templates</a></li>
+                                            <li><a href="otp-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">OTP</a></li>
+                                            <li><a href="gdpr.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">GDPR Cookies</a></li>
+                                            <li><a href="maintenance-mode.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Maintenance Mode</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Financial Settings<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li><a href="payment-gateways.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Payment Gateways</a></li>
+                                            <li><a href="tax-rates.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Tax Rate</a></li>
+                                            <li><a href="currencies.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Currencies</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Other Settings<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li><a href="custom-css.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Custom CSS</a></li>
+                                            <li><a href="custom-js.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Custom JS</a></li>
+                                            <li><a href="cronjob.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Cronjob</a></li>
+                                            <li><a href="storage-settings.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Storage</a></li>
+                                            <li><a href="ban-ip-address.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Ban IP Address</a></li>
+                                            <li><a href="backup.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Backup</a></li>
+                                            <li><a href="clear-cache.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Clear Cache</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>CONTENT</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="mb-[5px]">
+                                <a href="pages.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-box-multiple"></i><span class="ms-2">Pages</span>
+                                </a>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-brand-blogger"></i><span class="ms-2">Blogs</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="blogs.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">All Blogs</a></li>
+                                    <li><a href="blog-categories.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Categories</a></li>
+                                    <li><a href="blog-comments.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Comments</a></li>
+                                    <li><a href="blog-tags.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Blog Tags</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-map-pin-check"></i><span class="ms-2">Locations</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="countries.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Countries</a></li>
+                                    <li><a href="states.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">States</a></li>
+                                    <li><a href="cities.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Cities</a></li>
+                                </ul>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="testimonials.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-message-2"></i><span class="ms-2">Testimonials</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="faq.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-question-mark"></i><span class="ms-2">FAQ’S</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>PAGES</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="mb-[5px]">
+                                <a href="starter.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-layout-sidebar"></i><span class="ms-2">Starter</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="profile.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-user-circle"></i><span class="ms-2">Profile</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="gallery.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-photo"></i><span class="ms-2">Gallery</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="search-result.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-list-search"></i><span class="ms-2">Search Results</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="timeline.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-timeline"></i><span class="ms-2">Timeline</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="pricing.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-file-dollar"></i><span class="ms-2">Pricing</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="coming-soon.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-progress-bolt"></i><span class="ms-2">Coming Soon</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="under-maintenance.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-alert-octagon"></i><span class="ms-2">Under Maintenance</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="under-construction.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-barrier-block"></i><span class="ms-2">Under Construction</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="api-keys.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-api"></i><span class="ms-2">API Keys</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="privacy-policy.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-file-description"></i><span class="ms-2">Privacy Policy</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="terms-condition.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-file-check"></i><span class="ms-2">Terms & Conditions</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>AUTHENTICATION</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-login"></i><span class="ms-2">Login</span><span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="login.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Cover</a></li>
+                                    <li><a href="login-2.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Illustration</a></li>
+                                    <li><a href="login-3.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Basic</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-forms"></i><span class="ms-2">Register</span><span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="register.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Cover</a></li>
+                                    <li><a href="register-2.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Illustration</a></li>
+                                    <li><a href="register-3.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Basic</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-help-triangle"></i><span class="ms-2">Forgot Password</span><span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="forgot-password.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Cover</a></li>
+                                    <li><a href="forgot-password-2.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Illustration</a></li>
+                                    <li><a href="forgot-password-3.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Basic</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-restore"></i><span class="ms-2">Reset Password</span><span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="reset-password.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Cover</a></li>
+                                    <li><a href="reset-password-2.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Illustration</a></li>
+                                    <li><a href="reset-password-3.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Basic</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-mail-exclamation"></i><span class="ms-2">Email Verification</span><span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="email-verification.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Cover</a></li>
+                                    <li><a href="email-verification-2.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Illustration</a></li>
+                                    <li><a href="email-verification-3.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Basic</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-password"></i><span class="ms-2">2 Step Verification</span><span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="two-step-verification.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Cover</a></li>
+                                    <li><a href="two-step-verification-2.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Illustration</a></li>
+                                    <li><a href="two-step-verification-3.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Basic</a></li>
+                                </ul>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="lock-screen.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-lock-square"></i><span class="ms-2">Lock Screen</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="error-404.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-error-404"></i><span class="ms-2">404 Error</span>
+                                </a>
+                            </li>
+                            <li class="mb-[5px]">
+                                <a href="error-500.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-server"></i><span class="ms-2">500 Error</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>UI INTERFACE</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-hierarchy-2"></i>
+                                    <span class="ms-2">Base UI</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li>
+                                        <a href="ui-alerts.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Alerts</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-accordion.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Accordion</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-avatar.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Avatar</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-badges.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Badges</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-borders.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Border</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-buttons.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Buttons</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-buttons-group.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Button Group</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-breadcrumb.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Breadcrumb</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-cards.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Card</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-carousel.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Carousel</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-colors.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Colors</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-dropdowns.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Dropdowns</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-grid.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Grid</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-images.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Images</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-lightbox.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Lightbox</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-media.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Media</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-modals.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Modals</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-offcanvas.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Offcanvas</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-pagination.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Pagination</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-popovers.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Popovers</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-progress.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Progress</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-spinner.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Spinner</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-sweetalerts.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Sweet Alerts</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-nav-tabs.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Tabs</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-tooltips.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Tooltips</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-typography.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Typography</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-video.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Video</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-sortable.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Sortable</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-swiperjs.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Swiperjs</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-hierarchy-3"></i>
+                                    <span class="ms-2">Advanced UI</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li>
+                                        <a href="ui-clipboard.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Clipboard</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-drag-drop.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Drag & Drop</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-rangeslider.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Range Slider</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-rating.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Rating</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-text-editor.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Text Editor</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-counter.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Counter</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-scrollbar.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Scrollbar</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-stickynote.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Sticky Note</a>
+                                    </li>
+                                    <li>
+                                        <a href="ui-timeline.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Timeline</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-input-search"></i>
+                                    <span class="ms-2">Forms</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Form Elements <span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li>
+                                                <a href="form-basic-inputs.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Basic Inputs</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-checkbox-radios.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Checkbox & Radios</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-input-groups.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Input Groups</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-grid-gutters.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Grid & Gutters</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-select.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Form Select</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-mask.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Input Masks</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-fileupload.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">File Uploads</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Layouts <span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li>
+                                                <a href="form-horizontal.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Horizontal Form</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-vertical.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Vertical Form</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-floating-labels.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Floating Labels</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="form-validation.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Form Validation</a>
+                                    </li>
+
+                                    <li>
+                                        <a href="form-select2.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Select2</a>
+                                    </li>
+                                    <li>
+                                        <a href="form-wizard.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Form Wizard</a>
+                                    </li>
+                                    <li>
+                                        <a href="form-pickers.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Form Picker</a>
+                                    </li>
+
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-table-plus"></i>
+                                    <span class="ms-2">Tables</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li>
+                                        <a href="tables-basic.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Basic Tables </a>
+                                    </li>
+                                    <li>
+                                        <a href="data-tables.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Data Table </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-chart-line"></i>
+                                    <span class="ms-2">Charts</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li>
+                                        <a href="chart-apex.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Apex Charts</a>
+                                    </li>
+                                    <li>
+                                        <a href="chart-c3.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Chart C3</a>
+                                    </li>
+                                    <li>
+                                        <a href="chart-js.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Chart Js</a>
+                                    </li>
+                                    <li>
+                                        <a href="chart-morris.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Morris Charts</a>
+                                    </li>
+                                    <li>
+                                        <a href="chart-flot.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Flot Charts</a>
+                                    </li>
+                                    <li>
+                                        <a href="chart-peity.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Peity Charts</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-icons"></i>
+                                    <span class="ms-2">Icons</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li>
+                                        <a href="icon-fontawesome.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Fontawesome Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-tabler.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Tabler Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-bootstrap.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Bootstrap Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-remix.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Remix Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-feather.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Feather Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-ionic.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Ionic Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-material.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Material Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-pe7.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Pe7 Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-simpleline.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Simpleline Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-themify.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Themify Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-weather.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Weather Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-typicon.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Typicon Icons</a>
+                                    </li>
+                                    <li>
+                                        <a href="icon-flag.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Flag Icons</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-table-plus"></i>
+                                    <span class="ms-2">Maps</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li>
+                                        <a href="maps-vector.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Vector</a>
+                                    </li>
+                                    <li>
+                                        <a href="maps-leaflet.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Leaflet</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-title text-[10px] font-semibold text-gray-400 mb-3"><span>Extras</span></li>
+                    <li>
+                        <ul class="mb-[19px]">
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-file-text"></i>
+                                    <span class="ms-2">Documentation</span>
+                                </a>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-exchange"></i>
+                                    <span class="ms-2">Changelog</span>
+                                    <span class="bg-pink text-white text-[10px] py-0.5 px-1.5 ms-1 rounded leading-4">v4.0.3</span>
+                                </a>
+                            </li>
+                            <li class="submenu mb-[5px]">
+                                <a href="javascript:void(0);" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                    <i class="ti ti-menu-2"></i>
+                                    <span class="ms-2">Multi Level</span>
+                                    <span class="menu-arrow absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span>
+                                </a>
+                                <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
+                                    <li><a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Multilevel 1</a></li>
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Multilevel 2<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li><a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Multilevel 2.1</a></li>
+                                            <li class="submenu submenu-two submenu-three">
+                                                <a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-5 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Multilevel 2.2<span class="menu-arrow inside-submenu inside-submenu-two absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                                <ul>
+                                                    <li><a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-10 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Multilevel 2.2.1</a></li>
+                                                    <li><a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 ms-10 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Multilevel 2.2.2</a></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="javascript:void(0);" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Multilevel 3</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /Sidebar -->
+
+    <!-- Horizontal Menu -->
+    <div class="sidebar sidebar-horizontal hidden" id="horizontal-menu">
+        <div class="sidebar-menu">
+            <div class="main-menu">
+                <ul class="nav-menu">
+                    <li class="menu-title">
+                        <span>Main</span>
+                    </li>
+                    <li class="submenu">
+                        <a href="#"   class="subdrop">
+                            <i class="ti ti-smart-home"></i><span>Dashboard</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul>
+                            <li><a href="index.html">Admin Dashboard</a></li>
+                            <li><a href="employee-dashboard.html" class="active">Employee Dashboard</a></li>
+                            <li><a href="deals-dashboard.html">Deals Dashboard</a></li>
+                            <li><a href="leads-dashboard.html">Leads Dashboard</a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#">
+                            <i class="ti ti-user-star"></i><span>Super Admin</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul>
+                            <li><a href="dashboard.html">Dashboard</a></li>
+                            <li><a href="companies.html">Companies</a></li>
+                            <li><a href="subscription.html">Subscriptions</a></li>
+                            <li><a href="packages.html">Packages</a></li>
+                            <li><a href="domain.html">Domain</a></li>
+                            <li><a href="purchase-transaction.html">Purchase Transaction</a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#">
+                            <i class="ti ti-layout-grid-add"></i><span>Applications</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul>
+                            <li><a href="chat.html">Chat</a></li>
+                            <li class="submenu submenu-two">
+                                <a href="call.html">Calls<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                <ul>
+                                    <li><a href="voice-call.html">Voice Call</a></li>
+                                    <li><a href="video-call.html">Video Call</a></li>
+                                    <li><a href="outgoing-call.html">Outgoing Call</a></li>
+                                    <li><a href="incoming-call.html">Incoming Call</a></li>
+                                    <li><a href="call-history.html">Call History</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="calendar.html">Calendar</a></li>
+                            <li><a href="email.html">Email</a></li>
+                            <li><a href="todo.html">To Do</a></li>
+                            <li><a href="notes.html">Notes</a></li>
+                            <li><a href="file-manager.html">File Manager</a></li>
+                            <li><a href="kanban-view.html">Kanban</a></li>
+                            <li><a href="invoices.html">Invoices</a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#">
+                            <i class="ti ti-layout-board-split"></i><span>Layouts</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="layout-horizontal.html">
+                                    <span>Horizontal</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-detached.html">
+                                    <span>Detached</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-modern.html">
+                                    <span>Modern</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-two-column.html">
+                                    <span>Two Column </span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-hovered.html">
+                                    <span>Hovered</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-box.html">
+                                    <span>Boxed</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-horizontal-single.html">
+                                    <span>Horizontal Single</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-horizontal-overlay.html">
+                                    <span>Horizontal Overlay</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-horizontal-box.html">
+                                    <span>Horizontal Box</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-horizontal-sidemenu.html">
+                                    <span>Menu Aside</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-vertical-transparent.html">
+                                    <span>Transparent</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-without-header.html">
+                                    <span>Without Header</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-rtl.html">
+                                    <span>RTL</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="layout-dark.html">
+                                    <span>Dark</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#">
+                            <i class="ti ti-user-star"></i><span>Projects</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="clients-grid.html"><span>Clients</span>
+                                </a>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Projects</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="projects-grid.html">Projects</a></li>
+                                    <li><a href="tasks.html">Tasks</a></li>
+                                    <li><a href="task-board.html">Task Board</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="call.html">Crm<span class="menu-arrow"></span></a>
+                                <ul>
+                                    <li><a href="contacts-grid.html"><span>Contacts</span></a></li>
+                                    <li><a href="companies-grid.html"><span>Companies</span></a></li>
+                                    <li><a href="deals-grid.html"><span>Deals</span></a></li>
+                                    <li><a href="leads-grid.html"><span>Leads</span></a></li>
+                                    <li><a href="pipeline.html"><span>Pipeline</span></a></li>
+                                    <li><a href="analytics.html"><span>Analytics</span></a></li>
+                                    <li><a href="activity.html"><span>Activities</span></a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Employees</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="employees.html">Employee Lists</a></li>
+                                    <li><a href="employees-grid.html">Employee Grid</a></li>
+                                    <li><a href="employee-details.html">Employee Details</a></li>
+                                    <li><a href="departments.html">Departments</a></li>
+                                    <li><a href="designations.html">Designations</a></li>
+                                    <li><a href="policy.html">Policies</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Tickets</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="tickets.html">Tickets</a></li>
+                                    <li><a href="ticket-details.html">Ticket Details</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="holidays.html"><span>Holidays</span></a></li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Attendance</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Leaves<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="leaves.html">Leaves (Admin)</a></li>
+                                            <li><a href="leaves-employee.html">Leave (Employee)</a></li>
+                                            <li><a href="leave-settings.html">Leave Settings</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="attendance-admin.html">Attendance (Admin)</a></li>
+                                    <li><a href="attendance-employee.html">Attendance (Employee)</a></li>
+                                    <li><a href="timesheets.html">Timesheets</a></li>
+                                    <li><a href="schedule-timing.html">Shift & Schedule</a></li>
+                                    <li><a href="overtime.html">Overtime</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Performance</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="performance-indicator.html">Performance Indicator</a></li>
+                                    <li><a href="performance-review.html">Performance Review</a></li>
+                                    <li><a href="performance-appraisal.html">Performance Appraisal</a></li>
+                                    <li><a href="goal-tracking.html">Goal List</a></li>
+                                    <li><a href="goal-type.html">Goal Type</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Training</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="training.html">Training List</a></li>
+                                    <li><a href="trainers.html">Trainers</a></li>
+                                    <li><a href="training-type.html">Training Type</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="promotion.html"><span>Promotion</span></a></li>
+                            <li><a href="resignation.html"><span>Resignation</span></a></li>
+                            <li><a href="termination.html"><span>Termination</span></a></li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#">
+                            <i class="ti ti-user-star"></i><span>Administration</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Sales</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="estimates.html">Estimates</a></li>
+                                    <li><a href="invoices.html">Invoices</a></li>
+                                    <li><a href="payments.html">Payments</a></li>
+                                    <li><a href="expenses.html">Expenses</a></li>
+                                    <li><a href="provident-fund.html">Provident Fund</a></li>
+                                    <li><a href="taxes.html">Taxes</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Accounting</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="categories.html">Categories</a></li>
+                                    <li><a href="budgets.html">Budgets</a></li>
+                                    <li><a href="budget-expenses.html">Budget Expenses</a></li>
+                                    <li><a href="budget-revenues.html">Budget Revenues</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Payroll</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="employee-salary.html">Employee Salary</a></li>
+                                    <li><a href="payslip.html">Payslip</a></li>
+                                    <li><a href="payroll.html">Payroll Items</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Assets</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="assets.html">Assets</a></li>
+                                    <li><a href="asset-categories.html">Asset Categories</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Help & Supports</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="knowledgebase.html">Knowledge Base</a></li>
+                                    <li><a href="activity.html">Activities</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>User Management</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="users.html">Users</a></li>
+                                    <li><a href="roles-permissions.html">Roles & Permissions</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Reports</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="expenses-report.html">Expense Report</a></li>
+                                    <li><a href="invoice-report.html">Invoice Report</a></li>
+                                    <li><a href="payment-report.html">Payment Report</a></li>
+                                    <li><a href="project-report.html">Project Report</a></li>
+                                    <li><a href="task-report.html">Task Report</a></li>
+                                    <li><a href="user-report.html">User Report</a></li>
+                                    <li><a href="employee-report.html">Employee Report</a></li>
+                                    <li><a href="payslip-report.html">Payslip Report</a></li>
+                                    <li><a href="attendance-report.html">Attendance Report</a></li>
+                                    <li><a href="leave-report.html">Leave Report</a></li>
+                                    <li><a href="daily-report.html">Daily Report</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Settings</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">General Settings<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="profile-settings.html">Profile</a></li>
+                                            <li><a href="security-settings.html">Security</a></li>
+                                            <li><a href="notification-settings.html">Notifications</a></li>
+                                            <li><a href="connected-apps.html">Connected Apps</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Website Settings<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="bussiness-settings.html">Business Settings</a></li>
+                                            <li><a href="seo-settings.html">SEO Settings</a></li>
+                                            <li><a href="localization-settings.html">Localization</a></li>
+                                            <li><a href="prefixes.html">Prefixes</a></li>
+                                            <li><a href="preferences.html">Preferences</a></li>
+                                            <li><a href="performance-appraisal.html">Appearance</a></li>
+                                            <li><a href="language.html">Language</a></li>
+                                            <li><a href="authentication-settings.html">Authentication</a></li>
+                                            <li><a href="ai-settings.html">AI Settings</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">App Settings<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="salary-settings.html">Salary Settings</a></li>
+                                            <li><a href="approval-settings.html">Approval Settings</a></li>
+                                            <li><a href="invoice-settings.html">Invoice Settings</a></li>
+                                            <li><a href="leave-type.html">Leave Type</a></li>
+                                            <li><a href="custom-fields.html">Custom Fields</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">System Settings<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="email-settings.html">Email Settings</a></li>
+                                            <li><a href="email-template.html">Email Templates</a></li>
+                                            <li><a href="sms-settings.html">SMS Settings</a></li>
+                                            <li><a href="sms-template.html">SMS Templates</a></li>
+                                            <li><a href="otp-settings.html">OTP</a></li>
+                                            <li><a href="gdpr.html">GDPR Cookies</a></li>
+                                            <li><a href="maintenance-mode.html">Maintenance Mode</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Financial Settings<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="payment-gateways.html">Payment Gateways</a></li>
+                                            <li><a href="tax-rates.html">Tax Rate</a></li>
+                                            <li><a href="currencies.html">Currencies</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Other Settings<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="custom-css.html">Custom CSS</a></li>
+                                            <li><a href="custom-js.html">Custom JS</a></li>
+                                            <li><a href="cronjob.html">Cronjob</a></li>
+                                            <li><a href="storage-settings.html">Storage</a></li>
+                                            <li><a href="ban-ip-address.html">Ban IP Address</a></li>
+                                            <li><a href="backup.html">Backup</a></li>
+                                            <li><a href="clear-cache.html">Clear Cache</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="submenu">
+                        <a href="#">
+                            <i class="ti ti-page-break"></i><span>Pages</span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul>
+                            <li><a href="starter.html"><span>Starter</span></a></li>
+                            <li><a href="profile.html"><span>Profile</span></a></li>
+                            <li><a href="gallery.html"><span>Gallery</span></a></li>
+                            <li><a href="search-result.html"><span>Search Results</span></a></li>
+                            <li><a href="timeline.html"><span>Timeline</span></a></li>
+                            <li><a href="pricing.html"><span>Pricing</span></a></li>
+                            <li><a href="coming-soon.html"><span>Coming Soon</span></a></li>
+                            <li><a href="under-maintenance.html"><span>Under Maintenance</span></a></li>
+                            <li><a href="under-construction.html"><span>Under Construction</span></a></li>
+                            <li><a href="api-keys.html"><span>API Keys</span></a></li>
+                            <li><a href="privacy-policy.html"><span>Privacy Policy</span></a></li>
+                            <li><a href="terms-condition.html"><span>Terms & Conditions</span></a></li>
+                            <li class="submenu">
+                                <a href="#"><span>Content</span> <span class="menu-arrow"></span></a>
+                                <ul>
+                                    <li><a href="pages.html">Pages</a></li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Blogs<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="blogs.html">All Blogs</a></li>
+                                            <li><a href="blog-categories.html">Categories</a></li>
+                                            <li><a href="blog-comments.html">Comments</a></li>
+                                            <li><a href="blog-tags.html">Tags</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Locations<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="countries.html">Countries</a></li>
+                                            <li><a href="states.html">States</a></li>
+                                            <li><a href="cities.html">Cities</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="testimonials.html">Testimonials</a></li>
+                                    <li><a href="faq.html">FAQ’S</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="#">
+                                    <span>Authentication</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);" class="">Login<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="login.html">Cover</a></li>
+                                            <li><a href="login-2.html">Illustration</a></li>
+                                            <li><a href="login-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);" class="">Register<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="register.html">Cover</a></li>
+                                            <li><a href="register-2.html">Illustration</a></li>
+                                            <li><a href="register-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu"><a href="javascript:void(0);">Forgot Password<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="forgot-password.html">Cover</a></li>
+                                            <li><a href="forgot-password-2.html">Illustration</a></li>
+                                            <li><a href="forgot-password-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Reset Password<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="reset-password.html">Cover</a></li>
+                                            <li><a href="reset-password-2.html">Illustration</a></li>
+                                            <li><a href="reset-password-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Email Verification<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="email-verification.html">Cover</a></li>
+                                            <li><a href="email-verification-2.html">Illustration</a></li>
+                                            <li><a href="email-verification-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">2 Step Verification<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="two-step-verification.html">Cover</a></li>
+                                            <li><a href="two-step-verification-2.html">Illustration</a></li>
+                                            <li><a href="two-step-verification-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="lock-screen.html">Lock Screen</a></li>
+                                    <li><a href="error-404.html">404 Error</a></li>
+                                    <li><a href="error-500.html">500 Error</a></li>
+                                </ul>
+                            </li>
+                            <li class="submenu">
+                                <a href="#">
+                                    <span>UI Interface</span>
+                                    <span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            <i class="ti ti-hierarchy-2"></i>
+                                            <span>Base UI</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li>
+                                                <a href="ui-alerts.html">Alerts</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-accordion.html">Accordion</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-avatar.html">Avatar</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-badges.html">Badges</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-borders.html">Border</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-buttons.html">Buttons</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-buttons-group.html">Button Group</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-breadcrumb.html">Breadcrumb</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-cards.html">Card</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-carousel.html">Carousel</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-colors.html">Colors</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-dropdowns.html">Dropdowns</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-grid.html">Grid</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-images.html">Images</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-lightbox.html">Lightbox</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-media.html">Media</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-modals.html">Modals</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-offcanvas.html">Offcanvas</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-pagination.html">Pagination</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-popovers.html">Popovers</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-progress.html">Progress</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-spinner.html">Spinner</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-sweetalerts.html">Sweet Alerts</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-nav-tabs.html">Tabs</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-tooltips.html">Tooltips</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-typography.html">Typography</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-video.html">Video</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-sortable.html">Sortable</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-swiperjs.html">Swiperjs</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            <i class="ti ti-hierarchy-3"></i>
+                                            <span>Advanced UI</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li>
+                                                <a href="ui-clipboard.html">Clipboard</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-drag-drop.html">Drag & Drop</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-rangeslider.html">Range Slider</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-rating.html">Rating</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-text-editor.html">Text Editor</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-counter.html">Counter</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-scrollbar.html">Scrollbar</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-stickynote.html">Sticky Note</a>
+                                            </li>
+                                            <li>
+                                                <a href="ui-timeline.html">Timeline</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            <i class="ti ti-input-search"></i>
+                                            <span>Forms</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li class="submenu submenu-two">
+                                                <a href="javascript:void(0);">Form Elements <span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                                <ul>
+                                                    <li>
+                                                        <a href="form-basic-inputs.html">Basic Inputs</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="form-checkbox-radios.html">Checkbox & Radios</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="form-input-groups.html">Input Groups</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="form-grid-gutters.html">Grid & Gutters</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="form-select.html">Form Select</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="form-mask.html">Input Masks</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="form-fileupload.html">File Uploads</a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li class="submenu submenu-two">
+                                                <a href="javascript:void(0);">Layouts <span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                                <ul>
+                                                    <li>
+                                                        <a href="form-horizontal.html">Horizontal Form</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="form-vertical.html">Vertical Form</a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="form-floating-labels.html">Floating Labels</a>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                            <li>
+                                                <a href="form-validation.html">Form Validation</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-select2.html">Select2</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-wizard.html">Form Wizard</a>
+                                            </li>
+                                            <li>
+                                                <a href="form-pickers.html">Form Pickers</a>
+                                            </li>
+
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            <i class="ti ti-table-plus"></i>
+                                            <span>Tables</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li>
+                                                <a href="tables-basic.html">Basic Tables </a>
+                                            </li>
+                                            <li>
+                                                <a href="data-tables.html">Data Table </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            <i class="ti ti-chart-line"></i>
+                                            <span>Charts</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li>
+                                                <a href="chart-apex.html">Apex Charts</a>
+                                            </li>
+                                            <li>
+                                                <a href="chart-c3.html">Chart C3</a>
+                                            </li>
+                                            <li>
+                                                <a href="chart-js.html">Chart Js</a>
+                                            </li>
+                                            <li>
+                                                <a href="chart-morris.html">Morris Charts</a>
+                                            </li>
+                                            <li>
+                                                <a href="chart-flot.html">Flot Charts</a>
+                                            </li>
+                                            <li>
+                                                <a href="chart-peity.html">Peity Charts</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            <i class="ti ti-icons"></i>
+                                            <span>Icons</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li>
+                                                <a href="icon-fontawesome.html">Fontawesome Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-tabler.html">Tabler Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-bootstrap.html">Bootstrap Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-remix.html">Remix Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-feather.html">Feather Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-ionic.html">Ionic Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-material.html">Material Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-pe7.html">Pe7 Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-simpleline.html">Simpleline Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-themify.html">Themify Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-weather.html">Weather Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-typicon.html">Typicon Icons</a>
+                                            </li>
+                                            <li>
+                                                <a href="icon-flag.html">Flag Icons</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            <i class="ti ti-table-plus"></i>
+                                            <span>Maps</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li>
+                                                <a href="maps-vector.html">Vector</a>
+                                            </li>
+                                            <li>
+                                                <a href="maps-leaflet.html">Leaflet</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Documentation</a></li>
+                            <li><a href="#">Change Log</a></li>
+                            <li class="submenu">
+                                <a href="javascript:void(0);"><span>Multi Level</span><span class="menu-arrow"></span></a>
+                                <ul>
+                                    <li><a href="javascript:void(0);">Multilevel 1</a></li>
+                                    <li class="submenu submenu-two">
+                                        <a href="javascript:void(0);">Multilevel 2<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                        <ul>
+                                            <li><a href="javascript:void(0);">Multilevel 2.1</a></li>
+                                            <li class="submenu submenu-two submenu-three">
+                                                <a href="javascript:void(0);">Multilevel 2.2<span class="menu-arrow inside-submenu inside-submenu-two"></span></a>
+                                                <ul>
+                                                    <li><a href="javascript:void(0);">Multilevel 2.2.1</a></li>
+                                                    <li><a href="javascript:void(0);">Multilevel 2.2.2</a></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="javascript:void(0);">Multilevel 3</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="xl:flex items-center d-none">
+                    <a href="#" class="me-3 flex items-center justify-center avatar-sm">
+                        <img src="{{ asset('assets/img/profiles/avatar-07.jpg') }}" alt="profile" class="rounded-full">
+                    </a>
+                    <a href="#" class="btn btn-icon btn-sm rounded-full mode-toggle">
+                        <i class="ti ti-sun"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Horizontal Menu -->
+
+    <!-- Two Col Sidebar -->
+    <div class="two-col-sidebar" id="two-col-sidebar">
+        <div class="sidebar sidebar-twocol">
+            <div class="twocol-mini">
+                <a href="index.html" class="logo-small">
+                    <img src="{{ asset('assets/img/logo-small.svg') }}" alt="Logo">
+                </a>
+                <div class="sidebar-left slimscroll">
+                    <div class="nav flex flex-col items-center nav-pills" id="sidebar-tabs" data-tabs-toggle="#two-col-tabs" data-tabs-active-classes="bg-light text-default"  role="tablist" >
+                        <a href="#" class="nav-link" title="Dashboard" role="tab" data-tabs-target="#dashboard" aria-selected="true">
+                            <i class="ti ti-smart-home"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Apps" role="tab" data-tabs-target="#application" aria-selected="false">
+                            <i class="ti ti-layout-grid-add"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Super Admin" role="tab" data-tabs-target="#super-admin" aria-selected="false">
+                            <i class="ti ti-user-star"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Layout" role="tab" data-tabs-target="#layout" aria-selected="false">
+                            <i class="ti ti-layout-board-split"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Projects" role="tab" data-tabs-target="#projects" aria-selected="false">
+                            <i class="ti ti-users-group"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Crm" role="tab" data-tabs-target="#crm" aria-selected="false">
+                            <i class="ti ti-user-shield"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Hrm" role="tab" data-tabs-target="#hrm" aria-selected="false">
+                            <i class="ti ti-user"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Finance" role="tab" data-tabs-target="#finance" aria-selected="false">
+                            <i class="ti ti-shopping-cart-dollar"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Administration" role="tab" data-tabs-target="#administration" aria-selected="false">
+                            <i class="ti ti-cash"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Content" role="tab" data-tabs-target="#content" aria-selected="false">
+                            <i class="ti ti-license"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Pages" role="tab" data-tabs-target="#pages" aria-selected="false">
+                            <i class="ti ti-page-break"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Authentication" role="tab" data-tabs-target="#authentication" aria-selected="false">
+                            <i class="ti ti-lock-check"></i>
+                        </a>
+                        <a href="#" class="nav-link " title="UI Elements" role="tab" data-tabs-target="#ui-elements" aria-selected="false">
+                            <i class="ti ti-ux-circle"></i>
+                        </a>
+                        <a href="#" class="nav-link" title="Extras" role="tab" data-tabs-target="#extras" aria-selected="false">
+                            <i class="ti ti-vector-triangle"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-right">
+                <div class="sidebar-logo mb-4">
+                    <a href="index.html" class="logo logo-normal">
+                        <img src="{{ asset('assets/img/logo.svg') }}" alt="Logo">
+                    </a>
+                    <a href="index.html" class="dark-logo">
+                        <img src="{{ asset('assets/img/logo-white.svg') }}" alt="Logo">
+                    </a>
+                </div>
+                <div class="sidebar-scroll">
+                    <h6 class="mb-3">Welcome to SmartHR</h6>
+                    <div class="text-center rounded bg-light p-3 mb-4">
+                        <div class="avatar avatar-lg online mx-auto relative mb-3">
+                            <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="img-fluid rounded-full mx-auto">
+                        </div>
+                        <h6 class="text-[12px] font-normal mb-1">Adrian Herman</h6>
+                        <p class="text-[10px]">System Admin</p>
+                    </div>
+                    <div class="tab-content" id="two-col-tabs">
+                        <div class="hidden" id="dashboard">
+                            <ul>
+                                <li class="menu-title"><span>MAIN MENU</span></li>
+                                <li><a href="index.html">Admin Dashboard</a></li>
+                                <li><a href="employee-dashboard.html" class="active">Employee Dashboard</a></li>
+                                <li><a href="deals-dashboard.html">Deals Dashboard</a></li>
+                                <li><a href="leads-dashboard.html">Leads Dashboard</a></li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="application">
+                            <ul>
+                                <li class="menu-title"><span>APPLICATION</span></li>
+                                <li><a href="voice-call.html">Voice Call</a></li>
+                                <li><a href="video-call.html">Video Call</a></li>
+                                <li><a href="outgoing-call.html">Outgoing Call</a></li>
+                                <li><a href="incoming-call.html">Incoming Call</a></li>
+                                <li><a href="call-history.html">Call History</a></li>
+                                <li><a href="calendar.html">Calendar</a></li>
+                                <li><a href="email.html">Email</a></li>
+                                <li><a href="todo.html">To Do</a></li>
+                                <li><a href="notes.html">Notes</a></li>
+                                <li><a href="file-manager.html">File Manager</a></li>
+                                <li><a href="kanban-view.html">Kanban</a></li>
+                                <li><a href="invoices.html">Invoices</a></li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="super-admin">
+                            <ul>
+                                <li class="menu-title"><span>SUPER ADMIN</span></li>
+                                <li><a href="dashboard.html">Dashboard</a></li>
+                                <li><a href="companies.html">Companies</a></li>
+                                <li><a href="subscription.html">Subscriptions</a></li>
+                                <li><a href="packages.html">Packages</a></li>
+                                <li><a href="domain.html">Domain</a></li>
+                                <li><a href="purchase-transaction.html">Purchase Transaction</a></li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="layout">
+                            <ul>
+                                <li class="menu-title"><span>LAYOUT</span></li>
+                                <li><a href="layout-horizontal.html"><span>Horizontal</span></a></li>
+                                <li><a href="layout-detached.html"><span>Detached</span></a></li>
+                                <li><a href="layout-modern.html"><span>Modern</span></a></li>
+                                <li><a href="layout-two-column.html"><span>Two Column </span></a></li>
+                                <li><a href="layout-hovered.html"><span>Hovered</span></a></li>
+                                <li><a href="layout-box.html"><span>Boxed</span></a></li>
+                                <li><a href="layout-horizontal-single.html"><span>Horizontal Single</span></a></li>
+                                <li><a href="layout-horizontal-overlay.html"><span>Horizontal Overlay</span></a></li>
+                                <li><a href="layout-horizontal-box.html"><span>Horizontal Box</span></a></li>
+                                <li><a href="layout-horizontal-sidemenu.html"><span>Menu Aside</span></a></li>
+                                <li><a href="layout-vertical-transparent.html"><span>Transparent</span></a></li>
+                                <li><a href="layout-without-header.html"><span>Without Header</span></a></li>
+                                <li><a href="layout-rtl.html"><span>RTL</span></a></li>
+                                <li><a href="layout-dark.html"><span>Dark</span></a></li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="projects">
+                            <ul>
+                                <li class="menu-title"><span>PROJECTS</span></li>
+                                <li><a href="clients-grid.html">Clients</a></li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Projects</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="projects-grid.html">Projects</a></li>
+                                        <li><a href="tasks.html">Tasks</a></li>
+                                        <li><a href="task-board.html">Task Board</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="crm">
+                            <ul>
+                                <li class="menu-title"><span>CRM</span></li>
+                                <li><a href="contacts-grid.html"><span>Contacts</span></a></li>
+                                <li><a href="companies-grid.html"><span>Companies</span></a></li>
+                                <li><a href="deals-grid.html"><span>Deals</span></a></li>
+                                <li><a href="leads-grid.html"><span>Leads</span></a></li>
+                                <li><a href="pipeline.html"><span>Pipeline</span></a></li>
+                                <li><a href="analytics.html"><span>Analytics</span></a></li>
+                                <li><a href="activity.html"><span>Activities</span></a></li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="hrm">
+                            <ul>
+                                <li class="menu-title"><span>HRM</span></li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Employees</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="employees.html">Employee Lists</a></li>
+                                        <li><a href="employees-grid.html">Employee Grid</a></li>
+                                        <li><a href="employee-details.html">Employee Details</a></li>
+                                        <li><a href="departments.html">Departments</a></li>
+                                        <li><a href="designations.html">Designations</a></li>
+                                        <li><a href="policy.html">Policies</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Tickets</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="tickets.html">Tickets</a></li>
+                                        <li><a href="ticket-details.html">Ticket Details</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="holidays.html"><span>Holidays</span></a></li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Attendance</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li class="submenu submenu-two">
+                                            <a href="javascript:void(0);">Leaves<span
+                                                    class="menu-arrow inside-submenu"></span></a>
+                                            <ul>
+                                                <li><a href="leaves.html">Leaves (Admin)</a></li>
+                                                <li><a href="leaves-employee.html">Leave (Employee)</a></li>
+                                                <li><a href="leave-settings.html">Leave Settings</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="attendance-admin.html">Attendance (Admin)</a></li>
+                                        <li><a href="attendance-employee.html">Attendance (Employee)</a></li>
+                                        <li><a href="timesheets.html">Timesheets</a></li>
+                                        <li><a href="schedule-timing.html">Shift & Schedule</a></li>
+                                        <li><a href="overtime.html">Overtime</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Performance</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="performance-indicator.html">Performance Indicator</a></li>
+                                        <li><a href="performance-review.html">Performance Review</a></li>
+                                        <li><a href="performance-appraisal.html">Performance Appraisal</a></li>
+                                        <li><a href="goal-tracking.html">Goal List</a></li>
+                                        <li><a href="goal-type.html">Goal Type</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Training</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="training.html">Training List</a></li>
+                                        <li><a href="trainers.html">Trainers</a></li>
+                                        <li><a href="training-type.html">Training Type</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="promotion.html"><span>Promotion</span></a></li>
+                                <li><a href="resignation.html"><span>Resignation</span></a></li>
+                                <li><a href="termination.html"><span>Termination</span></a></li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="finance">
+                            <ul>
+                                <li class="menu-title"><span>FINANCE & ACCOUNTS</span></li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Sales</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="estimates.html">Estimates</a></li>
+                                        <li><a href="invoices.html">Invoices</a></li>
+                                        <li><a href="payments.html">Payments</a></li>
+                                        <li><a href="expenses.html">Expenses</a></li>
+                                        <li><a href="provident-fund.html">Provident Fund</a></li>
+                                        <li><a href="taxes.html">Taxes</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Accounting</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="categories.html">Categories</a></li>
+                                        <li><a href="budgets.html">Budgets</a></li>
+                                        <li><a href="budget-expenses.html">Budget Expenses</a></li>
+                                        <li><a href="budget-revenues.html">Budget Revenues</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Payroll</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="employee-salary.html">Employee Salary</a></li>
+                                        <li><a href="payslip.html">Payslip</a></li>
+                                        <li><a href="payroll.html">Payroll Items</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="administration">
+                            <ul>
+                                <li class="menu-title"><span>ADMINISTRATION</span></li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Assets</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="assets.html">Assets</a></li>
+                                        <li><a href="asset-categories.html">Asset Categories</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Help & Supports</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="knowledgebase.html">Knowledge Base</a></li>
+                                        <li><a href="activity.html">Activities</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>User Management</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="users.html">Users</a></li>
+                                        <li><a href="roles-permissions.html">Roles & Permissions</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Reports</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="expenses-report.html">Expense Report</a></li>
+                                        <li><a href="invoice-report.html">Invoice Report</a></li>
+                                        <li><a href="payment-report.html">Payment Report</a></li>
+                                        <li><a href="project-report.html">Project Report</a></li>
+                                        <li><a href="task-report.html">Task Report</a></li>
+                                        <li><a href="user-report.html">User Report</a></li>
+                                        <li><a href="employee-report.html">Employee Report</a></li>
+                                        <li><a href="payslip-report.html">Payslip Report</a></li>
+                                        <li><a href="attendance-report.html">Attendance Report</a></li>
+                                        <li><a href="leave-report.html">Leave Report</a></li>
+                                        <li><a href="daily-report.html">Daily Report</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        General Settings
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="profile-settings.html">Profile</a></li>
+                                        <li><a href="security-settings.html">Security</a></li>
+                                        <li><a href="notification-settings.html">Notifications</a></li>
+                                        <li><a href="connected-apps.html">Connected Apps</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        Website Settings
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="bussiness-settings.html">Business Settings</a></li>
+                                        <li><a href="seo-settings.html">SEO Settings</a></li>
+                                        <li><a href="localization-settings.html">Localization</a></li>
+                                        <li><a href="prefixes.html">Prefixes</a></li>
+                                        <li><a href="preferences.html">Preferences</a></li>
+                                        <li><a href="performance-appraisal.html">Appearance</a></li>
+                                        <li><a href="language.html">Language</a></li>
+                                        <li><a href="authentication-settings.html">Authentication</a></li>
+                                        <li><a href="ai-settings.html">AI Settings</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">App Settings<span class="menu-arrow"></span></a>
+                                    <ul>
+                                        <li><a href="salary-settings.html">Salary Settings</a></li>
+                                        <li><a href="approval-settings.html">Approval Settings</a></li>
+                                        <li><a href="invoice-settings.html">Invoice Settings</a></li>
+                                        <li><a href="leave-type.html">Leave Type</a></li>
+                                        <li><a href="custom-fields.html">Custom Fields</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        System Settings
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="email-settings.html">Email Settings</a></li>
+                                        <li><a href="email-template.html">Email Templates</a></li>
+                                        <li><a href="sms-settings.html">SMS Settings</a></li>
+                                        <li><a href="sms-template.html">SMS Templates</a></li>
+                                        <li><a href="otp-settings.html">OTP</a></li>
+                                        <li><a href="gdpr.html">GDPR Cookies</a></li>
+                                        <li><a href="maintenance-mode.html">Maintenance Mode</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        Financial Settings
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="payment-gateways.html">Payment Gateways</a></li>
+                                        <li><a href="tax-rates.html">Tax Rate</a></li>
+                                        <li><a href="currencies.html">Currencies</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">Other Settings<span class="menu-arrow"></span></a>
+                                    <ul>
+                                        <li><a href="custom-css.html">Custom CSS</a></li>
+                                        <li><a href="custom-js.html">Custom JS</a></li>
+                                        <li><a href="cronjob.html">Cronjob</a></li>
+                                        <li><a href="storage-settings.html">Storage</a></li>
+                                        <li><a href="ban-ip-address.html">Ban IP Address</a></li>
+                                        <li><a href="backup.html">Backup</a></li>
+                                        <li><a href="clear-cache.html">Clear Cache</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="content">
+                            <ul>
+                                <li class="menu-title"><span>CONTENT</span></li>
+                                <li><a href="pages.html">Pages</a></li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        Blogs
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="blogs.html">All Blogs</a></li>
+                                        <li><a href="blog-categories.html">Categories</a></li>
+                                        <li><a href="blog-comments.html">Comments</a></li>
+                                        <li><a href="blog-tags.html">Blog Tags</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        Locations
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="countries.html">Countries</a></li>
+                                        <li><a href="states.html">States</a></li>
+                                        <li><a href="cities.html">Cities</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="testimonials.html">Testimonials</a></li>
+                                <li><a href="faq.html">FAQ’S</a></li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="pages">
+                            <ul>
+                                <li class="menu-title"><span>PAGES</span></li>
+                                <li><a href="starter.html"><span>Starter</span></a></li>
+                                <li><a href="profile.html"><span>Profile</span></a></li>
+                                <li><a href="gallery.html"><span>Gallery</span></a></li>
+                                <li><a href="search-result.html"><span>Search Results</span></a></li>
+                                <li><a href="timeline.html"><span>Timeline</span></a></li>
+                                <li><a href="pricing.html"><span>Pricing</span></a></li>
+                                <li><a href="coming-soon.html"><span>Coming Soon</span></a></li>
+                                <li><a href="under-maintenance.html"><span>Under Maintenance</span></a></li>
+                                <li><a href="under-construction.html"><span>Under Construction</span></a></li>
+                                <li><a href="api-keys.html"><span>API Keys</span></a></li>
+                                <li><a href="privacy-policy.html"><span>Privacy Policy</span></a></li>
+                                <li><a href="terms-condition.html"><span>Terms & Conditions</span></a></li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="authentication">
+                            <ul>
+                                <li class="menu-title"><span>AUTHENTICATION</span></li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        Login<span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="login.html">Cover</a></li>
+                                        <li><a href="login-2.html">Illustration</a></li>
+                                        <li><a href="login-3.html">Basic</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        Register<span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="register.html">Cover</a></li>
+                                        <li><a href="register-2.html">Illustration</a></li>
+                                        <li><a href="register-3.html">Basic</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        Forgot Password<span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="forgot-password.html">Cover</a></li>
+                                        <li><a href="forgot-password-2.html">Illustration</a></li>
+                                        <li><a href="forgot-password-3.html">Basic</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        Reset Password<span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="reset-password.html">Cover</a></li>
+                                        <li><a href="reset-password-2.html">Illustration</a></li>
+                                        <li><a href="reset-password-3.html">Basic</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        Email Verification<span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="email-verification.html">Cover</a></li>
+                                        <li><a href="email-verification-2.html">Illustration</a></li>
+                                        <li><a href="email-verification-3.html">Basic</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        2 Step Verification<span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="two-step-verification.html">Cover</a></li>
+                                        <li><a href="two-step-verification-2.html">Illustration</a></li>
+                                        <li><a href="two-step-verification-3.html">Basic</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="lock-screen.html">Lock Screen</a></li>
+                                <li><a href="error-404.html">404 Error</a></li>
+                                <li><a href="error-500.html">500 Error</a></li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="ui-elements">
+                            <ul>
+                                <li class="menu-title"><span>UI INTERFACE</span></li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">Base UI<span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li><a href="ui-alerts.html">Alerts</a></li>
+                                        <li><a href="ui-accordion.html">Accordion</a></li>
+                                        <li><a href="ui-avatar.html">Avatar</a></li>
+                                        <li><a href="ui-badges.html">Badges</a></li>
+                                        <li><a href="ui-borders.html">Border</a></li>
+                                        <li><a href="ui-buttons.html">Buttons</a></li>
+                                        <li><a href="ui-buttons-group.html">Button Group</a></li>
+                                        <li><a href="ui-breadcrumb.html">Breadcrumb</a></li>
+                                        <li><a href="ui-cards.html">Card</a></li>
+                                        <li><a href="ui-carousel.html">Carousel</a></li>
+                                        <li><a href="ui-colors.html">Colors</a></li>
+                                        <li><a href="ui-dropdowns.html">Dropdowns</a></li>
+                                        <li><a href="ui-grid.html">Grid</a></li>
+                                        <li><a href="ui-images.html">Images</a></li>
+                                        <li><a href="ui-lightbox.html">Lightbox</a></li>
+                                        <li><a href="ui-media.html">Media</a></li>
+                                        <li><a href="ui-modals.html">Modals</a></li>
+                                        <li><a href="ui-offcanvas.html">Offcanvas</a></li>
+                                        <li><a href="ui-pagination.html">Pagination</a></li>
+                                        <li><a href="ui-popovers.html">Popovers</a></li>
+                                        <li><a href="ui-progress.html">Progress</a></li>
+                                        <li><a href="ui-spinner.html">Spinner</a></li>
+                                        <li><a href="ui-sweetalerts.html">Sweet Alerts</a></li>
+                                        <li><a href="ui-nav-tabs.html">Tabs</a></li>
+                                        <li><a href="ui-tooltips.html">Tooltips</a></li>
+                                        <li><a href="ui-typography.html">Typography</a></li>
+                                        <li><a href="ui-video.html">Video</a></li>
+                                        <li><a href="ui-sortable.html">Sortable</a></li>
+                                        <li><a href="ui-swiperjs.html">Swiperjs</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"> Advanced UI <span class="menu-arrow"></span> </a>
+                                    <ul>
+                                        <li><a href="ui-clipboard.html">Clipboard</a></li>
+                                        <li><a href="ui-drag-drop.html">Drag & Drop</a></li>
+                                        <li><a href="ui-rangeslider.html">Range Slider</a></li>
+                                        <li><a href="ui-rating.html">Rating</a></li>
+                                        <li><a href="ui-text-editor.html">Text Editor</a></li>
+                                        <li><a href="ui-counter.html">Counter</a></li>
+                                        <li><a href="ui-scrollbar.html">Scrollbar</a></li>
+                                        <li><a href="ui-stickynote.html">Sticky Note</a></li>
+                                        <li><a href="ui-timeline.html">Timeline</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"> Forms <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li class="submenu submenu-two">
+                                            <a href="javascript:void(0);">Form Elements<span class="menu-arrow inside-submenu"></span></a>
+                                            <ul>
+                                                <li><a href="form-basic-inputs.html">Basic Inputs</a></li>
+                                                <li><a href="form-checkbox-radios.html">Checkbox & Radios</a></li>
+                                                <li><a href="form-input-groups.html">Input Groups</a></li>
+                                                <li><a href="form-grid-gutters.html">Grid & Gutters</a></li>
+                                                <li><a href="form-select.html">Form Select</a></li>
+                                                <li><a href="form-mask.html">Input Masks</a></li>
+                                                <li><a href="form-fileupload.html">File Uploads</a></li>
+                                            </ul>
+                                        </li>
+                                        <li class="submenu submenu-two">
+                                            <a href="javascript:void(0);">Layouts<span class="menu-arrow inside-submenu"></span></a>
+                                            <ul>
+                                                <li><a href="form-horizontal.html">Horizontal Form</a></li>
+                                                <li><a href="form-vertical.html">Vertical Form</a></li>
+                                                <li><a href="form-floating-labels.html">Floating Labels</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="form-validation.html">Form Validation</a></li>
+                                        <li><a href="form-select2.html">Select2</a></li>
+                                        <li><a href="form-wizard.html">Form Wizard</a></li>
+                                        <li><a href="form-pickers.html">Form Picker</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">Tables <span class="menu-arrow"></span></a>
+                                    <ul>
+                                        <li><a href="tables-basic.html">Basic Tables </a></li>
+                                        <li><a href="data-tables.html">Data Table </a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">Charts<span class="menu-arrow"></span> </a>
+                                    <ul>
+                                        <li><a href="chart-apex.html">Apex Charts</a></li>
+                                        <li><a href="chart-c3.html">Chart C3</a></li>
+                                        <li><a href="chart-js.html">Chart Js</a></li>
+                                        <li><a href="chart-morris.html">Morris Charts</a></li>
+                                        <li><a href="chart-flot.html">Flot Charts</a></li>
+                                        <li><a href="chart-peity.html">Peity Charts</a></li>
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">Icons<span class="menu-arrow"></span> </a>
+                                    <ul>
+                                        <li><a href="icon-fontawesome.html">Fontawesome Icons</a></li>
+                                        <li><a href="icon-tabler.html">Tabler Icons</a></li>
+                                        <li><a href="icon-bootstrap.html">Bootstrap Icons</a></li>
+                                        <li><a href="icon-remix.html">Remix Icons</a></li>
+                                        <li><a href="icon-feather.html">Feather Icons</a></li>
+                                        <li><a href="icon-ionic.html">Ionic Icons</a></li>
+                                        <li><a href="icon-material.html">Material Icons</a></li>
+                                        <li><a href="icon-pe7.html">Pe7 Icons</a></li>
+                                        <li><a href="icon-simpleline.html">Simpleline Icons</a></li>
+                                        <li><a href="icon-themify.html">Themify Icons</a></li>
+                                        <li><a href="icon-weather.html">Weather Icons</a></li>
+                                        <li><a href="icon-typicon.html">Typicon Icons</a></li>
+                                        <li><a href="icon-flag.html">Flag Icons</a></li>
+
+                                    </ul>
+                                </li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);">
+                                        <i class="ti ti-table-plus"></i>
+                                        <span>Maps</span>
+                                        <span class="menu-arrow"></span>
+                                    </a>
+                                    <ul>
+                                        <li>
+                                            <a href="maps-vector.html">Vector</a>
+                                        </li>
+                                        <li>
+                                            <a href="maps-leaflet.html">Leaflet</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="hidden" id="extras">
+                            <ul>
+                                <li class="menu-title"><span>EXTRAS</span></li>
+                                <li><a href="#">Documentation</a></li>
+                                <li><a href="#">Change Log</a></li>
+                                <li class="submenu">
+                                    <a href="javascript:void(0);"><span>Multi Level</span><span class="menu-arrow"></span></a>
+                                    <ul>
+                                        <li><a href="javascript:void(0);">Multilevel 1</a></li>
+                                        <li class="submenu submenu-two">
+                                            <a href="javascript:void(0);">Multilevel 2<span class="menu-arrow inside-submenu"></span></a>
+                                            <ul>
+                                                <li><a href="javascript:void(0);">Multilevel 2.1</a></li>
+                                                <li class="submenu submenu-two submenu-three">
+                                                    <a href="javascript:void(0);">Multilevel 2.2<span class="menu-arrow inside-submenu inside-submenu-two"></span></a>
+                                                    <ul>
+                                                        <li><a href="javascript:void(0);">Multilevel 2.2.1</a></li>
+                                                        <li><a href="javascript:void(0);">Multilevel 2.2.2</a></li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="javascript:void(0);">Multilevel 3</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Two Col Sidebar -->
+
+    <!-- Stacked Sidebar -->
+    <div class="stacked-sidebar" id="stacked-sidebar">
+        <div class="sidebar sidebar-stacked flex">
+            <div class="stacked-mini">
+                <a href="index.html" class="logo-small flex items-center justify-center mb-5">
+                    <img src="{{ asset('assets/img/logo-small.svg') }}" alt="Logo">
+                </a>
+                <div class="sidebar-left slimscroll">
+                    <div class="flex items-center flex-col">
+                        <div class="mb-1 notification-item">
+                            <a href="#" class="btn border btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent relative">
+                                <i class="ti ti-bell"></i>
+                                <span class="notification-status-dot"></span>
+                            </a>
+                        </div>
+                        <div class="mb-1">
+                            <a href="#" class="btn border after:btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent btnFullscreen">
+                                <i class="ti ti-maximize"></i>
+                            </a>
+                        </div>
+                        <div class="mb-1">
+                            <a href="calendar.html" class="btn border btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent">
+                                <i class="ti ti-layout-grid-remove"></i>
+                            </a>
+                        </div>
+                        <div class="mb-1">
+                            <a href="chat.html" class="btn border btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent relative">
+                                <i class="ti ti-brand-hipchat"></i>
+                                <span class=" bg-info rounded-full flex items-center justify-center header-badge">5</span>
+                            </a>
+                        </div>
+                        <div class="mb-1">
+                            <a href="email.html" class="btn border btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent">
+                                <i class="ti ti-mail"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-right flex justify-between flex-col bg-white pt-[16px] border-r h-screen w-[180px]">
+                <div class="sidebar-scroll px-[16px] pt-0">
+                    <h6 class="mb-3 text-center">Welcome to SmartHR</h6>
+                    <div class="text-center rounded bg-light p-3 mb-4">
+                        <div class="avatar avatar-lg online mx-auto relative mb-3">
+                            <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="img-fluid rounded-full mx-auto">
+                        </div>
+                        <h6 class="text-[12px] font-normal mb-1">Adrian Herman</h6>
+                        <p class="text-[10px]">System Admin</p>
+                    </div>
+                    <div class="stack-menu relative">
+                        <div class="nav flex-column items-center nav-pills" role="tablist" id="default-stack-styled-tab" data-tabs-toggle="#menu-stacked-bar" data-tabs-active-classes="bg-light text-default">
+                            <div class="grid grid-cols-12 gap-2">
+                                <div class="col-span-6">
+                                    <a href="#menu-dashboard" class="nav-link" title="Dashboard" role="tab" data-tabs-target="#menu-dashboard" aria-selected="true">
+                                        <span><i class="ti ti-smart-home"></i></span>
+                                        <p>Dashboard</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-application" class="nav-link" title="Apps" role="tab" data-tabs-target="#menu-application" aria-selected="false">
+                                        <span><i class="ti ti-layout-grid-add"></i></span>
+                                        <p>Applications</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-superadmin" class="nav-link" title="Apps" role="tab" data-tabs-target="#menu-superadmin" aria-selected="false">
+                                        <span><i class="ti ti-user-star"></i></span>
+                                        <p>Super Admin</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-layout" class="nav-link" title="Layout" role="tab" data-tabs-target="#menu-layout" aria-selected="false">
+                                        <span><i class="ti ti-layout-board-split"></i></span>
+                                        <p>Layouts</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-project" class="nav-link" title="Projects" role="tab" data-tabs-target="#menu-project" aria-selected="false">
+                                        <span><i class="ti ti-folder"></i></span>
+                                        <p>Projects</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-crm" class="nav-link" title="CRM" role="tab" data-tabs-target="#menu-crm" aria-selected="false">
+                                        <span><i class="ti ti-user-shield"></i></span>
+                                        <p>Crm</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-hrm" class="nav-link" title="HRM" role="tab" data-tabs-target="#menu-hrm" aria-selected="false">
+                                        <span><i class="ti ti-users"></i></span>
+                                        <p>Hrm</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-finance" class="nav-link" title="Finance & Accounts" role="tab" data-tabs-target="#menu-finance" aria-selected="false">
+                                        <span><i class="ti ti-shopping-cart-dollar"></i></span>
+                                        <p>Finance & Accounts</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-administration" class="nav-link" title="Administration" role="tab" data-tabs-target="#menu-administration" aria-selected="false">
+                                        <span><i class="ti ti-cash"></i></span>
+                                        <p>Administration</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-content" class="nav-link" title="Content" role="tab" data-tabs-target="#menu-content" aria-selected="false">
+                                        <span><i class="ti ti-license"></i></span>
+                                        <p>Contents</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-pages" class="nav-link" title="Pages" role="tab" data-tabs-target="#menu-pages" aria-selected="false">
+                                        <span><i class="ti ti-page-break"></i></span>
+                                        <p>Pages</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-authentication" class="nav-link" title="Authentication" role="tab" data-tabs-target="#menu-authentication" aria-selected="false">
+                                        <span><i class="ti ti-lock-check"></i></span>
+                                        <p>Authentication</p>
+                                    </a>
+                                </div>
+                                <div class="col-span-6">
+                                    <a href="#menu-ui-elements" class="nav-link" title="UI Elements" role="tab" data-tabs-target="#menu-ui-elements" aria-selected="false">
+                                        <span><i class="ti ti-ux-circle"></i></span>
+                                        <p>Basic UI</p>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="menu-stacked-bar">
+                            <div class="hidden" id="menu-dashboard">
+                                <ul class="stack-submenu">
+                                    <li><a href="index.html">Admin Dashboard</a></li>
+                                    <li><a href="employee-dashboard.html" class="active">Employee Dashboard</a></li>
+                                    <li><a href="deals-dashboard.html">Deals Dashboard</a></li>
+                                    <li><a href="leads-dashboard.html">Leads Dashboard</a></li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-superadmin">
+                                <ul class="stack-submenu">
+                                    <li><a href="dashboard.html">Dashboard</a></li>
+                                    <li><a href="companies.html">Companies</a></li>
+                                    <li><a href="subscription.html">Subscriptions</a></li>
+                                    <li><a href="packages.html">Packages</a></li>
+                                    <li><a href="domain.html">Domain</a></li>
+                                    <li><a href="purchase-transaction.html">Purchase Transaction</a></li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-application">
+                                <ul class="stack-submenu">
+                                    <li><a href="chat.html">Chat</a></li>
+                                    <li class="submenu submenu-two">
+                                        <a href="call.html">Calls<span
+                                                class="menu-arrow inside-submenu"></span></a>
+                                        <ul>
+                                            <li><a href="voice-call.html">Voice Call</a></li>
+                                            <li><a href="video-call.html">Video Call</a></li>
+                                            <li><a href="outgoing-call.html">Outgoing Call</a></li>
+                                            <li><a href="incoming-call.html">Incoming Call</a></li>
+                                            <li><a href="call-history.html">Call History</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="calendar.html">Calendar</a></li>
+                                    <li><a href="email.html">Email</a></li>
+                                    <li><a href="todo.html">To Do</a></li>
+                                    <li><a href="notes.html">Notes</a></li>
+                                    <li><a href="social-feed.html">Social Feed</a></li>
+                                    <li><a href="file-manager.html">File Manager</a></li>
+                                    <li><a href="kanban-view.html">Kanban</a></li>
+                                    <li><a href="invoices.html">Invoices</a></li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-layout">
+                                <ul class="stack-submenu">
+                                    <li><a href="layout-horizontal.html">Horizontal</a></li>
+                                    <li><a href="layout-detached.html">Detached</a></li>
+                                    <li><a href="layout-modern.html">Modern</a></li>
+                                    <li><a href="layout-two-column.html">Two Column</a></li>
+                                    <li><a href="layout-hovered.html">Hovered</a></li>
+                                    <li><a href="layout-stacked.html">Stacked</a></li>
+                                    <li><a href="layout-box.html">Boxed</a></li>
+                                    <li><a href="layout-horizontal-single.html">Horizontal Single</a></li>
+                                    <li><a href="layout-horizontal-overlay.html">Horizontal Overlay</a></li>
+                                    <li><a href="layout-horizontal-box.html">Horizontal Box</a></li>
+                                    <li><a href="layout-horizontal-sidemenu.html">Menu Aside</a></li>
+                                    <li><a href="layout-vertical-transparent.html">Transparent</a></li>
+                                    <li><a href="layout-without-header.html">Without Header</a></li>
+                                    <li><a href="layout-rtl.html">RTL</a></li>
+                                    <li><a href="layout-dark.html">Dark</a></li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-project">
+                                <ul class="stack-submenu">
+                                    <li><a href="clients-grid.html"><span>Clients</span></a></li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Projects</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="projects-grid.html">Projects</a></li>
+                                            <li><a href="tasks.html">Tasks</a></li>
+                                            <li><a href="task-board.html">Task Board</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-crm">
+                                <ul class="stack-submenu">
+                                    <li><a href="contacts-grid.html"><span>Contacts</span></a></li>
+                                    <li><a href="companies-grid.html"><span>Companies</span></a></li>
+                                    <li><a href="deals-grid.html"><span>Deals</span></a></li>
+                                    <li><a href="leads-grid.html"><span>Leads</span></a></li>
+                                    <li><a href="pipeline.html"><span>Pipeline</span></a></li>
+                                    <li><a href="analytics.html"><span>Analytics</span></a></li>
+                                    <li><a href="activity.html"><span>Activities</span></a></li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-hrm">
+                                <ul class="stack-submenu">
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Employees</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="employees.html">Employee Lists</a></li>
+                                            <li><a href="employees-grid.html">Employee Grid</a></li>
+                                            <li><a href="employee-details.html">Employee Details</a></li>
+                                            <li><a href="departments.html">Departments</a></li>
+                                            <li><a href="designations.html">Designations</a></li>
+                                            <li><a href="policy.html">Policies</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Tickets</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="tickets.html">Tickets</a></li>
+                                            <li><a href="ticket-details.html">Ticket Details</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="holidays.html"><span>Holidays</span></a></li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Attendance</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li class="submenu submenu-two">
+                                                <a href="javascript:void(0);">Leaves<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                                <ul>
+                                                    <li><a href="leaves.html">Leaves (Admin)</a></li>
+                                                    <li><a href="leaves-employee.html">Leave (Employee)</a></li>
+                                                    <li><a href="leave-settings.html">Leave Settings</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="attendance-admin.html">Attendance (Admin)</a></li>
+                                            <li><a href="attendance-employee.html">Attendance (Employee)</a></li>
+                                            <li><a href="timesheets.html">Timesheets</a></li>
+                                            <li><a href="schedule-timing.html">Shift & Schedule</a></li>
+                                            <li><a href="overtime.html">Overtime</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Performance</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="performance-indicator.html">Performance Indicator</a></li>
+                                            <li><a href="performance-review.html">Performance Review</a></li>
+                                            <li><a href="performance-appraisal.html">Performance Appraisal</a></li>
+                                            <li><a href="goal-tracking.html">Goal List</a></li>
+                                            <li><a href="goal-type.html">Goal Type</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Training</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="training.html">Training List</a></li>
+                                            <li><a href="trainers.html">Trainers</a></li>
+                                            <li><a href="training-type.html">Training Type</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="promotion.html"><span>Promotion</span></a></li>
+                                    <li><a href="resignation.html"><span>Resignation</span></a></li>
+                                    <li><a href="termination.html"><span>Termination</span></a></li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-finance">
+                                <ul class="stack-submenu">
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Sales</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="estimates.html">Estimates</a></li>
+                                            <li><a href="invoices.html">Invoices</a></li>
+                                            <li><a href="payments.html">Payments</a></li>
+                                            <li><a href="expenses.html">Expenses</a></li>
+                                            <li><a href="provident-fund.html">Provident Fund</a></li>
+                                            <li><a href="taxes.html">Taxes</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Accounting</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="categories.html">Categories</a></li>
+                                            <li><a href="budgets.html">Budgets</a></li>
+                                            <li><a href="budget-expenses.html">Budget Expenses</a></li>
+                                            <li><a href="budget-revenues.html">Budget Revenues</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Payroll</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="employee-salary.html">Employee Salary</a></li>
+                                            <li><a href="payslip.html">Payslip</a></li>
+                                            <li><a href="payroll.html">Payroll Items</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-administration">
+                                <ul class="stack-submenu">
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Assets</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="assets.html">Assets</a></li>
+                                            <li><a href="asset-categories.html">Asset Categories</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Help & Supports</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="knowledgebase.html">Knowledge Base</a></li>
+                                            <li><a href="activity.html">Activities</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>User Management</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="users.html">Users</a></li>
+                                            <li><a href="roles-permissions.html">Roles & Permissions</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"><span>Reports</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="expenses-report.html">Expense Report</a></li>
+                                            <li><a href="invoice-report.html">Invoice Report</a></li>
+                                            <li><a href="payment-report.html">Payment Report</a></li>
+                                            <li><a href="project-report.html">Project Report</a></li>
+                                            <li><a href="task-report.html">Task Report</a></li>
+                                            <li><a href="user-report.html">User Report</a></li>
+                                            <li><a href="employee-report.html">Employee Report</a></li>
+                                            <li><a href="payslip-report.html">Payslip Report</a></li>
+                                            <li><a href="attendance-report.html">Attendance Report</a></li>
+                                            <li><a href="leave-report.html">Leave Report</a></li>
+                                            <li><a href="daily-report.html">Daily Report</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            General Settings
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="profile-settings.html">Profile</a></li>
+                                            <li><a href="security-settings.html">Security</a></li>
+                                            <li><a href="notification-settings.html">Notifications</a></li>
+                                            <li><a href="connected-apps.html">Connected Apps</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            Website Settings
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="bussiness-settings.html">Business Settings</a></li>
+                                            <li><a href="seo-settings.html">SEO Settings</a></li>
+                                            <li><a href="localization-settings.html">Localization</a></li>
+                                            <li><a href="prefixes.html">Prefixes</a></li>
+                                            <li><a href="preferences.html">Preferences</a></li>
+                                            <li><a href="performance-appraisal.html">Appearance</a></li>
+                                            <li><a href="language.html">Language</a></li>
+                                            <li><a href="authentication-settings.html">Authentication</a></li>
+                                            <li><a href="ai-settings.html">AI Settings</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">App Settings<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="salary-settings.html">Salary Settings</a></li>
+                                            <li><a href="approval-settings.html">Approval Settings</a></li>
+                                            <li><a href="invoice-settings.html">Invoice Settings</a></li>
+                                            <li><a href="leave-type.html">Leave Type</a></li>
+                                            <li><a href="custom-fields.html">Custom Fields</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            System Settings
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="email-settings.html">Email Settings</a></li>
+                                            <li><a href="email-template.html">Email Templates</a></li>
+                                            <li><a href="sms-settings.html">SMS Settings</a></li>
+                                            <li><a href="sms-template.html">SMS Templates</a></li>
+                                            <li><a href="otp-settings.html">OTP</a></li>
+                                            <li><a href="gdpr.html">GDPR Cookies</a></li>
+                                            <li><a href="maintenance-mode.html">Maintenance Mode</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            Financial Settings
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li><a href="payment-gateways.html">Payment Gateways</a></li>
+                                            <li><a href="tax-rates.html">Tax Rate</a></li>
+                                            <li><a href="currencies.html">Currencies</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Other Settings<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="custom-css.html">Custom CSS</a></li>
+                                            <li><a href="custom-js.html">Custom JS</a></li>
+                                            <li><a href="cronjob.html">Cronjob</a></li>
+                                            <li><a href="storage-settings.html">Storage</a></li>
+                                            <li><a href="ban-ip-address.html">Ban IP Address</a></li>
+                                            <li><a href="backup.html">Backup</a></li>
+                                            <li><a href="clear-cache.html">Clear Cache</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-content">
+                                <ul class="stack-submenu">
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Blogs<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="blogs.html">All Blogs</a></li>
+                                            <li><a href="blog-categories.html">Categories</a></li>
+                                            <li><a href="blog-comments.html">Comments</a></li>
+                                            <li><a href="blog-tags.html">Tags</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Locations<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="countries.html">Countries</a></li>
+                                            <li><a href="states.html">States</a></li>
+                                            <li><a href="cities.html">Cities</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="testimonials.html">Testimonials</a></li>
+                                    <li><a href="faq.html">FAQ’S</a></li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-pages">
+                                <ul class="stack-submenu">
+                                    <li><a href="starter.html">Starter</a></li>
+                                    <li><a href="profile.html">Profile</a></li>
+                                    <li><a href="profile-settings.html">Profile Settings</a></li>
+                                    <li><a href="gallery.html">Gallery</a></li>
+                                    <li><a href="search-result.html">Search Results</a></li>
+                                    <li><a href="timeline.html">Timeline</a></li>
+                                    <li><a href="pricing.html">Pricing</a></li>
+                                    <li><a href="coming-soon.html">Coming Soon</a></li>
+                                    <li><a href="under-maintenance.html">Under Maintenance</a></li>
+                                    <li><a href="under-construction.html">Under Construction</a></li>
+                                    <li><a href="api-keys.html">API Keys</a></li>
+                                    <li><a href="privacy-policy.html">Privacy Policy</a></li>
+                                    <li><a href="terms-condition.html">Terms & Conditions</a></li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-authentication">
+                                <ul class="stack-submenu">
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);" class="">Login<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="login.html">Cover</a></li>
+                                            <li><a href="login-2.html">Illustration</a></li>
+                                            <li><a href="login-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);" class="">Register<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="register.html">Cover</a></li>
+                                            <li><a href="register-2.html">Illustration</a></li>
+                                            <li><a href="register-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Reset Password<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="reset-password.html">Cover</a></li>
+                                            <li><a href="reset-password-2.html">Illustration</a></li>
+                                            <li><a href="reset-password-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Email Verification<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="email-verification.html">Cover</a></li>
+                                            <li><a href="email-verification-2.html">Illustration</a></li>
+                                            <li><a href="email-verification-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">2 Step Verification<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="two-step-verification.html">Cover</a></li>
+                                            <li><a href="two-step-verification-2.html">Illustration</a></li>
+                                            <li><a href="two-step-verification-3.html">Basic</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="lock-screen.html">Lock Screen</a></li>
+                                    <li><a href="error-404.html">404 Error</a></li>
+                                    <li><a href="error-500.html">500 Error</a></li>
+                                </ul>
+                            </div>
+                            <div class="hidden" id="menu-ui-elements">
+                                <ul class="stack-submenu">
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Base UI<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="ui-alerts.html">Alerts</a></li>
+                                            <li><a href="ui-accordion.html">Accordion</a></li>
+                                            <li><a href="ui-avatar.html">Avatar</a></li>
+                                            <li><a href="ui-badges.html">Badges</a></li>
+                                            <li><a href="ui-borders.html">Border</a></li>
+                                            <li><a href="ui-buttons.html">Buttons</a></li>
+                                            <li><a href="ui-buttons-group.html">Button Group</a></li>
+                                            <li><a href="ui-breadcrumb.html">Breadcrumb</a></li>
+                                            <li><a href="ui-cards.html">Card</a></li>
+                                            <li><a href="ui-carousel.html">Carousel</a></li>
+                                            <li><a href="ui-colors.html">Colors</a></li>
+                                            <li><a href="ui-dropdowns.html">Dropdowns</a></li>
+                                            <li><a href="ui-grid.html">Grid</a></li>
+                                            <li><a href="ui-images.html">Images</a></li>
+                                            <li><a href="ui-lightbox.html">Lightbox</a></li>
+                                            <li><a href="ui-media.html">Media</a></li>
+                                            <li><a href="ui-modals.html">Modals</a></li>
+                                            <li><a href="ui-offcanvas.html">Offcanvas</a></li>
+                                            <li><a href="ui-pagination.html">Pagination</a></li>
+                                            <li><a href="ui-popovers.html">Popovers</a></li>
+                                            <li><a href="ui-progress.html">Progress</a></li>
+                                            <li><a href="ui-spinner.html">Spinner</a></li>
+                                            <li><a href="ui-sweetalerts.html">Sweet Alerts</a></li>
+                                            <li><a href="ui-nav-tabs.html">Tabs</a></li>
+                                            <li><a href="ui-tooltips.html">Tooltips</a></li>
+                                            <li><a href="ui-typography.html">Typography</a></li>
+                                            <li><a href="ui-video.html">Video</a></li>
+                                            <li><a href="ui-sortable.html">Sortable</a></li>
+                                            <li><a href="ui-swiperjs.html">Swiperjs</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);"> Advanced UI<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="ui-clipboard.html">Clipboard</a></li>
+                                            <li><a href="ui-drag-drop.html">Drag & Drop</a></li>
+                                            <li><a href="ui-rangeslider.html">Range Slider</a></li>
+                                            <li><a href="ui-rating.html">Rating</a></li>
+                                            <li><a href="ui-text-editor.html">Text Editor</a></li>
+                                            <li><a href="ui-counter.html">Counter</a></li>
+                                            <li><a href="ui-scrollbar.html">Scrollbar</a></li>
+                                            <li><a href="ui-stickynote.html">Sticky Note</a></li>
+                                            <li><a href="ui-timeline.html">Timeline</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Forms<span class="menu-arrow"></span> </a>
+                                        <ul>
+                                            <li class="submenu submenu-two">
+                                                <a href="javascript:void(0);">Form Elements<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                                <ul>
+                                                    <li><a href="form-basic-inputs.html">Basic Inputs</a></li>
+                                                    <li><a href="form-checkbox-radios.html">Checkbox & Radios</a> </li>
+                                                    <li><a href="form-input-groups.html">Input Groups</a></li>
+                                                    <li><a href="form-grid-gutters.html">Grid & Gutters</a></li>
+                                                    <li><a href="form-select.html">Form Select</a></li>
+                                                    <li><a href="form-mask.html">Input Masks</a></li>
+                                                    <li><a href="form-fileupload.html">File Uploads</a></li>
+
+                                                </ul>
+                                            </li>
+                                            <li class="submenu submenu-two">
+                                                <a href="javascript:void(0);">Layouts<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
+                                                <ul>
+                                                    <li><a href="form-horizontal.html">Horizontal Form</a></li>
+                                                    <li><a href="form-vertical.html">Vertical Form</a></li>
+                                                    <li><a href="form-floating-labels.html">Floating Labels</a></li>
+                                                </ul>
+                                            </li>
+                                            <li><a href="form-validation.html">Form Validation</a></li>
+                                            <li><a href="form-select2.html">Select2</a></li>
+                                            <li><a href="form-wizard.html">Form Wizard</a></li>
+                                            <li><a href="form-pickers.html">Form Picker</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Tables<span class="menu-arrow"></span></a>
+                                        <ul>
+                                            <li><a href="tables-basic.html">Basic Tables </a></li>
+                                            <li><a href="data-tables.html">Data Table </a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Charts<span class="menu-arrow"></span> </a>
+                                        <ul>
+                                            <li><a href="chart-apex.html">Apex Charts</a></li>
+                                            <li><a href="chart-c3.html">Chart C3</a></li>
+                                            <li><a href="chart-js.html">Chart Js</a></li>
+                                            <li><a href="chart-morris.html">Morris Charts</a></li>
+                                            <li><a href="chart-flot.html">Flot Charts</a></li>
+                                            <li><a href="chart-peity.html">Peity Charts</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">Icons<span class="menu-arrow"></span> </a>
+                                        <ul>
+                                            <li><a href="icon-fontawesome.html">Fontawesome Icons</a></li>
+                                            <li><a href="icon-tabler.html">Tabler Icons</a></li>
+                                            <li><a href="icon-bootstrap.html">Bootstrap Icons</a></li>
+                                            <li><a href="icon-remix.html">Remix Icons</a></li>
+                                            <li><a href="icon-feather.html">Feather Icons</a></li>
+                                            <li><a href="icon-ionic.html">Ionic Icons</a></li>
+                                            <li><a href="icon-material.html">Material Icons</a></li>
+                                            <li><a href="icon-pe7.html">Pe7 Icons</a></li>
+                                            <li><a href="icon-simpleline.html">Simpleline Icons</a></li>
+                                            <li><a href="icon-themify.html">Themify Icons</a></li>
+                                            <li><a href="icon-weather.html">Weather Icons</a></li>
+                                            <li><a href="icon-typicon.html">Typicon Icons</a></li>
+                                            <li><a href="icon-flag.html">Flag Icons</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="submenu">
+                                        <a href="javascript:void(0);">
+                                            <i class="ti ti-table-plus"></i>
+                                            <span>Maps</span>
+                                            <span class="menu-arrow"></span>
+                                        </a>
+                                        <ul>
+                                            <li>
+                                                <a href="maps-vector.html">Vector</a>
+                                            </li>
+                                            <li>
+                                                <a href="maps-leaflet.html">Leaflet</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <a href="javascript:void(0);" class="flex items-center text-xs leading-normal mb-3">Documentation</a>
+                    <a href="javascript:void(0);" class="flex items-center text-xs leading-normal">Change Log<span class="badge bg-pink text-[10px] font-medium px-[5px] leading-4 rounded text-white fs-10 ms-2">v4.0.3</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Stacked Sidebar -->
+
+    <!-- Page Wrapper -->
+    <div class="page-wrapper relative pt-[50px] ml-[252px]">
+        <div class="content p-6">
+
+            <!-- Breadcrumb -->
+            <div class="md:flex block items-center justify-between page-breadcrumb mb-4">
+                <div class="my-auto mb-2">
+                    <h2 class="mb-1">Employee Dashboard</h2>
+                    <nav class="flex" aria-label="Breadcrumb">
+                        <ol class="inline-flex items-center space-x-1 md:space-x-2">
+                            <li class="inline-flex items-center">
+                                <a href="index.html" class="inline-flex items-center text-xs text-gray-500 hover:text-primary">
+                                    <i class="ti ti-smart-home"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <span class="text-default">/</span>
+                            </li>
+                            <li class="text-xs text-default">Dashboard</li>
+                            <li>
+                                <span class="text-default">/</span>
+                            </li>
+                            <li aria-current="page" class="text-xs text-gray-900">Employee Dashboard</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="flex my-xl-auto right-content items-center flex-wrap ">
+                    <div class="me-2 mb-2">
+                        <div>
+                            <a href="javascript:void(0);" class="border rounded p-2 bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900" data-dropdown-toggle="export-dropdown">
+                                <i class="ti ti-file-export me-1"></i>Export<i class="ti ti-chevron-down ml-1"></i>
+                            </a>
+                            <ul id="export-dropdown" class="hidden p-4 border rounded bg-white shadow-lg">
+                                <li>
+                                    <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900"><i class="ti ti-file-type-pdf me-1"></i>Export as PDF</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900"><i class="ti ti-file-type-xls me-1"></i>Export as Excel </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="relative w-[120px]">
+                            <div class="absolute inset-y-0 start-2 flex items-center pointer-events-none">
+                                <i class="ti ti-calendar text-gray-900 text-base leading-normal"></i>
+                            </div>
+                            <input type="text" class="flatpickr-input flat-monthpickr bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 ps-6 px-2.5 h-[38px] placeholder:text-gray-400">
+                        </div>
+                    </div>
+                    <div class="head-icons ml-2 mb-2">
+                        <a href="javascript:void(0);" class="border flex items-center justify-center rounded bg-white w-9 h-9 hover:bg-primary hover:text-white hover:border-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Collapse" id="collapse-header">
+                            <i class="ti ti-chevrons-up"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- /Breadcrumb -->
+
+            <!-- Welcome Wrap -->
+            <div id="alert-1" class="flex items-center p-4 mb-4 text-secondary rounded-lg bg-secondary-transparent" role="alert">
+                <p>Your Leave Request on“24th April 2024”has been Approved!!!</p>
+                <button type="button" class="ms-auto text-gray-900 " data-dismiss-target="#alert-1" aria-label="Close">
+                    <span class="sr-only">Close</span>
+                    <i class="ti ti-x"></i>
+                </button>
+            </div>
+            <!-- /Welcome Wrap -->
+
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 pb-5">
+                <div class="xl:col-span-4 flex">
+                    <div class="card relative border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                        <div class="card-header bg-dark text-white py-4 px-5 border-b border-borderColor rounded-s-defaultradius rounded-e-defaultradius">
+                            <div class="flex items-center">
+									<span class="flex items-center justify-center size-[45px] rounded-full border-2 border-white shrink-0 me-2">
+										<img src="{{ asset('assets/img/users/user-01.jpg') }}" alt="Img" class="rounded-full">
+									</span>
+                                <div>
+                                    <h5 class="text-white mb-1">Stephan Peralt</h5>
+                                    <div class="flex items-center">
+                                        <p class="text-white text-sm leading-normal mb-0">Senior Product Designer</p>
+                                        <span class="mx-1"><i class="ti ti-point-filled text-primary"></i></span>
+                                        <p class="text-sm leading-normal">UI/UX Design</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="#" class="size-7 inline-flex items-center justify-center bg-gray-700 text-white rounded-full absolute top-2.5 end-2.5 hover:bg-dark-transparent hover:text-dark"><i class="ti ti-edit"></i></a>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="mb-4">
+                                <span class="block mb-1 text-[13px]">Phone Number</span>
+                                <p class="text-gray-900">+1 324 3453 545</p>
+                            </div>
+                            <div class="mb-4">
+                                <span class="block mb-1 text-[13px]">Email Address</span>
+                                <p class="text-gray-900">Steperde124@example.com</p>
+                            </div>
+                            <div class="mb-4">
+                                <span class="block mb-1 text-[13px]">Report Office</span>
+                                <p class="text-gray-900">Doglas Martini</p>
+                            </div>
+                            <div>
+                                <span class="block mb-1 text-[13px]">Joined on</span>
+                                <p class="text-gray-900">15  Jan 2024</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="xl:col-span-5 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5>Leave Details</h5>
+                            <div>
+                                <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="week-dropdown">
+                                    <i class="ti ti-calendar me-1"></i>2024
+                                </a>
+                                <ul id="week-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2024</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2023</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2022</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="grid grid-cols-1 md:grid-cols-12">
+                                <div class="md:col-span-6">
+                                    <div class="mb-4">
+                                        <div class="mb-4">
+                                            <p class="flex items-center"><i class="ti ti-circle-filled text-[8px] text-dark me-1"></i>
+                                                <span class="text-gray-900 font-semibold me-1">1254</span>
+                                                on time
+                                            </p>
+                                        </div>
+                                        <div class="mb-4">
+                                            <p class="flex items-center"><i class="ti ti-circle-filled text-[8px] text-success me-1"></i>
+                                                <span class="text-gray-900 font-semibold me-1">32</span>
+                                                Late Attendance
+                                            </p>
+                                        </div>
+                                        <div class="mb-4">
+                                            <p class="flex items-center"><i class="ti ti-circle-filled text-[8px] text-primary me-1"></i>
+                                                <span class="text-gray-900 font-semibold me-1">658</span>
+                                                Work From Home
+                                            </p>
+                                        </div>
+                                        <div class="mb-4">
+                                            <p class="flex items-center"><i class="ti ti-circle-filled text-[8px] text-danger me-1"></i>
+                                                <span class="text-gray-900 font-semibold me-1">14</span>
+                                                Absent
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p class="flex items-center"><i class="ti ti-circle-filled text-[8px] text-warning me-1"></i>
+                                                <span class="text-gray-900 font-semibold me-1">68</span>
+                                                Sick Leave
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-6">
+                                    <div class="mb-4 justify-center flex md:justify-end">
+                                        <div id="leaves_chart"></div>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-12">
+                                    <div class="flex items-center mt-2">
+                                        <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="todo1">
+                                        <label for="todo1" class="ms-2">Better than  <span class="text-gray-900">85%</span> of Employees</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="xl:col-span-3 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor gap-2">
+                            <h5>Leave Details</h5>
+                            <div>
+                                <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="week-dropdown1">
+                                    <i class="ti ti-calendar me-1"></i>2024
+                                </a>
+                                <ul id="week-dropdown1" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2024</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2023</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2022</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-x-4">
+                                <div class="sm:col-span-6">
+                                    <div class="mb-6">
+                                        <span class="block mb-1">Total Leaves</span>
+                                        <h4>16</h4>
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-6">
+                                    <div class="mb-6">
+                                        <span class="block mb-1">Taken</span>
+                                        <h4>10</h4>
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-6">
+                                    <div class="mb-6">
+                                        <span class="block mb-1">Absent</span>
+                                        <h4>2</h4>
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-6">
+                                    <div class="mb-6">
+                                        <span class="block mb-1">Request</span>
+                                        <h4>0</h4>
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-6">
+                                    <div class="mb-6">
+                                        <span class="block mb-1">Worked Days</span>
+                                        <h4>240</h4>
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-6">
+                                    <div class="mb-6">
+                                        <span class="block mb-1">Loss of Pay</span>
+                                        <h4>2</h4>
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-12">
+                                    <div>
+                                        <a href="#" class="flex items-center justify-center bg-dark text-sm font-medium py-2 rounded text-white px-3" data-modal-toggle="add_leaves" data-modal-target="add_leaves">Apply New Leave</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 pb-5">
+                <div class="col-span-4 flex">
+                    <div class="card border-borderColor border-primary bg-custom-gradient border rounded-[5px] bg-white shadow-xs w-full">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-4">
+                                <h6 class="text-gray-500 mb-2 font-medium">Attendance</h6>
+                                <h4>08:35 AM, 11 Mar 2025</h4>
+                            </div>
+                            <div class="w-[130px] h-[130px] bg-white rounded-full leading-[38px] relative mx-auto mb-3"  data-value='65'>
+									<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
+										<span class="transform rotate-[54deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-success border-l-0 origin-left
+										w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+									</span>
+                                <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
+										<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-success border-r-0 origin-right
+										w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+									</span>
+                                <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">
+                                    <span class="text-[13px] block mb-1">Total Hours</span>
+                                    <h6>5:45:32</h6>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-white font-medium inline-flex items-center py-1 px-2 rounded bg-dark leading-none mb-3">Production :  3.45 hrs</div>
+                                <h6 class="fw-medium flex items-center justify-center mb-4">
+                                    <i class="ti ti-fingerprint text-primary me-1"></i>
+                                    Punch In at  10.00 AM
+                                </h6>
+                                <div>
+                                    <button	type="button" class="btn btn-primary font-medium me-2 mt-2 w-full">Punch Out</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-8 flex">
+                    <div class="grid grid-cols-1 xl:grid-cols-12 gap-x-6 w-full">
+                        <div class="xl:col-span-3 flex mb-6">
+                            <div class="md:flex items-center justify-center gap-3 w-full">
+                                <div class="card border-borderColor border bg-white shadow-xs rounded-[5px] w-full"	>
+                                    <div class="card-body p-5">
+                                        <div class="pb-3  border-b border-borderColor">
+												<span class="p-1 rounded-[5px] bg-primary mb-2">
+													<i class="ti ti-clock-stop text-white"></i>
+												</span>
+                                            <div class="mt-2">
+                                                <h2>8.36 <span class="text-lg text-gray-500">/ 9</span></h2>
+                                                <p class="font-medium truncate">Total Hours Today</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <span class="flex items-center text-xs truncate"><i class="ti ti-arrow-up me-2 filled p-1 bg-success text-white rounded-full"></i>5% This Week</span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="xl:col-span-3 flex mb-6">
+                            <div class="flex items-center justify-center gap-3 w-full">
+                                <div class="card border-borderColor border bg-white shadow-xs rounded-[5px] w-full"	>
+                                    <div class="card-body p-5">
+                                        <div class="pb-3 border-b border-borderColor">
+												<span class="p-1 rounded-[5px] bg-dark mb-2">
+													<i class="ti ti-clock-up text-white"></i>
+												</span>
+                                            <div class="mt-2">
+                                                <h2>10 <span class="text-lg text-gray-500">/ 40</span></h2>
+                                                <p class="font-medium truncate">Total Hours Week</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <span class="flex items-center text-xs truncate"><i class="ti ti-arrow-up me-2 filled p-1 bg-success text-white rounded-full"></i>7% Last Week</span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="xl:col-span-3 flex mb-6">
+                            <div class="flex items-center justify-center gap-3 w-full">
+                                <div class="card border-borderColor border bg-white shadow-xs rounded-[5px] w-full"	>
+                                    <div class="card-body p-5">
+                                        <div class="pb-3 border-b border-borderColor">
+												<span class="p-1 rounded-[5px] bg-info mb-2">
+													<i class="ti ti-calendar-up text-white"></i>
+												</span>
+                                            <div class="mt-2">
+                                                <h2>75 <span class="text-lg text-gray-500">/ 98</span></h2>
+                                                <p class="font-medium truncate">Total Hours Month</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <span class="flex items-center text-xs overflow-hidden text-ellipsis whitespace-nowrap"><i class="ti ti-arrow-down me-2 filled p-1 bg-danger text-white rounded-full"></i>8% Last Month</span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="xl:col-span-3 flex mb-6">
+                            <div class="flex items-center justify-center gap-3 w-full">
+                                <div class="card border-borderColor border bg-white shadow-xs rounded-[5px] w-full"	>
+                                    <div class="card-body p-5">
+                                        <div class="pb-3 border-b border-borderColor">
+												<span class="p-1 rounded-[5px] bg-pink mb-2">
+													<i class="ti ti-calendar-star text-white"></i>
+												</span>
+                                            <div class="mt-2">
+                                                <h2>16 <span class="text-lg text-gray-500">/ 28</span></h2>
+                                                <p class="font-medium overflow-hidden text-ellipsis whitespace-nowrap">Overtime this Month</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <span class="flex items-center text-xs overflow-hidden text-ellipsis whitespace-nowrap"><i class="ti ti-arrow-down me-2 filled p-1 bg-danger text-white rounded-full"></i>6% Last Month</span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="xl:col-span-12 flex">
+                            <div class="card border-bordercolor bg-white rounded-[5px] shadow-xs w-full">
+                                <div class="card-body p-5">
+                                    <div class="flex items-center justify-center mb-4">
+                                        <div class="w-full">
+                                            <span class="flex items-center mb-1"><i class="ti ti-point-filled me-1"></i>Total Working hours</span>
+                                            <h3>12h 36m</h3>
+                                        </div>
+                                        <div class="w-full">
+                                            <span class="flex items-center mb-1"><i class="ti ti-point-filled text-success me-1"></i>Productive Hours</span>
+                                            <h3>08h 36m</h3>
+                                        </div>
+                                        <div class="w-full">
+                                            <span class="flex items-center mb-1"><i class="ti ti-point-filled text-warning me-1"></i>Break hours</span>
+                                            <h3>22m 15s</h3>
+                                        </div>
+                                        <div class="w-full">
+                                            <span class="flex items-center mb-1"><i class="ti ti-point-filled text-info me-1"></i>Overtime</span>
+                                            <h3>22m 15s</h3>
+                                        </div>
+                                    </div>
+                                    <div class="flex item-center justify-center mb-3">
+                                        <div class="h-6 bg-white rounded-[5px]" style="width: 20%"></div>
+                                        <div class="h-6 bg-success rounded-[5px]" style="width: 10%"></div>
+                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
+                                        <div class="h-6 bg-warning rounded-[5px]" style="width: 5%"></div>
+                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
+                                        <div class="h-6 bg-success rounded-[5px]" style="width: 10%"></div>
+                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
+                                        <div class="h-6 bg-warning rounded-[5px]" style="width: 10%"></div>
+                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
+                                        <div class="h-6 bg-success rounded-[5px]" style="width: 20%"></div>
+                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
+                                        <div class="h-6 bg-warning rounded-[5px]" style="width: 2%"></div>
+                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
+                                        <div class="h-6 bg-info rounded-[5px]" style="width: 2%"></div>
+                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 1%"></div>
+                                        <div class="h-6 bg-info rounded-[5px]" style="width: 1%"></div>
+                                    </div>
+                                    <div class="flex items-center justify-center gap-2 flex-wrap ">
+                                        <span class="text-xs">06:00</span>
+                                        <span class="text-xs">07:00</span>
+                                        <span class="text-xs">08:00</span>
+                                        <span class="text-xs">09:00</span>
+                                        <span class="text-xs">10:00</span>
+                                        <span class="text-xs">11:00</span>
+                                        <span class="text-xs">12:00</span>
+                                        <span class="text-xs">01:00</span>
+                                        <span class="text-xs">02:00</span>
+                                        <span class="text-xs">03:00</span>
+                                        <span class="text-xs">04:00</span>
+                                        <span class="text-xs">05:00</span>
+                                        <span class="text-xs">06:00</span>
+                                        <span class="text-xs">07:00</span>
+                                        <span class="text-xs">08:00</span>
+                                        <span class="text-xs">09:00</span>
+                                        <span class="text-xs">10:00</span>
+                                        <span class="text-xs">11:00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-x-6 gap-y-4 pb-5">
+                <div class="xl:col-span-6 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5>Projects</h5>
+                            <div>
+                                <a href="javascript:void(0);" class="border rounded p-1 bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900" data-dropdown-toggle="emp-dropdown">
+                                    <i class="ti ti-git-branch me-1"></i>Ongoing Projects<i class="ti ti-chevron-down ml-1"></i>
+                                </a>
+                                <ul id="emp-dropdown" class="hidden z-[9] p-4 border rounded bg-white shadow-lg">
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900"><i class="ti ti-file-type-pdf me-1"></i>All Projects</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900"><i class="ti ti-file-type-xls me-1"></i>Ongoing Projects </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="grid grid-cols-1 md:grid-cols-12  gap-x-6">
+                                <div class="md:col-span-6">
+                                    <div class="card mb-4 border border-borderColor shadow-none mb-md-0">
+                                        <div class="card-body p-5">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <h6>Office Management</h6>
+                                                <div>
+                                                    <a href="javascript:void(0);" class="p-1 bg-white inline-flex items-center focus:text-primary hover:text-primary text-gray-900" data-dropdown-toggle="office-dropdown">
+                                                        <i class="ti ti-dots-vertical"></i>
+                                                    </a>
+                                                    <ul id="office-dropdown" class="hidden z-[9] p-4 border rounded bg-white shadow-lg">
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" data-modal-toggle="edit_task" data-modal-target="edit_task"><i class="ti ti-edit me-2"></i>Edit</a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" data-modal-toggle="delete_modal" data-modal-target="delete_modal"><i class="ti ti-trash me-2"></i>Delete </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center mb-3">
+                                                    <a href="javascript:void(0);" class="rounded-full w-8 h-8 overflow-hidden mr-2">
+                                                        <img src="{{ asset('assets/img/users/user-32.jpg') }}" class="w-full h-full object-cover" alt="img">
+                                                    </a>
+                                                    <div class="ms-2">
+                                                        <h6 class="fw-normal"><a href="javascript:void(0);">Anthony Lewis</a></h6>
+                                                        <span class="text-[13px] block">Project Leader</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center mb-3">
+                                                    <a href="javascript:void(0);" class="flex items-center justify-center bg-primary-transparent h-[42px] w-[42px] rounded-full">
+                                                        <i class="ti ti-calendar text-primary text-16"></i>
+                                                    </a>
+                                                    <div class="ms-2">
+                                                        <h6 class="fw-normal">14 Jan 2024</h6>
+                                                        <span class="text-[13px] block">Deadline</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center justify-between bg-light-transparent border border-dashed rounded p-2 mb-3">
+                                                    <div class="flex items-center me-2">
+                                                        <span class="flex items-center justify-center avatar-sm bg-success-transparent rounded-full me-1"><i class="ti ti-checklist text-16"></i></span>
+                                                        <p>Tasks : <span class="text-gray-900">6 </span> /10</p>
+                                                    </div>
+                                                    <div class="flex -space-x-2 mb-2">
+															<span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-06.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-07.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-08.jpg') }}" alt="img">
+															</span>
+                                                        <a class="flex items-center justify-center size-6 border text-xs font-medium text-white bg-primary border-primary rounded-full hover:primary-900 shrink-0 hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" href="javascript:void(0);">
+                                                            +2
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="bg-[#B9CBD1] p-2 rounded flex items-center justify-between">
+                                                    <p class="text-secondary mb-0 truncate">Time Spent</p>
+                                                    <h5 class="text-secondary truncate">65/120 <span class="text-14 fw-normal">Hrs</span></h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-6">
+                                    <div class="card mb-4 border border-borderColor shadow-none mb-md-0">
+                                        <div class="card-body p-5">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <h6>Office Management</h6>
+                                                <div>
+                                                    <a href="javascript:void(0);" class="p-1 bg-white inline-flex items-center focus:text-primary hover:text-primary text-gray-900" data-dropdown-toggle="office-dropdown1">
+                                                        <i class="ti ti-dots-vertical"></i>
+                                                    </a>
+                                                    <ul id="office-dropdown1" class="hidden z-[9] p-4 border rounded bg-white shadow-lg">
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" data-modal-toggle="edit_task" data-modal-target="edit_task"><i class="ti ti-edit me-2"></i>Edit</a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" data-modal-toggle="delete_modal" data-modal-target="delete_modal"><i class="ti ti-trash me-2"></i>Delete </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex items-center mb-3">
+                                                    <a href="javascript:void(0);" class="rounded-full w-8 h-8 overflow-hidden mr-2">
+                                                        <img src="{{ asset('assets/img/users/user-33.jpg') }}" class="w-full h-full object-cover" alt="img">
+                                                    </a>
+                                                    <div class="ms-2">
+                                                        <h6 class="fw-normal"><a href="javascript:void(0);">Anthony Lewis</a></h6>
+                                                        <span class="text-[13px] block">Project Leader</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center mb-3">
+                                                    <a href="javascript:void(0);" class="flex items-center justify-center bg-primary-transparent h-[42px] w-[42px] rounded-full">
+                                                        <i class="ti ti-calendar text-primary text-16"></i>
+                                                    </a>
+                                                    <div class="ms-2">
+                                                        <h6 class="fw-normal">14 Jan 2024</h6>
+                                                        <span class="text-[13px] block">Deadline</span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center justify-between bg-light-transparent border border-dashed rounded p-2 mb-3">
+                                                    <div class="flex items-center me-2">
+                                                        <span class="flex items-center justify-center avatar-sm bg-success-transparent rounded-full me-1"><i class="ti ti-checklist text-16"></i></span>
+                                                        <p>Tasks : <span class="text-gray-900">6 </span> /10</p>
+                                                    </div>
+                                                    <div class="flex -space-x-2 mb-2">
+															<span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-06.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-07.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-08.jpg') }}" alt="img">
+															</span>
+                                                        <a class="flex items-center justify-center size-6 border text-xs font-medium text-white bg-primary border-primary rounded-full hover:primary-900 shrink-0 hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" href="javascript:void(0);">
+                                                            +2
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="bg-[#B9CBD1] p-2 rounded flex items-center justify-between">
+                                                    <p class="text-secondary mb-0 truncate">Time Spent</p>
+                                                    <h5 class="text-secondary truncate">65/120 <span class="text-14 fw-normal">Hrs</span></h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="xl:col-span-6 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5>Tasks</h5>
+                            <div>
+                                <a href="javascript:void(0);" class="border rounded p-1 bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900" data-dropdown-toggle="all-dropdown">
+                                    <i class="ti ti-git-branch me-1"></i>All Projects<i class="ti ti-chevron-down ml-1"></i>
+                                </a>
+                                <ul id="all-dropdown" class="hidden z-[9] p-4 border rounded bg-white shadow-lg">
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">All Projects</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Ongoing Projects </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="list-group rounded-none">
+                                <div class="list-group-item border border-borderColor rounded mb-3 p-2">
+                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-x-3">
+                                        <div class="md:col-span-8 flex items-center">
+                                            <div class="todo-inbox-check flex items-center">
+                                                <span><i class="ti ti-grid-dots me-2"></i></span>
+                                                <div class="flex items-center me-2">
+                                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="select-all">
+                                                </div>
+                                                <span class="me-2 flex items-center rating-select "><i class="ti ti-star-filled filled"></i></span>
+                                                <div class="strike-info">
+                                                    <h4 class="text-[14px] truncate">Patient appointment booking</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="md:col-span-4">
+                                            <div class="flex items-center justify-end flex-wrap gap-y-3">
+                                                <span class="bg-pink-100 text-pink rounded text-[10px] font-medium leading-4 py-0.5 px-1.5 inline-flex items-center badge-xs me-2"><i class="ti ti-point-filled me-1"></i>Onhold</span>
+                                                <div class="flex items-center">
+                                                    <div class="flex -space-x-2 mb-2">
+															<span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-13.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-14.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-15.jpg') }}" alt="img">
+															</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border border-borderColor rounded mb-3 p-2">
+                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-x-3">
+                                        <div class="md:col-span-8 flex items-center">
+                                            <div class="todo-inbox-check flex items-center">
+                                                <span><i class="ti ti-grid-dots me-2"></i></span>
+                                                <div class="flex items-center me-2">
+                                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="select-all">
+                                                </div>
+                                                <span class="me-2 rating-select flex items-center"><i class="ti ti-star"></i></span>
+                                                <div class="strike-info">
+                                                    <h4 class="text-[14px] truncate">Appointment booking with payment</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="md:col-span-4">
+                                            <div class="flex items-center justify-end flex-wrap gap-y-3">
+                                                <span class="bg-purple-100 text-purple rounded text-[10px] font-medium leading-4 py-0.5 px-1.5 inline-flex items-center badge-xs me-2"><i class="ti ti-point-filled me-1"></i>Inprogress</span>
+                                                <div class="flex items-center">
+                                                    <div class="flex -space-x-2 mb-2">
+															<span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-20.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-21.jpg') }}" alt="img">
+															</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border border-borderColor rounded mb-3 p-2">
+                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-x-3">
+                                        <div class="md:col-span-8 flex items-center">
+                                            <div class="todo-inbox-check flex items-center">
+                                                <span><i class="ti ti-grid-dots me-2"></i></span>
+                                                <div class="flex items-center me-2">
+                                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="select-all">
+                                                </div>
+                                                <span class="me-2 rating-select flex items-center"><i class="ti ti-star"></i></span>
+                                                <div class="strike-info">
+                                                    <h4 class="text-[14px] truncate">Patient and Doctor video conferencing</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="md:col-span-4">
+                                            <div class="flex items-center justify-end flex-wrap gap-y-3">
+                                                <span class="bg-success-100 text-success rounded text-[10px] font-medium leading-4 py-0.5 px-1.5 inline-flex items-center badge-xs me-2"><i class="ti ti-point-filled me-1"></i>Completed</span>
+                                                <div class="flex items-center">
+                                                    <div class="flex -space-x-2 mb-2">
+															<span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-28.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-29.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-24.jpg') }}" alt="img">
+															</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border border-borderColor rounded mb-3 p-2">
+                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-x-3">
+                                        <div class="md:col-span-8 flex items-center">
+                                            <div class="todo-inbox-check flex items-center todo-strike-content">
+                                                <span><i class="ti ti-grid-dots me-2"></i></span>
+                                                <div class="flex items-center me-2">
+                                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="select-all" checked>
+                                                </div>
+                                                <span class="me-2 rating-select flex items-center"><i class="ti ti-star"></i></span>
+                                                <div class="strike-info">
+                                                    <h4 class="text-[14px] truncate">Private chat module</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="md:col-span-4">
+                                            <div class="flex items-center justify-end flex-wrap gap-y-3">
+                                                <span class="bg-secondary-100 text-secondary rounded text-[10px] font-medium leading-4 py-0.5 px-1.5 inline-flex items-center badge-xs me-2"><i class="ti ti-point-filled me-1"></i>Pending</span>
+                                                <div class="flex items-center">
+                                                    <div class="flex -space-x-2 mb-2">
+															<span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-23.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-24.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-25.jpg') }}" alt="img">
+															</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="list-group-item border border-borderColor rounded mb-3 p-2">
+                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-x-3">
+                                        <div class="md:col-span-8">
+                                            <div class="todo-inbox-check flex items-center">
+                                                <span><i class="ti ti-grid-dots me-2"></i></span>
+                                                <div class="flex items-center me-2">
+                                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="select-all">
+                                                </div>
+                                                <span class="me-2 rating-select flex items-center"><i class="ti ti-star"></i></span>
+                                                <div class="strike-info">
+                                                    <h4 class="text-[14px] truncate">Go-Live and Post-Implementation Support</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="md:col-span-4">
+                                            <div class="flex items-center justify-end flex-wrap gap-y-3">
+                                                <span class="bg-purple-100 text-purple rounded text-[10px] font-medium leading-4 py-0.5 px-1.5 inline-flex items-center badge-xs me-2"><i class="ti ti-point-filled me-1"></i>Inprogress</span>
+                                                <div class="flex items-center">
+                                                    <div class="flex -space-x-2 mb-2">
+															<span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-28.jpg') }}" alt="img">
+															</span>
+                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
+																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-29.jpg') }}" alt="img">
+															</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-x-6 gap-y-4 pb-5">
+                <div class="xl:col-span-5 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5>Performance</h5>
+                            <div>
+                                <a href="javascript:void(0);" class="border rounded p-1 bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900" data-dropdown-toggle="emp-dropdown">
+                                    <i class="ti ti-calendar me-1"></i>2024
+                                </a>
+                                <ul id="emp-dropdown" class="hidden z-[9] p-4 border rounded bg-white shadow-lg">
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2024</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2023 </a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2022 </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-body p-5">
+                            <div>
+                                <div class="bg-light flex items-center rounded p-2">
+                                    <h3 class="me-2">98%</h3>
+                                    <span class="badge badge-outline-success bg-success-transparent rounded-pill me-1">12%</span>
+                                    <span>vs last years</span>
+                                </div>
+                                <div id="performance_chart2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="xl:col-span-4 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5>My Skills</h5>
+                            <div>
+                                <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="week-dropdown3">
+                                    <i class="ti ti-calendar me-1"></i>2024
+                                </a>
+                                <ul id="week-dropdown3" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2024</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2023</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2022</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-body p-5">
+                            <div>
+                                <div class="border border-dashed bg-transparent-light rounded p-2 mb-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <span class="block border border-2 h-[12px] border-primary rounded-5 me-2"></span>
+                                            <div>
+                                                <h6 class="font-medium mb-1">Figma</h6>
+                                                <p>Updated : 15 May 2025</p>
+                                            </div>
+                                        </div>
+                                        <div class="w-[40px] h-[40px] bg-white rounded-full leading-[21px] relative mb-3"  data-value='95'>
+												<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
+													<span class="transform rotate-[162deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-primary border-l-0 origin-left
+													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+												</span>
+                                            <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-10">
+													<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-primary border-r-0 origin-right
+													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+												</span>
+                                            <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">95%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border border-dashed bg-transparent-light rounded p-2 mb-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <span class="block border border-2 h-[12px] border-success rounded-5 me-2"></span>
+                                            <div>
+                                                <h6 class="font-medium mb-1">HTML</h6>
+                                                <p>Updated : 12 May 2025</p>
+                                            </div>
+                                        </div>
+                                        <div class="w-[40px] h-[40px] bg-white rounded-full leading-[21px] relative mb-3"  data-value='85'>
+												<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
+													<span class="transform rotate-[126deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-success border-l-0 origin-left
+													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+												</span>
+                                            <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-10">
+													<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-success border-r-0 origin-right
+													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+												</span>
+                                            <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">85%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border border-dashed bg-transparent-light rounded p-2 mb-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <span class="block border border-2 h-[12px] border-purple rounded-5 me-2"></span>
+                                            <div>
+                                                <h6 class="font-medium mb-1">CSS</h6>
+                                                <p>Updated : 12 May 2025</p>
+                                            </div>
+                                        </div>
+                                        <div class="w-[40px] h-[40px] bg-white rounded-full leading-[21px] relative mb-3"  data-value='70'>
+												<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
+													<span class="transform rotate-[72deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-purple border-l-0 origin-left
+													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+												</span>
+                                            <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-10">
+													<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-purple border-r-0 origin-right
+													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+												</span>
+                                            <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">70%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border border-dashed bg-transparent-light rounded p-2 mb-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <span class="block border border-2 h-[12px] border-info rounded-5 me-2"></span>
+                                            <div>
+                                                <h6 class="font-medium mb-1">Wordpress</h6>
+                                                <p>Updated : 15 May 2025</p>
+                                            </div>
+                                        </div>
+                                        <div class="w-[40px] h-[40px] bg-white rounded-full leading-[21px] relative mb-3"  data-value='61'>
+												<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
+													<span class="transform rotate-[39.6deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-info border-l-0 origin-left
+													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+												</span>
+                                            <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-10">
+													<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-info border-r-0 origin-right
+													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+												</span>
+                                            <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">61%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="border border-dashed bg-transparent-light rounded p-2">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <span class="block border border-2 h-[12px] border-dark rounded-5 me-2"></span>
+                                            <div>
+                                                <h6 class="font-medium mb-1">Javascript</h6>
+                                                <p>Updated : 13 May 2025</p>
+                                            </div>
+                                        </div>
+                                        <div class="w-[40px] h-[40px] bg-white rounded-full leading-[21px] relative mb-3"  data-value='58'>
+												<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
+													<span class="transform rotate-[28.8deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-dark border-l-0 origin-left
+													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+												</span>
+                                            <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-10">
+													<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-dark border-r-0 origin-right
+													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
+												</span>
+                                            <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">58%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="xl:col-span-3">
+                    <div class="flex-fill">
+                        <div class="card bg-dark mb-3 relative">
+							<span class="absolute	w-full top-0 left-0 z-10 right-0">
+								<img src="{{ asset('assets/img/bg/card-bg-05.png') }}" alt="">
+							</span>
+                            <div class="card-body p-5">
+                                <div class="text-center">
+                                    <h5 class="text-white mb-4">Team Birthday</h5>
+                                    <span class="inline-flex items-center justify-center size-[57.6px] mb-2">
+											<img src="{{ asset('assets/img/users/user-35.jpg') }}" class="rounded-full" alt="Img">
+										</span>
+                                    <div class="mb-4">
+                                        <h6 class="text-white font-medium mb-1">Andrew Jermia</h6>
+                                        <p>IOS Developer</p>
+                                    </div>
+                                    <a href="#" class="btn btn-sm btn-primary">Send Wishes</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card bg-secondary border border-borderColor rounded mb-3">
+                            <div class="card-body flex items-center justify-between p-3">
+                                <div>
+                                    <h5 class="text-white mb-1">Leave Policy</h5>
+                                    <p class="text-white">Last Updated : Today</p>
+                                </div>
+                                <a href="#" class="btn bg-white btn-sm px-3">View All</a>
+                            </div>
+                        </div>
+                        <div class="card bg-warning border border-borderColor rounded">
+                            <div class="card-body flex items-center justify-between p-3">
+                                <div>
+                                    <h5 class="mb-1">Next Holiday</h5>
+                                    <p class="text-gray-900">Diwali, 15 Sep 2025</p>
+                                </div>
+                                <a href="holidays.html" class="btn bg-white btn-sm px-3">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-x-6 gap-y-4">
+                <div class="xl:col-span-4">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                        <div class="card-header py-4 px-5 flex-wrap border-b border-borderColor">
+                            <div class="flex items-center justify-between flex-wrap">
+                                <h5>Team Members</h5>
+                                <div>
+                                    <a href="#" class="btn btn-light btn-sm">View All</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center">
+                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                        <img src="{{ asset('assets/img/users/user-27.jpg') }}" class="rounded-full" alt="img">
+                                    </a>
+                                    <div class="ms-2">
+                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Alexander Jermai</a></h6>
+                                        <p class="text-[13px]">UI/UX Designer</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center">
+                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                        <img src="{{ asset('assets/img/users/user-42.jpg') }}" class="rounded-full" alt="img">
+                                    </a>
+                                    <div class="ms-2">
+                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Doglas Martini</a></h6>
+                                        <p class="text-[13px]">Product Designer</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center">
+                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                        <img src="{{ asset('assets/img/users/user-43.jpg') }}" class="rounded-full" alt="img">
+                                    </a>
+                                    <div class="ms-2">
+                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Daniel Esbella</a></h6>
+                                        <p class="text-[13px]">Project Manager</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center">
+                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                        <img src="{{ asset('assets/img/users/user-11.jpg') }}" class="rounded-full" alt="img">
+                                    </a>
+                                    <div class="ms-2">
+                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Daniel Esbella</a></h6>
+                                        <p class="text-[13px]">Team Lead</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center">
+                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                        <img src="{{ asset('assets/img/users/user-44.jpg') }}" class="rounded-full" alt="img">
+                                    </a>
+                                    <div class="ms-2">
+                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Stephan Peralt</a></h6>
+                                        <p class="text-[13px]">Team Lead</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                        <img src="{{ asset('assets/img/users/user-54.jpg') }}" class="rounded-full" alt="img">
+                                    </a>
+                                    <div class="ms-2">
+                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Andrew Jermia</a></h6>
+                                        <p class="text-[13px]">Project  Lead</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
+                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="xl:col-span-4">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <div class="flex items-center justify-between flex-wrap">
+                                <h5>Notifications</h5>
+                                <div>
+                                    <a href="#" class="btn btn-light btn-sm">View All</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="flex items-start mb-4">
+                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                    <img src="{{ asset('assets/img/users/user-27.jpg') }}" class="rounded-full" alt="img">
+                                </a>
+                                <div class="ms-2">
+                                    <h6 class="text-14 font-medium truncate mb-1">Lex Murphy requested access to UNIX </h6>
+                                    <p class="text-[13px] mb-2">Today at 9:42 AM</p>
+                                    <div class="flex items-center">
+                                        <a href="#" class="flex items-center justify-center avatar-sm border shrink-0 me-2"><img src="{{ asset('assets/img/social/pdf-icon.svg') }}" class="w-auto h-auto" alt="Img"></a>
+                                        <h6 class="fw-normal"><a href="#">EY_review.pdf</a></h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-start mb-4">
+                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                    <img src="{{ asset('assets/img/users/user-28.jpg') }}" class="rounded-full" alt="img">
+                                </a>
+                                <div class="ms-2">
+                                    <h6 class="text-14 font-medium truncate mb-1">Lex Murphy requested access to UNIX </h6>
+                                    <p class="text-[13px] mb-0">Today at 10:00 AM</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start mb-4">
+                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                    <img src="{{ asset('assets/img/users/user-29.jpg') }}" class="rounded-full" alt="img">
+                                </a>
+                                <div class="ms-2">
+                                    <h6 class="text-14 font-medium truncate mb-1">Lex Murphy requested access to UNIX </h6>
+                                    <p class="text-[13px] mb-2">Today at 10:50 AM</p>
+                                    <div class="flex items-center">
+                                        <a href="#" class="btn btn-primary btn-sm me-2">Approve</a>
+                                        <a href="#" class="btn btn-outline-primary btn-sm">Decline</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-start mb-4">
+                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                    <img src="{{ asset('assets/img/users/user-30.jpg') }}" class="rounded-full" alt="img">
+                                </a>
+                                <div class="ms-2">
+                                    <h6 class="text-14 font-medium truncate mb-1">Lex Murphy requested access to UNIX </h6>
+                                    <p class="text-[13px] mb-0">Today at 12:00 PM</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                    <img src="{{ asset('assets/img/users/user-33.jpg') }}" class="rounded-full" alt="img">
+                                </a>
+                                <div class="ms-2">
+                                    <h6 class="text-14 font-medium truncate mb-1">Lex Murphy requested access to UNIX </h6>
+                                    <p class="text-[13px] mb-0">Today at 05:00 PM</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="xl:col-span-4">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Meetings Schedule</h5>
+                            <div class="flex items-center">
+                                <div class="me-2 mb-2">
+                                    <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="todo-dropdown">
+                                        <i class="ti ti-calendar me-1"></i>Today
+                                    </a>
+                                    <ul id="todo-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Month</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Week</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Today</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body schedule-timeline p-4">
+                            <div class="flex items-start">
+                                <div class="flex items-center min-w-[80px]">
+                                    <span>09:25 AM</span>
+                                    <span><i class="ti ti-point-filled text-primary text-[20px] relative z-2"></i></span>
+                                </div>
+                                <div class="flex-fill ps-3 pb-4 relative z-[1] before:content-[''] before:w-[1px] before:h-full before:border-l before:border-dashed before:border-gray-200 before:absolute before:left-[-11px] before:top-[5px] before:z-[-1]">
+                                    <div class="bg-light p-2 rounded">
+                                        <p class="font-medium text-gray-9 mb-1">Marketing Strategy Presentation</p>
+                                        <span>Marketing</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex items-center min-w-[80px]">
+                                    <span>09:20 AM</span>
+                                    <span><i class="ti ti-point-filled text-secondary text-[20px] relative z-2"></i></span>
+                                </div>
+                                <div class="flex-fill ps-3 pb-4 relative z-[1] before:content-[''] before:w-[1px] before:h-full before:border-l before:border-dashed before:border-gray-200 before:absolute before:left-[-11px] before:top-[5px] before:z-[-1]">
+                                    <div class="bg-light p-2 rounded">
+                                        <p class="font-medium text-gray-9 mb-1">Design Review Hospital, doctors Management Project</p>
+                                        <span>Review</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex items-center min-w-[80px]">
+                                    <span>09:18 AM</span>
+                                    <span><i class="ti ti-point-filled text-warning text-[20px] relative z-2"></i></span>
+                                </div>
+                                <div class="flex-fill ps-3 pb-4 relative z-[1] before:content-[''] before:w-[1px] before:h-full before:border-l before:border-dashed before:border-gray-200 before:absolute before:left-[-11px] before:top-[5px] before:z-[-1]">
+                                    <div class="bg-light p-2 rounded">
+                                        <p class="font-medium text-gray-9 mb-1">Birthday Celebration of Employee</p>
+                                        <span>Celebration</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex items-center min-w-[80px]">
+                                    <span>09:10 AM</span>
+                                    <span><i class="ti ti-point-filled text-success text-[20px] relative z-2"></i></span>
+                                </div>
+                                <div class="flex-fill ps-3 relative z-[1]">
+                                    <div class="bg-light p-2 rounded">
+                                        <p class="font-medium text-gray-9 mb-1">Update of Project Flow</p>
+                                        <span>Development</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer sm:flex items-center justify-between bg-white border-t border-borderColor p-4">
+            <p class="text-default mb-0">2014 - 2025 &copy; SmartHR.</p>
+            <p class="text-default">Designed &amp; Developed By <a href="javascript:void(0);" class="text-primary">Dreams</a></p>
+        </div>
+
+    </div>
+    <!-- /Page Wrapper -->
+
+    <!-- Add Leaves -->
+    <div id="add_leaves" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[1055] justify-center items-center flex-wrap w-full md:inset-0 h-[calc(100%-1rem)] max-h-full  transition-all duration-300 ease-in-out modal p-4">
+        <div class="relative p-4 w-full max-w-[500px] max-h-full">
+            <div class="relative bg-white rounded-defaultradius">
+                <div class="flex items-center justify-between p-4 border-b border-borderColor">
+                    <h4 class="font-semibold">Add Leave</h4>
+                    <button type="button" class="end-2.5 text-white bg-gray-500 hover:bg-danger hover:text-white rounded-full text-xs leading-normal size-5 ms-auto inline-flex justify-center items-center" data-modal-hide="add_leaves">
+                        <i class="ti ti-x"></i>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <form action="employee-dashboard.html">
+                    <div class="p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-y-4 gap-x-6">
+                            <div class="md:col-span-12">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Employee Name</label>
+                                    <select class="select">
+                                        <option>Select</option>
+                                        <option>Anthony Lewis</option>
+                                        <option>Brian Villalobos</option>
+                                        <option>Harvey Smith</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="md:col-span-12">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Leave Type</label>
+                                    <select class="select">
+                                        <option>Select</option>
+                                        <option>Medical Leave</option>
+                                        <option>Casual Leave</option>
+                                        <option>Annual Leave</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="md:col-span-6">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">From </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 end-2 flex items-center pointer-events-none">
+                                            <i class="ti ti-calendar text-gray-600 text-base leading-normal"></i>
+                                        </div>
+                                        <input type="text" class="flatpickr-input flat-datepickr bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" placeholder="dd/mm/yyyy">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-6">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">To </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 end-2 flex items-center pointer-events-none">
+                                            <i class="ti ti-calendar text-gray-600 text-base leading-normal"></i>
+                                        </div>
+                                        <input type="text" class="flatpickr-input flat-datepickr bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" placeholder="dd/mm/yyyy">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-6">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">No of Days</label>
+                                    <input type="text" class="bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400">
+                                </div>
+                            </div>
+                            <div class="md:col-span-6">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Remaining Days</label>
+                                    <input type="text" class="bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400">
+                                </div>
+                            </div>
+                            <div class="md:col-span-12">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Reason</label>
+                                    <textarea id="message" rows="3" class="block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end p-4 border-t border-borderColor">
+                        <button data-modal-hide="add_leaves" type="button" class="btn bg-light border border-light text-gray-900 text-center hover:bg-light-900 hover:text-gray-900 font-medium me-2">Cancel
+                        </button>
+                        <button type="submit" class="btn bg-primary border border-primary text-white text-center hover:bg-primary-900 hover:text-white font-medium">Add Leaves
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- /Add Leaves -->
+
+    <!-- Edit Task -->
+    <div id="edit_task" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[1055] justify-center items-center flex-wrap w-full md:inset-0 h-[calc(100%-1rem)] max-h-full transition-all duration-300 ease-in-out p-4">
+        <div class="relative p-4 w-full max-w-[500px] max-h-full">
+            <div class="relative bg-white rounded-defaultradius">
+                <div class="flex items-center justify-between p-4 border-b border-borderColor">
+                    <h4 class="font-semibold">Edit Task  </h4>
+                    <button type="button" class="end-2.5 text-white bg-gray-500 hover:bg-danger hover:text-white rounded-full text-xs leading-normal size-5 ms-auto inline-flex justify-center items-center" data-modal-hide="edit_task">
+                        <i class="ti ti-x"></i>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <form action="employee-dashboard.html">
+                    <div class="p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-y-4 gap-x-6">
+                            <div class="md:col-span-12">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Todo Title</label>
+                                    <input type="text" class="bg-white border-borderColor text-gray-900 text-sm rounded-input block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" value="Patient appointment booking">
+                                </div>
+                            </div>
+                            <div class="md:col-span-6">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Due Date</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 end-2 flex items-center pointer-events-none">
+                                            <i class="ti ti-calendar text-gray-600 text-base leading-normal"></i>
+                                        </div>
+                                        <input type="text" class="flatpickr-input flat-datepickr bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" placeholder="dd/mm/yyyy">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-6">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Project</label>
+                                    <select class="select">
+                                        <option>Select</option>
+                                        <option selected>Office Management</option>
+                                        <option>Clinic Management </option>
+                                        <option>Educational Platform</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="md:col-span-12">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Team Members</label>
+                                    <input class="input-tags bg-white border-borderColor text-gray-900 text-sm rounded-input block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" placeholder="Add new" type="text" data-role="tagsinput"  name="Label" value="Jerald,Andrew,Philip">
+                                </div>
+                            </div>
+                            <div class="md:col-span-6">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Tag</label>
+                                    <select class="select">
+                                        <option>Select</option>
+                                        <option>Internal</option>
+                                        <option selected>Projects</option>
+                                        <option>Meetings</option>
+                                        <option>Reminder</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="md:col-span-6">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Status</label>
+                                    <select class="select">
+                                        <option>Select</option>
+                                        <option selected>Inprogress</option>
+                                        <option>Completed</option>
+                                        <option>Pending</option>
+                                        <option>Onhold</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="md:col-span-12">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Priority</label>
+                                    <select class="select">
+                                        <option>Select</option>
+                                        <option selected>Medium</option>
+                                        <option>High</option>
+                                        <option>Low</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="md:col-span-12">
+                                <label class="block mb-1 text-sm leading-normal font-medium text-title">Who Can See this Task?</label>
+                                <div class="flex items-center">
+                                    <div class="form-check me-3">
+                                        <input class="size-3.5 border-borderColor bg-white text-primary focus:ring-0" type="radio" name="flexRadioDefault" id="flexRadioDefault4">
+                                        <label class="form-check-label text-dark" for="flexRadioDefault4">
+                                            Public
+                                        </label>
+                                    </div>
+                                    <div class="form-check me-3">
+                                        <input class="size-3.5 border-borderColor bg-white text-primary focus:ring-0" type="radio" name="flexRadioDefault" id="flexRadioDefault5" checked="">
+                                        <label class="form-check-label text-dark" for="flexRadioDefault5">
+                                            Private
+                                        </label>
+                                    </div>
+                                    <div class="form-check ">
+                                        <input class="size-3.5 border-borderColor bg-white text-primary focus:ring-0" type="radio" name="flexRadioDefault" id="flexRadioDefault6">
+                                        <label class="form-check-label text-dark" for="flexRadioDefault6">
+                                            Admin Only
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-12">
+                                <div class="mb-3">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Descriptions</label>
+                                    <div class="summernote"></div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-12">
+                                <label class="block mb-1 text-sm leading-normal font-medium text-title">Upload Attachment</label>
+                                <div class="bg-gray-100 rounded p-2">
+                                    <div class="profile-uploader border-b mb-2 pb-2">
+                                        <div class="drag-upload-btn btn bg-white border text-dark text-sm text-center leading-4 relative py-1 px-2 me-2">
+                                            Select File
+                                            <input type="file" class="block mb-1 text-sm leading-normal font-medium text-title image-sign hidden" multiple>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between border-b mb-2 pb-2">
+                                        <div class="flex items-center">
+                                            <h6 class="text-xs font-medium mr-1">Logo.zip</h6>
+                                            <span class="badge bg-blue-100 text-blue-700 px-2 py-1 text-xs rounded">21MB</span>
+                                        </div>
+                                        <a href="#" class="btn btn-sm p-1 text-gray-500 hover:text-red-500">
+                                            <i class="ti ti-trash"></i>
+                                        </a>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <h6 class="text-xs font-medium mr-1">Files.zip</h6>
+                                            <span class="badge bg-blue-100 text-blue-700 px-2 py-1 text-xs rounded">25MB</span>
+                                        </div>
+                                        <a href="#" class="btn btn-sm p-1 text-gray-500 hover:text-red-500">
+                                            <i class="ti ti-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end p-4 border-t border-borderColor">
+                        <button data-modal-hide="edit_task" type="button" class="btn bg-light border border-light text-gray-900 text-center hover:bg-light-900 hover:text-gray-900 font-medium me-2">Cancel
+                        </button>
+                        <button type="submit" class="btn bg-primary border border-primary text-white text-center hover:bg-primary-900 hover:text-white font-medium">Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- /Edit Task -->
+
+    <!-- Delete Modal -->
+    <div id="delete_modal" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[1055] justify-center items-center flex-wrap w-full md:inset-0 h-[calc(100%-1rem)] max-h-full  transition-all duration-300 ease-in-out modal p-4">
+        <div class="relative p-4 w-full max-w-sm max-h-full">
+            <div class="relative bg-white rounded-defaultradius">
+                <div class="p-4 text-center">
+						<span class="size-[60px] rounded bg-danger-100 text-danger inline-flex items-center justify-center mb-4">
+							<i class="ti ti-trash-x text-4xl leading-normal"></i>
+						</span>
+                    <h4 class="mb-1">Confirm Delete</h4>
+                    <p class="mb-4">You want to delete all the marked items, this cant be undone once you delete.</p>
+                    <div class="flex justify-center">
+                        <a href="javascript:void(0);" class="btn bg-light border border-light text-gray-900 text-center hover:bg-light-900 hover:text-gray-900 me-4" data-modal-hide="delete_modal">Cancel</a>
+                        <a href="employee-dashboard.html" class="btn bg-danger border border-danger text-white text-center hover:bg-danger-900 hover:text-white">Yes, Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Delete Modal -->
+
+</div>
+<!-- /Main Wrapper -->
+
+<!-- jQuery -->
+<script src="{{ asset('assets/js/jquery-3.7.1.min.js') }}"></script>
+
+<!-- Flowbite JS -->
+<script src="{{ asset('assets/js/flowbite.min.js') }}"></script>
+
+<!-- Feather Icon JS -->
+<script src="{{ asset('assets/js/feather.min.js') }}"></script>
+
+<!-- Slimscroll JS -->
+<script src="{{ asset('assets/js/jquery.slimscroll.min.js') }}"></script>
+
+<!-- Chart JS -->
+<script src="{{ asset('assets/plugins/apexchart/apexcharts.min.js') }}"></script>
+<script src="{{ asset('assets/plugins/apexchart/chart-data.js') }}"></script>
+
+<!-- Chart JS -->
+<script src="{{ asset('assets/plugins/chartjs/chart.min.js') }}"></script>
+<script src="{{ asset('assets/plugins/chartjs/chart-data.js') }}"></script>
+
+<!-- Datetimepicker JS -->
+<script src="{{ asset('assets/js/moment.js') }}"></script>
+<script src="{{ asset('assets/plugins/flatpickr/flatpickr.min.js') }}"></script>
+
+<!-- Daterangepikcer JS -->
+<script src="{{ asset('assets/plugins/daterangepicker/daterangepicker.js') }}"></script>
+
+<!-- Summernote JS -->
+<script src="{{ asset('assets/plugins/summernote/summernote-lite.min.js') }}"></script>
+
+<!-- Bootstrap Tagsinput JS -->
+<script src="{{ asset('assets/plugins/bootstrap-tagsinput/bootstrap-tagsinput.js') }}"></script>
+
+<!-- Select2 JS -->
+<script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
+
+<!-- Color Picker JS -->
+<script src="{{ asset('assets/plugins/@simonwep/pickr/pickr.es5.min.js') }}"></script>
+
+<!-- Custom JS -->
+<script src="{{ asset('assets/js/todo.js') }}"></script>
+<script src="{{ asset('assets/js/theme-colorpicker.js') }}"></script>
+<script src="{{ asset('assets/js/script.js') }}"></script>
+
+</body>
+
 </html>
