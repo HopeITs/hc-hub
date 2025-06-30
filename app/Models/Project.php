@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Translatable\HasTranslations;
+
 
 class Project extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     protected $fillable = [
         'id',
@@ -15,6 +17,8 @@ class Project extends Model
         'description',
         'is_active',
     ];
+
+    public array $translatable = ['name', 'description'];
 
     public function centers()
     {

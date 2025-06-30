@@ -16,11 +16,6 @@ class Department extends Model
         'email'
     ];
 
-    public function center()
-    {
-        return $this->belongsTo(Center::class);
-    }
-
     public function positions()
     {
         return $this->hasMany(Position::class);

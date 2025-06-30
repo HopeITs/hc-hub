@@ -13,7 +13,6 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('email')->unique()->nullable();
-            // $table->foreignId('center_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

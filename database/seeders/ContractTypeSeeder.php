@@ -11,33 +11,33 @@ class ContractTypeSeeder extends Seeder
     {
         $types = [
             [
-                'type' => 'Full Annual',
-                'place' => 'Onsite',
+                'type' => ['en' => 'Full Annual', 'ar' => 'سنوي كامل'],
+                'place' => ['en' => 'Onsite', 'ar' => 'بالموقع'],
                 'weekly_hours' => 40,
             ],
             [
-                'type' => 'Partial Annual',
-                'place' => 'Onsite',
+                'type' => ['en' => 'Partial Annual', 'ar' => 'سنوي جزئي'],
+                'place' => ['en' => 'Onsite', 'ar' => 'بالموقع'],
                 'weekly_hours' => 20,
             ],
             [
-                'type' => 'Trial',
-                'place' => 'Onsite',
+                'type' => ['en' => 'Trial Full', 'ar' => 'تجريبي كامل'],
+                'place' => ['en' => 'Onsite', 'ar' => 'بالموقع'],
                 'weekly_hours' => 40,
             ],
             [
-                'type' => 'Trial',
-                'place' => 'Onsite',
+                'type' => ['en' => 'Trial Partial', 'ar' => 'تجريبي جزئي'],
+                'place' => ['en' => 'Onsite', 'ar' => 'بالموقع'],
                 'weekly_hours' => 20,
             ],
             [
-                'type' => 'Agreement Contract',
-                'place' => 'Online',
+                'type' => ['en' => 'Agreement Contract', 'ar' => 'عقد اتفاق'],
+                'place' => ['en' => 'Online', 'ar' => 'عن بعد'],
                 'weekly_hours' => 0,
             ],
             [
-                'type' => 'Agreement Contract',
-                'place' => 'Onsite',
+                'type' => ['en' => 'Agreement Contract', 'ar' => 'عقد اتفاق'],
+                'place' => ['en' => 'Onsite', 'ar' => 'بالموقع'],
                 'weekly_hours' => 0,
             ],
         ];

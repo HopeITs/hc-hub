@@ -10,8 +10,8 @@ return new class extends Migration
     {
         Schema::create('contract_types', function (Blueprint $table) {
             $table->id();
-            $table->string('type');
-            $table->string('place');
+            $table->json('type');
+            $table->json('place');
             $table->integer('weekly_hours');
             $table->timestamps();
         });
