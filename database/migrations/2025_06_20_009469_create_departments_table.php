@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->string('email');
-            $table->foreignId('center_id')->constrained()->onDelete('cascade');
+            $table->string('email')->unique()->nullable();
+            // $table->foreignId('center_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
