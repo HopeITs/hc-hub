@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('contract_types', function (Blueprint $table) {
             $table->id();
             $table->json('type');
-            $table->json('place');
+            $table->unsignedTinyInteger('place')->default(0)->comment('0 = Unknown, 1 = Onsite, 2 = Online');
             $table->integer('weekly_hours');
             $table->timestamps();
         });

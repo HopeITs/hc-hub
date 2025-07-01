@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\ContractType;
+use App\Enums\ContractPlaceEnum;
 
 class ContractTypeSeeder extends Seeder
 {
@@ -12,32 +13,32 @@ class ContractTypeSeeder extends Seeder
         $types = [
             [
                 'type' => ['en' => 'Full Annual', 'ar' => 'سنوي كامل'],
-                'place' => ['en' => 'Onsite', 'ar' => 'بالموقع'],
+                'place' => ContractPlaceEnum::Onsite,
                 'weekly_hours' => 40,
             ],
             [
                 'type' => ['en' => 'Partial Annual', 'ar' => 'سنوي جزئي'],
-                'place' => ['en' => 'Onsite', 'ar' => 'بالموقع'],
+                'place' => ContractPlaceEnum::Onsite,
                 'weekly_hours' => 20,
             ],
             [
                 'type' => ['en' => 'Trial Full', 'ar' => 'تجريبي كامل'],
-                'place' => ['en' => 'Onsite', 'ar' => 'بالموقع'],
+                'place' => ContractPlaceEnum::Onsite,
                 'weekly_hours' => 40,
             ],
             [
                 'type' => ['en' => 'Trial Partial', 'ar' => 'تجريبي جزئي'],
-                'place' => ['en' => 'Onsite', 'ar' => 'بالموقع'],
+                'place' => ContractPlaceEnum::Onsite,
                 'weekly_hours' => 20,
             ],
             [
                 'type' => ['en' => 'Agreement Contract', 'ar' => 'عقد اتفاق'],
-                'place' => ['en' => 'Online', 'ar' => 'عن بعد'],
+                'place' => ContractPlaceEnum::Online,
                 'weekly_hours' => 0,
             ],
             [
                 'type' => ['en' => 'Agreement Contract', 'ar' => 'عقد اتفاق'],
-                'place' => ['en' => 'Onsite', 'ar' => 'بالموقع'],
+                'place' => ContractPlaceEnum::Onsite,
                 'weekly_hours' => 0,
             ],
         ];

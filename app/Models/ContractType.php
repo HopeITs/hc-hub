@@ -17,7 +17,7 @@ class ContractType extends Model
         'weekly_hours'
     ];
 
-    public array $translatable = ['type', 'place'];
+    public array $translatable = ['type'];
 
     public function contracts()
     {
