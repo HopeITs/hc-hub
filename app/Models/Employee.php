@@ -28,6 +28,7 @@ class Employee extends Model
         'material_status',
         'children',
         'work_phone',
+        'personal_phone',
         'personal_email',
         'work_email',
         'address',

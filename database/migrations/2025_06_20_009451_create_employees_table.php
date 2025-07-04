@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('material_status');
             $table->integer('children')->default(0);
             $table->string('work_phone');
+            $table->string('personal_phone');
             $table->string('personal_email');
             $table->string('work_email');
             $table->text('address');
