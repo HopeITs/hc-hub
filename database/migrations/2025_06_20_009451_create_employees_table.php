@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('gender', ['male', 'female']);
             $table->json('father_name');
             $table->json('mother_name');
-            $table->string('nationality');
+            $table->enum('nationality', ['syrian']);
             $table->enum('marital_status', ['annual', 'sick', 'maternity', 'unpaid', 'hourly', 'death', 'marriage', 'paternity'])->nullable();
             $table->integer('children')->default(0);
             $table->string('work_phone');
@@ -31,9 +31,12 @@ return new class extends Migration
             $table->string('personal_email');
             $table->string('work_email');
             $table->json('address');
-            $table->text('skills')->nullable();
-            $table->text('interests')->nullable();
+            $table->string('skills')->nullable();
+            $table->str('interests')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->boolean('is_board_member');
+            $table->boolean('board_member_started_at');
+            $table->boolean('board_member_end_at');
             $table->timestamps();
         });
     }
