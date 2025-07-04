@@ -10,19 +10,19 @@ return new class extends Migration
     {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name');
-            $table->integer('years_of_service')->default(0);
+            $table->json('full_name');
+            $table->double('years_of_service')->default(0);
             $table->foreignId('direct_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->foreignId('tech_manager_id')->nullable()->constrained('employees')->onDelete('set null');
-            $table->string('national_number')->unique();
+            $table->char('national_number')->unique();
             $table->date('dob');
-            $table->string('actual_job')->nullable();
+            $table->date('actual_dob')->nullable();
             $table->string('civil_registry_office')->nullable();
             $table->string('civil_registry_number')->nullable();
             $table->string('place_of_registration')->nullable();
             $table->enum('gender', ['male', 'female']);
-            $table->string('father_name');
-            $table->string('mother_name');
+            $table->json('father_name');
+            $table->json('mother_name');
             $table->string('nationality');
             $table->enum('marital_status', ['annual', 'sick', 'maternity', 'unpaid', 'hourly', 'death', 'marriage', 'paternity'])->nullable();
             $table->integer('children')->default(0);
