@@ -11,10 +11,10 @@ return new class extends Migration
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->foreignId('position_id')->constrained()->onDelete('cascade');
-            $table->foreignId('contract_type_id')->constrained()->onDelete('cascade');
-            $table->foreignId('department_id')->constrained()->onDelete('cascade');
-            $table->foreignId('job_level_id')->constrained()->onDelete('cascade');
+            $table->foreignId('position_id')->constrained()->onDelete('restrict');
+            $table->foreignId('contract_type_id')->constrained()->onDelete('restrict');
+            $table->foreignId('department_id')->constrained()->onDelete('restrict');
+            $table->foreignId('job_level_id')->constrained()->onDelete('restrict');
             $table->date('start_date');
             $table->date('end_date');
             $table->date('terminated_at')->nullable();

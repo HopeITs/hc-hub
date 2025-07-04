@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('required_positions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id')->constrained()->onDelete('cascade');
+            $table->foreignId('project_id')->constrained()->onDelete('restrict');
             $table->string('title');
             $table->text('description');
             $table->text('requirements');

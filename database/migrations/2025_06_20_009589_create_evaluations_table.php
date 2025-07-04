@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('evaluations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('contract_id')->constrained()->onDelete('cascade');
+            $table->foreignId('contract_id')->constrained()->onDelete('restrict');
             $table->date('date');
             $table->foreignId('current_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->text('notes')->nullable();

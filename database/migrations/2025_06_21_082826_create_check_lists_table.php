@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('checklists', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->nullable();
+            $table->foreignId('item_id')->nullable()->onDelete('restrict');
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('brand')->nullable();
             $table->string('model')->nullable();

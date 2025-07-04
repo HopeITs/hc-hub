@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('centers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('city_id')->constrained()->onDelete('cascade');
-            $table->foreignId('project_id')->constrained()->onDelete('cascade');
+            $table->foreignId('city_id')->constrained();
+            $table->foreignId('project_id')->constrained();
             $table->string('address')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();

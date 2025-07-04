@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('leaves', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('leave_balance_id')->constrained()->onDelete('cascade');
+            $table->foreignId('leave_balance_id')->constrained()->onDelete('restrict');
             $table->date('start_date');
             $table->date('end_date');
             $table->text('reason')->nullable();
