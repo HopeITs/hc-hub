@@ -32,7 +32,7 @@ return new class extends Migration
             $table->string('work_email');
             $table->json('address');
             $table->string('skills')->nullable();
-            $table->str('interests')->nullable();
+            $table->string('interests')->nullable();
             $table->boolean('is_active')->default(true);
             $table->boolean('is_board_member');
             $table->boolean('board_member_started_at');
