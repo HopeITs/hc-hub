@@ -9,13 +9,11 @@ class Center extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'id',
-        'name',
-        'city_id',
-        'project_id',
-        'address',
-        'is_active'
+    protected $fillable = ['id', 'name', 'city_id', 'project_id', 'address', 'is_active'];
+
+    protected $casts = [
+        'name' => 'array',
+        'address' => 'array',
     ];
 
     public function city()

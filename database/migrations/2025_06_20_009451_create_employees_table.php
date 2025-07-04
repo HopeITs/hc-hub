@@ -35,8 +35,8 @@ return new class extends Migration
             $table->string('interests')->nullable();
             $table->boolean('is_active')->default(true);
             $table->boolean('is_board_member');
-            $table->boolean('board_member_started_at');
-            $table->boolean('board_member_end_at');
+            $table->date('board_member_started_at');
+            $table->date('board_member_end_at');
             $table->timestamps();
         });
     }
