@@ -24,8 +24,8 @@ class DatabaseSeeder extends Seeder
             ProjectSeeder::class,
             CitySeeder::class,
             ContractTypeSeeder::class,
-            DepartmentSeeder::class
+            DepartmentSeeder::class,
+            CenterSeeder::class
         ]);
-
     }
 }

@@ -60,15 +60,15 @@ return [
             ['name' => 'Front Desk',           'description' => null, 'email' => null],
             ['name' => 'Teachers',             'description' => null, 'email' => null],
             ['name' => 'Trainers/ Coach',      'description' => null, 'email' => null],
-            ['name' => 'IT',                   'description' => null, 'email' => 'it@hcsyria.org'],
-            ['name' => 'Communication',        'description' => null, 'email' => 'ct@hcsyria.org'],
-            ['name' => 'HR',                   'description' => null, 'email' => null],
-            ['name' => 'Finance',              'description' => null, 'email' => 'finance@hcsyria.org'],
-            ['name' => 'Meal',                 'description' => null, 'email' => null],
-            ['name' => 'Fundraising',          'description' => null, 'email' => null],
-            ['name' => 'Logistic',             'description' => null, 'email' => null],
-            ['name' => 'Legal Affairs',        'description' => null, 'email' => null],
-            ['name' => 'Services/ Keepers',    'description' => null, 'email' => null],
+            ['name' => 'IT',                   'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو تطوير التطبيقات البرمجية من أجل حفظ وعرض بيانات المؤسسة وإنشاء تقارير وإحصائيات ومتابعة صيانة الأمور الالكترونية وملحقاتها في المراكز.', 'email' => 'it@hcsyria.org'],
+            ['name' => 'Communication',        'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو العمل على توثيق النشاطات التي تقوم بها البرامج التابعة لـ Christian Hope Center أو يشرف عليها أو يكون شريكاً في إدارتها أو تنفيذها، وذلك من خلال التصوير التوثيقي للصور والفيديو، باستخدام كافة الكاميرات والمعدات التي يؤمنها له المركز.', 'email' => 'ct@hcsyria.org'],
+            ['name' => 'HR',                   'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو التواصل مع مدراء المشاريع في المحافظة ومساعدتهم في جميع المسائل المتعلقة بالموارد البشرية.', 'email' => null],
+            ['name' => 'Finance',              'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو إدارة الشؤون المالية لمشاريع مؤسسة "Christian Hope Center “في سوريا، بما في ذلك إعداد الميزانيات والتقارير المالية، ومتابعة الحسابات، وضمان الشفافية والكفاءة في العمليات المالية', 'email' => 'finance@hcsyria.org'],
+            ['name' => 'Meal',                 'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو متابعة وتقييم سير آلية المشاريع التابعة لـ Christian Hope Center في سوريا وضمان فعاليتها وكفاءتها واستدامتها بحيث تكون مطابقة للـ proposals المُرسلة للممولين.', 'email' => null],
+            ['name' => 'Fundraising',          'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو التواصل مع الجهات المانحة ومتابعة المشاريع الممولة في سوريا بعد التنسيق مع الإدارة العامة.', 'email' => 'pr@hcsyria.org'],
+            ['name' => 'Logistic',             'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو شراء وتسليم جميع مستلزمات المشاريع الصغيرة للمستفيدين ومشتريات البرامج التابعة لـ Hope Center ومتابعة صيانة المراكز.', 'email' => null],
+            ['name' => 'Legal Affairs',        'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو تنسيق ومتابعة جميع الأمور القانونية التابعة لبرامج Christian Hope Center', 'email' => null],
+            ['name' => 'Services/ Keepers',    'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو استقبال المستفيدين وتوجيههم والاهتمام بنظافة المكان بشكل عام.', 'email' => null],
     ],
 
     'projects' => [
@@ -149,6 +149,17 @@ return [
             ],
             [
                 'name' => [
+                    'en' => 'Study Zone',
+                    'ar' => 'نطاق الدراسة'
+                ],
+                'description' => [
+                    'en' => null,
+                    'ar' => null
+                ],
+                'is_active' => true,
+            ],
+            [
+                'name' => [
                     'en' => 'Rehabilitation',
                     'ar' => 'إعادة التأهيل'
                 ],
@@ -160,4 +171,28 @@ return [
             ],
         ],
 
+        'centers' => [
+            ['name' => 'Hope Center', 'city_id' => 1, 'project_id' => 1, 'address' => 'Aleppo', 'is_active' => true],
+            ['name' => 'Hope Center', 'city_id' => 2, 'project_id' => 1, 'address' => 'Damascus', 'is_active' => true],
+            ['name' => 'Hope Center', 'city_id' => 4, 'project_id' => 1, 'address' => 'Latakia', 'is_active' => true],
+            ['name' => 'Micro Project', 'city_id' => 3, 'project_id' => 2, 'address' => 'Homs', 'is_active' => true],
+            ['name' => 'Children University', 'city_id' => 3, 'project_id' => 4, 'address' => 'Homs', 'is_active' => true],
+            ['name' => 'ADISC', 'city_id' => 1, 'project_id' => 5, 'address' => 'Aleppo', 'is_active' => true],
+            ['name' => 'DDISC', 'city_id' => 2, 'project_id' => 5, 'address' => 'Damascus', 'is_active' => true],
+            ['name' => 'HDISC', 'city_id' => 3, 'project_id' => 5, 'address' => 'Homs', 'is_active' => true],
+            ['name' => 'LDISC', 'city_id' => 4, 'project_id' => 5, 'address' => 'Latakia', 'is_active' => false],
+            ['name' => 'HDISC', 'city_id' => 3, 'project_id' => 5, 'address' => 'Homs', 'is_active' => true],
+            ['name' => 'Science Zone', 'city_id' => 3, 'project_id' => 8, 'address' => 'Homs', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Nouzha', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Mashta', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 3, 'project_id' => 8, 'address' => 'Armenian', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Muzayneh', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 2, 'project_id' => 8, 'address' => 'Bab-Sharqi', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 2, 'project_id' => 8, 'address' => 'Bab-Touma', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 4, 'project_id' => 8, 'address' => 'Ziraa 1', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 4, 'project_id' => 8, 'address' => 'Ziraa 2', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 4, 'project_id' => 8, 'address' => 'Al-Haram', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 5, 'project_id' => 8, 'address' => 'Tartous', 'is_active' => true],
+            ['name' => 'Study Zone', 'city_id' => 1, 'project_id' => 6, 'address' => 'Aleppo', 'is_active' => true],
+        ]
 ];
