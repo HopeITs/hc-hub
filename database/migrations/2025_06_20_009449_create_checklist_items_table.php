@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('checklist_items', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('order');
+            $table->integer('order');
             // $table->foreignId('department_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });

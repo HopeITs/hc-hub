@@ -194,5 +194,21 @@ return [
             ['name' => 'Study Zone', 'city_id' => 4, 'project_id' => 8, 'address' => 'Al-Haram', 'is_active' => true],
             ['name' => 'Study Zone', 'city_id' => 5, 'project_id' => 8, 'address' => 'Tartous', 'is_active' => true],
             ['name' => 'Study Zone', 'city_id' => 1, 'project_id' => 6, 'address' => 'Aleppo', 'is_active' => true],
+        ],
+
+        'checkListsItems' => [
+            ['name' => 'ID Cartoon', 'order' => 1],
+            ['name' => 'Email', 'order' => 1],
+            ['name' => 'Email Signature', 'order' => 1],
+            ['name' => 'Laptop', 'order' => 1],
+            ['name' => 'Mobile', 'order' => 1],
+            ['name' => 'SIM', 'order' => 1],
+            ['name' => 'Mug', 'order' => 2],
+            ['name' => 'ID Plastic', 'order' => 2],
+            ['name' => 'Web photo', 'order' => 2],
+            ['name' => 'Recieve Electronics', 'order' => 3],
+            ['name' => 'Cancel work mail & work accounts', 'order' => 3],
+            ['name' => 'Delete the volunteer from the web page', 'order' => 3],
         ]
+
 ];
