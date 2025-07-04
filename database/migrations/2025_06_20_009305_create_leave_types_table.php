@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->integer('base_days')->default(0);
-            $table->string('allowed_gender')->nullable();
-            $table->string('material_status')->nullable();
+            $table->enum('allowed_gender', ['male', 'female'])->nullable();
+            $table->enum('marital_status', ['annual', 'sick', 'maternity', 'unpaid', 'hourly', 'death', 'marriage', 'paternity'])->nullable();
             $table->timestamps();
         });
     }

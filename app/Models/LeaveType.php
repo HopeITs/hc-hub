@@ -14,7 +14,7 @@ class LeaveType extends Model
         'name',
         'base_days',
         'allowed_gender',
-        'material_status'
+        'marital_status'
     ];
 
     public function leaveBalances()
