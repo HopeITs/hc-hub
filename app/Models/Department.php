@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Translatable\HasTranslations;
 
 class Department extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     protected $fillable = [
         'id',
@@ -15,7 +16,7 @@ class Department extends Model
         'description',
         'email'
     ];
-
+    public array $translatable = ['name','description'];
     public function positions()
     {
         return $this->hasMany(Position::class);
