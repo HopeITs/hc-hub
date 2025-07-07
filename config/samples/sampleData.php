@@ -188,6 +188,7 @@ return [
         ['name' => ['en' => 'HDISC', 'ar' => ''], 'city_id' => 3, 'project_id' => 5, 'address' => 'Homs', 'is_active' => true],
         ['name' => ['en' => 'LDISC', 'ar' => ''], 'city_id' => 4, 'project_id' => 5, 'address' => 'Latakia', 'is_active' => false],
         ['name' => ['en' => 'Science Zone', 'ar' => 'نطاق العلوم'], 'city_id' => 3, 'project_id' => 8, 'address' => 'Homs', 'is_active' => true],
+        ['name' => ['en' => 'Sience Zone', 'ar' => 'نطاق العلوم'], 'city_id' => 1, 'project_id' => 6, 'address' => 'Aleppo', 'is_active' => true],
         ['name' => ['en' => 'Study Zone', 'ar' => 'نطاق الدراسة'], 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Nouzha', 'is_active' => true],
         ['name' => ['en' => 'Study Zone', 'ar' => 'نطاق الدراسة'], 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Mashta', 'is_active' => true],
         ['name' => ['en' => 'Study Zone', 'ar' => 'نطاق الدراسة'], 'city_id' => 3, 'project_id' => 8, 'address' => 'Armenian', 'is_active' => true],
@@ -198,8 +199,8 @@ return [
         ['name' => ['en' => 'Study Zone', 'ar' => 'نطاق الدراسة'], 'city_id' => 4, 'project_id' => 8, 'address' => 'Ziraa 2', 'is_active' => true],
         ['name' => ['en' => 'Study Zone', 'ar' => 'نطاق الدراسة'], 'city_id' => 4, 'project_id' => 8, 'address' => 'Al-Haram', 'is_active' => true],
         ['name' => ['en' => 'Study Zone', 'ar' => 'نطاق الدراسة'], 'city_id' => 5, 'project_id' => 8, 'address' => 'Tartous', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'نطاق الدراسة'], 'city_id' => 1, 'project_id' => 6, 'address' => 'Aleppo', 'is_active' => true],
         ['name' => ['en' => 'LEAP', 'ar' => ''], 'city_id' => 1, 'project_id' => 6, 'address' => 'Aleppo', 'is_active' => true],
+        ['name' => ['en' => 'LEAP', 'ar' => ''], 'city_id' => 3, 'project_id' => 6, 'address' => 'Homs', 'is_active' => true],
         ['name' => ['en' => 'Rehabiliation', 'ar' => 'إعادة التأهيل'], 'city_id' => 1, 'project_id' => 6, 'address' => 'Aleppo', 'is_active' => true],
     ],
 
