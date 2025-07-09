@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->json('name');
             $table->integer('base_days')->default(0);
-            $table->enum('allowed_gender', ['male', 'female'])->nullable();
-            $table->enum('marital_status', ['annual', 'sick', 'maternity', 'unpaid', 'hourly', 'death', 'marriage', 'paternity'])->nullable();
+            $table->unsignedTinyInteger('allowed_gender')->nullable()->comment('0 = Unknown, 1 = Male, 2 = Female');
+            $table->unsignedTinyInteger('marital_status')->nullable()->comment('0 = Unknown, 1 = Single, 2 = Married');
             $table->timestamps();
         });
     }
