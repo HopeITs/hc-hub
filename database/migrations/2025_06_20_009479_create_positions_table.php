@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('positions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('position_detail_id')->nullable();
+            $table->foreignId('required_position_id')->nullable()->constrained()->onDelete('restrict');
             $table->foreignId('center_id')->constrained()->onDelete('restrict');
             $table->integer('max_emp');
             $table->integer('exist_emp');

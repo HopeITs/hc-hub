@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('leave_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->json('name');
             $table->integer('base_days')->default(0);
             $table->enum('allowed_gender', ['male', 'female'])->nullable();
             $table->enum('marital_status', ['annual', 'sick', 'maternity', 'unpaid', 'hourly', 'death', 'marriage', 'paternity'])->nullable();
