@@ -24,15 +24,17 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function getTranslatedNameAttribute()
+    {
+        return $this->name[app()->getLocale()] ?? ($this->name['en'] ?? null);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
     /**
      * Get the attributes that should be cast.
@@ -42,6 +44,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'name' => 'array',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
@@ -52,10 +55,6 @@ class User extends Authenticatable
      */
     public function initials(): string
     {
-        return Str::of($this->name)
-            ->explode(' ')
-            ->take(2)
-            ->map(fn ($word) => Str::substr($word, 0, 1))
-            ->implode('');
+        return Str::of($this->name)->explode(' ')->take(2)->map(fn($word) => Str::substr($word, 0, 1))->implode('');
     }
 }
