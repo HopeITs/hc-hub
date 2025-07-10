@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Translatable\HasTranslations;
 
 class LeaveType extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
     protected $fillable = [
         'id',
@@ -16,6 +17,8 @@ class LeaveType extends Model
         'allowed_gender',
         'marital_status'
     ];
+
+    public array $translatable = ['name'];
 
     public function leaveBalances()
     {

@@ -26,7 +26,8 @@ class DatabaseSeeder extends Seeder
             ContractTypeSeeder::class,
             DepartmentSeeder::class,
             CenterSeeder::class,
-            CheckListItemSeeder::class
+            CheckListItemSeeder::class,
+            LeaveTypeSeeder::class
         ]);
     }
 }

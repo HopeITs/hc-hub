@@ -205,4 +205,79 @@ return [
     ],
 
     'checkListsItems' => [['name' => 'ID Cartoon', 'order' => 1], ['name' => 'Email', 'order' => 1], ['name' => 'Email Signature', 'order' => 1], ['name' => 'Laptop', 'order' => 1], ['name' => 'Mobile', 'order' => 1], ['name' => 'SIM', 'order' => 1], ['name' => 'Mug', 'order' => 2], ['name' => 'ID Plastic', 'order' => 2], ['name' => 'Web photo', 'order' => 2], ['name' => 'Recieve Electronics', 'order' => 3], ['name' => 'Cancel work mail & work accounts', 'order' => 3], ['name' => 'Delete the volunteer from the web page', 'order' => 3]],
+
+    'leaveTypes' => [
+        [
+            'name' => ['en' => 'Annual', 'ar' => 'سنوية'],
+            'base_days' => 12,
+            'allowed_gender' => null,
+            'marital_status' => null,
+        ],
+        [
+            'name' => ['en' => 'Full Licensed', 'ar' => 'مرخصة كاملة'],
+            'base_days' => 12,
+            'allowed_gender' => null,
+            'marital_status' => null,
+        ],
+        [
+            'name' => ['en' => 'Partial Licensed', 'ar' => 'مرخصة جزئية'],
+            'base_days' => 12,
+            'allowed_gender' => null,
+            'marital_status' => null,
+        ],
+        [
+            'name' => ['en' => 'Maternity 1', 'ar' => 'إجازة أمومة 1'],
+            'base_days' => 120,
+            'allowed_gender' => 2,
+            'marital_status' => 2,
+        ],
+        [
+            'name' => ['en' => 'Maternity 2', 'ar' => 'إجازة أمومة 2'],
+            'base_days' => 60,
+            'allowed_gender' => 2,
+            'marital_status' => 2,
+        ],
+        [
+            'name' => ['en' => 'Paternity', 'ar' => 'إجازة أبوة'],
+            'base_days' => 15,
+            'allowed_gender' => 1,
+            'marital_status' => 2,
+        ],
+        [
+            'name' => ['en' => 'Marriage', 'ar' => 'زواج'],
+            'base_days' => 7,
+            'allowed_gender' => null,
+            'marital_status' => 1,
+        ],
+        [
+            'name' => ['en' => 'Death Degree 1', 'ar' => 'وفاة درجة 1'],
+            'base_days' => 7,
+            'allowed_gender' => null,
+            'marital_status' => null,
+        ],
+        [
+            'name' => ['en' => 'Death Degree 2', 'ar' => 'وفاة درجة 2'],
+            'base_days' => 1,
+            'allowed_gender' => null,
+            'marital_status' => null,
+        ],
+        [
+            'name' => ['en' => 'Unpaid Annual', 'ar' => 'سنوية غير مدفوعة'],
+            'base_days' => 12,
+            'allowed_gender' => null,
+            'marital_status' => null,
+        ],
+        [
+            'name' => ['en' => 'Unpaid Licensed', 'ar' => 'مرضية غير مدفوعة'],
+            'base_days' => 0,
+            'allowed_gender' => null,
+            'marital_status' => null,
+        ],
+        [
+            'name' => ['en' => 'Unpaid Leave', 'ar' => 'أمومة غير مدفوعة'],
+            'base_days' => 0,
+            'allowed_gender' => 2,
+            'marital_status' => 2,
+        ],
+    ],
 ];
