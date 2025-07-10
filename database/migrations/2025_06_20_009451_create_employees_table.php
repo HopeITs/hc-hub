@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->json('full_name');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->double('years_of_service')->default(0);
             $table->foreignId('direct_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->foreignId('tech_manager_id')->nullable()->constrained('employees')->onDelete('set null');
@@ -20,23 +20,22 @@ return new class extends Migration
             $table->string('civil_registry_office')->nullable();
             $table->string('civil_registry_number')->nullable();
             $table->string('place_of_registration')->nullable();
-            $table->enum('gender', ['male', 'female']);
+            $table->unsignedTinyInteger('gender')->nullable()->comment('0 = Unknown, 1 = Male, 2 = Female');
             $table->json('father_name');
             $table->json('mother_name');
             $table->enum('nationality', ['syrian']);
-            $table->enum('marital_status', ['annual', 'sick', 'maternity', 'unpaid', 'hourly', 'death', 'marriage', 'paternity'])->nullable();
+            $table->unsignedTinyInteger('marital_status')->nullable()->comment('0 = Unknown, 1 = Single, 2 = Married');
             $table->integer('children')->default(0);
             $table->string('work_phone');
             $table->string('personal_phone');
             $table->string('personal_email');
-            $table->string('work_email');
             $table->json('address');
             $table->string('skills')->nullable();
             $table->string('interests')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->boolean('is_board_member');
-            $table->date('board_member_started_at');
-            $table->date('board_member_end_at');
+            $table->boolean('is_board_member')->default(false);
+            $table->date('board_member_started_at')->nullable();
+            $table->date('board_member_end_at')->nullable();
             $table->timestamps();
         });
     }

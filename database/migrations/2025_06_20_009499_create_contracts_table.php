@@ -19,10 +19,11 @@ return new class extends Migration
             $table->date('end_date');
             $table->date('terminated_at')->nullable();
             $table->text('reason_of_termination')->nullable();
-            $table->integer('yearly_leave_days')->default(0);
+            $table->integer('yearly_leave_days')->default(12);
+            $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUP');
             $table->decimal('salary', 10, 2);
-            $table->integer('work_days');
-            $table->integer('work_hours');
+            $table->json('work_days');
+            $table->json('work_hours');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

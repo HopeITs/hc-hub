@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('badges', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->foreignId('evaluation_id')->constrained()->onDelete('restrict');
+            $table->foreignId('evaluation_id')->nullable()->constrained()->onDelete('restrict');
+            $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUP');
             $table->string('type');
             $table->date('date');
             $table->text('reason')->nullable();

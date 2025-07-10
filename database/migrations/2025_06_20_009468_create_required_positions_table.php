@@ -12,8 +12,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('project_id')->constrained()->onDelete('restrict');
             $table->string('title');
-            $table->text('description');
-            $table->text('requirements');
             $table->text('qualifications');
             $table->text('responsibilities');
             $table->boolean('is_active')->default(true);

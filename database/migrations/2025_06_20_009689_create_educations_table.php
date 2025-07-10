@@ -13,9 +13,8 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->string('university');
-            $table->string('type');
-            $table->string('level')->nullable();
-            $table->year('graduation_year');
+            $table->unsignedTinyInteger('type')->nullable()->comment('0 = Unknown, 1 = Primary_School, 2 = High_School, 3 = Institute, 4 = University, 5 = Master, 6 = PHD');
+            $table->year('graduation_year')->nullable();
             $table->timestamps();
         });
     }

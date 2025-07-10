@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('job_levels', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->json('name');
             $table->text('description');
-            $table->string('grade');
-            $table->string('email');
+            $table->integer('grade');
+            $table->string('email')->unique()->nullable();
             $table->timestamps();
         });
     }

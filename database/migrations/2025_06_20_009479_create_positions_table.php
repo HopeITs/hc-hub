@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('required_position_id')->nullable()->constrained()->onDelete('restrict');
             $table->foreignId('center_id')->constrained()->onDelete('restrict');
-            $table->integer('max_emp');
-            $table->integer('exist_emp');
+            $table->integer('max_emp')->default(1);
+            $table->integer('exist_emp')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
