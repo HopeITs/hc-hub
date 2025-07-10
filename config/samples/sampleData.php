@@ -1,5 +1,5 @@
 <?php
-use App\Enums\ContractPlaceEnum;
+use App\Enums\ContractPlace;
 
 return [
     'cities' => [
@@ -24,32 +24,32 @@ return [
     'ContractType' => [
         [
             'type' => ['en' => 'Full Annual', 'ar' => 'سنوي كامل'],
-            'place' => ContractPlaceEnum::Onsite,
+            'place' => ContractPlace::Onsite,
             'weekly_hours' => 40,
         ],
         [
             'type' => ['en' => 'Partial Annual', 'ar' => 'سنوي جزئي'],
-            'place' => ContractPlaceEnum::Onsite,
+            'place' => ContractPlace::Onsite,
             'weekly_hours' => 20,
         ],
         [
             'type' => ['en' => 'Trial Full', 'ar' => 'تجريبي كامل'],
-            'place' => ContractPlaceEnum::Onsite,
+            'place' => ContractPlace::Onsite,
             'weekly_hours' => 40,
         ],
         [
             'type' => ['en' => 'Trial Partial', 'ar' => 'تجريبي جزئي'],
-            'place' => ContractPlaceEnum::Onsite,
+            'place' => ContractPlace::Onsite,
             'weekly_hours' => 20,
         ],
         [
             'type' => ['en' => 'Online Agreement Contract', 'ar' => 'عقد اتفاق اونلاين'],
-            'place' => ContractPlaceEnum::Online,
+            'place' => ContractPlace::Online,
             'weekly_hours' => 0,
         ],
         [
             'type' => ['en' => 'Onsite Agreement Contract', 'ar' => 'عقد اتفاق في الموقع'],
-            'place' => ContractPlaceEnum::Onsite,
+            'place' => ContractPlace::Onsite,
             'weekly_hours' => 0,
         ],
     ],
