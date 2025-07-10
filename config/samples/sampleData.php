@@ -280,4 +280,27 @@ return [
             'marital_status' => 2,
         ],
     ],
+
+    'annualLeaveRules' => [
+        [
+            'years_of_volunteering' => 1,
+            'days' => 12,
+        ],
+        [
+            'years_of_volunteering' => 2,
+            'days' => 14,
+        ],
+        [
+            'years_of_volunteering' => 3,
+            'days' => 18,
+        ],
+        [
+            'years_of_volunteering' => 5,
+            'days' => 20,
+        ],
+        [
+            'years_of_volunteering' => 6,
+            'days' => 22,
+        ],
+    ],
 ];
