@@ -10,7 +10,6 @@ class AnnualLeaveRule extends Model
     use HasFactory;
 
     protected $fillable = [
-        'max',
         'days',
         'day_per_month',
         'years_of_volunteering'

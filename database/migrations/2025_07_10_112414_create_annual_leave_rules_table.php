@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('annual_leave_rules', function (Blueprint $table) {
             $table->id();
-            $table->integer('max')->nullable();
             $table->integer('days')->nullable();
-            $table->integer('day_per_month')->nullable();
+            $table->float('day_per_month')->nullable();
             $table->integer('years_of_volunteering')->nullable();
             $table->timestamps();
         });

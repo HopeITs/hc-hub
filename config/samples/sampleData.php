@@ -284,22 +284,27 @@ return [
     'annualLeaveRules' => [
         [
             'years_of_volunteering' => 1,
+            'day_per_month' => 1,
             'days' => 12,
         ],
         [
             'years_of_volunteering' => 2,
+            'day_per_month' => 1.25,
             'days' => 14,
         ],
         [
             'years_of_volunteering' => 3,
+            'day_per_month' => 1.5,
             'days' => 18,
         ],
         [
             'years_of_volunteering' => 5,
+            'day_per_month' => 1.6,
             'days' => 20,
         ],
         [
             'years_of_volunteering' => 6,
+            'day_per_month' => 1.8,
             'days' => 22,
         ],
     ],
