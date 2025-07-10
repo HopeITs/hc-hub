@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('terminated_at')->nullable();
             $table->text('reason_of_termination')->nullable();
             $table->integer('yearly_leave_days')->default(12);
-            $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUP');
+            $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR');
             $table->decimal('salary', 10, 2);
             $table->json('work_days');
             $table->json('work_hours');

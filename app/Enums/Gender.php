@@ -4,7 +4,7 @@ namespace App\Enums;
 
 use BenSampo\Enum\Enum;
 
-final class AllowedGenderEnum extends Enum
+final class Gender extends Enum
 {
     const Unknown = 0;
     const Male = 1;
