@@ -1,5 +1,7 @@
 <?php
 use App\Enums\ContractPlace;
+use App\Enums\Gender;
+use App\Enums\MaritalStatus;
 
 return [
     'cities' => [
@@ -228,26 +230,26 @@ return [
         [
             'name' => ['en' => 'Maternity 1', 'ar' => 'إجازة أمومة 1'],
             'base_days' => 120,
-            'allowed_gender' => 2,
-            'marital_status' => 2,
+            'allowed_gender' => Gender::Female(),
+            'marital_status' => MaritalStatus::Married(),
         ],
         [
             'name' => ['en' => 'Maternity 2', 'ar' => 'إجازة أمومة 2'],
             'base_days' => 60,
-            'allowed_gender' => 2,
-            'marital_status' => 2,
+            'allowed_gender' => Gender::Female(),
+            'marital_status' => MaritalStatus::Married(),
         ],
         [
             'name' => ['en' => 'Paternity', 'ar' => 'إجازة أبوة'],
             'base_days' => 15,
-            'allowed_gender' => 1,
-            'marital_status' => 2,
+            'allowed_gender' => Gender::Male(),
+            'marital_status' => MaritalStatus::Married(),
         ],
         [
             'name' => ['en' => 'Marriage', 'ar' => 'زواج'],
             'base_days' => 7,
             'allowed_gender' => null,
-            'marital_status' => 1,
+            'marital_status' => MaritalStatus::Single(),
         ],
         [
             'name' => ['en' => 'Death Degree 1', 'ar' => 'وفاة درجة 1'],
@@ -276,8 +278,8 @@ return [
         [
             'name' => ['en' => 'Unpaid Leave', 'ar' => 'أمومة غير مدفوعة'],
             'base_days' => 0,
-            'allowed_gender' => 2,
-            'marital_status' => 2,
+            'allowed_gender' => Gender::Female(),
+            'marital_status' => MaritalStatus::Married(),
         ],
     ],
 
