@@ -1,45 +1,42 @@
 /** @type {import('tailwindcss').Config} */
 
-
 import plugin from 'tailwindcss/plugin';
 import flowbite from 'flowbite/plugin';
 import lineClamp from '@tailwindcss/line-clamp';
 import { Modal } from 'flowbite';
-export default  {
+
+export default {
     content: [
-        "./resources//*.blade.php",
-        "./resources//*.js",
-        "./resources//*.vue",
-        "./vendor/livewire//*.blade.php",
-        "./node_modules/flowbite/**/*.js","./src/**/*.{html,js}"
+        "./resources/**/*.blade.php",
+        "./resources/**/*.js",
+        "./resources/**/*.vue",
+        "./vendor/livewire/**/*.blade.php",
+        "./node_modules/flowbite/**/*.js",
+        "./src/**/*.{html,js}"
     ],
     theme: {
         extend: {
             rotate: {
-                '317': '317deg', // Custom rotation
+                '317': '317deg',
             },
             spacing: {
                 '17': '68px',
             },
-            transform:{
-                'transition':'scale(1.14)',
-            },
             screens: {
-                'sm': {'min': '576px'},
-                'lg': {'min': '992px'},
-                'xl': {'min': '1200px'},
-                'xxl': {'min': '1400px'},
-                'media-max-xs': {'max': '575.98px'},
-                'media-max-sm': {'max': '767.98px'},
-                'media-max-md': {'max': '991.98px'},
-                'media-max-lg': {'max': '1199.98px'},
+                'sm': { 'min': '576px' },
+                'lg': { 'min': '992px' },
+                'xl': { 'min': '1200px' },
+                'xxl': { 'min': '1400px' },
+                'media-max-xs': { 'max': '575.98px' },
+                'media-max-sm': { 'max': '767.98px' },
+                'media-max-md': { 'max': '991.98px' },
+                'media-max-lg': { 'max': '1199.98px' },
             },
             maxWidth: {
-                'sm':'400px',
-
+                'sm': '400px',
             },
-            opacity:{
-                '50':'0.5',
+            opacity: {
+                '50': '0.5',
             },
             boxShadow: {
                 shadow: '0px 4px 54px 0px #E0E0E040',
@@ -56,7 +53,7 @@ export default  {
             },
             width: {
                 'sidebar': '252px',
-                '90':'90%',
+                '90': '90%',
             },
             zIndex: {
                 '40': '1050',
@@ -237,6 +234,7 @@ export default  {
                 'dark-mode-transparent': '#212324',
                 'dark-border':'#1F2228',
             },
+
             backgroundImage: {
                 'primary-gradient': 'linear-gradient(90deg, #FF6F28 0%, #FF5325 100%)',
                 'secondary-gradient': 'linear-gradient(180deg, #3B7080 0%, #3D90A9 100%)',
@@ -248,10 +246,10 @@ export default  {
                 'dark-gradient': 'linear-gradient(180deg, #F3F6FF 0%, #FFFFFF 100%)',
                 'linear-gradient': 'linear-gradient(115.43deg, #FFFFFF 0.45%, #FFF3ED 100%)',
                 'striped': 'linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent)',
-                'primary-gradient-100':' linear-gradient(180deg, #FFFFFF 0%, #FFEEEE 100%)',
-                'pink-gradient':'linear-gradient(180deg, #FFFFFF 0%, #FFEBF4 100%)',
-                'succcess-gradient-100':'linear-gradient(180deg, #FFFFFF 0%, #E8FFF2 100%)',
-                'purple-gradient':' linear-gradient(180deg, #FFFFFF 0%, #FCE8FF 100%)',
+                'primary-gradient-100': 'linear-gradient(180deg, #FFFFFF 0%, #FFEEEE 100%)',
+                'pink-gradient': 'linear-gradient(180deg, #FFFFFF 0%, #FFEBF4 100%)',
+                'succcess-gradient-100': 'linear-gradient(180deg, #FFFFFF 0%, #E8FFF2 100%)',
+                'purple-gradient': 'linear-gradient(180deg, #FFFFFF 0%, #FCE8FF 100%)',
                 'custom-gradient': 'linear-gradient(180deg, #FFF8F4 0%, #FFFFFF 100%)',
             },
             fontFamily: {
@@ -302,5 +300,4 @@ export default  {
         require('flowbite/plugin'),
         require('@tailwindcss/line-clamp')
     ],
-}
-
+};
