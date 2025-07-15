@@ -1,7 +1,16 @@
 /** @type {import('tailwindcss').Config} */
+
+
+import plugin from 'tailwindcss/plugin';
+import flowbite from 'flowbite/plugin';
+import lineClamp from '@tailwindcss/line-clamp';
 import { Modal } from 'flowbite';
-module.exports = {
+export default  {
     content: [
+        "./resources//*.blade.php",
+        "./resources//*.js",
+        "./resources//*.vue",
+        "./vendor/livewire//*.blade.php",
         "./node_modules/flowbite/**/*.js","./src/**/*.{html,js}"
     ],
     theme: {
@@ -63,7 +72,7 @@ module.exports = {
                 'dark-mode-body':'#131313',
                 'dark-color':'#D8DFEE',
                 'primary': {
-                    DEFAULT: '#F26522',
+                    DEFAULT: '#0000ff',
                     100: '#FEF0E9',
                     200: '#FCE0D3',
                     300: '#FBD1BD',

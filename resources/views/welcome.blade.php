@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-layout="modern">
 
 <head>
 
@@ -57,10 +57,11 @@
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{asset('assets/dist/style.css')}}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 </head>
 
-<body class="antialiased bg-light text-default">
+<body class="antialiased bg-light text-default layout-modern">
 
 <div id="global-loader">
     <div class="page-loader"></div>
@@ -75,10 +76,10 @@
 
             <div class="header-left hidden relative float-left text-center h-[50px] z-[1] media-max-md:flex">
                 <a href="index.html" class="logo">
-                    <img src="{{ asset('assets/img/logo.svg') }}" alt="Logo">
+                    <img src="assets/img/logo.svg" alt="Logo">
                 </a>
                 <a href="index.html" class="dark-logo">
-                    <img src="{{ asset('assets/img/logo-white.svg') }}" alt="Logo">
+                    <img src="assets/img/logo-white.svg" alt="Logo">
                 </a>
             </div>
 
@@ -174,8 +175,8 @@
                                             <span class="menu-arrow"></span>
                                         </a>
                                         <ul>
-                                            <li><a href="index.html">Admin Dashboard</a></li>
-                                            <li><a href="employee-dashboard.html" class="active">Employee Dashboard</a></li>
+                                            <li><a href="index.html" class="active">Admin Dashboard</a></li>
+                                            <li><a href="employee-dashboard.html">Employee Dashboard</a></li>
                                             <li><a href="deals-dashboard.html">Deals Dashboard</a></li>
                                             <li><a href="leads-dashboard.html">Leads Dashboard</a></li>
                                         </ul>
@@ -1076,7 +1077,7 @@
                                         <a href="activity.html">
                                             <div class="flex">
 													<span class="flex items-center size-[45px] me-2 shrink-0">
-														<img src="{{ asset('assets/img/profiles/avatar-27.jpg') }}" alt="Profile" class="rounded">
+														<img src="assets/img/profiles/avatar-27.jpg" alt="Profile" class="rounded">
 													</span>
                                                 <div class="grow">
                                                     <p class="mb-1"><span class="text-title font-semibold">Shawn</span> performance in Math is below the threshold.</p>
@@ -1089,7 +1090,7 @@
                                         <a href="activity.html" class="pb-0">
                                             <div class="flex">
 													<span class="flex items-center size-[45px] me-2 shrink-0">
-														<img src="{{ asset('assets/img/profiles/avatar-23.jpg') }}" alt="Profile" class="rounded">
+														<img src="assets/img/profiles/avatar-23.jpg" alt="Profile" class="rounded">
 													</span>
                                                 <div class="grow">
                                                     <p class="mb-1"><span class="text-title font-semibold">Sylvia</span> added appointment on 02:00 PM</p>
@@ -1107,7 +1108,7 @@
                                         <a href="activity.html">
                                             <div class="flex">
 													<span class="flex items-center size-[45px] me-2 shrink-0">
-														<img src="{{ asset('assets/img/profiles/avatar-25.jpg') }}" alt="Profile" class="rounded">
+														<img src="assets/img/profiles/avatar-25.jpg" alt="Profile" class="rounded">
 													</span>
                                                 <div class="grow">
                                                     <p class="mb-1">New student record <span class="text-title font-semibold"> George</span> is created by <span class="text-title font-semibold">Teressa</span></p>
@@ -1120,7 +1121,7 @@
                                         <a href="activity.html">
                                             <div class="flex">
 													<span class="flex items-center size-[45px] me-2 shrink-0">
-														<img src="{{ asset('assets/img/profiles/avatar-01.jpg') }}" alt="Profile" class="rounded">
+														<img src="assets/img/profiles/avatar-01.jpg" alt="Profile" class="rounded">
 													</span>
                                                 <div class="grow">
                                                     <p class="mb-1">A new teacher record for <span class="text-title font-semibold">Elisa</span> </p>
@@ -1139,7 +1140,7 @@
                         <div class="me-1">
                             <button data-dropdown-toggle="profile-dropdown" class="flex items-center justify-center" type="button">
 									<span class="relative">
-										<img src="{{ asset('assets/img/profiles/avatar-12.jpg') }}" alt="Img" class="size-6 rounded-full">
+										<img src="assets/img/profiles/avatar-12.jpg" alt="Img" class="size-6 rounded-full">
 										<span class="right-0 bottom-0 absolute  w-2 h-2 bg-success border-2 border-white  rounded-full"></span>
 									</span>
                             </button>
@@ -1147,7 +1148,7 @@
                                 <div class="px-[20px] py-4">
                                     <div class="flex items-center">
 												<span class="size-[45px] me-2">
-													<img src="{{ asset('assets/img/profiles/avatar-12.jpg') }}" alt="img" class="rounded-full border-2 border-gray-100">
+													<img src="assets/img/profiles/avatar-12.jpg" alt="img" class="rounded-full border-2 border-gray-100">
 												</span>
                                         <div>
                                             <h5 class="mb-0">Kevin Larry</h5>
@@ -1212,22 +1213,22 @@
     <!-- Sidebar -->
     <div class="sidebar fixed top-0 left-0 bottom-0 w-sidebar bg-white border-r border-borderColor" id="sidebar">
         <!-- Logo -->
-        <div class="sidebar-logo fixed h-[50px] w-sidebar pt-3 px-3">
+        <div class="sidebar-logo fixed h-[50px] w-sidebar relative pt-3 px-3">
             <a href="index.html" class="logo logo-normal">
-                <img src="{{ asset('assets/img/logo.svg') }}" alt="Logo">
+                <img src="assets/img/logo.svg" alt="Logo">
             </a>
             <a href="index.html" class="logo-small hidden">
-                <img src="{{ asset('assets/img/logo-small.svg') }}" alt="Logo">
+                <img src="assets/img/logo-small.svg" alt="Logo">
             </a>
             <a href="index.html" class="dark-logo hidden">
-                <img src="{{ asset('assets/img/logo-white.svg') }}" alt="Logo">
+                <img src="assets/img/logo-white.svg" alt="Logo">
             </a>
         </div>
         <!-- /Logo -->
-        <div class="modern-profile hidden p-3 pb-0 ">
+        <div class="modern-profile p-3 pb-0 ">
             <div class="text-center rounded bg-light p-3 mb-4 user-profile flex items-center justify-center flex-col">
                 <div class="relative inline-flex items-center justify-center size-[45px] online mb-3">
-                    <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="rounded-full">
+                    <img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="rounded-full">
                     <div class="absolute inline-flex items-center justify-center w-3 h-3 text-xs font-bold text-white bg-success border-2 border-white rounded-full top-8 end-0 dark:border-gray-900"></div>
                 </div>
                 <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
@@ -1241,10 +1242,10 @@
                 </ul>
             </div>
         </div>
-        <div class="sidebar-header p-3 pb-0 pt-2 hidden">
+        <div class="sidebar-header p-3 pb-0 pt-2 ">
             <div class="text-center rounded bg-light p-2 mb-4 sidebar-profile flex items-center">
                 <div class="size-8 onlin">
-                    <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="rounded-full">
+                    <img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="rounded-full">
                 </div>
                 <div class="text-start sidebar-profile-info ms-2">
                     <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
@@ -1291,7 +1292,7 @@
                     <li>
                         <ul class="mb-[19px]">
                             <li class="submenu mb-[5px]">
-                                <a href="javascript:void(0);" class="active subdrop relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
+                                <a href="javascript:void(0);" class=" relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
                                     <i class="ti ti-smart-home text-gray-500 group-hover:text-gray-900 group-active:text-gray-900"></i>
                                     <span class="ms-2">Dashboard</span>
                                     <span class="ms-2 text-[10px] bg-danger rounded font-medium text-white px-1 py-0.5 inline-flex items-center">Hot</span>
@@ -1299,7 +1300,7 @@
                                 </a>
                                 <ul class="relative mt-2 before:absolute before:top-0 before:left-3.5 before:w-[1.5px] before:h-full before:bg-gray-100">
                                     <li><a href="index.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Admin Dashboard</a></li>
-                                    <li><a href="employee-dashboard.html" class="active relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Employee Dashboard</a></li>
+                                    <li><a href="employee-dashboard.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Employee Dashboard</a></li>
                                     <li><a href="deals-dashboard.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Deals Dashboard</a></li>
                                     <li><a href="leads-dashboard.html" class="relative flex items-center w-full text-xs leading-normal p-2 ps-8 text-gray-500 hover:text-primary before:absolute before:left-[13px] before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-[18px] before:bg-primary before:opacity-0">Leads Dashboard</a></li>
                                 </ul>
@@ -1360,7 +1361,7 @@
                                     <i class="ti ti-details"></i><span class="ms-2">Detached</span>
                                 </a>
                             </li>
-                            <li class="mb-[5px]">
+                            <li class="mb-[5px] active">
                                 <a href="layout-modern.html" class="relative flex item-center w-full p-2 text-sm leading-normal font-medium text-gray-900 group hover:bg-dark-transparent transition-all duration-500 ease-in-out rounded-[5px]">
                                     <i class="ti ti-layout-board-split"></i><span class="ms-2">Modern</span>
                                 </a>
@@ -2316,13 +2317,13 @@
                         <span>Main</span>
                     </li>
                     <li class="submenu">
-                        <a href="#"   class="subdrop">
+                        <a href="#"   class="active subdrop">
                             <i class="ti ti-smart-home"></i><span>Dashboard</span>
                             <span class="menu-arrow"></span>
                         </a>
                         <ul>
-                            <li><a href="index.html">Admin Dashboard</a></li>
-                            <li><a href="employee-dashboard.html" class="active">Employee Dashboard</a></li>
+                            <li><a href="index.html" class="active">Admin Dashboard</a></li>
+                            <li><a href="employee-dashboard.html">Employee Dashboard</a></li>
                             <li><a href="deals-dashboard.html">Deals Dashboard</a></li>
                             <li><a href="leads-dashboard.html">Leads Dashboard</a></li>
                         </ul>
@@ -3140,8 +3141,8 @@
                     </li>
                 </ul>
                 <div class="xl:flex items-center d-none">
-                    <a href="#" class="me-3 flex items-center justify-center avatar-sm">
-                        <img src="{{ asset('assets/img/profiles/avatar-07.jpg') }}" alt="profile" class="rounded-full">
+                    <a href="#" class="me-3 avatar avatar-sm">
+                        <img src="assets/img/profiles/avatar-07.jpg" alt="profile" class="rounded-full">
                     </a>
                     <a href="#" class="btn btn-icon btn-sm rounded-full mode-toggle">
                         <i class="ti ti-sun"></i>
@@ -3153,54 +3154,56 @@
     <!-- /Horizontal Menu -->
 
     <!-- Two Col Sidebar -->
-    <div class="two-col-sidebar" id="two-col-sidebar">
+    <div class="two-col-sidebar hidden" id="two-col-sidebar">
         <div class="sidebar sidebar-twocol">
             <div class="twocol-mini">
                 <a href="index.html" class="logo-small">
-                    <img src="{{ asset('assets/img/logo-small.svg') }}" alt="Logo">
+                    <img src="assets/img/logo-small.svg" alt="Logo">
                 </a>
                 <div class="sidebar-left slimscroll">
-                    <div class="nav flex flex-col items-center nav-pills" id="sidebar-tabs" data-tabs-toggle="#two-col-tabs" data-tabs-active-classes="bg-light text-default"  role="tablist" >
-                        <a href="#" class="nav-link" title="Dashboard" role="tab" data-tabs-target="#dashboard" aria-selected="true">
+                    <div class="nav flex-column items-center nav-pills" id="sidebar-tabs" role="tablist" aria-orientation="vertical">
+                        <a href="#" class="nav-link active" title="Dashboard" data-bs-toggle="tab" data-bs-target="#dashboard">
                             <i class="ti ti-smart-home"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Apps" role="tab" data-tabs-target="#application" aria-selected="false">
+                        <a href="#" class="nav-link" title="Apps" data-bs-toggle="tab" data-bs-target="#application">
                             <i class="ti ti-layout-grid-add"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Super Admin" role="tab" data-tabs-target="#super-admin" aria-selected="false">
+                        <a href="#" class="nav-link" title="Super Admin" data-bs-toggle="tab" data-bs-target="#super-admin">
                             <i class="ti ti-user-star"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Layout" role="tab" data-tabs-target="#layout" aria-selected="false">
+                        <a href="#" class="nav-link" title="Layout" data-bs-toggle="tab" data-bs-target="#layout">
                             <i class="ti ti-layout-board-split"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Projects" role="tab" data-tabs-target="#projects" aria-selected="false">
+                        <a href="#" class="nav-link" title="Projects" data-bs-toggle="tab" data-bs-target="#projects">
                             <i class="ti ti-users-group"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Crm" role="tab" data-tabs-target="#crm" aria-selected="false">
+                        <a href="#" class="nav-link" title="Crm" data-bs-toggle="tab" data-bs-target="#crm">
                             <i class="ti ti-user-shield"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Hrm" role="tab" data-tabs-target="#hrm" aria-selected="false">
+                        <a href="#" class="nav-link" title="Hrm" data-bs-toggle="tab" data-bs-target="#hrm">
                             <i class="ti ti-user"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Finance" role="tab" data-tabs-target="#finance" aria-selected="false">
+                        <a href="#" class="nav-link" title="Finance" data-bs-toggle="tab" data-bs-target="#finance">
                             <i class="ti ti-shopping-cart-dollar"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Administration" role="tab" data-tabs-target="#administration" aria-selected="false">
+                        <a href="#" class="nav-link" title="Administration" data-bs-toggle="tab" data-bs-target="#administration">
                             <i class="ti ti-cash"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Content" role="tab" data-tabs-target="#content" aria-selected="false">
+                        <a href="#" class="nav-link" title="Content" data-bs-toggle="tab" data-bs-target="#content">
                             <i class="ti ti-license"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Pages" role="tab" data-tabs-target="#pages" aria-selected="false">
+                        <a href="#" class="nav-link" title="Pages" data-bs-toggle="tab" data-bs-target="#pages">
                             <i class="ti ti-page-break"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Authentication" role="tab" data-tabs-target="#authentication" aria-selected="false">
+                        <a href="#" class="nav-link" title="Authentication" data-bs-toggle="tab"
+                           data-bs-target="#authentication">
                             <i class="ti ti-lock-check"></i>
                         </a>
-                        <a href="#" class="nav-link " title="UI Elements" role="tab" data-tabs-target="#ui-elements" aria-selected="false">
+                        <a href="#" class="nav-link " title="UI Elements" data-bs-toggle="tab"
+                           data-bs-target="#ui-elements">
                             <i class="ti ti-ux-circle"></i>
                         </a>
-                        <a href="#" class="nav-link" title="Extras" role="tab" data-tabs-target="#extras" aria-selected="false">
+                        <a href="#" class="nav-link" title="Extras" data-bs-toggle="tab" data-bs-target="#extras">
                             <i class="ti ti-vector-triangle"></i>
                         </a>
                     </div>
@@ -3209,32 +3212,32 @@
             <div class="sidebar-right">
                 <div class="sidebar-logo mb-4">
                     <a href="index.html" class="logo logo-normal">
-                        <img src="{{ asset('assets/img/logo.svg') }}" alt="Logo">
+                        <img src="assets/img/logo.svg" alt="Logo">
                     </a>
                     <a href="index.html" class="dark-logo">
-                        <img src="{{ asset('assets/img/logo-white.svg') }}" alt="Logo">
+                        <img src="assets/img/logo-white.svg" alt="Logo">
                     </a>
                 </div>
                 <div class="sidebar-scroll">
                     <h6 class="mb-3">Welcome to SmartHR</h6>
                     <div class="text-center rounded bg-light p-3 mb-4">
-                        <div class="avatar avatar-lg online mx-auto relative mb-3">
-                            <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="img-fluid rounded-full mx-auto">
+                        <div class="flex items-center size-[45px] online mb-3">
+                            <img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="rounded-full">
                         </div>
-                        <h6 class="text-[12px] font-normal mb-1">Adrian Herman</h6>
+                        <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
                         <p class="text-[10px]">System Admin</p>
                     </div>
-                    <div class="tab-content" id="two-col-tabs">
-                        <div class="hidden" id="dashboard">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        <div class="tab-pane fade show active" id="dashboard">
                             <ul>
                                 <li class="menu-title"><span>MAIN MENU</span></li>
-                                <li><a href="index.html">Admin Dashboard</a></li>
-                                <li><a href="employee-dashboard.html" class="active">Employee Dashboard</a></li>
+                                <li><a href="index.html" class="active">Admin Dashboard</a></li>
+                                <li><a href="employee-dashboard.html">Employee Dashboard</a></li>
                                 <li><a href="deals-dashboard.html">Deals Dashboard</a></li>
                                 <li><a href="leads-dashboard.html">Leads Dashboard</a></li>
                             </ul>
                         </div>
-                        <div class="hidden" id="application">
+                        <div class="tab-pane fade" id="application">
                             <ul>
                                 <li class="menu-title"><span>APPLICATION</span></li>
                                 <li><a href="voice-call.html">Voice Call</a></li>
@@ -3251,7 +3254,7 @@
                                 <li><a href="invoices.html">Invoices</a></li>
                             </ul>
                         </div>
-                        <div class="hidden" id="super-admin">
+                        <div class="tab-pane fade" id="super-admin">
                             <ul>
                                 <li class="menu-title"><span>SUPER ADMIN</span></li>
                                 <li><a href="dashboard.html">Dashboard</a></li>
@@ -3262,7 +3265,7 @@
                                 <li><a href="purchase-transaction.html">Purchase Transaction</a></li>
                             </ul>
                         </div>
-                        <div class="hidden" id="layout">
+                        <div class="tab-pane fade" id="layout">
                             <ul>
                                 <li class="menu-title"><span>LAYOUT</span></li>
                                 <li><a href="layout-horizontal.html"><span>Horizontal</span></a></li>
@@ -3281,7 +3284,7 @@
                                 <li><a href="layout-dark.html"><span>Dark</span></a></li>
                             </ul>
                         </div>
-                        <div class="hidden" id="projects">
+                        <div class="tab-pane fade" id="projects">
                             <ul>
                                 <li class="menu-title"><span>PROJECTS</span></li>
                                 <li><a href="clients-grid.html">Clients</a></li>
@@ -3297,7 +3300,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="hidden" id="crm">
+                        <div class="tab-pane fade" id="crm">
                             <ul>
                                 <li class="menu-title"><span>CRM</span></li>
                                 <li><a href="contacts-grid.html"><span>Contacts</span></a></li>
@@ -3309,7 +3312,7 @@
                                 <li><a href="activity.html"><span>Activities</span></a></li>
                             </ul>
                         </div>
-                        <div class="hidden" id="hrm">
+                        <div class="tab-pane fade" id="hrm">
                             <ul>
                                 <li class="menu-title"><span>HRM</span></li>
                                 <li class="submenu">
@@ -3383,7 +3386,7 @@
                                 <li><a href="termination.html"><span>Termination</span></a></li>
                             </ul>
                         </div>
-                        <div class="hidden" id="finance">
+                        <div class="tab-pane fade" id="finance">
                             <ul>
                                 <li class="menu-title"><span>FINANCE & ACCOUNTS</span></li>
                                 <li class="submenu">
@@ -3422,7 +3425,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="hidden" id="administration">
+                        <div class="tab-pane fade" id="administration">
                             <ul>
                                 <li class="menu-title"><span>ADMINISTRATION</span></li>
                                 <li class="submenu">
@@ -3549,7 +3552,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="hidden" id="content">
+                        <div class="tab-pane fade" id="content">
                             <ul>
                                 <li class="menu-title"><span>CONTENT</span></li>
                                 <li><a href="pages.html">Pages</a></li>
@@ -3580,7 +3583,7 @@
                                 <li><a href="faq.html">FAQ’S</a></li>
                             </ul>
                         </div>
-                        <div class="hidden" id="pages">
+                        <div class="tab-pane fade" id="pages">
                             <ul>
                                 <li class="menu-title"><span>PAGES</span></li>
                                 <li><a href="starter.html"><span>Starter</span></a></li>
@@ -3597,7 +3600,7 @@
                                 <li><a href="terms-condition.html"><span>Terms & Conditions</span></a></li>
                             </ul>
                         </div>
-                        <div class="hidden" id="authentication">
+                        <div class="tab-pane fade" id="authentication">
                             <ul>
                                 <li class="menu-title"><span>AUTHENTICATION</span></li>
                                 <li class="submenu">
@@ -3665,7 +3668,7 @@
                                 <li><a href="error-500.html">500 Error</a></li>
                             </ul>
                         </div>
-                        <div class="hidden" id="ui-elements">
+                        <div class="tab-pane fade" id="ui-elements">
                             <ul>
                                 <li class="menu-title"><span>UI INTERFACE</span></li>
                                 <li class="submenu">
@@ -3722,7 +3725,7 @@
                                     </a>
                                     <ul>
                                         <li class="submenu submenu-two">
-                                            <a href="javascript:void(0);">Form Elements<span class="menu-arrow inside-submenu"></span></a>
+                                            <a href="javascript:void(0);">Form Elements<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
                                             <ul>
                                                 <li><a href="form-basic-inputs.html">Basic Inputs</a></li>
                                                 <li><a href="form-checkbox-radios.html">Checkbox & Radios</a></li>
@@ -3734,7 +3737,7 @@
                                             </ul>
                                         </li>
                                         <li class="submenu submenu-two">
-                                            <a href="javascript:void(0);">Layouts<span class="menu-arrow inside-submenu"></span></a>
+                                            <a href="javascript:void(0);">Layouts<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
                                             <ul>
                                                 <li><a href="form-horizontal.html">Horizontal Form</a></li>
                                                 <li><a href="form-vertical.html">Vertical Form</a></li>
@@ -3801,7 +3804,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="hidden" id="extras">
+                        <div class="tab-pane fade" id="extras">
                             <ul>
                                 <li class="menu-title"><span>EXTRAS</span></li>
                                 <li><a href="#">Documentation</a></li>
@@ -3811,7 +3814,7 @@
                                     <ul>
                                         <li><a href="javascript:void(0);">Multilevel 1</a></li>
                                         <li class="submenu submenu-two">
-                                            <a href="javascript:void(0);">Multilevel 2<span class="menu-arrow inside-submenu"></span></a>
+                                            <a href="javascript:void(0);">Multilevel 2<span class="menu-arrow inside-submenu  absolute top-1/2 -translate-y-1/2 right-2.5 flex items-center w-4 h-4 transition-all duration-200 ease-in-out before:absolute before:top-[5px] before:left-[5px] before:w-1.5 before:h-1.5 before:border-r-2 before:border-b-2 before:border-gray-900 before:rotate-45"></span></a>
                                             <ul>
                                                 <li><a href="javascript:void(0);">Multilevel 2.1</a></li>
                                                 <li class="submenu submenu-two submenu-three">
@@ -3836,147 +3839,148 @@
     <!-- /Two Col Sidebar -->
 
     <!-- Stacked Sidebar -->
-    <div class="stacked-sidebar" id="stacked-sidebar">
-        <div class="sidebar sidebar-stacked flex">
+    <div class="stacked-sidebar hidden" id="stacked-sidebar">
+        <div class="sidebar sidebar-stacked" style="display: flex !important;">
             <div class="stacked-mini">
-                <a href="index.html" class="logo-small flex items-center justify-center mb-5">
-                    <img src="{{ asset('assets/img/logo-small.svg') }}" alt="Logo">
+                <a href="index.html" class="logo-small">
+                    <img src="assets/img/logo-small.svg" alt="Logo">
                 </a>
                 <div class="sidebar-left slimscroll">
-                    <div class="flex items-center flex-col">
+                    <div class="flex items-center flex-column">
                         <div class="mb-1 notification-item">
-                            <a href="#" class="btn border btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent relative">
+                            <a href="#" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent relative">
                                 <i class="ti ti-bell"></i>
                                 <span class="notification-status-dot"></span>
                             </a>
                         </div>
                         <div class="mb-1">
-                            <a href="#" class="btn border after:btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent btnFullscreen">
+                            <a href="#" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent btnFullscreen">
                                 <i class="ti ti-maximize"></i>
                             </a>
                         </div>
                         <div class="mb-1">
-                            <a href="calendar.html" class="btn border btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent">
+                            <a href="calendar.html" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent">
                                 <i class="ti ti-layout-grid-remove"></i>
                             </a>
                         </div>
                         <div class="mb-1">
-                            <a href="chat.html" class="btn border btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent relative">
+                            <a href="chat.html" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent relative">
                                 <i class="ti ti-brand-hipchat"></i>
-                                <span class=" bg-info rounded-full flex items-center justify-center header-badge">5</span>
+                                <span class="badge bg-info rounded-pill flex items-center justify-center header-badge">5</span>
                             </a>
                         </div>
                         <div class="mb-1">
-                            <a href="email.html" class="btn border btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent">
+                            <a href="email.html" class="btn btn-menubar size-[30px] flex items-center justify-center text-gray-500 rounded-[5px] hover:text-gray-900 hover:bg-dark-transparent">
                                 <i class="ti ti-mail"></i>
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="sidebar-right flex justify-between flex-col bg-white pt-[16px] border-r h-screen w-[180px]">
-                <div class="sidebar-scroll px-[16px] pt-0">
-                    <h6 class="mb-3 text-center">Welcome to SmartHR</h6>
-                    <div class="text-center rounded bg-light p-3 mb-4">
-                        <div class="avatar avatar-lg online mx-auto relative mb-3">
-                            <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="img-fluid rounded-full mx-auto">
+            <div class="sidebar-right flex justify-between flex-column">
+                <div class="sidebar-scroll">
+                    <h6 class="mb-3">Welcome to SmartHR</h6>
+                    <div class="sidebar-profile text-center rounded bg-light p-3 mb-4">
+                        <div class="flex items-center size-[45px] online mb-3">
+                            <img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="rounded-full">
                         </div>
-                        <h6 class="text-[12px] font-normal mb-1">Adrian Herman</h6>
+                        <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
                         <p class="text-[10px]">System Admin</p>
                     </div>
-                    <div class="stack-menu relative">
-                        <div class="nav flex-column items-center nav-pills" role="tablist" id="default-stack-styled-tab" data-tabs-toggle="#menu-stacked-bar" data-tabs-active-classes="bg-light text-default">
-                            <div class="grid grid-cols-12 gap-2">
-                                <div class="col-span-6">
-                                    <a href="#menu-dashboard" class="nav-link" title="Dashboard" role="tab" data-tabs-target="#menu-dashboard" aria-selected="true">
+                    <div class="stack-menu">
+                        <div class="nav flex-column items-center nav-pills" role="tablist" aria-orientation="vertical">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <a href="#menu-dashboard" role="tab" class="nav-link active" title="Dashboard" data-bs-toggle="tab" data-bs-target="#menu-dashboard" aria-selected="true">
                                         <span><i class="ti ti-smart-home"></i></span>
                                         <p>Dashboard</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-application" class="nav-link" title="Apps" role="tab" data-tabs-target="#menu-application" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-application" role="tab" class="nav-link" title="Apps" data-bs-toggle="tab" data-bs-target="#menu-application" aria-selected="false">
                                         <span><i class="ti ti-layout-grid-add"></i></span>
                                         <p>Applications</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-superadmin" class="nav-link" title="Apps" role="tab" data-tabs-target="#menu-superadmin" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-superadmin" role="tab" class="nav-link" title="Apps" data-bs-toggle="tab" data-bs-target="#menu-superadmin" aria-selected="false">
                                         <span><i class="ti ti-user-star"></i></span>
                                         <p>Super Admin</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-layout" class="nav-link" title="Layout" role="tab" data-tabs-target="#menu-layout" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-layout" role="tab" class="nav-link" title="Layout" data-bs-toggle="tab" data-bs-target="#menu-layout" aria-selected="false">
                                         <span><i class="ti ti-layout-board-split"></i></span>
                                         <p>Layouts</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-project" class="nav-link" title="Projects" role="tab" data-tabs-target="#menu-project" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-project" role="tab" class="nav-link" title="Projects" data-bs-toggle="tab" data-bs-target="#menu-project" aria-selected="false">
                                         <span><i class="ti ti-folder"></i></span>
                                         <p>Projects</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-crm" class="nav-link" title="CRM" role="tab" data-tabs-target="#menu-crm" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-crm" role="tab" class="nav-link" title="CRM" data-bs-toggle="tab" data-bs-target="#menu-crm" aria-selected="false">
                                         <span><i class="ti ti-user-shield"></i></span>
                                         <p>Crm</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-hrm" class="nav-link" title="HRM" role="tab" data-tabs-target="#menu-hrm" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-hrm" role="tab" class="nav-link" title="HRM" data-bs-toggle="tab" data-bs-target="#menu-hrm" aria-selected="false">
                                         <span><i class="ti ti-users"></i></span>
                                         <p>Hrm</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-finance" class="nav-link" title="Finance & Accounts" role="tab" data-tabs-target="#menu-finance" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-finance" role="tab" class="nav-link" title="Finance & Accounts" data-bs-toggle="tab" data-bs-target="#menu-finance" aria-selected="false">
                                         <span><i class="ti ti-shopping-cart-dollar"></i></span>
                                         <p>Finance & Accounts</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-administration" class="nav-link" title="Administration" role="tab" data-tabs-target="#menu-administration" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-administration" role="tab" class="nav-link" title="Administration" data-bs-toggle="tab" data-bs-target="#menu-administration" aria-selected="false">
                                         <span><i class="ti ti-cash"></i></span>
                                         <p>Administration</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-content" class="nav-link" title="Content" role="tab" data-tabs-target="#menu-content" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-content" role="tab" class="nav-link" title="Content" data-bs-toggle="tab" data-bs-target="#menu-content" aria-selected="false">
                                         <span><i class="ti ti-license"></i></span>
                                         <p>Contents</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-pages" class="nav-link" title="Pages" role="tab" data-tabs-target="#menu-pages" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-pages" role="tab" class="nav-link" title="Pages"
+                                       data-bs-toggle="tab" data-bs-target="#menu-pages" aria-selected="false">
                                         <span><i class="ti ti-page-break"></i></span>
                                         <p>Pages</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-authentication" class="nav-link" title="Authentication" role="tab" data-tabs-target="#menu-authentication" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-authentication" role="tab" class="nav-link" title="Authentication" data-bs-toggle="tab" data-bs-target="#menu-authentication" aria-selected="false">
                                         <span><i class="ti ti-lock-check"></i></span>
                                         <p>Authentication</p>
                                     </a>
                                 </div>
-                                <div class="col-span-6">
-                                    <a href="#menu-ui-elements" class="nav-link" title="UI Elements" role="tab" data-tabs-target="#menu-ui-elements" aria-selected="false">
+                                <div class="col-6">
+                                    <a href="#menu-ui-elements" role="tab" class="nav-link" title="UI Elements" data-bs-toggle="tab" data-bs-target="#menu-ui-elements" aria-selected="false">
                                         <span><i class="ti ti-ux-circle"></i></span>
                                         <p>Basic UI</p>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-content" id="menu-stacked-bar">
-                            <div class="hidden" id="menu-dashboard">
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="menu-dashboard">
                                 <ul class="stack-submenu">
-                                    <li><a href="index.html">Admin Dashboard</a></li>
-                                    <li><a href="employee-dashboard.html" class="active">Employee Dashboard</a></li>
+                                    <li><a href="index.html" class="active">Admin Dashboard</a></li>
+                                    <li><a href="employee-dashboard.html">Employee Dashboard</a></li>
                                     <li><a href="deals-dashboard.html">Deals Dashboard</a></li>
                                     <li><a href="leads-dashboard.html">Leads Dashboard</a></li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-superadmin">
+                            <div class="tab-pane fade" id="menu-superadmin">
                                 <ul class="stack-submenu">
                                     <li><a href="dashboard.html">Dashboard</a></li>
                                     <li><a href="companies.html">Companies</a></li>
@@ -3986,7 +3990,7 @@
                                     <li><a href="purchase-transaction.html">Purchase Transaction</a></li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-application">
+                            <div class="tab-pane fade" id="menu-application">
                                 <ul class="stack-submenu">
                                     <li><a href="chat.html">Chat</a></li>
                                     <li class="submenu submenu-two">
@@ -4010,14 +4014,13 @@
                                     <li><a href="invoices.html">Invoices</a></li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-layout">
+                            <div class="tab-pane fade" id="menu-layout">
                                 <ul class="stack-submenu">
                                     <li><a href="layout-horizontal.html">Horizontal</a></li>
                                     <li><a href="layout-detached.html">Detached</a></li>
                                     <li><a href="layout-modern.html">Modern</a></li>
                                     <li><a href="layout-two-column.html">Two Column</a></li>
                                     <li><a href="layout-hovered.html">Hovered</a></li>
-                                    <li><a href="layout-stacked.html">Stacked</a></li>
                                     <li><a href="layout-box.html">Boxed</a></li>
                                     <li><a href="layout-horizontal-single.html">Horizontal Single</a></li>
                                     <li><a href="layout-horizontal-overlay.html">Horizontal Overlay</a></li>
@@ -4029,7 +4032,7 @@
                                     <li><a href="layout-dark.html">Dark</a></li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-project">
+                            <div class="tab-pane fade" id="menu-project">
                                 <ul class="stack-submenu">
                                     <li><a href="clients-grid.html"><span>Clients</span></a></li>
                                     <li class="submenu">
@@ -4044,7 +4047,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-crm">
+                            <div class="tab-pane fade" id="menu-crm">
                                 <ul class="stack-submenu">
                                     <li><a href="contacts-grid.html"><span>Contacts</span></a></li>
                                     <li><a href="companies-grid.html"><span>Companies</span></a></li>
@@ -4055,7 +4058,7 @@
                                     <li><a href="activity.html"><span>Activities</span></a></li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-hrm">
+                            <div class="tab-pane fade" id="menu-hrm">
                                 <ul class="stack-submenu">
                                     <li class="submenu">
                                         <a href="javascript:void(0);"><span>Employees</span>
@@ -4127,7 +4130,7 @@
                                     <li><a href="termination.html"><span>Termination</span></a></li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-finance">
+                            <div class="tab-pane fade" id="menu-finance">
                                 <ul class="stack-submenu">
                                     <li class="submenu">
                                         <a href="javascript:void(0);"><span>Sales</span>
@@ -4165,7 +4168,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-administration">
+                            <div class="tab-pane fade" id="menu-administration">
                                 <ul class="stack-submenu">
                                     <li class="submenu">
                                         <a href="javascript:void(0);"><span>Assets</span>
@@ -4291,7 +4294,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-content">
+                            <div class="tab-pane fade" id="menu-content">
                                 <ul class="stack-submenu">
                                     <li class="submenu">
                                         <a href="javascript:void(0);">Blogs<span class="menu-arrow"></span></a>
@@ -4314,7 +4317,7 @@
                                     <li><a href="faq.html">FAQ’S</a></li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-pages">
+                            <div class="tab-pane fade" id="menu-pages">
                                 <ul class="stack-submenu">
                                     <li><a href="starter.html">Starter</a></li>
                                     <li><a href="profile.html">Profile</a></li>
@@ -4331,7 +4334,7 @@
                                     <li><a href="terms-condition.html">Terms & Conditions</a></li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-authentication">
+                            <div class="tab-pane fade" id="menu-authentication">
                                 <ul class="stack-submenu">
                                     <li class="submenu">
                                         <a href="javascript:void(0);" class="">Login<span class="menu-arrow"></span></a>
@@ -4378,7 +4381,7 @@
                                     <li><a href="error-500.html">500 Error</a></li>
                                 </ul>
                             </div>
-                            <div class="hidden" id="menu-ui-elements">
+                            <div class="tab-pane fade" id="menu-ui-elements">
                                 <ul class="stack-submenu">
                                     <li class="submenu">
                                         <a href="javascript:void(0);">Base UI<span class="menu-arrow"></span></a>
@@ -4516,7 +4519,7 @@
                 </div>
                 <div class="p-3">
                     <a href="javascript:void(0);" class="flex items-center text-xs leading-normal mb-3">Documentation</a>
-                    <a href="javascript:void(0);" class="flex items-center text-xs leading-normal">Change Log<span class="badge bg-pink text-[10px] font-medium px-[5px] leading-4 rounded text-white fs-10 ms-2">v4.0.3</span></a>
+                    <a href="javascript:void(0);" class="flex items-center text-xs leading-normal">Change Log<span class="badge bg-pink text-[10px] font-medium px-[5px] leading-4 rounded text-white text-[10px] ms-2">v4.0.3</span></a>
                 </div>
             </div>
         </div>
@@ -4525,12 +4528,12 @@
 
     <!-- Page Wrapper -->
     <div class="page-wrapper relative pt-[50px] ml-[252px]">
-        <div class="content p-6">
+        <div class="content p-6 pb-0">
 
             <!-- Breadcrumb -->
             <div class="md:flex block items-center justify-between page-breadcrumb mb-4">
                 <div class="my-auto mb-2">
-                    <h2 class="mb-1">Employee Dashboard</h2>
+                    <h2 class="mb-1">Admin Dashboard</h2>
                     <nav class="flex" aria-label="Breadcrumb">
                         <ol class="inline-flex items-center space-x-1 md:space-x-2">
                             <li class="inline-flex items-center">
@@ -4545,7 +4548,7 @@
                             <li>
                                 <span class="text-default">/</span>
                             </li>
-                            <li aria-current="page" class="text-xs text-gray-900">Employee Dashboard</li>
+                            <li aria-current="page" class="text-xs text-gray-900">Admin Dashboard</li>
                         </ol>
                     </nav>
                 </div>
@@ -4583,1121 +4586,685 @@
             <!-- /Breadcrumb -->
 
             <!-- Welcome Wrap -->
-            <div id="alert-1" class="flex items-center p-4 mb-4 text-secondary rounded-lg bg-secondary-transparent" role="alert">
-                <p>Your Leave Request on“24th April 2024”has been Approved!!!</p>
-                <button type="button" class="ms-auto text-gray-900 " data-dismiss-target="#alert-1" aria-label="Close">
-                    <span class="sr-only">Close</span>
-                    <i class="ti ti-x"></i>
-                </button>
+            <div class="card rounded-[5px] shadow-xs bg-white border-0 mb-6">
+                <div class="card-body flex items-center justify-between flex-wrap p-5 pb-1">
+                    <div class="flex items-center mb-4">
+							<span class="flex items-center justify-center shrink-0 size-[60px]">
+								<img src="assets/img/profiles/avatar-31.jpg" class="rounded-full" alt="img">
+							</span>
+                        <div class="ms-4">
+                            <h3 class="mb-2">Welcome Back, Adrian <a href="javascript:void(0);" class="size-[22px] inline-flex items-center justify-center bg-dark-transparent text-gray-500 hover:bg-gray-300 hover:text-gray-500 rounded-full"><i class="ti ti-edit text-sm leading-none"></i></a></h3>
+                            <p>You have <span class="text-primary underline">21</span> Pending Approvals & <span class="text-primary underline">14</span> Leave Requests</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center flex-wrap mb-1">
+                        <a href="#" class="btn bg-secondary border border-secondary text-white text-center py-1.5 px-3 hover:bg-secondary-900 hover:text-white text-xs inline-flex items-center me-2 mb-2" data-bs-toggle="modal" data-bs-target="#add_project"><i class="ti ti-square-rounded-plus me-1"></i>Add Project</a>
+                        <a href="#" class="btn bg-primary border border-primary text-white text-center py-1.5 px-3 hover:bg-primary-900 hover:text-white text-xs inline-flex items-center mb-2"  data-modal-target="add_leaves" data-modal-toggle="add_leaves"><i class="ti ti-square-rounded-plus me-1"></i>Add Requests</a>
+                    </div>
+                </div>
             </div>
             <!-- /Welcome Wrap -->
 
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 pb-5">
-                <div class="xl:col-span-4 flex">
-                    <div class="card relative border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
-                        <div class="card-header bg-dark text-white py-4 px-5 border-b border-borderColor rounded-s-defaultradius rounded-e-defaultradius">
-                            <div class="flex items-center">
-									<span class="flex items-center justify-center size-[45px] rounded-full border-2 border-white shrink-0 me-2">
-										<img src="{{ asset('assets/img/users/user-01.jpg') }}" alt="Img" class="rounded-full">
-									</span>
-                                <div>
-                                    <h5 class="text-white mb-1">Stephan Peralt</h5>
-                                    <div class="flex items-center">
-                                        <p class="text-white text-sm leading-normal mb-0">Senior Product Designer</p>
-                                        <span class="mx-1"><i class="ti ti-point-filled text-primary"></i></span>
-                                        <p class="text-sm leading-normal">UI/UX Design</p>
-                                    </div>
+            <div class="grid grid-cols-1 xxl:grid-cols-12  gap-x-6">
+
+                <!-- Widget Info -->
+                <div class="xxl:col-span-8 flex">
+                    <div class="grid grid-cols-1 md:grid-cols-12 w-full gap-x-6">
+                        <div class="md:col-span-3 flex mb-6">
+                            <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                                <div class="card-body p-5">
+										<span class="size-[42px] flex items-center justify-center text-white rounded-full bg-primary mb-2">
+											<i class="ti ti-calendar-share text-base leading-none"></i>
+										</span>
+                                    <h6 class="text-[13px] font-medium text-default mb-1">Attendance Overview</h6>
+                                    <h3 class="mb-4">120/154 <span class="text-xs leading-normal font-medium text-success"><i class="fa-solid fa-caret-up me-1"></i>+2.1%</span></h3>
+                                    <a href="attendance-employee.html" class="text-default hover:text-primary">View Details</a>
                                 </div>
                             </div>
-                            <a href="#" class="size-7 inline-flex items-center justify-center bg-gray-700 text-white rounded-full absolute top-2.5 end-2.5 hover:bg-dark-transparent hover:text-dark"><i class="ti ti-edit"></i></a>
                         </div>
-                        <div class="card-body p-5">
-                            <div class="mb-4">
-                                <span class="block mb-1 text-[13px]">Phone Number</span>
-                                <p class="text-gray-900">+1 324 3453 545</p>
+                        <div class="md:col-span-3 flex mb-6">
+                            <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                                <div class="card-body p-5">
+										<span class="size-[42px] flex items-center justify-center text-white rounded-full bg-secondary mb-2">
+											<i class="ti ti-browser text-base leading-none"></i>
+										</span>
+                                    <h6 class="text-[13px] font-medium text-default mb-1">Total No of Project's</h6>
+                                    <h3 class="mb-4">90/125 <span class="text-xs leading-normal font-medium text-danger"><i class="fa-solid fa-caret-down me-1"></i>-2.1%</span></h3>
+                                    <a href="projects.html" class="text-default hover:text-primary">View All</a>
+                                </div>
                             </div>
-                            <div class="mb-4">
-                                <span class="block mb-1 text-[13px]">Email Address</span>
-                                <p class="text-gray-900">Steperde124@example.com</p>
+                        </div>
+                        <div class="md:col-span-3 flex mb-6">
+                            <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                                <div class="card-body p-5">
+										<span class="size-[42px] flex items-center justify-center text-white rounded-full bg-info mb-2">
+											<i class="ti ti-users-group text-base leading-none"></i>
+										</span>
+                                    <h6 class="text-[13px] font-medium text-default mb-1">Total No of Clients</h6>
+                                    <h3 class="mb-4">69/86 <span class="text-xs leading-normal font-medium text-danger"><i class="fa-solid fa-caret-down me-1"></i>-11.2%</span></h3>
+                                    <a href="clients.html" class="text-default hover:text-primary">View All</a>
+                                </div>
                             </div>
-                            <div class="mb-4">
-                                <span class="block mb-1 text-[13px]">Report Office</span>
-                                <p class="text-gray-900">Doglas Martini</p>
+                        </div>
+                        <div class="md:col-span-3 flex mb-6">
+                            <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                                <div class="card-body p-5">
+										<span class="size-[42px] flex items-center justify-center text-white rounded-full bg-pink mb-2">
+											<i class="ti ti-checklist text-base leading-none"></i>
+										</span>
+                                    <h6 class="text-[13px] font-medium text-default mb-1">Total No of Tasks</h6>
+                                    <h3 class="mb-4">225/28 <span class="text-xs leading-normal font-medium text-success"><i class="fa-solid fa-caret-down me-1"></i>+11.2%</span></h3>
+                                    <a href="tasks.html" class="text-default hover:text-primary">View All</a>
+                                </div>
                             </div>
-                            <div>
-                                <span class="block mb-1 text-[13px]">Joined on</span>
-                                <p class="text-gray-900">15  Jan 2024</p>
+                        </div>
+                        <div class="md:col-span-3 flex mb-6">
+                            <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                                <div class="card-body p-5">
+										<span class="size-[42px] flex items-center justify-center text-white rounded-full bg-purple mb-2">
+											<i class="ti ti-moneybag text-base leading-none"></i>
+										</span>
+                                    <h6 class="text-[13px] font-medium text-default mb-1">Earnings</h6>
+                                    <h3 class="mb-4">$21445 <span class="text-xs leading-normal font-medium text-success"><i class="fa-solid fa-caret-up me-1"></i>+10.2%</span></h3>
+                                    <a href="expenses.html" class="text-default hover:text-primary">View All</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3 flex mb-6">
+                            <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                                <div class="card-body p-5">
+										<span class="size-[42px] flex items-center justify-center text-white rounded-full bg-danger mb-2">
+											<i class="ti ti-browser text-base leading-none"></i>
+										</span>
+                                    <h6 class="text-[13px] font-medium text-default mb-1">Profit This Week</h6>
+                                    <h3 class="mb-4">$5,544 <span class="text-xs leading-normal font-medium text-success"><i class="fa-solid fa-caret-up me-1"></i>+2.1%</span></h3>
+                                    <a href="purchase-transaction.html" class="text-default hover:text-primary">View All</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3 flex mb-6">
+                            <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                                <div class="card-body p-5">
+										<span class="size-[42px] flex items-center justify-center text-white rounded-full bg-success mb-2">
+											<i class="ti ti-users-group text-base leading-none"></i>
+										</span>
+                                    <h6 class="text-[13px] font-medium text-default mb-1">Job Applicants</h6>
+                                    <h3 class="mb-4">98 <span class="text-xs leading-normal font-medium text-success"><i class="fa-solid fa-caret-up me-1"></i>+2.1%</span></h3>
+                                    <a href="job-list.html" class="text-default hover:text-primary">View All</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3 flex mb-6">
+                            <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                                <div class="card-body p-5">
+										<span class="size-[42px] flex items-center justify-center text-white rounded-full bg-dark mb-2">
+											<i class="ti ti-user-star text-base leading-none"></i>
+										</span>
+                                    <h6 class="text-[13px] font-medium text-default mb-1">New Hire</h6>
+                                    <h3 class="mb-4">45/48 <span class="text-xs leading-normal font-medium text-danger"><i class="fa-solid fa-caret-down me-1"></i>-11.2%</span></h3>
+                                    <a href="candidates.html" class="text-default hover:text-primary">View All</a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="xl:col-span-5 flex">
-                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
-                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
-                            <h5>Leave Details</h5>
-                            <div>
+                <!-- /Widget Info -->
+
+                <!-- Employees By Department -->
+                <div class="xxl:col-span-4 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full mb-6">
+                        <div class="card-header px-5 pt-4 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Employees By Department</h5>
+                            <div class="mb-2">
                                 <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="week-dropdown">
-                                    <i class="ti ti-calendar me-1"></i>2024
+                                    <i class="ti ti-calendar me-1"></i>This Week
                                 </a>
                                 <ul id="week-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
                                     <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2024</a>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Month</a>
                                     </li>
                                     <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2023</a>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Week</a>
                                     </li>
                                     <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2022</a>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Last Week</a>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                         <div class="card-body p-5">
-                            <div class="grid grid-cols-1 md:grid-cols-12">
-                                <div class="md:col-span-6">
-                                    <div class="mb-4">
-                                        <div class="mb-4">
-                                            <p class="flex items-center"><i class="ti ti-circle-filled text-[8px] text-dark me-1"></i>
-                                                <span class="text-gray-900 font-semibold me-1">1254</span>
-                                                on time
-                                            </p>
-                                        </div>
-                                        <div class="mb-4">
-                                            <p class="flex items-center"><i class="ti ti-circle-filled text-[8px] text-success me-1"></i>
-                                                <span class="text-gray-900 font-semibold me-1">32</span>
-                                                Late Attendance
-                                            </p>
-                                        </div>
-                                        <div class="mb-4">
-                                            <p class="flex items-center"><i class="ti ti-circle-filled text-[8px] text-primary me-1"></i>
-                                                <span class="text-gray-900 font-semibold me-1">658</span>
-                                                Work From Home
-                                            </p>
-                                        </div>
-                                        <div class="mb-4">
-                                            <p class="flex items-center"><i class="ti ti-circle-filled text-[8px] text-danger me-1"></i>
-                                                <span class="text-gray-900 font-semibold me-1">14</span>
-                                                Absent
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p class="flex items-center"><i class="ti ti-circle-filled text-[8px] text-warning me-1"></i>
-                                                <span class="text-gray-900 font-semibold me-1">68</span>
-                                                Sick Leave
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="md:col-span-6">
-                                    <div class="mb-4 justify-center flex md:justify-end">
-                                        <div id="leaves_chart"></div>
-                                    </div>
-                                </div>
-                                <div class="md:col-span-12">
-                                    <div class="flex items-center mt-2">
-                                        <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="todo1">
-                                        <label for="todo1" class="ms-2">Better than  <span class="text-gray-900">85%</span> of Employees</label>
-                                    </div>
-                                </div>
-                            </div>
+                            <div id="emp-department"></div>
+                            <p class="text-[13px]"><i class="ti ti-circle-filled me-2 text-[8px] text-primary"></i>No of Employees increased by <span class="text-success font-bold">+20%</span> from last Week
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="xl:col-span-3 flex">
-                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
-                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor gap-2">
-                            <h5>Leave Details</h5>
-                            <div>
-                                <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="week-dropdown1">
-                                    <i class="ti ti-calendar me-1"></i>2024
+                <!-- /Employees By Department -->
+
+            </div>
+
+            <div class="grid grid-cols-1 xxl:grid-cols-12 xl:grid-cols-12 gap-x-6">
+
+                <!-- Total Employee -->
+                <div class="xxl:col-span-4 xl:col-span-12 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full mb-6">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Employee Status</h5>
+                            <div class="mb-2">
+                                <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="emp-dropdown">
+                                    <i class="ti ti-calendar me-1"></i>This Week
                                 </a>
-                                <ul id="week-dropdown1" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                <ul id="emp-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
                                     <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2024</a>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Month</a>
                                     </li>
                                     <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2023</a>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Week</a>
                                     </li>
                                     <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2022</a>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Last Week</a>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                         <div class="card-body p-5">
-                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-x-4">
-                                <div class="sm:col-span-6">
-                                    <div class="mb-6">
-                                        <span class="block mb-1">Total Leaves</span>
-                                        <h4>16</h4>
-                                    </div>
-                                </div>
-                                <div class="sm:col-span-6">
-                                    <div class="mb-6">
-                                        <span class="block mb-1">Taken</span>
-                                        <h4>10</h4>
-                                    </div>
-                                </div>
-                                <div class="sm:col-span-6">
-                                    <div class="mb-6">
-                                        <span class="block mb-1">Absent</span>
-                                        <h4>2</h4>
-                                    </div>
-                                </div>
-                                <div class="sm:col-span-6">
-                                    <div class="mb-6">
-                                        <span class="block mb-1">Request</span>
-                                        <h4>0</h4>
-                                    </div>
-                                </div>
-                                <div class="sm:col-span-6">
-                                    <div class="mb-6">
-                                        <span class="block mb-1">Worked Days</span>
-                                        <h4>240</h4>
-                                    </div>
-                                </div>
-                                <div class="sm:col-span-6">
-                                    <div class="mb-6">
-                                        <span class="block mb-1">Loss of Pay</span>
-                                        <h4>2</h4>
-                                    </div>
-                                </div>
-                                <div class="sm:col-span-12">
+                            <div class="flex items-center justify-between mb-1">
+                                <p class="text-[13px] mb-4">Total Employee</p>
+                                <h3 class="mb-4">154</h3>
+                            </div>
+                            <div class="w-full bg-light-900 rounded flex h-6 mb-4">
+                                <div class="bg-warning h-6 rounded-s" style="width: 40%"></div>
+                                <div class="bg-secondary h-6" style="width: 20%"></div>
+                                <div class="bg-danger h-6" style="width: 10%"></div>
+                                <div class="bg-pink h-6 rounded-e" style="width: 30%"></div>
+                            </div>
+                            <div class="border border-borderColor mb-4">
+                                <div class="grid grid-cols-2 gx-0">
                                     <div>
-                                        <a href="#" class="flex items-center justify-center bg-dark text-sm font-medium py-2 rounded text-white px-3" data-modal-toggle="add_leaves" data-modal-target="add_leaves">Apply New Leave</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 pb-5">
-                <div class="col-span-4 flex">
-                    <div class="card border-borderColor border-primary bg-custom-gradient border rounded-[5px] bg-white shadow-xs w-full">
-                        <div class="card-body p-5">
-                            <div class="text-center mb-4">
-                                <h6 class="text-gray-500 mb-2 font-medium">Attendance</h6>
-                                <h4>08:35 AM, 11 Mar 2025</h4>
-                            </div>
-                            <div class="w-[130px] h-[130px] bg-white rounded-full leading-[38px] relative mx-auto mb-3"  data-value='65'>
-									<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
-										<span class="transform rotate-[54deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-success border-l-0 origin-left
-										w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-									</span>
-                                <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
-										<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-success border-r-0 origin-right
-										w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-									</span>
-                                <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">
-                                    <span class="text-[13px] block mb-1">Total Hours</span>
-                                    <h6>5:45:32</h6>
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-white font-medium inline-flex items-center py-1 px-2 rounded bg-dark leading-none mb-3">Production :  3.45 hrs</div>
-                                <h6 class="fw-medium flex items-center justify-center mb-4">
-                                    <i class="ti ti-fingerprint text-primary me-1"></i>
-                                    Punch In at  10.00 AM
-                                </h6>
-                                <div>
-                                    <button	type="button" class="btn btn-primary font-medium me-2 mt-2 w-full">Punch Out</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-span-8 flex">
-                    <div class="grid grid-cols-1 xl:grid-cols-12 gap-x-6 w-full">
-                        <div class="xl:col-span-3 flex mb-6">
-                            <div class="md:flex items-center justify-center gap-3 w-full">
-                                <div class="card border-borderColor border bg-white shadow-xs rounded-[5px] w-full"	>
-                                    <div class="card-body p-5">
-                                        <div class="pb-3  border-b border-borderColor">
-												<span class="p-1 rounded-[5px] bg-primary mb-2">
-													<i class="ti ti-clock-stop text-white"></i>
-												</span>
-                                            <div class="mt-2">
-                                                <h2>8.36 <span class="text-lg text-gray-500">/ 9</span></h2>
-                                                <p class="font-medium truncate">Total Hours Today</p>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <span class="flex items-center text-xs truncate"><i class="ti ti-arrow-up me-2 filled p-1 bg-success text-white rounded-full"></i>5% This Week</span>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="xl:col-span-3 flex mb-6">
-                            <div class="flex items-center justify-center gap-3 w-full">
-                                <div class="card border-borderColor border bg-white shadow-xs rounded-[5px] w-full"	>
-                                    <div class="card-body p-5">
-                                        <div class="pb-3 border-b border-borderColor">
-												<span class="p-1 rounded-[5px] bg-dark mb-2">
-													<i class="ti ti-clock-up text-white"></i>
-												</span>
-                                            <div class="mt-2">
-                                                <h2>10 <span class="text-lg text-gray-500">/ 40</span></h2>
-                                                <p class="font-medium truncate">Total Hours Week</p>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <span class="flex items-center text-xs truncate"><i class="ti ti-arrow-up me-2 filled p-1 bg-success text-white rounded-full"></i>7% Last Week</span>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="xl:col-span-3 flex mb-6">
-                            <div class="flex items-center justify-center gap-3 w-full">
-                                <div class="card border-borderColor border bg-white shadow-xs rounded-[5px] w-full"	>
-                                    <div class="card-body p-5">
-                                        <div class="pb-3 border-b border-borderColor">
-												<span class="p-1 rounded-[5px] bg-info mb-2">
-													<i class="ti ti-calendar-up text-white"></i>
-												</span>
-                                            <div class="mt-2">
-                                                <h2>75 <span class="text-lg text-gray-500">/ 98</span></h2>
-                                                <p class="font-medium truncate">Total Hours Month</p>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <span class="flex items-center text-xs overflow-hidden text-ellipsis whitespace-nowrap"><i class="ti ti-arrow-down me-2 filled p-1 bg-danger text-white rounded-full"></i>8% Last Month</span>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="xl:col-span-3 flex mb-6">
-                            <div class="flex items-center justify-center gap-3 w-full">
-                                <div class="card border-borderColor border bg-white shadow-xs rounded-[5px] w-full"	>
-                                    <div class="card-body p-5">
-                                        <div class="pb-3 border-b border-borderColor">
-												<span class="p-1 rounded-[5px] bg-pink mb-2">
-													<i class="ti ti-calendar-star text-white"></i>
-												</span>
-                                            <div class="mt-2">
-                                                <h2>16 <span class="text-lg text-gray-500">/ 28</span></h2>
-                                                <p class="font-medium overflow-hidden text-ellipsis whitespace-nowrap">Overtime this Month</p>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <span class="flex items-center text-xs overflow-hidden text-ellipsis whitespace-nowrap"><i class="ti ti-arrow-down me-2 filled p-1 bg-danger text-white rounded-full"></i>6% Last Month</span>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="xl:col-span-12 flex">
-                            <div class="card border-bordercolor bg-white rounded-[5px] shadow-xs w-full">
-                                <div class="card-body p-5">
-                                    <div class="flex items-center justify-center mb-4">
-                                        <div class="w-full">
-                                            <span class="flex items-center mb-1"><i class="ti ti-point-filled me-1"></i>Total Working hours</span>
-                                            <h3>12h 36m</h3>
-                                        </div>
-                                        <div class="w-full">
-                                            <span class="flex items-center mb-1"><i class="ti ti-point-filled text-success me-1"></i>Productive Hours</span>
-                                            <h3>08h 36m</h3>
-                                        </div>
-                                        <div class="w-full">
-                                            <span class="flex items-center mb-1"><i class="ti ti-point-filled text-warning me-1"></i>Break hours</span>
-                                            <h3>22m 15s</h3>
-                                        </div>
-                                        <div class="w-full">
-                                            <span class="flex items-center mb-1"><i class="ti ti-point-filled text-info me-1"></i>Overtime</span>
-                                            <h3>22m 15s</h3>
+                                        <div class="p-2 flex-1 border-e border-b border-borderColor">
+                                            <p class="text-[13px] mb-2"><i class="ti ti-square-filled text-primary text-xs leading-normal me-2"></i>Fulltime <span class="text-gray-900">(48%)</span></p>
+                                            <h2 class="display-1">112</h2>
                                         </div>
                                     </div>
-                                    <div class="flex item-center justify-center mb-3">
-                                        <div class="h-6 bg-white rounded-[5px]" style="width: 20%"></div>
-                                        <div class="h-6 bg-success rounded-[5px]" style="width: 10%"></div>
-                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
-                                        <div class="h-6 bg-warning rounded-[5px]" style="width: 5%"></div>
-                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
-                                        <div class="h-6 bg-success rounded-[5px]" style="width: 10%"></div>
-                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
-                                        <div class="h-6 bg-warning rounded-[5px]" style="width: 10%"></div>
-                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
-                                        <div class="h-6 bg-success rounded-[5px]" style="width: 20%"></div>
-                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
-                                        <div class="h-6 bg-warning rounded-[5px]" style="width: 2%"></div>
-                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 2%"></div>
-                                        <div class="h-6 bg-info rounded-[5px]" style="width: 2%"></div>
-                                        <div class="h-6 bg-gray-200 rounded-[5px]" style="width: 1%"></div>
-                                        <div class="h-6 bg-info rounded-[5px]" style="width: 1%"></div>
-                                    </div>
-                                    <div class="flex items-center justify-center gap-2 flex-wrap ">
-                                        <span class="text-xs">06:00</span>
-                                        <span class="text-xs">07:00</span>
-                                        <span class="text-xs">08:00</span>
-                                        <span class="text-xs">09:00</span>
-                                        <span class="text-xs">10:00</span>
-                                        <span class="text-xs">11:00</span>
-                                        <span class="text-xs">12:00</span>
-                                        <span class="text-xs">01:00</span>
-                                        <span class="text-xs">02:00</span>
-                                        <span class="text-xs">03:00</span>
-                                        <span class="text-xs">04:00</span>
-                                        <span class="text-xs">05:00</span>
-                                        <span class="text-xs">06:00</span>
-                                        <span class="text-xs">07:00</span>
-                                        <span class="text-xs">08:00</span>
-                                        <span class="text-xs">09:00</span>
-                                        <span class="text-xs">10:00</span>
-                                        <span class="text-xs">11:00</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-x-6 gap-y-4 pb-5">
-                <div class="xl:col-span-6 flex">
-                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
-                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
-                            <h5>Projects</h5>
-                            <div>
-                                <a href="javascript:void(0);" class="border rounded p-1 bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900" data-dropdown-toggle="emp-dropdown">
-                                    <i class="ti ti-git-branch me-1"></i>Ongoing Projects<i class="ti ti-chevron-down ml-1"></i>
-                                </a>
-                                <ul id="emp-dropdown" class="hidden z-[9] p-4 border rounded bg-white shadow-lg">
-                                    <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900"><i class="ti ti-file-type-pdf me-1"></i>All Projects</a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900"><i class="ti ti-file-type-xls me-1"></i>Ongoing Projects </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="card-body p-5">
-                            <div class="grid grid-cols-1 md:grid-cols-12  gap-x-6">
-                                <div class="md:col-span-6">
-                                    <div class="card mb-4 border border-borderColor shadow-none mb-md-0">
-                                        <div class="card-body p-5">
-                                            <div class="flex items-center justify-between mb-3">
-                                                <h6>Office Management</h6>
-                                                <div>
-                                                    <a href="javascript:void(0);" class="p-1 bg-white inline-flex items-center focus:text-primary hover:text-primary text-gray-900" data-dropdown-toggle="office-dropdown">
-                                                        <i class="ti ti-dots-vertical"></i>
-                                                    </a>
-                                                    <ul id="office-dropdown" class="hidden z-[9] p-4 border rounded bg-white shadow-lg">
-                                                        <li>
-                                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" data-modal-toggle="edit_task" data-modal-target="edit_task"><i class="ti ti-edit me-2"></i>Edit</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" data-modal-toggle="delete_modal" data-modal-target="delete_modal"><i class="ti ti-trash me-2"></i>Delete </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div class="flex items-center mb-3">
-                                                    <a href="javascript:void(0);" class="rounded-full w-8 h-8 overflow-hidden mr-2">
-                                                        <img src="{{ asset('assets/img/users/user-32.jpg') }}" class="w-full h-full object-cover" alt="img">
-                                                    </a>
-                                                    <div class="ms-2">
-                                                        <h6 class="fw-normal"><a href="javascript:void(0);">Anthony Lewis</a></h6>
-                                                        <span class="text-[13px] block">Project Leader</span>
-                                                    </div>
-                                                </div>
-                                                <div class="flex items-center mb-3">
-                                                    <a href="javascript:void(0);" class="flex items-center justify-center bg-primary-transparent h-[42px] w-[42px] rounded-full">
-                                                        <i class="ti ti-calendar text-primary text-16"></i>
-                                                    </a>
-                                                    <div class="ms-2">
-                                                        <h6 class="fw-normal">14 Jan 2024</h6>
-                                                        <span class="text-[13px] block">Deadline</span>
-                                                    </div>
-                                                </div>
-                                                <div class="flex items-center justify-between bg-light-transparent border border-dashed rounded p-2 mb-3">
-                                                    <div class="flex items-center me-2">
-                                                        <span class="flex items-center justify-center avatar-sm bg-success-transparent rounded-full me-1"><i class="ti ti-checklist text-16"></i></span>
-                                                        <p>Tasks : <span class="text-gray-900">6 </span> /10</p>
-                                                    </div>
-                                                    <div class="flex -space-x-2 mb-2">
-															<span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-06.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-07.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-08.jpg') }}" alt="img">
-															</span>
-                                                        <a class="flex items-center justify-center size-6 border text-xs font-medium text-white bg-primary border-primary rounded-full hover:primary-900 shrink-0 hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" href="javascript:void(0);">
-                                                            +2
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                                <div class="bg-[#B9CBD1] p-2 rounded flex items-center justify-between">
-                                                    <p class="text-secondary mb-0 truncate">Time Spent</p>
-                                                    <h5 class="text-secondary truncate">65/120 <span class="text-14 fw-normal">Hrs</span></h5>
-                                                </div>
-                                            </div>
+                                    <div>
+                                        <div class="p-2 flex-1 border-b border-borderColor text-end">
+                                            <p class="text-[13px] mb-2"><i class="ti ti-square-filled me-2 text-secondary text-xs leading-normal"></i>Contract <span class="text-gray-900">(20%)</span></p>
+                                            <h2 class="display-1">112</h2>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="md:col-span-6">
-                                    <div class="card mb-4 border border-borderColor shadow-none mb-md-0">
-                                        <div class="card-body p-5">
-                                            <div class="flex items-center justify-between mb-3">
-                                                <h6>Office Management</h6>
-                                                <div>
-                                                    <a href="javascript:void(0);" class="p-1 bg-white inline-flex items-center focus:text-primary hover:text-primary text-gray-900" data-dropdown-toggle="office-dropdown1">
-                                                        <i class="ti ti-dots-vertical"></i>
-                                                    </a>
-                                                    <ul id="office-dropdown1" class="hidden z-[9] p-4 border rounded bg-white shadow-lg">
-                                                        <li>
-                                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" data-modal-toggle="edit_task" data-modal-target="edit_task"><i class="ti ti-edit me-2"></i>Edit</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900" data-modal-toggle="delete_modal" data-modal-target="delete_modal"><i class="ti ti-trash me-2"></i>Delete </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div class="flex items-center mb-3">
-                                                    <a href="javascript:void(0);" class="rounded-full w-8 h-8 overflow-hidden mr-2">
-                                                        <img src="{{ asset('assets/img/users/user-33.jpg') }}" class="w-full h-full object-cover" alt="img">
-                                                    </a>
-                                                    <div class="ms-2">
-                                                        <h6 class="fw-normal"><a href="javascript:void(0);">Anthony Lewis</a></h6>
-                                                        <span class="text-[13px] block">Project Leader</span>
-                                                    </div>
-                                                </div>
-                                                <div class="flex items-center mb-3">
-                                                    <a href="javascript:void(0);" class="flex items-center justify-center bg-primary-transparent h-[42px] w-[42px] rounded-full">
-                                                        <i class="ti ti-calendar text-primary text-16"></i>
-                                                    </a>
-                                                    <div class="ms-2">
-                                                        <h6 class="fw-normal">14 Jan 2024</h6>
-                                                        <span class="text-[13px] block">Deadline</span>
-                                                    </div>
-                                                </div>
-                                                <div class="flex items-center justify-between bg-light-transparent border border-dashed rounded p-2 mb-3">
-                                                    <div class="flex items-center me-2">
-                                                        <span class="flex items-center justify-center avatar-sm bg-success-transparent rounded-full me-1"><i class="ti ti-checklist text-16"></i></span>
-                                                        <p>Tasks : <span class="text-gray-900">6 </span> /10</p>
-                                                    </div>
-                                                    <div class="flex -space-x-2 mb-2">
-															<span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-06.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-07.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-08.jpg') }}" alt="img">
-															</span>
-                                                        <a class="flex items-center justify-center size-6 border text-xs font-medium text-white bg-primary border-primary rounded-full hover:primary-900 shrink-0 hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" href="javascript:void(0);">
-                                                            +2
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                                <div class="bg-[#B9CBD1] p-2 rounded flex items-center justify-between">
-                                                    <p class="text-secondary mb-0 truncate">Time Spent</p>
-                                                    <h5 class="text-secondary truncate">65/120 <span class="text-14 fw-normal">Hrs</span></h5>
-                                                </div>
-                                            </div>
+                                    <div>
+                                        <div class="p-2 flex-1 border-e">
+                                            <p class="text-[13px] mb-2"><i class="ti ti-square-filled me-2 text-danger text-xs leading-normal"></i>Probation <span class="text-gray-900">(22%)</span></p>
+                                            <h2 class="display-1">12</h2>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="p-2 flex-1 text-end">
+                                            <p class="text-[13px] mb-2"><i class="ti ti-square-filled text-pink me-2 text-xs leading-normal"></i>WFH <span class="text-gray-900">(20%)</span></p>
+                                            <h2 class="display-1">04</h2>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="xl:col-span-6 flex">
-                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
-                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
-                            <h5>Tasks</h5>
-                            <div>
-                                <a href="javascript:void(0);" class="border rounded p-1 bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900" data-dropdown-toggle="all-dropdown">
-                                    <i class="ti ti-git-branch me-1"></i>All Projects<i class="ti ti-chevron-down ml-1"></i>
-                                </a>
-                                <ul id="all-dropdown" class="hidden z-[9] p-4 border rounded bg-white shadow-lg">
-                                    <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">All Projects</a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Ongoing Projects </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="card-body p-5">
-                            <div class="list-group rounded-none">
-                                <div class="list-group-item border border-borderColor rounded mb-3 p-2">
-                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-x-3">
-                                        <div class="md:col-span-8 flex items-center">
-                                            <div class="todo-inbox-check flex items-center">
-                                                <span><i class="ti ti-grid-dots me-2"></i></span>
-                                                <div class="flex items-center me-2">
-                                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="select-all">
-                                                </div>
-                                                <span class="me-2 flex items-center rating-select "><i class="ti ti-star-filled filled"></i></span>
-                                                <div class="strike-info">
-                                                    <h4 class="text-[14px] truncate">Patient appointment booking</h4>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="md:col-span-4">
-                                            <div class="flex items-center justify-end flex-wrap gap-y-3">
-                                                <span class="bg-pink-100 text-pink rounded text-[10px] font-medium leading-4 py-0.5 px-1.5 inline-flex items-center badge-xs me-2"><i class="ti ti-point-filled me-1"></i>Onhold</span>
-                                                <div class="flex items-center">
-                                                    <div class="flex -space-x-2 mb-2">
-															<span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-13.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-14.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-15.jpg') }}" alt="img">
-															</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="list-group-item border border-borderColor rounded mb-3 p-2">
-                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-x-3">
-                                        <div class="md:col-span-8 flex items-center">
-                                            <div class="todo-inbox-check flex items-center">
-                                                <span><i class="ti ti-grid-dots me-2"></i></span>
-                                                <div class="flex items-center me-2">
-                                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="select-all">
-                                                </div>
-                                                <span class="me-2 rating-select flex items-center"><i class="ti ti-star"></i></span>
-                                                <div class="strike-info">
-                                                    <h4 class="text-[14px] truncate">Appointment booking with payment</h4>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="md:col-span-4">
-                                            <div class="flex items-center justify-end flex-wrap gap-y-3">
-                                                <span class="bg-purple-100 text-purple rounded text-[10px] font-medium leading-4 py-0.5 px-1.5 inline-flex items-center badge-xs me-2"><i class="ti ti-point-filled me-1"></i>Inprogress</span>
-                                                <div class="flex items-center">
-                                                    <div class="flex -space-x-2 mb-2">
-															<span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-20.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-21.jpg') }}" alt="img">
-															</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="list-group-item border border-borderColor rounded mb-3 p-2">
-                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-x-3">
-                                        <div class="md:col-span-8 flex items-center">
-                                            <div class="todo-inbox-check flex items-center">
-                                                <span><i class="ti ti-grid-dots me-2"></i></span>
-                                                <div class="flex items-center me-2">
-                                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="select-all">
-                                                </div>
-                                                <span class="me-2 rating-select flex items-center"><i class="ti ti-star"></i></span>
-                                                <div class="strike-info">
-                                                    <h4 class="text-[14px] truncate">Patient and Doctor video conferencing</h4>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="md:col-span-4">
-                                            <div class="flex items-center justify-end flex-wrap gap-y-3">
-                                                <span class="bg-success-100 text-success rounded text-[10px] font-medium leading-4 py-0.5 px-1.5 inline-flex items-center badge-xs me-2"><i class="ti ti-point-filled me-1"></i>Completed</span>
-                                                <div class="flex items-center">
-                                                    <div class="flex -space-x-2 mb-2">
-															<span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-28.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-29.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-24.jpg') }}" alt="img">
-															</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="list-group-item border border-borderColor rounded mb-3 p-2">
-                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-x-3">
-                                        <div class="md:col-span-8 flex items-center">
-                                            <div class="todo-inbox-check flex items-center todo-strike-content">
-                                                <span><i class="ti ti-grid-dots me-2"></i></span>
-                                                <div class="flex items-center me-2">
-                                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="select-all" checked>
-                                                </div>
-                                                <span class="me-2 rating-select flex items-center"><i class="ti ti-star"></i></span>
-                                                <div class="strike-info">
-                                                    <h4 class="text-[14px] truncate">Private chat module</h4>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="md:col-span-4">
-                                            <div class="flex items-center justify-end flex-wrap gap-y-3">
-                                                <span class="bg-secondary-100 text-secondary rounded text-[10px] font-medium leading-4 py-0.5 px-1.5 inline-flex items-center badge-xs me-2"><i class="ti ti-point-filled me-1"></i>Pending</span>
-                                                <div class="flex items-center">
-                                                    <div class="flex -space-x-2 mb-2">
-															<span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-23.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-24.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-25.jpg') }}" alt="img">
-															</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="list-group-item border border-borderColor rounded mb-3 p-2">
-                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-x-3">
-                                        <div class="md:col-span-8">
-                                            <div class="todo-inbox-check flex items-center">
-                                                <span><i class="ti ti-grid-dots me-2"></i></span>
-                                                <div class="flex items-center me-2">
-                                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="select-all">
-                                                </div>
-                                                <span class="me-2 rating-select flex items-center"><i class="ti ti-star"></i></span>
-                                                <div class="strike-info">
-                                                    <h4 class="text-[14px] truncate">Go-Live and Post-Implementation Support</h4>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="md:col-span-4">
-                                            <div class="flex items-center justify-end flex-wrap gap-y-3">
-                                                <span class="bg-purple-100 text-purple rounded text-[10px] font-medium leading-4 py-0.5 px-1.5 inline-flex items-center badge-xs me-2"><i class="ti ti-point-filled me-1"></i>Inprogress</span>
-                                                <div class="flex items-center">
-                                                    <div class="flex -space-x-2 mb-2">
-															<span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-28.jpg') }}" alt="img">
-															</span>
-                                                        <span class="size-6 flex items-center justify-center rounded-full mx-1">
-																<img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-29.jpg') }}" alt="img">
-															</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-x-6 gap-y-4 pb-5">
-                <div class="xl:col-span-5 flex">
-                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
-                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
-                            <h5>Performance</h5>
-                            <div>
-                                <a href="javascript:void(0);" class="border rounded p-1 bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900" data-dropdown-toggle="emp-dropdown">
-                                    <i class="ti ti-calendar me-1"></i>2024
-                                </a>
-                                <ul id="emp-dropdown" class="hidden z-[9] p-4 border rounded bg-white shadow-lg">
-                                    <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2024</a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2023 </a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2022 </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="card-body p-5">
-                            <div>
-                                <div class="bg-light flex items-center rounded p-2">
-                                    <h3 class="me-2">98%</h3>
-                                    <span class="badge badge-outline-success bg-success-transparent rounded-pill me-1">12%</span>
-                                    <span>vs last years</span>
-                                </div>
-                                <div id="performance_chart2"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="xl:col-span-4 flex">
-                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
-                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
-                            <h5>My Skills</h5>
-                            <div>
-                                <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="week-dropdown3">
-                                    <i class="ti ti-calendar me-1"></i>2024
-                                </a>
-                                <ul id="week-dropdown3" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
-                                    <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2024</a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2023</a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">2022</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="card-body p-5">
-                            <div>
-                                <div class="border border-dashed bg-transparent-light rounded p-2 mb-2">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <span class="block border border-2 h-[12px] border-primary rounded-5 me-2"></span>
-                                            <div>
-                                                <h6 class="font-medium mb-1">Figma</h6>
-                                                <p>Updated : 15 May 2025</p>
-                                            </div>
-                                        </div>
-                                        <div class="w-[40px] h-[40px] bg-white rounded-full leading-[21px] relative mb-3"  data-value='95'>
-												<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
-													<span class="transform rotate-[162deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-primary border-l-0 origin-left
-													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-												</span>
-                                            <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-10">
-													<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-primary border-r-0 origin-right
-													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-												</span>
-                                            <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">95%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border border-dashed bg-transparent-light rounded p-2 mb-2">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <span class="block border border-2 h-[12px] border-success rounded-5 me-2"></span>
-                                            <div>
-                                                <h6 class="font-medium mb-1">HTML</h6>
-                                                <p>Updated : 12 May 2025</p>
-                                            </div>
-                                        </div>
-                                        <div class="w-[40px] h-[40px] bg-white rounded-full leading-[21px] relative mb-3"  data-value='85'>
-												<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
-													<span class="transform rotate-[126deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-success border-l-0 origin-left
-													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-												</span>
-                                            <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-10">
-													<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-success border-r-0 origin-right
-													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-												</span>
-                                            <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">85%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border border-dashed bg-transparent-light rounded p-2 mb-2">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <span class="block border border-2 h-[12px] border-purple rounded-5 me-2"></span>
-                                            <div>
-                                                <h6 class="font-medium mb-1">CSS</h6>
-                                                <p>Updated : 12 May 2025</p>
-                                            </div>
-                                        </div>
-                                        <div class="w-[40px] h-[40px] bg-white rounded-full leading-[21px] relative mb-3"  data-value='70'>
-												<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
-													<span class="transform rotate-[72deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-purple border-l-0 origin-left
-													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-												</span>
-                                            <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-10">
-													<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-purple border-r-0 origin-right
-													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-												</span>
-                                            <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">70%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border border-dashed bg-transparent-light rounded p-2 mb-2">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <span class="block border border-2 h-[12px] border-info rounded-5 me-2"></span>
-                                            <div>
-                                                <h6 class="font-medium mb-1">Wordpress</h6>
-                                                <p>Updated : 15 May 2025</p>
-                                            </div>
-                                        </div>
-                                        <div class="w-[40px] h-[40px] bg-white rounded-full leading-[21px] relative mb-3"  data-value='61'>
-												<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
-													<span class="transform rotate-[39.6deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-info border-l-0 origin-left
-													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-												</span>
-                                            <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-10">
-													<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-info border-r-0 origin-right
-													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-												</span>
-                                            <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">61%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border border-dashed bg-transparent-light rounded p-2">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <span class="block border border-2 h-[12px] border-dark rounded-5 me-2"></span>
-                                            <div>
-                                                <h6 class="font-medium mb-1">Javascript</h6>
-                                                <p>Updated : 13 May 2025</p>
-                                            </div>
-                                        </div>
-                                        <div class="w-[40px] h-[40px] bg-white rounded-full leading-[21px] relative mb-3"  data-value='58'>
-												<span class="left-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-[1]">
-													<span class="transform rotate-[28.8deg] left-[100%] rounded-tr-[80px] rounded-br-[80px] border-dark border-l-0 origin-left
-													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-												</span>
-                                            <span class="right-0 w-[50%] h-[100%] overflow-hidden absolute top-0 z-10">
-													<span class="transform rotate-[180deg] absolute left-[-100%] rounded-tl-[80px] rounded-bl-[80px] border-dark border-r-0 origin-right
-													w-full h-full bg-transparent border-4 border-solid absolute top-0"></span>
-												</span>
-                                            <div class="absolute left-[50%] top-[50%] transform -translate-x-1/2 -translate-y-1/2 leading-normal text-center w-100">58%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="xl:col-span-3">
-                    <div class="flex-fill">
-                        <div class="card bg-dark mb-3 relative">
-							<span class="absolute	w-full top-0 left-0 z-10 right-0">
-								<img src="{{ asset('assets/img/bg/card-bg-05.png') }}" alt="">
-							</span>
-                            <div class="card-body p-5">
-                                <div class="text-center">
-                                    <h5 class="text-white mb-4">Team Birthday</h5>
-                                    <span class="inline-flex items-center justify-center size-[57.6px] mb-2">
-											<img src="{{ asset('assets/img/users/user-35.jpg') }}" class="rounded-full" alt="Img">
+                            <h6 class="mb-2">Top Performer</h6>
+                            <div class="p-2 flex items-center justify-between border border-primary bg-primary-100 rounded-defaultradius mb-6">
+                                <div class="flex items-center overflow-hidden">
+										<span class="me-2">
+											<i class="ti ti-award-filled text-primary text-2xl leading-none"></i>
 										</span>
-                                    <div class="mb-4">
-                                        <h6 class="text-white font-medium mb-1">Andrew Jermia</h6>
-                                        <p>IOS Developer</p>
+                                    <a href="employee-details.html" class="size-8 me-2">
+                                        <img src="assets/img/profiles/avatar-24.jpg" class="rounded-full border border-white" alt="img">
+                                    </a>
+                                    <div>
+                                        <h6 class="truncate mb-1 fs-14 font-medium"><a href="employee-details.html" class="hover:text-primary">Daniel Esbella</a></h6>
+                                        <p class="text-[13px]">IOS Developer</p>
                                     </div>
-                                    <a href="#" class="btn btn-sm btn-primary">Send Wishes</a>
+                                </div>
+                                <div class="text-end">
+                                    <p class="text-[13px] mb-1">Performance</p>
+                                    <h5 class="text-primary">99%</h5>
                                 </div>
                             </div>
-                        </div>
-                        <div class="card bg-secondary border border-borderColor rounded mb-3">
-                            <div class="card-body flex items-center justify-between p-3">
-                                <div>
-                                    <h5 class="text-white mb-1">Leave Policy</h5>
-                                    <p class="text-white">Last Updated : Today</p>
-                                </div>
-                                <a href="#" class="btn bg-white btn-sm px-3">View All</a>
-                            </div>
-                        </div>
-                        <div class="card bg-warning border border-borderColor rounded">
-                            <div class="card-body flex items-center justify-between p-3">
-                                <div>
-                                    <h5 class="mb-1">Next Holiday</h5>
-                                    <p class="text-gray-900">Diwali, 15 Sep 2025</p>
-                                </div>
-                                <a href="holidays.html" class="btn bg-white btn-sm px-3">View All</a>
-                            </div>
+                            <a href="employees.html" class="btn bg-light border border-light text-gray-900 text-center py-1.5 px-2 hover:bg-light-900 hover:text-gray-900 text-xs leading-normal w-full">View All Employees</a>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-x-6 gap-y-4">
-                <div class="xl:col-span-4">
-                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
-                        <div class="card-header py-4 px-5 flex-wrap border-b border-borderColor">
-                            <div class="flex items-center justify-between flex-wrap">
-                                <h5>Team Members</h5>
-                                <div>
-                                    <a href="#" class="btn btn-light btn-sm">View All</a>
-                                </div>
+                <!-- /Total Employee -->
+
+                <!-- Attendance Overview -->
+                <div class="xxl:col-span-4 xl:col-span-6 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full mb-6">
+                        <div class="card-header  pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Attendance Overview</h5>
+                            <div class="mb-2">
+                                <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="today-dropdown">
+                                    <i class="ti ti-calendar me-1"></i>Today
+                                </a>
+                                <ul id="today-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Month</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Week</a>
+                                    </li>
+                                    <li>
+                                        <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Last Week</a>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                         <div class="card-body p-5">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center">
-                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                        <img src="{{ asset('assets/img/users/user-27.jpg') }}" class="rounded-full" alt="img">
-                                    </a>
-                                    <div class="ms-2">
-                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Alexander Jermai</a></h6>
-                                        <p class="text-[13px]">UI/UX Designer</p>
-                                    </div>
+                            <div class="chartjs-wrapper-demo relative mb-4">
+                                <div class="w-full h-52">
+                                    <canvas id="attendance" class="w-full h-full"></canvas>
                                 </div>
-                                <div class="flex items-center">
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
+                                <div class="absolute text-center top-1/2 left-1/2 -translate-x-1/2 transform attendance-canvas">
+                                    <p class="text-[13px] mb-1">Total Attendance</p>
+                                    <h3>120</h3>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center">
-                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                        <img src="{{ asset('assets/img/users/user-42.jpg') }}" class="rounded-full" alt="img">
-                                    </a>
-                                    <div class="ms-2">
-                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Doglas Martini</a></h6>
-                                        <p class="text-[13px]">Product Designer</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center">
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center">
-                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                        <img src="{{ asset('assets/img/users/user-43.jpg') }}" class="rounded-full" alt="img">
-                                    </a>
-                                    <div class="ms-2">
-                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Daniel Esbella</a></h6>
-                                        <p class="text-[13px]">Project Manager</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center">
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center">
-                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                        <img src="{{ asset('assets/img/users/user-11.jpg') }}" class="rounded-full" alt="img">
-                                    </a>
-                                    <div class="ms-2">
-                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Daniel Esbella</a></h6>
-                                        <p class="text-[13px]">Team Lead</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center">
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center">
-                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                        <img src="{{ asset('assets/img/users/user-44.jpg') }}" class="rounded-full" alt="img">
-                                    </a>
-                                    <div class="ms-2">
-                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Stephan Peralt</a></h6>
-                                        <p class="text-[13px]">Team Lead</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center">
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
-                                </div>
+                            <h6 class="mb-4">Status</h6>
+                            <div class="flex items-center justify-between">
+                                <p class="text-[13px] mb-2"><i class="ti ti-circle-filled text-success me-1"></i>Present</p>
+                                <p class="text-[13px] font-medium text-gray-900 mb-2">59%</p>
                             </div>
                             <div class="flex items-center justify-between">
+                                <p class="text-[13px] mb-2"><i class="ti ti-circle-filled text-secondary me-1"></i>Late</p>
+                                <p class="text-[13px] font-medium text-gray-900 mb-2">21%</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <p class="text-[13px] mb-2"><i class="ti ti-circle-filled text-warning me-1"></i>Permission</p>
+                                <p class="text-[13px] font-medium text-gray-900 mb-2">2%</p>
+                            </div>
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-[13px] mb-2"><i class="ti ti-circle-filled text-danger me-1"></i>Absent</p>
+                                <p class="text-[13px] font-medium text-gray-900 mb-2">15%</p>
+                            </div>
+                            <div class="bg-light rounded-defaultradius box-shadow-xs p-2 pb-0 flex items-center justify-between flex-wrap">
                                 <div class="flex items-center">
-                                    <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                        <img src="{{ asset('assets/img/users/user-54.jpg') }}" class="rounded-full" alt="img">
-                                    </a>
-                                    <div class="ms-2">
-                                        <h6 class="text-14 font-medium truncate mb-1"><a href="#">Andrew Jermia</a></h6>
-                                        <p class="text-[13px]">Project  Lead</p>
+                                    <p class="mb-2 me-2">Total Absenties</p>
+                                    <div class="flex -space-x-2 mb-2">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-27.jpg" alt="">
+                                        <img class="size-6 border border-white rounded-full  hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-30.jpg" alt="">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-14.jpg" alt="">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-29.jpg" alt="">
+                                        <a class="flex items-center justify-center size-6 border text-xs font-medium text-white bg-primary border-primary rounded-full hover:primary-900 shrink-0 hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" href="#">+1</a>
                                     </div>
                                 </div>
-                                <div class="flex items-center">
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-phone text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm me-2"><i class="ti ti-mail-bolt text-16"></i></a>
-                                    <a href="#" class="btn btn-light btn-icon btn-sm"><i class="ti ti-brand-hipchat text-16"></i></a>
-                                </div>
+                                <a href="leaves.html" class="text-[13px] text-primary hover:text-primary-900 underline mb-2">View Details</a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="xl:col-span-4">
-                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
-                        <div class="card-header py-4 px-5 flex items-center justify-between flex-wrap border-b border-borderColor">
-                            <div class="flex items-center justify-between flex-wrap">
-                                <h5>Notifications</h5>
-                                <div>
-                                    <a href="#" class="btn btn-light btn-sm">View All</a>
+                <!-- /Attendance Overview -->
+
+                <!-- Clock-In/Out -->
+                <div class="xxl:col-span-4 xl:col-span-6 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full mb-6">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Clock-In/Out</h5>
+                            <div class="flex items-center">
+                                <div class="me-2 mb-2">
+                                    <a href="javascript:void(0);" class="border border-white rounded py-1 px-2 text-[13px] font-normal bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="dept-dropdown">
+                                        All Departments
+                                    </a>
+                                    <ul id="dept-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Finance</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Development</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Marketing</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="mb-2">
+                                    <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="today-dropdown1">
+                                        <i class="ti ti-calendar me-1"></i>Today
+                                    </a>
+                                    <ul id="today-dropdown1" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Month</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Week</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Last Week</a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body p-5">
-                            <div class="flex items-start mb-4">
-                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                    <img src="{{ asset('assets/img/users/user-27.jpg') }}" class="rounded-full" alt="img">
-                                </a>
-                                <div class="ms-2">
-                                    <h6 class="text-14 font-medium truncate mb-1">Lex Murphy requested access to UNIX </h6>
-                                    <p class="text-[13px] mb-2">Today at 9:42 AM</p>
+                            <div>
+                                <div
+                                    class="flex items-center justify-between mb-4 p-2 border border-dashed rounded-defaultradius">
                                     <div class="flex items-center">
-                                        <a href="#" class="flex items-center justify-center avatar-sm border shrink-0 me-2"><img src="{{ asset('assets/img/social/pdf-icon.svg') }}" class="w-auto h-auto" alt="Img"></a>
-                                        <h6 class="fw-normal"><a href="#">EY_review.pdf</a></h6>
+                                        <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
+                                            <img src="assets/img/profiles/avatar-24.jpg" class="rounded-full border border-borderColor" alt="img">
+                                        </a>
+                                        <div class="ms-2">
+                                            <h6 class="fs-14 font-medium truncate">Daniel Esbella</h6>
+                                            <p class="text-[13px]">UI/UX Designer</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <a href="javascript:void(0);" class="text-default hover:text-primary me-2"><i class="ti ti-clock-share"></i></a>
+                                        <span class="text-[10px] font-medium inline-flex items-center py-1 px-2 rounded bg-success text-white leading-none"><i class="ti ti-circle-filled text-[5px] me-1"></i>09:15</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between mb-3 p-2 border rounded-defaultradius">
+                                    <div class="flex items-center">
+                                        <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
+                                            <img src="assets/img/profiles/avatar-23.jpg" class="rounded-full border border-borderColor" alt="img">
+                                        </a>
+                                        <div class="ms-2">
+                                            <h6 class="fs-14 font-medium">Doglas Martini</h6>
+                                            <p class="text-[13px]">Project Manager</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <a href="javascript:void(0);" class="text-default hover:text-primary me-2"><i class="ti ti-clock-share"></i></a>
+                                        <span class="text-[10px] font-medium inline-flex items-center py-1 px-2 rounded bg-success text-white leading-none"><i class="ti ti-circle-filled text-[5px] me-1"></i>09:36</span>
+                                    </div>
+                                </div>
+                                <div class="mb-4 p-2 border rounded-defaultradius">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
+                                                <img src="assets/img/profiles/avatar-27.jpg" class="rounded-full border-borderColor border-2" alt="img">
+                                            </a>
+                                            <div class="ms-2">
+                                                <h6 class="fs-14 font-medium truncate">Brian Villalobos</h6>
+                                                <p class="text-[13px]">PHP Developer</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <a href="javascript:void(0);" class="text-default hover:text-primary me-2"><i class="ti ti-clock-share"></i></a>
+                                            <span class="text-[10px] font-medium inline-flex items-center py-1 px-2 rounded bg-success text-white leading-none"><i class="ti ti-circle-filled text-[5px] me-1"></i>09:15</span>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="flex items-center justify-between flex-wrap mt-2 border rounded-defaultradius p-2 pb-0">
+                                        <div>
+                                            <p class="mb-1 inline-flex items-center"><i class="ti ti-circle-filled text-success text-[5px] me-1"></i>Clock In</p>
+                                            <h6 class="text-[13px] font-normal mb-2">10:30 AM</h6>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1 inline-flex items-center"><i class="ti ti-circle-filled text-danger text-[5px] me-1"></i>Clock Out</p>
+                                            <h6 class="text-[13px] font-normal mb-2">09:45 AM</h6>
+                                        </div>
+                                        <div>
+                                            <p class="mb-1 inline-flex items-center"><i class="ti ti-circle-filled text-warning text-[5px] me-1"></i>Production</p>
+                                            <h6 class="text-[13px] font-normal mb-2">09:21 Hrs</h6>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-start mb-4">
-                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                    <img src="{{ asset('assets/img/users/user-28.jpg') }}" class="rounded-full" alt="img">
-                                </a>
-                                <div class="ms-2">
-                                    <h6 class="text-14 font-medium truncate mb-1">Lex Murphy requested access to UNIX </h6>
-                                    <p class="text-[13px] mb-0">Today at 10:00 AM</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start mb-4">
-                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                    <img src="{{ asset('assets/img/users/user-29.jpg') }}" class="rounded-full" alt="img">
-                                </a>
-                                <div class="ms-2">
-                                    <h6 class="text-14 font-medium truncate mb-1">Lex Murphy requested access to UNIX </h6>
-                                    <p class="text-[13px] mb-2">Today at 10:50 AM</p>
-                                    <div class="flex items-center">
-                                        <a href="#" class="btn btn-primary btn-sm me-2">Approve</a>
-                                        <a href="#" class="btn btn-outline-primary btn-sm">Decline</a>
+                            <h6 class="mb-2">Late</h6>
+                            <div class="flex items-center justify-between mb-4 p-2 border border-dashed rounded-defaultradius">
+                                <div class="flex items-center overflow-hidden">
+										<span class="size-[42px] flex items-center justify-center rounded-full shrink-0">
+											<img src="assets/img/profiles/avatar-29.jpg" class="rounded-full border-borderColor border-2" alt="img">
+										</span>
+                                    <div class="ms-2 overflow-hidden">
+                                        <h6 class="fs-14 font-medium truncate">Anthony Lewis <span class="text-[10px] font-medium inline-flex items-center py-1 px-2 rounded bg-success text-white leading-none"><i class="ti ti-clock-hour-11 me-1"></i>30 Min</span></h6>
+                                        <p class="text-[13px]">Marketing Head</p>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="flex items-start mb-4">
-                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                    <img src="{{ asset('assets/img/users/user-30.jpg') }}" class="rounded-full" alt="img">
-                                </a>
-                                <div class="ms-2">
-                                    <h6 class="text-14 font-medium truncate mb-1">Lex Murphy requested access to UNIX </h6>
-                                    <p class="text-[13px] mb-0">Today at 12:00 PM</p>
+                                <div class="flex items-center">
+                                    <a href="javascript:void(0);" class="text-default hover:text-primary me-2"><i class="ti ti-clock-share"></i></a>
+                                    <span class="text-[10px] font-medium inline-flex items-center py-1 px-2 rounded bg-danger text-white leading-none"><i class="ti ti-circle-filled text-[5px] me-1"></i>08:35</span>
                                 </div>
                             </div>
-                            <div class="flex items-start">
-                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                    <img src="{{ asset('assets/img/users/user-33.jpg') }}" class="rounded-full" alt="img">
-                                </a>
-                                <div class="ms-2">
-                                    <h6 class="text-14 font-medium truncate mb-1">Lex Murphy requested access to UNIX </h6>
-                                    <p class="text-[13px] mb-0">Today at 05:00 PM</p>
+                            <a href="attendance-report.html" class="btn bg-light border border-light text-gray-900 text-center py-1.5 px-3.5 hover:bg-light-900 hover:text-gray-900 text-[13px] leading-normal w-full">View All Attendance</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Clock-In/Out -->
+
+            </div>
+
+            <div class="grid grid-cols-1 xxl:grid-cols-12 xl:grid-cols-12 gap-6 mb-6">
+
+                <!-- Jobs Applicants -->
+                <div class="xxl:col-span-4 xl:col-span-12 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Jobs Applicants</h5>
+                            <a href="job-list.html" class="btn bg-light border border-light text-gray-900 text-center py-1.5 px-3.5 hover:bg-light-900 hover:text-gray-900 text-[13px] leading-normal mb-2">View All</a>
+                        </div>
+                        <div class="card-body p-5">
+                            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center bg-gray-200 rounded-defaultradius mb-6" data-tabs-toggle="#job-tab-content" data-tabs-active-classes="bg-primary text-white hover:text-primary" data-tabs-inactive-classes="text-gray-900 hover:text-primary" role="tablist">
+                                <li role="presentation" class="flex-1">
+                                    <button class="block py-1.5 px-3 rounded-defaultradius w-full" data-tabs-target="#openings" type="button" role="tab" aria-selected="false">Openings</button>
+                                </li>
+                                <li role="presentation" class="flex-1">
+                                    <button class="block py-1.5 px-3 rounded-defaultradius w-full" data-tabs-target="#applicants" type="button" role="tab" aria-selected="false">Applicants</button>
+                                </li>
+                            </ul>
+                            <div id="job-tab-content">
+                                <div class="hidden " id="openings" role="tabpanel">
+                                    <div class="flex items-center justify-between mb-6">
+                                        <div class="flex items-center">
+                                            <a href="#" class="size-[42px] flex items-center justify-center rounded overflow-hidden shrink-0 bg-gray-100">
+                                                <img src="assets/img/icons/apple.svg" class="img-fluid w-auto h-auto" alt="img">
+                                            </a>
+                                            <div class="ms-2 overflow-hidden">
+                                                <p class="text-title font-medium truncate mb-0"><a href="javascript:void(0);">Senior IOS Developer</a></p>
+                                                <span class="text-xs leading-normal">No of Openings : 25 </span>
+                                            </div>
+                                        </div>
+                                        <a href="javascript:void(0);" class="size-7 rounded-defaultradius flex items-center justify-center border border-light bg-light text-gray-900 hover:bg-primary hover:text-white hover:border-primary"><i class="ti ti-edit"></i></a>
+                                    </div>
+                                    <div class="flex items-center justify-between mb-6">
+                                        <div class="flex items-center">
+                                            <a href="#" class="size-[42px] flex items-center justify-center rounded overflow-hidden shrink-0 bg-gray-100">
+                                                <img src="assets/img/icons/php.svg" class="img-fluid w-auto h-auto" alt="img">
+                                            </a>
+                                            <div class="ms-2 overflow-hidden">
+                                                <p class="text-title font-medium truncate mb-0"><a href="javascript:void(0);">Junior PHP Developer</a></p>
+                                                <span class="text-xs leading-normal">No of Openings : 20 </span>
+                                            </div>
+                                        </div>
+                                        <a href="javascript:void(0);" class="size-7 rounded-defaultradius flex items-center justify-center border border-light bg-light text-gray-900 hover:bg-primary hover:text-white hover:border-primary"><i class="ti ti-edit"></i></a>
+                                    </div>
+                                    <div class="flex items-center justify-between mb-6">
+                                        <div class="flex items-center">
+                                            <a href="#" class="size-[42px] flex items-center justify-center rounded overflow-hidden shrink-0 bg-gray-100">
+                                                <img src="assets/img/icons/react.svg" class="img-fluid w-auto h-auto" alt="img">
+                                            </a>
+                                            <div class="ms-2 overflow-hidden">
+                                                <p class="text-title font-medium truncate mb-0"><a href="javascript:void(0);">Junior React Developer </a></p>
+                                                <span class="text-xs leading-normal">No of Openings : 30 </span>
+                                            </div>
+                                        </div>
+                                        <a href="javascript:void(0);" class="size-7 rounded-defaultradius flex items-center justify-center border border-light bg-light text-gray-900 hover:bg-primary hover:text-white hover:border-primary"><i class="ti ti-edit"></i></a>
+                                    </div>
+                                    <div class="flex items-center justify-between mb-0">
+                                        <div class="flex items-center">
+                                            <a href="#" class="size-[42px] flex items-center justify-center rounded overflow-hidden shrink-0 bg-gray-100">
+                                                <img src="assets/img/icons/laravel-icon.svg" class="img-fluid w-auto h-auto" alt="img">
+                                            </a>
+                                            <div class="ms-2 overflow-hidden">
+                                                <p class="text-title font-medium truncate mb-0"><a href="javascript:void(0);">Senior Laravel Developer</a></p>
+                                                <span class="text-xs leading-normal">No of Openings : 40 </span>
+                                            </div>
+                                        </div>
+                                        <a href="javascript:void(0);" class="size-7 rounded-defaultradius flex items-center justify-center border border-light bg-light text-gray-900 hover:bg-primary hover:text-white hover:border-primary"><i class="ti ti-edit"></i></a>
+                                    </div>
+                                </div>
+                                <div class="hidden " id="applicants" role="tabpanel">
+                                    <div class="flex items-center justify-between mb-6">
+                                        <div class="flex items-center">
+                                            <a href="#" class="size-[42px] flex items-center justify-center overflow-hidden shrink-0">
+                                                <img src="assets/img/users/user-09.jpg" class="rounded-full" alt="img">
+                                            </a>
+                                            <div class="ms-2 overflow-hidden">
+                                                <p class="text-title font-medium truncate mb-0"><a href="#">Brian Villalobos</a></p>
+                                                <span class="text-[13px] inline-flex items-center">Exp : 5+ Years<i class="ti ti-circle-filled text-[4px] mx-2 text-primary"></i>USA</span>
+                                            </div>
+                                        </div>
+                                        <span class="bg-secondary text-white text-[10px] font-medium px-[5px] leading-4 rounded">UI/UX Designer</span>
+                                    </div>
+                                    <div class="flex items-center justify-between mb-6">
+                                        <div class="flex items-center">
+                                            <a href="#" class="size-[42px] flex items-center justify-center overflow-hidden shrink-0">
+                                                <img src="assets/img/users/user-32.jpg" class="rounded-full" alt="img">
+                                            </a>
+                                            <div class="ms-2 overflow-hidden">
+                                                <p class="text-title font-medium truncate mb-0"><a href="#">Anthony Lewis</a></p>
+                                                <span class="text-[13px] inline-flex items-center">Exp : 4+ Years<i class="ti ti-circle-filled text-[4px] mx-2 text-primary"></i>USA</span>
+                                            </div>
+                                        </div>
+                                        <span class="bg-info text-white text-[10px] font-medium px-[5px] leading-4 rounded">Python Developer</span>
+                                    </div>
+                                    <div class="flex items-center justify-between mb-6">
+                                        <div class="flex items-center">
+                                            <a href="#" class="size-[42px] flex items-center justify-center overflow-hidden shrink-0">
+                                                <img src="assets/img/users/user-32.jpg" class="rounded-full" alt="img">
+                                            </a>
+                                            <div class="ms-2 overflow-hidden">
+                                                <p class="text-title font-medium truncate mb-0"><a href="#">Stephan Peralt</a></p>
+                                                <span class="text-[13px] inline-flex items-center">Exp : 6+ Years<i class="ti ti-circle-filled text-[4px] mx-2 text-primary"></i>USA</span>
+                                            </div>
+                                        </div>
+                                        <span class="bg-pink text-white text-[10px] font-medium px-[5px] leading-4 rounded">Android Developer</span>
+                                    </div>
+                                    <div class="flex items-center justify-between mb-0">
+                                        <div class="flex items-center">
+                                            <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center overflow-hidden shrink-0">
+                                                <img src="assets/img/users/user-34.jpg" class="rounded-full" alt="img">
+                                            </a>
+                                            <div class="ms-2 overflow-hidden">
+                                                <p class="text-title font-medium truncate mb-0"><a href="javascript:void(0);">Doglas Martini</a></p>
+                                                <span class="text-[13px] inline-flex items-center">Exp : 2+ Years<i class="ti ti-circle-filled text-[4px] mx-2 text-primary"></i>USA</span>
+                                            </div>
+                                        </div>
+                                        <span class="bg-purple text-white text-[10px] font-medium px-[5px] leading-4 rounded">React Developer</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="xl:col-span-4">
-                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white flex-1">
+                <!-- /Jobs Applicants -->
+
+                <!-- Employees -->
+                <div class="xxl:col-span-4 xl:col-span-6 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full overflow-x-auto">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap">
+                            <h5 class="mb-2">Employees</h5>
+                            <a href="employees.html" class="btn bg-light border border-light text-gray-900 text-center py-1.5 px-3.5 hover:bg-light-900 hover:text-gray-900 text-[13px] leading-normal mb-2">View All</a>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="overflow-x-auto">
+                                <table class="table w-full text-default mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th class="font-semibold text-left py-2 px-5 bg-light-900 text-gray-900 border-b border-borderColor">Name</th>
+                                        <th class="font-semibold text-left py-2 px-5 bg-light-900 text-gray-900 border-b border-borderColor">Department</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr class="border-b border-borderColor">
+                                        <td class="py-2 px-5">
+                                            <div class="flex items-center">
+                                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                                    <img src="assets/img/users/user-32.jpg" class="rounded-full" alt="img">
+                                                </a>
+                                                <div class="ms-2">
+                                                    <h6 class="font-medium"><a href="javascript:void(0);">Anthony Lewis</a></h6>
+                                                    <span class="text-xs leading-normal">Finance</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5">
+													<span class="inline-block bg-secondary-transparent text-secondary text-[10px] font-medium px-[5px] leading-4 rounded">
+														Finance
+													</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-borderColor">
+                                        <td class="py-2 px-5">
+                                            <div class="flex items-center">
+                                                <a href="#" class="size-[42px] flex items-center justify-center rounded-full">
+                                                    <img src="assets/img/users/user-09.jpg" class="rounded-full" alt="img">
+                                                </a>
+                                                <div class="ms-2">
+                                                    <h6 class="font-medium"><a href="#">Brian Villalobos</a></h6>
+                                                    <span class="text-xs leading-normal">PHP Developer</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5">
+                                            <span class="inline-block bg-danger-transparent text-danger text-[10px] font-medium px-[5px] leading-4 rounded">Development</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-borderColor">
+                                        <td class="py-2 px-5">
+                                            <div class="flex items-center">
+                                                <a href="#" class="size-[42px] flex items-center justify-center rounded-full">
+                                                    <img src="assets/img/users/user-01.jpg" class="rounded-full" alt="img">
+                                                </a>
+                                                <div class="ms-2">
+                                                    <h6 class="font-medium"><a href="#">Stephan Peralt</a></h6>
+                                                    <span class="text-xs leading-normal">Executive</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5">
+                                            <span class="inline-block bg-info-transparent text-info text-[10px] font-medium px-[5px] leading-4 rounded">Marketing</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-borderColor">
+                                        <td class="py-2 px-5">
+                                            <div class="flex items-center">
+                                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                                    <img src="assets/img/users/user-34.jpg" class="rounded-full" alt="img">
+                                                </a>
+                                                <div class="ms-2">
+                                                    <h6 class="font-medium"><a href="javascript:void(0);">Doglas Martini</a></h6>
+                                                    <span class="text-xs leading-normal">Project Manager</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5">
+                                            <span class="inline-block bg-purple-transparent text-purple text-[10px] font-medium px-[5px] leading-4 rounded">Manager</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 px-5">
+                                            <div class="flex items-center">
+                                                <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                                    <img src="assets/img/users/user-37.jpg" class="rounded-full" alt="img">
+                                                </a>
+                                                <div class="ms-2">
+                                                    <h6 class="font-medium"><a href="javascript:void(0);">Anthony Lewis</a></h6>
+                                                    <span class="text-xs leading-normal">UI/UX Designer</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5">
+                                            <span class="inline-block bg-pink-transparent text-pink text-[10px] font-medium px-[5px] leading-4 rounded">UI/UX Design</span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Employees -->
+
+                <!-- Todo -->
+                <div class="xxl:col-span-4 xl:col-span-6 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full">
                         <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
-                            <h5 class="mb-2">Meetings Schedule</h5>
+                            <h5 class="mb-2">Todo</h5>
                             <div class="flex items-center">
                                 <div class="me-2 mb-2">
                                     <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="todo-dropdown">
@@ -5715,61 +5282,775 @@
                                         </li>
                                     </ul>
                                 </div>
+                                <a href="#" class="size-6 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-900 hover:text-white p-0 mb-2"  data-bs-toggle="modal" data-bs-target="#add_todo"><i class="ti ti-plus fs-16"></i></a>
                             </div>
                         </div>
-                        <div class="card-body schedule-timeline p-4">
-                            <div class="flex items-start">
-                                <div class="flex items-center min-w-[80px]">
-                                    <span>09:25 AM</span>
-                                    <span><i class="ti ti-point-filled text-primary text-[20px] relative z-2"></i></span>
+                        <div class="card-body p-5">
+                            <div class="flex items-center todo-item border p-2 rounded-defaultradius mb-2">
+                                <i class="ti ti-grid-dots me-2"></i>
+                                <div class="flex items-center">
+                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="todo1">
+                                    <label class="text-gray-900 font-medium ms-2" for="todo1">Add Holidays</label>
                                 </div>
-                                <div class="flex-fill ps-3 pb-4 relative z-[1] before:content-[''] before:w-[1px] before:h-full before:border-l before:border-dashed before:border-gray-200 before:absolute before:left-[-11px] before:top-[5px] before:z-[-1]">
-                                    <div class="bg-light p-2 rounded">
-                                        <p class="font-medium text-gray-9 mb-1">Marketing Strategy Presentation</p>
-                                        <span>Marketing</span>
+                            </div>
+                            <div class="flex items-center todo-item border p-2 rounded-defaultradius mb-2">
+                                <i class="ti ti-grid-dots me-2"></i>
+                                <div class="flex items-center">
+                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="todo1">
+                                    <label class="text-gray-900 font-medium ms-2" for="todo12">Add Meeting  to Client</label>
+                                </div>
+                            </div>
+                            <div class="flex items-center todo-item border p-2 rounded-defaultradius mb-2">
+                                <i class="ti ti-grid-dots me-2"></i>
+                                <div class="flex items-center">
+                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="todo3">
+                                    <label class="text-gray-900 font-medium ms-2" for="todo3">Chat with Adrian</label>
+                                </div>
+                            </div>
+                            <div class="flex items-center todo-item border p-2 rounded-defaultradius mb-2">
+                                <i class="ti ti-grid-dots me-2"></i>
+                                <div class="flex items-center">
+                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="todo4">
+                                    <label class="text-gray-900 font-medium ms-2" for="todo4">Management Call</label>
+                                </div>
+                            </div>
+                            <div class="flex items-center todo-item border p-2 rounded-defaultradius mb-2">
+                                <i class="ti ti-grid-dots me-2"></i>
+                                <div class="flex items-center">
+                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="todo5">
+                                    <label class="text-gray-900 font-medium ms-2" for="todo5">Add Payroll</label>
+                                </div>
+                            </div>
+                            <div class="flex items-center todo-item border p-2 rounded-defaultradius mb-0">
+                                <i class="ti ti-grid-dots me-2"></i>
+                                <div class="flex items-center">
+                                    <input class="size-4 bg-white border border-borderColor rounded text-primary focus:ring-0" type="checkbox" id="todo6">
+                                    <label class="text-gray-900 font-medium ms-2" for="todo6">Add Policy for Increment</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Todo -->
+
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-6">
+
+                <!-- Sales Overview -->
+                <div class="xl:col-span-7 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColorr">
+                            <h5 class="mb-2">Sales Overview</h5>
+                            <div class="flex items-center">
+                                <div class="mb-2">
+                                    <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="sale-dropdown">
+                                        All Departments
+                                    </a>
+                                    <ul id="sale-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">UI/UX Designer</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">HR Manager</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Junior Tester</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-5 pb-0">
+                            <div class="flex items-center justify-between flex-wrap">
+                                <div class="flex items-center mb-1">
+                                    <p class="text-[13px] text-gray-900 me-3 mb-0"><i class="ti ti-square-filled me-2 text-primary"></i>Income</p>
+                                    <p class="text-[13px] text-gray-900 mb-0"><i class="ti ti-square-filled me-2 text-gray-2"></i>Expenses</p>
+                                </div>
+                                <p class="text-[13px] mb-1">Last Updated at 11:30PM</p>
+                            </div>
+                            <div id="sales-income"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Sales Overview -->
+
+                <!-- Invoices -->
+                <div class="xl:col-span-5 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full overflow-x-auto">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Invoices</h5>
+                            <div class="flex items-center">
+                                <div class="me-2 mb-2">
+                                    <a href="javascript:void(0);" class="border-0 rounded py-1 px-2 bg-white inline-flex items-center focus:bg-primary focus:text-white text-gray-900"  data-dropdown-toggle="invoice-dropdown">
+                                        Invoices<i class="ti ti-chevron-down ml-1"></i>
+                                    </a>
+                                    <ul id="invoice-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Invoices</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Paid</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Unpaid</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="mb-2">
+                                    <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="invoiceday-dropdown">
+                                        <i class="ti ti-calendar me-1"></i>This Week
+                                    </a>
+                                    <ul id="invoiceday-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Month</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Week</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Today</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-5 pt-2">
+                            <div class="overflow-x-auto pt-1">
+                                <table class="table w-full mb-0">
+                                    <tbody>
+                                    <tr>
+                                        <td class="py-2 px-0 text-default">
+                                            <div class="flex items-center">
+                                                <a href="invoice-details.html" class="size-[42px] flex items-center justify-center rounded-full">
+                                                    <img src="assets/img/users/user-39.jpg" class="rounded-full" alt="img">
+                                                </a>
+                                                <div class="ms-2">
+                                                    <h6 class="font-medium"><a href="invoice-details.html">Redesign Website</a></h6>
+                                                    <span class="text-[13px] inline-flex items-center">#INVOO2<i class="ti ti-circle-filled text-[4px] mx-1 text-primary"></i>Logistics</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-default">
+                                            <p class="text-[13px] mb-1">Payment</p>
+                                            <h6 class="font-medium">$3560</h6>
+                                        </td>
+                                        <td class="py-2 px-0 text-end text-default">
+                                            <span class="bg-danger-transparent text-danger text-[10px] font-medium px-[5px] leading-4 rounded inline-flex items-center"><i class="ti ti-circle-filled text-[5px] me-1"></i>Unpaid</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 px-0 text-default">
+                                            <div class="flex items-center">
+                                                <a href="invoice-details.html" class="size-[42px] flex items-center justify-center rounded-full">
+                                                    <img src="assets/img/users/user-40.jpg" class="rounded-full" alt="img">
+                                                </a>
+                                                <div class="ms-2">
+                                                    <h6 class="font-medium"><a href="invoice-details.html">Module Completion</a></h6>
+                                                    <span class="text-[13px] inline-flex items-center">#INVOO5<i class="ti ti-circle-filled text-[4px] mx-1 text-primary"></i>Yip Corp</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-default">
+                                            <p class="text-[13px] mb-1">Payment</p>
+                                            <h6 class="font-medium">$4175</h6>
+                                        </td>
+                                        <td class="py-2 px-0 text-end text-default">
+                                            <span class="bg-danger-transparent text-danger text-[10px] font-medium px-[5px] leading-4 rounded inline-flex items-center"><i class="ti ti-circle-filled text-[5px] me-1"></i>Unpaid</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 px-0 text-default">
+                                            <div class="flex items-center">
+                                                <a href="invoice-details.html" class="size-[42px] flex items-center justify-center rounded-full">
+                                                    <img src="assets/img/users/user-55.jpg" class="rounded-full" alt="img">
+                                                </a>
+                                                <div class="ms-2">
+                                                    <h6 class="font-medium"><a href="invoice-details.html">Change on Emp Module</a></h6>
+                                                    <span class="text-[13px] inline-flex items-center">#INVOO3<i class="ti ti-circle-filled text-[4px] mx-1 text-primary"></i>Ignis LLP</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-default">
+                                            <p class="text-[13px] mb-1">Payment</p>
+                                            <h6 class="font-medium">$6985</h6>
+                                        </td>
+                                        <td class="py-2 px-0 text-end text-default">
+                                            <span class="bg-danger-transparent text-danger text-[10px] font-medium px-[5px] leading-4 rounded inline-flex items-center"><i class="ti ti-circle-filled text-[5px] me-1"></i>Unpaid</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 px-0 text-default">
+                                            <div class="flex items-center">
+                                                <a href="invoice-details.html" class="size-[42px] flex items-center justify-center rounded-full">
+                                                    <img src="assets/img/users/user-42.jpg" class="rounded-full" alt="img">
+                                                </a>
+                                                <div class="ms-2">
+                                                    <h6 class="font-medium"><a href="invoice-details.html">Changes on the Board</a></h6>
+                                                    <span class="text-[13px] inline-flex items-center">#INVOO2<i class="ti ti-circle-filled text-[4px] mx-1 text-primary"></i>Ignis LLP</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-default">
+                                            <p class="text-[13px] mb-1">Payment</p>
+                                            <h6 class="font-medium">$1457</h6>
+                                        </td>
+                                        <td class="px-0 text-end text-default">
+                                            <span class="bg-danger-transparent text-danger text-[10px] font-medium px-[5px] leading-4 rounded inline-flex items-center"><i class="ti ti-circle-filled text-[5px] me-1"></i>Unpaid</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-0 text-default">
+                                            <div class="flex items-center">
+                                                <a href="invoice-details.html" class="size-[42px] flex items-center justify-center rounded-full">
+                                                    <img src="assets/img/users/user-44.jpg" class="rounded-full" alt="img">
+                                                </a>
+                                                <div class="ms-2">
+                                                    <h6 class="font-medium"><a href="invoice-details.html">Hospital Management</a></h6>
+                                                    <span class="text-[13px] inline-flex items-center">#INVOO6<i class="ti ti-circle-filled text-[4px] mx-1 text-primary"></i>HCL Corp</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-default">
+                                            <p class="text-[13px] mb-1">Payment</p>
+                                            <h6 class="font-medium">$6458</h6>
+                                        </td>
+                                        <td class="px-0 text-end text-default">
+                                            <span class="bg-success-transparent text-success text-[10px] font-medium px-[5px] leading-4 rounded inline-flex items-center"><i class="ti ti-circle-filled text-[5px] me-1"></i>Paid</span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <a href="invoice.html" class="btn bg-light border border-light text-gray-900 text-center py-1.5 px-3.5 hover:bg-light-900 hover:text-gray-900 text-[13px] leading-normal w-full mt-2">View All</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Invoices -->
+
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-6">
+
+                <!-- Projects -->
+                <div class="xl:col-span-7 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full overflow-x-auto">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Projects</h5>
+                            <div class="flex items-center">
+                                <div class="mb-2">
+                                    <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="pro-dropdown">
+                                        <i class="ti ti-calendar me-1"></i>This Week
+                                    </a>
+                                    <ul id="pro-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Month</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Week</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Today</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="overflow-x-auto">
+                                <table class="table w-full text-default bg-white mb-0">
+                                    <thead class="bg-light-900 text-gray-900 text-left">
+                                    <tr>
+                                        <th class="font-semibold py-2 px-5">ID</th>
+                                        <th class="font-semibold py-2 px-5">Name</th>
+                                        <th class="font-semibold py-2 px-5">Team</th>
+                                        <th class="font-semibold py-2 px-5">Hours</th>
+                                        <th class="font-semibold py-2 px-5">Deadline</th>
+                                        <th class="font-semibold py-2 px-5">Priority</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr class="border-b border-borderColor">
+                                        <td class="py-2 px-5 text-nowrap"><a href="project-details.html" class="text-default hover:text-primary">PRO-001</a></td>
+                                        <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Office Management App</a></h6></td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <div class="flex -space-x-2 rtl:space-x-reverse">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-02.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-03.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-05.jpg" alt="img">
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <p class="mb-1">15/255 Hrs</p>
+                                            <div class="progress progress-xs w-full" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-primary" style="width: 40%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">12/09/2024</td>
+                                        <td class="py-2 px-5 text-nowrap">
+													<span class="bg-danger text-white inline-flex items-center text-[10px] font-medium px-[5px] leading-4 rounded">
+														<i class="ti ti-point-filled me-1"></i>High
+													</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-borderColor">
+                                        <td class="py-2 px-5 text-nowrap"><a href="project-details.html" class="text-default hover:text-primary">PRO-002</a></td>
+                                        <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Clinic Management </a></h6></td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <div class="flex -space-x-2 rtl:space-x-reverse">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-06.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-07.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-08.jpg" alt="img">
+                                                <a class="size-6 bg-primary rounded-full text-white text-[10px] font-medium flex items-center justify-center hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out shrink-0" href="javascript:void(0);">
+                                                    +1
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <p class="mb-1">15/255 Hrs</p>
+                                            <div class="progress progress-xs w-full" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-primary" style="width: 40%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">24/10/2024</td>
+                                        <td class="py-2 px-5 text-nowrap">
+													<span class="bg-success text-white inline-flex items-center text-[10px] font-medium px-[5px] leading-4 rounded">
+														<i class="ti ti-point-filled me-1"></i>Low
+													</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-borderColor">
+                                        <td class="py-2 px-5 text-nowrap"><a href="project-details.html" class="text-default hover:text-primary">PRO-003</a></td>
+                                        <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Educational Platform</a></h6></td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <div class="flex -space-x-2 rtl:space-x-reverse">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-06.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-08.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-09.jpg" alt="img">
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <p class="mb-1">40/255 Hrs</p>
+                                            <div class="progress progress-xs w-full" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-primary" style="width: 50%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">18/02/2024</td>
+                                        <td class="py-2 px-5 text-nowrap">
+													<span class="bg-pink text-white inline-flex items-center text-[10px] font-medium px-[5px] leading-4 rounded">
+														<i class="ti ti-point-filled me-1"></i>Medium
+													</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-borderColor">
+                                        <td class="py-2 px-5 text-nowrap"><a href="project-details.html" class="text-default hover:text-primary">PRO-004</a></td>
+                                        <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Chat & Call Mobile App</a></h6></td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <div class="flex -space-x-2 rtl:space-x-reverse">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-11.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-12.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-13.jpg" alt="img">
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <p class="mb-1">35/155 Hrs</p>
+                                            <div class="progress progress-xs w-full" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-primary" style="width: 50%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">19/02/2024</td>
+                                        <td class="py-2 px-5 text-nowrap">
+													<span class="bg-danger text-white inline-flex items-center text-[10px] font-medium px-[5px] leading-4 rounded">
+														<i class="ti ti-point-filled me-1"></i>High
+													</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-borderColor">
+                                        <td class="py-2 px-5 text-nowrap"><a href="project-details.html" class="text-default hover:text-primary">PRO-005</a></td>
+                                        <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Travel Planning Website</a></h6></td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <div class="flex -space-x-2 rtl:space-x-reverse">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-17.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-18.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-19.jpg" alt="img">
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <p class="mb-1">50/235 Hrs</p>
+                                            <div class="progress progress-xs w-full" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-primary" style="width: 50%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">18/02/2024</td>
+                                        <td class="py-2 px-5 text-nowrap">
+													<span class="bg-pink text-white inline-flex items-center text-[10px] font-medium px-[5px] leading-4 rounded">
+														<i class="ti ti-point-filled me-1"></i>Medium
+													</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-borderColor">
+                                        <td class="py-2 px-5 text-nowrap"><a href="project-details.html" class="text-default hover:text-primary">PRO-006</a></td>
+                                        <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Service Booking Software</a></h6></td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <div class="flex -space-x-2 rtl:space-x-reverse">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-06.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-08.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-09.jpg" alt="img">
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <p class="mb-1">40/255 Hrs</p>
+                                            <div class="progress progress-xs w-full" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-primary" style="width: 50%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">20/02/2024</td>
+                                        <td class="py-2 px-5 text-nowrap">
+													<span class="bg-success text-white inline-flex items-center text-[10px] font-medium px-[5px] leading-4 rounded">
+														<i class="ti ti-point-filled me-1"></i>Low
+													</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 px-5 text-nowrap"><a href="project-details.html" class="text-default hover:text-primary">PRO-008</a></td>
+                                        <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Travel Planning Website</a></h6></td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <div class="flex -space-x-2 rtl:space-x-reverse">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-15.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-16.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-17.jpg" alt="img">
+                                                <a class="size-6 bg-primary rounded-full text-white text-[10px] font-medium flex items-center justify-center hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out shrink-0" href="javascript:void(0);">
+                                                    +2
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">
+                                            <p class="mb-1">15/255 Hrs</p>
+                                            <div class="progress progress-xs w-full" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-primary" style="width: 45%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-5 text-nowrap">17/10/2024</td>
+                                        <td class="py-2 px-5 text-nowrap">
+													<span class="bg-pink text-white inline-flex items-center text-[10px] font-medium px-[5px] leading-4 rounded">
+														<i class="ti ti-point-filled me-1"></i>Medium
+													</span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Projects -->
+
+                <!-- Tasks Statistics -->
+                <div class="xl:col-span-5 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Tasks Statistics</h5>
+                            <div class="flex items-center">
+                                <div class="mb-2">
+                                    <a href="javascript:void(0);" class="border rounded py-1 px-2 text-xs font-medium bg-white inline-flex items-center focus:bg-primary focus:border-primary focus:text-white text-gray-900"  data-dropdown-toggle="task-dropdown">
+                                        <i class="ti ti-calendar me-1"></i>This Week
+                                    </a>
+                                    <ul id="task-dropdown" class="hidden p-4 border rounded bg-white shadow-lg w-40 z-[1]">
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Month</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">This Week</a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="rounded p-2 flex items-center hover:bg-primary-transparent hover:text-primary text-gray-900">Today</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="chartjs-wrapper-demo relative mb-6">
+                                <div class="w-full h-48">
+                                    <canvas id="mySemiDonutChart" class="w-full h-full"></canvas>
+                                </div>
+                                <div class="absolute text-center top-1/2 left-1/2 -translate-x-1/2 transform attendance-canvas">
+                                    <p class="text-[13px] mb-1">Total Tasks</p>
+                                    <h3>124/165</h3>
+                                </div>
+                            </div>
+                            <div class="flex items-center flex-wrap">
+                                <div class="border-e border-borderColor text-center me-2 pe-2 mb-4">
+                                    <p class="text-[13px] inline-flex items-center mb-1"><i class="ti ti-circle-filled text-[10px] me-1 text-warning"></i>Ongoing</p>
+                                    <h5>24%</h5>
+                                </div>
+                                <div class="border-e border-borderColor text-center me-2 pe-2 mb-4">
+                                    <p class="text-[13px] inline-flex items-center mb-1"><i class="ti ti-circle-filled text-[10px] me-1 text-info"></i>On Hold </p>
+                                    <h5>10%</h5>
+                                </div>
+                                <div class="border-e border-borderColor text-center me-2 pe-2 mb-4">
+                                    <p class="text-[13px] inline-flex items-center mb-1"><i class="ti ti-circle-filled text-[10px] me-1 text-danger"></i>Overdue</p>
+                                    <h5>16%</h5>
+                                </div>
+                                <div class="text-center me-2 pe-2 mb-4">
+                                    <p class="text-[13px] inline-flex items-center mb-1"><i class="ti ti-circle-filled text-[10px] me-1 text-success"></i>Ongoing</p>
+                                    <h5>40%</h5>
+                                </div>
+                            </div>
+                            <div class="bg-dark text-white rounded-defaultradius p-4 pb-0 flex items-center justify-between">
+                                <div class="mb-2">
+                                    <h4 class="text-success">389/689 hrs</h4>
+                                    <p class="text-[13px] mb-0">Spent on Overall Tasks This Week</p>
+                                </div>
+                                <a href="tasks.html" class="btn bg-light border border-light text-xs text-gray-900 text-center py-1 px-2 hover:bg-light-900 hover:text-gray-900 text-[13px] leading-normal mb-2 text-nowrap">View All</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Tasks Statistics -->
+
+            </div>
+
+            <div class="grid grid-cols-1 xxl:grid-cols-12 xl:grid-cols-12 gap-6 mb-6">
+
+                <!-- Schedules -->
+                <div class="xxl:col-span-4 xl:col-span-12 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Schedules</h5>
+                            <a href="candidates.html" class="btn bg-light border border-light text-gray-900 text-center py-1.5 px-3.5 hover:bg-light-900 hover:text-gray-900 text-[13px] leading-normal mb-2">View All</a>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="bg-light p-4 rounded-defaultradius mb-6">
+                                <span class="bg-secondary text-white text-[10px] font-medium px-[5px] leading-4 inline-block rounded mb-1">UI/ UX Designer</span>
+                                <h6 class="mb-2 truncate">Interview Candidates - UI/UX Designer</h6>
+                                <div class="flex items-center flex-wrap">
+                                    <p class="text-[13px] mb-1 me-2"><i class="ti ti-calendar-event me-2"></i>Thu, 15 Feb 2025</p>
+                                    <p class="text-[13px] mb-1"><i class="ti ti-clock-hour-11 me-2"></i>01:00 PM - 02:20 PM</p>
+                                </div>
+                                <div class="flex items-center justify-between border-t border-borderColor mt-2 pt-4">
+                                    <div class="flex -space-x-2 rtl:space-x-reverse">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-49.jpg" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-13.jpg" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-11.jpg" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-22.jpg" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-58.jpg" alt="img">
+                                        <a class="size-6 bg-primary rounded-full text-white text-[10px] font-medium flex items-center justify-center hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out shrink-0" href="javascript:void(0);">
+                                            +3
+                                        </a>
+                                    </div>
+                                    <a href="#" class="btn bg-primary border border-primary text-white text-center py-1 px-2 hover:bg-primary-900 hover:text-white text-[10px] leading-normal">Join Meeting</a>
+                                </div>
+                            </div>
+                            <div class="bg-light p-4 rounded-defaultradius mb-0">
+                                <span class="bg-dark text-white text-[10px] font-medium px-[5px] leading-4 inline-block rounded mb-1">IOS Developer</span>
+                                <h6 class="mb-2 truncate">Interview Candidates - IOS Developer</h6>
+                                <div class="flex items-center flex-wrap">
+                                    <p class="text-[13px] mb-1 me-2"><i class="ti ti-calendar-event me-2"></i>Thu, 15 Feb 2025</p>
+                                    <p class="text-[13px] mb-1"><i class="ti ti-clock-hour-11 me-2"></i>02:00 PM - 04:20 PM</p>
+                                </div>
+                                <div class="flex items-center justify-between border-t border-borderColor mt-2 pt-4">
+                                    <div class="flex -space-x-2 rtl:space-x-reverse">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-49.jpg" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-13.jpg" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-11.jpg" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-22.jpg" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-58.jpg" alt="img">
+                                        <a class="size-6 bg-primary rounded-full text-white text-[10px] font-medium flex items-center justify-center hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out shrink-0" href="javascript:void(0);">
+                                            +3
+                                        </a>
+                                    </div>
+                                    <a href="#" class="btn bg-primary border border-primary text-white text-center py-1 px-2 hover:bg-primary-900 hover:text-white text-[10px] leading-normal">Join Meeting</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Schedules -->
+
+                <!-- Recent Activities -->
+                <div class="xxl:col-span-4 xl:col-span-6 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full">
+                        <div class="card-header pt-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Recent Activities</h5>
+                            <a href="activity.html" class="btn bg-light border border-light text-gray-900 text-center py-1.5 px-3.5 hover:bg-light-900 hover:text-gray-900 text-[13px] leading-normal mb-2">View All</a>
+                        </div>
+                        <div class="card-body p-5">
+                            <div class="mb-5">
+                                <div class="flex justify-between">
+                                    <div class="flex items-center w-full">
+                                        <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
+                                            <img src="assets/img/users/user-38.jpg" class="rounded-full" alt="img">
+                                        </a>
+                                        <div class="ms-2 flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <h6 class="font-medium truncate"><a href="javscript:void(0);">Matt Morgan</a></h6>
+                                                <p class="text-[13px]">05:30 PM</p>
+                                            </div>
+                                            <p class="text-[13px]">Added New Project <span class="text-primary">HRMS Dashboard</span></p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-start">
-                                <div class="flex items-center min-w-[80px]">
-                                    <span>09:20 AM</span>
-                                    <span><i class="ti ti-point-filled text-secondary text-[20px] relative z-2"></i></span>
-                                </div>
-                                <div class="flex-fill ps-3 pb-4 relative z-[1] before:content-[''] before:w-[1px] before:h-full before:border-l before:border-dashed before:border-gray-200 before:absolute before:left-[-11px] before:top-[5px] before:z-[-1]">
-                                    <div class="bg-light p-2 rounded">
-                                        <p class="font-medium text-gray-9 mb-1">Design Review Hospital, doctors Management Project</p>
-                                        <span>Review</span>
+                            <div class="mb-5">
+                                <div class="flex justify-between">
+                                    <div class="flex items-center w-full">
+                                        <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
+                                            <img src="assets/img/users/user-01.jpg" class="rounded-full" alt="img">
+                                        </a>
+                                        <div class="ms-2 flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <h6 class="font-medium truncate"><a href="javscript:void(0);">Jay Ze</a></h6>
+                                                <p class="text-[13px]">05:00 PM</p>
+                                            </div>
+                                            <p class="text-[13px]">Commented on Uploaded Document</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-start">
-                                <div class="flex items-center min-w-[80px]">
-                                    <span>09:18 AM</span>
-                                    <span><i class="ti ti-point-filled text-warning text-[20px] relative z-2"></i></span>
-                                </div>
-                                <div class="flex-fill ps-3 pb-4 relative z-[1] before:content-[''] before:w-[1px] before:h-full before:border-l before:border-dashed before:border-gray-200 before:absolute before:left-[-11px] before:top-[5px] before:z-[-1]">
-                                    <div class="bg-light p-2 rounded">
-                                        <p class="font-medium text-gray-9 mb-1">Birthday Celebration of Employee</p>
-                                        <span>Celebration</span>
+                            <div class="mb-5">
+                                <div class="flex justify-between">
+                                    <div class="flex items-center w-full">
+                                        <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
+                                            <img src="assets/img/users/user-19.jpg" class="rounded-full" alt="img">
+                                        </a>
+                                        <div class="ms-2 flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <h6 class="font-medium truncate"><a href="javscript:void(0);">Mary Donald</a></h6>
+                                                <p class="text-[13px]">05:30 PM</p>
+                                            </div>
+                                            <p class="text-[13px]">Approved Task Projects</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-start">
-                                <div class="flex items-center min-w-[80px]">
-                                    <span>09:10 AM</span>
-                                    <span><i class="ti ti-point-filled text-success text-[20px] relative z-2"></i></span>
+                            <div class="mb-5">
+                                <div class="flex justify-between">
+                                    <div class="flex items-center w-full">
+                                        <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
+                                            <img src="assets/img/users/user-11.jpg" class="rounded-full" alt="img">
+                                        </a>
+                                        <div class="ms-2 flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <h6 class="font-medium truncate"><a href="javscript:void(0);">George David</a></h6>
+                                                <p class="text-[13px]">06:00 PM</p>
+                                            </div>
+                                            <p class="text-[13px]">Requesting Access to Module Tickets</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex-fill ps-3 relative z-[1]">
-                                    <div class="bg-light p-2 rounded">
-                                        <p class="font-medium text-gray-9 mb-1">Update of Project Flow</p>
-                                        <span>Development</span>
+                            </div>
+                            <div class="mb-5">
+                                <div class="flex justify-between">
+                                    <div class="flex items-center w-full">
+                                        <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
+                                            <img src="assets/img/users/user-20.jpg" class="rounded-full" alt="img">
+                                        </a>
+                                        <div class="ms-2 flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <h6 class="font-medium truncate"><a href="javscript:void(0);">Aaron Zeen</a></h6>
+                                                <p class="text-[13px]">06:30 PM</p>
+                                            </div>
+                                            <p class="text-[13px]">Downloaded App Reportss</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <div class="flex justify-between">
+                                    <div class="flex items-center w-full">
+                                        <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
+                                            <img src="assets/img/users/user-08.jpg" class="rounded-full" alt="img">
+                                        </a>
+                                        <div class="ms-2 flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <h6 class="font-medium truncate"><a href="javscript:void(0);">Hendry Daniel</a></h6>
+                                                <p class="text-[13px]">05:30 PM</p>
+                                            </div>
+                                            <p class="text-[13px]">Completed New Project <span>HMS</span></p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!-- /Recent Activities -->
+
+                <!-- Birthdays -->
+                <div class="xxl:col-span-4 xl:col-span-6 flex">
+                    <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white w-full">
+                        <div class="card-header py-4 px-5 pb-2 flex items-center justify-between flex-wrap border-b border-borderColor">
+                            <h5 class="mb-2">Birthdays</h5>
+                            <a href="javascript:void(0);" class="btn bg-light border border-light text-gray-900 text-center py-1.5 px-3.5 hover:bg-light-900 hover:text-gray-900 text-[13px] leading-normal mb-2">View All</a>
+                        </div>
+                        <div class="card-body p-5 pb-1">
+                            <h6 class="mb-2">Today</h6>
+                            <div class="bg-light p-2 border border-borderColor border-dashed rounded-t mb-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                            <img src="assets/img/users/user-38.jpg" class="rounded-full" alt="img">
+                                        </a>
+                                        <div class="ms-2 overflow-hidden">
+                                            <h6 class="font-medium ">Andrew Jermia</h6>
+                                            <p class="text-[13px]">IOS Developer</p>
+                                        </div>
+                                    </div>
+                                    <a href="javascript:void(0);" class="btn bg-secondary border border-secondary text-white text-center py-1 px-2 hover:bg-secondary-900 hover:text-white text-[10px] leading-normal"><i class="ti ti-cake me-1"></i>Send</a>
+                                </div>
+                            </div>
+                            <h6 class="mb-2">Tomorow</h6>
+                            <div class="bg-light p-2 border border-borderColor border-dashed rounded-t mb-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                            <img src="assets/img/users/user-10.jpg" class="rounded-full" alt="img">
+                                        </a>
+                                        <div class="ms-2 overflow-hidden">
+                                            <h6 class="font-medium"><a href="javascript:void(0);">Mary Zeen</a></h6>
+                                            <p class="text-[13px]">UI/UX Designer</p>
+                                        </div>
+                                    </div>
+                                    <a href="javascript:void(0);" class="btn bg-secondary border border-secondary text-white text-center py-1 px-2 hover:bg-secondary-900 hover:text-white text-[10px] leading-normal"><i class="ti ti-cake me-1"></i>Send</a>
+                                </div>
+                            </div>
+                            <div class="bg-light p-2 border border-borderColor border-dashed rounded-t mb-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
+                                            <img src="assets/img/users/user-09.jpg" class="rounded-full" alt="img">
+                                        </a>
+                                        <div class="ms-2 overflow-hidden">
+                                            <h6 class="font-medium "><a href="javascript:void(0);">Antony Lewis</a></h6>
+                                            <p class="text-[13px]">Android Developer</p>
+                                        </div>
+                                    </div>
+                                    <a href="javascript:void(0);" class="btn bg-secondary border border-secondary text-white text-center py-1 px-2 hover:bg-secondary-900 hover:text-white text-[10px] leading-normal"><i class="ti ti-cake me-1"></i>Send</a>
+                                </div>
+                            </div>
+                            <h6 class="mb-2">25 Jan 2025</h6>
+                            <div class="bg-light p-2 border border-borderColor border-dashed rounded-t mb-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+											<span class="size-[42px] flex items-center justify-center rounded-full">
+												<img src="assets/img/users/user-12.jpg" class="rounded-full" alt="img">
+											</span>
+                                        <div class="ms-2 overflow-hidden">
+                                            <h6 class="font-medium ">Doglas Martini</h6>
+                                            <p class="text-[13px]">.Net Developer</p>
+                                        </div>
+                                    </div>
+                                    <a href="javascript:void(0);" class="btn bg-secondary border border-secondary text-white text-center py-1 px-2 hover:bg-secondary-900 hover:text-white text-[10px] leading-normal"><i class="ti ti-cake me-1"></i>Send</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /Birthdays -->
+
             </div>
+
         </div>
 
         <div class="footer sm:flex items-center justify-between bg-white border-t border-borderColor p-4">
@@ -5781,21 +6062,21 @@
     <!-- /Page Wrapper -->
 
     <!-- Add Leaves -->
-    <div id="add_leaves" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[1055] justify-center items-center flex-wrap w-full md:inset-0 h-[calc(100%-1rem)] max-h-full  transition-all duration-300 ease-in-out modal p-4">
+    <div id="add_leaves" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[1055] justify-center items-center flex-wrap w-full md:inset-0 h-[calc(100%-1rem)] max-h-full transition-all duration-300 ease-in-out p-4">
         <div class="relative p-4 w-full max-w-[500px] max-h-full">
             <div class="relative bg-white rounded-defaultradius">
                 <div class="flex items-center justify-between p-4 border-b border-borderColor">
-                    <h4 class="font-semibold">Add Leave</h4>
+                    <h4 class="font-semibold">Add Leaves</h4>
                     <button type="button" class="end-2.5 text-white bg-gray-500 hover:bg-danger hover:text-white rounded-full text-xs leading-normal size-5 ms-auto inline-flex justify-center items-center" data-modal-hide="add_leaves">
                         <i class="ti ti-x"></i>
                         <span class="sr-only">Close modal</span>
                     </button>
                 </div>
-                <form action="employee-dashboard.html">
+                <form action="index.html">
                     <div class="p-4">
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-y-4 gap-x-6">
-                            <div class="md:col-span-12">
-                                <div class="mb-3">
+                        <div id="default-styled-tab-content">
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-y-4 gap-x-6">
+                                <div class="md:col-span-12">
                                     <label class="block mb-1 text-sm leading-normal font-medium text-title">Employee Name</label>
                                     <select class="select">
                                         <option>Select</option>
@@ -5804,9 +6085,7 @@
                                         <option>Harvey Smith</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="md:col-span-12">
-                                <div class="mb-3">
+                                <div class="md:col-span-12">
                                     <label class="block mb-1 text-sm leading-normal font-medium text-title">Leave Type</label>
                                     <select class="select">
                                         <option>Select</option>
@@ -5815,9 +6094,7 @@
                                         <option>Annual Leave</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="md:col-span-6">
-                                <div class="mb-3">
+                                <div class="md:col-span-6">
                                     <label class="block mb-1 text-sm leading-normal font-medium text-title">From </label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 end-2 flex items-center pointer-events-none">
@@ -5826,9 +6103,7 @@
                                         <input type="text" class="flatpickr-input flat-datepickr bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" placeholder="dd/mm/yyyy">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="md:col-span-6">
-                                <div class="mb-3">
+                                <div class="md:col-span-6">
                                     <label class="block mb-1 text-sm leading-normal font-medium text-title">To </label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 end-2 flex items-center pointer-events-none">
@@ -5837,22 +6112,16 @@
                                         <input type="text" class="flatpickr-input flat-datepickr bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" placeholder="dd/mm/yyyy">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="md:col-span-6">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">No of Days</label>
-                                    <input type="text" class="bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400">
+                                <div class="md:col-span-6">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">No of Days </label>
+                                    <input type="text" class="bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400 disabled:bg-light disabled:text-default" disabled>
                                 </div>
-                            </div>
-                            <div class="md:col-span-6">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Remaining Days</label>
-                                    <input type="text" class="bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400">
+                                <div class="md:col-span-6">
+                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Remaining Days </label>
+                                    <input type="text" class="bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" value="8" disabled>
                                 </div>
-                            </div>
-                            <div class="md:col-span-12">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Reason</label>
+                                <div class="md:col-span-12">
+                                    <label for="message" class="block mb-1 text-sm leading-normal font-medium text-title">Reason </label>
                                     <textarea id="message" rows="3" class="block p-2.5 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
                                 </div>
                             </div>
@@ -5861,7 +6130,8 @@
                     <div class="flex items-center justify-end p-4 border-t border-borderColor">
                         <button data-modal-hide="add_leaves" type="button" class="btn bg-light border border-light text-gray-900 text-center hover:bg-light-900 hover:text-gray-900 font-medium me-2">Cancel
                         </button>
-                        <button type="submit" class="btn bg-primary border border-primary text-white text-center hover:bg-primary-900 hover:text-white font-medium">Add Leaves
+                        <button type="submit" class="btn bg-primary border border-primary text-white text-center hover:bg-primary-900 hover:text-white font-medium">Add
+                            Leave
                         </button>
                     </div>
                 </form>
@@ -5869,181 +6139,6 @@
         </div>
     </div>
     <!-- /Add Leaves -->
-
-    <!-- Edit Task -->
-    <div id="edit_task" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[1055] justify-center items-center flex-wrap w-full md:inset-0 h-[calc(100%-1rem)] max-h-full transition-all duration-300 ease-in-out p-4">
-        <div class="relative p-4 w-full max-w-[500px] max-h-full">
-            <div class="relative bg-white rounded-defaultradius">
-                <div class="flex items-center justify-between p-4 border-b border-borderColor">
-                    <h4 class="font-semibold">Edit Task  </h4>
-                    <button type="button" class="end-2.5 text-white bg-gray-500 hover:bg-danger hover:text-white rounded-full text-xs leading-normal size-5 ms-auto inline-flex justify-center items-center" data-modal-hide="edit_task">
-                        <i class="ti ti-x"></i>
-                        <span class="sr-only">Close modal</span>
-                    </button>
-                </div>
-                <form action="employee-dashboard.html">
-                    <div class="p-4">
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-y-4 gap-x-6">
-                            <div class="md:col-span-12">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Todo Title</label>
-                                    <input type="text" class="bg-white border-borderColor text-gray-900 text-sm rounded-input block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" value="Patient appointment booking">
-                                </div>
-                            </div>
-                            <div class="md:col-span-6">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Due Date</label>
-                                    <div class="relative">
-                                        <div class="absolute inset-y-0 end-2 flex items-center pointer-events-none">
-                                            <i class="ti ti-calendar text-gray-600 text-base leading-normal"></i>
-                                        </div>
-                                        <input type="text" class="flatpickr-input flat-datepickr bg-white border-borderColor text-gray-900 text-sm rounded-input  block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" placeholder="dd/mm/yyyy">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="md:col-span-6">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Project</label>
-                                    <select class="select">
-                                        <option>Select</option>
-                                        <option selected>Office Management</option>
-                                        <option>Clinic Management </option>
-                                        <option>Educational Platform</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="md:col-span-12">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Team Members</label>
-                                    <input class="input-tags bg-white border-borderColor text-gray-900 text-sm rounded-input block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400" placeholder="Add new" type="text" data-role="tagsinput"  name="Label" value="Jerald,Andrew,Philip">
-                                </div>
-                            </div>
-                            <div class="md:col-span-6">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Tag</label>
-                                    <select class="select">
-                                        <option>Select</option>
-                                        <option>Internal</option>
-                                        <option selected>Projects</option>
-                                        <option>Meetings</option>
-                                        <option>Reminder</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="md:col-span-6">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Status</label>
-                                    <select class="select">
-                                        <option>Select</option>
-                                        <option selected>Inprogress</option>
-                                        <option>Completed</option>
-                                        <option>Pending</option>
-                                        <option>Onhold</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="md:col-span-12">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Priority</label>
-                                    <select class="select">
-                                        <option>Select</option>
-                                        <option selected>Medium</option>
-                                        <option>High</option>
-                                        <option>Low</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="md:col-span-12">
-                                <label class="block mb-1 text-sm leading-normal font-medium text-title">Who Can See this Task?</label>
-                                <div class="flex items-center">
-                                    <div class="form-check me-3">
-                                        <input class="size-3.5 border-borderColor bg-white text-primary focus:ring-0" type="radio" name="flexRadioDefault" id="flexRadioDefault4">
-                                        <label class="form-check-label text-dark" for="flexRadioDefault4">
-                                            Public
-                                        </label>
-                                    </div>
-                                    <div class="form-check me-3">
-                                        <input class="size-3.5 border-borderColor bg-white text-primary focus:ring-0" type="radio" name="flexRadioDefault" id="flexRadioDefault5" checked="">
-                                        <label class="form-check-label text-dark" for="flexRadioDefault5">
-                                            Private
-                                        </label>
-                                    </div>
-                                    <div class="form-check ">
-                                        <input class="size-3.5 border-borderColor bg-white text-primary focus:ring-0" type="radio" name="flexRadioDefault" id="flexRadioDefault6">
-                                        <label class="form-check-label text-dark" for="flexRadioDefault6">
-                                            Admin Only
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="md:col-span-12">
-                                <div class="mb-3">
-                                    <label class="block mb-1 text-sm leading-normal font-medium text-title">Descriptions</label>
-                                    <div class="summernote"></div>
-                                </div>
-                            </div>
-                            <div class="md:col-span-12">
-                                <label class="block mb-1 text-sm leading-normal font-medium text-title">Upload Attachment</label>
-                                <div class="bg-gray-100 rounded p-2">
-                                    <div class="profile-uploader border-b mb-2 pb-2">
-                                        <div class="drag-upload-btn btn bg-white border text-dark text-sm text-center leading-4 relative py-1 px-2 me-2">
-                                            Select File
-                                            <input type="file" class="block mb-1 text-sm leading-normal font-medium text-title image-sign hidden" multiple>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center justify-between border-b mb-2 pb-2">
-                                        <div class="flex items-center">
-                                            <h6 class="text-xs font-medium mr-1">Logo.zip</h6>
-                                            <span class="badge bg-blue-100 text-blue-700 px-2 py-1 text-xs rounded">21MB</span>
-                                        </div>
-                                        <a href="#" class="btn btn-sm p-1 text-gray-500 hover:text-red-500">
-                                            <i class="ti ti-trash"></i>
-                                        </a>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <h6 class="text-xs font-medium mr-1">Files.zip</h6>
-                                            <span class="badge bg-blue-100 text-blue-700 px-2 py-1 text-xs rounded">25MB</span>
-                                        </div>
-                                        <a href="#" class="btn btn-sm p-1 text-gray-500 hover:text-red-500">
-                                            <i class="ti ti-trash"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-end p-4 border-t border-borderColor">
-                        <button data-modal-hide="edit_task" type="button" class="btn bg-light border border-light text-gray-900 text-center hover:bg-light-900 hover:text-gray-900 font-medium me-2">Cancel
-                        </button>
-                        <button type="submit" class="btn bg-primary border border-primary text-white text-center hover:bg-primary-900 hover:text-white font-medium">Save
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- /Edit Task -->
-
-    <!-- Delete Modal -->
-    <div id="delete_modal" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[1055] justify-center items-center flex-wrap w-full md:inset-0 h-[calc(100%-1rem)] max-h-full  transition-all duration-300 ease-in-out modal p-4">
-        <div class="relative p-4 w-full max-w-sm max-h-full">
-            <div class="relative bg-white rounded-defaultradius">
-                <div class="p-4 text-center">
-						<span class="size-[60px] rounded bg-danger-100 text-danger inline-flex items-center justify-center mb-4">
-							<i class="ti ti-trash-x text-4xl leading-normal"></i>
-						</span>
-                    <h4 class="mb-1">Confirm Delete</h4>
-                    <p class="mb-4">You want to delete all the marked items, this cant be undone once you delete.</p>
-                    <div class="flex justify-center">
-                        <a href="javascript:void(0);" class="btn bg-light border border-light text-gray-900 text-center hover:bg-light-900 hover:text-gray-900 me-4" data-modal-hide="delete_modal">Cancel</a>
-                        <a href="employee-dashboard.html" class="btn bg-danger border border-danger text-white text-center hover:bg-danger-900 hover:text-white">Yes, Delete</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- /Delete Modal -->
 
 </div>
 <!-- /Main Wrapper -->
