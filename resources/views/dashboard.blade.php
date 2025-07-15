@@ -7522,4 +7522,4 @@
     <!-- /Main Wrapper -->
 </x-layouts.app>
     <!-- /Main Wrapper -->
-</x-layouts.app>
+
