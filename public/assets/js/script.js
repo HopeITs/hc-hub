@@ -76,7 +76,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 				},
 			 }
 		});
-	}	
+	}
 
 	// Loader
 	setTimeout(function () {
@@ -98,7 +98,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 			}
 		});
 	}
-	
+
 	// toggle-password
 	if($('.toggle-password').length > 0) {
 		$(document).on('click', '.toggle-password', function() {
@@ -134,11 +134,11 @@ Template Name: Smarthr - Bootstrap Admin Template
 		});
 	}
 
-	// Select 2	
+	// Select 2
 	if ($('.select2').length > 0) {
 	 	$(".select2").select2();
 	}
-	
+
 	if ($('.select').length > 0) {
 		$('.select').select2({
 			minimumResultsForSearch: -1,
@@ -167,15 +167,15 @@ Template Name: Smarthr - Bootstrap Admin Template
 
 	if($('.summernote').length > 0) {
 		$('.summernote').summernote({
-			height: 100,  
-			minHeight: null,           
-			maxHeight: null,      
+			height: 100,
+			minHeight: null,
+			maxHeight: null,
 			focus: true,
 			toolbar: [
 				['fontsize', ['fontsize']],
 				['font', ['bold', 'italic', 'underline', 'clear', 'strikethrough']],
 				['insert', ['picture']]
-		  ],          
+		  ],
 		});
 	}
 
@@ -224,7 +224,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 		$('.sidebar-menu ul li.submenu a.active').parents('li:last').children('a:first').addClass('active').trigger('click');
 	}
 
-	
+
 	// Sidebar Initiate
 	init();
 	$(document).on('mouseover', function(e) {
@@ -277,7 +277,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 			$('.table').parent().addClass('table-responsive');
 		});
 	}, 1000);
-	
+
 	// Date Range Picker
 
 	if($('.bookingrange').length > 0) {
@@ -302,7 +302,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 		booking_range(start, end);
 	}
 
-	
+
 	if($('.daterange').length > 0) {
 		$('.daterange').daterangepicker({
 			autoUpdateInput: false,  // Prevents immediate update of input field
@@ -322,12 +322,12 @@ Template Name: Smarthr - Bootstrap Admin Template
 			var textLength = $(this).val().length;
 			$(this).css('width', (textLength + 10) + 'px'); // 10ch adds space for padding
 		});
-	
+
 		// Event when the user selects a date
 		$('.daterange').on('apply.daterangepicker', function(ev, picker) {
 			$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
 		});
-	
+
 		// Event for clearing the selected date
 		$('.daterange').on('cancel.daterangepicker', function(ev, picker) {
 			$(this).val('');  // Resets to placeholder
@@ -358,7 +358,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 		return false;
 	});
 
-	var myDiv = document.querySelector('.sticky-sidebar-one');	
+	var myDiv = document.querySelector('.sticky-sidebar-one');
 
 	$('.themecolorset').on('click', function(){
 		$('.themecolorset').removeClass('active');
@@ -391,7 +391,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 	var selectAllItems = "#select-all2";
 	var checkboxItem = ".form-check.form-check-md :checkbox";
 	$(selectAllItems).on('click', function(){
-		
+
 		if (this.checked) {
 		$(checkboxItem).each(function() {
 			this.checked = true;
@@ -401,9 +401,9 @@ Template Name: Smarthr - Bootstrap Admin Template
 			this.checked = false;
 		});
 		}
-		
+
 	});
-	
+
 	if(window.location.hash == "#LightMode"){
 		localStorage.setItem('theme', 'dark');
 	}
@@ -413,7 +413,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 		}
 	}
 
-	
+
 	$('ul.tabs li').on('click', function(){
 		var $this = $(this);
 		var $theTab = $(this).attr('id');
@@ -424,7 +424,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 		  $this.closest('.tabs_wrapper').find('ul.tabs li, .tabs_container .tab_content').removeClass('active');
 		  $('.tabs_container .tab_content[data-tab="'+$theTab+'"], ul.tabs li[id="'+$theTab+'"]').addClass('active');
 		}
-		
+
 	});
 
 	// Date Range Picker
@@ -461,7 +461,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 			}
 		});
 	}
-	
+
 	// Collapse Header
 	if($('.btnFullscreen').length > 0) {
 		const btnFullscreenElements = document.getElementsByClassName('btnFullscreen');
@@ -483,7 +483,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 				}
 			}
 		}
-	} 
+	}
 
 	if($('#collapse-header').length > 0) {
 		document.getElementById('collapse-header').onclick = function() {
@@ -562,7 +562,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 		});
 	}
 
-	if($('.flat-datepickr').length > 0 ){		
+	if($('.flat-datepickr').length > 0 ){
 		flatpickr(".flat-datepickr", {
 			dateFormat: "d-m-Y",
 		});
@@ -575,14 +575,14 @@ Template Name: Smarthr - Bootstrap Admin Template
 			time_24hr: true // Ensures the picker uses a 24-hour clock
 		});
 	}
-	if($('.flat-monthpickr').length > 0 ){		
+	if($('.flat-monthpickr').length > 0 ){
 		flatpickr(".flat-monthpickr", {
 			shorthand: true, //defaults to false
           dateFormat: "m-Y", //defaults to "F Y"
 		});
 	}
 
-	// Upload Image 
+	// Upload Image
 
 	$('.image-sign').on('change', function(){
 		$(this).closest('.upload-pic').find(".frames").html('');
@@ -613,15 +613,15 @@ Template Name: Smarthr - Bootstrap Admin Template
 
 			if (activeTab === currentTab) {
 				if ($(currentTab).is(':visible')) {
-					$(currentTab).hide(); 
+					$(currentTab).hide();
 					activeTab = null;
 				} else {
-					$(currentTab).show(); 
+					$(currentTab).show();
 					activeTab = currentTab;
 				}
 			} else {
-				$('#myTabContent .hidden').hide(); 
-				$(currentTab).show(); 
+				$('#myTabContent .hidden').hide();
+				$(currentTab).show();
 				activeTab = currentTab;
 			}
 		});
@@ -639,7 +639,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 
 	var selectAllItems = "#select-all";
 	var checkboxItem = ":checkbox";
-	$(selectAllItems).on('click', function(){	
+	$(selectAllItems).on('click', function(){
 		if (this.checked) {
 		$(checkboxItem).each(function() {
 			this.checked = true;
@@ -650,7 +650,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 		});
 		}
 
-		
+
 	});
 
 	function toggleFullscreen(elem) {
@@ -684,7 +684,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 			const tabs = document.querySelectorAll('[data-tabs-target]');
 			const contents = document.querySelectorAll('.sign-tab-content > div');
 			const radios = document.querySelectorAll('input[type="radio"][name="email"]');
-		
+
 			// Function to switch tabs
 			function switchTab(targetId) {
 				// Remove active class and aria-selected from all tabs
@@ -692,33 +692,33 @@ Template Name: Smarthr - Bootstrap Admin Template
 					tab.classList.remove('active');
 					tab.setAttribute('aria-selected', 'false');
 				});
-		
+
 				// Hide all tab content
 				contents.forEach(content => content.classList.add('hidden'));
-		
+
 				// Activate the selected tab and show its content
 				const targetTab = document.querySelector(`[data-tabs-target="${targetId}"]`);
 				const targetContent = document.querySelector(targetId);
-		
+
 				if (targetTab && targetContent) {
 					targetTab.classList.add('active');
 					targetTab.setAttribute('aria-selected', 'true');
 					targetContent.classList.remove('hidden');
 				}
 			}
-		
+
 			// Add click event listeners to tabs
 			tabs.forEach(tab => {
 				tab.addEventListener('click', (event) => {
 					const targetId = tab.getAttribute('data-tabs-target');
 					switchTab(targetId);
-		
+
 					// Sync radio button state
 					const radio = tab.querySelector('input[type="radio"]');
 					if (radio) radio.checked = true;
 				});
 			});
-		
+
 			// Add change event listeners to radio buttons
 			radios.forEach(radio => {
 				radio.addEventListener('change', () => {
@@ -728,7 +728,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 					}
 				});
 			});
-		
+
 			// Initialize: Show the active tab content on page load
 			const activeTab = document.querySelector('.nav .active');
 			if (activeTab) {
@@ -737,7 +737,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 			}
 		});
 	}
-		
+
 
 	/*const modal = document.getElementsByClassName('modal');
 
@@ -778,7 +778,7 @@ function hide() {
 	});
 });*/
 
-	
+
 })();
 
 
