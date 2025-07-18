@@ -1,13 +1,13 @@
 <section class="min-h-screen bg-gray-100 flex items-center justify-center px-4">
     <div class="w-full max-w-[420px] mx-auto">
         <!-- Logo -->
-        <div class="text-center mb-6">
+        <div class="text-center mb-12">
             <img src="{{ asset('assets/img/001_HC.svg') }}" class="mx-auto w-36" alt="Logo" />
         </div>
 
         <!-- Login Form -->
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-center mb-6">
+        <div class="bg-white rounded-lg shadow p-8">
+            <div class="text-center mb-12">
                 <h2 class="text-[24px] font-semibold text-title mb-2">Sign In</h2>
                 <p class="text-sm text-[#6c757d]">Please enter your details to sign in</p>
             </div>
@@ -24,7 +24,7 @@
                         <input
                             type="email" id="email"
                             wire:model.defer="email"
-                            class="bg-gray-100 border border-borderColor text-sm rounded-input block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400"
+                            class="bg-gray-100 border border-borderColor text-sm rounded-input block w-full py-2 px-2.5  h-[38px] placeholder:text-gray-400"
                             placeholder="email@example.com"
                             autocomplete="email"
                             required
@@ -38,12 +38,12 @@
 
                 <!-- Password -->
                 <div>
-                    <label class="block mb-1 text-sm font-medium text-title">Password</label>
+                    <label class="block mb-1 text-sm font-medium text-title mt-6">Password</label>
                     <div class="relative">
                         <input
                             type="password"
                             wire:model.defer="password"
-                            class="bg-white border border-borderColor text-sm rounded-input block w-full py-2 px-2.5 h-[38px] placeholder:text-gray-400"
+                            class="bg-gray-100 border border-borderColor text-sm rounded-input block w-full py-2 px-2.5  h-[38px] placeholder:text-gray-400"
                             placeholder="••••••••"
                             autocomplete="current-password"
                             required
@@ -54,12 +54,12 @@
                 </div>
 
                 <!-- Remember & Forgot -->
-                <div class="flex items-center justify-between text-sm">
+                <div class="flex py-3 items-center justify-between text-sm">
                     <label class="flex items-center">
                         <input
                             type="checkbox"
                             wire:model="remember"
-                            class="size-4 bg-white border border-borderColor rounded text-primary me-2"
+                            class="size-4 bg-white border border-borderColor rounded text-primary mr-1 "
                         />
                         <span>Remember Me</span>
                     </label>

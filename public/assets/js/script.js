@@ -404,14 +404,7 @@ Template Name: Smarthr - Bootstrap Admin Template
 
 	});
 
-	if(window.location.hash == "#LightMode"){
-		localStorage.setItem('theme', 'dark');
-	}
-	else {
-		if(window.location.hash == "#DarkMode"){
-			localStorage.setItem('theme', 'light');
-		}
-	}
+
 
 
 	$('ul.tabs li').on('click', function(){

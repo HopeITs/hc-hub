@@ -12,7 +12,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
-#[Layout('components.layouts.auth')]
+#[Layout('components.layouts.auth.simple')]
 class Login extends Component
 {
     #[Validate('required|string|email')]
@@ -43,7 +43,6 @@ class Login extends Component
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        Session::flash('status', 'You are now logged in!');
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 
@@ -74,5 +73,10 @@ class Login extends Component
     protected function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+    }
+
+    public function render()
+    {
+        return view('livewire.auth.login');
     }
 }
