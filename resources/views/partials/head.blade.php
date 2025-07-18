@@ -15,8 +15,7 @@
 <link rel="icon" href="{{ asset('assets/img/favicon.png') }}" type="image/x-icon">
 <link rel="shortcut icon" href="{{ asset('assets/img/favicon.png') }}" type="image/x-icon">
 
-<!-- Theme Script js -->
-<script src="{{ asset('assets/js/theme-script.js') }}"></script>
+
 
 <!-- Feather CSS -->
 <link rel="stylesheet" href="{{ asset('assets/plugins/icons/feather/feather.css') }}">

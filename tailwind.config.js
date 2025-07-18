@@ -59,7 +59,7 @@ export default {
                 '40': '1050',
             },
             colors: {
-                'default': '#6B7280',
+                // 'default': '#6B7280',
                 'title': '#202C4B',
                 'borderColor': '#E5E7EB',
                 'darkBorderColor': '#1F2228',
@@ -69,7 +69,7 @@ export default {
                 'dark-mode-body':'#131313',
                 'dark-color':'#D8DFEE',
                 'primary': {
-                    DEFAULT: '#EF4444', // Red-500
+                    DEFAULT: '#be1f24', // Red-500
                     100: '#FEE2E2',
                     200: '#FECACA',
                     300: '#FCA5A5',
@@ -233,6 +233,8 @@ export default {
                 'dark-mode-dark':'#0D0D0D',
                 'dark-mode-transparent': '#212324',
                 'dark-border':'#1F2228',
+                'input-gray': '#f5f6fa',
+
             },
 
             backgroundImage: {
