@@ -20,9 +20,6 @@
     <link rel="icon" href="{{ asset('assets/img/favicon.png') }}" type="image/x-icon">
     <link rel="shortcut icon" href="{{ asset('assets/img/favicon.png') }}" type="image/x-icon">
 
-    <!-- Theme Script js -->
-    <script src="{{ asset('assets/js/theme-script.js') }}"></script>
-
     <!-- Feather CSS -->
     <link rel="stylesheet" href="{{ asset('assets/plugins/icons/feather/feather.css') }}">
 
@@ -56,9 +53,8 @@
     <link rel="stylesheet" href="{{ asset('assets/plugins/@simonwep/pickr/themes/nano.min.css') }}">
 
     <!-- Main CSS -->
-    <link rel="stylesheet" href="{{asset('assets/dist/style.css')}}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <link rel="stylesheet" href="{{ asset('assets/dist/style.css') }}">
 </head>
 
 <body class="antialiased bg-light text-default layout-modern">
@@ -76,10 +72,10 @@
 
             <div class="header-left hidden relative float-left text-center h-[50px] z-[1] media-max-md:flex">
                 <a href="index.html" class="logo">
-                    <img src="assets/img/logo.svg" alt="Logo">
+                    <img src="{{ asset('assets/img/logo.svg') }}" alt="Logo">
                 </a>
                 <a href="index.html" class="dark-logo">
-                    <img src="assets/img/logo-white.svg" alt="Logo">
+                    <img src="{{ asset('assets/img/logo-white.svg') }}" alt="Logo">
                 </a>
             </div>
 
@@ -1077,7 +1073,7 @@
                                         <a href="activity.html">
                                             <div class="flex">
 													<span class="flex items-center size-[45px] me-2 shrink-0">
-														<img src="assets/img/profiles/avatar-27.jpg" alt="Profile" class="rounded">
+														<img src="{{ asset('assets/img/profiles/avatar-27.jpg') }}" alt="Profile" class="rounded">
 													</span>
                                                 <div class="grow">
                                                     <p class="mb-1"><span class="text-title font-semibold">Shawn</span> performance in Math is below the threshold.</p>
@@ -1090,7 +1086,7 @@
                                         <a href="activity.html" class="pb-0">
                                             <div class="flex">
 													<span class="flex items-center size-[45px] me-2 shrink-0">
-														<img src="assets/img/profiles/avatar-23.jpg" alt="Profile" class="rounded">
+														<img src="{{ asset('assets/img/profiles/avatar-23.jpg') }}" alt="Profile" class="rounded">
 													</span>
                                                 <div class="grow">
                                                     <p class="mb-1"><span class="text-title font-semibold">Sylvia</span> added appointment on 02:00 PM</p>
@@ -1108,7 +1104,7 @@
                                         <a href="activity.html">
                                             <div class="flex">
 													<span class="flex items-center size-[45px] me-2 shrink-0">
-														<img src="assets/img/profiles/avatar-25.jpg" alt="Profile" class="rounded">
+														<img src="{{ asset('assets/img/profiles/avatar-25.jpg') }}" alt="Profile" class="rounded">
 													</span>
                                                 <div class="grow">
                                                     <p class="mb-1">New student record <span class="text-title font-semibold"> George</span> is created by <span class="text-title font-semibold">Teressa</span></p>
@@ -1121,7 +1117,7 @@
                                         <a href="activity.html">
                                             <div class="flex">
 													<span class="flex items-center size-[45px] me-2 shrink-0">
-														<img src="assets/img/profiles/avatar-01.jpg" alt="Profile" class="rounded">
+														<img src="{{ asset('assets/img/profiles/avatar-01.jpg') }}" alt="Profile" class="rounded">
 													</span>
                                                 <div class="grow">
                                                     <p class="mb-1">A new teacher record for <span class="text-title font-semibold">Elisa</span> </p>
@@ -1140,7 +1136,7 @@
                         <div class="me-1">
                             <button data-dropdown-toggle="profile-dropdown" class="flex items-center justify-center" type="button">
 									<span class="relative">
-										<img src="assets/img/profiles/avatar-12.jpg" alt="Img" class="size-6 rounded-full">
+										<img src="{{ asset('assets/img/profiles/avatar-12.jpg') }}" alt="Img" class="size-6 rounded-full">
 										<span class="right-0 bottom-0 absolute  w-2 h-2 bg-success border-2 border-white  rounded-full"></span>
 									</span>
                             </button>
@@ -1148,7 +1144,7 @@
                                 <div class="px-[20px] py-4">
                                     <div class="flex items-center">
 												<span class="size-[45px] me-2">
-													<img src="assets/img/profiles/avatar-12.jpg" alt="img" class="rounded-full border-2 border-gray-100">
+													<img src="{{ asset('assets/img/profiles/avatar-12.jpg') }}" alt="img" class="rounded-full border-2 border-gray-100">
 												</span>
                                         <div>
                                             <h5 class="mb-0">Kevin Larry</h5>
@@ -1215,20 +1211,20 @@
         <!-- Logo -->
         <div class="sidebar-logo fixed h-[50px] w-sidebar relative pt-3 px-3">
             <a href="index.html" class="logo logo-normal">
-                <img src="assets/img/logo.svg" alt="Logo">
+                <img src="{{ asset('assets/img/logo.svg') }}" alt="Logo">
             </a>
             <a href="index.html" class="logo-small hidden">
-                <img src="assets/img/logo-small.svg" alt="Logo">
+                <img src="{{ asset('assets/img/logo-small.svg') }}" alt="Logo">
             </a>
             <a href="index.html" class="dark-logo hidden">
-                <img src="assets/img/logo-white.svg" alt="Logo">
+                <img src="{{ asset('assets/img/logo-white.svg') }}" alt="Logo">
             </a>
         </div>
         <!-- /Logo -->
         <div class="modern-profile p-3 pb-0 ">
             <div class="text-center rounded bg-light p-3 mb-4 user-profile flex items-center justify-center flex-col">
                 <div class="relative inline-flex items-center justify-center size-[45px] online mb-3">
-                    <img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="rounded-full">
+                    <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="rounded-full">
                     <div class="absolute inline-flex items-center justify-center w-3 h-3 text-xs font-bold text-white bg-success border-2 border-white rounded-full top-8 end-0 dark:border-gray-900"></div>
                 </div>
                 <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
@@ -1245,7 +1241,7 @@
         <div class="sidebar-header p-3 pb-0 pt-2 ">
             <div class="text-center rounded bg-light p-2 mb-4 sidebar-profile flex items-center">
                 <div class="size-8 onlin">
-                    <img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="rounded-full">
+                    <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="rounded-full">
                 </div>
                 <div class="text-start sidebar-profile-info ms-2">
                     <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
@@ -3142,7 +3138,7 @@
                 </ul>
                 <div class="xl:flex items-center d-none">
                     <a href="#" class="me-3 avatar avatar-sm">
-                        <img src="assets/img/profiles/avatar-07.jpg" alt="profile" class="rounded-full">
+                        <img src="{{ asset('assets/img/profiles/avatar-07.jpg') }}" alt="profile" class="rounded-full">
                     </a>
                     <a href="#" class="btn btn-icon btn-sm rounded-full mode-toggle">
                         <i class="ti ti-sun"></i>
@@ -3158,7 +3154,7 @@
         <div class="sidebar sidebar-twocol">
             <div class="twocol-mini">
                 <a href="index.html" class="logo-small">
-                    <img src="assets/img/logo-small.svg" alt="Logo">
+                    <img src="{{ asset('assets/img/logo-small.svg') }}" alt="Logo">
                 </a>
                 <div class="sidebar-left slimscroll">
                     <div class="nav flex-column items-center nav-pills" id="sidebar-tabs" role="tablist" aria-orientation="vertical">
@@ -3212,17 +3208,17 @@
             <div class="sidebar-right">
                 <div class="sidebar-logo mb-4">
                     <a href="index.html" class="logo logo-normal">
-                        <img src="assets/img/logo.svg" alt="Logo">
+                        <img src="{{ asset('assets/img/logo.svg') }}" alt="Logo">
                     </a>
                     <a href="index.html" class="dark-logo">
-                        <img src="assets/img/logo-white.svg" alt="Logo">
+                        <img src="{{ asset('assets/img/logo-white.svg') }}" alt="Logo">
                     </a>
                 </div>
                 <div class="sidebar-scroll">
                     <h6 class="mb-3">Welcome to SmartHR</h6>
                     <div class="text-center rounded bg-light p-3 mb-4">
                         <div class="flex items-center size-[45px] online mb-3">
-                            <img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="rounded-full">
+                            <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="rounded-full">
                         </div>
                         <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
                         <p class="text-[10px]">System Admin</p>
@@ -3843,7 +3839,7 @@
         <div class="sidebar sidebar-stacked" style="display: flex !important;">
             <div class="stacked-mini">
                 <a href="index.html" class="logo-small">
-                    <img src="assets/img/logo-small.svg" alt="Logo">
+                    <img src="{{ asset('assets/img/logo-small.svg') }}" alt="Logo">
                 </a>
                 <div class="sidebar-left slimscroll">
                     <div class="flex items-center flex-column">
@@ -3882,7 +3878,7 @@
                     <h6 class="mb-3">Welcome to SmartHR</h6>
                     <div class="sidebar-profile text-center rounded bg-light p-3 mb-4">
                         <div class="flex items-center size-[45px] online mb-3">
-                            <img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="rounded-full">
+                            <img src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="Img" class="rounded-full">
                         </div>
                         <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
                         <p class="text-[10px]">System Admin</p>
@@ -4590,7 +4586,7 @@
                 <div class="card-body flex items-center justify-between flex-wrap p-5 pb-1">
                     <div class="flex items-center mb-4">
 							<span class="flex items-center justify-center shrink-0 size-[60px]">
-								<img src="assets/img/profiles/avatar-31.jpg" class="rounded-full" alt="img">
+								<img src="{{ asset('assets/img/profiles/avatar-31.jpg') }}" class="rounded-full" alt="img">
 							</span>
                         <div class="ms-4">
                             <h3 class="mb-2">Welcome Back, Adrian <a href="javascript:void(0);" class="size-[22px] inline-flex items-center justify-center bg-dark-transparent text-gray-500 hover:bg-gray-300 hover:text-gray-500 rounded-full"><i class="ti ti-edit text-sm leading-none"></i></a></h3>
@@ -4813,7 +4809,7 @@
 											<i class="ti ti-award-filled text-primary text-2xl leading-none"></i>
 										</span>
                                     <a href="employee-details.html" class="size-8 me-2">
-                                        <img src="assets/img/profiles/avatar-24.jpg" class="rounded-full border border-white" alt="img">
+                                        <img src="{{ asset('assets/img/profiles/avatar-24.jpg') }}" class="rounded-full border border-white" alt="img">
                                     </a>
                                     <div>
                                         <h6 class="truncate mb-1 fs-14 font-medium"><a href="employee-details.html" class="hover:text-primary">Daniel Esbella</a></h6>
@@ -4884,10 +4880,10 @@
                                 <div class="flex items-center">
                                     <p class="mb-2 me-2">Total Absenties</p>
                                     <div class="flex -space-x-2 mb-2">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-27.jpg" alt="">
-                                        <img class="size-6 border border-white rounded-full  hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-30.jpg" alt="">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-14.jpg" alt="">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-29.jpg" alt="">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-27.jpg') }}" alt="">
+                                        <img class="size-6 border border-white rounded-full  hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-30.jpg') }}" alt="">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-14.jpg') }}" alt="">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-29.jpg') }}" alt="">
                                         <a class="flex items-center justify-center size-6 border text-xs font-medium text-white bg-primary border-primary rounded-full hover:primary-900 shrink-0 hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" href="#">+1</a>
                                     </div>
                                 </div>
@@ -4944,7 +4940,7 @@
                                     class="flex items-center justify-between mb-4 p-2 border border-dashed rounded-defaultradius">
                                     <div class="flex items-center">
                                         <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
-                                            <img src="assets/img/profiles/avatar-24.jpg" class="rounded-full border border-borderColor" alt="img">
+                                            <img src="{{ asset('assets/img/profiles/avatar-24.jpg') }}" class="rounded-full border border-borderColor" alt="img">
                                         </a>
                                         <div class="ms-2">
                                             <h6 class="fs-14 font-medium truncate">Daniel Esbella</h6>
@@ -4959,7 +4955,7 @@
                                 <div class="flex items-center justify-between mb-3 p-2 border rounded-defaultradius">
                                     <div class="flex items-center">
                                         <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
-                                            <img src="assets/img/profiles/avatar-23.jpg" class="rounded-full border border-borderColor" alt="img">
+                                            <img src="{{ asset('assets/img/profiles/avatar-23.jpg') }}" class="rounded-full border border-borderColor" alt="img">
                                         </a>
                                         <div class="ms-2">
                                             <h6 class="fs-14 font-medium">Doglas Martini</h6>
@@ -4975,7 +4971,7 @@
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center">
                                             <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
-                                                <img src="assets/img/profiles/avatar-27.jpg" class="rounded-full border-borderColor border-2" alt="img">
+                                                <img src="{{ asset('assets/img/profiles/avatar-27.jpg') }}" class="rounded-full border-borderColor border-2" alt="img">
                                             </a>
                                             <div class="ms-2">
                                                 <h6 class="fs-14 font-medium truncate">Brian Villalobos</h6>
@@ -5008,7 +5004,7 @@
                             <div class="flex items-center justify-between mb-4 p-2 border border-dashed rounded-defaultradius">
                                 <div class="flex items-center overflow-hidden">
 										<span class="size-[42px] flex items-center justify-center rounded-full shrink-0">
-											<img src="assets/img/profiles/avatar-29.jpg" class="rounded-full border-borderColor border-2" alt="img">
+											<img src="{{ asset('assets/img/profiles/avatar-29.jpg') }}" class="rounded-full border-borderColor border-2" alt="img">
 										</span>
                                     <div class="ms-2 overflow-hidden">
                                         <h6 class="fs-14 font-medium truncate">Anthony Lewis <span class="text-[10px] font-medium inline-flex items-center py-1 px-2 rounded bg-success text-white leading-none"><i class="ti ti-clock-hour-11 me-1"></i>30 Min</span></h6>
@@ -5051,7 +5047,7 @@
                                     <div class="flex items-center justify-between mb-6">
                                         <div class="flex items-center">
                                             <a href="#" class="size-[42px] flex items-center justify-center rounded overflow-hidden shrink-0 bg-gray-100">
-                                                <img src="assets/img/icons/apple.svg" class="img-fluid w-auto h-auto" alt="img">
+                                                <img src="{{ asset('assets/img/icons/apple.svg') }}" class="img-fluid w-auto h-auto" alt="img">
                                             </a>
                                             <div class="ms-2 overflow-hidden">
                                                 <p class="text-title font-medium truncate mb-0"><a href="javascript:void(0);">Senior IOS Developer</a></p>
@@ -5063,7 +5059,7 @@
                                     <div class="flex items-center justify-between mb-6">
                                         <div class="flex items-center">
                                             <a href="#" class="size-[42px] flex items-center justify-center rounded overflow-hidden shrink-0 bg-gray-100">
-                                                <img src="assets/img/icons/php.svg" class="img-fluid w-auto h-auto" alt="img">
+                                                <img src="{{ asset('assets/img/icons/php.svg') }}" class="img-fluid w-auto h-auto" alt="img">
                                             </a>
                                             <div class="ms-2 overflow-hidden">
                                                 <p class="text-title font-medium truncate mb-0"><a href="javascript:void(0);">Junior PHP Developer</a></p>
@@ -5075,7 +5071,7 @@
                                     <div class="flex items-center justify-between mb-6">
                                         <div class="flex items-center">
                                             <a href="#" class="size-[42px] flex items-center justify-center rounded overflow-hidden shrink-0 bg-gray-100">
-                                                <img src="assets/img/icons/react.svg" class="img-fluid w-auto h-auto" alt="img">
+                                                <img src="{{ asset('assets/img/icons/react.svg') }}" class="img-fluid w-auto h-auto" alt="img">
                                             </a>
                                             <div class="ms-2 overflow-hidden">
                                                 <p class="text-title font-medium truncate mb-0"><a href="javascript:void(0);">Junior React Developer </a></p>
@@ -5087,7 +5083,7 @@
                                     <div class="flex items-center justify-between mb-0">
                                         <div class="flex items-center">
                                             <a href="#" class="size-[42px] flex items-center justify-center rounded overflow-hidden shrink-0 bg-gray-100">
-                                                <img src="assets/img/icons/laravel-icon.svg" class="img-fluid w-auto h-auto" alt="img">
+                                                <img src="{{ asset('assets/img/icons/laravel-icon.svg') }}" class="img-fluid w-auto h-auto" alt="img">
                                             </a>
                                             <div class="ms-2 overflow-hidden">
                                                 <p class="text-title font-medium truncate mb-0"><a href="javascript:void(0);">Senior Laravel Developer</a></p>
@@ -5101,7 +5097,7 @@
                                     <div class="flex items-center justify-between mb-6">
                                         <div class="flex items-center">
                                             <a href="#" class="size-[42px] flex items-center justify-center overflow-hidden shrink-0">
-                                                <img src="assets/img/users/user-09.jpg" class="rounded-full" alt="img">
+                                                <img src="{{ asset('assets/img/users/user-09.jpg') }}" class="rounded-full" alt="img">
                                             </a>
                                             <div class="ms-2 overflow-hidden">
                                                 <p class="text-title font-medium truncate mb-0"><a href="#">Brian Villalobos</a></p>
@@ -5113,7 +5109,7 @@
                                     <div class="flex items-center justify-between mb-6">
                                         <div class="flex items-center">
                                             <a href="#" class="size-[42px] flex items-center justify-center overflow-hidden shrink-0">
-                                                <img src="assets/img/users/user-32.jpg" class="rounded-full" alt="img">
+                                                <img src="{{ asset('assets/img/users/user-32.jpg') }}" class="rounded-full" alt="img">
                                             </a>
                                             <div class="ms-2 overflow-hidden">
                                                 <p class="text-title font-medium truncate mb-0"><a href="#">Anthony Lewis</a></p>
@@ -5125,7 +5121,7 @@
                                     <div class="flex items-center justify-between mb-6">
                                         <div class="flex items-center">
                                             <a href="#" class="size-[42px] flex items-center justify-center overflow-hidden shrink-0">
-                                                <img src="assets/img/users/user-32.jpg" class="rounded-full" alt="img">
+                                                <img src="{{ asset('assets/img/users/user-32.jpg') }}" class="rounded-full" alt="img">
                                             </a>
                                             <div class="ms-2 overflow-hidden">
                                                 <p class="text-title font-medium truncate mb-0"><a href="#">Stephan Peralt</a></p>
@@ -5137,7 +5133,7 @@
                                     <div class="flex items-center justify-between mb-0">
                                         <div class="flex items-center">
                                             <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center overflow-hidden shrink-0">
-                                                <img src="assets/img/users/user-34.jpg" class="rounded-full" alt="img">
+                                                <img src="{{ asset('assets/img/users/user-34.jpg') }}" class="rounded-full" alt="img">
                                             </a>
                                             <div class="ms-2 overflow-hidden">
                                                 <p class="text-title font-medium truncate mb-0"><a href="javascript:void(0);">Doglas Martini</a></p>
@@ -5174,7 +5170,7 @@
                                         <td class="py-2 px-5">
                                             <div class="flex items-center">
                                                 <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                                    <img src="assets/img/users/user-32.jpg" class="rounded-full" alt="img">
+                                                    <img src="{{ asset('assets/img/users/user-32.jpg') }}" class="rounded-full" alt="img">
                                                 </a>
                                                 <div class="ms-2">
                                                     <h6 class="font-medium"><a href="javascript:void(0);">Anthony Lewis</a></h6>
@@ -5192,7 +5188,7 @@
                                         <td class="py-2 px-5">
                                             <div class="flex items-center">
                                                 <a href="#" class="size-[42px] flex items-center justify-center rounded-full">
-                                                    <img src="assets/img/users/user-09.jpg" class="rounded-full" alt="img">
+                                                    <img src="{{ asset('assets/img/users/user-09.jpg') }}" class="rounded-full" alt="img">
                                                 </a>
                                                 <div class="ms-2">
                                                     <h6 class="font-medium"><a href="#">Brian Villalobos</a></h6>
@@ -5208,7 +5204,7 @@
                                         <td class="py-2 px-5">
                                             <div class="flex items-center">
                                                 <a href="#" class="size-[42px] flex items-center justify-center rounded-full">
-                                                    <img src="assets/img/users/user-01.jpg" class="rounded-full" alt="img">
+                                                    <img src="{{ asset('assets/img/users/user-01.jpg') }}" class="rounded-full" alt="img">
                                                 </a>
                                                 <div class="ms-2">
                                                     <h6 class="font-medium"><a href="#">Stephan Peralt</a></h6>
@@ -5224,7 +5220,7 @@
                                         <td class="py-2 px-5">
                                             <div class="flex items-center">
                                                 <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                                    <img src="assets/img/users/user-34.jpg" class="rounded-full" alt="img">
+                                                    <img src="{{ asset('assets/img/users/user-34.jpg') }}" class="rounded-full" alt="img">
                                                 </a>
                                                 <div class="ms-2">
                                                     <h6 class="font-medium"><a href="javascript:void(0);">Doglas Martini</a></h6>
@@ -5240,7 +5236,7 @@
                                         <td class="py-2 px-5">
                                             <div class="flex items-center">
                                                 <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                                    <img src="assets/img/users/user-37.jpg" class="rounded-full" alt="img">
+                                                    <img src="{{ asset('assets/img/users/user-37.jpg') }}" class="rounded-full" alt="img">
                                                 </a>
                                                 <div class="ms-2">
                                                     <h6 class="font-medium"><a href="javascript:void(0);">Anthony Lewis</a></h6>
@@ -5423,7 +5419,7 @@
                                         <td class="py-2 px-0 text-default">
                                             <div class="flex items-center">
                                                 <a href="invoice-details.html" class="size-[42px] flex items-center justify-center rounded-full">
-                                                    <img src="assets/img/users/user-39.jpg" class="rounded-full" alt="img">
+                                                    <img src="{{ asset('assets/img/users/user-39.jpg') }}" class="rounded-full" alt="img">
                                                 </a>
                                                 <div class="ms-2">
                                                     <h6 class="font-medium"><a href="invoice-details.html">Redesign Website</a></h6>
@@ -5443,7 +5439,7 @@
                                         <td class="py-2 px-0 text-default">
                                             <div class="flex items-center">
                                                 <a href="invoice-details.html" class="size-[42px] flex items-center justify-center rounded-full">
-                                                    <img src="assets/img/users/user-40.jpg" class="rounded-full" alt="img">
+                                                    <img src="{{ asset('assets/img/users/user-40.jpg') }}" class="rounded-full" alt="img">
                                                 </a>
                                                 <div class="ms-2">
                                                     <h6 class="font-medium"><a href="invoice-details.html">Module Completion</a></h6>
@@ -5463,7 +5459,7 @@
                                         <td class="py-2 px-0 text-default">
                                             <div class="flex items-center">
                                                 <a href="invoice-details.html" class="size-[42px] flex items-center justify-center rounded-full">
-                                                    <img src="assets/img/users/user-55.jpg" class="rounded-full" alt="img">
+                                                    <img src="{{ asset('assets/img/users/user-55.jpg') }}" class="rounded-full" alt="img">
                                                 </a>
                                                 <div class="ms-2">
                                                     <h6 class="font-medium"><a href="invoice-details.html">Change on Emp Module</a></h6>
@@ -5483,7 +5479,7 @@
                                         <td class="py-2 px-0 text-default">
                                             <div class="flex items-center">
                                                 <a href="invoice-details.html" class="size-[42px] flex items-center justify-center rounded-full">
-                                                    <img src="assets/img/users/user-42.jpg" class="rounded-full" alt="img">
+                                                    <img src="{{ asset('assets/img/users/user-42.jpg') }}" class="rounded-full" alt="img">
                                                 </a>
                                                 <div class="ms-2">
                                                     <h6 class="font-medium"><a href="invoice-details.html">Changes on the Board</a></h6>
@@ -5503,7 +5499,7 @@
                                         <td class="px-0 text-default">
                                             <div class="flex items-center">
                                                 <a href="invoice-details.html" class="size-[42px] flex items-center justify-center rounded-full">
-                                                    <img src="assets/img/users/user-44.jpg" class="rounded-full" alt="img">
+                                                    <img src="{{ asset('assets/img/users/user-44.jpg') }}" class="rounded-full" alt="img">
                                                 </a>
                                                 <div class="ms-2">
                                                     <h6 class="font-medium"><a href="invoice-details.html">Hospital Management</a></h6>
@@ -5575,9 +5571,9 @@
                                         <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Office Management App</a></h6></td>
                                         <td class="py-2 px-5 text-nowrap">
                                             <div class="flex -space-x-2 rtl:space-x-reverse">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-02.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-03.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-05.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-02.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-03.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-05.jpg') }}" alt="img">
                                             </div>
                                         </td>
                                         <td class="py-2 px-5 text-nowrap">
@@ -5598,9 +5594,9 @@
                                         <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Clinic Management </a></h6></td>
                                         <td class="py-2 px-5 text-nowrap">
                                             <div class="flex -space-x-2 rtl:space-x-reverse">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-06.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-07.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-08.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-06.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-07.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-08.jpg') }}" alt="img">
                                                 <a class="size-6 bg-primary rounded-full text-white text-[10px] font-medium flex items-center justify-center hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out shrink-0" href="javascript:void(0);">
                                                     +1
                                                 </a>
@@ -5624,9 +5620,9 @@
                                         <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Educational Platform</a></h6></td>
                                         <td class="py-2 px-5 text-nowrap">
                                             <div class="flex -space-x-2 rtl:space-x-reverse">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-06.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-08.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-09.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-06.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-08.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-09.jpg') }}" alt="img">
                                             </div>
                                         </td>
                                         <td class="py-2 px-5 text-nowrap">
@@ -5647,9 +5643,9 @@
                                         <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Chat & Call Mobile App</a></h6></td>
                                         <td class="py-2 px-5 text-nowrap">
                                             <div class="flex -space-x-2 rtl:space-x-reverse">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-11.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-12.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-13.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-11.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-12.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-13.jpg') }}" alt="img">
                                             </div>
                                         </td>
                                         <td class="py-2 px-5 text-nowrap">
@@ -5670,9 +5666,9 @@
                                         <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Travel Planning Website</a></h6></td>
                                         <td class="py-2 px-5 text-nowrap">
                                             <div class="flex -space-x-2 rtl:space-x-reverse">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-17.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-18.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-19.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-17.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-18.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-19.jpg') }}" alt="img">
                                             </div>
                                         </td>
                                         <td class="py-2 px-5 text-nowrap">
@@ -5693,9 +5689,9 @@
                                         <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Service Booking Software</a></h6></td>
                                         <td class="py-2 px-5 text-nowrap">
                                             <div class="flex -space-x-2 rtl:space-x-reverse">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-06.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-08.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-09.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-06.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-08.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-09.jpg') }}" alt="img">
                                             </div>
                                         </td>
                                         <td class="py-2 px-5 text-nowrap">
@@ -5716,9 +5712,9 @@
                                         <td class="py-2 px-5 text-nowrap"><h6 class="font-medium"><a href="project-details.html">Travel Planning Website</a></h6></td>
                                         <td class="py-2 px-5 text-nowrap">
                                             <div class="flex -space-x-2 rtl:space-x-reverse">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-15.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-16.jpg" alt="img">
-                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/profiles/avatar-17.jpg" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-15.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-16.jpg') }}" alt="img">
+                                                <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/profiles/avatar-17.jpg') }}" alt="img">
                                                 <a class="size-6 bg-primary rounded-full text-white text-[10px] font-medium flex items-center justify-center hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out shrink-0" href="javascript:void(0);">
                                                     +2
                                                 </a>
@@ -5830,11 +5826,11 @@
                                 </div>
                                 <div class="flex items-center justify-between border-t border-borderColor mt-2 pt-4">
                                     <div class="flex -space-x-2 rtl:space-x-reverse">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-49.jpg" alt="img">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-13.jpg" alt="img">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-11.jpg" alt="img">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-22.jpg" alt="img">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-58.jpg" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/users/user-49.jpg') }}" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/users/user-13.jpg') }}" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/users/user-11.jpg') }}" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/users/user-22.jpg') }}" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/users/user-58.jpg') }}" alt="img">
                                         <a class="size-6 bg-primary rounded-full text-white text-[10px] font-medium flex items-center justify-center hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out shrink-0" href="javascript:void(0);">
                                             +3
                                         </a>
@@ -5851,11 +5847,11 @@
                                 </div>
                                 <div class="flex items-center justify-between border-t border-borderColor mt-2 pt-4">
                                     <div class="flex -space-x-2 rtl:space-x-reverse">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-49.jpg" alt="img">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-13.jpg" alt="img">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-11.jpg" alt="img">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-22.jpg" alt="img">
-                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="assets/img/users/user-58.jpg" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/users/user-49.jpg') }}" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/users/user-13.jpg') }}" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/users/user-11.jpg') }}" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/users/user-22.jpg') }}" alt="img">
+                                        <img class="size-6 border border-white rounded-full hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out" src="{{ asset('assets/img/users/user-58.jpg') }}" alt="img">
                                         <a class="size-6 bg-primary rounded-full text-white text-[10px] font-medium flex items-center justify-center hover:-translate-y-[0.188rem] hover:z-[1] transition-transform duration-150 ease-in-out shrink-0" href="javascript:void(0);">
                                             +3
                                         </a>
@@ -5880,7 +5876,7 @@
                                 <div class="flex justify-between">
                                     <div class="flex items-center w-full">
                                         <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
-                                            <img src="assets/img/users/user-38.jpg" class="rounded-full" alt="img">
+                                            <img src="{{ asset('assets/img/users/user-38.jpg') }}" class="rounded-full" alt="img">
                                         </a>
                                         <div class="ms-2 flex-1">
                                             <div class="flex items-center justify-between">
@@ -5896,7 +5892,7 @@
                                 <div class="flex justify-between">
                                     <div class="flex items-center w-full">
                                         <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
-                                            <img src="assets/img/users/user-01.jpg" class="rounded-full" alt="img">
+                                            <img src="{{ asset('assets/img/users/user-01.jpg') }}" class="rounded-full" alt="img">
                                         </a>
                                         <div class="ms-2 flex-1">
                                             <div class="flex items-center justify-between">
@@ -5912,7 +5908,7 @@
                                 <div class="flex justify-between">
                                     <div class="flex items-center w-full">
                                         <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
-                                            <img src="assets/img/users/user-19.jpg" class="rounded-full" alt="img">
+                                            <img src="{{ asset('assets/img/users/user-19.jpg') }}" class="rounded-full" alt="img">
                                         </a>
                                         <div class="ms-2 flex-1">
                                             <div class="flex items-center justify-between">
@@ -5928,7 +5924,7 @@
                                 <div class="flex justify-between">
                                     <div class="flex items-center w-full">
                                         <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
-                                            <img src="assets/img/users/user-11.jpg" class="rounded-full" alt="img">
+                                            <img src="{{ asset('assets/img/users/user-11.jpg') }}" class="rounded-full" alt="img">
                                         </a>
                                         <div class="ms-2 flex-1">
                                             <div class="flex items-center justify-between">
@@ -5944,7 +5940,7 @@
                                 <div class="flex justify-between">
                                     <div class="flex items-center w-full">
                                         <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
-                                            <img src="assets/img/users/user-20.jpg" class="rounded-full" alt="img">
+                                            <img src="{{ asset('assets/img/users/user-20.jpg') }}" class="rounded-full" alt="img">
                                         </a>
                                         <div class="ms-2 flex-1">
                                             <div class="flex items-center justify-between">
@@ -5960,7 +5956,7 @@
                                 <div class="flex justify-between">
                                     <div class="flex items-center w-full">
                                         <a href="javscript:void(0);" class="size-[42px] flex items-center justify-center rounded-full shrink-0">
-                                            <img src="assets/img/users/user-08.jpg" class="rounded-full" alt="img">
+                                            <img src="{{ asset('assets/img/users/user-08.jpg') }}" class="rounded-full" alt="img">
                                         </a>
                                         <div class="ms-2 flex-1">
                                             <div class="flex items-center justify-between">
@@ -5990,7 +5986,7 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
                                         <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                            <img src="assets/img/users/user-38.jpg" class="rounded-full" alt="img">
+                                            <img src="{{ asset('assets/img/users/user-38.jpg') }}" class="rounded-full" alt="img">
                                         </a>
                                         <div class="ms-2 overflow-hidden">
                                             <h6 class="font-medium ">Andrew Jermia</h6>
@@ -6005,7 +6001,7 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
                                         <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                            <img src="assets/img/users/user-10.jpg" class="rounded-full" alt="img">
+                                            <img src="{{ asset('assets/img/users/user-10.jpg') }}" class="rounded-full" alt="img">
                                         </a>
                                         <div class="ms-2 overflow-hidden">
                                             <h6 class="font-medium"><a href="javascript:void(0);">Mary Zeen</a></h6>
@@ -6019,7 +6015,7 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
                                         <a href="javascript:void(0);" class="size-[42px] flex items-center justify-center rounded-full">
-                                            <img src="assets/img/users/user-09.jpg" class="rounded-full" alt="img">
+                                            <img src="{{ asset('assets/img/users/user-09.jpg') }}" class="rounded-full" alt="img">
                                         </a>
                                         <div class="ms-2 overflow-hidden">
                                             <h6 class="font-medium "><a href="javascript:void(0);">Antony Lewis</a></h6>
@@ -6034,7 +6030,7 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
 											<span class="size-[42px] flex items-center justify-center rounded-full">
-												<img src="assets/img/users/user-12.jpg" class="rounded-full" alt="img">
+												<img src="{{ asset('assets/img/users/user-12.jpg') }}" class="rounded-full" alt="img">
 											</span>
                                         <div class="ms-2 overflow-hidden">
                                             <h6 class="font-medium ">Doglas Martini</h6>

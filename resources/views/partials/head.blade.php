@@ -14,7 +14,12 @@
 <!-- Favicon -->
 <link rel="icon" href="{{ asset('assets/img/favicon.png') }}" type="image/x-icon">
 <link rel="shortcut icon" href="{{ asset('assets/img/favicon.png') }}" type="image/x-icon">
+<!-- Tabler Icon CSS -->
+<link rel="stylesheet" href="{{ asset('assets/plugins/tabler-icons/tabler-icons.css') }}">
 
+
+<!-- Feather CSS -->
+<link rel="stylesheet" href="{{ asset('assets/plugins/icons/feather/feather.css') }}">
 
 
 <!-- Fontawesome CSS -->
@@ -25,9 +30,11 @@
 <!-- Flowbite CSS -->
 <link rel="stylesheet" href="{{ asset('assets/css/flowbite.min.css') }}">
 
-
+<!-- Color Picker Css -->
+<link rel="stylesheet" href="{{ asset('assets/plugins/flatpickr/flatpickr.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/@simonwep/pickr/themes/nano.min.css') }}">
 
 <!-- Main CSS -->
-<link rel="stylesheet" href="{{asset('assets/dist/style.css')}}">
+<link rel="stylesheet" href="{{ asset('assets/dist/style.css') }}">
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance
