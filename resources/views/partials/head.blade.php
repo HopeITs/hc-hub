@@ -14,34 +14,18 @@
 <!-- Favicon -->
 <link rel="icon" href="{{ asset('assets/img/favicon.png') }}" type="image/x-icon">
 <link rel="shortcut icon" href="{{ asset('assets/img/favicon.png') }}" type="image/x-icon">
+<!-- Tabler Icon CSS -->
+<link rel="stylesheet" href="{{ asset('assets/plugins/tabler-icons/tabler-icons.css') }}">
 
-<!-- Theme Script js -->
-<script src="{{ asset('assets/js/theme-script.js') }}"></script>
 
 <!-- Feather CSS -->
 <link rel="stylesheet" href="{{ asset('assets/plugins/icons/feather/feather.css') }}">
 
-<!-- Tabler Icon CSS -->
-<link rel="stylesheet" href="{{ asset('assets/plugins/tabler-icons/tabler-icons.css') }}">
-
-<!-- Select2 CSS -->
-<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
 
 <!-- Fontawesome CSS -->
 <link rel="stylesheet" href="{{ asset('assets/plugins/fontawesome/css/fontawesome.min.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/plugins/fontawesome/css/all.min.css') }}">
 
-<!-- Datetimepicker CSS -->
-<link rel="stylesheet" href="{{ asset('assets/plugins/flatpickr/flatpickr.min.css') }}">
-
-<!-- Bootstrap Tagsinput CSS -->
-<link rel="stylesheet" href="{{ asset('assets/plugins/bootstrap-tagsinput/bootstrap-tagsinput.css') }}">
-
-<!-- Summernote CSS -->
-<link rel="stylesheet" href="{{ asset('assets/plugins/summernote/summernote-lite.min.css') }}">
-
-<!-- Daterangepikcer CSS -->
-<link rel="stylesheet" href="{{ asset('assets/plugins/daterangepicker/daterangepicker.css') }}">
 
 <!-- Flowbite CSS -->
 <link rel="stylesheet" href="{{ asset('assets/css/flowbite.min.css') }}">
@@ -51,6 +35,6 @@
 <link rel="stylesheet" href="{{ asset('assets/plugins/@simonwep/pickr/themes/nano.min.css') }}">
 
 <!-- Main CSS -->
-<link rel="stylesheet" href="{{asset('assets/dist/style.css')}}">
+<link rel="stylesheet" href="{{ asset('assets/dist/style.css') }}">
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance
