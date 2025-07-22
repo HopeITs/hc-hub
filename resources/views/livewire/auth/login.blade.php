@@ -1,12 +1,12 @@
 <section class="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-    <div class="w-full max-w-[420px] mx-auto">
-        <!-- Logo -->
+    <x-auth-card-wrapper>
+        {{-- logo --}}
         <div class="text-center mb-12">
             <x-app-logo class="mx-auto w-36"></x-app-logo>
         </div>
 
-        <!-- Login Form -->
-        <div class="bg-white rounded-lg shadow p-8">
+        {{-- login form --}}
+        <x-auth-card>
             <div class="text-center mb-12">
                 <h2 class="text-[24px] font-semibold text-title mb-2">Sign In</h2>
                 <p class="text-sm text-[#6c757d]">Please enter your details to sign in</p>
@@ -17,28 +17,28 @@
             @endif
 
             <form wire:submit.prevent="login" class="space-y-4">
-                <!-- Email -->
+
                 <div>
-                    <x-input-label for="email" value="Email Address" />
+                    <x-input-label for="email" value="Email Address"/>
                     <x-text-input
                         id="email"
                         type="email"
                         model="email"
                         placeholder="email@example.com"
                     />
-                    <x-input-error field="email" />
+                    <x-input-error field="email"/>
                 </div>
 
 
                 <div>
-                    <x-input-label for="password" value="Password" class="mt-6" />
+                    <x-input-label for="password" value="Password" class="mt-6"/>
                     <x-text-input
                         id="password"
                         type="password"
                         model="password"
                         placeholder="••••••••"
                     />
-                    <x-input-error field="password" />
+                    <x-input-error field="password"/>
 
                 </div>
 
@@ -46,8 +46,9 @@
                     <x-checkbox model="remember">
                         Remember Me
                     </x-checkbox>
-                @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">Forgot Password?</a>
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">Forgot
+                            Password?</a>
                     @endif
                 </div>
 
@@ -56,12 +57,12 @@
                 </x-primary-button>
 
             </form>
-        </div>
+        </x-auth-card>
 
         <div class="text-center text-gray-500 text-[13px] mt-6">
             &copy; 2025 - Hope Center HR
         </div>
-    </div>
+    </x-auth-card-wrapper>
 </section>
 
 <script>
