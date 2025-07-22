@@ -1,3 +1,4 @@
+
 <!-- Header -->
 <div class="header fixed top-0  left-0 right-[252px] bg-white h-[50px] border-b border-gray-200 lg:right-vertical-w">
     <div class="main-header h-[50px]">

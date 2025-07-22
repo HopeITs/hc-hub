@@ -38,3 +38,4 @@
 <link rel="stylesheet" href="{{ asset('assets/dist/style.css') }}">
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance
+@livewireStyles

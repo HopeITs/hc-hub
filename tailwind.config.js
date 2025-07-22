@@ -2,7 +2,6 @@
 
 import plugin from 'tailwindcss/plugin';
 import flowbite from 'flowbite/plugin';
-import lineClamp from '@tailwindcss/line-clamp';
 import { Modal } from 'flowbite';
 
 export default {

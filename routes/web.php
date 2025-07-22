@@ -23,6 +23,4 @@ Route::middleware(['auth'])->group(function () {
 
 require __DIR__ . '/auth.php';
 
-Route::get('/header', function () {
-    return view('components.layouts.app.header');
-});
+

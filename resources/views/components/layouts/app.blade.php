@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl" data-layout="modern">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl" data-layout="rtl">
 <head>
     @include('partials.head')
 </head>
-<body class="antialiased bg-light text-default  layout-modern">
+<body class="antialiased bg-light text-default  layout-rtl">
 <x-layouts.app.page-loader/>
 <div class="main-wrapper">
-    <x-layouts.app.header/>
-    <x-layouts.app.sidebar :title="$title ?? null"/>
+    <livewire:layouts.header/>
 
+    <livewire:layouts.sidebar/>
     <div class="page-wrapper relative pt-[60px] mr-[252px]">
         {{ $slot }}
-        <x-layouts.app.footer/>
+        <livewire:layouts.footer/>
     </div>
 
 </div>
