@@ -1,52 +1,77 @@
-<div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+<section class="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+    <x-auth-card-wrapper>
+        {{-- logo --}}
+        <div class="text-center mb-12">
+            <x-app-logo class="mx-auto w-36"></x-app-logo>
+        </div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+        {{-- login form --}}
+        <x-auth-card>
+            <div class="text-center mb-12">
+                <h2 class="text-[24px] font-semibold text-title mb-2">Sign In</h2>
+                <p class="text-sm text-[#6c757d]">Please enter your details to sign in</p>
+            </div>
 
-    <form wire:submit="login" class="flex flex-col gap-6">
-        <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('Email address')"
-            type="email"
-            required
-            autofocus
-            autocomplete="email"
-            placeholder="email@example.com"
-        />
-
-        <!-- Password -->
-        <div class="relative">
-            <flux:input
-                wire:model="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="current-password"
-                :placeholder="__('Password')"
-                viewable
-            />
-
-            @if (Route::has('password.request'))
-                <flux:link class="absolute end-0 top-0 text-sm" :href="route('password.request')" wire:navigate>
-                    {{ __('Forgot your password?') }}
-                </flux:link>
+            @if (session('status'))
+                <div class="text-green-600 text-sm text-center mb-4">{{ session('status') }}</div>
             @endif
-        </div>
 
-        <!-- Remember Me -->
-        <flux:checkbox wire:model="remember" :label="__('Remember me')" />
+            <form wire:submit.prevent="login" class="space-y-4">
 
-        <div class="flex items-center justify-end">
-            <flux:button variant="primary" type="submit" class="w-full">{{ __('Log in') }}</flux:button>
-        </div>
-    </form>
+                <div>
+                    <x-input-label for="email" value="Email Address"/>
+                    <x-text-input
+                        id="email"
+                        type="email"
+                        model="email"
+                        placeholder="email@example.com"
+                    />
+                    <x-input-error field="email"/>
+                </div>
 
-    @if (Route::has('register'))
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            {{ __('Don\'t have an account?') }}
-            <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
+
+                <div>
+                    <x-input-label for="password" value="Password" class="mt-6"/>
+                    <x-text-input
+                        id="password"
+                        type="password"
+                        model="password"
+                        placeholder="••••••••"
+                    />
+                    <x-input-error field="password"/>
+
+                </div>
+
+                <div class="flex py-3 items-center justify-between text-sm">
+                    <x-checkbox model="remember">
+                        Remember Me
+                    </x-checkbox>
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">Forgot
+                            Password?</a>
+                    @endif
+                </div>
+
+                <x-primary-button>
+                    Sign In
+                </x-primary-button>
+
+            </form>
+        </x-auth-card>
+
+        <div class="text-center text-gray-500 text-[13px] mt-6">
+            &copy; 2025 - Hope Center HR
         </div>
-    @endif
-</div>
+    </x-auth-card-wrapper>
+</section>
+
+<script>
+    document.querySelectorAll('.toggle-password').forEach(el => {
+        el.addEventListener('click', function () {
+            const input = this.previousElementSibling;
+            input.type = input.type === 'password' ? 'text' : 'password';
+            this.classList.toggle('ti-eye');
+            this.classList.toggle('ti-eye-off');
+        });
+    });
+</script>
