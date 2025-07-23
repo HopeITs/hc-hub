@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
             $table->foreignId('city_id')->constrained('cities')->onDelete('restrict');
-            $table->foreignId('item_id')->constrained('checklists')->onDelete('restrict');
+            $table->foreignId('item_id')->constrained('checklist_items')->onDelete('restrict');
             $table->timestamps();
         });
     }
