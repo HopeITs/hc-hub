@@ -30,4 +30,7 @@ export default defineConfig({
     server: {
         cors: true,
     },
+    build: {
+        target: 'esnext', // enables full CSS nesting
+    },
 });

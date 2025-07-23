@@ -255,6 +255,7 @@ export default {
             },
             fontFamily: {
                 roboto: ['"Roboto"', 'sans-serif'],
+                lato: ['Lato' , 'sans-serif'],
                 FontAwesome: ['FontAwesome'],
             },
             animation: {
