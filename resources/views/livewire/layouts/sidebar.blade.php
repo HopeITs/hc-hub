@@ -1,33 +1,28 @@
 <!-- Sidebar -->
 <div class="sidebar fixed top-0 right-0 bottom-0 w-sidebar bg-white border-l border-borderColor" id="sidebar">
-    <!-- Logo -->
-    <div class="sidebar-logo fixed h-[50px] w-sidebar flex justify-center pt-3 px-3">
-        <a href="index.html" class="logo logo-normal">
-            <img src="assets/img/logo.svg" alt="Logo">
-        </a>
-        <a href="index.html" class="logo-small hidden">
-            <img src="assets/img/logo-small.svg" alt="Logo">
-        </a>
-        <a href="index.html" class="dark-logo hidden">
-            <img src="assets/img/logo-white.svg" alt="Logo">
-        </a>
-    </div>
-    <!-- /Logo -->
-    <div class="modern-profile p-3 pb-0 hidden">
-        <div class="text-center rounded bg-light p-3 mb-4 user-profile">
-            <div class="flex items-center size-[45px] online mb-3">
+
+    <div class="modern-profile p-3 pb-0 ">
+        <!-- Logo -->
+        <div class="sidebar-logo fixed h-[50px] w-sidebar flex justify-center pt-3 px-3">
+            <a href="index.html" class="logo logo-normal">
+                <img src="assets/img/logo.svg" alt="Logo">
+            </a>
+            <a href="index.html" class="logo-small hidden">
+                <img src="assets/img/logo-small.svg" alt="Logo">
+            </a>
+            <a href="index.html" class="dark-logo hidden">
+                <img src="assets/img/logo-white.svg" alt="Logo">
+            </a>
+        </div>
+        <!-- /Logo -->
+        <div class="text-center rounded bg-light p-3 mb-4 user-profile mt-4">
+            <div class="flex justify-center items-center size-[45px] online mb-3">
                 <img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="rounded-full">
             </div>
             <h6 class="text-xs leading-normal font-normal mb-1">Adrian Herman</h6>
             <p class="fs-10">System Admin</p>
         </div>
-        <div class="sidebar-nav mb-3 hidden">
-            <ul class="nav nav-tabs nav-tabs-solid nav-tabs-rounded nav-justified bg-transparent" role="tablist">
-                <li class="nav-item"><a class="nav-link active border-0" href="#">Menu</a></li>
-                <li class="nav-item"><a class="nav-link border-0" href="chat.html">Chats</a></li>
-                <li class="nav-item"><a class="nav-link border-0" href="email.html">Inbox</a></li>
-            </ul>
-        </div>
+
     </div>
     <div class="sidebar-header p-3 pb-0 pt-2 hidden">
         <div class="text-center rounded bg-light p-2 mb-4 sidebar-profile flex items-center">
