@@ -1,7 +1,7 @@
 <?php
 
 return [
-
+    'project-name' => 'Hope HR',
     'basic-management' => 'الإدارة الأساسية',
     'project-basics' => 'أساسيات المشروع',
     'city' => 'مدن|مدينة',
