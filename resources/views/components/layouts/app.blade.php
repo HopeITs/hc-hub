@@ -7,13 +7,12 @@
 <x-layouts.app.page-loader/>
 <div class="main-wrapper">
     <livewire:layouts.header/>
-
     <livewire:layouts.sidebar/>
     <div class="page-wrapper relative pt-[60px] mr-[252px]">
         {{ $slot }}
-        <livewire:layouts.footer/>
-    </div>
 
+    </div>
+    <livewire:layouts.footer/>
 </div>
 @include('partials.scripts')
 @fluxScripts
