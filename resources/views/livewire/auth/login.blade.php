@@ -1,4 +1,4 @@
-<section class="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+<section class="min-h-screen rtl text-right bg-gray-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
         {{-- logo --}}
         <div class="text-center mb-12">
@@ -8,8 +8,8 @@
         {{-- login form --}}
         <x-auth-card>
             <div class="text-center mb-12">
-                <h2 class="text-[24px] font-semibold text-title mb-2">Sign In</h2>
-                <p class="text-sm text-[#6c757d]">Please enter your details to sign in</p>
+                <h2 class="text-[24px] font-semibold text-title mb-2">{{__('auth.sign-in')}}</h2>
+                <p class="text-sm text-[#6c757d]">{{__('auth.sign-in-text')}}</p>
             </div>
 
             @if (session('status'))
@@ -19,7 +19,7 @@
             <form wire:submit.prevent="login" class="space-y-4">
 
                 <div>
-                    <x-input-label for="email" value="Email Address"/>
+                    <x-input-label for="email" value="{{__('auth.email-address')}}"/>
                     <x-text-input
                         id="email"
                         type="email"
@@ -31,7 +31,7 @@
 
 
                 <div>
-                    <x-input-label for="password" value="Password" class="mt-6"/>
+                    <x-input-label for="password" value="{{__('auth.password')}}" class="mt-6"/>
                     <x-text-input
                         id="password"
                         type="password"
@@ -44,23 +44,24 @@
 
                 <div class="flex py-3 items-center justify-between text-sm">
                     <x-checkbox model="remember">
-                        Remember Me
+                        {{__('auth.remember-me')}}
                     </x-checkbox>
                     @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">Forgot
-                            Password?</a>
+                        <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">
+                            {{__('auth.forgot-password')}}
+                        </a>
                     @endif
                 </div>
 
                 <x-primary-button>
-                    Sign In
+                    {{__('auth.sign-in')}}
                 </x-primary-button>
 
             </form>
         </x-auth-card>
 
         <div class="text-center text-gray-500 text-[13px] mt-6">
-            &copy; 2025 - Hope Center HR
+            &copy; 2025 - {{__('auth.copyright')}}
         </div>
     </x-auth-card-wrapper>
 </section>
