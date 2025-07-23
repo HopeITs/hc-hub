@@ -9,6 +9,8 @@ return [
     'leave-type' => 'أنواع الإجازات|نوع الإجازة',
     'checklist-items' => 'عناصر القائمة|عنصر قائمة',
     'projects-management' => 'إدارة المشاريع',
+    'my-profile' => 'الصفحة الشخصية',
+    'my-account' => 'حسابي الشخصي'
 
 
 ];

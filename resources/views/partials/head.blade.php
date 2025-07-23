@@ -35,5 +35,5 @@
 <!-- Main CSS -->
 <link rel="stylesheet" href="{{ asset('assets/dist/style.css') }}">
 @vite(['resources/js/app.js'])
-@fluxAppearance
+
 @livewireStyles

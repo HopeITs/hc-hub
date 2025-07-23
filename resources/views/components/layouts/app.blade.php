@@ -9,11 +9,20 @@
     <livewire:layouts.header/>
     <livewire:layouts.sidebar/>
     <div class="page-wrapper relative pt-[60px] mr-[252px]">
-        {{ $slot }}
+        <div class="content p-6 pb-0">
+            {{ $slot }}
+        </div>
+
+        <livewire:layouts.footer/>
 
     </div>
-    <livewire:layouts.footer/>
+
 </div>
+
+
+
+
+
 @include('partials.scripts')
 @fluxScripts
 </body>
