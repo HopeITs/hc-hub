@@ -35,9 +35,9 @@
         </x-auth-card>
 
         <div class="text-center text-gray-500 text-[13px] mt-6">
-            {{ __('Return to') }}
+            إرجع إلى
             <a href="{{ route('login') }}" class="text-primary-600 hover:underline">
-                {{ __('Sign In') }}
+                {{ __('auth.sign-in') }}
             </a>
         </div>
     </x-auth-card-wrapper>
