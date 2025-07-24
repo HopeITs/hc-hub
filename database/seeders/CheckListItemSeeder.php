@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\CheckListItem;
+use App\Models\ChecklistItem;
 use Illuminate\Database\Seeder;
 
 class CheckListItemSeeder extends Seeder
@@ -12,7 +12,7 @@ class CheckListItemSeeder extends Seeder
         $items = config('samples.sampleData.checkListsItems');
 
         foreach ($items as $item) {
-            CheckListItem::create([
+            ChecklistItem::create([
                 'name' => $item['name'],
                 'order' => $item['order'],
             ]);
