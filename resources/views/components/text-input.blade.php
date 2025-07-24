@@ -4,7 +4,6 @@
     <input
         id="{{ $id }}"
         type="{{ $type }}"
-        wire:model.defer="{{ $model }}"
         placeholder="{{ $placeholder }}"
         autocomplete="{{ $id }}"
         required

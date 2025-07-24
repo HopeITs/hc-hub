@@ -10,6 +10,7 @@ return [
     'remember-me' => 'تذكرني',
     'forgot-password' => 'نسيت كلمة المرور ؟',
     'copyright' => 'مركز الرجاء المسيحي - إدارة الموارد البشرية',
+    'failed' => 'بيانات الدخول غير صحيحة',
 
     //reset-password
     'reset-password'=> 'إعادة تعيين كلمة المرور',

@@ -23,9 +23,9 @@
                     <x-text-input
                         id="email"
                         type="email"
-                        model="email"
-                        placeholder="email@example.com"
-                    />
+                        wire:model.defer="email"
+                        placeholder="email@example.com" />
+
                     <x-input-error field="email"/>
                 </div>
 
@@ -35,15 +35,15 @@
                     <x-text-input
                         id="password"
                         type="password"
-                        model="password"
-                        placeholder="••••••••"
-                    />
+                        wire:model.defer="password"
+                        placeholder="••••••••" />
+
                     <x-input-error field="password"/>
 
                 </div>
 
                 <div class="flex py-3 items-center justify-between text-sm">
-                    <x-checkbox model="remember">
+                    <x-checkbox wire:model.defer="remember">
                         {{__('auth.remember-me')}}
                     </x-checkbox>
                     @if (Route::has('password.request'))
