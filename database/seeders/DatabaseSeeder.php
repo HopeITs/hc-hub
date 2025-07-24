@@ -28,7 +28,8 @@ class DatabaseSeeder extends Seeder
             CenterSeeder::class,
             CheckListItemSeeder::class,
             LeaveTypeSeeder::class,
-            AnnualLeaveRuleSeeder::class
+            AnnualLeaveRuleSeeder::class,
+            RolesPermissionsSeeder::class
         ]);
     }
 }

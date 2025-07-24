@@ -30,7 +30,9 @@
             <ul>
                 <x-layouts.app.sidebar.menu-title>@lang('general.basic-management')</x-layouts.app.sidebar.menu-title>
                 <x-layouts.app.sidebar.dropdown-nav-list :title="__('general.project-basics')">
+                    @if (auth()->check() && auth()->user()->hasRole('Super Admin'))
                     <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.city', 2) }}</x-layouts.app.sidebar.nav-item>
+                    @endif
                     <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.contract-type', 2) }}</x-layouts.app.sidebar.nav-item>
                     <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.leave-type', 2) }}</x-layouts.app.sidebar.nav-item>
                     <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.checklist-items', 2) }}</x-layouts.app.sidebar.nav-item>
