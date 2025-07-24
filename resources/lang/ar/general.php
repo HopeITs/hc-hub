@@ -10,7 +10,8 @@ return [
     'checklist-items' => 'عناصر القائمة|عنصر قائمة',
     'projects-management' => 'إدارة المشاريع',
     'my-profile' => 'الصفحة الشخصية',
-    'my-account' => 'حسابي الشخصي'
+    'my-account' => 'حسابي الشخصي',
+    'dashboard' => 'لوحة التحكم'
 
 
 ];

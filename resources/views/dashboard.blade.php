@@ -1,14 +1,13 @@
 <x-layouts.app :title="__('Dashboard')">
-
-{{--        <div class="bg-primary text-white p-4">--}}
-{{--            This is using your custom primary color.--}}
-{{--        </div>--}}
-
-{{--        <h1>Hello world</h1>--}}
-
-
+    <livewire:layouts.breadcrumbs
+        :title="__('general.dashboard')"
+        :crumbs="[
+        ['label' => __('general.dashboard'), 'url' => null],
+   ]"
+        :showAddButton="false"
+    />
 
 
 </x-layouts.app>
-    <!-- /Main Wrapper -->
+<!-- /Main Wrapper -->
 
