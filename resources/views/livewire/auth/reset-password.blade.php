@@ -1,4 +1,4 @@
-<section class="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+<section class="min-h-screen rtl text-right bg-gray-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
         {{-- logo --}}
         <div class="text-center mb-12">
@@ -8,9 +8,9 @@
         {{-- Reset password card --}}
         <x-auth-card>
             <div class="text-center mb-8">
-                <h2 class="text-[24px] font-semibold text-title mb-2">{{ __('Reset Password') }}</h2>
+                <h2 class="text-[24px] font-semibold text-title mb-2">{{ __('auth.reset-password') }}</h2>
                 <p class="text-sm text-[#6c757d]">
-                    {{ __('Your new password must be different from previously used passwords.') }}
+                    {{ __('auth.reset-password-text') }}
                 </p>
             </div>
 
@@ -20,7 +20,7 @@
                 <input type="hidden" wire:model="email" />
 
                 <div>
-                    <x-input-label for="password" :value="__('Password')" />
+                    <x-input-label for="password" :value="__('auth.password')" />
 
                     <div class="relative">
                         <x-text-input
@@ -42,13 +42,13 @@
 
                     {{-- password hint  --}}
                     <p class="text-xs text-gray-500 mt-1">
-                        {{ __('Use 8 or more characters with a mix of letters, numbers, and symbols.') }}
+                        {{ __('auth.password-text') }}
                     </p>
                     <x-input-error field="password" />
                 </div>
 
                 <div>
-                    <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+                    <x-input-label for="password_confirmation" :value="__('auth.confirm-password')" />
                     <x-text-input
                         id="password_confirmation"
                         type="password"
@@ -59,7 +59,7 @@
                 </div>
 
                 <x-primary-button class="w-full">
-                    {{ __('Submit') }}
+                    {{ __('auth.confirm') }}
                 </x-primary-button>
             </form>
         </x-auth-card>
