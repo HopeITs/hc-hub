@@ -6,18 +6,17 @@ use Livewire\Component;
 
 class Breadcrumbs extends Component
 {
-    public string $title = 'Holidays';
+    public string $title = 'Page Title';
 
-    /** @var array<int, array{label: string, url: string|null}> */
-    public array $crumbs = [
-        ['label' => 'Hope Hr', 'url' => null],
-        ['label' => 'Test', 'url' => null],
-    ];
+    /** @var array<int, array{label: string, url?: string|null}> */
+    public array $crumbs = [];
 
-    public bool $showAddButton = true;
-    public string $addModalTarget = 'target';
-    public string $addLabel = 'Add Label';
-    public string $addUrl = '#';
+    public bool $showButton = false;
+    public string $buttonLabel = 'Add';
+    public string $buttonIcon = 'ti ti-circle-plus';
+    public string $buttonUrl = '';
+    public string $buttonModalTarget = '';
+    public string $buttonModalToggle = '';
 
     public function render()
     {

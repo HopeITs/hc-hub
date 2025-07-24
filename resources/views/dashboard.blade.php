@@ -2,10 +2,10 @@
     <livewire:layouts.breadcrumbs
         :title="__('general.dashboard')"
         :crumbs="[
-        ['label' => __('general.dashboard'), 'url' => null],
-   ]"
-        :showAddButton="false"
+        ['label' => __('general.dashboard')],
+    ]"
     />
+
 
 
 </x-layouts.app>
