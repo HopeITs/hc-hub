@@ -57,7 +57,7 @@ class User extends Authenticatable
 
     public function myRole()
     {
-        return 'مطور مواقع انترنت';
+        return $this->roles()->first()?->name;
     }
 
     public function roles()

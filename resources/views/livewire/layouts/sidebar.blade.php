@@ -20,7 +20,7 @@
                 <img src="assets/img/profiles/avatar-02.jpg" alt="Img" class="rounded-full">
             </div>
             <h6 class="text-xs leading-normal font-normal mb-1">{{$this->user->name ?? 'اسمي'}}</h6>
-            <p class="fs-10">{{$this->user->myRole() ?? 'دوري'}}</p>
+            <p class="fs-10">{{ auth()->user()?->myRole() ?? 'No Role' }}</p>
         </div>
 
     </div>
