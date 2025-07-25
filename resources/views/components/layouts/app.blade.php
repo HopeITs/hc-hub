@@ -3,7 +3,7 @@
 <head>
     @include('partials.head')
 </head>
-<body class="antialiased font-lato bg-light text-default relative layout-rtl ">
+<body class="antialiased font-lato bg-light text-default relative  ">
 <x-layouts.app.page-loader/>
 <div class="main-wrapper">
     <livewire:layouts.header/>
@@ -16,9 +16,9 @@
 
 
     </div>
-    <livewire:layouts.footer/>
-</div>
 
+</div>
+<livewire:layouts.footer/>
 
 
 
