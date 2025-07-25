@@ -29,18 +29,14 @@
         <div id="sidebar-menu" class="sidebar-menu">
             <ul>
                 <x-layouts.app.sidebar.menu-title>@lang('general.basic-management')</x-layouts.app.sidebar.menu-title>
-                <x-layouts.app.sidebar.dropdown-nav-list :title="__('general.project-basics')">
-                    <x-layouts.app.sidebar.nav-item class="active" :href="route('cities.index')" wire:navigate>{{ trans_choice('general.city', 2) }}</x-layouts.app.sidebar.nav-item>
+                <x-layouts.app.sidebar.dropdown-nav-list :title="__('general.project-basics')"  :active="request()->routeIs('cities.index') || request()->routeIs('contract-types.*') || request()->routeIs('leave-types.*') || request()->routeIs('checklist-items.*')">
+
+                    <x-layouts.app.sidebar.nav-item  :href="route('cities.index')" :active="request()->routeIs('cities.index')" wire:navigate>{{ trans_choice('general.city', 2) }}</x-layouts.app.sidebar.nav-item>
                     <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.contract-type', 2) }}</x-layouts.app.sidebar.nav-item>
                     <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.leave-type', 2) }}</x-layouts.app.sidebar.nav-item>
                     <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.checklist-items', 2) }}</x-layouts.app.sidebar.nav-item>
                 </x-layouts.app.sidebar.dropdown-nav-list>
-                <x-layouts.app.sidebar.dropdown-nav-list :title="__('general.project-basics')">
-                    <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.city', 2) }}</x-layouts.app.sidebar.nav-item>
-                    <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.contract-type', 2) }}</x-layouts.app.sidebar.nav-item>
-                    <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.leave-type', 2) }}</x-layouts.app.sidebar.nav-item>
-                    <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.checklist-items', 2) }}</x-layouts.app.sidebar.nav-item>
-                </x-layouts.app.sidebar.dropdown-nav-list>
+
                 <x-layouts.app.sidebar.single-item>
                     @lang('general.projects-management')
                 </x-layouts.app.sidebar.single-item>
