@@ -1,10 +1,5 @@
 <x-layouts.app :title="__('Dashboard')">
-    <livewire:layouts.breadcrumbs
-        :title="__('general.dashboard')"
-        :crumbs="[
-        ['label' => __('general.dashboard')],
-    ]"
-    />
+
 
  <livewire:city-table/>
 @section('js')
