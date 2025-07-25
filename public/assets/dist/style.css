@@ -13707,8 +13707,8 @@ span.select2-container.select2-container--default.select2-container--open{
 }
 
 .swal2-actions .swal2-confirm.btn:active {
-  /*background-color: #be1f24;*/
-  /*border-color: #be1f24;*/
+  background-color: #be1f24;
+  border-color: #be1f24;
 }
 
 .swal2-confirm{
