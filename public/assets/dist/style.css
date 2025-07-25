@@ -6400,7 +6400,7 @@ span.select2-container.select2-container--default.select2-container--open{
 }
 
 .theme-colorselect input[type=radio]:checked ~ label{
-  outline-color: #F26522;
+  /*outline-color: #be1f24;*/
 }
 
 .modal.theme-colorselect input[type=radio]{
@@ -6508,7 +6508,7 @@ span.select2-container.select2-container--default.select2-container--open{
 }
 
 [data-sidebar=all] .theme-colorselect .pickr-container-background{
-  outline-color: #F26522;
+  /*outline-color: #be1f24;*/
 }
 
 .modal.theme-container-primary button,.modal .theme-container-background button,.modal .theme-topbar button,.modal .theme-topbarcolor button{
@@ -13707,8 +13707,8 @@ span.select2-container.select2-container--default.select2-container--open{
 }
 
 .swal2-actions .swal2-confirm.btn:active {
-  background-color: #F26522;
-  border-color: #F26522;
+  /*background-color: #be1f24;*/
+  /*border-color: #be1f24;*/
 }
 
 .swal2-confirm{
@@ -13716,8 +13716,8 @@ span.select2-container.select2-container--default.select2-container--open{
 }
 
 button.swal2-confirm {
-  background: #F26522;
-  border: 1px solid #F26522;
+  background: #be1f24;
+  border: 1px solid #be1f24;
   color: white;
   border-radius: 5px;
   padding: 0.5rem 0.85rem;
@@ -13727,8 +13727,8 @@ button.swal2-confirm {
 }
 
 button.swal2-cancel {
-  background: #E70D0D;
-  border: 1px solid #E70D0D;
+  background: #808285;
+  border: 1px solid #808285;
   color: white;
   border-radius: 5px;
   padding: 0.5rem 0.85rem;
@@ -13955,9 +13955,9 @@ button.swal2-cancel {
     height: auto;
     padding: 10px 16px;
     line-height: 1.25;
-    background-color: #F26522;
+    /*background-color: #be1f24;*/
     color: white;
-    border-left: 1px solid #F26522;
+    /*border-left: 1px solid #be1f24;*/
     box-sizing: border-box;
     position: absolute;
     top: 0;
@@ -14101,7 +14101,7 @@ button.swal2-cancel {
 }
 
 .timeline-badge.primary {
-  background-color: #F26522;
+  background-color: #be1f24;
 }
 
 .timeline-badge.success {
@@ -14139,13 +14139,13 @@ button.swal2-cancel {
 
 .bootstrap-datetimepicker-widget table td.active,
 	.bootstrap-datetimepicker-widget table td.active:hover {
-  background-color: #F26522;
+  /*background-color: #be1f24;*/
   text-shadow: unset;
 }
 
 .bootstrap-datetimepicker-widget table td.\!active,
 	.bootstrap-datetimepicker-widget table td.\!active:hover {
-  background-color: #F26522 !important;
+  /*background-color: #be1f24 !important;*/
   text-shadow: unset !important;
 }
 
@@ -14259,7 +14259,7 @@ button.swal2-cancel {
 }
 
 .bootstrap-datetimepicker-widget table td.today:before {
-  border-bottom-color: #F26522;
+  /*border-bottom-color: #be1f24;*/
 }
 
 .bootstrap-datetimepicker-widget table thead tr:first-child th:hover {
@@ -14361,7 +14361,7 @@ button.swal2-cancel {
 .fc-state-down,
   .fc-state-active,
   .fc-state-disabled {
-  background-color: #F26522 !important;
+  /*background-color: #be1f24 !important;*/
   color: #FFF !important;
   text-shadow: none !important;
 }
@@ -14455,14 +14455,14 @@ button.swal2-cancel {
 }
 
 .fc .fc-button-primary:hover, .fc .fc-button-primary.active, .fc .fc-button-primary:active {
-  background-color: #F26522;
-  border-color: #F26522;
+  background-color: #be1f24;
+  border-color: #be1f24;
   color: #FFF;
 }
 
  .fc .fc-button-primary.\!active {
-  background-color: #F26522 !important;
-  border-color: #F26522 !important;
+  background-color: #be1f24 !important;
+  border-color: #be1f24 !important;
   color: #FFF !important;
 }
 
@@ -14477,8 +14477,8 @@ button.swal2-cancel {
 }
 
 .fc .fc-button-primary.fc-dayGridMonth-button, .fc .fc-button-primary:not(:disabled).fc-button-active {
-  background-color: #F26522;
-  border-color: #F26522;
+  background-color: #be1f24;
+  border-color: #be1f24;
   color: #FFF;
   font-size: 14px;
   font-weight: 400;
@@ -14489,8 +14489,8 @@ button.swal2-cancel {
 }
 
 .fc .fc-button-primary.fc-dayGridMonth-button:hover, .fc .fc-button-primary:not(:disabled).fc-button-active:hover {
-  background-color: #F26522;
-  border-color: #F26522;
+  background-color: #be1f24;
+  border-color: #be1f24;
   color: #FFF;
 }
 
@@ -14499,8 +14499,8 @@ button.swal2-cancel {
 }
 
 .fc .fc-button-primary.fc-custombtn-button {
-  background-color: #F26522;
-  border-color: #F26522;
+  background-color: #be1f24;
+  border-color: #be1f24;
   color: #FFF;
   font-size: 15px;
   font-weight: 500;
@@ -15658,7 +15658,7 @@ button.swal2-cancel {
 }
 
 .chat-wrapper .chat .chat-body .messages .chats.chats-right .message-content .file-attach .file-icon {
-  color: #F26522;
+  color: #be1f24;
 }
 
 .chat-wrapper .chat .chat-body .messages .chats.chats-right .message-content .file-attach h6 {
@@ -15813,7 +15813,7 @@ button.swal2-cancel {
 }
 
 .chat-wrapper .chats.chats-right .message-content {
-  background-color: #F26522;
+  background-color: #be1f24;
   color: #FFF;
   border-radius: 16px 16px 0px 16px;
   padding: 16px;
@@ -15890,7 +15890,7 @@ button.swal2-cancel {
 }
 
 .chat-wrapper .emoj-group > ul > li > a:hover {
-  background-color: #F26522;
+  background-color: #be1f24;
   color: #FFF;
 }
 
@@ -15977,7 +15977,7 @@ button.swal2-cancel {
   justify-content: center;
   -webkit-justify-content: center;
   -ms-flex-pack: center;
-  background-color: #F26522;
+  background-color: #be1f24;
   color: #FFF;
   font-size: 14px;
 }
@@ -16205,7 +16205,7 @@ button.swal2-cancel {
 }
 
 .chat-wrapper .action-wrap i {
-  color: #F26522;
+  color: #be1f24;
   font-size: 14px;
 }
 
@@ -16219,7 +16219,7 @@ button.swal2-cancel {
 }
 
 .chat-wrapper .link-icon:hover {
-  color: #F26522;
+  color: #be1f24;
 }
 
 .chat-wrapper .contact-user {
@@ -16255,8 +16255,8 @@ button.swal2-cancel {
 }
 
 .chat-wrapper .contact-actions a:hover {
-  background: #F26522;
-  border-color: #F26522;
+  background: #be1f24;
+  border-color: #be1f24;
   color: #FFF;
 }
 
@@ -16266,11 +16266,11 @@ button.swal2-cancel {
 }
 
 .chat-wrapper .chat-body .dropdown-item.active {
-  background-color: #F26522;
+  background-color: #be1f24;
 }
 
 .chat-wrapper .chat-body .dropdown-item.\!active {
-  background-color: #F26522 !important;
+  background-color: #be1f24 !important;
 }
 
 .chat-wrapper .file-action {
@@ -19353,7 +19353,7 @@ textarea.form-control{
 }
 
 .peer:focus ~ .dark\:peer-focus\:primary:is(.dark *).timeline-badge {
-  background-color: #F26522;
+  background-color: #be1f24;
 }
 
 @media (min-width: 576px){
