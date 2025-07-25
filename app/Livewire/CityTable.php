@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\City;
 use Livewire\WithPagination;
@@ -10,22 +11,20 @@ class CityTable extends Component
 {
     use WithPagination;
 
-    public string $sortField = 'created_at';
-    public string $sortDirection = 'desc';
 
-    public function sortBy(string $field)
+    #[On('toggleCityStatus')]
+    public function toggleCityStatus(int $id)
     {
-        if ($this->sortField === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortField = $field;
-            $this->sortDirection = 'asc';
-        }
+        $city = City::findOrFail($id);
+        $city->is_active = !$city->is_active;
+        $city->save();
+
+        session()->flash('message', __('general.status-updated'));
     }
 
     public function render()
     {
-        $cities = City::orderBy($this->sortField, $this->sortDirection)->paginate(10);
+        $cities = City::paginate(20);
 
         return view('livewire.city-table', [
             'cities' => $cities,
