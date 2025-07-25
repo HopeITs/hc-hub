@@ -11,6 +11,7 @@
 
 <!-- Feather Icon JS -->
 <script src="{{ asset('assets/js/feather.min.js') }}"></script>
+@yield('js')
 <script src="{{ asset('assets/js/script.js') }}"></script>
 @livewireScripts
-@yield('js')
+

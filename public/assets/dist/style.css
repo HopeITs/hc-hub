@@ -3301,7 +3301,7 @@ button:disabled{
   color: rgb(107 114 128 / var(--tw-text-opacity, 1));
 }
 
-[data-color=brightblue] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=brightblue]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=brightblue] 
+[data-color=brightblue] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=brightblue]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=brightblue]
 	.custom-datatable-filter .dt-paging nav .pagination a[aria-current="page"]{
   --tw-bg-opacity: 1 !important;
   background-color: rgb(70 128 255 / var(--tw-bg-opacity, 1)) !important;
@@ -3309,7 +3309,7 @@ button:disabled{
   border-color: rgb(70 128 255 / var(--tw-border-opacity, 1)) !important;
 }
 
-[data-color=lunargreen] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=lunargreen]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=lunargreen] 
+[data-color=lunargreen] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=lunargreen]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=lunargreen]
 	.custom-datatable-filter .dt-paging nav .pagination a[aria-current="page"]{
   --tw-bg-opacity: 1 !important;
   background-color: rgb(54 94 50 / var(--tw-bg-opacity, 1)) !important;
@@ -3317,7 +3317,7 @@ button:disabled{
   border-color: rgb(54 94 50 / var(--tw-border-opacity, 1)) !important;
 }
 
-[data-color=lavendar] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=lavendar]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=lavendar] 
+[data-color=lavendar] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=lavendar]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=lavendar]
 	.custom-datatable-filter .dt-paging nav .pagination a[aria-current="page"]{
   --tw-bg-opacity: 1 !important;
   background-color: rgb(103 58 183 / var(--tw-bg-opacity, 1)) !important;
@@ -3325,7 +3325,7 @@ button:disabled{
   border-color: rgb(103 58 183 / var(--tw-border-opacity, 1)) !important;
 }
 
-[data-color=magenta] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=magenta]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=magenta] 
+[data-color=magenta] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=magenta]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=magenta]
 	.custom-datatable-filter .dt-paging nav .pagination a[aria-current="page"]{
   --tw-bg-opacity: 1 !important;
   background-color: rgb(232 62 140 / var(--tw-bg-opacity, 1)) !important;
@@ -3333,7 +3333,7 @@ button:disabled{
   border-color: rgb(232 62 140 / var(--tw-border-opacity, 1)) !important;
 }
 
-[data-color=chromeyellow] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=chromeyellow]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=chromeyellow] 
+[data-color=chromeyellow] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=chromeyellow]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=chromeyellow]
 	.custom-datatable-filter .dt-paging nav .pagination a[aria-current="page"]{
   --tw-bg-opacity: 1 !important;
   background-color: rgb(255 155 4 / var(--tw-bg-opacity, 1)) !important;
@@ -3341,7 +3341,7 @@ button:disabled{
   border-color: rgb(255 155 4 / var(--tw-border-opacity, 1)) !important;
 }
 
-[data-color=lavared] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=lavared]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=lavared] 
+[data-color=lavared] .custom-datatable-filter .dt-paging nav .pagination a:active,[data-color=lavared]  .custom-datatable-filter .dt-paging nav .pagination a:hover,[data-color=lavared]
 	.custom-datatable-filter .dt-paging nav .pagination a[aria-current="page"]{
   --tw-bg-opacity: 1 !important;
   background-color: rgb(220 38 38 / var(--tw-bg-opacity, 1)) !important;
@@ -16935,7 +16935,7 @@ button.swal2-cancel {
 
 .page-loader {
   border: 2px solid;
-  border-color: transparent #F26522;
+  border-color: transparent #be1f24;
   width: 48px;
   height: 48px;
   border-radius: 50%;

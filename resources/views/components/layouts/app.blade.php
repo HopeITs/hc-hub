@@ -3,7 +3,7 @@
 <head>
     @include('partials.head')
 </head>
-<body class="antialiased font-lato bg-light text-default  layout-rtl">
+<body class="antialiased font-lato bg-light text-default relative  ">
 <x-layouts.app.page-loader/>
 <div class="main-wrapper">
     <livewire:layouts.header/>
@@ -13,17 +13,17 @@
             {{ $slot }}
         </div>
 
-        <livewire:layouts.footer/>
+
 
     </div>
 
 </div>
-
+<livewire:layouts.footer/>
 
 
 
 
 @include('partials.scripts')
-@fluxScripts
+
 </body>
 </html>

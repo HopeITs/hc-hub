@@ -9,7 +9,7 @@
         <x-auth-card>
             <div class="text-center mb-12">
                 <h2 class="text-[24px] font-semibold text-title mb-2">{{__('auth.sign-in')}}</h2>
-                <p class="text-sm text-[#6c757d]">{{__('auth.sign-in-text')}}</p>
+                <p class="text-sm text-secondary-700">{{__('auth.sign-in-text')}}</p>
             </div>
 
             @if (session('status'))
