@@ -16,7 +16,6 @@
             role="switch"
             @if($active) checked @endif
             wire:click="{{ $wireEvent }}({{ $modelId }})"
-            wire:confirm="{{ __('general.confirm-status-change') }}"
             class="text-primary rounded border-borderColor me-1"
         >
         <label for="{{ $switchId }}" class="text-xs form-check-label">

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\City;
@@ -12,14 +13,34 @@ class CityTable extends Component
     use WithPagination;
 
 
-    #[On('toggleCityStatus')]
-    public function toggleCityStatus(int $id)
+    public $cityId;
+
+    public function confirmToggleCityStatus($id)
     {
-        $city = City::findOrFail($id);
+        $this->cityId = $id;
+
+        LivewireAlert::title(__('general.toggle-status'))
+            ->text(__('general.confirm-status-change'))
+            ->asConfirm()
+            ->confirmButtonColor('red')
+            ->withConfirmButton(__('general.save'))
+            ->onConfirm('toggleCityStatusConfirmed', ['id' => $this->cityId])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+
+    public function toggleCityStatusConfirmed()
+    {
+        $city = City::findOrFail($this->cityId);
         $city->is_active = !$city->is_active;
         $city->save();
 
-        session()->flash('message', __('general.status-updated'));
+        LivewireAlert::title(__('general.status-updated'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 
     public function render()

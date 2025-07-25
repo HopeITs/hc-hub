@@ -17,7 +17,7 @@
                 <x-datatable.td-status
                     :active="$city->is_active"
                     :model-id="$city->id"
-                    wire-event="toggleCityStatus"
+                    wire-event="confirmToggleCityStatus"
                 />
 
             </tr>
