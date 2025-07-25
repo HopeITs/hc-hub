@@ -19,11 +19,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    protected $fillable = ['name', 'email', 'password'];
     public array $translatable = ['name'];
 
     public function getTranslatedNameAttribute()
@@ -62,5 +58,29 @@ class User extends Authenticatable
     public function myRole()
     {
         return 'مطور مواقع انترنت';
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    public function permissions()
+    {
+        return $this->belongsToMany(Permission::class);
+    }
+
+    // public function hasPermission($permission)
+    // {
+    //     return $this->roles()
+    //         ->whereHas('permissions', function ($query) use ($permission) {
+    //             $query->where('name', $permission);
+    //         })
+    //         ->exists();
+    // }
+
+    public function hasRole(string $roleName): bool
+    {
+        return $this->roles->contains('name', $roleName);
     }
 }

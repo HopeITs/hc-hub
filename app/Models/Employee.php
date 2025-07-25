@@ -9,34 +9,7 @@ class Employee extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'id',
-        'full_name',
-        'years_of_service',
-        'direct_manager_id',
-        'tech_manager_id',
-        'national_number',
-        'dob',
-        'actual_job',
-        'civil_registry_office',
-        'civil_registry_number',
-        'place_of_registration',
-        'gender',
-        'father_name',
-        'mother_name',
-        'nationality',
-        'material_status',
-        'children',
-        'work_phone',
-        'personal_phone',
-        'personal_email',
-        'work_email',
-        'address',
-        'skills',
-        'interests',
-        'is_active'
-
-    ];
+    protected $fillable = ['id', 'full_name', 'years_of_service', 'direct_manager_id', 'tech_manager_id', 'national_number', 'dob', 'actual_job', 'civil_registry_office', 'civil_registry_number', 'place_of_registration', 'gender', 'father_name', 'mother_name', 'nationality', 'material_status', 'children', 'work_phone', 'personal_phone', 'personal_email', 'work_email', 'address', 'skills', 'interests', 'is_active'];
 
     public function contracts()
     {
@@ -77,5 +50,4 @@ class Employee extends Model
     {
         return $this->hasOne(Checklist::class);
     }
-
 }
