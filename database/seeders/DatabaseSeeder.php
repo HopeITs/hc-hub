@@ -15,10 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => ['en' => 'Test User'],
-            'email' => 'test@example.com',
-        ]);
+
 
         $this->call([
             ProjectSeeder::class,
@@ -30,6 +27,10 @@ class DatabaseSeeder extends Seeder
             LeaveTypeSeeder::class,
             AnnualLeaveRuleSeeder::class,
             RolesPermissionsSeeder::class
+        ]);
+       $user = User::factory()->create([
+            'name' => ['en' => 'Test User'],
+            'email' => 'test@example.com',
         ]);
     }
 }
