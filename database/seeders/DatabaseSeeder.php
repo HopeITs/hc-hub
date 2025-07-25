@@ -26,8 +26,10 @@ class DatabaseSeeder extends Seeder
             CheckListItemSeeder::class,
             LeaveTypeSeeder::class,
             AnnualLeaveRuleSeeder::class,
-            RolesPermissionsSeeder::class
+            RolesPermissionsSeeder::class,
+            UserRoleSeeder::class
         ]);
+
        $user = User::factory()->create([
             'name' => ['en' => 'Test User'],
             'email' => 'test@example.com',
