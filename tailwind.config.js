@@ -7,6 +7,7 @@ import { Modal } from 'flowbite';
 export default {
     content: [
         "./resources/**/*.blade.php",
+        "./resources/**/**/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
         "./vendor/livewire/**/*.blade.php",
@@ -152,7 +153,7 @@ export default {
                     900: '#E9EDF4',
                 },
                 'gray': {
-                    DEFAULT: '#dcddde',
+                    DEFAULT: '#414042',
                     100: '#DCDDDE',
                     200: '#D0D2D3',
                     300: '#BCBEC0',

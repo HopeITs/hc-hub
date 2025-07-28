@@ -3,14 +3,14 @@
 <head>
     @include('partials.head')
 </head>
-<body class="min-h-screen bg-white dark:bg-zinc-800">
+<body class="min-h-screen bg-white  font-lato">
 <x-layouts.app.header/>
-<x-layouts.app.sidebar/>
-<div class="p-4 sm:mr-64">
-    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
+<livewire:layout.sidebar/>
+<div class="p-4 pt-8  sm:mr-60">
+    <div class="p-4 border-1 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
         {{$slot}}
     </div>
 </div>
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+   @include('partials.scripts')
 </body>
 </html>
