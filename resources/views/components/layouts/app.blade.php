@@ -1,29 +1,16 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl" data-layout="rtl">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl">
 <head>
     @include('partials.head')
 </head>
-<body class="antialiased font-lato bg-light text-default relative  ">
-<x-layouts.app.page-loader/>
-<div class="main-wrapper">
-    <livewire:layouts.header/>
-    <livewire:layouts.sidebar/>
-    <div class="page-wrapper relative pt-[60px] mr-[252px]">
-        <div class="content p-6 pb-0">
-            {{ $slot }}
-        </div>
-
-
-
+<body class="min-h-screen bg-white dark:bg-zinc-800">
+<x-layouts.app.header/>
+<x-layouts.app.sidebar/>
+<div class="p-4 sm:mr-64">
+    <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
+        {{$slot}}
     </div>
-
 </div>
-<livewire:layouts.footer/>
-
-
-
-
-@include('partials.scripts')
-
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </body>
 </html>

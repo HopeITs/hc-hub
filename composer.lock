@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "274367f645788c49a598dce344bc89ec",
+    "content-hash": "5b2b7ad272c901a55ea24b4f138481a8",
     "packages": [
         {
             "name": "bensampo/laravel-enum",
@@ -1297,70 +1297,6 @@
                 }
             ],
             "time": "2025-02-03T10:55:03+00:00"
-        },
-        {
-            "name": "jantinnerezo/livewire-alert",
-            "version": "v4.0.6",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/jantinnerezo/livewire-alert.git",
-                "reference": "5e0eeeb5eeec6429fc49eb66ecf1e6898b7e25c6"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/jantinnerezo/livewire-alert/zipball/5e0eeeb5eeec6429fc49eb66ecf1e6898b7e25c6",
-                "reference": "5e0eeeb5eeec6429fc49eb66ecf1e6898b7e25c6",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/support": "^10.0|^11.0|^12.0",
-                "livewire/livewire": "^3.0",
-                "php": "^8.1"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.70",
-                "orchestra/testbench": "^8.0|^9.0|^10.0",
-                "phpstan/phpstan": "^2.1",
-                "phpunit/phpunit": "^9.5|^10.0|^11.5.3"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "LivewireAlert": "Jantinnerezo\\LivewireAlert\\LivewireAlert"
-                    },
-                    "providers": [
-                        "Jantinnerezo\\LivewireAlert\\LivewireAlertServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Jantinnerezo\\LivewireAlert\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jantinn Erezo",
-                    "email": "erezojantinn@gmail.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "This package provides a simple alert utilities for your livewire components.",
-            "homepage": "https://github.com/jantinnerezo/livewire-alert",
-            "keywords": [
-                "jantinnerezo",
-                "livewire-alert"
-            ],
-            "support": {
-                "issues": "https://github.com/jantinnerezo/livewire-alert/issues",
-                "source": "https://github.com/jantinnerezo/livewire-alert/tree/v4.0.6"
-            },
-            "time": "2025-07-13T10:49:59+00:00"
         },
         {
             "name": "laminas/laminas-code",
@@ -2946,16 +2882,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v5.5.0",
+            "version": "v5.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "ae59794362fe85e051a58ad36b289443f57be7a9"
+                "reference": "221b0d0fdf1369c71047ad1d18bb5880017bbc56"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/ae59794362fe85e051a58ad36b289443f57be7a9",
-                "reference": "ae59794362fe85e051a58ad36b289443f57be7a9",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/221b0d0fdf1369c71047ad1d18bb5880017bbc56",
+                "reference": "221b0d0fdf1369c71047ad1d18bb5880017bbc56",
                 "shasum": ""
             },
             "require": {
@@ -2998,9 +2934,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v5.5.0"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v5.6.0"
             },
-            "time": "2025-05-31T08:24:38+00:00"
+            "time": "2025-07-27T20:03:57+00:00"
         },
         {
             "name": "nunomaduro/termwind",

@@ -1,44 +1,25 @@
-<section class="min-h-screen rtl text-right bg-gray-100 flex items-center justify-center px-4">
-    <x-auth-card-wrapper>
-        {{-- logo --}}
-        <div class="text-center mb-12">
-            <x-app-logo class="mx-auto w-36" />
-        </div>
+ <div class="flex flex-col gap-6">
+    <x-auth-header :title="__('Forgot password')" :description="__('Enter your email to receive a password reset link')" />
 
-        {{-- forgot password card --}}
-        <x-auth-card>
-            <div class="text-center mb-8">
-                <h2 class="text-[24px] font-semibold text-title mb-2">{{ __('auth.forgot-password') }}</h2>
-                <p class="text-sm text-[#6c757d]">
-                    {{ __("auth.forgot-password-text") }}
-                </p>
-            </div>
+    <!-- Session Status -->
+    <x-auth-session-status class="text-center" :status="session('status')" />
 
-            <x-auth-session-status class="text-center text-green-600 text-sm mb-4" :status="session('status')" />
+    <form wire:submit="sendPasswordResetLink" class="flex flex-col gap-6">
+        <!-- Email Address -->
+        <flux:input
+            wire:model="email"
+            :label="__('Email Address')"
+            type="email"
+            required
+            autofocus
+            placeholder="email@example.com"
+        />
 
-            <form wire:submit.prevent="sendPasswordResetLink" class="space-y-4">
-                <div>
-                    <x-input-label for="email" :value="__('auth.email-address')" />
-                    <x-text-input
-                        id="email"
-                        type="email"
-                        model="email"
-                        placeholder="email@example.com"
-                    />
-                    <x-input-error field="email" />
-                </div>
+        <flux:button variant="primary" type="submit" class="w-full">{{ __('Email password reset link') }}</flux:button>
+    </form>
 
-                <x-primary-button class="w-full ">
-                    {{ __('auth.submit') }}
-                </x-primary-button>
-            </form>
-        </x-auth-card>
-
-        <div class="text-center text-gray-500 text-[13px] mt-6">
-            إرجع إلى
-            <a href="{{ route('login') }}" class="text-primary-600 hover:underline">
-                {{ __('auth.sign-in') }}
-            </a>
-        </div>
-    </x-auth-card-wrapper>
-</section>
+    <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-400">
+        <span>{{ __('Or, return to') }}</span>
+        <flux:link :href="route('login')" wire:navigate>{{ __('log in') }}</flux:link>
+    </div>
+</div>

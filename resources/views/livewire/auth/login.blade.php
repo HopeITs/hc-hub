@@ -1,78 +1,52 @@
-<section class="min-h-screen rtl text-right bg-gray-100 flex items-center justify-center px-4">
-    <x-auth-card-wrapper>
-        {{-- logo --}}
-        <div class="text-center mb-12">
-            <x-app-logo class="mx-auto w-36"></x-app-logo>
-        </div>
+<div class="flex flex-col gap-6">
+    <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
 
-        {{-- login form --}}
-        <x-auth-card>
-            <div class="text-center mb-12">
-                <h2 class="text-[24px] font-semibold text-title mb-2">{{__('auth.sign-in')}}</h2>
-                <p class="text-sm text-secondary-700">{{__('auth.sign-in-text')}}</p>
-            </div>
+    <!-- Session Status -->
+    <x-auth-session-status class="text-center" :status="session('status')" />
 
-            @if (session('status'))
-                <div class="text-green-600 text-sm text-center mb-4">{{ session('status') }}</div>
+    <form wire:submit="login" class="flex flex-col gap-6">
+        <!-- Email Address -->
+        <flux:input
+            wire:model="email"
+            :label="__('Email address')"
+            type="email"
+            required
+            autofocus
+            autocomplete="email"
+            placeholder="email@example.com"
+        />
+
+        <!-- Password -->
+        <div class="relative">
+            <flux:input
+                wire:model="password"
+                :label="__('Password')"
+                type="password"
+                required
+                autocomplete="current-password"
+                :placeholder="__('Password')"
+                viewable
+            />
+
+            @if (Route::has('password.request'))
+                <flux:link class="absolute end-0 top-0 text-sm" :href="route('password.request')" wire:navigate>
+                    {{ __('Forgot your password?') }}
+                </flux:link>
             @endif
-
-            <form wire:submit.prevent="login" class="space-y-4">
-
-                <div>
-                    <x-input-label for="email" value="{{__('auth.email-address')}}"/>
-                    <x-text-input
-                        id="email"
-                        type="email"
-                        wire:model.defer="email"
-                        placeholder="email@example.com" />
-
-                    <x-input-error field="email"/>
-                </div>
-
-
-                <div>
-                    <x-input-label for="password" value="{{__('auth.password')}}" class="mt-6"/>
-                    <x-text-input
-                        id="password"
-                        type="password"
-                        wire:model.defer="password"
-                        placeholder="••••••••" />
-
-                    <x-input-error field="password"/>
-
-                </div>
-
-                <div class="flex py-3 items-center justify-between text-sm">
-                    <x-checkbox wire:model.defer="remember">
-                        {{__('auth.remember-me')}}
-                    </x-checkbox>
-                    @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">
-                            {{__('auth.forgot-password')}}
-                        </a>
-                    @endif
-                </div>
-
-                <x-primary-button>
-                    {{__('auth.sign-in')}}
-                </x-primary-button>
-
-            </form>
-        </x-auth-card>
-
-        <div class="text-center text-gray-500 text-[13px] mt-6">
-            &copy; 2025 - {{__('auth.copyright')}}
         </div>
-    </x-auth-card-wrapper>
-</section>
 
-<script>
-    document.querySelectorAll('.toggle-password').forEach(el => {
-        el.addEventListener('click', function () {
-            const input = this.previousElementSibling;
-            input.type = input.type === 'password' ? 'text' : 'password';
-            this.classList.toggle('ti-eye');
-            this.classList.toggle('ti-eye-off');
-        });
-    });
-</script>
+        <!-- Remember Me -->
+        <flux:checkbox wire:model="remember" :label="__('Remember me')" />
+
+        <div class="flex items-center justify-end">
+            <flux:button variant="primary" type="submit" class="w-full">{{ __('Log in') }}</flux:button>
+        </div>
+    </form>
+
+    @if (Route::has('register'))
+        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
+            <span>{{ __('Don\'t have an account?') }}</span>
+            <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
+        </div>
+    @endif
+</div>
