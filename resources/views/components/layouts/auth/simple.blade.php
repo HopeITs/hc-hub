@@ -25,6 +25,6 @@
     <x-layouts.app.footer/>
 </div>
 
-@fluxScripts
+{{--@fluxScripts--}}
 </body>
 </html>
