@@ -6,26 +6,36 @@
         ['label' => trans_choice('general.contract-type',2)],
     ]"
     />
-    <x-datatable.table :title="trans_choice('general.city',2)" :items="$items"
-                       :headings="['ID' , __('general.type') , __('general.place') ,__('general.weekly_hours')]">
+    <x-table>
+        <x-slot name="headings">
+            <x-table.heading>ID</x-table.heading>
+            <x-table.heading sortable> @lang('general.type')</x-table.heading>
+            <x-table.heading>@lang('general.place')</x-table.heading>
+            <x-table.heading>@lang('general.weekly_hours')</x-table.heading>
+        </x-slot>
+        <x-slot name="body">
+            @forelse($items as $item)
+                @php
+                    $place = \App\Enums\ContractPlace::getLocalizedName($item->place);
+                @endphp
+                <tr>
+                    <x-table.cell>{{$item->id}}</x-table.cell>
 
-        @forelse($items as $item)
-            @php
-                $place = \App\Enums\ContractPlace::getLocalizedName($item->place);
-            @endphp
-            <tr>
-                <x-datatable.td>{{$item->id}}</x-datatable.td>
+                    <x-table.cell>{{$item->type}}</x-table.cell>
 
-                <x-datatable.td>{{$item->type}}</x-datatable.td>
+                    <x-table.cell>
+                        <x-badge :color="$place['color']"> {{ $place['value'] }}</x-badge>
+                    </x-table.cell>
+                    <x-table.cell>{{$item->weekly_hours}}</x-table.cell>
+                </tr>
+            @empty
+                <x-table.no-data/>
+            @endforelse
+        </x-slot>
+        <x-slot name="pagination">
+            {{$items->links()}}
+        </x-slot>
+    </x-table>
 
-                <x-datatable.td>
-                    <x-badge :color="$place['color']"> {{ $place['value'] }}</x-badge>
-                </x-datatable.td>
-                <x-datatable.td>{{$item->weekly_hours}}</x-datatable.td>
-            </tr>
-        @empty
-            <x-datatable.no-data/>
-        @endforelse
-    </x-datatable.table>
 
 </div>

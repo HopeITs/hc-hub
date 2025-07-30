@@ -6,24 +6,29 @@
         ['label' => trans_choice('general.city',2)],
     ]"
     />
-    <x-datatable.table :title="trans_choice('general.city',2)" :items="$cities"
-                       :headings="['ID' , __('general.name') , __('general.status') ]">
+    <x-table>
+        <x-slot name="headings">
+            <x-table.heading>ID</x-table.heading>
+            <x-table.heading sortable> @lang('general.name')</x-table.heading>
+            <x-table.heading>@lang('general.status')</x-table.heading>
+        </x-slot>
+        <x-slot name="body">
+            @forelse($cities as $item)
+                <tr>
+                    <x-table.cell>{{$item->id}}</x-table.cell>
+                    <x-table.cell>{{$item->name}}</x-table.cell>
+                    <x-table.cell-status :active="$item->is_active"
+                                         :model-id="$item->id"
+                                         wire-event="confirmToggleCityStatus"/>
+                </tr>
+            @empty
+                <x-table.no-data/>
+            @endforelse
+        </x-slot>
+        <x-slot name="pagination">
+            {{ $cities->links() }}
+        </x-slot>
+    </x-table>
 
-        @forelse($cities as $city)
-            <tr>
-                <x-datatable.td>{{$city->id}}</x-datatable.td>
-
-                <x-datatable.td>{{$city->name}}</x-datatable.td>
-                <x-datatable.td-status
-                    :active="$city->is_active"
-                    :model-id="$city->id"
-                    wire-event="confirmToggleCityStatus"
-                />
-
-            </tr>
-        @empty
-            <x-datatable.no-data/>
-        @endforelse
-    </x-datatable.table>
 
 </div>
