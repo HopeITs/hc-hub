@@ -1,47 +1,66 @@
-<div class="flex flex-col gap-6">
-    <x-auth-header :title="__('auth.sign-in')" :description="__('auth.sign-in-text')"/>
+<section class="min-h-[90dvh] rtl text-right bg-gray-100 flex items-center justify-center px-4">
+    <x-auth-card-wrapper>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')"/>
+        {{-- logo --}}
+        <div class="text-center mb-6">
+            <x-app-logo class="mx-auto w-36" />
+        </div>
 
-    <form wire:submit="login" class=" flex flex-col gap-6">
-        <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('auth.email-address')"
-            type="email"
-            required
-            autofocus
-            autocomplete="email"
-            placeholder="email@example.com"
-        />
-
-        <!-- Password -->
-
-        <flux:input
-            wire:model="password"
-            :label="__('auth.password')"
-            type="password"
-            required
-            autocomplete="current-password"
-            :placeholder="__('auth.password')"
-            viewable
-        />
+        {{-- login card --}}
+        <x-auth-card class="w-96 space-y-6">
 
 
-        <!-- Remember Me -->
-        <div class="relative">
-            <flux:checkbox wire:model="remember" :label="__('auth.remember-me')"/>
-            @if (Route::has('password.request'))
-                <flux:link class="absolute end-0 top-0 text-sm" :href="route('password.request')" wire:navigate>
-                    {{ __('auth.forgot-password') }}
-                </flux:link>
+        {{-- Title --}}
+            <div class="text-center space-y-1">
+                <h2 class="text-2xl font-bold text-gray-900">{{ __('auth.sign-in') }}</h2>
+                <p class="text-sm text-gray-500">{{ __('auth.sign-in-text') }}</p>
+            </div>
+
+            {{-- Status --}}
+            @if (session('status'))
+                <div class="text-green-600 text-sm text-center">
+                    {{ session('status') }}
+                </div>
             @endif
-        </div>
-        <div class="flex items-center justify-end">
-            <flux:button variant="primary" type="submit" class="w-full">{{ __('auth.sign-in') }}</flux:button>
-        </div>
-    </form>
 
+            {{-- Login form --}}
+            <form wire:submit.prevent="login" class="space-y-5">
 
-</div>
+                {{-- Email --}}
+                <div>
+                    <x-input-label for="email" value="{{ __('auth.email-address') }}" />
+                    <x-text-input id="email" type="email" wire:model.defer="email" placeholder="email@example.com" />
+                    <x-input-error field="email" />
+                </div>
+
+                {{-- Password --}}
+                <div>
+                    <x-input-label for="password" value="{{ __('auth.password') }}" />
+                    <x-text-input id="password" type="password" wire:model.defer="password" placeholder="••••••••" />
+                    <x-input-error field="password" />
+                </div>
+
+                {{-- Remember + Forgot --}}
+                <div class="flex items-center justify-between text-sm text-gray-600">
+                    <label class="flex items-center gap-2">
+                        <x-checkbox wire:model.defer="remember" />
+                        <span>{{ __('auth.remember-me') }}</span>
+                    </label>
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">
+                            {{ __('auth.forgot-password') }}
+                        </a>
+                    @endif
+                </div>
+
+                {{-- Submit --}}
+                <x-primary-button>
+                    {{ __('auth.sign-in') }}
+                </x-primary-button>
+
+            </form>
+
+        </x-auth-card>
+
+    </x-auth-card-wrapper>
+</section>
