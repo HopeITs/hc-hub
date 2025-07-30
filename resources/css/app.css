@@ -123,6 +123,16 @@ body {
     --color-secondary-light: #939598;
     --color-secondary-soft: #dcddde;
 
+    --color-primary-100: #FEE2E2;
+    --color-primary-200: #FECACA;
+    --color-primary-300: #FCA5A5;
+    --color-primary-400: #F87171;
+    --color-primary-500: #EF4444;
+    --color-primary-600: #DC2626;
+    --color-primary-700: #B91C1C;
+    --color-primary-800: #991B1B;
+    --color-primary-900: #7F1D1D;
+
     --colot-black : #414042;
 
     --color-zinc: #414042;
