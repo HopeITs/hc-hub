@@ -2,6 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl">
 <head>
     @include('partials.head')
+    @fluxAppearance
 </head>
 <body class="min-h-screen bg-gray-100 antialiased font-SomarSans">
 
