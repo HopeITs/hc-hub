@@ -16,9 +16,9 @@
             role="switch"
             @if($active) checked @endif
             wire:click="{{ $wireEvent }}({{ $modelId }})"
-            class="text-green-400 rounded border-green-400 me-1"
+            class="text-green-400 rounded border-green-400  focus:ring-green-400 me-1"
         >
-        <label for="{{ $switchId }}" class="text-xs form-check-label">
+        <label for="{{ $switchId }}" class="ms-1 text-xs form-check-label">
             {{ $active ? __('general.active') : __('general.inactive') }}
         </label>
     </div>
