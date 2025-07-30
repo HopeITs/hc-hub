@@ -1,12 +1,12 @@
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-settings.layout :heading="__('general.my-profile')" :subheading="__('general.profile.manage-settings')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
-
+            <flux:input class="text-secondary-dark outline-secondary-light" wire:model="name.en" :label="__('general.profile.name-en')" type="text" required autofocus autocomplete="name" />
+            <flux:input class="text-secondary-dark"  wire:model="name.ar" :label="__('general.profile.name-ar')" type="text" required autofocus autocomplete="name" />
             <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+                <flux:input class="text-secondary-dark" wire:model="email" :label="__('general.profile.email')" type="email" required autocomplete="email" />
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
                     <div>
@@ -29,15 +29,15 @@
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>
+                    <flux:button  variant="primary" type="submit" class="w-full bg-secondary-medium">{{ __('general.profile.save') }}</flux:button>
                 </div>
 
                 <x-action-message class="me-3" on="profile-updated">
-                    {{ __('Saved.') }}
+                    {{ __('general.profile.got-saved') }}
                 </x-action-message>
             </div>
         </form>
 
-        <livewire:settings.delete-user-form />
+{{--        <livewire:settings.delete-user-form />--}}
     </x-settings.layout>
 </section>

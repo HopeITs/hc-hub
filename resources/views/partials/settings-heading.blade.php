@@ -1,5 +1,11 @@
 <div class="relative mb-6 w-full">
-    <flux:heading size="xl" level="1">{{ __('Settings') }}</flux:heading>
-    <flux:subheading size="lg" class="mb-6">{{ __('Manage your profile and account settings') }}</flux:subheading>
-    <flux:separator variant="subtle" />
+    <livewire:layout.breadcrumbs
+        :title="__('general.profile.profile')"
+        :crumbs="[
+            ['label' => __('general.dashboard'), 'url' => route('dashboard')],
+            ['label' => __('general.profile.settings')],
+        ]"/>
+
+
+
 </div>

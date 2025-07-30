@@ -15,7 +15,7 @@
 
                     @foreach($crumbs as $crumb)
                         <li><span class="text-default">/</span></li>
-                        <li class="text-xs {{ $loop->last ? 'text-gray-900' : 'text-default' }}">
+                        <li class="text-xs {{ $loop->last ? 'text-secondary-light' : 'text-secondary-dark' }}">
                             @if (!empty($crumb['url']))
                                 <a href="{{ $crumb['url'] }}" class="hover:underline">{{ $crumb['label'] }}</a>
                             @else
@@ -45,3 +45,4 @@
 
     </div>
 </div>
+

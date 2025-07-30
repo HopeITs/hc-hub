@@ -4,10 +4,10 @@
     'items' => ''
 ])
 <div class="card border border-borderColor rounded-[5px] shadow-xs bg-white mt-2 mb-8">
-    <div
-        class="card-header py-4 px-5 border-b border-borderColor flex items-center justify-between flex-wrap gap-3">
-        <h5>{{$title}}</h5>
-    </div>
+{{--    <div--}}
+{{--        class="card-header py-4 px-5 border-b border-borderColor flex items-center justify-between flex-wrap gap-3">--}}
+{{--        <h5>{{$title}}</h5>--}}
+{{--    </div>--}}
 
     <div class="card-body p-0">
         <div class="custom-datatable-filter">

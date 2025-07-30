@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
 
-
 @import "flowbite/src/themes/default";
+
 @plugin "flowbite/plugin";
 @source "../../node_modules/flowbite";
 @source '../views';
@@ -12,32 +12,68 @@
 
 
 @font-face {
-    font-family: 'Lato';
-    src: url('/fonts/Lato/Lato-Thin.ttf') format('truetype');
+    font-family: 'SomarSans';
+    src: url('/fonts/SomarSans/SomarSans-Thin.otf') format('opentype');
     font-weight: 100;
     font-style: normal;
-    font-display: swap;
 }
+
 @font-face {
-    font-family: 'Lato';
-    src: url('/fonts/Lato/Lato-ThinItalic.ttf') format('truetype');
-    font-weight: 100;
-    font-style: italic;
-    font-display: swap;
+    font-family: 'SomarSans';
+    src: url('/fonts/SomarSans/SOMARSANS-LIGHT.OTF') format('opentype');
+    font-weight: 300;
+    font-style: normal;
 }
+
+@font-face {
+    font-family: 'SomarSans';
+    src: url('/fonts/SomarSans/SomarSans-Regular.otf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SomarSans';
+    src: url('/fonts/SomarSans/SOMARSANS-MEDIUM.OTF') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SomarSans';
+    src: url('/fonts/SomarSans/SomarSans-SemiBold.otf') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SomarSans';
+    src: url('/fonts/SomarSans/SOMARSANS-BOLD.OTF') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SomarSans';
+    src: url('/fonts/SomarSans/SOMARSANS-EXTRABOLD.OTF') format('opentype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SomarSans';
+    src: url('/fonts/SomarSans/SOMARSANS-BLACK.OTF') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+
 
 @font-face {
     font-family: 'Lato';
     src: url('/fonts/Lato/Lato-Light.ttf') format('truetype');
     font-weight: 300;
     font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'Lato';
-    src: url('/fonts/Lato/Lato-LightItalic.ttf') format('truetype');
-    font-weight: 300;
-    font-style: italic;
     font-display: swap;
 }
 
@@ -48,13 +84,7 @@
     font-style: normal;
     font-display: swap;
 }
-@font-face {
-    font-family: 'Lato';
-    src: url('/fonts/Lato/Lato-Italic.ttf') format('truetype');
-    font-weight: 400;
-    font-style: italic;
-    font-display: swap;
-}
+
 
 @font-face {
     font-family: 'Lato';
@@ -63,13 +93,7 @@
     font-style: normal;
     font-display: swap;
 }
-@font-face {
-    font-family: 'Lato';
-    src: url('/fonts/Lato/Lato-BoldItalic.ttf') format('truetype');
-    font-weight: 700;
-    font-style: italic;
-    font-display: swap;
-}
+
 
 @font-face {
     font-family: 'Lato';
@@ -78,23 +102,19 @@
     font-style: normal;
     font-display: swap;
 }
-@font-face {
-    font-family: 'Lato';
-    src: url('/fonts/Lato/Lato-BlackItalic.ttf') format('truetype');
-    font-weight: 900;
-    font-style: italic;
-    font-display: swap;
-}
+
 
 @custom-variant dark (&:where(.dark, .dark *));
+body {
+    font-family: 'SomarSans', sans-serif;
+}
 
 @theme {
-    --font-sans: 'Lato','Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'SomarSans', 'Lato', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
 
-
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    --color-accent: #414042;
+    --color-accent-content: #414042;
     --color-accent-foreground: var(--color-white);
 
     --color-primary: #be1f24;
@@ -102,6 +122,20 @@
     --color-secondary-medium: #6d6e71;
     --color-secondary-light: #939598;
     --color-secondary-soft: #dcddde;
+
+    --colot-black : #414042;
+
+    --color-zinc: #414042;
+    --color-zinc-100: #DCDDDE;
+    --color-zinc-200: #D0D2D3;
+    --color-zinc-300: #BCBEC0;
+    --color-zinc-400: #A7A9AB;
+    --color-zinc-500: #939598;
+    --color-zinc-600: #808285;
+    --color-zinc-700: #6D6E71;
+    --color-zinc-800: #595A5C;
+    --color-zinc-900: #414042;
+
 }
 
 @layer theme {
@@ -128,7 +162,7 @@
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
 input:focus[data-flux-control],
