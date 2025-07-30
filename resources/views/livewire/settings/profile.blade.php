@@ -3,10 +3,10 @@
 
     <x-settings.layout :heading="__('general.my-profile')" :subheading="__('general.profile.manage-settings')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input class="text-secondary-dark outline-secondary-light" wire:model="name.en" :label="__('general.profile.name-en')" type="text" required autofocus autocomplete="name" />
-            <flux:input class="text-secondary-dark"  wire:model="name.ar" :label="__('general.profile.name-ar')" type="text" required autofocus autocomplete="name" />
+            <flux:input  wire:model="name.en" :label="__('general.profile.name-en')" type="text" required autofocus autocomplete="name" />
+            <flux:input  wire:model="name.ar" :label="__('general.profile.name-ar')" type="text" required autofocus autocomplete="name" />
             <div>
-                <flux:input class="text-secondary-dark" wire:model="email" :label="__('general.profile.email')" type="email" required autocomplete="email" />
+                <flux:input  wire:model="email" :label="__('general.profile.email')" type="email" required autocomplete="email" />
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
                     <div>
