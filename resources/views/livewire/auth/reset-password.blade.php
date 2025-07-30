@@ -1,4 +1,4 @@
-<section class="min-h-screen rtl text-right bg-gray-100 flex items-center justify-center px-4">
+<section class="min-h-[90dvh] rtl text-right bg-gray-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
         {{-- logo --}}
         <div class="text-center mb-12">
@@ -6,7 +6,7 @@
         </div>
 
         {{-- Reset password card --}}
-        <x-auth-card>
+        <x-auth-card class="w-96">
             <div class="text-center mb-8">
                 <h2 class="text-[24px] font-semibold text-title mb-2">{{ __('auth.reset-password') }}</h2>
                 <p class="text-sm text-[#6c757d]">
@@ -64,9 +64,6 @@
             </form>
         </x-auth-card>
 
-        <div class="text-center text-gray-500 text-[13px] mt-6">
-            &copy; {{ date('Y') }} - Hope Center HR
-        </div>
     </x-auth-card-wrapper>
 </section>
 
@@ -80,13 +77,13 @@
         if (/[0-9]/.test(password)) score++;
         if (/[^A-Za-z0-9]/.test(password)) score++;
 
-        let colorClass = 'bg-danger';
-        if (score === 2) colorClass = 'bg-warning';
-        else if (score === 3) colorClass = 'bg-info';
-        else if (score === 4) colorClass = 'bg-success';
+        let colorClass = 'bg-red-500'; // weak
+        if (score === 2) colorClass = 'bg-yellow-400';
+        else if (score === 3) colorClass = 'bg-blue-400';
+        else if (score === 4) colorClass = 'bg-green-500';
 
         bars.forEach((bar, index) => {
-            bar.classList.remove('bg-danger', 'bg-warning', 'bg-info', 'bg-success', 'bg-gray-200');
+            bar.classList.remove('bg-red-500', 'bg-yellow-400', 'bg-blue-400', 'bg-green-500', 'bg-gray-200');
             if (index < score) {
                 bar.classList.add(colorClass);
             } else {
@@ -95,7 +92,7 @@
         });
     }
 
-    //password eye toggle
+    // Optional: Password eye toggle
     document.querySelectorAll('.toggle-password').forEach(el => {
         el.addEventListener('click', function () {
             const input = this.previousElementSibling;
@@ -105,4 +102,5 @@
         });
     });
 </script>
+
 

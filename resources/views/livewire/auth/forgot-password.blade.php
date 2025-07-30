@@ -1,4 +1,4 @@
-<section class="min-h-screen rtl text-right bg-gray-100 flex items-center justify-center px-4">
+<section class="min-h-[90dvh] rtl text-right bg-gray-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
         {{-- logo --}}
         <div class="text-center mb-12">
@@ -6,7 +6,7 @@
         </div>
 
         {{-- forgot password card --}}
-        <x-auth-card>
+        <x-auth-card class="w-96">
             <div class="text-center mb-8">
                 <h2 class="text-[24px] font-semibold text-title mb-2">{{ __('auth.forgot-password') }}</h2>
                 <p class="text-sm text-[#6c757d]">
@@ -22,7 +22,7 @@
                     <x-text-input
                         id="email"
                         type="email"
-                        model="email"
+                        wire:model.defer="email"
                         placeholder="email@example.com"
                     />
                     <x-input-error field="email" />

@@ -7,9 +7,10 @@
         </div>
 
         {{-- login card --}}
-        <x-auth-card class="rounded-2xl shadow-xl p-8 bg-white w-full space-y-6">
+        <x-auth-card class="w-96 space-y-6">
 
-            {{-- Title --}}
+
+        {{-- Title --}}
             <div class="text-center space-y-1">
                 <h2 class="text-2xl font-bold text-gray-900">{{ __('auth.sign-in') }}</h2>
                 <p class="text-sm text-gray-500">{{ __('auth.sign-in-text') }}</p>
