@@ -14,7 +14,10 @@
                                                     :active="request()->routeIs('cities.index') || request()->routeIs('dashboard') "
                                                     wire:navigate>{{ trans_choice('general.city', 2) }}</x-layouts.app.sidebar.nav-item>
                     {{--                @endif--}}
-                    <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.contract-type', 2) }}</x-layouts.app.sidebar.nav-item>
+                    <x-layouts.app.sidebar.nav-item :href="route('contract-types.index')"
+                                                    :active="request()->routeIs('contract-types.index') "
+                                                    wire:navigate>{{ trans_choice('general.contract-type', 2) }}</x-layouts.app.sidebar.nav-item>
+
                     <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.leave-type', 2) }}</x-layouts.app.sidebar.nav-item>
                     <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.checklist-items', 2) }}</x-layouts.app.sidebar.nav-item>
                 </x-layouts.app.sidebar.dropdown-nav-list>

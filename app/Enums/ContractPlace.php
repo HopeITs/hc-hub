@@ -12,10 +12,17 @@ final class ContractPlace extends Enum
 
     public static function getLocalizedName(int $value): array
     {
-        return match ($value) {
-            self::Onsite => ['en' => 'Onsite', 'ar' => 'بالموقع'],
-            self::Online => ['en' => 'Online', 'ar' => 'عن بعد'],
-            default => ['en' => 'Unknown', 'ar' => 'غير معروف'],
+        $val =  match ($value) {
+            self::Onsite => ['text' => ['en' => 'Onsite', 'ar' => 'بالموقع'] , 'color' => 'green'],
+            self::Online => ['text' => ['en' => 'Online', 'ar' => 'عن بعد'] , 'color' => 'blue'],
+            default =>['text' =>  ['en' => 'Unknown', 'ar' => 'غير معروف'],'color' => 'purple'],
         };
+        $result = [
+            'value' => $val['text'][app()->getLocale()],
+            'color' => $val['color'],
+        ];
+
+
+        return $result;
     }
 }
