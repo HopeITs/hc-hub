@@ -8,10 +8,10 @@
             </a>
             <ul class="space-y-2 font-medium">
                 <x-layouts.app.sidebar.dropdown-nav-list id="basic-project" :title="__('general.project-basics')"
-                                                         :active="request()->routeIs('cities.index') || request()->routeIs('contract-types.*') || request()->routeIs('leave-types.*') || request()->routeIs('checklist-items.*')">
+                                                         :active="request()->routeIs('dashboard') || request()->routeIs('contract-types.*') || request()->routeIs('leave-types.*') || request()->routeIs('checklist-items.*')">
                     {{--                @if (auth()->check() && auth()->user()->hasRole('Super Admin'))--}}
                     <x-layouts.app.sidebar.nav-item :href="route('cities.index')"
-                                                    :active="request()->routeIs('cities.index')"
+                                                    :active="request()->routeIs('cities.index') || request()->routeIs('dashboard') "
                                                     wire:navigate>{{ trans_choice('general.city', 2) }}</x-layouts.app.sidebar.nav-item>
                     {{--                @endif--}}
                     <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.contract-type', 2) }}</x-layouts.app.sidebar.nav-item>
@@ -21,6 +21,7 @@
 
             </ul>
         </div>
+
         <div>
             <x-layouts.app.sidebar.profile-card :user="$user"/>
         </div>
