@@ -1,44 +1,53 @@
 <section class="min-h-[90dvh] rtl text-right bg-gray-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
-        {{-- logo --}}
+
+        {{-- Logo --}}
         <div class="text-center mb-12">
             <x-app-logo class="mx-auto w-36" />
         </div>
 
-        {{-- forgot password card --}}
-        <x-auth-card class="w-96">
-            <div class="text-center mb-8">
-                <h2 class="text-[24px] font-semibold text-title mb-2">{{ __('auth.forgot-password') }}</h2>
-                <p class="text-sm text-[#6c757d]">
-                    {{ __("auth.forgot-password-text") }}
+        {{-- Forgot Password Card --}}
+        <x-auth-card class="w-96 space-y-6">
+            {{-- Title --}}
+            <div class="text-center space-y-1">
+                <h2 class="text-2xl font-bold text-gray-900">{{ __('auth.forgot-password') }}</h2>
+                <p class="text-sm text-gray-500">
+                    {{ __('auth.forgot-password-text') }}
                 </p>
             </div>
 
-            <x-auth-session-status class="text-center text-green-600 text-sm mb-4" :status="session('status')" />
+            {{-- Status --}}
+            <x-auth-session-status class="text-center text-green-600 text-sm" :status="session('status')" />
 
-            <form wire:submit.prevent="sendPasswordResetLink" class="space-y-4">
+            {{-- Form --}}
+            <form wire:submit.prevent="sendPasswordResetLink" class="space-y-5">
+                {{-- Email --}}
                 <div>
-                    <x-input-label for="email" :value="__('auth.email-address')" />
-                    <x-text-input
+                    <x-forms.input-label for="email" :value="__('auth.email-address')" />
+                    <x-forms.input
                         id="email"
                         type="email"
-                        wire:model.defer="email"
+                        model="email"
                         placeholder="email@example.com"
+                        autocomplete="email"
                     />
-                    <x-input-error field="email" />
+                    <x-forms.input-error field="email" />
                 </div>
 
-                <x-primary-button class="w-full ">
+                {{-- Submit --}}
+                <x-primary-button class="w-full">
                     {{ __('auth.submit') }}
                 </x-primary-button>
             </form>
         </x-auth-card>
 
-        <div class="text-center text-gray-500 text-[13px] mt-6">
-            إرجع إلى
+        {{-- Back to Login --}}
+        <div class="text-center text-gray-500 text-sm mt-6">
+            {{ __('auth.back-to') }}
             <a href="{{ route('login') }}" class="text-primary-600 hover:underline">
                 {{ __('auth.sign-in') }}
             </a>
         </div>
+
     </x-auth-card-wrapper>
 </section>

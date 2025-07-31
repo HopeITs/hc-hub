@@ -1,13 +1,13 @@
 <section class="w-full bg-gray-50 dark:bg-gray-900 py-5 px-4 sm:px-6 lg:px-8">
 
     {{-- Breadcrumb --}}
-    <livewire:layouts.breadcrumbs
-        :title="__('general.profile.update-password')"
-        :crumbs="[
-            ['label' => __('general.dashboard'), 'url' => route('dashboard')],
-            ['label' => __('general.profile.settings')],
-        ]"
-    />
+{{--    <livewire:layout.breadcrumbs--}}
+{{--        :title="__('general.profile.update-password')"--}}
+{{--        :crumbs="[--}}
+{{--            ['label' => __('general.dashboard'), 'url' => route('dashboard')],--}}
+{{--            ['label' => __('general.profile.settings')],--}}
+{{--        ]"--}}
+{{--    />--}}
 
     <x-settings.card>
 
