@@ -12,8 +12,8 @@
     </svg>
 </button>
 <livewire:layout.sidebar/>
-<div class="p-4 sm:mr-60 min-h-screen flex flex-col justify-between">
-    <div class="p-4 border-1 border-gray-200 border-dashed rounded-lg min-h-full">
+<div class="pt-32  bg-gray-100 sm:mr-60 min-h-screen flex flex-col justify-between items-center">
+    <div class="px-4 py-6 w-11/12 bg-white shadow rounded-lg min-h-full">
         {{$slot}}
     </div>
     <x-layouts.app.footer/>
