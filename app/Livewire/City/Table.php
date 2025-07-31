@@ -35,7 +35,7 @@ class Table extends Component
         $city->is_active = !$city->is_active;
         $city->save();
 
-        LivewireAlert::title(__('general.status-updated'))
+        LivewireAlert::title(__('general.item-updated'))
             ->success()
             ->toast()
             ->position('top-start')

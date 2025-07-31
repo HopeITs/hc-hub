@@ -19,6 +19,8 @@ class ContractType extends Model
 
     public array $translatable = ['type'];
 
+
+
     public function contracts()
     {
         return $this->hasMany(Contract::class);

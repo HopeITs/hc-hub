@@ -22,8 +22,10 @@ return [
     'toggle-status' => 'تغيير الحالة',
     'confirm-status-change' => 'هل أنت متأكد أنك تريد تغيير الحالة؟',
     'status-updated' => 'تم تحديث الحالة بنجاح.',
+    'item-updated' => 'تم تحديث السطر بنجاح.',
     'save' => 'حفظ',
     'cancel' => 'إلغاء',
+    'edit' => 'تعديل',
 
     'profile'=> [
         'settings' => 'إعدادات الحساب',

@@ -1,4 +1,4 @@
-@props(['id', 'type' => 'text', 'model', 'placeholder' => ''])
+@props([ 'type' => 'text'])
 
 <div class="relative">
     {{-- Right icon (password toggle or mail icon) --}}
@@ -18,14 +18,11 @@
 
     {{-- Input --}}
     <input
-            id="{{ $id }}"
-            type="{{ $type }}"
-            placeholder="{{ $placeholder }}"
-            autocomplete="{{ $id }}"
-            required
+
             {{ $attributes->merge([
                 'class' =>
                     'w-full pl-4 pr-4 py-2 text-sm text-gray-900 placeholder-gray-400 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-500 transition'
-            ]) }}
+            ])
+            }}
     />
 </div>

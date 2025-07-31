@@ -1,3 +1,6 @@
+@php
+    use App\Enums\ContractPlace;
+@endphp
 <div>
     <livewire:layout.breadcrumbs
         :title="trans_choice('general.contract-type',2)"
@@ -12,11 +15,12 @@
             <x-table.heading sortable> @lang('general.type')</x-table.heading>
             <x-table.heading>@lang('general.place')</x-table.heading>
             <x-table.heading sortable>@lang('general.weekly_hours')</x-table.heading>
+            <x-table.heading/>
         </x-slot>
         <x-slot name="body">
             @forelse($items as $item)
                 @php
-                    $place = \App\Enums\ContractPlace::getLocalizedName($item->place);
+                    $place = ContractPlace::getLocalizedName($item->place);
                 @endphp
                 <tr>
                     <x-table.cell>{{$item->id}}</x-table.cell>
@@ -27,6 +31,9 @@
                         <x-badge :color="$place['color']"> {{ $place['value'] }}</x-badge>
                     </x-table.cell>
                     <x-table.cell>{{$item->weekly_hours}}</x-table.cell>
+                    <x-table.cell>
+                        <x-table.edit-btn wire:click="edit({{$item->id}})"></x-table.edit-btn>
+                    </x-table.cell>
                 </tr>
             @empty
                 <x-table.no-data/>
@@ -37,5 +44,41 @@
         </x-slot>
     </x-table>
 
+    <x-modal.dialog id="showEditModal" :title="__('general.edit')" wire:model.defer="showEditModal">
+
+
+        <form class="space-y-4" wire:submit.prevent="save">
+            <div class="grid grid-cols-2 space-x-2 space-y-4">
+                @foreach(config('app.supported_locales') as $locale)
+                    <div class="col-span-1">
+                        <x-input-label for="type_{{ $locale }}">@lang('general.type')({{ strtoupper($locale) }})
+                        </x-input-label>
+                        <x-text-input type="text" id="type_{{ $locale }}"
+                                      wire:model="editing.type.{{ $locale }}"/>
+                        <x-error-span>{{$errors->first('editing.type.'.$locale)}}</x-error-span>
+                    </div>
+                @endforeach
+                <div class="col-span-1">
+                    <x-input-label for="weekly_hours">@lang('general.weekly_hours')</x-input-label>
+                    <x-text-input type="number" placeholder="20" id="weekly_hours" wire:model="editing.weekly_hours"/>
+                    <x-error-span>{{$errors->first('editing.weekly_hours')}}</x-error-span>
+                </div>
+                <div>
+                    <x-input-label for="type_{{ $locale }}">@lang('general.place')</x-input-label>
+                    <div class="flex space-x-2">
+                        <x-radio-input id="onsite" name="place" value="{{ContractPlace::Onsite}}"
+                                       wire:model="editing.place">{{ContractPlace::getLocalizedName(ContractPlace::Onsite)['value']}}</x-radio-input>
+                        <x-radio-input id="online" name="place" value="{{ContractPlace::Online}}"
+                                       wire:model="editing.place">{{ContractPlace::getLocalizedName(ContractPlace::Online)['value']}}</x-radio-input>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+            <x-primary-button type="submit">@lang('save')</x-primary-button>
+        </form>
+    </x-modal.dialog>
 
 </div>

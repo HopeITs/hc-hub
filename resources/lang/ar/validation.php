@@ -142,12 +142,12 @@ return [
             'width' => 'يجب أن يكون عرض الصورة مساوي ل :val px',
             'height' => 'يجب أن يكون ارتفاع الصورة مساوي ل :val px',
             'min_width' => 'يجب عرض الصورة على الأقل أن يكون :val px',
-            'max_width' =>  'يجب عرض الصورة أن لا يكون أكبر من :val px',
+            'max_width' => 'يجب عرض الصورة أن لا يكون أكبر من :val px',
             'min_height' => 'يجب ارتفاع الصورة على الأقل أن يكون :val px',
-            'max_height' =>  'يجب ارتفاع الصورة أن لا يكون أكبر من :val px',
+            'max_height' => 'يجب ارتفاع الصورة أن لا يكون أكبر من :val px',
         ],
 
-        'required-fields'=> 'املأ الحقول المطلوبة اولاً',
+        'required-fields' => 'املأ الحقول المطلوبة اولاً',
         'adult' => 'يجب أن يكون العمر على الأقل 16 عامًا.',
         'password_rule' => 'يجب أن تكون كلمة المرور مكونة من 8 أحرف على الأقل وتحتوي على حروف ,أرقام و محارف خاصة.',
         'phone_rule' => 'يجب أن يحتوي رقم الهاتف على أرقام وعلامات + ( ) - فقط.',
@@ -162,13 +162,20 @@ return [
         'username' => 'اسم المستخدم',
         'password' => 'كلمة المرور',
         'password_confirmation' => 'تأكيد كلمة المرور',
-        'phone' => 'الموبايل' ,
-        'gender' => 'الجنس' ,
-        'birth_date' => 'تاريخ الميلاد' ,
+        'phone' => 'الموبايل',
+        'gender' => 'الجنس',
+        'birth_date' => 'تاريخ الميلاد',
         'role' => 'الدور الوظيفي',
         'city_id' => 'اسم المدينة',
         'location' => 'الموقع',
         'message' => 'الرسالة',
+        'editing' => [
+            'weekly_hours' => 'ساعات العمل الأسبوعية',
+            'type' => [
+                'ar' => 'النوع (عربي)',
+                'en' => 'النوع (انكليزي)'
+            ]
+        ],
 
         'g-recaptcha-response' => 'captcha (I\'m not a robot)',
 
@@ -185,7 +192,6 @@ return [
     | of "email". This simply helps us make our message more expressive.
     |
     */
-
 
 
 ];
