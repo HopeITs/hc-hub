@@ -145,6 +145,9 @@ return [
 
     'inject_morph_markers' => true,
 
+    'lifetime' => 120, // in minutes
+    'expire_on_close' => false,
+
     /*
     |---------------------------------------------------------------------------
     | Pagination Theme
