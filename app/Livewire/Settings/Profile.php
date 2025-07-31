@@ -23,11 +23,12 @@ class Profile extends Component
     public function mount(): void
     {
         $user = auth()->user();
+
         $this->name = [
             'en' => $user->getTranslation('name', 'en') ?? '',
             'ar' => $user->getTranslation('name', 'ar') ?? '',
         ];
-        $this->email = $user->email;
+        $this->email = Auth::user()->email;
     }
 
     /**
@@ -37,9 +38,9 @@ class Profile extends Component
     {
         $user = Auth::user();
 
-        $validated = $this->validate([
-            'name.*' => ['required', 'string', 'max:255'],
-
+        $this->validate([
+            'name.en' => ['required', 'string', 'max:255'],
+            'name.ar' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'string',
@@ -50,7 +51,8 @@ class Profile extends Component
             ],
         ]);
 
-        $user->fill($validated);
+        $user->setTranslations('name', $this->name);
+        $user->email = $this->email;
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
@@ -60,6 +62,7 @@ class Profile extends Component
 
         $this->dispatch('profile-updated', name: $user->name);
     }
+
 
     /**
      * Send an email verification notification to the current user.
