@@ -1,43 +1,73 @@
-<section class="w-full">
-    @include('partials.settings-heading')
+<x-slot:title>
+    إعدادات الحساب
+</x-slot:title>
 
-    <x-settings.layout :heading="__('general.my-profile')" :subheading="__('general.profile.manage-settings')">
-        <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input  wire:model="name.en" :label="__('general.profile.name-en')" type="text" required autofocus autocomplete="name" />
-            <flux:input  wire:model="name.ar" :label="__('general.profile.name-ar')" type="text" required autofocus autocomplete="name" />
-            <div>
-                <flux:input  wire:model="email" :label="__('general.profile.email')" type="email" required autocomplete="email" />
+<section class="w-full bg-gray-50 dark:bg-gray-900 py-5 px-4 sm:px-6 lg:px-8">
 
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
-                    <div>
-                        <flux:text class="mt-4">
-                            {{ __('Your email address is unverified.') }}
+    <livewire:layouts.breadcrumbs
+        :title="__('general.profile.profile')"
+        :crumbs="[
+            ['label' => __('general.dashboard'), 'url' => route('dashboard')],
+            ['label' => __('general.profile.settings')],
+        ]"/>
+    <x-settings.card>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <x-settings.tab-navigation
+                :tabs="[
+                        ['label' => __('general.profile.profile'), 'route' => 'settings.profile'],
+                        ['label' => __('general.profile.Password'), 'route' => 'settings.password'],
+                       ]"/>
+            <x-settings.form-section>
+                <form wire:submit="updateProfileInformation" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {{-- English Name --}}
+                        <x-settings.text-input
+                            wire:model="name.ar"
+                            label="{{ __('general.profile.name-ar') }}"
+                            type="text"
+                            required
+                            autocomplete="name"/>
 
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
-                                {{ __('Click here to re-send the verification email.') }}
-                            </flux:link>
-                        </flux:text>
-
-                        @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
-                                {{ __('A new verification link has been sent to your email address.') }}
-                            </flux:text>
-                        @endif
+                        {{-- Arabic Name --}}
+                        <x-settings.text-input
+                            wire:model="name.en"
+                            label="{{ __('general.profile.name-en') }}"
+                            type="text"
+                            required
+                            autocomplete="name"/>
                     </div>
-                @endif
-            </div>
 
-            <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <flux:button  variant="primary" type="submit" class="w-full bg-secondary-medium">{{ __('general.profile.save') }}</flux:button>
+
+                    {{-- Email Field --}}
+                    <x-settings.text-input
+                        wire:model="email"
+                        label="{{ __('general.profile.email') }}"
+                        type="email"
+                        required
+                        autocomplete="email"/>
+
+                    {{-- Email Verification Notice --}}
+                    <x-settings.email-verification-alert />
+
+                    {{-- Save Button + Message --}}
+                    <div class="flex items-center justify-between flex-wrap gap-4 pt-2">
+                        <x-settings.submit-button>
+                            {{ __('general.profile.save') }}
+                        </x-settings.submit-button>
+
+                        <x-action-message on="profile-updated" class="text-sm text-green-600 dark:text-green-400">
+                            {{ __('general.profile.got-saved') }}
+                        </x-action-message>
+
+                    </div>
+                </form>
+
+                {{-- Delete Section --}}
+                <div>
+                    <livewire:settings.delete-user-form/>
                 </div>
 
-                <x-action-message class="me-3" on="profile-updated">
-                    {{ __('general.profile.got-saved') }}
-                </x-action-message>
-            </div>
-        </form>
-
-{{--        <livewire:settings.delete-user-form />--}}
-    </x-settings.layout>
+            </x-settings.form-section>
+        </div>
+    </x-settings.card>
 </section>
