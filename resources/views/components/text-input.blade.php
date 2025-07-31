@@ -1,4 +1,4 @@
-@props([ 'type' => 'text'])
+@props([ 'type' => 'text' , 'id'])
 
 <div class="relative">
     {{-- Right icon (password toggle or mail icon) --}}
