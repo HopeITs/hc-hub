@@ -11,7 +11,7 @@
             <x-table.heading>ID</x-table.heading>
             <x-table.heading sortable> @lang('general.type')</x-table.heading>
             <x-table.heading>@lang('general.place')</x-table.heading>
-            <x-table.heading>@lang('general.weekly_hours')</x-table.heading>
+            <x-table.heading sortable>@lang('general.weekly_hours')</x-table.heading>
         </x-slot>
         <x-slot name="body">
             @forelse($items as $item)
