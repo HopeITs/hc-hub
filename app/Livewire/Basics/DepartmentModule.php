@@ -5,11 +5,11 @@ namespace App\Livewire\Basics;
 use App\Models\Department;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Jantinnerezo\LivewireAlert\LivewireAlert;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 
 class DepartmentModule extends Component
 {
-    use WithPagination, LivewireAlert;
+    use WithPagination;
 
     public $showModal = false;
     public $modalTitle = '';
