@@ -75,7 +75,7 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label>@lang('general.gender')</x-forms.input-label>
+                    <x-forms.input-label>@lang('general.allowed_gender')</x-forms.input-label>
                     <select wire:model="item.allowed_gender"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20">
                         <option value="">{{ __('general.select') }}</option>
