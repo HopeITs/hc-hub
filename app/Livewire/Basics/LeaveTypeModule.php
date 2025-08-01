@@ -26,8 +26,8 @@ class LeaveTypeModule extends Component
     protected $rules = [
         'item.name.*' => 'required|string',
         'item.base_days' => 'required|integer',
-        'item.allowed_gender' => 'nullable|integer',
-        'item.marital_status' => 'nullable|integer',
+        'item.allowed_gender' => 'integer',
+        'item.marital_status' => 'integer',
     ];
 
     public function create()
@@ -62,7 +62,11 @@ class LeaveTypeModule extends Component
         }
 
         $this->reset('item', 'showModal');
-        LivewireAlert::success(__('general.success-message'))->show();
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 
     public function confirmDelete($id)
@@ -81,7 +85,11 @@ class LeaveTypeModule extends Component
     {
         LeaveType::findOrFail($id['id'])->delete();
 
-        LivewireAlert::success(__('general.success-message'))->show();
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 
     public function cancel()
@@ -94,9 +102,8 @@ class LeaveTypeModule extends Component
     public function render()
     {
         return view('livewire.basics.leave-type', [
-            'items' => LeaveType::paginate(10),
-            'genders' => Gender::asArray(),
-            'statuses' => MaritalStatus::asArray(),
+            'items' => LeaveType::paginate(15),
+
         ]);
     }
 }

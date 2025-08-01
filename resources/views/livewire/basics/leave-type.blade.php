@@ -1,3 +1,6 @@
+@php
+use App\Enums\LeaveType;
+@endphp
 <div>
     <div class="flex justify-between">
         <livewire:layout.breadcrumbs
@@ -27,8 +30,8 @@
         <x-slot name="body">
             @forelse($items as $item)
                 @php
-                    $gender = \App\Enums\LeaveType::getGender($item->allowed_gender);
-                    $marital = \App\Enums\LeaveType::getMaritalStatus($item->marital_status);
+                    $gender = LeaveType::getGender($item->allowed_gender);
+                    $marital = LeaveType::getMaritalStatus($item->marital_status);
                 @endphp
                 <tr>
                     <x-table.cell>{{ $item->id }}</x-table.cell>
@@ -76,33 +79,29 @@
 
                 <div>
                     <x-forms.input-label>@lang('general.allowed_gender')</x-forms.input-label>
-                    <select wire:model="item.allowed_gender"
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20">
-                        <option value="">{{ __('general.select') }}</option>
-                        <option value="{{ \App\Enums\LeaveType::GENDER_MALE }}">{{ __('general.male') }}</option>
-                        <option value="{{ \App\Enums\LeaveType::GENDER_FEMALE }}">{{ __('general.female') }}</option>
-                        <option value="{{ \App\Enums\LeaveType::GENDER_ANY }}">{{ __('general.any') }}</option>
-                    </select>
+                    <div class="flex justify-between">
+                        <x-forms.radio-input id="any_gender" name="allowed_gender" value="{{LeaveType::GENDER_ANY}}"
+                                             wire:model="item.allowed_gender">{{LeaveType::getGender(LeaveType::GENDER_ANY)['value']}}</x-forms.radio-input>
+                        <x-forms.radio-input id="male" name="allowed_gender" value="{{LeaveType::GENDER_MALE}}"
+                                             wire:model="item.allowed_gender">{{LeaveType::getGender(LeaveType::GENDER_MALE)['value']}}</x-forms.radio-input>
+                        <x-forms.radio-input id="female" name="allowed_gender" value="{{LeaveType::GENDER_FEMALE}}"
+                                             wire:model="item.allowed_gender">{{LeaveType::getGender(LeaveType::GENDER_FEMALE)['value']}}</x-forms.radio-input>
+                    </div>
+
                     <x-error-span>{{ $errors->first('item.allowed_gender') }}</x-error-span>
                 </div>
 
                 <div>
                     <x-forms.input-label>@lang('general.marital_status')</x-forms.input-label>
-                    <div class="flex space-x-2">
-                        <x-forms.radio-input id="onsite" name="marital_status" value="{{LeaveType::Onsite}}"
-                                             wire:model="item.marital_status">{{LeaveType::getLocalizedName(LeaveType::Onsite)['value']}}</x-forms.radio-input>
-                        <x-forms.radio-input id="online" name="marital_status" value="{{LeaveType::Online}}"
-                                             wire:model="item.marital_status">{{LeaveType::getLocalizedName(LeaveType::Online)['value']}}</x-forms.radio-input>
-                        <x-forms.radio-input id="online" name="marital_status" value="{{LeaveType::Online}}"
-                                             wire:model="item.marital_status">{{LeaveType::getLocalizedName(LeaveType::Online)['value']}}</x-forms.radio-input>
+                    <div class="flex justify-between">
+                        <x-forms.radio-input id="any_status" name="marital_status" value="{{LeaveType::MARITAL_STATUS_ANY}}"
+                                             wire:model="item.marital_status">{{LeaveType::getMaritalStatus(LeaveType::MARITAL_STATUS_ANY)['value']}}</x-forms.radio-input>
+                        <x-forms.radio-input id="single" name="marital_status" value="{{LeaveType::MARITAL_STATUS_SINGLE}}"
+                                             wire:model="item.marital_status">{{LeaveType::getMaritalStatus(LeaveType::MARITAL_STATUS_SINGLE)['value']}}</x-forms.radio-input>
+                        <x-forms.radio-input id="married" name="marital_status" value="{{LeaveType::MARITAL_STATUS_MARRIED}}"
+                                             wire:model="item.marital_status">{{LeaveType::getMaritalStatus(LeaveType::MARITAL_STATUS_MARRIED)['value']}}</x-forms.radio-input>
                     </div>
-                    <select wire:model="item.marital_status"
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20">
-                        <option value="">{{ __('general.select') }}</option>
-                        <option value="{{ \App\Enums\LeaveType::MARITAL_STATUS_SINGLE }}">{{ __('general.single') }}</option>
-                        <option value="{{ \App\Enums\LeaveType::MARITAL_STATUS_MARRIED }}">{{ __('general.married') }}</option>
-                        <option value="{{ \App\Enums\LeaveType::MARITAL_STATUS_ANY }}">{{ __('general.any') }}</option>
-                    </select>
+
                     <x-error-span>{{ $errors->first('item.marital_status') }}</x-error-span>
                 </div>
             </div>

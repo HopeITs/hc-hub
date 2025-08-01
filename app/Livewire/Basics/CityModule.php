@@ -44,7 +44,7 @@ class CityModule extends Component
 
     public function render()
     {
-        $cities = City::paginate(10);
+        $cities = City::paginate(15);
 
         return view('livewire.basics.city', [
             'cities' => $cities,

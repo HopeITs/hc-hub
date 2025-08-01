@@ -1,3 +1,3 @@
 <x-layouts.app :title="__('Dashboard')">
-    <livewire:city.table/>
+    <livewire:basics.city/>
 </x-layouts.app>
