@@ -2,10 +2,7 @@
     إعدادات الحساب
 </x-slot:title>
 
-<section class="w-full min-h-[calc(100vh-140px)] bg-gray-100 dark:bg-gray-900 px-4 sm:px-6 lg:px-10 flex items-end">
-    <div class="w-full max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-md rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 mb-8">
-
-        <div class="grid md:grid-cols-4">
+        <div class="grid md:grid-cols-4 pl-30">
 
             {{-- Sidebar Tabs --}}
             <aside class="bg-gray-50 dark:bg-gray-900 p-6 border-e border-gray-200 dark:border-gray-700">
@@ -23,7 +20,6 @@
 
             {{-- Form Content --}}
             <div class="col-span-3 p-10 space-y-8">
-
                 <form wire:submit.prevent="updatePassword" class="space-y-6">
 
                     {{-- Current Password --}}
@@ -51,7 +47,7 @@
                     />
 
                     {{-- Submit --}}
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-4">
+                    <div class="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6">
                         <x-primary-button class="w-full sm:w-44 h-11 text-base">
                             {{ __('general.profile.save') }}
                         </x-primary-button>
@@ -62,8 +58,5 @@
                     </div>
 
                 </form>
-
             </div>
         </div>
-    </div>
-</section>
