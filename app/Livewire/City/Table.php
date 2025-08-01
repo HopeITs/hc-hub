@@ -21,7 +21,7 @@ class Table extends Component
         LivewireAlert::title(__('general.toggle-status'))
             ->text(__('general.confirm-status-change'))
             ->question()
-            ->confirmButtonColor('#34D399')
+            ->confirmButtonColor(config('samples.styles.colors.confirm'))
             ->withConfirmButton(__('general.save'))
             ->onConfirm('toggleCityStatusConfirmed', ['id' => $this->cityId])
             ->withCancelButton(__('general.cancel'))

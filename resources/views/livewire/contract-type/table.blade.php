@@ -47,6 +47,7 @@
                     <x-table.cell>{{$item->weekly_hours}}</x-table.cell>
                     <x-table.cell>
                         <x-table.edit-btn wire:click="edit({{$item->id}})"></x-table.edit-btn>
+                        <x-table.delete-btn :modelId="$item->id"/>
                     </x-table.cell>
                 </tr>
             @empty
