@@ -43,6 +43,7 @@ return [
     'female' => 'أنثى',
     'single' => 'أعزب',
     'married' => 'متزوج',
+    'select' => 'اختر',
 
 
     'profile'=> [
@@ -68,7 +69,6 @@ return [
         'update-password-text' => 'تأكد من أن حسابك يستخدم كلمة مرور طويلة وعشوائية للحفاظ على أمانه.',
         'current-password' => 'كلمة المرور الحالية',
         'new-password' => 'كلمة المرور الجديدة',
-
     ],
 
 
