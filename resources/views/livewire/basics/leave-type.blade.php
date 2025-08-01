@@ -88,6 +88,14 @@
 
                 <div>
                     <x-forms.input-label>@lang('general.marital_status')</x-forms.input-label>
+                    <div class="flex space-x-2">
+                        <x-forms.radio-input id="onsite" name="marital_status" value="{{LeaveType::Onsite}}"
+                                             wire:model="item.marital_status">{{LeaveType::getLocalizedName(LeaveType::Onsite)['value']}}</x-forms.radio-input>
+                        <x-forms.radio-input id="online" name="marital_status" value="{{LeaveType::Online}}"
+                                             wire:model="item.marital_status">{{LeaveType::getLocalizedName(LeaveType::Online)['value']}}</x-forms.radio-input>
+                        <x-forms.radio-input id="online" name="marital_status" value="{{LeaveType::Online}}"
+                                             wire:model="item.marital_status">{{LeaveType::getLocalizedName(LeaveType::Online)['value']}}</x-forms.radio-input>
+                    </div>
                     <select wire:model="item.marital_status"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20">
                         <option value="">{{ __('general.select') }}</option>
@@ -100,10 +108,8 @@
             </div>
 
             <div class="flex justify-end space-x-2">
-                <x-primary-button type="submit">@lang('general.save')</x-primary-button>
-                <x-primary-button type="button" wire:click="cancel" class="!bg-secondary-light">
-                    @lang('general.cancel')
-                </x-primary-button>
+                <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
+                <x-primary-button type="button" wire:click="cancel" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
             </div>
         </form>
     </x-modal.dialog>

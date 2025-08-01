@@ -31,8 +31,7 @@
                         <x-layouts.app.sidebar.nav-item :href="route('leave-types.index')"
                                                         :active="request()->routeIs('leave-types.index')"
                                                         wire:navigate>{{ trans_choice('general.leave-type', 2) }}</x-layouts.app.sidebar.nav-item>
-                        <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.checklist-items', 2) }}</x-layouts.app.sidebar.nav-item>
-                        <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.leave-type', 2) }}</x-layouts.app.sidebar.nav-item>
+
 
                         <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')"
                                                         :active="request()->routeIs('checklist-items.index') "

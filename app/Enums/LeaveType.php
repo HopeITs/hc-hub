@@ -13,19 +13,28 @@ class LeaveType
 
     public static function getGender(?int $status): array
     {
-        return match ($status) {
-            self::GENDER_MALE => ['value' => __('general.male'), 'color' => 'green'],
-            self::GENDER_FEMALE => ['value' => __('general.female'), 'color' => 'green'],
-            default => ['value' => __('general.any'), 'color' => 'gray'],
+
+        $val =  match ($status) {
+            self::GENDER_MALE => ['text' => ['en' => 'Male', 'ar' => 'ذكر'] , 'color' => 'blue'],
+            self::GENDER_FEMALE => ['text' => ['en' => 'Female', 'ar' => 'انثى'] , 'color' => 'pink'],
+            default =>['text' =>  ['en' => 'All', 'ar' => 'الكل '],'color' => 'purple'],
         };
+        $result = [
+            'value' => $val['text'][app()->getLocale()],
+            'color' => $val['color'],
+        ];
+
+
+        return $result;
+
     }
 
     public static function getMaritalStatus(?int $status): array
     {
         return match ($status) {
-            self::MARITAL_STATUS_SINGLE => ['value' => __('general.single'), 'color' => 'green'],
-            self::MARITAL_STATUS_MARRIED => ['value' => __('general.married'), 'color' => 'green'],
-            default => ['value' => __('general.any'), 'color' => 'gray'],
+            self::MARITAL_STATUS_SINGLE => ['value' => __('general.single'), 'color' => 'yellow'],
+            self::MARITAL_STATUS_MARRIED => ['value' => __('general.married'), 'color' => 'purple'],
+            default => ['value' => __('general.any'), 'color' => 'green'],
         };
     }
 }
