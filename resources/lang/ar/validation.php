@@ -175,7 +175,9 @@ return [
             'type' => [
                 'ar' => 'النوع (عربي)',
                 'en' => 'النوع (انكليزي)'
-            ]
+            ],
+            'name' => 'الاسم',
+            'order' => 'الترتيب'
         ],
 
         'g-recaptcha-response' => 'captcha (I\'m not a robot)',
