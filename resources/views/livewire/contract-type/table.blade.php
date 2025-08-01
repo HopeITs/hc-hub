@@ -68,25 +68,25 @@
             <div class="grid grid-cols-2 space-x-2 space-y-4">
                 @foreach(config('app.supported_locales') as $locale)
                     <div class="col-span-1">
-                        <x-input-label for="type_{{ $locale }}">@lang('general.type')({{ strtoupper($locale) }})
-                        </x-input-label>
-                        <x-text-input type="text" id="type_{{ $locale }}"
+                        <x-forms.input-label for="type_{{ $locale }}">@lang('general.type')({{ strtoupper($locale) }})
+                        </x-forms.input-label>
+                        <x-forms.input type="text" id="type_{{ $locale }}"
                                       wire:model="item.type.{{ $locale }}"/>
                         <x-error-span>{{$errors->first('item.type.'.$locale)}}</x-error-span>
                     </div>
                 @endforeach
                 <div class="col-span-1">
-                    <x-input-label for="weekly_hours">@lang('general.weekly_hours')</x-input-label>
-                    <x-text-input type="number" id="weekly_hours" wire:model="item.weekly_hours"/>
+                    <x-forms.input-label for="weekly_hours">@lang('general.weekly_hours')</x-forms.input-label>
+                    <x-forms.input type="number" id="weekly_hours" wire:model="item.weekly_hours"/>
                     <x-error-span>{{$errors->first('item.weekly_hours')}}</x-error-span>
                 </div>
                 <div>
-                    <x-input-label for="type_{{ $locale }}">@lang('general.place')</x-input-label>
+                    <x-forms.input-label for="type_{{ $locale }}">@lang('general.place')</x-forms.input-label>
                     <div class="flex space-x-2">
-                        <x-radio-input id="onsite" name="place" value="{{ContractPlace::Onsite}}"
-                                       wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Onsite)['value']}}</x-radio-input>
-                        <x-radio-input id="online" name="place" value="{{ContractPlace::Online}}"
-                                       wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Online)['value']}}</x-radio-input>
+                        <x-forms.radio-input id="onsite" name="place" value="{{ContractPlace::Onsite}}"
+                                       wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Onsite)['value']}}</x-forms.radio-input>
+                        <x-forms.radio-input id="online" name="place" value="{{ContractPlace::Online}}"
+                                       wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Online)['value']}}</x-forms.radio-input>
                     </div>
                 </div>
 
