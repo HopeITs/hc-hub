@@ -35,6 +35,12 @@ return [
     'cancel' => 'إلغاء',
     'edit' => 'تعديل',
     "add_new" => 'إضافة جديد',
+    'department-name' => 'اسم القسم',
+    'department-description' => 'وصف القسم',
+    'department-email' => 'عنوان البريد الإلكتروني',
+
+
+
 
     'profile'=> [
         'settings' => 'إعدادات الحساب',
@@ -61,6 +67,7 @@ return [
         'new-password' => 'كلمة المرور الجديدة',
 
     ],
+
 
 
 ];
