@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Livewire\ContractType;
+namespace App\Livewire\Basics;
 
 
-use App\Enums\ContractPlace;
 use App\Models\ContractType;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class Table extends Component
+class ContractTypeModule extends Component
 {
     use WithPagination;
 
@@ -51,6 +50,20 @@ class Table extends Component
         $this->showModal = true;
     }
 
+    public function confirmDelete($id)
+    {
+
+
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->confirmButtonColor(config('samples.styles.colors.primary'))
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
     public function save()
     {
         $this->validate();
@@ -78,7 +91,18 @@ class Table extends Component
             ->position('top-start')
             ->show();
     }
+    public function delete($id)
+    {
 
+        ContractType::find($id['id'])->delete();
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
+
+    }
 
     public function cancel()
     {
@@ -93,7 +117,7 @@ class Table extends Component
 
         $items = ContractType::paginate(10);
 
-        return view('livewire.contract-type.table', [
+        return view('livewire.basics.contract-type', [
             'items' => $items,
         ]);
 

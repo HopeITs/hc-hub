@@ -32,6 +32,8 @@
                                                         :active="request()->routeIs('leave-types.index')"
                                                         wire:navigate>{{ trans_choice('general.leave-type', 2) }}</x-layouts.app.sidebar.nav-item>
                         <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.checklist-items', 2) }}</x-layouts.app.sidebar.nav-item>
+                        <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.job-level', 2) }}</x-layouts.app.sidebar.nav-item>
+                        <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.department', 2) }}</x-layouts.app.sidebar.nav-item>
                     </x-slot>
 
                 </x-layouts.app.sidebar.dropdown-nav-list>

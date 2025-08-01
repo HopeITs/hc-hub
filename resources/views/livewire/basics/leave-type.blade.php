@@ -1,0 +1,110 @@
+<div>
+    <div class="flex justify-between">
+        <livewire:layout.breadcrumbs
+            :title="trans_choice('general.leave-type', 2)"
+            :crumbs="[
+                ['label' => __('general.dashboard')],
+                ['label' => trans_choice('general.leave-type', 2)],
+            ]"
+            :showButton="true"
+        />
+        <div>
+            <x-primary-button wire:click="create">
+                @lang('general.add_new')
+            </x-primary-button>
+        </div>
+    </div>
+
+    <x-table>
+        <x-slot name="headings">
+            <x-table.heading>ID</x-table.heading>
+            <x-table.heading>@lang('general.name')</x-table.heading>
+            <x-table.heading>@lang('general.base_days')</x-table.heading>
+            <x-table.heading>@lang('general.allowed_gender')</x-table.heading>
+            <x-table.heading>@lang('general.marital_status')</x-table.heading>
+            <x-table.heading />
+        </x-slot>
+        <x-slot name="body">
+            @forelse($items as $item)
+                @php
+                    $gender = \App\Enums\LeaveType::getGender($item->allowed_gender);
+                    $marital = \App\Enums\LeaveType::getMaritalStatus($item->marital_status);
+                @endphp
+                <tr>
+                    <x-table.cell>{{ $item->id }}</x-table.cell>
+                    <x-table.cell>{{ $item->name }}</x-table.cell>
+                    <x-table.cell>{{ $item->base_days }}</x-table.cell>
+                    <x-table.cell>
+                        <x-badge :color="$gender['color']">{{ $gender['value'] }}</x-badge>
+                    </x-table.cell>
+                    <x-table.cell>
+                        <x-badge :color="$marital['color']">{{ $marital['value'] }}</x-badge>
+                    </x-table.cell>
+                    <x-table.cell>
+                        <x-table.edit-btn wire:click="edit({{ $item->id }})" />
+                        <x-table.delete-btn :modelId="$item->id" />
+                    </x-table.cell>
+                </tr>
+            @empty
+                <x-table.no-data />
+            @endforelse
+        </x-slot>
+        <x-slot name="pagination">
+            {{ $items->links() }}
+        </x-slot>
+    </x-table>
+
+    {{-- Modal --}}
+    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
+        <form wire:submit.prevent="save" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                @foreach (config('app.supported_locales') as $locale)
+                    <div>
+                        <x-forms.input-label for="name_{{ $locale }}">
+                            @lang('general.name') ({{ strtoupper($locale) }})
+                        </x-forms.input-label>
+                        <x-forms.input type="text" wire:model="item.name.{{ $locale }}" id="name_{{ $locale }}" />
+                        <x-error-span>{{ $errors->first('item.name.' . $locale) }}</x-error-span>
+                    </div>
+                @endforeach
+
+                <div>
+                    <x-forms.input-label for="base_days">@lang('general.base_days')</x-forms.input-label>
+                    <x-forms.input type="number" wire:model="item.base_days" id="base_days" />
+                    <x-error-span>{{ $errors->first('item.base_days') }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label>@lang('general.gender')</x-forms.input-label>
+                    <select wire:model="item.allowed_gender"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20">
+                        <option value="">{{ __('general.select') }}</option>
+                        <option value="{{ \App\Enums\LeaveType::GENDER_MALE }}">{{ __('general.male') }}</option>
+                        <option value="{{ \App\Enums\LeaveType::GENDER_FEMALE }}">{{ __('general.female') }}</option>
+                        <option value="{{ \App\Enums\LeaveType::GENDER_ANY }}">{{ __('general.any') }}</option>
+                    </select>
+                    <x-error-span>{{ $errors->first('item.allowed_gender') }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label>@lang('general.marital_status')</x-forms.input-label>
+                    <select wire:model="item.marital_status"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary/20">
+                        <option value="">{{ __('general.select') }}</option>
+                        <option value="{{ \App\Enums\LeaveType::MARITAL_STATUS_SINGLE }}">{{ __('general.single') }}</option>
+                        <option value="{{ \App\Enums\LeaveType::MARITAL_STATUS_MARRIED }}">{{ __('general.married') }}</option>
+                        <option value="{{ \App\Enums\LeaveType::MARITAL_STATUS_ANY }}">{{ __('general.any') }}</option>
+                    </select>
+                    <x-error-span>{{ $errors->first('item.marital_status') }}</x-error-span>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2">
+                <x-primary-button type="submit">@lang('general.save')</x-primary-button>
+                <x-primary-button type="button" wire:click="cancel" class="!bg-secondary-light">
+                    @lang('general.cancel')
+                </x-primary-button>
+            </div>
+        </form>
+    </x-modal.dialog>
+</div>

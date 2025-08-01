@@ -1,31 +1,32 @@
-<?php
+    <?php
 
-use App\Livewire\City\Table as CityTable;
-use App\Livewire\ContractType\Table as ContractTypeTable;
-use App\Livewire\Settings\Appearance;
-use App\Livewire\Settings\Password;
-use App\Livewire\LeaveType\Table as LeaveTypeTable;
-use App\Livewire\Settings\Profile;
-use Illuminate\Support\Facades\Route;
+    use App\Livewire\Basics\CityModule as CityTable;
+    use App\Livewire\Basics\ContractTypeModule;
+    use App\Livewire\Basics\LeaveTypeModule;
+    use App\Livewire\Settings\Appearance;
+    use App\Livewire\Settings\Password;
+    use App\Livewire\Settings\Profile;
+    use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+    Route::get('/', function () {
+        return view('welcome');
+    })->name('home');
 
-Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', 'settings/profile');
+    Route::view('dashboard', 'dashboard')
+        ->middleware(['auth', 'verified'])
+        ->name('dashboard');
 
-    Route::get('settings/profile', Profile::class)->name('settings.profile');
-    Route::get('settings/password', Password::class)->name('settings.password');
-    Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
+    Route::middleware(['auth'])->group(function () {
+        Route::redirect('settings', 'settings/profile');
 
-    Route::get('cities', CityTable::class)->name('cities.index');
-    Route::get('contract-types', ContractTypeTable::class)->name('contract-types.index');
-    Route::get('leave-types', LeaveTypeTable::class)->name('leave-types.index');
-});
+        Route::get('settings/profile', Profile::class)->name('settings.profile');
+        Route::get('settings/password', Password::class)->name('settings.password');
+        Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 
-require __DIR__ . '/auth.php';
+        Route::get('cities', CityTable::class)->name('cities.index');
+        Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index');
+        Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
+    });
+
+    require __DIR__.'/auth.php';

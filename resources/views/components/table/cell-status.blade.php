@@ -8,7 +8,7 @@
     $switchId = 'status-switch-' . $modelId;
 @endphp
 
-<td class="px-5 py-2.5 text-gray-500">
+<td class="px-5 py-2.5 text-gray-500 cursor-pointer">
     <div class="flex items-center form-check form-switch">
         <input
             type="checkbox"
