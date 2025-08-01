@@ -4,10 +4,9 @@ use App\Livewire\City\Table as CityTable;
 use App\Livewire\ContractType\Table as ContractTypeTable;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
+use App\Livewire\LeaveType\Table as LeaveTypeTable;
 use App\Livewire\Settings\Profile;
 use Illuminate\Support\Facades\Route;
-
-
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,6 +25,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('cities', CityTable::class)->name('cities.index');
     Route::get('contract-types', ContractTypeTable::class)->name('contract-types.index');
+    Route::get('leave-types', LeaveTypeTable::class)->name('leave-types.index');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

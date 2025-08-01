@@ -33,7 +33,6 @@ class Table extends Component
 
     public function create()
     {
-        // Reset the item array to its default state before showing the modal
         $this->reset('item');
         $this->showModal = true;
         $this->modalTitle = __('general.add_new');
@@ -61,12 +60,11 @@ class Table extends Component
         $data = [
             'name' => $this->item['name'],
             'base_days' => $this->item['base_days'],
-            // Use null if the value is 0 or empty, otherwise cast to int
-            'allowed_gender' => !empty($this->item['allowed_gender']) ? (int)$this->item['allowed_gender'] : null,
-            'marital_status' => !empty($this->item['marital_status']) ? (int)$this->item['marital_status'] : null,
+            'allowed_gender' => !empty($this->item['allowed_gender']) ? (int) $this->item['allowed_gender'] : null,
+            'marital_status' => !empty($this->item['marital_status']) ? (int) $this->item['marital_status'] : null,
         ];
 
-        if (array_key_exists('id', $this->item)) {
+        if (array_key_exists('id', $this->item) && !empty($this->item['id'])) {
             LeaveType::findOrFail($this->item['id'])->update($data);
         } else {
             LeaveType::create($data);
@@ -74,11 +72,7 @@ class Table extends Component
 
         $this->showModal = false;
         $this->reset('item', 'showModal');
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
+        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
     }
 
     public function cancel()
@@ -88,7 +82,6 @@ class Table extends Component
         $this->resetValidation();
         $this->reset('item', 'showModal');
     }
-
 
     public function render()
     {
