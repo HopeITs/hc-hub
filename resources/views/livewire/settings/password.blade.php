@@ -1,63 +1,60 @@
-<section class="w-full bg-gray-50 dark:bg-gray-900 py-5 px-4 sm:px-6 lg:px-8">
+<x-slot:title>
+    إعدادات الحساب
+</x-slot:title>
 
-    {{-- Breadcrumb --}}
-{{--    <livewire:layout.breadcrumbs--}}
-{{--        :title="__('general.profile.update-password')"--}}
-{{--        :crumbs="[--}}
-{{--            ['label' => __('general.dashboard'), 'url' => route('dashboard')],--}}
-{{--            ['label' => __('general.profile.settings')],--}}
-{{--        ]"--}}
-{{--    />--}}
+<section class="w-full min-h-[calc(100vh-140px)] bg-gray-100 dark:bg-gray-900 px-4 sm:px-6 lg:px-10 flex items-end">
+    <div class="w-full max-w-3xl mx-auto bg-white dark:bg-gray-800 shadow-md rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 mb-8">
 
-    <x-settings.card>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="grid md:grid-cols-4">
 
             {{-- Sidebar Tabs --}}
-            <x-settings.tab-navigation
-                :tabs="[
-                    ['label' => __('general.profile.profile'), 'route' => 'settings.profile'],
-                    ['label' => __('general.profile.Password'), 'route' => 'settings.password'],
-                ]"
-            />
+            <aside class="bg-gray-50 dark:bg-gray-900 p-6 border-e border-gray-200 dark:border-gray-700">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-8">
+                    {{ __('general.profile.settings') }}
+                </h3>
 
-            {{-- Form Section --}}
-            <x-settings.form-section>
+                <x-settings.tab-navigation
+                    :tabs="[
+                        ['label' => __('general.profile.profile'), 'route' => 'settings.profile'],
+                        ['label' => __('general.profile.Password'), 'route' => 'settings.password'],
+                    ]"
+                />
+            </aside>
 
-                <form wire:submit="updatePassword" class="space-y-6">
+            {{-- Form Content --}}
+            <div class="col-span-3 p-10 space-y-8">
+
+                <form wire:submit.prevent="updatePassword" class="space-y-6">
 
                     {{-- Current Password --}}
-                    <x-settings.password-input
+                    <x-forms.password-input
                         id="current_password"
-                        wire:model.defer="current_password"
                         label="{{ __('general.profile.current-password') }}"
+                        model="current_password"
                         autocomplete="current-password"
-                        :error="$errors->get('current_password')"
                     />
 
                     {{-- New Password --}}
-                    <x-settings.password-input
+                    <x-forms.password-input
                         id="password"
-                        wire:model.defer="password"
                         label="{{ __('general.profile.new-password') }}"
+                        model="password"
                         autocomplete="new-password"
-                        :error="$errors->get('password')"
                     />
 
                     {{-- Confirm Password --}}
-                    <x-settings.password-input
+                    <x-forms.password-input
                         id="password_confirmation"
-                        wire:model.defer="password_confirmation"
                         label="{{ __('auth.confirm-password') }}"
+                        model="password_confirmation"
                         autocomplete="new-password"
-                        :error="$errors->get('password_confirmation')"
                     />
 
-                    {{-- Submit Button --}}
-                    <div class="flex items-center justify-between flex-wrap gap-4 pt-2">
-                        <x-settings.submit-button>
+                    {{-- Submit --}}
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-4">
+                        <x-primary-button class="w-full sm:w-44 h-11 text-base">
                             {{ __('general.profile.save') }}
-                        </x-settings.submit-button>
+                        </x-primary-button>
 
                         <x-action-message on="password-updated" class="text-sm text-green-600 dark:text-green-400">
                             {{ __('general.profile.got-saved') }}
@@ -66,8 +63,7 @@
 
                 </form>
 
-            </x-settings.form-section>
+            </div>
         </div>
-
-    </x-settings.card>
+    </div>
 </section>
