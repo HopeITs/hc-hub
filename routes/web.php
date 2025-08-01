@@ -1,12 +1,11 @@
 <?php
 
-use App\Livewire\City\Table as CityTable;
-use App\Livewire\ContractType\Table as ContractTypeTable;
+use App\Livewire\Basics\CityModule as CityTable;
+use App\Livewire\Basics\ContractTypeModule as ContractTypeTable;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use Illuminate\Support\Facades\Route;
-
 
 
 Route::get('/', function () {
