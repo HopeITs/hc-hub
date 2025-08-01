@@ -34,6 +34,7 @@
         {{-- Toggle Button using data attribute --}}
         <button
             type="button"
+            tabindex="-1"
             data-password-toggle="{{ $inputId }}"
             class="absolute top-2.5 end-3 text-gray-400 hover:text-gray-600 cursor-pointer"
         >
