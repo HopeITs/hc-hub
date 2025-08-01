@@ -1,7 +1,8 @@
 <?php
 
-use App\Livewire\Basics\CityModule as CityTable;
-use App\Livewire\Basics\ContractTypeModule as ContractTypeTable;
+use App\Livewire\Basics\ChecklistItemModule;
+use App\Livewire\Basics\CityModule ;
+use App\Livewire\Basics\ContractTypeModule ;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -23,8 +24,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/password', Password::class)->name('settings.password');
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 
-    Route::get('cities', CityTable::class)->name('cities.index');
-    Route::get('contract-types', ContractTypeTable::class)->name('contract-types.index');
+    Route::get('cities', CityModule::class)->name('cities.index');
+    Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index');
+    Route::get('checklist-items', ChecklistItemModule::class)->name('checklist-items.index');
 });
 
 require __DIR__.'/auth.php';

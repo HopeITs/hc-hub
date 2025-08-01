@@ -6,7 +6,7 @@
         <livewire:layout.breadcrumbs
             :title="trans_choice('general.contract-type',2)"
             :crumbs="[
-        ['label' => __('general.dashboard')],
+        ['label' => __('general.project-basics')],
         ['label' => trans_choice('general.contract-type',2)],
     ]"
             :showButton="true"

@@ -2,7 +2,7 @@
     <livewire:layout.breadcrumbs
         :title="trans_choice('general.city',2)"
         :crumbs="[
-        ['label' => __('general.dashboard')],
+        ['label' => __('general.project-basics')],
         ['label' => trans_choice('general.city',2)],
     ]"
     />
