@@ -60,7 +60,7 @@
 
 
 {{--    Edit Modal--}}
-    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal">
+    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
 
 
         <form class="space-y-4" wire:submit.prevent="save">
@@ -76,7 +76,7 @@
                 @endforeach
                 <div class="col-span-1">
                     <x-input-label for="weekly_hours">@lang('general.weekly_hours')</x-input-label>
-                    <x-text-input type="number" placeholder="20" id="weekly_hours" wire:model="item.weekly_hours"/>
+                    <x-text-input type="number" id="weekly_hours" wire:model="item.weekly_hours"/>
                     <x-error-span>{{$errors->first('item.weekly_hours')}}</x-error-span>
                 </div>
                 <div>
@@ -94,7 +94,7 @@
 
             <div class="flex justify-end space-x-2">
                 <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-                <x-primary-button type="button" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
+                <x-primary-button type="button" wire:click="cancel" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
             </div>
         </form>
     </x-modal.dialog>

@@ -1,6 +1,7 @@
 <button {{
     $attributes->merge([
-        'type' => 'button'
+        'type' => 'button',
+        'class' => 'cursor-pointer p-2'
 ])
 }}>
     <svg class="w-[16px] h-[16px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
