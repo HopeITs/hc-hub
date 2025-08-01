@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Livewire\ContractType;
+namespace App\Livewire\Basics;
 
 
-use App\Enums\ContractPlace;
 use App\Models\ContractType;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class Table extends Component
+class ContractTypeModule extends Component
 {
     use WithPagination;
 
@@ -118,7 +117,7 @@ class Table extends Component
 
         $items = ContractType::paginate(10);
 
-        return view('livewire.contract-type.table', [
+        return view('livewire.basics.contract-type', [
             'items' => $items,
         ]);
 

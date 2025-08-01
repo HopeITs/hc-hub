@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Livewire\City;
+namespace App\Livewire\Basics;
 
 use App\Models\City;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class Table extends Component
+class CityModule extends Component
 {
     use WithPagination;
 
@@ -46,7 +46,7 @@ class Table extends Component
     {
         $cities = City::paginate(10);
 
-        return view('livewire.city.table', [
+        return view('livewire.basics.city', [
             'cities' => $cities,
         ]);
     }
