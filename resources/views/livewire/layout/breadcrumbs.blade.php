@@ -8,14 +8,13 @@
                     <li class="inline-flex items-center">
                         <a href="{{ route('dashboard') }}"
                            class="inline-flex items-center text-xs text-gray-500 hover:text-primary">
-                            <i class="fa-regular fa-house"></i>
-
+                            <i class="ti ti-smart-home"></i>
                         </a>
                     </li>
 
                     @foreach($crumbs as $crumb)
                         <li><span class="text-default">/</span></li>
-                        <li class="text-xs {{ $loop->last ? 'text-secondary-light' : 'text-secondary-dark' }}">
+                        <li class="text-xs {{ $loop->last ? 'text-gray-900' : 'text-default' }}">
                             @if (!empty($crumb['url']))
                                 <a href="{{ $crumb['url'] }}" class="hover:underline">{{ $crumb['label'] }}</a>
                             @else
@@ -29,4 +28,3 @@
     </div>
 
 </div>
-
