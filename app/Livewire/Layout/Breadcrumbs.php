@@ -12,11 +12,8 @@ class Breadcrumbs extends Component
     public array $crumbs = [];
 
     public bool $showButton = false;
-    public string $buttonLabel = 'Add';
-    public string $buttonIcon = 'fa-solid fa-circle-plus';
-    public string $buttonUrl = '';
-    public string $buttonModalTarget = '';
-    public string $buttonModalToggle = '';
+
+
 
     public function render()
     {

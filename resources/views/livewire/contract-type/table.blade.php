@@ -2,13 +2,27 @@
     use App\Enums\ContractPlace;
 @endphp
 <div>
-    <livewire:layout.breadcrumbs
-        :title="trans_choice('general.contract-type',2)"
-        :crumbs="[
+    <div class="flex justify-between">
+        <livewire:layout.breadcrumbs
+            :title="trans_choice('general.contract-type',2)"
+            :crumbs="[
         ['label' => __('general.dashboard')],
         ['label' => trans_choice('general.contract-type',2)],
     ]"
-    />
+            :showButton="true"
+
+        />
+        <div>
+            <x-primary-button wire:click="create">
+                @lang('general.add_new')
+            </x-primary-button>
+        </div>
+
+    </div>
+
+
+
+
     <x-table>
         <x-slot name="headings">
             <x-table.heading>ID</x-table.heading>
@@ -44,7 +58,9 @@
         </x-slot>
     </x-table>
 
-    <x-modal.dialog id="showEditModal" :title="__('general.edit')" wire:model.defer="showEditModal">
+
+{{--    Edit Modal--}}
+    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal">
 
 
         <form class="space-y-4" wire:submit.prevent="save">
@@ -54,31 +70,37 @@
                         <x-input-label for="type_{{ $locale }}">@lang('general.type')({{ strtoupper($locale) }})
                         </x-input-label>
                         <x-text-input type="text" id="type_{{ $locale }}"
-                                      wire:model="editing.type.{{ $locale }}"/>
-                        <x-error-span>{{$errors->first('editing.type.'.$locale)}}</x-error-span>
+                                      wire:model="item.type.{{ $locale }}"/>
+                        <x-error-span>{{$errors->first('item.type.'.$locale)}}</x-error-span>
                     </div>
                 @endforeach
                 <div class="col-span-1">
                     <x-input-label for="weekly_hours">@lang('general.weekly_hours')</x-input-label>
-                    <x-text-input type="number" placeholder="20" id="weekly_hours" wire:model="editing.weekly_hours"/>
-                    <x-error-span>{{$errors->first('editing.weekly_hours')}}</x-error-span>
+                    <x-text-input type="number" placeholder="20" id="weekly_hours" wire:model="item.weekly_hours"/>
+                    <x-error-span>{{$errors->first('item.weekly_hours')}}</x-error-span>
                 </div>
                 <div>
                     <x-input-label for="type_{{ $locale }}">@lang('general.place')</x-input-label>
                     <div class="flex space-x-2">
                         <x-radio-input id="onsite" name="place" value="{{ContractPlace::Onsite}}"
-                                       wire:model="editing.place">{{ContractPlace::getLocalizedName(ContractPlace::Onsite)['value']}}</x-radio-input>
+                                       wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Onsite)['value']}}</x-radio-input>
                         <x-radio-input id="online" name="place" value="{{ContractPlace::Online}}"
-                                       wire:model="editing.place">{{ContractPlace::getLocalizedName(ContractPlace::Online)['value']}}</x-radio-input>
+                                       wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Online)['value']}}</x-radio-input>
                     </div>
                 </div>
 
 
             </div>
 
-
-            <x-primary-button type="submit">@lang('save')</x-primary-button>
+            <div class="flex justify-end space-x-2">
+                <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
+                <x-primary-button type="button" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
+            </div>
         </form>
     </x-modal.dialog>
+
+
+{{--    Create Modal --}}
+
 
 </div>

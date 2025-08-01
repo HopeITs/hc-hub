@@ -23,9 +23,12 @@ return [
     'confirm-status-change' => 'هل أنت متأكد أنك تريد تغيير الحالة؟',
     'status-updated' => 'تم تحديث الحالة بنجاح.',
     'item-updated' => 'تم تحديث السطر بنجاح.',
+    'item-added' => 'تم إضافة السطر بنجاح',
+    'success-message' => 'تمت العملية بنجاح',
     'save' => 'حفظ',
     'cancel' => 'إلغاء',
     'edit' => 'تعديل',
+    "add_new" => 'إضافة جديد',
 
     'profile'=> [
         'settings' => 'إعدادات الحساب',

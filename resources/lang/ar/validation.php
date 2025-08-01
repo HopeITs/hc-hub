@@ -169,7 +169,7 @@ return [
         'city_id' => 'اسم المدينة',
         'location' => 'الموقع',
         'message' => 'الرسالة',
-        'editing' => [
+        'item' => [
             'weekly_hours' => 'ساعات العمل الأسبوعية',
             'type' => [
                 'ar' => 'النوع (عربي)',
