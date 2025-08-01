@@ -27,14 +27,18 @@ class DepartmentModule extends Component
 
     public function render()
     {
-        $departments = Department::paginate(10);
+        $departments = Department::paginate(15);
 
         return view('livewire.basics.department-module', compact('departments'));
     }
 
     public function create()
     {
-        $this->reset('item');
+        $this->item = [
+            'name' => ['en' => ''], // ← this structure must stay for form binding
+            'description' => [],
+            'email' => null,
+        ];
         $this->modalTitle = __('general.add_new');
         $this->showModal = true;
     }
@@ -59,8 +63,8 @@ class DepartmentModule extends Component
         $this->validate();
 
         $data = [
-            'name' => $this->item['name'],
-            'description' => $this->item['description'],
+            'name' => $this->item['name']['en'] ?? '', // Extract English name only
+            'description' => $this->item['description'], // still array (translatable)
             'email' => $this->item['email'],
         ];
 
