@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Layouts;
+namespace App\Livewire\Layout;
 
 use Livewire\Component;
 
@@ -12,14 +12,11 @@ class Breadcrumbs extends Component
     public array $crumbs = [];
 
     public bool $showButton = false;
-    public string $buttonLabel = 'Add';
-    public string $buttonIcon = 'ti ti-circle-plus';
-    public string $buttonUrl = '';
-    public string $buttonModalTarget = '';
-    public string $buttonModalToggle = '';
+
+
 
     public function render()
     {
-        return view('livewire.layouts.breadcrumbs');
+        return view('livewire.layout.breadcrumbs');
     }
 }

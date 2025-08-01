@@ -27,20 +27,4 @@
         @endif
     </div>
 
-    <div class="flex my-xl-auto right-content items-center flex-wrap">
-        @if($showButton)
-            <div class="mb-2">
-                <a
-                    href="{{ $buttonUrl }}"
-                    @if($buttonModalTarget) data-modal-target="{{ $buttonModalTarget }}" @endif
-                    @if($buttonModalToggle) data-modal-toggle="{{ $buttonModalToggle }}" @endif
-                    class="flex items-center bg-primary text-sm font-medium py-2 rounded text-white px-3 hover:bg-primary-900 hover:text-white"
-                >
-                    <i class="{{ $buttonIcon }} me-2"></i>{{ $buttonLabel }}
-                </a>
-            </div>
-        @endif
-
-
-    </div>
 </div>
