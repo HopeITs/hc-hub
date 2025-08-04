@@ -10,13 +10,7 @@
                 <x-layouts.app.sidebar.dropdown-nav-list id="basic-project" :title="__('general.project-basics')"
                                                          :active="request()->routeIs('dashboard') || request()->routeIs('contract-types.*') || request()->routeIs('leave-types.*') || request()->routeIs('checklist-items.*')">
                     <x-slot name="icon">
-                        <svg class="size-4 text-secondary-dark" aria-hidden="true"
-                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                  stroke-width="1.9"
-                                  d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5"/>
-                        </svg>
-
+                        <x-icons.home/>
                     </x-slot>
                     <x-slot name="list">
                         {{--                @if (auth()->check() && auth()->user()->hasRole('Super Admin'))--}}
@@ -42,13 +36,18 @@
                         <x-layouts.app.sidebar.nav-item
                             :href="route('departments.index')"
                             :active="request()->routeIs('departments.index')"
-                            wire:navigate >
+                            wire:navigate>
                             {{ trans_choice('general.department', 2) }}
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>
 
                 </x-layouts.app.sidebar.dropdown-nav-list>
+                <x-layouts.app.sidebar.single-item>
+                    <x-slot name="icon">
 
+
+                    </x-slot>
+                    @lang('general.projects-management')</x-layouts.app.sidebar.single-item>
             </ul>
         </div>
 
