@@ -7,6 +7,7 @@ use App\Livewire\Basics\LeaveTypeModule;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\Basics\JobLevelModule;
 use Illuminate\Support\Facades\Route;
 
 
@@ -29,6 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index');
     Route::get('checklist-items', ChecklistItemModule::class)->name('checklist-items.index');
     Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
+    Route::get('/job-levels', JobLevelModule::class)->name('job-levels');
 });
 
 require __DIR__.'/auth.php';

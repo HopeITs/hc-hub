@@ -4,23 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Translatable\HasTranslations;
 
 class JobLevel extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
+
+    public $translatable = ['name'];
 
     protected $fillable = [
-        'jobLevel_id',
-        'contract_id',
         'name',
         'description',
         'grade',
-        'email'
+        'email',
     ];
 
-    public function contract()
-    {
-        return $this->belongsTo(Contract::class);
-    }
-
+    protected $casts = [
+        'name' => 'array',
+    ];
 }
