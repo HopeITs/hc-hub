@@ -114,7 +114,7 @@ class ChecklistItemModule extends Component
 
         $items = ChecklistItem::paginate(15);
 
-        return view('livewire.basics.checklist-item', [
+        return view('livewire.basics.checklist-item-module', [
             'items' => $items,
         ]);
 

@@ -48,6 +48,12 @@ return [
     'married' => 'متزوج',
     'select' => 'اختر',
 
+    'department-name' => 'اسم القسم',
+    'department-description' => 'وصف القسم',
+    'department-email' => 'عنوان البريد الإلكتروني',
+
+
+
 
     'profile'=> [
         'settings' => 'إعدادات الحساب',
@@ -72,6 +78,7 @@ return [
         'update-password-text' => 'تأكد من أن حسابك يستخدم كلمة مرور طويلة وعشوائية للحفاظ على أمانه.',
         'current-password' => 'كلمة المرور الحالية',
         'new-password' => 'كلمة المرور الجديدة',
+
     ],
 
 

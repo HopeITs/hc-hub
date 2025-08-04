@@ -16,7 +16,7 @@ class Department extends Model
         'description',
         'email'
     ];
-    public array $translatable = ['name','description'];
+    public $translatable = ['description'];
     public function positions()
     {
         return $this->hasMany(Position::class);

@@ -46,7 +46,7 @@ class CityModule extends Component
     {
         $cities = City::paginate(15);
 
-        return view('livewire.basics.city', [
+        return view('livewire.basics.city-module', [
             'cities' => $cities,
         ]);
     }
