@@ -101,13 +101,7 @@ class ChecklistItemModule extends Component
 
     }
 
-    public function cancel()
-    {
-        $this->showModal = false;
-        $this->resetErrorBag();
-        $this->resetValidation();
-        $this->reset('item', 'showModal');
-    }
+
 
     public function render()
     {

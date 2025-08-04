@@ -109,11 +109,5 @@ class DepartmentModule extends Component
 
     }
 
-    public function cancel()
-    {
-        $this->resetValidation();
-        $this->reset(['item', 'showModal']);
 
-
-    }
 }

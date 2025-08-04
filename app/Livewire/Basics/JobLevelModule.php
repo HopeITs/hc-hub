@@ -120,13 +120,7 @@ class JobLevelModule extends Component
             ->show();
     }
 
-    public function cancel()
-    {
-        $this->showModal = false;
-        $this->resetErrorBag();
-        $this->resetValidation();
-        $this->reset('item');
-    }
+
 
     public function render()
     {
