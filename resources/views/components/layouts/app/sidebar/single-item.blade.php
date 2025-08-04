@@ -1,14 +1,14 @@
-@props([
+@props(['active' => false])
 
-     'active' => request()->is($attributes->get('href'))
-])
 
 
 <li>
-    <a href="#"
-            {{ $attributes->merge([
-             'class' => 'flex items-center px-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 group transition-all duration-200 ease-in-out'])}}>
+    <a {{ $attributes->merge([
+             'class' => $active ? 'flex items-center w-full p-2 text-base text-secondary-dark transition duration-75 rounded-lg group hover:bg-gray-100  bg-gray-100' :  'flex items-center w-full p-2 text-base text-secondary-dark transition duration-75 rounded-lg group hover:bg-gray-100'   ])
+    }}
+    >
         {{ $icon ?? '' }}
-        <span class="ms-3">{{$slot}}</span>
+        <span class="text-sm font-extrabold flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">{{ $slot }}</span>
+
     </a>
 </li>

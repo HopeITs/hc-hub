@@ -120,6 +120,7 @@ return [
         ],
         [
             'name' => [
+                'ar' => 'DISC',
                 'en' => 'DISC',
             ],
             'description' => [
@@ -130,6 +131,7 @@ return [
         ],
         [
             'name' => [
+                'ar' => 'تدريب القادة',
                 'en' => 'Leap',
             ],
             'description' => [
@@ -152,7 +154,7 @@ return [
         [
             'name' => [
                 'en' => 'Study Zone',
-                'ar' => 'نطاق الدراسة',
+                'ar' => 'ستادي زون',
             ],
             'description' => [
                 'en' => null,

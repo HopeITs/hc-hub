@@ -62,10 +62,9 @@
                     </x-slot>
 
                 </x-layouts.app.sidebar.dropdown-nav-list>
-                <x-layouts.app.sidebar.single-item>
+                <x-layouts.app.sidebar.single-item :href="route('projects.index')">
                     <x-slot name="icon">
-
-
+                        <x-icons.layers/>
                     </x-slot>
                     @lang('general.projects-management')</x-layouts.app.sidebar.single-item>
             </ul>
