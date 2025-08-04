@@ -72,16 +72,15 @@
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         <form wire:submit.prevent="save" class="space-y-4">
             <div class="grid grid-cols-2 space-x-2 space-y-4">
-                {{-- Name Inputs --}}
-                @foreach(config('app.supported_locales') as $locale)
-                    <div class="col-span-1">
-                        <x-forms.input-label for="name_{{ $locale }}">
-                            @lang('general.department-name') ({{ strtoupper($locale) }})
-                        </x-forms.input-label>
-                        <x-forms.input type="text" id="name_{{ $locale }}" wire:model="item.name.{{ $locale }}" />
-                        <x-error-span>{{ $errors->first('item.name.' . $locale) }}</x-error-span>
-                    </div>
-                @endforeach
+                {{-- Name Input  --}}
+                <div class="col-span-2">
+                    <x-forms.input-label for="name_en">
+                        @lang('general.department-name') (EN)
+                    </x-forms.input-label>
+                    <x-forms.input type="text" id="name_en" wire:model="item.name.en" />
+                    <x-error-span>{{ $errors->first('item.name.en') }}</x-error-span>
+                </div>
+
 
                 {{-- Description Inputs --}}
                 @foreach(config('app.supported_locales') as $locale)
