@@ -30,25 +30,27 @@
             @forelse($departments as $item)
                 <tr>
                     {{-- ID --}}
-                    <x-table.cell class="w-12">{{ $item->id }}</x-table.cell>
+                    <x-table.cell class="w-1/12">{{ $item->id }}</x-table.cell>
 
                     {{-- Name --}}
-                    <x-table.cell class="w-64 truncate">
+                    <x-table.cell class="w-2/12">
                         {{ $item->name }}
                     </x-table.cell>
 
                     {{-- Description --}}
-                    <x-table.cell class="max-w-[200px] truncate" title="{{ $item->getTranslation('description', app()->getLocale()) }}">
-                        {{ $item->getTranslation('description', app()->getLocale()) ?: '-' }}
+                    <x-table.cell class="w-6/12"  title="{{ $item->getTranslation('description', app()->getLocale()) }}">
+                        <span class="line-clamp-1">
+                            {{ $item->getTranslation('description', app()->getLocale()) ?: '-' }}
+                        </span>
                     </x-table.cell>
 
                     {{-- Email --}}
-                    <x-table.cell class="w-64 truncate">
+                    <x-table.cell class="w-2/12">
                         {{ $item->email ?? '-' }}
                     </x-table.cell>
 
                     {{-- Actions --}}
-                    <x-table.cell class="w-[80px] whitespace-nowrap text-center">
+                    <x-table.cell class=" whitespace-nowrap text-center">
                         <div class="inline-flex items-center justify-center space-x-1 rtl:space-x-reverse">
                             <x-table.edit-btn wire:click="edit({{ $item->id }})" />
                             <x-table.delete-btn :modelId="$item->id" />
@@ -72,41 +74,38 @@
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         <form wire:submit.prevent="save" class="space-y-4">
             <div class="grid grid-cols-2 space-x-2 space-y-4">
-                {{-- Name Inputs --}}
-                @foreach(config('app.supported_locales') as $locale)
-                    <div class="col-span-1">
-                        <x-forms.input-label for="name_{{ $locale }}">
-                            @lang('general.department-name') ({{ strtoupper($locale) }})
-                        </x-forms.input-label>
-                        <x-forms.input type="text" id="name_{{ $locale }}" wire:model="item.name.{{ $locale }}" />
-                        <x-error-span>{{ $errors->first('item.name.' . $locale) }}</x-error-span>
-                    </div>
-                @endforeach
-
-                {{-- Description Inputs --}}
-                @foreach(config('app.supported_locales') as $locale)
-                    <div class="col-span-1">
-                        <x-forms.input-label for="description_{{ $locale }}">
-                            @lang('general.department-description') ({{ strtoupper($locale) }})
-                        </x-forms.input-label>
-                        <x-forms.input type="text" id="description_{{ $locale }}" wire:model="item.description.{{ $locale }}" />
-                        <x-error-span>{{ $errors->first('item.description.' . $locale) }}</x-error-span>
-                    </div>
-                @endforeach
-
+                {{-- Name Input  --}}
+                <div class="col-span-1">
+                    <x-forms.input-label for="name_en">
+                        @lang('general.department-name') (EN)
+                    </x-forms.input-label>
+                    <x-forms.input type="text" id="name_en" wire:model="item.name.en" />
+                    <x-error-span>{{ $errors->first('item.name.en') }}</x-error-span>
+                </div>
                 {{-- Email --}}
-                <div class="col-span-2">
+                <div class="col-span-1">
                     <x-forms.input-label for="email">@lang('general.department-email')</x-forms.input-label>
                     <x-forms.input type="email" id="email" wire:model="item.email" />
                     <x-error-span>{{ $errors->first('item.email') }}</x-error-span>
                 </div>
+
+                {{-- Description Inputs --}}
+                @foreach(config('app.supported_locales') as $locale)
+                    <div class="col-span-2">
+                        <x-forms.input-label for="description_{{ $locale }}">
+                            @lang('general.department-description') ({{ strtoupper($locale) }})
+                        </x-forms.input-label>
+                        <x-forms.textarea type="text" id="description_{{ $locale }}" wire:model="item.description.{{ $locale }}" />
+                        <x-error-span>{{ $errors->first('item.description.' . $locale) }}</x-error-span>
+                    </div>
+                @endforeach
+
+
             </div>
 
             <div class="flex justify-end space-x-2">
                 <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-                <x-primary-button type="button" wire:click="cancel" class="!bg-secondary-light !w-auto">
-                    @lang('general.cancel')
-                </x-primary-button>
+                <x-modal.cancel-btn/>
             </div>
         </form>
     </x-modal.dialog>

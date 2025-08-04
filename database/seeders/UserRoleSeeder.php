@@ -21,7 +21,7 @@ class UserRoleSeeder extends Seeder
         $this->createUserWithRole(
             name: ['en' => 'George'],
             email: 'generalmanager@mail.com',
-            password: 'passowrd',
+            password: 'password',
             roleName: 'General Manger'
         );
 

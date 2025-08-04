@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('job_levels', function (Blueprint $table) {
             $table->id();
             $table->json('name');
-            $table->text('description');
-            $table->integer('grade');
-            $table->string('email')->unique()->nullable();
+            $table->text('description')->nullable();
+            $table->integer('grade')->nullable();
+            $table->string('email')->nullable();
             $table->timestamps();
         });
     }

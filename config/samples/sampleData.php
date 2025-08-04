@@ -303,4 +303,13 @@ return [
             'days' => 22,
         ],
     ],
+    'jobLevels' => [
+    ['name' => ['en' => 'Board', 'ar' => 'مجلس الإدارة'], 'description' => null, 'grade' => 1, 'email' => 'board@hcsyria.org'],
+    ['name' => ['en' => 'Program M', 'ar' => 'مدير البرنامج'], 'description' => null, 'grade' => 2, 'email' => 'managers@hcsyria.org'],
+    ['name' => ['en' => 'Project M', 'ar' => 'مدير المشروع'], 'description' => null, 'grade' => 3, 'email' => 'managers@hcsyria.org'],
+    ['name' => ['en' => 'Department M', 'ar' => 'مدير القسم'], 'description' => null, 'grade' => 4, 'email' => 'managers@hcsyria.org'],
+    ['name' => ['en' => 'Team', 'ar' => 'الفريق'], 'description' => null, 'grade' => 5, 'email' => 'team@hcsyria.org'],
+    ['name' => ['en' => 'Service Agreement', 'ar' => 'اتفاقية الخدمة'], 'description' => null, 'grade' => 6, 'email' => null],
+    ['name' => ['en' => 'Keepers', 'ar' => 'المستخدمون'], 'description' => null, 'grade' => 7, 'email' => null],
+],
 ];

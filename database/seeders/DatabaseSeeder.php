@@ -27,7 +27,8 @@ class DatabaseSeeder extends Seeder
             LeaveTypeSeeder::class,
             AnnualLeaveRuleSeeder::class,
             RolesPermissionsSeeder::class,
-            UserRoleSeeder::class
+            UserRoleSeeder::class,
+            JobLevelSeeder::class
         ]);
 
        $user = User::factory()->create([

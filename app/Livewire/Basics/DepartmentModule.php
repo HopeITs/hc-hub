@@ -9,6 +9,7 @@ use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 
 class DepartmentModule extends Component
 {
+
     use WithPagination;
 
     public $showModal = false;
@@ -35,10 +36,11 @@ class DepartmentModule extends Component
     public function create()
     {
         $this->item = [
-            'name' => ['en' => ''], // ← this structure must stay for form binding
+            'name' => ['en' => ''],
             'description' => [],
             'email' => null,
         ];
+
         $this->modalTitle = __('general.add_new');
         $this->showModal = true;
     }
@@ -49,7 +51,7 @@ class DepartmentModule extends Component
 
         $this->item = [
             'id' => $model->id,
-            'name' => $model->getTranslations('name'),
+            'name' => ['en' => $model->name], // ✅ FIXED
             'description' => $model->getTranslations('description'),
             'email' => $model->email,
         ];
@@ -58,12 +60,14 @@ class DepartmentModule extends Component
         $this->showModal = true;
     }
 
+
     public function save()
     {
         $this->validate();
 
         $data = [
-            'name' => $this->item['name']['en'] ?? '', // Extract English name only
+            'name' => $this->item['name']['en'] ?? '',
+            // Extract English name only
             'description' => $this->item['description'], // still array (translatable)
             'email' => $this->item['email'],
         ];
@@ -75,30 +79,35 @@ class DepartmentModule extends Component
         }
 
         $this->reset(['item', 'showModal']);
-        $this->alert('success', __('general.success-message'));
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 
     public function confirmDelete($id)
     {
-        $this->alert('question', __('general.delete-item'), [
-            'text' => __('general.confirm-delete-item'),
-            'showCancelButton' => true,
-            'confirmButtonText' => __('general.delete'),
-            'cancelButtonText' => __('general.cancel'),
-            'onConfirmed' => 'delete',
-            'params' => ['id' => $id],
-        ]);
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->confirmButtonColor(config('samples.styles.colors.primary'))
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
     }
 
     public function delete($payload)
     {
         Department::findOrFail($payload['id'])->delete();
-        $this->alert('success', __('general.success-message'));
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
+
     }
 
-    public function cancel()
-    {
-        $this->reset(['item', 'showModal']);
-        $this->resetValidation();
-    }
+
 }
