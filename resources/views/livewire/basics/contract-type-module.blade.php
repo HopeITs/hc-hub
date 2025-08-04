@@ -95,7 +95,7 @@
 
             <div class="flex justify-end space-x-2">
                 <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-                <x-primary-button type="button" wire:click="cancel" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
+                <x-modal.cancel-btn/>
             </div>
         </form>
     </x-modal.dialog>

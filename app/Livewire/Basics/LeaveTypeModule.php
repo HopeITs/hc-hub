@@ -92,12 +92,7 @@ class LeaveTypeModule extends Component
             ->show();
     }
 
-    public function cancel()
-    {
-        $this->resetErrorBag();
-        $this->resetValidation();
-        $this->reset('item', 'showModal');
-    }
+
 
     public function render()
     {
