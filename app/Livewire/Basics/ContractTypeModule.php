@@ -115,7 +115,7 @@ class ContractTypeModule extends Component
     public function render()
     {
 
-        $items = ContractType::paginate(10);
+        $items = ContractType::paginate(15);
 
         return view('livewire.basics.contract-type', [
             'items' => $items,

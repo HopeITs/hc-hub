@@ -3,6 +3,7 @@
 use App\Livewire\Basics\ChecklistItemModule;
 use App\Livewire\Basics\CityModule ;
 use App\Livewire\Basics\ContractTypeModule ;
+use App\Livewire\Basics\LeaveTypeModule;
 use App\Livewire\Basics\DepartmentModule;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
@@ -27,8 +28,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('cities', CityModule::class)->name('cities.index');
     Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index');
-
     Route::get('checklist-items', ChecklistItemModule::class)->name('checklist-items.index');
+    Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
 
     Route::get('departments', DepartmentModule::class)->name('departments.index');
 });

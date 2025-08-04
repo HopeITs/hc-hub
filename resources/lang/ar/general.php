@@ -35,6 +35,16 @@ return [
     'cancel' => 'إلغاء',
     'edit' => 'تعديل',
     "add_new" => 'إضافة جديد',
+    'base_days' => 'الأيام الأساسية',
+    'allowed_gender' => 'الجنس المسموح به',
+    'marital_status' => 'الحالة الاجتماعية',
+    'any' => 'الكل',
+    'male' => 'ذكر',
+    'female' => 'أنثى',
+    'single' => 'أعزب',
+    'married' => 'متزوج',
+    'select' => 'اختر',
+
     'department-name' => 'اسم القسم',
     'department-description' => 'وصف القسم',
     'department-email' => 'عنوان البريد الإلكتروني',
@@ -67,7 +77,6 @@ return [
         'new-password' => 'كلمة المرور الجديدة',
 
     ],
-
 
 
 ];

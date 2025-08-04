@@ -1,6 +1,7 @@
 <?php
 use App\Enums\ContractPlace;
 use App\Enums\Gender;
+use App\Enums\LeaveType;
 use App\Enums\MaritalStatus;
 
 return [
@@ -212,75 +213,67 @@ return [
         [
             'name' => ['en' => 'Annual', 'ar' => 'سنوية'],
             'base_days' => 12,
-            'allowed_gender' => null,
-            'marital_status' => null,
+            'allowed_gender' => LeaveType::GENDER_ANY,
+            'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
         [
-            'name' => ['en' => 'Full Licensed', 'ar' => 'مرخصة كاملة'],
+            'name' => ['en' => 'Full Licensed', 'ar' => 'مرضية كاملة'],
             'base_days' => 12,
-            'allowed_gender' => null,
-            'marital_status' => null,
+            'allowed_gender' => LeaveType::GENDER_ANY,
+            'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
         [
-            'name' => ['en' => 'Partial Licensed', 'ar' => 'مرخصة جزئية'],
+            'name' => ['en' => 'Partial Licensed', 'ar' => 'مرضية جزئية'],
             'base_days' => 12,
-            'allowed_gender' => null,
-            'marital_status' => null,
+            'allowed_gender' => LeaveType::GENDER_ANY,
+            'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
         [
             'name' => ['en' => 'Maternity 1', 'ar' => 'إجازة أمومة 1'],
             'base_days' => 120,
-            'allowed_gender' => Gender::Female(),
-            'marital_status' => MaritalStatus::Married(),
+            'allowed_gender' => LeaveType::GENDER_FEMALE,
+            'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
         ],
         [
             'name' => ['en' => 'Maternity 2', 'ar' => 'إجازة أمومة 2'],
             'base_days' => 60,
-            'allowed_gender' => Gender::Female(),
-            'marital_status' => MaritalStatus::Married(),
+            'allowed_gender' => LeaveType::GENDER_FEMALE,
+            'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
+
         ],
         [
             'name' => ['en' => 'Paternity', 'ar' => 'إجازة أبوة'],
             'base_days' => 15,
-            'allowed_gender' => Gender::Male(),
-            'marital_status' => MaritalStatus::Married(),
+            'allowed_gender' => LeaveType::GENDER_MALE,
+            'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
+
         ],
         [
             'name' => ['en' => 'Marriage', 'ar' => 'زواج'],
             'base_days' => 7,
-            'allowed_gender' => null,
-            'marital_status' => MaritalStatus::Single(),
+            'allowed_gender' => LeaveType::GENDER_ANY,
+            'marital_status' => LeaveType::MARITAL_STATUS_SINGLE,
+
         ],
         [
             'name' => ['en' => 'Death Degree 1', 'ar' => 'وفاة درجة 1'],
             'base_days' => 7,
-            'allowed_gender' => null,
-            'marital_status' => null,
+            'allowed_gender' => LeaveType::GENDER_ANY,
+            'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
         [
             'name' => ['en' => 'Death Degree 2', 'ar' => 'وفاة درجة 2'],
             'base_days' => 1,
-            'allowed_gender' => null,
-            'marital_status' => null,
+            'allowed_gender' => LeaveType::GENDER_ANY,
+            'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
         [
-            'name' => ['en' => 'Unpaid Annual', 'ar' => 'سنوية غير مدفوعة'],
+            'name' => ['en' => 'Unpaid', 'ar' => ' غير مدفوعة'],
             'base_days' => 12,
-            'allowed_gender' => null,
-            'marital_status' => null,
+            'allowed_gender' => LeaveType::GENDER_ANY,
+            'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
-        [
-            'name' => ['en' => 'Unpaid Licensed', 'ar' => 'مرضية غير مدفوعة'],
-            'base_days' => 0,
-            'allowed_gender' => null,
-            'marital_status' => null,
-        ],
-        [
-            'name' => ['en' => 'Unpaid Leave', 'ar' => 'أمومة غير مدفوعة'],
-            'base_days' => 0,
-            'allowed_gender' => Gender::Female(),
-            'marital_status' => MaritalStatus::Married(),
-        ],
+
     ],
 
     'annualLeaveRules' => [
