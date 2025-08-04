@@ -101,7 +101,7 @@ class LeaveTypeModule extends Component
 
     public function render()
     {
-        return view('livewire.basics.leave-type', [
+        return view('livewire.basics.leave-type-module', [
             'items' => LeaveType::paginate(15),
 
         ]);
