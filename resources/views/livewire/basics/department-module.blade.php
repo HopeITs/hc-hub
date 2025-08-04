@@ -30,25 +30,27 @@
             @forelse($departments as $item)
                 <tr>
                     {{-- ID --}}
-                    <x-table.cell class="w-12">{{ $item->id }}</x-table.cell>
+                    <x-table.cell class="w-1/12">{{ $item->id }}</x-table.cell>
 
                     {{-- Name --}}
-                    <x-table.cell class="w-64 truncate">
+                    <x-table.cell class="w-2/12">
                         {{ $item->name }}
                     </x-table.cell>
 
                     {{-- Description --}}
-                    <x-table.cell class="max-w-[200px] truncate" title="{{ $item->getTranslation('description', app()->getLocale()) }}">
-                        {{ $item->getTranslation('description', app()->getLocale()) ?: '-' }}
+                    <x-table.cell class="w-6/12"  title="{{ $item->getTranslation('description', app()->getLocale()) }}">
+                        <span class="line-clamp-1">
+                            {{ $item->getTranslation('description', app()->getLocale()) ?: '-' }}
+                        </span>
                     </x-table.cell>
 
                     {{-- Email --}}
-                    <x-table.cell class="w-64 truncate">
+                    <x-table.cell class="w-2/12">
                         {{ $item->email ?? '-' }}
                     </x-table.cell>
 
                     {{-- Actions --}}
-                    <x-table.cell class="w-[80px] whitespace-nowrap text-center">
+                    <x-table.cell class=" whitespace-nowrap text-center">
                         <div class="inline-flex items-center justify-center space-x-1 rtl:space-x-reverse">
                             <x-table.edit-btn wire:click="edit({{ $item->id }})" />
                             <x-table.delete-btn :modelId="$item->id" />
