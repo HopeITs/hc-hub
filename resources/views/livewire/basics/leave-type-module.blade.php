@@ -1,5 +1,5 @@
 @php
-use App\Enums\LeaveType;
+    use App\Enums\LeaveType;
 @endphp
 <div>
     <div class="flex justify-between">
@@ -25,7 +25,7 @@ use App\Enums\LeaveType;
             <x-table.heading>@lang('general.base_days')</x-table.heading>
             <x-table.heading>@lang('general.allowed_gender')</x-table.heading>
             <x-table.heading>@lang('general.marital_status')</x-table.heading>
-            <x-table.heading />
+            <x-table.heading/>
         </x-slot>
         <x-slot name="body">
             @forelse($items as $item)
@@ -44,12 +44,12 @@ use App\Enums\LeaveType;
                         <x-badge :color="$marital['color']">{{ $marital['value'] }}</x-badge>
                     </x-table.cell>
                     <x-table.cell>
-                        <x-table.edit-btn wire:click="edit({{ $item->id }})" />
-                        <x-table.delete-btn :modelId="$item->id" />
+                        <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
+                        <x-table.delete-btn :modelId="$item->id"/>
                     </x-table.cell>
                 </tr>
             @empty
-                <x-table.no-data />
+                <x-table.no-data/>
             @endforelse
         </x-slot>
         <x-slot name="pagination">
@@ -66,14 +66,14 @@ use App\Enums\LeaveType;
                         <x-forms.input-label for="name_{{ $locale }}">
                             @lang('general.name') ({{ strtoupper($locale) }})
                         </x-forms.input-label>
-                        <x-forms.input type="text" wire:model="item.name.{{ $locale }}" id="name_{{ $locale }}" />
+                        <x-forms.input type="text" wire:model="item.name.{{ $locale }}" id="name_{{ $locale }}"/>
                         <x-error-span>{{ $errors->first('item.name.' . $locale) }}</x-error-span>
                     </div>
                 @endforeach
 
                 <div>
                     <x-forms.input-label for="base_days">@lang('general.base_days')</x-forms.input-label>
-                    <x-forms.input type="number" wire:model="item.base_days" id="base_days" />
+                    <x-forms.input type="number" wire:model="item.base_days" id="base_days"/>
                     <x-error-span>{{ $errors->first('item.base_days') }}</x-error-span>
                 </div>
 
@@ -94,11 +94,14 @@ use App\Enums\LeaveType;
                 <div>
                     <x-forms.input-label>@lang('general.marital_status')</x-forms.input-label>
                     <div class="flex justify-between">
-                        <x-forms.radio-input id="any_status" name="marital_status" value="{{LeaveType::MARITAL_STATUS_ANY}}"
+                        <x-forms.radio-input id="any_status" name="marital_status"
+                                             value="{{LeaveType::MARITAL_STATUS_ANY}}"
                                              wire:model="item.marital_status">{{LeaveType::getMaritalStatus(LeaveType::MARITAL_STATUS_ANY)['value']}}</x-forms.radio-input>
-                        <x-forms.radio-input id="single" name="marital_status" value="{{LeaveType::MARITAL_STATUS_SINGLE}}"
+                        <x-forms.radio-input id="single" name="marital_status"
+                                             value="{{LeaveType::MARITAL_STATUS_SINGLE}}"
                                              wire:model="item.marital_status">{{LeaveType::getMaritalStatus(LeaveType::MARITAL_STATUS_SINGLE)['value']}}</x-forms.radio-input>
-                        <x-forms.radio-input id="married" name="marital_status" value="{{LeaveType::MARITAL_STATUS_MARRIED}}"
+                        <x-forms.radio-input id="married" name="marital_status"
+                                             value="{{LeaveType::MARITAL_STATUS_MARRIED}}"
                                              wire:model="item.marital_status">{{LeaveType::getMaritalStatus(LeaveType::MARITAL_STATUS_MARRIED)['value']}}</x-forms.radio-input>
                     </div>
 
@@ -108,7 +111,7 @@ use App\Enums\LeaveType;
 
             <div class="flex justify-end space-x-2">
                 <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-                <x-primary-button type="button" wire:click="cancel" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
+                <x-modal.cancel-btn/>
             </div>
         </form>
     </x-modal.dialog>
