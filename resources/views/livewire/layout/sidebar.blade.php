@@ -40,8 +40,7 @@
                         <x-layouts.app.sidebar.nav-item :href="route('job-levels')" :active="request()->routeIs('job-levels')" wire:navigate>
                             {{ trans_choice('general.job-level', 2) }}
                         </x-layouts.app.sidebar.nav-item>
-                        <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.department', 2) }}</x-layouts.app.sidebar.nav-item>
-                        <x-layouts.app.sidebar.nav-item>{{ trans_choice('general.job-level', 2) }}</x-layouts.app.sidebar.nav-item>
+
 
                         <x-layouts.app.sidebar.nav-item
                             :href="route('departments.index')"
