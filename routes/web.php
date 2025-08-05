@@ -13,6 +13,7 @@ use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Employee\EmployeeForm;
 use App\Models\Role;
 use App\Livewire\Employee\EmployeeModule;
+use App\Livewire\Employee\EmployeeEditForm;
 use Illuminate\Support\Facades\Route;
 
 
@@ -40,6 +41,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('projects', ProjectModule::class)->name('projects.index');
     Route::get('employees', EmployeeModule::class)->name('employees.index');
     Route::get('employees/form', EmployeeForm::class)->name('employees.form');
+    Route::get('employees/edit/{employee}', EmployeeEditForm::class)->name('employees.edit');
+
 });
 
 require __DIR__.'/auth.php';
