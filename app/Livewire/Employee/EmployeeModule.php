@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Basics;
+namespace App\Livewire\Employee;
 
 use App\Models\Employee;
 use Livewire\Component;
@@ -105,6 +105,6 @@ class EmployeeModule extends Component
     {
         $items = Employee::with(['directManager', 'techManager', 'jobLevel', 'contractType', 'department'])->paginate(15);
 
-        return view('livewire.employees.index', compact('items'));
+        return view('livewire.employee.index', compact('items'));
     }
 }

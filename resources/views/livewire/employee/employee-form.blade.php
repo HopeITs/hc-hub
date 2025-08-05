@@ -1,66 +1,9 @@
+@php
+    use App\Enums\MaritalStatus;
+@endphp
 <div>
-    <div class="flex justify-between">
-        <livewire:layout.breadcrumbs :title="trans_choice('general.employee', 2)" :crumbs="[['label' => __('general.project-basics')], ['label' => trans_choice('general.employee', 2)]]" :showButton="true" />
-        <div>
-            <x-primary-button wire:click="create">
-                @lang('general.add_new')
-            </x-primary-button>
-        </div>
-    </div>
-
-    <x-table>
-        <x-slot name="headings">
-            <x-table.heading>ID</x-table.heading>
-            <x-table.heading>@lang('general.name')</x-table.heading>
-            <x-table.heading>@lang('general.photo')</x-table.heading>
-            <x-table.heading>@lang('general.tech_manager')</x-table.heading>
-            <x-table.heading>@lang('general.direct_manager')</x-table.heading>
-            <x-table.heading>@lang('general.work_email')</x-table.heading>
-            <x-table.heading>@lang('general.actual_job')</x-table.heading>
-            <x-table.heading>@lang('general.job_level')</x-table.heading>
-            <x-table.heading>@lang('general.contract_type')</x-table.heading>
-            <x-table.heading>@lang('general.department')</x-table.heading>
-            <x-table.heading>@lang('general.status')</x-table.heading>
-            <x-table.heading />
-        </x-slot>
-
-        <x-slot name="body">
-            @forelse($items as $item)
-                <tr>
-                    <x-table.cell>{{ $item->id }}</x-table.cell>
-                    <x-table.cell>{{ $item->name }}</x-table.cell>
-                    <x-table.cell>
-                        <img class="w-10 h-10 rounded-full"
-                            src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-                            alt="{{ $item->name }}">
-                    </x-table.cell>
-                    <x-table.cell>{{ $item->techManager?->name ?? '-' }}</x-table.cell>
-                    <x-table.cell>{{ $item->directManager?->name ?? '-' }}</x-table.cell>
-                    <x-table.cell>{{ $item->work_email }}</x-table.cell>
-                    <x-table.cell>{{ $item->actual_job }}</x-table.cell>
-                    <x-table.cell>{{ $item->jobLevel?->name ?? '-' }}</x-table.cell>
-                    <x-table.cell>{{ $item->contractType?->name ?? '-' }}</x-table.cell>
-                    <x-table.cell>{{ $item->department?->name ?? '-' }}</x-table.cell>
-                    <x-table.cell-status :active="$item->is_active" />
-                    <x-table.cell>
-                        <x-table.edit-btn wire:click="edit({{ $item->id }})" />
-                        <x-table.delete-btn :modelId="$item->id" />
-                    </x-table.cell>
-                </tr>
-            @empty
-                <x-table.no-data />
-            @endforelse
-        </x-slot>
-
-        <x-slot name="pagination">
-            {{ $items->links() }}
-        </x-slot>
-    </x-table>
-
-    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
-        <form class="space-y-4" wire:submit.prevent="save">
+    <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-2 gap-4">
-                <!-- Basic Info -->
                 <div>
                     <x-forms.input-label for="name">@lang('general.name')</x-forms.input-label>
                     <x-forms.input type="text" id="name" wire:model="item.name" />
@@ -105,7 +48,6 @@
                     </select>
                 </div>
 
-                <!-- Parents -->
                 <div>
                     <x-forms.input-label for="father_name">@lang('general.father_name')</x-forms.input-label>
                     <x-forms.input type="text" id="father_name"
@@ -118,7 +60,6 @@
                         wire:model="item.mother_name.{{ app()->getLocale() }}" />
                 </div>
 
-                <!-- Contact -->
                 <div>
                     <x-forms.input-label for="nationality">@lang('general.nationality')</x-forms.input-label>
                     <x-forms.input type="text" id="nationality" wire:model="item.nationality" />
@@ -126,14 +67,24 @@
 
                 <div>
                     <x-forms.input-label for="marital_status">@lang('general.marital_status')</x-forms.input-label>
-                    <select id="marital_status" wire:model="item.marital_status"
-                        class="w-full border-gray-300 rounded shadow-sm">
-                        <option value="">--</option>
-                        <option value="single">@lang('general.single')</option>
-                        <option value="married">@lang('general.married')</option>
-                        <option value="divorced">@lang('general.divorced')</option>
-                        <option value="widowed">@lang('general.widowed')</option>
-                    </select>
+                    <x-forms.select-input id="marital_status" wire:model="item.marital_status">
+                        <option value="">{{ __('general.select') }}</option>
+                        <option value="{{ MaritalStatus::Single }}">
+                            {{ MaritalStatus::getLocalizedName(MaritalStatus::Single)['value'] }}</option>
+                        <option value="{{ MaritalStatus::Engaged }}">
+                            {{ MaritalStatus::getLocalizedName(MaritalStatus::Engaged)['value'] }}</option>
+                        <option value="{{ MaritalStatus::Married }}">
+                            {{ MaritalStatus::getLocalizedName(MaritalStatus::Married)['value'] }}</option>
+                        <option value="{{ MaritalStatus::Divorced }}">
+                            {{ MaritalStatus::getLocalizedName(MaritalStatus::Divorced)['value'] }}</option>
+                        <option value="{{ MaritalStatus::Widowed }}">
+                            {{ MaritalStatus::getLocalizedName(MaritalStatus::Widowed)['value'] }}</option>
+                        <option value="{{ MaritalStatus::Separated }}">
+                            {{ MaritalStatus::getLocalizedName(MaritalStatus::Separated)['value'] }}</option>
+                        <option value="{{ MaritalStatus::Unknown }}">
+                            {{ MaritalStatus::getLocalizedName(MaritalStatus::Unknown)['value'] }}</option>
+                    </x-forms.select-input>
+                    <x-error-span>{{ $errors->first('item.marital_status') }}</x-error-span>
                 </div>
 
                 <div>
@@ -162,7 +113,6 @@
                     <x-error-span>{{ $errors->first('item.work_email') }}</x-error-span>
                 </div>
 
-                <!-- Others -->
                 <div>
                     <x-forms.input-label for="address">@lang('general.address')</x-forms.input-label>
                     <x-forms.textarea id="address" wire:model="item.address.{{ app()->getLocale() }}" />
@@ -184,7 +134,6 @@
                     <label for="is_active" class="text-sm text-gray-700">@lang('general.active')</label>
                 </div>
 
-                <!-- Existing Relationship Fields -->
                 <div>
                     <x-forms.input-label for="actual_job">@lang('general.actual_job')</x-forms.input-label>
                     <x-forms.input type="text" id="actual_job" wire:model="item.actual_job" />
@@ -221,5 +170,4 @@
                 <x-modal.cancel-btn />
             </div>
         </form>
-    </x-modal.dialog>
 </div>

@@ -10,8 +10,9 @@ use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Basics\JobLevelModule;
+use App\Livewire\Employee\EmployeeForm;
 use App\Models\Role;
-use App\Livewire\Basics\EmployeeModule;
+use App\Livewire\Employee\EmployeeModule;
 use Illuminate\Support\Facades\Route;
 
 
@@ -38,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('departments', DepartmentModule::class)->name('departments.index');
     Route::get('projects', ProjectModule::class)->name('projects.index');
     Route::get('employees', EmployeeModule::class)->name('employees.index');
+    Route::get('employees/form', EmployeeForm::class)->name('employees.form');
 });
 
 require __DIR__.'/auth.php';

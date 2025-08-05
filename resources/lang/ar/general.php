@@ -78,7 +78,6 @@ return [
     'department-email' => 'عنوان البريد الإلكتروني',
     'employee' => 'الموظف',
     'photo' => 'الصورة',
-
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',
