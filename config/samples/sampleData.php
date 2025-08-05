@@ -241,21 +241,18 @@ return [
             'base_days' => 60,
             'allowed_gender' => LeaveType::GENDER_FEMALE,
             'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
-
         ],
         [
             'name' => ['en' => 'Paternity', 'ar' => 'إجازة أبوة'],
             'base_days' => 15,
             'allowed_gender' => LeaveType::GENDER_MALE,
             'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
-
         ],
         [
             'name' => ['en' => 'Marriage', 'ar' => 'زواج'],
             'base_days' => 7,
             'allowed_gender' => LeaveType::GENDER_ANY,
             'marital_status' => LeaveType::MARITAL_STATUS_SINGLE,
-
         ],
         [
             'name' => ['en' => 'Death Degree 1', 'ar' => 'وفاة درجة 1'],
@@ -275,7 +272,6 @@ return [
             'allowed_gender' => LeaveType::GENDER_ANY,
             'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
-
     ],
 
     'annualLeaveRules' => [
@@ -305,13 +301,35 @@ return [
             'days' => 22,
         ],
     ],
-    'jobLevels' => [
-    ['name' => ['en' => 'Board', 'ar' => 'مجلس الإدارة'], 'description' => null, 'grade' => 1, 'email' => 'board@hcsyria.org'],
-    ['name' => ['en' => 'Program M', 'ar' => 'مدير البرنامج'], 'description' => null, 'grade' => 2, 'email' => 'managers@hcsyria.org'],
-    ['name' => ['en' => 'Project M', 'ar' => 'مدير المشروع'], 'description' => null, 'grade' => 3, 'email' => 'managers@hcsyria.org'],
-    ['name' => ['en' => 'Department M', 'ar' => 'مدير القسم'], 'description' => null, 'grade' => 4, 'email' => 'managers@hcsyria.org'],
-    ['name' => ['en' => 'Team', 'ar' => 'الفريق'], 'description' => null, 'grade' => 5, 'email' => 'team@hcsyria.org'],
-    ['name' => ['en' => 'Service Agreement', 'ar' => 'اتفاقية الخدمة'], 'description' => null, 'grade' => 6, 'email' => null],
-    ['name' => ['en' => 'Keepers', 'ar' => 'المستخدمون'], 'description' => null, 'grade' => 7, 'email' => null],
-],
+    'jobLevels' => [['name' => ['en' => 'Board', 'ar' => 'مجلس الإدارة'], 'description' => null, 'grade' => 1, 'email' => 'board@hcsyria.org'], ['name' => ['en' => 'Program M', 'ar' => 'مدير البرنامج'], 'description' => null, 'grade' => 2, 'email' => 'managers@hcsyria.org'], ['name' => ['en' => 'Project M', 'ar' => 'مدير المشروع'], 'description' => null, 'grade' => 3, 'email' => 'managers@hcsyria.org'], ['name' => ['en' => 'Department M', 'ar' => 'مدير القسم'], 'description' => null, 'grade' => 4, 'email' => 'managers@hcsyria.org'], ['name' => ['en' => 'Team', 'ar' => 'الفريق'], 'description' => null, 'grade' => 5, 'email' => 'team@hcsyria.org'], ['name' => ['en' => 'Service Agreement', 'ar' => 'اتفاقية الخدمة'], 'description' => null, 'grade' => 6, 'email' => null], ['name' => ['en' => 'Keepers', 'ar' => 'المستخدمون'], 'description' => null, 'grade' => 7, 'email' => null]],
+
+    'employees' => [
+        [
+            'id' => 11,
+            'name' => ['en'=> 'George', 'ar' => 'جورج'],
+            'years_of_service' => 1,
+            'direct_manager_id' => null,
+            'tech_manager_id' => null,
+            'national_number' => '11021034567',
+            'dob' => '1985-04-12',
+            'actual_job' => 'IT Specialist',
+            'civil_registry_office' => 'Damascus',
+            'civil_registry_number' => '123A',
+            'place_of_registration' => 'Damascus',
+            'gender' => 1,
+            'father_name' => ['en' => 'Doe', 'ar' => 'دو'],
+            'mother_name' => ['en' => 'Doe', 'ar' => 'دو'],
+            'nationality' => 'Syrian',
+            'marital_status' => 1,
+            'children' => 0,
+            'work_phone' => '0988123456',
+            'personal_phone' => '0933123456',
+            'personal_email' => 'exxx@example.com',
+            'work_email' => 'exx1@example.com',
+            'address' => ['en' => 'Aleppo', 'ar' => 'حلب'],
+            'skills' => 'etc1, etc2, etc3',
+            'interests' => 'Reading, Technology',
+            'is_active' => true,
+        ],
+    ],
 ];

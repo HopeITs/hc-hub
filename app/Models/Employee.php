@@ -4,12 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Translatable\HasTranslations;
 
 class Employee extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
-    protected $fillable = ['id', 'full_name', 'years_of_service', 'direct_manager_id', 'tech_manager_id', 'national_number', 'dob', 'actual_job', 'civil_registry_office', 'civil_registry_number', 'place_of_registration', 'gender', 'father_name', 'mother_name', 'nationality', 'material_status', 'children', 'work_phone', 'personal_phone', 'personal_email', 'work_email', 'address', 'skills', 'interests', 'is_active'];
+    protected $guarded = ['id'];
+
+    public array $translatable = ['name', 'father_name', 'mother_name', 'address'];
 
     public function contracts()
     {
@@ -49,5 +52,30 @@ class Employee extends Model
     public function checklist()
     {
         return $this->hasOne(Checklist::class);
+    }
+
+    public function techManager()
+    {
+        return $this->belongsTo(Employee::class, 'tech_manager_id');
+    }
+
+    public function directManager()
+    {
+        return $this->belongsTo(Employee::class, 'direct_manager_id');
+    }
+
+    public function jobLevel()
+    {
+        return $this->belongsTo(JobLevel::class);
+    }
+
+    public function contractType()
+    {
+        return $this->belongsTo(ContractType::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 }

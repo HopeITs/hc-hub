@@ -14,7 +14,7 @@ return [
     'my-profile' => 'الصفحة الشخصية',
     'my-account' => 'حسابي الشخصي',
     'dashboard' => 'لوحة التحكم',
-    'name' => 'الاسم' ,
+    'name' => 'الاسم',
     'type' => 'النوع',
     'place' => 'المكان',
     'order' => 'الترتيب',
@@ -37,7 +37,7 @@ return [
     'save' => 'حفظ',
     'cancel' => 'إلغاء',
     'edit' => 'تعديل',
-    "add_new" => 'إضافة جديد',
+    'add_new' => 'إضافة جديد',
     'base_days' => 'الأيام الأساسية',
     'allowed_gender' => 'الجنس المسموح به',
     'marital_status' => 'الحالة الاجتماعية',
@@ -47,15 +47,39 @@ return [
     'single' => 'أعزب',
     'married' => 'متزوج',
     'select' => 'اختر',
-
+    'dob' => 'تاريخ الميلاد',
+    'national_number' => 'الرقم الوطني',
+    'civil_registry_office' => 'دائرة السجل المدني',
+    'civil_registry_number' => 'رقم السجل المدني',
+    'place_of_registration' => 'مكان القيد',
+    'gender' => 'الجنس',
+    'father_name' => 'اسم الأب',
+    'mother_name' => 'اسم الأم',
+    'nationality' => 'الجنسية',
+    'marital_status' => 'الحالة الاجتماعية',
+    'children' => 'عدد الأولاد',
+    'work_phone' => 'هاتف العمل',
+    'personal_phone' => 'الهاتف الشخصي',
+    'personal_email' => 'البريد الشخصي',
+    'work_email' => 'البريد الوظيفي',
+    'address' => 'العنوان',
+    'skills' => 'المهارات',
+    'interests' => 'الاهتمامات',
+    'actual_job' => 'المسمى الوظيفي',
+    'direct_manager' => 'المدير المباشر',
+    'tech_manager' => 'المدير الفني',
+    'job_level' => 'المستوى الوظيفي',
+    'contract_type' => 'نوع العقد',
+    'department' => 'القسم',
+    'is_active' => 'الحالة',
+    'years_of_service' => 'سنوات الخدمة',
     'department-name' => 'اسم القسم',
     'department-description' => 'وصف القسم',
     'department-email' => 'عنوان البريد الإلكتروني',
+    'employee' => 'الموظف',
+    'photo' => 'الصورة',
 
-
-
-
-    'profile'=> [
+    'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',
         'profile' => 'الحساب',
@@ -78,8 +102,5 @@ return [
         'update-password-text' => 'تأكد من أن حسابك يستخدم كلمة مرور طويلة وعشوائية للحفاظ على أمانه.',
         'current-password' => 'كلمة المرور الحالية',
         'new-password' => 'كلمة المرور الجديدة',
-
     ],
-
-
 ];
