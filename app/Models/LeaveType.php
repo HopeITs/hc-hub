@@ -18,7 +18,7 @@ class LeaveType extends Model
         'marital_status'
     ];
 
-    public array $translatable = ['name'];
+    public $translatable = ['name'];
 
     public function leaveBalances()
     {

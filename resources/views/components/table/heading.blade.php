@@ -1,44 +1,45 @@
 @props([
-    'sortable' => null,
-    'direction' => null
+    'sortable' => false,
+    'direction' => null,
 ])
 
-<th {{$attributes->merge([
-    'class' => 'text-sm px-5 py-2.5 bg-gray-200 rtl:text-right text-left text-gray-900 border-secondary-medium'
+@php
+    $clickAction = $attributes->get('wire:click');
+@endphp
 
-])}}
->
-    @unless($sortable)
-        <span class="text-right text-xs leading-4 font-medium text-secondary-medium uppercase tracking-wider">
-              {{$slot}}
+<th class="text-sm px-5 py-2.5 bg-gray-200 rtl:text-right text-left text-gray-900 border-secondary-medium">
+    @if (! $sortable)
+        <span class="text-xs leading-4 font-medium text-secondary-medium uppercase tracking-wider">
+            {{ $slot }}
         </span>
     @else
         <button
-            {{$attributes->except('class') }} class="flex items-center space-x-1 text-right text-xs leading-4 font-medium">
-            <span>{{$slot}}</span>
-
+            type="button"
+            {{ $attributes->only('wire:click') }}
+            class="group flex items-center gap-1 text-xs leading-4 font-medium cursor-pointer hover:text-primary transition">
+            <span>{{ $slot }}</span>
             <span>
-            @if($direction === 'asc')
-                    <svg class="size-3 text-gray-800 dark:text-white" aria-hidden="true"
-                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="m8 10 4 4 4-4"/>
+                @if ($direction === 'asc')
+                    {{-- Up arrow --}}
+                    <svg class="size-3 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m8 10 4 4 4-4"/>
                     </svg>
-
-                @elseif($direction === 'desc')
-                    <svg class="size-3 text-gray-800 dark:text-white" aria-hidden="true"
-                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="m16 14-4-4-4 4"/>
+                @elseif ($direction === 'desc')
+                    {{-- Down arrow --}}
+                    <svg class="size-3 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m16 14-4-4-4 4"/>
                     </svg>
-
                 @else
-                    <svg class="size-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-secondary-dark " aria-hidden="true"
-                         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="m8 10 4 4 4-4"/>
+                    {{-- Hover arrow --}}
+                    <svg class="size-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-secondary-dark"
+                         xmlns="http://www.w3.org/2000/svg" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m8 10 4 4 4-4"/>
                     </svg>
                 @endif
-        </span>
+            </span>
         </button>
-
     @endif
-
 </th>
