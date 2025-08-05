@@ -50,14 +50,43 @@ class EmployeeModule extends Component
         $this->showModal = true;
     }
 
-    public function edit($id)
-    {
-        $model = Employee::findOrFail($id);
-        $this->item = $model->toArray();
-        $this->item['id'] = $model->id;
-        $this->modalTitle = __('general.edit');
-        $this->showModal = true;
-    }
+public function edit($id)
+{
+    $model = Employee::findOrFail($id);
+    $this->item = [
+        'id' => $model->id,
+        'full_name' => $model->getTranslation('name', app()->getLocale()),
+        'years_of_service' => $model->years_of_service,
+        'direct_manager_id' => $model->direct_manager_id,
+        'tech_manager_id' => $model->tech_manager_id,
+        'national_number' => $model->national_number,
+        'dob' => $model->dob,
+        'actual_job' => $model->actual_job,
+        'civil_registry_office' => $model->civil_registry_office,
+        'civil_registry_number' => $model->civil_registry_number,
+        'place_of_registration' => $model->place_of_registration,
+        'gender' => $model->gender,
+        'father_name' => $model->getTranslations('father_name'),
+        'mother_name' => $model->getTranslations('mother_name'),
+        'nationality' => $model->nationality,
+        'marital_status' => $model->marital_status,
+        'children' => $model->children,
+        'work_phone' => $model->work_phone,
+        'personal_phone' => $model->personal_phone,
+        'personal_email' => $model->personal_email,
+        'work_email' => $model->work_email,
+        'address' => $model->getTranslations('address'),
+        'skills' => $model->skills,
+        'interests' => $model->interests,
+        'is_active' => $model->is_active,
+        'job_level_id' => $model->job_level_id,
+        'contract_type_id' => $model->contract_type_id,
+        'department_id' => $model->department_id,
+    ];
+
+    $this->modalTitle = __('general.edit');
+    $this->showModal = true;
+}
 
     public function save()
     {

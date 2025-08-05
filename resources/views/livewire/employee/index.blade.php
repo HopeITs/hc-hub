@@ -1,11 +1,16 @@
 @php
-    use App\Enums\MaritalStatus;
+use App\Enums\MaritalStatus;
 @endphp
+
 <div>
     <div class="flex justify-between">
-        <livewire:layout.breadcrumbs :title="trans_choice('general.employee', 2)" :crumbs="[['label' => __('general.project-basics')], ['label' => trans_choice('general.employee', 2)]]" :showButton="true" />
+        <livewire:layout.breadcrumbs
+            :title="trans_choice('general.employee', 2)"
+            :crumbs="[['label' => __('general.project-basics')], ['label' => trans_choice('general.employee', 2)]]"
+            :showButton="true"
+        />
         <div>
-            <x-primary-link href="{{route('employees.form')}}">Add New</x-primary-link>
+            <x-primary-link href="{{ route('employees.form') }}">@lang('general.add_new')</x-primary-link>
         </div>
     </div>
 
@@ -32,7 +37,8 @@
                     <x-table.cell>{{ $item->name }}</x-table.cell>
                     <x-table.cell>
                         <img class="w-10 h-10 rounded-full"
-                            src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="{{ $item->name }}">
+                             src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                             alt="{{ $item->name }}">
                     </x-table.cell>
                     <x-table.cell>{{ $item->techManager?->name ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->directManager?->name ?? '-' }}</x-table.cell>
@@ -56,6 +62,8 @@
             {{ $items->links() }}
         </x-slot>
     </x-table>
-    {{-- <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self> --}}
-    {{-- </x-modal.dialog> --}}
+
+    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
+        @include('livewire.employee.employee-form')
+    </x-modal.dialog>
 </div>
