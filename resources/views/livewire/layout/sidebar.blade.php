@@ -10,12 +10,12 @@
                 <x-layouts.app.sidebar.dropdown-nav-list
                     id="basic-project"
                     :title="__('general.project-basics')"
-                    :active="request()->routeIs('dashboard') ||
-                              request()->routeIs('cities.*') ||
+                    :active="
+                             request()->routeIs('cities.*') ||
                               request()->routeIs('contract-types.*') ||
                               request()->routeIs('leave-types.*') ||
                               request()->routeIs('checklist-items.*') ||
-                                           request()->routeIs('departments.*') ||
+                              request()->routeIs('departments.*') ||
                               request()->routeIs('job-levels.*')">
 
                     <x-slot name="icon">
@@ -62,7 +62,7 @@
                     </x-slot>
 
                 </x-layouts.app.sidebar.dropdown-nav-list>
-                <x-layouts.app.sidebar.single-item :href="route('projects.index')">
+                <x-layouts.app.sidebar.single-item :href="route('projects.index')" :active="request()->routeIs('projects.index')">
                     <x-slot name="icon">
                         <x-icons.layers/>
                     </x-slot>

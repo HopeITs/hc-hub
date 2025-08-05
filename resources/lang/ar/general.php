@@ -11,6 +11,7 @@ return [
     'department' => 'الأقسام|قسم',
     'job-level' => 'المستويات الوظيفية|مستوى وظيفي',
     'projects-management' => 'إدارة المشاريع',
+    'project' => 'المشاريع|مشروع',
     'my-profile' => 'الصفحة الشخصية',
     'my-account' => 'حسابي الشخصي',
     'dashboard' => 'لوحة التحكم',
