@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
 
-class Project extends Model
+class Project extends Model implements HasMedia
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations,InteractsWithMedia;
 
     protected $fillable = [
         'id',
@@ -25,9 +27,14 @@ class Project extends Model
         return $this->hasMany(Center::class);
     }
 
-    public function requiredPosition()
+    public function requiredPositions()
     {
         return $this->hasMany(RequiredPosition::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('logo')->singleFile();
     }
 
 }

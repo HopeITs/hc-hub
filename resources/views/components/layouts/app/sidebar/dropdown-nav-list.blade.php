@@ -12,7 +12,7 @@
 <li >
     <button
         type="button"
-        class="flex items-center w-full p-2 text-base text-secondary-dark transition duration-75 rounded-lg group hover:bg-gray-100 {{$isActive ? ' bg-gray-100' : ''}}"
+        class="flex items-center w-full p-2 text-base text-secondary-dark transition duration-75 rounded-lg group hover:bg-gray-100 {{$active ? ' bg-gray-100' : ''}}"
         aria-controls="{{$id}}"
         data-collapse-toggle="{{$id}}"
         aria-expanded="{{$ariaExpanded}}"
