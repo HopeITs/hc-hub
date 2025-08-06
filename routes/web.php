@@ -41,8 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('projects', ProjectModule::class)->name('projects.index');
     Route::get('employees', EmployeeModule::class)->name('employees.index');
     Route::get('employees/form', EmployeeForm::class)->name('employees.form');
-    Route::get('employees/edit/{employee}', EmployeeEditForm::class)->name('employees.edit');
-
+    Route::get('/employees/edit/{employee}', EmployeeEditForm::class)->name('employees.edit');
 });
 
 require __DIR__.'/auth.php';

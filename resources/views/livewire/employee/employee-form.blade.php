@@ -2,7 +2,7 @@
     use App\Enums\MaritalStatus;
 @endphp
 <div>
-    <form class="space-y-4" wire:submit.prevent="save">
+    <form wire:submit.prevent="save" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <x-forms.input-label for="name">@lang('general.name')</x-forms.input-label>
@@ -167,7 +167,6 @@
 
             <div class="flex justify-end space-x-2">
                 <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-                <x-modal.cancel-btn />
             </div>
         </form>
 </div>

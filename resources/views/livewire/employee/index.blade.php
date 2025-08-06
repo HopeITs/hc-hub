@@ -6,7 +6,6 @@
     <div class="flex justify-between">
         <livewire:layout.breadcrumbs :title="trans_choice('general.employee', 2)" :crumbs="[['label' => __('general.project-basics')], ['label' => trans_choice('general.employee', 2)]]" :showButton="true" />
         <div>
-            {{-- Add New employee (Create) --}}
             <x-primary-link href="{{ route('employees.form') }}">@lang('general.add_new')</x-primary-link>
         </div>
     </div>
