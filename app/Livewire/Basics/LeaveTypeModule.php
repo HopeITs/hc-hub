@@ -8,12 +8,15 @@ use App\Enums\MaritalStatus;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
-use App\Traits\FilterableTable;
+
 
 class LeaveTypeModule extends Component
 {
-    use WithPagination,FilterableTable;
+    use WithPagination;
 
+
+    public $sortField = 'id';
+    public $sortDirection = 'asc';
 
     // Modal
     public $showModal = false;
@@ -34,27 +37,20 @@ class LeaveTypeModule extends Component
         'item.marital_status' => 'integer',
     ];
 
-
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+    }
 
     public function render()
     {
-        $query = LeaveType::query();
-
-        if ($this->search) {
-            $query->search([
-                'name->en',
-                'name->ar',
-            ], $this->search);
-        }
-
-        // Custom sort for translated name
-        if ($this->sortField === 'name') {
-            $query->orderBy('name->' . app()->getLocale(), $this->sortDirection);
-        } else {
-            $query->orderBy($this->sortField, $this->sortDirection);
-        }
-
-        $items = $query->paginate(15);
+        $items = LeaveType::orderBy($this->sortField, $this->sortDirection)
+            ->paginate(15);
 
         return view('livewire.basics.leave-type-module', compact('items'));
     }

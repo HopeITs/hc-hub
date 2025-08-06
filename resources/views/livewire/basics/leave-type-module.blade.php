@@ -20,29 +20,45 @@
 
     <x-table>
         <x-slot name="headings">
-            <x-table.heading wire:click="sortBy('id')" :sortable="true" :direction="$sortField === 'id' ? $sortDirection : null">
+            <x-table.heading
+                wire:click="sortBy('id')"
+                sortable
+                :direction="$sortField === 'id' ? $sortDirection : null">
                 ID
             </x-table.heading>
 
-            <x-table.heading wire:click="sortBy('name')" :sortable="true" :direction="$sortField === 'name' ? $sortDirection : null">
+            <x-table.heading
+                wire:click="sortBy('name')"
+                sortable
+                :direction="$sortField === 'name' ? $sortDirection : null">
                 @lang('general.name')
             </x-table.heading>
 
-            <x-table.heading wire:click="sortBy('base_days')" :sortable="true" :direction="$sortField === 'base_days' ? $sortDirection : null">
+            <x-table.heading
+                wire:click="sortBy('base_days')"
+                sortable
+                :direction="$sortField === 'base_days' ? $sortDirection : null">
                 @lang('general.base_days')
             </x-table.heading>
 
-            <x-table.heading wire:click="sortBy('allowed_gender')" :sortable="true" :direction="$sortField === 'allowed_gender' ? $sortDirection : null">
+            <x-table.heading
+                wire:click="sortBy('allowed_gender')"
+                sortable
+                :direction="$sortField === 'allowed_gender' ? $sortDirection : null">
                 @lang('general.allowed_gender')
             </x-table.heading>
 
-            <x-table.heading wire:click="sortBy('marital_status')" :sortable="true" :direction="$sortField === 'marital_status' ? $sortDirection : null">
+            <x-table.heading
+                wire:click="sortBy('marital_status')"
+                sortable
+                :direction="$sortField === 'marital_status' ? $sortDirection : null">
                 @lang('general.marital_status')
             </x-table.heading>
 
-
-            <x-table.heading/>
+            <x-table.heading />
         </x-slot>
+
+
         <x-slot name="body">
             @forelse($items as $item)
                 @php
@@ -68,10 +84,12 @@
                 <x-table.no-data/>
             @endforelse
         </x-slot>
+
         <x-slot name="pagination">
             {{ $items->links() }}
         </x-slot>
     </x-table>
+
 
     {{-- Modal --}}
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
