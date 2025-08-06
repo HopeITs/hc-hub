@@ -14,6 +14,7 @@ class JobLevelModule extends Component
 
     public $showModal = false;
     public $modalTitle = 'Modal title';
+    public $search = '';
 
     public $item = [
         'id' => null,
@@ -124,7 +125,7 @@ class JobLevelModule extends Component
 
     public function render()
     {
-        $items = JobLevel::paginate(10);
+        $items = JobLevel::search(['name','description','email'],$this->search)->paginate(10);
         return view('livewire.basics.job-level', [
             'items' => $items,
         ]);

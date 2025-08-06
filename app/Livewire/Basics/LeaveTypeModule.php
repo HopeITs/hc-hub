@@ -17,7 +17,7 @@ class LeaveTypeModule extends Component
 
     public $sortField = 'id';
     public $sortDirection = 'asc';
-
+    public $search = '';
     // Modal
     public $showModal = false;
     public $modalTitle = 'Modal title';
@@ -49,7 +49,8 @@ class LeaveTypeModule extends Component
 
     public function render()
     {
-        $items = LeaveType::orderBy($this->sortField, $this->sortDirection)
+        $items = LeaveType::search(['name'], $this->search)->
+        orderBy($this->sortField, $this->sortDirection)
             ->paginate(15);
 
         return view('livewire.basics.leave-type-module', compact('items'));

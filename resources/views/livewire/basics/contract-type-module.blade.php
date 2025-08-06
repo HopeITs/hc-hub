@@ -36,7 +36,7 @@
                 @php
                     $place = ContractPlace::getLocalizedName($item->place);
                 @endphp
-                <tr>
+                <x-table.row>
                     <x-table.cell>{{$item->id}}</x-table.cell>
 
                     <x-table.cell>{{$item->type}}</x-table.cell>
@@ -49,7 +49,7 @@
                         <x-table.edit-btn wire:click="edit({{$item->id}})"></x-table.edit-btn>
                         <x-table.delete-btn :modelId="$item->id"/>
                     </x-table.cell>
-                </tr>
+                </x-table.row>
             @empty
                 <x-table.no-data/>
             @endforelse

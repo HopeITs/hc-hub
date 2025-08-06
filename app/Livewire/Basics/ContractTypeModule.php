@@ -15,7 +15,7 @@ class ContractTypeModule extends Component
     public $showModal = false;
     public $modalTitle = 'Modal title';
 
-
+    public $search = '';
     public $item = [
         'type' => [],
         'place' => null,
@@ -32,7 +32,6 @@ class ContractTypeModule extends Component
             'item.weekly_hours' => 'required|integer',
         ];
     }
-
 
 
     public function create()
@@ -76,7 +75,7 @@ class ContractTypeModule extends Component
 
         $this->validate();
 
-        if (array_key_exists('id',$this->item)) {
+        if (array_key_exists('id', $this->item)) {
             ContractType::findOrFail($this->item['id'])->update([
                 'type' => $this->item['type'],
                 'place' => $this->item['place'],
@@ -99,6 +98,7 @@ class ContractTypeModule extends Component
             ->position('top-start')
             ->show();
     }
+
     public function delete($id)
     {
 
@@ -113,11 +113,12 @@ class ContractTypeModule extends Component
     }
 
 
-
     public function render()
     {
+//        for search
+        sleep(1);
 
-        $items = ContractType::paginate(15);
+        $items = ContractType::search('type', $this->search)->paginate(15);
 
         return view('livewire.basics.contract-type-module', [
             'items' => $items,

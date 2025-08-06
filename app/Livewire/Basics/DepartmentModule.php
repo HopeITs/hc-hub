@@ -14,6 +14,7 @@ class DepartmentModule extends Component
 
     public $showModal = false;
     public $modalTitle = '';
+    public $search = '';
     public $item = [
         'name' => [],
         'description' => [],
@@ -28,7 +29,7 @@ class DepartmentModule extends Component
 
     public function render()
     {
-        $departments = Department::paginate(15);
+        $departments = Department::search(['name' , 'description','email'],$this->search)->paginate(15);
 
         return view('livewire.basics.department-module', compact('departments'));
     }

@@ -14,7 +14,7 @@ class ChecklistItemModule extends Component
 
     public $showModal = false;
     public $modalTitle = 'Modal title';
-
+    public $search = '';
 
     public $item = [
         'name' => null,
@@ -66,7 +66,7 @@ class ChecklistItemModule extends Component
     {
         $this->validate();
 
-        if (array_key_exists('id',$this->item)) {
+        if (array_key_exists('id', $this->item)) {
             ChecklistItem::findOrFail($this->item['id'])->update([
                 'name' => $this->item['name'],
                 'order' => $this->item['order'],
@@ -88,6 +88,7 @@ class ChecklistItemModule extends Component
             ->position('top-start')
             ->show();
     }
+
     public function delete($id)
     {
 
@@ -102,11 +103,10 @@ class ChecklistItemModule extends Component
     }
 
 
-
     public function render()
     {
 
-        $items = ChecklistItem::paginate(15);
+        $items = ChecklistItem::search('name' , $this->search)->paginate(15);
 
         return view('livewire.basics.checklist-item-module', [
             'items' => $items,
