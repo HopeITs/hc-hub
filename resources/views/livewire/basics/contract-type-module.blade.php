@@ -60,9 +60,7 @@
     </x-table>
 
 
-{{--    Edit Modal--}}
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
-
 
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-2 space-x-2 space-y-4">
@@ -87,7 +85,9 @@
                                        wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Onsite)['value']}}</x-forms.radio-input>
                         <x-forms.radio-input id="online" name="place" value="{{ContractPlace::Online}}"
                                        wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Online)['value']}}</x-forms.radio-input>
+
                     </div>
+                    <x-error-span>{{$errors->first('item.place')}}</x-error-span>
                 </div>
 
 
@@ -99,9 +99,5 @@
             </div>
         </form>
     </x-modal.dialog>
-
-
-{{--    Create Modal --}}
-
 
 </div>

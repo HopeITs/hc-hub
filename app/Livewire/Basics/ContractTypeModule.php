@@ -22,11 +22,18 @@ class ContractTypeModule extends Component
         'weekly_hours' => null,
     ];
 
-    protected $rules = [
-        'item.type.*' => 'required',
-        'item.place' => 'required|integer',
-        'item.weekly_hours' => 'required|integer',
-    ];
+    protected function rules()
+    {
+        return [
+
+            'item.type.ar' => 'required|string',
+            'item.type.en' => 'required|string',
+            'item.place' => 'required|integer',
+            'item.weekly_hours' => 'required|integer',
+        ];
+    }
+
+
 
     public function create()
     {
@@ -66,6 +73,7 @@ class ContractTypeModule extends Component
 
     public function save()
     {
+
         $this->validate();
 
         if (array_key_exists('id',$this->item)) {
