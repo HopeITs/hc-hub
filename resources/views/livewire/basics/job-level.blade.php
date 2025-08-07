@@ -18,9 +18,14 @@
     <x-table>
         <x-slot name="headings">
             <x-table.heading>ID</x-table.heading>
-            <x-table.heading sortable>@lang('general.name')</x-table.heading>
+            <x-table.heading>@lang('general.name')</x-table.heading>
             <x-table.heading>@lang('general.description')</x-table.heading>
-            <x-table.heading sortable>@lang('general.grade')</x-table.heading>
+            <x-table.heading
+                sortable
+                wire:click="sortBy('grade')"
+                :direction="$sortField === 'grade' ? $sortDirection : null">
+                @lang('general.grade')
+            </x-table.heading>
             <x-table.heading>@lang('general.email')</x-table.heading>
             <x-table.heading/>
         </x-slot>
