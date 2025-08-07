@@ -26,9 +26,19 @@
     <x-table>
         <x-slot name="headings">
             <x-table.heading>ID</x-table.heading>
-            <x-table.heading sortable> @lang('general.type')</x-table.heading>
+
+            <x-table.heading sortable field="type" wire:click="sortBy('type')">
+                @lang('general.type')
+                @if ($sortField === 'type') @if ($sortDirection === 'asc')  @endif @endif
+            </x-table.heading>
+
             <x-table.heading>@lang('general.place')</x-table.heading>
-            <x-table.heading sortable>@lang('general.weekly_hours')</x-table.heading>
+
+            <x-table.heading sortable field="weekly_hours" wire:click="sortBy('weekly_hours')">
+                @lang('general.weekly_hours')
+                @if ($sortField === 'weekly_hours') @if ($sortDirection === 'asc') @endif @endif
+            </x-table.heading>
+
             <x-table.heading/>
         </x-slot>
         <x-slot name="body">
