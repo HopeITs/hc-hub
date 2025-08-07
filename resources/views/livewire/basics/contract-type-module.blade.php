@@ -24,7 +24,8 @@
     <x-table>
         <x-slot name="headings">
             <x-table.heading>ID</x-table.heading>
-            <x-table.heading sortable> @lang('general.type')</x-table.heading>
+            <x-table.heading sortable> @lang('general.name')(AR)</x-table.heading>
+            <x-table.heading sortable> @lang('general.name')(EN)</x-table.heading>
             <x-table.heading>@lang('general.place')</x-table.heading>
             <x-table.heading sortable>@lang('general.weekly_hours')</x-table.heading>
             <x-table.heading/>
@@ -38,8 +39,8 @@
                 <x-table.row>
                     <x-table.cell>{{$item->id}}</x-table.cell>
 
-                    <x-table.cell>{{$item->name}}</x-table.cell>
-
+                    <x-table.cell>{{$item->getTranslation('name' , 'ar')}}</x-table.cell>
+                    <x-table.cell>{{$item->getTranslation('name' , 'en')}}</x-table.cell>
                     <x-table.cell>
                         <x-badge :color="$place['color']"> {{ $place['value'] }}</x-badge>
                     </x-table.cell>

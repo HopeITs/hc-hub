@@ -18,8 +18,8 @@
     <x-table>
         <x-slot name="headings">
             <x-table.heading>ID</x-table.heading>
-            <x-table.heading sortable>@lang('general.name')</x-table.heading>
-            <x-table.heading>@lang('general.description')</x-table.heading>
+            <x-table.heading sortable>@lang('general.name')(AR)</x-table.heading>
+            <x-table.heading sortable>@lang('general.name')(EN)</x-table.heading>
             <x-table.heading sortable>@lang('general.grade')</x-table.heading>
             <x-table.heading>@lang('general.email')</x-table.heading>
             <x-table.heading/>
@@ -28,8 +28,8 @@
             @forelse($items as $item)
                 <tr>
                     <x-table.cell>{{ $item->id }}</x-table.cell>
-                    <x-table.cell>{{ $item->getTranslation('name', app()->getLocale()) }}</x-table.cell>
-                    <x-table.cell>{{ $item->description }}</x-table.cell>
+                    <x-table.cell>{{ $item->getTranslation('name','ar') }}</x-table.cell>
+                    <x-table.cell>{{ $item->getTranslation('name','en') }}</x-table.cell>
                     <x-table.cell>{{ $item->grade }}</x-table.cell>
                     <x-table.cell>{{ $item->email }}</x-table.cell>
                     <x-table.cell>

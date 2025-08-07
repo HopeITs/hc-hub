@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Project;
 
+use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -15,12 +16,15 @@ class ProjectModule extends Component
     use WithPagination, WithFileUploads;
 
     public $showModal = false;
+    public $showDetailsModal = false;
     public $modalTitle = '';
 
     public $item = [
         'name' => '',
         'description' => '',
         'is_active' => true,
+        'start_date' => '',
+        'end_date' => null,
         'logo' => ''
 
     ];
@@ -29,11 +33,13 @@ class ProjectModule extends Component
     {
         return [
 
-                'item.name.*' => 'required',
-                'item.description.*' => 'nullable',
-                'item.is_active' => 'required|boolean:0,1',
-                'item.logo' => 'nullable|image|max:2048',
-            ];
+            'item.name.*' => 'required',
+            'item.description.*' => 'nullable',
+            'item.is_active' => 'required|boolean:0,1',
+            'item.logo' => 'nullable|image|max:2048',
+            'item.start_date' => 'required|date',
+            'item.end_date' => 'nullable|date|after:item.start_date',
+        ];
     }
 
     public $itemID;
@@ -66,6 +72,17 @@ class ProjectModule extends Component
             ->show();
     }
 
+
+    public function show($id)
+    {
+        $project = Project::findOrFail($id);
+        $this->item = $project->toArray();
+        $this->item['logo'] = null; // Reset logo
+
+        $this->modalTitle = $project->name;
+        $this->showDetailsModal = true;
+
+    }
 
     public function create()
     {
@@ -101,6 +118,7 @@ class ProjectModule extends Component
 
     public function save()
     {
+
 
         $this->validate();
 
@@ -150,7 +168,12 @@ class ProjectModule extends Component
 
     public function render()
     {
-        $items = Project::with('media')->withCount(['centers','cities' ])->orderBy('is_active', 'desc')->get();
+        $items = Project::with('media')->withCount([
+            'centers',
+            'cities as cities_count' => function ($query) {
+                $query->select(DB::raw('count(distinct city_id)'));
+            }
+        ])->orderBy('is_active', 'desc')->get();
 
         return view('livewire.project-module', compact('items'));
     }

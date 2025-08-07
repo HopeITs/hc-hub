@@ -13,11 +13,11 @@ class Project extends Model implements HasMedia
 {
     use HasFactory, HasTranslations,InteractsWithMedia;
 
-    protected $fillable = [
-        'id',
-        'name',
-        'description',
-        'is_active',
+    protected $guarded = ['id'];
+
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     public array $translatable = ['name', 'description'];
@@ -28,7 +28,7 @@ class Project extends Model implements HasMedia
     }
 
     public function cities(){
-        return $this->belongsToMany(City::class ,'centers');
+        return $this->belongsToMany(City::class ,'centers','project_id','city_id');
     }
 
     public function requiredPositions()
