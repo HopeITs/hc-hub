@@ -16,18 +16,24 @@ class ContractTypeModule extends Component
     public $showModal = false;
     public $modalTitle = 'Modal title';
 
-
+    public $search = '';
     public $item = [
         'type' => [],
         'place' => null,
         'weekly_hours' => null,
     ];
 
-    protected $rules = [
-        'item.type.*' => 'required',
-        'item.place' => 'required|integer',
-        'item.weekly_hours' => 'required|integer',
-    ];
+    protected function rules()
+    {
+        return [
+
+            'item.type.ar' => 'required|string',
+            'item.type.en' => 'required|string',
+            'item.place' => 'required|integer',
+            'item.weekly_hours' => 'required|integer',
+        ];
+    }
+
 
     public function create()
     {
@@ -67,9 +73,10 @@ class ContractTypeModule extends Component
 
     public function save()
     {
+
         $this->validate();
 
-        if (array_key_exists('id',$this->item)) {
+        if (array_key_exists('id', $this->item)) {
             ContractType::findOrFail($this->item['id'])->update([
                 'type' => $this->item['type'],
                 'place' => $this->item['place'],
@@ -92,6 +99,7 @@ class ContractTypeModule extends Component
             ->position('top-start')
             ->show();
     }
+
     public function delete($id)
     {
 
@@ -109,7 +117,10 @@ class ContractTypeModule extends Component
 
     public function render()
     {
-        $items = ContractType::orderBy($this->sortField, $this->sortDirection)
+        sleep(1); // Optional: for debounce effect during search
+
+        $items = ContractType::search('type', $this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(15);
 
         return view('livewire.basics.contract-type-module', [

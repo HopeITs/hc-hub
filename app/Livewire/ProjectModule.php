@@ -12,24 +12,29 @@ use Livewire\WithPagination;
 class ProjectModule extends Component
 {
 
-    use WithPagination,WithFileUploads;
+    use WithPagination, WithFileUploads;
+
     public $showModal = false;
     public $modalTitle = '';
 
     public $item = [
-        'name' => [],
-        'description' => [],
+        'name' => '',
+        'description' => '',
         'is_active' => true,
         'logo' => ''
 
     ];
 
-    protected $rules = [
-        'item.name.*' => 'required',
-        'item.description.*' => 'nullable',
-        'item.is_active' => 'required|boolean:0,1',
-        'item.logo' => 'nullable|image|max:2048',
-    ];
+    protected function rules()
+    {
+        return [
+
+                'item.name.*' => 'required',
+                'item.description.*' => 'nullable',
+                'item.is_active' => 'required|boolean:0,1',
+                'item.logo' => 'nullable|image|max:2048',
+            ];
+    }
 
     public $itemID;
 
@@ -96,29 +101,30 @@ class ProjectModule extends Component
 
     public function save()
     {
+
         $this->validate();
 
         if (array_key_exists('id', $this->item)) {
             $project = Project::findOrFail($this->item['id']);
             $project->update($this->item);
+            if ($this->item['logo'] !== null) {
+
+                // Remove existing logo
+                $project->clearMediaCollection('logo');
+
+                // Add new logo
+                $project->addMedia($this->item['logo']->getRealPath())
+                    ->usingFileName('project-logo.' . $this->item['logo']->getClientOriginalExtension())
+                    ->toMediaCollection('logo');
+            }
         } else {
             $project = Project::create($this->item);
-
-        }
-
-        if ($this->item['logo']) {
-            // Remove existing logo
-            $project->clearMediaCollection('logo');
-
-            // Add new logo
             $project->addMedia($this->item['logo']->getRealPath())
                 ->usingFileName('project-logo.' . $this->item['logo']->getClientOriginalExtension())
                 ->toMediaCollection('logo');
-        }else{
-            $project->addMedia($this->item['logo']->getRealPath())
-                ->usingFileName('project-logo.' . $this->item['logo']->getClientOriginalExtension())
-                ->toMediaCollection('logo');
+
         }
+
 
         $this->reset(['item', 'showModal']);
 
@@ -144,7 +150,8 @@ class ProjectModule extends Component
 
     public function render()
     {
-        $items = Project::with('media')->orderBy('is_active' , 'desc')->get();
-        return view('livewire.project-module' ,compact('items'));
+        $items = Project::with('media')->withCount(['centers','cities' ])->orderBy('is_active', 'desc')->get();
+
+        return view('livewire.project-module', compact('items'));
     }
 }

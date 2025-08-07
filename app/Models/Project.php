@@ -27,6 +27,10 @@ class Project extends Model implements HasMedia
         return $this->hasMany(Center::class);
     }
 
+    public function cities(){
+        return $this->belongsToMany(City::class ,'centers');
+    }
+
     public function requiredPositions()
     {
         return $this->hasMany(RequiredPosition::class);
@@ -36,5 +40,6 @@ class Project extends Model implements HasMedia
     {
         $this->addMediaCollection('logo')->singleFile();
     }
+
 
 }

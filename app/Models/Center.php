@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Center extends Model
 {
@@ -16,18 +17,24 @@ class Center extends Model
         'address' => 'array',
     ];
 
-    public function city()
+    public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
     }
 
-    public function project()
+    public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
     }
 
-    public function departments()
-    {
-        return $this->hasMany(Department::class);
+    public function positions(){
+        return $this->hasMany(Position::class);
     }
+
+    public function contracts()
+    {
+        return $this->hasManyThrough(Contract::class, Position::class);
+    }
+
+
 }

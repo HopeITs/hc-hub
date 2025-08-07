@@ -46,7 +46,7 @@
                 @php
                     $place = ContractPlace::getLocalizedName($item->place);
                 @endphp
-                <tr>
+                <x-table.row>
                     <x-table.cell>{{$item->id}}</x-table.cell>
 
                     <x-table.cell>{{$item->type}}</x-table.cell>
@@ -59,7 +59,7 @@
                         <x-table.edit-btn wire:click="edit({{$item->id}})"></x-table.edit-btn>
                         <x-table.delete-btn :modelId="$item->id"/>
                     </x-table.cell>
-                </tr>
+                </x-table.row>
             @empty
                 <x-table.no-data/>
             @endforelse
@@ -70,9 +70,7 @@
     </x-table>
 
 
-{{--    Edit Modal--}}
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
-
 
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-2 space-x-2 space-y-4">
@@ -97,7 +95,9 @@
                                        wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Onsite)['value']}}</x-forms.radio-input>
                         <x-forms.radio-input id="online" name="place" value="{{ContractPlace::Online}}"
                                        wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Online)['value']}}</x-forms.radio-input>
+
                     </div>
+                    <x-error-span>{{$errors->first('item.place')}}</x-error-span>
                 </div>
 
 
@@ -109,9 +109,5 @@
             </div>
         </form>
     </x-modal.dialog>
-
-
-{{--    Create Modal --}}
-
 
 </div>

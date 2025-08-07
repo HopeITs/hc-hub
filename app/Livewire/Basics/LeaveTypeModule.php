@@ -13,7 +13,7 @@ use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 class LeaveTypeModule extends Component
 {
     use WithPagination, SortableTable;
-
+    public $search = '';
     // Modal
     public $showModal = false;
     public $modalTitle = 'Modal title';
@@ -35,7 +35,8 @@ class LeaveTypeModule extends Component
 
     public function render()
     {
-        $items = LeaveType::orderBy($this->sortField, $this->sortDirection)
+        $items = LeaveType::search(['name'], $this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(15);
 
         return view('livewire.basics.leave-type-module', compact('items'));
