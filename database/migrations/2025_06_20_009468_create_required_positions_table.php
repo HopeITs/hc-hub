@@ -13,7 +13,6 @@ return new class extends Migration
             $table->foreignId('project_id')->constrained()->onDelete('restrict');
             $table->string('title');
             $table->text('qualifications');
-            $table->text('responsibilities');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -52,13 +52,14 @@ return [
     'single' => 'أعزب',
     'married' => 'متزوج',
     'select' => 'اختر',
-
+    'required-positions' => 'الوظائف المطلوبة',
     'department-name' => 'اسم القسم',
     'department-description' => 'وصف القسم',
     'department-email' => 'عنوان البريد الإلكتروني',
-
-
-
+    'job-title' => ' المسمى الوظيفي ',
+    'required-project' => 'المشروع',
+    'is-active' => 'التفعيل',
+    'qualifications' => 'المؤهلات الوظيفية',
 
     'profile'=> [
         'settings' => 'إعدادات الحساب',

@@ -23,7 +23,7 @@
                     <x-table.cell>{{$item->slug}}</x-table.cell>
                     <x-table.cell-status :active="$item->is_active"
                                          :model-id="$item->id"
-                                         wire-event="confirmToggleCityStatus"/>
+                                         wire-event="confirmToggleItemStatus"/>
                 </tr>
             @empty
                 <x-table.no-data/>

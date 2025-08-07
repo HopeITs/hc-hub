@@ -320,5 +320,20 @@ return [
     ['name' => ['en' => 'Team', 'ar' => 'الفريق'], 'description' => null, 'grade' => 5, 'email' => 'team@hcsyria.org'],
     ['name' => ['en' => 'Service Agreement', 'ar' => 'اتفاقية الخدمة'], 'description' => null, 'grade' => 6, 'email' => null],
     ['name' => ['en' => 'Keepers', 'ar' => 'المستخدمون'], 'description' => null, 'grade' => 7, 'email' => null],
-],
+            ],
+
+    'requiredPositions' => [
+        [
+            'project_id' => 1,
+            'title' => 'Software Developer',
+            'qualifications' => 'Bachelor in Computer Science or related field.',
+            'is_active' => true,
+        ],
+        [
+            'project_id' => 2,
+            'title' => 'HR Manager',
+            'qualifications' => 'Degree in HR Management with 3+ years experience.',
+            'is_active' => true,
+        ],
+    ],
 ];
