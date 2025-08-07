@@ -78,6 +78,9 @@ return [
     'department-email' => 'عنوان البريد الإلكتروني',
     'employee' => 'الموظف',
     'photo' => 'الصورة',
+    'unknown' => 'غير معروف',
+    'is_board_member' => 'عضو مجلس إدارة',
+    'employee_management' => 'إدارة الموظفين',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',

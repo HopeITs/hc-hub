@@ -15,8 +15,9 @@
                               request()->routeIs('contract-types.*') ||
                               request()->routeIs('leave-types.*') ||
                               request()->routeIs('checklist-items.*') ||
-                                           request()->routeIs('departments.*') ||
-                              request()->routeIs('job-levels.*')">
+                              request()->routeIs('departments.*') ||
+                              request()->routeIs('job-levels.*') ||
+                              request()->routeIs('employees.index')">
 
                     <x-slot name="icon">
                         <x-icons.home/>
@@ -62,21 +63,37 @@
                     </x-slot>
 
                 </x-layouts.app.sidebar.dropdown-nav-list>
-                <x-layouts.app.sidebar.single-item :href="route('projects.index')">
+
+                <x-layouts.app.sidebar.single-item :href="route('projects.index')" :active="request()->routeIs('projects.*')">
                     <x-slot name="icon">
                         <x-icons.layers/>
                     </x-slot>
-                    @lang('general.projects-management')</x-layouts.app.sidebar.single-item>
+                    @lang('general.projects-management')
+                </x-layouts.app.sidebar.single-item>
+
+                <x-layouts.app.sidebar.dropdown-nav-list
+                    id="employees-management"
+                    :title="trans_choice('general.employee_management', 2)"
+                    :active="request()->routeIs('employees.*')">
+
+                    <x-slot name="icon">
+                        <x-icons.users/>
+                    </x-slot>
+                    <x-slot name="list">
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('employees.index')"
+                            :active="request()->routeIs('employees.*')">
+                            {{ trans_choice('general.employee', 2) }}
+                        </x-layouts.app.sidebar.nav-item>
+                    </x-slot>
+
+                </x-layouts.app.sidebar.dropdown-nav-list>
+
             </ul>
         </div>
 
         <div>
             <x-layouts.app.sidebar.profile-card :user="$user"/>
         </div>
-
-
     </div>
-
-
 </aside>
-

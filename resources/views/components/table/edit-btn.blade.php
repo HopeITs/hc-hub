@@ -1,6 +1,4 @@
-@props(['href'])
-
-<a href="{{ $href }}" {{
+<a {{
     $attributes->merge([
         'class' => 'cursor-pointer p-2 inline-flex items-center'
     ])
