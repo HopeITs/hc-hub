@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->json('name');
             $table->json('description')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -17,19 +17,19 @@ class ContractTypeModule extends Component
 
     public $search = '';
     public $item = [
-        'type' => [],
+        'name' => [],
         'place' => null,
-        'weekly_hours' => null,
+        'type' => null,
     ];
 
     protected function rules()
     {
         return [
 
-            'item.type.ar' => 'required|string',
-            'item.type.en' => 'required|string',
+            'item.name.ar' => 'required|string',
+            'item.name.en' => 'required|string',
             'item.place' => 'required|integer',
-            'item.weekly_hours' => 'required|integer',
+            'item.type' => 'required|integer',
         ];
     }
 
@@ -47,9 +47,9 @@ class ContractTypeModule extends Component
         $this->modalTitle = __('general.edit');
         $this->item = [
             'id' => $model->id,
-            'type' => $model->getTranslations('type'),
+            'name' => $model->getTranslations('name'),
             'place' => $model->place,
-            'weekly_hours' => $model->weekly_hours,
+            'type' => $model->type,
         ];
 
 
@@ -79,12 +79,12 @@ class ContractTypeModule extends Component
             ContractType::findOrFail($this->item['id'])->update([
                 'type' => $this->item['type'],
                 'place' => $this->item['place'],
-                'weekly_hours' => $this->item['weekly_hours'],
+                'name' => $this->item['name'],
             ]);
         } else {
             ContractType::create([
                 'type' => $this->item['type'],
-                'weekly_hours' => $this->item['weekly_hours'],
+                'name' => $this->item['name'],
                 'place' => $this->item['place'],
             ]);
 

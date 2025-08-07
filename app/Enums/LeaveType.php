@@ -17,7 +17,7 @@ class LeaveType
         $val =  match ($status) {
             self::GENDER_MALE => ['text' => ['en' => 'Male', 'ar' => 'ذكر'] , 'color' => 'blue'],
             self::GENDER_FEMALE => ['text' => ['en' => 'Female', 'ar' => 'انثى'] , 'color' => 'pink'],
-            default =>['text' =>  ['en' => 'All', 'ar' => 'الكل '],'color' => 'green'],
+            default =>['text' =>  ['en' => 'All', 'ar' => 'الكل '],'color' => 'gray'],
         };
         $result = [
             'value' => $val['text'][app()->getLocale()],
