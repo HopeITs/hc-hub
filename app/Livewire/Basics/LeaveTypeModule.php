@@ -7,16 +7,12 @@ use App\Enums\Gender;
 use App\Enums\MaritalStatus;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Traits\SortableTable;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
-
 
 class LeaveTypeModule extends Component
 {
-    use WithPagination;
-
-
-    public $sortField = 'id';
-    public $sortDirection = 'asc';
+    use WithPagination, SortableTable;
     public $search = '';
     // Modal
     public $showModal = false;
@@ -37,20 +33,10 @@ class LeaveTypeModule extends Component
         'item.marital_status' => 'integer',
     ];
 
-    public function sortBy($field)
-    {
-        if ($this->sortField === $field) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortField = $field;
-            $this->sortDirection = 'asc';
-        }
-    }
-
     public function render()
     {
-        $items = LeaveType::search(['name'], $this->search)->
-        orderBy($this->sortField, $this->sortDirection)
+        $items = LeaveType::search(['name'], $this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(15);
 
         return view('livewire.basics.leave-type-module', compact('items'));

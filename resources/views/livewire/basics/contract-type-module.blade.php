@@ -21,11 +21,20 @@
     </div>
 
 
+
+
     <x-table>
         <x-slot name="headings">
             <x-table.heading>ID</x-table.heading>
-            <x-table.heading sortable> @lang('general.name')(AR)</x-table.heading>
-            <x-table.heading sortable> @lang('general.name')(EN)</x-table.heading>
+
+            <x-table.heading sortable field="type" wire:click="sortBy('name')">
+                @lang('general.name')(AR)
+                @if ($sortField === 'name') @if ($sortDirection === 'asc')  @endif @endif
+            </x-table.heading>
+            <x-table.heading sortable field="type" wire:click="sortBy('name')">
+                @lang('general.name')(EN)
+                @if ($sortField === 'name') @if ($sortDirection === 'asc')  @endif @endif
+            </x-table.heading>
             <x-table.heading>@lang('general.place')</x-table.heading>
             <x-table.heading sortable>@lang('general.weekly_hours')</x-table.heading>
             <x-table.heading/>
@@ -34,7 +43,6 @@
             @forelse($items as $item)
                 @php
                     $place = ContractPlace::getLocalizedName($item->place);
-                       $type = ContractType::getLocalizedName($item->type);
                 @endphp
                 <x-table.row>
                     <x-table.cell>{{$item->id}}</x-table.cell>

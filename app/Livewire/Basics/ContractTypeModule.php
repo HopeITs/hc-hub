@@ -7,10 +7,11 @@ use App\Models\ContractType;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Traits\SortableTable;
 
 class ContractTypeModule extends Component
 {
-    use WithPagination;
+    use WithPagination, SortableTable;
 
     public $showModal = false;
     public $modalTitle = 'Modal title';
@@ -113,16 +114,17 @@ class ContractTypeModule extends Component
     }
 
 
+
     public function render()
     {
-//        for search
-        sleep(1);
+        sleep(1); // Optional: for debounce effect during search
 
-        $items = ContractType::search('type', $this->search)->paginate(15);
+        $items = ContractType::search('type', $this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate(15);
 
         return view('livewire.basics.contract-type-module', [
             'items' => $items,
         ]);
-
     }
 }

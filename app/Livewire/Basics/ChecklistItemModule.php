@@ -3,6 +3,7 @@
 namespace App\Livewire\Basics;
 
 use App\Models\ChecklistItem;
+use App\Traits\SortableTable;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -10,7 +11,7 @@ use Livewire\WithPagination;
 class ChecklistItemModule extends Component
 {
 
-    use WithPagination;
+    use WithPagination, SortableTable;
 
     public $showModal = false;
     public $modalTitle = 'Modal title';
@@ -103,10 +104,13 @@ class ChecklistItemModule extends Component
     }
 
 
+
     public function render()
     {
 
-        $items = ChecklistItem::search('name' , $this->search)->paginate(15);
+        $items = ChecklistItem::search('name', $this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate(15);
 
         return view('livewire.basics.checklist-item-module', [
             'items' => $items,
