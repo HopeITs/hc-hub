@@ -10,8 +10,6 @@ use Livewire\Form;
 class EmployeeForm extends Form
 {
     public ?Employee $employee = null;
-
-    // Properties for the form fields
     public array $name = [];
     public array $father_name = [];
     public array $mother_name = [];
@@ -41,9 +39,6 @@ class EmployeeForm extends Form
     public ?string $board_member_started_at = null;
     public ?string $board_member_end_at = null;
 
-    /**
-     * The validation rules for the form.
-     */
     public function rules(): array
     {
         return [
@@ -78,17 +73,10 @@ class EmployeeForm extends Form
         ];
     }
 
-    /**
-     * Set the employee model and fill the form for editing.
-     */
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
-
-        // Fill properties from the model
         $this->fill($employee->toArray());
-
-        // Manually fill translatable and special fields
         $this->name = $employee->getTranslations('name');
         $this->father_name = $employee->getTranslations('father_name');
         $this->mother_name = $employee->getTranslations('mother_name');
@@ -96,18 +84,12 @@ class EmployeeForm extends Form
         $this->is_board_member = (bool) $employee->is_board_member;
     }
 
-    /**
-     * Create a new employee.
-     */
     public function store(): void
     {
         $validated = $this->validate();
         Employee::create($validated);
     }
 
-    /**
-     * Update the existing employee.
-     */
     public function update(): void
     {
         $validated = $this->validate();
