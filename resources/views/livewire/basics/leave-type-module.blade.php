@@ -27,10 +27,7 @@
                 ID
             </x-table.heading>
 
-            <x-table.heading
-                wire:click="sortBy('name')"
-                sortable
-                :direction="$sortField === 'name' ? $sortDirection : null">
+            <x-table.heading>
                 @lang('general.name')
             </x-table.heading>
 
