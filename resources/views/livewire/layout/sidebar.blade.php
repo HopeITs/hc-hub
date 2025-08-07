@@ -16,8 +16,7 @@
                               request()->routeIs('leave-types.*') ||
                               request()->routeIs('checklist-items.*') ||
                               request()->routeIs('departments.*') ||
-                              request()->routeIs('job-levels.*') ||
-                              request()->routeIs('employees.index')">
+                              request()->routeIs('job-levels.*')">
 
                     <x-slot name="icon">
                         <x-icons.home/>
