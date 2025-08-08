@@ -58,6 +58,13 @@ return [
     'is-active' => 'التفعيل',
     'qualifications' => 'المؤهلات الوظيفية',
 
+
+    'centers'              => 'المركز',
+    'center-name'          => 'اسم المركز',
+    'center-city'        => 'المدينة',
+    'address'              => 'عنوان المركز',
+    'search'               => 'بحث',
+
     'profile'=> [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',

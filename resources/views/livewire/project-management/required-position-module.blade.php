@@ -50,7 +50,6 @@
     </x-table>
 
     {{-- Modal --}}
-    {{-- Modal --}}
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         <form wire:submit.prevent="save" class="space-y-4">
             <div class="grid grid-cols-2 space-x-2 space-y-4">

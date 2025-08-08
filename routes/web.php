@@ -5,6 +5,7 @@ use App\Livewire\Basics\CityModule ;
 use App\Livewire\Basics\ContractTypeModule ;
 use App\Livewire\Basics\LeaveTypeModule;
 use App\Livewire\Basics\DepartmentModule;
+use App\Livewire\ProjectManagement\CentersModule;
 use App\Livewire\ProjectManagement\RequiredPositionModule;
 use App\Livewire\ProjectModule;
 use App\Livewire\Settings\Appearance;
@@ -37,6 +38,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('departments', DepartmentModule::class)->name('departments.index');
     Route::get('projects', ProjectModule::class)->name('projects.index');
     Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
+    Route::get('/centers', CentersModule::class)->name('centers.index');
 });
 
 require __DIR__.'/auth.php';
