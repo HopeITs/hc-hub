@@ -6,12 +6,13 @@ use App\Models\City;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Traits\SortableTable;
 
 class CityModule extends Component
 {
-    use WithPagination;
+    use WithPagination, SortableTable;
 
-
+    public $search = '';
     public $itemID;
 
     public function confirmToggleItemStatus($id)
@@ -44,10 +45,39 @@ class CityModule extends Component
 
     public function render()
     {
-        $cities = City::paginate(15);
+        $table  = (new City())->getTable();         // e.g. hchr_cities
+        $locale = app()->getLocale();
+        $sort   = $this->sortField ?: 'id';
+        $dir    = $this->sortDirection ?: 'asc';
 
-        return view('livewire.basics.city-module', [
-            'cities' => $cities,
-        ]);
+        $query = City::query()
+            ->when($this->search, function ($q) use ($locale) {
+                $term = $this->search;
+                $q->where(function ($w) use ($term, $locale) {
+                    // search() is your app macro used elsewhere
+                    $w->search(["name->$locale", 'code', 'slug'], $term);
+                });
+            });
+
+        // Sorting (match your other modules)
+        switch ($sort) {
+            case 'name_ar':
+                $query->orderBy("name->ar", $dir);
+                break;
+            case 'name_en':
+                $query->orderBy("name->en", $dir);
+                break;
+            case 'code':
+            case 'slug':
+            case 'is_active':
+                $query->orderBy($sort, $dir);
+                break;
+            default: // id
+                $query->orderBy('id', $dir);
+        }
+
+        $cities = $query->paginate(15);
+
+        return view('livewire.basics.city-module', compact('cities'));
     }
 }

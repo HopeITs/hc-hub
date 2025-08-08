@@ -60,10 +60,41 @@ class RequiredPositionModule extends Component
 
     public function render()
     {
-        $items = RequiredPosition::with('project')
-            ->search(['title'], $this->search)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(15);
+        $locale = app()->getLocale();
+        $sort   = $this->sortField ?: 'id';
+        $dir    = $this->sortDirection ?: 'desc';
+
+        $query = RequiredPosition::query()
+            ->with('project')
+            ->when($this->search, function ($q) use ($locale) {
+                $term = $this->search;
+
+                $q->where(function ($w) use ($term, $locale) {
+                    // Own columns
+                    $w->search(['title', 'qualifications'], $term)
+
+                        // Project name (translatable JSON)
+                        ->orWhereHas('project', function ($p) use ($term, $locale) {
+                            $p->search(["name->$locale"], $term);
+                        });
+                });
+            });
+
+        // Sorting (supports: id, title, is_active, project_name)
+        if ($sort === 'title') {
+            $query->orderBy('title', $dir);
+        } elseif ($sort === 'project_name') {
+            $query->leftJoin('projects', 'required_positions.project_id', '=', 'projects.id')
+                ->orderBy("projects.name->$locale", $dir)
+                ->select('required_positions.*');
+        } elseif ($sort === 'is_active') {
+            $query->orderBy('is_active', $dir);
+        } else {
+            // id or any other simple column
+            $query->orderBy($sort, $dir);
+        }
+
+        $items = $query->paginate(15);
 
         return view('livewire.project-management.required-position-module', compact('items'));
     }

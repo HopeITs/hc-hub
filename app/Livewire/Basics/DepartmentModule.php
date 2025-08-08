@@ -30,9 +30,30 @@ class DepartmentModule extends Component
 
     public function render()
     {
-        $departments = Department::search(['name', 'description', 'email'], $this->search)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(15);
+        $locale = app()->getLocale();
+        $sort   = $this->sortField ?: 'id';
+        $dir    = $this->sortDirection ?: 'asc';
+
+        $query = \App\Models\Department::query()
+            ->when($this->search, function ($q) {
+                $term = $this->search;
+
+                // Search only in name column
+                $q->search(['name'], $term);
+            });
+
+        // Sorting
+        if ($sort === 'name') {
+            $query->orderBy('name', $dir);
+        } elseif ($sort === 'description') {
+            $query->orderBy('description', $dir);
+        } elseif ($sort === 'email') {
+            $query->orderByRaw("COALESCE(email, '-') {$dir}");
+        } else {
+            $query->orderBy($sort, $dir);
+        }
+
+        $departments = $query->paginate(15);
 
         return view('livewire.basics.department-module', compact('departments'));
     }
