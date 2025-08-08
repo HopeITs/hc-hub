@@ -86,13 +86,14 @@ return [
     'is-active' => 'التفعيل',
     'qualifications' => 'المؤهلات الوظيفية',
 
-    'profile'=> [
-    'employee' => 'الموظف',
-    'photo' => 'الصورة',
-    'unknown' => 'غير معروف',
-    'is_board_member' => 'عضو مجلس إدارة',
-    'employee_management' => 'إدارة الموظفين',
+
+
     'profile' => [
+        'employee' => 'الموظف',
+        'photo' => 'الصورة',
+        'unknown' => 'غير معروف',
+        'is_board_member' => 'عضو مجلس إدارة',
+        'employee_management' => 'إدارة الموظفين',
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',
         'profile' => 'الحساب',
@@ -116,7 +117,7 @@ return [
         'current-password' => 'كلمة المرور الحالية',
         'new-password' => 'كلمة المرور الجديدة',
 
-    ],
+    ]
 
 
 ];

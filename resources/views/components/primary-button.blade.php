@@ -1,4 +1,4 @@
-<button
+@props(['href' => null])
 
 @if ($href)
     <a href="{{ $href }}"
