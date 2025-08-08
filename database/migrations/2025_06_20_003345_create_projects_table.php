@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->json('name');
             $table->json('description')->nullable();
-            $table->char('code')->unique();
+            $table->char('code');
             $table->char('slug')->unique();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
