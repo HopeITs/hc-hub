@@ -125,7 +125,7 @@
                         <option value="">{{ __('general.select') }}</option>
                         @foreach($cities as $city)
                             <option value="{{ $city->id }}">
-                                {{ $city->getTranslation('name', $locale) }}
+                                {{ $city->name }}
                             </option>
                         @endforeach
                     </x-forms.select-input>
@@ -139,7 +139,7 @@
                         <option value="">{{ __('general.select') }}</option>
                         @foreach($projects as $project)
                             <option value="{{ $project->id }}">
-                                {{ $project->getTranslation('name', $locale) }}
+                                {{ $project->name }}
                             </option>
                         @endforeach
                     </x-forms.select-input>
