@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\ProjectManagement;
 
 use App\Models\Project;
-
 use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -176,6 +175,6 @@ class ProjectModule extends Component
             }
         ])->orderBy('is_active', 'desc')->get();
 
-        return view('livewire.project-module', compact('items'));
+        return view('livewire.project-management.project-module', compact('items'));
     }
 }
