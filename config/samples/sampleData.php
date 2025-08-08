@@ -23,16 +23,7 @@ return [
         ['slug' => 'IDL', 'name' => ['en' => 'Idleb', 'ar' => 'إدلب'], 'is_active' => false, 'code' => '013' ],
         ['slug' => 'RID', 'name' => ['en' => 'Rif Dimashq', 'ar' => 'ريف دمشق'], 'is_active' => false, 'code' => '014'  ],
 
-        // Non-active cities:
-        ['code' => 'hasakah', 'name' => ['en' => 'Hasakah', 'ar' => 'الحسكة'], 'is_active' => false],
-        ['code' => 'deir-el-zor', 'name' => ['en' => 'Deir el-zor', 'ar' => 'دير الزور'], 'is_active' => false],
-        ['code' => 'raqqa', 'name' => ['en' => 'Raqqa', 'ar' => 'الرقة'], 'is_active' => false],
-        ['code' => 'edleb', 'name' => ['en' => 'Edleb', 'ar' => 'إدلب'], 'is_active' => false],
-        ['code' => 'suwaida', 'name' => ['en' => 'Suwaida', 'ar' => 'السويداء'], 'is_active' => false],
-        ['code' => 'daraa', 'name' => ['en' => 'Daraa', 'ar' => 'درعا'], 'is_active' => false],
-        ['code' => 'quneitra', 'name' => ['en' => 'Quneitra', 'ar' => 'القنيطرة'], 'is_active' => false],
-        ['code' => 'rif-dimashq', 'name' => ['en' => 'Rif Dimashq', 'ar' => 'ريف دمشق'], 'is_active' => false],
-        ['code' => 'hama', 'name' => ['en' => 'Hama', 'ar' => 'حماة'], 'is_active' => false],
+
     ],
 
     'ContractType' => [
