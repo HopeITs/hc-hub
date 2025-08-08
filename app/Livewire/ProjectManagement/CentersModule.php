@@ -92,40 +92,21 @@ class CentersModule extends Component
 
         // Sorting — with fallback '-' for missing translations
         if ($sort === 'name') {
-            $query->orderByRaw(
-                "COALESCE(
-                JSON_UNQUOTE(JSON_EXTRACT(centers.name, '$.\"$locale\"')),
-                '-'
-            ) $dir"
-            );
+            $query->orderBy("name->$locale", $dir) ; // Center name
         } elseif ($sort === 'address') {
-            $query->orderByRaw(
-                "COALESCE(
-                JSON_UNQUOTE(JSON_EXTRACT(centers.address, '$.\"$locale\"')),
-                '-'
-            ) $dir"
-            );
+            $query->orderBy("address->$locale", $dir);
         } elseif ($sort === 'city_name') {
             $query->leftJoin('cities', 'centers.city_id', '=', 'cities.id')
-                ->orderByRaw(
-                    "COALESCE(
-                      JSON_UNQUOTE(JSON_EXTRACT(cities.name, '$.\"$locale\"')),
-                      '-'
-                  ) $dir"
-                )
+                ->orderBy("cities.name->$locale", $dir)
                 ->select('centers.*');
         } elseif ($sort === 'project_name') {
             $query->leftJoin('projects', 'centers.project_id', '=', 'projects.id')
-                ->orderByRaw(
-                    "COALESCE(
-                      JSON_UNQUOTE(JSON_EXTRACT(projects.name, '$.\"$locale\"')),
-                      '-'
-                  ) $dir"
-                )
+                ->orderBy("projects.name->$locale", $dir)
                 ->select('centers.*');
         } else {
             $query->orderBy($sort, $dir);
         }
+
 
         $items    = $query->paginate(15);
 
