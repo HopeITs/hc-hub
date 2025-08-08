@@ -133,7 +133,7 @@
 
 
     <x-modal.dialog id="showDetailsModal" :title="$modalTitle" wire:model.defer="showDetailsModal">
-
+@dump($item)
             <x-slot name="icon">
                 <div class="flex justify-between">
 

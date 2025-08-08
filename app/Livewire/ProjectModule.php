@@ -19,6 +19,8 @@ class ProjectModule extends Component
     public $showDetailsModal = false;
     public $modalTitle = '';
 
+    public Project $project;
+
     public $item = [
         'name' => '',
         'description' => '',
@@ -76,9 +78,8 @@ class ProjectModule extends Component
     public function show($id)
     {
         $project = Project::findOrFail($id);
-        $this->item = $project->toArray();
-        $this->item['logo'] = null; // Reset logo
-
+        $this->reset(['item']);
+        $this->item = $project;
         $this->modalTitle = $project->name;
         $this->showDetailsModal = true;
 
