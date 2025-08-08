@@ -7,10 +7,12 @@ use Livewire\Component;
 
 class ProjectDetail extends Component
 {
-    public Project $preject;
-    public function render($slug)
+    public $slug ;
+
+    public function render()
     {
-        $project = Project();
+        $project = Project::whereSlug($this->slug)->firstOrFail();
+
         return view('livewire.project-management.project-detail' , compact('project'));
     }
 }

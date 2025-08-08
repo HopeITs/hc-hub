@@ -38,7 +38,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');
     Route::get('departments', DepartmentModule::class)->name('departments.index');
     Route::get('projects', ProjectModule::class)->name('projects.index');
-    Route::get('projects\{project:slug}', ProjectDetail::class)->name('projects.show');
+    Route::get('projects/{slug}', ProjectDetail::class)->name('projects.show');
     Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
     Route::get('/centers', CentersModule::class)->name('centers.index');
 });

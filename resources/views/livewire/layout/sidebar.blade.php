@@ -11,6 +11,7 @@
                     id="basic-project"
                     :title="__('general.project-basics')"
                     :active="
+                        request()->routeIs('dashboard') ||
                         request()->routeIs('cities.*') ||
                         request()->routeIs('contract-types.*') ||
                         request()->routeIs('leave-types.*') ||
@@ -56,7 +57,7 @@
                         <x-layouts.app.sidebar.nav-item
                             :href="route('departments.index')"
                             :active="request()->routeIs('departments.index')"
-                            wire:navigate >
+                            wire:navigate>
                             {{ trans_choice('general.department', 2) }}
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>
