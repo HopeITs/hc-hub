@@ -5,6 +5,7 @@ use App\Livewire\Basics\CityModule ;
 use App\Livewire\Basics\ContractTypeModule ;
 use App\Livewire\Basics\LeaveTypeModule;
 use App\Livewire\Basics\DepartmentModule;
+use App\Livewire\ProjectManagement\RequiredPositionModule;
 use App\Livewire\ProjectModule;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
@@ -38,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');
     Route::get('departments', DepartmentModule::class)->name('departments.index');
     Route::get('projects', ProjectModule::class)->name('projects.index');
+    Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
 });
 Route::prefix('employees')->name('employees.')->group(function () {
     Route::get('/', EmployeeModule::class)->name('index');

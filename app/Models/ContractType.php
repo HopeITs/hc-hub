@@ -14,10 +14,10 @@ class ContractType extends Model
         'id',
         'type',
         'place',
-        'weekly_hours'
+        'name'
     ];
 
-    public array $translatable = ['type'];
+    public array $translatable = ['name'];
 
 
 

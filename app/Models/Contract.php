@@ -54,7 +54,7 @@ class Contract extends Model
 
     public function jobLevel()
     {
-        return $this->hasMany(jobLevel::class);
+        return $this->hasMany(JobLevel::class);
     }
 
 }

@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
             $table->json('name');
-            $table->string('code');
+            $table->char('slug')->unique();
+            $table->char('code')->unique();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

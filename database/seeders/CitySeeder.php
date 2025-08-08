@@ -15,6 +15,7 @@ class CitySeeder extends Seeder
             City::create([
                 'name' => $city['name'],
                 'code' => $city['code'],
+                'slug' => $city['slug'],
                 'is_active' => $city['is_active'],
             ]);
         }

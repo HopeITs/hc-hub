@@ -7,26 +7,33 @@ use App\Models\ContractType;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Traits\SortableTable;
 
 class ContractTypeModule extends Component
 {
-    use WithPagination;
+    use WithPagination, SortableTable;
 
     public $showModal = false;
     public $modalTitle = 'Modal title';
 
-
+    public $search = '';
     public $item = [
-        'type' => [],
+        'name' => [],
         'place' => null,
-        'weekly_hours' => null,
+        'type' => null,
     ];
 
-    protected $rules = [
-        'item.type.*' => 'required',
-        'item.place' => 'required|integer',
-        'item.weekly_hours' => 'required|integer',
-    ];
+    protected function rules()
+    {
+        return [
+
+            'item.name.ar' => 'required|string',
+            'item.name.en' => 'required|string',
+            'item.place' => 'required|integer',
+            'item.type' => 'required|integer',
+        ];
+    }
+
 
     public function create()
     {
@@ -41,9 +48,9 @@ class ContractTypeModule extends Component
         $this->modalTitle = __('general.edit');
         $this->item = [
             'id' => $model->id,
-            'type' => $model->getTranslations('type'),
+            'name' => $model->getTranslations('name'),
             'place' => $model->place,
-            'weekly_hours' => $model->weekly_hours,
+            'type' => $model->type,
         ];
 
 
@@ -66,18 +73,19 @@ class ContractTypeModule extends Component
 
     public function save()
     {
+
         $this->validate();
 
-        if (array_key_exists('id',$this->item)) {
+        if (array_key_exists('id', $this->item)) {
             ContractType::findOrFail($this->item['id'])->update([
                 'type' => $this->item['type'],
                 'place' => $this->item['place'],
-                'weekly_hours' => $this->item['weekly_hours'],
+                'name' => $this->item['name'],
             ]);
         } else {
             ContractType::create([
                 'type' => $this->item['type'],
-                'weekly_hours' => $this->item['weekly_hours'],
+                'name' => $this->item['name'],
                 'place' => $this->item['place'],
             ]);
 
@@ -91,6 +99,7 @@ class ContractTypeModule extends Component
             ->position('top-start')
             ->show();
     }
+
     public function delete($id)
     {
 
@@ -108,12 +117,14 @@ class ContractTypeModule extends Component
 
     public function render()
     {
+        sleep(1); // Optional: for debounce effect during search
 
-        $items = ContractType::paginate(15);
+        $items = ContractType::search('type', $this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate(15);
 
         return view('livewire.basics.contract-type-module', [
             'items' => $items,
         ]);
-
     }
 }

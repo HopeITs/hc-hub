@@ -7,15 +7,18 @@ use App\Enums\Gender;
 use App\Enums\MaritalStatus;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Traits\SortableTable;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 
 class LeaveTypeModule extends Component
 {
-    use WithPagination;
-
+    use WithPagination, SortableTable;
+    public $search = '';
+    // Modal
     public $showModal = false;
     public $modalTitle = 'Modal title';
 
+    // Form fields
     public $item = [
         'name' => [],
         'base_days' => null,
@@ -30,6 +33,15 @@ class LeaveTypeModule extends Component
         'item.marital_status' => 'integer',
     ];
 
+    public function render()
+    {
+        $items = LeaveType::search(['name'], $this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate(15);
+
+        return view('livewire.basics.leave-type-module', compact('items'));
+    }
+
     public function create()
     {
         $this->reset('item');
@@ -40,6 +52,7 @@ class LeaveTypeModule extends Component
     public function edit($id)
     {
         $model = LeaveType::findOrFail($id);
+
         $this->modalTitle = __('general.edit');
         $this->item = [
             'id' => $model->id,
@@ -48,6 +61,7 @@ class LeaveTypeModule extends Component
             'allowed_gender' => $model->allowed_gender,
             'marital_status' => $model->marital_status,
         ];
+
         $this->showModal = true;
     }
 
@@ -90,15 +104,5 @@ class LeaveTypeModule extends Component
             ->toast()
             ->position('top-start')
             ->show();
-    }
-
-
-
-    public function render()
-    {
-        return view('livewire.basics.leave-type-module', [
-            'items' => LeaveType::paginate(15),
-
-        ]);
     }
 }

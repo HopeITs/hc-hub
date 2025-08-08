@@ -12,28 +12,28 @@ class CityModule extends Component
     use WithPagination;
 
 
-    public $cityId;
+    public $itemID;
 
-    public function confirmToggleCityStatus($id)
+    public function confirmToggleItemStatus($id)
     {
-        $this->cityId = $id;
+        $this->itemID = $id;
 
         LivewireAlert::title(__('general.toggle-status'))
             ->text(__('general.confirm-status-change'))
             ->question()
             ->confirmButtonColor(config('samples.styles.colors.confirm'))
             ->withConfirmButton(__('general.save'))
-            ->onConfirm('toggleCityStatusConfirmed', ['id' => $this->cityId])
+            ->onConfirm('toggleItemStatusConfirmed', ['id' => $this->itemID])
             ->withCancelButton(__('general.cancel'))
             ->show();
     }
 
 
-    public function toggleCityStatusConfirmed()
+    public function toggleItemStatusConfirmed()
     {
-        $city = City::findOrFail($this->cityId);
-        $city->is_active = !$city->is_active;
-        $city->save();
+        $item = City::findOrFail($this->itemID);
+        $item->is_active = !$item->is_active;
+        $item->save();
 
         LivewireAlert::title(__('general.item-updated'))
             ->success()
