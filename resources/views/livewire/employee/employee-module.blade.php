@@ -19,6 +19,7 @@
         <x-slot name="headings">
             <x-table.heading>ID</x-table.heading>
             <x-table.heading>@lang('general.name')</x-table.heading>
+            <x-table.heading>@lang('general.photo')</x-table.heading>
             <x-table.heading>@lang('general.years_of_service')</x-table.heading>
             <x-table.heading>@lang('general.direct_manager')</x-table.heading>
             <x-table.heading>@lang('general.tech_manager')</x-table.heading>
@@ -33,6 +34,9 @@
                 <tr>
                     <x-table.cell>{{ $item->id }}</x-table.cell>
                     <x-table.cell>{{ $item->getTranslation('name', app()->getLocale()) }}</x-table.cell>
+                    <x-table.cell>
+                        <img src="{{ $item->photo ? asset('storage/' . $item->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($item->name) . '&color=7F9CF5&background=EBF4FF' }}" alt="{{ $item->name }}" class="h-12 w-12 rounded-full object-cover">
+                    </x-table.cell>
                     <x-table.cell>{{ $item->years_of_service }}</x-table.cell>
                     <x-table.cell>{{ $item->directManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->techManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</x-table.cell>

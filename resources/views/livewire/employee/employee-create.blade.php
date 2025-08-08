@@ -7,10 +7,38 @@
 
     <form wire:submit.prevent="save" class="space-y-4 mt-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md">
+            <div class="md:col-span-3">
+                <x-forms.input-label for="photo">@lang('general.photo')</x-forms.input-label>
+                <div class="mt-2 flex items-center space-x-6">
+                    <div class="shrink-0">
+                        @if ($form->photo)
+                            <img class="h-20 w-20 rounded-full object-cover" src="{{ $form->photo->temporaryUrl() }}"
+                                alt="Profile photo preview" />
+                        @else
+                            <div class="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
+                                <svg class="h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg>
+                            </div>
+                        @endif
+                    </div>
+                    <div>
+                        <input type="file" wire:model.live="form.photo" id="photo"
+                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100" />
+                        <div wire:loading wire:target="form.photo" class="text-sm text-gray-500 mt-1">
+                        <x-error-span>{{ $errors->first('form.photo') }}</x-error-span>
+                    </div>
+                </div>
+            </div>
+
             @foreach (config('app.supported_locales') as $locale)
                 <div>
-                    <x-forms.input-label for="name_{{ $locale }}">@lang('general.name') ({{ strtoupper($locale) }})</x-forms.input-label>
-                    <x-forms.input type="text" wire:model="form.name.{{ $locale }}" id="name_{{ $locale }}" />
+                    <x-forms.input-label for="name_{{ $locale }}">@lang('general.name')
+                        ({{ strtoupper($locale) }})</x-forms.input-label>
+                    <x-forms.input type="text" wire:model="form.name.{{ $locale }}"
+                        id="name_{{ $locale }}" />
                     <x-error-span>{{ $errors->first('form.name.' . $locale) }}</x-error-span>
                 </div>
             @endforeach
@@ -44,8 +72,9 @@
                 <x-forms.select-input wire:model="form.direct_manager_id" id="direct_manager_id">
                     <option value="">--</option>
                     @foreach ($allEmployees as $emp)
-                        @if($emp)
-                        <option value="{{ $emp->id }}">{{ $emp->getTranslation('name', app()->getLocale()) }}</option>
+                        @if ($emp)
+                            <option value="{{ $emp->id }}">{{ $emp->getTranslation('name', app()->getLocale()) }}
+                            </option>
                         @endif
                     @endforeach
                 </x-forms.select-input>
@@ -57,8 +86,9 @@
                 <x-forms.select-input wire:model="form.tech_manager_id" id="tech_manager_id">
                     <option value="">--</option>
                     @foreach ($allEmployees as $emp)
-                         @if($emp)
-                        <option value="{{ $emp->id }}">{{ $emp->getTranslation('name', app()->getLocale()) }}</option>
+                        @if ($emp)
+                            <option value="{{ $emp->id }}">{{ $emp->getTranslation('name', app()->getLocale()) }}
+                            </option>
                         @endif
                     @endforeach
                 </x-forms.select-input>
@@ -67,16 +97,20 @@
 
             @foreach (config('app.supported_locales') as $locale)
                 <div>
-                    <x-forms.input-label for="father_name_{{ $locale }}">@lang('general.father_name') ({{ strtoupper($locale) }})</x-forms.input-label>
-                    <x-forms.input type="text" wire:model="form.father_name.{{ $locale }}" id="father_name_{{ $locale }}" />
+                    <x-forms.input-label for="father_name_{{ $locale }}">@lang('general.father_name')
+                        ({{ strtoupper($locale) }})</x-forms.input-label>
+                    <x-forms.input type="text" wire:model="form.father_name.{{ $locale }}"
+                        id="father_name_{{ $locale }}" />
                     <x-error-span>{{ $errors->first('form.father_name.' . $locale) }}</x-error-span>
                 </div>
             @endforeach
 
             @foreach (config('app.supported_locales') as $locale)
                 <div>
-                    <x-forms.input-label for="mother_name_{{ $locale }}">@lang('general.mother_name') ({{ strtoupper($locale) }})</x-forms.input-label>
-                    <x-forms.input type="text" wire:model="form.mother_name.{{ $locale }}" id="mother_name_{{ $locale }}" />
+                    <x-forms.input-label for="mother_name_{{ $locale }}">@lang('general.mother_name')
+                        ({{ strtoupper($locale) }})</x-forms.input-label>
+                    <x-forms.input type="text" wire:model="form.mother_name.{{ $locale }}"
+                        id="mother_name_{{ $locale }}" />
                     <x-error-span>{{ $errors->first('form.mother_name.' . $locale) }}</x-error-span>
                 </div>
             @endforeach
@@ -159,8 +193,10 @@
 
             @foreach (config('app.supported_locales') as $locale)
                 <div class="md:col-span-1">
-                    <x-forms.input-label for="address_{{ $locale }}">@lang('general.address') ({{ strtoupper($locale) }})</x-forms.input-label>
-                    <x-forms.input type="text" wire:model="form.address.{{ $locale }}" id="address_{{ $locale }}" />
+                    <x-forms.input-label for="address_{{ $locale }}">@lang('general.address')
+                        ({{ strtoupper($locale) }})</x-forms.input-label>
+                    <x-forms.input type="text" wire:model="form.address.{{ $locale }}"
+                        id="address_{{ $locale }}" />
                     <x-error-span>{{ $errors->first('form.address.' . $locale) }}</x-error-span>
                 </div>
             @endforeach
@@ -180,8 +216,10 @@
             <div>
                 <x-forms.input-label>@lang('general.status')</x-forms.input-label>
                 <div class="flex space-x-4 items-center mt-2">
-                    <x-forms.radio-input name="is_active" value="1" wire:model="form.is_active">@lang('general.active')</x-forms.radio-input>
-                    <x-forms.radio-input name="is_active" value="0" wire:model="form.is_active">@lang('general.inactive')</x-forms.radio-input>
+                    <x-forms.radio-input name="is_active" value="1"
+                        wire:model="form.is_active">@lang('general.active')</x-forms.radio-input>
+                    <x-forms.radio-input name="is_active" value="0"
+                        wire:model="form.is_active">@lang('general.inactive')</x-forms.radio-input>
                 </div>
                 <x-error-span>{{ $errors->first('form.is_active') }}</x-error-span>
             </div>
@@ -197,7 +235,8 @@
             @if ($this->form->is_board_member)
                 <div>
                     <x-forms.input-label for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>
-                    <x-forms.input type="date" wire:model="form.board_member_started_at" id="board_member_started_at" />
+                    <x-forms.input type="date" wire:model="form.board_member_started_at"
+                        id="board_member_started_at" />
                     <x-error-span>{{ $errors->first('form.board_member_started_at') }}</x-error-span>
                 </div>
                 <div>

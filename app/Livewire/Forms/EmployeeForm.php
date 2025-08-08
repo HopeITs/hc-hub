@@ -3,6 +3,7 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Employee;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
@@ -10,6 +11,10 @@ use Livewire\Form;
 class EmployeeForm extends Form
 {
     public ?Employee $employee = null;
+
+    #[Validate]
+    public $photo;
+
     public array $name = [];
     public array $father_name = [];
     public array $mother_name = [];
@@ -42,6 +47,7 @@ class EmployeeForm extends Form
     public function rules(): array
     {
         return [
+            'photo' => ['nullable', 'image', 'max:2048'],
             'name.*' => ['required', 'string', 'max:255'],
             'national_number' => ['required', 'string', Rule::unique('employees', 'national_number')->ignore($this->employee)],
             'actual_job' => ['nullable', 'string', 'max:255'],
@@ -87,12 +93,24 @@ class EmployeeForm extends Form
     public function store(): void
     {
         $validated = $this->validate();
+        if ($this->photo) {
+            $validated['photo'] = $this->photo->store('employee_photos', 'public');
+        }
+
         Employee::create($validated);
     }
 
     public function update(): void
     {
         $validated = $this->validate();
+
+        if ($this->photo) {
+            if ($this->employee->photo) {
+                Storage::disk('public')->delete($this->employee->photo);
+            }
+            $validated['photo'] = $this->photo->store('employee_photos', 'public');
+        }
+
         $this->employee->update($validated);
     }
 }
