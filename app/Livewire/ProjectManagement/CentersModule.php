@@ -72,25 +72,56 @@ class CentersModule extends Component
         $query = Center::query()
             ->with(['city', 'project'])
             ->when($this->search, function ($q) use ($locale) {
-                $s = $this->search;
-                $q->where(function ($qq) use ($s, $locale) {
-                    $qq->whereTranslationLike('name', "%{$s}%", $locale)
-                        ->orWhereTranslationLike('address', "%{$s}%", $locale);
+                $term = $this->search;
+
+                $q->where(function ($w) use ($term, $locale) {
+                    // Center fields (JSON path by locale)
+                    $w->search(["name->$locale", "address->$locale"], $term)
+
+                        // City relation
+                        ->orWhereHas('city', function ($c) use ($term, $locale) {
+                            $c->search(["name->$locale"], $term);
+                        })
+
+                        // Project relation
+                        ->orWhereHas('project', function ($p) use ($term, $locale) {
+                            $p->search(["name->$locale"], $term);
+                        });
                 });
             });
 
-
+        // Sorting — with fallback '-' for missing translations
         if ($sort === 'name') {
-            $query->orderBy("name->$locale", $dir) ; // Center name
+            $query->orderByRaw(
+                "COALESCE(
+                JSON_UNQUOTE(JSON_EXTRACT(centers.name, '$.\"$locale\"')),
+                '-'
+            ) $dir"
+            );
         } elseif ($sort === 'address') {
-            $query->orderBy("address->$locale", $dir);
+            $query->orderByRaw(
+                "COALESCE(
+                JSON_UNQUOTE(JSON_EXTRACT(centers.address, '$.\"$locale\"')),
+                '-'
+            ) $dir"
+            );
         } elseif ($sort === 'city_name') {
             $query->leftJoin('cities', 'centers.city_id', '=', 'cities.id')
-                ->orderBy("cities.name->$locale", $dir)
+                ->orderByRaw(
+                    "COALESCE(
+                      JSON_UNQUOTE(JSON_EXTRACT(cities.name, '$.\"$locale\"')),
+                      '-'
+                  ) $dir"
+                )
                 ->select('centers.*');
         } elseif ($sort === 'project_name') {
             $query->leftJoin('projects', 'centers.project_id', '=', 'projects.id')
-                ->orderBy("projects.name->$locale", $dir)
+                ->orderByRaw(
+                    "COALESCE(
+                      JSON_UNQUOTE(JSON_EXTRACT(projects.name, '$.\"$locale\"')),
+                      '-'
+                  ) $dir"
+                )
                 ->select('centers.*');
         } else {
             $query->orderBy($sort, $dir);
@@ -99,11 +130,12 @@ class CentersModule extends Component
         $items    = $query->paginate(15);
 
         // For selects in the modal
-        $cities   = City::orderBy("name->$locale")->get(['id','name']);
-        $projects = Project::orderBy("name->$locale")->get(['id','name']);
+        $cities   = City::orderBy("name->$locale")->get(['id', 'name']);
+        $projects = Project::orderBy("name->$locale")->get(['id', 'name']);
 
         return view('livewire.project-management.centers-module', compact('items', 'cities', 'projects'));
     }
+
 
     public function create()
     {

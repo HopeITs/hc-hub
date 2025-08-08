@@ -111,21 +111,16 @@
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         <form wire:submit.prevent="save" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
-                {{-- Name (EN / AR) --}}
-                <div>
-                    <x-forms.input-label for="name_en">@lang('general.center-name') (EN)</x-forms.input-label>
-                    <x-forms.input id="name_en" type="text" wire:model.defer="item.name.en" />
-                    <x-error-span>{{ $errors->first('item.name.en') }}</x-error-span>
-                </div>
-                <div>
-                    <x-forms.input-label for="name_ar">@lang('general.center-name') (AR)</x-forms.input-label>
-                    <x-forms.input id="name_ar" type="text" wire:model.defer="item.name.ar" dir="rtl" />
-                    <x-error-span>{{ $errors->first('item.name.ar') }}</x-error-span>
-                </div>
-
+                @foreach(config('app.supported_locales') as $locale)
+                    <div>
+                        <x-forms.input-label for="name_{{ $locale }}">@lang('general.center-name')({{ strtoupper($locale) }})</x-forms.input-label>
+                        <x-forms.input id="name_{{ $locale }}" type="text" wire:model.defer="item.name.{{ $locale }}" />
+                        <x-error-span>{{ $errors->first('item.name.' . $locale) }}</x-error-span>
+                    </div>
+                @endforeach
                 {{-- City --}}
                 <div>
-                    <x-forms.input-label for="city_id">@lang('general.city')</x-forms.input-label>
+                    <x-forms.input-label for="city_id">{{trans_choice('general.city',1)}}</x-forms.input-label>
                     <x-forms.select-input id="city_id" wire:model="item.city_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach($cities as $city)
@@ -151,17 +146,14 @@
                     <x-error-span>{{ $errors->first('item.project_id') }}</x-error-span>
                 </div>
 
-                {{-- Address (EN / AR) --}}
-                <div class="col-span-2">
-                    <x-forms.input-label for="address_en">@lang('general.address') (EN)</x-forms.input-label>
-                    <x-forms.textarea id="address_en" wire:model.defer="item.address.en" rows="2" />
-                    <x-error-span>{{ $errors->first('item.address.en') }}</x-error-span>
-                </div>
-                <div class="col-span-2">
-                    <x-forms.input-label for="address_ar">@lang('general.address') (AR)</x-forms.input-label>
-                    <x-forms.textarea id="address_ar" wire:model.defer="item.address.ar" rows="2" dir="rtl" />
-                    <x-error-span>{{ $errors->first('item.address.ar') }}</x-error-span>
-                </div>
+
+                    @foreach(config('app.supported_locales') as $locale)
+                        <div class="col-span-2">
+                            <x-forms.input-label for="address_{{ $locale }}">@lang('general.address') ({{ strtoupper($locale) }})</x-forms.input-label>
+                            <x-forms.textarea id="address_{{ $locale }}" wire:model.defer="item.address.{{ $locale }}" rows="2" />
+                            <x-error-span>{{ $errors->first('item.address.' . $locale) }}</x-error-span>
+                        </div>
+                    @endforeach
             </div>
 
             <div class="flex justify-end gap-2">
