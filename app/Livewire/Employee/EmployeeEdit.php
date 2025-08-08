@@ -19,6 +19,8 @@ class EmployeeEdit extends Component
         $this->form->setEmployee($employee);
     }
 
+    // Education methods are no longer needed
+
     public function save()
     {
         $this->form->update();

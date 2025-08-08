@@ -7,11 +7,14 @@ use App\Models\Employee;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+
 class EmployeeCreate extends Component
 {
     use WithFileUploads;
 
     public EmployeeForm $form;
+
+    // MOUNT and education methods are no longer needed
 
     public function save()
     {
