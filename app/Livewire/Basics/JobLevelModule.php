@@ -3,6 +3,7 @@
 namespace App\Livewire\Basics;
 
 use App\Models\JobLevel;
+use App\Traits\SortableTable;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -10,10 +11,11 @@ use Illuminate\Validation\Rule;
 
 class JobLevelModule extends Component
 {
-    use WithPagination;
+    use WithPagination, SortableTable;
 
     public $showModal = false;
     public $modalTitle = 'Modal title';
+    public $search = '';
 
     public $item = [
         'id' => null,
@@ -124,7 +126,10 @@ class JobLevelModule extends Component
 
     public function render()
     {
-        $items = JobLevel::paginate(10);
+        $items = JobLevel::search(['name', 'description', 'email'], $this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate(15);
+
         return view('livewire.basics.job-level', [
             'items' => $items,
         ]);

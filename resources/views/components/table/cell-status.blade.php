@@ -8,16 +8,10 @@
     $switchId = 'status-switch-' . $modelId;
 @endphp
 
-<td class="px-5 py-2.5 text-gray-500 cursor-pointer">
+<td class="px-5 py-2.5 text-gray-500 cursor-pointer  text-right">
     <div class="flex items-center form-check form-switch">
-        <input
-            type="checkbox"
-            id="{{ $switchId }}"
-            role="switch"
-            @if($active) checked @endif
-            wire:click="{{ $wireEvent }}({{ $modelId }})"
-            class="text-green-400 rounded border-green-400  focus:ring-green-400 me-1"
-        >
+        <x-forms.toggle-input :modelId="$modelId" :active="$active"  :wireEvent="$wireEvent"/>
+
         <label for="{{ $switchId }}" class="ms-1 text-xs form-check-label">
             {{ $active ? __('general.active') : __('general.inactive') }}
         </label>

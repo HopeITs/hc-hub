@@ -24,8 +24,18 @@
     <x-table>
         <x-slot name="headings">
             <x-table.heading>ID</x-table.heading>
-            <x-table.heading sortable> @lang('general.name')</x-table.heading>
-            <x-table.heading>@lang('general.order')</x-table.heading>
+            <x-table.heading
+                sortable
+                wire:click="sortBy('name')"
+                :direction="$sortField === 'name' ? $sortDirection : null">
+                @lang('general.name')
+            </x-table.heading>
+            <x-table.heading
+                sortable
+                wire:click="sortBy('order')"
+                :direction="$sortField === 'order' ? $sortDirection : null">
+                @lang('general.order')
+            </x-table.heading>
             <x-table.heading/>
         </x-slot>
         <x-slot name="body">

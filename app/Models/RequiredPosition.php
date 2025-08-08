@@ -20,9 +20,9 @@ class RequiredPosition extends Model
         'is_active'
     ];
 
-    public function position()
+    public function project()
     {
-        return $this->belongsTo(Position::class);
+        return $this->belongsTo(Project::class);
     }
 
 }

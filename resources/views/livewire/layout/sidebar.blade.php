@@ -10,7 +10,7 @@
                 <x-layouts.app.sidebar.dropdown-nav-list
                     id="basic-project"
                     :title="__('general.project-basics')"
-                    :active="request()->routeIs('dashboard') ||
+                    :active="
                               request()->routeIs('cities.*') ||
                               request()->routeIs('contract-types.*') ||
                               request()->routeIs('leave-types.*') ||
@@ -63,12 +63,39 @@
 
                 </x-layouts.app.sidebar.dropdown-nav-list>
 
-                <x-layouts.app.sidebar.single-item :href="route('projects.index')" :active="request()->routeIs('projects.*')">
+                {{-- إدارة المشاريع - NEW DROPDOWN --}}
+                <x-layouts.app.sidebar.dropdown-nav-list
+                    id="project-management"
+                    :title="__('general.projects-management')"
+                    :active="
+                        request()->routeIs('projects.*') ||
+                        request()->routeIs('required-positions.*') ||
+                        request()->routeIs('centers.*')">
+
                     <x-slot name="icon">
                         <x-icons.layers/>
                     </x-slot>
-                    @lang('general.projects-management')
-                </x-layouts.app.sidebar.single-item>
+
+                    <x-slot name="list">
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('projects.index')"
+                            :active="request()->routeIs('projects.index')">
+                            {{ trans_choice('general.project', 2) }}
+                        </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('required-positions.index')"
+                            :active="request()->routeIs('required-positions.index')">
+                            {{ __('general.required-positions') }}
+                        </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item
+                            :href="'#'"
+                            :active="false">
+                            {{ trans_choice('general.center', 2) }}
+                        </x-layouts.app.sidebar.nav-item>
+                    </x-slot>
+                </x-layouts.app.sidebar.dropdown-nav-list>
 
                 <x-layouts.app.sidebar.dropdown-nav-list
                     id="employees-management"
@@ -87,12 +114,16 @@
                     </x-slot>
 
                 </x-layouts.app.sidebar.dropdown-nav-list>
-
             </ul>
         </div>
 
         <div>
             <x-layouts.app.sidebar.profile-card :user="$user"/>
         </div>
+
+
     </div>
+
+
 </aside>
+

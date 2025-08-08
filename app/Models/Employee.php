@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Translatable\HasTranslations;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Employee extends Model
 {
@@ -20,6 +21,10 @@ class Employee extends Model
         return $this->hasMany(Contract::class);
     }
 
+    public function positions(): BelongsToMany
+    {
+        return $this->belongsToMany(Position::class);
+    }
     public function educations()
     {
         return $this->hasMany(Education::class);

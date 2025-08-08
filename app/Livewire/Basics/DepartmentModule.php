@@ -3,6 +3,7 @@
 namespace App\Livewire\Basics;
 
 use App\Models\Department;
+use App\Traits\SortableTable;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -10,10 +11,11 @@ use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 class DepartmentModule extends Component
 {
 
-    use WithPagination;
+    use WithPagination, SortableTable;
 
     public $showModal = false;
     public $modalTitle = '';
+    public $search = '';
     public $item = [
         'name' => [],
         'description' => [],
@@ -28,7 +30,9 @@ class DepartmentModule extends Component
 
     public function render()
     {
-        $departments = Department::paginate(15);
+        $departments = Department::search(['name', 'description', 'email'], $this->search)
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate(15);
 
         return view('livewire.basics.department-module', compact('departments'));
     }
