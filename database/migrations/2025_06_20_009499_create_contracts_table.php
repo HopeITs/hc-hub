@@ -24,6 +24,7 @@ return new class extends Migration
             $table->decimal('salary', 10, 2);
             $table->json('work_days');
             $table->json('work_hours');
+            $table->integer('weekly_hours');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

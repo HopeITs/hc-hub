@@ -1,14 +1,12 @@
 <aside id="cta-button-sidebar"
-       class="fixed bg-white top-0 right-auto border-e-1 shadow-xl md:right-0 z-40 w-60 h-screen pt-4 transition-transform -translate-x-full border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+       class="fixed bg-white top-0 right-auto border-e-1 shadow-xl    md:right-0 z-40 w-60 h-screen pt-4 transition-transform -translate-x-full border-r border-gray-200 sm:translate-x-0"
        aria-label="Sidebar">
     <div class="flex flex-col h-full justify-between">
-        <div class="h-full px-3 pb-4 bg-white dark:bg-gray-800">
+        <div class="h-full px-3 pb-4 bg-white">
             <a href="{{ route('home') }}" class="flex justify-center items-center mt-4 mb-8">
                 <x-app-logo class="md:w-40 md:h-16"/>
             </a>
-
             <ul class="space-y-2 font-medium">
-                {{-- أساسيات المشروع --}}
                 <x-layouts.app.sidebar.dropdown-nav-list
                     id="basic-project"
                     :title="__('general.project-basics')"
@@ -23,7 +21,6 @@
                     <x-slot name="icon">
                         <x-icons.home/>
                     </x-slot>
-
                     <x-slot name="list">
                         <x-layouts.app.sidebar.nav-item
                             :href="route('cities.index')"
@@ -55,13 +52,15 @@
                             {{ trans_choice('general.job-level', 2) }}
                         </x-layouts.app.sidebar.nav-item>
 
+
                         <x-layouts.app.sidebar.nav-item
                             :href="route('departments.index')"
                             :active="request()->routeIs('departments.index')"
-                            wire:navigate>
+                            wire:navigate >
                             {{ trans_choice('general.department', 2) }}
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>
+
                 </x-layouts.app.sidebar.dropdown-nav-list>
 
                 {{-- إدارة المشاريع - NEW DROPDOWN --}}
@@ -104,5 +103,10 @@
         <div>
             <x-layouts.app.sidebar.profile-card :user="$user"/>
         </div>
+
+
     </div>
+
+
 </aside>
+

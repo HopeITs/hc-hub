@@ -84,9 +84,9 @@
             </div>
 
             {{-- Buttons --}}
-            <div class="flex justify-end space-x-2 rtl:space-x-reverse">
+            <div class="flex justify-end space-x-2">
                 <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-                <x-modal.cancel-btn />
+                <x-modal.cancel-btn/>
             </div>
         </form>
     </x-modal.dialog>

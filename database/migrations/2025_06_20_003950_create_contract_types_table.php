@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::create('contract_types', function (Blueprint $table) {
             $table->id();
-            $table->json('type');
+            $table->json('name');
             $table->unsignedTinyInteger('place')->default(1)->comment('0 = Unknown, 1 = Onsite, 2 = Online');
-            $table->integer('weekly_hours');
+            $table->unsignedTinyInteger('type')->default(1)->comment('0 = Unknown, 1 = Full Time, 2 = Part Time, 3 = Freelance');
             $table->timestamps();
         });
     }

@@ -1,59 +1,66 @@
 <?php
 use App\Enums\ContractPlace;
+use App\Enums\ContractType;
 use App\Enums\Gender;
 use App\Enums\LeaveType;
 use App\Enums\MaritalStatus;
 
 return [
     'cities' => [
-        ['code' => 'aleppo', 'name' => ['en' => 'Aleppo', 'ar' => 'حلب'], 'is_active' => true],
-        ['code' => 'damascus', 'name' => ['en' => 'Damascus', 'ar' => 'دمشق'], 'is_active' => true],
-        ['code' => 'homs', 'name' => ['en' => 'Homs', 'ar' => 'حمص'], 'is_active' => true],
-        ['code' => 'latakia', 'name' => ['en' => 'Latakia', 'ar' => 'اللاذقية'], 'is_active' => true],
-        ['code' => 'tartus', 'name' => ['en' => 'Tartus', 'ar' => 'طرطوس'], 'is_active' => true],
+        ['slug' => 'SYR', 'name' => ['en' => 'Syria', 'ar' => 'سوريا'], 'is_active' => true , 'code' => '000'  ],
+        ['slug' => 'ALP', 'name' => ['en' => 'Aleppo', 'ar' => 'حلب'], 'is_active' => true , 'code' => '001'  ],
+        ['slug' => 'HMS', 'name' => ['en' => 'Homs', 'ar' => 'حمص'], 'is_active' => true , 'code' => '002'  ],
+        ['slug' => 'DMS', 'name' => ['en' => 'Damascus', 'ar' => 'دمشق'], 'is_active' => true, 'code' => '003'  ],
+        ['slug' => 'LAT', 'name' => ['en' => 'Latakia', 'ar' => 'اللاذقية'], 'is_active' => true, 'code' => '004'  ],
+        ['slug' => 'TAR', 'name' => ['en' => 'Tartus', 'ar' => 'طرطوس'], 'is_active' => true, 'code' => '005'  ],
+        ['slug' => 'HAM', 'name' => ['en' => 'Hama', 'ar' => 'حماة'], 'is_active' => false, 'code' => '006'  ],
+        ['slug' => 'DAR', 'name' => ['en' => 'Daraa', 'ar' => 'درعا'], 'is_active' => false   , 'code' => '007'  ],
+        ['slug' => 'SWD', 'name' => ['en' => 'Suwaida', 'ar' => 'السويداء'], 'is_active' => false , 'code' => '008'  ],
+        ['slug' => 'QNT', 'name' => ['en' => 'Qounaitra', 'ar' => 'القنيطرة'], 'is_active' => false , 'code' => '009'  ],
+        ['slug' => 'RQA', 'name' => ['en' => ' Ar-raqqa', 'ar' => 'الرقة'], 'is_active' => false , 'code' => '010'  ],
+        ['slug' => 'DZR', 'name' => ['en' => ' Deir Az-zor', 'ar' => 'دير الزور'], 'is_active' => false,'code' => '011' ],
+        ['slug' => 'HSK', 'name' => ['en' => ' Al-Hasakah', 'ar' => 'الحسكة'], 'is_active' => false , 'code' => '012'  ],
+        ['slug' => 'IDL', 'name' => ['en' => 'Idleb', 'ar' => 'إدلب'], 'is_active' => false, 'code' => '013' ],
+        ['slug' => 'RID', 'name' => ['en' => 'Rif Dimashq', 'ar' => 'ريف دمشق'], 'is_active' => false, 'code' => '014'  ],
 
-        // Non-active cities:
-        ['code' => 'hasakah', 'name' => ['en' => 'Hasakah', 'ar' => 'الحسكة'], 'is_active' => false],
-        ['code' => 'deir-el-zor', 'name' => ['en' => 'Deir el-zor', 'ar' => 'دير الزور'], 'is_active' => false],
-        ['code' => 'raqqa', 'name' => ['en' => 'Raqqa', 'ar' => 'الرقة'], 'is_active' => false],
-        ['code' => 'edleb', 'name' => ['en' => 'Edleb', 'ar' => 'إدلب'], 'is_active' => false],
-        ['code' => 'suwaida', 'name' => ['en' => 'Suwaida', 'ar' => 'السويداء'], 'is_active' => false],
-        ['code' => 'daraa', 'name' => ['en' => 'Daraa', 'ar' => 'درعا'], 'is_active' => false],
-        ['code' => 'quneitra', 'name' => ['en' => 'Quneitra', 'ar' => 'القنيطرة'], 'is_active' => false],
-        ['code' => 'rif-dimashq', 'name' => ['en' => 'Rif Dimashq', 'ar' => 'ريف دمشق'], 'is_active' => false],
-        ['code' => 'hama', 'name' => ['en' => 'Hama', 'ar' => 'حماة'], 'is_active' => false],
     ],
 
     'ContractType' => [
         [
-            'type' => ['en' => 'Full Annual', 'ar' => 'سنوي كامل'],
+            'name' => ['en' => 'Full Annual', 'ar' => 'سنوي كامل'],
             'place' => ContractPlace::Onsite,
-            'weekly_hours' => 40,
+            'type' => ContractType::FullTime,
+
         ],
         [
-            'type' => ['en' => 'Partial Annual', 'ar' => 'سنوي جزئي'],
+            'name' => ['en' => 'Partial Annual', 'ar' => 'سنوي جزئي'],
             'place' => ContractPlace::Onsite,
-            'weekly_hours' => 20,
+            'type' => ContractType::PartTime,
+
         ],
         [
-            'type' => ['en' => 'Trial Full', 'ar' => 'تجريبي كامل'],
+            'name' => ['en' => 'Trial Full', 'ar' => 'تجريبي كامل'],
             'place' => ContractPlace::Onsite,
-            'weekly_hours' => 40,
+            'type' => ContractType::FullTime,
+
         ],
         [
-            'type' => ['en' => 'Trial Partial', 'ar' => 'تجريبي جزئي'],
+            'name' => ['en' => 'Trial Partial', 'ar' => 'تجريبي جزئي'],
             'place' => ContractPlace::Onsite,
-            'weekly_hours' => 20,
+            'type' => ContractType::PartTime,
+
         ],
         [
-            'type' => ['en' => 'Online Agreement Contract', 'ar' => 'عقد اتفاق اونلاين'],
+            'name' => ['en' => 'Online Agreement Contract', 'ar' => 'عقد اتفاق اونلاين'],
             'place' => ContractPlace::Online,
-            'weekly_hours' => 0,
+            'type' => ContractType::Freelance,
+
         ],
         [
-            'type' => ['en' => 'Onsite Agreement Contract', 'ar' => 'عقد اتفاق في الموقع'],
+            'name' => ['en' => 'Onsite Agreement Contract', 'ar' => 'عقد اتفاق في الموقع'],
             'place' => ContractPlace::Onsite,
-            'weekly_hours' => 0,
+            'type' => ContractType::Freelance,
+
         ],
     ],
 
@@ -219,13 +226,13 @@ return [
             'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
         [
-            'name' => ['en' => 'Full Licensed', 'ar' => 'مرضية كاملة'],
+            'name' => ['en' => 'Full Sick Leave', 'ar' => 'مرضية كاملة'],
             'base_days' => 12,
             'allowed_gender' => LeaveType::GENDER_ANY,
             'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
         [
-            'name' => ['en' => 'Partial Licensed', 'ar' => 'مرضية جزئية'],
+            'name' => ['en' => 'Partial Sick Leave', 'ar' => 'مرضية جزئية'],
             'base_days' => 12,
             'allowed_gender' => LeaveType::GENDER_ANY,
             'marital_status' => LeaveType::MARITAL_STATUS_ANY,
