@@ -14,8 +14,6 @@ class EmployeeCreate extends Component
 
     public EmployeeForm $form;
 
-    // MOUNT and education methods are no longer needed
-
     public function save()
     {
         $this->form->store();

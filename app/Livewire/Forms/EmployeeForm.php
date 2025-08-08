@@ -44,8 +44,6 @@ class EmployeeForm extends Form
     public bool $is_board_member = false;
     public ?string $board_member_started_at = null;
     public ?string $board_member_end_at = null;
-
-    // ++ REPLACED 'educations' array with single properties for one education record ++
     public ?string $education_title = null;
     public ?string $education_university = null;
     public ?string $education_type = null;
@@ -55,7 +53,6 @@ class EmployeeForm extends Form
     public function rules(): array
     {
         return [
-            // ... (all your employee rules)
             'photo' => ['nullable', 'image', 'max:2048'],
             'name.*' => ['required', 'string', 'max:255'],
             'national_number' => ['required', 'string', Rule::unique('employees', 'national_number')->ignore($this->employee)],
@@ -84,8 +81,6 @@ class EmployeeForm extends Form
             'is_board_member' => ['required', 'boolean'],
             'board_member_started_at' => ['nullable', 'required_if:is_board_member,true', 'date'],
             'board_member_end_at' => ['nullable', 'date'],
-
-            // ++ UPDATED: Rules for the single education record. Now nullable. ++
             'education_title' => ['nullable', 'string', 'max:255', 'required_with:education_university,education_type,education_graduation_year'],
             'education_university' => ['nullable', 'string', 'max:255'],
             'education_type' => ['nullable', 'in:0,1,2,3,4,5,6'],
@@ -103,7 +98,6 @@ class EmployeeForm extends Form
         $this->address = $employee->getTranslations('address');
         $this->is_board_member = (bool) $employee->is_board_member;
 
-        // ++ Load the FIRST education record into the form properties ++
         if ($education = $employee->educations()->first()) {
             $this->education_title = $education->title;
             $this->education_university = $education->university;
@@ -122,7 +116,6 @@ class EmployeeForm extends Form
         DB::transaction(function () use ($validated) {
             $employee = Employee::create($validated);
 
-            // If education title is provided, create the single education record
             if (!empty($validated['education_title'])) {
                 $employee->educations()->create([
                     'title' => $validated['education_title'],
@@ -144,13 +137,10 @@ class EmployeeForm extends Form
 
         DB::transaction(function () use ($validated) {
             $this->employee->update($validated);
-
-            // Use updateOrCreate to handle the single education record
-            // This will update the existing record or create a new one if it doesn't exist
             if (!empty($validated['education_title'])) {
                 $this->employee->educations()->updateOrCreate(
-                    ['employee_id' => $this->employee->id], // Find by employee_id
-                    [ // Data to update or create
+                    ['employee_id' => $this->employee->id],
+                    [
                         'title' => $validated['education_title'],
                         'university' => $validated['education_university'],
                         'type' => $validated['education_type'],
@@ -158,7 +148,6 @@ class EmployeeForm extends Form
                     ]
                 );
             } else {
-                // If the form is submitted with no education title, delete any existing record.
                 $this->employee->educations()->delete();
             }
         });

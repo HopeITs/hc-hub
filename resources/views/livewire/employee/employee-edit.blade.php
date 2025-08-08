@@ -26,7 +26,6 @@
                 <div x-show="activeTab === 'information'" class="p-4 border rounded-md">
                     @include('livewire.employee.partials.edit-info-form')
                 </div>
-                {{-- ++ UPDATED: Education tab is now a simple, single form ++ --}}
                 <div x-show="activeTab === 'education'" class="p-4 border rounded-md">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
