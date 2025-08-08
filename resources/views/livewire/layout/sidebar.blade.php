@@ -96,6 +96,24 @@
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
+
+                <x-layouts.app.sidebar.dropdown-nav-list
+                    id="employees-management"
+                    :title="trans_choice('general.employee_management', 2)"
+                    :active="request()->routeIs('employees.*')">
+
+                    <x-slot name="icon">
+                        <x-icons.users/>
+                    </x-slot>
+                    <x-slot name="list">
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('employees.index')"
+                            :active="request()->routeIs('employees.*')">
+                            {{ trans_choice('general.employee', 2) }}
+                        </x-layouts.app.sidebar.nav-item>
+                    </x-slot>
+
+                </x-layouts.app.sidebar.dropdown-nav-list>
             </ul>
         </div>
 
