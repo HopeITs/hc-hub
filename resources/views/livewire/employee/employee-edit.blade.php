@@ -5,259 +5,64 @@
         ['label' => __('general.edit')],
     ]" />
 
-    <form wire:submit.prevent="save" class="space-y-4 mt-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-md">
-            <div class="md:col-span-3">
-                <x-forms.input-label for="photo">@lang('general.photo')</x-forms.input-label>
-                <div class="mt-2 flex items-center space-x-6">
-                    <div class="shrink-0">
-                        @if ($form->photo)
-                            <img class="h-20 w-20 rounded-full object-cover" src="{{ $form->photo->temporaryUrl() }}"
-                                alt="New profile photo" />
-                        @elseif ($form->employee?->photo)
-                            <img class="h-20 w-20 rounded-full object-cover"
-                                src="{{ asset('storage/' . $form->employee->photo) }}" alt="Current profile photo" />
-                        @else
-                            <div class="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
-                                <svg class="h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                                </svg>
-                            </div>
-                        @endif
+    <form wire:submit.prevent="save" class="mt-4">
+        <div x-data="{ activeTab: 'information' }" class="flex flex-col md:flex-row gap-8">
+             <ul class="flex-none w-full md:w-48 text-sm font-medium text-gray-500 space-y-2">
+                <li>
+                    <button type="button" @click="activeTab = 'information'" :class="{ 'bg-blue-600 text-white': activeTab === 'information', 'bg-gray-50 hover:bg-gray-100': activeTab !== 'information' }" class="w-full flex items-center p-3 rounded-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                        <span class="font-semibold">@lang('general.information')</span>
+                    </button>
+                </li>
+                <li>
+                    <button type="button" @click="activeTab = 'education'" :class="{ 'bg-blue-600 text-white': activeTab === 'education', 'bg-gray-50 hover:bg-gray-100': activeTab !== 'education' }" class="w-full flex items-center p-3 rounded-lg">
+                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 16c1.255 0 2.443-.29 3.5-.804V4.804zM14.5 4c1.255 0 2.443.29 3.5.804v10A7.969 7.969 0 0114.5 16c-1.255 0-2.443-.29-3.5-.804V4.804A7.968 7.968 0 0114.5 4z"></path></svg>
+                        <span class="font-semibold">@lang('general.education')</span>
+                    </button>
+                </li>
+            </ul>
+
+            <div class="flex-grow w-full">
+                <div x-show="activeTab === 'information'" class="p-4 border rounded-md">
+                    @include('livewire.employee.partials.edit-info-form')
+                </div>
+                <div x-show="activeTab === 'education'" class="p-4 border rounded-md">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <x-forms.input-label for="education_title">@lang('general.title')</x-forms.input-label>
+                            <x-forms.input type="text" wire:model="form.education_title" id="education_title" />
+                            <x-error-span>{{ $errors->first('form.education_title') }}</x-error-span>
+                        </div>
+                        <div>
+                            <x-forms.input-label for="education_university">@lang('general.university')</x-forms.input-label>
+                            <x-forms.input type="text" wire:model="form.education_university" id="education_university" />
+                            <x-error-span>{{ $errors->first('form.education_university') }}</x-error-span>
+                        </div>
+                        <div>
+                            <x-forms.input-label for="education_type">@lang('general.type')</x-forms.input-label>
+                            <x-forms.select-input wire:model="form.education_type" id="education_type">
+                                <option value="">-- @lang('general.select') --</option>
+                                <option value="0">@lang('general.unknown')</option>
+                                <option value="1">@lang('general.primary_school')</option>
+                                <option value="2">@lang('general.high_school')</option>
+                                <option value="3">@lang('general.institute')</option>
+                                <option value="4">@lang('general.university')</option>
+                                <option value="5">@lang('general.master')</option>
+                                <option value="6">@lang('general.phd')</option>
+                            </x-forms.select-input>
+                            <x-error-span>{{ $errors->first('form.education_type') }}</x-error-span>
+                        </div>
+                        <div>
+                            <x-forms.input-label for="education_graduation_year">@lang('general.graduation_year')</x-forms.input-label>
+                            <x-forms.input type="number" placeholder="YYYY" wire:model="form.education_graduation_year" id="education_graduation_year" />
+                            <x-error-span>{{ $errors->first('form.education_graduation_year') }}</x-error-span>
+                        </div>
                     </div>
-                    <div>
-                        <input type="file" wire:model.live="form.photo" id="photo"
-                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100" />
-                        <div wire:loading wire:target="form.photo" class="text-sm text-gray-500 mt-1">
-                            @lang('general.uploading')...</div>
-                        <x-error-span>{{ $errors->first('form.photo') }}</x-error-span>
-                    </div>
                 </div>
             </div>
-
-            @foreach (config('app.supported_locales') as $locale)
-                <div>
-                    <x-forms.input-label for="name_{{ $locale }}">@lang('general.name')
-                        ({{ strtoupper($locale) }})</x-forms.input-label>
-                    <x-forms.input type="text" wire:model="form.name.{{ $locale }}"
-                        id="name_{{ $locale }}" />
-                    <x-error-span>{{ $errors->first('form.name.' . $locale) }}</x-error-span>
-                </div>
-            @endforeach
-
-            <div>
-                <x-forms.input-label for="national_number">@lang('general.national_number')</x-forms.input-label>
-                <x-forms.input type="text" wire:model="form.national_number" id="national_number" />
-                <x-error-span>{{ $errors->first('form.national_number') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="actual_job">@lang('general.actual_job')</x-forms.input-label>
-                <x-forms.input type="text" wire:model="form.actual_job" id="actual_job" />
-                <x-error-span>{{ $errors->first('form.actual_job') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="years_of_service">@lang('general.years_of_service')</x-forms.input-label>
-                <x-forms.input type="number" step="0.1" wire:model="form.years_of_service" id="years_of_service" />
-                <x-error-span>{{ $errors->first('form.years_of_service') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="work_email">@lang('general.work_email')</x-forms.input-label>
-                <x-forms.input type="email" wire:model="form.work_email" id="work_email" />
-                <x-error-span>{{ $errors->first('form.work_email') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="direct_manager_id">@lang('general.direct_manager')</x-forms.input-label>
-                <x-forms.select-input wire:model="form.direct_manager_id" id="direct_manager_id">
-                    <option value="">--</option>
-                    @foreach ($allEmployees as $emp)
-                        @if ($emp)
-                            <option value="{{ $emp->id }}">{{ $emp->getTranslation('name', app()->getLocale()) }}
-                            </option>
-                        @endif
-                    @endforeach
-                </x-forms.select-input>
-                <x-error-span>{{ $errors->first('form.direct_manager_id') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="tech_manager_id">@lang('general.tech_manager')</x-forms.input-label>
-                <x-forms.select-input wire:model="form.tech_manager_id" id="tech_manager_id">
-                    <option value="">--</option>
-                    @foreach ($allEmployees as $emp)
-                        @if ($emp)
-                            <option value="{{ $emp->id }}">{{ $emp->getTranslation('name', app()->getLocale()) }}
-                            </option>
-                        @endif
-                    @endforeach
-                </x-forms.select-input>
-                <x-error-span>{{ $errors->first('form.tech_manager_id') }}</x-error-span>
-            </div>
-
-            @foreach (config('app.supported_locales') as $locale)
-                <div>
-                    <x-forms.input-label for="father_name_{{ $locale }}">@lang('general.father_name')
-                        ({{ strtoupper($locale) }})</x-forms.input-label>
-                    <x-forms.input type="text" wire:model="form.father_name.{{ $locale }}"
-                        id="father_name_{{ $locale }}" />
-                    <x-error-span>{{ $errors->first('form.father_name.' . $locale) }}</x-error-span>
-                </div>
-            @endforeach
-
-            @foreach (config('app.supported_locales') as $locale)
-                <div>
-                    <x-forms.input-label for="mother_name_{{ $locale }}">@lang('general.mother_name')
-                        ({{ strtoupper($locale) }})</x-forms.input-label>
-                    <x-forms.input type="text" wire:model="form.mother_name.{{ $locale }}"
-                        id="mother_name_{{ $locale }}" />
-                    <x-error-span>{{ $errors->first('form.mother_name.' . $locale) }}</x-error-span>
-                </div>
-            @endforeach
-
-            <div>
-                <x-forms.input-label for="dob">@lang('general.dob')</x-forms.input-label>
-                <x-forms.input type="date" wire:model="form.dob" id="dob" />
-                <x-error-span>{{ $errors->first('form.dob') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="actual_dob">@lang('general.actual_dob')</x-forms.input-label>
-                <x-forms.input type="date" wire:model="form.actual_dob" id="actual_dob" />
-                <x-error-span>{{ $errors->first('form.actual_dob') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="gender">@lang('general.gender')</x-forms.input-label>
-                <x-forms.select-input wire:model="form.gender" id="gender">
-                    <option value="0">@lang('general.unknown')</option>
-                    <option value="1">@lang('general.male')</option>
-                    <option value="2">@lang('general.female')</option>
-                </x-forms.select-input>
-                <x-error-span>{{ $errors->first('form.gender') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="marital_status">@lang('general.marital_status')</x-forms.input-label>
-                <x-forms.select-input wire:model="form.marital_status" id="marital_status">
-                    <option value="0">@lang('general.unknown')</option>
-                    <option value="1">@lang('general.single')</option>
-                    <option value="2">@lang('general.married')</option>
-                </x-forms.select-input>
-                <x-error-span>{{ $errors->first('form.marital_status') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="children">@lang('general.children')</x-forms.input-label>
-                <x-forms.input type="number" wire:model="form.children" id="children" />
-                <x-error-span>{{ $errors->first('form.children') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="nationality">@lang('general.nationality')</x-forms.input-label>
-                <x-forms.select-input wire:model="form.nationality" id="nationality">
-                    <option value="syrian">Syrian</option>
-                </x-forms.select-input>
-                <x-error-span>{{ $errors->first('form.nationality') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="civil_registry_office">@lang('general.civil_registry_office')</x-forms.input-label>
-                <x-forms.input type="text" wire:model="form.civil_registry_office" id="civil_registry_office" />
-                <x-error-span>{{ $errors->first('form.civil_registry_office') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="civil_registry_number">@lang('general.civil_registry_number')</x-forms.input-label>
-                <x-forms.input type="text" wire:model="form.civil_registry_number" id="civil_registry_number" />
-                <x-error-span>{{ $errors->first('form.civil_registry_number') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="place_of_registration">@lang('general.place_of_registration')</x-forms.input-label>
-                <x-forms.input type="text" wire:model="form.place_of_registration" id="place_of_registration" />
-                <x-error-span>{{ $errors->first('form.place_of_registration') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="work_phone">@lang('general.work_phone')</x-forms.input-label>
-                <x-forms.input type="tel" wire:model="form.work_phone" id="work_phone" />
-                <x-error-span>{{ $errors->first('form.work_phone') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="personal_phone">@lang('general.personal_phone')</x-forms.input-label>
-                <x-forms.input type="tel" wire:model="form.personal_phone" id="personal_phone" />
-                <x-error-span>{{ $errors->first('form.personal_phone') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="personal_email">@lang('general.personal_email')</x-forms.input-label>
-                <x-forms.input type="email" wire:model="form.personal_email" id="personal_email" />
-                <x-error-span>{{ $errors->first('form.personal_email') }}</x-error-span>
-            </div>
-
-            @foreach (config('app.supported_locales') as $locale)
-                <div class="md:col-span-1">
-                    <x-forms.input-label for="address_{{ $locale }}">@lang('general.address')
-                        ({{ strtoupper($locale) }})</x-forms.input-label>
-                    <x-forms.input type="text" wire:model="form.address.{{ $locale }}"
-                        id="address_{{ $locale }}" />
-                    <x-error-span>{{ $errors->first('form.address.' . $locale) }}</x-error-span>
-                </div>
-            @endforeach
-
-            <div class="md:col-span-3">
-                <x-forms.input-label for="skills">@lang('general.skills')</x-forms.input-label>
-                <x-forms.input type="text" wire:model="form.skills" id="skills" />
-                <x-error-span>{{ $errors->first('form.skills') }}</x-error-span>
-            </div>
-
-            <div class="md:col-span-3">
-                <x-forms.input-label for="interests">@lang('general.interests')</x-forms.input-label>
-                <x-forms.input type="text" wire:model="form.interests" id="interests" />
-                <x-error-span>{{ $errors->first('form.interests') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label>@lang('general.status')</x-forms.input-label>
-                <div class="flex space-x-4 items-center mt-2">
-                    <x-forms.radio-input name="is_active" value="1"
-                        wire:model="form.is_active">@lang('general.active')</x-forms.radio-input>
-                    <x-forms.radio-input name="is_active" value="0"
-                        wire:model="form.is_active">@lang('general.inactive')</x-forms.radio-input>
-                </div>
-                <x-error-span>{{ $errors->first('form.is_active') }}</x-error-span>
-            </div>
-
-            <div class="flex items-center space-x-2">
-                <input type="checkbox" wire:model.live="form.is_board_member" id="is_board_member" class="rounded">
-                <x-forms.input-label for="is_board_member">@lang('general.is_board_member')</x-forms.input-label>
-                <x-error-span>{{ $errors->first('form.is_board_member') }}</x-error-span>
-            </div>
-
-            <div></div>
-
-            @if ($this->form->is_board_member)
-                <div>
-                    <x-forms.input-label for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>
-                    <x-forms.input type="date" wire:model="form.board_member_started_at"
-                        id="board_member_started_at" />
-                    <x-error-span>{{ $errors->first('form.board_member_started_at') }}</x-error-span>
-                </div>
-                <div>
-                    <x-forms.input-label for="board_member_end_at">@lang('general.board_member_end_at')</x-forms.input-label>
-                    <x-forms.input type="date" wire:model="form.board_member_end_at" id="board_member_end_at" />
-                    <x-error-span>{{ $errors->first('form.board_member_end_at') }}</x-error-span>
-                </div>
-            @endif
         </div>
 
-        <div class="flex justify-end space-x-2 pt-4">
+        <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
             <x-primary-button type="submit">@lang('general.save')</x-primary-button>
             <x-secondary-button :href="route('employees.index')">@lang('general.cancel')</x-secondary-button>
         </div>
