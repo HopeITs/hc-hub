@@ -90,8 +90,9 @@
                         </x-layouts.app.sidebar.nav-item>
 
                         <x-layouts.app.sidebar.nav-item
-                            :href="'#'"
-                            :active="false">
+                            :href="route('centers.index')"
+                            :active="request()->routeIs('centers.index')"
+                            wire:navigate>
                             {{ trans_choice('general.center', 2) }}
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>

@@ -4,6 +4,7 @@ use App\Livewire\Basics\ChecklistItemModule;
 use App\Livewire\Basics\CityModule;
 use App\Livewire\Basics\ContractTypeModule;
 use App\Livewire\Basics\DepartmentModule;
+use App\Livewire\ProjectManagement\CentersModule;
 use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Basics\LeaveTypeModule;
 use App\Livewire\ProjectManagement\ProjectDetail;
@@ -39,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('projects', ProjectModule::class)->name('projects.index');
     Route::get('projects\{project:slug}', ProjectDetail::class)->name('projects.show');
     Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
+    Route::get('/centers', CentersModule::class)->name('centers.index');
 });
 
 require __DIR__.'/auth.php';
