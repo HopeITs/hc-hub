@@ -3,153 +3,128 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Employee;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
+use Livewire\WithFileUploads;
 
 class EmployeeForm extends Form
 {
+    use WithFileUploads;
+
     public ?Employee $employee = null;
 
-    #[Validate]
     public $photo;
+    public $name = [];
+    public $national_number;
+    public $actual_job;
+    public $years_of_service;
+    public $work_email;
+    public $direct_manager_id;
+    public $tech_manager_id;
+    public $father_name = [];
+    public $mother_name = [];
+    public $dob;
+    public $gender;
+    public $marital_status;
+    public $children;
+    public $nationality;
+    public $civil_registry_office;
+    public $civil_registry_number;
+    public $place_of_registration;
+    public $work_phone;
+    public $personal_phone;
+    public $personal_email;
+    public $address = [];
+    public $skills;
+    public $interests;
+    public $is_active = 1;
+    public $is_board_member = false;
+    public $board_member_started_at;
+    public $board_member_end_at;
 
-    // ... (all your other employee properties)
-    public array $name = [];
-    public array $father_name = [];
-    public array $mother_name = [];
-    public array $address = [];
-    public ?string $national_number = '';
-    public ?string $actual_job = '';
-    public float $years_of_service = 0;
-    public ?string $work_email = '';
-    public ?int $direct_manager_id = null;
-    public ?int $tech_manager_id = null;
-    public ?string $dob = '';
-    public ?string $civil_registry_office = '';
-    public ?string $civil_registry_number = '';
-    public ?string $place_of_registration = '';
-    public int $gender = 0;
-    public string $nationality = 'syrian';
-    public int $marital_status = 0;
-    public int $children = 0;
-    public ?string $work_phone = '';
-    public ?string $personal_phone = '';
-    public ?string $personal_email = '';
-    public ?string $skills = '';
-    public ?string $interests = '';
-    public bool $is_active = true;
-    public bool $is_board_member = false;
-    public ?string $board_member_started_at = null;
-    public ?string $board_member_end_at = null;
-    public ?string $education_title = null;
-    public ?string $education_university = null;
-    public ?string $education_type = null;
-    public ?string $education_graduation_year = null;
+    // Education
+    public $education_title;
+    public $education_university;
+    public $education_type;
+    public $education_graduation_year;
 
-
-    public function rules(): array
-    {
-        return [
-            'photo' => ['nullable', 'image', 'max:2048'],
-            'name.*' => ['required', 'string', 'max:255'],
-            'national_number' => ['required', 'string', Rule::unique('employees', 'national_number')->ignore($this->employee)],
-            'actual_job' => ['nullable', 'string', 'max:255'],
-            'years_of_service' => ['nullable', 'numeric', 'min:0'],
-            'work_email' => ['nullable', 'email', Rule::unique('employees', 'work_email')->ignore($this->employee)],
-            'direct_manager_id' => ['nullable', 'exists:employees,id'],
-            'tech_manager_id' => ['nullable', 'exists:employees,id'],
-            'dob' => ['nullable', 'date'],
-            'civil_registry_office' => ['nullable', 'string', 'max:255'],
-            'civil_registry_number' => ['nullable', 'string', 'max:255'],
-            'place_of_registration' => ['nullable', 'string', 'max:255'],
-            'gender' => ['nullable', 'in:0,1,2'],
-            'father_name.*' => ['nullable', 'string', 'max:255'],
-            'mother_name.*' => ['nullable', 'string', 'max:255'],
-            'nationality' => ['required', 'in:syrian'],
-            'marital_status' => ['nullable', 'in:0,1,2'],
-            'children' => ['nullable', 'integer', 'min:0'],
-            'work_phone' => ['required', 'string', 'max:255'],
-            'personal_phone' => ['required', 'string', 'max:255'],
-            'personal_email' => ['required', 'email'],
-            'address.*' => ['required', 'string', 'max:255'],
-            'skills' => ['nullable', 'string'],
-            'interests' => ['nullable', 'string'],
-            'is_active' => ['required', 'boolean'],
-            'is_board_member' => ['required', 'boolean'],
-            'board_member_started_at' => ['nullable', 'required_if:is_board_member,true', 'date'],
-            'board_member_end_at' => ['nullable', 'date'],
-            'education_title' => ['nullable', 'string', 'max:255', 'required_with:education_university,education_type,education_graduation_year'],
-            'education_university' => ['nullable', 'string', 'max:255'],
-            'education_type' => ['nullable', 'in:0,1,2,3,4,5,6'],
-            'education_graduation_year' => ['nullable', 'numeric', 'min:1950'],
-        ];
-    }
-
-    public function setEmployee(Employee $employee): void
+    public function setEmployee(Employee $employee)
     {
         $this->employee = $employee;
+
         $this->fill($employee->toArray());
         $this->name = $employee->getTranslations('name');
         $this->father_name = $employee->getTranslations('father_name');
         $this->mother_name = $employee->getTranslations('mother_name');
         $this->address = $employee->getTranslations('address');
-        $this->is_board_member = (bool) $employee->is_board_member;
-
-        if ($education = $employee->educations()->first()) {
-            $this->education_title = $education->title;
-            $this->education_university = $education->university;
-            $this->education_type = $education->type;
-            $this->education_graduation_year = $education->graduation_year;
-        }
     }
 
-    public function store(): void
+    public function rules()
     {
-        $validated = $this->validate();
-        if ($this->photo) {
-            $validated['photo'] = $this->photo->store('employee_photos', 'public');
-        }
+        return [
+            'name' => 'required|array',
+            'name.*' => 'required|string|max:255',
+            'national_number' => 'required|string|max:20',
+            'actual_job' => 'nullable|string|max:255',
+            'years_of_service' => 'nullable|numeric|min:0',
+            'work_email' => 'nullable|email|max:255',
+            'direct_manager_id' => 'nullable|exists:employees,id',
+            'tech_manager_id' => 'nullable|exists:employees,id',
+            'photo' => 'nullable|image|max:2048',
 
-        DB::transaction(function () use ($validated) {
-            $employee = Employee::create($validated);
+            'father_name' => 'nullable|array',
+            'mother_name' => 'nullable|array',
+            'dob' => 'nullable|date',
+            'gender' => 'nullable|integer|in:0,1,2',
+            'marital_status' => 'nullable|integer|in:0,1,2',
+            'children' => 'nullable|integer|min:0',
+            'nationality' => 'nullable|string|max:100',
+            'civil_registry_office' => 'nullable|string|max:255',
+            'civil_registry_number' => 'nullable|string|max:255',
+            'place_of_registration' => 'nullable|string|max:255',
+            'work_phone' => 'nullable|string|max:50',
+            'personal_phone' => 'nullable|string|max:50',
+            'personal_email' => 'nullable|email|max:255',
+            'address' => 'nullable|array',
+            'skills' => 'nullable|string|max:255',
+            'interests' => 'nullable|string|max:255',
+            'is_active' => 'required|boolean',
+            'is_board_member' => 'nullable|boolean',
+            'board_member_started_at' => 'nullable|date',
+            'board_member_end_at' => 'nullable|date|after_or_equal:board_member_started_at',
 
-            if (!empty($validated['education_title'])) {
-                $employee->educations()->create([
-                    'title' => $validated['education_title'],
-                    'university' => $validated['education_university'],
-                    'type' => $validated['education_type'],
-                    'graduation_year' => $validated['education_graduation_year'],
-                ]);
-            }
-        });
+            // Education
+            'education_title' => 'nullable|string|max:255',
+            'education_university' => 'nullable|string|max:255',
+            'education_type' => 'nullable|integer|in:0,1,2,3,4,5,6',
+            'education_graduation_year' => 'nullable|digits:4|integer',
+        ];
     }
 
-    public function update(): void
+    public function store()
     {
-        $validated = $this->validate();
+        $data = $this->validate();
+
+        $employee = Employee::create($data);
+
         if ($this->photo) {
-            if ($this->employee->photo) { Storage::disk('public')->delete($this->employee->photo); }
-            $validated['photo'] = $this->photo->store('employee_photos', 'public');
+            $employee->photo = $this->photo->store('employees', 'public');
+            $employee->save();
         }
 
-        DB::transaction(function () use ($validated) {
-            $this->employee->update($validated);
-            if (!empty($validated['education_title'])) {
-                $this->employee->educations()->updateOrCreate(
-                    ['employee_id' => $this->employee->id],
-                    [
-                        'title' => $validated['education_title'],
-                        'university' => $validated['education_university'],
-                        'type' => $validated['education_type'],
-                        'graduation_year' => $validated['education_graduation_year'],
-                    ]
-                );
-            } else {
-                $this->employee->educations()->delete();
-            }
-        });
+        $this->reset();
+    }
+
+    public function update()
+    {
+        $data = $this->validate();
+
+        $this->employee->update($data);
+
+        if ($this->photo && !is_string($this->photo)) {
+            $this->employee->photo = $this->photo->store('employees', 'public');
+            $this->employee->save();
+        }
     }
 }
