@@ -23,24 +23,39 @@
 
     <x-table>
         <x-slot name="headings">
-            <x-table.heading>ID</x-table.heading>
+            <x-table.heading
+                sortable
+                wire:click="sortBy('id')"
+                :direction="$sortField === 'id' ? $sortDirection : null"
+            >ID</x-table.heading>
 
-            <x-table.heading sortable field="type" wire:click="sortBy('name')">
-                @lang('general.name')(AR)
-                @if ($sortField === 'name')
-                    @if ($sortDirection === 'asc')  @endif
-                @endif
-            </x-table.heading>
-            <x-table.heading sortable field="type" wire:click="sortBy('name')">
-                @lang('general.name')(EN)
-                @if ($sortField === 'name')
-                    @if ($sortDirection === 'asc')  @endif
-                @endif
-            </x-table.heading>
-            <x-table.heading>@lang('general.place')</x-table.heading>
-            <x-table.heading sortable>@lang('general.weekly_hours')</x-table.heading>
+            <x-table.heading
+                sortable
+                wire:click="sortBy('name_ar')"
+                :direction="$sortField === 'name_ar' ? $sortDirection : null"
+            >@lang('general.name')(AR)</x-table.heading>
+
+            <x-table.heading
+                sortable
+                wire:click="sortBy('name_en')"
+                :direction="$sortField === 'name_en' ? $sortDirection : null"
+            >@lang('general.name')(EN)</x-table.heading>
+
+            <x-table.heading
+                sortable
+                wire:click="sortBy('place')"
+                :direction="$sortField === 'place' ? $sortDirection : null"
+            >@lang('general.place')</x-table.heading>
+
+            <x-table.heading
+                sortable
+                wire:click="sortBy('type')"
+                :direction="$sortField === 'type' ? $sortDirection : null"
+            >@lang('general.type')</x-table.heading>
+
             <x-table.heading/>
         </x-slot>
+
         <x-slot name="body">
             @forelse($items as $item)
                 @php
