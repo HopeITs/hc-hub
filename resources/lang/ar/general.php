@@ -42,7 +42,7 @@ return [
     'save' => 'حفظ',
     'cancel' => 'إلغاء',
     'edit' => 'تعديل',
-    'add_new' => 'إضافة جديد',
+    "add_new" => 'إضافة جديد',
     'base_days' => 'الأيام الأساسية',
     'allowed_gender' => 'الجنس المسموح به',
     'marital_status' => 'الحالة الاجتماعية',
@@ -86,6 +86,15 @@ return [
     'required-project' => 'المشروع',
     'is-active' => 'التفعيل',
     'qualifications' => 'المؤهلات الوظيفية',
+
+
+    'centers'              => 'المركز',
+    'center-name'          => 'اسم المركز',
+    'center-city'        => 'المدينة',
+    'address'              => 'عنوان المركز',
+    'search'               => 'بحث',
+
+
     'employee' => 'الموظف',
     'photo' => 'الصورة',
     'unknown' => 'غير معروف',
@@ -174,7 +183,7 @@ return [
         'current-password' => 'كلمة المرور الحالية',
         'new-password' => 'كلمة المرور الجديدة',
 
-    ]
+    ],
 
 
 ];

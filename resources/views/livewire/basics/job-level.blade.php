@@ -17,18 +17,39 @@
 
     <x-table>
         <x-slot name="headings">
-            <x-table.heading>ID</x-table.heading>
-            <x-table.heading sortable>@lang('general.name')(AR)</x-table.heading>
-            <x-table.heading sortable>@lang('general.name')(EN)</x-table.heading>
+            <x-table.heading
+                sortable
+                wire:click="sortBy('id')"
+                :direction="$sortField === 'id' ? $sortDirection : null"
+            >ID</x-table.heading>
+
+            <x-table.heading
+                sortable
+                wire:click="sortBy('name_ar')"
+                :direction="$sortField === 'name_ar' ? $sortDirection : null"
+            >@lang('general.name')(AR)</x-table.heading>
+
+            <x-table.heading
+                sortable
+                wire:click="sortBy('name_en')"
+                :direction="$sortField === 'name_en' ? $sortDirection : null"
+            >@lang('general.name')(EN)</x-table.heading>
+
             <x-table.heading
                 sortable
                 wire:click="sortBy('grade')"
-                :direction="$sortField === 'grade' ? $sortDirection : null">
-                @lang('general.grade')
-            </x-table.heading>
-            <x-table.heading>@lang('general.email')</x-table.heading>
+                :direction="$sortField === 'grade' ? $sortDirection : null"
+            >@lang('general.grade')</x-table.heading>
+
+            <x-table.heading
+                sortable
+                wire:click="sortBy('email')"
+                :direction="$sortField === 'email' ? $sortDirection : null"
+            >@lang('general.email')</x-table.heading>
+
             <x-table.heading/>
         </x-slot>
+
         <x-slot name="body">
             @forelse($items as $item)
                 <tr>
@@ -36,7 +57,7 @@
                     <x-table.cell>{{ $item->getTranslation('name','ar') }}</x-table.cell>
                     <x-table.cell>{{ $item->getTranslation('name','en') }}</x-table.cell>
                     <x-table.cell>{{ $item->grade }}</x-table.cell>
-                    <x-table.cell>{{ $item->email }}</x-table.cell>
+                    <x-table.cell>{{ $item->email ?? '-' }}</x-table.cell>
                     <x-table.cell>
                         <x-table.edit-btn wire:click="edit({{ $item->id }})"></x-table.edit-btn>
                         <x-table.delete-btn :modelId="$item->id"/>
@@ -58,26 +79,26 @@
                     <div class="col-span-1">
                         <x-forms.input-label for="name_{{ $locale }}">@lang('general.name') ({{ strtoupper($locale) }})</x-forms.input-label>
                         <x-forms.input type="text" id="name_{{ $locale }}" wire:model.defer="item.name.{{ $locale }}"/>
-                        <x-error-span>{{ $errors->first('item.name.' . $locale) }}</x-error-span>
+                        <x-error-span>{{ $errors->first('item.name.' . $locale) ?? '-' }}</x-error-span>
                     </div>
                 @endforeach
 
                 <div class="col-span-2">
                     <x-forms.input-label for="description">@lang('general.description')</x-forms.input-label>
                     <x-forms.input type="text" id="description" wire:model.defer="item.description"/>
-                    <x-error-span>{{ $errors->first('item.description') }}</x-error-span>
+                    <x-error-span>{{ $errors->first('item.description') ?? '-' }}</x-error-span>
                 </div>
 
                 <div class="col-span-1">
                     <x-forms.input-label for="grade">@lang('general.grade')</x-forms.input-label>
                     <x-forms.input type="number" id="grade" wire:model.defer="item.grade"/>
-                    <x-error-span>{{ $errors->first('item.grade') }}</x-error-span>
+                    <x-error-span>{{ $errors->first('item.grade') ?? '-' }}</x-error-span>
                 </div>
 
                 <div class="col-span-1">
                     <x-forms.input-label for="email">@lang('general.email')</x-forms.input-label>
                     <x-forms.input type="email" id="email" wire:model.defer="item.email"/>
-                    <x-error-span>{{ $errors->first('item.email') }}</x-error-span>
+                    <x-error-span>{{ $errors->first('item.email') ?? '-' }}</x-error-span>
                 </div>
             </div>
 

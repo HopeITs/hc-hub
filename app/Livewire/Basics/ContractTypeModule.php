@@ -117,14 +117,43 @@ class ContractTypeModule extends Component
 
     public function render()
     {
-        sleep(1); // Optional: for debounce effect during search
+        $locale = app()->getLocale();
+        $sort   = $this->sortField ?: 'id';
+        $dir    = $this->sortDirection ?: 'asc';
 
-        $items = ContractType::search('type', $this->search)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(15);
+        $query = ContractType::query()
+            ->when($this->search, function ($q) use ($locale) {
+                $term = $this->search;
 
-        return view('livewire.basics.contract-type-module', [
-            'items' => $items,
-        ]);
+                $q->where(function ($w) use ($term, $locale) {
+                    // Search in translated name
+                    $w->search(["name->$locale"], $term)
+                        // Search numeric or text values in place/type if needed
+                        ->orWhere('place', 'like', "%{$term}%")
+                        ->orWhere('type', 'like', "%{$term}%");
+                });
+            });
+
+        // Sorting logic
+        switch ($sort) {
+            case 'name_ar':
+                $query->orderBy("name->ar", $dir);
+                break;
+            case 'name_en':
+                $query->orderBy("name->en", $dir);
+                break;
+            case 'place':
+            case 'type':
+                $query->orderBy($sort, $dir);
+                break;
+            default:
+                $query->orderBy('id', $dir);
+                break;
+        }
+
+        $items = $query->paginate(15);
+
+        return view('livewire.basics.contract-type-module', compact('items'));
     }
+
 }

@@ -73,13 +73,16 @@
                     {{$item->description}}
                 </span>
                 <div class="mt-4 pt-4 border-t-1 border-gray-200">
-                    <button type="button" wire:click="show({{$item->id}})">عرض التفاصيل</button>
+                    <a href="{{route('projects.show',['slug' => $item->slug])}}">عرض التفاصيل</a>
                 </div>
 
 
             </x-card>
         @endforeach
+
+
     </div>
+    <div class="py-4">{{$items->links()}}</div>
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal">
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-2 gap-4">
@@ -133,7 +136,7 @@
 
 
     <x-modal.dialog id="showDetailsModal" :title="$modalTitle" wire:model.defer="showDetailsModal">
-@dump($item)
+
             <x-slot name="icon">
                 <div class="flex justify-between">
 

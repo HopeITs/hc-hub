@@ -1,4 +1,4 @@
-<section class="min-h-[90dvh] rtl text-right bg-gray-100 flex items-center justify-center px-4">
+<section class="min-h-[86.7dvh] rtl text-right bg-gray-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
 
         {{-- Logo --}}

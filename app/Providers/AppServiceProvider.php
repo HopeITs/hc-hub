@@ -37,5 +37,21 @@ class AppServiceProvider extends ServiceProvider
 
 
         });
+        Builder::macro('findBySlug', function ($fields, $string) {
+            if (!$string) {
+                return $this;
+            }
+
+            $fields = Arr::wrap($fields); // ensure $fields is always an array
+
+            return $this->where(function ($query) use ($fields, $string) {
+                foreach ($fields as $field) {
+                    $query->orWhere($field, 'like', '%' . $string . '%');
+                }
+
+            });
+
+
+        });
     }
 }

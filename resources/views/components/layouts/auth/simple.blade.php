@@ -3,9 +3,9 @@
 <head>
     @include('partials.head')
 </head>
-<body class="font-SomarSans">
+<body class="font-SomarSans bg-gray-100">
 
-<div class=" bg-gray-100 flex items-center justify-center px-4">
+<div class=" flex items-center justify-center px-4">
 
     <div class="flex w-full max-w-sm flex-col gap-6">
         <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>

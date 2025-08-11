@@ -126,12 +126,41 @@ class JobLevelModule extends Component
 
     public function render()
     {
-        $items = JobLevel::search(['name', 'description', 'email'], $this->search)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(15);
+        $locale = app()->getLocale();
+        $sort   = $this->sortField ?: 'id';
+        $dir    = $this->sortDirection ?: 'asc';
 
-        return view('livewire.basics.job-level', [
-            'items' => $items,
-        ]);
+        $query = JobLevel::query()
+            ->when($this->search, function ($q) use ($locale) {
+                $term = $this->search;
+
+                $q->where(function ($w) use ($term, $locale) {
+                    // Reuse your app-wide search() scope like other modules
+                    $w->search(["name->$locale", 'description', 'email'], $term);
+                });
+            });
+
+        // Sorting (keep keys in sync with Blade headers)
+        switch ($sort) {
+            case 'name_ar':
+                $query->orderBy('name->ar', $dir);
+                break;
+
+            case 'name_en':
+                $query->orderBy('name->en', $dir);
+                break;
+
+            case 'grade':
+            case 'email':
+                $query->orderBy($sort, $dir);
+                break;
+
+            default: // id
+                $query->orderBy('id', $dir);
+        }
+
+        $items = $query->paginate(15);
+
+        return view('livewire.basics.job-level', compact('items'));
     }
 }

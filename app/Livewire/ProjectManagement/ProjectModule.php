@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\ProjectManagement;
 
 use App\Models\Project;
-
 use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -174,8 +173,8 @@ class ProjectModule extends Component
             'cities as cities_count' => function ($query) {
                 $query->select(DB::raw('count(distinct city_id)'));
             }
-        ])->orderBy('is_active', 'desc')->get();
+        ])->orderBy('is_active', 'desc')->paginate(9);
 
-        return view('livewire.project-module', compact('items'));
+        return view('livewire.project-management.project-module', compact('items'));
     }
 }

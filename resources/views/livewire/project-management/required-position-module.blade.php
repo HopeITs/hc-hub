@@ -17,10 +17,30 @@
 
     <x-table>
         <x-slot name="headings">
-            <x-table.heading wire:click="sortBy('id')" sortable :direction="$sortField === 'id' ? $sortDirection : null">ID</x-table.heading>
-            <x-table.heading>@lang('general.job-title')</x-table.heading>
-            <x-table.heading>@lang('general.required-project')</x-table.heading>
-            <x-table.heading wire:click="sortBy('is-active')" sortable :direction="$sortField === 'is-active' ? $sortDirection : null">@lang('general.is-active')</x-table.heading>
+            <x-table.heading
+                wire:click="sortBy('id')"
+                sortable
+                :direction="$sortField === 'id' ? $sortDirection : null"
+            >ID</x-table.heading>
+
+            <x-table.heading
+                wire:click="sortBy('title')"
+                sortable
+                :direction="$sortField === 'title' ? $sortDirection : null"
+            >@lang('general.job-title')</x-table.heading>
+
+            <x-table.heading
+                wire:click="sortBy('project_name')"
+                sortable
+                :direction="$sortField === 'project_name' ? $sortDirection : null"
+            >@lang('general.required-project')</x-table.heading>
+
+            <x-table.heading
+                wire:click="sortBy('is_active')"
+                sortable
+                :direction="$sortField === 'is_active' ? $sortDirection : null"
+            >@lang('general.is-active')</x-table.heading>
+
             <x-table.heading />
         </x-slot>
 
@@ -29,10 +49,16 @@
                 <tr>
                     <x-table.cell>{{ $item->id }}</x-table.cell>
                     <x-table.cell>{{ $item->title }}</x-table.cell>
-                    <x-table.cell>{{ ($item->project)->getTranslation('name', app()->getLocale()) ?? '-'  }}</x-table.cell>
-                    <x-table.cell-status :active="$item->is_active"
-                                         :model-id="$item->id"
-                                         wire-event="confirmToggleItemStatus"/>
+
+                    <x-table.cell>
+                        {{ optional($item->project)->getTranslation('name', app()->getLocale()) ?? '-' }}
+                    </x-table.cell>
+
+                    <x-table.cell-status
+                        :active="$item->is_active"
+                        :model-id="$item->id"
+                        wire-event="confirmToggleItemStatus"
+                    />
 
                     <x-table.cell>
                         <x-table.edit-btn wire:click="edit({{ $item->id }})" />
@@ -49,7 +75,6 @@
         </x-slot>
     </x-table>
 
-    {{-- Modal --}}
     {{-- Modal --}}
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         <form wire:submit.prevent="save" class="space-y-4">
