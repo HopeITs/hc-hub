@@ -14,6 +14,15 @@ class EmployeeCreate extends Component
 
     public EmployeeForm $form;
 
+    public function mount()
+    {
+        $this->form->addCourse();
+        $this->form->addExperience();
+        $this->form->addRelative();
+        $this->form->addBadge();
+        $this->form->addChecklist();
+    }
+
     public function save()
     {
         $this->form->store();

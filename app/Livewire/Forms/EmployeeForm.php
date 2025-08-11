@@ -3,8 +3,6 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Employee;
-use Illuminate\Validation\Rule;
-use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Livewire\WithFileUploads;
 
@@ -14,6 +12,7 @@ class EmployeeForm extends Form
 
     public ?Employee $employee = null;
 
+    // ... All your properties
     public $photo;
     public $name = [];
     public $national_number;
@@ -28,7 +27,7 @@ class EmployeeForm extends Form
     public $gender;
     public $marital_status;
     public $children;
-    public $nationality;
+    public $nationality = 'syrian';
     public $civil_registry_office;
     public $civil_registry_number;
     public $place_of_registration;
@@ -42,85 +41,113 @@ class EmployeeForm extends Form
     public $is_board_member = false;
     public $board_member_started_at;
     public $board_member_end_at;
-
-    // Education
-    public $education_title;
-    public $education_university;
-    public $education_type;
-    public $education_graduation_year;
+    public array $educations = [];
+    public array $courses = [];
+    public array $experiences = [];
+    public array $relatives = [];
+    public array $badges = [];
+    public array $checklists = [];
 
     public function setEmployee(Employee $employee)
     {
         $this->employee = $employee;
-
         $this->fill($employee->toArray());
         $this->name = $employee->getTranslations('name');
         $this->father_name = $employee->getTranslations('father_name');
         $this->mother_name = $employee->getTranslations('mother_name');
         $this->address = $employee->getTranslations('address');
+
+        $this->educations = $employee->educations()->get()->toArray();
+        $this->courses = $employee->courses()->get()->toArray();
+        $this->experiences = $employee->experiences()->get()->toArray();
+        $this->relatives = $employee->relatives()->get()->toArray();
+        $this->badges = $employee->badges()->get()->toArray();
+        $this->checklists = $employee->checklists()->get()->toArray();
     }
+
+    public function addEducation() { $this->educations[] = ['title' => '', 'university' => '', 'type' => '', 'graduation_year' => '']; }
+    public function removeEducation(int $index) { unset($this->educations[$index]); $this->educations = array_values($this->educations); }
+    public function addCourse() { $this->courses[] = ['title' => '', 'issuing_organization' => '', 'date' => '', 'is_approved' => 0]; }
+    public function removeCourse(int $index) { unset($this->courses[$index]); $this->courses = array_values($this->courses); }
+    public function addExperience() { $this->experiences[] = ['job_title' => '', 'company' => '', 'start_date' => '', 'end_date' => '', 'place' => '', 'type' => '']; }
+    public function removeExperience(int $index) { unset($this->experiences[$index]); $this->experiences = array_values($this->experiences); }
+    public function addRelative() { $this->relatives[] = ['name' => '', 'phone' => '', 'relation' => '']; }
+    public function removeRelative(int $index) { unset($this->relatives[$index]); $this->relatives = array_values($this->relatives); }
+    public function addBadge() { $this->badges[] = ['evaluation_id' => null, 'currency' => 1, 'type' => '', 'date' => now()->format('Y-m-d'), 'reason' => '', 'current_salary' => null, 'new_salary' => null, 'notes' => '']; }
+    public function removeBadge(int $index) { unset($this->badges[$index]); $this->badges = array_values($this->badges); }
+    public function addChecklist() { $this->checklists[] = ['item_name' => '', 'brand' => '', 'model' => '', 'serial' => '', 'delivered_at' => now()->format('Y-m-d'), 'delivered_status' => '', 'returned_at' => null, 'returned_status' => '', 'notes' => '']; }
+    public function removeChecklist(int $index) { unset($this->checklists[$index]); $this->checklists = array_values($this->checklists); }
 
     public function rules()
     {
         return [
-            'name' => 'required|array',
-            'name.*' => 'required|string|max:255',
+            'name' => 'required|array', 'name.*' => 'required|string|max:255',
             'national_number' => 'required|string|max:20',
-            'actual_job' => 'nullable|string|max:255',
-            'years_of_service' => 'nullable|numeric|min:0',
-            'work_email' => 'nullable|email|max:255',
-            'direct_manager_id' => 'nullable|exists:employees,id',
-            'tech_manager_id' => 'nullable|exists:employees,id',
-            'photo' => 'nullable|image|max:2048',
-
-            'father_name' => 'nullable|array',
-            'mother_name' => 'nullable|array',
-            'dob' => 'nullable|date',
-            'gender' => 'nullable|integer|in:0,1,2',
-            'marital_status' => 'nullable|integer|in:0,1,2',
-            'children' => 'nullable|integer|min:0',
-            'nationality' => 'nullable|string|max:100',
-            'civil_registry_office' => 'nullable|string|max:255',
-            'civil_registry_number' => 'nullable|string|max:255',
-            'place_of_registration' => 'nullable|string|max:255',
-            'work_phone' => 'nullable|string|max:50',
-            'personal_phone' => 'nullable|string|max:50',
-            'personal_email' => 'nullable|email|max:255',
-            'address' => 'nullable|array',
-            'skills' => 'nullable|string|max:255',
-            'interests' => 'nullable|string|max:255',
             'is_active' => 'required|boolean',
-            'is_board_member' => 'nullable|boolean',
-            'board_member_started_at' => 'nullable|date',
-            'board_member_end_at' => 'nullable|date|after_or_equal:board_member_started_at',
-
-            // Education
-            'education_title' => 'nullable|string|max:255',
-            'education_university' => 'nullable|string|max:255',
-            'education_type' => 'nullable|integer|in:0,1,2,3,4,5,6',
-            'education_graduation_year' => 'nullable|digits:4|integer',
+            'nationality' => 'required|string|max:100',
+            'educations' => 'nullable|array',
+            'educations.*.title' => 'required_with:educations.*.university|string|max:255|nullable',
+            'courses' => 'nullable|array', 'courses.*.title' => 'required_with:courses.*.issuing_organization|string|max:255|nullable',
+            'experiences' => 'nullable|array', 'experiences.*.job_title' => 'required_with:experiences.*.company|string|max:255|nullable',
+            'relatives' => 'nullable|array', 'relatives.*.name' => 'required_with:relatives.*.relation|string|max:255|nullable',
+            'badges' => 'nullable|array', 'badges.*.type' => 'required_with:badges.*.date|string|max:255|nullable',
+            'checklists' => 'nullable|array', 'checklists.*.item_name' => 'nullable|string|max:255',
         ];
+    }
+
+    private function cleanupEmptyRelations()
+    {
+        $this->educations = collect($this->educations)->filter(fn ($edu) => !empty($edu['title']) || !empty($edu['university']))->values()->all();
+        $this->courses = collect($this->courses)->filter(fn ($course) => !empty($course['title']) || !empty($course['issuing_organization']))->values()->all();
+        $this->experiences = collect($this->experiences)->filter(fn ($exp) => !empty($exp['job_title']) || !empty($exp['company']))->values()->all();
+        $this->relatives = collect($this->relatives)->filter(fn ($rel) => !empty($rel['name']) || !empty($rel['relation']))->values()->all();
+        $this->badges = collect($this->badges)->filter(fn ($badge) => !empty($badge['type']))->values()->all();
+        $this->checklists = collect($this->checklists)->filter(fn ($item) => !empty($item['item_name']))->values()->all();
     }
 
     public function store()
     {
+        $this->cleanupEmptyRelations();
         $data = $this->validate();
-
         $employee = Employee::create($data);
+
+        if (!empty($this->educations)) { $employee->educations()->createMany($this->educations); }
+        if (!empty($this->courses)) { $employee->courses()->createMany($this->courses); }
+        if (!empty($this->experiences)) { $employee->experiences()->createMany($this->experiences); }
+        if (!empty($this->relatives)) { $employee->relatives()->createMany($this->relatives); }
+        if (!empty($this->badges)) { $employee->badges()->createMany($this->badges); }
+        if (!empty($this->checklists)) { $employee->checklists()->createMany($this->checklists); }
 
         if ($this->photo) {
             $employee->photo = $this->photo->store('employees', 'public');
             $employee->save();
         }
-
         $this->reset();
     }
 
     public function update()
     {
+        $this->cleanupEmptyRelations();
         $data = $this->validate();
-
         $this->employee->update($data);
+
+        $this->employee->educations()->delete();
+        if (!empty($this->educations)) { $this->employee->educations()->createMany($this->educations); }
+
+        $this->employee->courses()->delete();
+        if (!empty($this->courses)) { $this->employee->courses()->createMany($this->courses); }
+
+        $this->employee->experiences()->delete();
+        if (!empty($this->experiences)) { $this->employee->experiences()->createMany($this->experiences); }
+
+        $this->employee->relatives()->delete();
+        if (!empty($this->relatives)) { $this->employee->relatives()->createMany($this->relatives); }
+
+        $this->employee->badges()->delete();
+        if (!empty($this->badges)) { $this->employee->badges()->createMany($this->badges); }
+
+        $this->employee->checklists()->delete();
+        if (!empty($this->checklists)) { $this->employee->checklists()->createMany($this->checklists); }
 
         if ($this->photo && !is_string($this->photo)) {
             $this->employee->photo = $this->photo->store('employees', 'public');
