@@ -56,7 +56,7 @@
                 @lang('general.is-active')
             </x-table.heading>
 
-            <x-table.heading />
+            <x-table.heading/>
         </x-slot>
 
         <x-slot name="body">
@@ -72,11 +72,13 @@
                     </x-table.cell>
 
                     {{-- City & Project names (null-safe, translatable) --}}
-                    <x-table.cell class="max-w-56 truncate" title="{{ optional($item->city)->getTranslation('name', $locale) }}">
+                    <x-table.cell class="max-w-56 truncate"
+                                  title="{{ optional($item->city)->getTranslation('name', $locale) }}">
                         {{ optional($item->city)->getTranslation('name', $locale) ?? '-' }}
                     </x-table.cell>
 
-                    <x-table.cell class="max-w-56 truncate" title="{{ optional($item->project)->getTranslation('name', $locale) }}">
+                    <x-table.cell class="max-w-56 truncate"
+                                  title="{{ optional($item->project)->getTranslation('name', $locale) }}">
                         {{ optional($item->project)->getTranslation('name', $locale) ?? '-' }}
                     </x-table.cell>
 
@@ -93,12 +95,12 @@
                     />
 
                     <x-table.cell class="whitespace-nowrap">
-                        <x-table.edit-btn wire:click="edit({{ $item->id }})" />
-                        <x-table.delete-btn :modelId="$item->id" />
+                        <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
+                        <x-table.delete-btn :modelId="$item->id"/>
                     </x-table.cell>
                 </tr>
             @empty
-                <x-table.no-data />
+                <x-table.no-data/>
             @endforelse
         </x-slot>
 
@@ -113,8 +115,10 @@
             <div class="grid grid-cols-2 gap-4">
                 @foreach(config('app.supported_locales') as $locale)
                     <div>
-                        <x-forms.input-label for="name_{{ $locale }}">@lang('general.center-name')({{ strtoupper($locale) }})</x-forms.input-label>
-                        <x-forms.input id="name_{{ $locale }}" type="text" wire:model.defer="item.name.{{ $locale }}" />
+                        <x-forms.input-label for="name_{{ $locale }}">@lang('general.center-name')
+                            ({{ strtoupper($locale) }})
+                        </x-forms.input-label>
+                        <x-forms.input id="name_{{ $locale }}" type="text" wire:model.defer="item.name.{{ $locale }}"/>
                         <x-error-span>{{ $errors->first('item.name.' . $locale) }}</x-error-span>
                     </div>
                 @endforeach
@@ -147,20 +151,23 @@
                 </div>
 
 
-                    @foreach(config('app.supported_locales') as $locale)
-                        <div class="col-span-2">
-                            <x-forms.input-label for="address_{{ $locale }}">@lang('general.address') ({{ strtoupper($locale) }})</x-forms.input-label>
-                            <x-forms.textarea id="address_{{ $locale }}" wire:model.defer="item.address.{{ $locale }}" rows="2" />
-                            <x-error-span>{{ $errors->first('item.address.' . $locale) }}</x-error-span>
-                        </div>
-                    @endforeach
+                @foreach(config('app.supported_locales') as $locale)
+                    <div class="col-span-2">
+                        <x-forms.input-label for="address_{{ $locale }}">@lang('general.address')
+                            ({{ strtoupper($locale) }})
+                        </x-forms.input-label>
+                        <x-forms.textarea id="address_{{ $locale }}" wire:model.defer="item.address.{{ $locale }}"
+                                          rows="2"/>
+                        <x-error-span>{{ $errors->first('item.address.' . $locale) }}</x-error-span>
+                    </div>
+                @endforeach
             </div>
 
             <div class="flex justify-end gap-2">
                 <x-primary-button type="submit" class="!w-auto">
                     @lang('general.save')
                 </x-primary-button>
-                <x-modal.cancel-btn />
+                <x-modal.cancel-btn/>
             </div>
         </form>
     </x-modal.dialog>

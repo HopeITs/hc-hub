@@ -24,13 +24,13 @@
                 <img :src="preview" class="object-cover w-full h-full rounded-sm" />
             </template>
 
-                                            @isset ($item['logo'])
-                                                <img src="{{ $logo->temporaryUrl() }}" class="object-cover w-full h-full rounded-sm" />
-                                            @else(array_key_exists('id', $item->toArray()) && $item->getFirstMediaUrl('logo'))
+        @isset ($item['logo'])
+            <img src="{{ $logo->temporaryUrl() }}" class="object-cover w-full h-full rounded-sm" />
+        @else(array_key_exists('id', $item->toArray()) && $item->getFirstMediaUrl('logo'))
 
-                                                <img src="{{ $item->getFirstMediaUrl('logo') }}" class="object-cover w-full h-full rounded-full" />
+            <img src="{{ $item->getFirstMediaUrl('logo') }}" class="object-cover w-full h-full rounded-full" />
 
-                                            @endisset
+        @endisset
         </div>
     </label>
 
