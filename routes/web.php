@@ -13,7 +13,6 @@ use App\Livewire\ProjectManagement\RequiredPositionModule;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
-use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Employee\EmployeeModule;
 use App\Livewire\Employee\EmployeeCreate;
 use App\Livewire\Employee\EmployeeEdit;
