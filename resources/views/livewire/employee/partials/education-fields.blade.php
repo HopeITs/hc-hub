@@ -4,11 +4,13 @@
         <x-forms.input type="text" wire:model="form.education_title" id="education_title" />
         <x-error-span>{{ $errors->first('form.education_title') }}</x-error-span>
     </div>
+
     <div>
         <x-forms.input-label for="education_university">@lang('general.university')</x-forms.input-label>
         <x-forms.input type="text" wire:model="form.education_university" id="education_university" />
         <x-error-span>{{ $errors->first('form.education_university') }}</x-error-span>
     </div>
+
     <div>
         <x-forms.input-label for="education_type">@lang('general.type')</x-forms.input-label>
         <x-forms.select-input wire:model="form.education_type" id="education_type">
@@ -23,6 +25,7 @@
         </x-forms.select-input>
         <x-error-span>{{ $errors->first('form.education_type') }}</x-error-span>
     </div>
+
     <div>
         <x-forms.input-label for="education_graduation_year">@lang('general.graduation_year')</x-forms.input-label>
         <x-forms.input type="number" placeholder="YYYY" wire:model="form.education_graduation_year" id="education_graduation_year" />

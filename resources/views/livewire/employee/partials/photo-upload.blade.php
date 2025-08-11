@@ -1,4 +1,4 @@
-@if ($form->photo instanceof TemporaryUploadedFile)
+@if ($form->photo instanceof Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
     <img class="h-20 w-20 rounded-full object-cover" src="{{ $form->photo->temporaryUrl() }}" alt="New profile photo" />
 @elseif ($form->employee?->photo)
     <img class="h-20 w-20 rounded-full object-cover" src="{{ asset('storage/' . $form->employee->photo) }}" alt="Current profile photo" />
