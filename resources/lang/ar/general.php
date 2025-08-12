@@ -89,7 +89,7 @@ return [
     'centers' => 'المركز',
     'center-name' => 'اسم المركز',
     'center-city' => 'المدينة',
-    'address' => 'عنوان المركز',
+
     'search' => 'بحث',
 
     'employee' => 'الموظف',

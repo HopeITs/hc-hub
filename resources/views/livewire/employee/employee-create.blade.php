@@ -5,7 +5,7 @@
         ['label' => __('general.add_new')],
     ]"/>
 
-    <form wire:submit.prevent="save" class="mt-4">
+
         <x-tab.form activeTab="information">
             <x-tab.list>
                 <x-tab.item :title="__('general.information')" activeTab="information">
@@ -52,36 +52,33 @@
                 </x-tab.item>
             </x-tab.list>
 
-            <div class="flex-grow w-full">
-                <x-tab.container active-tab="information">
-                    @include('livewire.employee.partials.info-form')
-                </x-tab.container>
-                <x-tab.container active-tab="education">
-                    @include('livewire.employee.partials.education-fields')
-                </x-tab.container>
-                <x-tab.container active-tab="courses">
-                    @include('livewire.employee.partials.courses-fields')
-                </x-tab.container>
-                <x-tab.container active-tab="experience">
-                    @include('livewire.employee.partials.experience-fields')
-                </x-tab.container>
-                <x-tab.container active-tab="relatives">
-                    @include('livewire.employee.partials.relatives-fields')
-                </x-tab.container>
-                <x-tab.container active-tab="badges">
-                    @include('livewire.employee.partials.badges-fields')
-                </x-tab.container>
-                <x-tab.container active-tab="checklist">
-                    @include('livewire.employee.partials.checklist-fields')
-                </x-tab.container>
+        <div class="flex-grow w-full">
+            <x-tab.container active-tab="information">
+                @include('livewire.employee.partials.info-form')
+            </x-tab.container>
+            <x-tab.container active-tab="education">
+                @include('livewire.employee.partials.education-fields')
+            </x-tab.container>
+            <x-tab.container active-tab="courses">
+                @include('livewire.employee.partials.courses-fields')
+            </x-tab.container>
+            <x-tab.container active-tab="experience">
+                @include('livewire.employee.partials.experience-fields')
+            </x-tab.container>
+            <x-tab.container active-tab="relatives">
+                @include('livewire.employee.partials.relatives-fields')
+            </x-tab.container>
+            <x-tab.container active-tab="badges">
+                @include('livewire.employee.partials.badges-fields')
+            </x-tab.container>
+            <x-tab.container active-tab="checklist">
+                @include('livewire.employee.partials.checklist-fields')
+            </x-tab.container>
 
-            </div>
-        </x-tab.form>
-
-        <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
-            <x-primary-button type="submit">@lang('general.save')</x-primary-button>
-            <x-secondary-button :href="route('employees.index')">@lang('general.cancel')</x-secondary-button>
         </div>
-    </form>
+    </x-tab.form>
+
+
+
 </div>
 

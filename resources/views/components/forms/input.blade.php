@@ -18,23 +18,27 @@
     {{-- Checkbox Input --}}
     <label for="{{ $inputId }}" class="flex items-center gap-2 text-sm text-gray-700">
         <input
-            id="{{ $inputId }}"
-            type="checkbox"
-            class="size-4 bg-white border border-primary text-primary rounded focus:ring-primary"
-            {{ $hasModel ? $attributes->merge(['wire:model.defer' => $model]) : $attributes }}
+            {{$attributes->merge([
+    'id' => $inputId,
+    'type' => 'checkbox',
+    'class' => 'size-4 bg-white border border-primary text-primary rounded focus:ring-primary',
+    'wire:model.defer' => $model
+])}}
+
         >
         {{ $slot }}
     </label>
 @else
     {{-- Text, Email, Number, etc. --}}
-    <div class="relative">
+    <div class="relative w-full">
         <input
-            id="{{ $inputId }}"
-            type="{{ $type }}"
-            placeholder="{{ $placeholder }}"
-            autocomplete="{{ $autocomplete ?: $inputId }}"
-            {{ $hasModel ? $attributes->merge(['wire:model.defer' => $model]) : $attributes }}
-            class="w-full py-2 px-3 text-sm text-gray-900 placeholder-gray-400 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-500 transition"
+            {{$attributes->merge([
+                'id' => $inputId,
+                'type' => $type,
+                'class' => 'w-full py-2 px-3 text-sm text-gray-900 placeholder-gray-400 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-500 transition',
+                'wire:model.defer' => $model
+            ])}}
+
         />
 
         {{-- Optional Right Icons --}}

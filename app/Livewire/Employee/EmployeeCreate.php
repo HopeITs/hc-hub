@@ -47,6 +47,7 @@ class EmployeeCreate extends Component
 
     public function save()
     {
+        dd($this->form);
         $this->form->store();
         LivewireAlert::title(__('general.success-message'))->success()->show();
         return redirect()->route('employees.index');
