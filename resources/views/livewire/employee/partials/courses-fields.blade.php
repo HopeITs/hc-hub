@@ -26,17 +26,13 @@
                     <x-error-span>{{ $errors->first('form.courses.' . $index . '.is_approved') }}</x-error-span>
                 </div>
             </div>
-
-            <button type="button" wire:click="removeCourse({{ $index }})" class="absolute top-0 -right-2 text-gray-400 hover:text-red-600 transition-colors" title="@lang('general.remove_course')">
-                &times;
-            </button>
         </div>
     @endforeach
 
     <div>
         <button
             type="button"
-            wire:click="addCourse"
+            wire:click="form.addCourse"
             class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">
             + @lang('general.add_new')
         </button>

@@ -38,7 +38,7 @@
 
             <button
                 type="button"
-                wire:click="removeEducation({{ $index }})"
+                wire:click="form.removeEducation({{ $index }})"
                 class="absolute top-0 -right-2 text-gray-400 hover:text-red-600 transition-colors"
                 title="@lang('general.remove_education')">
                 &times;
@@ -49,7 +49,7 @@
     <div>
         <button
             type="button"
-            wire:click="addEducation"
+            wire:click="form.addEducation"
             class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">
             + @lang('general.add_new')
         </button>
