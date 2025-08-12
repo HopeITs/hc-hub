@@ -7,6 +7,7 @@ use App\Livewire\Basics\DepartmentModule;
 use App\Livewire\ProjectManagement\CentersModule;
 use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Basics\LeaveTypeModule;
+use App\Livewire\ProjectManagement\PositionsModule;
 use App\Livewire\ProjectManagement\ProjectDetail;
 use App\Livewire\ProjectManagement\ProjectModule;
 use App\Livewire\ProjectManagement\RequiredPositionModule;
@@ -41,6 +42,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('projects/{slug}', ProjectDetail::class)->name('projects.show');
     Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
     Route::get('/centers', CentersModule::class)->name('centers.index');
+    Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
 });
 
 require __DIR__.'/auth.php';

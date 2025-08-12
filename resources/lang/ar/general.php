@@ -52,7 +52,7 @@ return [
     'single' => 'أعزب',
     'married' => 'متزوج',
     'select' => 'اختر',
-    'required-positions' => 'الوظائف المطلوبة',
+    'required-positions' => 'المنصب المطلوب | المناصب المطلوبة',
     'department-name' => 'اسم القسم',
     'department-description' => 'وصف القسم',
     'department-email' => 'عنوان البريد الإلكتروني',
@@ -60,6 +60,11 @@ return [
     'required-project' => 'المشروع',
     'is-active' => 'التفعيل',
     'qualifications' => 'المؤهلات الوظيفية',
+    'positions' => 'المناصب',
+    'responsibilities' => 'المسؤوليات',
+    'max' => 'اقصى عدد للموظفين',
+    'existing' => 'الموظفين الموجودين',
+    '4' => '',
 
 
     'centers'              => 'المركز',

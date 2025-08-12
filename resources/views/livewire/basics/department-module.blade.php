@@ -19,17 +19,32 @@
     {{-- Table --}}
     <x-table>
         <x-slot name="headings">
-            <x-table.heading>ID</x-table.heading>
+            <x-table.heading
+                sortable
+                wire:click="sortBy('id')"
+                :direction="$sortField === 'id' ? $sortDirection : null">
+                ID
+            </x-table.heading>
+
             <x-table.heading
                 sortable
                 wire:click="sortBy('name')"
                 :direction="$sortField === 'name' ? $sortDirection : null">
                 @lang('general.department-name')
             </x-table.heading>
+
             <x-table.heading>@lang('general.department-description')</x-table.heading>
-            <x-table.heading>@lang('general.department-email')</x-table.heading>
+
+            <x-table.heading
+                sortable
+                wire:click="sortBy('email')"
+                :direction="$sortField === 'email' ? $sortDirection : null">
+                @lang('general.department-email')
+            </x-table.heading>
+
             <x-table.heading/>
         </x-slot>
+
 
         <x-slot name="body">
             @forelse($departments as $item)
