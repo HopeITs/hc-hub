@@ -160,6 +160,10 @@ return [
     'item_name' => 'اسم العنصر',
     'onsite' => 'في الموقع',
     'remote' => 'عن بعد',
+    'relations.father' => 'أب',
+    'relations.mother' => 'أم',
+    'relations.brother' => 'أخ',
+    'relations.sister' => 'أخت',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',
