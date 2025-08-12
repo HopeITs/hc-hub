@@ -6,90 +6,74 @@
     ]" />
 
     <form wire:submit.prevent="save" class="mt-4">
-        <div x-data="{ activeTab: 'information' }" class="flex flex-col md:flex-row gap-8">
-            <ul class="flex-none w-full md:w-48 text-sm font-medium text-gray-500 space-y-2">
-                <li>
-                    <button type="button" @click="activeTab = 'information'"
-                        :class="{ 'bg-blue-600 text-white': activeTab === 'information', 'bg-gray-50 hover:bg-gray-100': activeTab !== 'information' }"
-                        class="w-full flex items-center p-3 rounded-lg">
-                        <x-icons.users class="w-5 h-5 mr-2" />
-                        <span class="font-semibold">@lang('general.information')</span>
-                    </button>
-                </li>
-                <li>
-                    <button type="button" @click="activeTab = 'education'"
-                        :class="{ 'bg-blue-600 text-white': activeTab === 'education', 'bg-gray-50 hover:bg-gray-100': activeTab !== 'education' }"
-                        class="w-full flex items-center p-3 rounded-lg">
-                        <x-icons.education />
-                        <span class="font-semibold">@lang('general.education')</span>
-                    </button>
-                </li>
-                <li>
-                    <button type="button" @click="activeTab = 'courses'"
-                        :class="{ 'bg-blue-600 text-white': activeTab === 'courses', 'bg-gray-50 hover:bg-gray-100': activeTab !== 'courses' }"
-                        class="w-full flex items-center p-3 rounded-lg">
-                        <x-icons.courses />
-                        <span class="font-semibold">@lang('general.courses')</span>
-                    </button>
-                </li>
-                <li>
-                    <button type="button" @click="activeTab = 'experience'"
-                        :class="{ 'bg-blue-600 text-white': activeTab === 'experience', 'bg-gray-50 hover:bg-gray-100': activeTab !== 'experience' }"
-                        class="w-full flex items-center p-3 rounded-lg">
-                        <x-icons.experience />
-                        <span class="font-semibold">@lang('general.experience')</span>
-                    </button>
-                </li>
-                <li>
-                    <button type="button" @click="activeTab = 'relatives'"
-                        :class="{ 'bg-blue-600 text-white': activeTab === 'relatives', 'bg-gray-50 hover:bg-gray-100': activeTab !== 'relatives' }"
-                        class="w-full flex items-center p-3 rounded-lg">
-                        <x-icons.relatives />
-                        <span class="font-semibold">@lang('general.relatives')</span>
-                    </button>
-                </li>
-                <li>
-                    <button type="button" @click="activeTab = 'badges'"
-                        :class="{ 'bg-blue-600 text-white': activeTab === 'badges', 'bg-gray-50 hover:bg-gray-100': activeTab !== 'badges' }"
-                        class="w-full flex items-center p-3 rounded-lg">
-                        <x-icons.badges />
-                        <span class="font-semibold">@lang('general.badges')</span>
-                    </button>
-                </li>
-                <li>
-                    <button type="button" @click="activeTab = 'checklist'"
-                        :class="{ 'bg-blue-600 text-white': activeTab === 'checklist', 'bg-gray-50 hover:bg-gray-100': activeTab !== 'checklist' }"
-                        class="w-full flex items-center p-3 rounded-lg">
-                        <x-icons.checklist />
-                        <span class="font-semibold">@lang('general.checklist')</span>
-                    </button>
-                </li>
-            </ul>
+        <x-tab.form activeTab="information">
+            <x-tab.list>
+                <x-tab.item :title="__('general.information')" activeTab="information"
+                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                    <x-icons.users class="w-5 h-5 mr-2" />
+                </x-tab.item>
+
+                <x-tab.item :title="__('general.education')" activeTab="education"
+                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                    <x-icons.education class="w-5 h-5 mr-2" />
+                </x-tab.item>
+
+                <x-tab.item :title="__('general.courses')" activeTab="courses"
+                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                    <x-icons.courses class="w-5 h-5 mr-2" />
+                </x-tab.item>
+
+                <x-tab.item :title="__('general.experience')" activeTab="experience"
+                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                    <x-icons.experience class="w-5 h-5 mr-2" />
+                </x-tab.item>
+
+                <x-tab.item :title="__('general.relatives')" activeTab="relatives"
+                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                    <x-icons.relatives class="w-5 h-5 mr-2" />
+                </x-tab.item>
+
+                <x-tab.item :title="__('general.badges')" activeTab="badges"
+                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                    <x-icons.badges class="w-5 h-5 mr-2" />
+                </x-tab.item>
+
+                <x-tab.item :title="__('general.checklist')" activeTab="checklist"
+                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                    <x-icons.checklist class="w-5 h-5 mr-2" />
+                </x-tab.item>
+            </x-tab.list>
 
             <div class="flex-grow w-full">
-                <div x-show="activeTab === 'information'" x-cloak style="display: none;" class="p-4 border rounded-md">
+                <x-tab.container activeTab="information">
                     @include('livewire.employee.partials.info-form')
-                </div>
-                <div x-show="activeTab === 'education'" x-cloak style="display: none;" class="p-4 border rounded-md">
+                </x-tab.container>
+
+                <x-tab.container activeTab="education">
                     @include('livewire.employee.partials.education-fields')
-                </div>
-                <div x-show="activeTab === 'courses'" x-cloak style="display: none;" class="p-4 border rounded-md">
+                </x-tab.container>
+
+                <x-tab.container activeTab="courses">
                     @include('livewire.employee.partials.courses-fields')
-                </div>
-                <div x-show="activeTab === 'experience'" x-cloak style="display: none;" class="p-4 border rounded-md">
+                </x-tab.container>
+
+                <x-tab.container activeTab="experience">
                     @include('livewire.employee.partials.experience-fields')
-                </div>
-                <div x-show="activeTab === 'relatives'" x-cloak style="display: none;" class="p-4 border rounded-md">
+                </x-tab.container>
+
+                <x-tab.container activeTab="relatives">
                     @include('livewire.employee.partials.relatives-fields')
-                </div>
-                <div x-show="activeTab === 'badges'" x-cloak style="display: none;" class="p-4 border rounded-md">
+                </x-tab.container>
+
+                <x-tab.container activeTab="badges">
                     @include('livewire.employee.partials.badges-fields')
-                </div>
-                <div x-show="activeTab === 'checklist'" x-cloak style="display: none;" class="p-4 border rounded-md">
+                </x-tab.container>
+
+                <x-tab.container activeTab="checklist">
                     @include('livewire.employee.partials.checklist-fields')
-                </div>
+                </x-tab.container>
             </div>
-        </div>
+        </x-tab.form>
 
         <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
             <x-primary-button type="submit">@lang('general.save')</x-primary-button>

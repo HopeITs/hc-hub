@@ -18,6 +18,24 @@ class EmployeeEdit extends Component
     public function mount(Employee $employee)
     {
         $this->form->setEmployee($employee);
+        if (empty($this->form->educations)) {
+            $this->form->addEducation();
+        }
+        if (empty($this->form->courses)) {
+            $this->form->addCourse();
+        }
+        if (empty($this->form->experiences)) {
+            $this->form->addExperience();
+        }
+        if (empty($this->form->relatives)) {
+            $this->form->addRelative();
+        }
+        if (empty($this->form->badges)) {
+            $this->form->addBadge();
+        }
+        if (empty($this->form->checklists)) {
+            $this->form->addChecklist();
+        }
     }
 
     public function save()

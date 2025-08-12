@@ -55,7 +55,7 @@ class Employee extends Model
         return $this->hasMany(Relative::class);
     }
 
-    public function checklist()
+    public function checklists()
     {
         return $this->hasMany(Checklist::class);
     }
