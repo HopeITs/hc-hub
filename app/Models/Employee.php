@@ -57,7 +57,7 @@ class Employee extends Model
 
     public function checklist()
     {
-        return $this->hasOne(Checklist::class);
+        return $this->hasMany(Checklist::class);
     }
 
     public function techManager()
