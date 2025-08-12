@@ -12,7 +12,6 @@ class EmployeeForm extends Form
 
     public ?Employee $employee = null;
 
-    // ============ Main Employee Properties ============
     public $photo;
     public $name = [];
     public $national_number;
@@ -41,8 +40,6 @@ class EmployeeForm extends Form
     public $board_member_started_at;
     public $board_member_end_at;
 
-    // ============ Relational Data Arrays ============
-    // The old single education properties have been completely removed.
     public array $educations = [];
     public array $courses = [];
     public array $experiences = [];
@@ -70,14 +67,38 @@ class EmployeeForm extends Form
     public function setEmployee(Employee $employee)
     {
         $this->employee = $employee;
-        $this->fill($employee->toArray()); // This now only fills the main employee properties
 
-        // Manually load all translatable and relational data
+        // --- Refined explicit property setting ---
+        $this->photo = $employee->photo;
+        $this->national_number = $employee->national_number;
+        $this->work_email = $employee->work_email;
+        $this->direct_manager_id = $employee->direct_manager_id;
+        $this->tech_manager_id = $employee->tech_manager_id;
+        $this->dob = $employee->dob;
+        $this->gender = $employee->gender;
+        $this->marital_status = $employee->marital_status;
+        $this->children = $employee->children;
+        $this->nationality = $employee->nationality;
+        $this->civil_registry_office = $employee->civil_registry_office;
+        $this->civil_registry_number = $employee->civil_registry_number;
+        $this->place_of_registration = $employee->place_of_registration;
+        $this->work_phone = $employee->work_phone;
+        $this->personal_phone = $employee->personal_phone;
+        $this->personal_email = $employee->personal_email;
+        $this->skills = $employee->skills;
+        $this->interests = $employee->interests;
+        $this->is_active = $employee->is_active;
+        $this->is_board_member = $employee->is_board_member;
+        $this->board_member_started_at = $employee->board_member_started_at;
+        $this->board_member_end_at = $employee->board_member_end_at;
+
+        // Set translatable properties
         $this->name = $employee->getTranslations('name');
         $this->father_name = $employee->getTranslations('father_name');
         $this->mother_name = $employee->getTranslations('mother_name');
         $this->address = $employee->getTranslations('address');
 
+        // Set relations
         $this->educations = $employee->educations()->get()->toArray();
         $this->courses = $employee->courses()->get()->toArray();
         $this->experiences = $employee->experiences()->get()->toArray();
@@ -85,10 +106,10 @@ class EmployeeForm extends Form
         $this->badges = $employee->badges()->get()->toArray();
         $this->checklists = $employee->checklists()->get()->toArray();
 
+        // Set derived properties
         $this->work_email_username = $this->extractUsernameFromEmail($employee->work_email);
     }
 
-    // Methods to Add/Remove rows
     public function addEducation() { $this->educations[] = ['title' => '', 'university' => '', 'type' => '', 'graduation_year' => '']; }
     public function removeEducation(int $index) { unset($this->educations[$index]); $this->educations = array_values($this->educations); }
     public function addCourse() { $this->courses[] = ['title' => '', 'issuing_organization' => '', 'date' => '', 'is_approved' => 0]; }
@@ -105,7 +126,6 @@ class EmployeeForm extends Form
     public function rules()
     {
         $this->work_email = $this->buildWorkEmail($this->work_email_username);
-
         return [
             'name' => 'required|array', 'name.*' => 'required|string|max:255',
             'national_number' => 'required|string|max:20',
@@ -144,16 +164,13 @@ class EmployeeForm extends Form
         $this->validate();
         $data = $this->all();
         unset($data['work_email_username']);
-
         $employee = Employee::create($data);
-
         if (!empty($this->educations)) { $employee->educations()->createMany($this->educations); }
         if (!empty($this->courses)) { $employee->courses()->createMany($this->courses); }
         if (!empty($this->experiences)) { $employee->experiences()->createMany($this->experiences); }
         if (!empty($this->relatives)) { $employee->relatives()->createMany($this->relatives); }
         if (!empty($this->badges)) { $employee->badges()->createMany($this->badges); }
         if (!empty($this->checklists)) { $employee->checklists()->createMany($this->checklists); }
-
         if ($this->photo) {
             $employee->photo = $this->photo->store('employees', 'public');
             $employee->save();
@@ -167,27 +184,19 @@ class EmployeeForm extends Form
         $this->validate();
         $data = $this->all();
         unset($data['work_email_username']);
-
         $this->employee->update($data);
-
         $this->employee->educations()->delete();
         if (!empty($this->educations)) { $this->employee->educations()->createMany($this->educations); }
-
         $this->employee->courses()->delete();
         if (!empty($this->courses)) { $this->employee->courses()->createMany($this->courses); }
-
         $this->employee->experiences()->delete();
         if (!empty($this->experiences)) { $this->employee->experiences()->createMany($this->experiences); }
-
         $this->employee->relatives()->delete();
         if (!empty($this->relatives)) { $this->employee->relatives()->createMany($this->relatives); }
-
         $this->employee->badges()->delete();
         if (!empty($this->badges)) { $this->employee->badges()->createMany($this->badges); }
-
         $this->employee->checklists()->delete();
         if (!empty($this->checklists)) { $this->employee->checklists()->createMany($this->checklists); }
-
         if ($this->photo && !is_string($this->photo)) {
             $this->employee->photo = $this->photo->store('employees', 'public');
             $this->employee->save();
