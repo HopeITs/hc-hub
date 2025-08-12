@@ -7,7 +7,8 @@
 
     @foreach (config('app.supported_locales') as $locale)
         <div>
-            <x-forms.input-label for="name_{{ $locale }}">@lang('general.name') ({{ strtoupper($locale) }})</x-forms.input-label>
+            <x-forms.input-label for="name_{{ $locale }}">@lang('general.name')
+                ({{ strtoupper($locale) }})</x-forms.input-label>
             <x-forms.input type="text" wire:model="form.name.{{ $locale }}" id="name_{{ $locale }}" />
             <x-error-span>{{ $errors->first('form.name.' . $locale) }}</x-error-span>
         </div>
@@ -15,8 +16,8 @@
 
     <div>
         <x-forms.input-label for="national_number">@lang('general.national_number')</x-forms.input-label>
-        <x-forms.input type="text" wire:model="form.national_number" id="national_number" />
-        <x-error-span>{{ $errors->first('form.national_number') }}</x-error-span>
+        <x-forms.input type="text" wire:model="form.name.en" ... />
+        <x-forms.input type="text" wire:model="form.national_number" ... />
     </div>
 
     <div>
@@ -66,8 +67,10 @@
     <div>
         <x-forms.input-label for="work_email_username">@lang('general.work_email')</x-forms.input-label>
         <div class="flex mt-1">
-            <x-forms.input type="text" wire:model="form.work_email_username" id="work_email_username" class="rounded-l-none" placeholder="username" />
-            <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <x-forms.input type="text" wire:model="form.work_email_username" id="work_email_username"
+                class="rounded-l-none" placeholder="username" />
+            <span
+                class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
                 @hcsyria.org
             </span>
         </div>
@@ -103,16 +106,20 @@
 
     @foreach (config('app.supported_locales') as $locale)
         <div>
-            <x-forms.input-label for="father_name_{{ $locale }}">@lang('general.father_name') ({{ strtoupper($locale) }})</x-forms.input-label>
-            <x-forms.input type="text" wire:model="form.father_name.{{ $locale }}" id="father_name_{{ $locale }}" />
+            <x-forms.input-label for="father_name_{{ $locale }}">@lang('general.father_name')
+                ({{ strtoupper($locale) }})</x-forms.input-label>
+            <x-forms.input type="text" wire:model="form.father_name.{{ $locale }}"
+                id="father_name_{{ $locale }}" />
             <x-error-span>{{ $errors->first('form.father_name.' . $locale) }}</x-error-span>
         </div>
     @endforeach
 
     @foreach (config('app.supported_locales') as $locale)
         <div>
-            <x-forms.input-label for="mother_name_{{ $locale }}">@lang('general.mother_name') ({{ strtoupper($locale) }})</x-forms.input-label>
-            <x-forms.input type="text" wire:model="form.mother_name.{{ $locale }}" id="mother_name_{{ $locale }}" />
+            <x-forms.input-label for="mother_name_{{ $locale }}">@lang('general.mother_name')
+                ({{ strtoupper($locale) }})</x-forms.input-label>
+            <x-forms.input type="text" wire:model="form.mother_name.{{ $locale }}"
+                id="mother_name_{{ $locale }}" />
             <x-error-span>{{ $errors->first('form.mother_name.' . $locale) }}</x-error-span>
         </div>
     @endforeach
@@ -171,8 +178,10 @@
 
     @foreach (config('app.supported_locales') as $locale)
         <div class="md:col-span-2">
-            <x-forms.input-label for="address_{{ $locale }}">@lang('general.address') ({{ strtoupper($locale) }})</x-forms.input-label>
-            <x-forms.input type="text" wire:model="form.address.{{ $locale }}" id="address_{{ $locale }}" />
+            <x-forms.input-label for="address_{{ $locale }}">@lang('general.address')
+                ({{ strtoupper($locale) }})</x-forms.input-label>
+            <x-forms.input type="text" wire:model="form.address.{{ $locale }}"
+                id="address_{{ $locale }}" />
             <x-error-span>{{ $errors->first('form.address.' . $locale) }}</x-error-span>
         </div>
     @endforeach

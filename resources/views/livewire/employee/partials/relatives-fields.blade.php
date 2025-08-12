@@ -44,7 +44,7 @@
     <div>
         <button
             type="button"
-            wire:click="addRelative"
+            wire:click="form.addRelative"
             class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">
             + @lang('general.add_new')
         </button>
