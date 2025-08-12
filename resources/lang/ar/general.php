@@ -42,7 +42,7 @@ return [
     'save' => 'حفظ',
     'cancel' => 'إلغاء',
     'edit' => 'تعديل',
-    "add_new" => 'إضافة جديد',
+    'add_new' => 'إضافة جديد',
     'base_days' => 'الأيام الأساسية',
     'allowed_gender' => 'الجنس المسموح به',
     'marital_status' => 'الحالة الاجتماعية',
@@ -87,13 +87,11 @@ return [
     'is-active' => 'التفعيل',
     'qualifications' => 'المؤهلات الوظيفية',
 
-
-    'centers'              => 'المركز',
-    'center-name'          => 'اسم المركز',
-    'center-city'        => 'المدينة',
-    'address'              => 'عنوان المركز',
-    'search'               => 'بحث',
-
+    'centers' => 'المركز',
+    'center-name' => 'اسم المركز',
+    'center-city' => 'المدينة',
+    'address' => 'عنوان المركز',
+    'search' => 'بحث',
 
     'employee' => 'الموظف',
     'photo' => 'الصورة',
@@ -115,7 +113,7 @@ return [
     'employment_info' => 'المعلومات الوظيفية',
     'family_info' => 'معلومات العائلة',
     'contact_info' => 'معلومات التواصل',
-    'address_info' => 'معلومات العنوان والسجل المدني',
+    'address_info' => 'معلومات الهوية',
     'skills_and_interests' => 'المهارات والاهتمامات',
     'courses' => 'الدورات',
     'issuing_organization' => 'الجهة المانحة',
@@ -159,6 +157,9 @@ return [
     'delivered_status' => 'حالة التسليم',
     'returned_at' => 'تاريخ الإرجاع',
     'returned_status' => 'حالة الإرجاع',
+    'item_name' => 'اسم العنصر',
+    'onsite' => 'في الموقع',
+    'remote' => 'عن بعد',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',
@@ -182,8 +183,5 @@ return [
         'update-password-text' => 'تأكد من أن حسابك يستخدم كلمة مرور طويلة وعشوائية للحفاظ على أمانه.',
         'current-password' => 'كلمة المرور الحالية',
         'new-password' => 'كلمة المرور الجديدة',
-
     ],
-
-
 ];

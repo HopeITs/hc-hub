@@ -1,4 +1,7 @@
-{{-- ==================== General Info ==================== --}}
+@php
+    use App\Enums\MaritalStatus;
+@endphp
+
 <div class="mb-6">
     <h2 class="text-xl font-semibold mb-4">@lang('general.general_info')</h2>
 
@@ -23,21 +26,29 @@
     </div>
 
     <div>
-        <x-forms.input-label for="gender">@lang('general.gender')</x-forms.input-label>
-        <x-forms.select-input wire:model="form.gender" id="gender">
-            <option value="0">@lang('general.unknown')</option>
-            <option value="1">@lang('general.male')</option>
-            <option value="2">@lang('general.female')</option>
-        </x-forms.select-input>
+        <x-forms.input-label>@lang('general.gender')</x-forms.input-label>
+        <div class="flex space-x-4 mt-2">
+            <x-forms.radio-input name="gender" value="1" wire:model="form.gender">
+                @lang('general.male')
+            </x-forms.radio-input>
+            <x-forms.radio-input name="gender" value="2" wire:model="form.gender">
+                @lang('general.female')
+            </x-forms.radio-input>
+        </div>
         <x-error-span>{{ $errors->first('form.gender') }}</x-error-span>
     </div>
 
     <div>
         <x-forms.input-label for="marital_status">@lang('general.marital_status')</x-forms.input-label>
         <x-forms.select-input wire:model="form.marital_status" id="marital_status">
-            <option value="0">@lang('general.unknown')</option>
-            <option value="1">@lang('general.single')</option>
-            <option value="2">@lang('general.married')</option>
+            @foreach (MaritalStatus::getValues() as $statusValue)
+                @php
+                    $status = MaritalStatus::getLocalizedName($statusValue);
+                @endphp
+                <option value="{{ $statusValue }}">
+                    {{ $status['value'] }}
+                </option>
+            @endforeach
         </x-forms.select-input>
         <x-error-span>{{ $errors->first('form.marital_status') }}</x-error-span>
     </div>
@@ -49,25 +60,18 @@
     </div>
 </div>
 
-{{-- ==================== Employment Info ==================== --}}
 <div class="mb-6">
     <h2 class="text-xl font-semibold mb-4">@lang('general.employment_info')</h2>
 
     <div>
-        <x-forms.input-label for="actual_job">@lang('general.actual_job')</x-forms.input-label>
-        <x-forms.input type="text" wire:model="form.actual_job" id="actual_job" />
-        <x-error-span>{{ $errors->first('form.actual_job') }}</x-error-span>
-    </div>
-
-    <div>
-        <x-forms.input-label for="years_of_service">@lang('general.years_of_service')</x-forms.input-label>
-        <x-forms.input type="number" step="0.1" wire:model="form.years_of_service" id="years_of_service" />
-        <x-error-span>{{ $errors->first('form.years_of_service') }}</x-error-span>
-    </div>
-
-    <div>
-        <x-forms.input-label for="work_email">@lang('general.work_email')</x-forms.input-label>
-        <x-forms.input type="email" wire:model="form.work_email" id="work_email" />
+        <x-forms.input-label for="work_email_username">@lang('general.work_email')</x-forms.input-label>
+        <div class="flex mt-1">
+            <x-forms.input type="text" wire:model="form.work_email_username" id="work_email_username" class="rounded-l-none" placeholder="username" />
+            <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                @hcsyria.org
+            </span>
+        </div>
+        <x-error-span>{{ $errors->first('form.work_email_username') }}</x-error-span>
         <x-error-span>{{ $errors->first('form.work_email') }}</x-error-span>
     </div>
 
@@ -94,7 +98,6 @@
     </div>
 </div>
 
-{{-- ==================== Family Info ==================== --}}
 <div class="mb-6">
     <h2 class="text-xl font-semibold mb-4">@lang('general.family_info')</h2>
 
@@ -115,7 +118,6 @@
     @endforeach
 </div>
 
-{{-- ==================== Contact Info ==================== --}}
 <div class="mb-6">
     <h2 class="text-xl font-semibold mb-4">@lang('general.contact_info')</h2>
 
@@ -138,7 +140,6 @@
     </div>
 </div>
 
-{{-- ==================== Address & Identity ==================== --}}
 <div class="mb-6">
     <h2 class="text-xl font-semibold mb-4">@lang('general.address_info')</h2>
 
@@ -177,7 +178,6 @@
     @endforeach
 </div>
 
-{{-- ==================== Skills & Interests ==================== --}}
 <div class="mb-6">
     <h2 class="text-xl font-semibold mb-4">@lang('general.skills_and_interests')</h2>
 
@@ -194,8 +194,7 @@
     </div>
 </div>
 
-{{-- ==================== Status ==================== --}}
-<div class="mb-6">
+{{-- <div class="mb-6">
     <h2 class="text-xl font-semibold mb-4">@lang('general.status')</h2>
 
     <div class="flex space-x-4 items-center mt-2">
@@ -203,9 +202,8 @@
         <x-forms.radio-input name="_is_active" value="0" wire:model="form.is_active">@lang('general.inactive')</x-forms.radio-input>
     </div>
     <x-error-span>{{ $errors->first('form.is_active') }}</x-error-span>
-</div>
+</div> --}}
 
-{{-- ==================== Board Member ==================== --}}
 <div class="mb-6">
     <h2 class="text-xl font-semibold mb-4">@lang('general.board_member')</h2>
 

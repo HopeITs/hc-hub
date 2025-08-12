@@ -1,6 +1,6 @@
 <div class="space-y-6">
     @foreach ($form->experiences as $index => $experience)
-        <div wire:key="experience-{{ $index }}" class="relative">
+        <div wire:key="experience-{{ $index }}" class="relative border-b pb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <x-forms.input-label for="exp_job_title_{{ $index }}">@lang('general.job_title')</x-forms.input-label>
@@ -22,11 +22,21 @@
                     <x-forms.input type="date" wire:model="form.experiences.{{ $index }}.end_date" id="exp_end_date_{{ $index }}" />
                     <x-error-span>{{ $errors->first('form.experiences.' . $index . '.end_date') }}</x-error-span>
                 </div>
+
+                {{-- This is the corrected 'Place' section --}}
                 <div>
-                    <x-forms.input-label for="exp_place_{{ $index }}">@lang('general.place')</x-forms.input-label>
-                    <x-forms.input type="text" wire:model="form.experiences.{{ $index }}.place" id="exp_place_{{ $index }}" />
+                    <x-forms.input-label>@lang('general.place')</x-forms.input-label>
+                    <div class="flex space-x-4 mt-2">
+                        <x-forms.radio-input name="experiences_{{ $index }}_place" value="onsite" wire:model="form.experiences.{{ $index }}.place">
+                            @lang('general.onsite')
+                        </x-forms.radio-input>
+                        <x-forms.radio-input name="experiences_{{ $index }}_place" value="remote" wire:model="form.experiences.{{ $index }}.place">
+                            @lang('general.remote')
+                        </x-forms.radio-input>
+                    </div>
                     <x-error-span>{{ $errors->first('form.experiences.' . $index . '.place') }}</x-error-span>
                 </div>
+
                 <div>
                     <x-forms.input-label for="exp_type_{{ $index }}">@lang('general.type')</x-forms.input-label>
                     <x-forms.select-input wire:model="form.experiences.{{ $index }}.type" id="exp_type_{{ $index }}">
@@ -40,8 +50,6 @@
                     <x-error-span>{{ $errors->first('form.experiences.' . $index . '.type') }}</x-error-span>
                 </div>
             </div>
-            <button type="button" wire:click="form.removeExperience({{ $index }})" class="absolute top-0 -right-2 text-gray-400 hover:text-red-600 transition-colors" title="@lang('general.remove_experience')">
-            </button>
         </div>
     @endforeach
 </div>

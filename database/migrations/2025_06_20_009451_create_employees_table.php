@@ -13,7 +13,7 @@ return new class extends Migration
             $table->json('name');
             $table->string('photo')->nullable();
             $table->string('actual_job')->nullable();
-            $table->double('years_of_service')->default(0);
+            $table->double('years_of_service')->nullable();
             $table->string('work_email')->nullable();
             $table->foreignId('direct_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->foreignId('tech_manager_id')->nullable()->constrained('employees')->onDelete('set null');
