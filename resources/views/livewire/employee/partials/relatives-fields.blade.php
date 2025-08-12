@@ -24,10 +24,11 @@
                         $relations = ['father', 'mother', 'brother', 'sister', 'husband', 'wife', 'son', 'daughter', 'other'];
                     @endphp
 
-                    <div class="flex flex-wrap gap-4">
+                    <div class="flex flex-wrap gap-4 mt-2">
                         @foreach ($relations as $relation)
                             <label class="inline-flex items-center gap-2">
-                                <input type="radio" wire:model="form.relatives.{{ $index }}.relation"
+                                <input type="radio" name="relative_{{ $index }}_relation"
+                                    wire:model="form.relatives.{{ $index }}.relation"
                                     value="{{ $relation }}" class="text-primary focus:ring-primary">
                                 <span>@lang('general.relations.' . $relation)</span>
                             </label>
@@ -39,4 +40,13 @@
             </div>
         </div>
     @endforeach
+
+    <div>
+        <button
+            type="button"
+            wire:click="addRelative"
+            class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">
+            + @lang('general.add_new')
+        </button>
+    </div>
 </div>

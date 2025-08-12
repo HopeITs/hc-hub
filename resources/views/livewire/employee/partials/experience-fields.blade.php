@@ -23,7 +23,6 @@
                     <x-error-span>{{ $errors->first('form.experiences.' . $index . '.end_date') }}</x-error-span>
                 </div>
 
-                {{-- This is the corrected 'Place' section --}}
                 <div>
                     <x-forms.input-label>@lang('general.place')</x-forms.input-label>
                     <div class="flex space-x-4 mt-2">
@@ -52,4 +51,13 @@
             </div>
         </div>
     @endforeach
+
+    <div>
+        <button
+            type="button"
+            wire:click="addExperience"
+            class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">
+            + @lang('general.add_new')
+        </button>
+    </div>
 </div>

@@ -20,14 +20,25 @@
                 <div>
                     <x-forms.input-label>@lang('general.status')</x-forms.input-label>
                     <div class="flex space-x-4 items-center mt-2">
-                        <x-forms.radio-input name="is_approved_{{ $index }}" value="1" wire:model="form.courses.{{ $index }}.is_approved">@lang('general.approved')</x-forms.radio-input>
-                        <x-forms.radio-input name="is_approved_{{ $index }}" value="0" wire:model="form.courses.{{ $index }}.is_approved">@lang('general.not_approved')</x-forms.radio-input>
+                        <x-forms.radio-input name="courses_{{ $index }}_approved" value="1" wire:model="form.courses.{{ $index }}.is_approved">@lang('general.approved')</x-forms.radio-input>
+                        <x-forms.radio-input name="courses_{{ $index }}_approved" value="0" wire:model="form.courses.{{ $index }}.is_approved">@lang('general.not_approved')</x-forms.radio-input>
                     </div>
                     <x-error-span>{{ $errors->first('form.courses.' . $index . '.is_approved') }}</x-error-span>
                 </div>
             </div>
-            <button type="button" wire:click="form.removeCourse({{ $index }})" class="absolute top-0 -right-2 text-gray-400 hover:text-red-600 transition-colors" title="@lang('general.remove_course')">
+
+            <button type="button" wire:click="removeCourse({{ $index }})" class="absolute top-0 -right-2 text-gray-400 hover:text-red-600 transition-colors" title="@lang('general.remove_course')">
+                &times;
             </button>
         </div>
     @endforeach
+
+    <div>
+        <button
+            type="button"
+            wire:click="addCourse"
+            class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">
+            + @lang('general.add_new')
+        </button>
+    </div>
 </div>
