@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee;
 
 use App\Livewire\Forms\EmployeeForm;
+use App\Models\ChecklistItem;
 use App\Models\Employee;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -28,8 +29,11 @@ class EmployeeEdit extends Component
 
     public function render()
     {
+        $checklistItems = ChecklistItem::where('order', 1)->orderBy('name')->get();
+
         return view('livewire.employee.employee-edit', [
             'allEmployees' => Employee::select('id', 'name')->where('id', '!=', $this->form->employee->id)->get(),
+            'checklistItems' => $checklistItems,
         ]);
     }
 }

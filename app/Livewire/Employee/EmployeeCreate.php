@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee;
 
 use App\Livewire\Forms\EmployeeForm;
+use App\Models\ChecklistItem;
 use App\Models\Employee;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -16,6 +17,7 @@ class EmployeeCreate extends Component
 
     public function mount()
     {
+        $this->form->addEducation();
         $this->form->addCourse();
         $this->form->addExperience();
         $this->form->addRelative();
@@ -32,8 +34,10 @@ class EmployeeCreate extends Component
 
     public function render()
     {
+        $checklistItems = ChecklistItem::where('order', 1)->orderBy('name')->get();
         return view('livewire.employee.employee-create', [
             'allEmployees' => Employee::select('id', 'name')->get(),
+            'checklistItems' => $checklistItems,
         ]);
     }
 }
