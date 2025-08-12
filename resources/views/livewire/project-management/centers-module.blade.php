@@ -56,6 +56,10 @@
                 @lang('general.is-active')
             </x-table.heading>
 
+            <x-table.heading>
+                @lang('general.positions')
+            </x-table.heading>
+
             <x-table.heading />
         </x-slot>
 
@@ -91,6 +95,33 @@
                         :model-id="$item->id"
                         wire-event="confirmToggleItemStatus"
                     />
+
+                    <x-table.cell class="whitespace-nowrap">
+                        <a
+                            href="{{ route('centers.positions', ['center' => $item->id, 'city' => $item->city_id]) }}"
+                            @class([
+                                // base styles
+                                'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium
+                                 border shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary/40',
+
+                                // active vs inactive styles
+                                'bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 hover:border-primary/30' => $item->is_active,
+                                'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300' => ! $item->is_active,
+                            ])
+                            title="@lang('general.positions')"
+                        >
+                            <i class="ti ti-briefcase text-base"></i>
+                            <span>@lang('general.positions')</span>
+
+                            @if(isset($item->positions_count))
+                                <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full
+                         text-[11px] md:text-xs bg-current/10">
+                {{ $item->positions_count }}
+            </span>
+                            @endif
+                        </a>
+                    </x-table.cell>
+
 
                     <x-table.cell class="whitespace-nowrap">
                         <x-table.edit-btn wire:click="edit({{ $item->id }})" />

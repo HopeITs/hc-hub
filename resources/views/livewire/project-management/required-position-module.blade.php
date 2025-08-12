@@ -1,10 +1,10 @@
 <div>
     <div class="flex justify-between">
         <livewire:layout.breadcrumbs
-            :title="__('general.required-positions')"
+            :title="trans_choice('general.required-positions' , 1)"
             :crumbs="[
                 ['label' => __('general.dashboard')],
-                ['label' => __('general.required-positions')],
+                ['label' => trans_choice('general.required-positions' , 1)],
             ]"
             :showButton="true"
         />

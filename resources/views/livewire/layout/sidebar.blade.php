@@ -87,7 +87,7 @@
                         <x-layouts.app.sidebar.nav-item
                             :href="route('required-positions.index')"
                             :active="request()->routeIs('required-positions.index')">
-                            {{ __('general.required-positions') }}
+                            {{ trans_choice('general.required-positions' , 1) }}
                         </x-layouts.app.sidebar.nav-item>
 
                         <x-layouts.app.sidebar.nav-item
