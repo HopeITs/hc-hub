@@ -145,7 +145,7 @@ return [
     'notes' => 'ملاحظات',
     'promotion' => 'ترقية',
     'warning' => 'إنذار',
-    'salary_adjustment' => 'تعديل راتب',
+    'salary_adjustment' => 'زيادة راتب',
     'bonus' => 'مكافأة',
     'other' => 'غير',
     'checklist' => 'عناصر التسليم',
