@@ -21,7 +21,7 @@
                     <x-forms.input-label>@lang('general.relation')</x-forms.input-label>
 
                     @php
-                        $relations = ['father', 'mother', 'brother', 'sister'];
+                        $relations = ['father', 'mother', 'brother', 'sister', 'husband', 'wife', 'son', 'daughter', 'other'];
                     @endphp
 
                     <div class="flex flex-wrap gap-4">

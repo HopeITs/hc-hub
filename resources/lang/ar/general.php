@@ -62,7 +62,6 @@ return [
     'father_name' => 'اسم الأب',
     'mother_name' => 'اسم الأم',
     'nationality' => 'الجنسية',
-
     'children' => 'عدد الأولاد',
     'phone' => 'الهاتف',
     'work_phone' => 'هاتف العمل',
@@ -164,6 +163,11 @@ return [
     'relations.mother' => 'أم',
     'relations.brother' => 'أخ',
     'relations.sister' => 'أخت',
+    'relations.wife' => 'زوجة',
+    'relations.husband' => 'زوج',
+    'relations.daughter' => 'أبنة',
+    'relations.son' => 'أبن',
+    'relations.other' => 'آخر',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',
