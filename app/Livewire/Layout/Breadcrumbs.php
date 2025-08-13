@@ -14,8 +14,6 @@ class Breadcrumbs extends Component
 
     public bool $showButton = false;
 
-
-
     public function render()
     {
         // Normalize crumbs & compute href
@@ -32,7 +30,6 @@ class Breadcrumbs extends Component
                     $href = null;
                 }
             }
-
             return ['label' => $label, 'href' => $href];
         })->toArray();
 

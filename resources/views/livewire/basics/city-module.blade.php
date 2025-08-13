@@ -1,4 +1,5 @@
 <div>
+
     <livewire:layout.breadcrumbs
         :title="trans_choice('general.city', 2)"
         :crumbs="[
