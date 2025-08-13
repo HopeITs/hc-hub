@@ -1,11 +1,11 @@
-@php
+{{-- @php
     use App\Enums\MaritalStatus;
-@endphp
+@endphp --}}
 
-<div class="mb-6">
-    <h2 class="text-xl font-semibold mb-4">@lang('general.general_info')</h2>
+{{-- <div class="mb-6">
+    <h2 class="text-xl font-semibold mb-4">@lang('general.general_info')</h2> --}}
 
-    @foreach (config('app.supported_locales') as $locale)
+    {{-- @foreach (config('app.supported_locales') as $locale)
         <div>
             <x-forms.input-label for="name_{{ $locale }}">@lang('general.name')
                 ({{ strtoupper($locale) }})</x-forms.input-label>
@@ -213,7 +213,7 @@
     <x-error-span>{{ $errors->first('form.is_active') }}</x-error-span>
 </div> --}}
 
-<div class="mb-6">
+{{-- <div class="mb-6">
     <h2 class="text-xl font-semibold mb-4">@lang('general.board_member')</h2>
 
     <div class="flex items-center space-x-2">
@@ -234,5 +234,5 @@
             <x-forms.input type="date" wire:model="form.board_member_end_at" id="board_member_end_at" />
             <x-error-span>{{ $errors->first('form.board_member_end_at') }}</x-error-span>
         </div>
-    @endif
-</div>
+    @endif --}}
+{{-- </div> --}}
