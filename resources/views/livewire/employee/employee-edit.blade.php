@@ -8,38 +8,38 @@
     <form wire:submit.prevent="save" class="mt-4">
         <x-tab.form activeTab="information">
             <x-tab.list>
-                <x-tab.item :title="__('general.information')" activeTab="information"
-                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                <x-tab.item :title="__('general.information')" activeTab="information" activeClass="bg-blue-600 text-white"
+                    inactiveClass="bg-gray-50 hover:bg-gray-100">
                     <x-icons.users class="w-5 h-5 mr-2" />
                 </x-tab.item>
 
-                <x-tab.item :title="__('general.education')" activeTab="education"
-                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                <x-tab.item :title="__('general.education')" activeTab="education" activeClass="bg-blue-600 text-white"
+                    inactiveClass="bg-gray-50 hover:bg-gray-100">
                     <x-icons.education class="w-5 h-5 mr-2" />
                 </x-tab.item>
 
-                <x-tab.item :title="__('general.courses')" activeTab="courses"
-                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                <x-tab.item :title="__('general.courses')" activeTab="courses" activeClass="bg-blue-600 text-white"
+                    inactiveClass="bg-gray-50 hover:bg-gray-100">
                     <x-icons.courses class="w-5 h-5 mr-2" />
                 </x-tab.item>
 
-                <x-tab.item :title="__('general.experience')" activeTab="experience"
-                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                <x-tab.item :title="__('general.experience')" activeTab="experience" activeClass="bg-blue-600 text-white"
+                    inactiveClass="bg-gray-50 hover:bg-gray-100">
                     <x-icons.experience class="w-5 h-5 mr-2" />
                 </x-tab.item>
 
-                <x-tab.item :title="__('general.relatives')" activeTab="relatives"
-                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                <x-tab.item :title="__('general.relatives')" activeTab="relatives" activeClass="bg-blue-600 text-white"
+                    inactiveClass="bg-gray-50 hover:bg-gray-100">
                     <x-icons.relatives class="w-5 h-5 mr-2" />
                 </x-tab.item>
 
-                <x-tab.item :title="__('general.badges')" activeTab="badges"
-                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                <x-tab.item :title="__('general.badges')" activeTab="badges" activeClass="bg-blue-600 text-white"
+                    inactiveClass="bg-gray-50 hover:bg-gray-100">
                     <x-icons.badges class="w-5 h-5 mr-2" />
                 </x-tab.item>
 
-                <x-tab.item :title="__('general.checklist')" activeTab="checklist"
-                            activeClass="bg-blue-600 text-white" inactiveClass="bg-gray-50 hover:bg-gray-100">
+                <x-tab.item :title="__('general.checklist')" activeTab="checklist" activeClass="bg-blue-600 text-white"
+                    inactiveClass="bg-gray-50 hover:bg-gray-100">
                     <x-icons.checklist class="w-5 h-5 mr-2" />
                 </x-tab.item>
             </x-tab.list>

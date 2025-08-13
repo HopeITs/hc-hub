@@ -11,7 +11,6 @@ class EmployeeForm extends Form
     use WithFileUploads;
 
     public ?Employee $employee = null;
-
     public $photo;
     public $name = [];
     public $national_number;
@@ -39,17 +38,12 @@ class EmployeeForm extends Form
     public $is_board_member = false;
     public $board_member_started_at;
     public $board_member_end_at;
-
     public array $educations = [];
     public array $courses = [];
     public array $experiences = [];
     public array $relatives = [];
     public array $badges = [];
     public array $checklists = [];
-
-    // ----------------------
-    // INIT + UTILITIES
-    // ----------------------
 
     protected function buildWorkEmail(?string $username): ?string
     {
@@ -65,8 +59,6 @@ class EmployeeForm extends Form
     public function setEmployee(Employee $employee)
     {
         $this->employee = $employee;
-
-        // Fill fields
         $this->photo = $employee->photo;
         $this->national_number = $employee->national_number;
         $this->work_email = $employee->work_email;
@@ -89,14 +81,10 @@ class EmployeeForm extends Form
         $this->is_board_member = $employee->is_board_member;
         $this->board_member_started_at = $employee->board_member_started_at;
         $this->board_member_end_at = $employee->board_member_end_at;
-
-        // Translations
         $this->name = $employee->getTranslations('name');
         $this->father_name = $employee->getTranslations('father_name');
         $this->mother_name = $employee->getTranslations('mother_name');
         $this->address = $employee->getTranslations('address');
-
-        // Relations
         $this->educations = $employee->educations()->get()->toArray();
         $this->courses = $employee->courses()->get()->toArray();
         $this->experiences = $employee->experiences()->get()->toArray();
@@ -106,10 +94,6 @@ class EmployeeForm extends Form
 
         $this->work_email_username = $this->extractUsernameFromEmail($employee->work_email);
     }
-
-    // ----------------------
-    // ADD/REMOVE
-    // ----------------------
 
     public function addEducation()
     {
@@ -170,10 +154,6 @@ class EmployeeForm extends Form
         unset($this->checklists[$index]);
         $this->checklists = array_values($this->checklists);
     }
-
-    // ----------------------
-    // SAVE METHODS (Per Tab)
-    // ----------------------
 
     public function saveInformation()
     {

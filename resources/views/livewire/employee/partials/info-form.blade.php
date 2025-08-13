@@ -17,7 +17,6 @@ use App\Enums\MaritalStatus;
         </div>
     </div>
 
-    {{-- General Info --}}
     <div class="grid md:grid-cols-2 gap-x-6 gap-y-3">
         <h2 class="text-xl font-semibold mb-4 col-span-2">@lang('general.general_info')</h2>
 
@@ -70,7 +69,6 @@ use App\Enums\MaritalStatus;
         @endforeach
     </div>
 
-    {{-- Family Info --}}
     <div class="grid md:grid-cols-2 gap-x-6 gap-y-3">
         <h2 class="text-xl col-span-full font-semibold mb-4">@lang('general.address_info')</h2>
 
@@ -123,7 +121,6 @@ use App\Enums\MaritalStatus;
         </div>
     </div>
 
-    {{-- Work Info --}}
     <div class="grid md:grid-cols-2 gap-x-6 gap-y-3">
         <div>
             <h2 class="text-xl font-semibold mb-4">@lang('general.employment_info')</h2>
@@ -186,7 +183,6 @@ use App\Enums\MaritalStatus;
         </div>
     </div>
 
-    {{-- Skills & Board Member --}}
     <div>
         <h2 class="text-xl font-semibold mb-4">@lang('general.skills_and_interests')</h2>
 
@@ -227,7 +223,6 @@ use App\Enums\MaritalStatus;
         @endif
     </div>
 
-    {{-- SAVE BUTTON --}}
     <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
         <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
         <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
