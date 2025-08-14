@@ -93,7 +93,7 @@ class DefaultDeliverablesModule extends Component
         $employees = Employee::get()->mapWithKeys(function ($employee) use ($locale) {
             return [$employee->id => $employee->getTranslation('name', $locale)];
         });
-        $cities         = City::orderBy("name->$locale")->get(['id','name']);
+        $cities         = City::whereHas('centers')->orderBy("name->$locale")->get(['id','name']);
         $checklistItems = ChecklistItem::orderBy('order')->get(['id','name']);
 
         return view('livewire.default-deliverables-module', compact('items','employees','cities','checklistItems'));
