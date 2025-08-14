@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Layout;
 
+use Illuminate\Support\Facades\Route;
 use Livewire\Component;
 
 class Breadcrumbs extends Component
@@ -13,10 +14,29 @@ class Breadcrumbs extends Component
 
     public bool $showButton = false;
 
-
-
     public function render()
     {
-        return view('livewire.layout.breadcrumbs');
+        // Normalize crumbs & compute href
+        $items = collect($this->crumbs)->map(function ($c) {
+            $label  = (string)($c['label'] ?? '');
+            $href   = null;
+
+            if (!empty($c['url'])) {
+                $href = (string)$c['url'];
+            } elseif (!empty($c['route']) && Route::has($c['route'])) {
+                try {
+                    $href = route($c['route'], $c['params'] ?? []);
+                } catch (\Throwable $e) {
+                    $href = null;
+                }
+            }
+            return ['label' => $label, 'href' => $href];
+        })->toArray();
+
+        return view('livewire.layout.breadcrumbs', [
+            'items'      => $items,
+            'title'      => $this->title,
+            'showButton' => $this->showButton,
+        ]);
     }
 }

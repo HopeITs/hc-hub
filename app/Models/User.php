@@ -19,13 +19,12 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = ['name', 'email', 'password'];
-    public array $translatable = ['name'];
+    protected $fillable = ['email', 'password'];
 
-    public function getTranslatedNameAttribute()
-    {
-        return $this->name[app()->getLocale()] ?? ($this->name['en'] ?? null);
-    }
+    // public function getTranslatedNameAttribute()
+    // {
+    //     return $this->name[app()->getLocale()] ?? ($this->name['en'] ?? null);
+    // }
 
     /**
      * The attributes that should be hidden for serialization.

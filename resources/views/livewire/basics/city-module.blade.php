@@ -1,10 +1,11 @@
 <div>
+
     <livewire:layout.breadcrumbs
-        :title="trans_choice('general.city',2)"
+        :title="trans_choice('general.city', 2)"
         :crumbs="[
-            ['label' => __('general.project-basics')],
-            ['label' => trans_choice('general.city',2)],
-        ]"
+         ['label' => __('general.project-basics')],
+        ['label' => trans_choice('general.city', 2), 'route' => 'cities.index'],
+    ]"
     />
 
     <x-table>

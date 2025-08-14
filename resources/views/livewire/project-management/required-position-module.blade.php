@@ -3,7 +3,7 @@
         <livewire:layout.breadcrumbs
             :title="trans_choice('general.required-positions' , 1)"
             :crumbs="[
-                ['label' => __('general.dashboard')],
+                ['label' => __('general.projects-management')],
                 ['label' => trans_choice('general.required-positions' , 1)],
             ]"
             :showButton="true"

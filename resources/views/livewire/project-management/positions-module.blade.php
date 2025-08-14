@@ -3,9 +3,10 @@
         <livewire:layout.breadcrumbs
             :title="__('general.positions')"
             :crumbs="[
-                ['label' => __('general.dashboard')],
-                ['label' => trans_choice('general.center', 2)],
-                ['label' => (string) $center->getTranslation('name', $locale) . ' (' . $center->city->getTranslation('name', $locale) . ')'],            ]"
+        ['label' => __('general.projects-management')],
+        ['label' => __('general.centers'), 'url' => route('centers.index')],
+        ['label' => (string) $center->getTranslation('name', $locale) . ' (' . $center->city->getTranslation('name', $locale) . ')'],
+            ]"
             :showButton="true"
         />
         <div class="flex items-center gap-2">

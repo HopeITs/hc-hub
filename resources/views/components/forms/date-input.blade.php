@@ -1,4 +1,4 @@
-<div class="relative max-w-sm">
+<div class="relative w-full">
     <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
         <x-icons.calendar/>
     </div>
