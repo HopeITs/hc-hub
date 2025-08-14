@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -19,7 +20,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = ['email', 'password'];
+    protected $fillable = ['email', 'password' , 'employee_id'];
 
     // public function getTranslatedNameAttribute()
     // {
@@ -53,7 +54,10 @@ class User extends Authenticatable
     {
         return Str::of($this->name)->explode(' ')->take(2)->map(fn($word) => Str::substr($word, 0, 1))->implode('');
     }
-
+    public function profile(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class,'employee_id');
+    }
     public function myRole()
     {
         return $this->roles()->first()?->name;
@@ -82,4 +86,6 @@ class User extends Authenticatable
     {
         return $this->roles->contains('name', $roleName);
     }
+
+
 }

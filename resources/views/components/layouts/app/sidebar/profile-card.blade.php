@@ -6,7 +6,7 @@
             @if(Auth::user())
                 <img class="size-10 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="user photo">
                 <div class="ms-4">
-                    <div class="text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</div>
+                    <div class="text-sm font-semibold text-gray-900">{{ Auth::user()->profile->name }}</div>
                     <div class="text-sm font-normal">{{ Auth::user()->myRole() }}</div>
                 </div>
             @endif
@@ -17,7 +17,7 @@
     <div id="userDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-52">
         @if(Auth::user())
             <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                <div>{{ Auth::user()->name }}</div>
+                <div>{{ Auth::user()->profile->name }}</div>
                 <div class="font-medium truncate">{{ Auth::user()->email }}</div>
             </div>
             <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">

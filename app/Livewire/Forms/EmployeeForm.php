@@ -3,6 +3,8 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Employee;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Form;
 use Livewire\WithFileUploads;
 
@@ -14,7 +16,7 @@ class EmployeeForm extends Form
     public $photo;
     public $name = [];
     public $national_number;
-    public $work_email;
+
     public $work_email_username;
     public $direct_manager_id;
     public $tech_manager_id;
@@ -61,7 +63,6 @@ class EmployeeForm extends Form
         $this->employee = $employee;
         $this->photo = $employee->photo;
         $this->national_number = $employee->national_number;
-        $this->work_email = $employee->work_email;
         $this->direct_manager_id = $employee->direct_manager_id;
         $this->tech_manager_id = $employee->tech_manager_id;
         $this->dob = $employee->dob;
@@ -92,13 +93,14 @@ class EmployeeForm extends Form
         $this->badges = $employee->badges()->get()->toArray();
         $this->checklists = $employee->checklists()->get()->toArray();
 
-        $this->work_email_username = $this->extractUsernameFromEmail($employee->work_email);
+        $this->work_email_username = $this->extractUsernameFromEmail($employee->email);
     }
 
     public function addEducation()
     {
         $this->educations[] = ['title' => '', 'university' => '', 'type' => '', 'graduation_year' => ''];
     }
+
     public function removeEducation(int $index)
     {
         unset($this->educations[$index]);
@@ -109,6 +111,7 @@ class EmployeeForm extends Form
     {
         $this->courses[] = ['title' => '', 'issuing_organization' => '', 'date' => '', 'is_approved' => 0];
     }
+
     public function removeCourse(int $index)
     {
         unset($this->courses[$index]);
@@ -119,6 +122,7 @@ class EmployeeForm extends Form
     {
         $this->experiences[] = ['job_title' => '', 'company' => '', 'start_date' => '', 'end_date' => '', 'place' => 'onsite', 'type' => ''];
     }
+
     public function removeExperience(int $index)
     {
         unset($this->experiences[$index]);
@@ -129,6 +133,7 @@ class EmployeeForm extends Form
     {
         $this->relatives[] = ['name' => '', 'phone' => '', 'relation' => ''];
     }
+
     public function removeRelative(int $index)
     {
         unset($this->relatives[$index]);
@@ -139,6 +144,7 @@ class EmployeeForm extends Form
     {
         $this->badges[] = ['evaluation_id' => null, 'currency' => 1, 'type' => '', 'date' => now()->format('Y-m-d'), 'reason' => '', 'current_salary' => null, 'new_salary' => null, 'notes' => ''];
     }
+
     public function removeBadge(int $index)
     {
         unset($this->badges[$index]);
@@ -149,6 +155,7 @@ class EmployeeForm extends Form
     {
         $this->checklists[] = ['item_id' => null, 'brand' => '', 'model' => '', 'serial' => '', 'delivered_at' => now()->format('Y-m-d'), 'delivered_status' => '', 'returned_at' => null, 'returned_status' => '', 'notes' => ''];
     }
+
     public function removeChecklist(int $index)
     {
         unset($this->checklists[$index]);
@@ -157,7 +164,7 @@ class EmployeeForm extends Form
 
     public function saveInformation()
     {
-        $this->work_email = $this->buildWorkEmail($this->work_email_username);
+        $this->email = $this->buildWorkEmail($this->work_email_username);
 
         $this->validate([
             'name' => 'required|array',
@@ -165,16 +172,22 @@ class EmployeeForm extends Form
             'national_number' => 'required|string|max:20',
             'is_active' => 'required|boolean',
             'nationality' => 'required|string|max:100',
-            'work_email' => 'nullable|email|max:255|unique:employees,work_email,' . $this->employee?->id,
+            'email' => 'nullable|email|max:255|unique:users,email,' . $this->employee?->id,
             'work_email_username' => 'nullable|regex:/^[a-zA-Z0-9.\-_]+$/',
         ]);
 
-        $data = $this->only(['name', 'national_number', 'is_active', 'nationality', 'work_email', 'direct_manager_id', 'tech_manager_id', 'dob', 'gender', 'marital_status', 'children', 'father_name', 'mother_name', 'civil_registry_office', 'civil_registry_number', 'place_of_registration', 'work_phone', 'personal_phone', 'personal_email', 'address', 'skills', 'interests', 'is_board_member', 'board_member_started_at', 'board_member_end_at']);
-
+        $data = $this->only(['name', 'national_number', 'is_active', 'nationality', 'direct_manager_id', 'tech_manager_id', 'dob', 'gender', 'marital_status', 'children', 'father_name', 'mother_name', 'civil_registry_office', 'civil_registry_number', 'place_of_registration', 'work_phone', 'personal_phone', 'personal_email', 'address', 'skills', 'interests', 'is_board_member', 'board_member_started_at', 'board_member_end_at']);
+        $emailData = $this->only(['email']);
         if ($this->employee) {
             $this->employee->update($data);
+            $this->employee->account()->update($emailData);
         } else {
             $this->employee = Employee::create($data);
+            User::create([
+                'email' => $emailData,
+                'password' => Hash::make('HopeCenterHR'),
+                'employee_id' => $this->employee->id,
+            ]);
         }
 
         if ($this->photo && !is_string($this->photo)) {

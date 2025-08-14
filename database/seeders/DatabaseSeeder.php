@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             RolesPermissionsSeeder::class,
             UserRoleSeeder::class,
             JobLevelSeeder::class,
-            EmployeeSeeder::class,
+//            EmployeeSeeder::class,
             RequiredPositionsSeeder::class
         ]);
 

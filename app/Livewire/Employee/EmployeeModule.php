@@ -38,8 +38,8 @@ class EmployeeModule extends Component
 
     public function render()
     {
-        $items = Employee::with(['directManager', 'techManager'])
-            ->select(['id', 'name', 'photo', 'years_of_service', 'direct_manager_id', 'tech_manager_id', 'actual_job', 'work_email', 'is_active'])
+        $items = Employee::with(['directManager', 'techManager','account'])
+            ->select(['id', 'name', 'photo', 'years_of_service', 'direct_manager_id', 'tech_manager_id', 'actual_job', 'is_active'])
             ->paginate(15);
 
         return view('livewire.employee.employee-module', [

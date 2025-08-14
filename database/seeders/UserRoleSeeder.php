@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Employee;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Database\Seeder;
@@ -45,6 +46,7 @@ class UserRoleSeeder extends Seeder
     private function createUserWithRole(string $email, string $password, string $roleName): void
     {
         $user = User::create([
+            'employee_id' => Employee::factory()->create()->id,
             'email' => $email,
             'password' => Hash::make($password),
         ]);

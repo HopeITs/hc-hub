@@ -38,7 +38,7 @@
                     <x-table.cell>{{ $item->directManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->techManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->actual_job }}</x-table.cell>
-                    <x-table.cell>{{ $item->work_email }}</x-table.cell>
+                    <x-table.cell>{{ $item->account->email }}</x-table.cell>
                     <x-table.cell>
                         <x-badge :color="$item->is_active ? 'green' : 'red'">
                             {{ $item->is_active ? __('general.active') : __('general.inactive') }}

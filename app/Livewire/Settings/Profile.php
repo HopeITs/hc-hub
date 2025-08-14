@@ -25,10 +25,11 @@ class Profile extends Component
         $user = auth()->user();
 
         $this->name = [
-            'en' => $user->getTranslation('name', 'en') ?? '',
-            'ar' => $user->getTranslation('name', 'ar') ?? '',
+            'en' => $user->profile?->getTranslation('name', 'en') ?? '',
+            'ar' => $user->profile?->getTranslation('name', 'ar') ?? '',
         ];
         $this->email = Auth::user()->email;
+
     }
 
     /**
@@ -51,7 +52,9 @@ class Profile extends Component
             ],
         ]);
 
-        $user->setTranslations('name', $this->name);
+        $user->profile->update([
+            'name' => $this->name,
+        ]);
         $user->email = $this->email;
 
         if ($user->isDirty('email')) {

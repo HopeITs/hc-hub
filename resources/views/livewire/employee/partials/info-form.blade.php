@@ -134,7 +134,7 @@ use App\Enums\MaritalStatus;
                     <x-forms.input type="text" wire:model="form.work_email_username" id="work_email_username" class="rounded-r-none" placeholder="username" />
                 </div>
                 <x-error-span>{{ $errors->first('form.work_email_username') }}</x-error-span>
-                <x-error-span>{{ $errors->first('form.work_email') }}</x-error-span>
+                <x-error-span>{{ $errors->first('form.email') }}</x-error-span>
             </div>
 
             <div>

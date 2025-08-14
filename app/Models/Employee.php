@@ -84,4 +84,8 @@ class Employee extends Model
     {
         return $this->belongsTo(Department::class);
     }
+
+    public function account(){
+        return $this->hasOne(User::class, 'employee_id');
+    }
 }
