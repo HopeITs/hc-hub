@@ -1,8 +1,7 @@
-<div class="space-y-6">
+<form wire:submit.prevent="saveRelatives" class="space-y-6">
     @foreach ($form->relatives as $index => $relative)
         <div wire:key="relative-{{ $index }}" class="relative">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                 <div>
                     <x-forms.input-label for="relative_name_{{ $index }}">@lang('general.name')</x-forms.input-label>
                     <x-forms.input type="text" wire:model="form.relatives.{{ $index }}.name"
@@ -21,7 +20,17 @@
                     <x-forms.input-label>@lang('general.relation')</x-forms.input-label>
 
                     @php
-                        $relations = ['father', 'mother', 'brother', 'sister', 'husband', 'wife', 'son', 'daughter', 'other'];
+                        $relations = [
+                            'father',
+                            'mother',
+                            'brother',
+                            'sister',
+                            'husband',
+                            'wife',
+                            'son',
+                            'daughter',
+                            'other',
+                        ];
                     @endphp
 
                     <div class="flex flex-wrap gap-4 mt-2">
@@ -42,11 +51,14 @@
     @endforeach
 
     <div>
-        <button
-            type="button"
-            wire:click="form.addRelative"
+        <button type="button" wire:click="form.addRelative"
             class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">
             + @lang('general.add_new')
         </button>
     </div>
-</div>
+
+    <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
+        <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
+        <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
+    </div>
+</form>

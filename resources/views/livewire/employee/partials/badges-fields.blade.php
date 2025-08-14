@@ -1,15 +1,11 @@
-<div class="space-y-6">
+<form wire:submit.prevent="saveBadges" class="space-y-6">
     @foreach ($form->badges as $index => $badge)
-        <div
-            wire:key="badge-{{ $index }}"
-            class="relative"
-            x-data="{ type: @entangle('form.badges.' . $index . '.type') }"
-            x-cloak
-        >
+        <div wire:key="badge-{{ $index }}" class="relative" x-data="{ type: @entangle('form.badges.' . $index . '.type') }" x-cloak>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                     <x-forms.input-label for="badge_type_{{ $index }}">@lang('general.type')</x-forms.input-label>
-                    <x-forms.select-input wire:model="form.badges.{{ $index }}.type" id="badge_type_{{ $index }}">
+                    <x-forms.select-input wire:model="form.badges.{{ $index }}.type"
+                        id="badge_type_{{ $index }}">
                         <option value="">-- @lang('general.select') --</option>
                         <option value="promotion">@lang('general.promotion')</option>
                         <option value="warning">@lang('general.warning')</option>
@@ -22,18 +18,15 @@
 
                 <div>
                     <x-forms.input-label for="badge_date_{{ $index }}">@lang('general.date')</x-forms.input-label>
-                    <x-forms.input type="date" wire:model="form.badges.{{ $index }}.date" id="badge_date_{{ $index }}" />
+                    <x-forms.input type="date" wire:model="form.badges.{{ $index }}.date"
+                        id="badge_date_{{ $index }}" />
                     <x-error-span>{{ $errors->first('form.badges.' . $index . '.date') }}</x-error-span>
                 </div>
-
-                {{-- Currency (only when salary_adjustment) --}}
                 <div x-show="type === 'salary_adjustment'">
-                    <x-forms.input-label for="badge_currency_{{ $index }}">@lang('general.currency')</x-forms.input-label>
-                    <x-forms.select-input
-                        wire:model="form.badges.{{ $index }}.currency"
-                        id="badge_currency_{{ $index }}"
-                        x-bind:disabled="type !== 'salary_adjustment'"
-                    >
+                    <x-forms.input-label
+                        for="badge_currency_{{ $index }}">@lang('general.currency')</x-forms.input-label>
+                    <x-forms.select-input wire:model="form.badges.{{ $index }}.currency"
+                        id="badge_currency_{{ $index }}" x-bind:disabled="type !== 'salary_adjustment'">
                         <option value="0">@lang('general.unknown')</option>
                         <option value="1">SYP</option>
                         <option value="2">USD</option>
@@ -42,50 +35,51 @@
                     <x-error-span>{{ $errors->first('form.badges.' . $index . '.currency') }}</x-error-span>
                 </div>
 
-                {{-- Current Salary (only when salary_adjustment) --}}
                 <div x-show="type === 'salary_adjustment'">
-                    <x-forms.input-label for="badge_current_salary_{{ $index }}">@lang('general.current_salary')</x-forms.input-label>
-                    <x-forms.input
-                        type="number"
-                        step="0.01"
+                    <x-forms.input-label
+                        for="badge_current_salary_{{ $index }}">@lang('general.current_salary')</x-forms.input-label>
+                    <x-forms.input type="number" step="0.01"
                         wire:model="form.badges.{{ $index }}.current_salary"
-                        id="badge_current_salary_{{ $index }}"
-                        x-bind:disabled="type !== 'salary_adjustment'"
-                    />
+                        id="badge_current_salary_{{ $index }}" x-bind:disabled="type !== 'salary_adjustment'" />
                     <x-error-span>{{ $errors->first('form.badges.' . $index . '.current_salary') }}</x-error-span>
                 </div>
 
-                {{-- New Salary (only when salary_adjustment) --}}
                 <div x-show="type === 'salary_adjustment'">
-                    <x-forms.input-label for="badge_new_salary_{{ $index }}">@lang('general.new_salary')</x-forms.input-label>
-                    <x-forms.input
-                        type="number"
-                        step="0.01"
+                    <x-forms.input-label
+                        for="badge_new_salary_{{ $index }}">@lang('general.new_salary')</x-forms.input-label>
+                    <x-forms.input type="number" step="0.01"
                         wire:model="form.badges.{{ $index }}.new_salary"
-                        id="badge_new_salary_{{ $index }}"
-                        x-bind:disabled="type !== 'salary_adjustment'"
-                    />
+                        id="badge_new_salary_{{ $index }}" x-bind:disabled="type !== 'salary_adjustment'" />
                     <x-error-span>{{ $errors->first('form.badges.' . $index . '.new_salary') }}</x-error-span>
                 </div>
 
                 <div class="lg:col-span-3">
-                    <x-forms.input-label for="badge_reason_{{ $index }}">@lang('general.reason')</x-forms.input-label>
-                    <x-forms.textarea wire:model="form.badges.{{ $index }}.reason" id="badge_reason_{{ $index }}" />
+                    <x-forms.input-label
+                        for="badge_reason_{{ $index }}">@lang('general.reason')</x-forms.input-label>
+                    <x-forms.textarea wire:model="form.badges.{{ $index }}.reason"
+                        id="badge_reason_{{ $index }}" />
                     <x-error-span>{{ $errors->first('form.badges.' . $index . '.reason') }}</x-error-span>
                 </div>
 
                 <div class="lg:col-span-3">
                     <x-forms.input-label for="badge_notes_{{ $index }}">@lang('general.notes')</x-forms.input-label>
-                    <x-forms.textarea wire:model="form.badges.{{ $index }}.notes" id="badge_notes_{{ $index }}" />
+                    <x-forms.textarea wire:model="form.badges.{{ $index }}.notes"
+                        id="badge_notes_{{ $index }}" />
                     <x-error-span>{{ $errors->first('form.badges.' . $index . '.notes') }}</x-error-span>
                 </div>
             </div>
-
-            <button type="button"
-                wire:click="form.removeBadge({{ $index }})"
-                class="absolute top-0 -right-2 text-gray-400 hover:text-red-600 transition-colors"
-                title="@lang('general.remove_badge')">
-            </button>
         </div>
     @endforeach
-</div>
+
+    <div>
+        <button type="button" wire:click="form.addBadge"
+            class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">
+            + @lang('general.add_new')
+        </button>
+    </div>
+
+    <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
+        <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
+        <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
+    </div>
+</form>
