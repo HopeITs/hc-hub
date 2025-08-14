@@ -24,9 +24,11 @@ class ProjectModule extends Component
         'name' => '',
         'description' => '',
         'is_active' => true,
-        'start_date' => '',
+        'start_date' => null,
         'end_date' => null,
-        'logo' => ''
+        'logo' => '',
+        'code' => '',
+        'slug' => ''
 
     ];
 
@@ -38,6 +40,8 @@ class ProjectModule extends Component
             'item.description.*' => 'nullable',
             'item.is_active' => 'required|boolean:0,1',
             'item.logo' => 'nullable|image|max:2048',
+            'item.code' => 'required',
+            'item.slug' => 'required',
             'item.start_date' => 'required|date',
             'item.end_date' => 'nullable|date|after:item.start_date',
         ];
@@ -118,7 +122,7 @@ class ProjectModule extends Component
 
     public function save()
     {
-
+//dd($this->item);
 
         $this->validate();
 

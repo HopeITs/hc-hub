@@ -72,6 +72,7 @@
                 <span class="line-clamp-2 pt-4 border-t-1 border-gray-200">
                     {{$project->description}}
                 </span>
+
                 <div class="mt-4 pt-4 border-t-1 border-gray-200">
                     <a href="{{route('projects.show',['slug' => $project->slug])}}">عرض التفاصيل</a>
                 </div>
@@ -88,17 +89,22 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
                     <x-forms.input-label for="logo">@lang('general.project_logo')</x-forms.input-label>
-                    <div class="grid grid-cols-3 gap-x-2">
-                        <x-forms.file-input id="logo" class="col-span-2" wire:model.live="item.logo" :file="$item['logo']"/>
-
-                    </div>
-
-                    {{--                    <x-forms.image-input :item="$item"/>--}}
+                    <x-forms.file-input id="logo"  wire:model.live="item.logo" :file="$item['logo']"/>
                     <x-error-span>{{ $errors->first('item.logo') }}</x-error-span>
 
                 </div>
+                <div>
+                    <x-forms.input-label for="code">@lang('general.code')</x-forms.input-label>
+                    <x-forms.input type="text" id="code" wire:model.defer="item.code"/>
+                    <x-error-span>{{ $errors->first('item.code') }}</x-error-span>
+                </div>
+                <div>
+                    <x-forms.input-label for="slug">@lang('general.slug')</x-forms.input-label>
+                    <x-forms.input type="text" id="code" wire:model.defer="item.slug"/>
+                    <x-error-span>{{ $errors->first('item.slug') }}</x-error-span>
+                </div>
                 @foreach(config('app.supported_locales') as $locale)
-                    <div class="col-span-1">
+                    <div>
                         <x-forms.input-label for="name_{{ $locale }}">@lang('general.name') ({{ strtoupper($locale) }})
                         </x-forms.input-label>
                         <x-forms.input type="text" id="name_{{ $locale }}" wire:model.defer="item.name.{{ $locale }}"/>
