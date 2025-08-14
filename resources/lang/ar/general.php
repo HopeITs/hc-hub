@@ -4,7 +4,7 @@ return [
     'project-name' => 'Hope HR',
     'basic-management' => 'الإدارة الأساسية',
     'project-basics' => 'أساسيات المشروع',
-    'city' => 'المدن|مدينة',
+    'city' => 'المدن|المدينة',
     'center' => 'المراكز|مركز',
     'contract-type' => 'أنواع العقود|نوع العقد',
     'leave-type' => 'أنواع الإجازات|نوع الإجازة',
@@ -91,6 +91,7 @@ return [
     'max' => 'اقصى عدد للموظفين',
     'existing' => 'الموظفين الموجودين',
 
+    'default-deliverables' => 'التسليم الافتراضي ',
     'centers' => 'المركز',
     'center-name' => 'اسم المركز',
     'center-city' => 'المدينة',
