@@ -113,6 +113,12 @@
                             :active="request()->routeIs('employees.*')">
                             {{ trans_choice('general.employee', 2) }}
                         </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('default-deliverables.index')"
+                            :active="request()->routeIs('default-deliverables.index')">
+                            {{ trans_choice('general.default-deliverables', 2) }}
+                        </x-layouts.app.sidebar.nav-item>
                     </x-slot>
 
                 </x-layouts.app.sidebar.dropdown-nav-list>

@@ -4,6 +4,7 @@ use App\Livewire\Basics\ChecklistItemModule;
 use App\Livewire\Basics\CityModule;
 use App\Livewire\Basics\ContractTypeModule;
 use App\Livewire\Basics\DepartmentModule;
+use App\Livewire\DefaultDeliverablesModule;
 use App\Livewire\ProjectManagement\CentersModule;
 use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Basics\LeaveTypeModule;
@@ -46,6 +47,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
     Route::get('/centers', CentersModule::class)->name('centers.index');
     Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
+    Route::get('/default-deliverables', DefaultDeliverablesModule::class)
+        ->name('default-deliverables.index');
 });
 Route::prefix('employees')->name('employees.')->group(function () {
     Route::get('/', EmployeeModule::class)->name('index');
