@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Employee;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -29,12 +30,13 @@ class DatabaseSeeder extends Seeder
             RolesPermissionsSeeder::class,
             UserRoleSeeder::class,
             JobLevelSeeder::class,
-            RequiredPositionsSeeder::class,
+            EmployeeSeeder::class,
+            RequiredPositionsSeeder::class
         ]);
 
-       $user = User::factory()->create([
-            'name' => ['en' => 'Test User'],
-            'email' => 'test@example.com',
-        ]);
+    //    $user = User::factory()->create([
+    //         // 'name' => ['en' => 'Test User'],
+    //         'email' => 'test@example.com',
+    //     ]);
     }
 }

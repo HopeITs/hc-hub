@@ -14,6 +14,7 @@ class Badge extends Model
         'employee_id',
         'evaluation_id',
         'type',
+        'currency',
         'date',
         'reason',
         'current_salary',

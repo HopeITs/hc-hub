@@ -14,6 +14,9 @@ use App\Livewire\ProjectManagement\RequiredPositionModule;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\Employee\EmployeeModule;
+use App\Livewire\Employee\EmployeeCreate;
+use App\Livewire\Employee\EmployeeEdit;
 use Illuminate\Support\Facades\Route;
 
 
@@ -43,6 +46,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
     Route::get('/centers', CentersModule::class)->name('centers.index');
     Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
+});
+Route::prefix('employees')->name('employees.')->group(function () {
+    Route::get('/', EmployeeModule::class)->name('index');
+    Route::get('/create', EmployeeCreate::class)->name('create');
+    Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
 });
 
 require __DIR__.'/auth.php';
