@@ -1,6 +1,6 @@
 @props([
     'previewType' => 'image' ,// image - docs - pdf - video
-    'file' => null
+    'oldFile' => null
 ])
 <div class="grid md:grid-cols-2 items-end gap-4">
     <input {{$attributes->merge([
@@ -10,12 +10,12 @@
     />
 
 
-    @if($previewType === 'image' && $file !== "" && isset($file))
+    @if($previewType === 'image' )
 
-        <a href="{{$file->temporaryUrl()}}" >
-            <img src="{{$file->temporaryUrl()}}" alt="preview-img"
-                 class="h-20 p-1 rounded-md  "/>
-        </a>
+            <a href="{{$oldFile ?? $file->temporaryUrl()}}">
+                <img src="{{ $oldFile ?? $file->temporaryUrl()}}" alt="preview-img"
+                     class="h-20 p-1 rounded-md  "/>
+            </a>
 
     @endif
 </div>

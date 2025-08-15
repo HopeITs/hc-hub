@@ -53,7 +53,7 @@ return [
     'single' => 'أعزب',
     'married' => 'متزوج',
     'select' => 'اختر',
-    'required-positions' => 'المنصب المطلوب | المناصب المطلوبة',
+    'required-positions' => 'المناصب المطلوبة | المنصب المطلوب',
     'dob' => 'تاريخ الميلاد',
     'national_number' => 'الرقم الوطني',
     'civil_registry_office' => 'دائرة السجل المدني',
@@ -95,7 +95,7 @@ return [
     'centers' => 'المركز',
     'center-name' => 'اسم المركز',
     'center-city' => 'المدينة',
-
+    'logo' => 'اللوغو' ,
     'search' => 'بحث',
 
     'employee' => 'الموظف',

@@ -18,7 +18,7 @@
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach($items as $project)
-            <x-card class="col-span-1  {{$project->is_active ? '!border-red-200' : ''}}" :title="$project->name">
+            <x-card class="col-span-1  {{$project->is_active ? '!border-red-200' : ''}}" :title="$project->getTranslation('name' , 'en')">
                 <x-slot name="icon">
                     <div class="flex justify-between">
 
@@ -34,47 +34,98 @@
                                       d="M8 4h8v4H8V4Zm7 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                             </svg>
                         @endif
-                        <div class="flex justify-between items-center">
-                            <x-forms.toggle-input
-                                :active="$project->is_active"
-                                :model-id="$project->id"
-                                wire-event="confirmToggleItemStatus"/>
-                            <x-table.edit-btn wire:click="edit({{ $project->id }})"></x-table.edit-btn>
-                            <x-table.delete-btn :modelId="$project->id"/>
-                        </div>
+
 
                     </div>
+
                 </x-slot>
-                <ul class="text-gray-400 mb-4">
-                    <li class="flex items-center">
-                        <x-icons.calendar class="me-2"/>
-                        {{ __('general.start_date') .': '. $project->start_date?->format('d-m-Y')}}
-                    </li>
-                    <li class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <x-icons.building class="me-2"/>
-                            <span>
-                               {{ trans_choice('general.center' , 2) .': '. $project->centers_count}}
-                           </span>
-                        </div>
-                        <div class="flex items-center">
-                            <x-icons.map-pin class="me-2"/>
-                            <span>
-                                  {{ trans_choice('general.city' , 2) .': '. $project->cities_count}}
+                <div class="text-gray-400 grid md:grid-cols-2 mb-4 gap-x-4 gap-y-2">
+                    <div class="flex items-center md:col-span-2 ">
+                        <x-icons.info class="me-2"/>
+
+                        <span class="font-bold me-1">
+                            {{__('general.name') .': '}}
+                        </span>
+                        <span>
+                                  {{ $project->getTranslation('name', 'ar')  }}
                             </span>
 
-                        </div>
+                    </div>
+                    <div class="flex items-center ">
+                        <x-icons.barcode class="me-2"/>
 
-                    </li>
+                        <span class="font-bold me-1">
+                            {{__('general.code') .': '}}
+                        </span>
+                        <span>
+                                  {{ $project->slug.'-'. $project->code  }}
+                            </span>
+
+                    </div>
+                    <div class="flex items-center ">
+                        <x-icons.bag class="me-2"/>
+
+                        <span class="font-bold me-1">
+                            {{trans_choice('general.required-positions' , 2) .': '}}
+                        </span>
+                        <span>
+                                  {{  $project->required_positions_count}}
+                            </span>
+
+                    </div>
+                    <div class="flex items-center">
+                        <x-icons.calendar class="me-2"/>
+                        <span class="font-bold me-1">  {{ __('general.start_date') .': '}} </span>
+                        <span>
+                          {{ $project->start_date?->format('M, Y')}}
+                      </span>
+                    </div>
+                    <div class="flex items-center ">
+                        <x-icons.calendar class="me-2 "/>
+                        <span class="font-bold me-1">
+                            {{ __('general.end_date') .': '}}
+                       </span>
+                        <span>
+
+                  {{ $project->end_date !== null ? $project->end_date?->format(' M, Y') : __('general.active')}}
+                        </span>
+                    </div>
+                    <div class="flex items-center  ">
+                        <x-icons.building class="me-2 "/>
+                        <span class="font-bold me-1">
+                            {{trans_choice('general.center' , 2) .': '}}
+                        </span>
+                        <span>
+                               {{  $project->centers_count}}
+                           </span>
+                    </div>
+                    <div class="flex items-center ">
+                        <x-icons.map-pin class="me-2"/>
+                        <span class="font-bold me-1">
+                            {{trans_choice('general.city' , 2) .': '}}
+                        </span>
+                        <span>
+                                  {{  $project->cities_count}}
+                            </span>
+
+                    </div>
 
 
-                </ul>
-                <span class="line-clamp-2 pt-4 border-t-1 border-gray-200">
-                    {{$project->description}}
-                </span>
 
-                <div class="mt-4 pt-4 border-t-1 border-gray-200">
+
+                </div>
+
+
+                <div class="flex justify-between items-end mt-4 pt-4 border-t-1 border-gray-200">
                     <a href="{{route('projects.show',['slug' => $project->slug])}}">عرض التفاصيل</a>
+                    <div class="flex justify-between items-center">
+                        <x-forms.toggle-input
+                            :active="$project->is_active"
+                            :model-id="$project->id"
+                            wire-event="confirmToggleItemStatus"/>
+                        <x-table.edit-btn wire:click="edit({{ $project->id }})"></x-table.edit-btn>
+                        <x-table.delete-btn :modelId="$project->id"/>
+                    </div>
                 </div>
 
 
@@ -88,8 +139,8 @@
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
-                    <x-forms.input-label for="logo">@lang('general.project_logo')</x-forms.input-label>
-                    <x-forms.file-input id="logo"  wire:model.live="item.logo" :file="$item['logo']"/>
+                    <x-forms.input-label for="logo">@lang('general.logo')</x-forms.input-label>
+                    <x-forms.file-input id="logo" wire:model.live="item.logo" :old-file="$item['logo']" />
                     <x-error-span>{{ $errors->first('item.logo') }}</x-error-span>
 
                 </div>
@@ -124,13 +175,13 @@
                 <div>
                     <x-forms.input-label for="start_date">@lang('general.start_date')
                     </x-forms.input-label>
-                    <x-forms.date-input id="start_date" wire:model="item.start_date"/>
+                    <x-forms.date-input id="start_date" wire:model.defer="item.start_date"/>
                     <x-error-span>{{ $errors->first('item.start_date') }}</x-error-span>
                 </div>
                 <div>
                     <x-forms.input-label for="end_date">@lang('general.end_date')
                     </x-forms.input-label>
-                    <x-forms.date-input id="end_date" wire:model="item.end_date"/>
+                    <x-forms.date-input id="end_date" wire:model.defer="item.end_date"/>
                     <x-error-span>{{ $errors->first('item.end_date') }}</x-error-span>
                 </div>
 

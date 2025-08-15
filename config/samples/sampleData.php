@@ -123,7 +123,7 @@ return [
         ],
         [
             'name' => [
-                'en' => 'Family to Family )Rodzina Rodzinie(',
+                'en' => 'Family to Family (Rodzina Rodzinie)',
                 'ar' => 'من عائلة إلى عائلة',
             ],
             'description' => [
@@ -149,7 +149,7 @@ return [
         ],
         [
             'name' => [
-                'en' => 'School to School )Szkoła szkole(',
+                'en' => 'School to School (Szkoła szkole)',
                 'ar' => 'من مدرسة إلى مدرسة',
             ],
             'description' => [
