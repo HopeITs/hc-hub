@@ -25,31 +25,98 @@ class EmployeeCreate extends Component
         $this->form->addChecklist();
     }
 
-    public function saveInformation() { $this->form->saveInformation(); LivewireAlert::success(__('general.success-message')); }
-    public function saveEducation() { $this->form->saveEducation(); LivewireAlert::success(__('general.success-message')); }
-    public function saveCourses() { $this->form->saveCourses(); LivewireAlert::success(__('general.success-message')); }
-    public function saveExperience() { $this->form->saveExperience(); LivewireAlert::success(__('general.success-message')); }
-    public function saveRelatives() { $this->form->saveRelatives(); LivewireAlert::success(__('general.success-message')); }
-    public function saveBadges() { $this->form->saveBadges(); LivewireAlert::success(__('general.success-message')); }
-    public function saveChecklist() { $this->form->saveChecklist(); LivewireAlert::success(__('general.success-message')); }
+    public function saveInformation()
+    {
+        $employee = $this->form->saveInformation();
 
-    public function addEducation() { $this->form->addEducation(); }
-    public function removeEducation($i) { $this->form->removeEducation((int) $i); }
+        LivewireAlert::success(__('general.success-message'));
 
-    public function addCourse() { $this->form->addCourse(); }
-    public function removeCourse($i) { $this->form->removeCourse((int) $i); }
+        return $this->redirect(route('employees.edit', $employee->id), navigate: true);
+    }
+    public function saveEducation()
+    {
+        $this->form->saveEducation();
+        LivewireAlert::success(__('general.success-message'));
+    }
+    public function saveCourses()
+    {
+        $this->form->saveCourses();
+        LivewireAlert::success(__('general.success-message'));
+    }
+    public function saveExperience()
+    {
+        $this->form->saveExperience();
+        LivewireAlert::success(__('general.success-message'));
+    }
+    public function saveRelatives()
+    {
+        $this->form->saveRelatives();
+        LivewireAlert::success(__('general.success-message'));
+    }
+    public function saveBadges()
+    {
+        $this->form->saveBadges();
+        LivewireAlert::success(__('general.success-message'));
+    }
+    public function saveChecklist()
+    {
+        $this->form->saveChecklist();
+        LivewireAlert::success(__('general.success-message'));
+    }
 
-    public function addExperience() { $this->form->addExperience(); }
-    public function removeExperience($i) { $this->form->removeExperience((int) $i); }
+    public function addEducation()
+    {
+        $this->form->addEducation();
+    }
+    public function removeEducation($i)
+    {
+        $this->form->removeEducation((int) $i);
+    }
 
-    public function addRelative() { $this->form->addRelative(); }
-    public function removeRelative($i) { $this->form->removeRelative((int) $i); }
+    public function addCourse()
+    {
+        $this->form->addCourse();
+    }
+    public function removeCourse($i)
+    {
+        $this->form->removeCourse((int) $i);
+    }
 
-    public function addBadge() { $this->form->addBadge(); }
-    public function removeBadge($i) { $this->form->removeBadge((int) $i); }
+    public function addExperience()
+    {
+        $this->form->addExperience();
+    }
+    public function removeExperience($i)
+    {
+        $this->form->removeExperience((int) $i);
+    }
 
-    public function addChecklist() { $this->form->addChecklist(); }
-    public function removeChecklist($i) { $this->form->removeChecklist((int) $i); }
+    public function addRelative()
+    {
+        $this->form->addRelative();
+    }
+    public function removeRelative($i)
+    {
+        $this->form->removeRelative((int) $i);
+    }
+
+    public function addBadge()
+    {
+        $this->form->addBadge();
+    }
+    public function removeBadge($i)
+    {
+        $this->form->removeBadge((int) $i);
+    }
+
+    public function addChecklist()
+    {
+        $this->form->addChecklist();
+    }
+    public function removeChecklist($i)
+    {
+        $this->form->removeChecklist((int) $i);
+    }
 
     public function render()
     {

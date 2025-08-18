@@ -182,7 +182,7 @@ class EmployeeForm extends Form
         $this->checklists = array_values($this->checklists);
     }
 
-    public function saveInformation(): void
+    public function saveInformation(): Employee
     {
         $this->email = $this->buildWorkEmail($this->work_email_username);
 
@@ -251,6 +251,7 @@ class EmployeeForm extends Form
             $this->employee->photo = $this->photo->store('employees', 'public');
             $this->employee->save();
         }
+        return $this->employee;
     }
 
     public function saveEducation(): void

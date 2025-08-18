@@ -75,11 +75,6 @@
             </div>
         </x-tab.form>
 
-        <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
-            <x-primary-button type="submit">@lang('general.save')</x-primary-button>
-            <x-secondary-button :href="route('employees.index')">@lang('general.cancel')</x-secondary-button>
-        </div>
-
         @if ($errors->any())
             <div class="mt-4 text-sm text-red-600 space-y-1">
                 @foreach ($errors->all() as $error)
