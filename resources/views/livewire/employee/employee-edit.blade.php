@@ -5,7 +5,7 @@
         ['label' => __('general.edit')],
     ]" />
 
-    <form wire:submit.prevent="save" class="mt-4">
+    <form wire:submit.prevent="saveInformation" class="mt-4">
         <x-tab.form activeTab="information">
             <x-tab.list>
                 <x-tab.item :title="__('general.information')" activeTab="information" activeClass="bg-blue-600 text-white"
