@@ -24,8 +24,11 @@ class Employee extends Model
     public function positions(): BelongsToMany
     {
         return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')
-            ->withPivot(['id','contract_type_id','department_id','job_level_id','start_date','end_date','terminated_at','is_active','weekly_hours','yearly_leave_days'])
-            ->withTimestamps();
+            ->withPivot([
+                'id','contract_type_id','department_id','job_level_id',
+                'is_active','start_date','end_date','terminated_at',
+                'salary','currency','weekly_hours','yearly_leave_days','work_days','work_hours',
+            ]);
     }
 
     public function educations()
@@ -76,19 +79,31 @@ class Employee extends Model
     public function jobLevels(): BelongsToMany
     {
         return $this->belongsToMany(JobLevel::class, 'contracts', 'employee_id', 'job_level_id')
-            ->withPivot(['id','contract_type_id','department_id','job_level_id','start_date','end_date','terminated_at','is_active','weekly_hours','yearly_leave_days']);
+            ->withPivot([
+                'id','contract_type_id','department_id','job_level_id',
+                'is_active','start_date','end_date','terminated_at',
+                'salary','currency','weekly_hours','yearly_leave_days','work_days','work_hours',
+            ]);
     }
 
     public function contractTypes(): BelongsToMany
     {
         return $this->belongsToMany(ContractType::class, 'contracts', 'employee_id', 'contract_type_id')
-            ->withPivot(['id','contract_type_id','department_id','job_level_id','start_date','end_date','terminated_at','is_active','weekly_hours','yearly_leave_days']);
+            ->withPivot([
+                'id','contract_type_id','department_id','job_level_id',
+                'is_active','start_date','end_date','terminated_at',
+                'salary','currency','weekly_hours','yearly_leave_days','work_days','work_hours',
+            ]);
     }
 
     public function departments(): BelongsToMany
     {
         return $this->belongsToMany(Department::class, 'contracts', 'employee_id', 'department_id')
-            ->withPivot(['id','contract_type_id','department_id','job_level_id','start_date','end_date','terminated_at','is_active','weekly_hours','yearly_leave_days']);
+            ->withPivot([
+                'id','contract_type_id','department_id','job_level_id',
+                'is_active','start_date','end_date','terminated_at',
+                'salary','currency','weekly_hours','yearly_leave_days','work_days','work_hours',
+            ]);
     }
 
     public function account(){

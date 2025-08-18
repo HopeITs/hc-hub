@@ -31,7 +31,7 @@ class Contract extends Model
     protected $casts = [
         'start_date'        => 'date',
         'end_date'          => 'date',
-        'terminated_at'     => 'datetime',
+        'terminated_at'     => 'date',
         'is_active'         => 'boolean',
         'yearly_leave_days' => 'integer',
         'weekly_hours'      => 'integer',
