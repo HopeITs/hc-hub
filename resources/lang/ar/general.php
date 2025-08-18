@@ -90,7 +90,7 @@ return [
     'responsibilities' => 'المسؤوليات',
     'max' => 'اقصى عدد للموظفين',
     'existing' => 'الموظفين الموجودين',
-
+    'contracts'=> 'العقود | العقد',
     'default-deliverables' => 'التسليم الافتراضي ',
     'centers' => 'المركز',
     'center-name' => 'اسم المركز',

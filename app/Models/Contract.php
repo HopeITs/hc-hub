@@ -10,51 +10,60 @@ class Contract extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id',
         'employee_id',
         'position_id',
         'contract_type_id',
         'department_id',
-        'jobLevel_id',
+        'job_level_id',
         'start_date',
         'end_date',
         'terminated_at',
         'reason_of_termination',
         'yearly_leave_days',
+        'currency',
         'salary',
         'work_days',
         'work_hours',
+        'weekly_hours',
         'is_active'
+    ];
+
+    protected $casts = [
+        'start_date'        => 'date',
+        'end_date'          => 'date',
+        'terminated_at'     => 'datetime',
+        'is_active'         => 'boolean',
+        'yearly_leave_days' => 'integer',
+        'weekly_hours'      => 'integer',
+        'currency'          => 'integer',
+        'salary'            => 'decimal:2',
+        'work_days'         => 'array',
+        'work_hours'        => 'array',
     ];
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
-
     public function position()
     {
-        return $this->belongsTo(Position::class);
+        return $this->belongsTo(Position::class, 'position_id');
     }
-
     public function contractType()
     {
-        return $this->belongsTo(ContractType::class);
+        return $this->belongsTo(ContractType::class, 'contract_type_id');
+    }
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+    public function jobLevel()
+    {
+        return $this->belongsTo(JobLevel::class, 'job_level_id');
     }
 
     public function leaveBalances()
     {
-        return $this->hasMany(LeaveBalance::class);
+        return $this->hasMany(LeaveBalance::class, 'contract_id');
     }
-
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
-
-    public function jobLevel()
-    {
-        return $this->hasMany(JobLevel::class);
-    }
-
 }

@@ -18,8 +18,9 @@ class JobLevel extends Model
         'grade',
         'email',
     ];
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class, 'job_level_id');
+    }
 
-    protected $casts = [
-        'name' => 'array',
-    ];
 }

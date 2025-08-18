@@ -18,13 +18,16 @@ class Employee extends Model
 
     public function contracts()
     {
-        return $this->hasMany(Contract::class);
+        return $this->hasMany(Contract::class , 'employee_id');
     }
 
     public function positions(): BelongsToMany
     {
-        return $this->belongsToMany(Position::class);
+        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')
+            ->withPivot(['id','contract_type_id','department_id','job_level_id','start_date','end_date','terminated_at','is_active','weekly_hours','yearly_leave_days'])
+            ->withTimestamps();
     }
+
     public function educations()
     {
         return $this->hasMany(Education::class);
@@ -70,19 +73,22 @@ class Employee extends Model
         return $this->belongsTo(Employee::class, 'direct_manager_id');
     }
 
-    public function jobLevel()
+    public function jobLevels(): BelongsToMany
     {
-        return $this->belongsTo(JobLevel::class);
+        return $this->belongsToMany(JobLevel::class, 'contracts', 'employee_id', 'job_level_id')
+            ->withPivot(['id','contract_type_id','department_id','job_level_id','start_date','end_date','terminated_at','is_active','weekly_hours','yearly_leave_days']);
     }
 
-    public function contractType()
+    public function contractTypes(): BelongsToMany
     {
-        return $this->belongsTo(ContractType::class);
+        return $this->belongsToMany(ContractType::class, 'contracts', 'employee_id', 'contract_type_id')
+            ->withPivot(['id','contract_type_id','department_id','job_level_id','start_date','end_date','terminated_at','is_active','weekly_hours','yearly_leave_days']);
     }
 
-    public function department()
+    public function departments(): BelongsToMany
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsToMany(Department::class, 'contracts', 'employee_id', 'department_id')
+            ->withPivot(['id','contract_type_id','department_id','job_level_id','start_date','end_date','terminated_at','is_active','weekly_hours','yearly_leave_days']);
     }
 
     public function account(){

@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\ProjectManagement;
 
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Models\ChecklistItem;
+use App\Models\City;
+use App\Models\DefaultDeliverable as DefaultDeliverableModel;
+use App\Models\Employee;
 use App\Traits\SortableTable;
 use Illuminate\Validation\Rule;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-use App\Models\DefaultDeliverable as DefaultDeliverableModel; // alias to avoid clash
-use App\Models\Employee;
-use App\Models\City;
-use App\Models\ChecklistItem;
+// alias to avoid clash
 
 class DefaultDeliverablesModule extends Component
 {
@@ -96,7 +97,7 @@ class DefaultDeliverablesModule extends Component
         $cities         = City::whereHas('centers')->orderBy("name->$locale")->get(['id','name']);
         $checklistItems = ChecklistItem::orderBy('order')->get(['id','name']);
 
-        return view('livewire.default-deliverables-module', compact('items','employees','cities','checklistItems'));
+        return view('livewire.project-management.default-deliverables-module', compact('items','employees','cities','checklistItems'));
     }
 
     public function create()

@@ -11,7 +11,6 @@ class ContractType extends Model
     use HasFactory, HasTranslations;
 
     protected $fillable = [
-        'id',
         'type',
         'place',
         'name'
@@ -19,10 +18,13 @@ class ContractType extends Model
 
     public array $translatable = ['name'];
 
-
+    protected $casts = [
+        'type'  => 'integer',
+        'place' => 'integer',
+    ];
 
     public function contracts()
     {
-        return $this->hasMany(Contract::class);
+        return $this->hasMany(Contract::class ,'contract_type_id');
     }
 }
