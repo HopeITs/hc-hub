@@ -121,7 +121,9 @@
                         </x-layouts.app.sidebar.nav-item>
 
 
-                        <x-layouts.app.sidebar.nav-item>
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('contracts.index')"
+                            :active="request()->routeIs('contracts.*')">
                             {{ trans_choice('general.contracts', 2) }}
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>

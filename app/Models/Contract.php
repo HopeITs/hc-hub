@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SalaryPer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -22,6 +23,7 @@ class Contract extends Model
         'yearly_leave_days',
         'currency',
         'salary',
+        'salary_per',
         'work_days',
         'work_hours',
         'weekly_hours',
@@ -37,6 +39,7 @@ class Contract extends Model
         'weekly_hours'      => 'integer',
         'currency'          => 'integer',
         'salary'            => 'decimal:2',
+        'salary_per'        => SalaryPer::class,
         'work_days'         => 'array',
         'work_hours'        => 'array',
     ];

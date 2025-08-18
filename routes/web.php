@@ -6,6 +6,7 @@ use App\Livewire\Basics\ContractTypeModule;
 use App\Livewire\Basics\DepartmentModule;
 use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Basics\LeaveTypeModule;
+use App\Livewire\Contract\ContractsModule;
 use App\Livewire\Employee\EmployeeCreate;
 use App\Livewire\Employee\EmployeeEdit;
 use App\Livewire\Employee\EmployeeModule;
@@ -47,8 +48,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
     Route::get('/centers', CentersModule::class)->name('centers.index');
     Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
-    Route::get('/default-deliverables', DefaultDeliverablesModule::class)
-        ->name('default-deliverables.index');
+    Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
+    Route::get('/contracts', ContractsModule::class)->name('contracts.index');
+
 });
 Route::prefix('employees')->name('employees.')->group(function () {
     Route::get('/', EmployeeModule::class)->name('index');

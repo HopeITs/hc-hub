@@ -57,7 +57,7 @@
             </x-table.heading>
 
             <x-table.heading>
-                @lang('general.positions')
+                {{trans_choice('general.positions' , 2)}}
             </x-table.heading>
 
             <x-table.heading />
@@ -113,13 +113,13 @@
                             title="@lang('general.positions')"
                         >
                             <i class="ti ti-briefcase text-base"></i>
-                            <span>@lang('general.positions')</span>
+                            <span>{{trans_choice('general.positions' , 2)}}</span>
 
                             @if(isset($item->positions_count))
                                 <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full
-                         text-[11px] md:text-xs bg-current/10">
-                {{ $item->positions_count }}
-            </span>
+                                            text-[11px] md:text-xs bg-current/10">
+                                    {{ $item->positions_count }}
+                                </span>
                             @endif
                         </a>
                     </x-table.cell>
