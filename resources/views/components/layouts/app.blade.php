@@ -5,14 +5,14 @@
     @include('partials.head')
 </head>
 
-<body class="min-h-screen bg-white">
+<body class="antialiased min-h-screen bg-white">
 
     <livewire:layout.sidebar />
 
     <div class="flex flex-col min-h-screen sm:mr-60">
 
         <header class="fixed top-0 w-full bg-gray-100 sm:mr-60 z-10">
-            <div class="px-4 py-3">
+            <div class="px-4 py-3 flex justify-end">
                 <button id="sidebar-toggle" type="button"
                     class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
                     <span class="sr-only">Open sidebar</span>
@@ -37,7 +37,7 @@
         </footer>
     </div>
 
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 sm:hidden hidden"></div>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-gray-200 opacity-50 z-30 sm:hidden hidden"></div>
 
     @include('partials.scripts')
     <script>
