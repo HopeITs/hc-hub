@@ -39,11 +39,11 @@ class EmployeeEdit extends Component
         }
     }
 
-    // make the action name match your blade's wire:submit
     public function saveInformation()
     {
         $this->form->saveInformation();
         LivewireAlert::success(__('general.success-message'));
+        return $this->redirect(route('employees.index'), navigate: true);
     }
 
     public function saveEducation()
