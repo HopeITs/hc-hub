@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Employee;
+namespace App\Livewire\Employee\Tabs;
 
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Models\Employee;
@@ -20,7 +20,7 @@ class PersonalInfoTab extends Component
     }
     public function render()
     {
-        return view('livewire.employee.personal-info-tab',[
+        return view('livewire.employee.tabs.personal-info-tab',[
             'allEmployees' => Employee::select('id', 'name')->get(),
         ]);
     }

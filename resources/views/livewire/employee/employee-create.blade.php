@@ -54,7 +54,7 @@
 
         <div class="flex-grow w-full">
             <x-tab.container active-tab="information" wire:key="tab">
-       {{$slot}}
+
             </x-tab.container>
 
 

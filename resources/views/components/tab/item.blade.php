@@ -1,7 +1,7 @@
 @props(['title' , 'active' => false])
 <li>
     <a {{$attributes->merge([
-    'class' => 'w-full flex items-center p-3 rounded-lg'. $active ? 'bg-primary text-white' : 'bg-gray-50 hover:bg-gray-100'
+    'class' => $active ? 'w-full flex items-center p-3 rounded-lg bg-primary text-white' : 'w-full flex items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100'
 ])}}
 
 >
