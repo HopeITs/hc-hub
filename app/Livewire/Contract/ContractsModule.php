@@ -19,6 +19,9 @@ class ContractsModule extends Component
 {
     use WithPagination, SortableTable;
 
+    protected $listeners = ['delete', 'toggleItemStatusConfirmed'];
+
+
     public $search = '';
     public $showModal = false;
     public $modalTitle = '';
@@ -38,6 +41,7 @@ class ContractsModule extends Component
         'yearly_leave_days'=> 12,
         'currency' => 1,
         'salary'  => null,
+        'salary_per' => 1,
         'weekly_hours' => null,
         'work_days'  => ['day' => ['from' => 'mon', 'to' => 'fri']],
         'work_hours'  => ['hour'=> ['from' => '09:00', 'to' => '17:00']],
@@ -57,13 +61,13 @@ class ContractsModule extends Component
 
         'item.yearly_leave_days'=> 'nullable|integer|min:0|max:365',
         'item.currency' => 'required|integer|in:0,1,2,3',
-        'item.salary' => 'nullable|numeric|min:0',
-        'item.salary_per'  => 'required|in:month,hour,session',
-        'item.weekly_hours'  => 'nullable|integer|min:0|max:168',
+        'item.salary' => 'required|numeric|min:0',
+        'item.salary_per'  => 'required|integer|in:0,1,2,3',
+        'item.weekly_hours'  => 'required|integer|min:0|max:168',
         'item.is_active'  => 'boolean',
 
-        'item.work_days'  => 'nullable|array',
-        'item.work_hours'  => 'nullable|array',
+        'item.work_days'  => 'required|array',
+        'item.work_hours'  => 'required|array',
         'item.reason_of_termination' => 'nullable|string',
     ];
 
@@ -212,23 +216,24 @@ class ContractsModule extends Component
 
         $this->modalTitle = __('general.edit');
         $this->item = [
-            'id'               => $model->id,
-            'employee_id'      => $model->employee_id,
-            'position_id'      => $model->position_id,
+            'id'   => $model->id,
+            'employee_id' => $model->employee_id,
+            'position_id'    => $model->position_id,
             'contract_type_id' => $model->contract_type_id,
-            'department_id'    => $model->department_id,
-            'job_level_id'     => $model->job_level_id,
-            'start_date'       => optional($model->start_date)->toDateString(),
-            'end_date'         => optional($model->end_date)->toDateString(),
-            'terminated_at'    => optional($model->terminated_at)->toDateString(),
+            'department_id'=> $model->department_id,
+            'job_level_id' => $model->job_level_id,
+            'start_date'  => optional($model->start_date)->toDateString(),
+            'end_date'=> optional($model->end_date)->toDateString(),
+            'terminated_at' => optional($model->terminated_at)->toDateString(),
             'reason_of_termination' => $model->reason_of_termination,
             'yearly_leave_days'=> $model->yearly_leave_days,
-            'currency'         => $model->currency,
-            'salary'           => $model->salary,
-            'weekly_hours'     => $model->weekly_hours,
-            'work_days'        => $model->work_days ?: ['day'=>['from'=>'mon','to'=>'fri']],
-            'work_hours'       => $model->work_hours ?: ['hour'=>['from'=>'09:00','to'=>'17:00']],
-            'is_active'        => (bool) $model->is_active,
+            'currency' => $model->currency,
+            'salary' => $model->salary,
+            'salary_per'  => $model->salary_per,
+            'weekly_hours' => $model->weekly_hours,
+            'work_days' => $model->work_days ?: ['day'=>['from'=>'mon','to'=>'fri']],
+            'work_hours'  => $model->work_hours ?: ['hour'=>['from'=>'09:00','to'=>'17:00']],
+            'is_active'  => (bool) $model->is_active,
         ];
 
         $this->resetValidation();

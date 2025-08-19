@@ -7,6 +7,8 @@ use App\Livewire\Basics\DepartmentModule;
 use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Basics\LeaveTypeModule;
 use App\Livewire\Contract\ContractsModule;
+use App\Livewire\Contract\ContractCreate;
+use App\Livewire\Contract\ContractEdit;
 use App\Livewire\Employee\EmployeeCreate;
 use App\Livewire\Employee\EmployeeEdit;
 use App\Livewire\Employee\EmployeeModule;
@@ -49,13 +51,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/centers', CentersModule::class)->name('centers.index');
     Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
     Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
-    Route::get('/contracts', ContractsModule::class)->name('contracts.index');
 
-});
-Route::prefix('employees')->name('employees.')->group(function () {
-    Route::get('/', EmployeeModule::class)->name('index');
-    Route::get('/create', EmployeeCreate::class)->name('create');
-    Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
-});
+    Route::prefix('contracts')->name('contracts.')->group(function () {
+        Route::get('/', ContractsModule::class)->name('index');
+        Route::get('/create', ContractCreate::class)->name('create');
+        Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
+    });
+
+    });
+    Route::prefix('employees')->name('employees.')->group(function () {
+        Route::get('/', EmployeeModule::class)->name('index');
+        Route::get('/create', EmployeeCreate::class)->name('create');
+        Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
+    });
 
 require __DIR__.'/auth.php';
