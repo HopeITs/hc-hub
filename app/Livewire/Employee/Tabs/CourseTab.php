@@ -2,13 +2,14 @@
 
 namespace App\Livewire\Employee\Tabs;
 
+use App\Livewire\Forms\Employee\CourseForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use Livewire\Component;
 
 class CourseTab extends Component
 {
-    public PersonalInfoForm $form;
-    public function saveInformation()
+    public CourseForm $form;
+    public function saver()
     {
 
         $employee = $this->form->saveInformation();
@@ -19,6 +20,6 @@ class CourseTab extends Component
     }
     public function render()
     {
-        return view('livewire.employee.partials.info-form',);
+        return view('livewire.employee.tabs.courses-fields');
     }
 }

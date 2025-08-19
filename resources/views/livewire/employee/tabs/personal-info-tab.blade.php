@@ -1,15 +1,9 @@
 @php
-    use App\Enums\MaritalStatus;
+    use App\Enums\MaritalStatus;use App\Enums\Nationality;
 @endphp
 <x-layouts.employee-form>
     <form wire:submit.prevent="save" class="flex flex-col space-y-6">
-        @if($errors->any())
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{$error}}</li>
-                @endforeach
-            </ul>
-        @endif
+        <x-forms.errors-validation-list/>
         <div class="">
             <x-forms.input-label for="photo">@lang('general.photo')</x-forms.input-label>
             <div class="mt-2 flex items-center space-x-6">
@@ -33,23 +27,19 @@
                     </x-forms.input-label>
                     <x-forms.input type="text" wire:model.blur="form.name.{{ $locale }}" id="name_{{ $locale }}"/>
                     <x-error-span>{{ $errors->first('form.name.' . $locale) }}</x-error-span>
-                    @error('form.name.'.$locale)
-                    <x-error-span>{{ $message }}</x-error-span>
-                    @enderror
+
                 </div>
             @endforeach
 
             <div wire:key="emp-dob">
                 <x-forms.input-label for="dob">@lang('general.dob')</x-forms.input-label>
                 <x-forms.date-input wire:model.blur="form.dob" id="dob"/>
-                <x-error-span>{{ $errors->first('dob') }}</x-error-span>
-                @error('form.dob')
-                <x-error-span>{{ $message }}</x-error-span>
-                @enderror
+                <x-error-span>{{ $errors->first('form.dob') }}</x-error-span>
+
             </div>
 
             <div wire:key="emp-gender">
-                <x-forms.input-label>@lang('general.gender')</x-forms.input-label>
+                <x-forms.input-label for="gender">@lang('general.gender')</x-forms.input-label>
                 <div class="flex space-x-4 mt-2">
                     <x-forms.radio-input name="gender" value="1"
                                          wire:model.blur="form.gender">@lang('general.male')</x-forms.radio-input>
@@ -61,7 +51,7 @@
 
             <div wire:key="emp-marital_status">
                 <x-forms.input-label for="marital_status">@lang('general.marital_status')</x-forms.input-label>
-                <x-forms.select-input wire:model.blur="form.marital_status" id="marital_status">
+                <x-forms.select-input wire:model="form.marital_status" id="marital_status">
                     @foreach (MaritalStatus::getValues() as $statusValue)
                         @php $status = MaritalStatus::getLocalizedName($statusValue); @endphp
                         <option value="{{ $statusValue }}">{{ $status['value'] }}</option>
@@ -91,7 +81,7 @@
             <h2 class="text-xl col-span-full font-semibold mb-4">@lang('general.address_info')</h2>
 
             @foreach (config('app.supported_locales') as $locale)
-                <div  wire:key="emp-father-{{ $locale }}">
+                <div wire:key="emp-father-{{ $locale }}">
                     <x-forms.input-label for="father_name_{{ $locale }}">@lang('general.father_name')
                         ({{ strtoupper($locale) }})
                     </x-forms.input-label>
@@ -102,7 +92,7 @@
             @endforeach
 
             @foreach (config('app.supported_locales') as $locale)
-                <div  wire:key="emp-mother-{{ $locale }}">
+                <div wire:key="emp-mother-{{ $locale }}">
                     <x-forms.input-label for="mother_name_{{ $locale }}">@lang('general.mother_name')
                         ({{ strtoupper($locale) }})
                     </x-forms.input-label>
@@ -112,15 +102,19 @@
                 </div>
             @endforeach
 
-            <div  wire:key="emp-nationality">
+            <div wire:key="emp-nationality">
                 <x-forms.input-label for="nationality">@lang('general.nationality')</x-forms.input-label>
-                <x-forms.select-input wire:model.blur="form.nationality" id="nationality">
-                    <option value="syrian">Syrian</option>
+
+                <x-forms.select-input wire:model="form.nationality" id="nationality">
+                    @foreach (Nationality::getValues() as $statusValue)
+                        @php $status = Nationality::getLocalizedName($statusValue); @endphp
+                        <option value="{{ $statusValue }}">{{ $status }}</option>
+                    @endforeach
                 </x-forms.select-input>
                 <x-error-span>{{ $errors->first('form.nationality') }}</x-error-span>
             </div>
 
-            <div  wire:key="emp-national-number">
+            <div wire:key="emp-national-number">
                 <x-forms.input-label for="national_number">@lang('general.national_number')</x-forms.input-label>
                 <x-forms.input type="text" wire:model.blur="form.national_number" id="national_number"/>
                 <x-error-span>{{ $errors->first('form.national_number') }}</x-error-span>
@@ -171,7 +165,7 @@
 
                 <div>
                     <x-forms.input-label for="direct_manager_id">@lang('general.direct_manager')</x-forms.input-label>
-                    <x-forms.select-input wire:model.blur="form.direct_manager_id" id="direct_manager_id">
+                    <x-forms.select-input wire:model="form.direct_manager_id" id="direct_manager_id">
                         <option value="">--</option>
                         @foreach ($allEmployees as $emp)
                             <option
@@ -183,7 +177,7 @@
 
                 <div>
                     <x-forms.input-label for="tech_manager_id">@lang('general.tech_manager')</x-forms.input-label>
-                    <x-forms.select-input wire:model.blur="form.tech_manager_id" id="tech_manager_id">
+                    <x-forms.select-input wire:model="form.tech_manager_id" id="tech_manager_id">
                         <option value="">--</option>
                         @foreach ($allEmployees as $emp)
                             <option
@@ -236,7 +230,8 @@
         <div>
             <h2 class="text-xl font-semibold mb-4">@lang('general.board_member')</h2>
             <div class="flex items-center space-x-2">
-                <input type="checkbox" wire:model.live="form.is_board_member" id="is_board_member" class="rounded">
+                {{--                <x-forms.input type="checkbox" wire:model.live="form.is_board_member" value="0" class="hidden"/>--}}
+                <x-forms.input type="checkbox" wire:model.live="form.is_board_member" value="1" id="is_board_member"/>
                 <x-forms.input-label for="is_board_member">@lang('general.is_board_member')</x-forms.input-label>
                 <x-error-span>{{ $errors->first('form.is_board_member') }}</x-error-span>
             </div>
@@ -245,14 +240,17 @@
             <div wire:key="board-member-{{ (int) data_get($form, 'is_board_member') }}">
                 @if (data_get($form, 'is_board_member'))
                     <div>
-                        <x-forms.input-label for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>
-                        <x-forms.date-input wire:model.blur="form.board_member_started_at" id="board_member_started_at" />
+                        <x-forms.input-label
+                            for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>
+                        <x-forms.date-input wire:model.blur="form.board_member_started_at"
+                                            id="board_member_started_at"/>
                         <x-error-span>{{ $errors->first('form.board_member_started_at') }}</x-error-span>
                     </div>
 
                     <div>
-                        <x-forms.input-label for="board_member_end_at">@lang('general.board_member_end_at')</x-forms.input-label>
-                        <x-forms.input type="date" wire:model.blur="form.board_member_end_at" id="board_member_end_at" />
+                        <x-forms.input-label
+                            for="board_member_end_at">@lang('general.board_member_end_at')</x-forms.input-label>
+                        <x-forms.input type="date" wire:model.blur="form.board_member_end_at" id="board_member_end_at"/>
                         <x-error-span>{{ $errors->first('form.board_member_end_at') }}</x-error-span>
                     </div>
                 @endif
@@ -260,26 +258,26 @@
 
 
             {{--            <div class="flex items-center space-x-2">--}}
-{{--                <input type="checkbox" wire:model.live="form.is_board_member" id="is_board_member" class="rounded">--}}
-{{--                <x-forms.input-label for="is_board_member">@lang('general.is_board_member')</x-forms.input-label>--}}
-{{--                <x-error-span>{{ $errors->first('form.is_board_member') }}</x-error-span>--}}
-{{--            </div>--}}
+            {{--                <input type="checkbox" wire:model.live="form.is_board_member" id="is_board_member" class="rounded">--}}
+            {{--                <x-forms.input-label for="is_board_member">@lang('general.is_board_member')</x-forms.input-label>--}}
+            {{--                <x-error-span>{{ $errors->first('form.is_board_member') }}</x-error-span>--}}
+            {{--            </div>--}}
 
-{{--            @if ($form->is_board_member)--}}
-{{--                <div>--}}
-{{--                    <x-forms.input-label--}}
-{{--                        for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>--}}
-{{--                    <x-forms.date-input wire:model.blur="form.board_member_started_at" id="board_member_started_at"/>--}}
-{{--                    <x-error-span>{{ $errors->first('form.board_member_started_at') }}</x-error-span>--}}
-{{--                </div>--}}
+            {{--            @if ($form->is_board_member)--}}
+            {{--                <div>--}}
+            {{--                    <x-forms.input-label--}}
+            {{--                        for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>--}}
+            {{--                    <x-forms.date-input wire:model.blur="form.board_member_started_at" id="board_member_started_at"/>--}}
+            {{--                    <x-error-span>{{ $errors->first('form.board_member_started_at') }}</x-error-span>--}}
+            {{--                </div>--}}
 
-{{--                <div>--}}
-{{--                    <x-forms.input-label--}}
-{{--                        for="board_member_end_at">@lang('general.board_member_end_at')</x-forms.input-label>--}}
-{{--                    <x-forms.input type="date" wire:model.blur="form.board_member_end_at" id="board_member_end_at"/>--}}
-{{--                    <x-error-span>{{ $errors->first('form.board_member_end_at') }}</x-error-span>--}}
-{{--                </div>--}}
-{{--            @endif--}}
+            {{--                <div>--}}
+            {{--                    <x-forms.input-label--}}
+            {{--                        for="board_member_end_at">@lang('general.board_member_end_at')</x-forms.input-label>--}}
+            {{--                    <x-forms.input type="date" wire:model.blur="form.board_member_end_at" id="board_member_end_at"/>--}}
+            {{--                    <x-error-span>{{ $errors->first('form.board_member_end_at') }}</x-error-span>--}}
+            {{--                </div>--}}
+            {{--            @endif--}}
         </div>
 
         <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">

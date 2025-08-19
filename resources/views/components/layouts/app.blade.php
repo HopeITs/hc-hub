@@ -12,7 +12,7 @@
     <div class="flex flex-col min-h-screen sm:mr-60">
 
         <header class="fixed top-0 w-full bg-gray-100 sm:mr-60 z-10">
-            <div class="px-4 py-3 flex justify-end">
+            <div class="px-4 py-3 flex justify-end sm:hidden">
                 <button id="sidebar-toggle" type="button"
                     class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
                     <span class="sr-only">Open sidebar</span>

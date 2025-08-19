@@ -208,35 +208,8 @@ class RelativeForm extends Form
     public function saveInformation(): Employee
     {
         $this->email = $this->buildWorkEmail($this->work_email_username);
-//dd($this->all());
+dd($this->all());
         $this->validate();
-
-        $data = [
-            'name' => $this->name,
-            'national_number' => $this->national_number,
-            'is_active' => (bool) $this->is_active,
-            'nationality' => $this->nationality,
-            'direct_manager_id' => $this->direct_manager_id,
-            'tech_manager_id' => $this->tech_manager_id,
-            'dob' => $this->dob ?: null,
-            'gender' => $this->gender,
-            'marital_status' => $this->marital_status,
-            'children' => $this->children,
-            'father_name' => $this->father_name,
-            'mother_name' => $this->mother_name,
-            'civil_registry_office' => $this->civil_registry_office,
-            'civil_registry_number' => $this->civil_registry_number,
-            'place_of_registration' => $this->place_of_registration,
-            'work_phone' => $this->work_phone,
-            'personal_phone' => $this->personal_phone,
-            'personal_email' => $this->personal_email,
-            'address' => $this->address,
-            'skills' => $this->skills,
-            'interests' => $this->interests,
-            'is_board_member' => (bool) $this->is_board_member,
-            'board_member_started_at' => $this->board_member_started_at ?: null,
-            'board_member_end_at' => $this->board_member_end_at ?: null,
-        ];
 
         if ($this->employee) {
             $this->employee->update($this->except('email'));

@@ -18,19 +18,21 @@ class PersonalInfoForm extends Form
     public ?Employee $employee = null;
 
     public $photo = null;
-    #[Validate(['name' => 'required|array', 'name.*' => 'required|string'])]
+    #[Validate(['name.ar' => 'required|string' , 'name.en' => 'required|string'])]
     public $name = [];
 
-    #[Validate(['father_name' => 'nullable|array', 'father_name.*' => 'nullable|string'])]
+    #[Validate(['father_name.ar' => 'required|string','father_name.en' => 'nullable|string'])]
     public $father_name = [];
 
-    #[Validate(['mother_name' => 'nullable|array', 'mother_name.*' => 'nullable|string'])]
+    #[Validate([ 'mother_name.ar' => 'required|string','mother_name.en' => 'nullable|string'])]
     public $mother_name = [];
 
     #[Validate(['address' => 'nullable|array', 'address.*' => 'nullable|string'])]
     public $address = [];
 
-    #[Validate('nullable|date')]
+    public $email;
+
+    #[Validate('nullable|date_format:d-m-Y')]
     public $dob;
 
     #[Validate('required|in:1,2')]
@@ -42,7 +44,7 @@ class PersonalInfoForm extends Form
     #[Validate('nullable|integer|min:0')]
     public $children;
 
-    #[Validate('required|string')]
+    #[Validate('string')]
     public $nationality;
 
     #[Validate('nullable|string')]
@@ -70,7 +72,7 @@ class PersonalInfoForm extends Form
     public $interests;
 
     #[Validate('boolean')]
-    public $is_board_member;
+    public $is_board_member = false;
 
     #[Validate('nullable|date')]
     public $board_member_started_at;
@@ -135,34 +137,6 @@ class PersonalInfoForm extends Form
         $this->email = $this->buildWorkEmail($this->work_email_username);
 
         $this->validate();
-        dd($this->all());
-        dd($this->all());
-        $data = [
-            'name' => $this->name,
-            'national_number' => $this->national_number,
-            'is_active' => (bool)$this->is_active,
-            'nationality' => $this->nationality,
-            'direct_manager_id' => $this->direct_manager_id,
-            'tech_manager_id' => $this->tech_manager_id,
-            'dob' => $this->dob ?: null,
-            'gender' => $this->gender,
-            'marital_status' => $this->marital_status,
-            'children' => $this->children,
-            'father_name' => $this->father_name,
-            'mother_name' => $this->mother_name,
-            'civil_registry_office' => $this->civil_registry_office,
-            'civil_registry_number' => $this->civil_registry_number,
-            'place_of_registration' => $this->place_of_registration,
-            'work_phone' => $this->work_phone,
-            'personal_phone' => $this->personal_phone,
-            'personal_email' => $this->personal_email,
-            'address' => $this->address,
-            'skills' => $this->skills,
-            'interests' => $this->interests,
-            'is_board_member' => (bool)$this->is_board_member,
-            'board_member_started_at' => $this->board_member_started_at ?: null,
-            'board_member_end_at' => $this->board_member_end_at ?: null,
-        ];
 
         if ($this->employee) {
             $this->employee->update($this->except('email'));
