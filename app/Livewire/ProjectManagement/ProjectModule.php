@@ -4,10 +4,12 @@ namespace App\Livewire\ProjectManagement;
 
 use App\Models\Project;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Exception;
 
 class ProjectModule extends Component
 {
@@ -19,6 +21,7 @@ class ProjectModule extends Component
     public $modalTitle = '';
 
     public Project $project;
+    public $existingLogoUrl = '';
 
     public $item = [
         'id' => 0,
@@ -27,22 +30,20 @@ class ProjectModule extends Component
         'is_active' => true,
         'start_date' => null,
         'end_date' => null,
-        'logo' => '',
+        'logo' => null,
         'code' => '',
         'slug' => ''
-
     ];
 
     protected function rules()
     {
         return [
-
             'item.name.*' => 'required',
             'item.description.*' => 'nullable',
             'item.is_active' => 'required|boolean:0,1',
             'item.logo' => 'nullable|image|max:2048',
             'item.code' => 'required',
-            'item.slug' => 'required|unique:projects,slug,'.$this->item['id'],
+            'item.slug' => 'required|unique:projects,slug,' . $this->item['id'],
             'item.start_date' => 'required|date',
             'item.end_date' => 'nullable|date|after:item.start_date',
         ];
@@ -86,12 +87,12 @@ class ProjectModule extends Component
         $this->item = $project;
         $this->modalTitle = $project->name;
         $this->showDetailsModal = true;
-
     }
 
     public function create()
     {
-        $this->reset(['item']); // Reset all
+        $this->reset(['item']);
+        $this->reset('existingLogoUrl');
         $this->item['is_active'] = true;
         $this->showModal = true;
         $this->modalTitle = __('general.add_new');
@@ -101,7 +102,8 @@ class ProjectModule extends Component
     {
         $project = Project::findOrFail($id);
         $this->item = $project->toArray();
-        $this->item['logo'] = $project->getFirstMediaUrl('logo'); // Reset logo
+        $this->item['logo'] = null;
+        $this->existingLogoUrl = $project->getFirstMediaUrl('logo');
 
         $this->modalTitle = __('general.edit');
         $this->showModal = true;
@@ -109,8 +111,6 @@ class ProjectModule extends Component
 
     public function confirmDelete($id)
     {
-
-
         LivewireAlert::title(__('general.delete-item'))
             ->text(__('general.confirm-delete-item'))
             ->question()
@@ -121,46 +121,52 @@ class ProjectModule extends Component
             ->show();
     }
 
+
     public function save()
     {
-//dd($this->item);
-
         $this->validate();
 
-        if (array_key_exists('id', $this->item)) {
-            $project = Project::findOrFail($this->item['id']);
-            $project->update($this->item);
-            if ($this->item['logo'] !== null) {
+        $data = $this->item;
+        $newLogo = $data['logo'] ?? null;
+        unset($data['logo']);
 
-                // Remove existing logo
-                $project->clearMediaCollection('logo');
+        try {
+            DB::transaction(function () use ($data, $newLogo) {
+                if (isset($data['id']) && $data['id'] > 0) {
+                    $project = Project::findOrFail($data['id']);
+                    $project->update($data);
 
-                // Add new logo
-                $project->addMedia($this->item['logo']->getRealPath())
-                    ->usingFileName('project-logo.' . $this->item['logo']->getClientOriginalExtension())
-                    ->toMediaCollection('logo');
-            }
-        } else {
-            $project = Project::create($this->item);
-            $project->addMedia($this->item['logo']->getRealPath())
-                ->usingFileName('project-logo.' . $this->item['logo']->getClientOriginalExtension())
-                ->toMediaCollection('logo');
+                    if ($newLogo) {
+                        $project->clearMediaCollection('logo');
+                        $project->addMedia($newLogo->getRealPath())
+                            ->usingFileName('project-logo.' . $newLogo->getClientOriginalExtension())
+                            ->toMediaCollection('logo');
+                    }
+                } else {
+                    $project = Project::create($data);
+                    if ($newLogo) {
+                        $project->addMedia($newLogo->getRealPath())
+                            ->usingFileName('project-logo.' . $newLogo->getClientOriginalExtension())
+                            ->toMediaCollection('logo');
+                    }
+                }
+            });
 
+            $this->reset(['item', 'showModal', 'existingLogoUrl']);
+
+            LivewireAlert::title(__('general.success-message'))
+                ->success()
+                ->toast()
+                ->position('top-start')
+                ->show();
+
+        } catch (Exception $e) {
+            dd($e->getMessage());
         }
-
-
-        $this->reset(['item', 'showModal']);
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
     }
 
     public function delete($id)
     {
-
         Project::find($id['id'])->delete();
 
         LivewireAlert::title(__('general.success-message'))
@@ -168,7 +174,6 @@ class ProjectModule extends Component
             ->toast()
             ->position('top-start')
             ->show();
-
     }
 
     public function render()
