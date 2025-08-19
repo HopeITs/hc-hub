@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Employee;
 
-use App\Livewire\Forms\EmployeeForm;
+use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Models\ChecklistItem;
 use App\Models\Employee;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -13,7 +13,7 @@ class EmployeeEdit extends Component
 {
     use WithFileUploads;
 
-    public EmployeeForm $form;
+    public PersonalInfoForm $form;
 
     public function mount(Employee $employee)
     {

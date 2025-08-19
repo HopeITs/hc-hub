@@ -5,6 +5,7 @@ use App\Livewire\Basics\CityModule;
 use App\Livewire\Basics\ContractTypeModule;
 use App\Livewire\Basics\DepartmentModule;
 use App\Livewire\DefaultDeliverablesModule;
+use App\Livewire\Employee\PersonalInfoTab;
 use App\Livewire\ProjectManagement\CentersModule;
 use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Basics\LeaveTypeModule;
@@ -53,6 +54,7 @@ Route::middleware(['auth'])->group(function () {
 Route::prefix('employees')->name('employees.')->group(function () {
     Route::get('/', EmployeeModule::class)->name('index');
     Route::get('/create', EmployeeCreate::class)->name('create');
+    Route::get('/personal-info', PersonalInfoTab::class)->name('personal-info-tab');
     Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
 });
 

@@ -1,22 +1,26 @@
 <?php
 
-namespace App\Livewire\Forms;
+namespace App\Livewire\Forms\Employee;
 
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Livewire\WithFileUploads;
 
-class EmployeeForm extends Form
+class ChecklistForm extends Form
 {
     use WithFileUploads;
 
-    public ?Employee $employee = null;
+    public ?Employee $employee = null ;
 
     public $photo;
+
+    #[Validate('required|array')]
     public $name = [];
+    #[Validate('required|array')]
     public $national_number;
     public $email;
     public $work_email_username;
@@ -48,7 +52,26 @@ class EmployeeForm extends Form
     public array $relatives = [];
     public array $badges = [];
     public array $checklists = [];
-
+    protected function rules()
+    {
+        return [
+            'name' => 'required|array',
+            'name.*' => 'required|string|max:255',
+            'national_number' => 'required|string|max:20',
+            'nationality' => 'required|in:syrian',
+            'is_active' => 'required|boolean',
+            'dob' => 'nullable|date_format:Y-m-d',
+            'board_member_started_at' => 'nullable|date_format:Y-m-d',
+            'board_member_end_at' => 'nullable|date_format:Y-m-d|after_or_equal:board_member_started_at',
+            'gender' => 'nullable|in:0,1,2',
+            'marital_status' => 'nullable|in:0,1,2',
+            'children' => 'nullable|integer|min:0',
+            'direct_manager_id' => 'nullable|exists:employees,id',
+            'tech_manager_id' => 'nullable|exists:employees,id',
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore(optional($this->employee?->account)->id)],
+            'work_email_username' => 'nullable|regex:/^[a-zA-Z0-9.\-_]+$/',
+        ];
+    }
     protected function buildWorkEmail(?string $username): ?string
     {
         $username = trim($username ?? '');
@@ -185,24 +208,8 @@ class EmployeeForm extends Form
     public function saveInformation(): Employee
     {
         $this->email = $this->buildWorkEmail($this->work_email_username);
-
-        $this->validate([
-            'name' => 'required|array',
-            'name.*' => 'required|string|max:255',
-            'national_number' => 'required|string|max:20',
-            'nationality' => 'required|in:syrian',
-            'is_active' => 'required|boolean',
-            'dob' => 'nullable|date_format:Y-m-d',
-            'board_member_started_at' => 'nullable|date_format:Y-m-d',
-            'board_member_end_at' => 'nullable|date_format:Y-m-d|after_or_equal:board_member_started_at',
-            'gender' => 'nullable|in:0,1,2',
-            'marital_status' => 'nullable|in:0,1,2',
-            'children' => 'nullable|integer|min:0',
-            'direct_manager_id' => 'nullable|exists:employees,id',
-            'tech_manager_id' => 'nullable|exists:employees,id',
-            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore(optional($this->employee?->account)->id)],
-            'work_email_username' => 'nullable|regex:/^[a-zA-Z0-9.\-_]+$/',
-        ]);
+//dd($this->all());
+        $this->validate();
 
         $data = [
             'name' => $this->name,
@@ -232,13 +239,13 @@ class EmployeeForm extends Form
         ];
 
         if ($this->employee) {
-            $this->employee->update($data);
+            $this->employee->update($this->except('email'));
 
             if ($this->employee->account) {
                 $this->employee->account->update(['email' => $this->email]);
             }
         } else {
-            $this->employee = Employee::create($data);
+            $this->employee = Employee::create($this->except('email'));
 
             User::create([
                 'email' => $this->email,

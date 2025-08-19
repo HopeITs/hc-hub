@@ -2,61 +2,55 @@
 
 namespace App\Livewire\Employee;
 
-use App\Livewire\Forms\EmployeeForm;
+use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Models\ChecklistItem;
 use App\Models\Employee;
+use App\Traits\WithAlerts;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class EmployeeCreate extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads , WithAlerts;
 
-    public EmployeeForm $form;
+    public PersonalInfoForm $form;
 
-    public function mount()
-    {
-        $this->form->addEducation();
-        $this->form->addCourse();
-        $this->form->addExperience();
-        $this->form->addRelative();
-        $this->form->addBadge();
-        $this->form->addChecklist();
-    }
+
 
     public function saveInformation()
     {
         $employee = $this->form->saveInformation();
 
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
 
         return $this->redirect(route('employees.edit', $employee->id), navigate: true);
     }
     public function saveEducation()
     {
         $this->form->saveEducation();
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
     }
     public function saveCourses()
     {
         $this->form->saveCourses();
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
     }
     public function saveExperience()
     {
         $this->form->saveExperience();
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
     }
     public function saveRelatives()
     {
         $this->form->saveRelatives();
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
     }
     public function saveBadges()
     {
         $this->form->saveBadges();
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
+
     }
     public function saveChecklist()
     {
