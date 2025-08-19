@@ -8,7 +8,7 @@
 
     <x-tab.form activeTab="information">
         <x-tab.list>
-            <x-tab.item :title="__('general.information')" href="{{route('employees.personal-info-tab')}}" :active="request()->routeIs('employees.personal-info-tab')"  wire:key="tabitem-information">
+            <x-tab.item :title="__('general.information')" href="{{route('employees.personal-info-tab')}}" :active="request()->routeIs('employees.personal-info-tab') || request()->routeIs('employees.create')"  wire:key="tabitem-information">
                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd">
                     </path>

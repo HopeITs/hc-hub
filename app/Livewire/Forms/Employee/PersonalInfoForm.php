@@ -131,9 +131,11 @@ class PersonalInfoForm extends Form
 
     public function saveInformation(): Employee
     {
+
         $this->email = $this->buildWorkEmail($this->work_email_username);
 
         $this->validate();
+        dd($this->all());
         dd($this->all());
         $data = [
             'name' => $this->name,

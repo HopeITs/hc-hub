@@ -53,7 +53,7 @@ Route::middleware(['auth'])->group(function () {
 });
 Route::prefix('employees')->name('employees.')->group(function () {
     Route::get('/', EmployeeModule::class)->name('index');
-    Route::view('/create','pages.employees.form')->name('create');
+    Route::get('/create',\App\Livewire\Employee\Form::class)->name('create');
     Route::get('/personal-info', PersonalInfoTab::class)->name('personal-info-tab');
     Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
 });

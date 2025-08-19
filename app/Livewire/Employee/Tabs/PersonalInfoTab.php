@@ -9,7 +9,7 @@ use Livewire\Component;
 class PersonalInfoTab extends Component
 {
     public PersonalInfoForm $form;
-    public function saveInformation()
+    public function save()
     {
 
         $employee = $this->form->saveInformation();
