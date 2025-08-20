@@ -16,15 +16,7 @@
 
                         @if ($project->getFirstMediaUrl('logo') !== '')
                             <img class="h-10 m-4 " src="{{ $project->getFirstMediaUrl('logo') }}" />
-                        @else
-                            <svg class="size-10 text-gray-800 dark:text-white" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 5a1 1 0 0 1 1-1h11.586a1 1 0 0 1 .707.293l2.414 2.414a1 1 0 0 1 .293.707V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5Z" />
-                                <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 4h8v4H8V4Zm7 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                            </svg>
+
                         @endif
 
 
@@ -32,75 +24,28 @@
 
                 </x-slot>
                 <div class="text-gray-400 grid md:grid-cols-2 mb-4 gap-x-4 gap-y-2">
-                    <div class="flex items-center md:col-span-2 ">
+                    <x-icon-label-info :label="__('general.name')"  class=" md:col-span-2" :info="$project->getTranslation('name', 'ar')">
                         <x-icons.info class="me-2" />
-
-                        <span class="font-bold me-1">
-                            {{ __('general.name') . ': ' }}
-                        </span>
-                        <span>
-                            {{ $project->getTranslation('name', 'ar') }}
-                        </span>
-
-                    </div>
-                    <div class="flex items-center ">
+                    </x-icon-label-info>
+                    <x-icon-label-info :label="__('general.code')"   :info="$project->slug . '-' . $project->code">
                         <x-icons.barcode class="me-2" />
-
-                        <span class="font-bold me-1 text-sm xl:text-base">
-                            {{ __('general.code') . ': ' }}
-                        </span>
-                        <span>
-                            {{ $project->slug . '-' . $project->code }}
-                        </span>
-
-                    </div>
-                    <div class="flex items-center ">
+                    </x-icon-label-info>
+                    <x-icon-label-info :label="trans_choice('general.required-positions', 2)"   :info="$project->required_positions_count">
                         <x-icons.bag class="me-2" />
-
-                        <span class="font-bold me-1">
-                            {{ trans_choice('general.required-positions', 2) . ': ' }}
-                        </span>
-                        <span>
-                            {{ $project->required_positions_count }}
-                        </span>
-
-                    </div>
-                    <div class="flex items-center">
+                    </x-icon-label-info>
+                    <x-icon-label-info :label="__('general.start_date')"   :info="$project->start_date?->format('M, Y')">
                         <x-icons.calendar class="me-2" />
-                        <span class="font-bold me-1"> {{ __('general.start_date') . ': ' }} </span>
-                        <span>
-                            {{ $project->start_date?->format('M, Y') }}
-                        </span>
-                    </div>
-                    <div class="flex items-center ">
-                        <x-icons.calendar class="me-2 " />
-                        <span class="font-bold me-1">
-                            {{ __('general.end_date') . ': ' }}
-                        </span>
-                        <span>
-
-                            {{ $project->end_date !== null ? $project->end_date?->format(' M, Y') : __('general.active') }}
-                        </span>
-                    </div>
-                    <div class="flex items-center ">
-                        <x-icons.building class="me-2 " />
-                        <span class="font-bold me-1">
-                            {{ trans_choice('general.center', 2) . ': ' }}
-                        </span>
-                        <span>
-                            {{ $project->centers_count }}
-                        </span>
-                    </div>
-                    <div class="flex items-center ">
+                    </x-icon-label-info>
+                    <x-icon-label-info :label="__('general.end_date')"   :info="$project->end_date !== null ? $project->end_date?->format(' M, Y') : __('general.active') ">
+                        <x-icons.calendar class="me-2" />
+                    </x-icon-label-info>
+                    <x-icon-label-info :label="trans_choice('general.center', 2)"   :info="$project->centers_count">
+                        <x-icons.building class="me-2" />
+                    </x-icon-label-info>
+                    <x-icon-label-info :label="trans_choice('general.city', 2)"   :info="$project->cities_count">
                         <x-icons.map-pin class="me-2" />
-                        <span class="font-bold me-1">
-                            {{ trans_choice('general.city', 2) . ': ' }}
-                        </span>
-                        <span>
-                            {{ $project->cities_count }}
-                        </span>
+                    </x-icon-label-info>
 
-                    </div>
                 </div>
 
                 <div class="flex justify-between items-end mt-4 pt-4 border-t-1 border-gray-200">
