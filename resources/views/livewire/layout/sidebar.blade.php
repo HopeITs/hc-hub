@@ -55,7 +55,7 @@
                     </x-slot>
 
                     <x-slot name="list">
-                        <x-layouts.app.sidebar.nav-item :href="route('projects.index')" :active="request()->routeIs('projects.index')">
+                        <x-layouts.app.sidebar.nav-item :href="route('projects.index')" :active="request()->routeIs('projects.*')">
                             {{ trans_choice('general.project', 2) }}
                         </x-layouts.app.sidebar.nav-item>
 

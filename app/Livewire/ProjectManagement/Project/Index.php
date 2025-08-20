@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Livewire\ProjectManagement;
+namespace App\Livewire\ProjectManagement\Project;
 
 use App\Models\Project;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
-class ProjectModule extends Component
+class Index extends Component
 {
 
     use WithPagination, WithFileUploads;
@@ -121,42 +122,7 @@ class ProjectModule extends Component
             ->show();
     }
 
-    public function save()
-    {
-//dd($this->item);
 
-        $this->validate();
-
-        if (array_key_exists('id', $this->item)) {
-            $project = Project::findOrFail($this->item['id']);
-            $project->update($this->item);
-            if ($this->item['logo'] !== null) {
-
-                // Remove existing logo
-                $project->clearMediaCollection('logo');
-
-                // Add new logo
-                $project->addMedia($this->item['logo']->getRealPath())
-                    ->usingFileName('project-logo.' . $this->item['logo']->getClientOriginalExtension())
-                    ->toMediaCollection('logo');
-            }
-        } else {
-            $project = Project::create($this->item);
-            $project->addMedia($this->item['logo']->getRealPath())
-                ->usingFileName('project-logo.' . $this->item['logo']->getClientOriginalExtension())
-                ->toMediaCollection('logo');
-
-        }
-
-
-        $this->reset(['item', 'showModal']);
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
-    }
 
     public function delete($id)
     {
@@ -180,6 +146,6 @@ class ProjectModule extends Component
             }
         ])->orderBy('is_active', 'desc')->paginate(9);
 
-        return view('livewire.project-management.project-module', compact('items'));
+        return view('livewire.project-management.project.index', compact('items'));
     }
 }

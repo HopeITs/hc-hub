@@ -10,11 +10,12 @@ use App\Livewire\DefaultDeliverablesModule;
 use App\Livewire\Employee\EmployeeCreate;
 use App\Livewire\Employee\EmployeeEdit;
 use App\Livewire\Employee\EmployeeModule;
-use App\Livewire\Employee\Tabs\PersonalInfoTab;
 use App\Livewire\ProjectManagement\CentersModule;
 use App\Livewire\ProjectManagement\PositionsModule;
-use App\Livewire\ProjectManagement\ProjectDetail;
-use App\Livewire\ProjectManagement\ProjectModule;
+use App\Livewire\ProjectManagement\Project\Detail as ProjectDetail;
+use App\Livewire\ProjectManagement\Project\Create as ProjectCreate;
+use App\Livewire\ProjectManagement\Project\Update as ProjectUpdate;
+use App\Livewire\ProjectManagement\Project\Index as ProjectIndex;
 use App\Livewire\ProjectManagement\RequiredPositionModule;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
@@ -43,19 +44,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
     Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');
     Route::get('departments', DepartmentModule::class)->name('departments.index');
-    Route::get('projects', ProjectModule::class)->name('projects.index');
-    Route::get('projects/{slug}', ProjectDetail::class)->name('projects.show');
     Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
     Route::get('/centers', CentersModule::class)->name('centers.index');
     Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
     Route::get('/default-deliverables', DefaultDeliverablesModule::class)
         ->name('default-deliverables.index');
-});
-Route::prefix('employees')->name('employees.')->group(function () {
-    Route::get('/', EmployeeModule::class)->name('index');
-    Route::get('/create',\App\Livewire\Employee\Form::class)->name('create');
-    Route::get('/personal-info', PersonalInfoTab::class)->name('personal-info-tab');
-    Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
+    Route::prefix('projects')->name('projects.')->group(function () {
+        Route::get('/', ProjectIndex::class)->name('index');
+        Route::get('/create', ProjectCreate::class)->name('create');
+        Route::get('/edit/{project:slug}', ProjectUpdate::class)->name('edit');
+        Route::get('/{slug}', ProjectDetail::class)->name('show');
+    });
+    Route::prefix('employees')->name('employees.')->group(function () {
+        Route::get('/', EmployeeModule::class)->name('index');
+        Route::get('/create', EmployeeCreate::class)->name('create');
+        Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
+    });
 });
 
 require __DIR__.'/auth.php';

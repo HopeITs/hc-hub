@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Livewire\ProjectManagement;
+namespace App\Livewire\ProjectManagement\Project;
 
 use App\Models\Project;
 use Livewire\Component;
 
-class ProjectDetail extends Component
+class Detail extends Component
 {
     public $slug ;
 
@@ -13,6 +13,6 @@ class ProjectDetail extends Component
     {
         $project = Project::whereSlug($this->slug)->firstOrFail();
 
-        return view('livewire.project-management.project-detail' , compact('project'));
+        return view('livewire.project-management.project.detail' , compact('project'));
     }
 }
