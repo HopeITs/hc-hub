@@ -5,7 +5,7 @@
             ['label' => trans_choice('general.employee', 2)],
         ]" :showButton="true" />
         <div>
-            <x-primary-button :href="route('employees.create')">
+            <x-primary-button :href="route('employees.personal-info-tab')">
                 @lang('general.add_new')
             </x-primary-button>
         </div>
@@ -38,7 +38,7 @@
                     <x-table.cell>{{ $item->directManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->techManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->actual_job }}</x-table.cell>
-                    <x-table.cell>{{ $item->account->email }}</x-table.cell>
+                    <x-table.cell>{{ $item->account?->email }}</x-table.cell>
                     <x-table.cell>
                         <x-badge :color="$item->is_active ? 'green' : 'red'">
                             {{ $item->is_active ? __('general.active') : __('general.inactive') }}

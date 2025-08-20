@@ -46,6 +46,7 @@
                         <x-icons.map-pin class="me-2" />
                     </x-icon-label-info>
 
+                    </div>
                 </div>
 
                 <div class="flex justify-between items-end mt-4 pt-4 border-t-1 border-gray-200">

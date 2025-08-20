@@ -35,7 +35,7 @@ class EmployeeFactory extends Factory
                 'en' => $this->faker->firstNameFemale,
                 'ar' => 'اسمأم' . $this->faker->unique()->numberBetween(1, 1000),
             ],
-            'nationality' => 'syrian',
+            'nationality' => 1,
             'marital_status' => $this->faker->randomElement([0, 1, 2]),
             'children' => $this->faker->numberBetween(0, 5),
             'work_phone' => $this->faker->numerify('09########'),
