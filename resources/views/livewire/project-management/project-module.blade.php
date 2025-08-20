@@ -46,7 +46,7 @@
                     <div class="flex items-center ">
                         <x-icons.barcode class="me-2" />
 
-                        <span class="font-bold me-1">
+                        <span class="font-bold me-1 text-sm xl:text-base">
                             {{ __('general.code') . ': ' }}
                         </span>
                         <span>
