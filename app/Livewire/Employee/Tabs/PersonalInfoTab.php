@@ -4,11 +4,13 @@ namespace App\Livewire\Employee\Tabs;
 
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Models\Employee;
+use App\Traits\WithAlerts;
 use Livewire\Component;
 
 class PersonalInfoTab extends Component
 {
     public PersonalInfoForm $form;
+    use WithAlerts;
     public function save()
     {
 

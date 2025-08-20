@@ -16,9 +16,9 @@ class Employee extends Model
     public array $translatable = ['name', 'father_name', 'mother_name', 'address'];
 
     protected $casts = [
-        'dob'                     => 'date:Y-m-d',
-        'board_member_started_at' => 'date:Y-m-d',
-        'board_member_end_at'     => 'date:Y-m-d',
+        'dob'                     => 'datetime',
+        'board_member_started_at' => 'datetime',
+        'board_member_end_at'     => 'datetime',
         'is_active'               => 'boolean',
         'is_board_member'         => 'boolean',
         'children'                => 'integer',
