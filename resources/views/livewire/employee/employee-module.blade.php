@@ -5,7 +5,7 @@
             ['label' => trans_choice('general.employee', 2)],
         ]" :showButton="true" />
         <div>
-            <x-primary-button :href="route('employees.personal-info-tab')">
+            <x-primary-button :href="route('employees.create')">
                 @lang('general.add_new')
             </x-primary-button>
         </div>

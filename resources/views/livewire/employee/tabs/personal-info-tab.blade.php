@@ -1,7 +1,7 @@
 @php
     use App\Enums\MaritalStatus;use App\Enums\Nationality;
 @endphp
-<x-layouts.employee-form>
+
     <form wire:submit.prevent="save" class="flex flex-col space-y-6">
         <x-forms.errors-validation-list/>
         <div class="">
@@ -286,4 +286,4 @@
                                 class="!w-auto">@lang('general.cancel')</x-secondary-button>
         </div>
     </form>
-</x-layouts.employee-form>
+
