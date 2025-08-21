@@ -62,28 +62,31 @@ Route::group(
             Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');
             Route::get('departments', DepartmentModule::class)->name('departments.index');
 
-    Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
-    Route::get('/centers', CentersModule::class)->name('centers.index');
-    Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
-    Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
+            Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
+            Route::get('/centers', CentersModule::class)->name('centers.index');
+            Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
+            Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
-    Route::prefix('contracts')->name('contracts.')->group(function () {
-        Route::get('/', ContractsModule::class)->name('index');
-        Route::get('/create', ContractCreate::class)->name('create');
-        Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
-    });
+            Route::prefix('contracts')->name('contracts.')->group(function () {
+                Route::get('/', ContractsModule::class)->name('index');
+                Route::get('/create', ContractCreate::class)->name('create');
+                Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
+            });
 
 
-    Route::prefix('projects')->name('projects.')->group(function () {
+            Route::prefix('projects')->name('projects.')->group(function () {
                 Route::get('/', ProjectIndex::class)->name('index');
                 Route::get('/create', ProjectCreate::class)->name('create');
                 Route::get('/edit/{project:slug}', ProjectUpdate::class)->name('edit');
                 Route::get('/{slug}', ProjectDetail::class)->name('show');
-            });Route::prefix('employees')->name('employees.')->group(function () {
-        Route::get('/', EmployeeModule::class)->name('index');
-        Route::get('/create', EmployeeCreate::class)->name('create');
-        Route::get('/create/personal-info', PersonalInfoTab::class)->name('create.personal-info');Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
-    });});
+            });
+            Route::prefix('employees')->name('employees.')->group(function () {
+                Route::get('/', EmployeeModule::class)->name('index');
+                Route::get('/create', EmployeeCreate::class)->name('create');
+                Route::get('/create/personal-info', PersonalInfoTab::class)->name('create.personal-info');
+                Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
+            });
+        });
 
         require __DIR__ . '/auth.php';
     }
