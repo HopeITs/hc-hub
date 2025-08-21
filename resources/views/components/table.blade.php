@@ -8,7 +8,7 @@
     <div class="card-body p-0">
 
         <div class="custom-datatable-filter overflow-x-auto">
-            <table id="datatable" class="table w-full border-b border-borderColor text-right">
+            <table id="datatable" class="table w-full border-b border-borderColor text-start">
             <thead class="thead-light">
                 <tr>
                     {{ $headings ?? '' }}
