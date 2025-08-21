@@ -15,8 +15,8 @@ final class SalaryPer extends Enum
     public static function getLocalizedName(int $value): array
     {
         $val = match ($value) {
-            self::Month   => ['text' => ['en' => 'Monthly',     'ar' => 'شهري'],   'color' => 'green'],
-            self::Hour    => ['text' => ['en' => 'Hourly',      'ar' => 'ساعي'],   'color' => 'blue'],
+            self::Month   => ['text' => ['en' => 'Monthly',     'ar' => 'شهر'],   'color' => 'green'],
+            self::Hour    => ['text' => ['en' => 'Hourly',      'ar' => 'ساعة'],   'color' => 'blue'],
             self::Session => ['text' => ['en' => 'Per Session', 'ar' => 'جلسة'],   'color' => 'yellow'],
             default       => ['text' => ['en' => 'Unknown',     'ar' => 'غير معروف'], 'color' => 'gray'],
         };

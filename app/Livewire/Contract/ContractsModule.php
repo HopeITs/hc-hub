@@ -167,7 +167,11 @@ class ContractsModule extends Component
                 ->orderBy("job_levels.name->$locale", $dir)->select('contracts.*');
         } elseif (in_array($sort, ['start_date','end_date','salary','is_active','position_id','id'])) {
             $query->orderBy($sort, $dir);
-        } else {
+        } elseif ($sort === 'period') {
+            $query->orderBy('start_date', $dir)
+                ->orderBy('end_date', $dir);
+        }
+        else {
             $query->orderBy('id', 'desc');
         }
 

@@ -3,7 +3,7 @@
         ['label' => trans_choice('general.employee_management', 2)],
         ['label' => trans_choice('general.contracts', 2), 'url' => route('contracts.index')],
         ['label' => __('general.edit')],
-    ]" />
+    ]"/>
 
     <form wire:submit.prevent="save" class="mt-4">
         <x-tab.form activeTab="identity">
@@ -13,7 +13,7 @@
                     activeTab="identity"
                     activeClass="bg-blue-600 text-white"
                     inactiveClass="bg-gray-50 hover:bg-gray-100">
-                    <x-icons.users class="w-5 h-5 mr-2" />
+                    <x-icons.users class="w-5 h-5 mr-2"/>
                 </x-tab.item>
 
                 <x-tab.item
@@ -21,15 +21,15 @@
                     activeTab="terms"
                     activeClass="bg-blue-600 text-white"
                     inactiveClass="bg-gray-50 hover:bg-gray-100">
-                    <x-icons.calendar class="w-5 h-5 mr-2" />
+                    <x-icons.calendar class="w-5 h-5 mr-2"/>
                 </x-tab.item>
 
                 <x-tab.item
-                    :title="__('general.compensation-schedule')"
+                    :title="__('general.Pay-schedule')"
                     activeTab="comp"
                     activeClass="bg-blue-600 text-white"
                     inactiveClass="bg-gray-50 hover:bg-gray-100">
-                    <x-icons.currency-dollar class="w-5 h-5 mr-2" />
+                    <x-icons.currency-dollar class="w-5 h-5 mr-2"/>
                 </x-tab.item>
             </x-tab.list>
 
@@ -43,7 +43,7 @@
                 </x-tab.container>
 
                 <x-tab.container activeTab="comp">
-                    @include('livewire.contract.partials.compensation-fields')
+                    @include('livewire.contract.partials.Pay-fields')
                 </x-tab.container>
             </div>
         </x-tab.form>

@@ -33,9 +33,9 @@ class ContractEdit extends Component
         LivewireAlert::success(__('general.success-message'));
     }
 
-    public function saveCompensation(): void
+    public function savePay(): void
     {
-        $this->form->saveCompensation();
+        $this->form->savePay();
         LivewireAlert::success(__('general.success-message'));
     }
 

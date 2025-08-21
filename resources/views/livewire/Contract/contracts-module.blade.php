@@ -22,17 +22,16 @@
         <x-slot name="headings">
             <x-table.heading>ID</x-table.heading>
             <x-table.heading>@lang('general.employee')</x-table.heading>
-            <x-table.heading>{{ trans_choice('general.position', 1) }}</x-table.heading>
+            <x-table.heading>{{ trans_choice('general.positions', 1) }}</x-table.heading>
             <x-table.heading>{{ trans_choice('general.contract-type', 1) }}</x-table.heading>
             <x-table.heading>{{ trans_choice('general.department', 1) }}</x-table.heading>
             <x-table.heading>{{ trans_choice('general.job-level', 1) }}</x-table.heading>
-            <x-table.heading>@lang('general.start-date')</x-table.heading>
-            <x-table.heading>@lang('general.end-date')</x-table.heading>
+            <x-table.heading data-sort="period">@lang('general.period')</x-table.heading>
             <x-table.heading>@lang('general.yearly-leave-days')</x-table.heading>
             <x-table.heading>@lang('general.salary-per')</x-table.heading>
             <x-table.heading>@lang('general.weekly-hours')</x-table.heading>
             <x-table.heading>@lang('general.status')</x-table.heading>
-            <x-table.heading />
+            <x-table.heading/>
         </x-slot>
 
         <x-slot name="body">
@@ -45,7 +44,7 @@
                     </x-table.cell>
 
                     <x-table.cell>
-                        {{ $item->position?->requiredPosition?->getTranslation('name', $locale) ?? '#'.$item->position_id }}
+                        {{ $item->position?->requiredPosition?->title ?? '#'.$item->position_id }}
                     </x-table.cell>
 
                     <x-table.cell>
@@ -60,13 +59,18 @@
                         {{ $item->jobLevel?->getTranslation('name', $locale) ?? '—' }}
                     </x-table.cell>
 
-                    <x-table.cell>{{ optional($item->start_date)->toDateString() ?? '—' }}</x-table.cell>
-                    <x-table.cell>{{ optional($item->end_date)->toDateString() ?? '—' }}</x-table.cell>
+                    <x-table.cell>
+                        <x-period :start="$item->start_date" :end="$item->end_date"/>
+                    </x-table.cell>
 
                     <x-table.cell>{{ $item->yearly_leave_days ?? '—' }}</x-table.cell>
 
                     <x-table.cell>
-                        @php($per = SalaryPer::getLocalizedName((int)$item->salary_per))
+                        @php($per = \App\Enums\SalaryPer::getLocalizedName(
+                        $item->salary_per instanceof \BackedEnum
+                            ? $item->salary_per->value
+                            : (string) $item->salary_per
+                        ))
                         <x-badge :color="$per['color']">{{ $per['value'] }}</x-badge>
                     </x-table.cell>
 
@@ -79,12 +83,12 @@
                     </x-table.cell>
 
                     <x-table.cell>
-                        <x-table.edit-btn :href="route('contracts.edit', $item->id)" />
-                        <x-table.delete-btn :modelId="$item->id" />
+                        <x-table.edit-btn :href="route('contracts.edit', $item->id)"/>
+                        <x-table.delete-btn :modelId="$item->id"/>
                     </x-table.cell>
                 </tr>
             @empty
-                <x-table.no-data />
+                <x-table.no-data/>
             @endforelse
         </x-slot>
 
