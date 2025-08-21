@@ -174,6 +174,7 @@ return [
     'relations.daughter' => 'أبنة',
     'relations.son' => 'أبن',
     'relations.other' => 'آخر',
+    'show-more' => 'عرض المزيد',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',

@@ -63,6 +63,12 @@
         @endforeach
 
     </div>
-    <div class="py-4">{{ $items->links() }}</div>
+
+    @if($items->count() >= $perPage)
+        <div class="py-4 mt-4 text-center">
+            <x-outline-button  wire:click="loadMore">@lang('general.show-more')</x-outline-button>
+        </div>
+    @endif
+{{--    <div class="py-4">{{ $items->links() }}</div>--}}
 
 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\ProjectManagement\Project;
 
+use App\Livewire\Forms\ProjectManagement\ProjectForm;
 use App\Models\Project;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -15,62 +16,38 @@ class Index extends Component
 
     use WithPagination, WithFileUploads;
 
-    public $showModal = false;
-    public $showDetailsModal = false;
-    public $modalTitle = '';
+    protected $listeners = ['load-more' => 'loadMore'];
 
     public Project $project;
-
-    public $item = [
-        'id' => 0,
-        'name' => '',
-        'description' => '',
-        'is_active' => true,
-        'start_date' => null,
-        'end_date' => null,
-        'logo' => '',
-        'code' => '',
-        'slug' => ''
-
-    ];
-
-    protected function rules()
+    public ProjectForm $form;
+    public $perPage = 6;
+    public function loadMore(): void
     {
-        return [
-
-            'item.name.*' => 'required',
-            'item.description.*' => 'nullable',
-            'item.is_active' => 'required|boolean:0,1',
-            'item.logo' => 'nullable|image|max:2048',
-            'item.code' => 'required',
-            'item.slug' => 'required|unique:projects,slug,'.$this->item['id'],
-            'item.start_date' => 'required|date',
-            'item.end_date' => 'nullable|date|after:item.start_date',
-        ];
+        $this->perPage += 6; // increase the limit
     }
 
-    public $itemID;
+
+
 
     public function confirmToggleItemStatus($id)
     {
-        $this->itemID = $id;
 
         LivewireAlert::title(__('general.toggle-status'))
             ->text(__('general.confirm-status-change'))
             ->question()
             ->confirmButtonColor(config('samples.styles.colors.confirm'))
             ->withConfirmButton(__('general.save'))
-            ->onConfirm('toggleItemStatusConfirmed', ['id' => $this->itemID])
+            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
             ->withCancelButton(__('general.cancel'))
             ->show();
     }
 
 
-    public function toggleItemStatusConfirmed()
+    public function toggleItemStatusConfirmed(Project $project)
     {
-        $item = Project::findOrFail($this->itemID);
-        $item->is_active = !$item->is_active;
-        $item->save();
+        $this->form->setProject($project);
+        $this->form->statusToggle();
+
 
         LivewireAlert::title(__('general.item-updated'))
             ->success()
@@ -80,38 +57,15 @@ class Index extends Component
     }
 
 
-    public function show($id)
+    public function show(Project $project)
     {
-        $project = Project::findOrFail($id);
-        $this->reset(['item']);
-        $this->item = $project;
-        $this->modalTitle = $project->name;
-        $this->showDetailsModal = true;
-
+        $this->form->setProject($project);
     }
 
-    public function create()
-    {
-        $this->reset(['item']); // Reset all
-        $this->item['is_active'] = true;
-        $this->showModal = true;
-        $this->modalTitle = __('general.add_new');
-    }
 
-    public function edit($id)
-    {
-        $project = Project::findOrFail($id);
-        $this->item = $project->toArray();
-        $this->item['logo'] = $project->getFirstMediaUrl('logo'); // Reset logo
-
-        $this->modalTitle = __('general.edit');
-        $this->showModal = true;
-    }
 
     public function confirmDelete($id)
     {
-
-
         LivewireAlert::title(__('general.delete-item'))
             ->text(__('general.confirm-delete-item'))
             ->question()
@@ -123,11 +77,10 @@ class Index extends Component
     }
 
 
-
-    public function delete($id)
+    public function delete(Project $project)
     {
-
-        Project::find($id['id'])->delete();
+        $this->form->setProject($project);
+        $this->form->project->delete();
 
         LivewireAlert::title(__('general.success-message'))
             ->success()
@@ -144,7 +97,7 @@ class Index extends Component
             'cities as cities_count' => function ($query) {
                 $query->select(DB::raw('count(distinct city_id)'));
             }
-        ])->orderBy('is_active', 'desc')->paginate(9);
+        ])->orderBy('is_active', 'desc')->latest()->take($this->perPage)->get();
 
         return view('livewire.project-management.project.index', compact('items'));
     }

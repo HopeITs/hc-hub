@@ -19,6 +19,7 @@ class ProjectForm extends Form
     public $code;
     public $slug;
     public $logo = null;
+    public $is_active = true;
 
     protected function rules()
     {
@@ -35,6 +36,7 @@ class ProjectForm extends Form
             ],
             'code' => 'required',
             'logo' => 'nullable|image',
+
         ];
     }
 
@@ -48,6 +50,7 @@ class ProjectForm extends Form
         $this->end_date = $project->end_date;
         $this->code = $project->code;
         $this->logo = $project->getFirstMediaUrl('logo');
+        $this->is_active = $project->is_active;
 
     }
 
@@ -82,6 +85,14 @@ class ProjectForm extends Form
                 ->toMediaCollection('logo');
         }
         $this->reset();
+    }
+
+    public function statusToggle(){
+        $this->project->update(
+           [
+               'is_active' => !$this->project->is_active,
+           ]
+        );
     }
 
 }
