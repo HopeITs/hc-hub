@@ -10,6 +10,7 @@ use App\Livewire\DefaultDeliverablesModule;
 use App\Livewire\Employee\EmployeeCreate;
 use App\Livewire\Employee\EmployeeEdit;
 use App\Livewire\Employee\EmployeeModule;
+use App\Livewire\Employee\Tabs\PersonalInfoTab;
 use App\Livewire\ProjectManagement\CentersModule;
 use App\Livewire\ProjectManagement\PositionsModule;
 use App\Livewire\ProjectManagement\Project\Detail as ProjectDetail;
@@ -64,7 +65,7 @@ Route::group(
             Route::prefix('employees')->name('employees.')->group(function () {
                 Route::get('/', EmployeeModule::class)->name('index');
                 Route::get('/create', EmployeeCreate::class)->name('create');
-                Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
+                Route::get('/create/personal-info', PersonalInfoTab::class)->name('create.personal-info');Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
             });
         });
 
