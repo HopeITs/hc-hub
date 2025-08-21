@@ -1,22 +1,28 @@
 <?php
 
-namespace App\Livewire\Forms;
+namespace App\Livewire\Forms\Employee;
 
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Livewire\WithFileUploads;
 
-class EmployeeForm extends Form
+class ChecklistForm extends Form
 {
     use WithFileUploads;
 
-    public ?Employee $employee = null;
-    public $photo;
-    public $name = [];
-    public $national_number;
+    public ?Employee $employee = null ;
 
+    public $photo;
+
+    #[Validate('required|array')]
+    public $name = [];
+    #[Validate('required|array')]
+    public $national_number;
+    public $email;
     public $work_email_username;
     public $direct_manager_id;
     public $tech_manager_id;
@@ -25,7 +31,7 @@ class EmployeeForm extends Form
     public $dob;
     public $gender;
     public $marital_status;
-    public $children;
+    public $children = 0;
     public $nationality = 'syrian';
     public $civil_registry_office;
     public $civil_registry_number;
@@ -46,7 +52,26 @@ class EmployeeForm extends Form
     public array $relatives = [];
     public array $badges = [];
     public array $checklists = [];
-
+    protected function rules()
+    {
+        return [
+            'name' => 'required|array',
+            'name.*' => 'required|string|max:255',
+            'national_number' => 'required|string|max:20',
+            'nationality' => 'required|in:syrian',
+            'is_active' => 'required|boolean',
+            'dob' => 'nullable|date_format:Y-m-d',
+            'board_member_started_at' => 'nullable|date_format:Y-m-d',
+            'board_member_end_at' => 'nullable|date_format:Y-m-d|after_or_equal:board_member_started_at',
+            'gender' => 'nullable|in:0,1,2',
+            'marital_status' => 'nullable|in:0,1,2',
+            'children' => 'nullable|integer|min:0',
+            'direct_manager_id' => 'nullable|exists:employees,id',
+            'tech_manager_id' => 'nullable|exists:employees,id',
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore(optional($this->employee?->account)->id)],
+            'work_email_username' => 'nullable|regex:/^[a-zA-Z0-9.\-_]+$/',
+        ];
+    }
     protected function buildWorkEmail(?string $username): ?string
     {
         $username = trim($username ?? '');
@@ -58,14 +83,14 @@ class EmployeeForm extends Form
         return $email ? explode('@', $email, 2)[0] ?? null : null;
     }
 
-    public function setEmployee(Employee $employee)
+    public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
         $this->photo = $employee->photo;
         $this->national_number = $employee->national_number;
         $this->direct_manager_id = $employee->direct_manager_id;
         $this->tech_manager_id = $employee->tech_manager_id;
-        $this->dob = $employee->dob;
+        $this->dob = $employee->dob?->format('Y-m-d');
         $this->gender = $employee->gender;
         $this->marital_status = $employee->marital_status;
         $this->children = $employee->children;
@@ -80,8 +105,8 @@ class EmployeeForm extends Form
         $this->interests = $employee->interests;
         $this->is_active = $employee->is_active;
         $this->is_board_member = $employee->is_board_member;
-        $this->board_member_started_at = $employee->board_member_started_at;
-        $this->board_member_end_at = $employee->board_member_end_at;
+        $this->board_member_started_at = $employee->board_member_started_at?->format('Y-m-d');
+        $this->board_member_end_at = $employee->board_member_end_at?->format('Y-m-d');
         $this->name = $employee->getTranslations('name');
         $this->father_name = $employee->getTranslations('father_name');
         $this->mother_name = $employee->getTranslations('mother_name');
@@ -92,99 +117,138 @@ class EmployeeForm extends Form
         $this->relatives = $employee->relatives()->get()->toArray();
         $this->badges = $employee->badges()->get()->toArray();
         $this->checklists = $employee->checklists()->get()->toArray();
-
-        $this->work_email_username = $this->extractUsernameFromEmail($employee->email);
+        $this->work_email_username = $this->extractUsernameFromEmail($employee->account?->email);
     }
 
-    public function addEducation()
+    public function addEducation(): void
     {
         $this->educations[] = ['title' => '', 'university' => '', 'type' => '', 'graduation_year' => ''];
     }
 
-    public function removeEducation(int $index)
+    public function removeEducation(int $index): void
     {
         unset($this->educations[$index]);
         $this->educations = array_values($this->educations);
     }
 
-    public function addCourse()
+    public function addCourse(): void
     {
         $this->courses[] = ['title' => '', 'issuing_organization' => '', 'date' => '', 'is_approved' => 0];
     }
 
-    public function removeCourse(int $index)
+    public function removeCourse(int $index): void
     {
         unset($this->courses[$index]);
         $this->courses = array_values($this->courses);
     }
 
-    public function addExperience()
+    public function addExperience(): void
     {
         $this->experiences[] = ['job_title' => '', 'company' => '', 'start_date' => '', 'end_date' => '', 'place' => 'onsite', 'type' => ''];
     }
 
-    public function removeExperience(int $index)
+    public function removeExperience(int $index): void
     {
         unset($this->experiences[$index]);
         $this->experiences = array_values($this->experiences);
     }
 
-    public function addRelative()
+    public function addRelative(): void
     {
         $this->relatives[] = ['name' => '', 'phone' => '', 'relation' => ''];
     }
 
-    public function removeRelative(int $index)
+    public function removeRelative(int $index): void
     {
         unset($this->relatives[$index]);
         $this->relatives = array_values($this->relatives);
     }
 
-    public function addBadge()
+    public function addBadge(): void
     {
-        $this->badges[] = ['evaluation_id' => null, 'currency' => 1, 'type' => '', 'date' => now()->format('Y-m-d'), 'reason' => '', 'current_salary' => null, 'new_salary' => null, 'notes' => ''];
+        $this->badges[] = [
+            'evaluation_id' => null,
+            'currency' => 1,
+            'type' => '',
+            'date' => now()->format('Y-m-d'),
+            'reason' => '',
+            'current_salary' => null,
+            'new_salary' => null,
+            'notes' => '',
+        ];
     }
 
-    public function removeBadge(int $index)
+    public function removeBadge(int $index): void
     {
         unset($this->badges[$index]);
         $this->badges = array_values($this->badges);
     }
 
-    public function addChecklist()
+    public function addChecklist(): void
     {
-        $this->checklists[] = ['item_id' => null, 'brand' => '', 'model' => '', 'serial' => '', 'delivered_at' => now()->format('Y-m-d'), 'delivered_status' => '', 'returned_at' => null, 'returned_status' => '', 'notes' => ''];
+        $this->checklists[] = [
+            'item_id' => null,
+            'brand' => '',
+            'model' => '',
+            'serial' => '',
+            'delivered_at' => now()->format('Y-m-d'),
+            'delivered_status' => '',
+            'returned_at' => null,
+            'returned_status' => '',
+            'notes' => '',
+        ];
     }
 
-    public function removeChecklist(int $index)
+    public function removeChecklist(int $index): void
     {
         unset($this->checklists[$index]);
         $this->checklists = array_values($this->checklists);
     }
 
-    public function saveInformation()
+    public function saveInformation(): Employee
     {
         $this->email = $this->buildWorkEmail($this->work_email_username);
+//dd($this->all());
+        $this->validate();
 
-        $this->validate([
-            'name' => 'required|array',
-            'name.*' => 'required|string|max:255',
-            'national_number' => 'required|string|max:20',
-            'is_active' => 'required|boolean',
-            'nationality' => 'required|string|max:100',
-            'email' => 'nullable|email|max:255|unique:users,email,' . $this->employee?->id,
-            'work_email_username' => 'nullable|regex:/^[a-zA-Z0-9.\-_]+$/',
-        ]);
+        $data = [
+            'name' => $this->name,
+            'national_number' => $this->national_number,
+            'is_active' => (bool) $this->is_active,
+            'nationality' => $this->nationality,
+            'direct_manager_id' => $this->direct_manager_id,
+            'tech_manager_id' => $this->tech_manager_id,
+            'dob' => $this->dob ?: null,
+            'gender' => $this->gender,
+            'marital_status' => $this->marital_status,
+            'children' => $this->children,
+            'father_name' => $this->father_name,
+            'mother_name' => $this->mother_name,
+            'civil_registry_office' => $this->civil_registry_office,
+            'civil_registry_number' => $this->civil_registry_number,
+            'place_of_registration' => $this->place_of_registration,
+            'work_phone' => $this->work_phone,
+            'personal_phone' => $this->personal_phone,
+            'personal_email' => $this->personal_email,
+            'address' => $this->address,
+            'skills' => $this->skills,
+            'interests' => $this->interests,
+            'is_board_member' => (bool) $this->is_board_member,
+            'board_member_started_at' => $this->board_member_started_at ?: null,
+            'board_member_end_at' => $this->board_member_end_at ?: null,
+        ];
 
-        $data = $this->only(['name', 'national_number', 'is_active', 'nationality', 'direct_manager_id', 'tech_manager_id', 'dob', 'gender', 'marital_status', 'children', 'father_name', 'mother_name', 'civil_registry_office', 'civil_registry_number', 'place_of_registration', 'work_phone', 'personal_phone', 'personal_email', 'address', 'skills', 'interests', 'is_board_member', 'board_member_started_at', 'board_member_end_at']);
-        $emailData = $this->only(['email']);
         if ($this->employee) {
-            $this->employee->update($data);
-            $this->employee->account()->update($emailData);
+            $this->employee->update($this->except('email'));
+
+            if ($this->employee->account) {
+                $this->employee->account->update(['email' => $this->email]);
+            }
         } else {
-            $this->employee = Employee::create($data);
+            $this->employee = Employee::create($this->except('email'));
+
             User::create([
-                'email' => $emailData,
+                'email' => $this->email,
                 'password' => Hash::make('HopeCenterHR'),
                 'employee_id' => $this->employee->id,
             ]);
@@ -194,9 +258,10 @@ class EmployeeForm extends Form
             $this->employee->photo = $this->photo->store('employees', 'public');
             $this->employee->save();
         }
+        return $this->employee;
     }
 
-    public function saveEducation()
+    public function saveEducation(): void
     {
         $this->validate([
             'educations' => 'array',
@@ -207,7 +272,7 @@ class EmployeeForm extends Form
         $this->employee->educations()->createMany($this->educations);
     }
 
-    public function saveCourses()
+    public function saveCourses(): void
     {
         $this->validate([
             'courses' => 'array',
@@ -218,7 +283,7 @@ class EmployeeForm extends Form
         $this->employee->courses()->createMany($this->courses);
     }
 
-    public function saveExperience()
+    public function saveExperience(): void
     {
         $this->validate([
             'experiences' => 'array',
@@ -229,7 +294,7 @@ class EmployeeForm extends Form
         $this->employee->experiences()->createMany($this->experiences);
     }
 
-    public function saveRelatives()
+    public function saveRelatives(): void
     {
         $this->validate([
             'relatives' => 'array',
@@ -240,7 +305,7 @@ class EmployeeForm extends Form
         $this->employee->relatives()->createMany($this->relatives);
     }
 
-    public function saveBadges()
+    public function saveBadges(): void
     {
         $this->validate([
             'badges' => 'array',
@@ -251,7 +316,7 @@ class EmployeeForm extends Form
         $this->employee->badges()->createMany($this->badges);
     }
 
-    public function saveChecklist()
+    public function saveChecklist(): void
     {
         $this->validate([
             'checklists' => 'array',

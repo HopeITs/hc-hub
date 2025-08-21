@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Livewire\ProjectManagement\Project;
+
+use App\Livewire\Forms\ProjectManagement\ProjectForm;
+use App\Models\Project;
+use App\Traits\WithAlerts;
+use Illuminate\Support\Facades\DB;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+
+class Update extends Component
+{
+    use WithAlerts, WithFileUploads;
+
+    public ProjectForm $form;
+    public $existingLogoUrl = '';
+
+
+    public function mount(Project $project)
+    {
+        $this->form->setProject($project);
+    }
+
+    public function save()
+    {
+        $this->validate();
+        $this->form->update();
+        $this->successToast(__('general.success-message'));
+        return redirect()->route('projects.index');
+    }
+
+    public function render()
+    {
+
+        return view('livewire.project-management.project.form', [
+            'title' => $this->form->project->name,
+        ]);
+    }
+}
