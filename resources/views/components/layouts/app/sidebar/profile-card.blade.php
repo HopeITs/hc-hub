@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <div id="userDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-52">
+    <div id="userDropdown" class="z-10 hidden bg-gray-100 divide-y divide-gray-100 rounded-lg shadow-md w-52">
         @if (Auth::user())
             <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
                 <div>{{ Auth::user()->profile->name }}</div>
@@ -36,7 +36,7 @@
                     </a>
                 </li>
             </ul>
-            <div class="py-1">
+            <div class="py-1 px-4">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
