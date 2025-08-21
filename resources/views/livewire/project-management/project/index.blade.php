@@ -11,18 +11,6 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach ($items as $project)
             <x-card class="col-span-1 {{ $project->is_active ? '!border-red-200' : '' }}" :title="$project->getTranslation('name', 'en')">
-                <x-slot name="icon">
-                    <div class="flex justify-between">
-
-                        @if ($project->getFirstMediaUrl('logo') !== '')
-                            <img class="h-10 m-4 " src="{{ $project->getFirstMediaUrl('logo') }}"  alt="logo"/>
-
-                        @endif
-
-
-                    </div>
-
-                </x-slot>
                 <div class="text-gray-400 grid md:grid-cols-2 mb-4 gap-x-4 gap-y-2">
                     <x-icon-label-info :label="__('general.name')"  class=" md:col-span-2" :info="$project->getTranslation('name', 'ar')">
                         <x-icons.info class="me-2" />
