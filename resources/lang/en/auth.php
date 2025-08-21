@@ -1,39 +1,24 @@
 <?php
 
 return [
-    //login
-    'logout' => 'تسجيل خروج',
-    'sign-in' => 'تسجيل دخول',
-    'sign-in-text' => 'يرجى إدخال بياناتك لتسجيل الدخول',
-    'email-address' => 'البريد الإلكتروني',
-    'password' => 'كلمة المرور',
-    'remember-me' => 'تذكرني',
-    'forgot-password' => 'نسيت كلمة المرور ؟',
-    'copyright' => 'مركز الرجاء المسيحي - إدارة الموارد البشرية',
-    'failed' => 'بيانات الدخول غير صحيحة',
+    'logout' => 'Logout',
+    'sign-in' => 'Sign In',
+    'sign-in-text' => 'Please enter your credentials to sign in',
+    'email-address' => 'Email Address',
+    'password' => 'Password',
+    'remember-me' => 'Remember Me',
+    'forgot-password' => 'Forgot Password?',
+    'copyright' => 'Raja Christian Center - Human Resources Management',
+    'failed' => 'These login credentials are incorrect.',
 
-    //reset-password
-    'reset-password'=> 'إعادة تعيين كلمة المرور',
-    'reset-password-text' => 'يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمات المرور المستخدمة سابقًا.',
-    'password-text' => 'استخدم 8 أحرف أو أكثر مع مزيج من الأحرف والأرقام والرموز.',
-    'confirm-password' => 'إعادة إدخال كلمة المرور',
-    'confirm' => 'تأكيد',
-    'back-to' => 'العودة إلى',
+    'reset-password' => 'Reset Password',
+    'reset-password-text' => 'The new password must be different from previously used passwords.',
+    'password-text' => 'Use 8 or more characters with a mix of letters, numbers, and symbols.',
+    'confirm-password' => 'Confirm Password',
+    'confirm' => 'Confirm',
+    'back-to' => 'Back to',
 
-    //forgot-password
-    'forgot-password-text' => 'إذا نسيت كلمة المرور الخاصة بك، فسنرسل لك تعليمات عبر البريد الإلكتروني لإعادة تعيينها',
-    'submit' => 'إرسال',
-    'send-link-reset-password-status' => 'رابط إعادة تعيين سيتم إرساله إذا كان الحساب موجودًا.'
-
+    'forgot-password-text' => 'If you forgot your password, we’ll send you instructions to reset it via email.',
+    'submit' => 'Submit',
+    'send-link-reset-password-status' => 'A password reset link will be sent if the account exists.',
 ];
-
-
-
-
-
-
-
-
-
-
-
