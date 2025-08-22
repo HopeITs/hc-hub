@@ -188,6 +188,7 @@ return [
     'session' => 'جلسة',
     'start_date' => 'تاريخ البدء',
     'end_date' => 'تاريخ النهاية',
+    'all' => 'الكل',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',
