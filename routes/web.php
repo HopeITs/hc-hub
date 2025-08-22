@@ -83,7 +83,6 @@ Route::group(
             Route::prefix('employees')->name('employees.')->group(function () {
                 Route::get('/', EmployeeModule::class)->name('index');
                 Route::get('/create', EmployeeCreate::class)->name('create');
-                Route::get('/create/personal-info', PersonalInfoTab::class)->name('create.personal-info');
                 Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
             });
         });

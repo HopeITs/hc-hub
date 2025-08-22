@@ -1,11 +1,12 @@
-@props(['title' , 'active' => false])
+@props(['title' , 'active' => false ,'activeTab'])
 <li>
-    <a {{$attributes->merge([
+    <button {{$attributes->merge([
     'class' => $active ? 'w-full flex items-center p-3 rounded-lg bg-primary text-white' : 'w-full flex items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100'
-])}}
+])
+}} wire:click="setActiveTab('{{$activeTab}}')"
 
->
+    >
         {{$slot}}
         <span class="ms-2 font-semibold">{{$title}}</span>
-    </a>
+    </button>
 </li>

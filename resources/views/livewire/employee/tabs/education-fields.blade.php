@@ -1,5 +1,5 @@
 <div x-data="{
-    nextIndex: {{ count($form->educations) }},
+    nextIndex: {{ count($educationForm->educations) }},
 
     add() {
         const template = this.$refs.educationTemplate.innerHTML.replaceAll('__INDEX__', this.nextIndex);
@@ -22,30 +22,30 @@
     <form wire:submit.prevent="saveEducation" class="space-y-6">
 
         <div x-ref="educationContainer">
-            @foreach ($form->educations as $index => $education)
+            @foreach ($educationForm->educations as $index => $education)
                 <div wire:key="education-{{ $index }}" id="education-row-{{ $index }}"
                     class="relative border-b pb-6 mb-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <x-forms.input-label
                                 for="education_title_{{ $index }}">@lang('general.title')</x-forms.input-label>
-                            <x-forms.input type="text" wire:model="form.educations.{{ $index }}.title"
+                            <x-forms.input type="text" wire:model="educationForm.educations.{{ $index }}.title"
                                 id="education_title_{{ $index }}" />
-                            <x-error-span>{{ $errors->first('form.educations.' . $index . '.title') }}</x-error-span>
+                            <x-error-span>{{ $errors->first('educationForm.educations.' . $index . '.title') }}</x-error-span>
                         </div>
 
                         <div>
                             <x-forms.input-label
                                 for="education_university_{{ $index }}">@lang('general.university')</x-forms.input-label>
-                            <x-forms.input type="text" wire:model="form.educations.{{ $index }}.university"
+                            <x-forms.input type="text" wire:model="educationForm.educations.{{ $index }}.university"
                                 id="education_university_{{ $index }}" />
-                            <x-error-span>{{ $errors->first('form.educations.' . $index . '.university') }}</x-error-span>
+                            <x-error-span>{{ $errors->first('educationForm.educations.' . $index . '.university') }}</x-error-span>
                         </div>
 
                         <div>
                             <x-forms.input-label
                                 for="education_type_{{ $index }}">@lang('general.type')</x-forms.input-label>
-                            <x-forms.select-input wire:model="form.educations.{{ $index }}.type"
+                            <x-forms.select-input wire:model="educationForm.educations.{{ $index }}.type"
                                 id="education_type_{{ $index }}">
                                 <option value="">-- @lang('general.select') --</option>
                                 <option value="0">@lang('general.unknown')</option>
@@ -56,16 +56,16 @@
                                 <option value="5">@lang('general.master')</option>
                                 <option value="6">@lang('general.phd')</option>
                             </x-forms.select-input>
-                            <x-error-span>{{ $errors->first('form.educations.' . $index . '.type') }}</x-error-span>
+                            <x-error-span>{{ $errors->first('educationForm.educations.' . $index . '.type') }}</x-error-span>
                         </div>
 
                         <div>
                             <x-forms.input-label
                                 for="education_graduation_year_{{ $index }}">@lang('general.graduation_year')</x-forms.input-label>
                             <x-forms.input type="number" placeholder="YYYY"
-                                wire:model="form.educations.{{ $index }}.graduation_year"
+                                wire:model="educationForm.educations.{{ $index }}.graduation_year"
                                 id="education_graduation_year_{{ $index }}" />
-                            <x-error-span>{{ $errors->first('form.educations.' . $index . '.graduation_year') }}</x-error-span>
+                            <x-error-span>{{ $errors->first('educationForm.educations.' . $index . '.graduation_year') }}</x-error-span>
                         </div>
                     </div>
                     <button type="button" @click="remove({{ $index }})"
@@ -81,20 +81,20 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <x-forms.input-label for="education_title___INDEX__">@lang('general.title')</x-forms.input-label>
-                        <x-forms.input type="text" wire:model="form.educations.__INDEX__.title"
+                        <x-forms.input type="text" wire:model="educationForm.educations.__INDEX__.title"
                             id="education_title___INDEX__" />
                     </div>
 
                     <div>
                         <x-forms.input-label
                             for="education_university___INDEX__">@lang('general.university')</x-forms.input-label>
-                        <x-forms.input type="text" wire:model="form.educations.__INDEX__.university"
+                        <x-forms.input type="text" wire:model="educationForm.educations.__INDEX__.university"
                             id="education_university___INDEX__" />
                     </div>
 
                     <div>
                         <x-forms.input-label for="education_type___INDEX__">@lang('general.type')</x-forms.input-label>
-                        <x-forms.select-input wire:model="form.educations.__INDEX__.type" id="education_type___INDEX__">
+                        <x-forms.select-input wire:model="educationForm.educations.__INDEX__.type" id="education_type___INDEX__">
                             <option value="">-- @lang('general.select') --</option>
                             <option value="0">@lang('general.unknown')</option>
                             <option value="1">@lang('general.primary_school')</option>
@@ -110,7 +110,7 @@
                         <x-forms.input-label
                             for="education_graduation_year___INDEX__">@lang('general.graduation_year')</x-forms.input-label>
                         <x-forms.input type="number" placeholder="YYYY"
-                            wire:model="form.educations.__INDEX__.graduation_year"
+                            wire:model="educationForm.educations.__INDEX__.graduation_year"
                             id="education_graduation_year___INDEX__" />
                     </div>
                 </div>
