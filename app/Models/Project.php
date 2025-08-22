@@ -8,10 +8,9 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
-
 class Project extends Model implements HasMedia
 {
-    use HasFactory, HasTranslations,InteractsWithMedia;
+    use HasFactory, HasTranslations, InteractsWithMedia;
 
     protected $guarded = ['id'];
 
@@ -27,8 +26,9 @@ class Project extends Model implements HasMedia
         return $this->hasMany(Center::class);
     }
 
-    public function cities(){
-        return $this->belongsToMany(City::class ,'centers','project_id','city_id');
+    public function cities()
+    {
+        return $this->belongsToMany(City::class, 'centers', 'project_id', 'city_id');
     }
 
     public function requiredPositions()
@@ -41,5 +41,8 @@ class Project extends Model implements HasMedia
         $this->addMediaCollection('logo')->singleFile();
     }
 
-
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class);
+    }
 }
