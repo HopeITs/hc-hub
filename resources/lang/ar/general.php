@@ -186,6 +186,8 @@ return [
     'month' => 'شهر',
     'hour'=>'ساعة',
     'session' => 'جلسة',
+    'start_date' => 'تاريخ البدء',
+    'end_date' => 'تاريخ النهاية',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',
