@@ -10,7 +10,7 @@ class Contract extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['employee_id', 'position_id', 'contract_type_id', 'department_id', 'job_level_id', 'project_id', 'start_date', 'end_date', 'terminated_at', 'reason_of_termination', 'yearly_leave_days', 'currency', 'salary', 'salary_per', 'work_days', 'work_hours', 'weekly_hours', 'is_active'];
+    protected $fillable = ['employee_id', 'position_id', 'contract_type_id', 'department_id', 'job_level_id', 'start_date', 'end_date', 'terminated_at', 'reason_of_termination', 'yearly_leave_days', 'currency', 'salary', 'salary_per', 'work_days', 'work_hours', 'weekly_hours', 'is_active'];
 
     protected $casts = [
         'start_date' => 'date',
@@ -52,8 +52,5 @@ class Contract extends Model
         return $this->hasMany(LeaveBalance::class, 'contract_id');
     }
 
-    public function project()
-    {
-        return $this->belongsTo(Project::class);
-    }
+
 }

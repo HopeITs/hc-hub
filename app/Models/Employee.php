@@ -44,6 +44,13 @@ class Employee extends Model
             ]);
     }
 
+    public function scopeInvolvedInProject($query, $projectId)
+    {
+        return $query->whereHas('contracts.position.center', function ($q) use ($projectId) {
+            $q->where('project_id', $projectId);
+        });
+    }
+
     public function educations()
     {
         return $this->hasMany(Education::class);

@@ -125,7 +125,7 @@
         </div>
 
         <div x-show="activeTab === 'employees'" x-cloak>
-            @if ($project->contracts && $project->contracts->isNotEmpty())
+            @if ($employees)
                 <div class="overflow-x-auto border rounded-lg">
                     <table class="w-full text-sm text-left text-gray-500">
                         <thead class="text-xs text-gray-700 bg-gray-50 border-b">
@@ -137,20 +137,20 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y">
-                            @foreach ($project->contracts as $contract)
+                            @foreach ($employees as $employee)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 font-medium text-gray-900">
-                                        {{ $contract->employee->name ?? '-' }}
+                                        {{ $employee->name ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        {{ $contract->position?->requiredPosition?->title }}
-                                        @if($contract->position?->center)
-                                            — {{ $contract->position->center->getTranslation('name', app()->getLocale()) }}
-                                        @endif
+{{--                                        {{ $contract->position?->requiredPosition?->title }}--}}
+{{--                                        @if($contract->position?->center)--}}
+{{--                                            — {{ $contract->position->center->getTranslation('name', app()->getLocale()) }}--}}
+{{--                                        @endif--}}
                                     </td>
-                                    <td class="px-6 py-4">{{ $contract->start_date?->format('d M, Y') }}</td>
+{{--                                    <td class="px-6 py-4">{{ $employee->contract->start_date?->format('d M, Y') }}</td>--}}
                                     <td class="px-6 py-4">
-                                        {{ $contract->end_date?->format('d M, Y') ?? __('general.ongoing') }}
+{{--                                        {{ $contract->end_date?->format('d M, Y') ?? __('general.ongoing') }}--}}
                                     </td>
                                 </tr>
                             @endforeach
