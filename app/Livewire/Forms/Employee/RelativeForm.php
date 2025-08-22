@@ -88,6 +88,7 @@ class RelativeForm extends Form
         $this->employee = $employee;
         $this->photo = $employee->photo;
         $this->national_number = $employee->national_number;
+        $this->username = $employee->username;
         $this->direct_manager_id = $employee->direct_manager_id;
         $this->tech_manager_id = $employee->tech_manager_id;
         $this->dob = $employee->dob?->format('Y-m-d');

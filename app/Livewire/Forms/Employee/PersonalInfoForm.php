@@ -18,19 +18,22 @@ class PersonalInfoForm extends Form
     public ?Employee $employee = null;
 
     public $photo = null;
-    #[Validate(['name.ar' => 'required|string' , 'name.en' => 'required|string'])]
+    #[Validate(['name.ar' => 'required|string', 'name.en' => 'required|string'])]
     public $name = [];
 
-    #[Validate(['father_name.ar' => 'required|string','father_name.en' => 'nullable|string'])]
+    #[Validate(['father_name.ar' => 'required|string', 'father_name.en' => 'nullable|string'])]
     public $father_name = [];
 
-    #[Validate([ 'mother_name.ar' => 'required|string','mother_name.en' => 'nullable|string'])]
+    #[Validate(['mother_name.ar' => 'required|string', 'mother_name.en' => 'nullable|string'])]
     public $mother_name = [];
 
     #[Validate(['address' => 'nullable|array', 'address.*' => 'nullable|string'])]
     public $address = [];
 
     public $email;
+
+    #[Validate('required|unique:employees,national_number')]
+    public $national_number;
 
     #[Validate('nullable|date_format:d-m-Y')]
     public $dob;
@@ -79,8 +82,18 @@ class PersonalInfoForm extends Form
 
     #[Validate('nullable|date|after:board_member_started_at')]
     public $board_member_end_at;
+    #[Validate('boolean')]
+    public $is_active = true;
 
-    public $work_email_username;
+    #[Validate('required|unique:employees,username')]
+    public $username;
+
+    #[Validate('nullable|exists:employees,id')]
+    public $direct_manager_id = null;
+    #[Validate('nullable|exists:employees,id')]
+    public $tech_manager_id = null;
+
+    public $city_id;
 
     protected function buildWorkEmail(?string $username): ?string
     {
@@ -97,6 +110,7 @@ class PersonalInfoForm extends Form
     {
         $this->employee = $employee;
         $this->photo = $employee->photo;
+        $this->city_id = auth()->user->profile->city_id;
         $this->national_number = $employee->national_number;
         $this->direct_manager_id = $employee->direct_manager_id;
         $this->tech_manager_id = $employee->tech_manager_id;
@@ -121,13 +135,8 @@ class PersonalInfoForm extends Form
         $this->father_name = $employee->getTranslations('father_name');
         $this->mother_name = $employee->getTranslations('mother_name');
         $this->address = $employee->getTranslations('address');
-        $this->educations = $employee->educations()->get()->toArray();
-        $this->courses = $employee->courses()->get()->toArray();
-        $this->experiences = $employee->experiences()->get()->toArray();
-        $this->relatives = $employee->relatives()->get()->toArray();
-        $this->badges = $employee->badges()->get()->toArray();
-        $this->checklists = $employee->checklists()->get()->toArray();
-        $this->work_email_username = $this->extractUsernameFromEmail($employee->account?->email);
+        $this->username = $employee->username;
+        $this->email = $employee->account?->email;
     }
 
 
@@ -139,13 +148,14 @@ class PersonalInfoForm extends Form
         $this->validate();
 
         if ($this->employee) {
-            $this->employee->update($this->except('email'));
+            $this->employee->update($this->except(['email','photo']));
 
             if ($this->employee->account) {
                 $this->employee->account->update(['email' => $this->email]);
             }
         } else {
-            $this->employee = Employee::create($this->except('email'));
+            $this->city_id = auth()->user()->profile?->city_id ?? 1;
+            $this->employee = Employee::create($this->except(['email','photo']));
 
             User::create([
                 'email' => $this->email,

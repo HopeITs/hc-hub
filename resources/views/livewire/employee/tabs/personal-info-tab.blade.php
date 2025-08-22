@@ -8,7 +8,19 @@
             <x-forms.input-label for="photo">@lang('general.photo')</x-forms.input-label>
             <div class="mt-2 flex items-center space-x-6">
                 <div class="shrink-0">
-                    @include('livewire.employee.tabs.photo-upload')
+                    @if ($infoForm->photo instanceof Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
+                        <img class="h-20 w-20 rounded-full object-cover" src="{{ $infoForm->photo->temporaryUrl() }}" alt="New profile photo" />
+                    @elseif ($infoForm->employee?->photo)
+                        <img class="h-20 w-20 rounded-full object-cover" src="{{ asset('storage/' . $infoForm->employee->photo) }}" alt="Current profile photo" />
+                    @else
+                        <div class="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
+                            <svg class="h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                 viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                        </div>
+                    @endif
                 </div>
                 <div>
                     <input type="file" wire:model.live="infoForm.photo" id="photo"
@@ -150,17 +162,17 @@
                 <h2 class="text-xl font-semibold mb-4">@lang('general.employment_info')</h2>
 
                 <div>
-                    <x-forms.input-label for="work_email_username">@lang('general.work_email')</x-forms.input-label>
-                    <div class="flex mt-1">
-                    <span
-                        class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                    <x-forms.input-label for="username">@lang('general.work_email')</x-forms.input-label>
+                    <div class="flex rtl:flex-row-reverse  mt-1">
+
+                        <x-forms.input type="text" wire:model.blur="infoForm.username" id="username"
+                                       class="rounded-r-none" placeholder="username"/>
+                        <span
+                            class="inline-flex items-center px-3 rounded-e-md shadow-md border border-s-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
                         hcsyria.org@
                     </span>
-                        <x-forms.input type="text" wire:model.blur="infoForm.work_email_username" id="work_email_username"
-                                       class="rounded-r-none" placeholder="username"/>
                     </div>
-                    <x-error-span>{{ $errors->first('infoForm.work_email_username') }}</x-error-span>
-                    <x-error-span>{{ $errors->first('infoForm.email') }}</x-error-span>
+                    <x-error-span>{{ $errors->first('infoForm.username') }}</x-error-span>
                 </div>
 
                 <div>
