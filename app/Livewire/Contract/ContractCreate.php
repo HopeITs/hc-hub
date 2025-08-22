@@ -80,9 +80,8 @@ class ContractCreate extends Component
     public function render()
     {
         $locale = app()->getLocale();
-
         return view('livewire.contract.contract-create', [
-            'employees'   => Employee::select('id','name')->orderBy("name->$locale")->get(),
+            'employees'   => Employee::where('city_id',auth()->user()->profile->city_id)->select('id','name')->orderBy("name->$locale")->get(),
             'positions'   => Position::with([
                 'center:id,name',
                 'requiredPosition:id,title',

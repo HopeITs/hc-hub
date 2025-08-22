@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -24,6 +25,10 @@ class Employee extends Model
         'children'                => 'integer',
     ];
 
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
     public function contracts()
     {
         return $this->hasMany(Contract::class , 'employee_id');

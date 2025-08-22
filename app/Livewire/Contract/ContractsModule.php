@@ -176,7 +176,6 @@ class ContractsModule extends Component
         }
 
         $items = $query->paginate(15);
-
         // For selects in the modal (match Centers pattern)
         $employees   = Employee::orderBy("name->$locale")->get(['id','name']);
         $positions   = Position::with('center')->orderBy('id')->get(['id','center_id']);
