@@ -27,6 +27,11 @@
         </header>
 
         <main class="pt-20 bg-gray-100 flex-grow flex flex-col items-center">
+            @if (session('status'))
+                <div class="alert alert-success">
+                    {{ session('status') }}
+                </div>
+            @endif
             <div class="px-4 py-6 w-11/12 bg-white shadow rounded-lg min-h-full">
                 {{ $slot }}
             </div>
