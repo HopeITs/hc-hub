@@ -69,8 +69,7 @@
                         <p class="text-gray-600">{{ $project->slug }}</p>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                </div>
+                <div class="flex items-start gap-3"></div>
                 <div class="flex items-start gap-3">
                     <svg class="w-5 h-5 text-gray-400 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -141,11 +140,18 @@
                             @foreach ($project->contracts as $contract)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 font-medium text-gray-900">
-                                        {{ $contract->employee->name ?? '-' }}</td>
-                                    <td class="px-6 py-4">{{ $contract->position }}</td>
+                                        {{ $contract->employee->name ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ $contract->position?->requiredPosition?->title }}
+                                        @if($contract->position?->center)
+                                            — {{ $contract->position->center->getTranslation('name', app()->getLocale()) }}
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4">{{ $contract->start_date?->format('d M, Y') }}</td>
                                     <td class="px-6 py-4">
-                                        {{ $contract->end_date?->format('d M, Y') ?? __('general.ongoing') }}</td>
+                                        {{ $contract->end_date?->format('d M, Y') ?? __('general.ongoing') }}
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -157,6 +163,5 @@
                 </div>
             @endif
         </div>
-
     </div>
 </div>
