@@ -17,7 +17,6 @@
     @if($title)
         <title>{{ $title }}</title>
     @endif
-    <!-- Simple dollar sign -->
     <path d="M12 1v20"/>
     <path d="M17 7c0-2.5-2-4-5-4s-5 1.5-5 4c0 2.5 2 4 5 4s5 1.5 5 4c0 2.5-2 4-5 4s-5-1.5-5-4"/>
 </svg>
