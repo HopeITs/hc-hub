@@ -10,38 +10,20 @@ class Contract extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'employee_id',
-        'position_id',
-        'contract_type_id',
-        'department_id',
-        'job_level_id',
-        'start_date',
-        'end_date',
-        'terminated_at',
-        'reason_of_termination',
-        'yearly_leave_days',
-        'currency',
-        'salary',
-        'salary_per',
-        'work_days',
-        'work_hours',
-        'weekly_hours',
-        'is_active'
-    ];
+    protected $fillable = ['employee_id', 'position_id', 'contract_type_id', 'department_id', 'job_level_id', 'project_id', 'start_date', 'end_date', 'terminated_at', 'reason_of_termination', 'yearly_leave_days', 'currency', 'salary', 'salary_per', 'work_days', 'work_hours', 'weekly_hours', 'is_active'];
 
     protected $casts = [
-        'start_date'        => 'date',
-        'end_date'          => 'date',
-        'terminated_at'     => 'date',
-        'is_active'         => 'boolean',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'terminated_at' => 'date',
+        'is_active' => 'boolean',
         'yearly_leave_days' => 'integer',
-        'weekly_hours'      => 'integer',
-        'currency'          => 'integer',
-        'salary'            => 'decimal:2',
-        'salary_per'        => SalaryPer::class,
-        'work_days'         => 'array',
-        'work_hours'        => 'array',
+        'weekly_hours' => 'integer',
+        'currency' => 'integer',
+        'salary' => 'decimal:2',
+        'salary_per' => SalaryPer::class,
+        'work_days' => 'array',
+        'work_hours' => 'array',
     ];
 
     public function employee()
@@ -68,5 +50,10 @@ class Contract extends Model
     public function leaveBalances()
     {
         return $this->hasMany(LeaveBalance::class, 'contract_id');
+    }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
     }
 }

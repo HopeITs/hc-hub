@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->foreignId('project_id')->constrained()->onDelete('cascade');
             $table->foreignId('position_id')->constrained()->onDelete('restrict');
             $table->foreignId('contract_type_id')->constrained()->onDelete('restrict');
             $table->foreignId('department_id')->constrained()->onDelete('restrict');
