@@ -1,78 +1,112 @@
-<div>
-    <div class="flex justify-between">
-        <livewire:layout.breadcrumbs
-            :title="__('general.projects-management')"
-            :crumbs="[
-['label' => __('general.projects-management')],
-        ['label' => trans_choice('general.project',2) , 'url' => route('projects.index')] ,
-        ['label' => $project->name]
-    ]"
-            :showButton="true"
+<div class="space-y-8">
 
-        />
+    <livewire:layout.breadcrumbs :title="__('general.projects-management')" :crumbs="[
+        ['label' => __('general.projects-management')],
+        ['label' => trans_choice('general.project', 2), 'url' => route('projects.index')],
+        ['label' => $project->name],
+    ]" />
 
-    </div>
-    <div>
-        <h1>{{$project->name}}</h1>
-    </div>
-
-
-    <x-slot name="icon">
-        <div class="flex justify-between">
-
-            @if($project->getFirstMediaUrl('logo') !== "")
-                <img class="h-10 m-4 " src="{{$project->getFirstMediaUrl('logo')}}"/>
-            @else
-                <svg class="size-10 text-gray-800 dark:text-white" aria-hidden="true"
-                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                     viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
-                          d="M4 5a1 1 0 0 1 1-1h11.586a1 1 0 0 1 .707.293l2.414 2.414a1 1 0 0 1 .293.707V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5Z"/>
-                    <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
-                          d="M8 4h8v4H8V4Zm7 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                </svg>
-            @endif
-            <div class="flex justify-between items-center">
-                <x-forms.toggle-input
-                    :active="$project->is_active"
-                    :model-id="$project->id"
-                    wire-event="confirmToggleItemStatus"/>
-                <x-table.edit-btn wire:click="edit({{ $project->id }})"></x-table.edit-btn>
-                <x-table.delete-btn :modelId="$project->id"/>
-            </div>
-
+    <div class="flex justify-between items-center p-6 bg-white rounded-lg shadow-sm border">
+        <div>
+            <h2 class="text-xl font-bold text-gray-800">{{ $project->getTranslation('name', app()->getLocale()) }}</h2>
+            <p class="text-sm text-gray-500 mt-1">
+                {{ $project->getTranslation('description', app()->getLocale()) }}
+            </p>
         </div>
-    </x-slot>
-    <ul class="text-gray-400 mb-4">
-        <li class="flex items-center">
-            <x-icons.calendar class="me-2"/>
-            {{ __('general.start_date') .': '. $project->start_date?->format('d-m-Y')}}
-        </li>
-        <li class="flex items-center justify-between">
-            <div class="flex items-center">
-                <x-icons.building class="me-2"/>
-                <span>
-                               {{ trans_choice('general.center' , 2) .': '. $project->centers_count}}
-                           </span>
+
+        <div class="flex items-center space-x-2">
+            <x-forms.toggle-input :active="$project->is_active" :model-id="$project->id" wire-event="confirmToggleItemStatus" />
+            <x-table.edit-btn :href="route('projects.edit', ['project' => $project->slug])" />
+            <x-table.delete-btn :modelId="$project->id" />
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-6 shadow-sm border space-y-4">
+        <h3 class="text-lg font-semibold text-gray-800">@lang('general.project-info')</h3>
+
+        <div class="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+            <div>
+                <strong>@lang('general.code'):</strong> {{ $project->code }}
             </div>
-            <div class="flex items-center">
-                <x-icons.map-pin class="me-2"/>
-                <span>
-                                  {{ trans_choice('general.city' , 2) .': '. $project->cities_count}}
-                            </span>
-
+            <div>
+                <strong>@lang('general.slug'):</strong> {{ $project->slug }}
             </div>
+            <div>
+                <strong>@lang('general.start_date'):</strong> {{ $project->start_date?->format('d-m-Y') }}
+            </div>
+            <div>
+                <strong>@lang('general.end_date'):</strong> {{ $project->end_date?->format('d-m-Y') ?? __('general.active') }}
+            </div>
+            <div class="md:col-span-2">
+                <strong>@lang('general.description'):</strong>
+                <p class="mt-1">{{ $project->getTranslation('description', app()->getLocale()) }}</p>
+            </div>
+        </div>
+    </div>
 
-        </li>
+    <div class="bg-white rounded-lg p-6 shadow-sm border space-y-4">
+        <h3 class="text-lg font-semibold text-gray-800">{{ trans_choice('general.center', 2) }}</h3>
 
+        @if ($project->centers->isNotEmpty())
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2">#</th>
+                            <th class="px-4 py-2">@lang('general.name')</th>
+                            <th class="px-4 py-2">@lang('general.city')</th>
+                            <th class="px-4 py-2">@lang('general.created_at')</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y">
+                        @foreach ($project->centers as $index => $center)
+                            <tr>
+                                <td class="px-4 py-2">{{ $index + 1 }}</td>
+                                <td class="px-4 py-2">{{ $center->name }}</td>
+                                <td class="px-4 py-2">{{ $center->city->name ?? '-' }}</td>
+                                <td class="px-4 py-2">{{ $center->created_at->format('d-m-Y') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <p class="text-sm text-gray-500">@lang('general.no-centers')</p>
+        @endif
+    </div>
 
-    </ul>
-    <span class=" pt-4 border-t-1 border-gray-200">
-                    {{$project->description}}
-                </span>
+    <div class="bg-white rounded-lg p-6 shadow-sm border space-y-4">
+        <h3 class="text-lg font-semibold text-gray-800">{{ trans_choice('general.employee', 2) }}</h3>
 
+        @if ($project->contracts && $project->contracts->isNotEmpty())
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2">#</th>
+                            <th class="px-4 py-2">@lang('general.employee-name')</th>
+                            <th class="px-4 py-2">@lang('general.position')</th>
+                            <th class="px-4 py-2">@lang('general.contract-start')</th>
+                            <th class="px-4 py-2">@lang('general.contract-end')</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y">
+                        @foreach ($project->contracts as $index => $contract)
+                            <tr>
+                                <td class="px-4 py-2">{{ $index + 1 }}</td>
+                                <td class="px-4 py-2">{{ $contract->employee->name ?? '-' }}</td>
+                                <td class="px-4 py-2">{{ $contract->position }}</td>
+                                <td class="px-4 py-2">{{ $contract->start_date?->format('d-m-Y') }}</td>
+                                <td class="px-4 py-2">
+                                    {{ $contract->end_date?->format('d-m-Y') ?? __('general.ongoing') }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <p class="text-sm text-gray-500">@lang('general.no-employees')</p>
+        @endif
+    </div>
 
 </div>
-
-
-
