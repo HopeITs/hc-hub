@@ -150,7 +150,7 @@ class EmployeeCreate extends Component
 
         return view('livewire.employee.form', [
             'allEmployees' => Employee::select('id', 'name')->get(),
-            'checklistItems' => $checklistItems,
+
         ]);
     }
 }

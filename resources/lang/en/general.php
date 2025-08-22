@@ -140,7 +140,7 @@ return [
     'add_new_relative' => 'Add New Relative',
     'remove_relative' => 'Remove Relative',
     'relation' => 'Relation',
-    'badges' => 'Administrative Actions',
+    'badges' => 'Badges',
     'add_new_badge' => 'Add New Action',
     'remove_badge' => 'Remove Action',
     'currency' => 'Currency',
