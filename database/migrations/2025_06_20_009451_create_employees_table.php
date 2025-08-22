@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->json('name');
+            $table->string('username')->unique();
             $table->string('photo')->nullable();
             $table->string('actual_job')->nullable();
             $table->double('years_of_service')->nullable();
