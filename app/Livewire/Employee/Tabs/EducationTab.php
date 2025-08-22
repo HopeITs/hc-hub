@@ -2,16 +2,14 @@
 
 namespace App\Livewire\Employee\Tabs;
 
+use App\Livewire\Forms\Employee\CourseForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
-use App\Models\Employee;
-use App\Traits\WithAlerts;
 use Livewire\Component;
 
-class PersonalInfoTab extends Component
+class EducationTab extends Component
 {
-    public PersonalInfoForm $form;
-    use WithAlerts;
-    public function save()
+    public CourseForm $form;
+    public function saver()
     {
 
         $employee = $this->form->saveInformation();
@@ -22,8 +20,6 @@ class PersonalInfoTab extends Component
     }
     public function render()
     {
-        return view('livewire.employee.tabs.personal-info-tab',[
-            'allEmployees' => Employee::select('id', 'name')->get(),
-        ]);
+        return view('livewire.employee.tabs.courses-fields');
     }
 }

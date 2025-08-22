@@ -1,5 +1,5 @@
 <div x-data="{
-    nextIndex: {{ count($form->relatives) }},
+    nextIndex: {{ count($relativeForm->relatives) }},
     add() {
         const template = this.$refs.relativeTemplate.innerHTML.replaceAll('__INDEX__', this.nextIndex);
         this.$refs.relativeContainer.insertAdjacentHTML('beforeend', template);
@@ -14,18 +14,18 @@
 }">
     <form wire:submit.prevent="saveRelatives" class="space-y-6">
         <div x-ref="relativeContainer">
-            @foreach ($form->relatives as $index => $relative)
+            @foreach ($relativeForm->relatives as $index => $relative)
                 <div wire:key="relative-{{ $index }}" id="relative-row-{{ $index }}" class="relative border-b pb-6 mb-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <x-forms.input-label for="relative_name_{{ $index }}">@lang('general.name')</x-forms.input-label>
-                            <x-forms.input type="text" wire:model="form.relatives.{{ $index }}.name" id="relative_name_{{ $index }}" />
-                            <x-error-span>{{ $errors->first('form.relatives.' . $index . '.name') }}</x-error-span>
+                            <x-forms.input type="text" wire:model="relativeForm.relatives.{{ $index }}.name" id="relative_name_{{ $index }}" />
+                            <x-error-span>{{ $errors->first('relativeForm.relatives.' . $index . '.name') }}</x-error-span>
                         </div>
                         <div>
                             <x-forms.input-label for="relative_phone_{{ $index }}">@lang('general.phone')</x-forms.input-label>
-                            <x-forms.input type="tel" wire:model="form.relatives.{{ $index }}.phone" id="relative_phone_{{ $index }}" />
-                            <x-error-span>{{ $errors->first('form.relatives.' . $index . '.phone') }}</x-error-span>
+                            <x-forms.input type="tel" wire:model="relativeForm.relatives.{{ $index }}.phone" id="relative_phone_{{ $index }}" />
+                            <x-error-span>{{ $errors->first('relativeForm.relatives.' . $index . '.phone') }}</x-error-span>
                         </div>
                         <div class="md:col-span-2">
                             <x-forms.input-label>@lang('general.relation')</x-forms.input-label>
@@ -35,7 +35,7 @@
                             <div class="flex flex-wrap gap-4 mt-2">
                                 @foreach ($relations as $relation)
                                     <label class="inline-flex items-center gap-2">
-                                        <input type="radio" name="relative_{{ $index }}_relation" wire:model="form.relatives.{{ $index }}.relation" value="{{ $relation }}" class="text-primary focus:ring-primary">
+                                        <input type="radio" name="relative_{{ $index }}_relation" wire:model="relativeForm.relatives.{{ $index }}.relation" value="{{ $relation }}" class="text-primary focus:ring-primary">
                                         <span>@lang('general.relations.' . $relation)</span>
                                     </label>
                                 @endforeach
@@ -51,18 +51,18 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <x-forms.input-label for="relative_name___INDEX__">@lang('general.name')</x-forms.input-label>
-                        <x-forms.input type="text" wire:model="form.relatives.__INDEX__.name" id="relative_name___INDEX__" />
+                        <x-forms.input type="text" wire:model="relativeForm.relatives.__INDEX__.name" id="relative_name___INDEX__" />
                     </div>
                     <div>
                         <x-forms.input-label for="relative_phone___INDEX__">@lang('general.phone')</x-forms.input-label>
-                        <x-forms.input type="tel" wire:model="form.relatives.__INDEX__.phone" id="relative_phone___INDEX__" />
+                        <x-forms.input type="tel" wire:model="relativeForm.relatives.__INDEX__.phone" id="relative_phone___INDEX__" />
                     </div>
                     <div class="md:col-span-2">
                         <x-forms.input-label>@lang('general.relation')</x-forms.input-label>
                         <div class="flex flex-wrap gap-4 mt-2">
                             @foreach ($relations as $relation)
                                 <label class="inline-flex items-center gap-2">
-                                    <input type="radio" name="relative___INDEX___relation" wire:model="form.relatives.__INDEX__.relation" value="{{ $relation }}" class="text-primary focus:ring-primary">
+                                    <input type="radio" name="relative___INDEX___relation" wire:model="relativeForm.relatives.__INDEX__.relation" value="{{ $relation }}" class="text-primary focus:ring-primary">
                                     <span>@lang('general.relations.' . $relation)</span>
                                 </label>
                             @endforeach

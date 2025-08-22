@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="flex justify-between items-end mt-4 pt-4 border-t-1 border-gray-200">
-                    <a href="{{ route('projects.show', ['slug' => $project->slug]) }}">عرض التفاصيل</a>
+                    <a class="text-primary underline" href="{{ route('projects.show', ['project' => $project->slug]) }}">@lang('general.show-more') </a>
                     <div class="flex justify-between items-center">
                         <x-forms.toggle-input :active="$project->is_active" :model-id="$project->id"
                             wire-event="confirmToggleItemStatus" />

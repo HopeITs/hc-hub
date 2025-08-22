@@ -17,6 +17,7 @@ class EmployeeFactory extends Factory
                 'ar' => 'اسم ' . $this->faker->unique()->numberBetween(1, 1000),
             ],
             'city_id' => $this->faker->numberBetween(2,6),
+            'username' => $this->faker->userName,
             'photo' => null, // or you can use $this->faker->imageUrl()
             'actual_job' => $this->faker->jobTitle,
             'years_of_service' => $this->faker->randomFloat(1, 0, 8),

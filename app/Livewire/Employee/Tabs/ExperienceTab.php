@@ -6,7 +6,7 @@ use App\Livewire\Forms\Employee\CourseForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use Livewire\Component;
 
-class CourseTab extends Component
+class ExperienceTab extends Component
 {
     public CourseForm $form;
     public function saver()
