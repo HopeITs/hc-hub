@@ -21,7 +21,7 @@ class CentersModule extends Component
 
     public $item = [
         'id'         => null,
-        'name'       => ['en' => '', 'ar' => ''],
+        'name'       => '',
         'city_id'    => '',
         'project_id' => '',
         'address'    => ['en' => '', 'ar' => ''],
@@ -29,15 +29,17 @@ class CentersModule extends Component
     ];
 
     protected $rules = [
-        'item.name.en'       => 'required|string|max:255',
-        'item.name.ar'       => 'nullable|string|max:255',
-        'item.city_id'       => 'required|exists:cities,id',
-        'item.project_id'    => 'required|exists:projects,id',
-        'item.address.en'    => 'nullable|string|max:255',
-        'item.address.ar'    => 'nullable|string|max:255',
+        'item.name'       => 'required|string|max:255',
+        'item.city_id'    => 'required|exists:cities,id',
+        'item.project_id' => 'required|exists:projects,id',
+        'item.address.en' => 'nullable|string|max:255',
+        'item.address.ar' => 'nullable|string|max:255',
     ];
 
-    public function updatingSearch() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
 
     public function confirmToggleItemStatus($id)
     {
@@ -56,7 +58,7 @@ class CentersModule extends Component
     public function toggleItemStatusConfirmed()
     {
         $item = Center::findOrFail($this->itemID);
-        $item->is_active = ! $item->is_active;
+        $item->is_active = !$item->is_active;
         $item->save();
 
         LivewireAlert::title(__('general.item-updated'))
@@ -66,63 +68,52 @@ class CentersModule extends Component
     public function render()
     {
         $locale = app()->getLocale();
-        $sort   = $this->sortField ?: 'id';
-        $dir    = $this->sortDirection ?: 'desc';
+        $sort = $this->sortField ?: 'id';
+        $dir = $this->sortDirection ?: 'desc';
 
         $query = Center::query()
             ->with(['city', 'project'])
             ->when($this->search, function ($q) use ($locale) {
                 $term = $this->search;
-
                 $q->where(function ($w) use ($term, $locale) {
-                    // Center fields (JSON path by locale)
-                    $w->search(["name->$locale", "address->$locale"], $term)
-
-                        // City relation
-                        ->orWhereHas('city', function ($c) use ($term, $locale) {
-                            $c->search(["name->$locale"], $term);
-                        })
-
-                        // Project relation
-                        ->orWhereHas('project', function ($p) use ($term, $locale) {
-                            $p->search(["name->$locale"], $term);
-                        });
+                    $w->where('name', 'like', "%{$term}%")
+                      ->orWhere("address->$locale", 'like', "%{$term}%")
+                      ->orWhereHas('city', function ($c) use ($term, $locale) {
+                          $c->where("name->$locale", 'like', "%{$term}%");
+                      })
+                      ->orWhereHas('project', function ($p) use ($term) {
+                          $p->where('name', 'like', "%{$term}%");
+                      });
                 });
             });
 
-        // Sorting — with fallback '-' for missing translations
-        if ($sort === 'name') {
-            $query->orderBy("name->$locale", $dir) ; // Center name
-        } elseif ($sort === 'address') {
+        if ($sort === 'address') {
             $query->orderBy("address->$locale", $dir);
         } elseif ($sort === 'city_name') {
             $query->leftJoin('cities', 'centers.city_id', '=', 'cities.id')
-                ->orderBy("cities.name->$locale", $dir)
-                ->select('centers.*');
+                  ->orderBy("cities.name->$locale", $dir)
+                  ->select('centers.*');
         } elseif ($sort === 'project_name') {
             $query->leftJoin('projects', 'centers.project_id', '=', 'projects.id')
-                ->orderBy("projects.name->$locale", $dir)
-                ->select('centers.*');
+                  ->orderBy('projects.name', $dir)
+                  ->select('centers.*');
         } else {
             $query->orderBy($sort, $dir);
         }
 
+        $items = $query->paginate(15);
 
-        $items    = $query->paginate(15);
-
-        // For selects in the modal
-        $cities   = City::orderBy("name->$locale")->get(['id', 'name']);
-        $projects = Project::orderBy("name->$locale")->get(['id', 'name']);
+        $cities = City::orderBy("name->$locale")->get(['id', 'name']);
+        $projects = Project::orderBy('name')->get(['id', 'name']);
 
         return view('livewire.project-management.centers-module', compact('items', 'cities', 'projects'));
     }
-
 
     public function create()
     {
         $this->item = [
             'id'         => null,
-            'name'       => ['en' => '', 'ar' => ''],
+            'name'       => '',
             'city_id'    => '',
             'project_id' => '',
             'address'    => ['en' => '', 'ar' => ''],
@@ -141,7 +132,7 @@ class CentersModule extends Component
         $this->modalTitle = __('general.edit');
         $this->item = [
             'id'         => $model->id,
-            'name'       => array_merge(['en' => '', 'ar' => ''], $model->getTranslations('name')),
+            'name'       => $model->name,
             'city_id'    => $model->city_id,
             'project_id' => $model->project_id,
             'address'    => array_merge(['en' => '', 'ar' => ''], $model->getTranslations('address')),
@@ -156,26 +147,21 @@ class CentersModule extends Component
     {
         $this->validate();
 
-        $model = !empty($this->item['id'])
-            ? Center::findOrFail($this->item['id'])
-            : new Center();
+        $data = [
+            'name' => $this->item['name'],
+            'city_id' => $this->item['city_id'],
+            'project_id' => $this->item['project_id'],
+        ];
 
-        $model->setTranslations('name', $this->item['name']);
-        $model->city_id    = $this->item['city_id'];
-        $model->project_id = $this->item['project_id'];
+        $model = Center::findOrNew($this->item['id']);
+        $model->fill($data);
         $model->setTranslations('address', $this->item['address']);
-
-        if (!$model->exists) {
-            $model->is_active = true;
-        }
-
         $model->save();
 
         $this->showModal = false;
         $this->resetErrorBag();
         $this->resetValidation();
         $this->dispatch('closeModal');
-
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
