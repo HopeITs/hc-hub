@@ -1,4 +1,3 @@
-@php use App\Enums\SalaryPer; @endphp
 <div>
     @php($locale = app()->getLocale())
 
@@ -18,6 +17,47 @@
         </div>
     </div>
 
+    {{-- Center tabs (render only if we actually have centers) --}}
+    @if(isset($centers) && $centers->count())
+        <div class="mt-4 mb-6 overflow-x-auto">
+            <div class="inline-flex gap-2 border-b border-gray-200 dark:border-gray-700 min-w-full"
+                 role="tablist" aria-label="{{ __('general.centers') }}">
+                {{-- All tab --}}
+                <button
+                    type="button"
+                    wire:click="setCenter('all')"
+                    wire:key="center-tab-all"
+                    role="tab"
+                    aria-current="{{ $centerId === 'all' ? 'page' : 'false' }}"
+                    @class([
+                        'px-4 py-2 -mb-px border-b-2 transition',
+                        'border-primary text-primary font-semibold' => $centerId === 'all',
+                        'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300' => $centerId !== 'all',
+                    ])>
+                    {{ __('general.all') ?? 'الكل' }}
+                </button>
+
+                {{-- One tab per center --}}
+                @foreach($centers as $center)
+                    @php($active = (string) $centerId === (string) $center->id)
+                        <button
+                            type="button"
+                            wire:click="setCenter({{ $center->id }})"
+                            wire:key="center-tab-{{ $center->id }}"
+                            role="tab"
+                            aria-current="{{ $active ? 'page' : 'false' }}"
+                            @class([
+                                'px-4 py-2 -mb-px border-b-2 transition whitespace-nowrap',
+                                'border-primary text-primary font-semibold' => $active,
+                                'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300' => ! $active,
+                            ])>
+                            {{ $center->getTranslation('name', $locale) }}
+                        </button>
+                        @endforeach
+            </div>
+        </div>
+    @endif
+
     <x-table>
         <x-slot name="headings">
             <x-table.heading>ID</x-table.heading>
@@ -36,7 +76,7 @@
 
         <x-slot name="body">
             @forelse($items as $item)
-                <tr>
+                <tr wire:key="contract-row-{{ $item->id }}">
                     <x-table.cell>{{ $item->id }}</x-table.cell>
 
                     <x-table.cell>
@@ -67,9 +107,9 @@
 
                     <x-table.cell>
                         @php($per = \App\Enums\SalaryPer::getLocalizedName(
-                        $item->salary_per instanceof \BackedEnum
-                            ? $item->salary_per->value
-                            : (string) $item->salary_per
+                            $item->salary_per instanceof \BackedEnum
+                                ? $item->salary_per->value
+                                : (string) $item->salary_per
                         ))
                         <x-badge :color="$per['color']">{{ $per['value'] }}</x-badge>
                     </x-table.cell>

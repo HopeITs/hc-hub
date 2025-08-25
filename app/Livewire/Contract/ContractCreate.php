@@ -91,6 +91,7 @@ class ContractCreate extends Component
             'types'       => ContractType::select('id','name')->orderBy("name->$locale")->get(),
             'departments' => Department::select('id','name')->orderBy('name')->get(),
             'levels'      => JobLevel::select('id','name')->orderBy('id')->get(),
+            'projects'   => \App\Models\Project::all(),
         ]);
     }
 }
