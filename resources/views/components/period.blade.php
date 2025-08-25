@@ -12,17 +12,17 @@
     $s = $start ? Carbon::parse($start)->isoFormat($format) : null;
     $e = $end   ? Carbon::parse($end)->isoFormat($format)   : null;
 
-    $now  = $locale === 'ar' ? 'الآن' : 'present';
+    $now = __('general.present');
 @endphp
 
 <div class="grid grid-rows-2 gap-1 leading-5 text-center" dir="{{ $locale === 'ar' ? 'rtl' : 'ltr' }}">
     <div class="inline-flex items-center justify-center gap-2">
-        <span class="text-[11px] text-gray-500">من</span>
-        <span class="font-medium  tabular-nums whitespace-nowrap">{{ $s ?? '—' }}</span>
+        <span class="text-[11px] text-gray-500">@lang('general.from')</span>
+        <span class="font-medium tabular-nums whitespace-nowrap">{{ $s ?? '—' }}</span>
     </div>
     <div class="inline-flex items-center justify-center gap-2">
-        <span class="text-[11px] text-gray-500">إلى</span>
-        <span class="font-medium  tabular-nums whitespace-nowrap">
+        <span class="text-[11px] text-gray-500">@lang('general.to')</span>
+        <span class="font-medium tabular-nums whitespace-nowrap">
             {{ $e ?? ($s ? $now : '—') }}
         </span>
     </div>

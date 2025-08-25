@@ -1,3 +1,4 @@
+@php use App\Enums\SalaryPer; @endphp
 <div>
     @php($locale = app()->getLocale())
 
@@ -106,7 +107,7 @@
                     <x-table.cell>{{ $item->yearly_leave_days ?? '—' }}</x-table.cell>
 
                     <x-table.cell>
-                        @php($per = \App\Enums\SalaryPer::getLocalizedName(
+                        @php($per = SalaryPer::getLocalizedName(
                             $item->salary_per instanceof \BackedEnum
                                 ? $item->salary_per->value
                                 : (string) $item->salary_per
