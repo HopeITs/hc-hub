@@ -8,7 +8,7 @@
     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
             <div class="flex items-center gap-3">
-                <h1 class="text-3xl font-bold text-gray-800">{{ $project->getTranslation('name', app()->getLocale()) }}
+                <h1 class="text-3xl font-bold text-gray-800">{{ $project->name }}
                 </h1>
                 <span
                     class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ $project->code }}</span>
