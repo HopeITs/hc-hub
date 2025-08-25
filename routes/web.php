@@ -6,6 +6,7 @@ use App\Livewire\Basics\ContractTypeModule;
 use App\Livewire\Basics\DepartmentModule;
 use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Basics\LeaveTypeModule;
+use App\Livewire\Contract\ContractDetails;
 use App\Livewire\Contract\ContractsModule;
 use App\Livewire\Contract\ContractCreate;
 use App\Livewire\Contract\ContractEdit;
@@ -85,6 +86,7 @@ Route::group(
                 Route::get('/create', EmployeeCreate::class)->name('create');
                 Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
             });
+            Route::get('/contracts/{contract}', ContractDetails::class)->name('contracts.show');
         });
 
         require __DIR__ . '/auth.php';

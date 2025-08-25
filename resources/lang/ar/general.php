@@ -5,7 +5,7 @@ return [
     'basic-management' => 'الإدارة الأساسية',
     'project-basics' => 'أساسيات المشروع',
     'city' => 'المدن|المدينة',
-    'center' => 'المراكز|مركز',
+    'center' => 'المراكز|المركز',
     'contract-type' => 'أنواع العقود|نوع العقد',
     'leave-type' => 'أنواع الإجازات|نوع الإجازة',
     'checklist-items' => 'عناصر القائمة|عنصر قائمة',
@@ -189,6 +189,8 @@ return [
     'start_date' => 'تاريخ البدء',
     'end_date' => 'تاريخ النهاية',
     'all' => 'الكل',
+    'back' => 'رجوع',
+    'contract-details' => 'تفاصيل العقد',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',

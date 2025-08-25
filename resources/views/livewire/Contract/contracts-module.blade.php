@@ -47,7 +47,7 @@
                             role="tab"
                             aria-current="{{ $active ? 'page' : 'false' }}"
                             @class([
-                                'px-4 py-2 -mb-px border-b-2 transition whitespace-nowrap',
+                                'px-4 py-2 -mb-px border-b-2 transition whitespace-nowrap cursor-pointer',
                                 'border-primary text-primary font-semibold' => $active,
                                 'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300' => ! $active,
                             ])>
@@ -123,6 +123,17 @@
                     </x-table.cell>
 
                     <x-table.cell>
+                        <a href="{{ route('contracts.show', $item->id) }}"
+                           class="inline-flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                           title="{{ __('general.view') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                 stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </a>
                         <x-table.edit-btn :href="route('contracts.edit', $item->id)"/>
                         <x-table.delete-btn :modelId="$item->id"/>
                     </x-table.cell>
