@@ -14,6 +14,20 @@
         <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.employee_id') }}</x-error-span>
     </div>
 
+    {{-- Project --}}
+    @isset($projects)
+        <div class="md:col-span-6">
+            <x-forms.input-label for="project_id">@lang('general.project')</x-forms.input-label>
+            <x-forms.select-input id="project_id" wire:model="form.project_id" class="mt-1">
+                <option value="">{{ __('general.select') }}</option>
+                @foreach($projects as $project)
+                    <option value="{{ $project->id }}">{{ $project->getTranslation('name', $locale) }}</option>
+                @endforeach
+            </x-forms.select-input>
+            <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.project_id') }}</x-error-span>
+        </div>
+    @endisset
+
     {{-- Position --}}
     <div class="md:col-span-6">
         <x-forms.input-label for="position_id">{{ trans_choice('general.positions', 1) }}</x-forms.input-label>

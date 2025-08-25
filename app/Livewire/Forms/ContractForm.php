@@ -32,6 +32,7 @@ class ContractForm extends Form
     public $work_days  = ['day'  => ['from' => 'mon',  'to' => 'fri']];
     public $work_hours = ['hour' => ['from' => '09:00','to' => '17:00']];
 
+    public $project_id;
 
     private function toInt($value): int
     {
@@ -104,6 +105,7 @@ class ContractForm extends Form
         $this->contract_type_id = $c->contract_type_id;
         $this->department_id    = $c->department_id;
         $this->job_level_id     = $c->job_level_id;
+        $this->project_id = $c->project_id;
         $this->is_active        = (bool) $c->is_active;
 
         $this->start_date            = optional($c->start_date)?->toDateString();
@@ -130,6 +132,7 @@ class ContractForm extends Form
             'contract_type_id' => ['required', 'exists:contract_types,id'],
             'department_id'    => ['required', 'exists:departments,id'],
             'job_level_id'     => ['required', 'exists:job_levels,id'],
+            'project_id' => ['required', 'exists:projects,id'],
             'is_active'        => ['required', 'boolean'],
         ]);
     }
@@ -165,6 +168,7 @@ class ContractForm extends Form
             'contract_type_id'      => $this->contract_type_id,
             'department_id'         => $this->department_id,
             'job_level_id'          => $this->job_level_id,
+            'project_id'            => $this->project_id,
             'is_active'             => (bool) $this->is_active,
 
             // Terms

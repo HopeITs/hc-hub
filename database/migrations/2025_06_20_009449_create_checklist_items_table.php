@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->integer('order');
-            // $table->foreignId('department_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
