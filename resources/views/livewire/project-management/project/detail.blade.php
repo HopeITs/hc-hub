@@ -1,5 +1,4 @@
 <div class="space-y-8" x-data="{ activeTab: 'details' }">
-
     <livewire:layout.breadcrumbs :title="__('general.projects-management')" :crumbs="[
         ['label' => __('general.projects-management')],
         ['label' => trans_choice('general.project', 2), 'url' => route('projects.index')],
@@ -59,11 +58,7 @@
         <div x-show="activeTab === 'details'" x-cloak>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm">
                 <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-gray-400 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
-                    </svg>
+                    <x-icon name="arrows-pointing-in" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                         <span class="font-semibold text-gray-800">@lang('general.slug'):</span>
                         <p class="text-gray-600">{{ $project->slug }}</p>
@@ -71,22 +66,14 @@
                 </div>
                 <div class="flex items-start gap-3"></div>
                 <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-gray-400 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0h18" />
-                    </svg>
+                    <x-icon name="calendar" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                         <span class="font-semibold text-gray-800">@lang('general.start_date'):</span>
                         <p class="text-gray-600">{{ $project->start_date?->format('d M, Y') }}</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-gray-400 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none"
-                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0h18" />
-                    </svg>
+                    <x-icon name="calendar" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                         <span class="font-semibold text-gray-800">@lang('general.end_date'):</span>
                         <p class="text-gray-600">{{ $project->end_date?->format('d M, Y') ?? __('general.active') }}</p>
@@ -104,14 +91,24 @@
                                 <th class="px-6 py-3 font-medium">@lang('general.name')</th>
                                 <th class="px-6 py-3 font-medium">@lang('general.city')</th>
                                 <th class="px-6 py-3 font-medium">@lang('general.created_at')</th>
+                                <th class="px-6 py-3 font-medium text-center"></th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y">
                             @foreach ($project->centers as $center)
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-medium text-gray-900">{{ $center->name }}</td>
-                                    <td class="px-6 py-4">{{ $center->city->name ?? '-' }}</td>
-                                    <td class="px-6 py-4">{{ $center->created_at->format('d M, Y') }}</td>
+                                    <td class="px-6 py-4 font-medium text-gray-900">
+                                        {{ $center->getTranslation('name', app()->getLocale()) }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ $center->city?->getTranslation('name', app()->getLocale()) ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ $center->created_at->format('d M, Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <x-table.edit-btn :href="route('centers.index', ['edit' => $center->id])" class="mx-auto" />
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -143,14 +140,10 @@
                                         {{ $employee->name ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4">
-{{--                                        {{ $contract->position?->requiredPosition?->title }}--}}
-{{--                                        @if($contract->position?->center)--}}
-{{--                                            — {{ $contract->position->center->getTranslation('name', app()->getLocale()) }}--}}
-{{--                                        @endif--}}
                                     </td>
-{{--                                    <td class="px-6 py-4">{{ $employee->contract->start_date?->format('d M, Y') }}</td>--}}
                                     <td class="px-6 py-4">
-{{--                                        {{ $contract->end_date?->format('d M, Y') ?? __('general.ongoing') }}--}}
+                                    </td>
+                                    <td class="px-6 py-4">
                                     </td>
                                 </tr>
                             @endforeach
