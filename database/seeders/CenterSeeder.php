@@ -12,10 +12,15 @@ class CenterSeeder extends Seeder
         $centers = config('samples.sampleData.centers');
 
         foreach ($centers as $center) {
-            $center['name'] = is_array($center['name']) ? $center['name'] : ['en' => $center['name']];
-            $center['address'] = is_array($center['address']) ? $center['address'] : ['en' => $center['address'], 'ar' => $center['address']];
+            $data = [
+                'name' => $center['name'],
+                'city_id' => $center['city_id'],
+                'project_id' => $center['project_id'],
+                'is_active' => $center['is_active'],
+                'address' => is_string($center['address']) ? ['en' => $center['address'], 'ar' => $center['address']] : $center['address'],
+            ];
 
-            Center::create($center);
+            Center::create($data);
         }
     }
 }
