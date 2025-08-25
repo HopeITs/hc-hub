@@ -15,9 +15,10 @@
         <x-tab.form :activeTab="$active" wire:key="contract-edit-wizard-{{ $step }}">
             <x-tab.list>
                 <x-tab.item :title="__('general.identity-org')" activeTab="identity"
-                                class="pointer-events-none select-none {{ $active === 'identity' ? 'bg-primary text-white' : '' }}">
+                            class="pointer-events-none select-none {{ $active === 'identity' ? 'bg-primary text-white' : '' }}">
                     <svg class="w-5 h-5 mr-2 opacity-80" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zM3 18a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zM3 18a7 7 0 1114 0H3z"
+                              clip-rule="evenodd"/>
                     </svg>
                 </x-tab.item>
 
@@ -31,11 +32,9 @@
 
                 <x-tab.item :title="__('general.Pay-schedule')" activeTab="comp"
                             class="{{ $maxStep < 3 ? 'opacity-50' : '' }} pointer-events-none select-none {{ $active === 'comp' ? 'bg-primary text-white' : '' }}">
-                    <x-icons.cash class="w-5 h-5 mr-2" :title="__('general.Pay-schedule')" />
+                    <x-icons.cash class="w-5 h-5 mr-2" :title="__('general.Pay-schedule')"/>
                 </x-tab.item>
             </x-tab.list>
-
-
 
 
             <div class="flex-grow w-full">
@@ -46,7 +45,7 @@
                             <h2 class="text-base font-semibold text-gray-900">@lang('general.identity-org')</h2>
                         </div>
 
-                        @include('livewire.contract.partials.identity-fields')
+                        @include('livewire.contract.Partials.identity-fields')
 
                         <div class="mt-6 flex items-center justify-end gap-3">
                             <x-primary-button type="button" wire:click="next" wire:loading.attr="disabled">
@@ -64,7 +63,7 @@
                             <h2 class="text-base font-semibold text-gray-900">@lang('general.terms-status')</h2>
                         </div>
 
-                        @include('livewire.contract.partials.terms-fields')
+                        @include('livewire.contract.Partials.terms-fields')
 
                         <div class="mt-6 flex items-center justify-between">
                             <x-secondary-button type="button" wire:click="prev" class="hover:bg-gray-100"
@@ -87,7 +86,7 @@
                         </div>
 
                         {{-- IMPORTANT: match create filename (lowercase) --}}
-                        @include('livewire.contract.partials.pay-fields')
+                        @include('livewire.contract.Partials.pay-fields')
 
                         <div class="mt-6 flex items-center justify-between">
                             <x-secondary-button type="button" wire:click="prev" class="hover:bg-gray-100"

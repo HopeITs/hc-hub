@@ -239,7 +239,7 @@ class ContractsModule extends Component
                 ->get(['id','name']);
         }
 
-        return view('livewire.Contract.contracts-module', compact(
+        return view('livewire.contract.contracts-module', compact(
             'items','employees','positions','types','departments','levels','centers'
         ));
     }
