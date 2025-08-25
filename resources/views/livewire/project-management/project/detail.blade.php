@@ -122,7 +122,7 @@
         </div>
 
         <div x-show="activeTab === 'employees'" x-cloak>
-            @if ($employees)
+            @if ($employees && $employees->isNotEmpty())
                 <div class="overflow-x-auto border rounded-lg">
                     <table class="w-full text-sm text-left text-gray-500">
                         <thead class="text-xs text-gray-700 bg-gray-50 border-b">
@@ -135,17 +135,22 @@
                         </thead>
                         <tbody class="bg-white divide-y">
                             @foreach ($employees as $employee)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-medium text-gray-900">
-                                        {{ $employee->name ?? '-' }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                    </td>
-                                    <td class="px-6 py-4">
-                                    </td>
-                                    <td class="px-6 py-4">
-                                    </td>
-                                </tr>
+                                @foreach ($employee->contracts as $contract)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 font-medium text-gray-900">
+                                            {{ $employee->getTranslation('name', app()->getLocale()) ?? '-' }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            {{ $contract->position?->requiredPosition?->title ?? '—' }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            {{ $contract->start_date?->format('d M, Y') ?? '—' }}
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            {{ $contract->end_date?->format('d M, Y') ?? __('general.active') }}
+                                        </td>
+                                    </tr>
+                                @endforeach
                             @endforeach
                         </tbody>
                     </table>
@@ -156,5 +161,3 @@
                 </div>
             @endif
         </div>
-    </div>
-</div>
