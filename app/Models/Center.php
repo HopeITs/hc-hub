@@ -9,11 +9,12 @@ use Spatie\Translatable\HasTranslations;
 
 class Center extends Model
 {
-    use HasFactory , HasTranslations;
+    use HasFactory, HasTranslations;
 
     protected $fillable = ['name', 'city_id', 'project_id', 'address', 'is_active'];
 
-    public $translatable = ['name', 'address'];
+    public $translatable = ['address'];
+
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
@@ -33,6 +34,4 @@ class Center extends Model
     {
         return $this->hasManyThrough(Contract::class, Position::class);
     }
-
-
 }
