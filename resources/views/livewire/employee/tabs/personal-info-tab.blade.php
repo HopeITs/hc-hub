@@ -24,7 +24,7 @@
                 </div>
                 <div>
                     <input type="file" wire:model.live="infoForm.photo" id="photo"
-                           class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
+                           class="block w-full text-sm text-slate-500 px-4 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"/>
                     <x-error-span>{{ $errors->first('infoForm.photo') }}</x-error-span>
                 </div>
             </div>
