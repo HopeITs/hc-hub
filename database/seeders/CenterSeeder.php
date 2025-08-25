@@ -13,7 +13,7 @@ class CenterSeeder extends Seeder
 
         foreach ($centers as $center) {
             $data = [
-                'name' => $center['name']['en'],
+                'name' => $center['name'],
                 'city_id' => $center['city_id'],
                 'project_id' => $center['project_id'],
                 'is_active' => $center['is_active'],
