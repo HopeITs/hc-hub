@@ -98,7 +98,8 @@
                             @foreach ($project->centers as $center)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 font-medium text-gray-900">
-                                        {{ $center->getTranslation('name', app()->getLocale()) }}
+                                        {{-- CORRECTED: Access Center name directly --}}
+                                        {{ $center->name }}
                                     </td>
                                     <td class="px-6 py-4">
                                         {{ $center->city?->getTranslation('name', app()->getLocale()) ?? '-' }}
@@ -161,3 +162,5 @@
                 </div>
             @endif
         </div>
+    </div>
+</div>

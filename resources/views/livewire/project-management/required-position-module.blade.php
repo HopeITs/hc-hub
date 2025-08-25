@@ -51,7 +51,8 @@
                     <x-table.cell>{{ $item->title }}</x-table.cell>
 
                     <x-table.cell>
-                        {{ optional($item->project)->getTranslation('name', app()->getLocale()) ?? '-' }}
+                        {{-- CORRECTED: Access name directly --}}
+                        {{ optional($item->project)->name ?? '-' }}
                     </x-table.cell>
 
                     <x-table.cell-status
@@ -91,9 +92,10 @@
                     <x-forms.input-label for="project_id">@lang('general.required-project')</x-forms.input-label>
                     <x-forms.select-input id="project_id" wire:model="item.project_id">
                         <option value="">@lang('general.select')</option>
-                        @foreach(\App\Models\Project::all() as $project)
+                        @foreach(\App\Models\Project::orderBy('name')->get() as $project)
                             <option value="{{ $project->id }}">
-                                {{ $project->getTranslation('name', app()->getLocale()) }}
+                                {{-- CORRECTED: Access name directly --}}
+                                {{ $project->name }}
                             </option>
                         @endforeach
                     </x-forms.select-input>
@@ -106,7 +108,6 @@
                     <x-error-span>{{ $errors->first('item.qualifications') }}</x-error-span>
                 </div>
 
-
             </div>
 
             {{-- Buttons --}}
@@ -116,5 +117,4 @@
             </div>
         </form>
     </x-modal.dialog>
-
 </div>
