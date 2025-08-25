@@ -23,7 +23,6 @@ return [
         ['slug' => 'HSK', 'name' => ['en' => ' Al-Hasakah', 'ar' => 'الحسكة'], 'is_active' => false, 'code' => '012'],
         ['slug' => 'IDL', 'name' => ['en' => 'Idleb', 'ar' => 'إدلب'], 'is_active' => false, 'code' => '013'],
         ['slug' => 'RID', 'name' => ['en' => 'Rif Dimashq', 'ar' => 'ريف دمشق'], 'is_active' => false, 'code' => '014'],
-
     ],
 
     'ContractType' => [
@@ -31,37 +30,31 @@ return [
             'name' => ['en' => 'Full Annual', 'ar' => 'سنوي كامل'],
             'place' => ContractPlace::Onsite,
             'type' => ContractType::FullTime,
-
         ],
         [
             'name' => ['en' => 'Partial Annual', 'ar' => 'سنوي جزئي'],
             'place' => ContractPlace::Onsite,
             'type' => ContractType::PartTime,
-
         ],
         [
             'name' => ['en' => 'Trial Full', 'ar' => 'تجريبي كامل'],
             'place' => ContractPlace::Onsite,
             'type' => ContractType::FullTime,
-
         ],
         [
             'name' => ['en' => 'Trial Partial', 'ar' => 'تجريبي جزئي'],
             'place' => ContractPlace::Onsite,
             'type' => ContractType::PartTime,
-
         ],
         [
             'name' => ['en' => 'Online Agreement Contract', 'ar' => 'عقد اتفاق اونلاين'],
             'place' => ContractPlace::Online,
             'type' => ContractType::Freelance,
-
         ],
         [
             'name' => ['en' => 'Onsite Agreement Contract', 'ar' => 'عقد اتفاق في الموقع'],
             'place' => ContractPlace::Onsite,
             'type' => ContractType::Freelance,
-
         ],
     ],
 
@@ -83,10 +76,7 @@ return [
 
     'projects' => [
         [
-            'name' => [
-                'en' => 'Hope Center',
-                'ar' => 'مركز الرجاء',
-            ],
+            'name' => 'Hope Center',
             'description' => [
                 'en' => 'An ecumenical Christian organization established in 2018 under the guidance of the Latin Church in Syria. It empowers Syrian families through diverse initiatives across relief, livelihood, development, and education.',
                 'ar' => 'مركز الرجاء المسيحي منظمة مسكونية، تأسست مطلع عام ٢٠١٨، وتعمل بتوجيه من الكنيسة اللاتينية في سورية. رسالتنا هي تمكين الأسر السورية من خلال مبادرات متعددة تستهدف كل مكون من مكونات الأسرة، في مجالات الإغاثة، ودعم سبل العيش، والتنمية، والتعليم.',
@@ -96,10 +86,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Micro Project',
-                'ar' => 'مشاريع صغيرة',
-            ],
+            'name' => 'Micro Project',
             'description' => [
                 'en' => 'Aimed at empowering Syrian families via livelihood, education, and development programs.',
                 'ar' => 'مركز الرجاء المسيحي منظمة مسكونية، تأسست مطلع عام ٢٠١٨، وتعمل بتوجيه من الكنيسة اللاتينية في سورية. رسالتنا هي تمكين الأسر السورية من خلال مبادرات متعددة تستهدف كل مكون من مكونات الأسرة، في مجالات الإغاثة، ودعم سبل العيش، والتنمية، والتعليم.',
@@ -109,10 +96,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Relief Programs',
-                'ar' => 'برامج الإغاثة',
-            ],
+            'name' => 'Relief Programs',
             'description' => [
                 'en' => 'Aims to reduce suffering caused by war and economic crises through essential humanitarian support.',
                 'ar' => 'الهدف من البرامج الإغاثية هو تخفيف المعاناة الناجمة عن الحرب السورية وتداعياتها الاقتصادية المعقدة، والتي تُثقل كاهل غالبية الأسر التي تعيش تحت خط الفقر. هدفنا هو مساعدة هذه الأسرعلى تلبية احتياجاتها الأساسية والحفاظ على كرامتها.',
@@ -122,10 +106,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Family to Family (Rodzina Rodzinie)',
-                'ar' => 'من عائلة إلى عائلة',
-            ],
+            'name' => 'Family to Family (Rodzina Rodzinie)',
             'description' => [
                 'en' => 'Aims to reduce suffering caused by war and economic crises through essential humanitarian support.',
                 'ar' => 'الهدف من البرامج الإغاثية هو تخفيف المعاناة الناجمة عن الحرب السورية وتداعياتها الاقتصادية المعقدة، والتي تُثقل كاهل غالبية الأسر التي تعيش تحت خط الفقر. هدفنا هو مساعدة هذه الأسرعلى تلبية احتياجاتها الأساسية والحفاظ على كرامتها.',
@@ -135,10 +116,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Assistance for Earthquake',
-                'ar' => 'الإستجابة للزلزال',
-            ],
+            'name' => 'Assistance for Earthquake',
             'description' => [
                 'en' => 'Supports post-war recovery through rebuilding infrastructure, schools, homes, and implementing sustainable energy solutions.',
                 'ar' => 'يُعدّ عمل إعادة التأهيل في فترة ما بعد الحرب أمرًا بالغ الأهمية للتعافي المبكر للمجتمعات. كما أنه ضروري لاستعادة البنى التحتية المتضررة وخدمات الدعم التي تُمكّن الناس من استئناف حياتهم. وقد ساهم مركز الأمل المسيحي في هذا المجال من خلال إعادة تأهيل المرافق التعليمية والمجتمعية المدمرة، مثل المدارس والملاعب، وترميم المنازل وأماكن العمل. كما امتدت جهودنا إلى دعم المجتمعات الريفية من خلال توفير البنية التحتية الكهروضوئية لإنتاج الكهرباء واستخراج المياه في عدة قرى.',
@@ -148,10 +126,7 @@ return [
             'is_active' => false,
         ],
         [
-            'name' => [
-                'en' => 'School to School (Szkoła szkole)',
-                'ar' => 'من مدرسة إلى مدرسة',
-            ],
+            'name' => 'School to School (Szkoła szkole)',
             'description' => [
                 'en' => 'Supports post-war recovery through rebuilding infrastructure, schools, homes, and implementing sustainable energy solutions.',
                 'ar' => 'يُعدّ عمل إعادة التأهيل في فترة ما بعد الحرب أمرًا بالغ الأهمية للتعافي المبكر للمجتمعات. كما أنه ضروري لاستعادة البنى التحتية المتضررة وخدمات الدعم التي تُمكّن الناس من استئناف حياتهم. وقد ساهم مركز الأمل المسيحي في هذا المجال من خلال إعادة تأهيل المرافق التعليمية والمجتمعية المدمرة، مثل المدارس والملاعب، وترميم المنازل وأماكن العمل. كما امتدت جهودنا إلى دعم المجتمعات الريفية من خلال توفير البنية التحتية الكهروضوئية لإنتاج الكهرباء واستخراج المياه في عدة قرى.',
@@ -161,10 +136,7 @@ return [
             'is_active' => false,
         ],
         [
-            'name' => [
-                'ar' => 'مركز التدريب والتكوين',
-                'en' => 'Development Impact and Support Center',
-            ],
+            'name' => 'Development Impact and Support Center',
             'description' => [
                 'en' => 'Supports fresh graduates in developing foundational, employability, and peer mentorship skills to enter the job market.',
                 'ar' => 'الهدف من برنامج DISC في مساعدة الخريجين الجدد على توجيه أنفسهم نحو العمل وتزويدهم بالمهارات اللازمة لضمان استعدادهم لدخول سوق العمل. يعمل المشروع على ثلاثة جوانب أساسية في آنٍ واحد: المهارات الأساسية، ومهارات التوظيف، والرفقة لتبادل الخبرات والدعم.',
@@ -174,10 +146,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Study Zone',
-                'ar' => 'ستادي زون',
-            ],
+            'name' => 'Study Zone',
             'description' => [
                 'en' => null,
                 'ar' => null,
@@ -187,10 +156,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Homework Room',
-                'ar' => 'هوم وورك روم',
-            ],
+            'name' => 'Homework Room',
             'description' => [
                 'en' => null,
                 'ar' => null,
@@ -200,10 +166,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Children University',
-                'ar' => 'أكاديمية الأطفال',
-            ],
+            'name' => 'Children University',
             'description' => [
                 'en' => 'An interactive educational program for children aged 6 to 16, designed to simulate university-style learning through experience.',
                 'ar' => 'جامعة الأطفال برنامج تعليمي مصمم خصيصًا للأطفال من سن 6 إلى 16 عامًا، يشبه المقررات الجامعية، بأسلوب تفاعلي متقدم ومبتكر، يركز على التجربة كأداة تعليمية، بالإضافة إلى أساليب متنوعة أخرى. يتكون البرنامج من مرحلتين: مستوى أساسي ومستوى متقدم، مدة كل مرحلة 4 أشهر، ويتكون كل مستوى من يومين دراسيين ويوم واحد للأنشطة أسبوعيًا.',
@@ -213,10 +176,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Sha8er',
-                'ar' => 'منصة شاغر',
-            ],
+            'name' => 'Sha8er',
             'description' => [
                 'en' => null,
                 'ar' => null,
@@ -226,10 +186,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'ar' => 'مشروع ريادة الأعمال',
-                'en' => 'Entrepreneurship project',
-            ],
+            'name' => 'Entrepreneurship project',
             'description' => [
                 'en' => 'Leadership program to equip community leaders with technical and leadership skills for effective crisis response.',
                 'ar' => 'نظرًا لعدم وجود قادة ناجحين يمكنهم توجيه المجتمعات المحلية خلال أوقات الأزمات، تم إنشاء برنامج القيادة لاستهداف الأعضاء النشطين في المجتمع وتزويدهم بالمهارات الفنية والقدرات القيادية، والتي ستدعمهم في التقييم الدقيق لاحتياجات مجتمعاتهم الحالية والمستقبلية واقتراح حلول فعالة، وبالتالي المساهمة الفعلية على تشجيع تنمية المجتمع.',
@@ -239,10 +196,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'ar' => 'برنامج تطوير وتمكين القادة',
-                'en' => 'Leadership Empowerment & Achievement Program',
-            ],
+            'name' => 'Leadership Empowerment & Achievement Program',
             'description' => [
                 'en' => 'Leadership program to equip community leaders with technical and leadership skills for effective crisis response.',
                 'ar' => 'نظرًا لعدم وجود قادة ناجحين يمكنهم توجيه المجتمعات المحلية خلال أوقات الأزمات، تم إنشاء برنامج القيادة لاستهداف الأعضاء النشطين في المجتمع وتزويدهم بالمهارات الفنية والقدرات القيادية، والتي ستدعمهم في التقييم الدقيق لاحتياجات مجتمعاتهم الحالية والمستقبلية واقتراح حلول فعالة، وبالتالي المساهمة الفعلية على تشجيع تنمية المجتمع.',
@@ -251,8 +205,6 @@ return [
             'code' => '010',
             'is_active' => true,
         ],
-
-
     ],
 
     'centers' => [
@@ -321,21 +273,18 @@ return [
             'base_days' => 60,
             'allowed_gender' => LeaveType::GENDER_FEMALE,
             'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
-
         ],
         [
             'name' => ['en' => 'Paternity', 'ar' => 'إجازة أبوة'],
             'base_days' => 15,
             'allowed_gender' => LeaveType::GENDER_MALE,
             'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
-
         ],
         [
             'name' => ['en' => 'Marriage', 'ar' => 'زواج'],
             'base_days' => 7,
             'allowed_gender' => LeaveType::GENDER_ANY,
             'marital_status' => LeaveType::MARITAL_STATUS_SINGLE,
-
         ],
         [
             'name' => ['en' => 'Death Degree 1', 'ar' => 'وفاة درجة 1'],
@@ -355,7 +304,6 @@ return [
             'allowed_gender' => LeaveType::GENDER_ANY,
             'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
-
     ],
 
     'annualLeaveRules' => [
@@ -390,7 +338,7 @@ return [
     'employees' => [
         [
             'id' => 1,
-            'name' => ['en'=> 'George', 'ar' => 'جورج'],
+            'name' => ['en' => 'George', 'ar' => 'جورج'],
             'years_of_service' => 1,
             'direct_manager_id' => null,
             'tech_manager_id' => null,
@@ -415,7 +363,8 @@ return [
             'interests' => 'Reading, Technology',
             'is_active' => true,
         ],
-    ],'requiredPositions' => [
+    ],
+    'requiredPositions' => [
         [
             'project_id' => 1,
             'title' => 'Software Developer',

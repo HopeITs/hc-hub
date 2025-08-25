@@ -12,7 +12,7 @@ class ProjectForm extends Form
 
     public ?Project $project = null;
 
-    public $name = [];
+    public $name;
     public $description = [];
     public $start_date;
     public $end_date;
@@ -24,8 +24,7 @@ class ProjectForm extends Form
     protected function rules()
     {
         return [
-            'name.ar' => ['required', 'min:3', 'max:255'],
-            'name.en' => ['required', 'min:3', 'max:255'],
+            'name' => ['required', 'string'],
             'description.en' => ['nullable', 'min:3', 'max:255'],
             'description.ar' => ['nullable', 'min:3', 'max:255'],
             'start_date' => ['required', 'date'],
@@ -43,7 +42,7 @@ class ProjectForm extends Form
     public function setProject(Project $project)
     {
         $this->project = $project;
-        $this->name = $project->getTranslations('name');
+        $this->name = $project->name;
         $this->description = $project->getTranslations('description') ;
         $this->slug = $project->slug;
         $this->start_date = $project->start_date;
