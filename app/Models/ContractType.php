@@ -27,4 +27,13 @@ class ContractType extends Model
     {
         return $this->hasMany(Contract::class ,'contract_type_id');
     }
+
+
+    public function getCategoryAttribute(): string
+    {
+        $map = config('contracts.map_by_id');
+
+        return $map[$this->id] ?? 'annual';
+
+    }
 }
