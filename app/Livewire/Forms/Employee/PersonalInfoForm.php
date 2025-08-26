@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 use Livewire\WithFileUploads;
 
@@ -36,7 +37,7 @@ class PersonalInfoForm extends Form
 
     public $national_number;
 
-    #[Validate('nullable|date_format:d-m-Y')]
+    #[Validate('nullable|date')]
     public $dob;
 
     #[Validate('required|in:1,2')]
@@ -114,6 +115,8 @@ class PersonalInfoForm extends Form
             ],
         ];
     }
+
+
     protected function buildWorkEmail(?string $username): ?string
     {
         $username = trim($username ?? '');
@@ -168,14 +171,15 @@ class PersonalInfoForm extends Form
         $this->validate();
 
         if ($this->employee) {
-            $this->employee->update($this->except(['email','photo']));
+            $this->employee->update($this->except(['email', 'photo']));
 
             if ($this->employee->account) {
                 $this->employee->account->update(['email' => $this->email]);
             }
+
         } else {
             $this->city_id = auth()->user()->profile?->city_id ?? 1;
-            $this->employee = Employee::create($this->except(['email','photo']));
+            $this->employee = Employee::create($this->except(['email', 'photo']));
 
             User::create([
                 'email' => $this->email,
@@ -184,7 +188,7 @@ class PersonalInfoForm extends Form
             ]);
         }
 
-        if ($this->photo != null) {
+        if ($this->photo instanceof TemporaryUploadedFile) {
             $this->employee->addMedia($this->photo->getRealPath())
                 ->usingFileName('employee-avatar.' . $this->photo->getClientOriginalExtension())
                 ->toMediaCollection('avatar');

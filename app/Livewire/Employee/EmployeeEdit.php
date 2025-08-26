@@ -11,13 +11,14 @@ use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
 use App\Models\Employee;
+use App\Traits\WithAlerts;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class EmployeeEdit extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads , WithAlerts;
 
     public PersonalInfoForm $infoForm;
     public EducationForm $educationForm;
@@ -36,7 +37,7 @@ class EmployeeEdit extends Component
     public function mount(Employee $employee)
     {
         $this->infoForm->setEmployee($employee);
-dd($this->infoForm->employee);
+
         if (empty($this->infoForm->employee->educations)) {
             $this->educationForm->addEducation();
         }
@@ -60,7 +61,7 @@ dd($this->infoForm->employee);
     public function saveInformation()
     {
         $this->infoForm->saveInformation();
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
         return $this->redirect(route('employees.index'), navigate: true);
     }
 

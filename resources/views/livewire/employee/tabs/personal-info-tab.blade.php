@@ -34,7 +34,7 @@
     </div>
 
     <div class="grid md:grid-cols-2 gap-x-6 gap-y-3">
-        <h2 class="text-xl font-semibold mb-4 col-span-2">@lang('general.general_info')</h2>
+        <x-heading-label class="col-span-full">@lang('general.general_info')</x-heading-label>
 
         @foreach (config('app.supported_locales') as $locale)
             <div wire:key="emp-name-{{ $locale }}">
@@ -48,8 +48,7 @@
 
         <div wire:key="emp-dob">
             <x-forms.input-label for="dob">@lang('general.dob')</x-forms.input-label>
-            <x-forms.input type="date" wire:model="infoForm.dob" id="dob"/>
-{{--            <x-forms.date-input wire:model="infoForm.dob" id="dob"/>--}}
+            <x-forms.date-input wire:model="infoForm.dob" id="dob"/>
             <x-error-span>{{ $errors->first('infoForm.dob') }}</x-error-span>
 
         </div>
@@ -94,7 +93,7 @@
     </div>
 
     <div class="grid md:grid-cols-2 gap-x-6 gap-y-3">
-        <h2 class="text-xl col-span-full font-semibold mb-4">@lang('general.address_info')</h2>
+        <x-heading-label class="col-span-full" >@lang('general.address_info')</x-heading-label>
 
         @foreach (config('app.supported_locales') as $locale)
             <div wire:key="emp-father-{{ $locale }}">
@@ -163,7 +162,7 @@
 
     <div class="grid md:grid-cols-2 gap-x-6 ">
         <div class="grid grid-cols-1 gap-y-3">
-            <h2 class="text-xl font-semibold mb-4">@lang('general.employment_info')</h2>
+            <x-heading-label>@lang('general.employment_info')</x-heading-label>
             <div>
                 <div class="flex justify-between">
                     <x-forms.input-label for="username">@lang('general.work_email')</x-forms.input-label>
@@ -208,7 +207,7 @@
         </div>
 
         <div class="grid grid-cols-1 gap-y-3">
-            <h2 class="text-xl font-semibold mb-4">@lang('general.contact_info')</h2>
+            <x-heading-label>@lang('general.contact_info')</x-heading-label>
 
             <div>
                 <x-forms.input-label for="personal_phone">@lang('general.personal_phone')</x-forms.input-label>
@@ -231,7 +230,7 @@
     </div>
 
     <div>
-        <h2 class="text-xl font-semibold mb-4">@lang('general.skills_and_interests')</h2>
+        <x-heading-label>@lang('general.skills_and_interests')</x-heading-label>
 
         <div class="md:col-span-2">
             <x-forms.input-label for="skills">@lang('general.skills')</x-forms.input-label>
@@ -247,56 +246,55 @@
     </div>
 
     <div class="grid md:grid-cols-1 gap-x-6 gap-y-3">
-        <h2 class="col-span-1 text-xl font-semibold mb-4">@lang('general.board_member')</h2>
+        <x-heading-label class="col-span-1 ">@lang('general.board_member')</x-heading-label>
         <div class=" col-span-1 flex items-center space-x-2">
             {{--                <x-forms.input type="checkbox" wire:model.live="infoForm.is_board_member" value="0" class="hidden"/>--}}
-            <x-forms.input type="checkbox" wire:model.live="infoForm.is_board_member" value="1" id="is_board_member"/>
+            <x-forms.input type="checkbox" wire:model.live="infoForm.is_board_member"
+                           wire:change="toggleBoardMember($event.target.checked)"
+                           value="1" id="is_board_member"/>
             <x-forms.input-label for="is_board_member">@lang('general.is_board_member')</x-forms.input-label>
             <x-error-span>{{ $errors->first('infoForm.is_board_member') }}</x-error-span>
         </div>
 
         {{-- Key the whole conditional block by state --}}
         <div class="col-span-1 grid  md:grid-cols-2 gap-x-6 gap-y-3"  wire:key="board-member-{{ (int) data_get($infoForm, 'is_board_member') }}">
-            @if (data_get($infoForm, 'is_board_member'))
+
+
+
+
+
                 <div>
                     <x-forms.input-label
                         for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>
-                    <x-forms.date-input wire:model="infoForm.board_member_started_at"
-                                        id="board_member_started_at"/>
+{{--                    <x-forms.date-input wire:model="infoForm.board_member_started_at"--}}
+{{--                                        id="board_member_started_at" :required="data_get($infoForm, 'is_board_member')"/>--}}
+
+                    <x-forms.date-input
+                        wire:model.live="infoForm.board_member_started_at"
+                        id="board_member_started_at"
+                        :required="data_get($infoForm, 'is_board_member')"
+                        value="{{data_get($infoForm, 'is_board_member') ?? null}}"
+                    />
                     <x-error-span>{{ $errors->first('infoForm.board_member_started_at') }}</x-error-span>
                 </div>
 
                 <div>
                     <x-forms.input-label
                         for="board_member_end_at">@lang('general.board_member_end_at')</x-forms.input-label>
-                    <x-forms.date-input wire:model="infoForm.board_member_end_at" id="board_member_end_at"/>
+{{--                    <x-forms.date-input wire:model="infoForm.board_member_end_at" id="board_member_end_at"/>--}}
+
+                    <x-forms.date-input
+                        wire:model.live="infoForm.board_member_end_at"
+                        id="board_member_end_at"
+                    value="{{data_get($infoForm, 'is_board_member') ?? null}}"
+                    />
                     <x-error-span>{{ $errors->first('infoForm.board_member_end_at') }}</x-error-span>
                 </div>
-            @endif
+
         </div>
 
 
-        {{--            <div class="flex items-center space-x-2">--}}
-        {{--                <input type="checkbox" wire:model.live="infoForm.is_board_member" id="is_board_member" class="rounded">--}}
-        {{--                <x-forms.input-label for="is_board_member">@lang('general.is_board_member')</x-forms.input-label>--}}
-        {{--                <x-error-span>{{ $errors->first('infoForm.is_board_member') }}</x-error-span>--}}
-        {{--            </div>--}}
 
-        {{--            @if ($infoForm->is_board_member)--}}
-        {{--                <div>--}}
-        {{--                    <x-forms.input-label--}}
-        {{--                        for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>--}}
-        {{--                    <x-forms.date-input wire:model="infoForm.board_member_started_at" id="board_member_started_at"/>--}}
-        {{--                    <x-error-span>{{ $errors->first('infoForm.board_member_started_at') }}</x-error-span>--}}
-        {{--                </div>--}}
-
-        {{--                <div>--}}
-        {{--                    <x-forms.input-label--}}
-        {{--                        for="board_member_end_at">@lang('general.board_member_end_at')</x-forms.input-label>--}}
-        {{--                    <x-forms.input type="date" wire:model="infoForm.board_member_end_at" id="board_member_end_at"/>--}}
-        {{--                    <x-error-span>{{ $errors->first('infoForm.board_member_end_at') }}</x-error-span>--}}
-        {{--                </div>--}}
-        {{--            @endif--}}
     </div>
 
     <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">

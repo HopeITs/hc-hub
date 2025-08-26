@@ -36,6 +36,17 @@ class EmployeeCreate extends Component
     {
         $this->activeTab = $tab;
     }
+
+    public function toggleBoardMember($checked): void
+    {
+
+        $this->infoForm->is_board_member = (bool) $checked;
+
+        if (!$this->infoForm->is_board_member) {
+            $this->infoForm->board_member_started_at = null;
+            $this->infoForm->board_member_end_at = null;
+        }
+    }
     public function saveInformation()
     {
         $employee = $this->infoForm->saveInformation();

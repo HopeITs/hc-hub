@@ -19,9 +19,9 @@ class Employee extends Model implements HasMedia
     public array $translatable = ['name', 'father_name', 'mother_name', 'address'];
 
     protected $casts = [
-        'dob'                     => 'date',
-        'board_member_started_at' => 'date',
-        'board_member_end_at'     => 'date',
+        'dob'                     => 'datetime',
+        'board_member_started_at' => 'datetime',
+        'board_member_end_at'     => 'datetime',
         'is_active'               => 'boolean',
         'is_board_member'         => 'boolean',
         'children'                => 'integer',
