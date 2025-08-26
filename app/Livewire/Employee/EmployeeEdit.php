@@ -2,7 +2,13 @@
 
 namespace App\Livewire\Employee;
 
+use App\Livewire\Forms\Employee\BadgeForm;
+use App\Livewire\Forms\Employee\ChecklistForm;
+use App\Livewire\Forms\Employee\CourseForm;
+use App\Livewire\Forms\Employee\EducationForm;
+use App\Livewire\Forms\Employee\ExperienceForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
+use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
 use App\Models\Employee;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -13,72 +19,84 @@ class EmployeeEdit extends Component
 {
     use WithFileUploads;
 
-    public PersonalInfoForm $form;
+    public PersonalInfoForm $infoForm;
+    public EducationForm $educationForm;
+    public ChecklistForm $checklistItemForm;
+    public  CourseForm $courseForm;
+    public ExperienceForm $experienceForm;
+    public RelativeForm $relativeForm;
+    public BadgeForm $badgeForm;
+    public $activeTab = 'information';
+
+    public function setActiveTab($tab)
+    {
+        $this->activeTab = $tab;
+    }
 
     public function mount(Employee $employee)
     {
-        $this->form->setEmployee($employee);
-
-        if (empty($this->form->educations)) {
-            $this->form->addEducation();
+        $this->infoForm->setEmployee($employee);
+dd($this->infoForm->employee);
+        if (empty($this->infoForm->employee->educations)) {
+            $this->educationForm->addEducation();
         }
-        if (empty($this->form->courses)) {
-            $this->form->addCourse();
+        if (empty($this->infoForm->employee->courses)) {
+            $this->courseForm->addCourse();
         }
-        if (empty($this->form->experiences)) {
-            $this->form->addExperience();
+        if (empty($this->infoForm->employee->experiences)) {
+            $this->experienceForm->addExperience();
         }
-        if (empty($this->form->relatives)) {
-            $this->form->addRelative();
+        if (empty($this->infoForm->employee->relatives)) {
+            $this->relativeForm->addRelative();
         }
-        if (empty($this->form->badges)) {
-            $this->form->addBadge();
+        if (empty($this->infoForm->employee->badges)) {
+            $this->badgeForm->addBadge();
         }
-        if (empty($this->form->checklists)) {
-            $this->form->addChecklist();
+        if (empty($this->infoForm->employee->checklists)) {
+            $this->checklistItemForm->addChecklist();
         }
     }
 
     public function saveInformation()
     {
-        $this->form->saveInformation();
+        $this->infoForm->saveInformation();
         LivewireAlert::success(__('general.success-message'));
         return $this->redirect(route('employees.index'), navigate: true);
     }
 
     public function saveEducation()
     {
-        $this->form->saveEducation();
+        $this->educationForm->saveEducation();
         LivewireAlert::success(__('general.success-message'));
     }
 
     public function saveCourses()
     {
-        $this->form->saveCourses();
+        $this->courseForm->saveCourses();
         LivewireAlert::success(__('general.success-message'));
     }
 
     public function saveExperience()
     {
-        $this->form->saveExperience();
+        $this->experienceForm->saveExperience();
         LivewireAlert::success(__('general.success-message'));
     }
 
     public function saveRelatives()
     {
-        $this->form->saveRelatives();
+        $this->relativeForm->saveRelatives();
         LivewireAlert::success(__('general.success-message'));
     }
 
     public function saveBadges()
     {
-        $this->form->saveBadges();
+        $this->badgeForm->saveBadges();
         LivewireAlert::success(__('general.success-message'));
     }
 
     public function saveChecklist()
     {
-        $this->form->saveChecklist();
+        $this->checklistItemForm->saveChecklist();
         LivewireAlert::success(__('general.success-message'));
     }
 
@@ -86,9 +104,9 @@ class EmployeeEdit extends Component
     {
         $checklistItems = ChecklistItem::where('order', 1)->orderBy('name')->get();
 
-        return view('livewire.employee.employee-edit', [
+        return view('livewire.employee.form', [
             'allEmployees' => Employee::select('id', 'name')
-                ->where('id', '!=', $this->form->employee->id)
+                ->where('id', '!=', $this->infoForm->employee->id)
                 ->get(),
             'checklistItems' => $checklistItems,
         ]);

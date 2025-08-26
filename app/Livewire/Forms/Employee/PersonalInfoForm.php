@@ -6,7 +6,8 @@ use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-use Livewire\Attributes\Rule;
+
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Livewire\WithFileUploads;
@@ -32,7 +33,7 @@ class PersonalInfoForm extends Form
 
     public $email;
 
-    #[Validate('required|unique:employees,national_number')]
+
     public $national_number;
 
     #[Validate('nullable|date_format:d-m-Y')]
@@ -47,7 +48,7 @@ class PersonalInfoForm extends Form
     #[Validate('nullable|integer|min:0')]
     public $children;
 
-    #[Validate('string')]
+    #[Validate('integer')]
     public $nationality;
 
     #[Validate('nullable|string')]
@@ -85,7 +86,7 @@ class PersonalInfoForm extends Form
     #[Validate('boolean')]
     public $is_active = true;
 
-    #[Validate('required|unique:employees,username')]
+
     public $username;
 
     #[Validate('nullable|exists:employees,id')]
@@ -95,6 +96,24 @@ class PersonalInfoForm extends Form
 
     public $city_id;
 
+
+    public function rules()
+    {
+        return [
+            'national_number' => [
+                'required',
+                Rule::unique('employees', 'national_number')->ignore($this->employee?->id),
+            ],
+            'email' => [
+                'required',
+                Rule::unique('users', 'email')->ignore($this->employee?->account->id),
+            ],
+            'username' => [
+                'required',
+                Rule::unique('employees', 'username')->ignore($this->employee?->id),
+            ],
+        ];
+    }
     protected function buildWorkEmail(?string $username): ?string
     {
         $username = trim($username ?? '');
@@ -109,8 +128,7 @@ class PersonalInfoForm extends Form
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
-        $this->photo = $employee->photo;
-        $this->city_id = auth()->user->profile->city_id;
+        $this->city_id = $employee->city_id;
         $this->national_number = $employee->national_number;
         $this->direct_manager_id = $employee->direct_manager_id;
         $this->tech_manager_id = $employee->tech_manager_id;
@@ -137,13 +155,15 @@ class PersonalInfoForm extends Form
         $this->address = $employee->getTranslations('address');
         $this->username = $employee->username;
         $this->email = $employee->account?->email;
+        $this->photo = $employee->getFirstMediaUrl('avatar');
+
     }
 
 
     public function saveInformation(): Employee
     {
 
-        $this->email = $this->buildWorkEmail($this->work_email_username);
+        $this->email = $this->buildWorkEmail($this->username);
 
         $this->validate();
 
@@ -164,10 +184,13 @@ class PersonalInfoForm extends Form
             ]);
         }
 
-        if ($this->photo && !is_string($this->photo)) {
-            $this->employee->photo = $this->photo->store('employees', 'public');
-            $this->employee->save();
+        if ($this->photo != null) {
+            $this->employee->addMedia($this->photo->getRealPath())
+                ->usingFileName('employee-avatar.' . $this->photo->getClientOriginalExtension())
+                ->toMediaCollection('avatar');
         }
+
+
         return $this->employee;
     }
 

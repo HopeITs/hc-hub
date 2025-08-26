@@ -49,47 +49,5 @@ class CourseForm extends Form
         $this->employee->courses()->createMany($this->courses);
     }
 
-    public function saveExperience(): void
-    {
-        $this->validate([
-            'experiences' => 'array',
-            'experiences.*.job_title' => 'required_with:experiences.*.company|string|max:255|nullable',
-        ]);
 
-        $this->employee->experiences()->delete();
-        $this->employee->experiences()->createMany($this->experiences);
-    }
-
-    public function saveRelatives(): void
-    {
-        $this->validate([
-            'relatives' => 'array',
-            'relatives.*.name' => 'required_with:relatives.*.relation|string|max:255|nullable',
-        ]);
-
-        $this->employee->relatives()->delete();
-        $this->employee->relatives()->createMany($this->relatives);
-    }
-
-    public function saveBadges(): void
-    {
-        $this->validate([
-            'badges' => 'array',
-            'badges.*.type' => 'required_with:badges.*.date|string|max:255|nullable',
-        ]);
-
-        $this->employee->badges()->delete();
-        $this->employee->badges()->createMany($this->badges);
-    }
-
-    public function saveChecklist(): void
-    {
-        $this->validate([
-            'checklists' => 'array',
-            'checklists.*.item_id' => 'required_with:checklists.*.brand|exists:checklist_items,id|nullable',
-        ]);
-
-        $this->employee->checklists()->delete();
-        $this->employee->checklists()->createMany($this->checklists);
-    }
 }

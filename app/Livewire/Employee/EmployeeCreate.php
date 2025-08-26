@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee;
 
 use App\Livewire\Forms\Employee\BadgeForm;
+use App\Livewire\Forms\Employee\ChecklistForm;
 use App\Livewire\Forms\Employee\CourseForm;
 use App\Livewire\Forms\Employee\EducationForm;
 use App\Livewire\Forms\Employee\ExperienceForm;
@@ -21,13 +22,10 @@ class EmployeeCreate extends Component
 
     public PersonalInfoForm $infoForm;
     public EducationForm $educationForm;
-    public ChecklistItem $checklistItemForm;
-
+    public ChecklistForm$checklistItemForm;
     public  CourseForm $courseForm;
     public ExperienceForm $experienceForm;
-
     public RelativeForm $relativeForm;
-
     public BadgeForm $badgeForm;
 
 
