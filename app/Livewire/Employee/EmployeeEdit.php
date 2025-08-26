@@ -41,7 +41,7 @@ class EmployeeEdit extends Component
 
         // Seed each sub-form with the same employee (so they can load existing rows)
         $this->educationForm->setEmployee($employee);
-//        $this->courseForm->setEmployee($employee ?? null);
+        $this->courseForm->setEmployee($employee ?? null);
 //        $this->experienceForm->setEmployee($employee ?? null);
 //        $this->relativeForm->setEmployee($employee ?? null);
 //        $this->badgeForm->setEmployee($employee ?? null);
@@ -93,12 +93,25 @@ class EmployeeEdit extends Component
         $this->setActiveTab('education');
         $this->successToast(); // from WithAlerts
     }
-
-    public function saveCourses()
+    public function addCourse(): void
     {
-        $this->courseForm->saveCourses();
-        LivewireAlert::success(__('general.success-message'));
+        $this->courseForm->addCourse();
     }
+
+    public function removeCourse(int $index): void
+    {
+        $this->courseForm->removeCourse($index);
+        // Optional: clear stale validation errors for removed index
+        $this->resetErrorBag();
+    }
+
+    public function saveCourses(): void
+    {
+        $this->courseForm->save();
+        $this->setActiveTab('courses');
+        $this->successToast(); // from WithAlerts
+    }
+
 
     public function saveExperience()
     {
