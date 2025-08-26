@@ -36,27 +36,37 @@ class EmployeeEdit extends Component
 
     public function mount(Employee $employee)
     {
+        // Seed base info first
         $this->infoForm->setEmployee($employee);
 
-        if (empty($this->infoForm->employee->educations)) {
+        // Seed each sub-form with the same employee (so they can load existing rows)
+        $this->educationForm->setEmployee($employee);
+//        $this->courseForm->setEmployee($employee ?? null);
+//        $this->experienceForm->setEmployee($employee ?? null);
+//        $this->relativeForm->setEmployee($employee ?? null);
+//        $this->badgeForm->setEmployee($employee ?? null);
+//        $this->checklistItemForm->setEmployee($employee ?? null);
+
+        if (empty($this->educationForm->educations)) {
             $this->educationForm->addEducation();
         }
-        if (empty($this->infoForm->employee->courses)) {
+        if (empty($this->courseForm->courses ?? [])) {
             $this->courseForm->addCourse();
         }
-        if (empty($this->infoForm->employee->experiences)) {
+        if (empty($this->experienceForm->experiences ?? [])) {
             $this->experienceForm->addExperience();
         }
-        if (empty($this->infoForm->employee->relatives)) {
+        if (empty($this->relativeForm->relatives ?? [])) {
             $this->relativeForm->addRelative();
         }
-        if (empty($this->infoForm->employee->badges)) {
+        if (empty($this->badgeForm->badges ?? [])) {
             $this->badgeForm->addBadge();
         }
-        if (empty($this->infoForm->employee->checklists)) {
+        if (empty($this->checklistItemForm->checklists ?? [])) {
             $this->checklistItemForm->addChecklist();
         }
     }
+
 
     public function saveInformation()
     {
@@ -65,10 +75,23 @@ class EmployeeEdit extends Component
         return $this->redirect(route('employees.index'), navigate: true);
     }
 
-    public function saveEducation()
+    public function addEducation(): void
     {
-        $this->educationForm->saveEducation();
-        LivewireAlert::success(__('general.success-message'));
+        $this->educationForm->addEducation();
+    }
+
+    public function removeEducation(int $index): void
+    {
+        $this->educationForm->removeEducation($index);
+        // Optional: clear stale validation errors for removed index
+        $this->resetErrorBag();
+    }
+
+    public function saveEducation(): void
+    {
+        $this->educationForm->save();
+        $this->setActiveTab('education');
+        $this->successToast(); // from WithAlerts
     }
 
     public function saveCourses()
