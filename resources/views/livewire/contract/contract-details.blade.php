@@ -1,8 +1,8 @@
 @php
     /** @var \App\Models\Contract $contract */
-    $locale     = $locale ?? app()->getLocale();
-    $viewKey    = $displayView ?? 'annual'; // 'annual' | 'trial' | 'service'
-    $partial    = $partialPath ?? "livewire.contract.partials.{$viewKey}";
+    use Illuminate\Support\Str;
+
+    $locale = $locale ?? app()->getLocale();
 @endphp
 
 <div class="space-y-4">
@@ -11,8 +11,8 @@
             :title="trans_choice('general.contracts', 1)"
             :crumbs="$crumbs ?? [
                 ['label' => trans_choice('general.employee_management', 2)],
-                ['label' => trans_choice('general.contracts', 2), 'url' => (route('contracts.index', [], false) ?? null)],
-                ['label' => '#'.$contract->id],
+                ['label' => trans_choice('general.contracts', 2), 'url' => route('contracts.index', [], false)],
+                ['label' => $contract->employee?->getTranslation('name', app()->getLocale()) ?? __('general.na')],
             ]"
         />
 
@@ -27,17 +27,18 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
-        <x-badge>
+        <x-badge color="red" >
             {{ $contract->contractType?->getTranslation('name', $locale) ?? __('general.na') }}
-        </x-badge>
-        <x-badge>
-            {{ Str::ucfirst($viewKey) }} {{ __('general.view') }}
         </x-badge>
     </div>
 
-    @includeIf($partial, [
-        'contract' => $contract,
-        'locale'   => $locale,
-    ])
-
+    @includeIf($partialPath)
 </div>
+
+<script>
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('scroll-to-top', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+</script>
