@@ -1,0 +1,33 @@
+<div class="no-print sticky bottom-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur
+            border-t border-gray-200 dark:border-gray-700">
+    <div class="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between gap-3">
+        <div class="text-sm opacity-70">Page {{ $annualPage }} of {{ $totalPages }}</div>
+
+        <div class="flex items-center gap-2">
+            <button type="button"
+                    class="px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-40"
+                    wire:click="prevAnnualPage"
+                @disabled($annualPage === 1)>
+                @lang('general.previous')
+            </button>
+
+            <div class="hidden sm:flex items-center gap-1">
+                @for($i=1; $i<= $totalPages; $i++)
+                    <button type="button"
+                            wire:click="setAnnualPage({{ $i }})"
+                            class="px-3 py-1 rounded-lg border
+                                   {{ $annualPage === $i ? 'bg-primary text-white border-primary' : 'border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800' }}">
+                        {{ $i }}
+                    </button>
+                @endfor
+            </div>
+
+            <button type="button"
+                    class="px-3 py-2 rounded-lg bg-primary text-white hover:opacity-90 disabled:opacity-40"
+                    wire:click="nextAnnualPage"
+                @disabled($annualPage === $totalPages)>
+                @lang('general.next')
+            </button>
+        </div>
+    </div>
+</div>
