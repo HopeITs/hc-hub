@@ -6,8 +6,8 @@
 
 @php
     $baseClass = match($theme) {
-        'settings' => 'block text-sm mb-3 font-medium text-gray-700 dark:text-gray-300',
-        default    => 'block mb-1 text-sm font-medium text-gray-700',
+        'settings' => 'block text-sm mb-3 font-medium text-secondary-medium',
+        default    => 'block mb-1 text-sm font-medium text-secondary-medium',
     };
 @endphp
 

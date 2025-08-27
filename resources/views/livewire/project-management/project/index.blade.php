@@ -10,9 +10,9 @@
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach ($items as $project)
-            <x-card class="col-span-1 {{ $project->is_active ? '!border-red-200' : '' }}" :title="$project->getTranslation('name', 'en')">
+            <x-card class="col-span-1 {{ $project->is_active ? '!border-red-200' : '' }}" :title="$project->name">
                 <div class="text-gray-400 grid md:grid-cols-2 mb-4 gap-x-4 gap-y-2">
-                    <x-icon-label-info :label="__('general.name')"  class=" md:col-span-2" :info="$project->getTranslation('name', 'ar')">
+                    <x-icon-label-info :label="__('general.name')"  class=" md:col-span-2" :info="$project->name">
                         <x-icons.info class="me-2" />
                     </x-icon-label-info>
                     <x-icon-label-info :label="__('general.code')"   :info="$project->slug . '-' . $project->code">

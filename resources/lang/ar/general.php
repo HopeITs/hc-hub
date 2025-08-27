@@ -105,6 +105,8 @@ return [
     'photo' => 'الصورة',
     'unknown' => 'غير معروف',
     'is_board_member' => 'عضو مجلس إدارة',
+    'board_member_started_at' => 'بداية العضوية',
+    'board_member_end_at' => 'نهاية العضوية',
     'employee_management' => 'إدارة الموظفين',
     'university' => 'الجامعة',
     'graduation_year' => 'سنة التخرج',

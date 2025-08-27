@@ -19,7 +19,7 @@ class Project extends Model implements HasMedia
         'end_date' => 'date',
     ];
 
-    public array $translatable = ['name', 'description'];
+    public array $translatable = ['description'];
 
     public function centers()
     {

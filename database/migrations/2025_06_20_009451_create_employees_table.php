@@ -13,7 +13,6 @@ return new class extends Migration
             $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('set null');
             $table->json('name');
             $table->string('username')->unique();
-            $table->string('photo')->nullable();
             $table->string('actual_job')->nullable();
             $table->double('years_of_service')->nullable();
             $table->foreignId('direct_manager_id')->nullable()->constrained('employees')->onDelete('set null');

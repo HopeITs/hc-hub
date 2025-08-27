@@ -21,7 +21,7 @@
             <x-forms.select-input id="project_id" wire:model="form.project_id" class="mt-1">
                 <option value="">{{ __('general.select') }}</option>
                 @foreach($projects as $project)
-                    <option value="{{ $project->id }}">{{ $project->getTranslation('name', $locale) }}</option>
+                    <option value="{{ $project->id }}">{{ $project->name }}</option>
                 @endforeach
             </x-forms.select-input>
             <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.project_id') }}</x-error-span>

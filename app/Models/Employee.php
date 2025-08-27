@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Employee extends Model
+class Employee extends Model implements HasMedia
 {
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations, InteractsWithMedia;
 
     protected $guarded = ['id'];
 
@@ -129,5 +131,13 @@ class Employee extends Model
     public function account()
     {
         return $this->hasOne(User::class, 'employee_id');
+    }
+
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatar')
+            ->useFallbackUrl('https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=be1f24&background=FEE2E2')
+            ->singleFile();
     }
 }

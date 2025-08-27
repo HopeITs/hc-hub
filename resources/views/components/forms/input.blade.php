@@ -21,7 +21,7 @@
             {{$attributes->merge([
     'id' => $inputId,
     'type' => 'checkbox',
-    'class' => 'size-4 bg-white border border-primary text-primary rounded focus:ring-primary',
+    'class' => 'size-4 bg-white border border-primary text-primary rounded focus:ring-primary focus:ring-0',
     'wire:model.defer' => $model
 ])}}
 
@@ -51,10 +51,10 @@
                 <span class="absolute top-2.5 end-3 text-gray-400">
                     <i class="fa-solid fa-hashtag text-sm"></i>
                 </span>
-            @elseif ($type === 'date')
-                <span class="absolute top-2.5 end-3 text-gray-400">
-                    <i class="fa-regular fa-calendar text-sm"></i>
-                </span>
+{{--            @elseif ($type === 'date')--}}
+{{--                <span class="absolute top-2.5 end-3 text-gray-400">--}}
+{{--                    <i class="fa-regular fa-calendar text-sm"></i>--}}
+{{--                </span>--}}
             @endif
         @endif
     </div>
