@@ -13,7 +13,7 @@ class Center extends Model
 
     protected $fillable = ['name', 'city_id', 'project_id', 'address', 'is_active'];
 
-    public $translatable = ['address'];
+    public $translatable = ['name','address'];
 
     public function city(): BelongsTo
     {
