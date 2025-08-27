@@ -59,6 +59,7 @@ return [
     'national_number' => 'National Number',
     'civil_registry_office' => 'Civil Registry Office',
     'civil_registry_number' => 'Civil Registry Number',
+    'place_and_birth_date' => 'Place and Birth Date',
     'place_of_registration' => 'Place of Registration',
     'gender' => 'Gender',
     'father_name' => "Father's Name",

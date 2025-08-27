@@ -56,6 +56,7 @@ return [
     'required-positions' => 'المناصب المطلوبة | المنصب المطلوب',
     'dob' => 'تاريخ الميلاد',
     'national_number' => 'الرقم الوطني',
+    'place_and_birth_date' => 'محل وتاريخ الولادة',
     'civil_registry_office' => 'دائرة السجل المدني',
     'civil_registry_number' => 'رقم السجل المدني',
     'place_of_registration' => 'مكان القيد',

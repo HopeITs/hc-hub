@@ -14,7 +14,7 @@ class CourseForm extends Form
 
     public function setEmployee(Employee $employee): void
     {
-        $this->employee = $employee;
+        $this->employee = $employee->load('courses');
 
         // Seed existing rows
         $this->courses = $employee->courses()
@@ -26,6 +26,7 @@ class CourseForm extends Form
                 'date'                 => optional($c->date)->toDateString(), // Y-m-d for <input type="date">
                 'is_approved'          => (int) $c->is_approved,
             ])->toArray();
+
     }
 
     public function rules(): array
@@ -70,7 +71,7 @@ class CourseForm extends Form
                 'is_approved'          => (bool) ($row['is_approved'] ?? false),
             ];
         })->all();
-
+dd($payload);
         $this->employee->courses()->delete();
         $this->employee->courses()->createMany($payload);
     }

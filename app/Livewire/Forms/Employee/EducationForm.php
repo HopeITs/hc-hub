@@ -21,40 +21,43 @@ class EducationForm extends Form
         $this->educations = $this->employee->educations()
             ->select('title', 'university', 'type', 'graduation_year')
             ->get()
-            ->map(fn ($e) => [
-                'title'           => $e->title,
-                'university'      => $e->university,
-                'type'            => $e->type,
+            ->map(fn($e) => [
+                'title' => $e->title,
+                'university' => $e->university,
+                'type' => $e->type,
                 'graduation_year' => $e->graduation_year,
+                'edu_attachment' => $e->getFirstMediaUrl('file')
             ])->toArray();
     }
 
     public function rules(): array
     {
-        $currentYear = (int) now()->year;
+        $currentYear = (int)now()->year;
 
         return [
-            'educations'                         => ['array'],
-            'educations.*.title'                 => ['required','string','max:255'],
-            'educations.*.university'            => ['required','string','max:255'],
-            'educations.*.type'                  => ['nullable','integer','between:0,6'],
-            'educations.*.graduation_year'       => ['nullable','integer','digits:4','max:'.$currentYear],
+            'educations' => ['array'],
+            'educations.*.title' => ['required', 'string', 'max:255'],
+            'educations.*.university' => ['required', 'string', 'max:255'],
+            'educations.*.type' => ['nullable', 'integer', 'between:0,6'],
+            'educations.*.graduation_year' => ['nullable', 'integer', 'digits:4', 'max:' . $currentYear],
+            'educations.*.edu_attachment' => ['nullable', 'file'],
         ];
     }
 
     public function addEducation(): void
     {
         $this->educations[] = [
-            'title'           => '',
-            'university'      => '',
-            'type'            => null,
+            'title' => '',
+            'university' => '',
+            'type' => null,
             'graduation_year' => null,
+            'edu_attachment' => null,
         ];
     }
 
     public function removeEducation(int $index): void
     {
-        if (! array_key_exists($index, $this->educations)) return;
+        if (!array_key_exists($index, $this->educations)) return;
 
         unset($this->educations[$index]);
         // Reindex so Blade indexes and array keys stay aligned
@@ -68,9 +71,9 @@ class EducationForm extends Form
         // Normalize empties to null to match DB
         $payload = collect($this->educations)->map(function ($row) {
             return [
-                'title'           => $row['title'],
-                'university'      => $row['university'],
-                'type'            => $row['type'] === '' ? null : $row['type'],
+                'title' => $row['title'],
+                'university' => $row['university'],
+                'type' => $row['type'] === '' ? null : $row['type'],
                 'graduation_year' => $row['graduation_year'] === '' ? null : $row['graduation_year'],
             ];
         })->all();
