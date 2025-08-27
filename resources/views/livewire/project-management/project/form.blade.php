@@ -5,9 +5,7 @@
         <div class="grid grid-cols-2 gap-4">
             <div class="col-span-2">
                 <x-forms.input-label for="logo">@lang('general.logo')</x-forms.input-label>
-                <x-forms.file-input id="logo" wire:model="form.logo" :old-file="$form->logo" />
-                <x-error-span>{{ $errors->first('form.logo') }}</x-error-span>
-
+                <x-forms.file-input id="logo" wire:model="form.logo"  name="form.logo" :old-file="$form->logo" />
             </div>
             <div>
                 <x-forms.input-label for="code">@lang('general.code')</x-forms.input-label>
