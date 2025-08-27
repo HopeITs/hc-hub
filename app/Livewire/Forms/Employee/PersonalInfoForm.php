@@ -57,7 +57,8 @@ class PersonalInfoForm extends Form
 
     #[Validate('nullable|string')]
     public $civil_registry_number;
-
+    #[Validate('nullable|string')]
+    public $place_and_birth_date;
     #[Validate('nullable|string')]
     public $place_of_registration;
 
@@ -141,6 +142,7 @@ class PersonalInfoForm extends Form
         $this->children = $employee->children;
         $this->nationality = $employee->nationality;
         $this->civil_registry_office = $employee->civil_registry_office;
+        $this->place_and_birth_date = $employee->place_and_birth_date;
         $this->civil_registry_number = $employee->civil_registry_number;
         $this->place_of_registration = $employee->place_of_registration;
         $this->work_phone = $employee->work_phone;

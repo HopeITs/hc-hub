@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('tech_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->char('national_number')->unique()->nullable();
             $table->dateTime('dob')->nullable();
+            $table->string('place_and_birth_date')->nullable();
             $table->string('civil_registry_office')->nullable();
             $table->string('civil_registry_number')->nullable();
             $table->string('place_of_registration')->nullable();

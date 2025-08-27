@@ -114,7 +114,12 @@
             <x-error-span>{{ $message }}</x-error-span>
             @enderror
         </div>
-
+        <div>
+            <x-forms.input-label
+                for="place_and_birth_date">@lang('general.place_and_birth_date')</x-forms.input-label>
+            <x-forms.input type="text" wire:model="infoForm.place_and_birth_date" id="place_and_birth_date"/>
+            <x-error-span>{{ $errors->first('infoForm.place_and_birth_date') }}</x-error-span>
+        </div>
         <div>
             <x-forms.input-label
                 for="civil_registry_office">@lang('general.civil_registry_office')</x-forms.input-label>
@@ -150,7 +155,7 @@
                     <x-forms.input type="text" wire:model="infoForm.username" id="username"
                                    class="rounded-r-none" placeholder="username"/>
                     <span
-                        class="inline-flex items-center px-3 rounded-e-md shadow-md border border-s-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        class="inline-flex items-center px-3 ltr:rounded-e-md rtl:rounded-s-md shadow-md border ltr:border-s-0 rtl:border-e-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
                         @hcsyria.org
                     </span>
                 </div>

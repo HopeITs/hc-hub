@@ -54,6 +54,26 @@
                         wire:model.defer="educationForm.educations.{{ $index }}.graduation_year"/>
                     <x-error-span>{{ $errors->first("educationForm.educations.$index.graduation_year") }}</x-error-span>
                 </div>
+
+                <div>
+                    <x-forms.input-label for="education_graduation_year_{{ $index }}">@lang('general.graduation_year')</x-forms.input-label>
+                    <x-forms.input
+                        id="education_graduation_year_{{ $index }}"
+                        type="number"
+                        placeholder="YYYY"
+                        wire:model.defer="educationForm.educations.{{ $index }}.graduation_year"/>
+                    <x-error-span>{{ $errors->first("educationForm.educations.$index.graduation_year") }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="edu_attachment_{{ $index }}">@lang('general.attachment')</x-forms.input-label>
+                    <x-forms.file-input wire:model="educationForm.educations.{{ $index }}.edu_attachment"
+                                        name="educationForm.educations.{{ $index }}.edu_attachment"
+                                        preview-type="pdf"
+                                        :old-file="$educationForm->educations[$index]['edu_attachment']"
+                                        accept="pdf"/>
+
+                </div>
             </div>
 
 
