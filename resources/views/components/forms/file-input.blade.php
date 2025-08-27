@@ -1,31 +1,58 @@
 @props([
     'previewType' => 'image', // image - docs - pdf - video
     'oldFile' => null,
+
 ])
 
-<div class="grid md:grid-cols-2 items-end gap-4">
-    <input
-        {{ $attributes->merge([
-            'class' => 'w-full h-fit text-sm rounded-lg cursor-pointer rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-500 transition',
-            'type' => 'file',
-        ]) }}
-    />
 
-    @if ($previewType === 'image')
-        @php
-            // Handle both TemporaryUploadedFile (new upload) and string URL (existing logo)
-            $src = null;
-            if (is_object($oldFile) && method_exists($oldFile, 'temporaryUrl')) {
-                $src = $oldFile->temporaryUrl();
-            } elseif (is_string($oldFile) && $oldFile !== '') {
-                $src = $oldFile;
-            }
-        @endphp
 
-        @if ($src)
-            <a href="{{ $src }}" target="_blank" rel="noopener">
-                <img src="{{ $src }}" alt="preview-img" class="h-20 p-1 rounded-md" />
-            </a>
+
+
+<div class="mt-2 flex items-center space-x-6">
+    @if ($previewType === 'avatar')
+    <div class="shrink-0">
+        @if ($oldFile instanceof Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
+            <img class="size-20 rounded-full object-cover" src="{{ $oldFile->temporaryUrl() }}"
+                 alt="New profile photo"/>
+        @elseif ($oldFile !== null)
+            <img class="size-20  rounded-full object-cover"
+                 src="{{ $oldFile}}" alt="Current profile photo"/>
+        @else
+            <div class="size-20  rounded-full bg-gray-200 flex items-center justify-center">
+                <svg class="h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                </svg>
+            </div>
         @endif
+    </div>
     @endif
+        @if ($previewType === 'image')
+            <div class="shrink-0">
+                @if ($oldFile instanceof Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
+                    <img class="w-28  rounded-md object-cover" src="{{ $oldFile->temporaryUrl() }}"
+                         alt="New profile photo"/>
+                @elseif ($oldFile !== null)
+                    <img class="w-28  rounded-md object-cover"
+                         src="{{ $oldFile}}" alt="Current profile photo"/>
+                @else
+                    <div class="w-24 rounded-md bg-gray-200 flex items-center justify-center">
+                        <x-icons.user class="size-12"/>
+{{--                        <svg class="h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"--}}
+{{--                             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">--}}
+{{--                            <path stroke-linecap="round" stroke-linejoin="round"--}}
+{{--                                  d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>--}}
+{{--                        </svg>--}}
+                    </div>
+                @endif
+            </div>
+        @endif
+    <div>
+        <input     {{ $attributes->merge([
+            'class' => 'block w-full text-sm text-slate-500 px-4 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100',
+            'type' => 'file',
+        ]) }}/>
+        <x-error-span>{{ $errors->first($attributes->get('name')) }}</x-error-span>
+    </div>
 </div>
