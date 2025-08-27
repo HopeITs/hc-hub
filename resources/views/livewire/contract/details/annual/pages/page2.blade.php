@@ -1,63 +1,98 @@
 @php
-    $loc           = $locale ?? app()->getLocale();
-    $employee      = $contract->employee;
-    $employeeName  = $employee?->getTranslation('name', $loc) ?? '—';
+    use Illuminate\Support\Str;
+
+    $loc      = $locale ?? app()->getLocale();
 
     $positionTitle = $contract->position?->requiredPosition?->title
-                     ?? $contract->position?->name
-                     ?? '#'.$contract->position_id;
+                  ?? $contract->position?->name
+                  ?? ('#'.$contract->position_id);
 
-    $centerName    = $contract->position?->center?->getTranslation('name', $loc) ?? '—';
-    $startDate     = optional($contract->start_date)->format('d/m/Y');
-    $endDate       = optional($contract->end_date)->format('d/m/Y');
+    $startDate = optional($contract->start_date)->format('d/m/Y') ?: '—';
+    $endDate   = optional($contract->end_date)->format('d/m/Y') ?: '—';
 
-    $weeklyHours   = (int) ($contract->weekly_hours ?? 40);
-    $salaryFormatted = number_format((float) ($contract->salary ?? 0), 0); // “/ 000 USD” style in doc
+    $weeklyHours = (int) ($contract->weekly_hours ?? 40);
+    $salary      = (float) ($contract->salary ?? 0);
+    $salaryFormatted = number_format($salary, 0);
+
+    // tiny helper for safe HTML text where needed
+    $esc = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
+
+    // Pre-build red labels to match page1
+    $L = fn(string $txt) => '<span class="h-label">'.$txt.'</span>';
 @endphp
 
-<x-contract.dual
-    :en="'whereas “ Christian Hope Center Aleppo / Head office ” has agreed to this volunteer according to the conditions outlined in this contract,'"
-    :ar="'و بما أن \" مركز الرجاء المسيحي - حلب - الإدارة العامة \" قد وافق على تطوعه بالشروط المنصوص عليها في هذا العقد,'"
+{{-- Whereas --}}
+<x-contract.dual tight
+                 :en="'whereas “ Christian Hope Center Aleppo / Head office ” has agreed to this volunteer according to the conditions outlined in this contract,'"
+                 :ar="'وبما أن \"مركز الرجاء المسيحي - حلب - الإدارة العامة\" قد وافق على تطوعه بالشروط المنصوص عليها في هذا العقد،'"
 />
 
+{{-- Intro line --}}
 <x-contract.dual rowClass="mt-4"
                  :en="'This contract between the two parties witnesses mutual acceptance of the following:'"
                  :ar="'تم العقد بين الطرفين والقبول المشترك لما يلي:'"
 />
 
+{{-- Contract type --}}
 <x-contract.dual rowClass="mt-4"
-                 :en="'<span class=\"text-red-600 font-semibold\">Contract type:</span> Volunteer agreement for limited period'"
-:ar="'<span class=\"text-red-600 font-semibold\">نوع العقد:</span> عقد تطوعي لمدة محدودة'"
+                 :en="$L('Contract type:').' Volunteer agreement for limited period'"
+                 :ar="$L('نوع العقد:').' عقد تطوعي لمدة محدودة'"
 />
 
+{{-- Place of Work --}}
 <x-contract.dual rowClass="mt-2"
-                 :en="'<span class=\"text-red-600 font-semibold\">Place of Work:</span> Aleppo – Christian Hope Center – Head Office'"
-:ar="'<span class=\"text-red-600 font-semibold\">مكان العمل:</span> حلب – مركز الرجاء المسيحي – المكتب'"
+                 :en="$L('Place of Work:').' Aleppo – Christian Hope Center – Head Office'"
+                 :ar="$L('مكان العمل:').' حلب – مركز الرجاء المسيحي – المكتب'"
 />
 
+{{-- Job description --}}
 <x-contract.dual rowClass="mt-2"
-                 :en="'<span class=\"text-red-600 font-semibold\">Job description:</span> ' . e($positionTitle) . ','"
-:ar="'<span class=\"text-red-600 font-semibold\">وصف العمل:</span> ' . e($positionTitle) . ','"
+                 :en="$L('Job description:').' '.$esc($positionTitle).','"
+                 :ar="$L('وصف العمل:').' '.$esc($positionTitle).','"
 />
 
+{{-- Duration + dates --}}
 <x-contract.dual rowClass="mt-4"
-                 :en="'<span class=\"text-red-600 font-semibold\">Duration of the agreement:</span><br>One Year<br><br>Starts from: ' . e($startDate ?: '—') . '<br>And ends on: ' . e($endDate ?: '—')"
-:ar="'<span class=\"text-red-600 font-semibold\">مدة العقد:</span><br>سنة<br><br>تبدأ من تاريخ: ' . e($startDate ?: '—') . '<br>وتنتهي في التاريخ: ' . e($endDate ?: '—')"
+                 :en="$L('Duration of the agreement:').'<br>One Year<br><br>Starts from: '.$esc($startDate).'<br>And ends on: '.$esc($endDate)"
+                 :ar="$L('مدة العقد:').'<br>سنة<br><br>تبدأ من تاريخ: '.$esc($startDate).'<br>وتنتهي في التاريخ: '.$esc($endDate)"
 />
 
-<x-contract.dual rowClass="mt-4"
-                 :en="'<span class=\"text-red-600 font-semibold\">Volunteer Work Hours:</span><br>' .
-$weeklyHours . ' working hours per week, 8 hours per day.<br>Standard office hours are Monday to Friday from 9:30 AM to 5:30 PM.<br><br>Saturdays are considered working days when necessary and not treated as extra hours.'"
-:ar="'<span class=\"text-red-600 font-semibold\">ساعات العمل التطوعي:</span><br>' .
-$weeklyHours . ' ساعة عمل أسبوعياً، 8 ساعات يومياً.<br>الدوام الإداري من الاثنين إلى الجمعة من الساعة 9:30 AM حتى الساعة 5:30 PM.<br><br>يُعتبر يوم السبت يوماً للعمل عند الحاجة، ولا يُعتبر دواماً إضافياً.'"
-/>
+{{-- Work hours --}}
+@php
+    $EN_HOURS = implode('<br>', [
+        $L('Volunteer Work Hours:'),
+        $weeklyHours.' working hours per week, 8 hours per day.',
+        'Standard office hours are Monday to Friday from 9:30 AM to 5:30 PM.',
+        '',
+        'Saturdays are considered working days when necessary and not treated as extra hours.'
+    ]);
 
-<x-contract.dual rowClass="mt-4"
-                 :en="'<span class=\"text-red-600 font-semibold\">Stipend and Benefits:</span><br>Christian Hope Center is to give a monthly stipend of / ' . $salaryFormatted . ' USD / or its equivalent in Syrian pounds, to be paid in cash to the volunteer at the end of each month.'"
-:ar="'<span class=\"text-red-600 font-semibold\">المكافأة المالية والمزايا:</span><br>يمنح مركز الرجاء المسيحي شهرياً للسيد/ة متطوع/ة مكافأة مقدارها / ' . $salaryFormatted . ' / دولار أمريكي أو ما يعادلها بالليرة السورية، تُمنح نقداً في نهاية كل شهر.'"
-/>
+    $AR_HOURS = implode('<br>', [
+        $L('ساعات العمل التطوعي:'),
+        $weeklyHours.' ساعة عمل أسبوعياً، 8 ساعات يومياً.',
+        'الدوام الإداري من الاثنين إلى الجمعة من الساعة 9:30 AM حتى الساعة 5:30 PM.',
+        '',
+        'يُعتبر يوم السبت يوماً للعمل عند الحاجة، ولا يُعتبر دواماً إضافياً.'
+    ]);
+@endphp
 
+<x-contract.dual rowClass="mt-4" :en="$EN_HOURS" :ar="$AR_HOURS"/>
+
+{{-- Stipend & Benefits --}}
+@php
+    $EN_STIPEND = $L('Stipend and Benefits:').'<br>'.
+        'Christian Hope Center is to give a monthly stipend of / '.$salaryFormatted.' USD / or its equivalent in Syrian pounds, '.
+        'to be paid in cash to the volunteer at the end of each month.';
+
+    $AR_STIPEND = $L('المكافأة المالية والمزايا:').'<br>'.
+        'يمنح مركز الرجاء المسيحي شهرياً للسيد/ة متطوع/ة مكافأة مقدارها / '.$salaryFormatted.' / دولار أمريكي أو ما يعادلها بالليرة السورية، '.
+        'تُمنح نقداً في نهاية كل شهر.';
+@endphp
+
+<x-contract.dual rowClass="mt-4" :en="$EN_STIPEND" :ar="$AR_STIPEND"/>
+
+{{-- Duties --}}
 <x-contract.dual rowClass="mt-4"
-                 :en="'<span class=\"text-red-600 font-semibold\">Duties:</span><br>as listed in the job description of the position (attached).'"
-:ar="'<span class=\"text-red-600 font-semibold\">المسؤوليات:</span><br>حسب ما ورد في توصيف العمل التطوعي لهذا المنصب (مرفق).'"
+                 :en="$L('Duties:').'<br>as listed in the job description of the position (attached).'"
+                 :ar="$L('المسؤوليات:').'<br>حسب ما ورد في توصيف العمل التطوعي لهذا المنصب (مرفق).'"
 />
