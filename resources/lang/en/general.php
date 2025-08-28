@@ -202,6 +202,7 @@ return [
     'contract-end' => 'Contract End',
     'ongoing' => 'Ongoing',
     'no-employees' => 'No employees assigned to this project yet.',
+    'archived-files' => 'Archived Files',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

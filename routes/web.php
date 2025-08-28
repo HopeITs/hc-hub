@@ -15,9 +15,7 @@ use App\Livewire\Employee\EmployeeEdit;
 use App\Livewire\Employee\EmployeeModule;
 use App\Livewire\ProjectManagement\CentersModule;
 use App\Livewire\ProjectManagement\DefaultDeliverablesModule;
-
 use App\Livewire\Employee\Tabs\PersonalInfoTab;
-
 use App\Livewire\ProjectManagement\PositionsModule;
 use App\Livewire\ProjectManagement\Project\Detail as ProjectDetail;
 use App\Livewire\ProjectManagement\Project\Create as ProjectCreate;
@@ -27,17 +25,16 @@ use App\Livewire\ProjectManagement\RequiredPositionModule;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
-
+use App\Livewire\Archives\ArchivedFilesModule;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 Route::group(
     [
         'prefix' => LaravelLocalization::setLocale(),
-//        'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
+        //        'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
     ],
     function () {
-
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle);
         });
@@ -68,27 +65,36 @@ Route::group(
             Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
-            Route::prefix('contracts')->name('contracts.')->group(function () {
-                Route::get('/', ContractsModule::class)->name('index');
-                Route::get('/create', ContractCreate::class)->name('create');
-                Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
-            });
+            Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
 
+            Route::prefix('contracts')
+                ->name('contracts.')
+                ->group(function () {
+                    Route::get('/', ContractsModule::class)->name('index');
+                    Route::get('/create', ContractCreate::class)->name('create');
+                    Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
+                });
 
-            Route::prefix('projects')->name('projects.')->group(function () {
-                Route::get('/', ProjectIndex::class)->name('index');
-                Route::get('/create', ProjectCreate::class)->name('create');
-                Route::get('/edit/{project:slug}', ProjectUpdate::class)->name('edit');
-                Route::get('/{project:slug}', ProjectDetail::class)->name('show');
-            });
-            Route::prefix('employees')->name('employees.')->group(function () {
-                Route::get('/', EmployeeModule::class)->name('index');
-                Route::get('/create', EmployeeCreate::class)->name('create');
-                Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
-            });
+            Route::prefix('projects')
+                ->name('projects.')
+                ->group(function () {
+                    Route::get('/', ProjectIndex::class)->name('index');
+                    Route::get('/create', ProjectCreate::class)->name('create');
+                    Route::get('/edit/{project:slug}', ProjectUpdate::class)->name('edit');
+                    Route::get('/{project:slug}', ProjectDetail::class)->name('show');
+                });
+
+            Route::prefix('employees')
+                ->name('employees.')
+                ->group(function () {
+                    Route::get('/', EmployeeModule::class)->name('index');
+                    Route::get('/create', EmployeeCreate::class)->name('create');
+                    Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
+                });
+
             Route::get('/contracts/{contract}', ContractDetails::class)->name('contracts.show');
         });
 
         require __DIR__ . '/auth.php';
-    }
+    },
 );

@@ -204,6 +204,7 @@ return [
     'contract-end' => 'نهاية العقد',
     'ongoing' => 'مستمر',
     'no-employees' => 'لا يوجد موظفون معينون في هذا المشروع بعد.',
+    'archived-files' => 'أرشفة الملفات',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',
