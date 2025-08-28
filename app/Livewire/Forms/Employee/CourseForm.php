@@ -71,7 +71,7 @@ class CourseForm extends Form
                 'is_approved'          => (bool) ($row['is_approved'] ?? false),
             ];
         })->all();
-dd($payload);
+
         $this->employee->courses()->delete();
         $this->employee->courses()->createMany($payload);
     }

@@ -49,6 +49,7 @@ return [
     'allowed_gender' => 'Allowed Gender',
     'marital_status' => 'Marital Status',
     'any' => 'Any',
+    'attachment' => 'Attachment',
     'male' => 'Male',
     'female' => 'Female',
     'single' => 'Single',

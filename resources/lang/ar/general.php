@@ -61,6 +61,7 @@ return [
     'civil_registry_number' => 'رقم السجل المدني',
     'place_of_registration' => 'مكان القيد',
     'gender' => 'الجنس',
+    'attachment' => 'مرفقات',
     'father_name' => 'اسم الأب',
     'mother_name' => 'اسم الأم',
     'nationality' => 'الجنسية',

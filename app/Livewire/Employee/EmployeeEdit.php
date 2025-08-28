@@ -80,9 +80,9 @@ class EmployeeEdit extends Component
         $this->educationForm->addEducation();
     }
 
-    public function removeEducation(int $index): void
+    public function removeEducation(int $index , int $id =null): void
     {
-        $this->educationForm->removeEducation($index);
+        $this->educationForm->removeEducation($index , $id);
         // Optional: clear stale validation errors for removed index
         $this->resetErrorBag();
     }
