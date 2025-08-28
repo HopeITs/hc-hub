@@ -18,7 +18,7 @@
                                 <a href="{{ route('archived-files.index') }}"
                                     class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
                                     <x-icons.home class="w-4 h-4 mr-2" />
-                                    Home
+                                    Root
                                 </a>
                             </li>
                             @foreach ($breadcrumbs as $breadcrumb)
@@ -41,8 +41,8 @@
 
                     <div class="flex items-center space-x-2">
                         <button type="button" wire:click="$set('showCreateFolderModal', true)"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-700 border border-transparent rounded-md shadow-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <x-icons.plus class="w-5 h-5 mr-2 -ml-1" />
+                            class="flex items-center gap-2 px-3 py-1 text-white bg-[#E63946] hover:bg-[#d92f3c] rounded-lg shadow font-medium transition-all focus:ring-2 focus:ring-[#E63946] focus:ring-offset-1">
+                            <x-icons.plus class="w-5 h-5" />
                             New Folder
                         </button>
 
@@ -123,8 +123,7 @@
                     <div class="mt-4">
                         <label for="folderName" class="block text-sm font-medium text-gray-700">Folder Name</label>
                         <input type="text" id="folderName" wire:model.defer="newFolderName"
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            placeholder="e.g., Company Policies" wire:keydown.enter="createFolder">
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         @error('newFolderName')
                             <span class="mt-2 block text-sm text-red-600">{{ $message }}</span>
                         @enderror
@@ -133,7 +132,8 @@
 
                 <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
                     <button type="button" wire:click="createFolder"
-                        class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
+                        class="flex items-center gap-2 px-3 py-1 text-white bg-[#E63946] hover:bg-[#d92f3c] rounded-lg shadow font-medium transition-all focus:ring-2 focus:ring-[#E63946] focus:ring-offset-1">
+                        <x-icons.plus class="w-5 h-5" />
                         Create
                     </button>
                     <button type="button" wire:click="$set('showCreateFolderModal', false)"
@@ -145,6 +145,7 @@
         </div>
     @endif
 
+    {{-- Delete Confirmation Modal --}}
     @if ($showDeleteConfirmationModal)
         <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('showDeleteConfirmationModal', false)">
         </div>
@@ -163,7 +164,7 @@
                             </h3>
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500">
-                                    Are you sure you want to delete this item?
+                                    Are you sure you want to delete this item? This action cannot be undone.
                                 </p>
                             </div>
                         </div>
