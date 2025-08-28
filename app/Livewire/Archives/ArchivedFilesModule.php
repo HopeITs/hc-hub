@@ -72,7 +72,7 @@ class ArchivedFilesModule extends Component
         }
 
         foreach ($this->filesToUpload as $file) {
-            $this->currentFolder->addMedia($file->getRealPath())->usingName($file->getClientOriginalName())->toMediaCollection();
+            $this->currentFolder->addMedia($file->getRealPath())->usingName($file->getClientOriginalName())->toMediaCollection('default', 'public');
         }
 
         $this->filesToUpload = [];

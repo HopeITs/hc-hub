@@ -24,4 +24,5 @@ class Folder extends Model implements HasMedia
     {
         return $this->hasMany(Folder::class, 'parent_id');
     }
+
 }
