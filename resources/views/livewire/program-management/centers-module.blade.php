@@ -5,7 +5,7 @@
         <livewire:layout.breadcrumbs
             :title="__('general.centers')"
             :crumbs="[
-                ['label' =>__('general.projects-management')],
+                ['label' =>__('general.programs-management')],
                 ['label' => __('general.centers'),  'route' => 'centers.index'],
             ]"
             :showButton="true"
@@ -22,7 +22,7 @@
             <x-table.heading wire:click="sortBy('id')" sortable :direction="$sortField === 'id' ? $sortDirection : null">ID</x-table.heading>
             <x-table.heading wire:click="sortBy('name')" sortable :direction="$sortField === 'name' ? $sortDirection : null">@lang('general.center-name')</x-table.heading>
             <x-table.heading wire:click="sortBy('city_name')" sortable :direction="$sortField === 'city_name' ? $sortDirection : null">@lang('general.center-city')</x-table.heading>
-            <x-table.heading wire:click="sortBy('project_name')" sortable :direction="$sortField === 'project_name' ? $sortDirection : null">@lang('general.required-project')</x-table.heading>
+            <x-table.heading wire:click="sortBy('program_name')" sortable :direction="$sortField === 'program_name' ? $sortDirection : null">@lang('general.required-program')</x-table.heading>
             <x-table.heading wire:click="sortBy('address')" sortable :direction="$sortField === 'address' ? $sortDirection : null">@lang('general.address')</x-table.heading>
             <x-table.heading wire:click="sortBy('is_active')" sortable :direction="$sortField === 'is_active' ? $sortDirection : null">@lang('general.is-active')</x-table.heading>
             <x-table.heading>{{trans_choice('general.positions' , 2)}}</x-table.heading>
@@ -35,7 +35,7 @@
                     <x-table.cell class="whitespace-nowrap">{{ $item->id }}</x-table.cell>
                     <x-table.cell class="max-w-64 truncate" title="{{ $item->name }}">{{ $item->name ?? '-' }}</x-table.cell>
                     <x-table.cell class="max-w-56 truncate" title="{{ optional($item->city)->getTranslation('name', $locale) }}">{{ optional($item->city)->getTranslation('name', $locale) ?? '-' }}</x-table.cell>
-                    <x-table.cell class="max-w-56 truncate" title="{{ optional($item->project)->name }}">{{ optional($item->project)->name ?? '-' }}</x-table.cell>
+                    <x-table.cell class="max-w-56 truncate" title="{{ optional($item->program)->name }}">{{ optional($item->program)->name ?? '-' }}</x-table.cell>
                     <x-table.cell class="max-w-72 truncate" title="{{ $item->getTranslation('address', $locale) }}">{{ $item->getTranslation('address', $locale) ?? '-' }}</x-table.cell>
                     <x-table.cell-status :active="$item->is_active" :model-id="$item->id" wire-event="confirmToggleItemStatus" />
                     <x-table.cell class="whitespace-nowrap">
@@ -86,14 +86,14 @@
                         <x-error-span>{{ $errors->first('item.city_id') }}</x-error-span>
                     </div>
                     <div>
-                        <x-forms.input-label for="project_id">@lang('general.required-project')</x-forms.input-label>
-                        <x-forms.select-input id="project_id" wire:model="item.project_id">
+                        <x-forms.input-label for="program_id">@lang('general.required-project')</x-forms.input-label>
+                        <x-forms.select-input id="program_id" wire:model="item.program_id">
                             <option value="">{{ __('general.select') }}</option>
-                            @foreach($projects as $project)
-                                <option value="{{ $project->id }}">{{ $project->name }}</option>
+                            @foreach($programs as $program)
+                                <option value="{{ $program->id }}">{{ $program->name }}</option>
                             @endforeach
                         </x-forms.select-input>
-                        <x-error-span>{{ $errors->first('item.project_id') }}</x-error-span>
+                        <x-error-span>{{ $errors->first('item.program_id') }}</x-error-span>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">

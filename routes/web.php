@@ -13,17 +13,17 @@ use App\Livewire\Contract\ContractEdit;
 use App\Livewire\Employee\EmployeeCreate;
 use App\Livewire\Employee\EmployeeEdit;
 use App\Livewire\Employee\EmployeeModule;
-use App\Livewire\ProjectManagement\CentersModule;
-use App\Livewire\ProjectManagement\DefaultDeliverablesModule;
+use App\Livewire\ProgramManagement\CentersModule;
+use App\Livewire\ProgramManagement\DefaultDeliverablesModule;
 
 use App\Livewire\Employee\Tabs\PersonalInfoTab;
 
-use App\Livewire\ProjectManagement\PositionsModule;
-use App\Livewire\ProjectManagement\Project\Detail as ProjectDetail;
-use App\Livewire\ProjectManagement\Project\Create as ProjectCreate;
-use App\Livewire\ProjectManagement\Project\Update as ProjectUpdate;
-use App\Livewire\ProjectManagement\Project\Index as ProjectIndex;
-use App\Livewire\ProjectManagement\RequiredPositionModule;
+use App\Livewire\ProgramManagement\PositionsModule;
+use App\Livewire\ProgramManagement\Program\Detail as ProgramDetail;
+use App\Livewire\ProgramManagement\Program\Create as ProgramCreate;
+use App\Livewire\ProgramManagement\Program\Update as ProgramUpdate;
+use App\Livewire\ProgramManagement\Program\Index as ProgramIndex;
+use App\Livewire\ProgramManagement\RequiredPositionModule;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -65,7 +65,7 @@ Route::group(
 
             Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
             Route::get('/centers', CentersModule::class)->name('centers.index');
-            Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
+            Route::get('/program-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
             Route::prefix('contracts')->name('contracts.')->group(function () {
@@ -75,11 +75,11 @@ Route::group(
             });
 
 
-            Route::prefix('projects')->name('projects.')->group(function () {
-                Route::get('/', ProjectIndex::class)->name('index');
-                Route::get('/create', ProjectCreate::class)->name('create');
-                Route::get('/edit/{project:slug}', ProjectUpdate::class)->name('edit');
-                Route::get('/{project:slug}', ProjectDetail::class)->name('show');
+            Route::prefix('programs')->name('programs.')->group(function () {
+                Route::get('/', ProgramIndex::class)->name('index');
+                Route::get('/create', ProgramCreate::class)->name('create');
+                Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
+                Route::get('/{program:slug}', ProgramDetail::class)->name('show');
             });
             Route::prefix('employees')->name('employees.')->group(function () {
                 Route::get('/', EmployeeModule::class)->name('index');

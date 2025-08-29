@@ -30,9 +30,9 @@
             >@lang('general.job-title')</x-table.heading>
 
             <x-table.heading
-                wire:click="sortBy('project_name')"
+                wire:click="sortBy('program_name')"
                 sortable
-                :direction="$sortField === 'project_name' ? $sortDirection : null"
+                :direction="$sortField === 'program_name' ? $sortDirection : null"
             >@lang('general.required-project')</x-table.heading>
 
             <x-table.heading
@@ -52,7 +52,7 @@
 
                     <x-table.cell>
                         {{-- CORRECTED: Access name directly --}}
-                        {{ optional($item->project)->name ?? '-' }}
+                        {{ optional($item->program)->name ?? '-' }}
                     </x-table.cell>
 
                     <x-table.cell-status
@@ -89,17 +89,17 @@
 
                 {{-- Project Selection --}}
                 <div class="col-span-1">
-                    <x-forms.input-label for="project_id">@lang('general.required-project')</x-forms.input-label>
-                    <x-forms.select-input id="project_id" wire:model="item.project_id">
+                    <x-forms.input-label for="program_id">@lang('general.required-program')</x-forms.input-label>
+                    <x-forms.select-input id="program_id" wire:model="item.program_id">
                         <option value="">@lang('general.select')</option>
-                        @foreach(\App\Models\Project::orderBy('name')->get() as $project)
-                            <option value="{{ $project->id }}">
+                        @foreach(\App\Models\Program::orderBy('name')->get() as $program)
+                            <option value="{{ $program->id }}">
                                 {{-- CORRECTED: Access name directly --}}
-                                {{ $project->name }}
+                                {{ $program->name }}
                             </option>
                         @endforeach
                     </x-forms.select-input>
-                    <x-error-span>{{ $errors->first('item.project_id') }}</x-error-span>
+                    <x-error-span>{{ $errors->first('item.program_id') }}</x-error-span>
                 </div>
 
                 <div class="col-span-2">

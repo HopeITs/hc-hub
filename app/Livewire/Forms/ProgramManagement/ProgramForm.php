@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Livewire\Forms\ProjectManagement;
+namespace App\Livewire\Forms\ProgramManagement;
 
-use App\Models\Project;
+use App\Models\Program;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
-class ProjectForm extends Form
+class ProgramForm extends Form
 {
 
-    public ?Project $project = null;
+    public ?Program $program = null;
 
     public $name;
     public $description = [];
@@ -31,7 +31,7 @@ class ProjectForm extends Form
             'end_date' => ['nullable', 'date', 'after:start_date'],
             'slug' => [
                 'required',
-                Rule::unique('projects')->ignore($this->project),
+                Rule::unique('programs')->ignore($this->program),
             ],
             'code' => 'required',
             'logo' => 'nullable|image',
@@ -39,17 +39,17 @@ class ProjectForm extends Form
         ];
     }
 
-    public function setProject(Project $project)
+    public function setProgram(Program $program)
     {
-        $this->project = $project;
-        $this->name = $project->name;
-        $this->description = $project->getTranslations('description') ;
-        $this->slug = $project->slug;
-        $this->start_date = $project->start_date;
-        $this->end_date = $project->end_date;
-        $this->code = $project->code;
-        $this->logo = $project->getFirstMediaUrl('logo');
-        $this->is_active = $project->is_active;
+        $this->program = $program;
+        $this->name = $program->name;
+        $this->description = $program->getTranslations('description') ;
+        $this->slug = $program->slug;
+        $this->start_date = $program->start_date;
+        $this->end_date = $program->end_date;
+        $this->code = $program->code;
+        $this->logo = $program->getFirstMediaUrl('logo');
+        $this->is_active = $program->is_active;
 
     }
 
@@ -57,11 +57,11 @@ class ProjectForm extends Form
     {
         $this->validate();
 
-        $project = Project::create($this->except('logo'));
+        $program = Program::create($this->except('logo'));
 
         if ($this->logo != null) {
-            $project->addMedia($this->logo->getRealPath())
-                ->usingFileName('project-logo.' . $this->logo->getClientOriginalExtension())
+            $program->addMedia($this->logo->getRealPath())
+                ->usingFileName('program-logo.' . $this->logo->getClientOriginalExtension())
                 ->toMediaCollection('logo');
         }
 
@@ -74,22 +74,22 @@ class ProjectForm extends Form
     {
         $this->validate();
 
-        $this->project->update(
+        $this->program->update(
             $this->all()
         );
         if ($this->logo) {
-            $this->project->clearMediaCollection('logo');
-            $this->project->addMedia($this->logo->getRealPath())
-                ->usingFileName('project-logo.' . $this->logo->getClientOriginalExtension())
+            $this->program->clearMediaCollection('logo');
+            $this->program->addMedia($this->logo->getRealPath())
+                ->usingFileName('program-logo.' . $this->logo->getClientOriginalExtension())
                 ->toMediaCollection('logo');
         }
         $this->reset();
     }
 
     public function statusToggle(){
-        $this->project->update(
+        $this->program->update(
            [
-               'is_active' => !$this->project->is_active,
+               'is_active' => !$this->program->is_active,
            ]
         );
     }

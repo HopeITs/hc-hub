@@ -3,7 +3,7 @@
 namespace App\Livewire\Contract;
 
 use App\Livewire\Forms\ContractForm;
-use App\Models\{Contract, Employee, Position, ContractType, Department, JobLevel, Project};
+use App\Models\{Contract, Employee, Position, ContractType, Department, JobLevel, Program};
 use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -102,13 +102,13 @@ class ContractEdit extends Component
         }
         $employees = $employeesQuery->get();
 
-        $projectsQuery = Project::select('id', 'name')->orderBy("name->$locale");
-        $projects = $projectsQuery->get();
+        $programsQuery = Program::select('id', 'name')->orderBy("name->$locale");
+        $programs = $programsQuery->get();
 
         $positionsQuery = Position::with([
             'center:id,name',
             'requiredPosition:id,title',
-        ])->orderBy('id')->select(['id','center_id','required_position_id']);
+        ])->orderBy('id')->select(['id','center_id','position_id']);
 
         if ($isHr && $cityId) {
             $positionsQuery->whereHas('center', fn($c) => $c->where('city_id', $cityId));
@@ -120,7 +120,7 @@ class ContractEdit extends Component
         $levels      = JobLevel::select('id', 'name')->orderBy('id')->get();
 
         return view('livewire.contract.contract-edit', compact(
-            'employees', 'projects', 'positions', 'types', 'departments', 'levels'
+            'employees', 'programs', 'positions', 'types', 'departments', 'levels'
         ));
     }
 }

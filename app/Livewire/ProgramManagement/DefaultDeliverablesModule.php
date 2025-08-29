@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\ProjectManagement;
+namespace App\Livewire\ProgramManagement;
 
 use App\Models\ChecklistItem;
 use App\Models\City;
@@ -97,7 +97,7 @@ class DefaultDeliverablesModule extends Component
         $cities         = City::whereHas('centers')->orderBy("name->$locale")->get(['id','name']);
         $checklistItems = ChecklistItem::orderBy('order')->get(['id','name']);
 
-        return view('livewire.project-management.default-deliverables-module', compact('items','employees','cities','checklistItems'));
+        return view('livewire.program-management.default-deliverables-module', compact('items','employees','cities','checklistItems'));
     }
 
     public function create()

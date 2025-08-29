@@ -1,5 +1,5 @@
 <div>
-    <livewire:layout.breadcrumbs :title="__('general.projects-management')" :crumbs="[['label' => trans_choice('general.project', 2), 'url' => route('projects.index')], ['label' => $title]]" :showButton="true" />
+    <livewire:layout.breadcrumbs :title="__('general.projects-management')" :crumbs="[['label' => trans_choice('general.project', 2), 'url' => route('programs.index')], ['label' => $title]]" :showButton="true" />
 
     <form class="space-y-4" wire:submit.prevent="save">
         <div class="grid grid-cols-2 gap-4">

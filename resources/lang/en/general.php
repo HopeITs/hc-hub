@@ -12,7 +12,7 @@ return [
     'department' => 'Departments|Department',
     'job-level' => 'Job Levels|Job Level',
     'projects-management' => 'Projects Management',
-    'project' => 'Projects|Project',
+    'program' => 'programs|program',
     'my-profile' => 'My Profile',
     'my-account' => 'Personal Account',
     'dashboard' => 'Dashboard',

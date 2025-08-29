@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\ProjectManagement\Project;
+namespace App\Livewire\ProgramManagement\Program;
 
-use App\Livewire\Forms\ProjectManagement\ProjectForm;
-use App\Models\Project;
+use App\Livewire\Forms\ProgramManagement\ProgramForm;
+use App\Models\Program;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -18,8 +18,8 @@ class Index extends Component
 
     protected $listeners = ['load-more' => 'loadMore'];
 
-    public Project $project;
-    public ProjectForm $form;
+    public Program $program;
+    public ProgramForm $form;
     public $perPage = 6;
     public function loadMore(): void
     {
@@ -43,9 +43,9 @@ class Index extends Component
     }
 
 
-    public function toggleItemStatusConfirmed(Project $project)
+    public function toggleItemStatusConfirmed(Program $program)
     {
-        $this->form->setProject($project);
+        $this->form->setProgram($program);
         $this->form->statusToggle();
 
 
@@ -57,9 +57,9 @@ class Index extends Component
     }
 
 
-    public function show(Project $project)
+    public function show(Program $program)
     {
-        $this->form->setProject($project);
+        $this->form->setProgram($program);
     }
 
 
@@ -77,10 +77,10 @@ class Index extends Component
     }
 
 
-    public function delete(Project $project)
+    public function delete(Program $program)
     {
-        $this->form->setProject($project);
-        $this->form->project->delete();
+        $this->form->setProgram($program);
+        $this->form->program->delete();
 
         LivewireAlert::title(__('general.success-message'))
             ->success()
@@ -92,13 +92,13 @@ class Index extends Component
 
     public function render()
     {
-        $items = Project::with('media')->withCount([
+        $items = Program::with('media')->withCount([
             'centers', 'requiredPositions',
             'cities as cities_count' => function ($query) {
                 $query->select(DB::raw('count(distinct city_id)'));
             }
         ])->orderBy('is_active', 'desc')->latest()->take($this->perPage)->get();
 
-        return view('livewire.project-management.project.index', compact('items'));
+        return view('livewire.program-management.program.index', compact('items'));
     }
 }

@@ -7,7 +7,7 @@
                 <x-app-logo class="md:w-40 md:h-16" />
             </a>
             <ul class="space-y-2 font-medium">
-                <x-layouts.app.sidebar.dropdown-nav-list id="basic-project" :title="__('general.project-basics')" :active="request()->routeIs('dashboard') ||
+                <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('dashboard') ||
                     request()->routeIs('cities.*') ||
                     request()->routeIs('contract-types.*') ||
                     request()->routeIs('leave-types.*') ||
@@ -46,7 +46,7 @@
 
                 </x-layouts.app.sidebar.dropdown-nav-list>
 
-                <x-layouts.app.sidebar.dropdown-nav-list id="project-management" :title="__('general.projects-management')" :active="request()->routeIs('projects.*') ||
+                <x-layouts.app.sidebar.dropdown-nav-list id="program-management" :title="__('general.programs-management')" :active="request()->routeIs('programs.*') ||
                     request()->routeIs('required-positions.*') ||
                     request()->routeIs('centers.*')">
 
@@ -55,8 +55,8 @@
                     </x-slot>
 
                     <x-slot name="list">
-                        <x-layouts.app.sidebar.nav-item :href="route('projects.index')" :active="request()->routeIs('projects.*')">
-                            {{ trans_choice('general.project', 2) }}
+                        <x-layouts.app.sidebar.nav-item :href="route('programs.index')" :active="request()->routeIs('programs.*')">
+                            {{ trans_choice('general.program', 2) }}
                         </x-layouts.app.sidebar.nav-item>
 
                         <x-layouts.app.sidebar.nav-item :href="route('required-positions.index')" :active="request()->routeIs('required-positions.index')">

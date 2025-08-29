@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Livewire\ProjectManagement;
+namespace App\Livewire\ProgramManagement;
 
-use App\Models\Project;
+use App\Models\Program;
 use App\Models\RequiredPosition;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -20,14 +20,14 @@ class RequiredPositionModule extends Component
 
     public $item = [
         'title' => '',
-        'project_id' => '',
+        'program_id' => '',
         'is_active' => true,
         'qualifications' => '',
     ];
 
     protected $rules = [
         'item.title' => 'required|string|max:255',
-        'item.project_id' => 'required|exists:projects,id',
+        'item.program_id' => 'required|exists:programs,id',
         'item.qualifications' => 'nullable|string',
     ];
 
@@ -65,7 +65,7 @@ class RequiredPositionModule extends Component
         $dir    = $this->sortDirection ?: 'desc';
 
         $query = RequiredPosition::query()
-            ->with('project')
+            ->with('program')
             ->when($this->search, function ($q) use ($locale) {
                 $term = $this->search;
 
@@ -73,19 +73,19 @@ class RequiredPositionModule extends Component
                     // Own columns
                     $w->search(['title', 'qualifications'], $term)
 
-                        // Project name (translatable JSON)
-                        ->orWhereHas('project', function ($p) use ($term, $locale) {
+                        // Program name (translatable JSON)
+                        ->orWhereHas('program', function ($p) use ($term, $locale) {
                             $p->search(["name->$locale"], $term);
                         });
                 });
             });
 
-        // Sorting (supports: id, title, is_active, project_name)
+        // Sorting (supports: id, title, is_active, program_name)
         if ($sort === 'title') {
             $query->orderBy('title', $dir);
-        } elseif ($sort === 'project_name') {
-            $query->leftJoin('projects', 'required_positions.project_id', '=', 'projects.id')
-                ->orderBy("projects.name->$locale", $dir)
+        } elseif ($sort === 'program_name') {
+            $query->leftJoin('programs', 'required_positions.program_id', '=', 'programs.id')
+                ->orderBy("programs.name->$locale", $dir)
                 ->select('required_positions.*');
         } elseif ($sort === 'is_active') {
             $query->orderBy('is_active', $dir);
@@ -96,7 +96,7 @@ class RequiredPositionModule extends Component
 
         $items = $query->paginate(15);
 
-        return view('livewire.project-management.required-position-module', compact('items'));
+        return view('livewire.program-management.required-position-module', compact('items'));
     }
 
     public function create()
@@ -112,7 +112,7 @@ class RequiredPositionModule extends Component
         $model = RequiredPosition::findOrFail($id);
 
         $this->modalTitle = __('general.edit');
-        $this->item = $model->only(['id', 'title', 'project_id', 'qualifications']);
+        $this->item = $model->only(['id', 'title', 'program_id', 'qualifications']);
         $this->resetValidation();
         $this->showModal = true;
     }
@@ -126,7 +126,7 @@ class RequiredPositionModule extends Component
         } else {
             RequiredPosition::create([
                 'title' => $this->item['title'],
-                'project_id' => $this->item['project_id'],
+                'program_id' => $this->item['program_id'],
                 'qualifications' => $this->item['qualifications'],
             ]);
         }

@@ -8,7 +8,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
-class Project extends Model implements HasMedia
+class Program extends Model implements HasMedia
 {
     use HasFactory, HasTranslations, InteractsWithMedia;
 
@@ -28,7 +28,7 @@ class Project extends Model implements HasMedia
 
     public function cities()
     {
-        return $this->belongsToMany(City::class, 'centers', 'project_id', 'city_id');
+        return $this->belongsToMany(City::class, 'centers', 'program_id', 'city_id');
     }
 
     public function requiredPositions()

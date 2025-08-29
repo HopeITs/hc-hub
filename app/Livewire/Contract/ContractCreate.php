@@ -87,11 +87,11 @@ class ContractCreate extends Component
                 'requiredPosition:id,title',
             ])
                 ->orderBy('id')
-                ->get(['id','center_id','required_position_id']),
+                ->get(['id','center_id','position_id']),
             'types'       => ContractType::select('id','name')->orderBy("name->$locale")->get(),
             'departments' => Department::select('id','name')->orderBy('name')->get(),
             'levels'      => JobLevel::select('id','name')->orderBy('id')->get(),
-            'projects'   => \App\Models\Project::all(),
+            'programs'   => \App\Models\Program::all(),
         ]);
     }
 }

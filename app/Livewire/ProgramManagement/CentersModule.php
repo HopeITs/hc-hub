@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Livewire\ProjectManagement;
+namespace App\Livewire\ProgramManagement;
 
 use App\Models\Center;
 use App\Models\City;
-use App\Models\Project;
+use App\Models\Program;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Traits\SortableTable;
@@ -23,7 +23,7 @@ class CentersModule extends Component
         'id'         => null,
         'name'       => '',
         'city_id'    => '',
-        'project_id' => '',
+        'program_id' => '',
         'address'    => ['en' => '', 'ar' => ''],
         'is_active'  => true,
     ];
@@ -31,7 +31,7 @@ class CentersModule extends Component
     protected $rules = [
         'item.name'       => 'required|string|max:255',
         'item.city_id'    => 'required|exists:cities,id',
-        'item.project_id' => 'required|exists:projects,id',
+        'item.program_id' => 'required|exists:programs,id',
         'item.address.en' => 'nullable|string|max:255',
         'item.address.ar' => 'nullable|string|max:255',
     ];
@@ -72,7 +72,7 @@ class CentersModule extends Component
         $dir = $this->sortDirection ?: 'desc';
 
         $query = Center::query()
-            ->with(['city', 'project'])
+            ->with(['city', 'program'])
             ->when($this->search, function ($q) use ($locale) {
                 $term = $this->search;
                 $q->where(function ($w) use ($term, $locale) {
@@ -81,7 +81,7 @@ class CentersModule extends Component
                       ->orWhereHas('city', function ($c) use ($term, $locale) {
                           $c->where("name->$locale", 'like', "%{$term}%");
                       })
-                      ->orWhereHas('project', function ($p) use ($term) {
+                      ->orWhereHas('program', function ($p) use ($term) {
                           $p->where('name', 'like', "%{$term}%");
                       });
                 });
@@ -93,9 +93,9 @@ class CentersModule extends Component
             $query->leftJoin('cities', 'centers.city_id', '=', 'cities.id')
                   ->orderBy("cities.name->$locale", $dir)
                   ->select('centers.*');
-        } elseif ($sort === 'project_name') {
-            $query->leftJoin('projects', 'centers.project_id', '=', 'projects.id')
-                  ->orderBy('projects.name', $dir)
+        } elseif ($sort === 'program_name') {
+            $query->leftJoin('programs', 'centers.program_id', '=', 'programs.id')
+                  ->orderBy('programs.name', $dir)
                   ->select('centers.*');
         } else {
             $query->orderBy($sort, $dir);
@@ -104,9 +104,9 @@ class CentersModule extends Component
         $items = $query->paginate(15);
 
         $cities = City::orderBy("name->$locale")->get(['id', 'name']);
-        $projects = Project::orderBy('name')->get(['id', 'name']);
+        $programs = Program::orderBy('name')->get(['id', 'name']);
 
-        return view('livewire.project-management.centers-module', compact('items', 'cities', 'projects'));
+        return view('livewire.program-management.centers-module', compact('items', 'cities', 'programs'));
     }
 
     public function create()
@@ -115,7 +115,7 @@ class CentersModule extends Component
             'id'         => null,
             'name'       => '',
             'city_id'    => '',
-            'project_id' => '',
+            'program_id' => '',
             'address'    => ['en' => '', 'ar' => ''],
             'is_active'  => true,
         ];
@@ -134,7 +134,7 @@ class CentersModule extends Component
             'id'         => $model->id,
             'name'       => $model->name,
             'city_id'    => $model->city_id,
-            'project_id' => $model->project_id,
+            'program_id' => $model->program_id,
             'address'    => array_merge(['en' => '', 'ar' => ''], $model->getTranslations('address')),
             'is_active'  => (bool) $model->is_active,
         ];
@@ -150,7 +150,7 @@ class CentersModule extends Component
         $data = [
             'name' => $this->item['name'],
             'city_id' => $this->item['city_id'],
-            'project_id' => $this->item['project_id'],
+            'program_id' => $this->item['program_id'],
         ];
 
         $model = Center::findOrNew($this->item['id']);

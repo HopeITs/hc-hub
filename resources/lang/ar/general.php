@@ -11,7 +11,7 @@ return [
     'checklist-items' => 'عناصر القائمة|عنصر قائمة',
     'department' => 'الأقسام|القسم',
     'job-level' => 'المستويات الوظيفية|المستوى الوظيفي',
-    'projects-management' => 'إدارة المشاريع',
+    'programs-management' => 'إدارة المشاريع',
     'project' => 'المشاريع|مشروع',
     'my-profile' => 'الصفحة الشخصية',
     'my-account' => 'حسابي الشخصي',

@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
 
 
         $this->call([
-            ProjectSeeder::class,
+            ProgramSeeder::class,
             CitySeeder::class,
             ContractTypeSeeder::class,
             DepartmentSeeder::class,
@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
             UserRoleSeeder::class,
             JobLevelSeeder::class,
 //            EmployeeSeeder::class,
-            RequiredPositionsSeeder::class
+
         ]);
 
     //    $user = User::factory()->create([

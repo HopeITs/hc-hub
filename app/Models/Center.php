@@ -11,7 +11,7 @@ class Center extends Model
 {
     use HasFactory, HasTranslations;
 
-    protected $fillable = ['name', 'city_id', 'project_id', 'address', 'is_active'];
+    protected $fillable = ['name', 'city_id', 'program_id', 'address', 'is_active'];
 
     public $translatable = ['name','address'];
 
@@ -20,9 +20,9 @@ class Center extends Model
         return $this->belongsTo(City::class);
     }
 
-    public function project(): BelongsTo
+    public function program(): BelongsTo
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Program::class);
     }
 
     public function positions()

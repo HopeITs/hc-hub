@@ -2,26 +2,26 @@
     <livewire:layout.breadcrumbs :title="__('general.projects-management')" :crumbs="[
         ['label' => __('general.projects-management')],
         ['label' => trans_choice('general.project', 2), 'url' => route('projects.index')],
-        ['label' => $project->name],
+        ['label' => $program->name],
     ]" />
 
     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
             <div class="flex items-center gap-3">
-                <h1 class="text-3xl font-bold text-gray-800">{{ $project->name }}
+                <h1 class="text-3xl font-bold text-gray-800">{{ $program->name }}
                 </h1>
                 <span
-                    class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ $project->code }}</span>
+                    class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ $program->code }}</span>
             </div>
             <p class="text-md text-gray-500 mt-2">
-                {{ $project->getTranslation('description', app()->getLocale()) }}
+                {{ $program->getTranslation('description', app()->getLocale()) }}
             </p>
         </div>
 
         <div class="flex items-center space-x-2 flex-shrink-0">
-            <x-forms.toggle-input :active="$project->is_active" :model-id="$project->id" wire-event="confirmToggleItemStatus" />
-            <x-table.edit-btn :href="route('projects.edit', ['project' => $project->slug])" />
-            <x-table.delete-btn :modelId="$project->id" />
+            <x-forms.toggle-input :active="$program->is_active" :model-id="$program->id" wire-event="confirmToggleItemStatus" />
+            <x-table.edit-btn :href="route('programs.edit', ['program' => $program->slug])" />
+            <x-table.delete-btn :modelId="$program->id" />
         </div>
     </div>
 
@@ -61,7 +61,7 @@
                     <x-icon name="arrows-pointing-in" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                         <span class="font-semibold text-gray-800">@lang('general.slug'):</span>
-                        <p class="text-gray-600">{{ $project->slug }}</p>
+                        <p class="text-gray-600">{{ $program->slug }}</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3"></div>
@@ -69,21 +69,21 @@
                     <x-icon name="calendar" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                         <span class="font-semibold text-gray-800">@lang('general.start_date'):</span>
-                        <p class="text-gray-600">{{ $project->start_date?->format('d M, Y') }}</p>
+                        <p class="text-gray-600">{{ $program->start_date?->format('d M, Y') }}</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
                     <x-icon name="calendar" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                         <span class="font-semibold text-gray-800">@lang('general.end_date'):</span>
-                        <p class="text-gray-600">{{ $project->end_date?->format('d M, Y') ?? __('general.active') }}</p>
+                        <p class="text-gray-600">{{ $program->end_date?->format('d M, Y') ?? __('general.active') }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div x-show="activeTab === 'centers'" x-cloak>
-            @if ($project->centers->isNotEmpty())
+            @if ($program->centers->isNotEmpty())
                 <div class="overflow-x-auto border rounded-lg">
                     <table class="w-full text-sm text-left text-gray-500">
                         <thead class="text-xs text-gray-700 bg-gray-50 border-b">
@@ -95,7 +95,7 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y">
-                            @foreach ($project->centers as $center)
+                            @foreach ($program->centers as $center)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 font-medium text-gray-900">
                                         {{-- CORRECTED: Access Center name directly --}}

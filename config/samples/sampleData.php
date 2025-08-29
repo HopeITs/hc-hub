@@ -74,7 +74,7 @@ return [
         ['name' => 'Services/ Keepers', 'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو استقبال المستفيدين وتوجيههم والاهتمام بنظافة المكان بشكل عام.', 'email' => null],
     ],
 
-    'projects' => [
+    'programs' => [
         [
             'name' => 'Hope Center',
             'description' => [
@@ -86,7 +86,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => 'Micro Project',
+            'name' => 'Micro Program',
             'description' => [
                 'en' => 'Aimed at empowering Syrian families via livelihood, education, and development programs.',
                 'ar' => 'مركز الرجاء المسيحي منظمة مسكونية، تأسست مطلع عام ٢٠١٨، وتعمل بتوجيه من الكنيسة اللاتينية في سورية. رسالتنا هي تمكين الأسر السورية من خلال مبادرات متعددة تستهدف كل مكون من مكونات الأسرة، في مجالات الإغاثة، ودعم سبل العيش، والتنمية، والتعليم.',
@@ -186,7 +186,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => 'Entrepreneurship project',
+            'name' => 'Entrepreneurship program',
             'description' => [
                 'en' => 'Leadership program to equip community leaders with technical and leadership skills for effective crisis response.',
                 'ar' => 'نظرًا لعدم وجود قادة ناجحين يمكنهم توجيه المجتمعات المحلية خلال أوقات الأزمات، تم إنشاء برنامج القيادة لاستهداف الأعضاء النشطين في المجتمع وتزويدهم بالمهارات الفنية والقدرات القيادية، والتي ستدعمهم في التقييم الدقيق لاحتياجات مجتمعاتهم الحالية والمستقبلية واقتراح حلول فعالة، وبالتالي المساهمة الفعلية على تشجيع تنمية المجتمع.',
@@ -208,34 +208,31 @@ return [
     ],
 
     'centers' => [
-        ['name' => 'Hope Center', 'city_id' => 2, 'project_id' => 1, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => 'Micro Project', 'city_id' => 2, 'project_id' => 2, 'address' => 'Homs', 'is_active' => true],
-        ['name' => 'Micro Project', 'city_id' => 3, 'project_id' => 2, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => 'Micro Project', 'city_id' => 4, 'project_id' => 2, 'address' => 'Damascus', 'is_active' => true],
-        ['name' => 'Micro Project', 'city_id' => 5, 'project_id' => 2, 'address' => 'Latakia', 'is_active' => true],
-        ['name' => 'Relief programs', 'city_id' => 2, 'project_id' => 3, 'address' => 'Damascus', 'is_active' => true],
-        ['name' => 'Sha8er', 'city_id' => 1, 'project_id' => 11, 'address' => null, 'is_active' => true],
-        ['name' => 'Children University', 'city_id' => 2, 'project_id' => 10, 'address' => 'Homs', 'is_active' => true],
-        ['name' => 'Children University', 'city_id' => 3, 'project_id' => 10, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => 'ADISC', 'city_id' => 2, 'project_id' => 7, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => 'HDISC', 'city_id' => 3, 'project_id' => 7, 'address' => 'Homs', 'is_active' => true],
-        ['name' => 'DDISC', 'city_id' => 4, 'project_id' => 7, 'address' => 'Damascus', 'is_active' => true],
-        ['name' => 'LDISC', 'city_id' => 5, 'project_id' => 7, 'address' => 'Latakia', 'is_active' => false],
-        ['name' => 'Science Zone', 'city_id' => 2, 'project_id' => 8, 'address' => 'Homs', 'is_active' => true],
-        ['name' => 'Science Zone', 'city_id' => 3, 'project_id' => 8, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => 'Study Zone', 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Nouzha', 'is_active' => true],
-        ['name' => 'Study Zone', 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Mashta', 'is_active' => true],
-        ['name' => 'Study Zone', 'city_id' => 3, 'project_id' => 8, 'address' => 'Armenian', 'is_active' => true],
-        ['name' => 'Study Zone', 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Muzayneh', 'is_active' => true],
-        ['name' => 'Study Zone', 'city_id' => 4, 'project_id' => 8, 'address' => 'Bab-Sharqi', 'is_active' => true],
-        ['name' => 'Study Zone', 'city_id' => 4, 'project_id' => 8, 'address' => 'Bab-Touma', 'is_active' => true],
-        ['name' => 'Study Zone', 'city_id' => 5, 'project_id' => 8, 'address' => 'Ziraa 1', 'is_active' => true],
-        ['name' => 'Study Zone', 'city_id' => 5, 'project_id' => 8, 'address' => 'Ziraa 2', 'is_active' => true],
-        ['name' => 'Study Zone', 'city_id' => 5, 'project_id' => 8, 'address' => 'Al-Haram', 'is_active' => true],
-        ['name' => 'Study Zone', 'city_id' => 6, 'project_id' => 8, 'address' => 'Tartous', 'is_active' => true],
-        ['name' => 'LEAP', 'city_id' => 2, 'project_id' => 13, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => 'LEAP', 'city_id' => 3, 'project_id' => 13, 'address' => 'Homs', 'is_active' => true],
-        ['name' => 'Rehabiliation', 'city_id' => 2, 'project_id' => 3, 'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'Hope Center/Head Office', 'city_id' => 2,  'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'Micro Project', 'city_id' => 3,  'address' => 'Homs', 'is_active' => true],
+        ['name' => 'Micro Project', 'city_id' => 4,  'address' => 'Damascus', 'is_active' => true],
+        ['name' => 'Micro Project', 'city_id' => 5,  'address' => 'Latakia', 'is_active' => true],
+        ['name' => 'Children University', 'city_id' => 2,  'address' => 'Homs', 'is_active' => true],
+        ['name' => 'Children University', 'city_id' => 3, 'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'ADISC', 'city_id' => 2,  'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'HDISC', 'city_id' => 3,  'address' => 'Homs', 'is_active' => true],
+        ['name' => 'DDISC', 'city_id' => 4,  'address' => 'Damascus', 'is_active' => true],
+        ['name' => 'LDISC', 'city_id' => 5,  'address' => 'Latakia', 'is_active' => false],
+        ['name' => 'Science Zone', 'city_id' => 2,  'address' => 'Homs', 'is_active' => true],
+        ['name' => 'Science Zone', 'city_id' => 3,  'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'Study Zone Al-Nouzha', 'city_id' => 3, 'address' => 'Al-Nouzha', 'is_active' => true],
+        ['name' => 'Study Zone Al-Mashta', 'city_id' => 3, 'address' => 'Al-Mashta', 'is_active' => true],
+        ['name' => 'Study Zone Armenian', 'city_id' => 3,  'address' => 'Armenian', 'is_active' => true],
+        ['name' => 'Study Zone Al-Muzayneh', 'city_id' => 3,  'address' => 'Al-Muzayneh', 'is_active' => true],
+        ['name' => 'Study Zone Bab-Sharqi', 'city_id' => 4,  'address' => 'Bab-Sharqi', 'is_active' => true],
+        ['name' => 'Study Zone Bab-Touma', 'city_id' => 4,  'address' => 'Bab-Touma', 'is_active' => true],
+        ['name' => 'Study Zone Ziraa 1', 'city_id' => 5,  'address' => 'Ziraa 1', 'is_active' => true],
+        ['name' => 'Study Zone Ziraa 2', 'city_id' => 5,  'address' => 'Ziraa 2', 'is_active' => true],
+        ['name' => 'Study Zone Al-Haram', 'city_id' => 5,  'address' => 'Al-Haram', 'is_active' => true],
+        ['name' => 'Study Zone Tartous', 'city_id' => 6,  'address' => 'Tartous', 'is_active' => true],
+        ['name' => 'LEAP Aleppo', 'city_id' => 2, 'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'LEAP Homs', 'city_id' => 3,  'address' => 'Homs', 'is_active' => true],
+
     ],
 
     'checkListsItems' => [['name' => 'ID Cartoon', 'order' => 1], ['name' => 'Email', 'order' => 1], ['name' => 'Email Signature', 'order' => 1], ['name' => 'Laptop', 'order' => 1], ['name' => 'Mobile', 'order' => 1], ['name' => 'SIM', 'order' => 1], ['name' => 'Mug', 'order' => 2], ['name' => 'ID Plastic', 'order' => 2], ['name' => 'Web photo', 'order' => 2], ['name' => 'Recieve Electronics', 'order' => 3], ['name' => 'Cancel work mail & work accounts', 'order' => 3], ['name' => 'Delete the volunteer from the web page', 'order' => 3]],
@@ -361,15 +358,23 @@ return [
             'is_active' => true,
         ],
     ],
-    'requiredPositions' => [
+    'positions' => [
         [
-            'project_id' => 1,
+            'program_id' => 1,
+            'city_id' => 2,
+            'center_id' => 1,
+            'job_level_id' => 4,
+            'department_id' => 4,
             'title' => 'Software Developer',
             'qualifications' => 'Bachelor in Computer Science or related field.',
             'is_active' => true,
         ],
         [
-            'project_id' => 2,
+            'program_id' => 2,
+            'city_id' => 1,
+            'center_id' => 1,
+            'job_level_id' => 4,
+            'department_id' => 4,
             'title' => 'HR Manager',
             'qualifications' => 'Degree in HR Management with 3+ years experience.',
             'is_active' => true,

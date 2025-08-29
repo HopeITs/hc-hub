@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\ProjectManagement;
+namespace App\Livewire\ProgramManagement;
 
 use App\Models\Center;
 use App\Models\Position;
@@ -25,7 +25,7 @@ class PositionsModule extends Component
     public $itemID = null;
 
     public $item = [
-        'required_position_id' => '',
+        'position_id' => '',
         'responsibilities'     => '',
         'max_emp'              => 0,
         'exist_emp'            => 0,
@@ -42,13 +42,13 @@ class PositionsModule extends Component
 
     protected function rules()
     {
-        // unique required_position_id within this center
-        $unique = Rule::unique((new Position)->getTable(), 'required_position_id')
+        // unique position_id within this center
+        $unique = Rule::unique((new Position)->getTable(), 'position_id')
             ->where(fn($q) => $q->where('center_id', $this->center->id))
             ->ignore($this->itemID);
 
         return [
-            'item.required_position_id' => ['required', 'integer', 'exists:' . (new RequiredPosition)->getTable() . ',id', $unique],
+            'item.position_id' => ['required', 'integer', 'exists:' . (new RequiredPosition)->getTable() . ',id', $unique],
             'item.responsibilities'     => ['nullable', 'string', 'max:2000'],
             'item.max_emp'              => ['required', 'integer', 'min:0'],
             'item.exist_emp'            => ['required', 'integer', 'min:0'],
@@ -72,21 +72,21 @@ class PositionsModule extends Component
 
         $taken = Position::where('center_id', $this->center->id)
             ->when($this->itemID, fn($q) => $q->where('id', '!=', $this->itemID))
-            ->pluck('required_position_id');
+            ->pluck('position_id');
 
-        $availableRequired = RequiredPosition::where('project_id', $this->center->project_id)
+        $availableRequired = RequiredPosition::where('program_id', $this->center->program_id)
             ->whereNotIn('id', $taken)
             ->orderBy('title')
             ->get(['id','title']);
 
-        return view('livewire.project-management.positions-module', compact('rows', 'availableRequired', 'locale'));
+        return view('livewire.program-management.positions-module', compact('rows', 'availableRequired', 'locale'));
     }
 
     public function create()
     {
         $this->itemID = null;
         $this->item = [
-            'required_position_id' => '',
+            'position_id' => '',
             'responsibilities'     => '',
             'max_emp'              => 0,
             'exist_emp'            => 0,
@@ -102,7 +102,7 @@ class PositionsModule extends Component
         $m = Position::where('center_id', $this->center->id)->findOrFail($id);
         $this->itemID = $m->id;
         $this->item = [
-            'required_position_id' => $m->required_position_id,
+            'position_id' => $m->required_position_id,
             'responsibilities'     => $m->responsibilities,
             'max_emp'              => $m->max_emp,
             'exist_emp'            => $m->exist_emp,
@@ -117,10 +117,10 @@ class PositionsModule extends Component
     {
         $this->validate();
 
-        // guard: required_position must belong to the same project as the center
+        // guard: required_position must belong to the same program as the center
         $rp = RequiredPosition::findOrFail($this->item['required_position_id']);
-        if ($rp->project_id !== $this->center->project_id) {
-            $this->addError('item.required_position_id', __('This role is not in the center’s project.'));
+        if ($rp->program_id !== $this->center->program_id) {
+            $this->addError('item.required_position_id', __('This role is not in the center’s program.'));
             return;
         }
         if ($this->item['exist_emp'] > $this->item['max_emp']) {

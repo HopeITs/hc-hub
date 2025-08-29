@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Livewire\ProjectManagement\Project;
+namespace App\Livewire\ProgramManagement\Program;
 
-use App\Livewire\Forms\ProjectManagement\ProjectForm;
-use App\Models\Project;
+use App\Livewire\Forms\ProgramManagement\ProgramForm;
+use App\Models\Program;
 use App\Traits\WithAlerts;
 use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -14,19 +14,19 @@ class Create extends Component
 {
     use WithAlerts, WithFileUploads;
 
-    public ProjectForm $form;
+    public ProgramForm $form;
     public $existingLogoUrl = '';
 
     public function save()
     {
         $this->form->store();
         $this->successToast(__('general.success-message'));
-        return redirect()->route('projects.index');
+        return redirect()->route('programs.index');
     }
 
     public function render()
     {
-        return view('livewire.project-management.project.form', [
+        return view('livewire.program-management.program.form', [
             'title' => __('general.add_new')
         ]);
     }
