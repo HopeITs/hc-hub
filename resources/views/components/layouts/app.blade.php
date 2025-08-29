@@ -3,6 +3,14 @@
 
 <head>
     @include('partials.head')
+
+    @livewireStyles
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 </head>
 
 <body class="antialiased min-h-screen bg-white">
@@ -44,7 +52,10 @@
 
     <div id="sidebar-overlay" class="fixed inset-0 bg-gray-200 opacity-50 z-30 sm:hidden hidden"></div>
 
+    @livewireScripts
+
     @include('partials.scripts')
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const sidebar = document.getElementById('cta-button-sidebar');
@@ -52,8 +63,8 @@
             const overlay = document.getElementById('sidebar-overlay');
 
             const toggleSidebar = () => {
-                sidebar.classList.toggle('translate-x-full');
-                overlay.classList.toggle('hidden');
+                sidebar?.classList.toggle('translate-x-full');
+                overlay?.classList.toggle('hidden');
             };
 
             if (toggleButton && sidebar && overlay) {
