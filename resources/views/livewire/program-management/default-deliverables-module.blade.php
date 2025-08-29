@@ -6,14 +6,14 @@
         <livewire:layout.breadcrumbs
             :title="__('general.default-deliverables')"
             :crumbs="[
-                ['label' => trans_choice('general.employee_management', 2)],
+                ['label' => trans_choice('general.employee-management', 2)],
                 ['label' => __('general.default-deliverables')],
             ]"
             :showButton="true"
         />
         <div class="flex items-center gap-2">
             <x-primary-button type="button" wire:click.prevent="create">
-                @lang('general.add_new')
+                @lang('general.add-new')
             </x-primary-button>
         </div>
     </div>

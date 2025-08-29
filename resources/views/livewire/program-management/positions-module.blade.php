@@ -3,7 +3,7 @@
         <livewire:layout.breadcrumbs
             :title="__('general.positions')"
             :crumbs="[
-        ['label' => __('general.projects-management')],
+        ['label' => __('general.programs-management')],
         ['label' => __('general.centers'), 'url' => route('centers.index')],
         ['label' => (string) $center->getTranslation('name', $locale) . ' (' . $center->city->getTranslation('name', $locale) . ')'],
             ]"
@@ -11,7 +11,7 @@
         />
         <div class="flex items-center gap-2">
             <x-primary-button wire:click="create">
-                @lang('general.add_new')
+                @lang('general.add-new')
             </x-primary-button>
         </div>
     </div>

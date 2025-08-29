@@ -30,7 +30,7 @@ class ChecklistItemModule extends Component
     public function create()
     {
         $this->showModal = true;
-        $this->modalTitle = __('general.add_new');
+        $this->modalTitle = __('general.add-new');
     }
 
 

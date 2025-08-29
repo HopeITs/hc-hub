@@ -5,6 +5,7 @@ namespace App\Livewire\Forms\ProgramManagement;
 use App\Models\Program;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 
 class ProgramForm extends Form
@@ -34,7 +35,7 @@ class ProgramForm extends Form
                 Rule::unique('programs')->ignore($this->program),
             ],
             'code' => 'required',
-            'logo' => 'nullable|image',
+            'logo' => 'nullable',
 
         ];
     }
@@ -59,7 +60,7 @@ class ProgramForm extends Form
 
         $program = Program::create($this->except('logo'));
 
-        if ($this->logo != null) {
+        if ($this->logo instanceof TemporaryUploadedFile) {
             $program->addMedia($this->logo->getRealPath())
                 ->usingFileName('program-logo.' . $this->logo->getClientOriginalExtension())
                 ->toMediaCollection('logo');
@@ -77,7 +78,7 @@ class ProgramForm extends Form
         $this->program->update(
             $this->all()
         );
-        if ($this->logo) {
+        if ($this->logo instanceof TemporaryUploadedFile) {
             $this->program->clearMediaCollection('logo');
             $this->program->addMedia($this->logo->getRealPath())
                 ->usingFileName('program-logo.' . $this->logo->getClientOriginalExtension())

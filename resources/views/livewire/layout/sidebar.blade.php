@@ -47,7 +47,7 @@
                 </x-layouts.app.sidebar.dropdown-nav-list>
 
                 <x-layouts.app.sidebar.dropdown-nav-list id="program-management" :title="__('general.programs-management')" :active="request()->routeIs('programs.*') ||
-                    request()->routeIs('required-positions.*') ||
+
                     request()->routeIs('centers.*')">
 
                     <x-slot name="icon">
@@ -67,7 +67,7 @@
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
 
-                <x-layouts.app.sidebar.dropdown-nav-list id="employees-management" :title="trans_choice('general.employee_management', 2)"
+                <x-layouts.app.sidebar.dropdown-nav-list id="employees-management" :title="trans_choice('general.employee-management', 2)"
                     :active="request()->routeIs('employees.*')">
 
                     <x-slot name="icon">

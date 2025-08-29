@@ -1,6 +1,6 @@
 <div class="space-y-8" x-data="{ activeTab: 'details' }">
-    <livewire:layout.breadcrumbs :title="__('general.projects-management')" :crumbs="[
-        ['label' => __('general.projects-management')],
+    <livewire:layout.breadcrumbs :title="__('general.programs-management')" :crumbs="[
+        ['label' => __('general.programs-management')],
         ['label' => trans_choice('general.project', 2), 'url' => route('programs.index')],
         ['label' => $program->name],
     ]" />
@@ -68,14 +68,14 @@
                 <div class="flex items-start gap-3">
                     <x-icon name="calendar" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
-                        <span class="font-semibold text-gray-800">@lang('general.start_date'):</span>
+                        <span class="font-semibold text-gray-800">@lang('general.start-date'):</span>
                         <p class="text-gray-600">{{ $program->start_date?->format('d M, Y') }}</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
                     <x-icon name="calendar" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
-                        <span class="font-semibold text-gray-800">@lang('general.end_date'):</span>
+                        <span class="font-semibold text-gray-800">@lang('general.end-date'):</span>
                         <p class="text-gray-600">{{ $program->end_date?->format('d M, Y') ?? __('general.active') }}</p>
                     </div>
                 </div>

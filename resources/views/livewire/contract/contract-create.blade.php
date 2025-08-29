@@ -4,10 +4,10 @@
 @endphp
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <livewire:layout.breadcrumbs :title="__('general.add_new')" :crumbs="[
-        ['label' => trans_choice('general.employee_management', 2)],
+    <livewire:layout.breadcrumbs :title="__('general.add-new')" :crumbs="[
+        ['label' => trans_choice('general.employee-management', 2)],
         ['label' => trans_choice('general.contracts', 2), 'url' => route('contracts.index')],
-        ['label' => __('general.add_new')],
+        ['label' => __('general.add-new')],
     ]"/>
 
 

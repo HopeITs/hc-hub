@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
@@ -23,16 +24,23 @@ class Program extends Model implements HasMedia
 
 
 
-    public function cities()
+    public function cities(): BelongsToMany
     {
         return $this->belongsToMany(City::class, 'positions', 'program_id', 'city_id');
     }
 
-    public function centers()
+    public function centers(): BelongsToMany
     {
         return $this->belongsToMany(Center::class, 'positions', 'program_id', 'center_id');
     }
-
+    public function jobLevels(): BelongsToMany
+    {
+        return $this->belongsToMany(JobLevel::class, 'positions', 'program_id', 'job_level_id');
+    }
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class, 'positions', 'program_id', 'department_id');
+    }
     public function positions()
     {
         return $this->hasMany(Position::class);
@@ -47,6 +55,6 @@ class Program extends Model implements HasMedia
 
     public function contracts()
     {
-        return $this->hasMany(Contract::class);
+        return $this->hasManyThrough(Contract::class , Position::class)->where('contracts.is_active', true);
     }
 }

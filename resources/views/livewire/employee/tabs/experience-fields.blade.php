@@ -28,12 +28,12 @@
                             <x-error-span>{{ $errors->first('experienceForm.experiences.' . $index . '.company') }}</x-error-span>
                         </div>
                         <div>
-                            <x-forms.input-label for="exp_start_date_{{ $index }}">@lang('general.start_date')</x-forms.input-label>
+                            <x-forms.input-label for="exp_start_date_{{ $index }}">@lang('general.start-date')</x-forms.input-label>
                             <x-forms.input type="date" wire:model="experienceForm.experiences.{{ $index }}.start_date" id="exp_start_date_{{ $index }}" />
                             <x-error-span>{{ $errors->first('experienceForm.experiences.' . $index . '.start_date') }}</x-error-span>
                         </div>
                         <div>
-                            <x-forms.input-label for="exp_end_date_{{ $index }}">@lang('general.end_date')</x-forms.input-label>
+                            <x-forms.input-label for="exp_end_date_{{ $index }}">@lang('general.end-date')</x-forms.input-label>
                             <x-forms.input type="date" wire:model="experienceForm.experiences.{{ $index }}.end_date" id="exp_end_date_{{ $index }}" />
                             <x-error-span>{{ $errors->first('experienceForm.experiences.' . $index . '.end_date') }}</x-error-span>
                         </div>
@@ -72,11 +72,11 @@
                         <x-forms.input type="text" wire:model="experienceForm.experiences.__INDEX__.company" id="exp_company___INDEX__" />
                     </div>
                     <div>
-                        <x-forms.input-label for="exp_start_date___INDEX__">@lang('general.start_date')</x-forms.input-label>
+                        <x-forms.input-label for="exp_start_date___INDEX__">@lang('general.start-date')</x-forms.input-label>
                         <x-forms.input type="date" wire:model="experienceForm.experiences.__INDEX__.start_date" id="exp_start_date___INDEX__" />
                     </div>
                     <div>
-                        <x-forms.input-label for="exp_end_date___INDEX__">@lang('general.end_date')</x-forms.input-label>
+                        <x-forms.input-label for="exp_end_date___INDEX__">@lang('general.end-date')</x-forms.input-label>
                         <x-forms.input type="date" wire:model="experienceForm.experiences.__INDEX__.end_date" id="exp_end_date___INDEX__" />
                     </div>
                     <div>
@@ -101,7 +101,7 @@
             </div>
         </template>
 
-        <div><button type="button" @click="add" class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">+ @lang('general.add_new')</button></div>
+        <div><button type="button" @click="add" class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">+ @lang('general.add-new')</button></div>
         <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
             <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
             <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>

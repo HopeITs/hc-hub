@@ -145,7 +145,7 @@
         </template>
 
         <div><button type="button" @click="add" class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">+
-                @lang('general.add_new')</button></div>
+                @lang('general.add-new')</button></div>
         <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
             <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
             <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>

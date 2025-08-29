@@ -78,7 +78,7 @@
     <x-primary-button type="button"
                       wire:click="addEducation"
     >
-        + @lang('general.add_new')
+        + @lang('general.add-new')
     </x-primary-button>
 </div>
 

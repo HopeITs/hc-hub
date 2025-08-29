@@ -1,11 +1,11 @@
 <div>
-    <livewire:layout.breadcrumbs :title="__('general.projects-management')" :crumbs="[['label' => trans_choice('general.project', 2), 'url' => route('programs.index')], ['label' => $title]]" :showButton="true" />
+    <livewire:layout.breadcrumbs :title="__('general.programs-management')" :crumbs="[['label' => trans_choice('general.program', 2), 'url' => route('programs.index')], ['label' => $title]]" :showButton="true" />
 
     <form class="space-y-4" wire:submit.prevent="save">
         <div class="grid grid-cols-2 gap-4">
             <div class="col-span-2">
                 <x-forms.input-label for="logo">@lang('general.logo')</x-forms.input-label>
-                <x-forms.file-input id="logo" wire:model="form.logo"  name="form.logo" :old-file="$form->logo" />
+                <x-forms.file-input id="logo" wire:model="form.logo" accept="image/*"  name="form.logo" :old-file="$form->logo" />
             </div>
             <div>
                 <x-forms.input-label for="code">@lang('general.code')</x-forms.input-label>
@@ -33,13 +33,13 @@
                 </div>
             @endforeach
             <div>
-                <x-forms.input-label for="start_date">@lang('general.start_date')
+                <x-forms.input-label for="start_date">@lang('general.start-date')
                 </x-forms.input-label>
                 <x-forms.date-input id="start_date" wire:model.defer="form.start_date" />
                 <x-error-span>{{ $errors->first('form.start_date') }}</x-error-span>
             </div>
             <div>
-                <x-forms.input-label for="end_date">@lang('general.end_date')
+                <x-forms.input-label for="end_date">@lang('general.end-date')
                 </x-forms.input-label>
                 <x-forms.date-input id="end_date" wire:model.defer="form.end_date" />
                 <x-error-span>{{ $errors->first('form.end_date') }}</x-error-span>

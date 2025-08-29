@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Employee;
+use App\Models\Position;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -30,6 +31,7 @@ class DatabaseSeeder extends Seeder
             RolesPermissionsSeeder::class,
             UserRoleSeeder::class,
             JobLevelSeeder::class,
+            PositionsSeeder::class,
 //            EmployeeSeeder::class,
 
         ]);

@@ -92,7 +92,7 @@ class PositionsModule extends Component
             'exist_emp'            => 0,
             'is_active'            => true,
         ];
-        $this->modalTitle = __('general.add_new');
+        $this->modalTitle = __('general.add-new');
         $this->resetValidation();
         $this->showModal = true;
     }

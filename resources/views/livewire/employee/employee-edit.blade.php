@@ -1,6 +1,6 @@
 <div>
     <livewire:layout.breadcrumbs :title="__('general.edit')" :crumbs="[
-        ['label' => trans_choice('general.employee_management', 2)],
+        ['label' => trans_choice('general.employee-management', 2)],
         ['label' => trans_choice('general.employee', 2), 'url' => route('employees.index')],
         ['label' => __('general.edit')],
     ]"/>

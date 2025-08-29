@@ -92,12 +92,29 @@ class Index extends Component
 
     public function render()
     {
-        $items = Program::with('media')->withCount([
-            'positions',
-            'cities as cities_count' => function ($query) {
-                $query->select(DB::raw('count(distinct city_id)'));
+        $items = Program::with('media')
+            ->withCount([
+                'cities as cities_count' => function ($query) {
+                    $query->select(DB::raw('count(distinct city_id)'));
+                },
+                'contracts'
+
+            ])
+            ->with('contracts')
+
+            ->orderBy('programs.is_active', 'desc')
+            ->latest()
+            ->take($this->perPage)
+            ->get();
+
+        // Adding program manager name manually
+        $items->each(function ($item) {
+            $programManager = $item->contracts->first();
+            if ($programManager) {
+                $item->program_manager_name = $programManager->employee->name;
             }
-        ])->orderBy('is_active', 'desc')->latest()->take($this->perPage)->get();
+        });
+
 
         return view('livewire.program-management.program.index', compact('items'));
     }

@@ -27,7 +27,7 @@ class Create extends Component
     public function render()
     {
         return view('livewire.program-management.program.form', [
-            'title' => __('general.add_new')
+            'title' => __('general.add-new')
         ]);
     }
 }
