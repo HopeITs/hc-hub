@@ -3,6 +3,7 @@
 namespace App\Livewire\Archives;
 
 use App\Models\Folder;
+use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -23,19 +24,38 @@ class ArchivedFilesModule extends Component
     public bool $showDeleteConfirmationModal = false;
     public $itemToDeleteType = null;
     public $itemToDeleteId = null;
-
     public array $filePreviews = [];
+
+    public bool $showPermissionsModal = false;
+    public ?Folder $folderForPermissions = null;
+    public ?Collection $allUsers = null;
+    public array $selectedUsers = [];
+    public string $userSearch = '';
 
     public function mount($folderId = null)
     {
-        $this->currentFolder = $folderId ? Folder::find($folderId) : null;
+        if ($folderId) {
+            $folder = Folder::with('users')->find($folderId);
+
+            if ($folder && !auth()->user()->hasRole('Super Admin') && !$folder->users->contains(auth()->id())) {
+                abort(403, 'You do not have permission to access this folder.');
+            }
+            $this->currentFolder = $folder;
+        }
+
         $this->loadContent();
     }
 
     public function loadContent(): void
     {
         $parentId = $this->currentFolder?->id;
-        $this->folders = Folder::where('parent_id', $parentId)->orderBy('name')->get();
+        $query = Folder::where('parent_id', $parentId);
+
+        if (!auth()->user()->hasRole('Super Admin')) {
+            $query->whereHas('users', fn($q) => $q->where('user_id', auth()->id()));
+        }
+
+        $this->folders = $query->orderBy('name')->get();
         $this->files = $this->currentFolder ? $this->currentFolder->getMedia('archived_files') : collect();
         $this->generateBreadcrumbs();
         $this->generateFilePreviews();
@@ -45,8 +65,9 @@ class ArchivedFilesModule extends Component
     {
         $this->filePreviews = [];
         foreach ($this->files as $file) {
+            // THE BUG WAS HERE. The check for 'thumbnail' was re-added by mistake.
+            // This is the corrected version that only checks if it's an image.
             if (Str::startsWith($file->mime_type, 'image')) {
-                // Read the original image file, encode it, and store it for the view
                 $this->filePreviews[$file->id] = 'data:' . $file->mime_type . ';base64,' . base64_encode(file_get_contents($file->getPath()));
             }
         }
@@ -65,14 +86,44 @@ class ArchivedFilesModule extends Component
     public function createFolder()
     {
         $this->validate(['newFolderName' => 'required|string|max:255']);
-        Folder::create([
+
+        $folder = Folder::create([
             'name' => $this->newFolderName,
             'parent_id' => null,
             'user_id' => auth()->id(),
         ]);
+
+        $folder->users()->attach(auth()->id());
         $this->showCreateFolderModal = false;
         $this->newFolderName = '';
+
+        $this->editPermissions($folder->id);
+    }
+
+    public function editPermissions(int $folderId)
+    {
+        $folder = Folder::findOrFail($folderId);
+        $this->folderForPermissions = $folder;
+        $this->selectedUsers = $folder->users->pluck('id')->toArray();
+        $this->showPermissionsModal = true;
+    }
+
+    public function savePermissions()
+    {
+        if ($this->folderForPermissions) {
+            $permissions = collect($this->selectedUsers)->push($this->folderForPermissions->user_id)->unique()->all();
+            $this->folderForPermissions->users()->sync($permissions);
+        }
+        $this->closePermissionsModal();
         $this->loadContent();
+    }
+
+    public function closePermissionsModal()
+    {
+        $this->showPermissionsModal = false;
+        $this->folderForPermissions = null;
+        $this->selectedUsers = [];
+        $this->userSearch = '';
     }
 
     public function updatedFilesToUpload()
@@ -124,6 +175,22 @@ class ArchivedFilesModule extends Component
 
     public function render()
     {
+        if ($this->showPermissionsModal) {
+            $users = User::with('profile')->whereHas('profile')->get();
+
+            if (trim($this->userSearch)) {
+                $users = $users->filter(function ($user) {
+                    return Str::contains(
+                        $user->profile->name,
+                        $this->userSearch,
+                        true
+                    );
+                });
+            }
+
+            $this->allUsers = $users->sortBy('profile.name');
+        }
+
         return view('livewire.archives.archived-files-module');
     }
 }
