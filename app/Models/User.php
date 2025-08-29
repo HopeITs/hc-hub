@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -91,5 +92,10 @@ class User extends Authenticatable
     public function folders(): HasMany
     {
         return $this->hasMany(Folder::class, 'user_id');
+    }
+
+    public function accessibleFolders(): BelongsToMany
+    {
+        return $this->belongsToMany(Folder::class);
     }
 }

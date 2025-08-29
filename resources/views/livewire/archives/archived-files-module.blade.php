@@ -62,15 +62,20 @@
 
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                     @forelse($folders as $folder)
-                        <div class="relative">
+                        <div class="relative group">
                             <a href="{{ route('archived-files.index', ['folder' => $folder->id]) }}" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg hover:bg-gray-100 hover:shadow-md">
                                 <x-icons.folder class="w-16 h-16 text-yellow-400" />
                                 <span class="mt-2 text-sm font-medium text-gray-800 truncate">{{ $folder->name }}</span>
                                 <span class="mt-1 text-xs text-gray-500">By: {{ optional($folder->creator->profile)->name ?? 'Unknown' }}</span>
                             </a>
-                            <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="absolute top-2 right-2 p-1 bg-white rounded-full text-gray-500 hover:text-red-600 hover:bg-gray-100 focus:outline-none">
-                                <x-icons.trash class="w-4 h-4" />
-                            </button>
+                            <div class="absolute top-2 right-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button wire:click.prevent="editPermissions({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-blue-600 hover:bg-gray-100 focus:outline-none">
+                                    <x-icons.cog class="w-4 h-4" />
+                                </button>
+                                <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-red-600 hover:bg-gray-100 focus:outline-none">
+                                    <x-icons.trash class="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
                     @empty
                         @if ($files->isEmpty())
@@ -79,7 +84,7 @@
                     @endforelse
 
                     @foreach ($files as $file)
-                        <div class="relative">
+                        <div class="relative group">
                             <div wire:click="downloadFile({{ $file->id }})" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg hover:bg-gray-100 hover:shadow-md cursor-pointer">
                                 @if (isset($filePreviews[$file->id]))
                                     <img src="{{ $filePreviews[$file->id] }}" alt="{{ $file->name }}" class="w-16 h-16 object-cover rounded-md" />
@@ -88,7 +93,7 @@
                                 @endif
                                 <span class="mt-2 text-sm font-medium text-gray-800 break-all">{{ $file->name }}</span>
                             </div>
-                            <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="absolute top-2 right-2 p-1 bg-white rounded-full text-gray-500 hover:text-red-600 hover:bg-gray-100 focus:outline-none">
+                            <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="absolute top-2 right-2 p-1 bg-white rounded-full text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600 hover:bg-gray-100 focus:outline-none">
                                 <x-icons.trash class="w-4 h-4" />
                             </button>
                         </div>
@@ -146,6 +151,40 @@
                         Delete
                     </button>
                     <button type="button" wire:click="$set('showDeleteConfirmationModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($showPermissionsModal)
+        <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('showPermissionsModal', false)"></div>
+        <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
+            <div class="mx-4 rounded-lg bg-white shadow-xl">
+                <div class="px-6 pt-6">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">
+                        Assign Permissions for '{{ $folderForPermissions?->name }}'
+                    </h3>
+                    <p class="mt-1 text-sm text-gray-500">Select the employees who can access this folder.</p>
+                    <div class="mt-4 h-64 overflow-y-auto border rounded-md p-2 space-y-2">
+                        @if($allUsers)
+                            @foreach ($allUsers as $user)
+                                <label for="user-{{ $user->id }}" class="flex items-center p-2 rounded-md hover:bg-gray-50 cursor-pointer">
+                                    <input id="user-{{ $user->id }}" type="checkbox" value="{{ $user->id }}" wire:model.live="selectedUsers"
+                                           class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="ml-3 text-sm text-gray-700">{{ optional($user->profile)->name ?? $user->email }}</span>
+                                </label>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
+                    <button type="button" wire:click="savePermissions" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
+                        Save Permissions
+                    </button>
+                    <button type="button" wire:click="$set('showPermissionsModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
                         Cancel
                     </button>
                 </div>
