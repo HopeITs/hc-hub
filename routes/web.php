@@ -16,8 +16,6 @@ use App\Livewire\Employee\EmployeeModule;
 use App\Livewire\ProgramManagement\CentersModule;
 use App\Livewire\ProgramManagement\DefaultDeliverablesModule;
 
-use App\Livewire\Employee\Tabs\PersonalInfoTab;
-
 use App\Livewire\ProgramManagement\PositionsModule;
 use App\Livewire\ProgramManagement\Program\Detail as ProgramDetail;
 use App\Livewire\ProgramManagement\Program\Create as ProgramCreate;
@@ -26,7 +24,7 @@ use App\Livewire\ProgramManagement\Program\Index as ProgramIndex;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
-
+use App\Livewire\Archives\ArchivedFilesModule;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
@@ -67,27 +65,35 @@ Route::group(
             Route::get('/program-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
-            Route::prefix('contracts')->name('contracts.')->group(function () {
-                Route::get('/', ContractsModule::class)->name('index');
-                Route::get('/create', ContractCreate::class)->name('create');
-                Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
-            });
+            Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
 
+            Route::prefix('contracts')
+                ->name('contracts.')
+                ->group(function () {
+                    Route::get('/', ContractsModule::class)->name('index');
+                    Route::get('/create', ContractCreate::class)->name('create');
+                    Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
+                });
 
-            Route::prefix('programs')->name('programs.')->group(function () {
-                Route::get('/', ProgramIndex::class)->name('index');
-                Route::get('/create', ProgramCreate::class)->name('create');
-                Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
-                Route::get('/{program:slug}', ProgramDetail::class)->name('show');
-            });
-            Route::prefix('employees')->name('employees.')->group(function () {
-                Route::get('/', EmployeeModule::class)->name('index');
-                Route::get('/create', EmployeeCreate::class)->name('create');
-                Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
-            });
+            Route::prefix('programs')
+                ->name('programs.')
+                ->group(function () {
+                    Route::get('/', ProgramIndex::class)->name('index');
+                    Route::get('/create', ProgramCreate::class)->name('create');
+                    Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
+                    Route::get('/{program:slug}', ProgramDetail::class)->name('show');
+                });
+
+            Route::prefix('employees')
+                ->name('employees.')
+                ->group(function () {
+                    Route::get('/', EmployeeModule::class)->name('index');
+                    Route::get('/create', EmployeeCreate::class)->name('create');
+                    Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
+                });
             Route::get('/contracts/{contract}', ContractDetails::class)->name('contracts.show');
         });
 
         require __DIR__ . '/auth.php';
-    }
+    },
 );

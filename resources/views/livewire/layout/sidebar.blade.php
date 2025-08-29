@@ -82,14 +82,22 @@
                             {{ trans_choice('general.default-deliverables', 2) }}
                         </x-layouts.app.sidebar.nav-item>
 
-
-                        <x-layouts.app.sidebar.nav-item
-                            :href="route('contracts.index')"
-                            :active="request()->routeIs('contracts.*')">
+                        <x-layouts.app.sidebar.nav-item :href="route('contracts.index')" :active="request()->routeIs('contracts.*')">
                             {{ trans_choice('general.contracts', 2) }}
                         </x-layouts.app.sidebar.nav-item>
+
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
+
+                <li>
+                    <a href="{{ route('archived-files.index') }}"
+                        class="flex items-center p-2 rounded-lg text-gray-900 hover:bg-gray-100 group @if (request()->routeIs('archived-files.*')) bg-gray-100 @endif">
+                        <x-icons.folder
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" />
+                        <span class="ms-3">{{ __('general.archived-files') }}</span>
+                    </a>
+                </li>
+
             </ul>
         </div>
 
