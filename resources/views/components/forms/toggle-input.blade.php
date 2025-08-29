@@ -8,10 +8,14 @@
     $switchId = 'status-switch-' . $modelId;
 @endphp
 <input
-    type="checkbox"
-    id="{{ $switchId }}"
-    role="switch"
+    {{$attributes->merge([
+    'type' => 'checkbox',
+    'role' => 'switch',
+    'class' => 'text-green-400 rounded border-green-400  focus:ring-green-400 me-1'
+])}}
     @if($active) checked @endif
-    wire:click="{{ $wireEvent }}({{ $modelId }})"
-    class="text-green-400 rounded border-green-400  focus:ring-green-400 me-1"
+wire:click="{{ $wireEvent }}({{ $modelId }})"
 >
+
+
+

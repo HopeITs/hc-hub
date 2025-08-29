@@ -1,28 +1,34 @@
 <div class="space-y-8" x-data="{ activeTab: 'details' }">
     <livewire:layout.breadcrumbs :title="__('general.programs-management')" :crumbs="[
         ['label' => __('general.programs-management')],
-        ['label' => trans_choice('general.project', 2), 'url' => route('programs.index')],
+        ['label' => trans_choice('general.program', 2), 'url' => route('programs.index')],
         ['label' => $program->name],
     ]" />
 
     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-            <div class="flex items-center gap-3">
-                <h1 class="text-3xl font-bold text-gray-800">{{ $program->name }}
-                </h1>
-                <span
-                    class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ $program->code }}</span>
+        <div class="w-full">
+            <div class="flex justify-between">
+                <div class="flex items-center  gap-3">
+
+                    <h1  class="text-3xl font-bold text-gray-800" tooltip>{{ $program->name }}
+                    </h1>
+
+                    <span
+                        class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full">{{ $program->code .'-'. $program->slug }}</span>
+                </div>
+                <div class="flex h-fit  space-x-2 ">
+                    <x-forms.toggle-input class="!me-2 text-xl p-2" :active="$program->is_active" :model-id="$program->id" wire-event="confirmToggleItemStatus" />
+                    <x-table.edit-btn class="!p-0 me-2" :href="route('programs.edit', ['program' => $program->slug])" />
+                    <x-table.delete-btn class="!p-0" :modelId="$program->id" />
+                </div>
             </div>
+
             <p class="text-md text-gray-500 mt-2">
                 {{ $program->getTranslation('description', app()->getLocale()) }}
             </p>
         </div>
 
-        <div class="flex items-center space-x-2 flex-shrink-0">
-            <x-forms.toggle-input :active="$program->is_active" :model-id="$program->id" wire-event="confirmToggleItemStatus" />
-            <x-table.edit-btn :href="route('programs.edit', ['program' => $program->slug])" />
-            <x-table.delete-btn :modelId="$program->id" />
-        </div>
+
     </div>
 
     <div class="border-b border-gray-200">

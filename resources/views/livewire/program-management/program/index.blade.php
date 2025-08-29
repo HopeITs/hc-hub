@@ -13,7 +13,7 @@
         @foreach ($items as $program)
             <x-card class="col-span-1 {{ $program->is_active ? '!border-red-200' : '' }}" :title="$program->name">
                 <x-slot name="icon">
-                    <span class="px-3 py-1  text-center text-xs rounded-lg bg-red-200 text-primary h-fit">
+                    <span  class="bg-primary-100 text-primary-800 text-xs h-fit font-medium px-2.5 py-0.5 rounded-full">
                          {{ $program->code . '-' . $program->slug}}
                     </span>
 
