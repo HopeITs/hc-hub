@@ -26,11 +26,11 @@ class ArchivedFilesModule extends Component
     public $itemToDeleteId = null;
     public array $filePreviews = [];
 
-    // Properties for permissions
     public bool $showPermissionsModal = false;
-    public ?Folder $folderForPermissions = null; // Renamed for clarity
+    public ?Folder $folderForPermissions = null;
     public ?Collection $allUsers = null;
     public array $selectedUsers = [];
+    public string $userSearch = '';
 
     public function mount($folderId = null)
     {
@@ -65,8 +65,10 @@ class ArchivedFilesModule extends Component
     {
         $this->filePreviews = [];
         foreach ($this->files as $file) {
-            if (Str::startsWith($file->mime_type, 'image') && $file->hasGeneratedConversion('thumbnail')) {
-                $this->filePreviews[$file->id] = 'data:' . $file->mime_type . ';base64,' . base64_encode(file_get_contents($file->getPath('thumbnail')));
+            // THE BUG WAS HERE. The check for 'thumbnail' was re-added by mistake.
+            // This is the corrected version that only checks if it's an image.
+            if (Str::startsWith($file->mime_type, 'image')) {
+                $this->filePreviews[$file->id] = 'data:' . $file->mime_type . ';base64,' . base64_encode(file_get_contents($file->getPath()));
             }
         }
     }
@@ -95,18 +97,14 @@ class ArchivedFilesModule extends Component
         $this->showCreateFolderModal = false;
         $this->newFolderName = '';
 
-        // Now just call the new editPermissions method
         $this->editPermissions($folder->id);
     }
 
-    // New method to open the permissions modal for editing
     public function editPermissions(int $folderId)
     {
         $folder = Folder::findOrFail($folderId);
-
         $this->folderForPermissions = $folder;
-        $this->allUsers = User::with('profile')->whereHas('profile')->get()->sortBy('profile.name');
-        $this->selectedUsers = $folder->users->pluck('id')->toArray(); // Pre-select current users
+        $this->selectedUsers = $folder->users->pluck('id')->toArray();
         $this->showPermissionsModal = true;
     }
 
@@ -116,11 +114,16 @@ class ArchivedFilesModule extends Component
             $permissions = collect($this->selectedUsers)->push($this->folderForPermissions->user_id)->unique()->all();
             $this->folderForPermissions->users()->sync($permissions);
         }
+        $this->closePermissionsModal();
+        $this->loadContent();
+    }
 
+    public function closePermissionsModal()
+    {
         $this->showPermissionsModal = false;
         $this->folderForPermissions = null;
         $this->selectedUsers = [];
-        $this->loadContent();
+        $this->userSearch = '';
     }
 
     public function updatedFilesToUpload()
@@ -172,6 +175,22 @@ class ArchivedFilesModule extends Component
 
     public function render()
     {
+        if ($this->showPermissionsModal) {
+            $users = User::with('profile')->whereHas('profile')->get();
+
+            if (trim($this->userSearch)) {
+                $users = $users->filter(function ($user) {
+                    return Str::contains(
+                        $user->profile->name,
+                        $this->userSearch,
+                        true
+                    );
+                });
+            }
+
+            $this->allUsers = $users->sortBy('profile.name');
+        }
+
         return view('livewire.archives.archived-files-module');
     }
 }
