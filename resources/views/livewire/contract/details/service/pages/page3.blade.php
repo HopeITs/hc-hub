@@ -1,7 +1,6 @@
 @php
     use Illuminate\Support\Number;
 
-    // ---------- Role (safe, even if Position isn't translatable)
     $t = function ($model, string $field, string $lang, $fallback = null) {
         if (! $model) return $fallback;
         if (method_exists($model, 'getTranslation')) {
@@ -21,7 +20,6 @@
     $roleAr = $t($contract->position?->requiredPosition, 'title', 'ar',
              $t($contract->position, 'name', 'ar', 'مطوّر ويب'));
 
-    // ---------- Stipend (avoid intl dependency)
     $amount = $contract->salary ?? null;
     $formatEn = fn ($n) => is_numeric($n) ? number_format((float)$n, 0, '.', ',') : '—';
     $toArabicDigits = fn ($s) => str_replace(
@@ -33,14 +31,12 @@
     $amtEn = $formatEn($amount);
     $amtAr = $toArabicDigits($amtEn);
 
-    // ---------- Labels
     $EN_THIRD_TERM_LABEL  = '<span class="h-label">Third term:</span>';
     $AR_THIRD_TERM_LABEL  = '<span class="h-label">البند الثالث:</span>';
 
     $EN_FOURTH_TERM_LABEL = '<span class="h-label">Fourth term:</span>';
     $AR_FOURTH_TERM_LABEL = '<span class="h-label">البند الرابع:</span>';
 
-    // ---------- Third term (items 2–5)
     $EN_LI_2 = "The second party is committed to delivering volunteering services as a {$roleEn} for 6 days per week, 6 hours a day (Working hours are determined in coordination with the direct manager).";
     $AR_LI_2 = "على الفريق الثاني تقديم خدماته التطوعية كـ{$roleAr} لمدة 6 أيام في الأسبوع، 6 ساعات يومياً (تُحدَّد ساعات العمل بالتنسيق مع المدير المباشر).";
 
@@ -53,7 +49,6 @@
     $EN_LI_5 = 'The second party has to commit, abide and sign the code of conduct.';
     $AR_LI_5 = 'على الفريق الثاني الالتزام والتقيّد والتوقيع على قواعد السلوك الأخلاقية.';
 
-    // ---------- Fourth term (items 1–2)
     $EN_FOURTH_1 = 'The second party stipend amount will be deducted in case of repeated delays beyond working hours for more than 3 times a month, an amount equal to one work day cost.';
     $AR_FOURTH_1 = 'يُحسم من المكافأة المالية للفريق الثاني في حال تكرار التأخر عن مواعيد الدوام المحددة أكثر من 3 مرات في الشهر، بمقدار يعادل كلفة يوم عمل واحد.';
 
@@ -61,7 +56,6 @@
     $AR_FOURTH_2 = 'في حال اضطرار الفريق الثاني للغياب، فعليه الحصول على موافقة الفريق الأول بذلك.';
 @endphp
 
-{{-- Third term (continuation 2–5) --}}
 <x-contract.dual rowClass="mt-1" :en="$EN_THIRD_TERM_LABEL" :ar="$AR_THIRD_TERM_LABEL"/>
 
 <div class="dual-row mt-2">
@@ -83,7 +77,6 @@
     </div>
 </div>
 
-{{-- Fourth term --}}
 <x-contract.dual rowClass="mt-4" :en="$EN_FOURTH_TERM_LABEL" :ar="$AR_FOURTH_TERM_LABEL"/>
 
 <div class="dual-row mt-2">

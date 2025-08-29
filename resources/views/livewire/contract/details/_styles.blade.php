@@ -1,34 +1,29 @@
 <style>
     .contract-a4{
-        /* A4 sheet */
         width: 210mm;
-        height: 300mm;            /* 👈 makes every page the same height */
+        height: 300mm;
         max-width: 100%;
         margin: 0 auto;
 
-        /* Background + header */
         background: #fff url('{{ asset('assets/img/header.png') }}') no-repeat top center;
-        background-size: contain; /* header scales consistently against the fixed page box */
+        background-size: contain;
 
-        /* Interior margins (safe text area) */
         padding: 28mm 18mm 18mm;
 
-        /* Frame */
         box-shadow: 0 8px 24px rgba(0,0,0,.06);
         border-radius: 16px;
 
         position: relative;
         direction: ltr;
 
-        /* Optional: keep layout steady if content is short/tall */
         display: flex;
         flex-direction: column;
     }
 
     .contract-body{
         margin-top: 2mm;
-        flex: 1;                 /* fills vertical space neatly */
-        overflow: hidden;        /* use 'auto' if you prefer scroll inside the page */
+        flex: 1;
+        overflow: hidden;
     }
 
     .contract-footer{
@@ -57,7 +52,7 @@
     }
 
     @media print{
-        @page { size: A4 portrait; margin: 0; } /* ensures true A4 on PDF/print */
+        @page { size: A4 portrait; margin: 0; }
         .no-print{ display:none!important; }
         .contract-a4{ box-shadow: none; border-radius: 0; }
         .page-break{ page-break-after: always; }

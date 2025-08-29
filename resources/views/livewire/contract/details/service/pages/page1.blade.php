@@ -5,7 +5,6 @@
     $loc = $locale ?? app()->getLocale();
     $emp = $contract->employee;
 
-    // Person basics (Employee supports translations)
     $nameEn = $emp?->getTranslation('name', 'en')
             ?? $emp?->getTranslation('name', $loc)
             ?? $emp?->name ?? '—';
@@ -41,7 +40,6 @@
 
     $esc = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
 
-    // Nationality map
     $natKey = strtoupper(trim((string) $nationalityRaw));
     $NATIONALITY_MAP = [
         '1'   => ['en' => 'Syrian', 'ar' => 'سوري'],
@@ -51,7 +49,6 @@
     $natEn = $NATIONALITY_MAP[$natKey]['en'] ?? (string)($nationalityRaw ?: '—');
     $natAr = $NATIONALITY_MAP[$natKey]['ar'] ?? (string)($nationalityRaw ?: '—');
 
-    // -------- SAFE TRANSLATION HELPER (works even if model isn't translatable)
     $t = function ($model, string $field, string $lang, $fallback = null) {
         if (! $model) return $fallback;
         if (method_exists($model, 'getTranslation')) {
@@ -66,13 +63,11 @@
         return ($raw === null || $raw === '') ? $fallback : $raw;
     };
 
-    // Role (Position usually is NOT translatable) – try requiredPosition.title then position.name
     $roleEn = $t($contract->position?->requiredPosition, 'title', 'en',
              $t($contract->position, 'name', 'en', 'Web Developer'));
     $roleAr = $t($contract->position?->requiredPosition, 'title', 'ar',
              $t($contract->position, 'name', 'ar', 'مطوّر ويب'));
 
-    // ===== Static text blocks (same as annual p1) =====
     $EN_TOP = <<<'HTML'
         <span class="h-label">PRIVATE AND CONFIDENTIAL</span><br>
         Volunteer agreement for a limited period
@@ -103,7 +98,6 @@
     $EN_SECOND_LABEL = '<span class="h-label">Second Party:</span>';
     $AR_SECOND_LABEL = '<span class="h-label">الفريق الثاني:</span>';
 
-    // Second party dynamic lines
     $EN_SECOND_NAME = '<strong>Ms./Mrs.</strong> ' . $esc($nameEn);
     $AR_SECOND_NAME = '<strong>السيد/ة:</strong> ' . $esc($nameAr);
 
@@ -125,7 +119,6 @@
     $EN_PREAMBLE_LABEL = '<span class="h-label">Preamble:</span>';
     $AR_PREAMBLE_LABEL = '<span class="h-label">المقدمة:</span>';
 
-    // Preamble uses the dynamic role
     $EN_PREAMBLE_TEXT = 'Whereas the Volunteer has stated that he/she possesses the required qualifications for <strong>'
         . e($roleEn) . '</strong> (the qualifications are attached to the job description), and on the basis thereof has offered to volunteer for “Christian Hope Center Aleppo / Head office” as a <strong>'
         . e($roleEn) . '</strong>, starting from the signing date of this contract,';
@@ -139,22 +132,17 @@
 <div class="text-center mb-3">
     <h2 class="text-[18px] font-bold">عقد اتفاق تطوعي</h2>
 </div>
-{{-- Top ribbons --}}
 <x-contract.dual tight :en="$EN_TOP" :ar="$AR_TOP" enClass="text-base" arClass="text-base"/>
 
-{{-- Between --}}
 <x-contract.dual rowClass="mt-4 font-semibold" :en="$EN_BETWEEN" :ar="$AR_BETWEEN"/>
 
-{{-- First party --}}
 <x-contract.dual rowClass="mt-1" :en="$EN_FIRST_LABEL" :ar="$AR_FIRST_LABEL"/>
 <x-contract.dual :en="$EN_FIRST_1" :ar="$AR_FIRST_1"/>
 <x-contract.dual :en="$EN_FIRST_2" :ar="$AR_FIRST_2"/>
 <x-contract.dual :en="$EN_FIRST_3" :ar="$AR_FIRST_3"/>
 
-{{-- And --}}
 <x-contract.dual rowClass="mt-3 font-semibold" :en="$EN_AND" :ar="$AR_AND"/>
 
-{{-- Second party --}}
 <x-contract.dual rowClass="mt-1" :en="$EN_SECOND_LABEL" :ar="$AR_SECOND_LABEL"/>
 <x-contract.dual :en="$EN_SECOND_NAME" :ar="$AR_SECOND_NAME"/>
 <x-contract.dual :en="$EN_SECOND_DOB"  :ar="$AR_SECOND_DOB"/>
@@ -163,6 +151,5 @@
 <x-contract.dual :en="$EN_SECOND_ADDR" :ar="$AR_SECOND_ADDR"/>
 <x-contract.dual :en="$EN_SECOND_NOTE" :ar="$AR_SECOND_NOTE"/>
 
-{{-- Preamble --}}
 <x-contract.dual rowClass="mt-4" :en="$EN_PREAMBLE_LABEL" :ar="$AR_PREAMBLE_LABEL"/>
 <x-contract.dual :en="$EN_PREAMBLE_TEXT" :ar="$AR_PREAMBLE_TEXT"/>
