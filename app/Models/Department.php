@@ -17,9 +17,9 @@ class Department extends Model
     ];
     public $translatable = ['description'];
 
-    public function contracts()
+    public function positions()
     {
-        return $this->hasMany(Contract::class , 'department_id');
+        return $this->hasMany(Position::class , 'department_id');
     }
 
 }

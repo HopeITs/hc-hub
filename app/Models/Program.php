@@ -21,19 +21,21 @@ class Program extends Model implements HasMedia
 
     public array $translatable = ['description'];
 
-    public function centers()
-    {
-        return $this->hasMany(Center::class);
-    }
+
 
     public function cities()
     {
-        return $this->belongsToMany(City::class, 'centers', 'program_id', 'city_id');
+        return $this->belongsToMany(City::class, 'positions', 'program_id', 'city_id');
     }
 
-    public function requiredPositions()
+    public function centers()
     {
-        return $this->hasMany(RequiredPosition::class);
+        return $this->belongsToMany(Center::class, 'positions', 'program_id', 'center_id');
+    }
+
+    public function positions()
+    {
+        return $this->hasMany(Position::class);
     }
 
     public function registerMediaCollections(): void

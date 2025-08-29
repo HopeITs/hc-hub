@@ -21,9 +21,7 @@
                     <x-icon-label-info :label="trans_choice('general.required-positions', 2)"   :info="$program->required_positions_count">
                         <x-icons.bag class="me-2" />
                     </x-icon-label-info>
-                    <x-icon-label-info :label="trans_choice('general.center', 2)"   :info="$program->centers_count">
-                        <x-icons.building class="me-2" />
-                    </x-icon-label-info>
+
                     <x-icon-label-info :label="trans_choice('general.city', 2)"   :info="$program->cities_count">
                         <x-icons.map-pin class="me-2" />
                     </x-icon-label-info>

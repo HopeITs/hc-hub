@@ -23,7 +23,6 @@ use App\Livewire\ProgramManagement\Program\Detail as ProgramDetail;
 use App\Livewire\ProgramManagement\Program\Create as ProgramCreate;
 use App\Livewire\ProgramManagement\Program\Update as ProgramUpdate;
 use App\Livewire\ProgramManagement\Program\Index as ProgramIndex;
-use App\Livewire\ProgramManagement\RequiredPositionModule;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -63,7 +62,7 @@ Route::group(
             Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');
             Route::get('departments', DepartmentModule::class)->name('departments.index');
 
-            Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
+
             Route::get('/centers', CentersModule::class)->name('centers.index');
             Route::get('/program-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');

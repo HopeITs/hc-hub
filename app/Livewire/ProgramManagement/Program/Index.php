@@ -93,7 +93,7 @@ class Index extends Component
     public function render()
     {
         $items = Program::with('media')->withCount([
-            'centers', 'requiredPositions',
+            'positions',
             'cities as cities_count' => function ($query) {
                 $query->select(DB::raw('count(distinct city_id)'));
             }

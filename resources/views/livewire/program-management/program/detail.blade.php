@@ -1,7 +1,7 @@
 <div class="space-y-8" x-data="{ activeTab: 'details' }">
     <livewire:layout.breadcrumbs :title="__('general.projects-management')" :crumbs="[
         ['label' => __('general.projects-management')],
-        ['label' => trans_choice('general.project', 2), 'url' => route('projects.index')],
+        ['label' => trans_choice('general.project', 2), 'url' => route('programs.index')],
         ['label' => $program->name],
     ]" />
 
