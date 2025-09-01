@@ -62,7 +62,7 @@ Route::group(
 
 
             Route::get('/centers', CentersModule::class)->name('centers.index');
-            Route::get('/program-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
+            Route::get('/positions', PositionsModule::class)->name('positions');
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
             Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');

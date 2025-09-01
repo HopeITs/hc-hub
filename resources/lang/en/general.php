@@ -114,7 +114,7 @@ return [
     'phd' => 'PhD',
     'information' => 'Profile',
     'education' => 'Education',
-    'general-info' => 'General Information',
+//    'general-info' => 'General Information',
     'employment-info' => 'Employment Information',
     'family-info' => 'Family Information',
     'contact-info' => 'Contact Information',
