@@ -6,25 +6,25 @@ use App\Livewire\Basics\ContractTypeModule;
 use App\Livewire\Basics\DepartmentModule;
 use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Basics\LeaveTypeModule;
-use App\Livewire\Contract\ContractDetails;
-use App\Livewire\Contract\ContractsModule;
 use App\Livewire\Contract\ContractCreate;
+use App\Livewire\Contract\ContractDetails;
 use App\Livewire\Contract\ContractEdit;
+use App\Livewire\Contract\ContractsModule;
 use App\Livewire\Employee\EmployeeCreate;
 use App\Livewire\Employee\EmployeeEdit;
 use App\Livewire\Employee\EmployeeModule;
+use App\Livewire\Position\PositionCreate;
+use App\Livewire\Position\PositionEdit;
+use App\Livewire\Position\PositionsModule;
 use App\Livewire\ProgramManagement\CentersModule;
 use App\Livewire\ProgramManagement\DefaultDeliverablesModule;
-
-use App\Livewire\ProgramManagement\PositionsModule;
-use App\Livewire\ProgramManagement\Program\Detail as ProgramDetail;
 use App\Livewire\ProgramManagement\Program\Create as ProgramCreate;
-use App\Livewire\ProgramManagement\Program\Update as ProgramUpdate;
+use App\Livewire\ProgramManagement\Program\Detail as ProgramDetail;
 use App\Livewire\ProgramManagement\Program\Index as ProgramIndex;
+use App\Livewire\ProgramManagement\Program\Update as ProgramUpdate;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
-use App\Livewire\Archives\ArchivedFilesModule;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
@@ -62,7 +62,14 @@ Route::group(
 
 
             Route::get('/centers', CentersModule::class)->name('centers.index');
-            Route::get('/positions', PositionsModule::class)->name('positions');
+
+            Route::prefix('positions')
+                ->name('positions.')
+                ->group(function () {
+                    Route::get('/', PositionsModule::class)->name('index');
+                    Route::get('/create', PositionCreate::class)->name('create');
+                    Route::get('/{position}/edit', PositionEdit::class)->name('edit');
+                });
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
             Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');

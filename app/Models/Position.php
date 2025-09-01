@@ -6,20 +6,14 @@ use Illuminate\Console\Prohibitable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Translatable\HasTranslations;
 
 class Position extends Model
 {
-    use HasFactory;
+    use HasFactory , HasTranslations;
 
-    protected $fillable = [
-        'required_position_id',
-        'center_id',
-        'responsibilities',
-        'max_emp',
-        'exist_emp',
-        'is_active',
-    ];
-
+    protected $guarded = ['id'];
+    public array $translatable = ['title'];
     protected $casts = [
         'max_emp'   => 'integer',
         'exist_emp' => 'integer',

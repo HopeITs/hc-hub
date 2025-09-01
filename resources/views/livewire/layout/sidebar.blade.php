@@ -59,7 +59,7 @@
                             {{ trans_choice('general.program', 2) }}
                         </x-layouts.app.sidebar.nav-item>
 
-                        <x-layouts.app.sidebar.nav-item :href="route('positions')" :active="request()->routeIs('programs.*')">
+                        <x-layouts.app.sidebar.nav-item :href="route('positions.index')" :active="request()->routeIs('programs.*')">
                             {{ __('general.positions') }}
                         </x-layouts.app.sidebar.nav-item>
 

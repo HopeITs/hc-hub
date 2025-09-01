@@ -82,7 +82,7 @@ return new class extends Migration
             $table->foreignId('city_id')->constrained()->onDelete('restrict');
             $table->foreignId('job_level_id')->constrained()->onDelete('restrict');
             $table->foreignId('department_id')->constrained()->onDelete('restrict');
-            $table->string('title');
+            $table->json('title');
             $table->text('qualifications');
             $table->text('responsibilities');
             $table->integer('max_emp')->default(1);

@@ -1,16 +1,12 @@
 <?php
 
-namespace App\Livewire\ProgramManagement;
+namespace App\Livewire\Position;
 
-use App\Models\Center;
 use App\Models\Position;
-
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Livewire\Component;
-use Livewire\WithPagination;
 use App\Traits\SortableTable;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class PositionsModule extends Component
 {
