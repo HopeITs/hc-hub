@@ -18,9 +18,9 @@ class JobLevel extends Model
         'grade',
         'email',
     ];
-    public function contracts()
+    public function positions()
     {
-        return $this->hasMany(Contract::class, 'job_level_id');
+        return $this->hasMany(Position::class, 'job_level_id');
     }
 
 }

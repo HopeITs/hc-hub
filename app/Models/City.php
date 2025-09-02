@@ -23,4 +23,8 @@ class City extends Model
     {
         return $this->hasMany(Center::class);
     }
+    public function positions()
+    {
+        return $this->hasMany(Position::class);
+    }
 }

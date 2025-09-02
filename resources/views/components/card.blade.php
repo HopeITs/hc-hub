@@ -6,8 +6,9 @@
 
     @isset($title)
         <div class="flex justify-between ">
+
+            <h5 class="mb-2 text-xl font-semibold text-start line-clamp-2 tracking-tight text-gray-900 w-2/3  ">{{$title}}</h5>
             {{$icon ?? ''}}
-            <h5 class="mb-2 text-xl font-semibold text-start line-clamp-2 tracking-tight text-gray-900 w-2/3 ">{{$title}}</h5>
         </div>
 
     @endisset

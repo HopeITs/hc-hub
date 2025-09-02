@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Spatie\Translatable\HasTranslations;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -20,7 +22,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = ['email', 'password' , 'employee_id'];
+    protected $fillable = ['email', 'password', 'employee_id'];
 
     // public function getTranslatedNameAttribute()
     // {
@@ -56,7 +58,7 @@ class User extends Authenticatable
     }
     public function profile(): BelongsTo
     {
-        return $this->belongsTo(Employee::class,'employee_id');
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
     public function myRole()
     {
@@ -87,5 +89,13 @@ class User extends Authenticatable
         return $this->roles->contains('name', $roleName);
     }
 
+    public function folders(): HasMany
+    {
+        return $this->hasMany(Folder::class, 'user_id');
+    }
 
+    public function accessibleFolders(): BelongsToMany
+    {
+        return $this->belongsToMany(Folder::class);
+    }
 }

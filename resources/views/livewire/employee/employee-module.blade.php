@@ -1,12 +1,12 @@
 <div>
     <div class="flex justify-between">
         <livewire:layout.breadcrumbs :title="trans_choice('general.employee', 2)" :crumbs="[
-            ['label' => trans_choice('general.employee_management', 2)],
+            ['label' => trans_choice('general.employee-management', 2)],
             ['label' => trans_choice('general.employee', 2)],
         ]" :showButton="true" />
         <div>
             <x-primary-button :href="route('employees.create')">
-                @lang('general.add_new')
+                @lang('general.add-new')
             </x-primary-button>
         </div>
     </div>
@@ -31,7 +31,7 @@
                     <x-table.cell>{{ $item->id }}</x-table.cell>
                     <x-table.cell>{{ $item->getTranslation('name', app()->getLocale()) }}</x-table.cell>
                     <x-table.cell>
-                        <img src="{{ $item->photo ? asset('storage/' . $item->photo) : 'https://ui-avatars.com/api/?name=' . urlencode($item->name) . '&color=7F9CF5&background=EBF4FF' }}"
+                        <img src="{{ $item->getFirstMediaUrl('avatar') }}"
                             alt="{{ $item->name }}" class="h-12 w-12 rounded-full object-cover">
                     </x-table.cell>
                     <x-table.cell>{{ $item->years_of_service }}</x-table.cell>

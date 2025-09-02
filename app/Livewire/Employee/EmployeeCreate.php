@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee;
 
 use App\Livewire\Forms\Employee\BadgeForm;
+use App\Livewire\Forms\Employee\ChecklistForm;
 use App\Livewire\Forms\Employee\CourseForm;
 use App\Livewire\Forms\Employee\EducationForm;
 use App\Livewire\Forms\Employee\ExperienceForm;
@@ -21,13 +22,10 @@ class EmployeeCreate extends Component
 
     public PersonalInfoForm $infoForm;
     public EducationForm $educationForm;
-    public ChecklistItem $checklistItemForm;
-
+    public ChecklistForm$checklistItemForm;
     public  CourseForm $courseForm;
     public ExperienceForm $experienceForm;
-
     public RelativeForm $relativeForm;
-
     public BadgeForm $badgeForm;
 
 
@@ -37,6 +35,17 @@ class EmployeeCreate extends Component
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;
+    }
+
+    public function toggleBoardMember($checked): void
+    {
+
+        $this->infoForm->is_board_member = (bool) $checked;
+
+        if (!$this->infoForm->is_board_member) {
+            $this->infoForm->board_member_started_at = null;
+            $this->infoForm->board_member_end_at = null;
+        }
     }
     public function saveInformation()
     {

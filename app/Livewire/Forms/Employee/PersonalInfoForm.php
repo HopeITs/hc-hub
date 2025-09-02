@@ -6,8 +6,10 @@ use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-use Livewire\Attributes\Rule;
+
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 use Livewire\WithFileUploads;
 
@@ -18,13 +20,13 @@ class PersonalInfoForm extends Form
     public ?Employee $employee = null;
 
     public $photo = null;
-    #[Validate(['name.ar' => 'required|string' , 'name.en' => 'required|string'])]
+    #[Validate(['name.ar' => 'required|string', 'name.en' => 'required|string'])]
     public $name = [];
 
-    #[Validate(['father_name.ar' => 'required|string','father_name.en' => 'nullable|string'])]
+    #[Validate(['father_name.ar' => 'required|string', 'father_name.en' => 'nullable|string'])]
     public $father_name = [];
 
-    #[Validate([ 'mother_name.ar' => 'required|string','mother_name.en' => 'nullable|string'])]
+    #[Validate(['mother_name.ar' => 'required|string', 'mother_name.en' => 'nullable|string'])]
     public $mother_name = [];
 
     #[Validate(['address' => 'nullable|array', 'address.*' => 'nullable|string'])]
@@ -32,7 +34,10 @@ class PersonalInfoForm extends Form
 
     public $email;
 
-    #[Validate('nullable|date_format:d-m-Y')]
+
+    public $national_number;
+
+    #[Validate('nullable|date')]
     public $dob;
 
     #[Validate('required|in:1,2')]
@@ -44,7 +49,7 @@ class PersonalInfoForm extends Form
     #[Validate('nullable|integer|min:0')]
     public $children;
 
-    #[Validate('string')]
+    #[Validate('integer')]
     public $nationality;
 
     #[Validate('nullable|string')]
@@ -52,7 +57,8 @@ class PersonalInfoForm extends Form
 
     #[Validate('nullable|string')]
     public $civil_registry_number;
-
+    #[Validate('nullable|string')]
+    public $place_and_birth_date;
     #[Validate('nullable|string')]
     public $place_of_registration;
 
@@ -79,8 +85,38 @@ class PersonalInfoForm extends Form
 
     #[Validate('nullable|date|after:board_member_started_at')]
     public $board_member_end_at;
+    #[Validate('boolean')]
+    public $is_active = true;
 
-    public $work_email_username;
+
+    public $username;
+
+    #[Validate('nullable|exists:employees,id')]
+    public $direct_manager_id = null;
+    #[Validate('nullable|exists:employees,id')]
+    public $tech_manager_id = null;
+
+    public $city_id;
+
+
+    public function rules()
+    {
+        return [
+            'national_number' => [
+                'required',
+                Rule::unique('employees', 'national_number')->ignore($this->employee?->id),
+            ],
+            'email' => [
+                'required',
+                Rule::unique('users', 'email')->ignore($this->employee?->account->id),
+            ],
+            'username' => [
+                'required',
+                Rule::unique('employees', 'username')->ignore($this->employee?->id),
+            ],
+        ];
+    }
+
 
     protected function buildWorkEmail(?string $username): ?string
     {
@@ -96,7 +132,7 @@ class PersonalInfoForm extends Form
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
-        $this->photo = $employee->photo;
+        $this->city_id = $employee->city_id;
         $this->national_number = $employee->national_number;
         $this->direct_manager_id = $employee->direct_manager_id;
         $this->tech_manager_id = $employee->tech_manager_id;
@@ -106,6 +142,7 @@ class PersonalInfoForm extends Form
         $this->children = $employee->children;
         $this->nationality = $employee->nationality;
         $this->civil_registry_office = $employee->civil_registry_office;
+        $this->place_and_birth_date = $employee->place_and_birth_date;
         $this->civil_registry_number = $employee->civil_registry_number;
         $this->place_of_registration = $employee->place_of_registration;
         $this->work_phone = $employee->work_phone;
@@ -121,31 +158,30 @@ class PersonalInfoForm extends Form
         $this->father_name = $employee->getTranslations('father_name');
         $this->mother_name = $employee->getTranslations('mother_name');
         $this->address = $employee->getTranslations('address');
-        $this->educations = $employee->educations()->get()->toArray();
-        $this->courses = $employee->courses()->get()->toArray();
-        $this->experiences = $employee->experiences()->get()->toArray();
-        $this->relatives = $employee->relatives()->get()->toArray();
-        $this->badges = $employee->badges()->get()->toArray();
-        $this->checklists = $employee->checklists()->get()->toArray();
-        $this->work_email_username = $this->extractUsernameFromEmail($employee->account?->email);
+        $this->username = $employee->username;
+        $this->email = $employee->account?->email;
+        $this->photo = $employee->getFirstMediaUrl('avatar');
+
     }
 
 
     public function saveInformation(): Employee
     {
 
-        $this->email = $this->buildWorkEmail($this->work_email_username);
+        $this->email = $this->buildWorkEmail($this->username);
 
         $this->validate();
 
         if ($this->employee) {
-            $this->employee->update($this->except('email'));
+            $this->employee->update($this->except(['email', 'photo']));
 
             if ($this->employee->account) {
                 $this->employee->account->update(['email' => $this->email]);
             }
+
         } else {
-            $this->employee = Employee::create($this->except('email'));
+            $this->city_id = auth()->user()->profile?->city_id ?? 1;
+            $this->employee = Employee::create($this->except(['email', 'photo']));
 
             User::create([
                 'email' => $this->email,
@@ -154,10 +190,13 @@ class PersonalInfoForm extends Form
             ]);
         }
 
-        if ($this->photo && !is_string($this->photo)) {
-            $this->employee->photo = $this->photo->store('employees', 'public');
-            $this->employee->save();
+        if ($this->photo instanceof TemporaryUploadedFile) {
+            $this->employee->addMedia($this->photo->getRealPath())
+                ->usingFileName('employee-avatar.' . $this->photo->getClientOriginalExtension())
+                ->toMediaCollection('avatar');
         }
+
+
         return $this->employee;
     }
 

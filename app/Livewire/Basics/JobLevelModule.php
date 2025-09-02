@@ -55,7 +55,7 @@ class JobLevelModule extends Component
         $this->resetErrorBag();
         $this->resetValidation();
         $this->showModal = true;
-        $this->modalTitle = __('general.add_new');
+        $this->modalTitle = __('general.add-new');
     }
 
     public function edit($id)

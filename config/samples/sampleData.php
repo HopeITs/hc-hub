@@ -23,7 +23,6 @@ return [
         ['slug' => 'HSK', 'name' => ['en' => ' Al-Hasakah', 'ar' => 'الحسكة'], 'is_active' => false, 'code' => '012'],
         ['slug' => 'IDL', 'name' => ['en' => 'Idleb', 'ar' => 'إدلب'], 'is_active' => false, 'code' => '013'],
         ['slug' => 'RID', 'name' => ['en' => 'Rif Dimashq', 'ar' => 'ريف دمشق'], 'is_active' => false, 'code' => '014'],
-
     ],
 
     'ContractType' => [
@@ -31,42 +30,36 @@ return [
             'name' => ['en' => 'Full Annual', 'ar' => 'سنوي كامل'],
             'place' => ContractPlace::Onsite,
             'type' => ContractType::FullTime,
-
         ],
         [
             'name' => ['en' => 'Partial Annual', 'ar' => 'سنوي جزئي'],
             'place' => ContractPlace::Onsite,
             'type' => ContractType::PartTime,
-
         ],
         [
             'name' => ['en' => 'Trial Full', 'ar' => 'تجريبي كامل'],
             'place' => ContractPlace::Onsite,
             'type' => ContractType::FullTime,
-
         ],
         [
             'name' => ['en' => 'Trial Partial', 'ar' => 'تجريبي جزئي'],
             'place' => ContractPlace::Onsite,
             'type' => ContractType::PartTime,
-
         ],
         [
             'name' => ['en' => 'Online Agreement Contract', 'ar' => 'عقد اتفاق اونلاين'],
             'place' => ContractPlace::Online,
             'type' => ContractType::Freelance,
-
         ],
         [
             'name' => ['en' => 'Onsite Agreement Contract', 'ar' => 'عقد اتفاق في الموقع'],
             'place' => ContractPlace::Onsite,
             'type' => ContractType::Freelance,
-
         ],
     ],
 
     'departments' => [
-        ['name' => 'HeadOffice/ Aleppo', 'description' => null, 'email' => 'headoffice@hcsyria.org'],
+        ['name' => 'Management', 'description' => null, 'email' => 'headoffice@hcsyria.org'],
         ['name' => 'Front Desk', 'description' => null, 'email' => null],
         ['name' => 'Teachers', 'description' => null, 'email' => null],
         ['name' => 'Trainers/ Coach', 'description' => null, 'email' => null],
@@ -81,12 +74,9 @@ return [
         ['name' => 'Services/ Keepers', 'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو استقبال المستفيدين وتوجيههم والاهتمام بنظافة المكان بشكل عام.', 'email' => null],
     ],
 
-    'projects' => [
+    'programs' => [
         [
-            'name' => [
-                'en' => 'Hope Center',
-                'ar' => 'مركز الرجاء',
-            ],
+            'name' => 'Hope Center',
             'description' => [
                 'en' => 'An ecumenical Christian organization established in 2018 under the guidance of the Latin Church in Syria. It empowers Syrian families through diverse initiatives across relief, livelihood, development, and education.',
                 'ar' => 'مركز الرجاء المسيحي منظمة مسكونية، تأسست مطلع عام ٢٠١٨، وتعمل بتوجيه من الكنيسة اللاتينية في سورية. رسالتنا هي تمكين الأسر السورية من خلال مبادرات متعددة تستهدف كل مكون من مكونات الأسرة، في مجالات الإغاثة، ودعم سبل العيش، والتنمية، والتعليم.',
@@ -96,10 +86,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Micro Project',
-                'ar' => 'مشاريع صغيرة',
-            ],
+            'name' => 'Micro Program',
             'description' => [
                 'en' => 'Aimed at empowering Syrian families via livelihood, education, and development programs.',
                 'ar' => 'مركز الرجاء المسيحي منظمة مسكونية، تأسست مطلع عام ٢٠١٨، وتعمل بتوجيه من الكنيسة اللاتينية في سورية. رسالتنا هي تمكين الأسر السورية من خلال مبادرات متعددة تستهدف كل مكون من مكونات الأسرة، في مجالات الإغاثة، ودعم سبل العيش، والتنمية، والتعليم.',
@@ -109,10 +96,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Relief Programs',
-                'ar' => 'برامج الإغاثة',
-            ],
+            'name' => 'Relief Programs',
             'description' => [
                 'en' => 'Aims to reduce suffering caused by war and economic crises through essential humanitarian support.',
                 'ar' => 'الهدف من البرامج الإغاثية هو تخفيف المعاناة الناجمة عن الحرب السورية وتداعياتها الاقتصادية المعقدة، والتي تُثقل كاهل غالبية الأسر التي تعيش تحت خط الفقر. هدفنا هو مساعدة هذه الأسرعلى تلبية احتياجاتها الأساسية والحفاظ على كرامتها.',
@@ -122,10 +106,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Family to Family (Rodzina Rodzinie)',
-                'ar' => 'من عائلة إلى عائلة',
-            ],
+            'name' => 'Family to Family (Rodzina Rodzinie)',
             'description' => [
                 'en' => 'Aims to reduce suffering caused by war and economic crises through essential humanitarian support.',
                 'ar' => 'الهدف من البرامج الإغاثية هو تخفيف المعاناة الناجمة عن الحرب السورية وتداعياتها الاقتصادية المعقدة، والتي تُثقل كاهل غالبية الأسر التي تعيش تحت خط الفقر. هدفنا هو مساعدة هذه الأسرعلى تلبية احتياجاتها الأساسية والحفاظ على كرامتها.',
@@ -135,10 +116,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Assistance for Earthquake',
-                'ar' => 'الإستجابة للزلزال',
-            ],
+            'name' => 'Assistance for Earthquake',
             'description' => [
                 'en' => 'Supports post-war recovery through rebuilding infrastructure, schools, homes, and implementing sustainable energy solutions.',
                 'ar' => 'يُعدّ عمل إعادة التأهيل في فترة ما بعد الحرب أمرًا بالغ الأهمية للتعافي المبكر للمجتمعات. كما أنه ضروري لاستعادة البنى التحتية المتضررة وخدمات الدعم التي تُمكّن الناس من استئناف حياتهم. وقد ساهم مركز الأمل المسيحي في هذا المجال من خلال إعادة تأهيل المرافق التعليمية والمجتمعية المدمرة، مثل المدارس والملاعب، وترميم المنازل وأماكن العمل. كما امتدت جهودنا إلى دعم المجتمعات الريفية من خلال توفير البنية التحتية الكهروضوئية لإنتاج الكهرباء واستخراج المياه في عدة قرى.',
@@ -148,10 +126,7 @@ return [
             'is_active' => false,
         ],
         [
-            'name' => [
-                'en' => 'School to School (Szkoła szkole)',
-                'ar' => 'من مدرسة إلى مدرسة',
-            ],
+            'name' => 'School to School (Szkoła szkole)',
             'description' => [
                 'en' => 'Supports post-war recovery through rebuilding infrastructure, schools, homes, and implementing sustainable energy solutions.',
                 'ar' => 'يُعدّ عمل إعادة التأهيل في فترة ما بعد الحرب أمرًا بالغ الأهمية للتعافي المبكر للمجتمعات. كما أنه ضروري لاستعادة البنى التحتية المتضررة وخدمات الدعم التي تُمكّن الناس من استئناف حياتهم. وقد ساهم مركز الأمل المسيحي في هذا المجال من خلال إعادة تأهيل المرافق التعليمية والمجتمعية المدمرة، مثل المدارس والملاعب، وترميم المنازل وأماكن العمل. كما امتدت جهودنا إلى دعم المجتمعات الريفية من خلال توفير البنية التحتية الكهروضوئية لإنتاج الكهرباء واستخراج المياه في عدة قرى.',
@@ -161,10 +136,7 @@ return [
             'is_active' => false,
         ],
         [
-            'name' => [
-                'ar' => 'مركز التدريب والتكوين',
-                'en' => 'Development Impact and Support Center',
-            ],
+            'name' => 'Development Impact and Support Center',
             'description' => [
                 'en' => 'Supports fresh graduates in developing foundational, employability, and peer mentorship skills to enter the job market.',
                 'ar' => 'الهدف من برنامج DISC في مساعدة الخريجين الجدد على توجيه أنفسهم نحو العمل وتزويدهم بالمهارات اللازمة لضمان استعدادهم لدخول سوق العمل. يعمل المشروع على ثلاثة جوانب أساسية في آنٍ واحد: المهارات الأساسية، ومهارات التوظيف، والرفقة لتبادل الخبرات والدعم.',
@@ -174,10 +146,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Study Zone',
-                'ar' => 'ستادي زون',
-            ],
+            'name' => 'Study Zone',
             'description' => [
                 'en' => null,
                 'ar' => null,
@@ -187,10 +156,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Homework Room',
-                'ar' => 'هوم وورك روم',
-            ],
+            'name' => 'Homework Room',
             'description' => [
                 'en' => null,
                 'ar' => null,
@@ -200,10 +166,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Children University',
-                'ar' => 'أكاديمية الأطفال',
-            ],
+            'name' => 'Children University',
             'description' => [
                 'en' => 'An interactive educational program for children aged 6 to 16, designed to simulate university-style learning through experience.',
                 'ar' => 'جامعة الأطفال برنامج تعليمي مصمم خصيصًا للأطفال من سن 6 إلى 16 عامًا، يشبه المقررات الجامعية، بأسلوب تفاعلي متقدم ومبتكر، يركز على التجربة كأداة تعليمية، بالإضافة إلى أساليب متنوعة أخرى. يتكون البرنامج من مرحلتين: مستوى أساسي ومستوى متقدم، مدة كل مرحلة 4 أشهر، ويتكون كل مستوى من يومين دراسيين ويوم واحد للأنشطة أسبوعيًا.',
@@ -213,10 +176,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'en' => 'Sha8er',
-                'ar' => 'منصة شاغر',
-            ],
+            'name' => 'Sha8er',
             'description' => [
                 'en' => null,
                 'ar' => null,
@@ -226,10 +186,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'ar' => 'مشروع ريادة الأعمال',
-                'en' => 'Entrepreneurship project',
-            ],
+            'name' => 'Entrepreneurship program',
             'description' => [
                 'en' => 'Leadership program to equip community leaders with technical and leadership skills for effective crisis response.',
                 'ar' => 'نظرًا لعدم وجود قادة ناجحين يمكنهم توجيه المجتمعات المحلية خلال أوقات الأزمات، تم إنشاء برنامج القيادة لاستهداف الأعضاء النشطين في المجتمع وتزويدهم بالمهارات الفنية والقدرات القيادية، والتي ستدعمهم في التقييم الدقيق لاحتياجات مجتمعاتهم الحالية والمستقبلية واقتراح حلول فعالة، وبالتالي المساهمة الفعلية على تشجيع تنمية المجتمع.',
@@ -239,10 +196,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => [
-                'ar' => 'برنامج تطوير وتمكين القادة',
-                'en' => 'Leadership Empowerment & Achievement Program',
-            ],
+            'name' => 'Leadership Empowerment & Achievement Program',
             'description' => [
                 'en' => 'Leadership program to equip community leaders with technical and leadership skills for effective crisis response.',
                 'ar' => 'نظرًا لعدم وجود قادة ناجحين يمكنهم توجيه المجتمعات المحلية خلال أوقات الأزمات، تم إنشاء برنامج القيادة لاستهداف الأعضاء النشطين في المجتمع وتزويدهم بالمهارات الفنية والقدرات القيادية، والتي ستدعمهم في التقييم الدقيق لاحتياجات مجتمعاتهم الحالية والمستقبلية واقتراح حلول فعالة، وبالتالي المساهمة الفعلية على تشجيع تنمية المجتمع.',
@@ -251,42 +205,34 @@ return [
             'code' => '010',
             'is_active' => true,
         ],
-
-
     ],
 
     'centers' => [
-        ['name' => ['en' => 'Hope Center', 'ar' => 'مركز الرجاء'], 'city_id' => 2, 'project_id' => 1, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => ['en' => 'Hope Center', 'ar' => 'مركز الرجاء'], 'city_id' => 3, 'project_id' => 1, 'address' => 'Damascus', 'is_active' => true],
-        ['name' => ['en' => 'Hope Center', 'ar' => 'مركز الرجاء'], 'city_id' => 4, 'project_id' => 1, 'address' => 'Latakia', 'is_active' => true],
-        ['name' => ['en' => 'Hope Center', 'ar' => 'مركز الرجاء'], 'city_id' => 5, 'project_id' => 1, 'address' => 'Homs', 'is_active' => true],
-        ['name' => ['en' => 'Micro Project', 'ar' => 'المشاريع الصغيرة'], 'city_id' => 2, 'project_id' => 2, 'address' => 'Homs', 'is_active' => true],
-        ['name' => ['en' => 'Micro Project', 'ar' => 'المشاريع الصغيرة'], 'city_id' => 3, 'project_id' => 2, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => ['en' => 'Micro Project', 'ar' => 'المشاريع الصغيرة'], 'city_id' => 4, 'project_id' => 2, 'address' => 'Damascus', 'is_active' => true],
-        ['name' => ['en' => 'Micro Project', 'ar' => 'المشاريع الصغيرة'], 'city_id' => 5, 'project_id' => 2, 'address' => 'Latakia', 'is_active' => true],
-        ['name' => ['en' => 'Relief programs', 'ar' => 'برامج الاغاثة'], 'city_id' => 2, 'project_id' => 3, 'address' => 'Damascus', 'is_active' => true],
-        ['name' => ['en' => 'Sha8er', 'ar' => 'شاغر'], 'city_id' => 1, 'project_id' => 11, 'address' => null, 'is_active' => true],
-        ['name' => ['en' => 'Children University', 'ar' => 'أكاديمية الأطفال'], 'city_id' => 2, 'project_id' => 10, 'address' => 'Homs', 'is_active' => true],
-        ['name' => ['en' => 'Children University', 'ar' => 'أكاديمية الأطفال'], 'city_id' => 3, 'project_id' => 10, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => ['en' => 'ADISC', 'ar' => 'التأهيل والتمكين'], 'city_id' => 2, 'project_id' => 7, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => ['en' => 'HDISC', 'ar' => 'التأهيل والتمكين'], 'city_id' => 3, 'project_id' => 7, 'address' => 'Homs', 'is_active' => true],
-        ['name' => ['en' => 'DDISC', 'ar' => 'التأهيل والتمكين'], 'city_id' => 4, 'project_id' => 7, 'address' => 'Damascus', 'is_active' => true],
-        ['name' => ['en' => 'LDISC', 'ar' => 'التأهيل والتمكين'], 'city_id' => 5, 'project_id' => 7, 'address' => 'Latakia', 'is_active' => false],
-        ['name' => ['en' => 'Science Zone', 'ar' => 'ساينس زون'], 'city_id' => 2, 'project_id' => 8, 'address' => 'Homs', 'is_active' => true],
-        ['name' => ['en' => 'Science Zone', 'ar' => 'ساينس زون'], 'city_id' => 3, 'project_id' => 8, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'ستادي زون النزهة'], 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Nouzha', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'ستادي زون المحطة'], 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Mashta', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'ستادي زون الارمن'], 'city_id' => 3, 'project_id' => 8, 'address' => 'Armenian', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'ستادي زون المزينة'], 'city_id' => 3, 'project_id' => 8, 'address' => 'Al-Muzayneh', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'ستادي زون باب شرقي'], 'city_id' => 4, 'project_id' => 8, 'address' => 'Bab-Sharqi', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'ستادي زون باب توما'], 'city_id' => 4, 'project_id' => 8, 'address' => 'Bab-Touma', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'ستادي زون زراعة 1'], 'city_id' => 5, 'project_id' => 8, 'address' => 'Ziraa 1', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'ستادي زون زراعة 2'], 'city_id' => 5, 'project_id' => 8, 'address' => 'Ziraa 2', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'ستادي زون 8 اذار'], 'city_id' => 5, 'project_id' => 8, 'address' => 'Al-Haram', 'is_active' => true],
-        ['name' => ['en' => 'Study Zone', 'ar' => 'ستادي زون طرطوس'], 'city_id' => 6, 'project_id' => 8, 'address' => 'Tartous', 'is_active' => true],
-        ['name' => ['en' => 'LEAP', 'ar' => 'إعداد القادة'], 'city_id' => 2, 'project_id' => 13, 'address' => 'Aleppo', 'is_active' => true],
-        ['name' => ['en' => 'LEAP', 'ar' => 'إعداد القادة'], 'city_id' => 3, 'project_id' => 13, 'address' => 'Homs', 'is_active' => true],
-        ['name' => ['en' => 'Rehabiliation', 'ar' => 'إعادة التأهيل'], 'city_id' => 2, 'project_id' => 3, 'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'Hope Center/Head Office', 'city_id' => 2, 'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'Micro Project', 'city_id' => 3, 'address' => 'Homs', 'is_active' => true],
+        ['name' => 'Micro Project', 'city_id' => 4, 'address' => 'Damascus', 'is_active' => true],
+        ['name' => 'Micro Project', 'city_id' => 5, 'address' => 'Latakia', 'is_active' => true],
+        ['name' => 'Children University', 'city_id' => 2, 'address' => 'Homs', 'is_active' => true],
+        ['name' => 'Children University', 'city_id' => 3, 'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'ADISC', 'city_id' => 2, 'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'HDISC', 'city_id' => 3, 'address' => 'Homs', 'is_active' => true],
+        ['name' => 'DDISC', 'city_id' => 4, 'address' => 'Damascus', 'is_active' => true],
+        ['name' => 'LDISC', 'city_id' => 5, 'address' => 'Latakia', 'is_active' => false],
+        ['name' => 'Science Zone', 'city_id' => 2, 'address' => 'Homs', 'is_active' => true],
+        ['name' => 'Science Zone', 'city_id' => 3, 'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'Study Zone Al-Nouzha', 'city_id' => 3, 'address' => 'Al-Nouzha', 'is_active' => true],
+        ['name' => 'Study Zone Al-Mashta', 'city_id' => 3, 'address' => 'Al-Mashta', 'is_active' => true],
+        ['name' => 'Study Zone Armenian', 'city_id' => 3, 'address' => 'Armenian', 'is_active' => true],
+        ['name' => 'Study Zone Al-Muzayneh', 'city_id' => 3, 'address' => 'Al-Muzayneh', 'is_active' => true],
+        ['name' => 'Study Zone Bab-Sharqi', 'city_id' => 4, 'address' => 'Bab-Sharqi', 'is_active' => true],
+        ['name' => 'Study Zone Bab-Touma', 'city_id' => 4, 'address' => 'Bab-Touma', 'is_active' => true],
+        ['name' => 'Study Zone Ziraa 1', 'city_id' => 5, 'address' => 'Ziraa 1', 'is_active' => true],
+        ['name' => 'Study Zone Ziraa 2', 'city_id' => 5, 'address' => 'Ziraa 2', 'is_active' => true],
+        ['name' => 'Study Zone Al-Haram', 'city_id' => 5, 'address' => 'Al-Haram', 'is_active' => true],
+        ['name' => 'Study Zone Tartous', 'city_id' => 6, 'address' => 'Tartous', 'is_active' => true],
+        ['name' => 'LEAP Aleppo', 'city_id' => 2, 'address' => 'Aleppo', 'is_active' => true],
+        ['name' => 'LEAP Homs', 'city_id' => 3, 'address' => 'Homs', 'is_active' => true],
+
     ],
 
     'checkListsItems' => [['name' => 'ID Cartoon', 'order' => 1], ['name' => 'Email', 'order' => 1], ['name' => 'Email Signature', 'order' => 1], ['name' => 'Laptop', 'order' => 1], ['name' => 'Mobile', 'order' => 1], ['name' => 'SIM', 'order' => 1], ['name' => 'Mug', 'order' => 2], ['name' => 'ID Plastic', 'order' => 2], ['name' => 'Web photo', 'order' => 2], ['name' => 'Recieve Electronics', 'order' => 3], ['name' => 'Cancel work mail & work accounts', 'order' => 3], ['name' => 'Delete the volunteer from the web page', 'order' => 3]],
@@ -321,21 +267,18 @@ return [
             'base_days' => 60,
             'allowed_gender' => LeaveType::GENDER_FEMALE,
             'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
-
         ],
         [
             'name' => ['en' => 'Paternity', 'ar' => 'إجازة أبوة'],
             'base_days' => 15,
             'allowed_gender' => LeaveType::GENDER_MALE,
             'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
-
         ],
         [
             'name' => ['en' => 'Marriage', 'ar' => 'زواج'],
             'base_days' => 7,
             'allowed_gender' => LeaveType::GENDER_ANY,
             'marital_status' => LeaveType::MARITAL_STATUS_SINGLE,
-
         ],
         [
             'name' => ['en' => 'Death Degree 1', 'ar' => 'وفاة درجة 1'],
@@ -355,7 +298,6 @@ return [
             'allowed_gender' => LeaveType::GENDER_ANY,
             'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
-
     ],
 
     'annualLeaveRules' => [
@@ -385,12 +327,19 @@ return [
             'days' => 22,
         ],
     ],
-    'jobLevels' => [['name' => ['en' => 'Board', 'ar' => 'مجلس الإدارة'], 'description' => null, 'grade' => 1, 'email' => 'board@hcsyria.org'], ['name' => ['en' => 'Program M', 'ar' => 'مدير البرنامج'], 'description' => null, 'grade' => 2, 'email' => 'managers@hcsyria.org'], ['name' => ['en' => 'Project M', 'ar' => 'مدير المشروع'], 'description' => null, 'grade' => 3, 'email' => 'managers@hcsyria.org'], ['name' => ['en' => 'Department M', 'ar' => 'مدير القسم'], 'description' => null, 'grade' => 4, 'email' => 'managers@hcsyria.org'], ['name' => ['en' => 'Team', 'ar' => 'الفريق'], 'description' => null, 'grade' => 5, 'email' => 'team@hcsyria.org'], ['name' => ['en' => 'Service Agreement', 'ar' => 'اتفاقية الخدمة'], 'description' => null, 'grade' => 6, 'email' => null], ['name' => ['en' => 'Keepers', 'ar' => 'المستخدمون'], 'description' => null, 'grade' => 7, 'email' => null]],
+    'jobLevels' => [
+        ['name' => ['en' => 'Program Manager', 'ar' => 'مدير البرنامج'], 'description' => null, 'grade' => 1, 'email' => 'managers@hcsyria.org'],
+        ['name' => ['en' => 'Project Manager', 'ar' => 'مدير المشروع'], 'description' => null, 'grade' => 2, 'email' => 'managers@hcsyria.org'],
+        ['name' => ['en' => 'Department Manager', 'ar' => 'مدير القسم'], 'description' => null, 'grade' => 3, 'email' => 'managers@hcsyria.org'],
+        ['name' => ['en' => 'Team', 'ar' => 'الفريق'], 'description' => null, 'grade' => 4, 'email' => 'team@hcsyria.org'],
+        ['name' => ['en' => 'Service Agreement', 'ar' => 'اتفاقية الخدمة'], 'description' => null, 'grade' => 5, 'email' => null],
+        ['name' => ['en' => 'Keepers', 'ar' => 'المستخدمون'], 'description' => null, 'grade' => 6, 'email' => null]
+    ],
 
     'employees' => [
         [
             'id' => 1,
-            'name' => ['en'=> 'George', 'ar' => 'جورج'],
+            'name' => ['en' => 'George', 'ar' => 'جورج'],
             'years_of_service' => 1,
             'direct_manager_id' => null,
             'tech_manager_id' => null,
@@ -415,17 +364,28 @@ return [
             'interests' => 'Reading, Technology',
             'is_active' => true,
         ],
-    ],'requiredPositions' => [
+    ],
+    'positions' => [
         [
-            'project_id' => 1,
-            'title' => 'Software Developer',
+            'program_id' => 1,
+            'city_id' => 1,
+            'center_id' => 1,
+            'job_level_id' => 1,
+            'department_id' => 1,
+            'title' =>['en' => 'Program Manager'],
             'qualifications' => 'Bachelor in Computer Science or related field.',
+            'responsibilities' => 'test',
             'is_active' => true,
         ],
         [
-            'project_id' => 2,
-            'title' => 'HR Manager',
+            'program_id' => 1,
+            'city_id' => 1,
+            'center_id' => 1,
+            'job_level_id' => 4,
+            'department_id' => 4,
+            'title' => ['en' => 'HR Manager'],
             'qualifications' => 'Degree in HR Management with 3+ years experience.',
+            'responsibilities' => 'test',
             'is_active' => true,
         ],
     ],

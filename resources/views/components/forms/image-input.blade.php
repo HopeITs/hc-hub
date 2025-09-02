@@ -5,7 +5,7 @@
             @this.on('resetPreview', () => preview = null);
         "
 >
-    <label for="logo-upload" class="cursor-pointer relative block aspect-video w-4/12 rounded-sm overflow-hidden border-2 border-dashed border-gray-300 group hover:border-blue-400 transition">
+    <label for="logo-upload" class="cursor-pointer relative block aspect-video w-4/12 rounded-sm overflow-hidden border-2 border-dashed border-gray-300 group hover:border-primary-400 transition">
         <input id="logo-upload" type="file" class="hidden"
                wire:model="item.logo"
                x-ref="logo"
@@ -19,7 +19,7 @@
                 "
         >
 
-        <div class="flex items-center justify-center h-full bg-gray-100 group-hover:bg-blue-50 transition">
+        <div class="flex items-center justify-center h-full bg-gray-100 group-hover:bg-primary-50 transition">
             <template x-if="preview">
                 <img :src="preview" class="object-cover w-full h-full rounded-sm" />
             </template>

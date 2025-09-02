@@ -9,19 +9,20 @@ use Spatie\Translatable\HasTranslations;
 
 class Center extends Model
 {
-    use HasFactory , HasTranslations;
+    use HasFactory, HasTranslations;
 
-    protected $fillable = ['name', 'city_id', 'project_id', 'address', 'is_active'];
+    protected $fillable = ['name', 'city_id', 'program_id', 'address', 'is_active'];
 
-    public $translatable = ['name', 'address'];
+    public $translatable = ['name','address'];
+
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
     }
 
-    public function project(): BelongsTo
+    public function program(): BelongsTo
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Program::class);
     }
 
     public function positions()
@@ -33,6 +34,4 @@ class Center extends Model
     {
         return $this->hasManyThrough(Contract::class, Position::class);
     }
-
-
 }

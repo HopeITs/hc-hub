@@ -7,7 +7,7 @@
                 <x-app-logo class="md:w-40 md:h-16" />
             </a>
             <ul class="space-y-2 font-medium">
-                <x-layouts.app.sidebar.dropdown-nav-list id="basic-project" :title="__('general.project-basics')" :active="request()->routeIs('dashboard') ||
+                <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('dashboard') ||
                     request()->routeIs('cities.*') ||
                     request()->routeIs('contract-types.*') ||
                     request()->routeIs('leave-types.*') ||
@@ -46,8 +46,8 @@
 
                 </x-layouts.app.sidebar.dropdown-nav-list>
 
-                <x-layouts.app.sidebar.dropdown-nav-list id="project-management" :title="__('general.projects-management')" :active="request()->routeIs('projects.*') ||
-                    request()->routeIs('required-positions.*') ||
+                <x-layouts.app.sidebar.dropdown-nav-list id="program-management" :title="__('general.programs-management')" :active="request()->routeIs('programs.*') ||
+
                     request()->routeIs('centers.*')">
 
                     <x-slot name="icon">
@@ -55,12 +55,12 @@
                     </x-slot>
 
                     <x-slot name="list">
-                        <x-layouts.app.sidebar.nav-item :href="route('projects.index')" :active="request()->routeIs('projects.*')">
-                            {{ trans_choice('general.project', 2) }}
+                        <x-layouts.app.sidebar.nav-item :href="route('programs.index')" :active="request()->routeIs('programs.*')">
+                            {{ trans_choice('general.program', 2) }}
                         </x-layouts.app.sidebar.nav-item>
 
-                        <x-layouts.app.sidebar.nav-item :href="route('required-positions.index')" :active="request()->routeIs('required-positions.index')">
-                            {{ trans_choice('general.required-positions', 1) }}
+                        <x-layouts.app.sidebar.nav-item :href="route('positions.index')" :active="request()->routeIs('programs.*')">
+                            {{ __('general.positions') }}
                         </x-layouts.app.sidebar.nav-item>
 
                         <x-layouts.app.sidebar.nav-item :href="route('centers.index')" :active="request()->routeIs('centers.index')" wire:navigate>
@@ -69,7 +69,7 @@
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
 
-                <x-layouts.app.sidebar.dropdown-nav-list id="employees-management" :title="trans_choice('general.employee_management', 2)"
+                <x-layouts.app.sidebar.dropdown-nav-list id="employees-management" :title="trans_choice('general.employee-management', 2)"
                     :active="request()->routeIs('employees.*')">
 
                     <x-slot name="icon">
@@ -84,14 +84,22 @@
                             {{ trans_choice('general.default-deliverables', 2) }}
                         </x-layouts.app.sidebar.nav-item>
 
-
-                        <x-layouts.app.sidebar.nav-item
-                            :href="route('contracts.index')"
-                            :active="request()->routeIs('contracts.*')">
+                        <x-layouts.app.sidebar.nav-item :href="route('contracts.index')" :active="request()->routeIs('contracts.*')">
                             {{ trans_choice('general.contracts', 2) }}
                         </x-layouts.app.sidebar.nav-item>
+
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
+
+                <li>
+                    <a href="{{ route('archived-files.index') }}"
+                        class="flex items-center p-2 rounded-lg text-gray-900 hover:bg-gray-100 group @if (request()->routeIs('archived-files.*')) bg-gray-100 @endif">
+                        <x-icons.folder
+                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" />
+                        <span class="ms-3">{{ __('general.archived-files') }}</span>
+                    </a>
+                </li>
+
             </ul>
         </div>
 

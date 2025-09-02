@@ -1,81 +1,67 @@
 <div>
-    <livewire:layout.breadcrumbs :title="__('general.add_new')" :crumbs="[
-        ['label' => trans_choice('general.employee_management', 2)],
+    <livewire:layout.breadcrumbs :title="__('general.add-new')" :crumbs="[
+        ['label' => trans_choice('general.employee-management', 2)],
         ['label' => trans_choice('general.employee', 2), 'url' => route('employees.index')],
-        ['label' => __('general.add_new')],
+        ['label' => __('general.add-new')],
     ]"/>
 
 
     <x-tab.form activeTab="information">
         <x-tab.list>
-            <x-tab.item :title="__('general.information')" activeTab="information" :active="$activeTab === 'information'"
-                    >
-                <x-icons.users class="w-5 h-5 mr-2"/>
+            <x-tab.item :title="__('general.information')" activeTab="information"
+                        :active="$activeTab === 'information'">
+                <x-icons.user class="w-5 h-5 mr-2"/>
             </x-tab.item>
 
             <x-tab.item :title="__('general.education')" activeTab="education" :active="$activeTab === 'education'">
                 <x-icons.education class="w-5 h-5 mr-2"/>
             </x-tab.item>
 
-            <x-tab.item :title="__('general.courses')" activeTab="courses"  :active="$activeTab === 'courses'">
+            <x-tab.item :title="__('general.courses')" activeTab="courses" :active="$activeTab === 'courses'">
                 <x-icons.courses class="w-5 h-5 mr-2"/>
             </x-tab.item>
 
             <x-tab.item :title="__('general.experience')" activeTab="experience" :active="$activeTab === 'experience'"
-                     >
+            >
                 <x-icons.experience class="w-5 h-5 mr-2"/>
             </x-tab.item>
 
-            <x-tab.item :title="__('general.relatives')" activeTab="relatives" :active="$activeTab === 'relatives'" >
+            <x-tab.item :title="__('general.relatives')" activeTab="relatives" :active="$activeTab === 'relatives'">
                 <x-icons.relatives class="w-5 h-5 mr-2"/>
             </x-tab.item>
 
-            <x-tab.item :title="__('general.badges')" activeTab="badges" :active="$activeTab === 'badges'" >
+            <x-tab.item :title="__('general.badges')" activeTab="badges" :active="$activeTab === 'badges'">
                 <x-icons.badges class="w-5 h-5 mr-2"/>
             </x-tab.item>
 
-            <x-tab.item :title="__('general.checklist')" activeTab="checklist"  :active="$activeTab === 'checklist'">
+            <x-tab.item :title="__('general.checklist')" activeTab="checklist" :active="$activeTab === 'checklist'">
                 <x-icons.checklist class="w-5 h-5 mr-2"/>
             </x-tab.item>
         </x-tab.list>
 
 
         <div class="flex-grow w-full">
-            @if($activeTab === 'information')
-                <x-tab.container activeTab="information">
+
+            <x-tab.container activeTab="information">
+                @if($activeTab === 'information')
                     @include('livewire.employee.tabs.personal-info-tab')
-                </x-tab.container>
-            @endif
-            @if($activeTab === 'education')
-                <x-tab.container activeTab="education">
+                @elseif($activeTab === 'education')
                     @include('livewire.employee.tabs.education-fields')
-                </x-tab.container>
-            @endif
-            @if($activeTab === 'courses')
-                <x-tab.container activeTab="courses">
+                @elseif($activeTab === 'courses')
                     @include('livewire.employee.tabs.courses-fields')
-                </x-tab.container>
-            @endif
-            @if($activeTab === 'experience')
-                <x-tab.container activeTab="experience">
+                @elseif($activeTab === 'experience')
                     @include('livewire.employee.tabs.experience-fields')
-                </x-tab.container>
-            @endif
-            @if($activeTab === 'relatives')
-                <x-tab.container activeTab="relatives">
+                @elseif($activeTab === 'relatives')
                     @include('livewire.employee.tabs.relatives-fields')
-                </x-tab.container>
-            @endif
-            @if($activeTab === 'badges')
-                <x-tab.container activeTab="badges">
+                @elseif($activeTab === 'badges')
                     @include('livewire.employee.tabs.badges-fields')
-                </x-tab.container>
-            @endif
-            @if($activeTab === 'checklist')
-                <x-tab.container activeTab="checklist">
+                @elseif($activeTab === 'checklist')
                     @include('livewire.employee.tabs.checklist-fields')
-                </x-tab.container>
-            @endif
+                @else
+                    @include('livewire.employee.tabs.personal-info-tab')
+                @endif
+            </x-tab.container>
+
         </div>
 
 

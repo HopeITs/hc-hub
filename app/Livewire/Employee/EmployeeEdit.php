@@ -2,83 +2,138 @@
 
 namespace App\Livewire\Employee;
 
+use App\Livewire\Forms\Employee\BadgeForm;
+use App\Livewire\Forms\Employee\ChecklistForm;
+use App\Livewire\Forms\Employee\CourseForm;
+use App\Livewire\Forms\Employee\EducationForm;
+use App\Livewire\Forms\Employee\ExperienceForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
+use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
 use App\Models\Employee;
+use App\Traits\WithAlerts;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class EmployeeEdit extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads , WithAlerts;
 
-    public PersonalInfoForm $form;
+    public PersonalInfoForm $infoForm;
+    public EducationForm $educationForm;
+    public ChecklistForm $checklistItemForm;
+    public  CourseForm $courseForm;
+    public ExperienceForm $experienceForm;
+    public RelativeForm $relativeForm;
+    public BadgeForm $badgeForm;
+    public $activeTab = 'information';
+
+    public function setActiveTab($tab)
+    {
+        $this->activeTab = $tab;
+    }
 
     public function mount(Employee $employee)
     {
-        $this->form->setEmployee($employee);
+        // Seed base info first
+        $this->infoForm->setEmployee($employee);
 
-        if (empty($this->form->educations)) {
-            $this->form->addEducation();
+        // Seed each sub-form with the same employee (so they can load existing rows)
+        $this->educationForm->setEmployee($employee);
+        $this->courseForm->setEmployee($employee ?? null);
+//        $this->experienceForm->setEmployee($employee ?? null);
+//        $this->relativeForm->setEmployee($employee ?? null);
+//        $this->badgeForm->setEmployee($employee ?? null);
+//        $this->checklistItemForm->setEmployee($employee ?? null);
+
+        if (empty($this->educationForm->educations)) {
+            $this->educationForm->addEducation();
         }
-        if (empty($this->form->courses)) {
-            $this->form->addCourse();
+        if (empty($this->courseForm->courses ?? [])) {
+            $this->courseForm->addCourse();
         }
-        if (empty($this->form->experiences)) {
-            $this->form->addExperience();
+        if (empty($this->experienceForm->experiences ?? [])) {
+            $this->experienceForm->addExperience();
         }
-        if (empty($this->form->relatives)) {
-            $this->form->addRelative();
+        if (empty($this->relativeForm->relatives ?? [])) {
+            $this->relativeForm->addRelative();
         }
-        if (empty($this->form->badges)) {
-            $this->form->addBadge();
+        if (empty($this->badgeForm->badges ?? [])) {
+            $this->badgeForm->addBadge();
         }
-        if (empty($this->form->checklists)) {
-            $this->form->addChecklist();
+        if (empty($this->checklistItemForm->checklists ?? [])) {
+            $this->checklistItemForm->addChecklist();
         }
     }
+
 
     public function saveInformation()
     {
-        $this->form->saveInformation();
-        LivewireAlert::success(__('general.success-message'));
+        $this->infoForm->saveInformation();
+        $this->successToast();
         return $this->redirect(route('employees.index'), navigate: true);
     }
 
-    public function saveEducation()
+    public function addEducation(): void
     {
-        $this->form->saveEducation();
-        LivewireAlert::success(__('general.success-message'));
+        $this->educationForm->addEducation();
     }
 
-    public function saveCourses()
+    public function removeEducation(int $index , int $id =null): void
     {
-        $this->form->saveCourses();
-        LivewireAlert::success(__('general.success-message'));
+        $this->educationForm->removeEducation($index , $id);
+        // Optional: clear stale validation errors for removed index
+        $this->resetErrorBag();
     }
+
+    public function saveEducation(): void
+    {
+        $this->educationForm->save();
+        $this->setActiveTab('education');
+        $this->successToast(); // from WithAlerts
+    }
+    public function addCourse(): void
+    {
+        $this->courseForm->addCourse();
+    }
+
+    public function removeCourse(int $index): void
+    {
+        $this->courseForm->removeCourse($index);
+        // Optional: clear stale validation errors for removed index
+        $this->resetErrorBag();
+    }
+
+    public function saveCourses(): void
+    {
+        $this->courseForm->save();
+        $this->setActiveTab('courses');
+        $this->successToast(); // from WithAlerts
+    }
+
 
     public function saveExperience()
     {
-        $this->form->saveExperience();
+        $this->experienceForm->saveExperience();
         LivewireAlert::success(__('general.success-message'));
     }
 
     public function saveRelatives()
     {
-        $this->form->saveRelatives();
+        $this->relativeForm->saveRelatives();
         LivewireAlert::success(__('general.success-message'));
     }
 
     public function saveBadges()
     {
-        $this->form->saveBadges();
+        $this->badgeForm->saveBadges();
         LivewireAlert::success(__('general.success-message'));
     }
 
     public function saveChecklist()
     {
-        $this->form->saveChecklist();
+        $this->checklistItemForm->saveChecklist();
         LivewireAlert::success(__('general.success-message'));
     }
 
@@ -86,9 +141,9 @@ class EmployeeEdit extends Component
     {
         $checklistItems = ChecklistItem::where('order', 1)->orderBy('name')->get();
 
-        return view('livewire.employee.employee-edit', [
+        return view('livewire.employee.form', [
             'allEmployees' => Employee::select('id', 'name')
-                ->where('id', '!=', $this->form->employee->id)
+                ->where('id', '!=', $this->infoForm->employee->id)
                 ->get(),
             'checklistItems' => $checklistItems,
         ]);

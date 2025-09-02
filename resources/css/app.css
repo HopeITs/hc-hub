@@ -7,9 +7,11 @@
 @source "../../node_modules/flowbite";
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source "../../vendor/ramonrietdijk/livewire-tables/resources/**/*.blade.php";
 @source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
 @source '../../vendor/livewire/flux/stubs/**/*.blade.php';
 @source "../node_modules/flowbite-datepicker";
+
 
 @font-face {
     font-family: 'SomarSans';
@@ -68,7 +70,6 @@
 }
 
 
-
 @font-face {
     font-family: 'Lato';
     src: url('/fonts/Lato/Lato-Light.ttf') format('truetype');
@@ -123,28 +124,33 @@ body {
     --color-secondary-light: #939598;
     --color-secondary-soft: #dcddde;
 
-    --color-primary-100: #FEE2E2;
-    --color-primary-200: #FECACA;
-    --color-primary-300: #FCA5A5;
-    --color-primary-400: #F87171;
-    --color-primary-500: #EF4444;
-    --color-primary-600: #DC2626;
-    --color-primary-700: #B91C1C;
-    --color-primary-800: #991B1B;
-    --color-primary-900: #7F1D1D;
+    --color-primary-50: #fef2f2;
+    --color-primary-100: #fdeaea;
+    --color-primary-200: #f9c5c6;
+    --color-primary-300: #f49797;
+    --color-primary-400: #ec6a6c;
+    --color-primary-500: #be1f24; /* your base */
+    --color-primary-600: #98191d;
+    --color-primary-700: #731316;
+    --color-primary-800: #4d0d0f;
+    --color-primary-900: #2a0808;
+    --color-primary-950: #150404;
 
-    --colot-black : #414042;
+    --color-neutral-50: #f5f5f6;
+    --color-neutral-100: #eeeff0;
+    --color-neutral-200: #dcddde; /* soft */
+    --color-neutral-300: #bcbec0;
+    --color-neutral-400: #939598; /* light */
+    --color-neutral-500: #808184;
+    --color-neutral-600: #6d6e71; /* medium */
+    --color-neutral-700: #575759;
+    --color-neutral-800: #414042; /* dark */
+    --color-neutral-900: #2b2a2c;
+    --color-neutral-950: #171718;
 
-    --color-zinc: #414042;
-    --color-zinc-100: #DCDDDE;
-    --color-zinc-200: #D0D2D3;
-    --color-zinc-300: #BCBEC0;
-    --color-zinc-400: #A7A9AB;
-    --color-zinc-500: #939598;
-    --color-zinc-600: #808285;
-    --color-zinc-700: #6D6E71;
-    --color-zinc-800: #595A5C;
-    --color-zinc-900: #414042;
+
+    --color-black: #414042;
+
 
 }
 
@@ -166,7 +172,11 @@ body {
         border-color: var(--color-gray-200, currentColor);
     }
 }
+:root{
 
+    --livewire-progress-bar-color: var(--color-primary-400);
+    --tagify-dd-color-primary: var(--color-primary-400);
+}
 [data-flux-field]:not(ui-radio, ui-checkbox) {
     @apply grid gap-2;
 }
@@ -179,6 +189,34 @@ input:focus[data-flux-control],
 textarea:focus[data-flux-control],
 select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
+}
+
+[type="text"],
+[type="email"],
+[type="url"],
+[type="password"],
+[type="number"],
+[type="date"],
+[type="datetime-local"],
+[type="month"],
+[type="search"],
+[type="tel"],
+[type="time"],
+[type="week"],
+[type="checkbox"],
+[type="radio"],
+[multiple],
+textarea,
+select {
+    &:focus {
+        --tw-ring-color: var(--color-primary);
+    }
+}
+[type='checkbox'], [type='radio'] {
+    color: var(--color-primary);
+}
+[type='checkbox']:checked, [type='radio']:checked, .dark [type='checkbox']:checked, .dark [type='radio']:checked  {
+    background-color: var(--color-primary) !important;
 }
 
 /* \[:where(&)\]:size-4 {
