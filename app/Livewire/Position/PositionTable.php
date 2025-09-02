@@ -23,6 +23,22 @@ class PositionTable extends LivewireTable
 {
     protected string $model = Position::class;
 
+
+    /** @return \Illuminate\Database\Eloquent\Builder */
+    protected function query(): \Illuminate\Database\Eloquent\Builder
+    {
+
+        $query = $this->model()->query();
+        $filters = request()->query();
+        if(isset($filters['center'])){
+            $query->where('center_id', $filters['center']);
+        }
+        if(isset($filters['city'])){
+            $query->where('city_id', $filters['city']);
+        }
+
+        return $query;
+    }
     protected function columns(): array
     {
         return [
