@@ -31,15 +31,7 @@ class PositionTable extends LivewireTable
             Column::make(__('Title'), 'title')
                 ->sortable()
                 ->searchable(),
-            SelectColumn::make(trans_choice('general.city', 1), 'city_id')
-                ->displayUsing(function (mixed $value, Model $model): string {
-                    return $model->city->name;
-                })
-                ->options(
-                    City::query()->get()->pluck('name', 'id')->toArray()
-                )
-                ->sortable()
-                ->searchable(),
+
             SelectColumn::make(trans_choice('general.city', 1), 'city_id')
                 ->displayUsing(function (mixed $value, Model $model): string {
                     return $model->city->name;
@@ -67,14 +59,25 @@ class PositionTable extends LivewireTable
                 )
                 ->sortable()
                 ->searchable(),
-
-
-            Column::make(trans_choice('general.department', 1), 'department.name')
+            SelectColumn::make(trans_choice('general.department', 1), 'department_id')
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    return $model->department->name ?? '-';
+                })
+                ->options(
+                    Department::query()->get()->pluck('name', 'id')->toArray()
+                )
                 ->sortable()
                 ->searchable(),
-            Column::make(trans_choice('general.job-level', 1), 'jobLevel.name')
+            SelectColumn::make(trans_choice('general.job-level', 1), 'job_level_id')
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    return $model->jobLevel->name ?? '-';
+                })
+                ->options(
+                    JobLevel::query()->get()->pluck('name', 'id')->toArray()
+                )
                 ->sortable()
                 ->searchable(),
+
             BooleanColumn::make(__('general.is-active'), 'is_active'),
 
             Column::make(__('Actions'), function (Model $model): string {
