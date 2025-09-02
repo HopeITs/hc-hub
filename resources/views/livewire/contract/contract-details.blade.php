@@ -12,7 +12,7 @@
             :crumbs="$crumbs ?? [
                 ['label' => trans_choice('general.employee-management', 2)],
                 ['label' => trans_choice('general.contracts', 2), 'url' => route('contracts.index', [], false)],
-                ['label' => $contract->employee?->getTranslation('name', app()->getLocale()) ?? __('general.na')],
+
             ]"
         />
 
@@ -27,12 +27,15 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
-        <x-badge color="red" >
-            {{ $contract->contractType?->getTranslation('name', $locale) ?? __('general.na') }}
+        <x-badge color="red">
+            {{ $contract->contractType?->name
+                ?? $contract->contractType?->name
+                ?? __('general.na') }}
         </x-badge>
     </div>
 
     @includeIf($partialPath)
+
 </div>
 
 <script>
@@ -42,3 +45,4 @@
         });
     });
 </script>
+

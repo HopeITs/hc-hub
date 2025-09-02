@@ -44,34 +44,6 @@
 
         {{-- Derived info from the selected position --}}
         @php($selected = $positions->firstWhere('id', (int) ($form->position_id ?? 0)))
-        @if($selected)
-            <div class="mt-2 flex flex-wrap gap-2 text-sm">
-                <x-badge>
-                    {{ __('general.program') }}:
-                    {{
-                        ($selected->program
-                            && method_exists($selected->program, 'getTranslatableAttributes')
-                            && in_array('name', $selected->program->getTranslatableAttributes(), true))
-                            ? $selected->program->getTranslation('name', $locale)
-                            : ($selected->program->name ?? '—')
-                    }}
-                </x-badge>
-                <x-badge>
-                    {{ trans_choice('general.department',1) }}:
-                    {{ $selected->department->name ?? '—' }}
-                </x-badge>
-                <x-badge>
-                    {{ trans_choice('general.job-level',1) }}:
-                    {{
-                        ($selected->jobLevel
-                            && method_exists($selected->jobLevel, 'getTranslatableAttributes')
-                            && in_array('name', $selected->jobLevel->getTranslatableAttributes(), true))
-                            ? $selected->jobLevel->getTranslation('name', $locale)
-                            : ($selected->jobLevel->name ?? '—')
-                    }}
-                </x-badge>
-            </div>
-        @endif
     </div>
 
     {{-- Contract type --}}

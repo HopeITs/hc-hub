@@ -11,8 +11,8 @@
 
     // Title shown in both languages (fallbacks)
     $positionTitle = $req?->title
-        ?? $pos?->getTranslation('name', $loc)
-        ?? $pos?->name
+        ?? $pos?->getTranslation('title', $loc)
+        ?? $pos?->title
         ?? ('#'.$contract->position_id);
 
     // Dates — keep identical approach to page1

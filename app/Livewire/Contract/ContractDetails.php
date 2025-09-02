@@ -3,12 +3,10 @@
 namespace App\Livewire\Contract;
 
 use App\Models\Contract;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Livewire\Component;
 
 class ContractDetails extends Component
 {
-    use AuthorizesRequests;
 
     public Contract $contract;
 
@@ -37,11 +35,11 @@ class ContractDetails extends Component
             'employee.city',
             'position.center',
             'contractType',
-            'department',
-            'jobLevel',
+            'position.department',
+            'position.jobLevel',
+            'position.program',
         ]);
 
-        $this->authorize('view', $contract);
 
         $this->contract    = $contract;
         $category          = $contract->contractType->category;
@@ -52,12 +50,12 @@ class ContractDetails extends Component
         $requested = (int) (request()->query('p', $this->pageNo) ?: 1);
         $this->pageNo = $this->clamp($requested);
 
-        $employeeName = $contract->employee?->getTranslation('name', app()->getLocale()) ?? __('general.na');
+    $employeeName = $contract->employee?->getTranslation('name', app()->getLocale()) ?? __('general.na');
 
         $this->crumbs = [
             ['label' => trans_choice('general.employee_management', 2)],
             ['label' => trans_choice('general.contracts', 2), 'url' => route('contracts.index', [], false)],
-            ['label' => $employeeName],
+            ['label' => $employeeName ?? ''],
         ];
     }
 
