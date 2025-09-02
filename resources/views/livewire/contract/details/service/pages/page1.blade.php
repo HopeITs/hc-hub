@@ -64,9 +64,9 @@
     };
 
     $roleEn = $t($contract->position?->requiredPosition, 'title', 'en',
-             $t($contract->position, 'name', 'en', 'Web Developer'));
-    $roleAr = $t($contract->position?->requiredPosition, 'title', 'ar',
-             $t($contract->position, 'name', 'ar', 'مطوّر ويب'));
+         $t($contract->position, 'title', 'en', 'Web Developer'));
+$roleAr = $t($contract->position?->requiredPosition, 'title', 'ar',
+         $t($contract->position, 'title', 'ar', 'مطوّر ويب'));
 
     $EN_TOP = <<<'HTML'
         <span class="h-label">PRIVATE AND CONFIDENTIAL</span><br>

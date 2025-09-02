@@ -16,9 +16,10 @@
     };
 
     $roleEn = $t($contract->position?->requiredPosition, 'title', 'en',
-             $t($contract->position, 'name', 'en', 'Web Developer'));
+         $t($contract->position, 'title', 'en', 'Web Developer'));
     $roleAr = $t($contract->position?->requiredPosition, 'title', 'ar',
-             $t($contract->position, 'name', 'ar', 'مطوّر ويب'));
+         $t($contract->position, 'title', 'ar', 'مطوّر ويب'));
+
 
     $amount = $contract->salary ?? null;
     $formatEn = fn ($n) => is_numeric($n) ? number_format((float)$n, 0, '.', ',') : '—';
