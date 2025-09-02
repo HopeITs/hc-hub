@@ -44,7 +44,7 @@ class PositionForm extends Form
     }
     public function setPosition(Position $position){
         $this->position = $position;
-        $this->title = $position->title;
+        $this->title = $position->getTranslations('title');
         $this->city_id = $position->city_id;
         $this->program_id = $position->program_id;
         $this->department_id = $position->department_id;

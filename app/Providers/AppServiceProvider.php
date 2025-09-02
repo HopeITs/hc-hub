@@ -6,6 +6,7 @@ use App\Models\Contract;
 use App\Policies\ContractPolicy;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+
         Builder::macro('search', function ($fields, $string) {
             if (!$string) {
                 return $this;

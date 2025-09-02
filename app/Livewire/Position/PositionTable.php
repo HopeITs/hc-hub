@@ -10,7 +10,10 @@ use App\Models\Position;
 
 use App\Models\Program;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Blade;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use PHPUnit\Util\PHP\Job;
+use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Filters\SelectFilter;
@@ -28,37 +31,59 @@ class PositionTable extends LivewireTable
             Column::make(__('Title'), 'title')
                 ->sortable()
                 ->searchable(),
+            SelectColumn::make(trans_choice('general.city', 1), 'city_id')
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    return $model->city->name;
+                })
+                ->options(
+                    City::query()->get()->pluck('name', 'id')->toArray()
+                )
+                ->sortable()
+                ->searchable(),
+            SelectColumn::make(trans_choice('general.city', 1), 'city_id')
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    return $model->city->name;
+                })
+                ->options(
+                    City::query()->get()->pluck('name', 'id')->toArray()
+                )
+                ->sortable()
+                ->searchable(),
+            SelectColumn::make(trans_choice('general.program', 1), 'program_id')
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    return $model->program->name;
+                })
+                ->options(
+                    Program::query()->get()->pluck('name', 'id')->toArray()
+                )
+                ->sortable()
+                ->searchable(),
+            SelectColumn::make(trans_choice('general.center', 1), 'center_id')
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    return $model->center->name ?? '-';
+                })
+                ->options(
+                    Center::query()->get()->pluck('name', 'id')->toArray()
+                )
+                ->sortable()
+                ->searchable(),
 
-            Column::make(trans_choice('general.city',1), 'city.name')
-                ->sortable()
-                ->searchable(),
-            Column::make(trans_choice('general.program',1), 'program.name')
-                ->sortable()
-                ->searchable(),
-            Column::make(trans_choice('general.center',1), 'center.name')
-                ->sortable()
-                ->searchable(),
-            Column::make(trans_choice('general.department',1), 'department.name')
-                ->sortable()
-                ->searchable(),
-            Column::make(trans_choice('general.job-level',1), 'jobLevel.name')
-                ->sortable()
-                ->searchable(),
 
-
+            Column::make(trans_choice('general.department', 1), 'department.name')
+                ->sortable()
+                ->searchable(),
+            Column::make(trans_choice('general.job-level', 1), 'jobLevel.name')
+                ->sortable()
+                ->searchable(),
+            BooleanColumn::make(__('general.is-active'), 'is_active'),
 
             Column::make(__('Actions'), function (Model $model): string {
-                $editBtn = "<x-table.edit-btn href=".route('positions.edit', ['position' => $model->getKey()])."/>";
-                $edit = '<a class="cursor-pointer p-2 inline-flex items-center">
-    <svg class="size-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-         width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
-    </svg>
-</a>';
-                return $editBtn .$edit  ;
-            } )
-                ->clickable(false)
+                $is_active = $model->is_active ? 1 : 0;
+                $is_activeBtn = Blade::render('<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $is_active . '" :model-id="' . $model->id . '" wire-event="confirmToggleItemStatus" />');
+                $editBtn = Blade::render("<x-table.edit-btn href=" . route('positions.edit', ['position' => $model->getKey()]) . "/>");
+                $deleteBtn = Blade::render("<x-table.delete-btn :modelId=" . $model->getKey() . "/>");
+                return $is_activeBtn . $editBtn . $deleteBtn;
+            })
                 ->asHtml(),
         ];
     }
@@ -67,27 +92,27 @@ class PositionTable extends LivewireTable
     {
         return [
 
-            SelectFilter::make(trans_choice('general.city',1), 'city_id')
+            SelectFilter::make(trans_choice('general.city', 1), 'city_id')
                 ->options(
                     City::query()->get()->pluck('name', 'id')->toArray()
                 )
-                ,
-            SelectFilter::make(trans_choice('general.program',1), 'program_id')
+            ,
+            SelectFilter::make(trans_choice('general.program', 1), 'program_id')
                 ->options(
                     Program::query()->get()->pluck('name', 'id')->toArray()
                 )
             ,
-            SelectFilter::make(trans_choice('general.center',1), 'center_id')
+            SelectFilter::make(trans_choice('general.center', 1), 'center_id')
                 ->options(
                     Center::query()->get()->pluck('name', 'id')->toArray()
                 )
             ,
-            SelectFilter::make(trans_choice('general.department',1), 'department_id')
+            SelectFilter::make(trans_choice('general.department', 1), 'department_id')
                 ->options(
                     Department::query()->get()->pluck('name', 'id')->toArray()
                 )
             ,
-            SelectFilter::make(trans_choice('general.job-level',1), 'job_level_id')
+            SelectFilter::make(trans_choice('general.job-level', 1), 'job_level_id')
                 ->options(
                     JobLevel::query()->get()->pluck('name', 'id')->toArray()
                 )
@@ -101,4 +126,47 @@ class PositionTable extends LivewireTable
 
         ];
     }
+
+    public function confirmDelete($id)
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete($payload)
+    {
+        Position::findOrFail($payload['id'])->delete();
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
+    public function confirmToggleItemStatus($id)
+    {
+        $this->itemID = $id;
+
+        LivewireAlert::title(__('general.toggle-status'))
+            ->text(__('general.confirm-status-change'))
+            ->question()
+            ->withConfirmButton(__('general.save'))
+            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function toggleItemStatusConfirmed($payload)
+    {
+        $item = Position::findOrFail($payload['id']);
+        $item->is_active = !$item->is_active;
+        $item->save();
+
+        LivewireAlert::title(__('general.item-updated'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
 }
