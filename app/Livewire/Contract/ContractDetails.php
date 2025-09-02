@@ -55,7 +55,7 @@ class ContractDetails extends Component
         $employeeName = $contract->employee?->getTranslation('name', app()->getLocale()) ?? __('general.na');
 
         $this->crumbs = [
-            ['label' => trans_choice('general.employee-management', 2)],
+            ['label' => trans_choice('general.employee_management', 2)],
             ['label' => trans_choice('general.contracts', 2), 'url' => route('contracts.index', [], false)],
             ['label' => $employeeName],
         ];

@@ -18,46 +18,7 @@
         </div>
     </div>
 
-    {{-- Center tabs (render only if we actually have centers) --}}
-    @if(isset($centers) && $centers->count())
-        <div class="mt-4 mb-6 overflow-x-auto">
-            <div class="inline-flex gap-2 border-b border-gray-200 dark:border-gray-700 min-w-full"
-                 role="tablist" aria-label="{{ __('general.centers') }}">
-                {{-- All tab --}}
-                <button
-                    type="button"
-                    wire:click="setCenter('all')"
-                    wire:key="center-tab-all"
-                    role="tab"
-                    aria-current="{{ $centerId === 'all' ? 'page' : 'false' }}"
-                    @class([
-                        'px-4 py-2 -mb-px border-b-2 transition',
-                        'border-primary text-primary font-semibold' => $centerId === 'all',
-                        'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300' => $centerId !== 'all',
-                    ])>
-                    {{ __('general.all') ?? 'الكل' }}
-                </button>
 
-                {{-- One tab per center --}}
-                @foreach($centers as $center)
-                    @php($active = (string) $centerId === (string) $center->id)
-                        <button
-                            type="button"
-                            wire:click="setCenter({{ $center->id }})"
-                            wire:key="center-tab-{{ $center->id }}"
-                            role="tab"
-                            aria-current="{{ $active ? 'page' : 'false' }}"
-                            @class([
-                                'px-4 py-2 -mb-px border-b-2 transition whitespace-nowrap cursor-pointer',
-                                'border-primary text-primary font-semibold' => $active,
-                                'border-transparent text-gray-600 hover:text-gray-900 dark:text-gray-300' => ! $active,
-                            ])>
-                            {{ $center->getTranslation('name', $locale) }}
-                        </button>
-                        @endforeach
-            </div>
-        </div>
-    @endif
 
     <x-table>
         <x-slot name="headings">
@@ -80,32 +41,44 @@
                 <tr wire:key="contract-row-{{ $item->id }}">
                     <x-table.cell>{{ $item->id }}</x-table.cell>
 
+                    {{-- Employee --}}
                     <x-table.cell>
                         {{ $item->employee?->getTranslation('name', $locale) ?? '—' }}
                     </x-table.cell>
 
+                    {{-- Position (show title if present, fallback to requiredPosition->title or #id) --}}
                     <x-table.cell>
-                        {{ $item->position?->requiredPosition?->title ?? '#'.$item->position_id }}
+                        {{ $item->position?->title
+                            ?? $item->position?->requiredPosition?->title
+                            ?? '#'.$item->position_id }}
                     </x-table.cell>
 
+                    {{-- Contract Type --}}
                     <x-table.cell>
                         {{ $item->contractType?->getTranslation('name', $locale) ?? '—' }}
                     </x-table.cell>
 
+                    {{-- Department via position --}}
                     <x-table.cell>
-                        {{ $item->department?->name ?? '—' }}
+                        {{ $item->position?->department?->name ?? '—' }}
                     </x-table.cell>
 
+                    {{-- Job Level via position --}}
                     <x-table.cell>
-                        {{ $item->jobLevel?->getTranslation('name', $locale) ?? '—' }}
+                        {{ $item->position?->jobLevel?->getTranslation('name', $locale)
+                            ?? $item->position?->jobLevel?->name
+                            ?? '—' }}
                     </x-table.cell>
 
+                    {{-- Period --}}
                     <x-table.cell>
                         <x-period :start="$item->start_date" :end="$item->end_date"/>
                     </x-table.cell>
 
+                    {{-- Yearly leave --}}
                     <x-table.cell>{{ $item->yearly_leave_days ?? '—' }}</x-table.cell>
 
+                    {{-- Salary per --}}
                     <x-table.cell>
                         @php($per = SalaryPer::getLocalizedName(
                             $item->salary_per instanceof \BackedEnum
@@ -115,14 +88,17 @@
                         <x-badge :color="$per['color']">{{ $per['value'] }}</x-badge>
                     </x-table.cell>
 
+                    {{-- Weekly hours --}}
                     <x-table.cell>{{ $item->weekly_hours ?? '—' }}</x-table.cell>
 
+                    {{-- Status --}}
                     <x-table.cell>
                         <x-badge :color="$item->is_active ? 'green' : 'red'">
                             {{ $item->is_active ? __('general.active') : __('general.inactive') }}
                         </x-badge>
                     </x-table.cell>
 
+                    {{-- Actions --}}
                     <x-table.cell>
                         <a href="{{ route('contracts.show', $item->id) }}"
                            class="inline-flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
