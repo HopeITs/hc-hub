@@ -237,6 +237,7 @@ return [
     'returned_at' => 'Returbed At',
     'returned_status' => 'Returned Status',
     'attachments' => 'Attachments',
+    'file' => 'File',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

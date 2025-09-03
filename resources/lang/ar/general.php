@@ -237,6 +237,7 @@ return [
     'returned_at' => 'تاريخ الإعادة',
     'returned_status' => 'حالة الإعادة',
     'attachments' => 'الملحقات',
+    'file' => 'الملف',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
