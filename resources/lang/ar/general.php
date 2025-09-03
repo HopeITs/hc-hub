@@ -239,6 +239,7 @@ return [
     'attachments' => 'الملحقات',
     'file' => 'الملف',
     'add-item' => 'إضافة عنصر',
+    'items' => 'العنصر',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',

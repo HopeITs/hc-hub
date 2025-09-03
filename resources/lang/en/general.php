@@ -239,6 +239,7 @@ return [
     'attachments' => 'Attachments',
     'file' => 'File',
     'add-item' => 'Add Item',
+    'items' => 'Items',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
