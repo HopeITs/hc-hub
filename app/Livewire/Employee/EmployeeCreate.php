@@ -9,6 +9,7 @@ use App\Livewire\Forms\Employee\EducationForm;
 use App\Livewire\Forms\Employee\ExperienceForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
+use App\Livewire\Forms\Employee\AttachmentForm;
 use App\Models\ChecklistItem;
 use App\Models\Employee;
 use App\Traits\WithAlerts;
@@ -27,6 +28,7 @@ class EmployeeCreate extends Component
     public ExperienceForm $experienceForm;
     public RelativeForm $relativeForm;
     public BadgeForm $badgeForm;
+    public AttachmentForm $attachmentForm;
 
     public $activeTab = 'information';
 
@@ -56,26 +58,31 @@ class EmployeeCreate extends Component
         $this->educationForm->saveEducation();
         $this->successToast();
     }
+
     public function saveCourses()
     {
         $this->courseForm->saveCourses();
         $this->successToast();
     }
+
     public function saveExperience()
     {
         $this->experienceForm->saveExperience();
         $this->successToast();
     }
+
     public function saveRelatives()
     {
         $this->relativeForm->saveRelatives();
         $this->successToast();
     }
+
     public function saveBadges()
     {
         $this->badgeForm->save();
         $this->successToast();
     }
+
     public function saveChecklist()
     {
         $this->checklistForm->save();
@@ -86,6 +93,7 @@ class EmployeeCreate extends Component
     {
         $this->educationForm->addEducation();
     }
+
     public function removeEducation($i)
     {
         $this->educationForm->removeEducation((int) $i);
@@ -95,6 +103,7 @@ class EmployeeCreate extends Component
     {
         $this->courseForm->addCourse();
     }
+
     public function removeCourse($i)
     {
         $this->courseForm->removeCourse((int) $i);
@@ -104,6 +113,7 @@ class EmployeeCreate extends Component
     {
         $this->experienceForm->addExperience();
     }
+
     public function removeExperience($i)
     {
         $this->experienceForm->removeExperience((int) $i);
@@ -113,6 +123,7 @@ class EmployeeCreate extends Component
     {
         $this->relativeForm->addRelative();
     }
+
     public function removeRelative($i)
     {
         $this->relativeForm->removeRelative((int) $i);
@@ -122,6 +133,7 @@ class EmployeeCreate extends Component
     {
         $this->badgeForm->addBadge();
     }
+
     public function removeBadge($i)
     {
         $this->badgeForm->removeBadge((int) $i);
@@ -131,9 +143,26 @@ class EmployeeCreate extends Component
     {
         $this->checklistForm->addChecklist();
     }
+
     public function removeChecklist($i)
     {
         $this->checklistForm->removeChecklist((int) $i);
+    }
+
+    public function addAttachment()
+    {
+        $this->attachmentForm->addAttachment();
+    }
+
+    public function removeAttachment($i, $id = null)
+    {
+        $this->attachmentForm->removeAttachment((int) $i, $id);
+    }
+
+    public function saveAttachments()
+    {
+        $this->attachmentForm->save();
+        $this->successToast();
     }
 
     public function render()
