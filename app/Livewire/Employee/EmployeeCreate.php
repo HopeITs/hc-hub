@@ -91,6 +91,12 @@ class EmployeeCreate extends Component
         LivewireAlert::success(__('general.success-message'));
     }
 
+    public function saveAttachments()
+    {
+        $this->attachmentForm->save();
+        $this->successToast();
+    }
+
     public function addAttachment()
     {
         $this->attachmentForm->addAttachment();
@@ -101,6 +107,12 @@ class EmployeeCreate extends Component
         $this->attachmentForm->removeAttachment((int) $index, $id);
     }
 
+    public function saveItems()
+    {
+        $this->itemForm->save();
+        $this->successToast();
+    }
+
     public function addItem()
     {
         $this->itemForm->addItem();
@@ -109,12 +121,6 @@ class EmployeeCreate extends Component
     public function removeItem($index, $id = null)
     {
         $this->itemForm->removeItem((int) $index, $id);
-    }
-
-    public function saveItems()
-    {
-        $this->itemForm->save();
-        $this->successToast();
     }
 
     public function addEducation()
@@ -179,9 +185,20 @@ class EmployeeCreate extends Component
 
     public function render()
     {
+        $deviceTypes = [
+            '4G hotspot Adapter', '4G Router', 'Access Point', 'Audio Record',
+            'Cooling Pad', 'DVR', 'External Hard', 'HeadPhone', 'Hub',
+            'Keyboard', 'Landline Phone', 'Laptop', 'Laptop Bag', 'Laptop Charger',
+            'Memory', 'Mobile', 'Mobile Charger', 'Mouse', 'Number',
+            'Power Bank', 'Printer', 'Projector', 'Ram', 'Router',
+            'Screen', 'SD Reader', 'Security Camera', 'Smart Watch', 'Switch',
+            'Tab', 'Time Attendance Machine', 'Toner', 'USB Flash Memory', 'WebCam'
+        ];
+
         return view('livewire.employee.form', [
             'allEmployees' => Employee::select('id', 'name')->get(),
             'checklistItems' => ChecklistItem::where('order', 1)->orderBy('name')->get(),
+            'deviceTypes' => $deviceTypes,
         ]);
     }
 }

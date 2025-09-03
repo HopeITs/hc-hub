@@ -19,7 +19,7 @@ class AttachmentForm extends Form
     {
         $this->employee = $employee;
         $this->attachments = $employee->attachments()
-            ->select('id', 'name', 'file_path')
+            ->select('id', 'name')
             ->get()
             ->map(fn($a) => [
                 'id' => $a->id,

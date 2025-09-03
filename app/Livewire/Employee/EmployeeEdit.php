@@ -14,7 +14,6 @@ use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
 use App\Models\Employee;
 use App\Traits\WithAlerts;
-use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -31,6 +30,7 @@ class EmployeeEdit extends Component
     public BadgeForm $badgeForm;
     public AttachmentForm $attachmentForm;
     public ItemForm $itemForm;
+    public bool $isCreateMode = false;
 
     public $activeTab = 'information';
 
@@ -51,28 +51,25 @@ class EmployeeEdit extends Component
         $this->attachmentForm->setEmployee($employee);
         $this->itemForm->setEmployee($employee);
 
-        if (empty($this->educationForm->educations ?? [])) {
+        if (empty($this->educationForm->educations)) {
             $this->educationForm->addEducation();
         }
-        if (empty($this->courseForm->courses ?? [])) {
+        if (empty($this->courseForm->courses)) {
             $this->courseForm->addCourse();
         }
-        if (empty($this->experienceForm->experiences ?? [])) {
+        if (empty($this->experienceForm->experiences)) {
             $this->experienceForm->addExperience();
         }
-        if (empty($this->relativeForm->relatives ?? [])) {
+        if (empty($this->relativeForm->relatives)) {
             $this->relativeForm->addRelative();
         }
-        if (empty($this->badgeForm->badges ?? [])) {
+        if (empty($this->badgeForm->badges)) {
             $this->badgeForm->addBadge();
         }
-        if (empty($this->checklistForm->checklists ?? [])) {
-            $this->checklistForm->addChecklist();
-        }
-        if (empty($this->attachmentForm->attachments ?? [])) {
+        if (empty($this->attachmentForm->attachments)) {
             $this->attachmentForm->addAttachment();
         }
-        if (empty($this->itemForm->items ?? [])) {
+        if (empty($this->itemForm->items)) {
             $this->itemForm->addItem();
         }
     }
@@ -101,25 +98,25 @@ class EmployeeEdit extends Component
     public function saveExperience()
     {
         $this->experienceForm->saveExperience();
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
     }
 
     public function saveRelatives()
     {
         $this->relativeForm->saveRelatives();
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
     }
 
     public function saveBadges()
     {
         $this->badgeForm->save();
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
     }
 
     public function saveChecklist()
     {
         $this->checklistForm->save();
-        LivewireAlert::success(__('general.success-message'));
+        $this->successToast();
     }
 
     public function saveAttachments()
@@ -142,6 +139,7 @@ class EmployeeEdit extends Component
     public function removeItem($index, $id = null)
     {
         $this->itemForm->removeItem($index, $id);
+        $this->resetErrorBag();
     }
 
     public function addAttachment()
@@ -152,6 +150,7 @@ class EmployeeEdit extends Component
     public function removeAttachment($index, $id = null)
     {
         $this->attachmentForm->removeAttachment($index, $id);
+        $this->resetErrorBag();
     }
 
     public function addEducation()
@@ -159,7 +158,7 @@ class EmployeeEdit extends Component
         $this->educationForm->addEducation();
     }
 
-    public function removeEducation(int $index, int $id = null)
+    public function removeEducation(int $index, ?int $id = null)
     {
         $this->educationForm->removeEducation($index, $id);
         $this->resetErrorBag();
@@ -209,23 +208,30 @@ class EmployeeEdit extends Component
         $this->resetErrorBag();
     }
 
-    public function addChecklist()
+    public function removeChecklistItem($i, $id = null)
     {
-        $this->checklistForm->addChecklist();
-    }
-
-    public function removeChecklist($i, $id = null)
-    {
-        $this->checklistForm->removeChecklist((int) $i, $id);
+        $this->checklistForm->removeChecklistItem((int) $i, $id);
+        $this->resetErrorBag();
     }
 
     public function render()
     {
+        $deviceTypes = [
+            '4G hotspot Adapter', '4G Router', 'Access Point', 'Audio Record',
+            'Cooling Pad', 'DVR', 'External Hard', 'HeadPhone', 'Hub',
+            'Keyboard', 'Landline Phone', 'Laptop', 'Laptop Bag', 'Laptop Charger',
+            'Memory', 'Mobile', 'Mobile Charger', 'Mouse', 'Number',
+            'Power Bank', 'Printer', 'Projector', 'Ram', 'Router',
+            'Screen', 'SD Reader', 'Security Camera', 'Smart Watch', 'Switch',
+            'Tab', 'Time Attendance Machine', 'Toner', 'USB Flash Memory', 'WebCam'
+        ];
+
         return view('livewire.employee.form', [
             'allEmployees' => Employee::select('id', 'name')
                 ->where('id', '!=', $this->infoForm->employee->id)
                 ->get(),
-            'checklistItems' => ChecklistItem::where('order', 1)->orderBy('name')->get(),
+            'allItems' => ChecklistItem::orderBy('name')->get(),
+            'deviceTypes' => $deviceTypes,
         ]);
     }
 }
