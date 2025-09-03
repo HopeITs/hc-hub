@@ -22,13 +22,11 @@ class EmployeeCreate extends Component
 
     public PersonalInfoForm $infoForm;
     public EducationForm $educationForm;
-    public ChecklistForm$checklistItemForm;
-    public  CourseForm $courseForm;
+    public ChecklistForm $checklistForm;
+    public CourseForm $courseForm;
     public ExperienceForm $experienceForm;
     public RelativeForm $relativeForm;
     public BadgeForm $badgeForm;
-
-
 
     public $activeTab = 'information';
 
@@ -39,20 +37,17 @@ class EmployeeCreate extends Component
 
     public function toggleBoardMember($checked): void
     {
-
         $this->infoForm->is_board_member = (bool) $checked;
-
         if (!$this->infoForm->is_board_member) {
             $this->infoForm->board_member_started_at = null;
             $this->infoForm->board_member_end_at = null;
         }
     }
+
     public function saveInformation()
     {
         $employee = $this->infoForm->saveInformation();
-
         $this->successToast();
-
         return $this->redirect(route('employees.edit', $employee->id), navigate: true);
     }
 
@@ -61,35 +56,29 @@ class EmployeeCreate extends Component
         $this->educationForm->saveEducation();
         $this->successToast();
     }
-
     public function saveCourses()
     {
         $this->courseForm->saveCourses();
         $this->successToast();
     }
-
     public function saveExperience()
     {
         $this->experienceForm->saveExperience();
         $this->successToast();
     }
-
     public function saveRelatives()
     {
         $this->relativeForm->saveRelatives();
         $this->successToast();
     }
-
     public function saveBadges()
     {
-        $this->badgeForm->saveBadges();
+        $this->badgeForm->save();
         $this->successToast();
-
     }
-
     public function saveChecklist()
     {
-        $this->checklistItemForm->saveChecklist();
+        $this->checklistForm->save();
         LivewireAlert::success(__('general.success-message'));
     }
 
@@ -97,60 +86,54 @@ class EmployeeCreate extends Component
     {
         $this->educationForm->addEducation();
     }
-
     public function removeEducation($i)
     {
-        $this->educationForm->removeEducation((int)$i);
+        $this->educationForm->removeEducation((int) $i);
     }
 
     public function addCourse()
     {
         $this->courseForm->addCourse();
     }
-
     public function removeCourse($i)
     {
-        $this->courseForm->removeCourse((int)$i);
+        $this->courseForm->removeCourse((int) $i);
     }
 
     public function addExperience()
     {
         $this->experienceForm->addExperience();
     }
-
     public function removeExperience($i)
     {
-        $this->experienceForm->removeExperience((int)$i);
+        $this->experienceForm->removeExperience((int) $i);
     }
 
     public function addRelative()
     {
         $this->relativeForm->addRelative();
     }
-
     public function removeRelative($i)
     {
-        $this->relativeForm->removeRelative((int)$i);
+        $this->relativeForm->removeRelative((int) $i);
     }
 
     public function addBadge()
     {
         $this->badgeForm->addBadge();
     }
-
     public function removeBadge($i)
     {
-        $this->badgeForm->removeBadge((int)$i);
+        $this->badgeForm->removeBadge((int) $i);
     }
 
     public function addChecklist()
     {
-        $this->checklistItemForm->addChecklist();
+        $this->checklistForm->addChecklist();
     }
-
     public function removeChecklist($i)
     {
-        $this->checklistItemForm->removeChecklist((int)$i);
+        $this->checklistForm->removeChecklist((int) $i);
     }
 
     public function render()
@@ -159,7 +142,7 @@ class EmployeeCreate extends Component
 
         return view('livewire.employee.form', [
             'allEmployees' => Employee::select('id', 'name')->get(),
-
+            'checklistItems' => $checklistItems,
         ]);
     }
 }

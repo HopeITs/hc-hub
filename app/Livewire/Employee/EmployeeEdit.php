@@ -18,15 +18,16 @@ use Livewire\WithFileUploads;
 
 class EmployeeEdit extends Component
 {
-    use WithFileUploads , WithAlerts;
+    use WithFileUploads, WithAlerts;
 
     public PersonalInfoForm $infoForm;
     public EducationForm $educationForm;
-    public ChecklistForm $checklistItemForm;
-    public  CourseForm $courseForm;
+    public ChecklistForm $checklistForm;
+    public CourseForm $courseForm;
     public ExperienceForm $experienceForm;
     public RelativeForm $relativeForm;
     public BadgeForm $badgeForm;
+
     public $activeTab = 'information';
 
     public function setActiveTab($tab)
@@ -36,16 +37,13 @@ class EmployeeEdit extends Component
 
     public function mount(Employee $employee)
     {
-        // Seed base info first
         $this->infoForm->setEmployee($employee);
-
-        // Seed each sub-form with the same employee (so they can load existing rows)
         $this->educationForm->setEmployee($employee);
-        $this->courseForm->setEmployee($employee ?? null);
-//        $this->experienceForm->setEmployee($employee ?? null);
-//        $this->relativeForm->setEmployee($employee ?? null);
-//        $this->badgeForm->setEmployee($employee ?? null);
-//        $this->checklistItemForm->setEmployee($employee ?? null);
+        $this->courseForm->setEmployee($employee);
+        $this->experienceForm->setEmployee($employee);
+        $this->relativeForm->setEmployee($employee);
+        $this->badgeForm->setEmployee($employee);
+        $this->checklistForm->setEmployee($employee);
 
         if (empty($this->educationForm->educations)) {
             $this->educationForm->addEducation();
@@ -62,11 +60,10 @@ class EmployeeEdit extends Component
         if (empty($this->badgeForm->badges ?? [])) {
             $this->badgeForm->addBadge();
         }
-        if (empty($this->checklistItemForm->checklists ?? [])) {
-            $this->checklistItemForm->addChecklist();
+        if (empty($this->checklistForm->checklists ?? [])) {
+            $this->checklistForm->addChecklist();
         }
     }
-
 
     public function saveInformation()
     {
@@ -75,43 +72,37 @@ class EmployeeEdit extends Component
         return $this->redirect(route('employees.index'), navigate: true);
     }
 
-    public function addEducation(): void
+    public function addEducation()
     {
         $this->educationForm->addEducation();
     }
-
-    public function removeEducation(int $index , int $id =null): void
+    public function removeEducation(int $index, int $id = null)
     {
-        $this->educationForm->removeEducation($index , $id);
-        // Optional: clear stale validation errors for removed index
+        $this->educationForm->removeEducation($index, $id);
         $this->resetErrorBag();
     }
-
-    public function saveEducation(): void
+    public function saveEducation()
     {
         $this->educationForm->save();
         $this->setActiveTab('education');
-        $this->successToast(); // from WithAlerts
+        $this->successToast();
     }
-    public function addCourse(): void
+
+    public function addCourse()
     {
         $this->courseForm->addCourse();
     }
-
-    public function removeCourse(int $index): void
+    public function removeCourse(int $index)
     {
         $this->courseForm->removeCourse($index);
-        // Optional: clear stale validation errors for removed index
         $this->resetErrorBag();
     }
-
-    public function saveCourses(): void
+    public function saveCourses()
     {
         $this->courseForm->save();
         $this->setActiveTab('courses');
-        $this->successToast(); // from WithAlerts
+        $this->successToast();
     }
-
 
     public function saveExperience()
     {
@@ -127,13 +118,21 @@ class EmployeeEdit extends Component
 
     public function saveBadges()
     {
-        $this->badgeForm->saveBadges();
+        $this->badgeForm->save();
         LivewireAlert::success(__('general.success-message'));
     }
 
+    public function addChecklist()
+    {
+        $this->checklistForm->addChecklist();
+    }
+    public function removeChecklist($i, $id = null)
+    {
+        $this->checklistForm->removeChecklist((int) $i, $id);
+    }
     public function saveChecklist()
     {
-        $this->checklistItemForm->saveChecklist();
+        $this->checklistForm->save();
         LivewireAlert::success(__('general.success-message'));
     }
 
