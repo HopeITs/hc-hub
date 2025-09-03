@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContractExportController;
 use App\Livewire\Basics\ChecklistItemModule;
 use App\Livewire\Basics\CityModule;
 use App\Livewire\Basics\ContractTypeModule;
@@ -62,7 +63,8 @@ Route::group(
 
 
             Route::get('/centers', CentersModule::class)->name('centers.index');
-
+            Route::get('/contracts/{contract}/export', [ContractExportController::class, 'pdf'])
+                ->name('contracts.export');
             Route::prefix('positions')
                 ->name('positions.')
                 ->group(function () {
@@ -80,6 +82,9 @@ Route::group(
                     Route::get('/', ContractsModule::class)->name('index');
                     Route::get('/create', ContractCreate::class)->name('create');
                     Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
+                    Route::middleware(['auth'])->group(function () {
+
+                    });
                 });
 
             Route::prefix('programs')
