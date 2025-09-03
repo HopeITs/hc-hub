@@ -8,6 +8,7 @@ use App\Livewire\Forms\Employee\ChecklistForm;
 use App\Livewire\Forms\Employee\CourseForm;
 use App\Livewire\Forms\Employee\EducationForm;
 use App\Livewire\Forms\Employee\ExperienceForm;
+use App\Livewire\Forms\Employee\ItemForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
@@ -29,6 +30,7 @@ class EmployeeEdit extends Component
     public RelativeForm $relativeForm;
     public BadgeForm $badgeForm;
     public AttachmentForm $attachmentForm;
+    public ItemForm $itemForm;
 
     public $activeTab = 'information';
 
@@ -47,6 +49,7 @@ class EmployeeEdit extends Component
         $this->badgeForm->setEmployee($employee);
         $this->checklistForm->setEmployee($employee);
         $this->attachmentForm->setEmployee($employee);
+        $this->itemForm->setEmployee($employee);
 
         if (empty($this->educationForm->educations ?? [])) {
             $this->educationForm->addEducation();
@@ -68,6 +71,9 @@ class EmployeeEdit extends Component
         }
         if (empty($this->attachmentForm->attachments ?? [])) {
             $this->attachmentForm->addAttachment();
+        }
+        if (empty($this->itemForm->items ?? [])) {
+            $this->itemForm->addItem();
         }
     }
 
@@ -120,6 +126,32 @@ class EmployeeEdit extends Component
     {
         $this->attachmentForm->save();
         $this->successToast();
+    }
+
+    public function saveItems()
+    {
+        $this->itemForm->save();
+        $this->successToast();
+    }
+
+    public function addItem()
+    {
+        $this->itemForm->addItem();
+    }
+
+    public function removeItem($index, $id = null)
+    {
+        $this->itemForm->removeItem($index, $id);
+    }
+
+    public function addAttachment()
+    {
+        $this->attachmentForm->addAttachment();
+    }
+
+    public function removeAttachment($index, $id = null)
+    {
+        $this->attachmentForm->removeAttachment($index, $id);
     }
 
     public function addEducation()
@@ -185,16 +217,6 @@ class EmployeeEdit extends Component
     public function removeChecklist($i, $id = null)
     {
         $this->checklistForm->removeChecklist((int) $i, $id);
-    }
-
-    public function addAttachment()
-    {
-        $this->attachmentForm->addAttachment();
-    }
-
-    public function removeAttachment($index, $id = null)
-    {
-        $this->attachmentForm->removeAttachment($index, $id);
     }
 
     public function render()

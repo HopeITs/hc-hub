@@ -19,12 +19,12 @@ class Employee extends Model implements HasMedia
     public array $translatable = ['name', 'father_name', 'mother_name', 'address'];
 
     protected $casts = [
-        'dob'                     => 'datetime',
+        'dob' => 'datetime',
         'board_member_started_at' => 'datetime',
-        'board_member_end_at'     => 'datetime',
-        'is_active'               => 'boolean',
-        'is_board_member'         => 'boolean',
-        'children'                => 'integer',
+        'board_member_end_at' => 'datetime',
+        'is_active' => 'boolean',
+        'is_board_member' => 'boolean',
+        'children' => 'integer',
     ];
 
     public function city(): BelongsTo
@@ -33,17 +33,12 @@ class Employee extends Model implements HasMedia
     }
     public function contracts()
     {
-        return $this->hasMany(Contract::class , 'employee_id');
+        return $this->hasMany(Contract::class, 'employee_id');
     }
 
     public function positions(): BelongsToMany
     {
-        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')
-            ->withPivot([
-                'id','contract_type_id','department_id','job_level_id',
-                'is_active','start_date','end_date','terminated_at',
-                'salary','currency','weekly_hours','yearly_leave_days','work_days','work_hours',
-            ]);
+        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours']);
     }
 
     public function scopeInvolvedInProgram($query, $programId)
@@ -98,41 +93,30 @@ class Employee extends Model implements HasMedia
         return $this->belongsTo(Employee::class, 'direct_manager_id');
     }
 
+    public function items()
+    {
+        return $this->hasMany(EmployeeItem::class);
+    }
+
     public function jobLevels(): BelongsToMany
     {
-        return $this->belongsToMany(JobLevel::class, 'contracts', 'employee_id', 'job_level_id')
-            ->withPivot([
-                'id','contract_type_id','department_id','job_level_id',
-                'is_active','start_date','end_date','terminated_at',
-                'salary','currency','weekly_hours','yearly_leave_days','work_days','work_hours',
-            ]);
+        return $this->belongsToMany(JobLevel::class, 'contracts', 'employee_id', 'job_level_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours']);
     }
 
     public function contractTypes(): BelongsToMany
     {
-        return $this->belongsToMany(ContractType::class, 'contracts', 'employee_id', 'contract_type_id')
-            ->withPivot([
-                'id','contract_type_id','department_id','job_level_id',
-                'is_active','start_date','end_date','terminated_at',
-                'salary','currency','weekly_hours','yearly_leave_days','work_days','work_hours',
-            ]);
+        return $this->belongsToMany(ContractType::class, 'contracts', 'employee_id', 'contract_type_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours']);
     }
 
     public function departments(): BelongsToMany
     {
-        return $this->belongsToMany(Department::class, 'contracts', 'employee_id', 'department_id')
-            ->withPivot([
-                'id','contract_type_id','department_id','job_level_id',
-                'is_active','start_date','end_date','terminated_at',
-                'salary','currency','weekly_hours','yearly_leave_days','work_days','work_hours',
-            ]);
+        return $this->belongsToMany(Department::class, 'contracts', 'employee_id', 'department_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours']);
     }
 
     public function account()
     {
         return $this->hasOne(User::class, 'employee_id');
     }
-
 
     public function registerMediaCollections(): void
     {

@@ -2,14 +2,15 @@
 
 namespace App\Livewire\Employee;
 
+use App\Livewire\Forms\Employee\AttachmentForm;
 use App\Livewire\Forms\Employee\BadgeForm;
 use App\Livewire\Forms\Employee\ChecklistForm;
 use App\Livewire\Forms\Employee\CourseForm;
 use App\Livewire\Forms\Employee\EducationForm;
 use App\Livewire\Forms\Employee\ExperienceForm;
+use App\Livewire\Forms\Employee\ItemForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
-use App\Livewire\Forms\Employee\AttachmentForm;
 use App\Models\ChecklistItem;
 use App\Models\Employee;
 use App\Traits\WithAlerts;
@@ -29,6 +30,7 @@ class EmployeeCreate extends Component
     public RelativeForm $relativeForm;
     public BadgeForm $badgeForm;
     public AttachmentForm $attachmentForm;
+    public ItemForm $itemForm;
 
     public $activeTab = 'information';
 
@@ -87,6 +89,32 @@ class EmployeeCreate extends Component
     {
         $this->checklistForm->save();
         LivewireAlert::success(__('general.success-message'));
+    }
+
+    public function addAttachment()
+    {
+        $this->attachmentForm->addAttachment();
+    }
+
+    public function removeAttachment($index, $id = null)
+    {
+        $this->attachmentForm->removeAttachment((int) $index, $id);
+    }
+
+    public function addItem()
+    {
+        $this->itemForm->addItem();
+    }
+
+    public function removeItem($index, $id = null)
+    {
+        $this->itemForm->removeItem((int) $index, $id);
+    }
+
+    public function saveItems()
+    {
+        $this->itemForm->save();
+        $this->successToast();
     }
 
     public function addEducation()
@@ -149,29 +177,11 @@ class EmployeeCreate extends Component
         $this->checklistForm->removeChecklist((int) $i);
     }
 
-    public function addAttachment()
-    {
-        $this->attachmentForm->addAttachment();
-    }
-
-    public function removeAttachment($i, $id = null)
-    {
-        $this->attachmentForm->removeAttachment((int) $i, $id);
-    }
-
-    public function saveAttachments()
-    {
-        $this->attachmentForm->save();
-        $this->successToast();
-    }
-
     public function render()
     {
-        $checklistItems = ChecklistItem::where('order', 1)->orderBy('name')->get();
-
         return view('livewire.employee.form', [
             'allEmployees' => Employee::select('id', 'name')->get(),
-            'checklistItems' => $checklistItems,
+            'checklistItems' => ChecklistItem::where('order', 1)->orderBy('name')->get(),
         ]);
     }
 }

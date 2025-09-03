@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -191,7 +190,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
         //contracts
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
@@ -254,6 +252,24 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('attachments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('employee_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->string('item');
+            $table->string('brand')->nullable();
+            $table->string('model')->nullable();
+            $table->string('serial_number')->nullable();
+            $table->string('status')->nullable();
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -272,8 +288,6 @@ return new class extends Migration
         Schema::dropIfExists('positions');
         Schema::dropIfExists('annual_leave_rules');
 
-
-
         Schema::dropIfExists('employees');
         Schema::dropIfExists('courses');
         Schema::dropIfExists('educations');
@@ -282,12 +296,12 @@ return new class extends Migration
         Schema::dropIfExists('checklist');
         Schema::dropIfExists('default_deliverables');
 
-
         Schema::dropIfExists('contracts');
         Schema::dropIfExists('evaluations');
         Schema::dropIfExists('badges');
         Schema::dropIfExists('leave_balances');
         Schema::dropIfExists('leave_requests');
-
+        Schema::dropIfExists('attachments');
+        Schema::dropIfExists('employee_items');
     }
 };

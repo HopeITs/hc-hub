@@ -238,6 +238,7 @@ return [
     'returned_status' => 'Returned Status',
     'attachments' => 'Attachments',
     'file' => 'File',
+    'add-item' => 'Add Item',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

@@ -238,6 +238,7 @@ return [
     'returned_status' => 'حالة الإعادة',
     'attachments' => 'الملحقات',
     'file' => 'الملف',
+    'add-item' => 'إضافة عنصر',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
