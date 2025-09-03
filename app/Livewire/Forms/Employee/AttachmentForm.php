@@ -3,7 +3,7 @@
 namespace App\Livewire\Forms\Employee;
 
 use App\Models\Employee;
-use App\Models\EmployeeAttachment;
+use App\Models\Attachment;
 use Livewire\Form;
 use Livewire\WithFileUploads;
 
@@ -50,7 +50,7 @@ class AttachmentForm extends Form
     public function removeAttachment(int $index, ?int $id = null): void
     {
         if ($id) {
-            EmployeeAttachment::find($id)?->delete();
+            Attachment::find($id)?->delete();
         }
         unset($this->attachments[$index]);
         $this->attachments = array_values($this->attachments);
@@ -67,7 +67,7 @@ class AttachmentForm extends Form
                 $path = $item['file']->store('attachments', 'public');
             }
 
-            EmployeeAttachment::updateOrCreate(
+            Attachment::updateOrCreate(
                 ['id' => $item['id']],
                 [
                     'employee_id' => $this->employee->id,
