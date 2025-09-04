@@ -10,7 +10,6 @@
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="p-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
-
                 <div class="flex items-center justify-between mb-6">
                     <nav class="flex" aria-label="Breadcrumb">
                         <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -23,7 +22,7 @@
                             @foreach ($breadcrumbs as $breadcrumb)
                                 <li>
                                     <div class="flex items-center">
-                                        <svg class="w-3 h-3 mx-1 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                        <svg class="w-3 h-3 mx-1 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
                                         </svg>
                                         <a href="{{ route('archived-files.index', ['folder' => $breadcrumb['id']]) }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">
@@ -69,10 +68,13 @@
                                 <span class="mt-1 text-xs text-gray-500">By: {{ optional($folder->creator->profile)->name ?? 'Unknown' }}</span>
                             </a>
                             <div class="absolute top-2 right-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button wire:click.prevent="editPermissions({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-blue-600 hover:bg-gray-100 focus:outline-none" title="Edit Permissions">
+                                <button wire:click.prevent="editPermissions({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-blue-600 hover:bg-gray-100 focus:outline-none">
                                     <x-icons.cog class="w-4 h-4" />
                                 </button>
-                                <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-red-600 hover:bg-gray-100 focus:outline-none" title="Delete Folder">
+                                <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-yellow-600 hover:bg-gray-100 focus:outline-none">
+                                    <x-icons.pencil class="w-4 h-4" />
+                                </button>
+                                <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-red-600 hover:bg-gray-100 focus:outline-none">
                                     <x-icons.trash class="w-4 h-4" />
                                 </button>
                             </div>
@@ -93,7 +95,10 @@
                                 @endif
                                 <span class="mt-2 text-sm font-medium text-gray-800 break-all">{{ $file->name }}</span>
                             </div>
-                            <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="absolute top-2 right-2 p-1 bg-white rounded-full text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600 hover:bg-gray-100 focus:outline-none" title="Delete File">
+                            <button wire:click.prevent="startEditingFile({{ $file->id }})" class="absolute top-2 right-8 p-1 bg-white rounded-full text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-yellow-600 hover:bg-gray-100 focus:outline-none">
+                                <x-icons.pencil class="w-4 h-4" />
+                            </button>
+                            <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="absolute top-2 right-2 p-1 bg-white rounded-full text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600 hover:bg-gray-100 focus:outline-none">
                                 <x-icons.trash class="w-4 h-4" />
                             </button>
                         </div>
@@ -118,12 +123,8 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
-                    <button type="button" wire:click="createFolder" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
-                        Create
-                    </button>
-                    <button type="button" wire:click="$set('showCreateFolderModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
-                        Cancel
-                    </button>
+                    <button type="button" wire:click="createFolder" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none">Create</button>
+                    <button type="button" wire:click="$set('showCreateFolderModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
                 </div>
             </div>
         </div>
@@ -135,11 +136,11 @@
             <div class="mx-4 rounded-lg bg-white shadow-xl">
                 <div class="px-6 pt-6">
                     <div class="flex items-start">
-                        <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                             <x-icons.exclamation-triangle class="h-6 w-6 text-red-600" />
                         </div>
                         <div class="ml-4 text-left">
-                            <h3 class="text-lg font-medium leading-6 text-gray-900">Delete Item</h3>
+                            <h3 class="text-lg font-medium text-gray-900">Delete Item</h3>
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500">Are you sure you want to delete this item? This action cannot be undone.</p>
                             </div>
@@ -147,12 +148,52 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
-                    <button type="button" wire:click="deleteItem" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
-                        Delete
-                    </button>
-                    <button type="button" wire:click="$set('showDeleteConfirmationModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
-                        Cancel
-                    </button>
+                    <button type="button" wire:click="deleteItem" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none">Delete</button>
+                    <button type="button" wire:click="$set('showDeleteConfirmationModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($editingFolderId)
+        <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('editingFolderId', null)"></div>
+        <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
+            <div class="mx-4 rounded-lg bg-white shadow-xl">
+                <div class="px-6 pt-6">
+                    <h3 class="text-lg font-medium text-gray-900">Edit Folder</h3>
+                    <div class="mt-4">
+                        <label for="editingFolderName" class="block text-sm font-medium text-gray-700">Folder Name</label>
+                        <input type="text" id="editingFolderName" wire:model.defer="editingFolderName" wire:keydown.enter="saveEditedFolder" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        @error('editingFolderName')
+                        <span class="mt-2 block text-sm text-red-600">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
+                    <button wire:click="saveEditedFolder" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none">Save</button>
+                    <button wire:click="$set('editingFolderId', null)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">Cancel</button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($editingFileId)
+        <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('editingFileId', null)"></div>
+        <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
+            <div class="mx-4 rounded-lg bg-white shadow-xl">
+                <div class="px-6 pt-6">
+                    <h3 class="text-lg font-medium text-gray-900">Edit File Name</h3>
+                    <div class="mt-4">
+                        <label for="editingFileName" class="block text-sm font-medium text-gray-700">File Name</label>
+                        <input type="text" id="editingFileName" wire:model.defer="editingFileName" wire:keydown.enter="saveEditedFile" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        @error('editingFileName')
+                        <span class="mt-2 block text-sm text-red-600">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
+                    <button wire:click="saveEditedFile" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none">Save</button>
+                    <button wire:click="$set('editingFileId', null)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">Cancel</button>
                 </div>
             </div>
         </div>
@@ -163,9 +204,7 @@
         <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
             <div class="mx-4 rounded-lg bg-white shadow-xl flex flex-col">
                 <div class="px-6 pt-6">
-                    <h3 class="text-lg font-medium leading-6 text-gray-900">
-                        Assign Permissions for '{{ $folderForPermissions?->name }}'
-                    </h3>
+                    <h3 class="text-lg font-medium text-gray-900">Assign Permissions for '{{ $folderForPermissions?->name }}'</h3>
                     <p class="mt-1 text-sm text-gray-500">Select the employees who can access this folder.</p>
                     <div class="mt-4">
                         <input type="text" wire:model.live.debounce.300ms="userSearch" placeholder="Search employees..." class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
@@ -175,22 +214,17 @@
                     @if($allUsers)
                         @forelse ($allUsers as $user)
                             <label for="user-{{ $user->id }}" class="flex items-center p-2 rounded-md hover:bg-gray-50 cursor-pointer">
-                                <input id="user-{{ $user->id }}" type="checkbox" value="{{ $user->id }}" wire:model.live="selectedUsers"
-                                       class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <input id="user-{{ $user->id }}" type="checkbox" value="{{ $user->id }}" wire:model.live="selectedUsers" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                 <span class="ml-3 text-sm text-gray-700">{{ optional($user->profile)->name ?? $user->email }}</span>
                             </label>
                         @empty
-                             <p class="text-sm text-gray-500 text-center">No employees found.</p>
+                            <p class="text-sm text-gray-500 text-center">No employees found.</p>
                         @endforelse
                     @endif
                 </div>
                 <div class="bg-gray-50 px-6 py-4 grid grid-cols-2 gap-3 rounded-b-lg">
-                    <button type="button" wire:click="savePermissions" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
-                        Save Permissions
-                    </button>
-                    <button type="button" wire:click="closePermissionsModal" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
-                        Cancel
-                    </button>
+                    <button type="button" wire:click="savePermissions" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none">Save Permissions</button>
+                    <button type="button" wire:click="closePermissionsModal" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">Cancel</button>
                 </div>
             </div>
         </div>

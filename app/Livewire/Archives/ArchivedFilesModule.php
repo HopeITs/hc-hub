@@ -32,11 +32,16 @@ class ArchivedFilesModule extends Component
     public array $selectedUsers = [];
     public string $userSearch = '';
 
+    public ?int $editingFolderId = null;
+    public string $editingFolderName = '';
+
+    public ?int $editingFileId = null;
+    public string $editingFileName = '';
+
     public function mount($folderId = null)
     {
         if ($folderId) {
             $folder = Folder::with('users')->find($folderId);
-
             if ($folder && !auth()->user()->hasRole('Super Admin') && !$folder->users->contains(auth()->id())) {
                 abort(403, 'You do not have permission to access this folder.');
             }
@@ -65,8 +70,6 @@ class ArchivedFilesModule extends Component
     {
         $this->filePreviews = [];
         foreach ($this->files as $file) {
-            // THE BUG WAS HERE. The check for 'thumbnail' was re-added by mistake.
-            // This is the corrected version that only checks if it's an image.
             if (Str::startsWith($file->mime_type, 'image')) {
                 $this->filePreviews[$file->id] = 'data:' . $file->mime_type . ';base64,' . base64_encode(file_get_contents($file->getPath()));
             }
@@ -89,7 +92,7 @@ class ArchivedFilesModule extends Component
 
         $folder = Folder::create([
             'name' => $this->newFolderName,
-            'parent_id' => null,
+            'parent_id' => $this->currentFolder?->id,
             'user_id' => auth()->id(),
         ]);
 
@@ -131,13 +134,16 @@ class ArchivedFilesModule extends Component
         $this->validate([
             'filesToUpload.*' => 'mimes:jpg,jpeg,png,gif,xls,xlsx,doc,docx,pdf|max:10240',
         ]);
+
         if (!$this->currentFolder) {
             $this->addError('filesToUpload', 'You must select a folder before uploading files.');
             return;
         }
+
         foreach ($this->filesToUpload as $file) {
             $this->currentFolder->addMedia($file->getRealPath())->usingName($file->getClientOriginalName())->toMediaCollection('archived_files', 'public');
         }
+
         $this->filesToUpload = [];
         $this->loadContent();
     }
@@ -169,7 +175,47 @@ class ArchivedFilesModule extends Component
         } elseif ($this->itemToDeleteType === 'folder') {
             Folder::findOrFail($this->itemToDeleteId)->delete();
         }
+
         $this->showDeleteConfirmationModal = false;
+        $this->loadContent();
+    }
+
+    public function startEditingFolder(int $folderId)
+    {
+        $folder = Folder::findOrFail($folderId);
+        $this->editingFolderId = $folder->id;
+        $this->editingFolderName = $folder->name;
+    }
+
+    public function saveEditedFolder()
+    {
+        $this->validate(['editingFolderName' => 'required|string|max:255']);
+
+        $folder = Folder::findOrFail($this->editingFolderId);
+        $folder->update(['name' => $this->editingFolderName]);
+
+        $this->editingFolderId = null;
+        $this->editingFolderName = '';
+        $this->loadContent();
+    }
+
+    public function startEditingFile(int $fileId)
+    {
+        $file = Media::findOrFail($fileId);
+        $this->editingFileId = $file->id;
+        $this->editingFileName = $file->name;
+    }
+
+    public function saveEditedFile()
+    {
+        $this->validate(['editingFileName' => 'required|string|max:255']);
+
+        $file = Media::findOrFail($this->editingFileId);
+        $file->name = $this->editingFileName;
+        $file->save();
+
+        $this->editingFileId = null;
+        $this->editingFileName = '';
         $this->loadContent();
     }
 
@@ -180,11 +226,7 @@ class ArchivedFilesModule extends Component
 
             if (trim($this->userSearch)) {
                 $users = $users->filter(function ($user) {
-                    return Str::contains(
-                        $user->profile->name,
-                        $this->userSearch,
-                        true
-                    );
+                    return Str::contains($user->profile->name, $this->userSearch, true);
                 });
             }
 
