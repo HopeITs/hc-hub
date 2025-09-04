@@ -2,7 +2,7 @@
     <header class="bg-white shadow">
         <div class="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
             <h1 class="text-3xl font-bold tracking-tight text-gray-900">
-                {{ __('general.archived-files') }}
+                {{ $isShared ? __('general.shared-folders') : __('general.my-folders') }}
             </h1>
         </div>
     </header>
@@ -14,7 +14,7 @@
                     <nav class="flex" aria-label="Breadcrumb">
                         <ol class="inline-flex items-center space-x-1 md:space-x-3">
                             <li class="inline-flex items-center">
-                                <a href="{{ route('archived-files.index') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                                <a href="{{ $isShared ? route('shared-folders.index') : route('my-folders.index') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
                                     <x-icons.home class="w-4 h-4 mr-2" />
                                     Root
                                 </a>
@@ -25,7 +25,7 @@
                                         <svg class="w-3 h-3 mx-1 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
                                         </svg>
-                                        <a href="{{ route('archived-files.index', ['folder' => $breadcrumb['id']]) }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">
+                                        <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $breadcrumb['id']]) : route('my-folders.index', ['folderId' => $breadcrumb['id']]) }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">
                                             {{ $breadcrumb['name'] }}
                                         </a>
                                     </div>
@@ -35,14 +35,14 @@
                     </nav>
 
                     <div class="flex items-center space-x-2">
-                        @if (!$currentFolder)
+                        @if (!$currentFolder && (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin'))))
                             <button type="button" wire:click="$set('showCreateFolderModal', true)" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-700 border border-transparent rounded-md shadow-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 <x-icons.plus class="w-5 h-5 mr-2 -ml-1" />
                                 New Folder
                             </button>
                         @endif
 
-                        @if ($currentFolder)
+                        @if ($currentFolder && (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin'))))
                             <label for="file-upload" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm cursor-pointer hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                                 <x-icons.upload class="w-5 h-5 mr-2 -ml-1" />
                                 Upload Files
@@ -62,22 +62,24 @@
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                     @forelse($folders as $folder)
                         <div class="relative group">
-                            <a href="{{ route('archived-files.index', ['folder' => $folder->id]) }}" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg hover:bg-gray-100 hover:shadow-md">
+                            <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg hover:bg-gray-100 hover:shadow-md">
                                 <x-icons.folder class="w-16 h-16 text-yellow-400" />
                                 <span class="mt-2 text-sm font-medium text-gray-800 truncate">{{ $folder->name }}</span>
                                 <span class="mt-1 text-xs text-gray-500">By: {{ optional($folder->creator->profile)->name ?? 'Unknown' }}</span>
                             </a>
-                            <div class="absolute top-2 right-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button wire:click.prevent="editPermissions({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-blue-600 hover:bg-gray-100 focus:outline-none">
-                                    <x-icons.cog class="w-4 h-4" />
-                                </button>
-                                <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-yellow-600 hover:bg-gray-100 focus:outline-none">
-                                    <x-icons.pencil class="w-4 h-4" />
-                                </button>
-                                <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-red-600 hover:bg-gray-100 focus:outline-none">
-                                    <x-icons.trash class="w-4 h-4" />
-                                </button>
-                            </div>
+                             @if (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin')))
+                                <div class="absolute top-2 right-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button wire:click.prevent="editPermissions({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-blue-600 hover:bg-gray-100 focus:outline-none" title="Permissions">
+                                        <x-icons.cog class="w-4 h-4" />
+                                    </button>
+                                    <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-yellow-600 hover:bg-gray-100 focus:outline-none" title="Edit">
+                                        <x-icons.pencil class="w-4 h-4" />
+                                    </button>
+                                    <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-red-600 hover:bg-gray-100 focus:outline-none" title="Delete">
+                                        <x-icons.trash class="w-4 h-4" />
+                                    </button>
+                                </div>
+                            @endif
                         </div>
                     @empty
                         @if ($files->isEmpty())
@@ -95,12 +97,14 @@
                                 @endif
                                 <span class="mt-2 text-sm font-medium text-gray-800 break-all">{{ $file->name }}</span>
                             </div>
-                            <button wire:click.prevent="startEditingFile({{ $file->id }})" class="absolute top-2 right-8 p-1 bg-white rounded-full text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-yellow-600 hover:bg-gray-100 focus:outline-none">
-                                <x-icons.pencil class="w-4 h-4" />
-                            </button>
-                            <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="absolute top-2 right-2 p-1 bg-white rounded-full text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600 hover:bg-gray-100 focus:outline-none">
-                                <x-icons.trash class="w-4 h-4" />
-                            </button>
+                            @if (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin')))
+                                <button wire:click.prevent="startEditingFile({{ $file->id }})" class="absolute top-2 right-8 p-1 bg-white rounded-full text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-yellow-600 hover:bg-gray-100 focus:outline-none" title="Edit name">
+                                    <x-icons.pencil class="w-4 h-4" />
+                                </button>
+                                <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="absolute top-2 right-2 p-1 bg-white rounded-full text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600 hover:bg-gray-100 focus:outline-none" title="Delete file">
+                                    <x-icons.trash class="w-4 h-4" />
+                                </button>
+                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -108,6 +112,7 @@
         </div>
     </div>
 
+    {{-- All Modals (Create, Delete, Edit, Permissions) remain the same --}}
     @if ($showCreateFolderModal)
         <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('showCreateFolderModal', false)"></div>
         <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">

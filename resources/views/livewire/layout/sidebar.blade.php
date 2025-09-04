@@ -90,16 +90,17 @@
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
 
-                <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')" :active="request()->routeIs('archived-files.*')">
+                <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')"
+                    :active="request()->routeIs('my-folders.*') || request()->routeIs('shared-folders.*')">
                     <x-slot name="icon">
                         <x-icons.folder class="w-5 h-5" />
                     </x-slot>
                     <x-slot name="list">
-                        <x-layouts.app.sidebar.nav-item :href="route('archived-files.index')" :active="request()->routeIs('archived-files.index') && !request()->routeIs('archived-files.shared')">
+                        <x-layouts.app.sidebar.nav-item :href="route('my-folders.index')" :active="request()->routeIs('my-folders.*')">
                             {{ __('general.my-folders') }}
                         </x-layouts.app.sidebar.nav-item>
 
-                        <x-layouts.app.sidebar.nav-item :href="route('archived-files.shared')" :active="request()->routeIs('archived-files.shared')">
+                        <x-layouts.app.sidebar.nav-item :href="route('shared-folders.index')" :active="request()->routeIs('shared-folders.*')">
                             {{ __('general.shared-folders') }}
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>

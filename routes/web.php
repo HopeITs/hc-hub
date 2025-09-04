@@ -1,38 +1,36 @@
 <?php
 
+use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Basics\ChecklistItemModule;
 use App\Livewire\Basics\CityModule;
 use App\Livewire\Basics\ContractTypeModule;
 use App\Livewire\Basics\DepartmentModule;
 use App\Livewire\Basics\JobLevelModule;
 use App\Livewire\Basics\LeaveTypeModule;
-use App\Livewire\Contract\ContractDetails;
-use App\Livewire\Contract\ContractsModule;
 use App\Livewire\Contract\ContractCreate;
+use App\Livewire\Contract\ContractDetails;
 use App\Livewire\Contract\ContractEdit;
+use App\Livewire\Contract\ContractsModule;
 use App\Livewire\Employee\EmployeeCreate;
 use App\Livewire\Employee\EmployeeEdit;
 use App\Livewire\Employee\EmployeeModule;
 use App\Livewire\ProjectManagement\CentersModule;
 use App\Livewire\ProjectManagement\DefaultDeliverablesModule;
-use App\Livewire\Employee\Tabs\PersonalInfoTab;
 use App\Livewire\ProjectManagement\PositionsModule;
-use App\Livewire\ProjectManagement\Project\Detail as ProjectDetail;
 use App\Livewire\ProjectManagement\Project\Create as ProjectCreate;
-use App\Livewire\ProjectManagement\Project\Update as ProjectUpdate;
+use App\Livewire\ProjectManagement\Project\Detail as ProjectDetail;
 use App\Livewire\ProjectManagement\Project\Index as ProjectIndex;
+use App\Livewire\ProjectManagement\Project\Update as ProjectUpdate;
 use App\Livewire\ProjectManagement\RequiredPositionModule;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
-use App\Livewire\Archives\ArchivedFilesModule;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 Route::group(
     [
         'prefix' => LaravelLocalization::setLocale(),
-        //        'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
     ],
     function () {
         Livewire::setUpdateRoute(function ($handle) {
@@ -65,8 +63,14 @@ Route::group(
             Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
-            Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
-            Route::get('archived-files/shared', ArchivedFilesModule::class)->name('archived-files.shared');
+            // Archived Files Routes
+            Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)
+                ->defaults('isShared', false)
+                ->name('my-folders.index');
+
+            Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)
+                ->defaults('isShared', true)
+                ->name('shared-folders.index');
 
             Route::prefix('contracts')
                 ->name('contracts.')

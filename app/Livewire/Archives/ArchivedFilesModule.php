@@ -5,6 +5,7 @@ namespace App\Livewire\Archives;
 use App\Models\Folder;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -14,6 +15,7 @@ class ArchivedFilesModule extends Component
 {
     use WithFileUploads;
 
+    public bool $isShared;
     public ?Folder $currentFolder = null;
     public Collection $folders;
     public Collection $files;
@@ -25,23 +27,27 @@ class ArchivedFilesModule extends Component
     public $itemToDeleteType = null;
     public $itemToDeleteId = null;
     public array $filePreviews = [];
-
     public bool $showPermissionsModal = false;
     public ?Folder $folderForPermissions = null;
     public ?Collection $allUsers = null;
     public array $selectedUsers = [];
     public string $userSearch = '';
-
     public ?int $editingFolderId = null;
     public string $editingFolderName = '';
-
     public ?int $editingFileId = null;
     public string $editingFileName = '';
 
-    public function mount($folderId = null)
+    public function mount(bool $isShared, $folderId = null)
     {
+        $this->isShared = $isShared;
+
         if ($folderId) {
             $folder = Folder::with('users')->find($folderId);
+            // Ensure the accessed folder matches the context (my vs shared)
+            if ($folder && $folder->is_shared != $this->isShared) {
+                abort(404);
+            }
+            // Permission check for non-admins
             if ($folder && !auth()->user()->hasRole('Super Admin') && !$folder->users->contains(auth()->id())) {
                 abort(403, 'You do not have permission to access this folder.');
             }
@@ -51,13 +57,20 @@ class ArchivedFilesModule extends Component
         $this->loadContent();
     }
 
+    private function authorizeSharedAction(): void
+    {
+        if ($this->isShared && !auth()->user()->hasRole('Super Admin')) {
+            abort(403, 'You are not authorized to perform this action in Shared Folders.');
+        }
+    }
+
     public function loadContent(): void
     {
         $parentId = $this->currentFolder?->id;
-        $query = Folder::where('parent_id', $parentId);
+        $query = Folder::where('parent_id', $parentId)->where('is_shared', $this->isShared);
 
         if (!auth()->user()->hasRole('Super Admin')) {
-            $query->whereHas('users', fn($q) => $q->where('user_id', auth()->id()));
+            $query->whereHas('users', fn ($q) => $q->where('user_id', auth()->id()));
         }
 
         $this->folders = $query->orderBy('name')->get();
@@ -88,23 +101,29 @@ class ArchivedFilesModule extends Component
 
     public function createFolder()
     {
+        $this->authorizeSharedAction();
         $this->validate(['newFolderName' => 'required|string|max:255']);
 
         $folder = Folder::create([
             'name' => $this->newFolderName,
             'parent_id' => $this->currentFolder?->id,
             'user_id' => auth()->id(),
+            'is_shared' => $this->isShared,
         ]);
 
-        $folder->users()->attach(auth()->id());
+        // In shared folders, only admins manage permissions. In my folders, the creator is added.
+        if (!$this->isShared) {
+            $folder->users()->attach(auth()->id());
+        }
+
         $this->showCreateFolderModal = false;
         $this->newFolderName = '';
-
         $this->editPermissions($folder->id);
     }
 
     public function editPermissions(int $folderId)
     {
+        $this->authorizeSharedAction();
         $folder = Folder::findOrFail($folderId);
         $this->folderForPermissions = $folder;
         $this->selectedUsers = $folder->users->pluck('id')->toArray();
@@ -113,9 +132,13 @@ class ArchivedFilesModule extends Component
 
     public function savePermissions()
     {
+        $this->authorizeSharedAction();
         if ($this->folderForPermissions) {
-            $permissions = collect($this->selectedUsers)->push($this->folderForPermissions->user_id)->unique()->all();
-            $this->folderForPermissions->users()->sync($permissions);
+            $permissions = collect($this->selectedUsers);
+            if (!$this->isShared) {
+                $permissions->push($this->folderForPermissions->user_id);
+            }
+            $this->folderForPermissions->users()->sync($permissions->unique()->all());
         }
         $this->closePermissionsModal();
         $this->loadContent();
@@ -131,9 +154,8 @@ class ArchivedFilesModule extends Component
 
     public function updatedFilesToUpload()
     {
-        $this->validate([
-            'filesToUpload.*' => 'mimes:jpg,jpeg,png,gif,xls,xlsx,doc,docx,pdf|max:10240',
-        ]);
+        $this->authorizeSharedAction();
+        $this->validate(['filesToUpload.*' => 'mimes:jpg,jpeg,png,gif,xls,xlsx,doc,docx,pdf|max:10240']);
 
         if (!$this->currentFolder) {
             $this->addError('filesToUpload', 'You must select a folder before uploading files.');
@@ -151,11 +173,13 @@ class ArchivedFilesModule extends Component
     public function downloadFile($mediaId)
     {
         $mediaItem = Media::findOrFail($mediaId);
+        // Add permission check here if necessary, but loadContent should already prevent unauthorized access
         return response()->download($mediaItem->getPath(), $mediaItem->name);
     }
 
     public function confirmFileDeletion($mediaId)
     {
+        $this->authorizeSharedAction();
         $this->itemToDeleteType = 'file';
         $this->itemToDeleteId = $mediaId;
         $this->showDeleteConfirmationModal = true;
@@ -163,6 +187,7 @@ class ArchivedFilesModule extends Component
 
     public function confirmFolderDeletion($folderId)
     {
+        $this->authorizeSharedAction();
         $this->itemToDeleteType = 'folder';
         $this->itemToDeleteId = $folderId;
         $this->showDeleteConfirmationModal = true;
@@ -170,6 +195,7 @@ class ArchivedFilesModule extends Component
 
     public function deleteItem()
     {
+        $this->authorizeSharedAction();
         if ($this->itemToDeleteType === 'file') {
             Media::findOrFail($this->itemToDeleteId)->delete();
         } elseif ($this->itemToDeleteType === 'folder') {
@@ -182,6 +208,7 @@ class ArchivedFilesModule extends Component
 
     public function startEditingFolder(int $folderId)
     {
+        $this->authorizeSharedAction();
         $folder = Folder::findOrFail($folderId);
         $this->editingFolderId = $folder->id;
         $this->editingFolderName = $folder->name;
@@ -189,11 +216,10 @@ class ArchivedFilesModule extends Component
 
     public function saveEditedFolder()
     {
+        $this->authorizeSharedAction();
         $this->validate(['editingFolderName' => 'required|string|max:255']);
-
         $folder = Folder::findOrFail($this->editingFolderId);
         $folder->update(['name' => $this->editingFolderName]);
-
         $this->editingFolderId = null;
         $this->editingFolderName = '';
         $this->loadContent();
@@ -201,6 +227,7 @@ class ArchivedFilesModule extends Component
 
     public function startEditingFile(int $fileId)
     {
+        $this->authorizeSharedAction();
         $file = Media::findOrFail($fileId);
         $this->editingFileId = $file->id;
         $this->editingFileName = $file->name;
@@ -208,12 +235,11 @@ class ArchivedFilesModule extends Component
 
     public function saveEditedFile()
     {
+        $this->authorizeSharedAction();
         $this->validate(['editingFileName' => 'required|string|max:255']);
-
         $file = Media::findOrFail($this->editingFileId);
         $file->name = $this->editingFileName;
         $file->save();
-
         $this->editingFileId = null;
         $this->editingFileName = '';
         $this->loadContent();
@@ -223,13 +249,11 @@ class ArchivedFilesModule extends Component
     {
         if ($this->showPermissionsModal) {
             $users = User::with('profile')->whereHas('profile')->get();
-
             if (trim($this->userSearch)) {
                 $users = $users->filter(function ($user) {
                     return Str::contains($user->profile->name, $this->userSearch, true);
                 });
             }
-
             $this->allUsers = $users->sortBy('profile.name');
         }
 
