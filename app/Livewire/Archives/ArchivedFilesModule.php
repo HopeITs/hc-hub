@@ -43,11 +43,9 @@ class ArchivedFilesModule extends Component
 
         if ($folderId) {
             $folder = Folder::with('users')->find($folderId);
-            // Ensure the accessed folder matches the context (my vs shared)
             if ($folder && $folder->is_shared != $this->isShared) {
                 abort(404);
             }
-            // Permission check for non-admins
             if ($folder && !auth()->user()->hasRole('Super Admin') && !$folder->users->contains(auth()->id())) {
                 abort(403, 'You do not have permission to access this folder.');
             }
@@ -111,7 +109,6 @@ class ArchivedFilesModule extends Component
             'is_shared' => $this->isShared,
         ]);
 
-        // In shared folders, only admins manage permissions. In my folders, the creator is added.
         if (!$this->isShared) {
             $folder->users()->attach(auth()->id());
         }
@@ -173,7 +170,6 @@ class ArchivedFilesModule extends Component
     public function downloadFile($mediaId)
     {
         $mediaItem = Media::findOrFail($mediaId);
-        // Add permission check here if necessary, but loadContent should already prevent unauthorized access
         return response()->download($mediaItem->getPath(), $mediaItem->name);
     }
 

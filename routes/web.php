@@ -63,7 +63,6 @@ Route::group(
             Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
-            // Archived Files Routes
             Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)
                 ->defaults('isShared', false)
                 ->name('my-folders.index');

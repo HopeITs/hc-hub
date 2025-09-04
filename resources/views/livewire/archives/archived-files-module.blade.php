@@ -112,7 +112,6 @@
         </div>
     </div>
 
-    {{-- All Modals (Create, Delete, Edit, Permissions) remain the same --}}
     @if ($showCreateFolderModal)
         <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('showCreateFolderModal', false)"></div>
         <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
