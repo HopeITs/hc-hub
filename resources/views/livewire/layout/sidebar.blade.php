@@ -6,7 +6,7 @@
             <a href="{{ route('home') }}" class="flex justify-center items-center mt-4 mb-8">
                 <x-app-logo class="md:w-40 md:h-16" />
             </a>
-            <ul class="space-y-2 font-medium">
+            <ul class="space-y-1 font-medium text-sm">
                 <x-layouts.app.sidebar.dropdown-nav-list id="basic-project" :title="__('general.project-basics')" :active="request()->routeIs('dashboard') ||
                     request()->routeIs('cities.*') ||
                     request()->routeIs('contract-types.*') ||
@@ -16,7 +16,7 @@
                     request()->routeIs('job-levels.*')">
 
                     <x-slot name="icon">
-                        <x-icons.home />
+                        <x-icons.home class="w-5 h-5" />
                     </x-slot>
                     <x-slot name="list">
                         <x-layouts.app.sidebar.nav-item :href="route('cities.index')" :active="request()->routeIs('cities.index') || request()->routeIs('dashboard')">
@@ -51,7 +51,7 @@
                     request()->routeIs('centers.*')">
 
                     <x-slot name="icon">
-                        <x-icons.layers />
+                        <x-icons.layers class="w-5 h-5" />
                     </x-slot>
 
                     <x-slot name="list">
@@ -73,7 +73,7 @@
                     :active="request()->routeIs('employees.*')">
 
                     <x-slot name="icon">
-                        <x-icons.users />
+                        <x-icons.users class="w-5 h-5" />
                     </x-slot>
                     <x-slot name="list">
                         <x-layouts.app.sidebar.nav-item :href="route('employees.index')" :active="request()->routeIs('employees.*')">
@@ -87,18 +87,23 @@
                         <x-layouts.app.sidebar.nav-item :href="route('contracts.index')" :active="request()->routeIs('contracts.*')">
                             {{ trans_choice('general.contracts', 2) }}
                         </x-layouts.app.sidebar.nav-item>
-
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
 
-                <li>
-                    <a href="{{ route('archived-files.index') }}"
-                        class="flex items-center p-2 rounded-lg text-gray-900 hover:bg-gray-100 group @if (request()->routeIs('archived-files.*')) bg-gray-100 @endif">
-                        <x-icons.folder
-                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900" />
-                        <span class="ms-3">{{ __('general.archived-files') }}</span>
-                    </a>
-                </li>
+                <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')" :active="request()->routeIs('archived-files.*')">
+                    <x-slot name="icon">
+                        <x-icons.folder class="w-5 h-5" />
+                    </x-slot>
+                    <x-slot name="list">
+                        <x-layouts.app.sidebar.nav-item :href="route('archived-files.index')" :active="request()->routeIs('archived-files.index') && !request()->routeIs('archived-files.shared')">
+                            {{ __('general.my-folders') }}
+                        </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item :href="route('archived-files.shared')" :active="request()->routeIs('archived-files.shared')">
+                            {{ __('general.shared-folders') }}
+                        </x-layouts.app.sidebar.nav-item>
+                    </x-slot>
+                </x-layouts.app.sidebar.dropdown-nav-list>
 
             </ul>
         </div>

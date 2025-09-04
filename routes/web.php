@@ -66,6 +66,7 @@ Route::group(
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
             Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
+            Route::get('archived-files/shared', ArchivedFilesModule::class)->name('archived-files.shared');
 
             Route::prefix('contracts')
                 ->name('contracts.')

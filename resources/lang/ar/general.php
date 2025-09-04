@@ -204,7 +204,9 @@ return [
     'contract-end' => 'نهاية العقد',
     'ongoing' => 'مستمر',
     'no-employees' => 'لا يوجد موظفون معينون في هذا المشروع بعد.',
-    'archived-files' => 'أرشفة الملفات',
+    'archived-files' => 'الملفات المؤرشفة',
+    'my-folders' => 'مجلداتي',
+    'shared-folders' => 'المجلدات المشتركة',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',

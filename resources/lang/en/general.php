@@ -203,6 +203,8 @@ return [
     'ongoing' => 'Ongoing',
     'no-employees' => 'No employees assigned to this project yet.',
     'archived-files' => 'Archived Files',
+    'my-folders' => 'My Folders',
+    'shared-folders' => 'Shared Folders',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
