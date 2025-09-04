@@ -4,19 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\Translatable\HasTranslations;
 
 class ContractType extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory;
 
     protected $fillable = [
         'type',
         'place',
-        'name'
+        'name_en',
+        'name_ar'
     ];
-
-    public array $translatable = ['name'];
 
     protected $casts = [
         'type'  => 'integer',

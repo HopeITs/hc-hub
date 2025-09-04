@@ -33,3 +33,4 @@ class LeaveBalance extends Model
     }
 
 }
+

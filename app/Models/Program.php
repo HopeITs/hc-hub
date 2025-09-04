@@ -7,11 +7,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\Translatable\HasTranslations;
 
 class Program extends Model implements HasMedia
 {
-    use HasFactory, HasTranslations, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia;
 
     protected $guarded = ['id'];
 
@@ -19,10 +18,6 @@ class Program extends Model implements HasMedia
         'start_date' => 'date',
         'end_date' => 'date',
     ];
-
-    public array $translatable = ['description'];
-
-
 
     public function cities(): BelongsToMany
     {

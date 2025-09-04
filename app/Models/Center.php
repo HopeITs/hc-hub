@@ -5,15 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Translatable\HasTranslations;
 
 class Center extends Model
 {
-    use HasFactory, HasTranslations;
+    use HasFactory;
 
-    protected $fillable = ['name', 'city_id', 'program_id', 'address', 'is_active'];
-
-    public $translatable = ['name','address'];
+    protected $fillable = ['name', 'city_id', 'program_id', 'address_en', 'address_ar', 'is_active'];
 
     public function city(): BelongsTo
     {

@@ -17,7 +17,7 @@ class Experience extends Model
         'start_date',
         'end_date',
         'place',
-        'type' //full time, part time etc ...
+        'type'
     ];
 
     public function employee()

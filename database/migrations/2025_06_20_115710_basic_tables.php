@@ -6,15 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        //basics
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
-            $table->json('name');
+            $table->string('name_en');
+            $table->string('name_ar');
             $table->char('slug')->unique();
             $table->char('code')->unique();
             $table->boolean('is_active')->default(true);
@@ -23,7 +20,8 @@ return new class extends Migration
         Schema::create('programs', function (Blueprint $table) {
             $table->id();
             $table->text('name');
-            $table->json('description')->nullable();
+            $table->text('description_en')->nullable();
+            $table->text('description_ar')->nullable();
             $table->char('code');
             $table->char('slug')->unique();
             $table->date('start_date')->nullable();
@@ -35,23 +33,26 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('city_id')->nullable()->constrained()->onDelete('restrict');
-            $table->json('address')->nullable();
+            $table->text('address_en')->nullable();
+            $table->text('address_ar')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
         Schema::create('contract_types', function (Blueprint $table) {
             $table->id();
-            $table->json('name');
-            $table->unsignedTinyInteger('place')->default(1)->comment('0 = Unknown, 1 = Onsite, 2 = Online');
-            $table->unsignedTinyInteger('type')->default(1)->comment('0 = Unknown, 1 = Full Time, 2 = Part Time, 3 = Freelance');
+            $table->string('name_en');
+            $table->string('name_ar');
+            $table->unsignedTinyInteger('place')->default(1);
+            $table->unsignedTinyInteger('type')->default(1);
             $table->timestamps();
         });
         Schema::create('leave_types', function (Blueprint $table) {
             $table->id();
-            $table->json('name');
+            $table->string('name_en');
+            $table->string('name_ar');
             $table->integer('base_days')->default(0);
-            $table->unsignedTinyInteger('allowed_gender')->nullable()->comment('0 = Unknown, 1 = Male, 2 = Female');
-            $table->unsignedTinyInteger('marital_status')->nullable()->comment('0 = Unknown, 1 = Single, 2 = Married');
+            $table->unsignedTinyInteger('allowed_gender')->nullable();
+            $table->unsignedTinyInteger('marital_status')->nullable();
             $table->timestamps();
         });
         Schema::create('checklist_items', function (Blueprint $table) {
@@ -63,13 +64,15 @@ return new class extends Migration
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->json('description')->nullable();
+            $table->text('description_en')->nullable();
+            $table->text('description_ar')->nullable();
             $table->string('email')->unique()->nullable();
             $table->timestamps();
         });
         Schema::create('job_levels', function (Blueprint $table) {
             $table->id();
-            $table->json('name');
+            $table->string('name_en');
+            $table->string('name_ar');
             $table->text('description')->nullable();
             $table->integer('grade')->nullable();
             $table->string('email')->nullable();
@@ -82,7 +85,8 @@ return new class extends Migration
             $table->foreignId('city_id')->constrained()->onDelete('restrict');
             $table->foreignId('job_level_id')->constrained()->onDelete('restrict');
             $table->foreignId('department_id')->constrained()->onDelete('restrict');
-            $table->json('title');
+            $table->string('title_en');
+            $table->string('title_ar');
             $table->text('qualifications');
             $table->text('responsibilities');
             $table->integer('max_emp')->default(1);
@@ -98,11 +102,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        //employee
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('set null');
-            $table->json('name');
+            $table->string('name_en');
+            $table->string('name_ar');
             $table->string('username')->unique();
             $table->string('actual_job')->nullable();
             $table->double('years_of_service')->nullable();
@@ -114,16 +118,19 @@ return new class extends Migration
             $table->string('civil_registry_office')->nullable();
             $table->string('civil_registry_number')->nullable();
             $table->string('place_of_registration')->nullable();
-            $table->unsignedTinyInteger('gender')->nullable()->comment('0 = Unknown, 1 = Male, 2 = Female');
-            $table->json('father_name')->nullable();
-            $table->json('mother_name')->nullable();
-            $table->tinyInteger('nationality')->nullable()->comment('0 = Unknown, 1 = Syrian');
-            $table->unsignedTinyInteger('marital_status')->nullable()->comment('0 = Unknown, 1 = Single, 2 = Married');
+            $table->unsignedTinyInteger('gender')->nullable();
+            $table->string('father_name_en')->nullable();
+            $table->string('father_name_ar')->nullable();
+            $table->string('mother_name_en')->nullable();
+            $table->string('mother_name_ar')->nullable();
+            $table->tinyInteger('nationality')->nullable();
+            $table->unsignedTinyInteger('marital_status')->nullable();
             $table->integer('children')->default(0)->nullable();
             $table->string('work_phone')->nullable();
             $table->string('personal_phone')->nullable();
             $table->string('personal_email')->nullable();
-            $table->json('address')->nullable();
+            $table->text('address_en')->nullable();
+            $table->text('address_ar')->nullable();
             $table->string('skills')->nullable();
             $table->string('interests')->nullable();
             $table->boolean('is_active')->default(true);
@@ -146,7 +153,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->string('university');
-            $table->unsignedTinyInteger('type')->nullable()->comment('0 = Unknown, 1 = Primary_School, 2 = High_School, 3 = Institute, 4 = University, 5 = Master, 6 = PHD');
+            $table->unsignedTinyInteger('type')->nullable();
             $table->year('graduation_year')->nullable();
             $table->timestamps();
         });
@@ -192,7 +199,6 @@ return new class extends Migration
         });
 
 
-        //contracts
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
@@ -204,8 +210,8 @@ return new class extends Migration
             $table->text('reason_of_termination')->nullable();
             $table->integer('yearly_leave_days')->default(12);
             $table->decimal('salary', 10, 2);
-            $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR');
-            $table->unsignedTinyInteger('salary_per')->comment('0=Unknown, 1=Month, 2=Hour, 3=Session')->default(0);
+            $table->unsignedTinyInteger('currency');
+            $table->unsignedTinyInteger('salary_per')->default(0);
             $table->json('work_days');
             $table->json('work_hours');
             $table->integer('weekly_hours');
@@ -224,7 +230,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->foreignId('evaluation_id')->nullable()->constrained()->onDelete('restrict');
-            $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR')->nullable();
+            $table->unsignedTinyInteger('currency')->nullable();
             $table->string('type');
             $table->date('date');
             $table->text('reason')->nullable();
@@ -256,9 +262,6 @@ return new class extends Migration
 
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('cities');
@@ -271,9 +274,6 @@ return new class extends Migration
         Schema::dropIfExists('job_levels');
         Schema::dropIfExists('positions');
         Schema::dropIfExists('annual_leave_rules');
-
-
-
         Schema::dropIfExists('employees');
         Schema::dropIfExists('courses');
         Schema::dropIfExists('educations');
@@ -281,13 +281,10 @@ return new class extends Migration
         Schema::dropIfExists('relatives');
         Schema::dropIfExists('checklist');
         Schema::dropIfExists('default_deliverables');
-
-
         Schema::dropIfExists('contracts');
         Schema::dropIfExists('evaluations');
         Schema::dropIfExists('badges');
         Schema::dropIfExists('leave_balances');
         Schema::dropIfExists('leave_requests');
-
     }
 };

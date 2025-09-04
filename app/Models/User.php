@@ -2,45 +2,22 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
-use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasTranslations;
+    use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = ['email', 'password', 'employee_id'];
 
-    // public function getTranslatedNameAttribute()
-    // {
-    //     return $this->name[app()->getLocale()] ?? ($this->name['en'] ?? null);
-    // }
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = ['password', 'remember_token'];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -49,9 +26,11 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the user's initials
-     */
+    public function getNameAttribute(): ?string
+    {
+        return $this->profile?->name_en;
+    }
+
     public function initials(): string
     {
         return Str::of($this->name)->explode(' ')->take(2)->map(fn($word) => Str::substr($word, 0, 1))->implode('');
@@ -74,15 +53,6 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Permission::class);
     }
-
-    // public function hasPermission($permission)
-    // {
-    //     return $this->roles()
-    //         ->whereHas('permissions', function ($query) use ($permission) {
-    //             $query->where('name', $permission);
-    //         })
-    //         ->exists();
-    // }
 
     public function hasRole(string $roleName): bool
     {
