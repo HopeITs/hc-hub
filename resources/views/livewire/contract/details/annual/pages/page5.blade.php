@@ -1,59 +1,66 @@
 @php
-    $loc   = $locale ?? app()->getLocale();
-    $emp   = $contract->employee;
+    use App\Support\ArabicText as AR;
 
-    // Keep name resolution identical to Page 1 (both languages)
+    $forPdf = $forPdf ?? false;
+    $G = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+
+    $loc = $locale ?? app()->getLocale();
+    $emp = $contract->employee;
+
     $nameEn = $emp?->getTranslation('name', 'en')
-            ?? $emp?->getTranslation('name', $loc)
-            ?? $emp?->name
-            ?? '—';
+        ?? $emp?->getTranslation('name', $loc)
+        ?? $emp?->name ?? '—';
 
-    $nameAr = $emp?->getTranslation('name', 'ar')
-            ?? $emp?->getTranslation('name', $loc)
-            ?? $emp?->name
-            ?? '—';
+    $nameAr = $G(
+        $emp?->getTranslation('name', 'ar')
+        ?? $emp?->getTranslation('name', $loc)
+        ?? $emp?->name ?? '—'
+    );
 
-    $esc = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
+    $esc   = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
+    $escAr = fn ($v) => e((string)($v === '' || $v === null ? '—' : $G($v)));
 
     $L = fn (string $t) => '<span class="h-label">'.$t.'</span>';
+    $p = fn (string $t) => '<div>'.$t.'</div>';
 @endphp
 
-{{-- Important note --}}
-<x-contract.dual rowClass="mt-2"
-                 :en="$L('Important note:').'<br>Hope Center Aleppo / Head office is not obligated to any compensation upon the expiry or termination of the contract.'"
-                 :ar="$L('ملاحظة هامة:').'<br>لا يلتزم الفريق الأول بأي تعويضات عند انتهاء عقد المتطوع أو إنهائه.'"
-/>
+<div class="avoid-break">
+    <x-contract.dual rowClass="mt-2"
+                     :en="$L('Important note:').$p('Hope Center Aleppo / Head office is not obligated to any compensation upon the expiry or termination of the contract.')"
+                     :ar="$L($G('ملاحظة هامة:')).$p($G('لا يلتزم الفريق الأول بأي تعويضات عند انتهاء عقد المتطوع أو إنهائه.'))"
+    />
+</div>
 
-{{-- Acknowledgement --}}
-<x-contract.dual rowClass="mt-6"
-                 :en="'I hereby certify having read and understood the conditions stipulated above and all the attached documents and confirm that I accept them all.'"
-                 :ar="'أقرّ بأني قرأت وفهمت شروط العمل المنصوص عليها وكافة المستندات المرفقة وأوافق عليها كلّها.'"
-/>
+<div class="avoid-break">
+    <x-contract.dual rowClass="mt-6"
+                     :en="$p('I hereby certify having read and understood the conditions stipulated above and all attached documents and confirm that I accept them all.')"
+                     :ar="$p($G('أقرّ بأنني قرأت وفهمت شروط العمل المنصوص عليها وكافة المستندات المرفقة وأوافق عليها كلها.'))"
+    />
+</div>
 
-{{-- Issuance of contract --}}
-<x-contract.dual rowClass="mt-6"
-                 :en="'This contract was issued on 4 pages, printed on a single copy and kept at the Head Office in Aleppo.<br>The contract is produced in Arabic and translated into English.'"
-                 :ar="'صدر هذا العقد على 4 صفحات، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.<br>صدر هذا العقد باللغة العربية وترجم إلى اللغة الإنجليزية.'"
-/>
+<div class="avoid-break">
+    <x-contract.dual rowClass="mt-6"
+                     :en="$p('This contract was issued on 4 pages, printed on a single copy and kept at the Head Office in Aleppo. The contract is produced in Arabic and translated into English.')"
+                     :ar="$p($G('صدر هذا العقد على 4 صفحات، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب. صدر هذا العقد باللغة العربية وترجم إلى اللغة الإنجليزية.'))"
+    />
+</div>
 
-{{-- First party (left EN, right AR), same pattern as Page 1 labels --}}
-<x-contract.dual rowClass="mt-10"
-                 :en="$L('first party').'<br>name and signature<br>Fredy Youssef'"
-                 :ar="$L('الفريق الأول').'<br>الاسم والتوقيع<br>فريدي يوسف'"
-                 enClass="text-left"
-                 arClass="text-right"
-/>
+<div class="avoid-break">
+    <x-contract.dual rowClass="mt-10"
+                     :en="$L('first party').$p('name and signature').$p('Fredy Youssef')"
+                     :ar="$L($G('الفريق الأول')).$p($G('الاسم والتوقيع')).$p($G('فريدي يوسف'))"
+                     enClass="text-left" arClass="text-right"
+    />
+</div>
 
-{{-- Second party (left EN, right AR), using resolved employee names exactly like Page 1 --}}
-<x-contract.dual rowClass="mt-10"
-                 :en="$L('second party').'<br>name and signature<br>'.$esc($nameEn)"
-                 :ar="$L('الفريق الثاني').'<br>الاسم والتوقيع<br>'.$esc($nameAr)"
-                 enClass="text-left"
-                 arClass="text-right"
-/>
+<div class="avoid-break">
+    <x-contract.dual rowClass="mt-10"
+                     :en="$L('second party').$p('name and signature').$p($esc($nameEn))"
+                     :ar="$L($G('الفريق الثاني')).$p($G('الاسم والتوقيع')).$p($esc($nameAr))"
+                     enClass="text-left" arClass="text-right"
+    />
+</div>
 
-{{-- Date --}}
-<x-contract.dual rowClass="mt-8"
-                 :en="'date'"
-                 :ar="'التاريخ'"
-/>
+<div class="avoid-break">
+    <x-contract.dual rowClass="mt-8" :en="'date'" :ar="$G('التاريخ')"/>
+</div>

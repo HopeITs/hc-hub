@@ -4,19 +4,16 @@
   'enClass' => '',
   'arClass' => '',
   'rowClass' => '',
-  'tight' => true,
+  'tight' => false,
 ])
 
 @php
-    $row = trim(($rowClass ?: '') . ' ' . ($tight ? 'tight' : ''));
+    $rowClasses = trim('dual-row '.($rowClass ?: '').($tight ? ' dual-tight' : ''));
+    $enClasses  = trim('dual-en leading-7 text-[15px] '.($enClass ?: ''));
+    $arClasses  = trim('dual-ar leading-7 text-[15px] '.($arClass ?: ''));
 @endphp
 
-<div {{ $attributes->merge(['class' => "dual-row {$row}"]) }}>
-    <div class="dual-col dual-en leading-7 text-[15px] {{ $enClass }}" dir="ltr">
-        {!! $en !!}
-    </div>
-
-    <div class="dual-col dual-ar leading-7 text-[15px] {{ $arClass }}" dir="rtl">
-        {!! $ar !!}
-    </div>
+<div {{ $attributes->merge(['class' => $rowClasses]) }}>
+    <div class="{{ $enClasses }}" dir="ltr">{!! $en !!}</div>
+    <div class="{{ $arClasses }}" dir="rtl">{!! $ar !!}</div>
 </div>

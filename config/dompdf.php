@@ -1,20 +1,24 @@
 <?php
 
 return [
-    'isRemoteEnabled'      => true,
-    'isHtml5ParserEnabled' => true,
-    'chroot'               => base_path(),
+    'isHtml5ParserEnabled'   => true,
+    'isRemoteEnabled'        => true,
+    'enable_font_subsetting' => true,
 
-    'font_dir'   => storage_path('fonts/'),
-    'font_cache' => storage_path('fonts/'),
+    'chroot'      => public_path(),
+    'font_dir'    => public_path('fonts'),
+    'font_cache'  => storage_path('fonts'),
 
     'default_font' => 'somar',
 
     'fonts' => [
         'somar' => [
-            'R' => 'SomarSans-Regular.otf',
-            'B' => 'SOMARSANS-BOLD.OTF',
+            'R' => 'SomarSans/SomarSans-Regular.ttf',
+            'B' => 'SomarSans/SomarSans-Bold.ttf',
+        ],
+        'NotoNaskhArabic' => [
+            'R' => 'NotoNaskh/NotoNaskhArabic-Regular.ttf',
+            'B' => 'NotoNaskh/NotoNaskhArabic-Bold.ttf',
         ],
     ],
 ];
-
