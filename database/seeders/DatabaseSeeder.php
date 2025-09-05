@@ -9,34 +9,8 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-
-
-        $this->call([
-            ProjectSeeder::class,
-            CitySeeder::class,
-            ContractTypeSeeder::class,
-            DepartmentSeeder::class,
-            CenterSeeder::class,
-            CheckListItemSeeder::class,
-            LeaveTypeSeeder::class,
-            AnnualLeaveRuleSeeder::class,
-            RolesPermissionsSeeder::class,
-            UserRoleSeeder::class,
-            JobLevelSeeder::class,
-//            EmployeeSeeder::class,
-            RequiredPositionsSeeder::class
-        ]);
-
-    //    $user = User::factory()->create([
-    //         // 'name' => ['en' => 'Test User'],
-    //         'email' => 'test@example.com',
-    //     ]);
+        $this->call([CitySeeder::class, ContractTypeSeeder::class, DepartmentSeeder::class, CheckListItemSeeder::class, LeaveTypeSeeder::class, AnnualLeaveRuleSeeder::class, RolesPermissionsSeeder::class, JobLevelSeeder::class, EmployeeSeeder::class, UserRoleSeeder::class, ProjectSeeder::class, CenterSeeder::class, RequiredPositionsSeeder::class]);
     }
 }

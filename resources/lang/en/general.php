@@ -205,6 +205,8 @@ return [
     'archived-files' => 'Archived Files',
     'my-folders' => 'My Folders',
     'shared-folders' => 'Shared Folders',
+    'project-manager' => 'Project Manager',
+    'program-manager' => 'Program Manager',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Translatable\HasTranslations;
 
 class Project extends Model implements HasMedia
@@ -46,5 +47,10 @@ class Project extends Model implements HasMedia
     public function contracts()
     {
         return $this->hasMany(Contract::class);
+    }
+
+    public function programManager(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'program_manager_id');
     }
 }

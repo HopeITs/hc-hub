@@ -4,6 +4,7 @@ namespace App\Livewire\ProjectManagement;
 
 use App\Models\Center;
 use App\Models\City;
+use App\Models\Employee;
 use App\Models\Project;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -26,15 +27,20 @@ class CentersModule extends Component
         'project_id' => '',
         'address'    => ['en' => '', 'ar' => ''],
         'is_active'  => true,
+        'project_manager_id' => null,
     ];
 
-    protected $rules = [
-        'item.name'       => 'required|string|max:255',
-        'item.city_id'    => 'required|exists:cities,id',
-        'item.project_id' => 'required|exists:projects,id',
-        'item.address.en' => 'nullable|string|max:255',
-        'item.address.ar' => 'nullable|string|max:255',
-    ];
+    protected function rules()
+    {
+        return [
+            'item.name'       => 'required|string|max:255',
+            'item.city_id'    => 'required|exists:cities,id',
+            'item.project_id' => 'required|exists:projects,id',
+            'item.address.en' => 'nullable|string|max:255',
+            'item.address.ar' => 'nullable|string|max:255',
+            'item.project_manager_id' => 'nullable|exists:employees,id',
+        ];
+    }
 
     public function updatingSearch()
     {
@@ -72,7 +78,7 @@ class CentersModule extends Component
         $dir = $this->sortDirection ?: 'desc';
 
         $query = Center::query()
-            ->with(['city', 'project'])
+            ->with(['city', 'project', 'projectManager'])
             ->when($this->search, function ($q) use ($locale) {
                 $term = $this->search;
                 $q->where(function ($w) use ($term, $locale) {
@@ -105,8 +111,9 @@ class CentersModule extends Component
 
         $cities = City::orderBy("name->$locale")->get(['id', 'name']);
         $projects = Project::orderBy('name')->get(['id', 'name']);
+        $employees = Employee::orderBy("name->$locale")->get(['id', 'name']);
 
-        return view('livewire.project-management.centers-module', compact('items', 'cities', 'projects'));
+        return view('livewire.project-management.centers-module', compact('items', 'cities', 'projects', 'employees'));
     }
 
     public function create()
@@ -118,6 +125,7 @@ class CentersModule extends Component
             'project_id' => '',
             'address'    => ['en' => '', 'ar' => ''],
             'is_active'  => true,
+            'project_manager_id' => null,
         ];
 
         $this->resetValidation();
@@ -137,6 +145,7 @@ class CentersModule extends Component
             'project_id' => $model->project_id,
             'address'    => array_merge(['en' => '', 'ar' => ''], $model->getTranslations('address')),
             'is_active'  => (bool) $model->is_active,
+            'project_manager_id' => $model->project_manager_id,
         ];
 
         $this->resetValidation();
@@ -151,6 +160,7 @@ class CentersModule extends Component
             'name' => $this->item['name'],
             'city_id' => $this->item['city_id'],
             'project_id' => $this->item['project_id'],
+            'project_manager_id' => $this->item['project_manager_id'],
         ];
 
         $model = Center::findOrNew($this->item['id']);

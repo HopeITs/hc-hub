@@ -18,6 +18,7 @@ class CenterSeeder extends Seeder
                 'project_id' => $center['project_id'],
                 'is_active' => $center['is_active'],
                 'address' => is_string($center['address']) ? ['en' => $center['address'], 'ar' => $center['address']] : $center['address'],
+                'project_manager_id' => $center['project_manager_id'] ?? null,
             ];
 
             Center::create($data);

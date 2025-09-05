@@ -20,6 +20,7 @@ class ProjectForm extends Form
     public $slug;
     public $logo = null;
     public $is_active = true;
+    public $program_manager_id;
 
     protected function rules()
     {
@@ -35,7 +36,7 @@ class ProjectForm extends Form
             ],
             'code' => 'required',
             'logo' => 'nullable|image',
-
+            'program_manager_id' => ['nullable', 'exists:employees,id'],
         ];
     }
 
@@ -50,7 +51,7 @@ class ProjectForm extends Form
         $this->code = $project->code;
         $this->logo = $project->getFirstMediaUrl('logo');
         $this->is_active = $project->is_active;
-
+        $this->program_manager_id = $project->program_manager_id;
     }
 
     public function store()
@@ -59,15 +60,13 @@ class ProjectForm extends Form
 
         $project = Project::create($this->except('logo'));
 
-        if ($this->logo != null) {
+        if ($this->logo != null && !is_string($this->logo)) {
             $project->addMedia($this->logo->getRealPath())
                 ->usingFileName('project-logo.' . $this->logo->getClientOriginalExtension())
                 ->toMediaCollection('logo');
         }
 
         $this->reset();
-
-
     }
 
     public function update()
@@ -77,7 +76,7 @@ class ProjectForm extends Form
         $this->project->update(
             $this->all()
         );
-        if ($this->logo) {
+        if ($this->logo && !is_string($this->logo)) {
             $this->project->clearMediaCollection('logo');
             $this->project->addMedia($this->logo->getRealPath())
                 ->usingFileName('project-logo.' . $this->logo->getClientOriginalExtension())
@@ -93,5 +92,4 @@ class ProjectForm extends Form
            ]
         );
     }
-
 }

@@ -12,9 +12,9 @@ class Detail extends Component
     public $slug;
     public ProjectForm $form;
 
-
     public function mount(Project $project)
     {
+        $project->load('programManager', 'centers.city', 'centers.projectManager');
         $this->form->setProject($project);
     }
 
@@ -26,7 +26,6 @@ class Detail extends Component
             ->involvedInProject($project->id)
             ->distinct()
             ->with([
-                // eager-load only the contracts tied to THIS project (and their position/center)
                 'contracts' => function ($q) use ($project) {
                     $q->whereHas('position.center', fn($qq) => $qq->where('project_id', $project->id))
                         ->with('position.center');

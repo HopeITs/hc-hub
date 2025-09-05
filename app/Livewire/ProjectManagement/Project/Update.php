@@ -3,6 +3,7 @@
 namespace App\Livewire\ProjectManagement\Project;
 
 use App\Livewire\Forms\ProjectManagement\ProjectForm;
+use App\Models\Employee;
 use App\Models\Project;
 use App\Traits\WithAlerts;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,6 @@ class Update extends Component
     public ProjectForm $form;
     public $existingLogoUrl = '';
 
-
     public function mount(Project $project)
     {
         $this->form->setProject($project);
@@ -25,7 +25,6 @@ class Update extends Component
 
     public function save()
     {
-        $this->validate();
         $this->form->update();
         $this->successToast(__('general.success-message'));
         return redirect()->route('projects.index');
@@ -33,9 +32,12 @@ class Update extends Component
 
     public function render()
     {
+        $locale = app()->getLocale();
+        $employees = Employee::orderBy("name->$locale")->get(['id', 'name']);
 
         return view('livewire.project-management.project.form', [
             'title' => $this->form->project->name,
+            'employees' => $employees
         ]);
     }
 }

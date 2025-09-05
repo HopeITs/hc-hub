@@ -58,13 +58,19 @@
         <div x-show="activeTab === 'details'" x-cloak>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm">
                 <div class="flex items-start gap-3">
+                    <x-icon name="user-circle" class="w-5 h-5 text-gray-400 mt-0.5" />
+                    <div>
+                        <span class="font-semibold text-gray-800">@lang('general.program-manager'):</span>
+                        <p class="text-gray-600">{{ $project->programManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
                     <x-icon name="arrows-pointing-in" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                         <span class="font-semibold text-gray-800">@lang('general.slug'):</span>
                         <p class="text-gray-600">{{ $project->slug }}</p>
                     </div>
                 </div>
-                <div class="flex items-start gap-3"></div>
                 <div class="flex items-start gap-3">
                     <x-icon name="calendar" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
@@ -90,6 +96,7 @@
                             <tr>
                                 <th class="px-6 py-3 font-medium">@lang('general.name')</th>
                                 <th class="px-6 py-3 font-medium">@lang('general.city')</th>
+                                <th class="px-6 py-3 font-medium">@lang('general.project-manager')</th>
                                 <th class="px-6 py-3 font-medium">@lang('general.created_at')</th>
                                 <th class="px-6 py-3 font-medium text-center"></th>
                             </tr>
@@ -98,11 +105,13 @@
                             @foreach ($project->centers as $center)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 font-medium text-gray-900">
-                                        {{-- CORRECTED: Access Center name directly --}}
                                         {{ $center->name }}
                                     </td>
                                     <td class="px-6 py-4">
                                         {{ $center->city?->getTranslation('name', app()->getLocale()) ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ $center->projectManager?->getTranslation('name', app()->getLocale()) ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4">
                                         {{ $center->created_at->format('d M, Y') }}

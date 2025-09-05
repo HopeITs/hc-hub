@@ -3,6 +3,7 @@
 namespace App\Livewire\ProjectManagement\Project;
 
 use App\Livewire\Forms\ProjectManagement\ProjectForm;
+use App\Models\Employee;
 use App\Models\Project;
 use App\Traits\WithAlerts;
 use Illuminate\Support\Facades\DB;
@@ -26,8 +27,12 @@ class Create extends Component
 
     public function render()
     {
+        $locale = app()->getLocale();
+        $employees = Employee::orderBy("name->$locale")->get(['id', 'name']);
+
         return view('livewire.project-management.project.form', [
-            'title' => __('general.add_new')
+            'title' => __('general.add_new'),
+            'employees' => $employees,
         ]);
     }
 }

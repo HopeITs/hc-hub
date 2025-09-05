@@ -207,6 +207,8 @@ return [
     'archived-files' => 'الملفات المؤرشفة',
     'my-folders' => 'مجلداتي',
     'shared-folders' => 'المجلدات المشتركة',
+    'project-manager' => 'مدير المشروع',
+    'program-manager' => 'مدير البرنامج',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك',
