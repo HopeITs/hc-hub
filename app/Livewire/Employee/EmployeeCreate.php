@@ -158,7 +158,7 @@ class EmployeeCreate extends Component
         $checklistItems = ChecklistItem::where('order', 1)->orderBy('name')->get();
 
         return view('livewire.employee.form', [
-            'allEmployees' => Employee::select('id', 'name')->get(),
+            'allEmployees' => Employee::select('id', 'name_en', 'name_ar')->get(),
 
         ]);
     }

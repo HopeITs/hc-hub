@@ -64,20 +64,20 @@ class DefaultDeliverablesModule extends Component
             ->with(['employee','city','item'])
             ->when($term, function ($q) use ($like, $locale) {
                 $q->where(function ($w) use ($like, $locale) {
-                    $w->whereHas('employee', fn($e) => $e->where('name', 'like', $like))
+                    $w->whereHas('employee', fn($e) => $e->where('name_en', 'like', $like)->orWhere('name_ar', 'like', $like))
                         ->orWhereHas('item',     fn($i) => $i->where('name', 'like', $like))
-                        ->orWhereHas('city',     fn($c) => $c->where("name->$locale", 'like', $like));
+                        ->orWhereHas('city',     fn($c) => $c->where('name_' . $locale, 'like', $like));
                 });
             });
 
-        // Sorting (same approach as CentersModule)
+        // Sorting
         if ($sort === 'employee_name') {
             $query->leftJoin('employees as e', 'e.id', '=', 'default_deliverables.employee_id')
-                ->orderBy('e.name', $dir)
+                ->orderBy('e.name_' . $locale, $dir)
                 ->select('default_deliverables.*');
         } elseif ($sort === 'city_name') {
             $query->leftJoin('cities as c', 'c.id', '=', 'default_deliverables.city_id')
-                ->orderBy("c.name->$locale", $dir)
+                ->orderBy('c.name_' . $locale, $dir)
                 ->select('default_deliverables.*');
         } elseif ($sort === 'item_name') {
             $query->leftJoin('checklist_items as i', 'i.id', '=', 'default_deliverables.item_id')
@@ -89,12 +89,8 @@ class DefaultDeliverablesModule extends Component
 
         $items = $query->paginate(15);
 
-        $locale = app()->getLocale();
-
-        $employees = Employee::get()->mapWithKeys(function ($employee) use ($locale) {
-            return [$employee->id => $employee->getTranslation('name', $locale)];
-        });
-        $cities         = City::whereHas('centers')->orderBy("name->$locale")->get(['id','name']);
+        $employees = Employee::select('id', "name_$locale as name")->get()->pluck('name', 'id');
+        $cities = City::whereHas('centers')->orderBy("name_$locale")->select('id', "name_$locale as name")->get();
         $checklistItems = ChecklistItem::orderBy('order')->get(['id','name']);
 
         return view('livewire.program-management.default-deliverables-module', compact('items','employees','cities','checklistItems'));

@@ -36,16 +36,9 @@ class EmployeeEdit extends Component
 
     public function mount(Employee $employee)
     {
-        // Seed base info first
         $this->infoForm->setEmployee($employee);
-
-        // Seed each sub-form with the same employee (so they can load existing rows)
         $this->educationForm->setEmployee($employee);
         $this->courseForm->setEmployee($employee ?? null);
-//        $this->experienceForm->setEmployee($employee ?? null);
-//        $this->relativeForm->setEmployee($employee ?? null);
-//        $this->badgeForm->setEmployee($employee ?? null);
-//        $this->checklistItemForm->setEmployee($employee ?? null);
 
         if (empty($this->educationForm->educations)) {
             $this->educationForm->addEducation();
@@ -83,7 +76,6 @@ class EmployeeEdit extends Component
     public function removeEducation(int $index , int $id =null): void
     {
         $this->educationForm->removeEducation($index , $id);
-        // Optional: clear stale validation errors for removed index
         $this->resetErrorBag();
     }
 
@@ -91,7 +83,7 @@ class EmployeeEdit extends Component
     {
         $this->educationForm->save();
         $this->setActiveTab('education');
-        $this->successToast(); // from WithAlerts
+        $this->successToast();
     }
     public function addCourse(): void
     {
@@ -101,7 +93,6 @@ class EmployeeEdit extends Component
     public function removeCourse(int $index): void
     {
         $this->courseForm->removeCourse($index);
-        // Optional: clear stale validation errors for removed index
         $this->resetErrorBag();
     }
 
@@ -142,7 +133,7 @@ class EmployeeEdit extends Component
         $checklistItems = ChecklistItem::where('order', 1)->orderBy('name')->get();
 
         return view('livewire.employee.form', [
-            'allEmployees' => Employee::select('id', 'name')
+            'allEmployees' => Employee::select('id', 'name_en', 'name_ar')
                 ->where('id', '!=', $this->infoForm->employee->id)
                 ->get(),
             'checklistItems' => $checklistItems,

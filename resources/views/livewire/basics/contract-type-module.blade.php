@@ -65,8 +65,8 @@
                 <x-table.row>
                     <x-table.cell>{{$item->id}}</x-table.cell>
 
-                    <x-table.cell>{{$item->getTranslation('name' , 'ar')}}</x-table.cell>
-                    <x-table.cell>{{$item->getTranslation('name' , 'en')}}</x-table.cell>
+                    <x-table.cell>{{$item->name_ar}}</x-table.cell>
+                    <x-table.cell>{{$item->name_en}}</x-table.cell>
                     <x-table.cell>
                         <x-badge :color="$place['color']"> {{ $place['value'] }}</x-badge>
                     </x-table.cell>
@@ -94,17 +94,18 @@
 
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-2 space-x-2 space-y-4">
-                @foreach(config('app.supported_locales') as $locale)
-                    <div class="col-span-1">
-                        <x-forms.input-label for="name_{{ $locale }}">@lang('general.name')({{ strtoupper($locale) }})
-                        </x-forms.input-label>
-                        <x-forms.input type="text" id="name_{{ $locale }}"
-                                       wire:model="item.name.{{ $locale }}"/>
-                        <x-error-span>{{$errors->first('item.name.'.$locale)}}</x-error-span>
-                    </div>
-                @endforeach
+                <div class="col-span-1">
+                    <x-forms.input-label for="name_ar">@lang('general.name')(AR)</x-forms.input-label>
+                    <x-forms.input type="text" id="name_ar" wire:model="item.name_ar"/>
+                    <x-error-span>{{$errors->first('item.name_ar')}}</x-error-span>
+                </div>
+                <div class="col-span-1">
+                    <x-forms.input-label for="name_en">@lang('general.name')(EN)</x-forms.input-label>
+                    <x-forms.input type="text" id="name_en" wire:model="item.name_en"/>
+                    <x-error-span>{{$errors->first('item.name_en')}}</x-error-span>
+                </div>
                 <div>
-                    <x-forms.input-label for="type_{{ $locale }}">@lang('general.type')</x-forms.input-label>
+                    <x-forms.input-label for="type">@lang('general.type')</x-forms.input-label>
                     <div class="flex space-x-2">
                         <x-forms.radio-input id="full" name="type" value="{{ContractType::FullTime}}"
                                              wire:model="item.type">{{ContractType::getLocalizedName(ContractType::FullTime)['value']}}</x-forms.radio-input>
@@ -117,7 +118,7 @@
                     <x-error-span>{{$errors->first('item.type')}}</x-error-span>
                 </div>
                 <div>
-                    <x-forms.input-label for="place_{{ $locale }}">@lang('general.place')</x-forms.input-label>
+                    <x-forms.input-label for="place">@lang('general.place')</x-forms.input-label>
                     <div class="flex space-x-2">
                         <x-forms.radio-input id="onsite" name="place" value="{{ContractPlace::Onsite}}"
                                              wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Onsite)['value']}}</x-forms.radio-input>

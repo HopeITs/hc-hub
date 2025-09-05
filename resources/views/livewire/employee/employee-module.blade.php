@@ -29,14 +29,14 @@
             @forelse($items as $item)
                 <tr>
                     <x-table.cell>{{ $item->id }}</x-table.cell>
-                    <x-table.cell>{{ $item->getTranslation('name', app()->getLocale()) }}</x-table.cell>
+                    <x-table.cell>{{ $item->{'name_' . app()->getLocale()} }}</x-table.cell>
                     <x-table.cell>
                         <img src="{{ $item->getFirstMediaUrl('avatar') }}"
-                            alt="{{ $item->name }}" class="h-12 w-12 rounded-full object-cover">
+                            alt="{{ $item->{'name_' . app()->getLocale()} }}" class="h-12 w-12 rounded-full object-cover">
                     </x-table.cell>
                     <x-table.cell>{{ $item->years_of_service }}</x-table.cell>
-                    <x-table.cell>{{ $item->directManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</x-table.cell>
-                    <x-table.cell>{{ $item->techManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</x-table.cell>
+                    <x-table.cell>{{ $item->directManager?->{'name_' . app()->getLocale()} ?? '-' }}</x-table.cell>
+                    <x-table.cell>{{ $item->techManager?->{'name_' . app()->getLocale()} ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->actual_job }}</x-table.cell>
                     <x-table.cell>{{ $item->account?->email }}</x-table.cell>
                     <x-table.cell>

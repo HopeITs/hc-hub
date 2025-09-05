@@ -21,7 +21,7 @@ class ContractsModule extends Component
 
     protected $listeners = ['delete', 'toggleItemStatusConfirmed'];
 
-    public string|int $centerId = 'all';   // active tab
+    public string|int $centerId = 'all';
     public string $search = '';
     public bool $showModal = false;
     public string $modalTitle = '';
@@ -29,27 +29,27 @@ class ContractsModule extends Component
 
     protected $queryString = [
         'centerId' => ['except' => 'all'],
-        'search'   => ['except' => ''],
+        'search' => ['except' => ''],
     ];
 
     public $item = [
         'id' => null,
         'employee_id' => '',
-        'position_id'  => '',
+        'position_id' => '',
         'contract_type_id' => '',
-        'department_id'=> '',
-        'job_level_id'  => '',
-        'start_date'  => '',
+        'department_id' => '',
+        'job_level_id' => '',
+        'start_date' => '',
         'end_date' => '',
         'terminated_at' => null,
         'reason_of_termination' => null,
-        'yearly_leave_days'=> 12,
+        'yearly_leave_days' => 12,
         'currency' => 1,
-        'salary'  => null,
+        'salary' => null,
         'salary_per' => 1,
         'weekly_hours' => null,
-        'work_days'  => ['day' => ['from' => 'mon', 'to' => 'fri']],
-        'work_hours'  => ['hour'=> ['from' => '09:00', 'to' => '17:00']],
+        'work_days' => ['day' => ['from' => 'mon', 'to' => 'fri']],
+        'work_hours' => ['hour' => ['from' => '09:00', 'to' => '17:00']],
         'is_active' => true,
     ];
 
@@ -57,41 +57,35 @@ class ContractsModule extends Component
         'item.employee_id' => 'required|exists:employees,id',
         'item.position_id' => 'required|exists:positions,id',
         'item.contract_type_id' => 'required|exists:contract_types,id',
-        'item.department_id'=> 'required|exists:departments,id',
+        'item.department_id' => 'required|exists:departments,id',
         'item.job_level_id' => 'required|exists:job_levels,id',
 
         'item.start_date' => 'required|date',
         'item.end_date' => 'required|date|after_or_equal:item.start_date',
         'item.terminated_at' => 'nullable|date|after_or_equal:item.start_date',
 
-        'item.yearly_leave_days'=> 'nullable|integer|min:0|max:365',
+        'item.yearly_leave_days' => 'nullable|integer|min:0|max:365',
         'item.currency' => 'required|integer|in:0,1,2,3',
         'item.salary' => 'required|numeric|min:0',
-        'item.salary_per'  => 'required|integer|in:0,1,2,3',
-        'item.weekly_hours'  => 'required|integer|min:0|max:168',
-        'item.is_active'  => 'boolean',
+        'item.salary_per' => 'required|integer|in:0,1,2,3',
+        'item.weekly_hours' => 'required|integer|min:0|max:168',
+        'item.is_active' => 'boolean',
 
-        'item.work_days'  => 'required|array',
-        'item.work_hours'  => 'required|array',
+        'item.work_days' => 'required|array',
+        'item.work_hours' => 'required|array',
         'item.reason_of_termination' => 'nullable|string',
     ];
 
-
     protected function userIsHr(): bool
     {
-        $hrNames = ['HR', 'HR Manager']; // adjust if your DB names differ
+        $hrNames = ['HR', 'HR Manager'];
         $user = auth()->user();
 
         if (method_exists($user, 'roles')) {
             return $user->roles()->whereIn('name', $hrNames)->exists();
         }
 
-        // Fallback if you don't have relation on the model:
-        return DB::table('hchr_role_user')
-            ->join('hchr_roles','hchr_roles.id','=','hchr_role_user.role_id')
-            ->where('hchr_role_user.user_id', $user->id)
-            ->whereIn('hchr_roles.name', $hrNames)
-            ->exists();
+        return DB::table('role_user')->join('roles', 'roles.id', '=', 'role_user.role_id')->where('role_user.user_id', $user->id)->whereIn('roles.name', $hrNames)->exists();
     }
 
     protected function userCityId(): ?int
@@ -99,12 +93,14 @@ class ContractsModule extends Component
         return optional(auth()->user()->profile)->city_id;
     }
 
-
-    public function updatingSearch() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
 
     public function setCenter(string|int $id): void
     {
-        $this->centerId = $id === 'all' ? 'all' : (int)$id;
+        $this->centerId = $id === 'all' ? 'all' : (int) $id;
         $this->resetPage();
     }
 
@@ -142,9 +138,7 @@ class ContractsModule extends Component
         DB::transaction(function () use ($contract) {
             $pos = $contract->position()->lockForUpdate()->first();
             if ($pos && $pos->exist_emp >= $pos->max_emp) {
-                LivewireAlert::title(__('general.error'))
-                    ->text(__('This position has reached its capacity.'))
-                    ->error()->toast()->position('top-start')->show();
+                LivewireAlert::title(__('general.error'))->text(__('This position has reached its capacity.'))->error()->toast()->position('top-start')->show();
                 return;
             }
             $contract->update(['is_active' => true]);
@@ -154,15 +148,15 @@ class ContractsModule extends Component
         });
     }
 
-
     public function render()
     {
         $locale = app()->getLocale();
-        $sort   = $this->sortField ?: 'id';
-        $dir    = $this->sortDirection ?: 'desc';
+        $sort = $this->sortField ?: 'id';
+        $dir = $this->sortDirection ?: 'desc';
+        $like = '%' . $this->search . '%';
 
         $query = Contract::query()
-            ->with(['employee','position.center','contractType','department','jobLevel'])
+            ->with(['employee', 'position.center', 'contractType', 'department', 'jobLevel'])
 
             ->when($this->userIsHr() && $this->userCityId(), function ($q) {
                 $q->whereHas('position.center', function ($c) {
@@ -176,39 +170,41 @@ class ContractsModule extends Component
                 });
             })
 
-            // Search
-            ->when($this->search, function ($q) use ($locale) {
-                $term = $this->search;
-                $q->where(function ($w) use ($term, $locale) {
-                    $w->orWhereHas('employee', function ($e) use ($term, $locale) {
-                        $e->search(["name->$locale"], $term)
-                            ->orWhere('personal_email', 'like', "%{$term}%");
+            ->when($this->search, function ($q) use ($like, $locale) {
+                $q->where(function ($w) use ($like, $locale) {
+                    $w->orWhereHas('employee', function ($e) use ($like) {
+                        $e->where('name_en', 'like', $like)->orWhere('name_ar', 'like', $like)->orWhere('personal_email', 'like', $like);
                     })
-                        ->orWhereHas('department', function ($d) use ($term) {
-                            $d->search(['name'], $term);
+                        ->orWhereHas('department', function ($d) use ($like) {
+                            $d->where('name', 'like', $like);
                         })
-                        ->orWhereHas('contractType', function ($t) use ($term, $locale) {
-                            $t->search(["name->$locale"], $term);
+                        ->orWhereHas('contractType', function ($t) use ($like, $locale) {
+                            $t->where('name_' . $locale, 'like', $like);
                         })
-                        ->orWhereHas('jobLevel', function ($l) use ($term, $locale) {
-                            $l->search(["name->$locale"], $term);
+                        ->orWhereHas('jobLevel', function ($l) use ($like, $locale) {
+                            $l->where('name_' . $locale, 'like', $like);
                         });
                 });
             });
 
         if ($sort === 'employee_name') {
-            $query->leftJoin('employees', 'contracts.employee_id', '=', 'employees.id')
-                ->orderBy("employees.name->$locale", $dir)->select('contracts.*');
+            $query
+                ->leftJoin('employees', 'contracts.employee_id', '=', 'employees.id')
+                ->orderBy("employees.name_$locale", $dir)
+                ->select('contracts.*');
         } elseif ($sort === 'type_name') {
-            $query->leftJoin('contract_types', 'contracts.contract_type_id', '=', 'contract_types.id')
-                ->orderBy("contract_types.name->$locale", $dir)->select('contracts.*');
+            $query
+                ->leftJoin('contract_types', 'contracts.contract_type_id', '=', 'contract_types.id')
+                ->orderBy("contract_types.name_$locale", $dir)
+                ->select('contracts.*');
         } elseif ($sort === 'dept_name') {
-            $query->leftJoin('departments', 'contracts.department_id', '=', 'departments.id')
-                ->orderBy("departments.name", $dir)->select('contracts.*');
+            $query->leftJoin('departments', 'contracts.department_id', '=', 'departments.id')->orderBy('departments.name', $dir)->select('contracts.*');
         } elseif ($sort === 'level_name') {
-            $query->leftJoin('job_levels', 'contracts.job_level_id', '=', 'job_levels.id')
-                ->orderBy("job_levels.name->$locale", $dir)->select('contracts.*');
-        } elseif (in_array($sort, ['start_date','end_date','salary','is_active','position_id','id'])) {
+            $query
+                ->leftJoin('job_levels', 'contracts.job_level_id', '=', 'job_levels.id')
+                ->orderBy("job_levels.name_$locale", $dir)
+                ->select('contracts.*');
+        } elseif (in_array($sort, ['start_date', 'end_date', 'salary', 'is_active', 'position_id', 'id'])) {
             $query->orderBy($sort, $dir);
         } elseif ($sort === 'period') {
             $query->orderBy('start_date', $dir)->orderBy('end_date', $dir);
@@ -218,57 +214,60 @@ class ContractsModule extends Component
 
         $items = $query->paginate(15);
 
-        $employeesQuery = Employee::orderBy("name->$locale")->select(['id','name','city_id']);
-        $positionsQuery = Position::with('center:id,city_id')->orderBy('id')->select(['id','center_id']);
+        $employeesQuery = Employee::orderBy("name_$locale")->select(['id', "name_$locale as name", 'city_id']);
+        $positionsQuery = Position::with('center:id,city_id')
+            ->orderBy('id')
+            ->select(['id', 'center_id', "title_$locale as title"]);
 
         if ($this->userIsHr() && $this->userCityId()) {
             $employeesQuery->where('city_id', $this->userCityId());
             $positionsQuery->whereHas('center', fn($c) => $c->where('city_id', $this->userCityId()));
         }
 
-        $employees   = $employeesQuery->get(['id','name']);
-        $positions   = $positionsQuery->get(['id','center_id']);
-        $types       = ContractType::orderBy("name->$locale")->get(['id','name']);
-        $departments = Department::orderBy('name')->get(['id','name']);
-        $levels      = JobLevel::orderBy('grade')->get(['id','name']);
+        $employees = $employeesQuery->get();
+        $positions = $positionsQuery->get();
+        $types = ContractType::orderBy("name_$locale")
+            ->select('id', "name_$locale as name")
+            ->get();
+        $departments = Department::orderBy('name')->get(['id', 'name']);
+        $levels = JobLevel::orderBy('grade')
+            ->select('id', "name_$locale as name")
+            ->get();
 
         $centers = collect();
         if ($this->userIsHr() && $this->userCityId()) {
             $centers = Center::where('city_id', $this->userCityId())
-                ->orderBy("name->$locale")
-                ->get(['id','name']);
+                ->orderBy('name')
+                ->get(['id', 'name']);
         }
 
-        return view('livewire.contract.contracts-module', compact(
-            'items','employees','positions','types','departments','levels','centers'
-        ));
+        return view('livewire.contract.contracts-module', compact('items', 'employees', 'positions', 'types', 'departments', 'levels', 'centers'));
     }
-
 
     public function create()
     {
         $this->item = [
-            'id'               => null,
-            'employee_id'      => '',
-            'position_id'      => '',
+            'id' => null,
+            'employee_id' => '',
+            'position_id' => '',
             'contract_type_id' => '',
-            'department_id'    => '',
-            'job_level_id'     => '',
-            'start_date'       => '',
-            'end_date'         => '',
-            'terminated_at'    => null,
+            'department_id' => '',
+            'job_level_id' => '',
+            'start_date' => '',
+            'end_date' => '',
+            'terminated_at' => null,
             'reason_of_termination' => null,
-            'yearly_leave_days'=> 12,
-            'currency'         => 1,
-            'salary'           => null,
-            'weekly_hours'     => null,
-            'work_days'        => ['day' => ['from' => 'mon', 'to' => 'fri']],
-            'work_hours'       => ['hour'=> ['from' => '09:00', 'to' => '17:00']],
-            'is_active'        => true,
+            'yearly_leave_days' => 12,
+            'currency' => 1,
+            'salary' => null,
+            'weekly_hours' => null,
+            'work_days' => ['day' => ['from' => 'mon', 'to' => 'fri']],
+            'work_hours' => ['hour' => ['from' => '09:00', 'to' => '17:00']],
+            'is_active' => true,
         ];
 
         $this->resetValidation();
-        $this->showModal  = true;
+        $this->showModal = true;
         $this->modalTitle = __('general.add-new');
     }
 
@@ -278,24 +277,24 @@ class ContractsModule extends Component
 
         $this->modalTitle = __('general.edit');
         $this->item = [
-            'id'   => $model->id,
+            'id' => $model->id,
             'employee_id' => $model->employee_id,
-            'position_id'    => $model->position_id,
+            'position_id' => $model->position_id,
             'contract_type_id' => $model->contract_type_id,
-            'department_id'=> $model->department_id,
+            'department_id' => $model->department_id,
             'job_level_id' => $model->job_level_id,
-            'start_date'  => optional($model->start_date)->toDateString(),
-            'end_date'=> optional($model->end_date)->toDateString(),
+            'start_date' => optional($model->start_date)->toDateString(),
+            'end_date' => optional($model->end_date)->toDateString(),
             'terminated_at' => optional($model->terminated_at)->toDateString(),
             'reason_of_termination' => $model->reason_of_termination,
-            'yearly_leave_days'=> $model->yearly_leave_days,
+            'yearly_leave_days' => $model->yearly_leave_days,
             'currency' => $model->currency,
             'salary' => $model->salary,
-            'salary_per'  => $model->salary_per,
+            'salary_per' => $model->salary_per,
             'weekly_hours' => $model->weekly_hours,
-            'work_days' => $model->work_days ?: ['day'=>['from'=>'mon','to'=>'fri']],
-            'work_hours'  => $model->work_hours ?: ['hour'=>['from'=>'09:00','to'=>'17:00']],
-            'is_active'  => (bool) $model->is_active,
+            'work_days' => $model->work_days ?: ['day' => ['from' => 'mon', 'to' => 'fri']],
+            'work_hours' => $model->work_hours ?: ['hour' => ['from' => '09:00', 'to' => '17:00']],
+            'is_active' => (bool) $model->is_active,
         ];
 
         $this->resetValidation();
@@ -309,10 +308,7 @@ class ContractsModule extends Component
         $id = $this->item['id'] ?? null;
 
         if (!empty($this->item['is_active'])) {
-            $exists = Contract::where('employee_id', $this->item['employee_id'])
-                ->where('is_active', true)
-                ->when($id, fn($q) => $q->where('id','!=',$id))
-                ->exists();
+            $exists = Contract::where('employee_id', $this->item['employee_id'])->where('is_active', true)->when($id, fn($q) => $q->where('id', '!=', $id))->exists();
             if ($exists) {
                 $this->addError('item.employee_id', __('This employee already has an active contract.'));
                 return;
@@ -320,19 +316,19 @@ class ContractsModule extends Component
         }
 
         $start = $this->item['start_date'];
-        $end   = $this->item['end_date'] ?: $start;
+        $end = $this->item['end_date'] ?: $start;
         $overlap = Contract::where('employee_id', $this->item['employee_id'])
-            ->when($id, fn($q) => $q->where('id','!=',$id))
+            ->when($id, fn($q) => $q->where('id', '!=', $id))
             ->where(function ($q) use ($start, $end) {
                 $q->whereBetween('start_date', [$start, $end])
                     ->orWhereBetween('end_date', [$start, $end])
                     ->orWhere(function ($qq) use ($start, $end) {
-                        $qq->where('start_date', '<=', $start)
-                            ->where(function ($qqq) use ($end) {
-                                $qqq->whereNull('end_date')->orWhere('end_date', '>=', $end);
-                            });
+                        $qq->where('start_date', '<=', $start)->where(function ($qqq) use ($end) {
+                            $qqq->whereNull('end_date')->orWhere('end_date', '>=', $end);
+                        });
                     });
-            })->exists();
+            })
+            ->exists();
 
         if ($overlap) {
             $this->addError('item.start_date', __('Contract dates overlap another contract for this employee.'));
@@ -341,14 +337,14 @@ class ContractsModule extends Component
 
         DB::transaction(function () use ($id) {
             if ($id) {
-                $model     = Contract::lockForUpdate()->findOrFail($id);
+                $model = Contract::lockForUpdate()->findOrFail($id);
                 $wasActive = (bool) $model->is_active;
-                $oldPosId  = $model->position_id;
+                $oldPosId = $model->position_id;
 
                 $model->update($this->item);
 
                 if ($wasActive && !$model->is_active) {
-                    Position::where('id',$oldPosId)->decrement('exist_emp');
+                    Position::where('id', $oldPosId)->decrement('exist_emp');
                 } elseif (!$wasActive && $model->is_active) {
                     $pos = Position::lockForUpdate()->find($model->position_id);
                     if ($pos && $pos->exist_emp >= $pos->max_emp) {
@@ -356,10 +352,9 @@ class ContractsModule extends Component
                     }
                     $pos?->increment('exist_emp');
                 } elseif ($model->is_active && $oldPosId != $model->position_id) {
-                    Position::where('id',$oldPosId)->decrement('exist_emp');
-                    Position::where('id',$model->position_id)->increment('exist_emp');
+                    Position::where('id', $oldPosId)->decrement('exist_emp');
+                    Position::where('id', $model->position_id)->increment('exist_emp');
                 }
-
             } else {
                 $pos = Position::lockForUpdate()->find($this->item['position_id']);
                 if (($this->item['is_active'] ?? false) && $pos && $pos->exist_emp >= $pos->max_emp) {
@@ -378,8 +373,7 @@ class ContractsModule extends Component
         $this->resetValidation();
         $this->dispatch('closeModal');
 
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
+        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
     }
 
     public function confirmDelete($id)
@@ -405,7 +399,6 @@ class ContractsModule extends Component
             $model->delete();
         });
 
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
+        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
     }
 }

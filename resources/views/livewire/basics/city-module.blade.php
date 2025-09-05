@@ -45,8 +45,8 @@
             @forelse($cities as $item)
                 <tr>
                     <x-table.cell>{{ $item->id }}</x-table.cell>
-                    <x-table.cell>{{ $item->getTranslation('name','ar') ?? '-' }}</x-table.cell>
-                    <x-table.cell>{{ $item->getTranslation('name','en') ?? '-' }}</x-table.cell>
+                    <x-table.cell>{{ $item->name_ar ?? '-' }}</x-table.cell>
+                    <x-table.cell>{{ $item->name_en ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->code ?? '-' }}</x-table.cell>
                     <x-table.cell-status
                         :active="$item->is_active"

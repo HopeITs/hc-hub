@@ -24,7 +24,7 @@
             </div>
 
             <p class="text-md text-gray-500 mt-2">
-                {{ $program->getTranslation('description', app()->getLocale()) }}
+                {{ $program->{'description_' . app()->getLocale()} }}
             </p>
         </div>
 
@@ -104,11 +104,10 @@
                             @foreach ($program->centers as $center)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 font-medium text-gray-900">
-                                        {{-- CORRECTED: Access Center name directly --}}
                                         {{ $center->name }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        {{ $center->city?->getTranslation('name', app()->getLocale()) ?? '-' }}
+                                        {{ $center->city?->{'name_' . app()->getLocale()} ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4">
                                         {{ $center->created_at->format('d M, Y') }}
@@ -145,10 +144,10 @@
                                 @foreach ($employee->contracts as $contract)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 font-medium text-gray-900">
-                                            {{ $employee->getTranslation('name', app()->getLocale()) ?? '-' }}
+                                            {{ $employee->{'name_' . app()->getLocale()} ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4">
-                                            {{ $contract->position?->requiredPosition?->title ?? '—' }}
+                                            {{ $contract->position?->{'title_' . app()->getLocale()} ?? '—' }}
                                         </td>
                                         <td class="px-6 py-4">
                                             {{ $contract->start_date?->format('d M, Y') ?? '—' }}

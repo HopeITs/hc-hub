@@ -4,17 +4,16 @@ namespace App\Livewire\Forms\ProgramManagement;
 
 use App\Models\Program;
 use Illuminate\Validation\Rule;
-use Livewire\Attributes\Validate;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 
 class ProgramForm extends Form
 {
-
     public ?Program $program = null;
 
     public $name;
-    public $description = [];
+    public $description_en;
+    public $description_ar;
     public $start_date;
     public $end_date;
     public $code;
@@ -26,8 +25,8 @@ class ProgramForm extends Form
     {
         return [
             'name' => ['required', 'string'],
-            'description.en' => ['nullable', 'min:3', 'max:255'],
-            'description.ar' => ['nullable', 'min:3', 'max:255'],
+            'description_en' => ['nullable', 'min:3', 'max:255'],
+            'description_ar' => ['nullable', 'min:3', 'max:255'],
             'start_date' => ['required', 'date'],
             'end_date' => ['nullable', 'date', 'after:start_date'],
             'slug' => [
@@ -36,7 +35,6 @@ class ProgramForm extends Form
             ],
             'code' => 'required',
             'logo' => 'nullable',
-
         ];
     }
 
@@ -44,21 +42,21 @@ class ProgramForm extends Form
     {
         $this->program = $program;
         $this->name = $program->name;
-        $this->description = $program->getTranslations('description') ;
+        $this->description_en = $program->description_en;
+        $this->description_ar = $program->description_ar;
         $this->slug = $program->slug;
         $this->start_date = $program->start_date;
         $this->end_date = $program->end_date;
         $this->code = $program->code;
         $this->logo = $program->getFirstMediaUrl('logo');
         $this->is_active = $program->is_active;
-
     }
 
     public function store()
     {
         $this->validate();
 
-        $program = Program::create($this->except('logo'));
+        $program = Program::create($this->except(['logo', 'program']));
 
         if ($this->logo instanceof TemporaryUploadedFile) {
             $program->addMedia($this->logo->getRealPath())
@@ -67,8 +65,6 @@ class ProgramForm extends Form
         }
 
         $this->reset();
-
-
     }
 
     public function update()
@@ -76,7 +72,7 @@ class ProgramForm extends Form
         $this->validate();
 
         $this->program->update(
-            $this->all()
+            $this->except(['logo', 'program'])
         );
         if ($this->logo instanceof TemporaryUploadedFile) {
             $this->program->clearMediaCollection('logo');
@@ -87,12 +83,12 @@ class ProgramForm extends Form
         $this->reset();
     }
 
-    public function statusToggle(){
+    public function statusToggle()
+    {
         $this->program->update(
-           [
-               'is_active' => !$this->program->is_active,
-           ]
+            [
+                'is_active' => !$this->program->is_active,
+            ]
         );
     }
-
 }

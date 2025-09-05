@@ -34,9 +34,9 @@
                 <tr wire:key="center-{{ $item->id }}">
                     <x-table.cell class="whitespace-nowrap">{{ $item->id }}</x-table.cell>
                     <x-table.cell class="max-w-64 truncate" title="{{ $item->name }}">{{ $item->name ?? '-' }}</x-table.cell>
-                    <x-table.cell class="max-w-56 truncate" title="{{ optional($item->city)->getTranslation('name', $locale) }}">{{ optional($item->city)->getTranslation('name', $locale) ?? '-' }}</x-table.cell>
+                    <x-table.cell class="max-w-56 truncate" title="{{ optional($item->city)->{'name_' . $locale} }}">{{ optional($item->city)->{'name_' . $locale} ?? '-' }}</x-table.cell>
 
-                    <x-table.cell class="max-w-72 truncate" title="{{ $item->getTranslation('address', $locale) }}">{{ $item->getTranslation('address', $locale) ?? '-' }}</x-table.cell>
+                    <x-table.cell class="max-w-72 truncate" title="{{ $item->{'address_' . $locale} }}">{{ $item->{'address_' . $locale} ?? '-' }}</x-table.cell>
                     <x-table.cell-status :active="$item->is_active" :model-id="$item->id" wire-event="confirmToggleItemStatus" />
                     <x-table.cell class="whitespace-nowrap">
                         <a href="{{ route('positions.index', ['center' => $item->id, 'city' => $item->city_id]) }}"
@@ -80,7 +80,7 @@
                         <x-forms.select-input id="city_id" wire:model="item.city_id">
                             <option value="">{{ __('general.select') }}</option>
                             @foreach($cities as $city)
-                                <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                <option value="{{ $city->id }}">{{ $city->{'name_' . $locale} }}</option>
                             @endforeach
                         </x-forms.select-input>
                         <x-error-span>{{ $errors->first('item.city_id') }}</x-error-span>
@@ -97,13 +97,16 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    @foreach(config('app.supported_locales') as $locale)
-                        <div>
-                            <x-forms.input-label for="address_{{ $locale }}">@lang('general.address') ({{ strtoupper($locale) }})</x-forms.input-label>
-                            <x-forms.textarea id="address_{{ $locale }}" wire:model.defer="item.address.{{ $locale }}" rows="2"/>
-                            <x-error-span>{{ $errors->first('item.address.' . $locale) }}</x-error-span>
-                        </div>
-                    @endforeach
+                    <div>
+                        <x-forms.input-label for="address_en">@lang('general.address') (EN)</x-forms.input-label>
+                        <x-forms.textarea id="address_en" wire:model.defer="item.address_en" rows="2"/>
+                        <x-error-span>{{ $errors->first('item.address_en') }}</x-error-span>
+                    </div>
+                    <div>
+                        <x-forms.input-label for="address_ar">@lang('general.address') (AR)</x-forms.input-label>
+                        <x-forms.textarea id="address_ar" wire:model.defer="item.address_ar" rows="2"/>
+                        <x-error-span>{{ $errors->first('item.address_ar') }}</x-error-span>
+                    </div>
                 </div>
             </div>
             <div class="flex justify-end gap-2">

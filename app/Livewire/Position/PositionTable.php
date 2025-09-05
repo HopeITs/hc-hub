@@ -12,7 +12,6 @@ use App\Models\Program;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
-use PHPUnit\Util\PHP\Job;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
@@ -42,18 +41,20 @@ class PositionTable extends LivewireTable
     protected function columns(): array
     {
         return [
+            Column::make(__('Title (EN)'), 'title_en')
+                ->sortable()
+                ->searchable(),
 
-
-            Column::make(__('Title'), 'title')
+            Column::make(__('Title (AR)'), 'title_ar')
                 ->sortable()
                 ->searchable(),
 
             SelectColumn::make(trans_choice('general.city', 1), 'city_id')
                 ->displayUsing(function (mixed $value, Model $model): string {
-                    return $model->city->name;
+                    return $model->city?->{'name_' . app()->getLocale()} ?? '-';
                 })
                 ->options(
-                    City::query()->get()->pluck('name', 'id')->toArray()
+                    City::query()->get()->mapWithKeys(fn($city) => [$city->id => $city->{'name_' . app()->getLocale()}])->toArray()
                 )
                 ->sortable()
                 ->searchable(),
@@ -86,10 +87,10 @@ class PositionTable extends LivewireTable
                 ->searchable(),
             SelectColumn::make(trans_choice('general.job-level', 1), 'job_level_id')
                 ->displayUsing(function (mixed $value, Model $model): string {
-                    return $model->jobLevel->name ?? '-';
+                    return $model->jobLevel?->{'name_' . app()->getLocale()} ?? '-';
                 })
                 ->options(
-                    JobLevel::query()->get()->pluck('name', 'id')->toArray()
+                    JobLevel::query()->get()->mapWithKeys(fn($level) => [$level->id => $level->{'name_' . app()->getLocale()}])->toArray()
                 )
                 ->sortable()
                 ->searchable(),
@@ -113,7 +114,7 @@ class PositionTable extends LivewireTable
 
             SelectFilter::make(trans_choice('general.city', 1), 'city_id')
                 ->options(
-                    City::query()->get()->pluck('name', 'id')->toArray()
+                    City::query()->get()->mapWithKeys(fn($city) => [$city->id => $city->{'name_' . app()->getLocale()}])->toArray()
                 )
             ,
             SelectFilter::make(trans_choice('general.program', 1), 'program_id')
@@ -133,7 +134,7 @@ class PositionTable extends LivewireTable
             ,
             SelectFilter::make(trans_choice('general.job-level', 1), 'job_level_id')
                 ->options(
-                    JobLevel::query()->get()->pluck('name', 'id')->toArray()
+                    JobLevel::query()->get()->mapWithKeys(fn($level) => [$level->id => $level->{'name_' . app()->getLocale()}])->toArray()
                 )
             ,
         ];

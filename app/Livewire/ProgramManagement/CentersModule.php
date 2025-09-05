@@ -24,7 +24,8 @@ class CentersModule extends Component
         'name'       => '',
         'city_id'    => '',
         'program_id' => '',
-        'address'    => ['en' => '', 'ar' => ''],
+        'address_en' => '',
+        'address_ar' => '',
         'is_active'  => true,
     ];
 
@@ -32,8 +33,8 @@ class CentersModule extends Component
         'item.name'       => 'required|string|max:255',
         'item.city_id'    => 'required|exists:cities,id',
         'item.program_id' => 'required|exists:programs,id',
-        'item.address.en' => 'nullable|string|max:255',
-        'item.address.ar' => 'nullable|string|max:255',
+        'item.address_en' => 'nullable|string|max:255',
+        'item.address_ar' => 'nullable|string|max:255',
     ];
 
     public function updatingSearch()
@@ -77,9 +78,10 @@ class CentersModule extends Component
                 $term = $this->search;
                 $q->where(function ($w) use ($term, $locale) {
                     $w->where('name', 'like', "%{$term}%")
-                      ->orWhere("address->$locale", 'like', "%{$term}%")
+                      ->orWhere('address_en', 'like', "%{$term}%")
+                      ->orWhere('address_ar', 'like', "%{$term}%")
                       ->orWhereHas('city', function ($c) use ($term, $locale) {
-                          $c->where("name->$locale", 'like', "%{$term}%");
+                          $c->where('name_' . $locale, 'like', "%{$term}%");
                       })
                       ->orWhereHas('program', function ($p) use ($term) {
                           $p->where('name', 'like', "%{$term}%");
@@ -88,10 +90,10 @@ class CentersModule extends Component
             });
 
         if ($sort === 'address') {
-            $query->orderBy("address->$locale", $dir);
+            $query->orderBy('address_' . $locale, $dir);
         } elseif ($sort === 'city_name') {
             $query->leftJoin('cities', 'centers.city_id', '=', 'cities.id')
-                  ->orderBy("cities.name->$locale", $dir)
+                  ->orderBy('cities.name_' . $locale, $dir)
                   ->select('centers.*');
         } elseif ($sort === 'program_name') {
             $query->leftJoin('programs', 'centers.program_id', '=', 'programs.id')
@@ -103,7 +105,7 @@ class CentersModule extends Component
 
         $items = $query->paginate(15);
 
-        $cities = City::orderBy("name->$locale")->get(['id', 'name']);
+        $cities = City::orderBy('name_' . $locale)->get();
         $programs = Program::orderBy('name')->get(['id', 'name']);
 
         return view('livewire.program-management.centers-module', compact('items', 'cities', 'programs'));
@@ -116,7 +118,8 @@ class CentersModule extends Component
             'name'       => '',
             'city_id'    => '',
             'program_id' => '',
-            'address'    => ['en' => '', 'ar' => ''],
+            'address_en' => '',
+            'address_ar' => '',
             'is_active'  => true,
         ];
 
@@ -135,7 +138,8 @@ class CentersModule extends Component
             'name'       => $model->name,
             'city_id'    => $model->city_id,
             'program_id' => $model->program_id,
-            'address'    => array_merge(['en' => '', 'ar' => ''], $model->getTranslations('address')),
+            'address_en' => $model->address_en,
+            'address_ar' => $model->address_ar,
             'is_active'  => (bool) $model->is_active,
         ];
 
@@ -147,16 +151,16 @@ class CentersModule extends Component
     {
         $this->validate();
 
-        $data = [
-            'name' => $this->item['name'],
-            'city_id' => $this->item['city_id'],
-            'program_id' => $this->item['program_id'],
-        ];
-
-        $model = Center::findOrNew($this->item['id']);
-        $model->fill($data);
-        $model->setTranslations('address', $this->item['address']);
-        $model->save();
+        Center::updateOrCreate(
+            ['id' => $this->item['id']],
+            [
+                'name' => $this->item['name'],
+                'city_id' => $this->item['city_id'],
+                'program_id' => $this->item['program_id'],
+                'address_en' => $this->item['address_en'],
+                'address_ar' => $this->item['address_ar'],
+            ]
+        );
 
         $this->showModal = false;
         $this->resetErrorBag();
