@@ -4,13 +4,12 @@
 <head>
     @include('partials.head')
 
-    @livewireStyles
-
     <style>
         [x-cloak] {
             display: none !important;
         }
     </style>
+    <title></title>
 </head>
 
 <body class="antialiased min-h-screen bg-white">
@@ -52,7 +51,6 @@
 
     <div id="sidebar-overlay" class="fixed inset-0 bg-gray-200 opacity-50 z-30 sm:hidden hidden"></div>
 
-    @livewireScripts
 
     @include('partials.scripts')
 
