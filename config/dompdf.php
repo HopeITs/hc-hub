@@ -6,11 +6,9 @@ return [
     'enable_font_subsetting' => true,
 
     'chroot'      => public_path(),
-    'font_dir'    => public_path('fonts'),
-    'font_cache'  => storage_path('fonts'),
-
+    'font_dir'   => public_path('fonts'),
+    'font_cache' => storage_path('fonts'),
     'default_font' => 'somar',
-
     'fonts' => [
         'somar' => [
             'R' => 'SomarSans/SomarSans-Regular.ttf',
@@ -21,4 +19,5 @@ return [
             'B' => 'NotoNaskh/NotoNaskhArabic-Bold.ttf',
         ],
     ],
+
 ];

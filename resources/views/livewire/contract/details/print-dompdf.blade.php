@@ -1,69 +1,61 @@
 @php
-    $dir = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
+    $dir        = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
+
+    // Header asset (must live under public/ due to dompdf chroot)
+    $headerSrc  = public_path('assets/img/Header.svg');
+
+    // Tuning (mm)
+    $HEADER_HEIGHT_MM = 24;
+    $TOP_MARGIN_MM    = 32;
 @endphp
     <!doctype html>
-<html lang="{{ app()->getLocale() }}" dir="{{ $dir }}">
+{{-- Keep the whole page LTR just like the on-screen contract --}}
+<html lang="{{ app()->getLocale() }}" dir="ltr">
 <head>
     <meta charset="utf-8">
     <style>
-        @font-face{
-            font-family:'somar';
-            src:url('{{ public_path('fonts/SomarSans/SomarSans-Regular.otf') }}') format('opentype');
-            font-weight:400; font-style:normal;
-        }
-        @font-face{
-            font-family:'somar';
-            src:url('{{ public_path('fonts/SomarSans/SOMARSANS-BOLD.OTF') }}') format('opentype');
-            font-weight:700; font-style:normal;
-        }
-        @font-face{
-            font-family:'NotoNaskhArabic';
-            src:url('{{ public_path('fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf') }}') format('truetype');
-            font-weight:400; font-style:normal;
-        }
-        @font-face{
-            font-family:'NotoNaskhArabic';
-            src:url('{{ public_path('fonts/NotoNaskh/NotoNaskhArabic-Bold.ttf') }}') format('truetype');
-            font-weight:700; font-style:normal;
-        }
-        @page { size: A4; margin: 24mm 16mm 22mm 16mm; }
+        /* === FONTS (unchanged) === */
+        @font-face{ font-family:'somar'; src:url('{{ public_path('fonts/SomarSans/SomarSans-Regular.ttf') }}') format('truetype'); font-weight:400; font-style:normal; }
+        @font-face{ font-family:'somar'; src:url('{{ public_path('fonts/SomarSans/SomarSans-Bold.ttf') }}') format('truetype'); font-weight:700; font-style:normal; }
+        @font-face{ font-family:'NotoNaskhArabic'; src:url('{{ public_path('fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf') }}') format('truetype'); font-weight:400; font-style:normal; }
+        @font-face{ font-family:'NotoNaskhArabic'; src:url('{{ public_path('fonts/NotoNaskh/NotoNaskhArabic-Bold.ttf') }}') format('truetype'); font-weight:700; font-style:normal; }
+
+        @page { size: A4; margin: {{ $TOP_MARGIN_MM }}mm 16mm 22mm 16mm; }
 
         html, body{
             margin:0; padding:0;
-            /* Arabic-capable base to avoid fallbacks in mixed runs */
-            font-family:'NotoNaskhArabic','DejaVu Sans',sans-serif;
+            font-family:'somar','NotoNaskhArabic','DejaVu Sans',sans-serif;
             font-size:12px; line-height:1.45; color:#111; background:#fff;
-            direction:{{ $dir }};
-        }
-        .footer{
-            position:fixed; left:0; right:0; bottom:8mm;
-            text-align:center; font-size:11px; color:#6B7280;
-        }
-        .pagenum:before{ content: counter(page); }
-        .pagecount:before{ content: counter(pages); }
 
-        .pdf-page{ page-break-after:always; }
+            /* IMPORTANT: keep base direction LTR to match the detail view */
+            direction: ltr;
+        }
+
+        /* Header (unchanged) */
+        .page-header{ position: relative; top:0; left:0; right:0; height: {{ $HEADER_HEIGHT_MM }}mm; }
+        .page-header img{ position:absolute; top:15px; left:40px; right:0; width:91%; }
+
+        .pdf-page{ page-break-after:always; padding:0 50px; }
         .pdf-page:last-child{ page-break-after:auto; }
 
-        /* Dual rows: two equal columns */
         .dual-row{ display:table; table-layout:fixed; width:100%; margin-top:10px; }
         .dual-tight{ margin-top:0; }
-        .dual-row > .dual-en,
-        .dual-row > .dual-ar{ display:table-cell; width:50%; vertical-align:top; }
+        .dual-row > .dual-en, .dual-row > .dual-ar{ display:table-cell; width:50%; vertical-align:top; }
 
-        /* EN column → Somar */
-        .dual-en{
-            direction:ltr; text-align:left; padding-right:9mm;
-            font-family:somar,'DejaVu Sans',sans-serif;
+        .dual-en, .dual-en *{
+            direction:ltr !important;
+            unicode-bidi: embed !important;
+            text-align:left !important;
         }
 
-        /* AR column → Force Naskh (guarantees shaping) */
-        .dual-ar{
-            direction:rtl; unicode-bidi:bidi-override; text-align:right; padding-left:9mm;
-            font-family:'NotoNaskhArabic','DejaVu Sans',sans-serif !important;
+        .dual-ar, .dual-ar *{
+            direction:rtl !important;
+            unicode-bidi: bidi-override !important;
+            text-align:right !important;
+            font-family:'somar','NotoNaskhArabic','DejaVu Sans',sans-serif;
         }
 
-        /* Helpers */
+        /* Utilities (unchanged) */
         .h-label{ color:#E31E24; font-weight:700; }
         .fw-bold{ font-weight:700; }
         .muted { color:#6B7280; }
@@ -79,17 +71,18 @@
 </head>
 <body>
 
-<div class="footer">
-    <span class="pagenum"></span> / <span class="pagecount"></span>
+<div class="page-header">
+    <img src="{{ $headerSrc }}" alt="Header">
 </div>
 
 @for($i = 1; $i <= $totalPages; $i++)
     <section class="pdf-page">
         @includeIf("livewire.contract.details.{$category}.pages.page{$i}", [
-          'contract'   => $contract,
-          'locale'     => $locale,
-          'pageNo'     => $i,
-          'totalPages' => $totalPages,
+            'contract'    => $contract,
+            'locale'      => $locale,
+            'pageNo'      => $i,
+            'totalPages'  => $totalPages,
+            'forPdf'      => true,
         ])
     </section>
 @endfor
