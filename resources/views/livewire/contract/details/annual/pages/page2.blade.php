@@ -1,13 +1,10 @@
 @php
     use App\Support\ArabicText as AR;
     use Illuminate\Support\Carbon;
-    use Illuminate\Support\Str;
 
     $forPdf = $forPdf ?? false;
     $G = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
     $D = fn ($s) => $forPdf ? AR::digits((string)$s) : (string)$s;
-
-    $loc = $locale ?? app()->getLocale();
 
     $pos  = $contract->position;
     $req  = $pos?->requiredPosition;
@@ -24,10 +21,8 @@
         ?? ('#'.$contract->position_id)
     );
 
-    $start    = $contract->start_date;
-    $end      = $contract->end_date;
-    $startStr = $start ? Carbon::parse($start)->format('d/m/Y') : '—';
-    $endStr   = $end   ? Carbon::parse($end)->format('d/m/Y')   : '—';
+    $startStr   = $contract->start_date ? Carbon::parse($contract->start_date)->format('d/m/Y') : '—';
+    $endStr     = $contract->end_date   ? Carbon::parse($contract->end_date)->format('d/m/Y')   : '—';
     $startStrAr = $D($startStr);
     $endStrAr   = $D($endStr);
 
@@ -36,15 +31,15 @@
     $salaryFormattedEn = $salary ? number_format($salary, 0, '.', ',') : '—';
     $salaryFormattedAr = $salary ? $D(number_format($salary, 0, '.', ',')) : '—';
 
-    $esc   = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
-    $escAr = fn ($v) => e((string)($v === '' || $v === null ? '—' : $G($v)));
-    $L     = fn (string $txt) => '<span class="h-label">'.$txt.'</span>';
+    $esc = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
+    $L   = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 @endphp
 
+{{-- Intro --}}
 <div class="avoid-break">
     <x-contract.dual tight
-                     :en="'whereas “Christian Hope Center Aleppo / Head office” has agreed to this volunteering according to the conditions outlined in this contract.'"
-                     :ar="$G('وبما أن \"مركز الرجاء المسيحي - حلب - الإدارة العامة\" قد وافق على هذا التطوع وفق الشروط المنصوص عليها في هذا العقد.')"
+                     :en="'whereas Christian Hope Center Aleppo / Head office has agreed to this volunteering according to the conditions outlined in this contract.'"
+                     :ar="$G('وبما أن مركز الرجاء المسيحي - حلب - الإدارة العامة قد وافق على هذا التطوع وفق الشروط المنصوص عليها في هذا العقد.')"
     />
     <x-contract.dual rowClass="mt-3"
                      :en="'This contract between the two parties witnesses mutual acceptance of the following:'"
@@ -52,6 +47,7 @@
     />
 </div>
 
+{{-- Basics --}}
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4"
                      :en="$L('Contract type:').' Volunteer agreement for a limited period'"
@@ -59,7 +55,7 @@
     />
     <x-contract.dual rowClass="mt-2"
                      :en="$L('Place of Work:').' Aleppo – Christian Hope Center – Head Office'"
-                     :ar="$L($G('مكان العمل:')).' '.$G('حلب – مركز الرجاء المسيحي – المكتب')"
+                     :ar="$L($G('مكان العمل:')).' '.$G('حلب – مركز الرجاء المسيحي – المكتب الرئيسي')"
     />
     <x-contract.dual rowClass="mt-2"
                      :en="$L('Job description:').' '.$esc($positionTitleEn)"
@@ -67,6 +63,7 @@
     />
 </div>
 
+{{-- Duration --}}
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4"
                      :en="$L('Duration of the agreement:').'<div>One Year</div><div>Starts from: '.$esc($startStr).'</div><div>Ends on: '.$esc($endStr).'</div>'"
@@ -74,33 +71,27 @@
     />
 </div>
 
-@php
-    $EN_HOURS_LIST = [
-        'Volunteer Work Hours:',
-        $weeklyHours.' working hours per week, 8 hours per day.',
-        'Standard office hours: Monday–Friday, 09:30–17:30.',
-        'Saturdays may be working days when necessary and are not treated as extra hours.',
-    ];
-    $AR_HOURS_LIST = [
-        $G('ساعات العمل التطوعي:'),
-        $D($weeklyHours).' '.$G('ساعة عمل أسبوعياً، 8 ساعات يومياً.'),
-        $G('الدوام الإداري: من الاثنين إلى الجمعة 09:30–17:30.'),
-        $G('يُعتبر السبت يوماً للعمل عند الحاجة، ولا يُعتبر دواماً إضافياً.'),
-    ];
-    $asList = function(array $lines) {
-        return '<ul style="margin:0; padding-left:14px;">'
-             . implode('', array_map(fn($l) => '<li>'.$l.'</li>', $lines))
-             . '</ul>';
-    };
-@endphp
-
+{{-- Working hours (each bullet is a line) --}}
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4"
-                     :en="$asList($EN_HOURS_LIST)"
-                     :ar="$asList($AR_HOURS_LIST)"
+                     :en="$L('Volunteer Work Hours:')"
+                     :ar="$L($G('ساعات العمل التطوعي:'))"
+    />
+    <x-contract.dual rowClass="mt-2"
+                     :en="'• '.$weeklyHours.' working hours per week, 8 hours per day.'"
+                     :ar="'• '.$D($weeklyHours).' '.$G('ساعة عمل أسبوعياً، 8 ساعات يومياً.')"
+    />
+    <x-contract.dual rowClass="mt-2"
+                     :en="'• Standard office hours: Monday–Friday, 09:30–17:30.'"
+                     :ar="'• '.$G('الدوام الإداري: من الاثنين إلى الجمعة 09:30–17:30.')"
+    />
+    <x-contract.dual rowClass="mt-2"
+                     :en="'• Saturdays may be working days when necessary and are not treated as extra hours.'"
+                     :ar="'• '.$G('يُعتبر السبت يوماً للعمل عند الحاجة، ولا يُعتبر دواماً إضافياً.')"
     />
 </div>
 
+{{-- Stipend --}}
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4"
                      :en="$L('Stipend and Benefits:').'<div>Christian Hope Center grants a monthly stipend of / '.$esc($salaryFormattedEn).' USD / or its equivalent in Syrian pounds, paid in cash at the end of each month.</div>'"
@@ -108,6 +99,7 @@
     />
 </div>
 
+{{-- Duties --}}
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4"
                      :en="$L('Duties:').'<div>As listed in the job description of the position (attached).</div>'"

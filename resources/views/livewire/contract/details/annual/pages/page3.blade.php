@@ -6,6 +6,13 @@
 
     $L = fn(string $txt) => '<span class="h-label">'.$txt.'</span>';
     $p = fn(string $t) => '<div>'.$t.'</div>';
+
+    // Helper to render bullet lists without breaking Alpine
+    $asList = function(array $lines) {
+        return '<ul style="margin:0; padding-left:14px;">'
+            . implode('', array_map(fn($l) => '<li>'.$l.'</li>', $lines))
+            . '</ul>';
+    };
 @endphp
 
 <div class="avoid-break">
@@ -36,11 +43,6 @@
                      :ar="$L($G('القوانين والأنظمة الداخلية:')).$p($G('يقرّ المتطوع ويتعهد بالالتزام بالمستندات المرفقة التالية:'))"
     />
     @php
-        $asList = function(array $lines) {
-            return '<ul style="margin:0; padding-left:14px;">'
-                 . implode('', array_map(fn($l) => '<li>'.$l.'</li>', $lines))
-                 . '</ul>';
-        };
         $EN_LIST = ['Job description.', 'Code of Conduct.', 'Christian Hope Center Policies.'];
         $AR_LIST = [$G('توصيف العمل التطوعي.'), $G('القواعد الأخلاقية للتطوع.'), $G('سياسات مركز الرجاء المسيحي.')];
     @endphp
@@ -52,8 +54,9 @@
                      :en="$L('Expiration of the agreement:').$p('This agreement shall be terminated immediately in the event of:')"
                      :ar="$L($G('انتهاء العقد:')).$p($G('يعتبر هذا العقد منتهياً في الحالات التالية:'))"
     />
-    <x-contract.dual rowClass="mt-2"
-                     :en="'<ul style=\"margin:0; padding-left:14px;\"><li>Closure of the Christian Hope Center in Syria.</li></ul>'"
-    :ar="$G('<ul style=\"margin:0; padding-left:14px;\"><li>إغلاق مركز الرجاء في سوريا.</li></ul>')"
-    />
+    @php
+        $EN_END = ['Closure of the Christian Hope Center in Syria.'];
+        $AR_END = [$G('إغلاق مركز الرجاء في سوريا.')];
+    @endphp
+    <x-contract.dual rowClass="mt-2" :en="$asList($EN_END)" :ar="$asList($AR_END)"/>
 </div>
