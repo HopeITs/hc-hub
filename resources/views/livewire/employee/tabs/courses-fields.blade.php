@@ -120,7 +120,7 @@
             wire:loading.attr="disabled"
             wire:target="addCourse"
         >
-            + @lang('general.add_new')
+            + @lang('general.add-new')
         </x-primary-button>
     </div>
 

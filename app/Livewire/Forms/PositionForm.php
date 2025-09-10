@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Livewire\Forms;
+
+use App\Models\Contract;
+use App\Enums\SalaryPer;
+use App\Models\Position;
+use Illuminate\Validation\Rule;
+use Livewire\Form;
+
+class PositionForm extends Form
+{
+    public ?Position $position = null;
+
+
+    public $department_id;
+    public $job_level_id;
+    public $program_id;
+    public $center_id;
+    public $city_id;
+    public $title = [];
+    public $qualifications;
+    public $max_emp;
+    public $responsibilities;
+    public  $is_active = true;
+
+    protected function rules()
+    {
+        return [
+            'title.en' => ['nullable', 'min:3', 'max:255'],
+            'title.ar' => ['nullable', 'min:3', 'max:255'],
+            'program_id'       => 'required|exists:programs,id',
+            'center_id'        => 'nullable|exists:centers,id',
+            'city_id'          => 'required|exists:cities,id',
+            'job_level_id'     => 'required|exists:job_levels,id',
+            'department_id'    => 'required|exists:departments,id',
+            'qualifications'   => 'required|string',
+            'responsibilities' => 'required|string',
+
+            'max_emp'          => 'required|integer|min:1',
+
+
+        ];
+    }
+    public function setPosition(Position $position){
+        $this->position = $position;
+        $this->title = $position->getTranslations('title');
+        $this->city_id = $position->city_id;
+        $this->program_id = $position->program_id;
+        $this->department_id = $position->department_id;
+        $this->job_level_id = $position->job_level_id;
+        $this->is_active = $position->is_active;
+        $this->max_emp = $position->max_emp;
+        $this->responsibilities = $position->responsibilities;
+        $this->qualifications = $position->qualifications;
+
+    }
+
+    public function store()
+    {
+        $this->validate();
+        $this->position = Position::create($this->pull());
+        $this->reset();
+
+    }
+
+    public function update()
+    {
+        $this->validate();
+
+        $this->position->update(
+            $this->all()
+        );
+
+        $this->reset();
+    }
+
+    public function statusToggle(){
+        $this->program->update(
+            [
+                'is_active' => !$this->position->is_active,
+            ]
+        );
+    }
+}

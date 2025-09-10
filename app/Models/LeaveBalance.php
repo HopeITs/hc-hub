@@ -27,9 +27,9 @@ class LeaveBalance extends Model
         return $this->belongsTo(LeaveType::class);
     }
 
-    public function leave()
+    public function leaveRequest()
     {
-        return $this->belongsTo(Leave::class);
+        return $this->belongsTo(LeaveRequest::class);
     }
 
 }

@@ -1,6 +1,6 @@
 @props([
-    'field',
-    'theme' => 'default', // 'default' for auth, 'settings' for settings/profile
+    'field' => null,
+    'theme' => 'default',
 ])
 
 @php
@@ -10,8 +10,10 @@
     };
 @endphp
 
-@error($field)
-<p {{ $attributes->merge(['class' => $baseClass]) }}>
-    {{ $message }}
-</p>
-@enderror
+@if(is_string($field))
+    @error($field)
+        <p {{ $attributes->merge(['class' => $baseClass]) }}>
+            {{ $message }}
+        </p>
+    @enderror
+@endif

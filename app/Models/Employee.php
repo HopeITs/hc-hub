@@ -46,10 +46,10 @@ class Employee extends Model implements HasMedia
             ]);
     }
 
-    public function scopeInvolvedInProject($query, $projectId)
+    public function scopeInvolvedInProgram($query, $programId)
     {
-        return $query->whereHas('contracts.position.center', function ($q) use ($projectId) {
-            $q->where('project_id', $projectId);
+        return $query->whereHas('contracts.position.center', function ($q) use ($programId) {
+            $q->where('program_id', $programId);
         });
     }
 

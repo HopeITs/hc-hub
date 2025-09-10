@@ -2,42 +2,49 @@
 
 namespace App\Models;
 
+use Illuminate\Console\Prohibitable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Translatable\HasTranslations;
 
 class Position extends Model
 {
-    use HasFactory;
+    use HasFactory , HasTranslations;
 
-    protected $fillable = [
-        'required_position_id',
-        'center_id',
-        'responsibilities',
-        'max_emp',
-        'exist_emp',
-        'is_active',
-    ];
-
+    protected $guarded = ['id'];
+    public array $translatable = ['title'];
     protected $casts = [
         'max_emp'   => 'integer',
         'exist_emp' => 'integer',
         'is_active' => 'boolean',
     ];
 
-    public function contracts()
+    public function contracts(): \Illuminate\Database\Eloquent\Relations\HasMany|Position
     {
         return $this->hasMany(Contract::class, 'position_id');
     }
 
-    public function center()
+    public function center(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Center::class, 'center_id');
     }
-
-    public function requiredPosition()
+    public function program(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(RequiredPosition::class, 'required_position_id');
+        return $this->belongsTo(Program::class, 'program_id');
+    }
+    public function city(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(City::class, 'city_id');
+    }
+
+    public function jobLevel(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(JobLevel::class, 'job_level_id');
+    }
+    public function department(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Department::class, 'department_id');
     }
 
 
