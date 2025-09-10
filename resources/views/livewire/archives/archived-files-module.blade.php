@@ -63,7 +63,7 @@
                     @forelse($folders as $folder)
                     <div class="relative group">
                         <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md">
-                            <x-icons.folder class="w-16 h-16 text-yellow-400" />
+                            <x-icons.folder class="w-16 h-16 text-primary" /> {{-- Changed to text-primary (red) --}}
                             <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $folder->name }}</span>
                             @if ($folder->user_id === auth()->id())
                                 <span class="mt-1 text-xs text-gray-500">By: Me</span>
@@ -101,7 +101,7 @@
                             @if (isset($filePreviews[$file->id]))
                             <img src="{{ $filePreviews[$file->id] }}" alt="{{ $file->name }}" class="object-cover w-16 h-16 rounded-md" />
                             @else
-                            <x-icons.document-text class="w-16 h-16 text-gray-500" />
+                            <x-icons.document-text class="w-16 h-16 text-primary" /> {{-- Changed to text-primary (red) --}}
                             @endif
                             <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $file->name }}</span>
                         </div>
