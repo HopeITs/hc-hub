@@ -43,9 +43,6 @@ class ArchivedFilesModule extends Component
 
         if ($folderId) {
             $folder = Folder::with('users')->find($folderId);
-            if ($folder && $folder->is_shared != $this->isShared) {
-                abort(404);
-            }
             if ($folder && !auth()->user()->hasRole('Super Admin') && !$folder->users->contains(auth()->id())) {
                 abort(403, 'You do not have permission to access this folder.');
             }
@@ -65,7 +62,19 @@ class ArchivedFilesModule extends Component
     public function loadContent(): void
     {
         $parentId = $this->currentFolder?->id;
-        $query = Folder::where('parent_id', $parentId)->where('is_shared', $this->isShared);
+        $query = Folder::where('parent_id', $parentId);
+
+        if ($this->isShared) {
+            $query->where(function ($q) {
+                $q->where('is_shared', true)
+                  ->orWhere(function($subQ) {
+                      $subQ->where('is_shared', false)
+                           ->where('user_id', '!=', auth()->id());
+                  });
+            });
+        } else {
+            $query->where('is_shared', false)->where('user_id', auth()->id());
+        }
 
         if (!auth()->user()->hasRole('Super Admin')) {
             $query->whereHas('users', fn ($q) => $q->where('user_id', auth()->id()));
@@ -109,9 +118,7 @@ class ArchivedFilesModule extends Component
             'is_shared' => $this->isShared,
         ]);
 
-        if (!$this->isShared) {
-            $folder->users()->attach(auth()->id());
-        }
+        $folder->users()->attach(auth()->id());
 
         $this->showCreateFolderModal = false;
         $this->newFolderName = '';
@@ -120,8 +127,10 @@ class ArchivedFilesModule extends Component
 
     public function editPermissions(int $folderId)
     {
-        $this->authorizeSharedAction();
         $folder = Folder::findOrFail($folderId);
+        if ($folder->user_id !== auth()->id() && !auth()->user()->hasRole('Super Admin')) {
+            abort(403, 'Only the creator can manage permissions.');
+        }
         $this->folderForPermissions = $folder;
         $this->selectedUsers = $folder->users->pluck('id')->toArray();
         $this->showPermissionsModal = true;
@@ -129,12 +138,12 @@ class ArchivedFilesModule extends Component
 
     public function savePermissions()
     {
-        $this->authorizeSharedAction();
         if ($this->folderForPermissions) {
-            $permissions = collect($this->selectedUsers);
-            if (!$this->isShared) {
-                $permissions->push($this->folderForPermissions->user_id);
+            if ($this->folderForPermissions->user_id !== auth()->id() && !auth()->user()->hasRole('Super Admin')) {
+                abort(403, 'Only the creator can manage permissions.');
             }
+            $permissions = collect($this->selectedUsers);
+            $permissions->push($this->folderForPermissions->user_id);
             $this->folderForPermissions->users()->sync($permissions->unique()->all());
         }
         $this->closePermissionsModal();
