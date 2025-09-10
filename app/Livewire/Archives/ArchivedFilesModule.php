@@ -63,11 +63,11 @@ class ArchivedFilesModule extends Component
     public function getPermissionFilterCategoriesProperty(): array
     {
         return [
-            'department' => 'Filter by Department',
-            'job_level' => 'Filter by Job Level',
-            'project' => 'Filter by Project',
-            'center' => 'Filter by Center',
-            'city' => 'Filter by City',
+            'department' => 'Department',
+            'job_level' => 'Job Level',
+            'project' => 'Project',
+            'center' => 'Center',
+            'city' => 'City',
         ];
     }
 

@@ -197,7 +197,7 @@
                 </div>
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="pFilterType" class="block text-sm font-medium text-gray-700">Filter by Category</label>
+                        <label for="pFilterType" class="block text-sm font-medium text-gray-700">Filter by:</label>
                         <select id="pFilterType" wire:model.live="permissionFilterType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md accent-primary">
                             <option value="">All Categories</option>
                             @foreach($this->permissionFilterCategories as $key => $label)
