@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('programs', function (Blueprint $table) {
             $table->foreignId('program_manager_id')->nullable()->after('is_active')->constrained('employees')->onDelete('set null');
         });
 
@@ -19,7 +19,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
+        Schema::table('programs', function (Blueprint $table) {
             $table->dropForeign(['program_manager_id']);
             $table->dropColumn('program_manager_id');
         });

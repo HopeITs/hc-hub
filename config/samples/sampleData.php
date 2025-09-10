@@ -74,7 +74,7 @@ return [
         ['name' => 'Services/ Keepers', 'description' => 'الهدف الرئيسي من هذا العمل التطوعي هو استقبال المستفيدين وتوجيههم والاهتمام بنظافة المكان بشكل عام.', 'email' => null],
     ],
 
-    'projects' => [
+    'programs' => [
         [
             'name' => 'Hope Center',
             'description' => [

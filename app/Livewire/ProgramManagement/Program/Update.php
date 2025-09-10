@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\ProjectManagement\Project;
+namespace App\Livewire\ProgramManagement\Program;
 
 use App\Livewire\Forms\ProgramManagement\ProgramForm;
 use App\Models\Program;
