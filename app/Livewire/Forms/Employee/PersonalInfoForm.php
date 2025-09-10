@@ -23,6 +23,8 @@ class PersonalInfoForm extends Form
     #[Validate(['name.ar' => 'required|string', 'name.en' => 'required|string'])]
     public $name = [];
 
+    public $id;
+
     #[Validate(['father_name.ar' => 'required|string', 'father_name.en' => 'nullable|string'])]
     public $father_name = [];
 
@@ -132,6 +134,7 @@ class PersonalInfoForm extends Form
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
+        $this->id = $employee->id;
         $this->city_id = $employee->city_id;
         $this->national_number = $employee->national_number;
         $this->direct_manager_id = $employee->direct_manager_id;

@@ -7,31 +7,31 @@
 
     <x-tab.form activeTab="information">
         <x-tab.list>
-            <x-tab.item :title="__('general.information')" activeTab="information" :active="$activeTab === 'information'">
+            <x-tab.item :title="__('general.information')"  activeTab="information" :active="$activeTab === 'information'">
                 <x-icons.user class="w-5 h-5 mr-2" />
             </x-tab.item>
-            <x-tab.item :title="__('general.education')" activeTab="education" :active="$activeTab === 'education'">
+            <x-tab.item :title="__('general.education')"  :disabled="!isset($infoForm->id)" activeTab="education" :active="$activeTab === 'education'">
                 <x-icons.education class="w-5 h-5 mr-2" />
             </x-tab.item>
-            <x-tab.item :title="__('general.courses')" activeTab="courses" :active="$activeTab === 'courses'">
+            <x-tab.item :title="__('general.courses')" activeTab="courses" :disabled="!isset($infoForm->id)" :active="$activeTab === 'courses'">
                 <x-icons.courses class="w-5 h-5 mr-2" />
             </x-tab.item>
-            <x-tab.item :title="__('general.experience')" activeTab="experience" :active="$activeTab === 'experience'">
+            <x-tab.item :title="__('general.experience')" activeTab="experience" :disabled="!isset($infoForm->id)" :active="$activeTab === 'experience'">
                 <x-icons.experience class="w-5 h-5 mr-2" />
             </x-tab.item>
-            <x-tab.item :title="__('general.relatives')" activeTab="relatives" :active="$activeTab === 'relatives'">
+            <x-tab.item :title="__('general.relatives')" activeTab="relatives" :disabled="!isset($infoForm->id)" :active="$activeTab === 'relatives'">
                 <x-icons.relatives class="w-5 h-5 mr-2" />
             </x-tab.item>
-            <x-tab.item :title="__('general.badges')" activeTab="badges" :active="$activeTab === 'badges'">
+            <x-tab.item :title="__('general.badges')" activeTab="badges" :disabled="!isset($infoForm->id)" :active="$activeTab === 'badges'">
                 <x-icons.badges class="w-5 h-5 mr-2" />
             </x-tab.item>
-            <x-tab.item :title="__('general.checklist')" activeTab="checklist" :active="$activeTab === 'checklist'">
+            <x-tab.item :title="__('general.checklist')" activeTab="checklist" :disabled="!isset($infoForm->id)" :active="$activeTab === 'checklist'">
                 <x-icons.checklist class="w-5 h-5 mr-2" />
             </x-tab.item>
-            <x-tab.item :title="__('general.attachments')" activeTab="attachments" :active="$activeTab === 'attachments'">
+            <x-tab.item :title="__('general.attachments')" activeTab="attachments" :disabled="!isset($infoForm->id)" :active="$activeTab === 'attachments'">
                 <x-icons.attachment class="w-5 h-5 mr-2" />
             </x-tab.item>
-            <x-tab.item :title="__('general.items')" activeTab="items" :active="$activeTab === 'items'">
+            <x-tab.item :title="__('general.items')" activeTab="items" :disabled="!isset($infoForm->id)" :active="$activeTab === 'items'">
                 <x-icons.items class="w-5 h-5 mr-2" />
             </x-tab.item>
         </x-tab.list>
