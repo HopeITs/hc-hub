@@ -1,20 +1,14 @@
 @php
     $dir        = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
-
-    // Header asset (must live under public/ due to dompdf chroot)
     $headerSrc  = public_path('assets/img/HC_SYR_Header2.png');
-
-    // Tuning (mm)
     $HEADER_HEIGHT_MM = 24;
     $TOP_MARGIN_MM    = 32;
 @endphp
     <!doctype html>
-{{-- Keep the whole page LTR just like the on-screen contract --}}
 <html lang="{{ app()->getLocale() }}" dir="ltr">
 <head>
     <meta charset="utf-8">
     <style>
-        /* === FONTS (unchanged) === */
         @font-face{ font-family:'somar'; src:url('{{ public_path('fonts/SomarSans/SomarSans-Regular.ttf') }}') format('truetype'); font-weight:400; font-style:normal; }
         @font-face{ font-family:'somar'; src:url('{{ public_path('fonts/SomarSans/SomarSans-Bold.ttf') }}') format('truetype'); font-weight:700; font-style:normal; }
         @font-face{ font-family:'NotoNaskhArabic'; src:url('{{ public_path('fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf') }}') format('truetype'); font-weight:400; font-style:normal; }
@@ -26,12 +20,8 @@
             margin:0; padding:0;
             font-family:'somar','NotoNaskhArabic','DejaVu Sans',sans-serif;
             font-size:12px; line-height:1.45; color:#111; background:#fff;
-
-            /* IMPORTANT: keep base direction LTR to match the detail view */
             direction: ltr;
         }
-
-        /* Header (unchanged) */
         .page-header{ position: relative; top:0; left:0; right:0; height: {{ $HEADER_HEIGHT_MM }}mm; }
         .page-header img{ position:absolute; top: -10px ; left:-2px; right:0; width:100%; }
 
@@ -55,7 +45,6 @@
             font-family:'somar','NotoNaskhArabic','DejaVu Sans',sans-serif;
         }
 
-        /* Utilities (unchanged) */
         .h-label{ color:#E31E24; font-weight:700; }
         .fw-bold{ font-weight:700; }
         .muted { color:#6B7280; }
