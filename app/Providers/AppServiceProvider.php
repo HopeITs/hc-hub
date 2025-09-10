@@ -18,9 +18,6 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        Blade::directive('glyph', function ($expr) {
-        return '<?php echo app(\App\Support\Arabic::class)->glyphs(' . $expr . '); ?>';
-        });
 
         Builder::macro('search', function ($fields, $string) {
             if (!$string) {
