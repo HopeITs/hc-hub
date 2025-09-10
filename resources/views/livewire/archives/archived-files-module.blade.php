@@ -36,18 +36,18 @@
 
                     <div class="flex items-center space-x-2">
                         @if (!$currentFolder && !$isShared)
-                        <button type="button" wire:click="$set('showCreateFolderModal', true)" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-700 border border-transparent rounded-md shadow-sm hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <x-icons.plus class="w-5 h-5 mr-2 -ml-1" />
-                            New Folder
-                        </button>
+                            <x-primary-button type="button" wire:click="$set('showCreateFolderModal', true)">
+                                <x-icons.plus class="w-5 h-5 mr-2 -ml-1" />
+                                New Folder
+                            </x-primary-button>
                         @endif
 
                         @if ($currentFolder && (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin'))))
-                        <label for="file-upload" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm cursor-pointer hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                            <x-icons.upload class="w-5 h-5 mr-2 -ml-1" />
-                            Upload Files
-                            <input id="file-upload" wire:model.live="filesToUpload" type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.gif,.xls,.xlsx,.doc,.docx,.pdf">
-                        </label>
+                            <label for="file-upload" class="py-2 px-4 text-sm font-semibold text-white bg-primary hover:opacity-90 cursor-pointer rounded-md shadow-sm transition duration-150 ease-in-out flex justify-center items-center">
+                                <x-icons.upload class="w-5 h-5 mr-2 -ml-1" />
+                                Upload Files
+                                <input id="file-upload" wire:model.live="filesToUpload" type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.gif,.xls,.xlsx,.doc,.docx,.pdf">
+                            </label>
                         @endif
                     </div>
                 </div>
@@ -124,14 +124,14 @@
                 <h3 class="text-lg font-medium leading-6 text-gray-900">Create New Folder</h3>
                 <div class="mt-4">
                     <label for="folderName" class="block text-sm font-medium text-gray-700">Folder Name</label>
-                    <input type="text" id="folderName" wire:model.defer="newFolderName" wire:keydown.enter="createFolder" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="folderName" wire:model.defer="newFolderName" wire:keydown.enter="createFolder" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm">
                     @error('newFolderName')
                     <span class="mt-2 block text-sm text-red-600">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
             <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
-                <button type="button" wire:click="createFolder" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none">Create</button>
+                <x-primary-button type="button" wire:click="createFolder" :full="true">Create</x-primary-button>
                 <button type="button" wire:click="$set('showCreateFolderModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
             </div>
         </div>
@@ -171,14 +171,14 @@
                 <h3 class="text-lg font-medium text-gray-900">Edit Folder</h3>
                 <div class="mt-4">
                     <label for="editingFolderName" class="block text-sm font-medium text-gray-700">Folder Name</label>
-                    <input type="text" id="editingFolderName" wire:model.defer="editingFolderName" wire:keydown.enter="saveEditedFolder" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="editingFolderName" wire:model.defer="editingFolderName" wire:keydown.enter="saveEditedFolder" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm">
                     @error('editingFolderName')
                     <span class="mt-2 block text-sm text-red-600">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
             <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
-                <button wire:click="saveEditedFolder" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none">Save</button>
+                <x-primary-button type="button" wire:click="saveEditedFolder" :full="true">Save</x-primary-button>
                 <button wire:click="$set('editingFolderId', null)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">Cancel</button>
             </div>
         </div>
@@ -193,14 +193,14 @@
                 <h3 class="text-lg font-medium text-gray-900">Edit File Name</h3>
                 <div class="mt-4">
                     <label for="editingFileName" class="block text-sm font-medium text-gray-700">File Name</label>
-                    <input type="text" id="editingFileName" wire:model.defer="editingFileName" wire:keydown.enter="saveEditedFile" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" id="editingFileName" wire:model.defer="editingFileName" wire:keydown.enter="saveEditedFile" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm">
                     @error('editingFileName')
                     <span class="mt-2 block text-sm text-red-600">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
             <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
-                <button wire:click="saveEditedFile" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none">Save</button>
+                <x-primary-button type="button" wire:click="saveEditedFile" :full="true">Save</x-primary-button>
                 <button wire:click="$set('editingFileId', null)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">Cancel</button>
             </div>
         </div>
@@ -215,14 +215,14 @@
                 <h3 class="text-lg font-medium text-gray-900">Assign Permissions for '{{ $folderForPermissions?->name }}'</h3>
                 <p class="mt-1 text-sm text-gray-500">Select the employees who can access this folder.</p>
                 <div class="mt-4">
-                    <input type="text" wire:model.live.debounce.300ms="userSearch" placeholder="Search employees..." class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    <input type="text" wire:model.live.debounce.300ms="userSearch" placeholder="Search employees..." class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm">
                 </div>
             </div>
             <div class="p-6 h-64 overflow-y-auto space-y-2">
                 @if($allUsers)
                 @forelse ($allUsers as $user)
                 <label for="user-{{ $user->id }}" class="flex items-center p-2 rounded-md hover:bg-gray-50 cursor-pointer @if($user->id === $folderForPermissions?->user_id) opacity-60 cursor-not-allowed @endif">
-                    <input id="user-{{ $user->id }}" type="checkbox" value="{{ $user->id }}" wire:model.live="selectedUsers" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" @if($user->id === $folderForPermissions?->user_id) disabled @endif>
+                    <input id="user-{{ $user->id }}" type="checkbox" value="{{ $user->id }}" wire:model.live="selectedUsers" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" @if($user->id === $folderForPermissions?->user_id) disabled @endif>
                     <span class="ml-3 text-sm text-gray-700">
                         {{ optional($user->profile)->name ?? $user->email }}
                         @if($user->id === $folderForPermissions?->user_id) (Me - Creator) @endif
@@ -234,8 +234,8 @@
                 @endif
             </div>
             <div class="bg-gray-50 px-6 py-4 grid grid-cols-2 gap-3 rounded-b-lg">
-                <button type="button" wire:click="savePermissions" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none">Save Permissions</button>
-                <button type="button" wire:click="closePermissionsModal" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">Cancel</button>
+                <x-primary-button type="button" wire:click="savePermissions" :full="true">Save Permissions</x-primary-button>
+                <button type="button" wire:click="closePermissionsModal" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
             </div>
         </div>
     </div>
