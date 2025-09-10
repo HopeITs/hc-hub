@@ -73,8 +73,8 @@
                         </a>
                         @if ($folder->user_id === auth()->id() || auth()->user()->hasRole('Super Admin'))
                         <div class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button wire:click.prevent="editPermissions({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-blue-600 hover:bg-gray-100 focus:outline-none" title="Permissions">
-                                <x-icons.cog class="w-4 h-4" />
+                            <button wire:click.prevent="editPermissions({{ $folder->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Permissions">
+                                <x-icons.cog class="size-5 text-red-800" />
                             </button>
                             <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Edit">
                                 <svg class="size-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
