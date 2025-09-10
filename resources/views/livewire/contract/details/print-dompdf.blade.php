@@ -2,7 +2,7 @@
     $dir        = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
 
     // Header asset (must live under public/ due to dompdf chroot)
-    $headerSrc  = public_path('assets/img/Header.svg');
+    $headerSrc  = public_path('assets/img/HC_SYR_Header2.png');
 
     // Tuning (mm)
     $HEADER_HEIGHT_MM = 24;
@@ -33,7 +33,7 @@
 
         /* Header (unchanged) */
         .page-header{ position: relative; top:0; left:0; right:0; height: {{ $HEADER_HEIGHT_MM }}mm; }
-        .page-header img{ position:absolute; top:15px; left:40px; right:0; width:91%; }
+        .page-header img{ position:absolute; top: -10px ; left:-2px; right:0; width:100%; }
 
         .pdf-page{ page-break-after:always; padding:0 50px; }
         .pdf-page:last-child{ page-break-after:auto; }
