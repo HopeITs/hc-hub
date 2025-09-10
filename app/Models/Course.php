@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Course extends Model
+class Course extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory , InteractsWithMedia;
 
     protected $fillable = [
         'id',
@@ -21,5 +23,10 @@ class Course extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('file')
+            ->singleFile();
     }
 }

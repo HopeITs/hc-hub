@@ -169,9 +169,9 @@ class EmployeeEdit extends Component
         $this->courseForm->addCourse();
     }
 
-    public function removeCourse(int $index)
+    public function removeCourse(int $index, ?int $id = null)
     {
-        $this->courseForm->removeCourse($index);
+        $this->courseForm->remove($index,$id);
         $this->resetErrorBag();
     }
 

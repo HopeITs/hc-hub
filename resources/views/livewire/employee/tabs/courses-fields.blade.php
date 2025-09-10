@@ -12,7 +12,7 @@
                     <x-primary-button
                         type="button"
                         variant="danger"
-                        wire:click="removeCourse({{ $index }})"
+                        wire:click="removeCourse({{ $index }} , {{$course['id']}})"
                         wire:loading.attr="disabled"
                         wire:target="removeCourse"
                         class="!px-3 !py-2"
@@ -104,6 +104,17 @@
                     <x-error-span>
                         {{ $errors->first("courseForm.courses.$index.is_approved") }}
                     </x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="course_attachment_{{ $index }}">@lang('general.attachment')</x-forms.input-label>
+                    <x-forms.file-input wire:model="courseForm.courses.{{ $index }}.course_attachment"
+                                        name="courseForm.courses.{{ $index }}.course_attachment"
+                                        preview-type="pdf"
+                                        :old-file="$course['course_attachment']"
+                                        :file-name="$course['file_name']"
+                                        accept=".pdf"/>
+
                 </div>
 
             </div>
