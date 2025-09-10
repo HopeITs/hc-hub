@@ -9,6 +9,7 @@ use App\Models\Folder;
 use App\Models\JobLevel;
 use App\Models\Project;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -86,6 +87,41 @@ class ArchivedFilesModule extends Component
                 default => [],
             };
         }
+    }
+
+    public function updatedPermissionFilterValue($value)
+    {
+        if (empty($value)) {
+            return;
+        }
+
+        $query = User::query();
+        $query = $this->applyPermissionFilters($query);
+        $filteredUserIds = $query->pluck('id')->toArray();
+
+        $this->selectedUsers = array_values(array_unique(array_merge($this->selectedUsers, $filteredUserIds)));
+    }
+
+    public function clearPermissionFilter(): void
+    {
+        $this->permissionFilterType = '';
+        $this->permissionFilterValue = '';
+        $this->permissionFilterOptions = [];
+    }
+
+    private function applyPermissionFilters(Builder $query): Builder
+    {
+        return $query->when($this->permissionFilterType && $this->permissionFilterValue, function ($q) {
+            $q->whereHas('profile', function ($profileQuery) {
+                match ($this->permissionFilterType) {
+                    'department' => $profileQuery->whereHas('departments', fn($sub) => $sub->where('departments.id', $this->permissionFilterValue)),
+                    'job_level' => $profileQuery->whereHas('jobLevels', fn($sub) => $sub->where('job_levels.id', $this->permissionFilterValue)),
+                    'project' => $profileQuery->whereHas('contracts.position.center.project', fn($sub) => $sub->where('projects.id', $this->permissionFilterValue)),
+                    'center' => $profileQuery->whereHas('contracts.position.center', fn($sub) => $sub->where('centers.id', $this->permissionFilterValue)),
+                    'city' => $profileQuery->whereHas('contracts.position.center.city', fn($sub) => $sub->where('cities.id', $this->permissionFilterValue)),
+                };
+            });
+        });
     }
 
     private function authorizeSharedAction(): void
@@ -315,17 +351,7 @@ class ArchivedFilesModule extends Component
                 });
             }
 
-            $query->when($this->permissionFilterType && $this->permissionFilterValue, function ($q) {
-                $q->whereHas('profile', function ($profileQuery) {
-                    match ($this->permissionFilterType) {
-                        'department' => $profileQuery->whereHas('departments', fn($sub) => $sub->where('departments.id', $this->permissionFilterValue)),
-                        'job_level' => $profileQuery->whereHas('jobLevels', fn($sub) => $sub->where('job_levels.id', $this->permissionFilterValue)),
-                        'project' => $profileQuery->whereHas('contracts.position.center.project', fn($sub) => $sub->where('projects.id', $this->permissionFilterValue)),
-                        'center' => $profileQuery->whereHas('contracts.position.center', fn($sub) => $sub->where('centers.id', $this->permissionFilterValue)),
-                        'city' => $profileQuery->whereHas('contracts.position.center.city', fn($sub) => $sub->where('cities.id', $this->permissionFilterValue)),
-                    };
-                });
-            });
+            $query = $this->applyPermissionFilters($query);
 
             $users = $query->get();
 
