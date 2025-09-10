@@ -72,15 +72,19 @@
                             @endif
                         </a>
                         @if ($folder->user_id === auth()->id() || auth()->user()->hasRole('Super Admin'))
-                        <div class="absolute top-2 right-2 flex flex-col space-y-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button wire:click.prevent="editPermissions({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-blue-600 hover:bg-gray-100 focus:outline-none" title="Permissions">
                                 <x-icons.cog class="w-4 h-4" />
                             </button>
-                            <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-yellow-600 hover:bg-gray-100 focus:outline-none" title="Edit">
-                                <x-icons.pencil class="w-4 h-4" />
+                            <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Edit">
+                                <svg class="size-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                                </svg>
                             </button>
-                            <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="p-1 bg-white rounded-full text-gray-500 hover:text-red-600 hover:bg-gray-100 focus:outline-none" title="Delete">
-                                <x-icons.trash class="w-4 h-4" />
+                            <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="cursor-pointer p-2" title="Delete">
+                                <svg class="size-5 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                                </svg>
                             </button>
                         </div>
                         @endif
@@ -102,12 +106,16 @@
                             <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $file->name }}</span>
                         </div>
                         @if (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin')))
-                        <button wire:click.prevent="startEditingFile({{ $file->id }})" class="absolute top-2 right-8 p-1 bg-white rounded-full text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-yellow-600 hover:bg-gray-100 focus:outline-none" title="Edit name">
-                            <x-icons.pencil class="w-4 h-4" />
-                        </button>
-                        <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="absolute top-2 right-2 p-1 bg-white rounded-full text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-600 hover:bg-gray-100 focus:outline-none" title="Delete file">
-                            <x-icons.trash class="w-4 h-4" />
-                        </button>
+                            <button wire:click.prevent="startEditingFile({{ $file->id }})" class="absolute top-1 right-10 cursor-pointer p-2 inline-flex items-center opacity-0 group-hover:opacity-100 transition-opacity" title="Edit name">
+                                <svg class="size-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                                </svg>
+                            </button>
+                            <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="absolute top-1 right-1 cursor-pointer p-2 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete file">
+                                <svg class="size-5 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                                </svg>
+                            </button>
                         @endif
                     </div>
                     @endforeach
