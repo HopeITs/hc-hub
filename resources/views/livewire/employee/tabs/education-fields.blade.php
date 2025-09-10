@@ -6,6 +6,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2 flex justify-end">
                     <x-primary-button type="button"
+                                      :showSpinner="false"
                                       wire:click="removeEducation({{ $index }} , {{$education['id']}})"
                     >
                         <x-icons.trash/>
@@ -36,6 +37,7 @@
                         id="education_type_{{ $index }}"
                         wire:model.defer="educationForm.educations.{{ $index }}.type">
                         <option value="">-- @lang('general.select') --</option>
+                        @foreach(\App\Enums\EducationType::cases() as ) @endforeach
                         <option value="0">@lang('general.unknown')</option>
                         <option value="1">@lang('general.primary_school')</option>
                         <option value="2">@lang('general.high_school')</option>
@@ -51,7 +53,7 @@
                     <x-forms.input-label for="education_graduation_year_{{ $index }}">@lang('general.graduation_year')</x-forms.input-label>
                     <x-forms.input
                         id="education_graduation_year_{{ $index }}"
-                        type="number"
+                        type="year"
                         placeholder="YYYY"
                         wire:model.defer="educationForm.educations.{{ $index }}.graduation_year"/>
                     <x-error-span>{{ $errors->first("educationForm.educations.$index.graduation_year") }}</x-error-span>

@@ -87,7 +87,7 @@ class CourseForm extends Form
                 $course['employee_id'] = $this->employee->id;
                 $this->course  = Course::create($course);
             }
-dd($course);
+
             if ($course['course_attachment'] instanceof TemporaryUploadedFile) {
                 $this->course->addMedia($course['course_attachment']->getRealPath())
                     ->usingFileName('course-file-'.$index .'.' . $course['course_attachment']->getClientOriginalExtension())
