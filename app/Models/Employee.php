@@ -20,6 +20,7 @@ class Employee extends Model implements HasMedia
 
     protected $casts = [
         'dob' => 'datetime',
+        'actual_dob' => 'datetime',
         'board_member_started_at' => 'datetime',
         'board_member_end_at' => 'datetime',
         'is_active' => 'boolean',
