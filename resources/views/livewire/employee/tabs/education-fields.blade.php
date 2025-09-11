@@ -1,3 +1,6 @@
+@php
+use App\Enums\EducationType;
+@endphp
 <form wire:submit.prevent="saveEducation" class="space-y-6">
     @foreach ($educationForm->educations as $index => $education)
 
@@ -37,14 +40,10 @@
                         id="education_type_{{ $index }}"
                         wire:model.defer="educationForm.educations.{{ $index }}.type">
                         <option value="">-- @lang('general.select') --</option>
-                        @foreach(\App\Enums\EducationType::cases() as ) @endforeach
-                        <option value="0">@lang('general.unknown')</option>
-                        <option value="1">@lang('general.primary_school')</option>
-                        <option value="2">@lang('general.high_school')</option>
-                        <option value="3">@lang('general.institute')</option>
-                        <option value="4">@lang('general.university')</option>
-                        <option value="5">@lang('general.master')</option>
-                        <option value="6">@lang('general.phd')</option>
+                        @foreach(EducationType::getValues() as $key => $value)
+                            <option value="{{$value}}">{{ EducationType::getLocalizedName($value)}}</option>
+                        @endforeach
+
                     </x-forms.select-input>
                     <x-error-span>{{ $errors->first("educationForm.educations.$index.type") }}</x-error-span>
                 </div>
@@ -77,7 +76,7 @@
         </div>
     @endforeach
 <div class="flex justify-center">
-    <x-primary-button type="button"
+    <x-primary-button type="button"  :showSpinner="false"
                       wire:click="addEducation"
     >
         + @lang('general.add-new')
