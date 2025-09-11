@@ -78,12 +78,13 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('program_id')->constrained()->onDelete('restrict');
             $table->foreignId('center_id')->nullable()->constrained()->onDelete('restrict');
-            $table->foreignId('city_id')->constrained()->onDelete('restrict');
+            $table->foreignId('city_id')->default(2)->constrained()->onDelete('restrict');
             $table->foreignId('job_level_id')->constrained()->onDelete('restrict');
             $table->foreignId('department_id')->constrained()->onDelete('restrict');
-            $table->json('title');
-            $table->text('qualifications');
-            $table->text('responsibilities');
+            $table->string('title');
+            $table->string('title_ar');
+            $table->text('qualifications')->nullable();
+            $table->text('responsibilities')->nullable();
             $table->integer('max_emp')->default(1);
             $table->integer('exist_emp')->default(0);
             $table->boolean('is_active')->default(true);
@@ -194,7 +195,7 @@ return new class extends Migration {
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->foreignId('position_id')->constrained()->onDelete('restrict');
+            $table->foreignId('position_id')->default(2)->constrained()->onDelete('restrict');
             $table->foreignId('contract_type_id')->constrained()->onDelete('restrict');
             $table->date('start_date');
             $table->date('end_date');

@@ -4,6 +4,7 @@ namespace App\Livewire\ProgramManagement\Program;
 
 use App\Livewire\Forms\ProgramManagement\ProgramForm;
 use App\Models\Employee;
+use App\Models\Program;
 use Livewire\Component;
 
 class Detail extends Component
@@ -14,7 +15,7 @@ class Detail extends Component
 
     public function mount(Program $program)
     {
-        $program->load('programManager', 'centers.city', 'centers.projectManager');
+        $program->load( 'centers.city');
         $this->form->setProgram($program);
     }
 

@@ -67,7 +67,7 @@
                     <x-icon name="user-circle" class="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
                         <span class="font-semibold text-gray-800">@lang('general.program-manager'):</span>
-                        <p class="text-gray-600">{{ $project->programManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</p>
+                        <p class="text-gray-600">{{ $program->programManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">

@@ -6,14 +6,14 @@ use Illuminate\Console\Prohibitable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Spatie\Translatable\HasTranslations;
+
 
 class Position extends Model
 {
-    use HasFactory , HasTranslations;
+    use HasFactory ;
 
     protected $guarded = ['id'];
-    public array $translatable = ['title'];
+
     protected $casts = [
         'max_emp'   => 'integer',
         'exist_emp' => 'integer',

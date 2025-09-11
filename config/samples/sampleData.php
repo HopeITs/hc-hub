@@ -338,7 +338,6 @@ return [
 
     'employees' => [
         [
-            'id' => 1,
             'name' => ['en' => 'George', 'ar' => 'جورج'],
             'years_of_service' => 1,
             'username' => 'george.s',
@@ -353,13 +352,12 @@ return [
             'gender' => 1,
             'father_name' => ['en' => 'Doe', 'ar' => 'دو'],
             'mother_name' => ['en' => 'Doe', 'ar' => 'دو'],
-            'nationality' => 'Syrian',
+            'nationality' => 1,
             'marital_status' => 1,
             'children' => 0,
             'work_phone' => '0988123456',
             'personal_phone' => '0933123456',
             'personal_email' => 'exxx@example.com',
-            'work_email' => 'exx1@example.com',
             'address' => ['en' => 'Aleppo', 'ar' => 'حلب'],
             'skills' => 'etc1, etc2, etc3',
             'interests' => 'Reading, Technology',
@@ -367,27 +365,65 @@ return [
         ],
     ],
     'positions' => [
-        [
-            'program_id' => 1,
-            'city_id' => 1,
-            'center_id' => 1,
-            'job_level_id' => 1,
-            'department_id' => 1,
-            'title' =>['en' => 'Program Manager'],
-            'qualifications' => 'Bachelor in Computer Science or related field.',
-            'responsibilities' => 'test',
-            'is_active' => true,
-        ],
-        [
-            'program_id' => 1,
-            'city_id' => 1,
-            'center_id' => 1,
-            'job_level_id' => 4,
-            'department_id' => 4,
-            'title' => ['en' => 'HR Manager'],
-            'qualifications' => 'Degree in HR Management with 3+ years experience.',
-            'responsibilities' => 'test',
-            'is_active' => true,
-        ],
-    ],
+
+        // -------------------------------
+        // Aleppo (city_id = 2)
+        // -------------------------------
+        ['title' => 'Chief Executive Officer', 'title_ar' => 'الرئيس التنفيذي', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1],
+        ['title' => 'Deputy Chief Executive Officer', 'title_ar' => 'نائب الرئيس التنفيذي', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1],
+        ['title' => 'Second Deputy Chief Executive Officer', 'title_ar' => 'نائب ثاني للرئيس التنفيذي', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1],
+        ['title' => 'IT Manager', 'title_ar' => 'مدير تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 3, 'city_id' => 1],
+        ['title' => 'IT Specialist', 'title_ar' => 'متخصص تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'HR Generalist', 'title_ar' => 'مسؤول الموارد البشرية', 'program_id' => 1, 'department_id' => 7, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Legal Affairs Consultant', 'title_ar' => 'مستشار الشؤون القانونية', 'program_id' => 1, 'department_id' => 12, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Senior Financial Manager', 'title_ar' => 'المدير المالي الأول', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 3, 'city_id' => 2],
+        ['title' => 'Accountant', 'title_ar' => 'محاسب', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Program Manager', 'title_ar' => 'مدير البرنامج', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 2],
+        ['title' => 'Projects and Fundraising Manager', 'title_ar' => 'مدير المشاريع وجمع التبرعات', 'program_id' => 1, 'department_id' => 10, 'job_level_id' => 3, 'city_id' => 2],
+        ['title' => 'Communication Manager / Syria', 'title_ar' => 'مدير التواصل / سوريا', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 3, 'city_id' => 2],
+        ['title' => 'Communication Officer / Videographer', 'title_ar' => 'مسؤول تواصل / مصور', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Communication Officer / Designer', 'title_ar' => 'مسؤول تواصل / مصمم', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Communication Officer / Photographer', 'title_ar' => 'مسؤول تواصل / مصور فوتوغرافي', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Public Relations Officer', 'title_ar' => 'مسؤول علاقات عامة', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Administrator', 'title_ar' => 'إداري', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Project Officer', 'title_ar' => 'مسؤول مشروع', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Relief Manager', 'title_ar' => 'مدير الإغاثة', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 3, 'city_id' => 2],
+        ['title' => 'MEAL Manager', 'title_ar' => 'مسؤول مراقبة وتقييم', 'program_id' => 1, 'department_id' => 9, 'job_level_id' => 3, 'city_id' => 2],
+        ['title' => 'Logistic Officer', 'title_ar' => 'مسؤول المشتريات', 'program_id' => 1, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Field Officer Assistant', 'title_ar' => 'مساعد مسؤول ميداني', 'program_id' => 1, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 2],
+        ['title' => 'Spiritual Care Specialist', 'title_ar' => 'مختص رعاية روحية', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 4, 'city_id' => 2],
+
+        // -------------------------------
+        // Damascus (city_id = 4)
+        // -------------------------------
+        ['title' => 'Project Assistant Manager', 'title_ar' => 'مساعد مدير المشروع', 'program_id' => 7, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 4],
+        ['title' => 'Project Manager', 'title_ar' => 'مدير مشروع', 'program_id' => 7, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 4],
+        ['title' => 'Supervisor', 'title_ar' => 'مشرف', 'program_id' => 7, 'department_id' => 1, 'job_level_id' => 3, 'city_id' => 4],
+        ['title' => 'Center Keeper', 'title_ar' => 'مدبرة مركز', 'program_id' => 7, 'department_id' => 13, 'job_level_id' => 6, 'city_id' => 4],
+        ['title' => 'English Teacher', 'title_ar' => 'استاذ لغة انجليزية', 'program_id' => 7, 'department_id' => 3, 'job_level_id' => 4, 'city_id' => 4],
+        ['title' => 'ICDL Trainer', 'title_ar' => 'مدرب ICDL', 'program_id' => 7, 'department_id' => 4, 'job_level_id' => 4, 'city_id' => 4],
+        ['title' => 'Companion', 'title_ar' => 'مرافق', 'program_id' => 7, 'department_id' => 1, 'job_level_id' => 4, 'city_id' => 4],
+
+        ['title' => 'Project Assistant Manager', 'title_ar' => 'مساعد مدير المشروع', 'program_id' => 8, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 4],
+        ['title' => 'Project Manager', 'title_ar' => 'مدير مشروع', 'program_id' => 8, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 4],
+        ['title' => 'Project Team Member', 'title_ar' => 'عضو في فريق البرنامج', 'program_id' => 8, 'department_id' => 1, 'job_level_id' => 4, 'city_id' => 4],
+        ['title' => 'Center Keeper', 'title_ar' => 'مدبرة مركز', 'program_id' => 8, 'department_id' => 13, 'job_level_id' => 6, 'city_id' => 4],
+
+        ['title' => 'Project Manager', 'title_ar' => 'مدير مشروع', 'program_id' => 2, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 4], // Micro Project
+        ['title' => 'Field Officer', 'title_ar' => 'مسؤول ميداني', 'program_id' => 2, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 4],
+        ['title' => 'Field Officer Assistant', 'title_ar' => 'مساعد مسؤول ميداني', 'program_id' => 2, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 4],
+        ['title' => 'Center Keeper', 'title_ar' => 'مدبرة مركز', 'program_id' => 2, 'department_id' => 13, 'job_level_id' => 6, 'city_id' => 4],
+
+        ['title' => 'Design Manager', 'title_ar' => 'مدير التصميم', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 3, 'city_id' => 4],
+        ['title' => 'Legal Affairs Consultant', 'title_ar' => 'مستشار الشؤون القانوينة', 'program_id' => 1, 'department_id' => 12, 'job_level_id' => 4, 'city_id' => 4],
+        ['title' => 'HR Manager', 'title_ar' => 'مسؤول الموارد البشرية', 'program_id' => 1, 'department_id' => 7, 'job_level_id' => 3, 'city_id' => 4],
+        ['title' => 'Logistic Officer', 'title_ar' => 'مسؤول المشتريات', 'program_id' => 1, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 4],
+        ['title' => 'Accountant', 'title_ar' => 'محاسب', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 4, 'city_id' => 4],
+        ['title' => 'MEAL Manager', 'title_ar' => 'مسؤول مراقبة وتقييم', 'program_id' => 1, 'department_id' => 9, 'job_level_id' => 3, 'city_id' => 4],
+        ['title' => 'IT Specialist', 'title_ar' => 'متخصص تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 4, 'city_id' => 4],
+        ['title' => 'Communication Officer / Photographer', 'title_ar' => 'مسؤول تواصل / مصور', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 4],
+        ['title' => 'Public Relations Officer', 'title_ar' => 'مسؤول علاقات عامة', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 4],
+    ]
+
+
 ];
