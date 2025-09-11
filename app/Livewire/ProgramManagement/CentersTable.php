@@ -25,12 +25,12 @@ class CentersTable extends LivewireTable
     {
         return $this->model()::query()
             ->with(['city', 'program'])
-            ->withCount('positions'); // for the badge in the Positions button
+            ->withCount('positions');
     }
 
     protected function globalSearchColumns(): array
     {
-        return ['name']; // keep search on stable text col
+        return ['name'];
     }
 
     protected function cityOptions(): array
@@ -65,7 +65,7 @@ class CentersTable extends LivewireTable
                     optional($m->city)?->getTranslation('name', $locale) ?? '—'
                 )
                 ->options($this->cityOptions())
-                ->sortable(), // not searchable to avoid LIKE on FK
+                ->sortable(),
 
             Column::make(__('general.address'))
                 ->displayUsing(fn ($v, Model $m) =>
@@ -107,7 +107,6 @@ class CentersTable extends LivewireTable
                     '" wire-event="confirmToggleItemStatus" />'
                 );
 
-                // emit up to CentersModule to open the modal
                 $editBtn = Blade::render(
                     '<x-table.edit-btn wire:click="$emitUp(\'openCenterEdit\','.$m->getKey().')" />'
                 );
@@ -135,7 +134,6 @@ class CentersTable extends LivewireTable
         ];
     }
 
-    /* === actions/alerts (same pattern as Positions) === */
 
     public function confirmToggleItemStatus($id): void
     {

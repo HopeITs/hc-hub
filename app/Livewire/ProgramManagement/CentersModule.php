@@ -10,7 +10,6 @@ use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 
 class CentersModule extends Component
 {
-    // Listen for edit requests coming from the table
     protected $listeners = [
         'openCenterEdit' => 'edit',
     ];
@@ -40,7 +39,6 @@ class CentersModule extends Component
         $cities   = City::orderBy("name->$locale")->get(['id', 'name']);
         $programs = Program::orderBy('name')->get(['id', 'name']);
 
-        // The grid is now a Livewire Tables child; we only pass data for the modal
         return view('livewire.program-management.centers-module', compact('cities', 'programs'));
     }
 

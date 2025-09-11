@@ -16,11 +16,8 @@
             </x-primary-button>
         </div>
     </div>
-
-    {{-- NEW Livewire Tables grid --}}
     <livewire:program-management.centers-table />
 
-    {{-- Your existing modal for create/edit (unchanged) --}}
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         <form wire:submit.prevent="save" class="space-y-4">
             <div class="space-y-4">
