@@ -34,7 +34,7 @@
                     )
                 }"
             >
-                <input type="checkbox" class="size-4" value="{{ $column->code() }}" wire:model.live="columns">
+                <input type="checkbox" class="size-4 !text-primary-400 rounded border-primary-400 " value="{{ $column->code() }}" wire:model.live="columns">
                 <span class="truncate" title="{{ $column->label() }}">{{ $column->label() }}</span>
             </label>
         @endforeach

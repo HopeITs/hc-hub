@@ -5,6 +5,7 @@ namespace App\Livewire\ProgramManagement;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\Program;
+use App\Models\Employee;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Traits\SortableTable;
@@ -23,9 +24,10 @@ class CentersModule extends Component
         'id'         => null,
         'name'       => '',
         'city_id'    => '',
-        'program_id' => '',
+        'project_id' => '',
         'address'    => ['en' => '', 'ar' => ''],
         'is_active'  => true,
+        'project_manager_id' => null,
     ];
 
     protected $rules = [
@@ -34,6 +36,7 @@ class CentersModule extends Component
         'item.program_id' => 'required|exists:programs,id',
         'item.address.en' => 'nullable|string|max:255',
         'item.address.ar' => 'nullable|string|max:255',
+        'item.project_manager_id' => 'nullable|exists:employees,id',
     ];
 
     public function updatingSearch()
@@ -72,7 +75,7 @@ class CentersModule extends Component
         $dir = $this->sortDirection ?: 'desc';
 
         $query = Center::query()
-            ->with(['city', 'program'])
+            ->with(['city', 'program','projectManager'])
             ->when($this->search, function ($q) use ($locale) {
                 $term = $this->search;
                 $q->where(function ($w) use ($term, $locale) {
@@ -105,8 +108,10 @@ class CentersModule extends Component
 
         $cities = City::orderBy("name->$locale")->get(['id', 'name']);
         $programs = Program::orderBy('name')->get(['id', 'name']);
+        $employees = Employee::orderBy("name->$locale")->get(['id', 'name']);
 
-        return view('livewire.program-management.centers-module', compact('items', 'cities', 'programs'));
+
+        return view('livewire.program-management.centers-module', compact('items', 'cities', 'programs' ,'employees'));
     }
 
     public function create()
@@ -118,6 +123,7 @@ class CentersModule extends Component
             'program_id' => '',
             'address'    => ['en' => '', 'ar' => ''],
             'is_active'  => true,
+            'project_manager_id' => null,
         ];
 
         $this->resetValidation();
@@ -137,6 +143,7 @@ class CentersModule extends Component
             'program_id' => $model->program_id,
             'address'    => array_merge(['en' => '', 'ar' => ''], $model->getTranslations('address')),
             'is_active'  => (bool) $model->is_active,
+            'project_manager_id' => $model->project_manager_id,
         ];
 
         $this->resetValidation();
@@ -151,6 +158,7 @@ class CentersModule extends Component
             'name' => $this->item['name'],
             'city_id' => $this->item['city_id'],
             'program_id' => $this->item['program_id'],
+            'project_manager_id' => $this->item['project_manager_id'],
         ];
 
         $model = Center::findOrNew($this->item['id']);

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Contract;
+use App\Policies\ContractPolicy;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
@@ -16,6 +17,9 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
+    /**
+     * Bootstrap any application services.
+     */
     public function boot(): void
     {
         Blade::directive('glyph', function ($expr) {
@@ -51,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
                 }
 
             });
+
 
         });
     }

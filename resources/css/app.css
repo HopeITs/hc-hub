@@ -209,15 +209,15 @@ select:focus[data-flux-control] {
 textarea,
 select {
     &:focus {
-        --tw-ring-color: var(--color-primary);
+        --tw-ring-color: transparent;
     }
 }
-[type='checkbox'], [type='radio'] {
-    color: var(--color-primary);
-}
-[type='checkbox']:checked, [type='radio']:checked, .dark [type='checkbox']:checked, .dark [type='radio']:checked  {
-    background-color: var(--color-primary) !important;
-}
+/*[type='checkbox'], [type='radio'] {*/
+/*    color: var(--color-primary);*/
+/*}*/
+/*[type='checkbox']:checked, [type='radio']:checked, .dark [type='checkbox']:checked, .dark [type='radio']:checked  {*/
+/*    background-color: var(--color-primary) !important;*/
+/*}*/
 
 /* \[:where(&)\]:size-4 {
     @apply size-4;

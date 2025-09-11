@@ -22,7 +22,7 @@
             <x-table.heading wire:click="sortBy('id')" sortable :direction="$sortField === 'id' ? $sortDirection : null">ID</x-table.heading>
             <x-table.heading wire:click="sortBy('name')" sortable :direction="$sortField === 'name' ? $sortDirection : null">@lang('general.center-name')</x-table.heading>
             <x-table.heading wire:click="sortBy('city_name')" sortable :direction="$sortField === 'city_name' ? $sortDirection : null">@lang('general.center-city')</x-table.heading>
-            <x-table.heading wire:click="sortBy('program_name')" sortable :direction="$sortField === 'program_name' ? $sortDirection : null">@lang('general.required-program')</x-table.heading>
+
             <x-table.heading wire:click="sortBy('address')" sortable :direction="$sortField === 'address' ? $sortDirection : null">@lang('general.address')</x-table.heading>
             <x-table.heading wire:click="sortBy('is_active')" sortable :direction="$sortField === 'is_active' ? $sortDirection : null">@lang('general.is-active')</x-table.heading>
             <x-table.heading>{{trans_choice('general.positions' , 2)}}</x-table.heading>
@@ -35,11 +35,11 @@
                     <x-table.cell class="whitespace-nowrap">{{ $item->id }}</x-table.cell>
                     <x-table.cell class="max-w-64 truncate" title="{{ $item->name }}">{{ $item->name ?? '-' }}</x-table.cell>
                     <x-table.cell class="max-w-56 truncate" title="{{ optional($item->city)->getTranslation('name', $locale) }}">{{ optional($item->city)->getTranslation('name', $locale) ?? '-' }}</x-table.cell>
-                    <x-table.cell class="max-w-56 truncate" title="{{ optional($item->program)->name }}">{{ optional($item->program)->name ?? '-' }}</x-table.cell>
+
                     <x-table.cell class="max-w-72 truncate" title="{{ $item->getTranslation('address', $locale) }}">{{ $item->getTranslation('address', $locale) ?? '-' }}</x-table.cell>
                     <x-table.cell-status :active="$item->is_active" :model-id="$item->id" wire-event="confirmToggleItemStatus" />
                     <x-table.cell class="whitespace-nowrap">
-                        <a href="{{ route('centers.positions', ['center' => $item->id, 'city' => $item->city_id]) }}"
+                        <a href="{{ route('positions.index', ['center' => $item->id, 'city' => $item->city_id]) }}"
                            @class([
                                'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium border shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary/40',
                                'bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 hover:border-primary/30' => $item->is_active,
@@ -95,6 +95,16 @@
                         </x-forms.select-input>
                         <x-error-span>{{ $errors->first('item.program_id') }}</x-error-span>
                     </div>
+                </div>
+                 <div>
+                    <x-forms.input-label for="project_manager_id">@lang('general.project-manager')</x-forms.input-label>
+                    <x-forms.select-input id="project_manager_id" wire:model="item.project_manager_id">
+                        <option value="">{{ __('general.select') }}</option>
+                        @foreach($employees as $employee)
+                            <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                        @endforeach
+                    </x-forms.select-input>
+                    <x-error-span>{{ $errors->first('item.project_manager_id') }}</x-error-span>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     @foreach(config('app.supported_locales') as $locale)

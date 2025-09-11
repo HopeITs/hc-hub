@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'project-name' => 'أمل لإدارة الموارد البشرية',
+    'project-name' => 'هوب سنتر لإدارة الموارد البشرية',
     'basic-management' => 'الإدارة الأساسية',
     'project-basics' => 'أساسيات المشروع',
     'city' => 'المدن|مدينة',
@@ -197,6 +198,13 @@ return [
     'position' => 'المنصب',
     'contract-start' => 'بداية العقد',
     'contract-end' => 'نهاية العقد',
+    'ongoing' => 'مستمر',
+    'no-employees' => 'لا يوجد موظفون معينون في هذا المشروع بعد.',
+    'archived-files' => 'الملفات المؤرشفة',
+    'my-folders' => 'مجلداتي',
+    'shared-folders' => 'المجلدات المشتركة',
+    'project-manager' => 'مدير المشروع',
+    'program-manager' => 'مدير البرنامج',
     'ongoing' => 'قيد التنفيذ',
     'no-employees' => 'لا يوجد موظفون مخصصون لهذا المشروع بعد.',
     'archived-files' => 'الملفات المؤرشفة',
@@ -223,5 +231,8 @@ return [
         'update-password-text' => 'تأكد من أن حسابك يستخدم كلمة مرور طويلة وعشوائية للحفاظ على الأمان.',
         'current-password' => 'كلمة المرور الحالية',
         'new-password' => 'كلمة المرور الجديدة',
+
     ],
+
+
 ];

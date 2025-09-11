@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContractExportController;
+use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Basics\ChecklistItemModule;
 use App\Livewire\Basics\CityModule;
 use App\Livewire\Basics\ContractTypeModule;
@@ -74,7 +75,13 @@ Route::group(
                 });
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
-            Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
+            Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)
+                ->defaults('isShared', false)
+                ->name('my-folders.index');
+
+            Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)
+                ->defaults('isShared', true)
+                ->name('shared-folders.index');
 
             Route::prefix('contracts')
                 ->name('contracts.')
@@ -82,9 +89,7 @@ Route::group(
                     Route::get('/', ContractsModule::class)->name('index');
                     Route::get('/create', ContractCreate::class)->name('create');
                     Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
-                    Route::middleware(['auth'])->group(function () {
 
-                    });
                 });
 
             Route::prefix('programs')
