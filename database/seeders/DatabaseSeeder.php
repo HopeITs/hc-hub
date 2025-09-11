@@ -29,9 +29,11 @@ class DatabaseSeeder extends Seeder
             LeaveTypeSeeder::class,
             AnnualLeaveRuleSeeder::class,
             RolesPermissionsSeeder::class,
-            UserRoleSeeder::class,
             JobLevelSeeder::class,
             PositionsSeeder::class,
+            UserRoleSeeder::class,
+
+
 //            EmployeeSeeder::class,
 
         ]);

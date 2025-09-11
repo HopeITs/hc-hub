@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Contract;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -55,5 +56,15 @@ class EmployeeFactory extends Factory
             'created_at' => now(),
             'updated_at' => now(),
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function ($employee) {
+
+          Contract::factory()->create([
+                'employee_id' => $employee->id,
+            ]);
+        });
     }
 }

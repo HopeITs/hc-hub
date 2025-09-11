@@ -2,10 +2,15 @@
 
 namespace App\Livewire\Archives;
 
+use App\Models\Center;
+use App\Models\City;
+use App\Models\Department;
 use App\Models\Folder;
+use App\Models\JobLevel;
+use App\Models\Program;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -37,6 +42,10 @@ class ArchivedFilesModule extends Component
     public ?int $editingFileId = null;
     public string $editingFileName = '';
 
+    public string $permissionFilterType = '';
+    public string $permissionFilterValue = '';
+    public array $permissionFilterOptions = [];
+
     public function mount(bool $isShared, $folderId = null)
     {
         $this->isShared = $isShared;
@@ -52,6 +61,75 @@ class ArchivedFilesModule extends Component
         $this->loadContent();
     }
 
+    public function getPermissionFilterCategoriesProperty(): array
+    {
+        return [
+            'department' => 'Department',
+            'job_level' => 'Job Level',
+            'program' => 'Program',
+            'center' => 'Center',
+            'city' => 'City',
+        ];
+    }
+
+    public function updatedPermissionFilterType($type)
+    {
+        $this->permissionFilterValue = '';
+        $this->permissionFilterOptions = [];
+
+        if ($type) {
+            $collection = match ($type) {
+                'department' => Department::all(),
+                'program' => Program::all(),
+                'job_level' => JobLevel::all(),
+                'center' => Center::all(),
+                'city' => City::all(),
+                default => collect(),
+            };
+
+            $this->permissionFilterOptions = $collection->mapWithKeys(function ($item) use ($type) {
+                $isTranslatable = in_array($type, ['job_level', 'city', 'center']);
+                $name = $isTranslatable ? $item->getTranslation('name', 'en') : $item->name;
+                return [$item->id => $name];
+            })->toArray();
+        }
+    }
+
+    public function updatedPermissionFilterValue($value)
+    {
+        if (empty($value)) {
+            return;
+        }
+
+        $query = User::query();
+        $query = $this->applyPermissionFilters($query);
+        $filteredUserIds = $query->pluck('id')->toArray();
+
+        $this->selectedUsers = array_values(array_unique(array_merge($this->selectedUsers, $filteredUserIds)));
+    }
+
+    public function clearPermissionFilter(): void
+    {
+        $this->permissionFilterType = '';
+        $this->permissionFilterValue = '';
+        $this->permissionFilterOptions = [];
+    }
+
+    private function applyPermissionFilters(Builder $query): Builder
+    {
+        return $query->when($this->permissionFilterType && $this->permissionFilterValue, function ($q) {
+            $q->whereHas('profile.contracts.position', function ($positionQuery) {
+                match ($this->permissionFilterType) {
+                    'department' => $positionQuery->where('department_id', $this->permissionFilterValue),
+                    'job_level' => $positionQuery->where('job_level_id', $this->permissionFilterValue),
+                    'program' => $positionQuery->where('program_id', $this->permissionFilterValue),
+                    'center' => $positionQuery->where('center_id', $this->permissionFilterValue),
+                    'city' => $positionQuery->where('city_id', $this->permissionFilterValue),
+                };
+            });
+        });
+    }
+
     private function authorizeSharedAction(): void
     {
         if ($this->isShared && !auth()->user()->hasRole('Super Admin')) {
@@ -62,7 +140,8 @@ class ArchivedFilesModule extends Component
     public function loadContent(): void
     {
         $parentId = $this->currentFolder?->id;
-        $query = Folder::where('parent_id', $parentId);
+        $query = Folder::query();
+        $query->where('parent_id', $parentId);
 
         if ($this->isShared) {
             $query->where(function ($q) {
@@ -100,9 +179,9 @@ class ArchivedFilesModule extends Component
     {
         $baseCrumbUrl = $this->isShared ? route('shared-folders.index') : route('my-folders.index');
         $crumbs = [['label' => __('general.archived-files'), 'url' => $baseCrumbUrl]];
-
         $folderLinks = [];
         $folder = $this->currentFolder;
+
         while ($folder) {
             array_unshift($folderLinks, [
                 'label' => $folder->name,
@@ -130,7 +209,6 @@ class ArchivedFilesModule extends Component
             'user_id' => auth()->id(),
             'is_shared' => $this->isShared,
         ]);
-
         $folder->users()->attach(auth()->id());
 
         $this->showCreateFolderModal = false;
@@ -169,6 +247,9 @@ class ArchivedFilesModule extends Component
         $this->folderForPermissions = null;
         $this->selectedUsers = [];
         $this->userSearch = '';
+        $this->permissionFilterType = '';
+        $this->permissionFilterValue = '';
+        $this->permissionFilterOptions = [];
     }
 
     public function updatedFilesToUpload()
@@ -184,7 +265,6 @@ class ArchivedFilesModule extends Component
         foreach ($this->filesToUpload as $file) {
             $this->currentFolder->addMedia($file->getRealPath())->usingName($file->getClientOriginalName())->toMediaCollection('archived_files', 'public');
         }
-
         $this->filesToUpload = [];
         $this->loadContent();
     }
@@ -219,7 +299,6 @@ class ArchivedFilesModule extends Component
         } elseif ($this->itemToDeleteType === 'folder') {
             Folder::findOrFail($this->itemToDeleteId)->delete();
         }
-
         $this->showDeleteConfirmationModal = false;
         $this->loadContent();
     }
@@ -266,18 +345,26 @@ class ArchivedFilesModule extends Component
     public function render()
     {
         if ($this->showPermissionsModal) {
-            $users = User::with('profile')->whereHas('profile')->get();
+            $query = User::with('profile')->whereHas('profile');
 
             if (trim($this->userSearch)) {
-                $users = $users->filter(function ($user) {
-                    return Str::contains(optional($user->profile)->name, $this->userSearch, true);
+                $query->whereHas('profile', function ($q) {
+                    $q->where('name', 'like', '%' . $this->userSearch . '%');
                 });
             }
+
+            $query = $this->applyPermissionFilters($query);
+
+            $users = $query->get();
 
             $creatorId = $this->folderForPermissions?->user_id;
             [$creator, $otherUsers] = $users->partition(fn($user) => $user->id === $creatorId);
 
-            $this->allUsers = $creator->merge($otherUsers->sortBy('profile.name'));
+            $sortedUsers = $otherUsers->sortBy(function ($user) {
+                return optional($user->profile)->name;
+            });
+
+            $this->allUsers = $creator->merge($sortedUsers);
         }
 
         return view('livewire.archives.archived-files-module');
