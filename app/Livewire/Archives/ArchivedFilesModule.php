@@ -19,7 +19,7 @@ class ArchivedFilesModule extends Component
     public ?Folder $currentFolder = null;
     public Collection $folders;
     public Collection $files;
-    public array $breadcrumbs = [];
+    public array $finalCrumbs = [];
     public bool $showCreateFolderModal = false;
     public string $newFolderName = '';
     public array $filesToUpload = [];
@@ -98,11 +98,24 @@ class ArchivedFilesModule extends Component
 
     protected function generateBreadcrumbs(): void
     {
-        $this->breadcrumbs = [];
+        $baseCrumbUrl = $this->isShared ? route('shared-folders.index') : route('my-folders.index');
+        $crumbs = [['label' => __('general.archived-files'), 'url' => $baseCrumbUrl]];
+
+        $folderLinks = [];
         $folder = $this->currentFolder;
         while ($folder) {
-            array_unshift($this->breadcrumbs, ['id' => $folder->id, 'name' => $folder->name]);
+            array_unshift($folderLinks, [
+                'label' => $folder->name,
+                'url' => $this->isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id])
+            ]);
             $folder = $folder->parent;
+        }
+
+        $this->finalCrumbs = array_merge($crumbs, $folderLinks);
+
+        if (count($this->finalCrumbs) > 1) {
+            $lastIndex = count($this->finalCrumbs) - 1;
+            unset($this->finalCrumbs[$lastIndex]['url']);
         }
     }
 
@@ -254,12 +267,17 @@ class ArchivedFilesModule extends Component
     {
         if ($this->showPermissionsModal) {
             $users = User::with('profile')->whereHas('profile')->get();
+
             if (trim($this->userSearch)) {
                 $users = $users->filter(function ($user) {
-                    return Str::contains($user->profile->name, $this->userSearch, true);
+                    return Str::contains(optional($user->profile)->name, $this->userSearch, true);
                 });
             }
-            $this->allUsers = $users->sortBy('profile.name');
+
+            $creatorId = $this->folderForPermissions?->user_id;
+            [$creator, $otherUsers] = $users->partition(fn($user) => $user->id === $creatorId);
+
+            $this->allUsers = $creator->merge($otherUsers->sortBy('profile.name'));
         }
 
         return view('livewire.archives.archived-files-module');
