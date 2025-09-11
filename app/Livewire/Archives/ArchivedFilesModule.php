@@ -7,7 +7,7 @@ use App\Models\City;
 use App\Models\Department;
 use App\Models\Folder;
 use App\Models\JobLevel;
-use App\Models\Project;
+use App\Models\Program;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -66,7 +66,7 @@ class ArchivedFilesModule extends Component
         return [
             'department' => 'Department',
             'job_level' => 'Job Level',
-            'project' => 'Project',
+            'program' => 'Program',
             'center' => 'Center',
             'city' => 'City',
         ];
@@ -78,14 +78,20 @@ class ArchivedFilesModule extends Component
         $this->permissionFilterOptions = [];
 
         if ($type) {
-            $this->permissionFilterOptions = match ($type) {
-                'department' => Department::pluck('name', 'id')->toArray(),
-                'project' => Project::pluck('name', 'id')->toArray(),
-                'job_level' => JobLevel::all()->mapWithKeys(fn($item) => [$item->id => $item->getTranslation('name', 'en')])->toArray(),
-                'center' => Center::all()->mapWithKeys(fn($item) => [$item->id => $item->getTranslation('name', 'en')])->toArray(),
-                'city' => City::all()->mapWithKeys(fn($item) => [$item->id => $item->getTranslation('name', 'en')])->toArray(),
-                default => [],
+            $collection = match ($type) {
+                'department' => Department::all(),
+                'program' => Program::all(),
+                'job_level' => JobLevel::all(),
+                'center' => Center::all(),
+                'city' => City::all(),
+                default => collect(),
             };
+
+            $this->permissionFilterOptions = $collection->mapWithKeys(function ($item) use ($type) {
+                $isTranslatable = in_array($type, ['job_level', 'city', 'center']);
+                $name = $isTranslatable ? $item->getTranslation('name', 'en') : $item->name;
+                return [$item->id => $name];
+            })->toArray();
         }
     }
 
@@ -102,23 +108,16 @@ class ArchivedFilesModule extends Component
         $this->selectedUsers = array_values(array_unique(array_merge($this->selectedUsers, $filteredUserIds)));
     }
 
-    public function clearPermissionFilter(): void
-    {
-        $this->permissionFilterType = '';
-        $this->permissionFilterValue = '';
-        $this->permissionFilterOptions = [];
-    }
-
     private function applyPermissionFilters(Builder $query): Builder
     {
         return $query->when($this->permissionFilterType && $this->permissionFilterValue, function ($q) {
-            $q->whereHas('profile', function ($profileQuery) {
+            $q->whereHas('profile.contracts.position', function ($positionQuery) {
                 match ($this->permissionFilterType) {
-                    'department' => $profileQuery->whereHas('departments', fn($sub) => $sub->where('departments.id', $this->permissionFilterValue)),
-                    'job_level' => $profileQuery->whereHas('jobLevels', fn($sub) => $sub->where('job_levels.id', $this->permissionFilterValue)),
-                    'project' => $profileQuery->whereHas('contracts.position.center.project', fn($sub) => $sub->where('projects.id', $this->permissionFilterValue)),
-                    'center' => $profileQuery->whereHas('contracts.position.center', fn($sub) => $sub->where('centers.id', $this->permissionFilterValue)),
-                    'city' => $profileQuery->whereHas('contracts.position.center.city', fn($sub) => $sub->where('cities.id', $this->permissionFilterValue)),
+                    'department' => $positionQuery->where('department_id', $this->permissionFilterValue),
+                    'job_level' => $positionQuery->where('job_level_id', $this->permissionFilterValue),
+                    'program' => $positionQuery->where('program_id', $this->permissionFilterValue),
+                    'center' => $positionQuery->where('center_id', $this->permissionFilterValue),
+                    'city' => $positionQuery->where('city_id', $this->permissionFilterValue),
                 };
             });
         });
@@ -135,7 +134,6 @@ class ArchivedFilesModule extends Component
     {
         $parentId = $this->currentFolder?->id;
         $query = Folder::query();
-
         $query->where('parent_id', $parentId);
 
         if ($this->isShared) {
@@ -174,9 +172,9 @@ class ArchivedFilesModule extends Component
     {
         $baseCrumbUrl = $this->isShared ? route('shared-folders.index') : route('my-folders.index');
         $crumbs = [['label' => __('general.archived-files'), 'url' => $baseCrumbUrl]];
-
         $folderLinks = [];
         $folder = $this->currentFolder;
+
         while ($folder) {
             array_unshift($folderLinks, [
                 'label' => $folder->name,
@@ -204,7 +202,6 @@ class ArchivedFilesModule extends Component
             'user_id' => auth()->id(),
             'is_shared' => $this->isShared,
         ]);
-
         $folder->users()->attach(auth()->id());
 
         $this->showCreateFolderModal = false;
@@ -261,7 +258,6 @@ class ArchivedFilesModule extends Component
         foreach ($this->filesToUpload as $file) {
             $this->currentFolder->addMedia($file->getRealPath())->usingName($file->getClientOriginalName())->toMediaCollection('archived_files', 'public');
         }
-
         $this->filesToUpload = [];
         $this->loadContent();
     }
@@ -296,7 +292,6 @@ class ArchivedFilesModule extends Component
         } elseif ($this->itemToDeleteType === 'folder') {
             Folder::findOrFail($this->itemToDeleteId)->delete();
         }
-
         $this->showDeleteConfirmationModal = false;
         $this->loadContent();
     }
