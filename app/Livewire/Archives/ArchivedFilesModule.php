@@ -108,6 +108,13 @@ class ArchivedFilesModule extends Component
         $this->selectedUsers = array_values(array_unique(array_merge($this->selectedUsers, $filteredUserIds)));
     }
 
+    public function clearPermissionFilter(): void
+    {
+        $this->permissionFilterType = '';
+        $this->permissionFilterValue = '';
+        $this->permissionFilterOptions = [];
+    }
+
     private function applyPermissionFilters(Builder $query): Builder
     {
         return $query->when($this->permissionFilterType && $this->permissionFilterValue, function ($q) {
