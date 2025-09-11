@@ -1,9 +1,9 @@
-@include('livewire.contract.details.annual._styles')
+@include('livewire.contract.details._styles')
 
 <div class="contract-a4 text-gray-900 dark:text-gray-100">
     <div class="contract-body space-y-">
-        <div wire:key="annual-container-{{ $annualPage }}">
-            @switch($annualPage)
+        <div wire:key="annual-container-{{ $pageNo }}">
+            @switch($pageNo)
                 @case(1) @include('livewire.contract.details.annual.pages.page1') @break
                 @case(2) @include('livewire.contract.details.annual.pages.page2') @break
                 @case(3) @include('livewire.contract.details.annual.pages.page3') @break
@@ -13,10 +13,10 @@
         </div>
     </div>
 
-    <div class="contract-footer">{{ $annualPage }} of {{ $totalPages }}</div>
+    <div class="contract-footer">{{ $pageNo }} of {{ $totalPages }}</div>
 </div>
 
-@include('livewire.contract.details.annual._pager')
+@include('livewire.contract.details._pager')
 
 <div class="hidden print:block">
     @for($i=1; $i<=$totalPages; $i++)

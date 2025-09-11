@@ -12,13 +12,6 @@ use Illuminate\Support\ServiceProvider;
 class AppServiceProvider extends ServiceProvider
 {
 
-    protected $policies = [
-        Contract::class => ContractPolicy::class,
-    ];
-
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
@@ -29,13 +22,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Blade::directive('glyph', function ($expr) {
+        return '<?php echo app(\App\Support\Arabic::class)->glyphs(' . $expr . '); ?>';
+        });
 
         Builder::macro('search', function ($fields, $string) {
             if (!$string) {
                 return $this;
             }
 
-            $fields = Arr::wrap($fields); // ensure $fields is always an array
+            $fields = Arr::wrap($fields);
 
             return $this->where(function ($query) use ($fields, $string) {
                 foreach ($fields as $field) {
@@ -51,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
                 return $this;
             }
 
-            $fields = Arr::wrap($fields); // ensure $fields is always an array
+            $fields = Arr::wrap($fields);
 
             return $this->where(function ($query) use ($fields, $string) {
                 foreach ($fields as $field) {

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Basics\ChecklistItemModule;
 use App\Livewire\Basics\CityModule;
@@ -35,6 +36,7 @@ Route::group(
 //        'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
     ],
     function () {
+
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle);
         });
@@ -62,7 +64,8 @@ Route::group(
 
 
             Route::get('/centers', CentersModule::class)->name('centers.index');
-
+            Route::get('/contracts/{contract}/export', [ContractExportController::class, 'pdf'])
+                ->name('contracts.export');
             Route::prefix('positions')
                 ->name('positions.')
                 ->group(function () {
@@ -86,6 +89,7 @@ Route::group(
                     Route::get('/', ContractsModule::class)->name('index');
                     Route::get('/create', ContractCreate::class)->name('create');
                     Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
+
                 });
 
             Route::prefix('programs')

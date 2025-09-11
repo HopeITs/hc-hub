@@ -1,129 +1,103 @@
 <div>
-    <header class="bg-white shadow">
-        <div class="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold tracking-tight text-gray-900">
-                {{ $isShared ? __('general.shared-folders') : __('general.my-folders') }}
-            </h1>
-        </div>
-    </header>
+    <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+        <livewire:layout.breadcrumbs
+            :title="$isShared ? __('general.shared-folders') : __('general.my-folders')"
+            :crumbs="$finalCrumbs"
+        />
 
-    <div class="py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="p-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="flex items-center justify-between mb-6">
-                    <nav class="flex" aria-label="Breadcrumb">
-                        <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                            <li class="inline-flex items-center">
-                                <a href="{{ $isShared ? route('shared-folders.index') : route('my-folders.index') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
-                                    <x-icons.home class="w-4 h-4 mr-2" />
-                                    Root
-                                </a>
-                            </li>
-                            @foreach ($breadcrumbs as $breadcrumb)
-                            <li>
-                                <div class="flex items-center">
-                                    <svg class="w-3 h-3 mx-1 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
-                                    </svg>
-                                    <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $breadcrumb['id']]) : route('my-folders.index', ['folderId' => $breadcrumb['id']]) }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">
-                                        {{ $breadcrumb['name'] }}
-                                    </a>
-                                </div>
-                            </li>
-                            @endforeach
-                        </ol>
-                    </nav>
+        <div class="flex items-center space-x-2 flex-shrink-0">
+            @if (!$currentFolder && !$isShared)
+                <x-primary-button type="button" wire:click="$set('showCreateFolderModal', true)">
+                    <x-icons.plus class="w-5 h-5 mr-2 -ml-1" />
+                    New Folder
+                </x-primary-button>
+            @endif
 
-                    <div class="flex items-center space-x-2">
-                        @if (!$currentFolder && !$isShared)
-                            <x-primary-button type="button" wire:click="$set('showCreateFolderModal', true)">
-                                <x-icons.plus class="w-5 h-5 mr-2 -ml-1" />
-                                New Folder
-                            </x-primary-button>
-                        @endif
-
-                        @if ($currentFolder && (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin'))))
-                            <label for="file-upload" class="py-2 px-4 text-sm font-semibold text-white bg-primary hover:opacity-90 cursor-pointer rounded-md shadow-sm transition duration-150 ease-in-out flex justify-center items-center">
-                                <x-icons.upload class="w-5 h-5 mr-2 -ml-1" />
-                                Upload Files
-                                <input id="file-upload" wire:model.live="filesToUpload" type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.gif,.xls,.xlsx,.doc,.docx,.pdf">
-                            </label>
-                        @endif
-                    </div>
-                </div>
-
-                <div wire:loading wire:target="filesToUpload" class="mb-4">
-                    <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 100%"></div>
-                    </div>
-                    <p class="text-sm text-gray-500 mt-1">Uploading...</p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                    @forelse($folders as $folder)
-                    <div class="relative group">
-                        <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md">
-                            <x-icons.folder class="w-16 h-16 text-primary" /> {{-- Changed to text-primary (red) --}}
-                            <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $folder->name }}</span>
-                            @if ($folder->user_id === auth()->id())
-                                <span class="mt-1 text-xs text-gray-500">By: Me</span>
-                            @else
-                                <span class="mt-1 text-xs text-gray-500">By: {{ optional($folder->creator->profile)->name ?? 'Unknown' }}</span>
-                            @endif
-                        </a>
-                        @if ($folder->user_id === auth()->id() || auth()->user()->hasRole('Super Admin'))
-                        <div class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button wire:click.prevent="editPermissions({{ $folder->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Permissions">
-                                <x-icons.cog class="size-5 text-red-800" />
-                            </button>
-                            <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Edit">
-                                <svg class="size-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
-                                </svg>
-                            </button>
-                            <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="cursor-pointer p-2" title="Delete">
-                                <svg class="size-5 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                                </svg>
-                            </button>
-                        </div>
-                        @endif
-                    </div>
-                    @empty
-                    @if ($files->isEmpty())
-                    <p class="col-span-full text-center text-gray-500">This folder is empty.</p>
-                    @endif
-                    @endforelse
-
-                    @foreach ($files as $file)
-                    <div class="relative group">
-                        <div wire:click="downloadFile({{ $file->id }})" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md cursor-pointer">
-                            @if (isset($filePreviews[$file->id]))
-                            <img src="{{ $filePreviews[$file->id] }}" alt="{{ $file->name }}" class="object-cover w-16 h-16 rounded-md" />
-                            @else
-                            <x-icons.document-text class="w-16 h-16 text-primary" /> {{-- Changed to text-primary (red) --}}
-                            @endif
-                            <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $file->name }}</span>
-                        </div>
-                        @if (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin')))
-                            <button wire:click.prevent="startEditingFile({{ $file->id }})" class="absolute top-1 right-10 cursor-pointer p-2 inline-flex items-center opacity-0 group-hover:opacity-100 transition-opacity" title="Edit name">
-                                <svg class="size-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
-                                </svg>
-                            </button>
-                            <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="absolute top-1 right-1 cursor-pointer p-2 opacity-0 group-hover:opacity-100 transition-opacity" title="Delete file">
-                                <svg class="size-5 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                                </svg>
-                            </button>
-                        @endif
-                    </div>
-                    @endforeach
-                </div>
-            </div>
+            @if ($currentFolder && (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin'))))
+                <label for="file-upload" class="py-2 px-4 text-sm font-semibold text-white bg-primary hover:opacity-90 cursor-pointer rounded-md shadow-sm transition duration-150 ease-in-out flex justify-center items-center">
+                    <x-icons.upload class="w-5 h-5 mr-2 -ml-1" />
+                    Upload Files
+                    <input id="file-upload" wire:model.live="filesToUpload" type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.gif,.xls,.xlsx,.doc,.docx,.pdf">
+                </label>
+            @endif
         </div>
     </div>
 
+
+    <div class="p-6 mt-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+        <div wire:loading.flex wire:target="filesToUpload" class="mb-4 items-center">
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-primary h-2.5 rounded-full" style="width: 100%"></div>
+            </div>
+            <p class="text-sm text-gray-500 ml-4 flex-shrink-0">Uploading...</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            @forelse($folders as $folder)
+            <div class="relative group">
+                <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md">
+                    <x-icons.folder class="w-16 h-16 text-primary" />
+                    <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $folder->name }}</span>
+                    @if ($folder->user_id === auth()->id())
+                        <span class="mt-1 text-xs text-gray-500 transition-opacity group-hover:opacity-0">By: Me</span>
+                    @else
+                        <span class="mt-1 text-xs text-gray-500 transition-opacity group-hover:opacity-0">By: {{ optional($folder->creator->profile)->name ?? 'Unknown' }}</span>
+                    @endif
+                </a>
+                @if ($folder->user_id === auth()->id() || auth()->user()->hasRole('Super Admin'))
+                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all">
+                    <button wire:click.prevent="editPermissions({{ $folder->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Permissions">
+                        <x-icons.cog class="size-5 text-red-800" />
+                    </button>
+                    <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Edit">
+                        <svg class="size-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                        </svg>
+                    </button>
+                    <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="cursor-pointer p-2" title="Delete">
+                        <svg class="size-5 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                        </svg>
+                    </button>
+                </div>
+                @endif
+            </div>
+            @empty
+            @if ($files->isEmpty())
+            <p class="col-span-full text-center text-gray-500">This folder is empty.</p>
+            @endif
+            @endforelse
+
+            @foreach ($files as $file)
+            <div class="relative group">
+                <div wire:click="downloadFile({{ $file->id }})" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md cursor-pointer">
+                    @if (isset($filePreviews[$file->id]))
+                    <img src="{{ $filePreviews[$file->id] }}" alt="{{ $file->name }}" class="object-cover w-16 h-16 rounded-md" />
+                    @else
+                    <x-icons.document-text class="w-16 h-16 text-primary" />
+                    @endif
+                    <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $file->name }}</span>
+                </div>
+                @if (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin')))
+                    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all">
+                        <button wire:click.prevent="startEditingFile({{ $file->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Edit name">
+                            <svg class="size-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                            </svg>
+                        </button>
+                        <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="cursor-pointer p-2" title="Delete file">
+                            <svg class="size-5 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                @endif
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    {{-- MODALS START HERE --}}
     @if ($showCreateFolderModal)
     <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('showCreateFolderModal', false)"></div>
     <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
