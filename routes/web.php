@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Basics\ChecklistItemModule;
 use App\Livewire\Basics\CityModule;
@@ -14,14 +15,15 @@ use App\Livewire\Contract\ContractsModule;
 use App\Livewire\Employee\EmployeeCreate;
 use App\Livewire\Employee\EmployeeEdit;
 use App\Livewire\Employee\EmployeeModule;
-use App\Livewire\ProjectManagement\CentersModule;
-use App\Livewire\ProjectManagement\DefaultDeliverablesModule;
-use App\Livewire\ProjectManagement\PositionsModule;
-use App\Livewire\ProjectManagement\Project\Create as ProjectCreate;
-use App\Livewire\ProjectManagement\Project\Detail as ProjectDetail;
-use App\Livewire\ProjectManagement\Project\Index as ProjectIndex;
-use App\Livewire\ProjectManagement\Project\Update as ProjectUpdate;
-use App\Livewire\ProjectManagement\RequiredPositionModule;
+use App\Livewire\Position\PositionCreate;
+use App\Livewire\Position\PositionEdit;
+use App\Livewire\Position\PositionsModule;
+use App\Livewire\ProgramManagement\CentersModule;
+use App\Livewire\ProgramManagement\DefaultDeliverablesModule;
+use App\Livewire\ProgramManagement\Program\Create as ProgramCreate;
+use App\Livewire\ProgramManagement\Program\Detail as ProgramDetail;
+use App\Livewire\ProgramManagement\Program\Index as ProgramIndex;
+use App\Livewire\ProgramManagement\Program\Update as ProgramUpdate;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -31,8 +33,10 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 Route::group(
     [
         'prefix' => LaravelLocalization::setLocale(),
+//        'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
     ],
     function () {
+
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle);
         });
@@ -58,9 +62,17 @@ Route::group(
             Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');
             Route::get('departments', DepartmentModule::class)->name('departments.index');
 
-            Route::get('required-positions', RequiredPositionModule::class)->name('required-positions.index');
+
             Route::get('/centers', CentersModule::class)->name('centers.index');
-            Route::get('/project-management/centers/{center}/positions', PositionsModule::class)->name('centers.positions');
+            Route::get('/contracts/{contract}/export', [ContractExportController::class, 'pdf'])
+                ->name('contracts.export');
+            Route::prefix('positions')
+                ->name('positions.')
+                ->group(function () {
+                    Route::get('/', PositionsModule::class)->name('index');
+                    Route::get('/create', PositionCreate::class)->name('create');
+                    Route::get('/{position}/edit', PositionEdit::class)->name('edit');
+                });
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
             Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)
@@ -77,15 +89,16 @@ Route::group(
                     Route::get('/', ContractsModule::class)->name('index');
                     Route::get('/create', ContractCreate::class)->name('create');
                     Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
+
                 });
 
-            Route::prefix('projects')
-                ->name('projects.')
+            Route::prefix('programs')
+                ->name('programs.')
                 ->group(function () {
-                    Route::get('/', ProjectIndex::class)->name('index');
-                    Route::get('/create', ProjectCreate::class)->name('create');
-                    Route::get('/edit/{project:slug}', ProjectUpdate::class)->name('edit');
-                    Route::get('/{project:slug}', ProjectDetail::class)->name('show');
+                    Route::get('/', ProgramIndex::class)->name('index');
+                    Route::get('/create', ProgramCreate::class)->name('create');
+                    Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
+                    Route::get('/{program:slug}', ProgramDetail::class)->name('show');
                 });
 
             Route::prefix('employees')
@@ -95,7 +108,6 @@ Route::group(
                     Route::get('/create', EmployeeCreate::class)->name('create');
                     Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
                 });
-
             Route::get('/contracts/{contract}', ContractDetails::class)->name('contracts.show');
         });
 

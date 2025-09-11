@@ -66,7 +66,7 @@ class DepartmentModule extends Component
             'email' => null,
         ];
 
-        $this->modalTitle = __('general.add_new');
+        $this->modalTitle = __('general.add-new');
         $this->showModal = true;
     }
 

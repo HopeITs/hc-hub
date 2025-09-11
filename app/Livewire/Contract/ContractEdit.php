@@ -3,8 +3,7 @@
 namespace App\Livewire\Contract;
 
 use App\Livewire\Forms\ContractForm;
-use App\Models\{Contract, Employee, Position, ContractType, Department, JobLevel, Project};
-use Illuminate\Support\Facades\DB;
+use App\Models\{Contract, Employee, Position, ContractType};
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
@@ -14,8 +13,9 @@ class ContractEdit extends Component
     public Contract $contract;
 
     public int $step = 1;
-    public int $maxStep = 3;
+    public int $maxStep = 1;
 
+    /** Keep the same step validation map as create */
     protected array $validatorsByStep = [
         1 => 'validateIdentity',
         2 => 'validateTerms',
@@ -26,31 +26,12 @@ class ContractEdit extends Component
     {
         $this->contract = $contract;
 
+        // Same defaults + prefill as create
         $this->form->setDefaults();
-        $this->form->fillFromModel($contract);
+        $this->form->setContract($contract);
     }
 
-    protected function userIsHr(): bool
-    {
-        $user = auth()->user();
-        $hrNames = ['HR', 'HR Manager'];
-
-        if (method_exists($user, 'roles')) {
-            return $user->roles()->whereIn('name', $hrNames)->exists();
-        }
-
-        return DB::table('role_user')
-            ->join('roles', 'roles.id', '=', 'role_user.role_id')
-            ->where('role_user.user_id', $user->id)
-            ->whereIn('roles.name', $hrNames)
-            ->exists();
-    }
-
-    protected function userCityId(): ?int
-    {
-        return optional(auth()->user()->profile)->city_id;
-    }
-
+    /** Same wizard controls as create */
     public function next(): void
     {
         $method = $this->validatorsByStep[$this->step] ?? null;
@@ -58,7 +39,10 @@ class ContractEdit extends Component
             $this->form->{$method}();
         }
 
-        if ($this->step < 3) $this->step++;
+        if ($this->step < 3) {
+            $this->step++;
+            $this->maxStep = max($this->maxStep, $this->step);
+        }
     }
 
     public function prev(): void
@@ -84,6 +68,7 @@ class ContractEdit extends Component
         return redirect()->route('contracts.index');
     }
 
+    // Legacy no-ops (keep to avoid breakage)
     public function saveIdentity(): void {}
     public function saveTerms(): void {}
     public function savePay(): void {}
@@ -92,35 +77,25 @@ class ContractEdit extends Component
     public function render()
     {
         $locale = app()->getLocale();
-        $isHr   = $this->userIsHr();
-        $cityId = $this->userCityId();
 
-        // Employees
-        $employeesQuery = Employee::select('id', 'name')->orderBy("name->$locale");
-        if ($isHr && $cityId) {
-            $employeesQuery->where('city_id', $cityId);
-        }
-        $employees = $employeesQuery->get();
+        return view('livewire.contract.contract-edit', [
+            // Match create: employees scoped by user's city
+            'employees' => Employee::where('city_id', auth()->user()->profile->city_id)
+                ->select('id','name')
+                ->orderBy("name->$locale")
+                ->get(),
 
-        $projectsQuery = Project::select('id', 'name')->orderBy("name->$locale");
-        $projects = $projectsQuery->get();
+            // Positions include relations so identity partial can show derived info
+            'positions' => Position::with([
+                'center:id,name,city_id',
+                'program:id,name',
+                'department:id,name',
+                'jobLevel:id,name,grade',
+            ])
+                ->orderBy('id')
+                ->get(['id','center_id','program_id','department_id','job_level_id']),
 
-        $positionsQuery = Position::with([
-            'center:id,name',
-            'requiredPosition:id,title',
-        ])->orderBy('id')->select(['id','center_id','required_position_id']);
-
-        if ($isHr && $cityId) {
-            $positionsQuery->whereHas('center', fn($c) => $c->where('city_id', $cityId));
-        }
-        $positions = $positionsQuery->get();
-
-        $types       = ContractType::select('id', 'name')->orderBy("name->$locale")->get();
-        $departments = Department::select('id', 'name')->orderBy('name')->get();
-        $levels      = JobLevel::select('id', 'name')->orderBy('id')->get();
-
-        return view('livewire.contract.contract-edit', compact(
-            'employees', 'projects', 'positions', 'types', 'departments', 'levels'
-        ));
+            'types' => ContractType::select('id','name')->orderBy("name->$locale")->get(),
+        ]);
     }
 }

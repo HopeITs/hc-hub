@@ -5,15 +5,15 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <livewire:layout.breadcrumbs :title="__('general.edit')" :crumbs="[
-        ['label' => trans_choice('general.employee_management', 2)],
+        ['label' => trans_choice('general.employee-management', 2)],
         ['label' => trans_choice('general.contracts', 2), 'url' => route('contracts.index')],
         ['label' => __('general.edit')],
     ]"/>
 
     <form wire:submit.prevent="submit" class="mt-2">
-
         <x-tab.form :activeTab="$active" wire:key="contract-edit-wizard-{{ $step }}">
             <x-tab.list>
+                {{-- Identity --}}
                 <x-tab.item :title="__('general.identity-org')" activeTab="identity"
                             class="pointer-events-none select-none {{ $active === 'identity' ? 'bg-primary text-white' : '' }}">
                     <svg class="w-5 h-5 mr-2 opacity-80" fill="currentColor" viewBox="0 0 20 20">
@@ -22,6 +22,7 @@
                     </svg>
                 </x-tab.item>
 
+                {{-- Terms --}}
                 <x-tab.item :title="__('general.terms-status')" activeTab="terms"
                             class="{{ $maxStep < 2 ? 'opacity-50' : '' }} pointer-events-none select-none {{ $active === 'terms' ? 'bg-primary text-white' : '' }}">
                     <svg class="w-5 h-5 mr-2 opacity-80" fill="currentColor" viewBox="0 0 20 20">
@@ -30,12 +31,12 @@
                     </svg>
                 </x-tab.item>
 
+                {{-- Pay --}}
                 <x-tab.item :title="__('general.Pay-schedule')" activeTab="comp"
                             class="{{ $maxStep < 3 ? 'opacity-50' : '' }} pointer-events-none select-none {{ $active === 'comp' ? 'bg-primary text-white' : '' }}">
                     <x-icons.cash class="w-5 h-5 mr-2" :title="__('general.Pay-schedule')"/>
                 </x-tab.item>
             </x-tab.list>
-
 
             <div class="flex-grow w-full">
                 {{-- step 1 --}}
@@ -85,7 +86,6 @@
                             <h2 class="text-base font-semibold text-gray-900">@lang('general.Pay-schedule')</h2>
                         </div>
 
-                        {{-- IMPORTANT: match create filename (lowercase) --}}
                         @include('livewire.contract.Partials.pay-fields')
 
                         <div class="mt-6 flex items-center justify-between">

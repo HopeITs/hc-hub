@@ -72,6 +72,7 @@ return [
             'png', 'gif', 'bmp', 'svg', 'wav', 'mp4',
             'mov', 'avi', 'wmv', 'mp3', 'm4a',
             'jpg', 'jpeg', 'mpga', 'webp', 'wma',
+            'pdf', 'doc', 'docx', 'xls', 'xlsx',''
         ],
         'max_upload_time' => 5, // Max duration (in minutes) before an upload is invalidated...
         'cleanup' => true, // Should cleanup temporary uploads older than 24 hrs...
@@ -144,9 +145,6 @@ return [
     */
 
     'inject_morph_markers' => true,
-
-    'lifetime' => 120, // in minutes
-    'expire_on_close' => false,
 
     /*
     |---------------------------------------------------------------------------

@@ -1,10 +1,12 @@
 <form wire:submit.prevent="saveEducation" class="space-y-6">
     @foreach ($educationForm->educations as $index => $education)
+
+        <input type="hidden" wire:model="educationForm.educations.{{ $index }}.id">
         <div wire:key="education-{{ $index }}" class="relative border-b pb-6 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2 flex justify-end">
                     <x-primary-button type="button"
-                                      wire:click="removeEducation({{ $index }})"
+                                      wire:click="removeEducation({{ $index }} , {{$education['id']}})"
                     >
                         <x-icons.trash/>
                     </x-primary-button>
@@ -55,23 +57,16 @@
                     <x-error-span>{{ $errors->first("educationForm.educations.$index.graduation_year") }}</x-error-span>
                 </div>
 
-                <div>
-                    <x-forms.input-label for="education_graduation_year_{{ $index }}">@lang('general.graduation_year')</x-forms.input-label>
-                    <x-forms.input
-                        id="education_graduation_year_{{ $index }}"
-                        type="number"
-                        placeholder="YYYY"
-                        wire:model.defer="educationForm.educations.{{ $index }}.graduation_year"/>
-                    <x-error-span>{{ $errors->first("educationForm.educations.$index.graduation_year") }}</x-error-span>
-                </div>
+
 
                 <div>
                     <x-forms.input-label for="edu_attachment_{{ $index }}">@lang('general.attachment')</x-forms.input-label>
                     <x-forms.file-input wire:model="educationForm.educations.{{ $index }}.edu_attachment"
                                         name="educationForm.educations.{{ $index }}.edu_attachment"
                                         preview-type="pdf"
-                                        :old-file="$educationForm->educations[$index]['edu_attachment']"
-                                        accept="pdf"/>
+                                        :old-file="$education['edu_attachment']"
+                                        :file-name="$education['file_name']"
+                                        accept=".pdf"/>
 
                 </div>
             </div>
@@ -83,7 +78,7 @@
     <x-primary-button type="button"
                       wire:click="addEducation"
     >
-        + @lang('general.add_new')
+        + @lang('general.add-new')
     </x-primary-button>
 </div>
 

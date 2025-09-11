@@ -9,7 +9,7 @@ return [
     'remember-me' => 'Remember Me',
     'forgot-password' => 'Forgot Password?',
     'copyright' => 'Raja Christian Center - Human Resources Management',
-    'failed' => 'These login credentials are incorrect.',
+    'failed' => 'Please check your credentials',
 
     'reset-password' => 'Reset Password',
     'reset-password-text' => 'The new password must be different from previously used passwords.',

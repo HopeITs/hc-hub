@@ -46,7 +46,7 @@ class LeaveTypeModule extends Component
     {
         $this->reset('item');
         $this->showModal = true;
-        $this->modalTitle = __('general.add_new');
+        $this->modalTitle = __('general.add-new');
     }
 
     public function edit($id)

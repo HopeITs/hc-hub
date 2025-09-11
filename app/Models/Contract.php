@@ -8,9 +8,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Contract extends Model
 {
-    use HasFactory;
+    use HasFactory ;
 
-    protected $fillable = ['employee_id', 'position_id', 'contract_type_id', 'department_id', 'job_level_id', 'start_date', 'end_date', 'terminated_at', 'reason_of_termination', 'yearly_leave_days', 'currency', 'salary', 'salary_per', 'work_days', 'work_hours', 'weekly_hours', 'is_active'];
+    protected $guarded = ['id'];
+
 
     protected $casts = [
         'start_date' => 'date',
@@ -38,14 +39,7 @@ class Contract extends Model
     {
         return $this->belongsTo(ContractType::class, 'contract_type_id');
     }
-    public function department()
-    {
-        return $this->belongsTo(Department::class, 'department_id');
-    }
-    public function jobLevel()
-    {
-        return $this->belongsTo(JobLevel::class, 'job_level_id');
-    }
+
 
     public function leaveBalances()
     {

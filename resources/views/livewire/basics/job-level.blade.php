@@ -10,7 +10,7 @@
         />
         <div>
             <x-primary-button wire:click="create">
-                @lang('general.add_new')
+                @lang('general.add-new')
             </x-primary-button>
         </div>
     </div>
