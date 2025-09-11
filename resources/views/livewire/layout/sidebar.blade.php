@@ -59,7 +59,7 @@ request()->routeIs('positions.*') ||
                     request()->routeIs('centers.*')">
 
                     <x-slot name="icon">
-                        <x-icons.layers/>
+                        <x-icons.layers class="w-5 h-5" />
                     </x-slot>
 
                     <x-slot name="list">
@@ -106,14 +106,21 @@ request()->routeIs('positions.*') ||
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
 
-                <li>
-                    <a href="{{ route('archived-files.index') }}"
-                       class="flex items-center p-2 rounded-lg text-gray-900 hover:bg-gray-100 group @if (request()->routeIs('archived-files.*')) bg-gray-100 @endif">
-                        <x-icons.folder
-                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"/>
-                        <span class="ms-3">{{ __('general.archived-files') }}</span>
-                    </a>
-                </li>
+                <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')"
+                    :active="request()->routeIs('my-folders.*') || request()->routeIs('shared-folders.*')">
+                    <x-slot name="icon">
+                        <x-icons.folder class="w-5 h-5" />
+                    </x-slot>
+                    <x-slot name="list">
+                        <x-layouts.app.sidebar.nav-item :href="route('my-folders.index')" :active="request()->routeIs('my-folders.*')">
+                            {{ __('general.my-folders') }}
+                        </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item :href="route('shared-folders.index')" :active="request()->routeIs('shared-folders.*')">
+                            {{ __('general.shared-folders') }}
+                        </x-layouts.app.sidebar.nav-item>
+                    </x-slot>
+                </x-layouts.app.sidebar.dropdown-nav-list>
 
             </ul>
         </div>

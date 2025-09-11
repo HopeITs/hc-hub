@@ -15,7 +15,7 @@ class Folder extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $fillable = ['name', 'parent_id', 'user_id'];
+    protected $fillable = ['name', 'parent_id', 'user_id', 'is_shared'];
 
     public function parent(): BelongsTo
     {
