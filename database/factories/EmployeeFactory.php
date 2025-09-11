@@ -18,7 +18,7 @@ class EmployeeFactory extends Factory
             ],
             'city_id' => $this->faker->numberBetween(2,6),
             'username' => $this->faker->userName,
-            'actual_job' => $this->faker->jobTitle,
+            'actual_dob' => $this->faker->date('Y-m-d', '-20 years'),
             'years_of_service' => $this->faker->randomFloat(1, 0, 8),
             'direct_manager_id' => null, // you can link later
             'tech_manager_id' => null,   // you can link later

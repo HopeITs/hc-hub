@@ -346,7 +346,7 @@ return [
             'tech_manager_id' => null,
             'national_number' => '11021034567',
             'dob' => '1985-04-12',
-            'actual_job' => 'IT Specialist',
+            'actual_dob' => '1985-04-12',
             'civil_registry_office' => 'Damascus',
             'civil_registry_number' => '123A',
             'place_of_registration' => 'Damascus',

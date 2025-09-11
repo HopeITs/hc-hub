@@ -103,11 +103,11 @@ return new class extends Migration {
             $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('set null');
             $table->json('name');
             $table->string('username')->unique();
-            $table->string('actual_job')->nullable();
             $table->double('years_of_service')->nullable();
             $table->foreignId('direct_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->foreignId('tech_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->char('national_number')->unique()->nullable();
+            $table->dateTime('actual_dob')->nullable();
             $table->dateTime('dob')->nullable();
             $table->string('place_and_birth_date')->nullable();
             $table->string('civil_registry_office')->nullable();

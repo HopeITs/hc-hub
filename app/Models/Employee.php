@@ -33,7 +33,7 @@ class Employee extends Model implements HasMedia
     }
     public function contracts()
     {
-        return $this->hasMany(Contract::class, 'employee_id');
+        return $this->hasMany(Contract::class, 'employee_id')->where('is_active', true);
     }
 
     public function positions(): BelongsToMany

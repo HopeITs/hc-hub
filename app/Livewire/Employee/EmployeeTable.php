@@ -27,7 +27,7 @@ class EmployeeTable extends LivewireTable
 
     protected function globalSearchColumns(): array
     {
-        return ['name', 'actual_job'];
+        return ['name', 'actual_dob'];
     }
 
     protected function managerOptions(): array
@@ -50,7 +50,7 @@ class EmployeeTable extends LivewireTable
             Column::make(trans('general.name'), 'name')
                 ->displayUsing(fn ($v, Model $m) => $m->getTranslation('name', app()->getLocale()))
                 ->sortable()
-                ->searchable(),
+               ,
 
             Column::make(trans('general.photo'), function (Model $m): string {
                 $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
@@ -59,7 +59,7 @@ class EmployeeTable extends LivewireTable
                     : '<div class="h-12 w-12 rounded-full bg-gray-200"></div>';
             })->asHtml(),
 
-            Column::make(trans('general.years_of_service'), 'years_of_service')->sortable(),
+            Column::make(trans('general.years-of-service'), 'years_of_service')->sortable(),
 
             SelectColumn::make(trans('general.direct_manager'), 'direct_manager_id')
                 ->displayUsing(fn ($v, Model $m) =>
@@ -75,9 +75,9 @@ class EmployeeTable extends LivewireTable
                 ->options($this->managerOptions())
                 ->sortable(),
 
-            Column::make(trans('general.actual_job'), 'actual_job')
+            Column::make(trans('general.position'), 'contracts.position.title')
                 ->sortable()
-                ->searchable(),
+               ,
 
             Column::make(trans('general.work_email'))
                 ->displayUsing(fn ($v, Model $m) => $m->account?->email ?? '—'),
