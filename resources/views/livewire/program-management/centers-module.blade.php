@@ -96,6 +96,16 @@
                         <x-error-span>{{ $errors->first('item.program_id') }}</x-error-span>
                     </div>
                 </div>
+                 <div>
+                    <x-forms.input-label for="project_manager_id">@lang('general.project-manager')</x-forms.input-label>
+                    <x-forms.select-input id="project_manager_id" wire:model="item.project_manager_id">
+                        <option value="">{{ __('general.select') }}</option>
+                        @foreach($employees as $employee)
+                            <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                        @endforeach
+                    </x-forms.select-input>
+                    <x-error-span>{{ $errors->first('item.project_manager_id') }}</x-error-span>
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     @foreach(config('app.supported_locales') as $locale)
                         <div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Basics\ChecklistItemModule;
 use App\Livewire\Basics\CityModule;
 use App\Livewire\Basics\ContractTypeModule;
@@ -34,7 +35,6 @@ Route::group(
 //        'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
     ],
     function () {
-
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle);
         });
@@ -72,7 +72,13 @@ Route::group(
                 });
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
-            Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
+            Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)
+                ->defaults('isShared', false)
+                ->name('my-folders.index');
+
+            Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)
+                ->defaults('isShared', true)
+                ->name('shared-folders.index');
 
             Route::prefix('contracts')
                 ->name('contracts.')

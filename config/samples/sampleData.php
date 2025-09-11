@@ -86,7 +86,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => 'Micro Program',
+            'name' => 'Micro Project',
             'description' => [
                 'en' => 'Aimed at empowering Syrian families via livelihood, education, and development programs.',
                 'ar' => 'مركز الرجاء المسيحي منظمة مسكونية، تأسست مطلع عام ٢٠١٨، وتعمل بتوجيه من الكنيسة اللاتينية في سورية. رسالتنا هي تمكين الأسر السورية من خلال مبادرات متعددة تستهدف كل مكون من مكونات الأسرة، في مجالات الإغاثة، ودعم سبل العيش، والتنمية، والتعليم.',
@@ -186,7 +186,7 @@ return [
             'is_active' => true,
         ],
         [
-            'name' => 'Entrepreneurship program',
+            'name' => 'Entrepreneurship project',
             'description' => [
                 'en' => 'Leadership program to equip community leaders with technical and leadership skills for effective crisis response.',
                 'ar' => 'نظرًا لعدم وجود قادة ناجحين يمكنهم توجيه المجتمعات المحلية خلال أوقات الأزمات، تم إنشاء برنامج القيادة لاستهداف الأعضاء النشطين في المجتمع وتزويدهم بالمهارات الفنية والقدرات القيادية، والتي ستدعمهم في التقييم الدقيق لاحتياجات مجتمعاتهم الحالية والمستقبلية واقتراح حلول فعالة، وبالتالي المساهمة الفعلية على تشجيع تنمية المجتمع.',
@@ -341,6 +341,7 @@ return [
             'id' => 1,
             'name' => ['en' => 'George', 'ar' => 'جورج'],
             'years_of_service' => 1,
+            'username' => 'george.s',
             'direct_manager_id' => null,
             'tech_manager_id' => null,
             'national_number' => '11021034567',
