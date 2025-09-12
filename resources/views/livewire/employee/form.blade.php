@@ -2,7 +2,7 @@
     <livewire:layout.breadcrumbs :title="__('general.add-new')" :crumbs="[
         ['label' => trans_choice('general.employee-management', 2)],
         ['label' => trans_choice('general.employee', 2), 'url' => route('employees.index')],
-        ['label' => __('general.add-new')],
+        ['label' => $title ?? __('general.add-new')],
     ]" />
 
     <x-tab.form activeTab="information">
