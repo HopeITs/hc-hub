@@ -67,6 +67,9 @@ class EmployeeEdit extends Component
         if (empty($this->badgeForm->badges)) {
             $this->badgeForm->addBadge();
         }
+        if (empty($this->checklistForm->checklists)) {
+            $this->checklistForm->addChecklist();
+        }
         if (empty($this->attachmentForm->attachments)) {
             $this->attachmentForm->addAttachment();
         }

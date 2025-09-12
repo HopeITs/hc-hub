@@ -18,7 +18,7 @@
                     <x-forms.select-input id="item_id_{{ $index }}"
                         wire:model.defer="checklistForm.checklists.{{ $index }}.item_id">
                         <option value="">-- @lang('general.select') --</option>
-                        @foreach ($checklistItems as $item)
+                        @foreach ($allItems as $item)
                             <option value="{{ $item->id }}">{{ $item->name }}</option>
                         @endforeach
                     </x-forms.select-input>
