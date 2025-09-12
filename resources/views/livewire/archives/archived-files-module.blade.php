@@ -195,8 +195,8 @@
                 <div class="mt-4">
                     <input type="text" wire:model.live.debounce.300ms="userSearch" placeholder="Search employees by name..." class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm">
                 </div>
-                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-1">
                         <label for="pFilterType" class="block text-sm font-medium text-gray-700">Filter by Category</label>
                         <select id="pFilterType" wire:model.live="permissionFilterType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
                             <option value="">All Categories</option>
@@ -205,35 +205,46 @@
                             @endforeach
                         </select>
                     </div>
-                    <div>
+                    <div class="md:col-span-2 flex items-end gap-x-2">
                         @if(!empty($permissionFilterOptions))
-                            <label for="pFilterValue" class="block text-sm font-medium text-gray-700">Select Value</label>
-                            <select id="pFilterValue" wire:model.live="permissionFilterValue" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
-                                <option value="">All</option>
-                                @foreach($permissionFilterOptions as $id => $name)
-                                    <option value="{{ $id }}">{{ $name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="flex-grow">
+                                <label for="pFilterValue" class="block text-sm font-medium text-gray-700">Select Value</label>
+                                <select id="pFilterValue" wire:model.live="permissionFilterValue" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+                                    <option value="">All</option>
+                                    @foreach($permissionFilterOptions as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <x-primary-button
+                                type="button"
+                                wire:click="addFilter"
+                                :disabled="!$permissionFilterType || !$permissionFilterValue"
+                                class="h-10">
+                                Add Filter
+                            </x-primary-button>
                         @endif
                     </div>
                 </div>
 
-                @if ($permissionFilterType && $permissionFilterValue)
-                    <div class="mt-4">
+                @if (!empty($activeFilters))
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        @foreach ($activeFilters as $index => $filter)
                         <span class="inline-flex items-center gap-x-1.5 rounded-md bg-gray-100 px-2 py-1 text-sm font-medium text-gray-800">
-                            {{ $this->permissionFilterCategories[$permissionFilterType] ?? '' }}: {{ $permissionFilterOptions[$permissionFilterValue] ?? '' }}
-                            <button type="button" wire:click="clearPermissionFilter" class="group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-gray-500/20">
+                            {{ $filter['type_label'] }}: {{ $filter['value_label'] }}
+                            <button type="button" wire:click="removeFilter({{ $index }})" class="group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-gray-500/20">
                                 <span class="sr-only">Remove</span>
                                 <svg viewBox="0 0 14 14" class="h-3.5 w-3.5 stroke-gray-600/50 group-hover:stroke-gray-600/75">
                                     <path d="M4 4l6 6m0-6l-6 6" />
                                 </svg>
                             </button>
                         </span>
+                        @endforeach
                     </div>
                 @endif
             </div>
-            <div class="p-6 h-64 overflow-y-auto space-y-2 relative" wire:loading.class="opacity-50" wire:target="permissionFilterType, permissionFilterValue, userSearch">
-                <div wire:loading wire:target="permissionFilterType, permissionFilterValue, userSearch" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
+            <div class="p-6 h-64 overflow-y-auto space-y-2 relative" wire:loading.class="opacity-50" wire:target="permissionFilterType, permissionFilterValue, userSearch, addFilter, removeFilter">
+                <div wire:loading wire:target="permissionFilterType, permissionFilterValue, userSearch, addFilter, removeFilter" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
                     <x-icons.spinner class="h-8 w-8 text-primary" />
                 </div>
                 @if($allUsers)
