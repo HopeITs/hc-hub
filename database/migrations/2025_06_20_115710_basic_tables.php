@@ -137,7 +137,7 @@ return new class extends Migration {
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->string('issuing_organization');
-            $table->dateTime('date')->nullable();
+            $table->dateTime('issue_date')->nullable();
             $table->boolean('is_approved')->default(false);
             $table->timestamps();
         });

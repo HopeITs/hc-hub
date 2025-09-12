@@ -18,6 +18,7 @@
                         class="!px-3 !py-2"
                         title="@lang('general.remove')"
                         aria-label="@lang('general.remove')"
+                        :showSpinner="false"
                     >
                         <x-icons.trash class="w-4 h-4"/>
                     </x-primary-button>
@@ -68,12 +69,12 @@
                     <x-forms.input
                         id="course_date_{{ $index }}"
                         type="date"
-                        wire:model.defer="courseForm.courses.{{ $index }}.date"
-                        :invalid="$errors->has('courseForm.courses.'.$index.'.date')"
+                        wire:model.defer="courseForm.courses.{{ $index }}.issue_date"
+                        :invalid="$errors->has('courseForm.courses.'.$index.'.issue_date')"
                     />
 
                     <x-error-span>
-                        {{ $errors->first("courseForm.courses.$index.date") }}
+                        {{ $errors->first("courseForm.courses.$index.issue_date") }}
                     </x-error-span>
                 </div>
 
@@ -130,6 +131,7 @@
             wire:click="addCourse"
             wire:loading.attr="disabled"
             wire:target="addCourse"
+            :showSpinner="false"
         >
             + @lang('general.add-new')
         </x-primary-button>

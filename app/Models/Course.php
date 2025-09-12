@@ -11,13 +11,11 @@ class Course extends Model implements HasMedia
 {
     use HasFactory , InteractsWithMedia;
 
-    protected $fillable = [
+    protected $guarded = [
         'id',
-        'employee_id',
-        'title',
-        'issuing_organization',
-        'date',
-        'is_approved'
+    ];
+    protected $casts = [
+        'issue_date' => 'datetime',
     ];
 
     public function employee()
