@@ -71,7 +71,7 @@ class EducationForm extends Form
         unset($this->educations[$index]);
 
         if(isset($id)){
-           Education::find($id)->delete();
+           Education::find($id)?->delete();
         }
         // Reindex so Blade indexes and array keys stay aligned
         $this->educations = array_values($this->educations);

@@ -97,7 +97,8 @@ class EmployeeEdit extends Component
 
     public function saveExperience()
     {
-        $this->experienceForm->saveExperience();
+        $this->experienceForm->save();
+        $this->setActiveTab('experience');
         $this->successToast();
     }
 

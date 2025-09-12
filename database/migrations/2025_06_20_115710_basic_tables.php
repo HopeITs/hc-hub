@@ -155,10 +155,10 @@ return new class extends Migration {
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('job_title');
             $table->string('company');
-            $table->date('start_date');
-            $table->date('end_date')->nullable();
-            $table->string('place')->nullable();
-            $table->string('type')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date')->nullable();
+            $table->tinyInteger('place')->nullable();
+            $table->tinyInteger('type')->nullable();
             $table->timestamps();
         });
         Schema::create('relatives', function (Blueprint $table) {

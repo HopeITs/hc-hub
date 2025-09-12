@@ -42,16 +42,23 @@
 
                 <div>
                     <x-forms.input-label for="place_{{ $index }}">@lang('general.place')</x-forms.input-label>
-                    <x-forms.input id="place_{{ $index }}" type="text"
-                        wire:model.defer="experienceForm.experiences.{{ $index }}.place" />
+                    <x-forms.select-input id="place_{{ $index }}"
+                                          wire:model.defer="experienceForm.experiences.{{ $index }}.place" >
+                        @foreach(\App\Enums\ContractPlace::getValues() as $key => $value)
+                            <option value="{{$value}}">{{\App\Enums\ContractPlace::getLocalizedName($value)['value']}}</option>
+                        @endforeach
+                    </x-forms.select-input>
                     <x-error-span>{{ $errors->first("experienceForm.experiences.$index.place") }}</x-error-span>
                 </div>
 
                 <div>
                     <x-forms.input-label for="type_{{ $index }}">@lang('general.type')</x-forms.input-label>
-                    <x-forms.input id="type_{{ $index }}" type="text"
-                        placeholder="e.g., Full-time, Part-time, Contract"
-                        wire:model.defer="experienceForm.experiences.{{ $index }}.type" />
+                    <x-forms.select-input id="type_{{ $index }}"
+                                          wire:model.defer="experienceForm.experiences.{{ $index }}.type" >
+                        @foreach(\App\Enums\ContractType::getValues() as $key => $value)
+                            <option value="{{$value}}">{{\App\Enums\ContractType::getLocalizedName($value)['value']}}</option>
+                        @endforeach
+                    </x-forms.select-input>
                     <x-error-span>{{ $errors->first("experienceForm.experiences.$index.type") }}</x-error-span>
                 </div>
             </div>
