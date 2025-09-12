@@ -45,11 +45,11 @@ class ArchivedFilesModule extends Component
     public string $permissionFilterType = '';
     public string $permissionFilterValue = '';
     public array $permissionFilterOptions = [];
+    public array $activeFilters = [];
 
     public function mount(bool $isShared, $folderId = null)
     {
         $this->isShared = $isShared;
-
         if ($folderId) {
             $folder = Folder::with('users')->find($folderId);
             if ($folder && !auth()->user()->hasRole('Super Admin') && !$folder->users->contains(auth()->id())) {
@@ -57,7 +57,6 @@ class ArchivedFilesModule extends Component
             }
             $this->currentFolder = $folder;
         }
-
         $this->loadContent();
     }
 
@@ -95,38 +94,50 @@ class ArchivedFilesModule extends Component
         }
     }
 
-    public function updatedPermissionFilterValue($value)
+    public function addFilter()
     {
-        if (empty($value)) {
+        if (!$this->permissionFilterType || !$this->permissionFilterValue) {
             return;
         }
 
-        $query = User::query();
-        $query = $this->applyPermissionFilters($query);
-        $filteredUserIds = $query->pluck('id')->toArray();
+        $this->activeFilters[] = [
+            'type' => $this->permissionFilterType,
+            'value' => $this->permissionFilterValue,
+            'type_label' => $this->permissionFilterCategories[$this->permissionFilterType],
+            'value_label' => $this->permissionFilterOptions[$this->permissionFilterValue],
+        ];
 
-        $this->selectedUsers = array_values(array_unique(array_merge($this->selectedUsers, $filteredUserIds)));
-    }
-
-    public function clearPermissionFilter(): void
-    {
         $this->permissionFilterType = '';
         $this->permissionFilterValue = '';
         $this->permissionFilterOptions = [];
     }
 
+    public function removeFilter($index)
+    {
+        if (isset($this->activeFilters[$index])) {
+            unset($this->activeFilters[$index]);
+            $this->activeFilters = array_values($this->activeFilters);
+        }
+    }
+
     private function applyPermissionFilters(Builder $query): Builder
     {
-        return $query->when($this->permissionFilterType && $this->permissionFilterValue, function ($q) {
-            $q->whereHas('profile.contracts.position', function ($positionQuery) {
-                match ($this->permissionFilterType) {
-                    'department' => $positionQuery->where('department_id', $this->permissionFilterValue),
-                    'job_level' => $positionQuery->where('job_level_id', $this->permissionFilterValue),
-                    'program' => $positionQuery->where('program_id', $this->permissionFilterValue),
-                    'center' => $positionQuery->where('center_id', $this->permissionFilterValue),
-                    'city' => $positionQuery->where('city_id', $this->permissionFilterValue),
-                };
-            });
+        if (empty($this->activeFilters)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) {
+            foreach ($this->activeFilters as $filter) {
+                $q->whereHas('profile.contracts.position', function ($positionQuery) use ($filter) {
+                    match ($filter['type']) {
+                        'department' => $positionQuery->where('department_id', $filter['value']),
+                        'job_level' => $positionQuery->where('job_level_id', $filter['value']),
+                        'program' => $positionQuery->where('program_id', $filter['value']),
+                        'center' => $positionQuery->where('center_id', $filter['value']),
+                        'city' => $positionQuery->where('city_id', $filter['value']),
+                    };
+                });
+            }
         });
     }
 
@@ -146,17 +157,17 @@ class ArchivedFilesModule extends Component
         if ($this->isShared) {
             $query->where(function ($q) {
                 $q->where('is_shared', true)
-                  ->orWhere(function($subQ) {
-                      $subQ->where('is_shared', false)
-                           ->where('user_id', '!=', auth()->id());
-                  });
+                    ->orWhere(function ($subQ) {
+                        $subQ->where('is_shared', false)
+                            ->where('user_id', '!=', auth()->id());
+                    });
             });
         } else {
             $query->where('is_shared', false)->where('user_id', auth()->id());
         }
 
         if (!auth()->user()->hasRole('Super Admin')) {
-            $query->whereHas('users', fn ($q) => $q->where('user_id', auth()->id()));
+            $query->whereHas('users', fn($q) => $q->where('user_id', auth()->id()));
         }
 
         $this->folders = $query->orderBy('name')->get();
@@ -250,6 +261,7 @@ class ArchivedFilesModule extends Component
         $this->permissionFilterType = '';
         $this->permissionFilterValue = '';
         $this->permissionFilterOptions = [];
+        $this->activeFilters = [];
     }
 
     public function updatedFilesToUpload()
