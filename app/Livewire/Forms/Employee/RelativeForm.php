@@ -37,7 +37,7 @@ class RelativeForm extends Form
             'relatives.*.id' => ['nullable', 'exists:relatives,id'],
             'relatives.*.name' => ['required', 'string', 'max:255'],
             'relatives.*.phone' => ['nullable', 'string', 'max:255'],
-            'relatives.*.relation' => ['required', 'string', 'max:255'],
+            'relatives.*.relation' => ['required', 'integer'],
         ];
     }
 

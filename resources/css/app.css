@@ -212,6 +212,27 @@ select {
         --tw-ring-color: transparent;
     }
 }
+
+
+
+/* Target Firefox “Today” button */
+input[type="date"]::-moz-focus-inner {
+    color: var(--color-primary);
+}
+
+/* Optional: more consistent override */
+/*::-webkit-datetime-edit,*/
+/*::-webkit-datetime-edit-fields-wrapper,*/
+/*::-webkit-datetime-edit-text,*/
+/*::-webkit-datetime-edit-month-field,*/
+/*::-webkit-datetime-edit-day-field,*/
+/*::-webkit-datetime-edit-year-field,*/
+/*::-webkit-inner-spin-button,*/
+::-webkit-clear-button {
+    color: var(--color-primary);
+}
+
+
 /*[type='checkbox'], [type='radio'] {*/
 /*    color: var(--color-primary);*/
 /*}*/

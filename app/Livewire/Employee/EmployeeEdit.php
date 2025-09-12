@@ -33,7 +33,7 @@ class EmployeeEdit extends Component
     public bool $isCreateMode = false;
 
     public $activeTab = 'information';
-
+    public $title = '';
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;
@@ -50,6 +50,7 @@ class EmployeeEdit extends Component
         $this->checklistForm->setEmployee($employee);
         $this->attachmentForm->setEmployee($employee);
         $this->itemForm->setEmployee($employee);
+        $this->title = $employee->name;
 
         if (empty($this->educationForm->educations)) {
             $this->educationForm->addEducation();
@@ -65,6 +66,9 @@ class EmployeeEdit extends Component
         }
         if (empty($this->badgeForm->badges)) {
             $this->badgeForm->addBadge();
+        }
+        if (empty($this->checklistForm->checklists)) {
+            $this->checklistForm->addChecklist();
         }
         if (empty($this->attachmentForm->attachments)) {
             $this->attachmentForm->addAttachment();
@@ -97,13 +101,14 @@ class EmployeeEdit extends Component
 
     public function saveExperience()
     {
-        $this->experienceForm->saveExperience();
+        $this->experienceForm->save();
+        $this->setActiveTab('experience');
         $this->successToast();
     }
 
     public function saveRelatives()
     {
-        $this->relativeForm->saveRelatives();
+        $this->relativeForm->save();
         $this->successToast();
     }
 

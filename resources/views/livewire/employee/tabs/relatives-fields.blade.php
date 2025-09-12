@@ -6,6 +6,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="md:col-span-2 lg:col-span-3 flex justify-end">
                     <x-primary-button type="button"
+                                      :showSpinner="false"
                         wire:click="removeRelative({{ $index }}, {{ $relative['id'] ?? 'null' }})"
                         title="@lang('general.remove')">
                         <x-icons.trash />
@@ -21,9 +22,13 @@
 
                 <div>
                     <x-forms.input-label for="relation_{{ $index }}">@lang('general.relation')</x-forms.input-label>
-                    <x-forms.input id="relation_{{ $index }}" type="text"
-                        placeholder="e.g., Father, Spouse, Sibling"
-                        wire:model.defer="relativeForm.relatives.{{ $index }}.relation" />
+                    <x-forms.select-input id="relation_{{ $index }}"
+                                          wire:model.defer="relativeForm.relatives.{{ $index }}.relation" >
+                        @foreach(\App\Enums\KinshipType::getValues() as $key => $value)
+                            <option value="{{$value}}">{{\App\Enums\KinshipType::getLocalizedName($value)}}</option>
+                        @endforeach
+                    </x-forms.select-input>
+
                     <x-error-span>{{ $errors->first("relativeForm.relatives.$index.relation") }}</x-error-span>
                 </div>
 
@@ -39,7 +44,8 @@
     @endforeach
 
     <div class="flex justify-center">
-        <x-primary-button type="button" wire:click="addRelative">
+        <x-primary-button type="button"
+                          :showSpinner="false" wire:click="addRelative">
             + @lang('general.add-new')
         </x-primary-button>
     </div>

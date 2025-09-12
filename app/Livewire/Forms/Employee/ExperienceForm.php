@@ -39,8 +39,8 @@ class ExperienceForm extends Form
             'experiences.*.company' => ['required', 'string', 'max:255'],
             'experiences.*.start_date' => ['required', 'date'],
             'experiences.*.end_date' => ['nullable', 'date', 'after_or_equal:experiences.*.start_date'],
-            'experiences.*.place' => ['nullable', 'string', 'max:255'],
-            'experiences.*.type' => ['nullable', 'string', 'max:255'],
+            'experiences.*.place' => ['integer'],
+            'experiences.*.type' => [ 'integer'],
         ];
     }
 
@@ -77,15 +77,14 @@ class ExperienceForm extends Form
         $this->validate();
 
         foreach ($this->experiences as $experienceData) {
-            if (isset($experienceData['id'])) {
+            if(array_key_exists('id', $experienceData) && isset($experienceData['id'])) {
                 $this->experience = Experience::find($experienceData['id']);
-                if ($this->experience) {
-                    $this->experience->update($experienceData);
-                }
-            } else {
+                $this->experience->update($experienceData);
+            }else{
                 $experienceData['employee_id'] = $this->employee->id;
-                Experience::create($experienceData);
+                $this->experience  = Experience::create($experienceData);
             }
+
         }
     }
 }

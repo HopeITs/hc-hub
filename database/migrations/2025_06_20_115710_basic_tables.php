@@ -137,7 +137,7 @@ return new class extends Migration {
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->string('issuing_organization');
-            $table->dateTime('date')->nullable();
+            $table->dateTime('issue_date')->nullable();
             $table->boolean('is_approved')->default(false);
             $table->timestamps();
         });
@@ -155,10 +155,10 @@ return new class extends Migration {
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('job_title');
             $table->string('company');
-            $table->date('start_date');
-            $table->date('end_date')->nullable();
-            $table->string('place')->nullable();
-            $table->string('type')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date')->nullable();
+            $table->tinyInteger('place')->nullable();
+            $table->tinyInteger('type')->nullable();
             $table->timestamps();
         });
         Schema::create('relatives', function (Blueprint $table) {
@@ -225,7 +225,7 @@ return new class extends Migration {
             $table->foreignId('evaluation_id')->nullable()->constrained()->onDelete('restrict');
             $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR')->nullable();
             $table->string('type');
-            $table->date('date');
+            $table->dateTime('date');
             $table->text('reason')->nullable();
             $table->decimal('current_salary', 10, 2)->nullable();
             $table->decimal('new_salary', 10, 2)->nullable();
