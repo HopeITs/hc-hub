@@ -2,8 +2,10 @@
 
 namespace App\Livewire\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -23,16 +25,48 @@ class Login extends Component
 
     public bool $remember = false;
 
-    /**
-     * Handle an incoming authentication request.
-     */
+    public ?int $selectedRoleId = null;
+    public array $roleOptions = [];
+
+    public function render()
+    {
+        if ($this->email !== '' && empty($this->roleOptions)) {
+            $user = User::where('email', $this->email)->with('roles')->first();
+            if ($user && $user->roles()->count() > 1) {
+                $this->roleOptions = $user->roles
+                    ->map(fn($r) => ['id' => $r->id, 'name' => $r->name])
+                    ->values()
+                    ->all();
+            }
+        }
+
+        return view('livewire.auth.login');
+    }
+
+    public function updatedEmail(): void
+    {
+        $this->selectedRoleId = null;
+        $this->roleOptions = [];
+
+        $user = User::query()
+            ->where('email', $this->email)
+            ->with('roles')
+            ->first();
+
+        if ($user && $user->roles()->count() > 1) {
+            $this->roleOptions = $user->roles
+                ->map(fn($r) => ['id' => $r->id, 'name' => $r->name])
+                ->values()
+                ->all();
+        }
+    }
+
     public function login(): void
     {
         $this->validate();
-
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        if (!Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -43,15 +77,40 @@ class Login extends Component
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        DB::transaction(function () use ($user) {
+            $allIds = $user->roles()->pluck('roles.id')->all();
+            if ($allIds) {
+                $user->roles()->updateExistingPivot($allIds, ['is_active' => false]);
+            }
+
+            $roleIdToActivate = null;
+
+            if ($this->selectedRoleId && $user->roles()->where('roles.id', $this->selectedRoleId)->exists()) {
+                $roleIdToActivate = $this->selectedRoleId;
+            } else {
+                $ids = $user->roles()->pluck('roles.id');
+                if ($ids->count() === 1) {
+                    $roleIdToActivate = $ids->first();
+                } else {
+                    $roleIdToActivate = $user->roles()->orderBy('roles.id')->pluck('roles.id')->first();
+                }
+            }
+
+            if ($roleIdToActivate) {
+                $user->roles()->updateExistingPivot($roleIdToActivate, ['is_active' => true]);
+                session(['active_role_id' => $roleIdToActivate]);
+            }
+        });
+
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 
-    /**
-     * Ensure the authentication request is not rate limited.
-     */
     protected function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -67,16 +126,8 @@ class Login extends Component
         ]);
     }
 
-    /**
-     * Get the authentication rate limiting throttle key.
-     */
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
-    }
-
-    public function render()
-    {
-        return view('livewire.auth.login');
+        return Str::transliterate(Str::lower($this->email) . '|' . request()->ip());
     }
 }
