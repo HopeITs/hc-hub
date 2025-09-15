@@ -160,6 +160,9 @@ body {
         --color-accent-content: var(--color-white);
         --color-accent-foreground: var(--color-neutral-800);
     }
+    .tagify{
+        --tags-focus-border-color: var(--color-primary) !important;
+    }
 }
 
 @layer base {
@@ -231,15 +234,6 @@ input[type="date"]::-moz-focus-inner {
 ::-webkit-clear-button {
     color: var(--color-primary);
 }
+.tagify__input {
 
-
-/*[type='checkbox'], [type='radio'] {*/
-/*    color: var(--color-primary);*/
-/*}*/
-/*[type='checkbox']:checked, [type='radio']:checked, .dark [type='checkbox']:checked, .dark [type='radio']:checked  {*/
-/*    background-color: var(--color-primary) !important;*/
-/*}*/
-
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
+}

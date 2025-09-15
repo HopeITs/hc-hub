@@ -221,13 +221,13 @@
 
         <div class="md:col-span-2">
             <x-forms.input-label for="skills">@lang('general.skills')</x-forms.input-label>
-            <x-forms.input type="text" wire:model="infoForm.skills" id="skills"/>
+            <x-forms.input class="tagify" type="text"  data-enforceWhitelist="1"  data-whitelist="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking ,Problem Solving, Adaptability, Willingness to learn,Active listening,Emotion Intelligence,Creativity , Data analysis     "  wire:model="infoForm.skills" id="skills"/>
             <x-error-span>{{ $errors->first('infoForm.skills') }}</x-error-span>
         </div>
 
         <div class="md:col-span-2">
             <x-forms.input-label for="interests">@lang('general.interests')</x-forms.input-label>
-            <x-forms.input type="text" wire:model="infoForm.interests" id="interests"/>
+            <x-forms.input class="tagify" data-enforceWhitelist="1"  data-whitelist="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling" type="text" wire:model="infoForm.interests" id="interests"/>
             <x-error-span>{{ $errors->first('infoForm.interests') }}</x-error-span>
         </div>
     </div>
