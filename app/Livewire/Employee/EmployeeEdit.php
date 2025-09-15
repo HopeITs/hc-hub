@@ -12,6 +12,7 @@ use App\Livewire\Forms\Employee\ItemForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
+use App\Models\DefaultDeliverable;
 use App\Models\Employee;
 use App\Traits\WithAlerts;
 use Carbon\Carbon;
@@ -242,12 +243,15 @@ class EmployeeEdit extends Component
                 return $query->where('city_id', $this->employee->city_id);
             }]) ->orderBy('order')->get();
         }
-dd($allItems);
+
+        $delivereds = DefaultDeliverable::whereIn('city_id', [1,$this->employee->city_id])->get();
+
         return view('livewire.employee.form', [
             'allEmployees' => Employee::select('id', 'name')
                 ->where('id', '!=', $this->employee->id)
                 ->get(),
             'allItems' => $allItems,
+            'delivereds' => $delivereds,
             'deviceTypes' => $deviceTypes,
         ]);
     }
