@@ -5,8 +5,7 @@
     'placeholder' => '',
     'autocomplete' => '',
     'showIcon' => true,
-    // NEW: control Livewire update strategy
-    'update' => 'defer', // 'live' | 'lazy' | 'defer'
+    'update' => 'defer',
 ])
 
 @php

@@ -22,7 +22,7 @@
                         id="email"
                         type="email"
                         model="email"
-                        update="live"            {{-- IMPORTANT: trigger updatedEmail() as you type --}}
+                        update="live"
                         placeholder="email@example.com"
                         autocomplete="email"
                     />

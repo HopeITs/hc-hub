@@ -59,7 +59,6 @@
             </div>
         @endif
 
-        {{-- Logout --}}
         <div class="py-1 px-4">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

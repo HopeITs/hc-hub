@@ -34,7 +34,7 @@ class Login extends Component
             $user = User::where('email', $this->email)->with('roles')->first();
             if ($user && $user->roles()->count() > 1) {
                 $this->roleOptions = $user->roles
-                    ->map(fn ($r) => ['id' => $r->id, 'name' => $r->name])
+                    ->map(fn($r) => ['id' => $r->id, 'name' => $r->name])
                     ->values()
                     ->all();
             }
@@ -55,7 +55,7 @@ class Login extends Component
 
         if ($user && $user->roles()->count() > 1) {
             $this->roleOptions = $user->roles
-                ->map(fn ($r) => ['id' => $r->id, 'name' => $r->name])
+                ->map(fn($r) => ['id' => $r->id, 'name' => $r->name])
                 ->values()
                 ->all();
         }
@@ -66,7 +66,7 @@ class Login extends Component
         $this->validate();
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        if (!Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -108,10 +108,9 @@ class Login extends Component
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 
-    /** Rate limiting helpers */
     protected function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -129,6 +128,6 @@ class Login extends Component
 
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+        return Str::transliterate(Str::lower($this->email) . '|' . request()->ip());
     }
 }
