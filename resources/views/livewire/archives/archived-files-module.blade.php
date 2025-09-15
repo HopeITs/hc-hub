@@ -14,50 +14,78 @@
             @endif
 
             @if ($currentFolder && (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin'))))
-                <label for="file-upload" class="py-2 px-4 text-sm font-semibold text-white bg-primary hover:opacity-90 cursor-pointer rounded-md shadow-sm transition duration-150 ease-in-out flex justify-center items-center">
-                    <x-icons.upload class="w-5 h-5 mr-2 -ml-1" />
-                    Upload Files
-                    <input id="file-upload" wire:model.live="filesToUpload" type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.gif,.xls,.xlsx,.doc,.docx,.pdf">
-                </label>
+                <div
+                    x-data="{ uploading: false, progress: 0 }"
+                    x-on:livewire-upload-start="uploading = true"
+                    x-on:livewire-upload-finish="uploading = false; progress = 0"
+                    x-on:livewire-upload-error="uploading = false; progress = 0"
+                    x-on:livewire-upload-progress="progress = $event.detail.progress"
+                    class="w-full"
+                >
+                    <label for="file-upload" class="py-2 px-4 text-sm font-semibold text-white bg-primary hover:opacity-90 cursor-pointer rounded-md shadow-sm transition duration-150 ease-in-out flex justify-center items-center">
+                        <x-icons.upload class="w-5 h-5 mr-2 -ml-1" />
+                        Upload Files
+                        <input id="file-upload" wire:model.live="filesToUpload" type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.gif,.xls,.xlsx,.doc,.docx,.pdf">
+                    </label>
+                    <div x-show="uploading" class="mt-2 w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-primary h-2.5 rounded-full" :style="`width: ${progress}%`"></div>
+                    </div>
+                </div>
             @endif
         </div>
     </div>
 
-    <div class="p-6 mt-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
-        <div wire:loading.flex wire:target="filesToUpload" class="mb-4 items-center">
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-primary h-2.5 rounded-full" style="width: 100%"></div>
-            </div>
-            <p class="text-sm text-gray-500 ml-4 flex-shrink-0">Uploading...</p>
-        </div>
-
+    {{-- The only change is removing "overflow-hidden" from this div --}}
+    <div class="p-6 mt-6 bg-white shadow-sm sm:rounded-lg">
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            {{-- Folders Loop --}}
             @forelse($folders as $folder)
             <div class="relative group">
                 <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md">
                     <x-icons.folder class="w-16 h-16 text-primary" />
                     <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $folder->name }}</span>
                     @if ($folder->user_id === auth()->id())
-                        <span class="mt-1 text-xs text-gray-500 transition-opacity group-hover:opacity-0">By: Me</span>
+                        <span class="mt-1 text-xs text-gray-500">By: Me</span>
                     @else
-                        <span class="mt-1 text-xs text-gray-500 transition-opacity group-hover:opacity-0">By: {{ optional($folder->creator->profile)->name ?? 'Unknown' }}</span>
+                        <span class="mt-1 text-xs text-gray-500">By: {{ optional($folder->creator->profile)->name ?? 'Unknown' }}</span>
                     @endif
                 </a>
+
                 @if ($folder->user_id === auth()->id() || auth()->user()->hasRole('Super Admin'))
-                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all">
-                    <button wire:click.prevent="editPermissions({{ $folder->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Permissions">
-                        <x-icons.cog class="size-5 text-red-800" />
+                <div x-data="{ open: false }" @click.away="open = false" class="absolute top-2 right-2">
+                    <button @click="open = !open" class="p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 8a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                     </button>
-                    <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Edit">
-                        <svg class="size-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
-                        </svg>
-                    </button>
-                    <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="cursor-pointer p-2" title="Delete">
-                        <svg class="size-5 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                        </svg>
-                    </button>
+
+                    <div x-show="open"
+                         x-transition
+                         class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 origin-top-right"
+                         style="display: none;"
+                         @click="open = false">
+
+                        <div class="py-1">
+                            <div class="px-4 py-2 text-sm text-gray-500">
+                                Files: <span class="font-semibold text-gray-700">{{ $folder->files_count }}</span>
+                            </div>
+                            <div class="border-t border-gray-100"></div>
+                            <button wire:click.prevent="editPermissions({{ $folder->id }})" class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <x-icons.cog class="size-5 mr-3 text-red-800" />
+                                Permissions
+                            </button>
+                            <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <svg class="size-5 mr-3 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                                </svg>
+                                Edit
+                            </button>
+                            <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="w-full text-left flex items-center px-4 py-2 text-sm text-red-700 hover:bg-gray-100">
+                                <svg class="size-5 mr-3 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 @endif
             </div>
@@ -65,6 +93,7 @@
             <p class="col-span-full text-center text-gray-500">This folder is empty.</p>
             @endforelse
 
+            {{-- Files Loop --}}
             @foreach ($files as $file)
             <div class="relative group">
                 <div wire:click="downloadFile({{ $file->id }})" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md cursor-pointer">
@@ -75,25 +104,42 @@
                     @endif
                     <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $file->name }}</span>
                 </div>
+
                 @if (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin')))
-                    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center space-x-1 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all">
-                        <button wire:click.prevent="startEditingFile({{ $file->id }})" class="cursor-pointer p-2 inline-flex items-center" title="Edit name">
-                            <svg class="size-5 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
-                            </svg>
-                        </button>
-                        <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="cursor-pointer p-2" title="Delete file">
-                            <svg class="size-5 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                            </svg>
-                        </button>
+                <div x-data="{ open: false }" @click.away="open = false" class="absolute top-2 right-2">
+                    <button @click="open = !open" class="p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 8a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
+                    </button>
+
+                    <div x-show="open"
+                         x-transition
+                         class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 origin-top-right"
+                         style="display: none;"
+                         @click="open = false">
+
+                        <div class="py-1">
+                            <button wire:click.prevent="startEditingFile({{ $file->id }})" class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <svg class="size-5 mr-3 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                                </svg>
+                                Edit Name
+                            </button>
+                            <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="w-full text-left flex items-center px-4 py-2 text-sm text-red-700 hover:bg-gray-100">
+                                <svg class="size-5 mr-3 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                                </svg>
+                                Delete File
+                            </button>
+                        </div>
                     </div>
+                </div>
                 @endif
             </div>
             @endforeach
         </div>
     </div>
 
+    {{-- Modals (No changes needed here) --}}
     @if ($showCreateFolderModal)
     <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('showCreateFolderModal', false)"></div>
     <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
@@ -128,7 +174,7 @@
                     <div class="ml-4 text-left">
                         <h3 class="text-lg font-medium text-gray-900">Delete Item</h3>
                         <div class="mt-2">
-                            <p class="text-sm text-gray-500">Are you sure you want to delete this item? This action cannot be undone.</p>
+                            <p class="text-sm text-gray-500">Are you sure you want to delete <strong>'{{ $itemNameToDelete ?? 'this item' }}'</strong>? This action cannot be undone.</p>
                         </div>
                     </div>
                 </div>
@@ -247,6 +293,15 @@
                 <div wire:loading wire:target="permissionFilterType, permissionFilterValue, userSearch, addFilter, removeFilter" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
                     <x-icons.spinner class="h-8 w-8 text-primary" />
                 </div>
+
+                @if($allUsers?->isNotEmpty())
+                    <div class="flex items-center justify-end mb-2 px-2">
+                        <button wire:click="toggleSelectAllVisible" type="button" class="text-sm font-medium text-primary hover:underline">
+                            {{ $allVisibleUsersSelected ? 'Deselect All Visible' : 'Select All Visible' }}
+                        </button>
+                    </div>
+                @endif
+
                 @if($allUsers)
                 @forelse ($allUsers as $user)
                 <label for="user-{{ $user->id }}" class="flex items-center p-2 rounded-md hover:bg-gray-50 cursor-pointer @if($user->id === $folderForPermissions?->user_id) opacity-60 cursor-not-allowed @endif">
