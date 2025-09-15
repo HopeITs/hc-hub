@@ -221,7 +221,7 @@
 
         <div class="md:col-span-2">
             <x-forms.input-label for="skills">@lang('general.skills')</x-forms.input-label>
-            <x-forms.input class="tagify" type="text"  data-enforceWhitelist="1"  data-whitelist="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking ,Problem Solving, Adaptability, Willingness to learn,Active listening,Emotion Intelligence,Creativity , Data analysis     "  wire:model="infoForm.skills" id="skills"/>
+            <x-forms.input class="tagify" type="text"  data-enforceWhitelist="0"  data-whitelist="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking ,Problem Solving, Adaptability, Willingness to learn,Active listening,Emotion Intelligence,Creativity , Data analysis     "  wire:model="infoForm.skills" id="skills"/>
             <x-error-span>{{ $errors->first('infoForm.skills') }}</x-error-span>
         </div>
 

@@ -11,11 +11,12 @@ window.Swal = Swal
 
 document.querySelectorAll('.tagify').forEach((input) => {
     let whitelist = []
-    let enforceWhitelist = true;
+    let enforceWhitelist = 1;
 
     if (input.dataset.whitelist) {
         whitelist = input.dataset.whitelist.split(',') // just split by comma
-        enforceWhitelist = input.dataset.enforceWhitelist ?? true;
+        enforceWhitelist = input.dataset.enforcewhitelist !== "0";
+        console.log(input.dataset);
     }
 
 
