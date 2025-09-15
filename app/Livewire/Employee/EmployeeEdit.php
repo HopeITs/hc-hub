@@ -14,6 +14,7 @@ use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
 use App\Models\Employee;
 use App\Traits\WithAlerts;
+use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -21,6 +22,7 @@ class EmployeeEdit extends Component
 {
     use WithFileUploads, WithAlerts;
 
+    public ?Employee $employee = null;
     public PersonalInfoForm $infoForm;
     public EducationForm $educationForm;
     public ChecklistForm $checklistForm;
@@ -231,11 +233,21 @@ class EmployeeEdit extends Component
             'Tab', 'Time Attendance Machine', 'Toner', 'USB Flash Memory', 'WebCam'
         ];
 
+        if ($this->employee->created_at->greaterThan(Carbon::now()->subMonth())) {
+            $allItems = ChecklistItem::where('order', 1)->with(['defaultDeliverable' => function ($query) {
+                return $query->where('city_id', $this->employee->city_id);
+            }])->get();
+        }else{
+            $allItems = ChecklistItem::whereNot('order',1)->with(['defaultDeliverable' => function ($query) {
+                return $query->where('city_id', $this->employee->city_id);
+            }]) ->orderBy('order')->get();
+        }
+dd($allItems);
         return view('livewire.employee.form', [
             'allEmployees' => Employee::select('id', 'name')
-                ->where('id', '!=', $this->infoForm->employee->id)
+                ->where('id', '!=', $this->employee->id)
                 ->get(),
-            'allItems' => ChecklistItem::orderBy('name')->get(),
+            'allItems' => $allItems,
             'deviceTypes' => $deviceTypes,
         ]);
     }

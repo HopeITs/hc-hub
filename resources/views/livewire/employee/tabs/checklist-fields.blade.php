@@ -24,6 +24,17 @@
                     </x-forms.select-input>
                     <x-error-span>{{ $errors->first("checklistForm.checklists.$index.item_id") }}</x-error-span>
                 </div>
+                <div>
+                    <x-forms.input-label for="item_id_{{ $index }}">@lang('general.item')</x-forms.input-label>
+                    <x-forms.select-input id="item_id_{{ $index }}"
+                                          wire:model.defer="checklistForm.checklists.{{ $index }}.item_id">
+                        <option value="">-- @lang('general.select') --</option>
+                        @foreach ($allItems as $item)
+                            <option value="{{ $item->id }}">{{ $item->name }}</option>
+                        @endforeach
+                    </x-forms.select-input>
+                    <x-error-span>{{ $errors->first("checklistForm.checklists.$index.item_id") }}</x-error-span>
+                </div>
 
                 <div>
                     <x-forms.input-label for="brand_{{ $index }}">@lang('general.brand')</x-forms.input-label>
