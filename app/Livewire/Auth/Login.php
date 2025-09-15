@@ -83,7 +83,7 @@ class Login extends Component
         DB::transaction(function () use ($user) {
             $allIds = $user->roles()->pluck('roles.id')->all();
             if ($allIds) {
-                $user->roles()->updateExistingPivot($allIds, ['isActive' => false]);
+                $user->roles()->updateExistingPivot($allIds, ['is_active' => false]);
             }
 
             $roleIdToActivate = null;
@@ -100,7 +100,7 @@ class Login extends Component
             }
 
             if ($roleIdToActivate) {
-                $user->roles()->updateExistingPivot($roleIdToActivate, ['isActive' => true]);
+                $user->roles()->updateExistingPivot($roleIdToActivate, ['is_active' => true]);
                 session(['active_role_id' => $roleIdToActivate]);
             }
         });

@@ -3,51 +3,97 @@
 namespace App\Livewire\Auth;
 
 use App\Models\Role;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class RoleSwitcher extends Component
 {
-    public ?string $activeRoleName = null;
-    public $inactive = [];
+    public bool $onlySwitchables = false;
 
-    public function mount(): void
+    public ?string $activeRoleName = null;
+    public array $inactive = [];
+    public array $all = [];
+
+    public array $roles = [];
+
+    public function mount(bool $onlySwitchables = false): void
     {
+        $this->onlySwitchables = $onlySwitchables;
         $this->refreshRoles();
     }
 
     #[On('refresh-role-switcher')]
     public function refreshRoles(): void
     {
-        $user = auth()->user();
+        $user = Auth::user();
+        if (!$user) {
+            $this->activeRoleName = null;
+            $this->inactive = $this->all = $this->roles = [];
+            return;
+        }
 
-        $this->activeRoleName = $user?->activeRole()?->name ?? null;
+        $rows = $user->roles()
+            ->select('roles.id', 'roles.name')
+            ->withPivot('is_active')
+            ->get();
 
-        $this->inactive = $user
-            ? $user->inactiveRoles()
-                ->map(fn(Role $r) => ['id' => $r->id, 'name' => $r->name])
-                ->values()
-                ->all()
-            : [];
+        $active = $rows->firstWhere('pivot.is_active', true);
+        $this->activeRoleName = $active?->name;
+
+        $this->inactive = $rows
+            ->where('pivot.is_active', false)
+            ->map(fn ($r) => ['id' => (int) $r->id, 'name' => (string) $r->name])
+            ->values()
+            ->all();
+
+        $this->all = $rows
+            ->map(fn ($r) => ['id' => (int) $r->id, 'name' => (string) $r->name])
+            ->values()
+            ->all();
+
+        $pool = $this->onlySwitchables ? $this->inactive : $this->all;
+        $labels = array_map(fn ($r) => $r['name'], $pool);
+
+        if ($this->activeRoleName) {
+            $labels = array_values(array_filter($labels, function ($label) {
+                return strcasecmp($label, (string) $this->activeRoleName) !== 0;
+            }));
+        }
+        $this->roles = $labels;
     }
 
-    public function switchTo(int $roleId): void
+    public function switchTo(string|int $target): void
     {
-        $user = auth()->user();
+        $user = Auth::user();
+        abort_unless($user, 403);
 
-        abort_unless($user && $user->roles()->where('roles.id', $roleId)->exists(), 403);
+        $roles = $user->roles()->select('roles.id', 'roles.name')->withPivot('is_active')->get();
 
-        DB::transaction(function () use ($user, $roleId) {
+        if (is_numeric($target)) {
+            $role = $roles->firstWhere('id', (int) $target);
+        } else {
+            $needle = Str::lower(trim((string) $target));
+            $role = $roles->first(function ($r) use ($needle) {
+                return Str::lower((string) $r->name) === $needle;
+            });
+        }
+
+        abort_unless($role, 403);
+
+        DB::transaction(function () use ($user, $role) {
             $ids = $user->roles()->pluck('roles.id')->all();
             if ($ids) {
-                $user->roles()->updateExistingPivot($ids, ['isActive' => false]);
+                $user->roles()->updateExistingPivot($ids, ['is_active' => false]);
             }
-            $user->roles()->updateExistingPivot($roleId, ['isActive' => true]);
+            $user->roles()->updateExistingPivot($role->id, ['is_active' => true]);
         });
 
-        session(['active_role_id' => $roleId]);
+        session(['active_role_id' => (int) $role->id]);
 
+        $this->dispatch('role-switched', role: (string) $role->name);
         $this->dispatch('notify', title: __('Role switched'), message: __('Role updated successfully.'));
 
         $this->refreshRoles();
@@ -55,6 +101,8 @@ class RoleSwitcher extends Component
 
     public function render()
     {
-        return view('livewire.auth.role-switcher');
+        return view('livewire.auth.role-switcher', [
+            'roles' => $this->roles,
+        ]);
     }
 }

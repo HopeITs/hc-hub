@@ -12,19 +12,18 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-/** @property-read string|null $active_role_name */
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
     protected $fillable = ['email', 'password', 'employee_id'];
-    protected $hidden   = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
         ];
     }
 
@@ -36,7 +35,7 @@ class User extends Authenticatable
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class)
-            ->withPivot('isActive')
+            ->withPivot('is_active')
             ->withTimestamps();
     }
 
@@ -54,22 +53,26 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Folder::class);
     }
+
     public function activeRole(): ?Role
     {
         return $this->roles()
-            ->wherePivot('isActive', true)
+            ->wherePivot('is_active', true)
             ->first();
     }
+
     public function myRole(): ?string
     {
         return $this->activeRole()?->name;
     }
+
     public function inactiveRoles()
     {
         return $this->roles()
-            ->wherePivot('isActive', false)
+            ->wherePivot('is_active', false)
             ->get();
     }
+
     public function hasMultipleRoles(): bool
     {
         return $this->roles()->limit(2)->count() > 1;
@@ -78,16 +81,16 @@ class User extends Authenticatable
     public function setActiveRole(int $roleId): void
     {
         DB::transaction(function () use ($roleId) {
-            if (! $this->roles()->where('roles.id', $roleId)->exists()) {
+            if (!$this->roles()->where('roles.id', $roleId)->exists()) {
                 abort(403, 'Role does not belong to this user.');
             }
 
             $ids = $this->roles()->pluck('roles.id')->all();
             if ($ids) {
-                $this->roles()->updateExistingPivot($ids, ['isActive' => false]);
+                $this->roles()->updateExistingPivot($ids, ['is_active' => false]);
             }
 
-            $this->roles()->updateExistingPivot($roleId, ['isActive' => true]);
+            $this->roles()->updateExistingPivot($roleId, ['is_active' => true]);
         });
     }
 
@@ -106,6 +109,6 @@ class User extends Authenticatable
     public function initials(): string
     {
         return Str::of($this->name)->explode(' ')
-            ->take(2)->map(fn ($w) => Str::substr($w, 0, 1))->implode('');
+            ->take(2)->map(fn($w) => Str::substr($w, 0, 1))->implode('');
     }
 }

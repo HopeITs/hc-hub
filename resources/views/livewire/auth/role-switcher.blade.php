@@ -1,22 +1,74 @@
-<div class="space-y-2">
-    <div class="text-xs">
-        <span class="px-2 py-1 rounded bg-gray-100">
-            {{ $activeRoleName ?? __('No active role') }}
-        </span>
-    </div>
+@php
+    use Illuminate\Support\Str;
 
-    @if(count($inactive) > 0)
-        <div class="text-sm opacity-70 mb-1">{{ __('Switch Role') }}</div>
-        <div class="flex flex-wrap gap-2">
-            @foreach($inactive as $r)
+   $icons = [
+    'super-admin' => '
+    <svg class="size-4 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 20h18l-2-9-4 4-4-8-4 8-4-4-2 9z"/>
+    </svg>',
+
+    'general-manager' => '
+    <svg class="size-4 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="18" rx="1"/>
+      <rect x="14" y="3" width="7" height="18" rx="1"/>
+      <path d="M3 9h7M14 9h7M3 15h7M14 15h7"/>
+    </svg>',
+
+    'hr-manager' => '
+    <svg class="size-4 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="7" r="4"/>
+      <path d="M2 21a6 6 0 0 1 12 0"/>
+      <path d="M16 11l1.2 2.4L20 14l-2 2 .5 2.8L16 17l-2.5 1.8L14 16l-2-2.1 2.8-.5L16 11z"/>
+    </svg>',
+
+    'hr' => '
+    <svg class="size-4 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M2 21a7 7 0 0 1 14 0"/>
+      <circle cx="17" cy="8" r="3"/>
+      <path d="M17 21a6 6 0 0 1 6-6"/>
+    </svg>',
+
+    'employee' => '
+    <svg class="size-4 text-primary-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="16" rx="2"/>
+      <circle cx="9" cy="12" r="2.5"/>
+      <path d="M15 10h4M15 14h4"/>
+    </svg>',
+];
+
+
+
+    $iconFor = function ($role) use ($icons) {
+        $key = Str::slug($role);
+        return $icons[$key] ?? $icons['employee'];
+    };
+@endphp
+
+<div class="space-y-2" id="roleList">
+    @if(!empty($roles) && count($roles))
+        @foreach($roles as $role)
+            <div>
                 <button
-                    wire:click="switchTo({{ $r['id'] }})"
                     type="button"
-                    class="px-3 py-1 rounded border hover:bg-gray-50"
-                >
-                    {{ $r['name'] }}
+                    wire:click="switchTo('{{ $role }}')"
+                    class="group w-full rounded-xl border-2 border-gray-200 p-3 text-sm font-medium
+                           hover:border-primary-400 hover:bg-primary-50/70 transition flex items-center gap-3">
+                    <span class="inline-grid place-items-center size-6 rounded-md border border-gray-300 bg-white">
+                        {!! $iconFor($role) !!}
+                    </span>
+
+                    <span class="truncate">{{ $role }}</span>
+
+                    <svg class="ms-auto size-4 opacity-0 group-hover:opacity-100 transition" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
                 </button>
-            @endforeach
-        </div>
+            </div>
+        @endforeach
+    @else
+        <div class="text-xs text-gray-500">{{ __('No other roles available.') }}</div>
     @endif
 </div>
+
