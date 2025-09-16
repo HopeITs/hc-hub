@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Contract;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -42,4 +43,6 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+
 }

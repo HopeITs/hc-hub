@@ -47,6 +47,9 @@ class PositionTable extends LivewireTable
             Column::make(__('Title'), 'title')
                 ->sortable()
                 ->searchable(),
+            Column::make(__('Title').'(AR)', 'title_ar')
+                ->sortable()
+                ->searchable(),
 
             SelectColumn::make(trans_choice('general.city', 1), 'city_id')
                 ->displayUsing(function (mixed $value, Model $model): string {

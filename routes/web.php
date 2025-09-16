@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContractExportController;
+use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, DepartmentModule, JobLevelModule, LeaveTypeModule};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
 use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule};

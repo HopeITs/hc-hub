@@ -1,154 +1,100 @@
-<div x-data="{
-    nextIndex: {{ count($checklistItemForm->checklists) }},
-    add() {
-        const template = this.$refs.checklistTemplate.innerHTML.replaceAll('__INDEX__', this.nextIndex);
-        this.$refs.checklistContainer.insertAdjacentHTML('beforeend', template);
-        this.nextIndex++;
-    },
-    remove(index) {
-        if (confirm('Are you sure you want to remove this item?')) {
-            document.getElementById('checklist-row-' + index)?.remove();
-            $wire.removeChecklist(index);
-        }
-    }
-}">
-    <form wire:submit.prevent="saveChecklist" class="space-y-6">
-        <div x-ref="checklistContainer">
-            @foreach ($checklistItemForm->checklists as $index => $item)
-                <div wire:key="checklist-{{ $index }}" id="checklist-row-{{ $index }}"
-                    class="relative border-b pb-6 mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="lg:col-span-3">
-                            <x-forms.input-label
-                                for="checklist_item_id_{{ $index }}">@lang('general.item_name')</x-forms.input-label>
-                            <x-forms.select-input wire:model="checklistItemForm.checklists.{{ $index }}.item_id"
-                                id="checklist_item_id_{{ $index }}">
-                                <option value="">-- @lang('general.select') --</option>
-                                @foreach ($checklistItems as $checklistItem)
-                                    <option value="{{ $checklistItem->id }}">{{ $checklistItem->name }}</option>
-                                @endforeach
-                            </x-forms.select-input>
-                        </div>
-                        <div>
-                            <x-forms.input-label
-                                for="checklist_brand_{{ $index }}">@lang('general.brand')</x-forms.input-label>
-                            <x-forms.input type="text" wire:model="checklistItemForm.checklists.{{ $index }}.brand"
-                                id="checklist_brand_{{ $index }}" />
-                        </div>
-                        <div>
-                            <x-forms.input-label
-                                for="checklist_model_{{ $index }}">@lang('general.model')</x-forms.input-label>
-                            <x-forms.input type="text" wire:model="checklistItemForm.checklists.{{ $index }}.model"
-                                id="checklist_model_{{ $index }}" />
-                        </div>
-                        <div>
-                            <x-forms.input-label
-                                for="checklist_serial_{{ $index }}">@lang('general.serial')</x-forms.input-label>
-                            <x-forms.input type="text" wire:model="checklistItemForm.checklists.{{ $index }}.serial"
-                                id="checklist_serial_{{ $index }}" />
-                        </div>
-                        <div>
-                            <x-forms.input-label
-                                for="checklist_delivered_at_{{ $index }}">@lang('general.delivered_at')</x-forms.input-label>
-                            <x-forms.input type="date" wire:model="checklistItemForm.checklists.{{ $index }}.delivered_at"
-                                id="checklist_delivered_at_{{ $index }}" />
-                        </div>
-                        <div class="lg:col-span-2">
-                            <x-forms.input-label
-                                for="checklist_delivered_status_{{ $index }}">@lang('general.delivered_status')</x-forms.input-label>
-                            <x-forms.input type="text"
-                                wire:model="checklistItemForm.checklists.{{ $index }}.delivered_status"
-                                id="checklist_delivered_status_{{ $index }}" />
-                        </div>
-                        <div>
-                            <x-forms.input-label
-                                for="checklist_returned_at_{{ $index }}">@lang('general.returned_at')</x-forms.input-label>
-                            <x-forms.input type="date" wire:model="checklistItemForm.checklists.{{ $index }}.returned_at"
-                                id="checklist_returned_at_{{ $index }}" />
-                        </div>
-                        <div class="lg:col-span-2">
-                            <x-forms.input-label
-                                for="checklist_returned_status_{{ $index }}">@lang('general.returned_status')</x-forms.input-label>
-                            <x-forms.input type="text"
-                                wire:model="checklistItemForm.checklists.{{ $index }}.returned_status"
-                                id="checklist_returned_status_{{ $index }}" />
-                        </div>
-                        <div class="lg:col-span-3">
-                            <x-forms.input-label
-                                for="checklist_notes_{{ $index }}">@lang('general.notes')</x-forms.input-label>
-                            <x-forms.textarea wire:model="checklistItemForm.checklists.{{ $index }}.notes"
-                                id="checklist_notes_{{ $index }}" />
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
+<form wire:submit.prevent="saveChecklist" class="space-y-6">
+    @foreach ($checklistForm->checklists as $index => $checklist)
+        <input type="hidden" wire:model="checklistForm.checklists.{{ $index }}.id">
 
-        <template x-ref="checklistTemplate">
-            <div id="checklist-row-__INDEX__" class="relative border-b pb-6 mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="lg:col-span-3">
-                        <x-forms.input-label for="checklist_item_id___INDEX__">@lang('general.item_name')</x-forms.input-label>
-                        <x-forms.select-input wire:model="checklistItemForm.checklists.__INDEX__.item_id"
-                            id="checklist_item_id___INDEX__">
-                            <option value="">-- @lang('general.select') --</option>
-                            @foreach ($checklistItems as $checklistItem)
-                                <option value="{{ $checklistItem->id }}">{{ $checklistItem->name }}</option>
-                            @endforeach
-                        </x-forms.select-input>
-                    </div>
-                    <div>
-                        <x-forms.input-label for="checklist_brand___INDEX__">@lang('general.brand')</x-forms.input-label>
-                        <x-forms.input type="text" wire:model="checklistItemForm.checklists.__INDEX__.brand"
-                            id="checklist_brand___INDEX__" />
-                    </div>
-                    <div>
-                        <x-forms.input-label for="checklist_model___INDEX__">@lang('general.model')</x-forms.input-label>
-                        <x-forms.input type="text" wire:model="checklistItemForm.checklists.__INDEX__.model"
-                            id="checklist_model___INDEX__" />
-                    </div>
-                    <div>
-                        <x-forms.input-label for="checklist_serial___INDEX__">@lang('general.serial')</x-forms.input-label>
-                        <x-forms.input type="text" wire:model="checklistItemForm.checklists.__INDEX__.serial"
-                            id="checklist_serial___INDEX__" />
-                    </div>
-                    <div>
-                        <x-forms.input-label
-                            for="checklist_delivered_at___INDEX__">@lang('general.delivered_at')</x-forms.input-label>
-                        <x-forms.input type="date" wire:model="checklistItemForm.checklists.__INDEX__.delivered_at"
-                            id="checklist_delivered_at___INDEX__" />
-                    </div>
-                    <div class="lg:col-span-2">
-                        <x-forms.input-label
-                            for="checklist_delivered_status___INDEX__">@lang('general.delivered_status')</x-forms.input-label>
-                        <x-forms.input type="text" wire:model="checklistItemForm.checklists.__INDEX__.delivered_status"
-                            id="checklist_delivered_status___INDEX__" />
-                    </div>
-                    <div>
-                        <x-forms.input-label
-                            for="checklist_returned_at___INDEX__">@lang('general.returned_at')</x-forms.input-label>
-                        <x-forms.input type="date" wire:model="checklistItemForm.checklists.__INDEX__.returned_at"
-                            id="checklist_returned_at___INDEX__" />
-                    </div>
-                    <div class="lg:col-span-2">
-                        <x-forms.input-label
-                            for="checklist_returned_status___INDEX__">@lang('general.returned_status')</x-forms.input-label>
-                        <x-forms.input type="text" wire:model="checklistItemForm.checklists.__INDEX__.returned_status"
-                            id="checklist_returned_status___INDEX__" />
-                    </div>
-                    <div class="lg:col-span-3">
-                        <x-forms.input-label for="checklist_notes___INDEX__">@lang('general.notes')</x-forms.input-label>
-                        <x-forms.textarea wire:model="checklistItemForm.checklists.__INDEX__.notes" id="checklist_notes___INDEX__" />
-                    </div>
+        <div wire:key="checklist-{{ $index }}" class="relative border-b pb-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div class="md:col-span-2 flex justify-end">
+                    <x-primary-button type="button"
+                        wire:click="removeChecklist({{ $index }}, {{ $checklist['id'] ?? 'null' }})"
+                        title="@lang('general.remove')">
+                        <x-icons.trash />
+                    </x-primary-button>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="item_id_{{ $index }}">@lang('general.item')</x-forms.input-label>
+                    <x-forms.select-input id="item_id_{{ $index }}"
+                        wire:model.defer="checklistForm.checklists.{{ $index }}.item_id">
+                        <option value="">-- @lang('general.select') --</option>
+                        @foreach ($allItems as $item)
+                            <option value="{{ $item->id }}">{{ $item->name }}</option>
+                        @endforeach
+                    </x-forms.select-input>
+                    <x-error-span>{{ $errors->first("checklistForm.checklists.$index.item_id") }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="brand_{{ $index }}">@lang('general.brand')</x-forms.input-label>
+                    <x-forms.input id="brand_{{ $index }}" type="text"
+                        wire:model.defer="checklistForm.checklists.{{ $index }}.brand" />
+                    <x-error-span>{{ $errors->first("checklistForm.checklists.$index.brand") }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="model_{{ $index }}">@lang('general.model')</x-forms.input-label>
+                    <x-forms.input id="model_{{ $index }}" type="text"
+                        wire:model.defer="checklistForm.checklists.{{ $index }}.model" />
+                    <x-error-span>{{ $errors->first("checklistForm.checklists.$index.model") }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="serial_{{ $index }}">@lang('general.serial')</x-forms.input-label>
+                    <x-forms.input id="serial_{{ $index }}" type="text"
+                        wire:model.defer="checklistForm.checklists.{{ $index }}.serial" />
+                    <x-error-span>{{ $errors->first("checklistForm.checklists.$index.serial") }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="delivered_at_{{ $index }}">@lang('general.delivered_at')</x-forms.input-label>
+                    <x-forms.date-input id="delivered_at_{{ $index }}"
+                        wire:model.defer="checklistForm.checklists.{{ $index }}.delivered_at" />
+                    <x-error-span>{{ $errors->first("checklistForm.checklists.$index.delivered_at") }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label
+                        for="delivered_status_{{ $index }}">@lang('general.delivered_status')</x-forms.input-label>
+                    <x-forms.input id="delivered_status_{{ $index }}" type="text"
+                        wire:model.defer="checklistForm.checklists.{{ $index }}.delivered_status" />
+                    <x-error-span>{{ $errors->first("checklistForm.checklists.$index.delivered_status") }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="returned_at_{{ $index }}">@lang('general.returned_at')</x-forms.input-label>
+                    <x-forms.date-input id="returned_at_{{ $index }}"
+                        wire:model.defer="checklistForm.checklists.{{ $index }}.returned_at" />
+                    <x-error-span>{{ $errors->first("checklistForm.checklists.$index.returned_at") }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label
+                        for="returned_status_{{ $index }}">@lang('general.returned_status')</x-forms.input-label>
+                    <x-forms.input id="returned_status_{{ $index }}" type="text"
+                        wire:model.defer="checklistForm.checklists.{{ $index }}.returned_status" />
+                    <x-error-span>{{ $errors->first("checklistForm.checklists.$index.returned_status") }}</x-error-span>
+                </div>
+
+                <div class="md:col-span-2">
+                    <x-forms.input-label for="notes_{{ $index }}">@lang('general.notes')</x-forms.input-label>
+                    <x-forms.textarea id="notes_{{ $index }}"
+                        wire:model.defer="checklistForm.checklists.{{ $index }}.notes"
+                        rows="3"></x-forms.textarea>
+                    <x-error-span>{{ $errors->first("checklistForm.checklists.$index.notes") }}</x-error-span>
                 </div>
             </div>
-        </template>
-
-        <div><button type="button" @click="add" class="px-4 py-2 rounded bg-primary text-white hover:opacity-90">+
-                @lang('general.add-new')</button></div>
-        <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
-            <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-            <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
         </div>
-    </form>
-</div>
+    @endforeach
+
+    <div class="flex justify-center">
+        <x-primary-button type="button" wire:click="addChecklist">
+            + @lang('general.add-new')
+        </x-primary-button>
+    </div>
+
+    <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
+        <x-primary-button type="submit">@lang('general.save')</x-primary-button>
+        <x-secondary-button :href="route('employees.index')">@lang('general.cancel')</x-secondary-button>
+    </div>
+</form>

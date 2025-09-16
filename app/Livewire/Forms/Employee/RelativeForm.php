@@ -3,56 +3,74 @@
 namespace App\Livewire\Forms\Employee;
 
 use App\Models\Employee;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use Livewire\Attributes\Validate;
+use App\Models\Relative;
 use Livewire\Form;
-use Livewire\WithFileUploads;
 
 class RelativeForm extends Form
 {
-    use WithFileUploads;
-
-    public ?Employee $employee = null ;
-
-
-    protected function rules()
-    {
-        return [
-
-        ];
-    }
-
+    public ?Employee $employee = null;
+    public array $relatives = [];
 
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
 
+        $this->relatives = $this->employee
+            ->relatives()
+            ->select('id', 'name', 'phone', 'relation')
+            ->get()
+            ->map(
+                fn(Relative $relative) => [
+                    'id' => $relative->id,
+                    'name' => $relative->name,
+                    'phone' => $relative->phone,
+                    'relation' => $relative->relation,
+                ],
+            )
+            ->toArray();
     }
 
+    public function rules(): array
+    {
+        return [
+            'relatives' => ['array'],
+            'relatives.*.id' => ['nullable', 'exists:relatives,id'],
+            'relatives.*.name' => ['required', 'string', 'max:255'],
+            'relatives.*.phone' => ['nullable', 'string', 'max:255'],
+            'relatives.*.relation' => ['required', 'integer'],
+        ];
+    }
 
     public function addRelative(): void
     {
-        $this->relatives[] = ['name' => '', 'phone' => '', 'relation' => ''];
+        $this->relatives[] = [
+            'id' => null,
+            'name' => '',
+            'phone' => '',
+            'relation' => '',
+        ];
     }
 
-    public function removeRelative(int $index): void
+    public function removeRelative(int $index, ?int $id = null): void
     {
+        if (!array_key_exists($index, $this->relatives)) {
+            return;
+        }
+
         unset($this->relatives[$index]);
+
+        if (isset($id)) {
+            Relative::find($id)?->delete();
+        }
+
         $this->relatives = array_values($this->relatives);
     }
 
-
-    public function saveRelatives(): void
+    public function save(): void
     {
-        $this->validate([
-            'relatives' => 'array',
-            'relatives.*.name' => 'required_with:relatives.*.relation|string|max:255|nullable',
-        ]);
-
-        $this->employee->relatives()->delete();
-        $this->employee->relatives()->createMany($this->relatives);
+        $this->validate();
+        collect($this->relatives)->each(function ($relativeData) {
+            $this->employee->relatives()->updateOrCreate(['id' => $relativeData['id'] ?? null], $relativeData);
+        });
     }
-
 }

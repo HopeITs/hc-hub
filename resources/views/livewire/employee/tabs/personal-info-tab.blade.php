@@ -23,10 +23,10 @@
             </div>
         @endforeach
 
-        <div wire:key="emp-dob">
-            <x-forms.input-label for="dob">@lang('general.dob')</x-forms.input-label>
-            <x-forms.date-input wire:model="infoForm.dob" id="dob"/>
-            <x-error-span>{{ $errors->first('infoForm.dob') }}</x-error-span>
+        <div wire:key="emp-actual-dob">
+            <x-forms.input-label for="dob">@lang('general.actual-dob')</x-forms.input-label>
+            <x-forms.date-input wire:model="infoForm.actual_dob" id="actual_dob"/>
+            <x-error-span>{{ $errors->first('infoForm.actual_dob') }}</x-error-span>
 
         </div>
 
@@ -93,7 +93,12 @@
                 <x-error-span>{{ $errors->first('infoForm.mother_name.' . $locale) }}</x-error-span>
             </div>
         @endforeach
+        <div wire:key="emp-dob">
+            <x-forms.input-label for="dob">@lang('general.dob')</x-forms.input-label>
+            <x-forms.date-input wire:model="infoForm.dob" id="dob"/>
+            <x-error-span>{{ $errors->first('infoForm.dob') }}</x-error-span>
 
+        </div>
         <div wire:key="emp-nationality">
             <x-forms.input-label for="nationality">@lang('general.nationality')</x-forms.input-label>
 

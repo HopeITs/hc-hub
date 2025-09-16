@@ -2,78 +2,61 @@
 
 namespace App\Livewire\Forms\Employee;
 
+use App\Models\Badge;
 use App\Models\Employee;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use Livewire\Attributes\Validate;
 use Livewire\Form;
-use Livewire\WithFileUploads;
 
 class BadgeForm extends Form
 {
-    use WithFileUploads;
-
     public ?Employee $employee = null;
 
-    public $photo;
-
-    #[Validate('required|array')]
-    public $name = [];
-    #[Validate('required|array')]
-    public $national_number;
-    public $email;
-    public $work_email_username;
-    public $direct_manager_id;
-    public $tech_manager_id;
-    public $father_name = [];
-    public $mother_name = [];
-    public $dob;
-    public $gender;
-    public $marital_status;
-    public $children = 0;
-    public $nationality = 'syrian';
-    public $civil_registry_office;
-    public $civil_registry_number;
-    public $place_of_registration;
-    public $work_phone;
-    public $personal_phone;
-    public $personal_email;
-    public $address = [];
-    public $skills;
-    public $interests;
-    public $is_active = 1;
-    public $is_board_member = false;
-    public $board_member_started_at;
-    public $board_member_end_at;
-    public array $educations = [];
-    public array $courses = [];
-    public array $experiences = [];
-    public array $relatives = [];
     public array $badges = [];
-    public array $checklists = [];
-
-    protected function rules()
-    {
-        return [
-
-        ];
-    }
-
-
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
-
+        $this->badges = $this->employee
+            ->badges()
+            ->select('id', 'evaluation_id', 'type', 'currency', 'date', 'reason', 'current_salary', 'new_salary', 'notes')
+            ->get()
+            ->map(
+                fn(Badge $badge) => [
+                    'id' => $badge->id,
+                    'evaluation_id' => $badge->evaluation_id,
+                    'type' => $badge->type,
+                    'currency' => $badge->currency,
+                    'date' => $badge->date?->format('Y-m-d'),
+                    'reason' => $badge->reason,
+                    'current_salary' => $badge->current_salary,
+                    'new_salary' => $badge->new_salary,
+                    'notes' => $badge->notes,
+                ],
+            )
+            ->toArray();
     }
 
+    public function rules(): array
+    {
+        return [
+            'badges' => ['array'],
+            'badges.*.id' => ['nullable', 'exists:badges,id'],
+            'badges.*.evaluation_id' => ['nullable', 'exists:evaluations,id'],
+            'badges.*.type' => ['required', 'string', 'max:255'],
+            'badges.*.currency' => ['nullable', 'integer', 'in:0,1,2,3'],
+            'badges.*.date' => ['required', 'date'],
+            'badges.*.reason' => ['nullable', 'string'],
+            'badges.*.current_salary' => ['nullable', 'numeric', 'min:0'],
+            'badges.*.new_salary' => ['nullable', 'numeric', 'min:0'],
+            'badges.*.notes' => ['nullable', 'string'],
+        ];
+    }
 
     public function addBadge(): void
     {
         $this->badges[] = [
+            'id' => null,
             'evaluation_id' => null,
-            'currency' => 1,
             'type' => '',
+            'currency' => 1,
             'date' => now()->format('Y-m-d'),
             'reason' => '',
             'current_salary' => null,
@@ -82,22 +65,27 @@ class BadgeForm extends Form
         ];
     }
 
-    public function removeBadge(int $index): void
+    public function removeBadge(int $index, ?int $id = null): void
     {
+        if (!array_key_exists($index, $this->badges)) {
+            return;
+        }
+
         unset($this->badges[$index]);
+
+        if (isset($id)) {
+            Badge::find($id)?->delete();
+        }
+
         $this->badges = array_values($this->badges);
     }
 
-
-    public function saveBadges(): void
+    public function save(): void
     {
-        $this->validate([
-            'badges' => 'array',
-            'badges.*.type' => 'required_with:badges.*.date|string|max:255|nullable',
-        ]);
+        $this->validate();
 
-        $this->employee->badges()->delete();
-        $this->employee->badges()->createMany($this->badges);
+        collect($this->badges)->each(function ($badgeData) {
+            $this->employee->badges()->updateOrCreate(['id' => $badgeData['id'] ?? null], $badgeData);
+        });
     }
-
 }

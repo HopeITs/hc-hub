@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -79,12 +78,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('program_id')->constrained()->onDelete('restrict');
             $table->foreignId('center_id')->nullable()->constrained()->onDelete('restrict');
-            $table->foreignId('city_id')->constrained()->onDelete('restrict');
+            $table->foreignId('city_id')->default(2)->constrained()->onDelete('restrict');
             $table->foreignId('job_level_id')->constrained()->onDelete('restrict');
             $table->foreignId('department_id')->constrained()->onDelete('restrict');
-            $table->json('title');
-            $table->text('qualifications');
-            $table->text('responsibilities');
+            $table->string('title');
+            $table->string('title_ar');
+            $table->text('qualifications')->nullable();
+            $table->text('responsibilities')->nullable();
             $table->integer('max_emp')->default(1);
             $table->integer('exist_emp')->default(0);
             $table->boolean('is_active')->default(true);
@@ -104,11 +104,11 @@ return new class extends Migration
             $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('set null');
             $table->json('name');
             $table->string('username')->unique();
-            $table->string('actual_job')->nullable();
             $table->double('years_of_service')->nullable();
             $table->foreignId('direct_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->foreignId('tech_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->char('national_number')->unique()->nullable();
+            $table->dateTime('actual_dob')->nullable();
             $table->dateTime('dob')->nullable();
             $table->string('place_and_birth_date')->nullable();
             $table->string('civil_registry_office')->nullable();
@@ -137,7 +137,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->string('issuing_organization');
-            $table->date('date')->nullable();
+            $table->dateTime('issue_date')->nullable();
             $table->boolean('is_approved')->default(false);
             $table->timestamps();
         });
@@ -155,10 +155,10 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('job_title');
             $table->string('company');
-            $table->date('start_date');
-            $table->date('end_date')->nullable();
-            $table->string('place')->nullable();
-            $table->string('type')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date')->nullable();
+            $table->tinyInteger('place')->nullable();
+            $table->tinyInteger('type')->nullable();
             $table->timestamps();
         });
         Schema::create('relatives', function (Blueprint $table) {
@@ -191,12 +191,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
         //contracts
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->foreignId('position_id')->constrained()->onDelete('restrict');
+            $table->foreignId('position_id')->default(2)->constrained()->onDelete('restrict');
             $table->foreignId('contract_type_id')->constrained()->onDelete('restrict');
             $table->date('start_date');
             $table->date('end_date');
@@ -226,7 +225,7 @@ return new class extends Migration
             $table->foreignId('evaluation_id')->nullable()->constrained()->onDelete('restrict');
             $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR')->nullable();
             $table->string('type');
-            $table->date('date');
+            $table->dateTime('date');
             $table->text('reason')->nullable();
             $table->decimal('current_salary', 10, 2)->nullable();
             $table->decimal('new_salary', 10, 2)->nullable();
@@ -254,6 +253,24 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('attachments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('employee_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->string('item');
+            $table->string('brand')->nullable();
+            $table->string('model')->nullable();
+            $table->string('serial_number')->nullable();
+            $table->string('status')->nullable();
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -272,8 +289,6 @@ return new class extends Migration
         Schema::dropIfExists('positions');
         Schema::dropIfExists('annual_leave_rules');
 
-
-
         Schema::dropIfExists('employees');
         Schema::dropIfExists('courses');
         Schema::dropIfExists('educations');
@@ -282,12 +297,12 @@ return new class extends Migration
         Schema::dropIfExists('checklist');
         Schema::dropIfExists('default_deliverables');
 
-
         Schema::dropIfExists('contracts');
         Schema::dropIfExists('evaluations');
         Schema::dropIfExists('badges');
         Schema::dropIfExists('leave_balances');
         Schema::dropIfExists('leave_requests');
-
+        Schema::dropIfExists('attachments');
+        Schema::dropIfExists('employee_items');
     }
 };

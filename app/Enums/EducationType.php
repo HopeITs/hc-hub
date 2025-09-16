@@ -14,16 +14,17 @@ final class EducationType extends Enum
     const Master = 5;
     const PHD = 6;
 
-    public static function getLocalizedName(int $value): array
+    public static function getLocalizedName(int $value): string
     {
-        return match ($value) {
-            self::Primary_School => ['en' => 'Primary_School', 'ar' => 'تعليم اساسي'],
-            self::High_School => ['en' => 'High_School', 'ar' => 'تعليم ثانوي'],
+        $result = match ($value) {
+            self::Primary_School => ['en' => 'Primary School', 'ar' => 'تعليم اساسي'],
+            self::High_School => ['en' => 'High School', 'ar' => 'تعليم ثانوي'],
             self::Institute => ['en' => 'Institute', 'ar' => 'معهد'],
             self::University => ['en' => 'University', 'ar' => 'جامعة'],
             self::Master => ['en' => 'Master', 'ar' => 'ماجستير'],
             self::PHD => ['en' => 'PHD', 'ar' => 'دكتوراه'],
             default => ['en' => 'Unknown', 'ar' => 'غير معروف'],
         };
+        return $result[app()->getLocale()] ?? '';
     }
 }

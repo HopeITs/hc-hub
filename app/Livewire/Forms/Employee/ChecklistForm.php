@@ -2,40 +2,62 @@
 
 namespace App\Livewire\Forms\Employee;
 
+use App\Models\Checklist;
 use App\Models\Employee;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
-use Livewire\Attributes\Validate;
 use Livewire\Form;
-use Livewire\WithFileUploads;
 
 class ChecklistForm extends Form
 {
-    use WithFileUploads;
+    public ?Employee $employee = null;
 
-    public ?Employee $employee = null ;
-
-
-    protected function rules()
-    {
-        return [
-
-        ];
-    }
+    public array $checklists = [];
 
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
 
+        $this->checklists = $employee
+            ->checklists()
+            ->select('id', 'item_id', 'brand', 'model', 'serial', 'delivered_at', 'delivered_status', 'returned_at', 'returned_status', 'notes')
+            ->get()
+            ->map(
+                fn(Checklist $checklist) => [
+                    'id' => $checklist->id,
+                    'item_id' => $checklist->item_id,
+                    'brand' => $checklist->brand,
+                    'model' => $checklist->model,
+                    'serial' => $checklist->serial,
+                    'delivered_at' => $checklist->delivered_at?->format('Y-m-d'),
+                    'delivered_status' => $checklist->delivered_status,
+                    'returned_at' => $checklist->returned_at?->format('Y-m-d'),
+                    'returned_status' => $checklist->returned_status,
+                    'notes' => $checklist->notes,
+                ],
+            )
+            ->toArray();
     }
 
-
-
+    public function rules(): array
+    {
+        return [
+            'checklists' => ['array'],
+            'checklists.*.id' => ['nullable', 'exists:checklists,id'],
+            'checklists.*.item_id' => ['nullable', 'integer', 'exists:checklist_items,id'],
+            'checklists.*.brand' => ['nullable', 'string', 'max:255'],
+            'checklists.*.model' => ['nullable', 'string', 'max:255'],
+            'checklists.*.serial' => ['nullable', 'string', 'max:255'],
+            'checklists.*.delivered_at' => ['nullable', 'date'],
+            'checklists.*.delivered_status' => ['nullable', 'string', 'max:255'],
+            'checklists.*.returned_at' => ['nullable', 'date'],
+            'checklists.*.returned_status' => ['nullable', 'string', 'max:255'],
+            'checklists.*.notes' => ['nullable', 'string'],
+        ];
+    }
 
     public function addChecklist(): void
     {
         $this->checklists[] = [
+            'id' => null,
             'item_id' => null,
             'brand' => '',
             'model' => '',
@@ -48,20 +70,27 @@ class ChecklistForm extends Form
         ];
     }
 
-    public function removeChecklist(int $index): void
+    public function removeChecklist(int $index, ?int $id = null): void
     {
+        if (!array_key_exists($index, $this->checklists)) {
+            return;
+        }
+
         unset($this->checklists[$index]);
+
+        if ($id) {
+            Checklist::find($id)?->delete();
+        }
+
         $this->checklists = array_values($this->checklists);
     }
 
-    public function saveChecklist(): void
+    public function save(): void
     {
-        $this->validate([
-            'checklists' => 'array',
-            'checklists.*.item_id' => 'required_with:checklists.*.brand|exists:checklist_items,id|nullable',
-        ]);
+        $this->validate();
 
-        $this->employee->checklists()->delete();
-        $this->employee->checklists()->createMany($this->checklists);
+        collect($this->checklists)->each(function ($data) {
+            $this->employee->checklists()->updateOrCreate(['id' => $data['id'] ?? null], $data);
+        });
     }
 }

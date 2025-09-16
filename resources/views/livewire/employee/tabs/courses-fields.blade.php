@@ -12,12 +12,13 @@
                     <x-primary-button
                         type="button"
                         variant="danger"
-                        wire:click="removeCourse({{ $index }})"
+                        wire:click="removeCourse({{ $index }} , {{$course['id']}})"
                         wire:loading.attr="disabled"
                         wire:target="removeCourse"
                         class="!px-3 !py-2"
                         title="@lang('general.remove')"
                         aria-label="@lang('general.remove')"
+                        :showSpinner="false"
                     >
                         <x-icons.trash class="w-4 h-4"/>
                     </x-primary-button>
@@ -68,12 +69,12 @@
                     <x-forms.input
                         id="course_date_{{ $index }}"
                         type="date"
-                        wire:model.defer="courseForm.courses.{{ $index }}.date"
-                        :invalid="$errors->has('courseForm.courses.'.$index.'.date')"
+                        wire:model.defer="courseForm.courses.{{ $index }}.issue_date"
+                        :invalid="$errors->has('courseForm.courses.'.$index.'.issue_date')"
                     />
 
                     <x-error-span>
-                        {{ $errors->first("courseForm.courses.$index.date") }}
+                        {{ $errors->first("courseForm.courses.$index.issue_date") }}
                     </x-error-span>
                 </div>
 
@@ -106,6 +107,17 @@
                     </x-error-span>
                 </div>
 
+                <div>
+                    <x-forms.input-label for="course_attachment_{{ $index }}">@lang('general.attachment')</x-forms.input-label>
+                    <x-forms.file-input wire:model="courseForm.courses.{{ $index }}.course_attachment"
+                                        name="courseForm.courses.{{ $index }}.course_attachment"
+                                        preview-type="pdf"
+                                        :old-file="$course['course_attachment']"
+                                        :file-name="$course['file_name']"
+                                        accept=".pdf"/>
+
+                </div>
+
             </div>
         </div>
 
@@ -119,6 +131,7 @@
             wire:click="addCourse"
             wire:loading.attr="disabled"
             wire:target="addCourse"
+            :showSpinner="false"
         >
             + @lang('general.add-new')
         </x-primary-button>

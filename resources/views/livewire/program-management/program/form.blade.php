@@ -22,6 +22,16 @@
                 <x-forms.input type="text" id="name" wire:model.defer="form.name" />
                 <x-error-span>{{ $errors->first('form.name') }}</x-error-span>
             </div>
+            <div class="col-span-2">
+                <x-forms.input-label for="program_manager_id">@lang('general.program-manager')</x-forms.input-label>
+                <x-forms.select-input id="program_manager_id" wire:model="form.program_manager_id">
+                    <option value="">{{ __('general.select') }}</option>
+                    @foreach($employees as $employee)
+                        <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                    @endforeach
+                </x-forms.select-input>
+                <x-error-span>{{ $errors->first('form.program_manager_id') }}</x-error-span>
+            </div>
             @foreach (config('app.supported_locales') as $locale)
                 <div class="col-span-1">
                     <x-forms.input-label for="description_{{ $locale }}">@lang('general.description')

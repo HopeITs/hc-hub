@@ -15,6 +15,7 @@ class Detail extends Component
 
     public function mount(Program $program)
     {
+        $program->load( 'centers.city');
         $this->form->setProgram($program);
     }
 

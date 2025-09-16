@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Employee;
 use App\Models\Position;
 use App\Models\User;
+
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -18,7 +19,6 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
 
-
         $this->call([
             ProgramSeeder::class,
             CitySeeder::class,
@@ -29,16 +29,18 @@ class DatabaseSeeder extends Seeder
             LeaveTypeSeeder::class,
             AnnualLeaveRuleSeeder::class,
             RolesPermissionsSeeder::class,
-            UserRoleSeeder::class,
             JobLevelSeeder::class,
             PositionsSeeder::class,
-//            EmployeeSeeder::class,
+            UserRoleSeeder::class,
+
+
+            EmployeeSeeder::class,
 
         ]);
 
-    //    $user = User::factory()->create([
-    //         // 'name' => ['en' => 'Test User'],
-    //         'email' => 'test@example.com',
-    //     ]);
+        //    $user = User::factory()->create([
+        //         // 'name' => ['en' => 'Test User'],
+        //         'email' => 'test@example.com',
+        //     ]);
     }
 }
