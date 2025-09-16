@@ -93,6 +93,7 @@ return [
     'existing' => 'الموظفين الحاليين',
 
     'default-deliverables' => 'المنتجات الأساسية',
+    'deliver-by' => 'التسليم بواسطة',
     'centers' => 'المراكز',
     'center-name' => 'اسم المركز',
     'center-city' => 'المدينة',

@@ -93,6 +93,7 @@ return [
     'existing' => 'Existing Employees',
 
     'default-deliverables' => 'Default Deliverables',
+    'deliver-by' => 'Deliver By',
     'centers' => 'Centers',
     'center-name' => 'Center Name',
     'center-city' => 'City',

@@ -25,7 +25,7 @@
                     <x-error-span>{{ $errors->first("checklistForm.checklists.$index.item_id") }}</x-error-span>
                 </div>
                 <div>
-                    <x-forms.input-label for="delivered_id_{{ $index }}">@lang('general.item')</x-forms.input-label>
+                    <x-forms.input-label for="delivered_id_{{ $index }}">@lang('general.deliver-by')</x-forms.input-label>
                     <x-forms.select-input id="delivered_id_{{ $index }}"
                                           wire:model.defer="checklistForm.checklists.{{ $index }}.delivered_id">
                         <option value="">-- @lang('general.select') --</option>
