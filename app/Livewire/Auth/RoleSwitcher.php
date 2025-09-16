@@ -97,6 +97,8 @@ class RoleSwitcher extends Component
         $this->dispatch('notify', title: __('Role switched'), message: __('Role updated successfully.'));
 
         $this->refreshRoles();
+
+        $this->redirectRoute('dashboard', navigate: true);
     }
 
     public function render()
