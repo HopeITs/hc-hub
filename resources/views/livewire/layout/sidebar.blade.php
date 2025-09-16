@@ -6,19 +6,19 @@
             <a href="{{ route('home') }}" class="flex justify-center items-center mt-4 mb-8">
                 <x-app-logo class="md:w-40 md:h-16"/>
             </a>
+
             <ul class="space-y-2 font-medium">
+                @activerole('employee')
                 <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')"
                                                          :active="request()->routeIs('dashboard') ||
-                    request()->routeIs('cities.*') ||
-                    request()->routeIs('contract-types.*') ||
-                    request()->routeIs('leave-types.*') ||
-                    request()->routeIs('checklist-items.*') ||
-                    request()->routeIs('departments.*') ||
-                    request()->routeIs('job-levels.*')">
+                             request()->routeIs('cities.*') ||
+                             request()->routeIs('contract-types.*') ||
+                             request()->routeIs('leave-types.*') ||
+                             request()->routeIs('checklist-items.*') ||
+                             request()->routeIs('departments.*') ||
+                             request()->routeIs('job-levels.*')">
 
-                    <x-slot name="icon">
-                        <x-icons.home/>
-                    </x-slot>
+                    <x-slot name="icon"><x-icons.home/></x-slot>
                     <x-slot name="list">
                         <x-layouts.app.sidebar.nav-item :href="route('cities.index')"
                                                         :active="request()->routeIs('cities.index') || request()->routeIs('dashboard')">
@@ -50,18 +50,17 @@
                             {{ trans_choice('general.department', 2) }}
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>
-
                 </x-layouts.app.sidebar.dropdown-nav-list>
+                @endactiverole
 
+                @activerole('hr manager')
                 <x-layouts.app.sidebar.dropdown-nav-list id="program-management"
-                                                         :title="__('general.programs-management')" :active="request()->routeIs('programs.*') ||
-request()->routeIs('positions.*') ||
-                    request()->routeIs('centers.*')">
+                                                         :title="__('general.programs-management')"
+                                                         :active="request()->routeIs('programs.*') ||
+                             request()->routeIs('positions.*') ||
+                             request()->routeIs('centers.*')">
 
-                    <x-slot name="icon">
-                        <x-icons.layers/>
-                    </x-slot>
-
+                    <x-slot name="icon"><x-icons.layers/></x-slot>
                     <x-slot name="list">
                         <x-layouts.app.sidebar.nav-item :href="route('programs.index')"
                                                         :active="request()->routeIs('programs.*')">
@@ -79,14 +78,16 @@ request()->routeIs('positions.*') ||
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
+                @endactiverole
 
+                @activerole('hr manager')
                 <x-layouts.app.sidebar.dropdown-nav-list id="employees-management"
                                                          :title="trans_choice('general.employee-management', 2)"
-                                                         :active="request()->routeIs('employees.*')">
+                                                         :active="request()->routeIs('employees.*') ||
+                             request()->routeIs('contracts.*') ||
+                             request()->routeIs('default-deliverables.*')">
 
-                    <x-slot name="icon">
-                        <x-icons.users/>
-                    </x-slot>
+                    <x-slot name="icon"><x-icons.users/></x-slot>
                     <x-slot name="list">
                         <x-layouts.app.sidebar.nav-item :href="route('employees.index')"
                                                         :active="request()->routeIs('employees.*')">
@@ -102,18 +103,19 @@ request()->routeIs('positions.*') ||
                                                         :active="request()->routeIs('contracts.*')">
                             {{ trans_choice('general.contracts', 2) }}
                         </x-layouts.app.sidebar.nav-item>
-
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
+                @endactiverole
 
+                @activerole('employee','hr manager')
                 <li>
                     <a href="{{ route('archived-files.index') }}"
                        class="flex items-center p-2 rounded-lg text-gray-900 hover:bg-gray-100 group @if (request()->routeIs('archived-files.*')) bg-gray-100 @endif">
-                        <x-icons.folder
-                            class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"/>
+                        <x-icons.folder class="w-5 h-5 text-gray-500 transition duration-75 group-hover:text-gray-900"/>
                         <span class="ms-3">{{ __('general.archived-files') }}</span>
                     </a>
                 </li>
+                @endactiverole
 
             </ul>
         </div>
