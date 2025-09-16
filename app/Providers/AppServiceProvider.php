@@ -22,6 +22,17 @@ class AppServiceProvider extends ServiceProvider
         return '<?php echo app(\App\Support\Arabic::class)->glyphs(' . $expr . '); ?>';
         });
 
+        Builder::macro('whereLikeAny', function ($fields, string $search) {
+            $fields = Arr::wrap($fields);
+            if ($search === '' || $search === null) return $this;
+
+            return $this->where(function ($q) use ($fields, $search) {
+                foreach ($fields as $field) {
+                    $q->orWhere($field, 'like', "%{$search}%");
+                }
+            });
+        });
+
         Builder::macro('search', function ($fields, $string) {
             if (!$string) {
                 return $this;
@@ -52,6 +63,14 @@ class AppServiceProvider extends ServiceProvider
 
             });
 
+        });
+
+        Blade::if('activerole', function (...$roles) {
+            return auth()->check() && auth()->user()->activeRoleIs(...$roles);
+        });
+
+        Blade::if('notactiverole', function (...$roles) {
+            return auth()->check() && ! auth()->user()->activeRoleIs(...$roles);
         });
     }
 }
