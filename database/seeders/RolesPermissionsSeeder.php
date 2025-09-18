@@ -13,9 +13,9 @@ class RolesPermissionsSeeder extends Seeder
     {
         //Roles:
         $superAdminRole = Role::create(['name' => 'Super Admin']);
-        $generalAdminRole = Role::create(['name' => 'General Manger']);
-        $hrManagerRole = Role::create(['name' => 'HR Manager']);
+        $generalAdminRole = Role::create(['name' => 'General Admin']);
         $hrRole = Role::create(['name' => 'HR']);
+        $managerRole = Role::create(['name' => 'Manager']);
         $employeeRole = Role::create(['name' => 'Employee']);
 
         //Here we can assign permissions to each role when we know it:
