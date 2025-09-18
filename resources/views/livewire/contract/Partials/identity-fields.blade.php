@@ -28,22 +28,17 @@
             @foreach($positions as $pos)
                 <option value="{{ $pos->id }}">
                     {{ $pos->title ?? $pos->requiredPosition?->title ?? ('#'.$pos->id) }}
-                    @php($center = $pos->center ?? null)
-                    @if($center)
-                        {{-- show center name (translated when available) --}}
+                    @if($pos->center)
                         — {{
-                            (method_exists($center, 'getTranslatableAttributes') && in_array('name', $center->getTranslatableAttributes(), true))
-                                ? $center->getTranslation('name', $locale)
-                                : ($center->name ?? '')
+                            (method_exists($pos->center, 'getTranslatableAttributes') && in_array('name', $pos->center->getTranslatableAttributes(), true))
+                                ? $pos->center->getTranslation('name', $locale)
+                                : ($pos->center->name ?? '')
                         }}
                     @endif
                 </option>
             @endforeach
         </x-forms.select-input>
         <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.position_id') }}</x-error-span>
-
-        {{-- Derived info from the selected position --}}
-        @php($selected = $positions->firstWhere('id', (int) ($form->position_id ?? 0)))
     </div>
 
     {{-- Contract type --}}

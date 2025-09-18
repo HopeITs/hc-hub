@@ -76,12 +76,12 @@ class ContractCreate extends Component
 
             'positions' => Position::with([
                 'center:id,name,city_id',
-                'program:id,name',        // ⬅ derive from position
-                'department:id,name',     // ⬅ derive from position
-                'jobLevel:id,name,grade', // ⬅ derive from position
+                'program:id,name',
+                'department:id,name',
+                'jobLevel:id,name,grade',
             ])
-                ->orderBy('id')
-                ->get(['id','center_id','program_id','department_id','job_level_id']),
+                ->orderBy('title')
+                ->get(['id','title','center_id','program_id','department_id','job_level_id']),
 
             'types' => ContractType::select('id','name')->orderBy("name->$locale")->get(),
         ]);
