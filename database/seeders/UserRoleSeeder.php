@@ -19,7 +19,7 @@ class UserRoleSeeder extends Seeder
         );
 
         $this->createUserWithRole(
-            email: 'generalmanager@mail.com',
+            email: 'generaladmin@mail.com',
             password: 'password',
             roleName: 'General Manager'
         );
@@ -34,6 +34,12 @@ class UserRoleSeeder extends Seeder
             email: 'hr@mail.com',
             password: 'password',
             roleName: 'HR-ALP'
+        );
+
+        $this->createUserWithRole(
+            email: 'manager@mail.com',
+            password: 'password',
+            roleName: 'Manager'
         );
 
         $this->createUserWithRole(
