@@ -172,36 +172,14 @@
         </div>
         <div>
             <x-forms.input-label for="roles">{{trans_choice('general.role',2)}}</x-forms.input-label>
-            <input class="tagify" id="roles" value="{{implode(',',$roles)}}" autocomplete="off"
-                   placeholder="How cool is this?">
 
-            {{--            <x-forms.input class="tagify" wire:model.live="infoForm.roles" id="roles" data-whitelist="{{implode(',',$roles)}}"/>--}}
+            <input class="hidden" wire:model="infoForm.roles"   id="roles_hidden">
+            <x-forms.input class="tagify" id="roles" value="{{$infoForm->roles}}"
+                           data-whitelist="{{implode(',',$roles)}}"/>
 
             <x-error-span>{{ $errors->first('infoForm.roles') }}</x-error-span>
         </div>
-        <div>
-            <x-forms.input-label for="direct_manager_id">@lang('general.direct_manager')</x-forms.input-label>
-            <x-forms.select-input wire:model="infoForm.direct_manager_id" id="direct_manager_id">
-                <option value="">--</option>
-                @foreach ($allEmployees as $emp)
-                    <option
-                        value="{{ $emp->id }}">{{ $emp->getTranslation('name', app()->getLocale()) }}</option>
-                @endforeach
-            </x-forms.select-input>
-            <x-error-span>{{ $errors->first('infoForm.direct_manager_id') }}</x-error-span>
-        </div>
 
-        <div>
-            <x-forms.input-label for="tech_manager_id">@lang('general.tech_manager')</x-forms.input-label>
-            <x-forms.select-input wire:model="infoForm.tech_manager_id" id="tech_manager_id">
-                <option value="">--</option>
-                @foreach ($allEmployees as $emp)
-                    <option
-                        value="{{ $emp->id }}">{{ $emp->getTranslation('name', app()->getLocale()) }}</option>
-                @endforeach
-            </x-forms.select-input>
-            <x-error-span>{{ $errors->first('infoForm.tech_manager_id') }}</x-error-span>
-        </div>
 
         <div>
             <x-forms.input-label for="work_phone">@lang('general.work_phone')</x-forms.input-label>
@@ -232,17 +210,19 @@
 
         <div class="md:col-span-2">
             <x-forms.input-label for="skills">@lang('general.skills')</x-forms.input-label>
-            <x-forms.input class="tagify" type="text" data-enforceWhitelist="0"
+            <input class="hidden" wire:model="infoForm.skills"  id="skills_hidden">
+            <x-forms.input class="tagify" type="text" data-enforceWhitelist="0" value="{{$infoForm->skills}}"
                            data-whitelist="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking ,Problem Solving, Adaptability, Willingness to learn,Active listening,Emotion Intelligence,Creativity , Data analysis     "
-                           wire:model="infoForm.skills" id="skills"/>
+                           id="skills"/>
             <x-error-span>{{ $errors->first('infoForm.skills') }}</x-error-span>
         </div>
 
         <div class="md:col-span-2">
             <x-forms.input-label for="interests">@lang('general.interests')</x-forms.input-label>
-            <x-forms.input class="tagify" data-enforceWhitelist="1"
+            <input class="hidden" wire:model="infoForm.interests"  id="interests_hidden">
+            <x-forms.input class="tagify" data-enforceWhitelist="1" value="{{$infoForm->interests}}"
                            data-whitelist="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling"
-                           type="text" wire:model="infoForm.interests" id="interests"/>
+                           type="text"   id="interests"/>
             <x-error-span>{{ $errors->first('infoForm.interests') }}</x-error-span>
         </div>
     </div>

@@ -181,7 +181,7 @@ class PersonalInfoForm extends Form
         $this->email = $this->buildWorkEmail($this->username);
 
         $this->validate();
-dd($this->all());
+
         if ($this->employee) {
             $this->employee->update($this->except(['email', 'photo']));
 
