@@ -14,6 +14,7 @@ use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
 use App\Models\DefaultDeliverable;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Traits\WithAlerts;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -37,6 +38,7 @@ class EmployeeEdit extends Component
 
     public $activeTab = 'information';
     public $title = '';
+
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;
@@ -179,7 +181,7 @@ class EmployeeEdit extends Component
 
     public function removeCourse(int $index, ?int $id = null)
     {
-        $this->courseForm->remove($index,$id);
+        $this->courseForm->remove($index, $id);
         $this->resetErrorBag();
     }
 
@@ -218,7 +220,7 @@ class EmployeeEdit extends Component
 
     public function removeChecklistItem($i, $id = null)
     {
-        $this->checklistForm->removeChecklistItem((int) $i, $id);
+        $this->checklistForm->removeChecklistItem((int)$i, $id);
         $this->resetErrorBag();
     }
 
@@ -238,15 +240,17 @@ class EmployeeEdit extends Component
             $allItems = ChecklistItem::where('order', 1)->with(['defaultDeliverable' => function ($query) {
                 return $query->where('city_id', $this->employee->city_id);
             }])->get();
-        }else{
-            $allItems = ChecklistItem::whereNot('order',1)->with(['defaultDeliverable' => function ($query) {
-                return $query->where('city_id', $this->employee->city_id);
-            }]) ->orderBy('order')->get();
+        } else {
+            $allItems = ChecklistItem::whereNot('order', 1)->with(['defaultDeliverable' => function ($query) {
+                return $query->whereIn('city_id', [1,$this->employee->city_id]);
+            }])->orderBy('order')->get();
         }
 
-        $delivereds = DefaultDeliverable::whereIn('city_id', [1,$this->employee->city_id])->get();
+        $delivereds = DefaultDeliverable::whereIn('city_id', [1, $this->employee->city_id])->get();
+        $roles = Role::pluck('name','id')->toArray();
 
         return view('livewire.employee.form', [
+            'roles' => $roles,
             'allEmployees' => Employee::select('id', 'name')
                 ->where('id', '!=', $this->employee->id)
                 ->get(),

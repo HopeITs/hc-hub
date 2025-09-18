@@ -6,3 +6,4 @@
 
 
 @livewireScripts
+@yield('js')

@@ -103,6 +103,8 @@ class PersonalInfoForm extends Form
 
     public $city_id;
 
+    public $roles;
+
 
     public function rules()
     {
@@ -168,6 +170,7 @@ class PersonalInfoForm extends Form
         $this->username = $employee->username;
         $this->email = $employee->account?->email;
         $this->photo = $employee->getFirstMediaUrl('avatar');
+        $this->roles = implode(',' ,$employee->account->roles()->pluck('name')->toArray());
 
     }
 
@@ -178,7 +181,7 @@ class PersonalInfoForm extends Form
         $this->email = $this->buildWorkEmail($this->username);
 
         $this->validate();
-
+dd($this->all());
         if ($this->employee) {
             $this->employee->update($this->except(['email', 'photo']));
 

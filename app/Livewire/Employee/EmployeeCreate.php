@@ -13,6 +13,7 @@ use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Traits\WithAlerts;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -198,6 +199,7 @@ class EmployeeCreate extends Component
         ];
 
         return view('livewire.employee.form', [
+            'roles' => Role::select('name')->toArray(),
             'allEmployees' => Employee::select('id', 'name')->get(),
             'checklistItems' => ChecklistItem::where('order', 1)->orderBy('name')->get(),
             'deviceTypes' => $deviceTypes,
