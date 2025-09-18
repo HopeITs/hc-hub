@@ -197,9 +197,10 @@ class EmployeeCreate extends Component
             'Screen', 'SD Reader', 'Security Camera', 'Smart Watch', 'Switch',
             'Tab', 'Time Attendance Machine', 'Toner', 'USB Flash Memory', 'WebCam'
         ];
+        $roles = Role::pluck('name','id')->toArray();
 
         return view('livewire.employee.form', [
-            'roles' => Role::select('name')->toArray(),
+            'roles' => $roles,
             'allEmployees' => Employee::select('id', 'name')->get(),
             'checklistItems' => ChecklistItem::where('order', 1)->orderBy('name')->get(),
             'deviceTypes' => $deviceTypes,
