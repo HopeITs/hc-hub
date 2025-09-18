@@ -21,9 +21,9 @@
                bg-white/60 backdrop-blur supports-[backdrop-filter]:bg-white/40
                border border-gray-200/70 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition"
         >
-        <span class="relative inline-grid place-items-center rounded-full p-[2px]
+        <span class="relative inline-grid place-items-center rounded-full p-[2px] shrink-0
                      bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
-            <img class="size-10 rounded-full ring-2 ring-white"
+            <img class="size-10 rounded-full ring-2 ring-white shrink-0"
                  src="{{ $user->profile_photo_url ?? 'https://flowbite.com/docs/images/people/profile-picture-2.jpg' }}"
                  alt="user"/>
             <span
@@ -64,8 +64,8 @@
 
                 <div class="relative flex items-center gap-3">
                 <span
-                    class="p-[3px] rounded-full bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
-                    <img class="size-12 rounded-full ring-2 ring-white"
+                    class="p-[3px] rounded-full shrink-0 bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
+                    <img class="size-12 rounded-full ring-2 ring-white shrink-0"
                          src="{{ $user->profile_photo_url ?? 'https://flowbite.com/docs/images/people/profile-picture-2.jpg' }}"
                          alt="user">
                 </span>
