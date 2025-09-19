@@ -21,6 +21,7 @@ return [
     'type' => 'النوع',
     'place' => 'المكان',
     'order' => 'الترتيب',
+    'role' => 'الأدوار|الدور',
     'weekly-hours' => 'ساعات العمل الأسبوعية',
     'status' => 'الحالة',
     'code' => 'الرمز',
@@ -93,6 +94,7 @@ return [
     'existing' => 'الموظفين الحاليين',
 
     'default-deliverables' => 'المنتجات الأساسية',
+    'deliver-by' => 'التسليم بواسطة',
     'centers' => 'المراكز',
     'center-name' => 'اسم المركز',
     'center-city' => 'المدينة',
@@ -199,13 +201,10 @@ return [
     'position' => 'المنصب',
     'contract-start' => 'بداية العقد',
     'contract-end' => 'نهاية العقد',
-    'ongoing' => 'مستمر',
-    'no-employees' => 'لا يوجد موظفون معينون في هذا المشروع بعد.',
-    'archived-files' => 'الملفات المؤرشفة',
+
     'my-folders' => 'مجلداتي',
     'shared-folders' => 'المجلدات المشتركة',
-    'project-manager' => 'مدير المشروع',
-    'program-manager' => 'مدير البرنامج',
+
     'ongoing' => 'قيد التنفيذ',
     'no-employees' => 'لا يوجد موظفون مخصصون لهذا المشروع بعد.',
     'archived-files' => 'الملفات المؤرشفة',

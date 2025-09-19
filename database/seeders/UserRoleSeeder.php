@@ -19,21 +19,27 @@ class UserRoleSeeder extends Seeder
         );
 
         $this->createUserWithRole(
-            email: 'generalmanager@mail.com',
+            email: 'generaladmin@mail.com',
             password: 'password',
-            roleName: 'General Manger'
+            roleName: 'General Manager'
         );
 
         $this->createUserWithRole(
             email: 'hrmanager@mail.com',
             password: 'password',
-            roleName: 'HR Manager'
+            roleName: 'HR-SYR'
         );
 
         $this->createUserWithRole(
             email: 'hr@mail.com',
             password: 'password',
-            roleName: 'HR'
+            roleName: 'HR-ALP'
+        );
+
+        $this->createUserWithRole(
+            email: 'manager@mail.com',
+            password: 'password',
+            roleName: 'Manager'
         );
 
         $this->createUserWithRole(
@@ -51,12 +57,10 @@ class UserRoleSeeder extends Seeder
             'password' => Hash::make($password),
         ]);
 
-        $role = Role::where('name', $roleName)->first();
 
-        if ($role) {
-            $user->roles()->attach($role);
-        } else {
-            echo "Role '{$roleName}' not found.\n";
-        }
+
+
+            $user->assignRole($roleName);
+
     }
 }

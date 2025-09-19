@@ -12,11 +12,19 @@ class RolesPermissionsSeeder extends Seeder
     public function run(): void
     {
         //Roles:
-        $superAdminRole = Role::create(['name' => 'Super Admin']);
-        $generalAdminRole = Role::create(['name' => 'General Manger']);
-        $hrManagerRole = Role::create(['name' => 'HR Manager']);
-        $hrRole = Role::create(['name' => 'HR']);
-        $employeeRole = Role::create(['name' => 'Employee']);
+        Role::create(['name' => 'Super Admin']);
+        Role::create(['name' => 'General Manager']);
+        Role::create(['name' => 'HR-SYR']);
+        Role::create(['name' => 'HR-ALP']);
+        Role::create(['name' => 'HR-HMS']);
+        Role::create(['name' => 'HR-DMS']);
+        Role::create(['name' => 'HR-LAT']);
+        Role::create(['name' => 'HR-TAR']);
+        Role::create(['name' => 'Manager']);
+        Role::create(['name' => 'Employee']);
+
+
+
 
         //Here we can assign permissions to each role when we know it:
         //     $superAdminPermissions = [];
