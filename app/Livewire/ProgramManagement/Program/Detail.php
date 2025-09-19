@@ -46,6 +46,7 @@ class Detail extends Component
     public function render()
     {
         $program = $this->form->program;
+
         $employees = Employee::query()
             ->select('employees.*')
             ->involvedInProgram($program->id)
@@ -59,5 +60,30 @@ class Detail extends Component
             ->paginate(15);
 
         return view('livewire.program-management.program.detail', compact('program', 'employees'));
+    }
+
+    public function confirmDelete($id)
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->confirmButtonColor(config('samples.styles.colors.primary'))
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete(Program $program)
+    {
+        $program->delete();
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
+
+        return redirect()->route('programs.index');
     }
 }

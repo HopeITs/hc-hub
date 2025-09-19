@@ -10,13 +10,11 @@
     $req  = $pos?->requiredPosition;
 
     $positionTitleEn = $req?->title
-        ?? $pos?->getTranslation('title', 'en')
         ?? $pos?->title
         ?? ('#'.$contract->position_id);
 
     $positionTitleAr = $G(
-        $pos?->getTranslation('title', 'ar')
-        ?? $req?->title
+        $req?->title
         ?? $pos?->title
         ?? ('#'.$contract->position_id)
     );
@@ -35,7 +33,6 @@
     $L   = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 @endphp
 
-{{-- Intro --}}
 <div class="avoid-break">
     <x-contract.dual tight
                      :en="'whereas Christian Hope Center Aleppo / Head office has agreed to this volunteering according to the conditions outlined in this contract.'"
@@ -47,7 +44,6 @@
     />
 </div>
 
-{{-- Basics --}}
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4"
                      :en="$L('Contract type:').' Volunteer agreement for a limited period'"
@@ -63,7 +59,6 @@
     />
 </div>
 
-{{-- Duration --}}
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4"
                      :en="$L('Duration of the agreement:').'<div>One Year</div><div>Starts from: '.$esc($startStr).'</div><div>Ends on: '.$esc($endStr).'</div>'"
@@ -71,7 +66,6 @@
     />
 </div>
 
-{{-- Working hours (each bullet is a line) --}}
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4"
                      :en="$L('Volunteer Work Hours:')"
@@ -91,7 +85,6 @@
     />
 </div>
 
-{{-- Stipend --}}
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4"
                      :en="$L('Stipend and Benefits:').'<div>Christian Hope Center grants a monthly stipend of / '.$esc($salaryFormattedEn).' USD / or its equivalent in Syrian pounds, paid in cash at the end of each month.</div>'"
@@ -99,7 +92,6 @@
     />
 </div>
 
-{{-- Duties --}}
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4"
                      :en="$L('Duties:').'<div>As listed in the job description of the position (attached).</div>'"

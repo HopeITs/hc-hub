@@ -76,7 +76,7 @@ return new class extends Migration {
         });
         Schema::create('positions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('program_id')->constrained()->onDelete('restrict');
+            $table->foreignId('program_id')->constrained()->onDelete('cascade');
             $table->foreignId('center_id')->nullable()->constrained()->onDelete('restrict');
             $table->foreignId('city_id')->default(2)->constrained()->onDelete('restrict');
             $table->foreignId('job_level_id')->constrained()->onDelete('restrict');
@@ -197,7 +197,7 @@ return new class extends Migration {
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->foreignId('position_id')->default(2)->constrained()->onDelete('restrict');
+            $table->foreignId('position_id')->constrained()->onDelete('cascade');
             $table->foreignId('contract_type_id')->constrained()->onDelete('restrict');
             $table->date('start_date');
             $table->date('end_date');
