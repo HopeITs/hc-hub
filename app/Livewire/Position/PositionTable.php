@@ -7,12 +7,10 @@ use App\Models\City;
 use App\Models\Department;
 use App\Models\JobLevel;
 use App\Models\Position;
-
 use App\Models\Program;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
-use PHPUnit\Util\PHP\Job;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
@@ -23,122 +21,102 @@ class PositionTable extends LivewireTable
 {
     protected string $model = Position::class;
 
+    public ?int $centerId = null;
+    public ?int $cityId = null;
 
-    /** @return \Illuminate\Database\Eloquent\Builder */
+    public function mount(?int $centerId = null, ?int $cityId = null): void
+    {
+        $this->centerId = $centerId ?? request()->get('center');
+        $this->cityId = $cityId ?? request()->get('city');
+    }
+
     protected function query(): \Illuminate\Database\Eloquent\Builder
     {
+        $query = $this->model()::query()->with(['city', 'program', 'center']);
 
-        $query = $this->model()->query();
-        $filters = request()->query();
-        if(isset($filters['center'])){
-            $query->where('center_id', $filters['center']);
+        if ($this->centerId) {
+            $query->where('center_id', $this->centerId);
         }
-        if(isset($filters['city'])){
-            $query->where('city_id', $filters['city']);
+        if ($this->cityId) {
+            $query->where('city_id', $this->cityId);
         }
 
         return $query;
     }
+
     protected function columns(): array
     {
         return [
-
-
-            Column::make(__('Title'), 'title')
-                ->sortable()
-                ->searchable(),
-            Column::make(__('Title').'(AR)', 'title_ar')
-                ->sortable()
-                ->searchable(),
+            Column::make(__('Title'), 'title')->sortable()->searchable(),
+            Column::make(__('Title') . ' (AR)', 'title_ar')->sortable()->searchable(),
 
             SelectColumn::make(trans_choice('general.city', 1), 'city_id')
-                ->displayUsing(function (mixed $value, Model $model): string {
-                    return $model->city->name;
-                })
-                ->options(
-                    City::query()->get()->pluck('name', 'id')->toArray()
-                )
-                ->sortable()
-                ->searchable(),
+                ->displayUsing(fn($v, Model $m) => $m->city->name ?? '-')
+                ->options(City::pluck('name', 'id')->toArray())
+                ->sortable(),
+
             SelectColumn::make(trans_choice('general.program', 1), 'program_id')
-                ->displayUsing(function (mixed $value, Model $model): string {
-                    return $model->program->name;
-                })
-                ->options(
-                    Program::query()->get()->pluck('name', 'id')->toArray()
-                )
-                ->sortable()
-                ->searchable(),
+                ->displayUsing(fn($v, Model $m) => $m->program->name ?? '-')
+                ->options(Program::pluck('name', 'id')->toArray())
+                ->sortable(),
+
             SelectColumn::make(trans_choice('general.center', 1), 'center_id')
-                ->displayUsing(function (mixed $value, Model $model): string {
-                    return $model->center->name ?? '-';
-                })
-                ->options(
-                    Center::query()->get()->pluck('name', 'id')->toArray()
-                )
-                ->sortable()
-                ->searchable(),
+                ->displayUsing(fn($v, Model $m) => $m->center->name ?? '-')
+                ->options(Center::pluck('name', 'id')->toArray())
+                ->sortable(),
+
             SelectColumn::make(trans_choice('general.department', 1), 'department_id')
-                ->displayUsing(function (mixed $value, Model $model): string {
-                    return $model->department->name ?? '-';
-                })
-                ->options(
-                    Department::query()->get()->pluck('name', 'id')->toArray()
-                )
-                ->sortable()
-                ->searchable(),
+                ->displayUsing(fn($v, Model $m) => $m->department->name ?? '-')
+                ->options(Department::pluck('name', 'id')->toArray())
+                ->sortable(),
+
             SelectColumn::make(trans_choice('general.job-level', 1), 'job_level_id')
-                ->displayUsing(function (mixed $value, Model $model): string {
-                    return $model->jobLevel->name ?? '-';
-                })
-                ->options(
-                    JobLevel::query()->get()->pluck('name', 'id')->toArray()
-                )
-                ->sortable()
-                ->searchable(),
+                ->displayUsing(fn($v, Model $m) => $m->jobLevel->name ?? '-')
+                ->options(JobLevel::pluck('name', 'id')->toArray())
+                ->sortable(),
 
             BooleanColumn::make(__('general.is-active'), 'is_active'),
 
-            Column::make(__('Actions'), function (Model $model): string {
-                $is_active = $model->is_active ? 1 : 0;
-                $is_activeBtn = Blade::render('<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $is_active . '" :model-id="' . $model->id . '" wire-event="confirmToggleItemStatus" />');
-                $editBtn = Blade::render("<x-table.edit-btn href=" . route('positions.edit', ['position' => $model->getKey()]) . "/>");
-                $deleteBtn = Blade::render("<x-table.delete-btn :modelId=" . $model->getKey() . "/>");
-                return $is_activeBtn . $editBtn . $deleteBtn;
-            })
-                ->asHtml(),
+            Column::make(__('Actions'), function (Model $m): string {
+                $isActive = $m->is_active ? 1 : 0;
+
+                $toggleBtn = Blade::render(
+                    '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3"
+                        active="' . $isActive . '"
+                        :model-id="' . $m->id . '"
+                        wire-event="confirmToggleItemStatus" />'
+                );
+
+                $editBtn = Blade::render(
+                    '<x-table.edit-btn href="' . route('positions.edit', $m->id) . '" />'
+                );
+
+                $deleteBtn = Blade::render(
+                    '<x-table.delete-btn :modelId="' . $m->id . '" />'
+                );
+
+                return $toggleBtn . $editBtn . $deleteBtn;
+            })->asHtml(),
         ];
     }
 
     protected function filters(): array
     {
         return [
-
             SelectFilter::make(trans_choice('general.city', 1), 'city_id')
-                ->options(
-                    City::query()->get()->pluck('name', 'id')->toArray()
-                )
-            ,
+                ->options(City::pluck('name', 'id')->toArray()),
+
             SelectFilter::make(trans_choice('general.program', 1), 'program_id')
-                ->options(
-                    Program::query()->get()->pluck('name', 'id')->toArray()
-                )
-            ,
+                ->options(Program::pluck('name', 'id')->toArray()),
+
             SelectFilter::make(trans_choice('general.center', 1), 'center_id')
-                ->options(
-                    Center::query()->get()->pluck('name', 'id')->toArray()
-                )
-            ,
+                ->options(Center::pluck('name', 'id')->toArray()),
+
             SelectFilter::make(trans_choice('general.department', 1), 'department_id')
-                ->options(
-                    Department::query()->get()->pluck('name', 'id')->toArray()
-                )
-            ,
+                ->options(Department::pluck('name', 'id')->toArray()),
+
             SelectFilter::make(trans_choice('general.job-level', 1), 'job_level_id')
-                ->options(
-                    JobLevel::query()->get()->pluck('name', 'id')->toArray()
-                )
-            ,
+                ->options(JobLevel::pluck('name', 'id')->toArray()),
         ];
     }
 

@@ -16,7 +16,7 @@
             </x-primary-button>
         </div>
     </div>
-    <livewire:program-management.centers-table />
+    <livewire:program-management.centers-table/>
 
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         <form wire:submit.prevent="save" class="space-y-4">
@@ -27,27 +27,15 @@
                     <x-error-span>{{ $errors->first('item.name') }}</x-error-span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <x-forms.input-label for="city_id">{{ trans_choice('general.city',1) }}</x-forms.input-label>
-                        <x-forms.select-input id="city_id" wire:model="item.city_id">
-                            <option value="">{{ __('general.select') }}</option>
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}">{{ $city->getTranslation('name', $locale) }}</option>
-                            @endforeach
-                        </x-forms.select-input>
-                        <x-error-span>{{ $errors->first('item.city_id') }}</x-error-span>
-                    </div>
-                    <div>
-                        <x-forms.input-label for="program_id">@lang('general.required-project')</x-forms.input-label>
-                        <x-forms.select-input id="program_id" wire:model="item.program_id">
-                            <option value="">{{ __('general.select') }}</option>
-                            @foreach($programs as $program)
-                                <option value="{{ $program->id }}">{{ $program->name }}</option>
-                            @endforeach
-                        </x-forms.select-input>
-                        <x-error-span>{{ $errors->first('item.program_id') }}</x-error-span>
-                    </div>
+                <div>
+                    <x-forms.input-label for="city_id">{{ trans_choice('general.city',1) }}</x-forms.input-label>
+                    <x-forms.select-input id="city_id" wire:model="item.city_id">
+                        <option value="">{{ __('general.select') }}</option>
+                        @foreach($cities as $city)
+                            <option value="{{ $city->id }}">{{ $city->getTranslation('name', $locale) }}</option>
+                        @endforeach
+                    </x-forms.select-input>
+                    <x-error-span>{{ $errors->first('item.city_id') }}</x-error-span>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -56,7 +44,8 @@
                             <x-forms.input-label for="address_{{ $loc }}">
                                 @lang('general.address') ({{ strtoupper($loc) }})
                             </x-forms.input-label>
-                            <x-forms.textarea id="address_{{ $loc }}" wire:model.defer="item.address.{{ $loc }}" rows="2"/>
+                            <x-forms.textarea id="address_{{ $loc }}" wire:model.defer="item.address.{{ $loc }}"
+                                              rows="2"/>
                             <x-error-span>{{ $errors->first('item.address.' . $loc) }}</x-error-span>
                         </div>
                     @endforeach
