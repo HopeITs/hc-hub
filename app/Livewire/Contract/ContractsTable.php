@@ -45,52 +45,51 @@ class ContractsTable extends LivewireTable
 
             Column::make(__('general.employee'), function (Model $m) use ($loc) {
                 return $m->employee?->getTranslation('name', $loc) ?? '—';
-            })->sortable(false),
+            }),
 
             Column::make(trans_choice('general.positions', 1), function (Model $m) {
                 return $m->position?->title
                     ?? $m->position?->requiredPosition?->title
                     ?? ('#' . $m->position_id);
-            })->sortable(false),
+            }),
 
             Column::make(trans_choice('general.contract-type', 1), function (Model $m) use ($loc) {
                 return $m->contractType?->getTranslation('name', $loc) ?? '—';
-            })->sortable(false),
+            }),
 
             Column::make(trans_choice('general.department', 1), function (Model $m) {
                 return $m->position?->department?->name ?? '—';
-            })->sortable(false),
+            }),
 
             Column::make(trans_choice('general.job-level', 1), function (Model $m) use ($loc) {
                 return $m->position?->jobLevel?->getTranslation('name', $loc)
                     ?? $m->position?->jobLevel?->name
                     ?? '—';
-            })->sortable(false),
+            }),
 
             Column::make(__('general.period'), function (Model $m) {
-                // Render your existing x-period Blade component
                 return Blade::render('<x-period :start="$start" :end="$end" />', [
                     'start' => $m->start_date,
                     'end'   => $m->end_date,
                 ]);
-            })->asHtml()->sortable(false),
+            })->asHtml(),
 
             Column::make(__('general.yearly-leave-days'), 'yearly_leave_days')
                 ->displayUsing(fn ($v) => $v ?? '—')
                 ->sortable(),
 
             Column::make(__('general.salary-per'), function (Model $m) {
-                $value = $m->salary_per instanceof \BackedEnum ? $m->salary_per->value : (string)$m->salary_per;
-                $per   = SalaryPer::getLocalizedName($value); // ['value' => ..., 'color' => ...]
+                $value = $m->salary_per instanceof \BackedEnum ? $m->salary_per->value : (string) $m->salary_per;
+                $per   = SalaryPer::getLocalizedName($value);
+
                 return Blade::render('<x-badge :color="$color">{{$text}}</x-badge>', [
                     'color' => $per['color'] ?? 'gray',
                     'text'  => $per['value'] ?? $value,
                 ]);
-            })->asHtml()->sortable(false),
+            })->asHtml(),
 
             Column::make(__('general.weekly-hours'), 'weekly_hours')
-                ->displayUsing(fn ($v) => $v ?? '—')
-                ->sortable(),
+                ->displayUsing(fn ($v) => $v ?? '—'),
 
             Column::make(__('general.status'), function (Model $m) {
                 return Blade::render(
@@ -100,10 +99,10 @@ class ContractsTable extends LivewireTable
                         't' => $m->is_active ? __('general.active') : __('general.inactive'),
                     ]
                 );
-            })->asHtml()->sortable(false),
+            })->asHtml(),
 
             Column::make(__('Actions'), function (Model $m): string {
-                $view  = Blade::render(
+                $view = Blade::render(
                     <<<'BLADE'
 <a href="{{ route('contracts.show', $id) }}"
    class="inline-flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -113,22 +112,29 @@ class ContractsTable extends LivewireTable
         <path stroke-linecap="round" stroke-linejoin="round"
               d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
         <path stroke-linecap="round" stroke-linejoin="round"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              d="M15 12a3 3 0 11-6 0 3 0 016 0z" />
     </svg>
 </a>
 BLADE
                     , ['id' => $m->getKey()]
                 );
 
-                $edit  = Blade::render('<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />', ['id' => $m->getKey()]);
-                $del   = Blade::render('<x-table.delete-btn wire:click="$emitSelf(\'confirmDelete\','.$m->getKey().')" :modelId="'.$m->getKey().'" />');
+                $edit = Blade::render(
+                    '<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />',
+                    ['id' => $m->getKey()]
+                );
 
-                return '<div class="flex items-center justify-center gap-2">'.$view.$edit.$del.'</div>';
+                // ✅ FIXED: just pass modelId, no extra wire:click
+                $del = Blade::render(
+                    '<x-table.delete-btn :modelId="$id" />',
+                    ['id' => $m->getKey()]
+                );
+
+                return '<div class="flex items-center justify-center gap-2">' . $view . $edit . $del . '</div>';
             })->asHtml(),
         ];
     }
 
-    /* ===== Delete flow with confirmation ===== */
     public function confirmDelete(int $id): void
     {
         LivewireAlert::title(__('general.delete-item'))
