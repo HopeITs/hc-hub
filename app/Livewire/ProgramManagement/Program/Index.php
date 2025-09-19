@@ -4,7 +4,6 @@ namespace App\Livewire\ProgramManagement\Program;
 
 use App\Livewire\Forms\ProgramManagement\ProgramForm;
 use App\Models\Program;
-use Exception;
 use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -13,7 +12,6 @@ use Livewire\WithPagination;
 
 class Index extends Component
 {
-
     use WithPagination, WithFileUploads;
 
     protected $listeners = ['load-more' => 'loadMore'];
@@ -21,17 +19,14 @@ class Index extends Component
     public Program $program;
     public ProgramForm $form;
     public $perPage = 6;
+
     public function loadMore(): void
     {
-        $this->perPage += 6; // increase the limit
+        $this->perPage += 6;
     }
-
-
-
 
     public function confirmToggleItemStatus($id)
     {
-
         LivewireAlert::title(__('general.toggle-status'))
             ->text(__('general.confirm-status-change'))
             ->question()
@@ -42,27 +37,24 @@ class Index extends Component
             ->show();
     }
 
-
     public function toggleItemStatusConfirmed(Program $program)
     {
         $this->form->setProgram($program);
         $this->form->statusToggle();
-
 
         LivewireAlert::title(__('general.item-updated'))
             ->success()
             ->toast()
             ->position('top-start')
             ->show();
-    }
 
+        $this->resetPage();
+    }
 
     public function show(Program $program)
     {
         $this->form->setProgram($program);
     }
-
-
 
     public function confirmDelete($id)
     {
@@ -76,7 +68,6 @@ class Index extends Component
             ->show();
     }
 
-
     public function delete(Program $program)
     {
         $this->form->setProgram($program);
@@ -87,7 +78,6 @@ class Index extends Component
             ->toast()
             ->position('top-start')
             ->show();
-
     }
 
     public function render()
@@ -98,23 +88,18 @@ class Index extends Component
                     $query->select(DB::raw('count(distinct city_id)'));
                 },
                 'contracts'
-
             ])
             ->with('contracts')
+            ->orderBy('is_active', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate($this->perPage);
 
-            ->orderBy('programs.is_active', 'desc')
-            ->latest()
-            ->take($this->perPage)
-            ->get();
-
-        // Adding program manager name manually
         $items->each(function ($item) {
             $programManager = $item->contracts->first();
             if ($programManager) {
                 $item->program_manager_name = $programManager->employee->name;
             }
         });
-
 
         return view('livewire.program-management.program.index', compact('items'));
     }
