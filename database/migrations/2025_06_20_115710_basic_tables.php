@@ -169,16 +169,18 @@ return new class extends Migration {
             $table->string('relation');
             $table->timestamps();
         });
+
         Schema::create('checklists', function (Blueprint $table) {
             $table->id();
             $table->foreignId('item_id')->nullable()->onDelete('restrict');
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->foreignId('delivered_id')->constrained('employees')->onDelete('cascade');
             $table->string('brand')->nullable();
             $table->string('model')->nullable();
             $table->string('serial')->nullable();
-            $table->date('delivered_at')->nullable();
+            $table->dateTime('delivered_at')->nullable();
             $table->string('delivered_status')->nullable();
-            $table->date('returned_at')->nullable();
+            $table->dateTime('returned_at')->nullable();
             $table->string('returned_status')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

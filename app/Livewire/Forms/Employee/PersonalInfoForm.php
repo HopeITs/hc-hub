@@ -103,6 +103,8 @@ class PersonalInfoForm extends Form
 
     public $city_id;
 
+    public $roles;
+
 
     public function rules()
     {
@@ -168,6 +170,7 @@ class PersonalInfoForm extends Form
         $this->username = $employee->username;
         $this->email = $employee->account?->email;
         $this->photo = $employee->getFirstMediaUrl('avatar');
+        $this->roles = implode(',' ,$employee->account->roles()->pluck('name')->toArray());
 
     }
 
@@ -184,17 +187,20 @@ class PersonalInfoForm extends Form
 
             if ($this->employee->account) {
                 $this->employee->account->update(['email' => $this->email]);
+                $this->employee->account->syncRoles(json_decode($this->roles));
             }
 
         } else {
             $this->city_id = auth()->user()->profile?->city_id ?? 1;
             $this->employee = Employee::create($this->except(['email', 'photo']));
 
-            User::create([
+          $user =  User::create([
                 'email' => $this->email,
                 'password' => Hash::make('HopeCenterHR'),
                 'employee_id' => $this->employee->id,
             ]);
+
+          $user->assignRole(json_decode($this->roles));
         }
 
         if ($this->photo instanceof TemporaryUploadedFile) {

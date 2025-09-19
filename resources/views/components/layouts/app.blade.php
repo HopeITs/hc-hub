@@ -9,7 +9,7 @@
             display: none !important;
         }
     </style>
-    <title></title>
+    <title>@yield('title' , 'Hope HR')</title>
 </head>
 
 <body class="antialiased min-h-screen bg-white">

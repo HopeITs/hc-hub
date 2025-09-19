@@ -10,10 +10,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = ['email', 'password', 'employee_id'];
     protected $hidden   = ['password', 'remember_token'];
@@ -31,17 +32,17 @@ class User extends Authenticatable
         return $this->belongsTo(Employee::class, 'employee_id');
     }
 
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Role::class)
-            ->withPivot('is_active')
-            ->withTimestamps();
-    }
-
-    public function permissions(): BelongsToMany
-    {
-        return $this->belongsToMany(Permission::class);
-    }
+//    public function roles(): BelongsToMany
+//    {
+//        return $this->belongsToMany(Role::class)
+//            ->withPivot('is_active')
+//            ->withTimestamps();
+//    }
+//
+//    public function permissions(): BelongsToMany
+//    {
+//        return $this->belongsToMany(Permission::class);
+//    }
 
     public function folders(): HasMany
     {
@@ -130,7 +131,7 @@ class User extends Authenticatable
             ? $this->roles->contains(fn($r) => Str::slug($r->name) === Str::slug($roleName))
             : $this->roles()->where('name', $roleName)->exists();
     }
-
+//
     public function getActiveRoleNameAttribute(): ?string
     {
         return $this->myRole();
