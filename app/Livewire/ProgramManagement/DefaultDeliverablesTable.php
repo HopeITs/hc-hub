@@ -79,11 +79,11 @@ class DefaultDeliverablesTable extends LivewireTable
                 $id = $m->getKey();
 
                 $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$emitUp(\'openDefaultDeliverableEdit\',' . $id . ')" />'
+                    '<x-table.edit-btn wire:click="$dispatchTo(\'program-management.default-deliverables-module\', \'openDefaultDeliverableEdit\', { id: ' . $id . ' })" />'
                 );
 
                 $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="$emitSelf(\'confirmDelete\',' . $id . ')" :modelId="' . $id . '" />'
+                    '<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />'
                 );
 
                 return '<div class="flex items-center justify-center gap-2">' . $editBtn . $deleteBtn . '</div>';
