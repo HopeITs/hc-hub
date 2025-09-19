@@ -4,14 +4,14 @@
     {{-- Start date --}}
     <div>
         <x-forms.input-label for="start_date">@lang('general.start-date')</x-forms.input-label>
-        <x-forms.input id="start_date" type="date" wire:model.defer="form.start_date" class="mt-1" />
+        <x-forms.date-input id="start_date" wire:model.defer="form.start_date" class="mt-1" />
         <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.start_date') }}</x-error-span>
     </div>
 
     {{-- End date --}}
     <div>
         <x-forms.input-label for="end_date">@lang('general.end-date')</x-forms.input-label>
-        <x-forms.input id="end_date" type="date" wire:model.defer="form.end_date" class="mt-1" />
+        <x-forms.date-input id="end_date" wire:model.defer="form.end_date" class="mt-1" />
         <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.end_date') }}</x-error-span>
     </div>
 
@@ -54,7 +54,7 @@
     {{-- Terminated at --}}
     <div>
         <x-forms.input-label for="terminated_at">@lang('general.terminated-at')</x-forms.input-label>
-        <x-forms.input id="terminated_at" type="date" wire:model.defer="form.terminated_at" class="mt-1" />
+        <x-forms.date-input id="terminated_at" wire:model.defer="form.terminated_at" class="mt-1" />
         <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.terminated_at') }}</x-error-span>
     </div>
 
