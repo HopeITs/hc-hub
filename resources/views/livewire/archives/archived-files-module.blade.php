@@ -90,7 +90,9 @@
                 @endif
             </div>
             @empty
-            <p class="col-span-full text-center text-gray-500">This folder is empty.</p>
+                @if ($files->isEmpty())
+                    <p class="col-span-full text-center text-gray-500">This folder is empty.</p>
+                @endif
             @endforelse
 
             {{-- Files Loop --}}
