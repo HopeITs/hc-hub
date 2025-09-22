@@ -23,11 +23,11 @@
         >
         <span class="relative inline-grid place-items-center rounded-full p-[2px] shrink-0
                      bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
-            <img class="size-10 rounded-full ring-2 ring-white shrink-0"
-                 src="{{ $user->profile_photo_url ?? 'https://flowbite.com/docs/images/people/profile-picture-2.jpg' }}"
+            <img class="size-14 border border-1 border-primary rounded-full ring-2 ring-white shrink-0"
+                 src="{{ $user->profile->getFirstMediaUrl('avatar') }}"
                  alt="user"/>
             <span
-                class="absolute -bottom-0.5 {{ $isRtl?'-left-0.5':'-right-0.5' }} size-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+                class="absolute bottom-1.5 {{ $isRtl?'left-1.5':'right-1.5' }} size-2 rounded-full bg-emerald-500 ring-2 ring-white"></span>
         </span>
 
             <div class="min-w-0 text-start">
@@ -65,8 +65,8 @@
                 <div class="relative flex items-center gap-3">
                 <span
                     class="p-[3px] rounded-full shrink-0 bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
-                    <img class="size-12 rounded-full ring-2 ring-white shrink-0"
-                         src="{{ $user->profile_photo_url ?? 'https://flowbite.com/docs/images/people/profile-picture-2.jpg' }}"
+                    <img class="size-12 border border-1 border-primary rounded-full ring-2 ring-white shrink-0"
+                         src="{{ $user->profile->getFirstMediaUrl('avatar') }}"
                          alt="user">
                 </span>
                     <div class="min-w-0">

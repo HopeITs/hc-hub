@@ -55,7 +55,7 @@ class EmployeeTable extends LivewireTable
             Column::make(trans('general.photo'), function (Model $m): string {
                 $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
                 return $src
-                    ? '<img src="'.e($src).'" alt="'.e($m->name).'" class="h-12 w-12 rounded-full object-cover" />'
+                    ? '<img src="'.e($src).'" alt="'.e($m->name).'" class="size-12 border border-1 border-primary rounded-full object-cover" />'
                     : '<div class="h-12 w-12 rounded-full bg-gray-200"></div>';
             })->asHtml(),
 
