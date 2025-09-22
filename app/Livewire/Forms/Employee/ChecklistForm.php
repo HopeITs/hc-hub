@@ -3,13 +3,15 @@
 namespace App\Livewire\Forms\Employee;
 
 use App\Models\Checklist;
+use App\Models\Course;
 use App\Models\Employee;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 
 class ChecklistForm extends Form
 {
     public ?Employee $employee = null;
-
+    public ?Checklist $checklist = null;
     public array $checklists = [];
 
     public function setEmployee(Employee $employee): void
@@ -18,12 +20,13 @@ class ChecklistForm extends Form
 
         $this->checklists = $employee
             ->checklists()
-            ->select('id', 'item_id', 'brand', 'model', 'serial', 'delivered_at', 'delivered_status', 'returned_at', 'returned_status', 'notes')
+            ->select('id', 'item_id', 'delivered_id', 'brand', 'model', 'serial', 'delivered_at', 'delivered_status', 'returned_at', 'returned_status', 'notes')
             ->get()
             ->map(
                 fn(Checklist $checklist) => [
                     'id' => $checklist->id,
                     'item_id' => $checklist->item_id,
+                    'delivered_id' => $checklist->delivered_id,
                     'brand' => $checklist->brand,
                     'model' => $checklist->model,
                     'serial' => $checklist->serial,
@@ -43,6 +46,7 @@ class ChecklistForm extends Form
             'checklists' => ['array'],
             'checklists.*.id' => ['nullable', 'exists:checklists,id'],
             'checklists.*.item_id' => ['nullable', 'integer', 'exists:checklist_items,id'],
+            'checklists.*.delivered_id' => ['nullable', 'integer', 'exists:employees,id'],
             'checklists.*.brand' => ['nullable', 'string', 'max:255'],
             'checklists.*.model' => ['nullable', 'string', 'max:255'],
             'checklists.*.serial' => ['nullable', 'string', 'max:255'],
@@ -59,6 +63,7 @@ class ChecklistForm extends Form
         $this->checklists[] = [
             'id' => null,
             'item_id' => null,
+            'delivered_id' => null,
             'brand' => '',
             'model' => '',
             'serial' => '',
@@ -88,9 +93,20 @@ class ChecklistForm extends Form
     public function save(): void
     {
         $this->validate();
+        foreach ($this->checklists as $index => $checklist) {
+            if (array_key_exists('id', $checklist) && isset($checklist['id'])) {
 
-        collect($this->checklists)->each(function ($data) {
-            $this->employee->checklists()->updateOrCreate(['id' => $data['id'] ?? null], $data);
-        });
+                $this->checklist = Checklist::find($checklist['id']);
+                $this->checklist->update($checklist);
+            } else {
+                $checklist['employee_id'] = $this->employee->id;
+                $this->checklist = Checklist::create($checklist);
+            }
+
+
+        }
+//        collect($this->checklists)->each(function ($data) {
+//            $this->employee->checklists()->updateOrCreate(['id' => $data['id'] ?? null], $data);
+//        });
     }
 }

@@ -96,6 +96,10 @@ class EmployeeEdit extends Component
         $this->setActiveTab('education');
         $this->successToast();
     }
+    public function addChecklist()
+    {
+        $this->checklistForm->addChecklist();
+    }
 
     public function saveCourses()
     {
@@ -222,6 +226,26 @@ class EmployeeEdit extends Component
     {
         $this->checklistForm->removeChecklistItem((int)$i, $id);
         $this->resetErrorBag();
+    }
+
+    public function updatedChecklistForm($value, $name)
+    {
+        // Example: $name = "checklists.0.item_id"
+
+        if (str_ends_with($name, 'item_id')) {
+            $index = explode('.', $name)[1];
+            $itemId = $value;
+
+            // Lookup default deliverable for this item
+            $default = DefaultDeliverable::where('item_id', $itemId)
+                ->whereIn('city_id', [1, $this->employee->city_id])
+                ->first();
+
+            if ($default) {
+                // Set delivered_id for this checklist row
+                $this->checklistForm->checklists[$index]['delivered_id'] = $default->employee_id;
+            }
+        }
     }
 
     public function render()
