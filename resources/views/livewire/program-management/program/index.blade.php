@@ -57,11 +57,12 @@
                     </a>
 
                     <div class="flex justify-between items-center">
-                        {{-- Force toggle state to reflect DB value --}}
+
                         <x-forms.toggle-input
-                            :active="(bool) $program->is_active"
+                            :active="$program->is_active"
                             :model-id="$program->id"
-                            wire-event="confirmToggleItemStatus" />
+                            wire-event="confirmToggleItemStatus"
+                        />
 
                         <x-table.edit-btn :href="route('programs.edit', ['program' => $program->slug])" />
                         <x-table.delete-btn class="!p-0" :modelId="$program->id" />

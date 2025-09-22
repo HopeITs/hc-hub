@@ -17,7 +17,7 @@
                 <div class="flex h-fit space-x-2">
                     <x-forms.toggle-input
                         class="!me-2 text-xl p-2"
-                        :checked="$program->is_active == 1"
+                        :active="$program->is_active"
                         :model-id="$program->id"
                         wire-event="confirmToggleItemStatus"
                     />
