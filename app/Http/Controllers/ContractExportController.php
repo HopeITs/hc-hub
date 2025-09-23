@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contract;
-use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use App\Support\ArabicText as AR;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 
 class ContractExportController extends Controller
@@ -16,7 +17,7 @@ class ContractExportController extends Controller
             'contractType',
         ]);
 
-        $category   = $contract->contractType?->category ?? 'annual'; // annual|trial|service
+        $category   = $contract->contractType?->category ?? 'annual';
         $pagesMap   = ['annual' => 5, 'trial' => 4, 'service' => 4];
         $totalPages = $pagesMap[$category] ?? 1;
         $locale     = app()->getLocale();
@@ -31,18 +32,13 @@ class ContractExportController extends Controller
             'forPdf'     => true,
         ];
 
-        $pdf = PDF::loadView('livewire.contract.details.print-snappy', $viewData)
-            ->setOption('encoding', 'UTF-8')
-            ->setOption('orientation', 'Portrait')
-            ->setOption('margin-top', 0)
-            ->setOption('margin-bottom', 0)
-            ->setOption('margin-left', 0)
-            ->setOption('margin-right', 0)
-            ->setOption('print-media-type', true)
-            ->setOption('enable-local-file-access', true)
-            ->setOption('dpi', 96)
-            ->setOption('image-dpi', 96)
-            ->setOption('disable-smart-shrinking', true);
+        $pdf = Pdf::loadView('livewire.contract.export.print-dompdf', $viewData)
+            ->setPaper('a4', 'portrait')
+            ->set_option('isHtml5ParserEnabled', true)
+            ->set_option('isRemoteEnabled', true)
+            ->set_option('isFontSubsettingEnabled', true)
+            ->setWarnings(false);
+
 
         $file = sprintf(
             '%s-%s-%s.pdf',
@@ -53,4 +49,5 @@ class ContractExportController extends Controller
 
         return $pdf->stream($file);
     }
+
 }
