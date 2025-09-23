@@ -62,7 +62,7 @@
                         <span>{{ __('auth.remember-me') }}</span>
                     </x-forms.input>
 
-                    @if (Route::has('password.request'))
+                    @if (request()->has('password.request'))
                         <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">
                             {{ __('auth.forgot-password') }}
                         </a>

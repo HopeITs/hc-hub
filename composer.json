@@ -11,6 +11,7 @@
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
+        "barryvdh/laravel-snappy": "^1.0",
         "bensampo/laravel-enum": "^6.12",
         "jantinnerezo/livewire-alert": "^4.0",
         "khaled.alshamaa/ar-php": "^7.0",
