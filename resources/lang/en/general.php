@@ -240,7 +240,7 @@ return [
     'related_evaluation' => 'Related Evaluation',
     'delivered_at' => 'Delivered At',
     'delivered_status' => 'Delivered Status',
-    'returned_at' => 'Returbed At',
+    'returned_at' => 'Returned At',
     'returned_status' => 'Returned Status',
     'attachments' => 'Attachments',
     'file' => 'File',

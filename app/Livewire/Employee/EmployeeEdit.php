@@ -53,6 +53,7 @@ class EmployeeEdit extends Component
         $this->relativeForm->setEmployee($employee);
         $this->badgeForm->setEmployee($employee);
         $this->checklistForm->setEmployee($employee);
+
         $this->attachmentForm->setEmployee($employee);
         $this->itemForm->setEmployee($employee);
         $this->title = $employee->name;
@@ -72,9 +73,7 @@ class EmployeeEdit extends Component
         if (empty($this->badgeForm->badges)) {
             $this->badgeForm->addBadge();
         }
-        if (empty($this->checklistForm->checklists)) {
-            $this->checklistForm->addChecklist();
-        }
+
         if (empty($this->attachmentForm->attachments)) {
             $this->attachmentForm->addAttachment();
         }
@@ -95,10 +94,6 @@ class EmployeeEdit extends Component
         $this->educationForm->save();
         $this->setActiveTab('education');
         $this->successToast();
-    }
-    public function addChecklist()
-    {
-        $this->checklistForm->addChecklist();
     }
 
     public function saveCourses()
@@ -228,25 +223,25 @@ class EmployeeEdit extends Component
         $this->resetErrorBag();
     }
 
-    public function updatedChecklistForm($value, $name)
-    {
-        // Example: $name = "checklists.0.item_id"
-
-        if (str_ends_with($name, 'item_id')) {
-            $index = explode('.', $name)[1];
-            $itemId = $value;
-
-            // Lookup default deliverable for this item
-            $default = DefaultDeliverable::where('item_id', $itemId)
-                ->whereIn('city_id', [1, $this->employee->city_id])
-                ->first();
-
-            if ($default) {
-                // Set delivered_id for this checklist row
-                $this->checklistForm->checklists[$index]['delivered_id'] = $default->employee_id;
-            }
-        }
-    }
+//    public function updatedChecklistForm($value, $name)
+//    {
+//        // Example: $name = "checklists.0.item_id"
+//
+//        if (str_ends_with($name, 'item_id')) {
+//            $index = explode('.', $name)[1];
+//            $itemId = $value;
+//
+//            // Lookup default deliverable for this item
+//            $default = DefaultDeliverable::where('item_id', $itemId)
+//                ->whereIn('city_id', [1, $this->employee->city_id])
+//                ->first();
+//
+//            if ($default) {
+//                // Set delivered_id for this checklist row
+//                $this->checklistForm->checklists[$index]['delivered_id'] = $default->employee_id;
+//            }
+//        }
+//    }
 
     public function render()
     {
@@ -269,10 +264,18 @@ class EmployeeEdit extends Component
                 return $query->whereIn('city_id', [1,$this->employee->city_id]);
             }])->orderBy('order')->get();
         }
-
-        $delivereds = DefaultDeliverable::whereIn('city_id', [1, $this->employee->city_id])->get();
+        $this->checklistForm->checklists = $allItems->map(function ($item) {
+            return [
+                'item_id'      => $item->id,
+                'delivered_id' => optional($item->defaultDeliverable()->first())->employee_id,
+            ];
+        })->toArray();
+        $delivereds = Employee::whereIn('id', DefaultDeliverable::whereIn('city_id', [1, $this->employee->city_id])
+            ->pluck('employee_id'))
+            ->get();
+//            DefaultDeliverable::whereIn('city_id', [1, $this->employee->city_id])->get();
         $roles = Role::pluck('name','id')->toArray();
-
+//dd($delivereds);
         return view('livewire.employee.form', [
             'roles' => $roles,
             'allEmployees' => Employee::select('id', 'name')

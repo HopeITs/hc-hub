@@ -13,7 +13,15 @@ class ChecklistForm extends Form
     public ?Employee $employee = null;
     public ?Checklist $checklist = null;
     public array $checklists = [];
-
+    public function mount()
+    {
+        $this->checklistForm['checklists'] = $this->allItems->map(function ($item) {
+            return [
+                'item_id'      => $item->id,
+                'delivered_id' => optional($item->defaultDeliverable()->first())->employee_id,
+            ];
+        })->toArray();
+    }
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
