@@ -19,7 +19,7 @@
                                           wire:model.defer="checklists.{{ $index }}.delivered_id">
                         <option value="">-- @lang('general.select')</option>
                         @foreach ($delivereds as $delivered)
-                            <option value="{{ $delivered->id }}">
+                            <option value="{{ $delivered->id }}" @selected($delivered->id === $item->defaultDeliverable()->first()->employee_id)>
                                 {{ $delivered->name }}
                             </option>
                         @endforeach
