@@ -1,13 +1,10 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/livewire-starter-kit",
-    "type": "project",
     "description": "The official Laravel starter kit for Livewire.",
-    "keywords": [
-        "laravel",
-        "framework"
-    ],
+    "type": "project",
     "license": "MIT",
+    "keywords": ["laravel", "framework"],
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
@@ -39,7 +36,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Support/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

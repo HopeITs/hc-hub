@@ -1,35 +1,40 @@
 @php
-    $empNameEn = $contract->employee?->getTranslation('name', 'en')
-        ?? $contract->employee?->name ?? '—';
-    $empNameAr = $contract->employee?->getTranslation('name', 'ar')
-        ?? $contract->employee?->name ?? '—';
+    use App\Support\ArabicText as AR;
 
-    $EN_FOURTH_TERM_LABEL = '<span class="h-label">Fourth term:</span>';
-    $AR_FOURTH_TERM_LABEL = '<span class="h-label">البند الرابع:</span>';
+    $forPdf = $forPdf ?? false;
+    $Glyphs = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+    $L = fn (string $t) => '<span class="h-label">'.$t.'</span>';
+
+    $emp = $contract->employee;
+    $empNameEn = $emp?->getTranslation('name', 'en') ?? $emp?->name ?? '—';
+    $empNameAr = $Glyphs($emp?->getTranslation('name', 'ar') ?? $emp?->name ?? '—');
+
+    $EN_FOURTH_TERM_LABEL = $L('Fourth term:');
+    $AR_FOURTH_TERM_LABEL = $L($Glyphs('البند الرابع:'));
 
     $EN_FOURTH_3 = 'The first party has the right to terminate this contract at any time before its expiry date in case the second party violates the terms of this contract and the volunteering code of conduct; in this case, all due amounts must be paid to the second party up to the termination date.';
-    $AR_FOURTH_3 = 'يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل تاريخ انتهائه في حال خالف الطرف الثاني بنود هذا العقد وقواعد السلوك التطوعي؛ وفي هذه الحالة تُدفع للفريق الثاني جميع المبالغ المستحقة له حتى تاريخ الإنهاء.';
+    $AR_FOURTH_3 = $Glyphs('يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل تاريخ انتهائه في حال خالف الطرف الثاني بنود هذا العقد وقواعد السلوك التطوعي؛ وفي هذه الحالة تُدفع للفريق الثاني جميع المبالغ المستحقة له حتى تاريخ الإنهاء.');
 
-    $EN_FIFTH_TERM_LABEL = '<span class="h-label">Fifth term:</span>';
-    $AR_FIFTH_TERM_LABEL = '<span class="h-label">البند الخامس:</span>';
+    $EN_FIFTH_TERM_LABEL = $L('Fifth term:');
+    $AR_FIFTH_TERM_LABEL = $L($Glyphs('البند الخامس:'));
 
     $EN_FIFTH_TEXT = 'I hereby confirm that I have read and understood the work conditions and all the attached documents and I agree to all of the stated.';
-    $AR_FIFTH_TEXT = 'أقر بأنني قرأت وفهمت شروط العمل المنصوص عليها وكافة المستندات المرفقة وأوافق على كل ما ورد فيها.';
+    $AR_FIFTH_TEXT = $Glyphs('أقر بأنني قرأت وفهمت شروط العمل المنصوص عليها وكافة المستندات المرفقة وأوافق على كل ما ورد فيها.');
 
     $EN_NOTE_1 = 'This contract was issued on three pages, printed as a single copy, and has only one version secured in the head office in Aleppo.';
-    $AR_NOTE_1 = 'صدر هذا العقد على ثلاث صفحات، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.';
+    $AR_NOTE_1 = $Glyphs('صدر هذا العقد على ثلاث صفحات، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.');
 
     $EN_NOTE_2 = 'This contract was issued in Arabic and translated into English.';
-    $AR_NOTE_2 = 'صدر هذا العقد بالنسخة العربية وترجم إلى اللغة الإنكليزية.';
+    $AR_NOTE_2 = $Glyphs('صدر هذا العقد بالنسخة العربية وترجم إلى اللغة الإنكليزية.');
 
-    $LEFT_LABEL  = '<span class="h-label">الفريق الثاني/Second Party</span>';
-    $RIGHT_LABEL = '<span class="h-label">الفريق الأول/First party</span>';
+    $LEFT_LABEL  = $L($Glyphs('الفريق الثاني')).'/Second Party';
+    $RIGHT_LABEL = $L($Glyphs('الفريق الأول')).'/First Party';
 
-    $LEFT_SIGN   = '<strong>الاسم والتوقيع/Name & Signature</strong><br>'.e($empNameAr).' / '.e($empNameEn);
-    $RIGHT_SIGN  = '<strong>Name & Signature/الاسم والتوقيع</strong><br>Fredy Youssef / فريدي يوسف';
+    $LEFT_SIGN  = '<strong>'.$Glyphs('الاسم والتوقيع').' / Name & Signature</strong><br>'.$empNameAr.' / '.e($empNameEn);
+    $RIGHT_SIGN = '<strong>Name & Signature / '.$Glyphs('الاسم والتوقيع').'</strong><br>Fredy Youssef / '.$Glyphs('فريدي يوسف');
 
-    $LEFT_DATE   = 'التاريخ/date : __________________';
-    $RIGHT_DATE  = 'date/التاريخ : __________________';
+    $LEFT_DATE  = $Glyphs('التاريخ').' / date : __________________';
+    $RIGHT_DATE = 'date / '.$Glyphs('التاريخ').' : __________________';
 @endphp
 
 <x-contract.dual rowClass="mt-1" :en="$EN_FOURTH_TERM_LABEL" :ar="$AR_FOURTH_TERM_LABEL"/>
