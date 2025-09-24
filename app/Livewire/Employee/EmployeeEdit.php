@@ -8,7 +8,6 @@ use App\Livewire\Forms\Employee\ChecklistForm;
 use App\Livewire\Forms\Employee\CourseForm;
 use App\Livewire\Forms\Employee\EducationForm;
 use App\Livewire\Forms\Employee\ExperienceForm;
-use App\Livewire\Forms\Employee\ItemForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
@@ -33,19 +32,14 @@ class EmployeeEdit extends Component
     public RelativeForm $relativeForm;
     public BadgeForm $badgeForm;
     public AttachmentForm $attachmentForm;
-    public ItemForm $itemForm;
-    public bool $isCreateMode = false;
 
     public $activeTab = 'information';
     public $title = '';
 
-    public function setActiveTab($tab)
-    {
-        $this->activeTab = $tab;
-    }
-
     public function mount(Employee $employee)
     {
+        $this->employee = $employee;
+        $this->title = $employee->name;
         $this->infoForm->setEmployee($employee);
         $this->educationForm->setEmployee($employee);
         $this->courseForm->setEmployee($employee);
@@ -53,237 +47,132 @@ class EmployeeEdit extends Component
         $this->relativeForm->setEmployee($employee);
         $this->badgeForm->setEmployee($employee);
         $this->checklistForm->setEmployee($employee);
-
         $this->attachmentForm->setEmployee($employee);
-        $this->itemForm->setEmployee($employee);
-        $this->title = $employee->name;
-
-        if (empty($this->educationForm->educations)) {
-            $this->educationForm->addEducation();
-        }
-        if (empty($this->courseForm->courses)) {
-            $this->courseForm->addCourse();
-        }
-        if (empty($this->experienceForm->experiences)) {
-            $this->experienceForm->addExperience();
-        }
-        if (empty($this->relativeForm->relatives)) {
-            $this->relativeForm->addRelative();
-        }
-        if (empty($this->badgeForm->badges)) {
-            $this->badgeForm->addBadge();
-        }
-
-        if (empty($this->attachmentForm->attachments)) {
-            $this->attachmentForm->addAttachment();
-        }
-        if (empty($this->itemForm->items)) {
-            $this->itemForm->addItem();
-        }
     }
 
+    public function setActiveTab($tab)
+    {
+        $this->activeTab = $tab;
+    }
     public function saveInformation()
     {
         $this->infoForm->saveInformation();
         $this->successToast();
         return $this->redirect(route('employees.index'), navigate: true);
     }
-
     public function saveEducation()
     {
         $this->educationForm->save();
-        $this->setActiveTab('education');
         $this->successToast();
     }
-
     public function saveCourses()
     {
         $this->courseForm->save();
-        $this->setActiveTab('courses');
         $this->successToast();
     }
-
     public function saveExperience()
     {
         $this->experienceForm->save();
-        $this->setActiveTab('experience');
         $this->successToast();
     }
-
     public function saveRelatives()
     {
         $this->relativeForm->save();
         $this->successToast();
     }
-
     public function saveBadges()
     {
         $this->badgeForm->save();
         $this->successToast();
     }
-
     public function saveChecklist()
     {
         $this->checklistForm->save();
         $this->successToast();
     }
-
     public function saveAttachments()
     {
         $this->attachmentForm->save();
         $this->successToast();
     }
-
-    public function saveItems()
-    {
-        $this->itemForm->save();
-        $this->successToast();
-    }
-
-    public function addItem()
-    {
-        $this->itemForm->addItem();
-    }
-
-    public function removeItem($index, $id = null)
-    {
-        $this->itemForm->removeItem($index, $id);
-        $this->resetErrorBag();
-    }
-
     public function addAttachment()
     {
         $this->attachmentForm->addAttachment();
     }
-
     public function removeAttachment($index, $id = null)
     {
         $this->attachmentForm->removeAttachment($index, $id);
         $this->resetErrorBag();
     }
-
     public function addEducation()
     {
         $this->educationForm->addEducation();
     }
-
     public function removeEducation(int $index, ?int $id = null)
     {
         $this->educationForm->removeEducation($index, $id);
         $this->resetErrorBag();
     }
-
     public function addCourse()
     {
         $this->courseForm->addCourse();
     }
-
     public function removeCourse(int $index, ?int $id = null)
     {
         $this->courseForm->remove($index, $id);
         $this->resetErrorBag();
     }
-
     public function addExperience()
     {
         $this->experienceForm->addExperience();
     }
-
     public function removeExperience(int $index, ?int $id = null)
     {
         $this->experienceForm->removeExperience($index, $id);
         $this->resetErrorBag();
     }
-
     public function addRelative()
     {
         $this->relativeForm->addRelative();
     }
-
     public function removeRelative(int $index, ?int $id = null)
     {
         $this->relativeForm->removeRelative($index, $id);
         $this->resetErrorBag();
     }
-
     public function addBadge()
     {
         $this->badgeForm->addBadge();
     }
-
-    public function removeBadge(int $index)
+    public function removeBadge(int $index, ?int $id = null)
     {
-        $this->badgeForm->removeBadge($index);
+        $this->badgeForm->removeBadge($index, $id);
         $this->resetErrorBag();
     }
-
-    public function removeChecklistItem($i, $id = null)
+    public function addChecklist()
     {
-        $this->checklistForm->removeChecklistItem((int)$i, $id);
+        $this->checklistForm->addChecklist();
+    }
+    public function removeChecklist(int $index, ?int $id = null)
+    {
+        $this->checklistForm->removeChecklist($index, $id);
         $this->resetErrorBag();
     }
-
-//    public function updatedChecklistForm($value, $name)
-//    {
-//        // Example: $name = "checklists.0.item_id"
-//
-//        if (str_ends_with($name, 'item_id')) {
-//            $index = explode('.', $name)[1];
-//            $itemId = $value;
-//
-//            // Lookup default deliverable for this item
-//            $default = DefaultDeliverable::where('item_id', $itemId)
-//                ->whereIn('city_id', [1, $this->employee->city_id])
-//                ->first();
-//
-//            if ($default) {
-//                // Set delivered_id for this checklist row
-//                $this->checklistForm->checklists[$index]['delivered_id'] = $default->employee_id;
-//            }
-//        }
-//    }
 
     public function render()
     {
-        $deviceTypes = [
-            '4G hotspot Adapter', '4G Router', 'Access Point', 'Audio Record',
-            'Cooling Pad', 'DVR', 'External Hard', 'HeadPhone', 'Hub',
-            'Keyboard', 'Landline Phone', 'Laptop', 'Laptop Bag', 'Laptop Charger',
-            'Memory', 'Mobile', 'Mobile Charger', 'Mouse', 'Number',
-            'Power Bank', 'Printer', 'Projector', 'Ram', 'Router',
-            'Screen', 'SD Reader', 'Security Camera', 'Smart Watch', 'Switch',
-            'Tab', 'Time Attendance Machine', 'Toner', 'USB Flash Memory', 'WebCam'
-        ];
+        $roles = Role::pluck('name', 'id')->toArray();
+        $allItems = ChecklistItem::orderBy('name')->get();
+        $delivereds = Employee::whereIn('id', DefaultDeliverable::whereIn('city_id', [1, $this->employee->city_id])->pluck('employee_id'))->get();
+        $employeeChecklistItems = $this->employee->checklists()->with('item')->get();
 
-        if ($this->employee->created_at->greaterThan(Carbon::now()->subMonth())) {
-            $allItems = ChecklistItem::where('order', 1)->with(['defaultDeliverable' => function ($query) {
-                return $query->where('city_id', $this->employee->city_id);
-            }])->get();
-        } else {
-            $allItems = ChecklistItem::whereNot('order', 1)->with(['defaultDeliverable' => function ($query) {
-                return $query->whereIn('city_id', [1,$this->employee->city_id]);
-            }])->orderBy('order')->get();
-        }
-        $this->checklistForm->checklists = $allItems->map(function ($item) {
-            return [
-                'item_id'      => $item->id,
-                'delivered_id' => optional($item->defaultDeliverable()->first())->employee_id,
-            ];
-        })->toArray();
-        $delivereds = Employee::whereIn('id', DefaultDeliverable::whereIn('city_id', [1, $this->employee->city_id])
-            ->pluck('employee_id'))
-            ->get();
-//            DefaultDeliverable::whereIn('city_id', [1, $this->employee->city_id])->get();
-        $roles = Role::pluck('name','id')->toArray();
-//dd($delivereds);
         return view('livewire.employee.form', [
             'roles' => $roles,
-            'allEmployees' => Employee::select('id', 'name')
-                ->where('id', '!=', $this->employee->id)
-                ->get(),
+            'allEmployees' => Employee::select('id', 'name')->where('id', '!=', $this->employee->id)->get(),
             'allItems' => $allItems,
             'delivereds' => $delivereds,
-            'deviceTypes' => $deviceTypes,
+            'employeeChecklistItems' => $employeeChecklistItems,
+            'isCreateMode' => false,
         ]);
     }
 }
