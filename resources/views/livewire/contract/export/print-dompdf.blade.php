@@ -19,7 +19,7 @@
         html, body{
             margin:0; padding:0;
             font-family:'somar','NotoNaskhArabic','DejaVu Sans',sans-serif;
-            font-size:12px; line-height:1.45; color:#111; background:#fff;
+            font-size:15px; line-height:1; color:#111; background:#fff;
             direction: ltr;
         }
         .page-header{ position: relative; top:0; left:0; right:0; height: {{ $HEADER_HEIGHT_MM }}mm; }
@@ -60,11 +60,12 @@
 </head>
 <body>
 
-<div class="page-header">
-    <img src="{{ $headerSrc }}" alt="Header">
-</div>
+
 
 @for($i = 1; $i <= $totalPages; $i++)
+    <div class="page-header">
+        <img src="{{ $headerSrc }}" alt="Header">
+    </div>
     <section class="pdf-page">
         @includeIf("livewire.contract.export.{$category}.pages.page{$i}", [
             'contract'    => $contract,

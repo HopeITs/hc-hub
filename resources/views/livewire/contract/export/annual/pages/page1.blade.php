@@ -74,10 +74,15 @@
     $L = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 @endphp
 
-<div class="avoid-break">
+<div class="avoid-break mt-4">
     <x-contract.dual tight
-                     :en="$L('PRIVATE AND CONFIDENTIAL').' — Volunteer agreement for a limited period'"
-                     :ar="$Glyphs('عقد تطوعي لمدة محدودة').' — '.$L($Glyphs('سري وخاص'))"
+                     :en="$L('PRIVATE AND CONFIDENTIAL')"
+                     :ar="$L($Glyphs('سري وخاص'))"
+                     enClass="text-base" arClass="text-base"
+    />
+    <x-contract.dual tight
+                     :en="' Volunteer agreement for a limited period'"
+                     :ar="$Glyphs('عقد تطوعي لمدة محدودة')"
                      enClass="text-base" arClass="text-base"
     />
 </div>
