@@ -12,15 +12,14 @@
                 </div>
 
                 <div>
-                    @if ($checklistForm->items[$index]['is_selected'])
-                        <x-forms.select-input id="delivered_id_{{ $index }}"
-                                              wire:model.defer="checklistForm.items.{{ $index }}.delivered_id">
-                            <option value="">-- @lang('general.deliver-by') --</option>
-                            @foreach ($delivereds as $delivered)
-                                <option value="{{ $delivered->id }}" @selected($delivered->id === $item[$index]->defaultDeliverable()->first()->employee_id)>{{ $delivered->name }}</option>
-                            @endforeach
-                        </x-forms.select-input>
-                    @endif
+                    <x-forms.select-input id="delivered_id_{{ $index }}"
+                                          wire:model.defer="checklistForm.items.{{ $index }}.delivered_id"
+                                          :disabled="!$checklistForm->items[$index]['is_selected']">
+                        <option value="">-- @lang('general.deliver-by') --</option>
+                        @foreach ($delivereds as $delivered)
+                            <option value="{{ $delivered->id }}">{{ $delivered->name }}</option>
+                        @endforeach
+                    </x-forms.select-input>
                 </div>
 
             </div>

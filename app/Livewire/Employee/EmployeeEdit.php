@@ -50,14 +50,18 @@ class EmployeeEdit extends Component
         $this->badgeForm->setEmployee($employee);
         $this->attachmentForm->setEmployee($employee);
 
-        $this->checklistForm->setEmployeeAndAllItems($employee, $this->getChecklistItems());
+        $defaultDeliverables = DefaultDeliverable::whereIn('city_id', [$this->employee->city_id, 1])->get();
+
+        $this->checklistForm->setEmployeeAndAllItems($employee, $this->getChecklistItems(), $defaultDeliverables);
     }
 
     public function saveChecklist()
     {
         $this->checklistForm->save();
         $this->successToast();
-        $this->checklistForm->setEmployeeAndAllItems($this->employee->fresh(), $this->getChecklistItems());
+
+        $defaultDeliverables = DefaultDeliverable::whereIn('city_id', [$this->employee->city_id, 1])->get();
+        $this->checklistForm->setEmployeeAndAllItems($this->employee->fresh(), $this->getChecklistItems(), $defaultDeliverables);
     }
 
     #region Other Methods
