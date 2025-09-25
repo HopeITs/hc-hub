@@ -16,6 +16,7 @@ use App\Models\Employee;
 use App\Models\Role;
 use App\Traits\WithAlerts;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -40,16 +41,26 @@ class EmployeeEdit extends Component
     {
         $this->employee = $employee;
         $this->title = $employee->name;
+
         $this->infoForm->setEmployee($employee);
         $this->educationForm->setEmployee($employee);
         $this->courseForm->setEmployee($employee);
         $this->experienceForm->setEmployee($employee);
         $this->relativeForm->setEmployee($employee);
         $this->badgeForm->setEmployee($employee);
-        $this->checklistForm->setEmployee($employee);
         $this->attachmentForm->setEmployee($employee);
+
+        $this->checklistForm->setEmployeeAndAllItems($employee, $this->getChecklistItems());
     }
 
+    public function saveChecklist()
+    {
+        $this->checklistForm->save();
+        $this->successToast();
+        $this->checklistForm->setEmployeeAndAllItems($this->employee->fresh(), $this->getChecklistItems());
+    }
+
+    #region Other Methods
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;
@@ -83,11 +94,6 @@ class EmployeeEdit extends Component
     public function saveBadges()
     {
         $this->badgeForm->save();
-        $this->successToast();
-    }
-    public function saveChecklist()
-    {
-        $this->checklistForm->save();
         $this->successToast();
     }
     public function saveAttachments()
@@ -149,30 +155,31 @@ class EmployeeEdit extends Component
         $this->badgeForm->removeBadge($index, $id);
         $this->resetErrorBag();
     }
-    public function addChecklist()
-    {
-        $this->checklistForm->addChecklist();
-    }
-    public function removeChecklist(int $index, ?int $id = null)
-    {
-        $this->checklistForm->removeChecklist($index, $id);
-        $this->resetErrorBag();
-    }
+    #endregion
 
     public function render()
     {
         $roles = Role::pluck('name', 'id')->toArray();
-        $allItems = ChecklistItem::orderBy('name')->get();
         $delivereds = Employee::whereIn('id', DefaultDeliverable::whereIn('city_id', [1, $this->employee->city_id])->pluck('employee_id'))->get();
         $employeeChecklistItems = $this->employee->checklists()->with('item')->get();
 
         return view('livewire.employee.form', [
             'roles' => $roles,
             'allEmployees' => Employee::select('id', 'name')->where('id', '!=', $this->employee->id)->get(),
-            'allItems' => $allItems,
             'delivereds' => $delivereds,
             'employeeChecklistItems' => $employeeChecklistItems,
             'isCreateMode' => false,
         ]);
+    }
+
+    private function getChecklistItems(): Collection
+    {
+        $query = ChecklistItem::query();
+
+        if ($this->employee->created_at->greaterThan(Carbon::now()->subMonth())) {
+            return $query->where('order', 1)->get();
+        }
+
+        return $query->whereNot('order', 1)->orderBy('order')->get();
     }
 }
