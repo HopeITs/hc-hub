@@ -158,7 +158,6 @@ class EmployeeEdit extends Component
         $this->badgeForm->removeBadge($index, $id);
         $this->resetErrorBag();
     }
-    #endregion
 
     public function render()
     {
