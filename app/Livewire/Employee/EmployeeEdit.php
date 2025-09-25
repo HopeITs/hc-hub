@@ -64,7 +64,6 @@ class EmployeeEdit extends Component
         $this->checklistForm->setEmployeeAndAllItems($this->employee->fresh(), $this->getChecklistItems(), $defaultDeliverables);
     }
 
-    #region Other Methods
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;
