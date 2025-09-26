@@ -50,7 +50,7 @@ class EmployeeEdit extends Component
         $this->badgeForm->setEmployee($employee);
         $this->attachmentForm->setEmployee($employee);
 
-        $defaultDeliverables = DefaultDeliverable::whereIn('city_id', [$this->employee->city_id, 1])->get();
+        $defaultDeliverables = DefaultDeliverable::all();
 
         $this->checklistForm->setEmployeeAndAllItems($employee, $this->getChecklistItems(), $defaultDeliverables);
     }
@@ -60,7 +60,7 @@ class EmployeeEdit extends Component
         $this->checklistForm->save();
         $this->successToast();
 
-        $defaultDeliverables = DefaultDeliverable::whereIn('city_id', [$this->employee->city_id, 1])->get();
+        $defaultDeliverables = DefaultDeliverable::all();
         $this->checklistForm->setEmployeeAndAllItems($this->employee->fresh(), $this->getChecklistItems(), $defaultDeliverables);
     }
 
@@ -162,7 +162,7 @@ class EmployeeEdit extends Component
     public function render()
     {
         $roles = Role::pluck('name', 'id')->toArray();
-        $delivereds = Employee::whereIn('id', DefaultDeliverable::whereIn('city_id', [1, $this->employee->city_id])->pluck('employee_id'))->get();
+        $delivereds = Employee::whereIn('id', DefaultDeliverable::pluck('employee_id'))->get();
         $employeeChecklistItems = $this->employee->checklists()->with('item')->get();
 
         return view('livewire.employee.form', [
