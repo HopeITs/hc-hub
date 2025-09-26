@@ -17,17 +17,16 @@ class ChecklistForm extends Form
         $this->employee = $employee;
         $savedChecklists = $employee->checklists->keyBy('item_id');
         $defaults = $defaultDeliverables->keyBy('item_id');
+        $isNewEmployeeChecklist = $savedChecklists->isEmpty();
 
-        $this->items = $allItems->map(function ($item) use ($savedChecklists, $defaults) {
+        $this->items = $allItems->map(function ($item) use ($savedChecklists, $defaults, $isNewEmployeeChecklist) {
             $saved = $savedChecklists->get($item->id);
             $default = $defaults->get($item->id);
 
             return [
                 'item_id' => $item->id,
                 'item_name' => $item->name,
-                // Check the box if a value is already saved OR if there is a default
-                'is_selected' => (bool) $saved || (bool) $default,
-                // Use the saved value first, otherwise fall back to the default value
+                'is_selected' => $isNewEmployeeChecklist || (bool) $saved || (bool) $default,
                 'delivered_id' => $saved?->delivered_id ?? $default?->employee_id,
             ];
         })->toArray();

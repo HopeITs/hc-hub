@@ -208,7 +208,7 @@ return [
     'ongoing' => 'قيد التنفيذ',
     'no-employees' => 'لا يوجد موظفون مخصصون لهذا المشروع بعد.',
     'archived-files' => 'الملفات المؤرشفة',
-     'general_info' => 'المعلومات العامة',
+    'general_info' => 'المعلومات العامة',
     'graduation_year' => 'سنة التخرج',
     'father_name' => 'اسم الأب',
     'mother_name' => 'اسم الأم',
@@ -248,6 +248,7 @@ return [
     'file' => 'الملف',
     'add-item' => 'إضافة عنصر',
     'items' => 'العنصر',
+    'no_items_from_checklist' => 'لم يتم تعيين أي عناصر من قائمة التحقق بعد.',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
@@ -271,8 +272,5 @@ return [
         'update-password-text' => 'تأكد من أن حسابك يستخدم كلمة مرور طويلة وعشوائية للحفاظ على الأمان.',
         'current-password' => 'كلمة المرور الحالية',
         'new-password' => 'كلمة المرور الجديدة',
-
     ],
-
-
 ];

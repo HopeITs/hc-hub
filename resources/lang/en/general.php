@@ -116,7 +116,7 @@ return [
     'phd' => 'PhD',
     'information' => 'Profile',
     'education' => 'Education',
-//    'general-info' => 'General Information',
+    //    'general-info' => 'General Information',
     'employment-info' => 'Employment Information',
     'family-info' => 'Family Information',
     'contact-info' => 'Contact Information',
@@ -247,6 +247,7 @@ return [
     'add-item' => 'Add Item',
     'items' => 'Items',
     'items_from_checklist' => 'All Items',
+    'no_items_from_checklist' => 'No items have been assigned from the checklist.',
     'back_to_list' => 'Cancel',
     'profile' => [
         'settings' => 'Account Settings',
