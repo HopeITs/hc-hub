@@ -22,7 +22,6 @@ return [
     'place' => 'المكان',
     'order' => 'الترتيب',
     'role' => 'الأدوار|الدور',
-
     'weekly-hours' => 'ساعات العمل الأسبوعية',
     'status' => 'الحالة',
     'code' => 'الرمز',
@@ -63,7 +62,7 @@ return [
     'national-number' => 'الرقم الوطني',
     'civil-registry-office' => 'مكتب السجل المدني',
     'civil-registry-number' => 'رقم السجل المدني',
-    'place-and-birth-date' => 'مكان وتاريخ الولادة',
+    'place-and-birth-date' => 'مكان وتاريخ الميلاد',
     'place-of-registration' => 'مكان التسجيل',
     'gender' => 'الجنس',
     'father-name' => 'اسم الأب',
@@ -249,6 +248,7 @@ return [
     'file' => 'الملف',
     'add-item' => 'إضافة عنصر',
     'items' => 'العنصر',
+    'no_items_from_checklist' => 'لم يتم تعيين أي عناصر من قائمة التحقق بعد.',
     'team1' => 'مركز الرجاء المسيحي - حلب / الإدارة العامة الممثل في هذا العقد بالسيد فريدي يوسف',
 
 

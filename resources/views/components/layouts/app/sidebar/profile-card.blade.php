@@ -23,7 +23,7 @@
         >
         <span class="relative inline-grid place-items-center rounded-full p-[2px] shrink-0
                      bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
-            <img class="size-14 border border-1 border-primary rounded-full ring-2 ring-white shrink-0"
+            <img class="size-14 border border-1 border-primary rounded-full object-cover"
                  src="{{ $user->profile->getFirstMediaUrl('avatar') }}"
                  alt="user"/>
             <span
@@ -65,7 +65,7 @@
                 <div class="relative flex items-center gap-3">
                 <span
                     class="p-[3px] rounded-full shrink-0 bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
-                    <img class="size-12 border border-1 border-primary rounded-full ring-2 ring-white shrink-0"
+                    <img class="size-12 border border-1 border-primary rounded-full object-cover"
                          src="{{ $user->profile->getFirstMediaUrl('avatar') }}"
                          alt="user">
                 </span>
