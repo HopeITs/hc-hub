@@ -1,5 +1,6 @@
 @php
-    use App\Enums\MaritalStatus;use App\Enums\Nationality;
+    use App\Enums\MaritalStatus;
+    use App\Enums\Nationality;
 @endphp
 @section('css')
     <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css">
@@ -13,7 +14,7 @@
                             accept="image/*" :old-file="$infoForm->photo"/>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-x-6 gap-y-3">
+    <div class="grid md:grid-cols-2 gap-x-6 gap-y-3 border-b pb-8 mb-8">
         <x-heading-label class="col-span-full">@lang('general.general_info')</x-heading-label>
 
         @foreach (config('app.supported_locales') as $locale)
@@ -72,7 +73,7 @@
         @endforeach
     </div>
 
-    <div class="grid md:grid-cols-2 gap-x-6 gap-y-3">
+    <div class="grid md:grid-cols-2 gap-x-6 gap-y-3 border-b pb-8 mb-8">
         <x-heading-label class="col-span-full">@lang('general.address_info')</x-heading-label>
 
         @foreach (config('app.supported_locales') as $locale)
@@ -118,9 +119,7 @@
             <x-forms.input-label for="national_number">@lang('general.national_number')</x-forms.input-label>
             <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number"/>
             <x-error-span>{{ $errors->first('infoForm.national_number') }}</x-error-span>
-            @error('infoForm.national_number')
-            <x-error-span>{{ $message }}</x-error-span>
-            @enderror
+
         </div>
         <div>
             <x-forms.input-label
@@ -150,7 +149,7 @@
         </div>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-x-6 gap-y-3">
+    <div class="grid md:grid-cols-2 gap-x-6 gap-y-3 border-b pb-8 mb-8">
 
         <x-heading-label>@lang('general.employment_info')</x-heading-label>
         <div>
@@ -158,7 +157,7 @@
                 <x-forms.input-label for="username">@lang('general.work_email')</x-forms.input-label>
                 <span class="text-secondary-light text-xs">password is: HopeCenterHR</span>
             </div>
-            <div class="flex rtl:flex-row-reverse  mt-1">
+            <div class="flex rtl:flex-row-reverse  ">
 
                 <x-forms.input type="text" wire:model="infoForm.username" id="username"
                                class="rounded-r-none" placeholder="username"/>
@@ -171,9 +170,14 @@
             <x-error-span>{{ $errors->first('infoForm.username') }}</x-error-span>
         </div>
         <div>
+            <x-forms.input-label for="work_phone">@lang('general.work_phone')</x-forms.input-label>
+            <x-forms.input type="tel" wire:model="infoForm.work_phone" id="work_phone"/>
+            <x-error-span>{{ $errors->first('infoForm.work_phone') }}</x-error-span>
+        </div>
+        <div class="col-span-full">
             <x-forms.input-label for="roles">{{trans_choice('general.role',2)}}</x-forms.input-label>
 
-            <input class="hidden" wire:model="infoForm.roles"   id="roles_hidden">
+            <input class="hidden" wire:model="infoForm.roles" id="roles_hidden">
             <x-forms.input class="tagify" id="roles" value="{{$infoForm->roles}}"
                            data-whitelist="{{implode(',',$roles)}}"/>
 
@@ -181,15 +185,8 @@
         </div>
 
 
-        <div>
-            <x-forms.input-label for="work_phone">@lang('general.work_phone')</x-forms.input-label>
-            <x-forms.input type="tel" wire:model="infoForm.work_phone" id="work_phone"/>
-            <x-error-span>{{ $errors->first('infoForm.work_phone') }}</x-error-span>
-        </div>
-
-
     </div>
-    <div class="grid md:grid-cols-2 gap-x-6 gap-y-3">
+    <div class="grid md:grid-cols-2 gap-x-6 gap-y-3 border-b pb-8 mb-8">
         <x-heading-label>@lang('general.contact_info')</x-heading-label>
 
         <div>
@@ -205,12 +202,12 @@
             <x-error-span>{{ $errors->first('infoForm.personal_email') }}</x-error-span>
         </div>
     </div>
-    <div>
+    <div class="border-b pb-8 mb-8">
         <x-heading-label>@lang('general.skills_and_interests')</x-heading-label>
 
         <div class="md:col-span-2">
             <x-forms.input-label for="skills">@lang('general.skills')</x-forms.input-label>
-            <input class="hidden" wire:model="infoForm.skills"  id="skills_hidden">
+            <input class="hidden" wire:model="infoForm.skills" id="skills_hidden">
             <x-forms.input class="tagify" type="text" data-enforceWhitelist="0" value="{{$infoForm->skills}}"
                            data-whitelist="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking ,Problem Solving, Adaptability, Willingness to learn,Active listening,Emotion Intelligence,Creativity , Data analysis     "
                            id="skills"/>
@@ -219,15 +216,15 @@
 
         <div class="md:col-span-2">
             <x-forms.input-label for="interests">@lang('general.interests')</x-forms.input-label>
-            <input class="hidden" wire:model="infoForm.interests"  id="interests_hidden">
+            <input class="hidden" wire:model="infoForm.interests" id="interests_hidden">
             <x-forms.input class="tagify" data-enforceWhitelist="1" value="{{$infoForm->interests}}"
                            data-whitelist="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling"
-                           type="text"   id="interests"/>
+                           type="text" id="interests"/>
             <x-error-span>{{ $errors->first('infoForm.interests') }}</x-error-span>
         </div>
     </div>
 
-    <div class="grid md:grid-cols-1 gap-x-6 gap-y-3">
+    <div class="grid md:grid-cols-1 gap-x-6 gap-y-3 border-b pb-8 mb-8">
         <x-heading-label class="col-span-1 ">@lang('general.board_member')</x-heading-label>
         <div class=" col-span-1 flex items-center space-x-2">
             {{--                <x-forms.input type="checkbox" wire:model.live="infoForm.is_board_member" value="0" class="hidden"/>--}}
@@ -276,7 +273,7 @@
 
     </div>
 
-    <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
+    <div class="flex justify-end space-x-2 ">
         <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
         <x-secondary-button :href="route('employees.index')"
                             class="!w-auto">@lang('general.cancel')</x-secondary-button>
