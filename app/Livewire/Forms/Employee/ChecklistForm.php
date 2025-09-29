@@ -26,7 +26,7 @@ class ChecklistForm extends Form
             return [
                 'item_id' => $item->id,
                 'item_name' => $item->name,
-                'is_selected' => $isNewEmployeeChecklist || (bool) $saved || (bool) $default,
+                'is_selected' => ($isNewEmployeeChecklist && (bool) $default ) || (bool) $saved  ,
                 'delivered_id' => $saved?->delivered_id ?? $default?->employee_id,
             ];
         })->toArray();
