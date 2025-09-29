@@ -16,11 +16,11 @@
             <x-table.heading>ID</x-table.heading>
             <x-table.heading>@lang('general.name')</x-table.heading>
             <x-table.heading>@lang('general.photo')</x-table.heading>
-            <x-table.heading>@lang('general.years_of_service')</x-table.heading>
-            <x-table.heading>@lang('general.direct_manager')</x-table.heading>
-            <x-table.heading>@lang('general.tech_manager')</x-table.heading>
-            <x-table.heading>@lang('general.actual_job')</x-table.heading>
-            <x-table.heading>@lang('general.work_email')</x-table.heading>
+            <x-table.heading>@lang('general.years-of-service')</x-table.heading>
+            <x-table.heading>@lang('general.direct-manager')</x-table.heading>
+            <x-table.heading>@lang('general.tech-manager')</x-table.heading>
+            <x-table.heading>@lang('general.actual-job')</x-table.heading>
+            <x-table.heading>@lang('general.work-email')</x-table.heading>
             <x-table.heading>@lang('general.status')</x-table.heading>
             <x-table.heading />
         </x-slot>
@@ -37,7 +37,7 @@
                     <x-table.cell>{{ $item->years_of_service }}</x-table.cell>
                     <x-table.cell>{{ $item->directManager?->{'name_' . app()->getLocale()} ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->techManager?->{'name_' . app()->getLocale()} ?? '-' }}</x-table.cell>
-                    <x-table.cell>{{ $item->actual_job }}</x-table.cell>
+                    <x-table.cell>{{ $item->actual_dob }}</x-table.cell>
                     <x-table.cell>{{ $item->account?->email }}</x-table.cell>
                     <x-table.cell>
                         <x-badge :color="$item->is_active ? 'green' : 'red'">

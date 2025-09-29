@@ -9,18 +9,11 @@ class Badge extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
         'id',
-        'employee_id',
-        'evaluation_id',
-        'type',
-        'currency',
-        'date',
-        'reason',
-        'current_salary',
-        'new_salary',
-        'notes'
     ];
+
+    protected $casts = ['date' => 'datetime:d-m-Y'];
 
     public function employee()
     {

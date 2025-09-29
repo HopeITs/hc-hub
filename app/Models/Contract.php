@@ -8,9 +8,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Contract extends Model
 {
-    use HasFactory;
+    use HasFactory ;
 
     protected $guarded = ['id'];
+
 
     protected $casts = [
         'start_date' => 'date',

@@ -16,16 +16,20 @@
         <x-forms.errors-validation-list/>
         <div class="grid md:grid-cols-2 gap-4">
 
-            @foreach (config('app.supported_locales') as $locale)
-                <div wire:key="title-{{ $locale }}">
-                    <x-forms.input-label for="title_{{ $locale }}">@lang('general.title') ({{ strtoupper($locale) }}
-                        )
-                    </x-forms.input-label>
-                    <x-forms.input type="text" wire:model="form.title.{{ $locale }}" id="title_{{ $locale }}"/>
-                    <x-error-span>{{ $errors->first('form.title.' . $locale) }}</x-error-span>
-                </div>
-            @endforeach
 
+            <div wire:key="title">
+                <x-forms.input-label for="title">@lang('general.title') (EN)
+                </x-forms.input-label>
+                <x-forms.input type="text" wire:model="form.title" id="title"/>
+                <x-error-span>{{ $errors->first('form.title') }}</x-error-span>
+            </div>
+
+            <div wire:key="title-ar">
+                <x-forms.input-label for="title_ar">@lang('general.title') (AR)
+                </x-forms.input-label>
+                <x-forms.input type="text" wire:model="form.title_ar" id="title_ar"/>
+                <x-error-span>{{ $errors->first('form.title_ar') }}</x-error-span>
+            </div>
             <div class="md:col-span-1">
                 <x-forms.input-label for="city">{{trans_choice('general.city',1)}}</x-forms.input-label>
                 <x-forms.select-input wire:model="form.city_id" id="city">
@@ -65,6 +69,7 @@
             <div class="md:col-span-1">
                 <x-forms.input-label for="center">{{trans_choice('general.center',1)}}</x-forms.input-label>
                 <x-forms.select-input wire:model="form.center_id" id="center">
+                    <option disabled>Select Any..</option>
                     @foreach($centers as $center)
                         <option value="{{$center->id}}">{{$center->name .' - ' . $center->city->name}}</option>
                     @endforeach

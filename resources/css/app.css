@@ -160,6 +160,9 @@ body {
         --color-accent-content: var(--color-white);
         --color-accent-foreground: var(--color-neutral-800);
     }
+    .tagify{
+        --tags-focus-border-color: var(--color-primary) !important;
+    }
 }
 
 @layer base {
@@ -212,13 +215,25 @@ select {
         --tw-ring-color: transparent;
     }
 }
-/*[type='checkbox'], [type='radio'] {*/
-/*    color: var(--color-primary);*/
-/*}*/
-/*[type='checkbox']:checked, [type='radio']:checked, .dark [type='checkbox']:checked, .dark [type='radio']:checked  {*/
-/*    background-color: var(--color-primary) !important;*/
-/*}*/
 
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
+
+
+/* Target Firefox “Today” button */
+input[type="date"]::-moz-focus-inner {
+    color: var(--color-primary);
+}
+
+/* Optional: more consistent override */
+/*::-webkit-datetime-edit,*/
+/*::-webkit-datetime-edit-fields-wrapper,*/
+/*::-webkit-datetime-edit-text,*/
+/*::-webkit-datetime-edit-month-field,*/
+/*::-webkit-datetime-edit-day-field,*/
+/*::-webkit-datetime-edit-year-field,*/
+/*::-webkit-inner-spin-button,*/
+::-webkit-clear-button {
+    color: var(--color-primary);
+}
+.tagify__input {
+
+}

@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'project-name' => 'أمل لإدارة الموارد البشرية',
+    'project-name' => 'هوب سنتر لإدارة الموارد البشرية',
     'basic-management' => 'الإدارة الأساسية',
     'project-basics' => 'أساسيات المشروع',
     'city' => 'المدن|مدينة',
@@ -20,6 +21,7 @@ return [
     'type' => 'النوع',
     'place' => 'المكان',
     'order' => 'الترتيب',
+    'role' => 'الأدوار|الدور',
     'weekly-hours' => 'ساعات العمل الأسبوعية',
     'status' => 'الحالة',
     'code' => 'الرمز',
@@ -55,7 +57,8 @@ return [
     'married' => 'متزوج',
     'select' => 'اختيار',
     'required-positions' => 'المناصب المطلوبة|المنصب المطلوب',
-    'dob' => 'تاريخ الميلاد',
+    'actual-dob' => 'تاريخ الميلاد (الفعلي)',
+    'dob' => 'تاريخ الميلاد (الهوية)',
     'national-number' => 'الرقم الوطني',
     'civil-registry-office' => 'مكتب السجل المدني',
     'civil-registry-number' => 'رقم السجل المدني',
@@ -91,6 +94,7 @@ return [
     'existing' => 'الموظفين الحاليين',
 
     'default-deliverables' => 'المنتجات الأساسية',
+    'deliver-by' => 'التسليم بواسطة',
     'centers' => 'المراكز',
     'center-name' => 'اسم المركز',
     'center-city' => 'المدينة',
@@ -108,7 +112,7 @@ return [
     'primary-school' => 'المدرسة الابتدائية',
     'high-school' => 'المدرسة الثانوية',
     'institute' => 'المعهد',
-    'title' => 'اللقب',
+    'title' => 'العنوان',
     'master' => 'ماجستير',
     'phd' => 'دكتوراه',
     'information' => 'الملف الشخصي',
@@ -139,7 +143,7 @@ return [
     'add-new-relative' => 'إضافة قريب جديد',
     'remove-relative' => 'إزالة قريب',
     'relation' => 'العلاقة',
-    'badges' => 'الشهادات',
+    'badges' => 'الشارات',
     'add-new-badge' => 'إضافة شهادة جديدة',
     'remove-badge' => 'إزالة الشهادة',
     'currency' => 'العملة',
@@ -152,8 +156,8 @@ return [
     'salary-adjustment' => 'تعديل الراتب',
     'bonus' => 'مكافأة',
     'other' => 'أخرى',
-    'checklist' => 'قائمة المراجعة',
-    'item' => 'عنصر',
+    'checklist' => 'قائمة التسليم',
+    'item' => 'العنصر',
     'brand' => 'العلامة التجارية',
     'model' => 'الموديل',
     'serial' => 'الرقم التسلسلي',
@@ -197,9 +201,68 @@ return [
     'position' => 'المنصب',
     'contract-start' => 'بداية العقد',
     'contract-end' => 'نهاية العقد',
+
+    'my-folders' => 'مجلداتي',
+    'shared-folders' => 'المجلدات المشتركة',
+
     'ongoing' => 'قيد التنفيذ',
     'no-employees' => 'لا يوجد موظفون مخصصون لهذا المشروع بعد.',
     'archived-files' => 'الملفات المؤرشفة',
+     'general_info' => 'المعلومات العامة',
+    'graduation_year' => 'سنة التخرج',
+    'father_name' => 'اسم الأب',
+    'mother_name' => 'اسم الأم',
+    'marital_status' => 'الحالة الاجتماعية',
+    'address_info' => 'معلومات الهوية',
+    'national_number' => 'الرقم الوطني',
+    'civil_registry_office' => 'أمانة السجل المدني',
+    'place_of_registration' => 'مكان القيد',
+    'place_and_birth_date' => 'مكان وتاريخ الولادة',
+    'civil_registry_number' => 'رقم القيد',
+    'employment_info' => 'معلومات التوظيف',
+    'work_email' => 'بريد العمل الإلكتروني',
+    'direct_manager' => 'المدير المباشر',
+    'tech_manager' => 'المدير التقني',
+    'contact_info' => 'معلومات الاتصال',
+    'personal_phone' => 'الهاتف الشخصي',
+    'work_phone' => 'هاتف العمل',
+    'personal_email' => 'البريد الشخصي الإلكتروني',
+    'board_member' => 'عضوية مجلس الإدارة',
+    'is_board_member' => 'عضو مجلس إدارة',
+    'board_member_started_at' => 'تاريخ بدء العضوية',
+    'board_member_end_at' => 'تاريخ انتهاء العضوية',
+    'skills_and_interests' => 'المهارات والاهتمامات',
+    'issuing_organization' => 'الجهة المانحة',
+    'not_approved' => 'غير معتمدة',
+    'job_title' => 'المسمى الوظيفي',
+    'start_date' => 'تاريخ البدء',
+    'end_date' => 'تاريخ الانتهاء',
+    'current_salary' => 'الراتب الحالي',
+    'new_salary' => 'الراتب الجديد',
+    'related_evaluation' => 'التقييم المرتبط',
+    'delivered_at' => 'تاريخ التسليم',
+    'delivered_status' => 'حالة التسليم',
+    'returned_at' => 'تاريخ الإعادة',
+    'returned_status' => 'حالة الإعادة',
+    'attachments' => 'الملحقات',
+    'file' => 'الملف',
+    'add-item' => 'إضافة عنصر',
+    'items' => 'العنصر',
+    'no_items_from_checklist' => 'لم يتم تعيين أي عناصر من قائمة التحقق بعد.',
+    'team1' => 'مركز الرجاء المسيحي - حلب / الإدارة العامة الممثل في هذا العقد بالسيد فريدي يوسف',
+
+
+
+
+
+
+
+
+
+
+
+
+
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
@@ -223,5 +286,8 @@ return [
         'update-password-text' => 'تأكد من أن حسابك يستخدم كلمة مرور طويلة وعشوائية للحفاظ على الأمان.',
         'current-password' => 'كلمة المرور الحالية',
         'new-password' => 'كلمة المرور الجديدة',
+
     ],
+
+
 ];

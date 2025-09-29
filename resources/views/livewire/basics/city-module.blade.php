@@ -34,11 +34,13 @@
                 :direction="$sortField === 'code' ? $sortDirection : null"
             >@lang('general.code')</x-table.heading>
 
-            <x-table.heading
-                sortable
-                wire:click="sortBy('is_active')"
-                :direction="$sortField === 'is_active' ? $sortDirection : null"
-            >@lang('general.status')</x-table.heading>
+            @activerole('super admin')
+                <x-table.heading
+                    sortable
+                    wire:click="sortBy('is_active')"
+                    :direction="$sortField === 'is_active' ? $sortDirection : null"
+                >@lang('general.status')</x-table.heading>
+            @endactiverole
         </x-slot>
 
         <x-slot name="body">
@@ -48,11 +50,13 @@
                     <x-table.cell>{{ $item->name_ar ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->name_en ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->code ?? '-' }}</x-table.cell>
+                    @activerole('super admin')
                     <x-table.cell-status
                         :active="$item->is_active"
                         :model-id="$item->id"
                         wire-event="confirmToggleItemStatus"
                     />
+                    @endactiverole
                 </tr>
             @empty
                 <x-table.no-data/>

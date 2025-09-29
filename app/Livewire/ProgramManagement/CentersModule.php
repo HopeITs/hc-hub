@@ -14,25 +14,18 @@ class CentersModule extends Component
 {
     use WithPagination, SortableTable;
 
-    public $search = '';
-    public $showModal = false;
-    public $modalTitle = '';
-    public $itemID;
-
-    public $item = [
-        'id'         => null,
-        'name'       => '',
-        'city_id'    => '',
-        'program_id' => '',
+    public array $item = [
+        'id' => null,
+        'name' => '',
+        'city_id' => '',
         'address_en' => '',
         'address_ar' => '',
-        'is_active'  => true,
+        'is_active' => true,
     ];
 
     protected $rules = [
-        'item.name'       => 'required|string|max:255',
-        'item.city_id'    => 'required|exists:cities,id',
-        'item.program_id' => 'required|exists:programs,id',
+        'item.name' => 'required|string|max:255',
+        'item.city_id' => 'required|exists:cities,id',
         'item.address_en' => 'nullable|string|max:255',
         'item.address_ar' => 'nullable|string|max:255',
     ];
@@ -78,10 +71,9 @@ class CentersModule extends Component
                 $term = $this->search;
                 $q->where(function ($w) use ($term, $locale) {
                     $w->where('name', 'like', "%{$term}%")
-                      ->orWhere('address_en', 'like', "%{$term}%")
-                      ->orWhere('address_ar', 'like', "%{$term}%")
+                      ->orWhere("address->$locale", 'like', "%{$term}%")
                       ->orWhereHas('city', function ($c) use ($term, $locale) {
-                          $c->where('name_' . $locale, 'like', "%{$term}%");
+                          $c->where("name->$locale", 'like', "%{$term}%");
                       })
                       ->orWhereHas('program', function ($p) use ($term) {
                           $p->where('name', 'like', "%{$term}%");
@@ -90,10 +82,10 @@ class CentersModule extends Component
             });
 
         if ($sort === 'address') {
-            $query->orderBy('address_' . $locale, $dir);
+            $query->orderBy("address->$locale", $dir);
         } elseif ($sort === 'city_name') {
             $query->leftJoin('cities', 'centers.city_id', '=', 'cities.id')
-                  ->orderBy('cities.name_' . $locale, $dir)
+                  ->orderBy("cities.name->$locale", $dir)
                   ->select('centers.*');
         } elseif ($sort === 'program_name') {
             $query->leftJoin('programs', 'centers.program_id', '=', 'programs.id')
@@ -105,30 +97,31 @@ class CentersModule extends Component
 
         $items = $query->paginate(15);
 
-        $cities = City::orderBy('name_' . $locale)->get();
+        $cities = City::orderBy("name->$locale")->get(['id', 'name']);
         $programs = Program::orderBy('name')->get(['id', 'name']);
 
-        return view('livewire.program-management.centers-module', compact('items', 'cities', 'programs'));
+        return view('livewire.program-management.centers-module', compact('cities'));
     }
 
-    public function create()
+    public function create(): void
     {
         $this->item = [
             'id'         => null,
             'name'       => '',
             'city_id'    => '',
             'program_id' => '',
-            'address_en' => '',
-            'address_ar' => '',
+            'address'    => ['en' => '', 'ar' => ''],
             'is_active'  => true,
         ];
 
         $this->resetValidation();
         $this->showModal = true;
         $this->modalTitle = __('general.add-new');
+        $this->showModal = true;
     }
 
-    public function edit($id)
+    #[On('openCenterEdit')]
+    public function edit(int $id): void
     {
         $model = Center::findOrFail($id);
 
@@ -144,6 +137,7 @@ class CentersModule extends Component
         ];
 
         $this->resetValidation();
+        $this->modalTitle = __('general.edit');
         $this->showModal = true;
     }
 
@@ -166,26 +160,6 @@ class CentersModule extends Component
         $this->resetErrorBag();
         $this->resetValidation();
         $this->dispatch('closeModal');
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
-    }
-
-    public function confirmDelete($id)
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->confirmButtonColor(config('samples.styles.colors.primary'))
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete($payload)
-    {
-        Center::findOrFail($payload['id'])->delete();
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();

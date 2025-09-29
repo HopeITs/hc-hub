@@ -4,60 +4,45 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = ['email', 'password', 'employee_id'];
-
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden   = ['password', 'remember_token'];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
 
-    public function getNameAttribute(): ?string
-    {
-        return $this->profile?->name_en;
-    }
-
-    public function initials(): string
-    {
-        return Str::of($this->name)->explode(' ')->take(2)->map(fn($word) => Str::substr($word, 0, 1))->implode('');
-    }
     public function profile(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'employee_id');
     }
-    public function myRole()
-    {
-        return $this->roles()->first()?->name;
-    }
 
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class);
-    }
-
-    public function permissions()
-    {
-        return $this->belongsToMany(Permission::class);
-    }
-
-    public function hasRole(string $roleName): bool
-    {
-        return $this->roles->contains('name', $roleName);
-    }
+//    public function roles(): BelongsToMany
+//    {
+//        return $this->belongsToMany(Role::class)
+//            ->withPivot('is_active')
+//            ->withTimestamps();
+//    }
+//
+//    public function permissions(): BelongsToMany
+//    {
+//        return $this->belongsToMany(Permission::class);
+//    }
 
     public function folders(): HasMany
     {
@@ -67,5 +52,97 @@ class User extends Authenticatable
     public function accessibleFolders(): BelongsToMany
     {
         return $this->belongsToMany(Folder::class);
+    }
+
+    public function activeRole(): ?Role
+    {
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->firstWhere(fn ($r) => (bool)($r->pivot->is_active ?? false));
+        }
+
+        return $this->roles()->wherePivot('is_active', true)->first();
+    }
+
+    public function myRole(): ?string
+    {
+        return $this->activeRole()?->name;
+    }
+
+    public function activeRoleSlug(): ?string
+    {
+        $name = $this->myRole();
+        return $name ? Str::slug($name) : null;
+    }
+
+    public function activeRoleIs(string ...$roles): bool
+    {
+        $current = $this->activeRoleSlug();
+        if (!$current) return false;
+
+        foreach ($roles as $r) {
+            if ($current === Str::slug($r)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function inactiveRoles()
+    {
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->filter(fn($r) => empty($r->pivot->is_active));
+        }
+        return $this->roles()->wherePivot('is_active', false)->get();
+    }
+
+    public function hasMultipleRoles(): bool
+    {
+        // Use loaded relation when possible.
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->count() > 1;
+        }
+        return $this->roles()->limit(2)->count() > 1;
+    }
+
+    public function setActiveRole(int $roleId): void
+    {
+        DB::transaction(function () use ($roleId) {
+            if (!$this->roles()->where('roles.id', $roleId)->exists()) {
+                abort(403, 'Role does not belong to this user.');
+            }
+
+            $ids = $this->roles()->pluck('roles.id')->all();
+            if (!empty($ids)) {
+                $this->roles()->updateExistingPivot($ids, ['is_active' => false]);
+            }
+            $this->roles()->updateExistingPivot($roleId, ['is_active' => true]);
+
+            if ($this->relationLoaded('roles')) {
+                $this->roles->each(function ($r) use ($roleId) {
+                    $r->pivot->is_active = (int) ($r->id === $roleId);
+                });
+            }
+        });
+    }
+
+    public function hasRole(string $roleName): bool
+    {
+        return $this->relationLoaded('roles')
+            ? $this->roles->contains(fn($r) => Str::slug($r->name) === Str::slug($roleName))
+            : $this->roles()->where('name', $roleName)->exists();
+    }
+//
+    public function getActiveRoleNameAttribute(): ?string
+    {
+        return $this->myRole();
+    }
+
+    public function initials(): string
+    {
+        $display = $this->profile?->name ?: '';
+        return Str::of($display)->trim()->explode(' ')
+            ->take(2)
+            ->map(fn ($w) => Str::substr($w, 0, 1))
+            ->implode('');
     }
 }

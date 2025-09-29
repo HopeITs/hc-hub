@@ -8,25 +8,17 @@
         <x-forms.select-input id="employee_id" wire:model="form.employee_id" class="mt-1">
             <option value="">{{ __('general.select') }}</option>
             @foreach($employees as $e)
-                <option value="{{ $e->id }}">{{ $e->getTranslation('name', $locale) }}</option>
+                <option value="{{ $e->id }}">
+                    {{
+                        (method_exists($e, 'getTranslatableAttributes') && in_array('name', $e->getTranslatableAttributes(), true))
+                            ? $e->getTranslation('name', $locale)
+                            : ($e->name ?? '')
+                    }}
+                </option>
             @endforeach
         </x-forms.select-input>
         <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.employee_id') }}</x-error-span>
     </div>
-
-    {{-- Project --}}
-    @isset($programs)
-        <div class="md:col-span-6">
-            <x-forms.input-label for="program_id">@lang('general.project')</x-forms.input-label>
-            <x-forms.select-input id="program_id" wire:model="form.program_id" class="mt-1">
-                <option value="">{{ __('general.select') }}</option>
-                @foreach($programs as $program)
-                    <option value="{{ $program->id }}">{{ $program->name }}</option>
-                @endforeach
-            </x-forms.select-input>
-            <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.program_id') }}</x-error-span>
-        </div>
-    @endisset
 
     {{-- Position --}}
     <div class="md:col-span-6">
@@ -35,9 +27,13 @@
             <option value="">{{ __('general.select') }}</option>
             @foreach($positions as $pos)
                 <option value="{{ $pos->id }}">
-                    {{ $pos->requiredPosition?->title ?? ('#'.$pos->id) }}
+                    {{ $pos->title ?? $pos->requiredPosition?->title ?? ('#'.$pos->id) }}
                     @if($pos->center)
-                        — {{ $pos->center->getTranslation('name', $locale) }}
+                        — {{
+                            (method_exists($pos->center, 'getTranslatableAttributes') && in_array('name', $pos->center->getTranslatableAttributes(), true))
+                                ? $pos->center->getTranslation('name', $locale)
+                                : ($pos->center->name ?? '')
+                        }}
                     @endif
                 </option>
             @endforeach
@@ -51,34 +47,15 @@
         <x-forms.select-input id="contract_type_id" wire:model="form.contract_type_id" class="mt-1">
             <option value="">{{ __('general.select') }}</option>
             @foreach($types as $t)
-                <option value="{{ $t->id }}">{{ $t->getTranslation('name', $locale) }}</option>
+                <option value="{{ $t->id }}">
+                    {{
+                        (method_exists($t, 'getTranslatableAttributes') && in_array('name', $t->getTranslatableAttributes(), true))
+                            ? $t->getTranslation('name', $locale)
+                            : ($t->name ?? '')
+                    }}
+                </option>
             @endforeach
         </x-forms.select-input>
         <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.contract_type_id') }}</x-error-span>
     </div>
-
-    {{-- Department --}}
-    <div class="md:col-span-6">
-        <x-forms.input-label for="department_id">{{ trans_choice('general.department', 1) }}</x-forms.input-label>
-        <x-forms.select-input id="department_id" wire:model="form.department_id" class="mt-1">
-            <option value="">{{ __('general.select') }}</option>
-            @foreach($departments as $d)
-                <option value="{{ $d->id }}">{{ $d->name }}</option>
-            @endforeach
-        </x-forms.select-input>
-        <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.department_id') }}</x-error-span>
-    </div>
-
-    {{-- Job level --}}
-    <div class="md:col-span-6">
-        <x-forms.input-label for="job_level_id">{{ trans_choice('general.job-level', 1) }}</x-forms.input-label>
-        <x-forms.select-input id="job_level_id" wire:model="form.job_level_id" class="mt-1">
-            <option value="">{{ __('general.select') }}</option>
-            @foreach($levels as $l)
-                <option value="{{ $l->id }}">{{ $l->getTranslation('name', $locale) }}</option>
-            @endforeach
-        </x-forms.select-input>
-        <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.job_level_id') }}</x-error-span>
-    </div>
-
 </div>

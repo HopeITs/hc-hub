@@ -31,4 +31,9 @@ class Center extends Model
     {
         return $this->hasManyThrough(Contract::class, Position::class);
     }
+
+    public function projectManager(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'project_manager_id');
+    }
 }

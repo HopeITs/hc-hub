@@ -4,16 +4,17 @@ namespace App\Livewire\Forms\ProgramManagement;
 
 use App\Models\Program;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Validate;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 
 class ProgramForm extends Form
 {
+
     public ?Program $program = null;
 
     public $name;
-    public $description_en;
-    public $description_ar;
+    public $description = [];
     public $start_date;
     public $end_date;
     public $code;
@@ -35,6 +36,7 @@ class ProgramForm extends Form
             ],
             'code' => 'required',
             'logo' => 'nullable',
+            'program_manager_id' => ['nullable', 'exists:employees,id'],
         ];
     }
 
@@ -45,18 +47,19 @@ class ProgramForm extends Form
         $this->description_en = $program->description_en;
         $this->description_ar = $program->description_ar;
         $this->slug = $program->slug;
-        $this->start_date = $program->start_date;
-        $this->end_date = $program->end_date;
+        $this->start_date = $program->start_date?->format('Y-m-d');
+        $this->end_date = $program->end_date?->format('Y-m-d');
         $this->code = $program->code;
         $this->logo = $program->getFirstMediaUrl('logo');
         $this->is_active = $program->is_active;
+        $this->program_manager_id = $program->contracts->first()?->employee_id;
     }
 
     public function store()
     {
         $this->validate();
 
-        $program = Program::create($this->except(['logo', 'program']));
+        $program = Program::create($this->except('logo', 'program_manager_id'));
 
         if ($this->logo instanceof TemporaryUploadedFile) {
             $program->addMedia($this->logo->getRealPath())
@@ -65,6 +68,8 @@ class ProgramForm extends Form
         }
 
         $this->reset();
+
+
     }
 
     public function update()
@@ -72,8 +77,9 @@ class ProgramForm extends Form
         $this->validate();
 
         $this->program->update(
-            $this->except(['logo', 'program'])
+            $this->except('logo', 'program_manager_id')
         );
+
         if ($this->logo instanceof TemporaryUploadedFile) {
             $this->program->clearMediaCollection('logo');
             $this->program->addMedia($this->logo->getRealPath())
@@ -91,4 +97,5 @@ class ProgramForm extends Form
             ]
         );
     }
+
 }

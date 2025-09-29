@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Console\Prohibitable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 
 class Position extends Model
 {
-    use HasFactory;
+    use HasFactory ;
 
     protected $guarded = ['id'];
 
@@ -43,4 +46,6 @@ class Position extends Model
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+
+
 }

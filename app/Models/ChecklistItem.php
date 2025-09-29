@@ -13,10 +13,21 @@ class ChecklistItem extends Model
         'id',
         'name',
         'order',
+        // 'department_id'
     ];
 
     public function checklist()
     {
         return $this->belongsTo(Checklist::class);
     }
+
+    public function defaultDeliverable(){
+        return $this->hasMany(DefaultDeliverable::class ,'item_id');
+    }
+
+    // public function department()
+    // {
+    //     return $this->belongsTo(Department::class);
+    // }
+
 }

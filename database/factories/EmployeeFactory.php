@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Contract;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -16,7 +17,7 @@ class EmployeeFactory extends Factory
             'name_ar' => 'اسم ' . $this->faker->unique()->numberBetween(1, 1000),
             'city_id' => $this->faker->numberBetween(2, 6),
             'username' => $this->faker->userName,
-            'actual_job' => $this->faker->jobTitle,
+            'actual_dob' => $this->faker->date('Y-m-d', '-20 years'),
             'years_of_service' => $this->faker->randomFloat(1, 0, 8),
             'direct_manager_id' => null, // you can link later
             'tech_manager_id' => null,   // you can link later
@@ -47,5 +48,15 @@ class EmployeeFactory extends Factory
             'created_at' => now(),
             'updated_at' => now(),
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function ($employee) {
+
+          Contract::factory()->create([
+                'employee_id' => $employee->id,
+            ]);
+        });
     }
 }

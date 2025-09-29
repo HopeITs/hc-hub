@@ -1,3 +1,6 @@
+@php
+use App\Enums\EducationType;
+@endphp
 <form wire:submit.prevent="saveEducation" class="space-y-6">
     @foreach ($educationForm->educations as $index => $education)
 
@@ -6,6 +9,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="md:col-span-2 flex justify-end">
                     <x-primary-button type="button"
+                                      :showSpinner="false"
                                       wire:click="removeEducation({{ $index }} , {{$education['id']}})"
                     >
                         <x-icons.trash/>
@@ -36,13 +40,10 @@
                         id="education_type_{{ $index }}"
                         wire:model.defer="educationForm.educations.{{ $index }}.type">
                         <option value="">-- @lang('general.select') --</option>
-                        <option value="0">@lang('general.unknown')</option>
-                        <option value="1">@lang('general.primary_school')</option>
-                        <option value="2">@lang('general.high_school')</option>
-                        <option value="3">@lang('general.institute')</option>
-                        <option value="4">@lang('general.university')</option>
-                        <option value="5">@lang('general.master')</option>
-                        <option value="6">@lang('general.phd')</option>
+                        @foreach(EducationType::getValues() as $key => $value)
+                            <option value="{{$value}}">{{ EducationType::getLocalizedName($value)}}</option>
+                        @endforeach
+
                     </x-forms.select-input>
                     <x-error-span>{{ $errors->first("educationForm.educations.$index.type") }}</x-error-span>
                 </div>
@@ -51,7 +52,7 @@
                     <x-forms.input-label for="education_graduation_year_{{ $index }}">@lang('general.graduation_year')</x-forms.input-label>
                     <x-forms.input
                         id="education_graduation_year_{{ $index }}"
-                        type="number"
+                        type="year"
                         placeholder="YYYY"
                         wire:model.defer="educationForm.educations.{{ $index }}.graduation_year"/>
                     <x-error-span>{{ $errors->first("educationForm.educations.$index.graduation_year") }}</x-error-span>
@@ -75,7 +76,7 @@
         </div>
     @endforeach
 <div class="flex justify-center">
-    <x-primary-button type="button"
+    <x-primary-button type="button"  :showSpinner="false"
                       wire:click="addEducation"
     >
         + @lang('general.add-new')

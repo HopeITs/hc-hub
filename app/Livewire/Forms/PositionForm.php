@@ -18,7 +18,8 @@ class PositionForm extends Form
     public $program_id;
     public $center_id;
     public $city_id;
-    public $title = [];
+    public $title = '';
+    public $title_ar = '';
     public $qualifications;
     public $max_emp;
     public $responsibilities;
@@ -27,8 +28,8 @@ class PositionForm extends Form
     protected function rules()
     {
         return [
-            'title.en' => ['nullable', 'min:3', 'max:255'],
-            'title.ar' => ['nullable', 'min:3', 'max:255'],
+            'title' => ['nullable', 'min:3', 'max:255'],
+            'title_ar' => ['nullable', 'min:3', 'max:255'],
             'program_id'       => 'required|exists:programs,id',
             'center_id'        => 'nullable|exists:centers,id',
             'city_id'          => 'required|exists:cities,id',
@@ -36,7 +37,6 @@ class PositionForm extends Form
             'department_id'    => 'required|exists:departments,id',
             'qualifications'   => 'required|string',
             'responsibilities' => 'required|string',
-
             'max_emp'          => 'required|integer|min:1',
 
 
@@ -44,8 +44,10 @@ class PositionForm extends Form
     }
     public function setPosition(Position $position){
         $this->position = $position;
-        $this->title = $position->getTranslations('title');
+        $this->title = $position->title;
+        $this->title_ar = $position->title_ar;
         $this->city_id = $position->city_id;
+        $this->center_id = $position->center_id;
         $this->program_id = $position->program_id;
         $this->department_id = $position->department_id;
         $this->job_level_id = $position->job_level_id;

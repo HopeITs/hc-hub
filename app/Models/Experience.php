@@ -9,15 +9,13 @@ class Experience extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $guarded = [
         'id',
-        'employee_id',
-        'job_title',
-        'company',
-        'start_date',
-        'end_date',
-        'place',
-        'type'
+
+    ];
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime'
     ];
 
     public function employee()

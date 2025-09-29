@@ -2,8 +2,14 @@
 
 namespace App\Livewire\Archives;
 
+use App\Models\Center;
+use App\Models\City;
+use App\Models\Department;
 use App\Models\Folder;
+use App\Models\JobLevel;
+use App\Models\Program;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -14,42 +20,156 @@ class ArchivedFilesModule extends Component
 {
     use WithFileUploads;
 
+    public bool $isShared;
     public ?Folder $currentFolder = null;
     public Collection $folders;
     public Collection $files;
-    public array $breadcrumbs = [];
+    public array $finalCrumbs = [];
     public bool $showCreateFolderModal = false;
     public string $newFolderName = '';
     public array $filesToUpload = [];
     public bool $showDeleteConfirmationModal = false;
     public $itemToDeleteType = null;
     public $itemToDeleteId = null;
+    public string $itemNameToDelete = ''; // Added for specific delete confirmation
     public array $filePreviews = [];
-
     public bool $showPermissionsModal = false;
     public ?Folder $folderForPermissions = null;
     public ?Collection $allUsers = null;
     public array $selectedUsers = [];
     public string $userSearch = '';
+    public ?int $editingFolderId = null;
+    public string $editingFolderName = '';
+    public ?int $editingFileId = null;
+    public string $editingFileName = '';
 
-    public function mount($folderId = null)
+    public string $permissionFilterType = '';
+    public string $permissionFilterValue = '';
+    public array $permissionFilterOptions = [];
+    public array $activeFilters = [];
+
+    // Added for "Select All" functionality
+    public bool $allVisibleUsersSelected = false;
+
+    public function mount(bool $isShared, $folderId = null)
     {
+        $this->isShared = $isShared;
         if ($folderId) {
             $folder = Folder::with('users')->find($folderId);
-
             if ($folder && !auth()->user()->hasRole('Super Admin') && !$folder->users->contains(auth()->id())) {
                 abort(403, 'You do not have permission to access this folder.');
             }
             $this->currentFolder = $folder;
         }
-
         $this->loadContent();
+    }
+
+    public function getPermissionFilterCategoriesProperty(): array
+    {
+        return [
+            'department' => 'Department',
+            'job_level' => 'Job Level',
+            'program' => 'Program',
+            'center' => 'Center',
+            'city' => 'City',
+        ];
+    }
+
+    public function updatedPermissionFilterType($type)
+    {
+        $this->permissionFilterValue = '';
+        $this->permissionFilterOptions = [];
+
+        if ($type) {
+            $collection = match ($type) {
+                'department' => Department::all(),
+                'program' => Program::all(),
+                'job_level' => JobLevel::all(),
+                'center' => Center::all(),
+                'city' => City::all(),
+                default => collect(),
+            };
+
+            $this->permissionFilterOptions = $collection->mapWithKeys(function ($item) use ($type) {
+                $isTranslatable = in_array($type, ['job_level', 'city', 'center']);
+                $name = $isTranslatable ? $item->getTranslation('name', 'en') : $item->name;
+                return [$item->id => $name];
+            })->toArray();
+        }
+    }
+
+    public function addFilter()
+    {
+        if (!$this->permissionFilterType || !$this->permissionFilterValue) {
+            return;
+        }
+
+        $this->activeFilters[] = [
+            'type' => $this->permissionFilterType,
+            'value' => $this->permissionFilterValue,
+            'type_label' => $this->permissionFilterCategories[$this->permissionFilterType],
+            'value_label' => $this->permissionFilterOptions[$this->permissionFilterValue],
+        ];
+
+        $this->permissionFilterType = '';
+        $this->permissionFilterValue = '';
+        $this->permissionFilterOptions = [];
+    }
+
+    public function removeFilter($index)
+    {
+        if (isset($this->activeFilters[$index])) {
+            unset($this->activeFilters[$index]);
+            $this->activeFilters = array_values($this->activeFilters);
+        }
+    }
+
+    private function applyPermissionFilters(Builder $query): Builder
+    {
+        if (empty($this->activeFilters)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) {
+            foreach ($this->activeFilters as $filter) {
+                $q->whereHas('profile.contracts.position', function ($positionQuery) use ($filter) {
+                    match ($filter['type']) {
+                        'department' => $positionQuery->where('department_id', $filter['value']),
+                        'job_level' => $positionQuery->where('job_level_id', $filter['value']),
+                        'program' => $positionQuery->where('program_id', $filter['value']),
+                        'center' => $positionQuery->where('center_id', $filter['value']),
+                        'city' => $positionQuery->where('city_id', $filter['value']),
+                    };
+                });
+            }
+        });
+    }
+
+    private function authorizeSharedAction(): void
+    {
+        if ($this->isShared && !auth()->user()->hasRole('Super Admin')) {
+            abort(403, 'You are not authorized to perform this action in Shared Folders.');
+        }
     }
 
     public function loadContent(): void
     {
         $parentId = $this->currentFolder?->id;
-        $query = Folder::where('parent_id', $parentId);
+        // Updated query to efficiently load file count
+        $query = Folder::withCount('media as files_count');
+        $query->where('parent_id', $parentId);
+
+        if ($this->isShared) {
+            $query->where(function ($q) {
+                $q->where('is_shared', true)
+                    ->orWhere(function ($subQ) {
+                        $subQ->where('is_shared', false)
+                            ->where('user_id', '!=', auth()->id());
+                    });
+            });
+        } else {
+            $query->where('is_shared', false)->where('user_id', auth()->id());
+        }
 
         if (!auth()->user()->hasRole('Super Admin')) {
             $query->whereHas('users', fn($q) => $q->where('user_id', auth()->id()));
@@ -65,8 +185,6 @@ class ArchivedFilesModule extends Component
     {
         $this->filePreviews = [];
         foreach ($this->files as $file) {
-            // THE BUG WAS HERE. The check for 'thumbnail' was re-added by mistake.
-            // This is the corrected version that only checks if it's an image.
             if (Str::startsWith($file->mime_type, 'image')) {
                 $this->filePreviews[$file->id] = 'data:' . $file->mime_type . ';base64,' . base64_encode(file_get_contents($file->getPath()));
             }
@@ -75,34 +193,51 @@ class ArchivedFilesModule extends Component
 
     protected function generateBreadcrumbs(): void
     {
-        $this->breadcrumbs = [];
+        $baseCrumbUrl = $this->isShared ? route('shared-folders.index') : route('my-folders.index');
+        $crumbs = [['label' => __('general.archived-files'), 'url' => $baseCrumbUrl]];
+        $folderLinks = [];
         $folder = $this->currentFolder;
+
         while ($folder) {
-            array_unshift($this->breadcrumbs, ['id' => $folder->id, 'name' => $folder->name]);
+            array_unshift($folderLinks, [
+                'label' => $folder->name,
+                'url' => $this->isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id])
+            ]);
             $folder = $folder->parent;
+        }
+
+        $this->finalCrumbs = array_merge($crumbs, $folderLinks);
+
+        if (count($this->finalCrumbs) > 1) {
+            $lastIndex = count($this->finalCrumbs) - 1;
+            unset($this->finalCrumbs[$lastIndex]['url']);
         }
     }
 
     public function createFolder()
     {
+        $this->authorizeSharedAction();
         $this->validate(['newFolderName' => 'required|string|max:255']);
 
         $folder = Folder::create([
             'name' => $this->newFolderName,
-            'parent_id' => null,
+            'parent_id' => $this->currentFolder?->id,
             'user_id' => auth()->id(),
+            'is_shared' => $this->isShared,
         ]);
-
         $folder->users()->attach(auth()->id());
+
         $this->showCreateFolderModal = false;
         $this->newFolderName = '';
-
         $this->editPermissions($folder->id);
     }
 
     public function editPermissions(int $folderId)
     {
         $folder = Folder::findOrFail($folderId);
+        if ($folder->user_id !== auth()->id() && !auth()->user()->hasRole('Super Admin')) {
+            abort(403, 'Only the creator can manage permissions.');
+        }
         $this->folderForPermissions = $folder;
         $this->selectedUsers = $folder->users->pluck('id')->toArray();
         $this->showPermissionsModal = true;
@@ -111,8 +246,12 @@ class ArchivedFilesModule extends Component
     public function savePermissions()
     {
         if ($this->folderForPermissions) {
-            $permissions = collect($this->selectedUsers)->push($this->folderForPermissions->user_id)->unique()->all();
-            $this->folderForPermissions->users()->sync($permissions);
+            if ($this->folderForPermissions->user_id !== auth()->id() && !auth()->user()->hasRole('Super Admin')) {
+                abort(403, 'Only the creator can manage permissions.');
+            }
+            $permissions = collect($this->selectedUsers);
+            $permissions->push($this->folderForPermissions->user_id);
+            $this->folderForPermissions->users()->sync($permissions->unique()->all());
         }
         $this->closePermissionsModal();
         $this->loadContent();
@@ -124,17 +263,22 @@ class ArchivedFilesModule extends Component
         $this->folderForPermissions = null;
         $this->selectedUsers = [];
         $this->userSearch = '';
+        $this->permissionFilterType = '';
+        $this->permissionFilterValue = '';
+        $this->permissionFilterOptions = [];
+        $this->activeFilters = [];
     }
 
     public function updatedFilesToUpload()
     {
-        $this->validate([
-            'filesToUpload.*' => 'mimes:jpg,jpeg,png,gif,xls,xlsx,doc,docx,pdf|max:10240',
-        ]);
+        $this->authorizeSharedAction();
+        $this->validate(['filesToUpload.*' => 'mimes:jpg,jpeg,png,gif,xls,xlsx,doc,docx,pdf|max:10240']);
+
         if (!$this->currentFolder) {
             $this->addError('filesToUpload', 'You must select a folder before uploading files.');
             return;
         }
+
         foreach ($this->filesToUpload as $file) {
             $this->currentFolder->addMedia($file->getRealPath())->usingName($file->getClientOriginalName())->toMediaCollection('archived_files', 'public');
         }
@@ -150,45 +294,127 @@ class ArchivedFilesModule extends Component
 
     public function confirmFileDeletion($mediaId)
     {
+        $this->authorizeSharedAction();
+        $media = Media::findOrFail($mediaId); // Find to get name
         $this->itemToDeleteType = 'file';
         $this->itemToDeleteId = $mediaId;
+        $this->itemNameToDelete = $media->name; // Set the name
         $this->showDeleteConfirmationModal = true;
     }
 
     public function confirmFolderDeletion($folderId)
     {
+        $this->authorizeSharedAction();
+        $folder = Folder::findOrFail($folderId); // Find to get name
         $this->itemToDeleteType = 'folder';
         $this->itemToDeleteId = $folderId;
+        $this->itemNameToDelete = $folder->name; // Set the name
         $this->showDeleteConfirmationModal = true;
     }
 
     public function deleteItem()
     {
+        $this->authorizeSharedAction();
         if ($this->itemToDeleteType === 'file') {
             Media::findOrFail($this->itemToDeleteId)->delete();
         } elseif ($this->itemToDeleteType === 'folder') {
             Folder::findOrFail($this->itemToDeleteId)->delete();
         }
         $this->showDeleteConfirmationModal = false;
+        $this->itemNameToDelete = ''; // Reset name
         $this->loadContent();
+    }
+
+    public function startEditingFolder(int $folderId)
+    {
+        $this->authorizeSharedAction();
+        $folder = Folder::findOrFail($folderId);
+        $this->editingFolderId = $folder->id;
+        $this->editingFolderName = $folder->name;
+    }
+
+    public function saveEditedFolder()
+    {
+        $this->authorizeSharedAction();
+        $this->validate(['editingFolderName' => 'required|string|max:255']);
+        $folder = Folder::findOrFail($this->editingFolderId);
+        $folder->update(['name' => $this->editingFolderName]);
+        $this->editingFolderId = null;
+        $this->editingFolderName = '';
+        $this->loadContent();
+    }
+
+    public function startEditingFile(int $fileId)
+    {
+        $this->authorizeSharedAction();
+        $file = Media::findOrFail($fileId);
+        $this->editingFileId = $file->id;
+        $this->editingFileName = pathinfo($file->name, PATHINFO_FILENAME);
+    }
+
+    public function saveEditedFile()
+    {
+        $this->authorizeSharedAction();
+        $this->validate(['editingFileName' => 'required|string|max:255']);
+        $file = Media::findOrFail($this->editingFileId);
+
+        $newFileName = $this->editingFileName . '.' . $file->extension;
+        $file->name = $newFileName;
+        $file->save();
+
+        $this->editingFileId = null;
+        $this->editingFileName = '';
+        $this->loadContent();
+    }
+
+    // New method for "Select All"
+    public function toggleSelectAllVisible()
+    {
+        $visibleUserIds = $this->getVisibleUsersQuery()->pluck('id')->toArray();
+        $creatorId = $this->folderForPermissions?->user_id;
+
+        // Exclude the creator from the list of IDs that can be toggled
+        $toggleableUserIds = array_diff($visibleUserIds, [$creatorId]);
+
+        $this->allVisibleUsersSelected = !$this->allVisibleUsersSelected;
+
+        if ($this->allVisibleUsersSelected) {
+            // Add all visible users to the selected list, ensuring no duplicates
+            $this->selectedUsers = array_unique(array_merge($this->selectedUsers, $toggleableUserIds));
+        } else {
+            // Remove all visible users from the selected list
+            $this->selectedUsers = array_diff($this->selectedUsers, $toggleableUserIds);
+        }
+    }
+
+    // New helper method to get the current user query
+    private function getVisibleUsersQuery(): Builder
+    {
+        $query = User::query()->whereHas('profile');
+
+        if (trim($this->userSearch)) {
+            $query->whereHas('profile', function ($q) {
+                $q->where('name', 'like', '%' . $this->userSearch . '%');
+            });
+        }
+
+        return $this->applyPermissionFilters($query);
     }
 
     public function render()
     {
         if ($this->showPermissionsModal) {
-            $users = User::with('profile')->whereHas('profile')->get();
+            $query = $this->getVisibleUsersQuery(); // Use the helper
+            $users = $query->get();
 
-            if (trim($this->userSearch)) {
-                $users = $users->filter(function ($user) {
-                    return Str::contains(
-                        $user->profile->name,
-                        $this->userSearch,
-                        true
-                    );
-                });
-            }
+            $creatorId = $this->folderForPermissions?->user_id;
+            [$creator, $otherUsers] = $users->partition(fn($user) => $user->id === $creatorId);
 
-            $this->allUsers = $users->sortBy('profile.name');
+            $sortedUsers = $otherUsers->sortBy(function ($user) {
+                return optional($user->profile)->name;
+            });
+
+            $this->allUsers = $creator->merge($sortedUsers);
         }
 
         return view('livewire.archives.archived-files-module');

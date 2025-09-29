@@ -1,5 +1,7 @@
 <?php
 
+use Barryvdh\Snappy\Facades\SnappyPdf;
+
 return [
 
     /*
@@ -123,6 +125,10 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    'supported_locales' => ['ar' , 'en']
+    'supported_locales' => ['ar' , 'en'],
+
+    'aliases' => [
+    'PDF' => SnappyPdf::class,
+],
 
 ];

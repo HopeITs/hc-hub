@@ -8,6 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
+        //basics
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
             $table->string('name_en');
@@ -80,15 +81,15 @@ return new class extends Migration
         });
         Schema::create('positions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('program_id')->constrained()->onDelete('restrict');
+            $table->foreignId('program_id')->constrained()->onDelete('cascade');
             $table->foreignId('center_id')->nullable()->constrained()->onDelete('restrict');
-            $table->foreignId('city_id')->constrained()->onDelete('restrict');
+            $table->foreignId('city_id')->default(2)->constrained()->onDelete('restrict');
             $table->foreignId('job_level_id')->constrained()->onDelete('restrict');
             $table->foreignId('department_id')->constrained()->onDelete('restrict');
             $table->string('title_en');
             $table->string('title_ar');
-            $table->text('qualifications');
-            $table->text('responsibilities');
+            $table->text('qualifications')->nullable();
+            $table->text('responsibilities')->nullable();
             $table->integer('max_emp')->default(1);
             $table->integer('exist_emp')->default(0);
             $table->boolean('is_active')->default(true);
@@ -102,6 +103,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        //employee
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('set null');
@@ -113,6 +115,7 @@ return new class extends Migration
             $table->foreignId('direct_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->foreignId('tech_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->char('national_number')->unique()->nullable();
+            $table->dateTime('actual_dob')->nullable();
             $table->dateTime('dob')->nullable();
             $table->string('place_and_birth_date')->nullable();
             $table->string('civil_registry_office')->nullable();
@@ -144,7 +147,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->string('issuing_organization');
-            $table->date('date')->nullable();
+            $table->dateTime('issue_date')->nullable();
             $table->boolean('is_approved')->default(false);
             $table->timestamps();
         });
@@ -153,7 +156,7 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->string('university');
-            $table->unsignedTinyInteger('type')->nullable();
+            $table->unsignedTinyInteger('type')->nullable()->comment('0 = Unknown, 1 = Primary_School, 2 = High_School, 3 = Institute, 4 = University, 5 = Master, 6 = PHD');
             $table->year('graduation_year')->nullable();
             $table->timestamps();
         });
@@ -162,10 +165,10 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('job_title');
             $table->string('company');
-            $table->date('start_date');
-            $table->date('end_date')->nullable();
-            $table->string('place')->nullable();
-            $table->string('type')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date')->nullable();
+            $table->tinyInteger('place')->nullable();
+            $table->tinyInteger('type')->nullable();
             $table->timestamps();
         });
         Schema::create('relatives', function (Blueprint $table) {
@@ -180,12 +183,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('item_id')->nullable()->onDelete('restrict');
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->foreignId('delivered_id')->constrained('employees')->onDelete('cascade');
             $table->string('brand')->nullable();
             $table->string('model')->nullable();
             $table->string('serial')->nullable();
-            $table->date('delivered_at')->nullable();
+            $table->dateTime('delivered_at')->nullable();
             $table->string('delivered_status')->nullable();
-            $table->date('returned_at')->nullable();
+            $table->dateTime('returned_at')->nullable();
             $table->string('returned_status')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
@@ -198,11 +202,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->foreignId('position_id')->constrained()->onDelete('restrict');
+            $table->foreignId('position_id')->constrained()->onDelete('cascade');
             $table->foreignId('contract_type_id')->constrained()->onDelete('restrict');
             $table->date('start_date');
             $table->date('end_date');
@@ -210,8 +213,8 @@ return new class extends Migration
             $table->text('reason_of_termination')->nullable();
             $table->integer('yearly_leave_days')->default(12);
             $table->decimal('salary', 10, 2);
-            $table->unsignedTinyInteger('currency');
-            $table->unsignedTinyInteger('salary_per')->default(0);
+            $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR');
+            $table->unsignedTinyInteger('salary_per')->comment('0=Unknown, 1=Month, 2=Hour, 3=Session')->default(0);
             $table->json('work_days');
             $table->json('work_hours');
             $table->integer('weekly_hours');
@@ -230,9 +233,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->foreignId('evaluation_id')->nullable()->constrained()->onDelete('restrict');
-            $table->unsignedTinyInteger('currency')->nullable();
+            $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR')->nullable();
             $table->string('type');
-            $table->date('date');
+            $table->dateTime('date');
             $table->text('reason')->nullable();
             $table->decimal('current_salary', 10, 2)->nullable();
             $table->decimal('new_salary', 10, 2)->nullable();
@@ -260,8 +263,29 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('attachments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('employee_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->string('item');
+            $table->string('brand')->nullable();
+            $table->string('model')->nullable();
+            $table->string('serial_number')->nullable();
+            $table->string('status')->nullable();
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('cities');
@@ -274,6 +298,7 @@ return new class extends Migration
         Schema::dropIfExists('job_levels');
         Schema::dropIfExists('positions');
         Schema::dropIfExists('annual_leave_rules');
+
         Schema::dropIfExists('employees');
         Schema::dropIfExists('courses');
         Schema::dropIfExists('educations');
@@ -281,10 +306,13 @@ return new class extends Migration
         Schema::dropIfExists('relatives');
         Schema::dropIfExists('checklist');
         Schema::dropIfExists('default_deliverables');
+
         Schema::dropIfExists('contracts');
         Schema::dropIfExists('evaluations');
         Schema::dropIfExists('badges');
         Schema::dropIfExists('leave_balances');
         Schema::dropIfExists('leave_requests');
+        Schema::dropIfExists('attachments');
+        Schema::dropIfExists('employee_items');
     }
 };

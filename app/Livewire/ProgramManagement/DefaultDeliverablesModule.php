@@ -6,24 +6,18 @@ use App\Models\ChecklistItem;
 use App\Models\City;
 use App\Models\DefaultDeliverable as DefaultDeliverableModel;
 use App\Models\Employee;
-use App\Traits\SortableTable;
 use Illuminate\Validation\Rule;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
-use Livewire\WithPagination;
-
-// alias to avoid clash
 
 class DefaultDeliverablesModule extends Component
 {
-    use WithPagination, SortableTable;
+    protected $listeners = ['openDefaultDeliverableEdit' => 'edit'];
 
-    public $search = '';
-    public $showModal = false;
-    public $modalTitle = '';
-    public $itemID;
+    public bool $showModal = false;
+    public string $modalTitle = '';
 
-    public $item = [
+    public array $item = [
         'id'          => null,
         'employee_id' => '',
         'city_id'     => '',
@@ -50,65 +44,38 @@ class DefaultDeliverablesModule extends Component
         ];
     }
 
-    public function updatingSearch() { $this->resetPage(); }
-
     public function render()
     {
         $locale = app()->getLocale();
-        $sort   = $this->sortField ?: 'id';
-        $dir    = $this->sortDirection ?: 'desc';
-        $term   = trim($this->search);
-        $like   = '%'.$term.'%';
 
-        $query = DefaultDeliverableModel::query()
-            ->with(['employee','city','item'])
-            ->when($term, function ($q) use ($like, $locale) {
-                $q->where(function ($w) use ($like, $locale) {
-                    $w->whereHas('employee', fn($e) => $e->where('name_en', 'like', $like)->orWhere('name_ar', 'like', $like))
-                        ->orWhereHas('item',     fn($i) => $i->where('name', 'like', $like))
-                        ->orWhereHas('city',     fn($c) => $c->where('name_' . $locale, 'like', $like));
-                });
-            });
+        // Dropdowns for the modal
+        $employees = Employee::orderBy("name->$locale")
+            ->get(['id','name'])
+            ->mapWithKeys(fn ($e) => [$e->id => $e->getTranslation('name', $locale)]);
 
-        // Sorting
-        if ($sort === 'employee_name') {
-            $query->leftJoin('employees as e', 'e.id', '=', 'default_deliverables.employee_id')
-                ->orderBy('e.name_' . $locale, $dir)
-                ->select('default_deliverables.*');
-        } elseif ($sort === 'city_name') {
-            $query->leftJoin('cities as c', 'c.id', '=', 'default_deliverables.city_id')
-                ->orderBy('c.name_' . $locale, $dir)
-                ->select('default_deliverables.*');
-        } elseif ($sort === 'item_name') {
-            $query->leftJoin('checklist_items as i', 'i.id', '=', 'default_deliverables.item_id')
-                ->orderBy('i.name', $dir)
-                ->select('default_deliverables.*');
-        } else {
-            $query->orderBy($sort, $dir);
-        }
+        $cities = City::whereHas('centers')
+            ->orderBy("name->$locale")
+            ->get(['id','name']);
 
-        $items = $query->paginate(15);
-
-        $employees = Employee::select('id', "name_$locale as name")->get()->pluck('name', 'id');
-        $cities = City::whereHas('centers')->orderBy("name_$locale")->select('id', "name_$locale as name")->get();
         $checklistItems = ChecklistItem::orderBy('order')->get(['id','name']);
 
-        return view('livewire.program-management.default-deliverables-module', compact('items','employees','cities','checklistItems'));
+        return view('livewire.program-management.default-deliverables-module', compact(
+            'employees', 'cities', 'checklistItems'
+        ));
     }
 
-    public function create()
+    public function create(): void
     {
         $this->item = ['id'=>null,'employee_id'=>'','city_id'=>'','item_id'=>''];
         $this->resetValidation();
-        $this->showModal  = true;
         $this->modalTitle = __('general.add-new');
+        $this->showModal  = true;
     }
 
-    public function edit($id)
+    public function edit(int $id): void
     {
         $model = DefaultDeliverableModel::findOrFail($id);
 
-        $this->modalTitle = __('general.edit');
         $this->item = [
             'id'          => $model->id,
             'employee_id' => $model->employee_id,
@@ -117,10 +84,11 @@ class DefaultDeliverablesModule extends Component
         ];
 
         $this->resetValidation();
-        $this->showModal = true;
+        $this->modalTitle = __('general.edit');
+        $this->showModal  = true;
     }
 
-    public function save()
+    public function save(): void
     {
         $this->validate();
 
@@ -138,25 +106,7 @@ class DefaultDeliverablesModule extends Component
         $this->resetValidation();
         $this->dispatch('closeModal');
 
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
-    }
-
-    public function confirmDelete($id)
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->confirmButtonColor(config('samples.styles.colors.primary'))
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete($payload)
-    {
-        DefaultDeliverableModel::findOrFail($payload['id'])->delete();
+        $this->dispatch('refreshDefaultDeliverablesTable');
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();

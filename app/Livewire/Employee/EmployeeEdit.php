@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Employee;
 
+use App\Livewire\Forms\Employee\AttachmentForm;
 use App\Livewire\Forms\Employee\BadgeForm;
 use App\Livewire\Forms\Employee\ChecklistForm;
 use App\Livewire\Forms\Employee\CourseForm;
@@ -10,133 +11,177 @@ use App\Livewire\Forms\Employee\ExperienceForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\ChecklistItem;
+use App\Models\DefaultDeliverable;
 use App\Models\Employee;
+use App\Models\Role;
 use App\Traits\WithAlerts;
-use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class EmployeeEdit extends Component
 {
-    use WithFileUploads , WithAlerts;
+    use WithFileUploads, WithAlerts;
 
+    public ?Employee $employee = null;
     public PersonalInfoForm $infoForm;
     public EducationForm $educationForm;
-    public ChecklistForm $checklistItemForm;
-    public  CourseForm $courseForm;
+    public ChecklistForm $checklistForm;
+    public CourseForm $courseForm;
     public ExperienceForm $experienceForm;
     public RelativeForm $relativeForm;
     public BadgeForm $badgeForm;
+    public AttachmentForm $attachmentForm;
+
     public $activeTab = 'information';
+    public $title = '';
+
+    public function mount(Employee $employee)
+    {
+        $this->employee = $employee;
+        $this->title = $employee->name;
+
+        $this->infoForm->setEmployee($employee);
+        $this->educationForm->setEmployee($employee);
+        $this->courseForm->setEmployee($employee);
+        $this->experienceForm->setEmployee($employee);
+        $this->relativeForm->setEmployee($employee);
+        $this->badgeForm->setEmployee($employee);
+        $this->attachmentForm->setEmployee($employee);
+
+        $defaultDeliverables = DefaultDeliverable::all();
+
+        $this->checklistForm->setEmployeeAndAllItems($employee, $this->getChecklistItems(), $defaultDeliverables);
+    }
+
+    public function saveChecklist()
+    {
+        $this->checklistForm->save();
+        $this->successToast();
+
+        $defaultDeliverables = DefaultDeliverable::all();
+        $this->checklistForm->setEmployeeAndAllItems($this->employee->fresh(), $this->getChecklistItems(), $defaultDeliverables);
+    }
 
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;
     }
-
-    public function mount(Employee $employee)
-    {
-        $this->infoForm->setEmployee($employee);
-        $this->educationForm->setEmployee($employee);
-        $this->courseForm->setEmployee($employee ?? null);
-
-        if (empty($this->educationForm->educations)) {
-            $this->educationForm->addEducation();
-        }
-        if (empty($this->courseForm->courses ?? [])) {
-            $this->courseForm->addCourse();
-        }
-        if (empty($this->experienceForm->experiences ?? [])) {
-            $this->experienceForm->addExperience();
-        }
-        if (empty($this->relativeForm->relatives ?? [])) {
-            $this->relativeForm->addRelative();
-        }
-        if (empty($this->badgeForm->badges ?? [])) {
-            $this->badgeForm->addBadge();
-        }
-        if (empty($this->checklistItemForm->checklists ?? [])) {
-            $this->checklistItemForm->addChecklist();
-        }
-    }
-
-
     public function saveInformation()
     {
         $this->infoForm->saveInformation();
         $this->successToast();
         return $this->redirect(route('employees.index'), navigate: true);
     }
-
-    public function addEducation(): void
+    public function saveEducation()
+    {
+        $this->educationForm->save();
+        $this->successToast();
+    }
+    public function saveCourses()
+    {
+        $this->courseForm->save();
+        $this->successToast();
+    }
+    public function saveExperience()
+    {
+        $this->experienceForm->save();
+        $this->successToast();
+    }
+    public function saveRelatives()
+    {
+        $this->relativeForm->save();
+        $this->successToast();
+    }
+    public function saveBadges()
+    {
+        $this->badgeForm->save();
+        $this->successToast();
+    }
+    public function saveAttachments()
+    {
+        $this->attachmentForm->save();
+        $this->successToast();
+    }
+    public function addAttachment()
+    {
+        $this->attachmentForm->addAttachment();
+    }
+    public function removeAttachment($index, $id = null)
+    {
+        $this->attachmentForm->removeAttachment($index, $id);
+        $this->resetErrorBag();
+    }
+    public function addEducation()
     {
         $this->educationForm->addEducation();
     }
-
-    public function removeEducation(int $index , int $id =null): void
+    public function removeEducation(int $index, ?int $id = null)
     {
-        $this->educationForm->removeEducation($index , $id);
+        $this->educationForm->removeEducation($index, $id);
         $this->resetErrorBag();
     }
-
-    public function saveEducation(): void
-    {
-        $this->educationForm->save();
-        $this->setActiveTab('education');
-        $this->successToast();
-    }
-    public function addCourse(): void
+    public function addCourse()
     {
         $this->courseForm->addCourse();
     }
-
-    public function removeCourse(int $index): void
+    public function removeCourse(int $index, ?int $id = null)
     {
-        $this->courseForm->removeCourse($index);
+        $this->courseForm->remove($index, $id);
         $this->resetErrorBag();
     }
-
-    public function saveCourses(): void
+    public function addExperience()
     {
-        $this->courseForm->save();
-        $this->setActiveTab('courses');
-        $this->successToast(); // from WithAlerts
+        $this->experienceForm->addExperience();
     }
-
-
-    public function saveExperience()
+    public function removeExperience(int $index, ?int $id = null)
     {
-        $this->experienceForm->saveExperience();
-        LivewireAlert::success(__('general.success-message'));
+        $this->experienceForm->removeExperience($index, $id);
+        $this->resetErrorBag();
     }
-
-    public function saveRelatives()
+    public function addRelative()
     {
-        $this->relativeForm->saveRelatives();
-        LivewireAlert::success(__('general.success-message'));
+        $this->relativeForm->addRelative();
     }
-
-    public function saveBadges()
+    public function removeRelative(int $index, ?int $id = null)
     {
-        $this->badgeForm->saveBadges();
-        LivewireAlert::success(__('general.success-message'));
+        $this->relativeForm->removeRelative($index, $id);
+        $this->resetErrorBag();
     }
-
-    public function saveChecklist()
+    public function addBadge()
     {
-        $this->checklistItemForm->saveChecklist();
-        LivewireAlert::success(__('general.success-message'));
+        $this->badgeForm->addBadge();
+    }
+    public function removeBadge(int $index, ?int $id = null)
+    {
+        $this->badgeForm->removeBadge($index, $id);
+        $this->resetErrorBag();
     }
 
     public function render()
     {
-        $checklistItems = ChecklistItem::where('order', 1)->orderBy('name')->get();
+        $roles = Role::pluck('name', 'id')->toArray();
+        $delivereds = Employee::whereIn('id', DefaultDeliverable::pluck('employee_id'))->get();
+        $employeeChecklistItems = $this->employee->checklists()->with('item')->get();
 
         return view('livewire.employee.form', [
-            'allEmployees' => Employee::select('id', 'name_en', 'name_ar')
-                ->where('id', '!=', $this->infoForm->employee->id)
-                ->get(),
-            'checklistItems' => $checklistItems,
+            'roles' => $roles,
+            'allEmployees' => Employee::select('id', 'name_en', 'name_ar')->where('id', '!=', $this->employee->id)->get(),
+            'delivereds' => $delivereds,
+            'employeeChecklistItems' => $employeeChecklistItems,
+            'isCreateMode' => false,
         ]);
+    }
+
+    private function getChecklistItems(): Collection
+    {
+        $query = ChecklistItem::query();
+
+        if ($this->employee->created_at->greaterThan(Carbon::now()->subMonth())) {
+            return $query->where('order', 1)->get();
+        }
+
+        return $query->whereNot('order', 1)->orderBy('order')->get();
     }
 }
