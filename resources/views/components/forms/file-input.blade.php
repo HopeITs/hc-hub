@@ -18,8 +18,8 @@
                 <img class="size-20  rounded-full object-cover"
                      src="{{ $oldFile}}" alt="Current profile photo"/>
             @else
-                <div class="size-20  rounded-full bg-gray-200 flex items-center justify-center">
-                    <x-icons.user class="size-18 text-secondary-medium"/>
+                <div class="size-24  rounded-full  flex border border-1 border-primary items-center justify-center">
+                    <x-icons.user class="size-20 text-secondary-medium"/>
 
                 </div>
             @endif

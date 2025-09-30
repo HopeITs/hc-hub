@@ -10,10 +10,9 @@ class Checklist extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id',
         'item_id',
         'employee_id',
-        'deliverable_id',
+        'delivered_id',
         'brand',
         'model',
         'serial',
@@ -24,13 +23,18 @@ class Checklist extends Model
         'notes',
     ];
 
+    protected $casts = [
+        'delivered_at' => 'datetime',
+        'returned_at' => 'datetime',
+    ];
+
     public function employee()
     {
         return $this->belongsTo(Employee::class);
     }
 
-    public function items()
+    public function item()
     {
-        return $this->hasMany(ChecklistItem::class);
+        return $this->belongsTo(ChecklistItem::class, 'item_id');
     }
 }
