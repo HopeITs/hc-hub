@@ -37,15 +37,15 @@ class DefaultDeliverablesTable extends LivewireTable
     protected function employeeOptions(): array
     {
         $loc = app()->getLocale();
-        return Employee::query()->orderBy("name->$loc")->get(['id', 'name'])
-            ->mapWithKeys(fn($e) => [$e->id => $e->getTranslation('name', $loc)])->all();
+        return Employee::query()->orderBy(transColumn('name'))->get(['id', transColumn('name')])
+            ->mapWithKeys(fn($e) => [$e->id => $e->name])->all();
     }
 
     protected function cityOptions(): array
     {
         $loc = app()->getLocale();
-        return City::query()->whereHas('centers')->orderBy("name->$loc")->get(['id', 'name'])
-            ->mapWithKeys(fn($c) => [$c->id => $c->getTranslation('name', $loc)])->all();
+        return City::query()->whereHas('centers')->orderBy(transColumn('name'))->get(['id', transColumn('name')])
+            ->mapWithKeys(fn($c) => [$c->id => $c->name])->all();
     }
 
     protected function itemOptions(): array
@@ -61,12 +61,12 @@ class DefaultDeliverablesTable extends LivewireTable
             Column::make('ID', 'id')->sortable(),
 
             SelectColumn::make(__('general.employee'), 'employee_id')
-                ->displayUsing(fn($v, Model $m) => $m->employee?->getTranslation('name', $loc) ?? '—')
+                ->displayUsing(fn($v, Model $m) => $m->employee?->name ?? '—')
                 ->options($this->employeeOptions())
                 ->sortable(),
 
             SelectColumn::make(trans_choice('general.city', 1), 'city_id')
-                ->displayUsing(fn($v, Model $m) => $m->city?->getTranslation('name', $loc) ?? '—')
+                ->displayUsing(fn($v, Model $m) => $m->city?->name ?? '—')
                 ->options($this->cityOptions())
                 ->sortable(),
 

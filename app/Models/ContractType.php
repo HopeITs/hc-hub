@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslation;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ContractType extends Model
 {
-    use HasFactory;
+    use HasFactory , HasTranslation;
 
     protected $fillable = [
         'type',
@@ -15,6 +17,14 @@ class ContractType extends Model
         'name_en',
         'name_ar'
     ];
+
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getTranslatableAttribute('name'),
+            set: fn($value) => $this->setTranslatableAttribute('name', $value)
+        );
+    }
 
     protected $casts = [
         'type'  => 'integer',

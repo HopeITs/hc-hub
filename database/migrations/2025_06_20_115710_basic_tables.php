@@ -86,6 +86,8 @@ return new class extends Migration
             $table->foreignId('city_id')->default(2)->constrained()->onDelete('restrict');
             $table->foreignId('job_level_id')->constrained()->onDelete('restrict');
             $table->foreignId('department_id')->constrained()->onDelete('restrict');
+            $table->foreignId('direct_manager_id')->nullable()->constrained('positions')->onDelete('set null');
+            $table->foreignId('tech_manager_id')->nullable()->constrained('positions')->onDelete('set null');
             $table->string('title_en');
             $table->string('title_ar');
             $table->text('qualifications')->nullable();
@@ -112,8 +114,7 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('actual_job')->nullable();
             $table->double('years_of_service')->nullable();
-            $table->foreignId('direct_manager_id')->nullable()->constrained('employees')->onDelete('set null');
-            $table->foreignId('tech_manager_id')->nullable()->constrained('employees')->onDelete('set null');
+
             $table->char('national_number')->unique()->nullable();
             $table->dateTime('actual_dob')->nullable();
             $table->dateTime('dob')->nullable();

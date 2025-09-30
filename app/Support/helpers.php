@@ -28,3 +28,9 @@ if (! function_exists('esc')) {
         return e($value ?? '');
     }
 }
+if (! function_exists('transColumn')) {
+    function transColumn(string $base, ?string $locale = null): string {
+        $locale = $locale ?? app()->getLocale();
+        return $base.'_'.$locale;
+    }
+}

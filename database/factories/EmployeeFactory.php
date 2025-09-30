@@ -19,8 +19,6 @@ class EmployeeFactory extends Factory
             'username' => $this->faker->userName,
             'actual_dob' => $this->faker->date('Y-m-d', '-20 years'),
             'years_of_service' => $this->faker->randomFloat(1, 0, 8),
-            'direct_manager_id' => null, // you can link later
-            'tech_manager_id' => null,   // you can link later
             'national_number' => $this->faker->unique()->numerify('###########'),
             'dob' => $this->faker->date('Y-m-d', '-20 years'),
             'civil_registry_office' => $this->faker->city,

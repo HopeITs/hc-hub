@@ -37,9 +37,9 @@ class CentersTable extends LivewireTable
         $locale = app()->getLocale();
 
         return City::query()
-            ->orderBy("name->$locale")
-            ->get(['id', 'name'])
-            ->mapWithKeys(fn($c) => [$c->id => $c->getTranslation('name', $locale)])
+            ->orderBy(transColumn('name'))
+            ->get(['id', transColumn( 'name')])
+            ->mapWithKeys(fn($c) => [$c->id => $c->name])
             ->all();
     }
 
@@ -55,13 +55,13 @@ class CentersTable extends LivewireTable
                 ->searchable(),
 
             SelectColumn::make(__('general.center-city'), 'city_id')
-                ->displayUsing(fn($v, Model $m) => optional($m->city)?->getTranslation('name', $locale) ?? '—'
+                ->displayUsing(fn($v, Model $m) => optional($m->city)?->name ?? '—'
                 )
                 ->options($this->cityOptions())
                 ->sortable(),
 
             Column::make(__('general.address'))
-                ->displayUsing(fn($v, Model $m) => $m->getTranslation('address', $locale) ?: '—'
+                ->displayUsing(fn($v, Model $m) => $m->address ?: '—'
                 ),
 
             BooleanColumn::make(__('general.is-active'), 'is_active'),

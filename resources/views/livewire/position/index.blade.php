@@ -12,7 +12,7 @@
             :crumbs="array_filter([
                 ['label' => __('general.programs-management')],
                 ['label' => __('general.positions'), 'route' => route('positions.index')],
-                $center ? ['label' => $center->name . ' (' . $center->city?->getTranslation('name', app()->getLocale()) . ')'] : null,
+                $center ? ['label' => $center->name . ' (' . $center->city?->name . ')'] : null,
             ])"
             :showButton="true"
         />

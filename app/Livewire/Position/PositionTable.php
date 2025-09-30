@@ -47,12 +47,12 @@ class PositionTable extends LivewireTable
     protected function columns(): array
     {
         return [
-            Column::make(__('Title'), 'title')->sortable()->searchable(),
+            Column::make(__('Title'), 'title_en')->sortable()->searchable(),
             Column::make(__('Title') . ' (AR)', 'title_ar')->sortable()->searchable(),
 
             SelectColumn::make(trans_choice('general.city', 1), 'city_id')
                 ->displayUsing(fn($v, Model $m) => $m->city->name ?? '-')
-                ->options(City::pluck('name', 'id')->toArray())
+                ->options(City::pluck(transColumn('name'), 'id')->toArray())
                 ->sortable(),
 
             SelectColumn::make(trans_choice('general.program', 1), 'program_id')
@@ -72,7 +72,7 @@ class PositionTable extends LivewireTable
 
             SelectColumn::make(trans_choice('general.job-level', 1), 'job_level_id')
                 ->displayUsing(fn($v, Model $m) => $m->jobLevel->name ?? '-')
-                ->options(JobLevel::pluck('name', 'id')->toArray())
+                ->options(JobLevel::pluck(transColumn('name'), 'id')->toArray())
                 ->sortable(),
 
             BooleanColumn::make(__('general.is-active'), 'is_active'),
@@ -104,7 +104,7 @@ class PositionTable extends LivewireTable
     {
         return [
             SelectFilter::make(trans_choice('general.city', 1), 'city_id')
-                ->options(City::pluck('name', 'id')->toArray()),
+                ->options(City::pluck(transColumn('name'), 'id')->toArray()),
 
             SelectFilter::make(trans_choice('general.program', 1), 'program_id')
                 ->options(Program::pluck('name', 'id')->toArray()),
@@ -116,7 +116,7 @@ class PositionTable extends LivewireTable
                 ->options(Department::pluck('name', 'id')->toArray()),
 
             SelectFilter::make(trans_choice('general.job-level', 1), 'job_level_id')
-                ->options(JobLevel::pluck('name', 'id')->toArray()),
+                ->options(JobLevel::pluck(transColumn('name'), 'id')->toArray()),
         ];
     }
 

@@ -49,13 +49,13 @@ class DefaultDeliverablesModule extends Component
         $locale = app()->getLocale();
 
         // Dropdowns for the modal
-        $employees = Employee::orderBy("name->$locale")
-            ->get(['id','name'])
-            ->mapWithKeys(fn ($e) => [$e->id => $e->getTranslation('name', $locale)]);
+        $employees = Employee::orderBy(transColumn('name'))
+            ->get(['id',transColumn('name')])
+            ->mapWithKeys(fn ($e) => [$e->id => $e->name]);
 
         $cities = City::whereHas('centers')
-            ->orderBy("name->$locale")
-            ->get(['id','name']);
+            ->orderBy(transColumn('name'))
+            ->get(['id',transColumn('name')]);
 
         $checklistItems = ChecklistItem::orderBy('order')->get(['id','name']);
 

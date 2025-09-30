@@ -48,8 +48,8 @@ class ContractTypeModule extends Component
         $this->modalTitle = __('general.edit');
         $this->item = [
             'id' => $model->id,
-            'name' => $model->getTranslations('name'),
-            'place' => $model->place,
+            'name_ar' => $model->name_ar,
+            'name_en' => $model->name_en,
             'type' => $model->type,
         ];
 

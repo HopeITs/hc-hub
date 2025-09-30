@@ -21,8 +21,8 @@
             <div wire:key="emp-name-{{ $locale }}">
                 <x-forms.input-label for="name_{{ $locale }}">@lang('general.name') ({{ strtoupper($locale) }})
                 </x-forms.input-label>
-                <x-forms.input type="text" wire:model="infoForm.name.{{ $locale }}" id="name_{{ $locale }}"/>
-                <x-error-span>{{ $errors->first('infoForm.name.' . $locale) }}</x-error-span>
+                <x-forms.input type="text" wire:model="infoForm.name_{{ $locale }}" id="name_{{ $locale }}"/>
+                <x-error-span>{{ $errors->first('infoForm.name_.' . $locale) }}</x-error-span>
 
             </div>
         @endforeach
@@ -67,8 +67,8 @@
                 <x-forms.input-label for="address_{{ $locale }}">@lang('general.address') ({{ strtoupper($locale) }}
                     )
                 </x-forms.input-label>
-                <x-forms.input type="text" wire:model="infoForm.address.{{ $locale }}" id="address_{{ $locale }}"/>
-                <x-error-span>{{ $errors->first('infoForm.address.' . $locale) }}</x-error-span>
+                <x-forms.input type="text" wire:model="infoForm.address_{{ $locale }}" id="address_{{ $locale }}"/>
+                <x-error-span>{{ $errors->first('infoForm.address_' . $locale) }}</x-error-span>
             </div>
         @endforeach
     </div>
@@ -81,9 +81,9 @@
                 <x-forms.input-label for="father_name_{{ $locale }}">@lang('general.father_name')
                     ({{ strtoupper($locale) }})
                 </x-forms.input-label>
-                <x-forms.input type="text" wire:model="infoForm.father_name.{{ $locale }}"
+                <x-forms.input type="text" wire:model="infoForm.father_name_{{ $locale }}"
                                id="father_name_{{ $locale }}"/>
-                <x-error-span>{{ $errors->first('infoForm.father_name.' . $locale) }}</x-error-span>
+                <x-error-span>{{ $errors->first('infoForm.father_name_' . $locale) }}</x-error-span>
             </div>
         @endforeach
 
@@ -92,9 +92,9 @@
                 <x-forms.input-label for="mother_name_{{ $locale }}">@lang('general.mother_name')
                     ({{ strtoupper($locale) }})
                 </x-forms.input-label>
-                <x-forms.input type="text" wire:model="infoForm.mother_name.{{ $locale }}"
+                <x-forms.input type="text" wire:model="infoForm.mother_name_{{ $locale }}"
                                id="mother_name_{{ $locale }}"/>
-                <x-error-span>{{ $errors->first('infoForm.mother_name.' . $locale) }}</x-error-span>
+                <x-error-span>{{ $errors->first('infoForm.mother_name_' . $locale) }}</x-error-span>
             </div>
         @endforeach
         <div wire:key="emp-dob">

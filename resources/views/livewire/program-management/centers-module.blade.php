@@ -32,7 +32,7 @@
                     <x-forms.select-input id="city_id" wire:model="item.city_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach($cities as $city)
-                            <option value="{{ $city->id }}">{{ $city->getTranslation('name', $locale) }}</option>
+                            <option value="{{ $city->id }}">{{ $city->name }}</option>
                         @endforeach
                     </x-forms.select-input>
                     <x-error-span>{{ $errors->first('item.city_id') }}</x-error-span>
