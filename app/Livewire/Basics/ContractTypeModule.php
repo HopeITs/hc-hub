@@ -27,8 +27,8 @@ class ContractTypeModule extends Component
     {
         return [
 
-            'item.name.ar' => 'required|string',
-            'item.name.en' => 'required|string',
+            'item.name_ar' => 'required|string',
+            'item.name_en' => 'required|string',
             'item.place' => 'required|integer',
             'item.type' => 'required|integer',
         ];
@@ -38,6 +38,7 @@ class ContractTypeModule extends Component
     public function create()
     {
         $this->showModal = true;
+        $this->item = [];
         $this->modalTitle = __('general.add-new');
     }
 
@@ -80,12 +81,14 @@ class ContractTypeModule extends Component
             ContractType::findOrFail($this->item['id'])->update([
                 'type' => $this->item['type'],
                 'place' => $this->item['place'],
-                'name' => $this->item['name'],
+                'name_ar' => $this->item['name_ar'],
+                'name_en' => $this->item['name_en'],
             ]);
         } else {
             ContractType::create([
                 'type' => $this->item['type'],
-                'name' => $this->item['name'],
+                'name_ar' => $this->item['name_ar'],
+                'name_en' => $this->item['name_en'],
                 'place' => $this->item['place'],
             ]);
 
