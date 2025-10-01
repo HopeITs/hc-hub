@@ -51,6 +51,7 @@ class ContractTypeModule extends Component
             'id' => $model->id,
             'name_ar' => $model->name_ar,
             'name_en' => $model->name_en,
+            'place' => $model->place,
             'type' => $model->type,
         ];
 
@@ -120,30 +121,28 @@ class ContractTypeModule extends Component
 
     public function render()
     {
-        $locale = app()->getLocale();
+
+
         $sort   = $this->sortField ?: 'id';
         $dir    = $this->sortDirection ?: 'asc';
 
         $query = ContractType::query()
-            ->when($this->search, function ($q) use ($locale) {
+            ->when($this->search, function ($q)  {
                 $term = $this->search;
 
-                $q->where(function ($w) use ($term, $locale) {
+                $q->where(function ($w) use ($term) {
                     // Search in translated name
-                    $w->search(["name->$locale"], $term)
-                        // Search numeric or text values in place/type if needed
-                        ->orWhere('place', 'like', "%{$term}%")
-                        ->orWhere('type', 'like', "%{$term}%");
+                    $w->search(["name_ar" , "name_en" , "place" , "type"], $term);
                 });
             });
 
         // Sorting logic
         switch ($sort) {
             case 'name_ar':
-                $query->orderBy("name->ar", $dir);
+                $query->orderBy("name_ar", $dir);
                 break;
             case 'name_en':
-                $query->orderBy("name->en", $dir);
+                $query->orderBy("name_en", $dir);
                 break;
             case 'place':
             case 'type':
