@@ -7,15 +7,22 @@
     $L = fn (string $t) => '<span class="h-label">'.$t.'</span>';
     $p = fn (string $t) => '<div>'.$t.'</div>';
 
-    $asList = fn (array $lines, string $lang = 'en') =>
-        '<ul style="margin:0; padding-left:14px; list-style:none;">'
-        . implode('', array_map(function($l) use ($lang) {
-            if ($lang === 'ar') {
-                return '<li style="direction:rtl; text-align:right;">'.$l.'-</li>';
-            }
-            return '<li>'.$l.'-</li>';
-        }, $lines))
-        . '</ul>';
+   $asList = fn (array $lines, string $lang = 'en') =>
+    '<ul style="margin:0; padding-left:0; padding-right:0; list-style:none;">'
+    . implode('', array_map(function($l) use ($lang) {
+        if ($lang === 'ar') {
+            return '<li style="direction:rtl; text-align:right; position:relative; padding-right:12px;">'
+                 . '<span style="position:absolute; right:0;">-</span>'
+                 . $l
+                 . '</li>';
+        }
+        return '<li style="position:relative; padding-left:12px;">'
+             . '<span style="position:absolute; left:0;">-</span>'
+             . $l
+             . '</li>';
+    }, $lines))
+    . '</ul>';
+
 
     $EN_REASONS = [
         'Project expiration.',
@@ -39,12 +46,12 @@
         'The volunteer will notify Hope Center Aleppo / Head office of his/her wish to end the volunteering one month in advance.',
     ];
     $AR_NOTICES = [
-        $Glyphs('يُعلم الفريق الأول المتطوع خطياً بإنهاء العقد أو تمديده قبل مدة شهر.'),
-        $Glyphs('يُعلم المتطوع الفريق الأول برغبته بإنهاء التطوع قبل مدة شهر.'),
+        $Glyphs('يلتزم الفريق الأول عند رغبته بالتمديد أو عدمه بأن  <br> يُبلّغ المتطوّع بذلك بشكل خطي قبل مدة شهر.'),
+        $Glyphs(__('general.text31')),
     ];
 
     $EN_RETURN = 'The volunteer is committed to deliver to “Christian Hope Center” all equipment, materials, and documents received upon termination or expiration of this contract, based on the volunteer’s personal receipt list (updated periodically).';
-    $AR_RETURN = $Glyphs('يلتزم الفريق الثاني (المتطوع) عند انتهاء أو إنهاء العقد بتسليم جميع العهد والأدوات والمستندات التي استلمها إلى مركز الرجاء المسيحي، وذلك استنادًا لقائمة الاستلام الشخصية لكل متطوع والتي يتم تحديثها دوريًا.');
+    $AR_RETURN = $Glyphs(__('general.text32'));
 @endphp
 
 <div class="avoid-break mt-2" style="line-height: 0.8">
@@ -67,7 +74,7 @@
 
 <div class="avoid-break mt-6" style="line-height: 0.8">
     <x-contract.dual
-        :en="$L('Duties and obligations on extension, expiration, or termination:')"
+        :en="$L('Duties and obligations on extension, expiration, or termination of the agreement:')"
         :ar="$L($Glyphs('الواجبات والالتزامات عند التمديد أو الانتهاء أو إنهاء العقد:'))"
     />
     <x-contract.dual rowClass="mt-2"
