@@ -121,15 +121,15 @@ class ContractTypeModule extends Component
 
     public function render()
     {
-        $locale = app()->getLocale();
+
         $sort   = $this->sortField ?: 'id';
         $dir    = $this->sortDirection ?: 'asc';
 
         $query = ContractType::query()
-            ->when($this->search, function ($q) use ($locale) {
+            ->when($this->search, function ($q){
                 $term = $this->search;
 
-                $q->where(function ($w) use ($term, $locale) {
+                $q->where(function ($w) use ($term) {
                     // Search in translated name
                     $w->search(["name_ar","name_en" , "place" , "type"], $term);
                 });
