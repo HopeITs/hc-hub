@@ -94,19 +94,18 @@
 
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-2 space-x-2 space-y-4">
-                <div class="col-span-1">
-                    <x-forms.input-label for="name_ar">@lang('general.name')(AR)</x-forms.input-label>
-                    <x-forms.input type="text" id="name_ar" wire:model="item.name_ar"/>
-                    <x-error-span>{{$errors->first('item.name_ar')}}</x-error-span>
-                </div>
-                <div class="col-span-1">
-                    <x-forms.input-label for="name_en">@lang('general.name')(EN)</x-forms.input-label>
-                    <x-forms.input type="text" id="name_en" wire:model="item.name_en"/>
-                    <x-error-span>{{$errors->first('item.name_en')}}</x-error-span>
-                </div>
+                @foreach(config('app.supported_locales') as $locale)
+                    <div class="col-span-1">
+                        <x-forms.input-label for="name_{{ $locale }}">@lang('general.name')({{ strtoupper($locale) }})
+                        </x-forms.input-label>
+                        <x-forms.input type="text" id="name_{{ $locale }}"
+                                       wire:model="item.name_{{ $locale }}"/>
+                        <x-error-span>{{$errors->first('item.name_'.$locale)}}</x-error-span>
+                    </div>
+                @endforeach
                 <div>
-                    <x-forms.input-label >@lang('general.type')</x-forms.input-label>
-                    <div class="flex space-x-2" id="type">
+                    <x-forms.input-label for="type_{{ $locale }}">@lang('general.type')</x-forms.input-label>
+                    <div class="flex space-x-2">
                         <x-forms.radio-input id="full" name="type" value="{{ContractType::FullTime}}"
                                              wire:model="item.type">{{ContractType::getLocalizedName(ContractType::FullTime)['value']}}</x-forms.radio-input>
                         <x-forms.radio-input id="part" name="type" value="{{ContractType::PartTime}}"
@@ -118,11 +117,11 @@
                     <x-error-span>{{$errors->first('item.type')}}</x-error-span>
                 </div>
                 <div>
-                    <x-forms.input-label >@lang('general.place')</x-forms.input-label>
-                    <div class="flex space-x-2" id="place">
-                        <x-forms.radio-input id="onsite" name="place" value="{{  ContractPlace::Onsite}}"
+                    <x-forms.input-label for="place_{{ $locale }}">@lang('general.place')</x-forms.input-label>
+                    <div class="flex space-x-2">
+                        <x-forms.radio-input id="onsite" name="place" value="{{ContractPlace::Onsite}}"
                                              wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Onsite)['value']}}</x-forms.radio-input>
-                        <x-forms.radio-input id="online" name="place" value="{{ ( ContractPlace::Online}}"
+                        <x-forms.radio-input id="online" name="place" value="{{ContractPlace::Online}}"
                                              wire:model="item.place">{{ContractPlace::getLocalizedName(ContractPlace::Online)['value']}}</x-forms.radio-input>
 
                     </div>

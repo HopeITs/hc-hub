@@ -18,7 +18,8 @@ class ContractTypeModule extends Component
 
     public $search = '';
     public $item = [
-        'name' => [],
+        'name_ar' => '',
+        'name_en' => '',
         'place' => null,
         'type' => null,
     ];
@@ -38,7 +39,6 @@ class ContractTypeModule extends Component
     public function create()
     {
         $this->showModal = true;
-        $this->item = [];
         $this->modalTitle = __('general.add-new');
     }
 
@@ -121,28 +121,27 @@ class ContractTypeModule extends Component
 
     public function render()
     {
-
-
+        $locale = app()->getLocale();
         $sort   = $this->sortField ?: 'id';
         $dir    = $this->sortDirection ?: 'asc';
 
         $query = ContractType::query()
-            ->when($this->search, function ($q)  {
+            ->when($this->search, function ($q) use ($locale) {
                 $term = $this->search;
 
-                $q->where(function ($w) use ($term) {
+                $q->where(function ($w) use ($term, $locale) {
                     // Search in translated name
-                    $w->search(["name_ar" , "name_en" , "place" , "type"], $term);
+                    $w->search(["name_ar","name_en" , "place" , "type"], $term);
                 });
             });
 
         // Sorting logic
         switch ($sort) {
             case 'name_ar':
-                $query->orderBy("name_ar", $dir);
+                $query->orderBy("name->ar", $dir);
                 break;
             case 'name_en':
-                $query->orderBy("name_en", $dir);
+                $query->orderBy("name->en", $dir);
                 break;
             case 'place':
             case 'type':
