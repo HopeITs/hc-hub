@@ -61,7 +61,9 @@
     $natEn = $NATIONALITY_MAP[$natKey]['en'] ?? ($nationalityRaw ?: '—');
     $natAr = $Glyphs($NATIONALITY_MAP[$natKey]['ar'] ?? ($nationalityRaw ?: '—'));
 
-    $position= $position?->title ?? '—';
+    $positionAR= $position?->title_ar ?? '—';
+    $positionEN= $position?->title ?? '—';
+
 
     $program  = $program?->name ?? '—';
 
@@ -140,7 +142,7 @@
 <div class="avoid-break mt-6">
     <x-contract.dual :en="$L('Preamble:')" :ar="$L($Glyphs('المقدمة:'))"/>
     <x-contract.dual style="margin-top: -3px"
-        :en="'Whereas the Volunteer has stated that he/she possesses the required qualifications for <strong>'.$esc($position).'</strong> (the qualifications are attached to the job description),<br>  and on the basis thereof has offered to volunteer for “'.$esc($program).'” as a <strong>'.$esc($position).'</strong>, starting  from the  signing <br> date of this contract.'"
-        :ar="$Glyphs(__('general.text10', ['position' => $position, 'program' => $program]))"
+        :en="'Whereas the Volunteer has stated that he/she possesses the required qualifications for <strong>'.$esc($positionEN).'</strong> (the qualifications are attached to the job description),<br>  and on the basis thereof has offered to volunteer for “'.$esc($program).'” as a <strong>'.$esc($positionEN).'</strong>, starting  from the  signing <br> date of this contract.'"
+        :ar="$Glyphs(__('general.text10', ['position' => $positionAR, 'program' => $program]))"
     />
 </div>
