@@ -11,12 +11,26 @@
     $emp = $contract->employee;
 
     $nameEn = $emp?->getTranslation('name', 'en') ?? $emp?->getTranslation('name', $loc) ?? $emp?->name ?? '—';
-    $nameAr = $Glyphs($emp?->getTranslation('name', 'ar') ?? $emp?->getTranslation('name', $loc) ?? $emp?->name ?? '—');
-
+    $nameAr = $emp?->getTranslation('name', 'ar')
+    ?? $emp?->getTranslation('name', $loc)
+    ?? $emp?->name
+    ?? '—';
     $esc   = fn ($v) => e($v === '' || $v === null ? '—' : $v);
     $escAr = fn ($v) => e($v === '' || $v === null ? '—' : $Glyphs($v));
 @endphp
+<style>
+    .party-container {
+        display: flex;
+        gap: 2rem;
+        width: 100%;
+        margin-top: 2rem;
+    }
 
+    .party-card {
+        flex: 1;
+        padding: 1rem;
+    }
+</style>
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-2"
                      :en="$L('Important note:')"
@@ -42,40 +56,42 @@
     />
 </div>
 
-<div class="avoid-break mt-10">
-    <div style="display:flex; justify-content:space-between; width:100%;">
-
-        <!-- Second Party (left column) -->
-        <div style="flex:1; text-align:left; padding-left:20px;">
-            <div style="font-weight:bold; color:#b00;">
-                Second Party<br>{{ $Glyphs('الفريق الثاني') }}
-            </div>
-            <div>
-                Name and Signature<br>{{ $Glyphs('الاسم والتوقيع') }}
-            </div>
-            <div>
-                {{ $esc($nameEn) }}<br>{{ $escAr($nameAr) }}
-            </div>
-        </div>
-
-        <!-- First Party (right column) -->
-        <div style="flex:1; text-align:right; padding-right:20px;">
-            <div style="font-weight:bold; color:#b00;">
-                First Party<br>{{ $Glyphs('الفريق الأول') }}
-            </div>
-            <div>
-                Name and Signature<br>{{ $Glyphs('الاسم والتوقيع') }}
-            </div>
-            <div>
-                Fredy Youssef<br>{{ $Glyphs('فريدي يوسف') }}
-            </div>
-        </div>
-
+<div style="position: absolute; left: 0; text-align: center; width: 50%;margin-top: 35px;">
+    <div style="font-weight:bold; color:#b00; margin-bottom:12px;">
+        Second Party/{{ $Glyphs('الفريق الثاني') }}
+    </div>
+    <div style="margin-bottom:6px;">
+        Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
+    </div>
+    <div>
+        {{ $esc($nameEn) }}/{{ $escAr($nameAr) }}
     </div>
 </div>
 
-<div class="avoid-break mt-8" style="text-align:center;">
-    Date<br>{{ $Glyphs('التاريخ') }}
+<!-- First Party -->
+<div style="position: absolute; right: 0; text-align: center;width: 50%;margin-top: 35px;">
+    <div style="font-weight:bold; color:#b00; margin-bottom:12px;">
+        First Party/{{ $Glyphs('الفريق الأول') }}
+    </div>
+    <div style="margin-bottom:6px;">
+        Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
+    </div>
+    <div>
+        Fredy Youssef/{{ $Glyphs('فريدي يوسف') }}
+    </div>
 </div>
+
+<!-- Date centered -->
+<div class="avoid-break" style="text-align:right; position: absolute; bottom:35%; right:160px">
+    <div style="margin-bottom:6px;">
+        Date/{{ $Glyphs('التاريخ') }}
+    </div>
+</div>
+
+
+
+
+
+
 
 

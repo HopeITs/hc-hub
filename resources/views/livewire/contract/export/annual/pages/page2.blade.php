@@ -120,9 +120,7 @@
     />
     <x-contract.dual
                      :en="'Christian Hope Center is to give a monthly stipend of / '.$salaryFormattedEn.' USD / or its equivalent in Syrian pounds, to be paid in cash to the volunteer at the end of each month.'"
-                     :ar="$Glyphs('يمنح مركز الرجاء المسيحي مكافأة شهرية مقدارها / ')
-         .$wrapLtr($salaryFormattedEn)
-         .$Glyphs(' / دولار أمريكي أو ما يعادلها بالليرة السورية، تمنح نقداً للمتطوع في نهاية كل شهر.')"
+                     :ar="$Glyphs(__('general.text35', ['salary' => $wrapLtr($salaryFormattedEn)]))"
     />
 
 </div>
