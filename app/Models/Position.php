@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslation;
 use Illuminate\Console\Prohibitable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Position extends Model
 {
-    use HasFactory;
+    use HasFactory , HasTranslation;
 
     protected $guarded = ['id'];
 
@@ -21,7 +23,13 @@ class Position extends Model
         'exist_emp' => 'integer',
         'is_active' => 'boolean',
     ];
-
+    protected function title(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getTranslatableAttribute('title'),
+            set: fn($value) => $this->setTranslatableAttribute('title', $value)
+        );
+    }
     public function contracts(): HasMany
     {
         return $this->hasMany(Contract::class, 'position_id');
