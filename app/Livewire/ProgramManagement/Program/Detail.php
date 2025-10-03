@@ -47,17 +47,7 @@ class Detail extends Component
     {
         $program = $this->form->program;
 
-        $employees = Employee::query()
-            ->select('employees.*')
-            ->involvedInProgram($program->id)
-            ->distinct()
-            ->with([
-                'contracts' => function ($q) use ($program) {
-                    $q->whereHas('position.center', fn($qq) => $qq->where('program_id', $program->id))
-                        ->with('position.center');
-                },
-            ])
-            ->paginate(15);
+        $employees = $program->employees()->paginate(15);
 
         return view('livewire.program-management.program.detail', compact('program', 'employees'));
     }

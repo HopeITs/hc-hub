@@ -95,9 +95,9 @@ class Index extends Component
             ->paginate($this->perPage);
 
         $items->each(function ($item) {
-            $programManager = $item->contracts->first();
+            $programManager = $item->manager();
             if ($programManager) {
-                $item->program_manager_name = $programManager->employee->name;
+                $item->program_manager_name = $programManager->name;
             }
         });
 

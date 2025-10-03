@@ -20,8 +20,8 @@
             <div wire:key="title">
                 <x-forms.input-label for="title">@lang('general.title') (EN)
                 </x-forms.input-label>
-                <x-forms.input type="text" wire:model="form.title" id="title"/>
-                <x-error-span>{{ $errors->first('form.title') }}</x-error-span>
+                <x-forms.input type="text" wire:model="form.title_en" id="title"/>
+                <x-error-span>{{ $errors->first('form.title_en') }}</x-error-span>
             </div>
 
             <div wire:key="title-ar">
