@@ -4,7 +4,7 @@
     <div class="flex flex-col h-full justify-between">
         <div class="h-full px-3 pb-4 bg-white overflow-y-auto">
             <a href="{{ route('home') }}" class="flex justify-center items-center mt-4 mb-8">
-                <x-app-logo class="md:w-40 md:h-16"/>
+                <x-app-logo class="md:w-[11rem] md:h-auto object-fit"/>
             </a>
 
             <ul class="space-y-2 font-medium">
