@@ -53,7 +53,7 @@
     $L = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 @endphp
 
-<div class="text-center ">
+<div class="text-center text-primary mb-6 ">
     <h2 class="text-[18px] font-bold">عقد اتفاق تجريبي</h2>
 </div>
 
@@ -70,7 +70,7 @@
     />
 </div>
 
-<div class="avoid-break mt-4" style="line-height: 1.3" >
+<div class="avoid-break mt-3" style="line-height: 1.3" >
     <x-contract.dual rowClass="fw-bold" :en="'Between'" :ar="$Glyphs('بين')"/>
     <x-contract.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))"/>
     <x-contract.dual
@@ -84,7 +84,7 @@
         :ar="$Glyphs('المشار إليه في هذا العقد بـ “<strong>مركز الرجاء المسيحي – حلب - الإدارة العامة</strong>”')"/>
 </div>
 
-<div class="avoid-break mt-4" style="line-height: 1.2" >
+<div class="avoid-break mt-3" style="line-height: 1.2" >
     <x-contract.dual rowClass="mt-3 fw-bold" :en="'And'" :ar="$Glyphs('و')"/>
     <x-contract.dual rowClass="mt-1" :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))"/>
     <x-contract.dual :en="'<strong>Ms./Mrs.</strong> '.$esc($nameEn)"
