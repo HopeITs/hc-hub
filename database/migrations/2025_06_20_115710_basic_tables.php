@@ -114,7 +114,6 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('actual_job')->nullable();
             $table->double('years_of_service')->nullable();
-
             $table->char('national_number')->unique()->nullable();
             $table->dateTime('actual_dob')->nullable();
             $table->dateTime('dob')->nullable();

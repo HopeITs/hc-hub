@@ -15,44 +15,50 @@ class UserRoleSeeder extends Seeder
         $this->createUserWithRole(
             email: 'superadmin@mail.com',
             password: 'password',
-            roleName: 'Super Admin'
+            roleName: 'Super Admin',
+            employee_id: 1
         );
 
         $this->createUserWithRole(
             email: 'generaladmin@mail.com',
             password: 'password',
-            roleName: 'General Manager'
+            roleName: 'General Manager',
+            employee_id: 2
         );
 
         $this->createUserWithRole(
             email: 'hrmanager@mail.com',
             password: 'password',
-            roleName: 'HR-SYR'
+            roleName: 'HR-SYR',
+            employee_id: 3
         );
 
         $this->createUserWithRole(
             email: 'hr@mail.com',
             password: 'password',
-            roleName: 'HR-ALP'
+            roleName: 'HR-ALP',
+            employee_id: 4
         );
 
         $this->createUserWithRole(
             email: 'manager@mail.com',
             password: 'password',
-            roleName: 'Manager'
+            roleName: 'Manager',
+            employee_id: 5
         );
 
         $this->createUserWithRole(
             email: 'employee@mail.com',
             password: 'password',
-            roleName: 'Employee'
+            roleName: 'Employee',
+            employee_id: 6
         );
     }
 
-    private function createUserWithRole(string $email, string $password, string $roleName): void
+    private function createUserWithRole(string $email, string $password, string $roleName , $employee_id): void
     {
         $user = User::create([
-            'employee_id' => Employee::factory()->create()->id,
+            'employee_id' => $employee_id,
             'email' => $email,
             'password' => Hash::make($password),
         ]);
