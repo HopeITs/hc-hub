@@ -55,9 +55,7 @@ class ContractDetails extends Component
 
         // 🔒 Guard employee name translation (no crash if employee null or no translation)
         $locale       = app()->getLocale();
-        $employeeName = $contract->employee?->getTranslation('name', $locale)
-            ?? $contract->employee?->name
-            ?? __('general.na');
+        $employeeName = $contract->employee?->name ?? __('general.na');
 
         $this->crumbs = [
             ['label' => trans_choice('general.employee_management', 2)],
