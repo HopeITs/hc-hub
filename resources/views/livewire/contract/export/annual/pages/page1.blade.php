@@ -12,34 +12,23 @@
     $program  = $position?->program;
 
     // English fields
-    $nameEn = $emp?->getTranslation('name', 'en')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—';
+     $nameEn = $emp?->name_en ?? '—';
+      $nameAr = $emp?->name_ar ?? '—';
 
-    $cityEn = $emp?->city?->getTranslation('name', 'en')
-        ?? $emp?->city?->name
-        ?? $emp?->place_of_birth ?? '';
+    $cityEn = $emp?->city?->name_en
+          ?? $emp?->city?->name
+          ?? $emp?->place_of_birth ?? '';
 
-    $addressEn = $emp?->getTranslation('address', 'en')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null)
-            ? ($emp->address['en'] ?? reset($emp->address) ?? '')
-            : ($emp->address ?? '') );
+      $cityAr = $emp?->city?->name_ar
+          ?? $emp?->city?->name
+          ?? $emp?->place_of_birth ?? '';
 
-    // Arabic fields
-    $nameAr = $Glyphs($emp?->getTranslation('name', 'ar')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—');
+    $addressEn = $emp?->address_en
+          ?? (is_array($emp?->address ?? null) ? ($emp->address['en'] ?? reset($emp->address) ?? '') : ($emp->address ?? ''));
 
-    $cityAr = $Glyphs($emp?->city?->getTranslation('name', 'ar')
-        ?? $emp?->city?->name
-        ?? $emp?->place_of_birth ?? '');
+      $addressAr = $emp?->address_ar
+          ?? (is_array($emp?->address ?? null) ? ($emp->address['ar'] ?? reset($emp->address) ?? '') : ($emp->address ?? ''));
 
-    $addressAr = $Glyphs($emp?->getTranslation('address', 'ar')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null)
-            ? ($emp->address['ar'] ?? reset($emp->address) ?? '')
-            : ($emp->address ?? '') ));
 
     // DOB
     $dob = $emp?->dob;
@@ -92,16 +81,16 @@
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))"/>
     <x-contract.dual
-        :en="'Christian Hope Center - Aleppo / Head office <br><strong> represented in this Contract by Mr. Fredy Youssef</strong> <br><br>'"
-        :ar="$Glyphs(__('general.text1'))"
+            :en="'Christian Hope Center - Aleppo / Head office <br><strong> represented in this Contract by Mr. Fredy Youssef</strong> <br><br>'"
+            :ar="$Glyphs(__('general.text1'))"
     />
     <x-contract.dual
-        :en="'Mr. Fredy Youssef is delegated by the <br>Latin church  in Syria to manage The Christian<br> Hope Center  and all affiliated programs.'"
-        :ar="$Glyphs(__('general.text2'))"
+            :en="'Mr. Fredy Youssef is delegated by the <br>Latin church  in Syria to manage The Christian<br> Hope Center  and all affiliated programs.'"
+            :ar="$Glyphs(__('general.text2'))"
     />
     <x-contract.dual
-        :en="'Hereinafter referred to as “<strong>Christian Hope <br>  Center - Aleppo - Head Office</strong>”'"
-        :ar="$Glyphs(__('general.text3'))"
+            :en="'Hereinafter referred to as “<strong>Christian Hope <br>  Center - Aleppo - Head Office</strong>”'"
+            :ar="$Glyphs(__('general.text3'))"
     />
 </div>
 
@@ -111,29 +100,29 @@
     <x-contract.dual rowClass="mt-1" :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))"/>
 
     <x-contract.dual
-        :en="'<strong>Ms./Mrs.</strong> '.$esc($nameEn)"
-        :ar="$esc($nameAr).' '.$Glyphs(__('general.text4'))"/>
+            :en="'<strong>Ms./Mrs.</strong> '.$esc($nameEn)"
+            :ar="$esc($nameAr).' '.$Glyphs(__('general.text4'))"/>
     <x-contract.dual
-        :en="'<strong>Date and Place of Birth:</strong> '.$esc($pobEn).' — '.$esc($dobStr)"
-        :ar="$esc($dobStrAr).' — '.$esc($pobAr).$Glyphs(__('general.text5'))"/>
+            :en="'<strong>Date and Place of Birth:</strong> '.$esc($pobEn).' — '.$esc($dobStr)"
+            :ar="$esc($dobStrAr).' — '.$esc($pobAr).$Glyphs(__('general.text5'))"/>
     <x-contract.dual
-        :en="'<strong>National ID number:</strong> '.$esc($nationalId)"
-        :ar="$esc(ar_digits($nationalId ?? '')).' '.$Glyphs(__('general.text6'))"/>
+            :en="'<strong>National ID number:</strong> '.$esc($nationalId)"
+            :ar="$esc(ar_digits($nationalId ?? '')).' '.$Glyphs(__('general.text6'))"/>
     <x-contract.dual
-        :en="'<strong>Nationality:</strong> '.$esc($natEn)"
-        :ar="$esc($natAr).' '.$Glyphs(__('general.text7'))"/>
+            :en="'<strong>Nationality:</strong> '.$esc($natEn)"
+            :ar="$esc($natAr).' '.$Glyphs(__('general.text7'))"/>
     <x-contract.dual
-        :en="'<strong>Address:</strong> '.$esc($addressEn)"
-        :ar="$esc($addressAr).' '.$Glyphs(__('general.text8'))"/>
+            :en="'<strong>Address:</strong> '.$esc($addressEn)"
+            :ar="$esc($addressAr).' '.$Glyphs(__('general.text8'))"/>
     <x-contract.dual
-        :en="'Hereinafter referred to as “<strong>Volunteer</strong>”'"
-        :ar="$Glyphs(__('general.text10', ['position' => $position, 'program' => $program]))"
+            :en="'Hereinafter referred to as “<strong>Volunteer</strong>”'"
+            :ar="$Glyphs(__('general.text10', ['position' => $position, 'program' => $program]))"
 </div>
 
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-4" :en="$L('Preamble:')" :ar="$L($Glyphs('المقدمة:'))"/>
     <x-contract.dual
-        :en="'Whereas the Volunteer has stated that he/she possesses the required qualifications for <strong>'.$esc($position).'</strong> (the qualifications are attached to the job description), and on the basis thereof has offered to volunteer for “'.$esc($program).'” as a <strong>'.$esc($position).'</strong>, starting from the signing date of this contract.'"
-        :ar="$Glyphs(__('general.text10', ['position' => $position, 'program' => $program]))"
+            :en="'Whereas the Volunteer has stated that he/she possesses the required qualifications for <strong>'.$esc($position).'</strong> (the qualifications are attached to the job description), and on the basis thereof has offered to volunteer for “'.$esc($program).'” as a <strong>'.$esc($position).'</strong>, starting from the signing date of this contract.'"
+            :ar="$Glyphs(__('general.text10', ['position' => $position, 'program' => $program]))"
     />
 </div>
