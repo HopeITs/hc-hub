@@ -1,68 +1,74 @@
 @php
-    $empNameEn = $contract->employee?->getTranslation('name', 'en')
-        ?? $contract->employee?->name ?? '—';
-    $empNameAr = $contract->employee?->getTranslation('name', 'ar')
-        ?? $contract->employee?->name ?? '—';
+    use App\Support\ArabicText as AR;
 
-    $EN_FOURTH_TERM_LABEL = '<span class="h-label">Fourth term:</span>';
-    $AR_FOURTH_TERM_LABEL = '<span class="h-label">البند الرابع:</span>';
+    $forPdf  = $forPdf ?? false;
+    $Glyphs  = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+    $Digits  = fn ($s) => $forPdf ? ar_digits((string)$s) : (string)$s;
+    $L       = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 
-    $EN_FOURTH_3 = 'The first party has the right to terminate this contract at any time before its expiry date in case the second party violates the terms of this contract and the volunteering code of conduct; in this case, all due amounts must be paid to the second party up to the termination date.';
-    $AR_FOURTH_3 = 'يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل تاريخ انتهائه في حال خالف الطرف الثاني بنود هذا العقد وقواعد السلوك التطوعي؛ وفي هذه الحالة تُدفع للفريق الثاني جميع المبالغ المستحقة له حتى تاريخ الإنهاء.';
+    // Employee name
+    $empNameEn = $contract->employee?->getTranslation('name', 'en') ?? $contract->employee?->name ?? '—';
+    $empNameAr = $contract->employee?->getTranslation('name', 'ar') ?? $contract->employee?->name ?? '—';
 
-    $EN_FIFTH_TERM_LABEL = '<span class="h-label">Fifth term:</span>';
-    $AR_FIFTH_TERM_LABEL = '<span class="h-label">البند الخامس:</span>';
-
-    $EN_FIFTH_TEXT = 'I hereby confirm that I have read and understood the work conditions and all the attached documents and I agree to all of the stated.';
-    $AR_FIFTH_TEXT = 'أقر بأنني قرأت وفهمت شروط العمل المنصوص عليها وكافة المستندات المرفقة وأوافق على كل ما ورد فيها.';
-
-    $EN_NOTE_1 = 'This contract was issued on three pages, printed as a single copy, and has only one version secured in the head office in Aleppo.';
-    $AR_NOTE_1 = 'صدر هذا العقد على ثلاث صفحات، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.';
-
-    $EN_NOTE_2 = 'This contract was issued in Arabic and translated into English.';
-    $AR_NOTE_2 = 'صدر هذا العقد بالنسخة العربية وترجم إلى اللغة الإنكليزية.';
-
-    $LEFT_LABEL  = '<span class="h-label">الفريق الثاني/Second Party</span>';
-    $RIGHT_LABEL = '<span class="h-label">الفريق الأول/First party</span>';
-
-    $LEFT_SIGN   = '<strong>الاسم والتوقيع/Name & Signature</strong><br>'.e($empNameAr).' / '.e($empNameEn);
-    $RIGHT_SIGN  = '<strong>Name & Signature/الاسم والتوقيع</strong><br>Fredy Youssef / فريدي يوسف';
-
-    $LEFT_DATE   = 'التاريخ/date : __________________';
-    $RIGHT_DATE  = 'date/التاريخ : __________________';
+    $esc   = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
+    $escAr = fn ($v) => e((string)($v === '' || $v === null ? '—' : $Glyphs($v)));
 @endphp
 
-<x-contract.dual rowClass="mt-1" :en="$EN_FOURTH_TERM_LABEL" :ar="$AR_FOURTH_TERM_LABEL"/>
+{{-- Fourth term (3) --}}
+<x-contract.dual rowClass="mt-6 mb-6"
+                 :en="'3. The first party has the right to terminate this contract at any time before its expiry date in case the second party violates the terms of this contract and the volunteering code of conduct; in this case, all due amounts must be paid to the second party up to the termination date.'"
+                 :ar="'3. يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل انتهاء مدته  في حال قيام الفريق الثاني بمخالفة بنود هذا العقد والقواعد الأخلاقية للتطوع؛ وعليه في هذه الحالة أن يدفع  للفريق الثاني كافة المبالغ المستحقة له حتى تاريخ الإنهاء.'"
+/>
 
-<div class="dual-row mt-2">
-    <div class="dual-col dual-en">
-        <ol class="list-decimal pl-5 space-y-3" start="3">
-            <li>{!! $EN_FOURTH_3 !!}</li>
-        </ol>
+{{-- Fifth term --}}
+<div class="avoid-break mt-4">
+    <x-contract.dual :en="$L('Fifth term:')" :ar="$L($Glyphs('البند الخامس:'))"/>
+</div>
+
+<x-contract.dual rowClass="mt-6 mb-6"
+                 :en="'I hereby confirm that I have read and understood the work conditions and all the attached documents and I agree to all of the stated.'"
+                 :ar="$Glyphs('أفيد بأنني قرأت وفهمت شروط العمل المنصوص عليها وكافة المستندات المرفقة وأوافق على كل ما ورد.')"
+/>
+
+<x-contract.dual rowClass="mt-2 mb-2"
+                 :en="'This contract was issued on three pages, printed as a single copy, and has only one version secured in the head office in Aleppo.'"
+                 :ar="$Glyphs('صدر هذا العقد على ثلاث صفحات، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.')"
+/>
+
+<x-contract.dual rowClass="mt-2 mb-10"
+                 :en="'This contract was issued in Arabic and translated into English.'"
+                 :ar="$Glyphs('صدر هذا العقد بالنسخة العربية وترجم إلى اللغة الإنكليزية.')"
+/>
+
+<!-- Second Party -->
+<div style="position: absolute; left: 0; text-align: center; width: 50%; margin-top: 35px;">
+    <div style="font-weight:bold; color:#b00; margin-bottom:12px;">
+        Second Party/{{ $Glyphs('الفريق الثاني') }}
     </div>
-    <div class="dual-col dual-ar">
-        <ol class="list-decimal pr-5 space-y-3" start="3" style="direction: rtl; text-align: right;">
-            <li>{!! $AR_FOURTH_3 !!}</li>
-        </ol>
+    <div style="margin-bottom:6px;">
+        Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
+    </div>
+    <div>
+        {{ $esc($empNameEn) }}/{{ $escAr($empNameAr) }}
     </div>
 </div>
 
-<x-contract.dual rowClass="mt-4" :en="$EN_FIFTH_TERM_LABEL" :ar="$AR_FIFTH_TERM_LABEL"/>
-<x-contract.dual :en="$EN_FIFTH_TEXT" :ar="$AR_FIFTH_TEXT"/>
-<x-contract.dual rowClass="mt-2" :en="$EN_NOTE_1" :ar="$AR_NOTE_1"/>
-<x-contract.dual :en="$EN_NOTE_2" :ar="$AR_NOTE_2"/>
-
-<div class="dual-row mt-8 font-semibold">
-    <div class="dual-col dual-en">{!! $LEFT_LABEL !!}</div>
-    <div class="dual-col dual-ar text-right">{!! $RIGHT_LABEL !!}</div>
+<!-- First Party -->
+<div style="position: absolute; right: 0; text-align: center; width: 50%; margin-top: 35px;">
+    <div style="font-weight:bold; color:#b00; margin-bottom:12px;">
+        First Party/{{ $Glyphs('الفريق الأول') }}
+    </div>
+    <div style="margin-bottom:6px;">
+        Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
+    </div>
+    <div>
+        Fredy Youssef/{{ $Glyphs('فريدي يوسف') }}
+    </div>
 </div>
 
-<div class="dual-row mt-2">
-    <div class="dual-col dual-en">{!! $LEFT_SIGN !!}</div>
-    <div class="dual-col dual-ar text-right">{!! $RIGHT_SIGN !!}</div>
-</div>
-
-<div class="dual-row mt-8">
-    <div class="dual-col dual-en">{!! $LEFT_DATE !!}</div>
-    <div class="dual-col dual-ar text-right">{!! $RIGHT_DATE !!}</div>
+<!-- Date -->
+<div class="avoid-break" style="text-align:right; position: absolute; bottom:19%; right:160px;">
+    <div style="margin-bottom:6px;">
+        Date/{{ $Glyphs('التاريخ') }}
+    </div>
 </div>

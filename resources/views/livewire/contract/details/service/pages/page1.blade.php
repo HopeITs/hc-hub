@@ -86,7 +86,7 @@
     $L = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 @endphp
 
-<div class="text-center mb-4">
+<div class="text-center mb-8 text-primary">
     <h2 class="text-[18px] font-bold">عقد اتفاق تطوعي</h2>
 </div>
 

@@ -1,59 +1,62 @@
 @php
-    use Illuminate\Support\Carbon;
+    use Carbon\Carbon;
+    use App\Support\ArabicText as AR;
 
+    $forPdf = $forPdf ?? false;
+
+    $Glyphs = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+    $Digits = fn ($s) => $forPdf ? ar_digits((string)$s) : (string)$s;
+    $L      = fn (string $t) => '<span class="h-label">'.$t.'</span>';
+
+    // Dates
     $start   = $contract->start_date ? Carbon::parse($contract->start_date) : null;
     $end     = $contract->end_date   ? Carbon::parse($contract->end_date)   : null;
 
-    $startEn = $start ? $start->format('d-m-Y') : '—';
-    $endEn   = $end   ? $end->format('d-m-Y')   : '—';
-    $startAr = $start ? $start->format('Y/m/d') : '—';
-    $endAr   = $end   ? $end->format('Y/m/d')   : '—';
+    $startStr   = $start ? $start->format('d-m-Y') : '—';
+    $endStr     = $end   ? $end->format('d-m-Y')   : '—';
+    $startStrAr = $start ? $Digits($start->format('Y/m/d')) : '—';
+    $endStrAr   = $end   ? $Digits($end->format('Y/m/d'))   : '—';
 
-    $EN_FIRST_TERM_LABEL  = '<span class="h-label">First term:</span>';
-    $AR_FIRST_TERM_LABEL  = '<span class="h-label">البند الأول:</span>';
+    $center = $contract->position?->center;
 
-    $EN_SECOND_TERM_LABEL = '<span class="h-label">Second term:</span>';
-    $AR_SECOND_TERM_LABEL = '<span class="h-label">البند الثاني:</span>';
+    $center = $center?->getTranslation('name', 'en')
+        ?? $center?->name
+        ?? '—';
 
-    $EN_THIRD_TERM_LABEL  = '<span class="h-label">Third term:</span>';
-    $AR_THIRD_TERM_LABEL  = '<span class="h-label">البند الثالث:</span>';
-
-    $EN_FIRST_TERM_TEXT = 'The introduction of this contract is considered an indissoluble part of it.';
-    $AR_FIRST_TERM_TEXT = 'تُعتبر مقدمة هذا العقد جزءاً لا يتجزأ من هذا العقد.';
-
-    $EN_SECOND_TERM_TEXT = 'The second party is committed to implementing all volunteering activities agreed on with the first party and all requested programming services.';
-    $AR_SECOND_TERM_TEXT = 'على الفريق الثاني الالتزام بالقيام بكافة الأعمال التطوعية المتفق عليها مع الفريق الأول وجميع الخدمات البرمجية المطلوبة.';
-
-    $EN_THIRD_LI_1 = "The contract is considered valid from {$startEn} until {$endEn} and the first two months are considered a trial period for the second party where the first party is entitled to terminate the contract and not continue with the second party.";
-    $AR_THIRD_LI_1 = "تُعد مدة هذا العقد اعتباراً من {$startAr} وتنتهي في {$endAr} ويُعتبر أول شهرين مدةً تجريبية للفريق الثاني يحق فيها للفريق الأول إنهاء العقد وعدم الاستمرار مع الفريق الثاني.";
-
-    $EN_NO_RENEWAL = 'This contract will not be renewed without a written agreement of both parties, whereas each party shall inform the other of the contract termination one month prior to the end of the contract.';
-    $AR_NO_RENEWAL = 'لا يُجدّد هذا العقد إلا بموافقة خطيّة من الطرفين، على أن يُعلم كل طرف الطرف الآخر بقرار إنهاء العقد قبل انتهاء مدته بشهر واحد.';
-
-    $EN_PLACE = 'Place of Work: Aleppo – Christian Hope Center – Head Office';
-    $AR_PLACE = 'مكان العمل: حلب – مركز الرجاء المسيحي – المكتب الرئيسي';
 @endphp
 
-<x-contract.dual rowClass="mt-1" :en="$EN_FIRST_TERM_LABEL" :ar="$AR_FIRST_TERM_LABEL"/>
-<x-contract.dual :en="$EN_FIRST_TERM_TEXT" :ar="$AR_FIRST_TERM_TEXT"/>
+{{-- First term --}}
+<div class="avoid-break mt-4">
+    <x-contract.dual :en="$L('First term:')" :ar="$L($Glyphs('البند الأول:'))"/>
+</div>
+<x-contract.dual rowClass="mt-2 mb-6"
+                 :en="'The introduction of this contract is considered an indissoluble part of it.'"
+                 :ar="$Glyphs('تُعتبر مقدمة هذا العقد جزءاً لا يتجزأ من هذا العقد.')"/>
 
-<x-contract.dual rowClass="mt-4" :en="$EN_SECOND_TERM_LABEL" :ar="$AR_SECOND_TERM_LABEL"/>
-<x-contract.dual :en="$EN_SECOND_TERM_TEXT" :ar="$AR_SECOND_TERM_TEXT"/>
+{{-- Second term --}}
+<div class="avoid-break mt-4">
+    <x-contract.dual :en="$L('Second term:')" :ar="$L($Glyphs('البند الثاني:'))"/>
+</div>
+<x-contract.dual rowClass="mt-2 mb-6"
+                 :en="'The second party is committed to implementing all volunteering activities agreed on with the first party and all requested programming services.'"
+                 :ar="$Glyphs('على الفريق الثاني الالتزام بالقيام بكافة الأعمال التطوعية المتفق عليها مع الفريق الأول وكافة ما يطلب منه من خدمات.')"/>
 
-<x-contract.dual rowClass="mt-4" :en="$EN_THIRD_TERM_LABEL" :ar="$AR_THIRD_TERM_LABEL"/>
-
-<div class="dual-row mt-2">
-    <div class="dual-col dual-en">
-        <ol class="list-decimal pl-5 space-y-3">
-            <li>{!! $EN_THIRD_LI_1 !!}</li>
-        </ol>
-    </div>
-    <div class="dual-col dual-ar">
-        <ol class="list-decimal pr-5 space-y-3" style="direction: rtl; text-align: right;">
-            <li>{!! $AR_THIRD_LI_1 !!}</li>
-        </ol>
-    </div>
+{{-- Third term --}}
+<div class="avoid-break mt-4">
+    <x-contract.dual :en="$L('Third term:')" :ar="$L($Glyphs('البند الثالث:'))"/>
 </div>
 
-<x-contract.dual rowClass="mt-4" :en="$EN_NO_RENEWAL" :ar="$AR_NO_RENEWAL"/>
-<x-contract.dual rowClass="mt-2" :en="$EN_PLACE" :ar="$AR_PLACE"/>
+{{-- 1 --}}
+<x-contract.dual rowClass="mt-2 mb-6"
+                 :en="'1. The contract is considered valid from '.$startStr.' until '.$endStr.' and the first two months are considered a trial period for the second party where the first party is entitled to terminate the contract and not continue with the second party.'"
+                 :ar="'1. تبدأ مدة هذا العقد  <br> اعتباراً من '.$startStrAr.' <br>  وتنتهي في '.$endStrAr.' <Br> ويُعتبر أول شهرين مدةً تجريبية للفريق الثاني يحق فيها للفريق الأول إنهاء العقد وعدم الاستمرار مع الفريق الثاني.'"/>
+
+{{-- 2 --}}
+<x-contract.dual rowClass="mt-2 mb-6"
+                 :en="'This contract will not be renewed without a written agreement of both parties, whereas each party shall inform the other of the contract termination one month prior to the end of the contract.'"
+                 :ar="$Glyphs('لا يتُجدّد هذا العقد لمدة أخرى إلا بموافقة الفريقين خطياً، على أن يُعلم كل فريق  الآخر بعدم التمديد قبل شهر من انتهاء العقد.')"/>
+
+{{-- 3 --}}
+<x-contract.dual rowClass="mt-2 mb-6"
+                 :en="'Place of Work: '.$center"
+                 :ar="$center.' :مكان العمل'"/>
