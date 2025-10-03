@@ -2,6 +2,7 @@
 
 return [
     'project-name' => 'هوب سنتر لإدارة الموارد البشرية',
+    'contracts' => 'العقود',
     'basic-management' => 'الإدارة الأساسية',
     'project-basics' => 'أساسيات المشروع',
     'city' => 'المدن|مدينة',

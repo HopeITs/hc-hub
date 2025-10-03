@@ -2,6 +2,7 @@
 
 return [
     'project-name' => 'Hope HR',
+    'contracts' => 'Contracts',
     'basic-management' => 'Basic Management',
     'project-basics' => 'Project Basics',
     'city' => 'City|Cities',
@@ -284,6 +285,18 @@ return [
     'text33' => 'ملاحظة هامة: ',
     'text34' => 'لا يلتزم الفريق الأول بأي تعويضات عند انتهاء عقد <Br> المتطوع او إنهائه.  ',
     'text35' => 'يمنح مركز الرجاء المسيحي شهرياً للسيد/ة مكافأة <br>  دولار / :salary وقدرها  /  <br> أو ما يعادلها بالليرة السورية تمنح <br> نقداً في نهاية كل شهر.  ',
+    'text36' => 'حيث أن الفريق الأول يرغب في الاستعانة بخبرة <br>الفريق الثاني لكونه :position <br>  وعرض على الفريق الثاني القيام بذلك  وحيث أن هذا <br> العرض قد لاقى قبول الفريق الثاني. ',
+    'text37' => 'تُعتبر مقدمة هذا العقد جزءاً لا يتجزأ من هذا <br>العقد.',
+    'text38' => '  على الفريق الثاني القيام بكافة الأعمال التطوعية <Br>  المتفق عليها مع الفريق الأول (مرفقة بتوصيف <br> العمل التطوعي).',
+    'text39' => '',
+    'text40' => '',
+    'text41' => '',
+    'text42' => '',
+    'text43' => '',
+    'text44' => '',
+    'text45' => '',
+
+
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
