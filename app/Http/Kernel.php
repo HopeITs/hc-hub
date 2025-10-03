@@ -40,4 +40,6 @@ class Kernel extends HttpKernel
 
         'role.active'     => \App\Http\Middleware\RequireActiveRole::class,
     ];
+
+
 }

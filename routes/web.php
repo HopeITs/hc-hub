@@ -45,6 +45,7 @@ use Livewire\Livewire;
 
 Route::group([
     'prefix' => LaravelLocalization::setLocale(),
+    'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
 ], function () {
 
     Livewire::setUpdateRoute(fn ($handle) => Route::post('/livewire/update', $handle));
