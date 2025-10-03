@@ -50,7 +50,7 @@
         $Glyphs(__('general.text31')),
     ];
 
-    $EN_RETURN = 'The volunteer is committed to deliver to “Christian Hope Center” all equipment, materials, and documents received upon termination or expiration of this contract, based on the volunteer’s personal receipt list (updated periodically).';
+    $EN_RETURN = '- The volunteer is committed to deliver to “Christian Hope Center” all equipment, materials, and documents received upon termination or expiration of this contract, based on the volunteer’s personal receipt list (updated periodically).';
     $AR_RETURN = $Glyphs(__('general.text32'));
 @endphp
 
@@ -75,7 +75,7 @@
 <div class="avoid-break mt-6" style="line-height: 0.8">
     <x-contract.dual
         :en="$L('Duties and obligations on extension, expiration, or termination of the agreement:')"
-        :ar="$L($Glyphs('الواجبات والالتزامات عند التمديد أو الانتهاء أو إنهاء العقد:'))"
+        :ar="$L($Glyphs('الواجبات والالتزامات على تمديد أو انتهاء أو إنهاء العقد:'))"
     />
     <x-contract.dual rowClass="mt-2"
                      :en="$asList($EN_NOTICES,'en')"
