@@ -37,7 +37,7 @@ class ChecklistForm extends Form
         foreach ($this->items as $itemData) {
             if ($itemData['is_selected']) {
                 $valuesToSave = [
-                    'delivered_id' => $itemData['delivered_id'] ?: auth()->id(),
+                    'delivered_id' => $itemData['delivered_id'] ?: auth()->user()->profile?->id,
                     'delivered_at' => now(),
                 ];
                 $this->employee->checklists()->updateOrCreate(
