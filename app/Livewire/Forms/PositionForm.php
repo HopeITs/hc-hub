@@ -16,6 +16,8 @@ class PositionForm extends Form
     public $department_id;
     public $job_level_id;
     public $program_id;
+    public $tech_manager_id;
+    public $direct_manager_id;
     public $center_id;
     public $city_id;
     public $title_en = '';
@@ -33,6 +35,8 @@ class PositionForm extends Form
             'program_id'       => 'required|exists:programs,id',
             'center_id'        => 'nullable|exists:centers,id',
             'city_id'          => 'required|exists:cities,id',
+            'tech_manager_id'  => 'nullable|exists:positions,id',
+            'direct_manager_id'  => 'nullable|exists:positions,id',
             'job_level_id'     => 'required|exists:job_levels,id',
             'department_id'    => 'required|exists:departments,id',
             'qualifications'   => 'required|string',
@@ -42,7 +46,8 @@ class PositionForm extends Form
 
         ];
     }
-    public function setPosition(Position $position){
+    public function setPosition(Position $position): void
+    {
         $this->position = $position;
         $this->title_en = $position->title_en;
         $this->title_ar = $position->title_ar;
@@ -51,6 +56,8 @@ class PositionForm extends Form
         $this->program_id = $position->program_id;
         $this->department_id = $position->department_id;
         $this->job_level_id = $position->job_level_id;
+        $this->tech_manager_id = $position->tech_manager_id;
+        $this->direct_manager_id = $position->direct_manager_id;
         $this->is_active = $position->is_active;
         $this->max_emp = $position->max_emp;
         $this->responsibilities = $position->responsibilities;
