@@ -62,7 +62,7 @@ class EmployeeTable extends LivewireTable
 
             SelectColumn::make(trans('general.direct_manager'), 'direct_manager_id')
                 ->displayUsing(fn ($v, Model $m) =>
-                $m->latestActiveContract()->position->directManager?->employee()?->name ?? '—'
+                $m->latestActiveContract()?->position->directManager?->employee()?->name ?? '—'
 
                 )
                 ->options($this->managerOptions())
@@ -70,7 +70,7 @@ class EmployeeTable extends LivewireTable
 
             SelectColumn::make(trans('general.tech_manager'), 'tech_manager_id')
                 ->displayUsing(fn ($v, Model $m) =>
-                    $m->latestActiveContract()->position->techManager?->employee()?->name ?? '—'
+                    $m->latestActiveContract()?->position->techManager?->employee()?->name ?? '—'
                 )
                 ->options($this->managerOptions())
                 ->sortable(),

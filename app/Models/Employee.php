@@ -65,7 +65,7 @@ class Employee extends Model implements HasMedia
         return $this->hasMany(Contract::class, 'employee_id')->where('is_active', true);
     }
 
-    public function latestActiveContract(): Contract
+    public function latestActiveContract(): Contract|Null
     {
         return $this->contracts()->with('position')->latest()->first();
     }
