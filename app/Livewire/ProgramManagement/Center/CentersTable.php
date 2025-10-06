@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\ProgramManagement;
+namespace App\Livewire\ProgramManagement\Center;
 
 use App\Models\Center;
 use App\Models\City;
@@ -36,7 +36,7 @@ class CentersTable extends LivewireTable
     {
         $locale = app()->getLocale();
 
-        return City::query()
+        return City::query()->whereHas('centers')
             ->orderBy(transColumn('name'))
             ->get(['id', transColumn( 'name')])
             ->mapWithKeys(fn($c) => [$c->id => $c->name])
@@ -51,14 +51,11 @@ class CentersTable extends LivewireTable
             Column::make('ID', 'id')->sortable(),
 
             Column::make(__('general.center-name'), 'name')
-                ->sortable()
-                ->searchable(),
-
-            SelectColumn::make(__('general.center-city'), 'city_id')
-                ->displayUsing(fn($v, Model $m) => optional($m->city)?->name ?? '—'
-                )
-                ->options($this->cityOptions())
                 ->sortable(),
+
+
+            Column::make(__('general.address'),'city.name')
+                ,
 
             Column::make(__('general.address'))
                 ->displayUsing(fn($v, Model $m) => $m->address ?: '—'

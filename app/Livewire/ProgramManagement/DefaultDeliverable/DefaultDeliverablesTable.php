@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\ProgramManagement;
+namespace App\Livewire\ProgramManagement\DefaultDeliverable;
 
 use App\Models\ChecklistItem;
 use App\Models\City;

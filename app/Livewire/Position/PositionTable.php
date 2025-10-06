@@ -49,28 +49,22 @@ class PositionTable extends LivewireTable
         return [
             Column::make(__('Title'), 'title_en')->sortable()->searchable(),
             Column::make(__('Title') . ' (AR)', 'title_ar')->sortable()->searchable(),
-
-
-
             SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
                 ->options(City::query()->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
-                ->sortable(),
-
+                ->sortable()     ->searchable(),
             SelectColumn::make(trans_choice('general.program', 1), 'program.name')
                 ->options(Program::query()->get()->pluck('name', 'name')->toArray())
-                ->sortable(),
-
+                ->sortable()     ->searchable(),
             SelectColumn::make(trans_choice('general.center', 1), 'center.name')
                 ->options(Center::query()->get()->pluck('name', 'name')->toArray())
-                ->sortable(),
-
+                ->sortable()     ->searchable(),
             SelectColumn::make(trans_choice('general.department', 1), 'department.name')
                 ->options(Department::query()->get()->pluck('name', 'name')->toArray())
-                ->sortable(),
+                ->sortable()     ->searchable(),
 
             SelectColumn::make(trans_choice('general.job-level', 1), 'jobLevel.'.transColumn('name'))
                 ->options(JobLevel::query()->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
-                ->sortable(),
+                ->sortable()     ->searchable(),
 
             BooleanColumn::make(__('general.is-active'), 'is_active'),
 

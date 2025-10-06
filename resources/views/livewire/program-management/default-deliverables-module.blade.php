@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <livewire:program-management.default-deliverables-table />
+    <livewire:program-management.default-deliverable.default-deliverables-table />
 
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model="showModal">
         <form wire:submit.prevent="save" class="space-y-4">

@@ -96,7 +96,7 @@
 
         <div class="flex justify-end gap-2">
             <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-            <x-modal.cancel-btn/>
+            <x-primary-button :href="route('positions.index')" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
         </div>
     </form>
 

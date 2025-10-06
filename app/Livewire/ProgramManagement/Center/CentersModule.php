@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Livewire\ProgramManagement;
+namespace App\Livewire\ProgramManagement\Center;
 
 use App\Models\Center;
 use App\Models\City;
-use Livewire\Component;
-use Livewire\Attributes\On;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Attributes\On;
+use Livewire\Component;
 
 class CentersModule extends Component
 {
@@ -43,7 +43,8 @@ class CentersModule extends Component
             'id' => null,
             'name' => '',
             'city_id' => '',
-            'address' => ['en' => '', 'ar' => ''],
+            'address_ar' => '',
+            'address_en' => '',
             'is_active' => true,
         ];
 
@@ -61,8 +62,8 @@ class CentersModule extends Component
             'id' => $model->id,
             'name' => $model->name,
             'city_id' => $model->city_id,
-            'address_ar' => $model->address['ar'],
-            'address_en' => $model->address['en'],
+            'address_ar' => $model->address_ar,
+            'address_en' => $model->address_en,
             'is_active' => (bool)$model->is_active,
         ];
 
@@ -80,8 +81,9 @@ class CentersModule extends Component
             'name' => $this->item['name'],
             'city_id' => $this->item['city_id'],
             'is_active' => $this->item['is_active'],
+            'address_ar' => $this->item['address_ar'],
+            'address_en' => $this->item['address_en'],
         ]);
-        $model->setTranslations('address', $this->item['address']);
         $model->save();
 
         $this->showModal = false;
