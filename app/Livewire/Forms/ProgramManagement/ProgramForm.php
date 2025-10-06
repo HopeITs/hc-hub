@@ -14,7 +14,8 @@ class ProgramForm extends Form
     public ?Program $program = null;
 
     public $name;
-    public $description = [];
+    public $description_en = '';
+    public $description_ar = '';
     public $start_date;
     public $end_date;
     public $code;
@@ -36,7 +37,7 @@ class ProgramForm extends Form
             ],
             'code' => 'required',
             'logo' => 'nullable',
-            'program_manager_id' => ['nullable', 'exists:employees,id'],
+
         ];
     }
 
@@ -52,14 +53,14 @@ class ProgramForm extends Form
         $this->code = $program->code;
         $this->logo = $program->getFirstMediaUrl('logo');
         $this->is_active = $program->is_active;
-        $this->program_manager_id = $program->contracts->first()?->employee_id;
+
     }
 
     public function store()
     {
         $this->validate();
 
-        $program = Program::create($this->except('logo', 'program_manager_id'));
+        $program = Program::create($this->except('logo'));
 
         if ($this->logo instanceof TemporaryUploadedFile) {
             $program->addMedia($this->logo->getRealPath())
@@ -77,7 +78,7 @@ class ProgramForm extends Form
         $this->validate();
 
         $this->program->update(
-            $this->except('logo', 'program_manager_id')
+            $this->except('logo')
         );
 
         if ($this->logo instanceof TemporaryUploadedFile) {

@@ -15,8 +15,8 @@ class Program extends Model implements HasMedia
     protected $guarded = ['id'];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
     ];
 
     public function cities(): BelongsToMany

@@ -25,8 +25,8 @@ return new class extends Migration
             $table->text('description_ar')->nullable();
             $table->char('code');
             $table->char('slug')->unique();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
+            $table->dateTime('start_date')->nullable();
+            $table->dateTime('end_date')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
@@ -207,9 +207,9 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->foreignId('position_id')->constrained()->onDelete('cascade');
             $table->foreignId('contract_type_id')->constrained()->onDelete('restrict');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->date('terminated_at')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
+            $table->dateTime('terminated_at')->nullable();
             $table->text('reason_of_termination')->nullable();
             $table->integer('yearly_leave_days')->default(12);
             $table->decimal('salary', 10, 2);
@@ -224,7 +224,7 @@ return new class extends Migration
         Schema::create('evaluations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('contract_id')->constrained('contracts')->onDelete('restrict');
-            $table->date('date');
+            $table->dateTime('date');
             $table->foreignId('current_manager_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->text('notes')->nullable();
             $table->timestamps();
@@ -253,8 +253,8 @@ return new class extends Migration
         Schema::create('leave_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('leave_balance_id')->constrained()->onDelete('restrict');
-            $table->date('start_date');
-            $table->date('end_date');
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
             $table->text('reason')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('employees')->onDelete('set null');
             $table->timestamp('approved_at')->nullable();
