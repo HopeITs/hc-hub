@@ -36,9 +36,17 @@ class DefaultDeliverablesTable extends LivewireTable
 
     protected function employeeOptions(): array
     {
-        $loc = app()->getLocale();
-        return Employee::query()->orderBy(transColumn('name'))->get(['id', transColumn('name')])
+
+        return Employee::query()->whereHas('contracts',function ($query){
+            $query->whereHas('position',function ($subQuery){
+                $subQuery->whereHas('department',function($q){
+                    $q->whereIn('name' , ['IT', 'Communication', 'HR']);
+                } );
+            });
+        })->orderBy(transColumn('name'))->get(['id', transColumn('name')])
             ->mapWithKeys(fn($e) => [$e->id => $e->name])->all();
+
+
     }
 
     protected function cityOptions(): array
@@ -60,20 +68,20 @@ class DefaultDeliverablesTable extends LivewireTable
         return [
             Column::make('ID', 'id')->sortable(),
 
-            SelectColumn::make(__('general.employee'), 'employee_id')
+            SelectColumn::make(trans_choice('general.employee',1), 'employee.name')
                 ->displayUsing(fn($v, Model $m) => $m->employee?->name ?? '—')
                 ->options($this->employeeOptions())
-                ->sortable(),
+                ->sortable()->searchable(),
 
             SelectColumn::make(trans_choice('general.city', 1), 'city_id')
                 ->displayUsing(fn($v, Model $m) => $m->city?->name ?? '—')
                 ->options($this->cityOptions())
-                ->sortable(),
+                ->sortable()->searchable(),
 
             SelectColumn::make(__('general.item'), 'item_id')
                 ->displayUsing(fn($v, Model $m) => $m->item?->name ?? '—')
                 ->options($this->itemOptions())
-                ->sortable(),
+                ->sortable()->searchable(),
 
             Column::make(__('Actions'), function (Model $m): string {
                 $id = $m->getKey();

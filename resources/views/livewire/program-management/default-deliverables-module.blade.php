@@ -23,7 +23,7 @@
         <form wire:submit.prevent="save" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2 md:col-span-1">
-                    <x-forms.input-label for="employee_id">@lang('general.employee')</x-forms.input-label>
+                    <x-forms.input-label for="employee_id">{{trans_choice('general.employee',1)}}</x-forms.input-label>
                     <x-forms.select-input id="employee_id" wire:model="item.employee_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach($employees as $id => $name)

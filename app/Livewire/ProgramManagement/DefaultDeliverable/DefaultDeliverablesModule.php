@@ -49,7 +49,14 @@ class DefaultDeliverablesModule extends Component
         $locale = app()->getLocale();
 
         // Dropdowns for the modal
-        $employees = Employee::orderBy(transColumn('name'))
+        $employees = Employee::whereHas('contracts',function ($query){
+            $query->whereHas('position',function ($subQuery){
+                $subQuery->whereHas('department',function($q){
+                    $q->whereIn('name' , ['IT', 'Communication', 'HR']);
+                } );
+            });
+        })
+        ->orderBy(transColumn('name'))
             ->get(['id',transColumn('name')])
             ->mapWithKeys(fn ($e) => [$e->id => $e->name]);
 
