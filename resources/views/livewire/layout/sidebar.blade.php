@@ -98,8 +98,11 @@
                     <x-layouts.app.sidebar.dropdown-nav-list id="checklist-items" :title="__('general.checklist_items')" :active="request()->routeIs('checklist-items.*')">
                         <x-slot name="icon"><x-icons.clipboard-list class="w-5 h-5" /></x-slot>
                         <x-slot name="list">
-                            <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending')" :active="request()->routeIs('checklist-items.pending')">
-                                {{ __('general.pending') }}
+                            <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-delivers')" :active="request()->routeIs('checklist-items.pending-delivers')">
+                                {{ __('general.pending-delivers') }}
+                            </x-layouts.app.sidebar.nav-item>
+                            <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-returns')" :active="request()->routeIs('checklist-items.pending-returns')">
+                                {{ __('general.pending_returns') }}
                             </x-layouts.app.sidebar.nav-item>
                             <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
                                 {{ __('general.items') }}

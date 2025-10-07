@@ -8,7 +8,7 @@ use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule};
 use App\Livewire\Position\{PositionCreate, PositionEdit, PositionsModule};
 use App\Livewire\ProgramManagement\{CentersModule, DefaultDeliverablesModule, Program\Create as ProgramCreate, Program\Detail as ProgramDetail, Program\Index as ProgramIndex, Program\Update as ProgramUpdate};
 use App\Livewire\Settings\{Appearance, Password, Profile};
-use App\Livewire\ChecklistItems\{PendingItems, AllItems};
+use App\Livewire\ChecklistItems\{PendingItems, AllItems, PendingReturns};
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use Livewire\Livewire;
@@ -80,7 +80,6 @@ Route::group(
             Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
 
             Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', false)->name('my-folders.index');
-
             Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', true)->name('shared-folders.index');
 
             Route::get('/contracts/{contract}', ContractDetails::class)->name('contracts.show');
@@ -88,7 +87,8 @@ Route::group(
             Route::prefix('checklist-items')
                 ->name('checklist-items.')
                 ->group(function () {
-                    Route::get('/pending', PendingItems::class)->name('pending');
+                    Route::get('/pending-delivers', PendingItems::class)->name('pending-delivers');
+                    Route::get('/pending-returns', PendingReturns::class)->name('pending-returns');
                     Route::get('/', AllItems::class)->name('index');
                 });
         });
