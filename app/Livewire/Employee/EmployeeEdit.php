@@ -211,8 +211,10 @@ class EmployeeEdit extends Component
         $roles = Role::pluck('name', 'id')->toArray();
         $delivereds = Employee::whereIn('id', DefaultDeliverable::pluck('employee_id'))->get();
 
-        $employeeChecklistItems = $this->employee->checklists()
-            ->with(['item', 'delivered', 'receiver'])
+        $employeeChecklistItems = Checklist::with(['item'])
+            ->where('employee_id', $this->employee->id)
+            ->where('delivered_status', 'delivered')
+            ->orderByDesc('delivered_at')
             ->get();
 
         return view('livewire.employee.form', [

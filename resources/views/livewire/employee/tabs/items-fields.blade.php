@@ -6,17 +6,19 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">@lang('general.item')</th>
-                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">@lang('general.brand')</th>
-                        <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">@lang('general.model')</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">@lang('general.item')</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">@lang('general.note')</th>
+                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">@lang('general.received_at')</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach ($employeeChecklistItems as $item)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item->item?->name ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->brand ?: '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->model ?: '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->notes ?: '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ $item->delivered_at ? $item->delivered_at->format('Y-m-d') : '-' }}
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -29,6 +31,6 @@
     @endif
 
     <div class="flex justify-end pt-4 mt-6 border-t">
-         <x-secondary-button :href="route('employees.index')">@lang('general.back_to_list')</x-secondary-button>
+        <x-secondary-button :href="route('employees.index')">@lang('general.back_to_list')</x-secondary-button>
     </div>
 </div>

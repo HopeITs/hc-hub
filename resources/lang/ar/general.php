@@ -280,6 +280,7 @@ return [
     'pending_returns' => 'الإرجاعات المعلقة',
     'receive-by' => 'تسليم الى',
     'note' => 'ملاحظات',
+    'received_at' => 'سلمت عند',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',

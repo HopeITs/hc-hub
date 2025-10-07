@@ -14,7 +14,6 @@ class EmployeeCreate extends Component
     use WithFileUploads, WithAlerts;
 
     public PersonalInfoForm $infoForm;
-
     public $activeTab = 'information';
     public $title = '';
 
@@ -52,6 +51,7 @@ class EmployeeCreate extends Component
             'roles' => $roles,
             'allEmployees' => Employee::select('id', 'name_en', 'name_ar')->get(),
             'isCreateMode' => true,
+            'employeeChecklistItems' => collect(),
         ]);
     }
 }

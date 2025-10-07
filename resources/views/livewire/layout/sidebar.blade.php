@@ -104,9 +104,9 @@
                             <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-returns')" :active="request()->routeIs('checklist-items.pending-returns')">
                                 {{ __('general.pending_returns') }}
                             </x-layouts.app.sidebar.nav-item>
-                            <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
+                            {{-- <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
                                 {{ __('general.items') }}
-                            </x-layouts.app.sidebar.nav-item>
+                            </x-layouts.app.sidebar.nav-item> --}}
                         </x-slot>
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole

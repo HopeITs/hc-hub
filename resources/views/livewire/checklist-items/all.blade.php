@@ -2,7 +2,7 @@
     <div class="flex items-center justify-between">
         <x-heading-label>{{ __('general.checklist_items') }}</x-heading-label>
         <span class="text-sm text-gray-500">
-            {{ $items->count() }} {{ Str::plural(__('general.item'), $items->count()) }}
+            {{ $items->count() }} {{ \Illuminate\Support\Str::plural(__('general.item'), $items->count()) }}
         </span>
     </div>
 
@@ -52,7 +52,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500">
-                                {{ $item->return_notes ?: '-' }}
+                                {{ $item->notes ?: ($item->return_notes ?: '-') }}
                             </td>
                         </tr>
                     @endforeach

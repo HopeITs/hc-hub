@@ -8,6 +8,8 @@ use Livewire\Component;
 
 class PendingItems extends Component
 {
+    public array $notes = [];
+
     public function getItemsProperty()
     {
         $employee = Auth::user()->profile ?? null;
@@ -28,7 +30,10 @@ class PendingItems extends Component
         $checklist->update([
             'delivered_status' => 'delivered',
             'delivered_at' => now(),
+            'notes' => $this->notes[$id] ?? null,
         ]);
+
+        unset($this->notes[$id]);
         session()->flash('message', __('general.item_marked_delivered'));
     }
 

@@ -297,6 +297,7 @@ return [
     'pending_returns' => 'Pending Returns',
     'receive-by' => 'Receive By',
     'note' => 'Note',
+    'received_at' => 'Received at',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
