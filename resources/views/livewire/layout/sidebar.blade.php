@@ -88,6 +88,12 @@
                             :active="request()->routeIs('positions.*')">
                             {{ __('general.positions') }}
                         </x-layouts.app.sidebar.nav-item>
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('positions.org.chart')"
+                            :active="request()->routeIs('positions.org.chart')">
+                            {{ __('general.positions') }}
+                        </x-layouts.app.sidebar.nav-item>
+
 
                         <x-layouts.app.sidebar.nav-item
                             :href="route('centers.index')"
