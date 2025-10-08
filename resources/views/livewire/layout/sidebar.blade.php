@@ -94,7 +94,7 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('employee', 'hr', 'hr manager', 'general manager', 'super-admin')
+                @activerole('employee', 'HR-SYR', 'general manager', 'super-admin')
                     <x-layouts.app.sidebar.dropdown-nav-list id="checklist-items" :title="__('general.checklist_items')" :active="request()->routeIs('checklist-items.*')">
                         <x-slot name="icon"><x-icons.clipboard-list class="w-5 h-5" /></x-slot>
                         <x-slot name="list">
