@@ -11,35 +11,19 @@
     $position = $contract->position;
     $program  = $position?->program;
 
-    // English fields
-    $nameEn = $emp?->getTranslation('name', 'en')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—';
+        $nameEn = $emp?->name_en ?? '—';
+      $nameAr = $emp?->name_ar ?? '—';
 
-    $cityEn = $emp?->city?->getTranslation('name', 'en')
-        ?? $emp?->city?->name
-        ?? $emp?->place_of_birth ?? '';
+      $cityEn = $emp?->city?->name_en
+          ?? $emp?->city?->name
+          ?? $emp?->place_of_birth ?? '—';
 
-    $addressEn = $emp?->getTranslation('address', 'en')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null)
-            ? ($emp->address['en'] ?? reset($emp->address) ?? '')
-            : ($emp->address ?? '') );
+      $cityAr = $emp?->city?->name_ar
+          ?? $emp?->city?->name
+          ?? $emp?->place_of_birth ?? '—';
 
-    // Arabic fields
-    $nameAr = $Glyphs($emp?->getTranslation('name', 'ar')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—');
-
-    $cityAr = $Glyphs($emp?->city?->getTranslation('name', 'ar')
-        ?? $emp?->city?->name
-        ?? $emp?->place_of_birth ?? '');
-
-    $addressAr = $Glyphs($emp?->getTranslation('address', 'ar')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null)
-            ? ($emp->address['ar'] ?? reset($emp->address) ?? '')
-            : ($emp->address ?? '') ));
+      $addressEn = $emp?->address_en ?? '—';
+      $addressAr = $emp?->address_ar ?? '—';
 
     // DOB
     $dob = $emp?->dob;

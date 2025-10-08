@@ -10,15 +10,8 @@
     $loc = $locale ?? app()->getLocale();
     $emp = $contract->employee;
 
-    $nameEn = $emp?->getTranslation('name', 'en')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—';
-
-    $nameAr = $Glyphs(
-        $emp?->getTranslation('name', 'ar')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—'
-    );
+      $nameEn = $emp?->name_en ?? '—';
+      $nameAr = $emp?->name_ar ?? '—';
 
     $esc   = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
     $escAr = fn ($v) => e((string)($v === '' || $v === null ? '—' : $Glyphs($v)));

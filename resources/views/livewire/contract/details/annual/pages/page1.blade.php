@@ -11,36 +11,21 @@
     $emp = $contract->employee;
     $position = $contract->position;
     $program  = $position?->program;
+      $nameEn = $emp?->name_en ?? '—';
+      $nameAr = $emp?->name_ar ?? '—';
 
-    // English fields
-    $nameEn = $emp?->getTranslation('name', 'en')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—';
+      $cityEn = $emp?->city?->name_en
+          ?? $emp?->city?->name
+          ?? $emp?->place_of_birth ?? '—';
 
-    $cityEn = $emp?->city?->getTranslation('name', 'en')
-        ?? $emp?->city?->name
-        ?? $emp?->place_of_birth ?? '';
+      $cityAr = $emp?->city?->name_ar
+          ?? $emp?->city?->name
+          ?? $emp?->place_of_birth ?? '—';
 
-    $addressEn = $emp?->getTranslation('address', 'en')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null)
-            ? ($emp->address['en'] ?? reset($emp->address) ?? '')
-            : ($emp->address ?? '') );
+      $addressEn = $emp?->address_en ?? '—';
+      $addressAr = $emp?->address_ar ?? '—';
 
-    // Arabic fields
-    $nameAr = $Glyphs($emp?->getTranslation('name', 'ar')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—');
 
-    $cityAr = $Glyphs($emp?->city?->getTranslation('name', 'ar')
-        ?? $emp?->city?->name
-        ?? $emp?->place_of_birth ?? '');
-
-    $addressAr = $Glyphs($emp?->getTranslation('address', 'ar')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null)
-            ? ($emp->address['ar'] ?? reset($emp->address) ?? '')
-            : ($emp->address ?? '') ));
 
     // DOB
     $dob = $emp?->dob;
@@ -75,7 +60,7 @@
 @endphp
 
 
-<div class="avoid-break " >
+<div class="avoid-break ">
     <x-contract.dual tight
                      :en="$L('PRIVATE AND CONFIDENTIAL')"
                      :ar="$L($Glyphs('سري وخاص'))"
@@ -88,21 +73,21 @@
     />
 </div>
 
-<div class="avoid-break mt-6" >
+<div class="avoid-break mt-6">
     <x-contract.dual rowClass="fw-bold" :en="'Between'" :ar="$Glyphs('بين')"/>
     <x-contract.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))"/>
     <x-contract.dual
-        :en="'<strong>Christian Hope Center - Aleppo / Head office</strong> represented in this Contract by <strong>Mr. Fredy Youssef</strong>'"
-        :ar="$Glyphs('<strong>مركز الرجاء المسيحي - حلب / الإدارة العامة</strong> الممثل في هذا العقد ب<strong>السيد فريدي يوسف</strong>')"/>
+            :en="'<strong>Christian Hope Center - Aleppo / Head office</strong> represented in this Contract by <strong>Mr. Fredy Youssef</strong>'"
+            :ar="$Glyphs('<strong>مركز الرجاء المسيحي - حلب / الإدارة العامة</strong> الممثل في هذا العقد ب<strong>السيد فريدي يوسف</strong>')"/>
     <x-contract.dual
-        :en="'<strong>Mr. Fredy Youssef</strong> is delegated by the Latin church in Syria to manage The Christian Hope Center and all affiliated programs.'"
-        :ar="$Glyphs('إن السيد فريدي يوسف تم تفويضه من قبل النيابة الرسولية اللاتينية في سوريا لإدارة مركز الرجاء المسيحي وكل البرامج التابعة له.')"/>
+            :en="'<strong>Mr. Fredy Youssef</strong> is delegated by the Latin church in Syria to manage The Christian Hope Center and all affiliated programs.'"
+            :ar="$Glyphs('إن السيد فريدي يوسف تم تفويضه من قبل النيابة الرسولية اللاتينية في سوريا لإدارة مركز الرجاء المسيحي وكل البرامج التابعة له.')"/>
     <x-contract.dual
-        :en="'Hereinafter referred to as “<strong>Christian Hope Center - Aleppo - Head Office</strong>”'"
-        :ar="$Glyphs('المشار إليه في هذا العقد بـ “<strong>مركز الرجاء المسيحي – حلب - الإدارة العامة</strong>”')"/>
+            :en="'Hereinafter referred to as “<strong>Christian Hope Center - Aleppo - Head Office</strong>”'"
+            :ar="$Glyphs('المشار إليه في هذا العقد بـ “<strong>مركز الرجاء المسيحي – حلب - الإدارة العامة</strong>”')"/>
 </div>
 
-<div class="avoid-break mt-6" >
+<div class="avoid-break mt-6">
     <x-contract.dual rowClass="mt-3 fw-bold" :en="'And'" :ar="$Glyphs('و')"/>
     <x-contract.dual rowClass="mt-1" :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))"/>
     <x-contract.dual :en="'<strong>Ms./Mrs.</strong> '.$esc($nameEn)"
