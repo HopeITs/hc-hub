@@ -92,7 +92,6 @@ return [
     'responsibilities' => 'المسؤوليات',
     'max' => 'أقصى عدد من الموظفين',
     'existing' => 'الموظفين الحاليين',
-
     'default-deliverables' => 'المنتجات الأساسية',
     'deliver-by' => 'التسليم بواسطة',
     'centers' => 'المراكز',
@@ -100,7 +99,6 @@ return [
     'center-city' => 'المدينة',
     'logo' => 'الشعار',
     'search' => 'بحث',
-
     'employee' => 'موظف|موظفين',
     'photo' => 'الصورة',
     'unknown' => 'مجهول',
@@ -201,14 +199,12 @@ return [
     'position' => 'المنصب',
     'contract-start' => 'بداية العقد',
     'contract-end' => 'نهاية العقد',
-
     'my-folders' => 'مجلداتي',
     'shared-folders' => 'المجلدات المشتركة',
-
     'ongoing' => 'قيد التنفيذ',
     'no-employees' => 'لا يوجد موظفون مخصصون لهذا المشروع بعد.',
     'archived-files' => 'الملفات المؤرشفة',
-     'general_info' => 'المعلومات العامة',
+    'general_info' => 'المعلومات العامة',
     'graduation_year' => 'سنة التخرج',
     'father_name' => 'اسم الأب',
     'mother_name' => 'اسم الأم',
@@ -247,22 +243,9 @@ return [
     'attachments' => 'الملحقات',
     'file' => 'الملف',
     'add-item' => 'إضافة عنصر',
-    'items' => 'العنصر',
+    'my-items' => 'عناصري',
     'no_items_from_checklist' => 'لم يتم تعيين أي عناصر من قائمة التحقق بعد.',
     'team1' => 'مركز الرجاء المسيحي - حلب / الإدارة العامة الممثل في هذا العقد بالسيد فريدي يوسف',
-
-
-
-
-
-
-
-
-
-
-
-
-
     'pending-delivers' => 'التسليمات المعلقة',
     'pending_checklist_requests' => 'طلبات قائمة التسليم المعلقة',
     'no_pending_requests' => 'لا توجد طلبات معلقة.',
@@ -281,6 +264,12 @@ return [
     'receive-by' => 'تسليم الى',
     'note' => 'ملاحظات',
     'received_at' => 'سلمت عند',
+    'done_requests' => 'الطلبات المنجزة',
+    'no_done_requests' => 'لا توجد طلبات منجزة بعد.',
+    'employee' => 'الموظف',
+    'action' => 'الإجراء',
+    'counterparty' => 'الطرف الآخر',
+    'request' => 'طلب|طلبات',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',

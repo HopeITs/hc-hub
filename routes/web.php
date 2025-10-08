@@ -8,16 +8,16 @@ use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule};
 use App\Livewire\Position\{PositionCreate, PositionEdit, PositionsModule};
 use App\Livewire\ProgramManagement\{Center\CentersModule, DefaultDeliverable\DefaultDeliverablesModule, Program\Create as ProgramCreate, Program\Detail as ProgramDetail, Program\Index as ProgramIndex, Program\Update as ProgramUpdate};
 use App\Livewire\Settings\{Appearance, Password, Profile};
-use App\Livewire\ChecklistItems\{PendingItems, AllItems, PendingReturns};
+use App\Livewire\ChecklistItems\{PendingItems, AllItems, PendingReturns, DoneRequests};
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use Livewire\Livewire;
 
-
 Route::group(
     [
         'prefix' => LaravelLocalization::setLocale(),
-    'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']],
+        'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath'],
+    ],
     function () {
         Livewire::setUpdateRoute(fn($handle) => Route::post('/livewire/update', $handle));
 
@@ -90,9 +90,11 @@ Route::group(
                 ->group(function () {
                     Route::get('/pending-delivers', PendingItems::class)->name('pending-delivers');
                     Route::get('/pending-returns', PendingReturns::class)->name('pending-returns');
+                    Route::get('/done-requests', DoneRequests::class)->name('done-requests');
                     Route::get('/', AllItems::class)->name('index');
                 });
         });
 
-    require __DIR__ . '/auth.php';
-});
+        require __DIR__ . '/auth.php';
+    },
+);
