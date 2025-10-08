@@ -17,14 +17,16 @@ class DepartmentModule extends Component
     public $modalTitle = '';
     public $search = '';
     public $item = [
-        'name' => [],
-        'description' => [],
+        'name' => '',
+        'description_ar' => '',
+        'description_en' => '',
         'email' => null,
     ];
 
     protected $rules = [
-        'item.name.*' => 'required|string|max:255',
-        'item.description.*' => 'nullable|string',
+        'item.name' => 'required|string|max:255',
+        'item.description_ar' => 'nullable|string',
+        'item.description_en' => 'nullable|string',
         'item.email' => 'nullable|email|max:255',
     ];
 
@@ -34,7 +36,7 @@ class DepartmentModule extends Component
         $sort   = $this->sortField ?: 'id';
         $dir    = $this->sortDirection ?: 'asc';
 
-        $query = \App\Models\Department::query()
+        $query = Department::query()
             ->when($this->search, function ($q) {
                 $term = $this->search;
 
@@ -46,7 +48,7 @@ class DepartmentModule extends Component
         if ($sort === 'name') {
             $query->orderBy('name', $dir);
         } elseif ($sort === 'description') {
-            $query->orderBy('description', $dir);
+            $query->orderBy(transColumn('description'), $dir);
         } elseif ($sort === 'email') {
             $query->orderByRaw("COALESCE(email, '-') {$dir}");
         } else {
@@ -61,8 +63,9 @@ class DepartmentModule extends Component
     public function create()
     {
         $this->item = [
-            'name' => ['en' => ''],
-            'description' => [],
+            'name' => '',
+            'description_ar' => '',
+            'description_en' => '',
             'email' => null,
         ];
 
@@ -76,8 +79,9 @@ class DepartmentModule extends Component
 
         $this->item = [
             'id' => $model->id,
-            'name' => ['en' => $model->name], // ✅ FIXED
-            'description' => $model->getTranslations('description'),
+            'name' =>  $model->name,
+            'description_ar' => $model->description_ar,
+            'description_en' => $model->description_en,
             'email' => $model->email,
         ];
 
@@ -91,9 +95,9 @@ class DepartmentModule extends Component
         $this->validate();
 
         $data = [
-            'name' => $this->item['name']['en'] ?? '',
-            // Extract English name only
-            'description' => $this->item['description'], // still array (translatable)
+            'name' => $this->item['name'] ?? '',
+            'description_en' => $this->item['description_en'],
+            'description_ar' => $this->item['description_ar'],
             'email' => $this->item['email'],
         ];
 

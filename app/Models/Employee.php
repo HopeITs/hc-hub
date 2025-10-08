@@ -2,21 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslation;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\Translatable\HasTranslations;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Employee extends Model implements HasMedia
 {
-    use HasFactory, HasTranslations, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia , HasTranslation;
 
     protected $guarded = ['id'];
-
-    public array $translatable = ['name', 'father_name', 'mother_name', 'address'];
 
     protected $casts = [
         'dob' => 'datetime',
@@ -27,6 +26,35 @@ class Employee extends Model implements HasMedia
         'is_board_member' => 'boolean',
         'children' => 'integer',
     ];
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getTranslatableAttribute('name'),
+            set: fn($value) => $this->setTranslatableAttribute('name', $value)
+        );
+    }
+    protected function father_name(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getTranslatableAttribute('father_name'),
+            set: fn($value) => $this->setTranslatableAttribute('father_name', $value)
+        );
+    }
+    protected function mother_name(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getTranslatableAttribute('mother_name'),
+            set: fn($value) => $this->setTranslatableAttribute('mother_name', $value)
+        );
+    }
+
+    protected function address(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getTranslatableAttribute('address'),
+            set: fn($value) => $this->setTranslatableAttribute('address', $value)
+        );
+    }
 
     public function city(): BelongsTo
     {
@@ -35,6 +63,11 @@ class Employee extends Model implements HasMedia
     public function contracts()
     {
         return $this->hasMany(Contract::class, 'employee_id')->where('is_active', true);
+    }
+
+    public function latestActiveContract(): Contract|Null
+    {
+        return $this->contracts()->with('position')->latest()->first();
     }
 
     public function defaultDeliverItems(): Employee|\Illuminate\Database\Eloquent\Relations\HasMany

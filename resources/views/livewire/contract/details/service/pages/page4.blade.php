@@ -1,8 +1,6 @@
 @php
-    $empNameEn = $contract->employee?->getTranslation('name', 'en')
-        ?? $contract->employee?->name ?? '—';
-    $empNameAr = $contract->employee?->getTranslation('name', 'ar')
-        ?? $contract->employee?->name ?? '—';
+    $empNameEn =  $contract->employee?->name_en ?? '—';
+    $empNameAr =  $contract->employee?->name_ar ?? '—';
 
     $EN_FOURTH_TERM_LABEL = '<span class="h-label">Fourth term:</span>';
     $AR_FOURTH_TERM_LABEL = '<span class="h-label">البند الرابع:</span>';

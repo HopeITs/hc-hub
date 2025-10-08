@@ -33,11 +33,11 @@ class EmployeeTable extends LivewireTable
     protected function managerOptions(): array
     {
         return Employee::query()
-            ->select(['id', 'name'])
-            ->orderBy('name')
+            ->select(['id', 'name_en', 'name_ar'])
+            ->orderBy('name_'.app()->getLocale(), 'asc')
             ->get()
             ->mapWithKeys(fn ($e) => [
-                $e->id => $e->getTranslation('name', app()->getLocale())
+                $e->id => $e->name
             ])
             ->all();
     }
@@ -48,9 +48,8 @@ class EmployeeTable extends LivewireTable
             Column::make('ID', 'id')->sortable(),
 
             Column::make(trans('general.name'), 'name')
-                ->displayUsing(fn ($v, Model $m) => $m->getTranslation('name', app()->getLocale()))
-                ->sortable()
-               ,
+                ->displayUsing(fn ($v, Model $m) => $m->name) // uses accessor
+                ->sortable(),
 
             Column::make(trans('general.photo'), function (Model $m): string {
                 $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
@@ -63,14 +62,15 @@ class EmployeeTable extends LivewireTable
 
             SelectColumn::make(trans('general.direct_manager'), 'direct_manager_id')
                 ->displayUsing(fn ($v, Model $m) =>
-                    optional($m->directManager)?->getTranslation('name', app()->getLocale()) ?? '—'
+                $m->latestActiveContract()?->position->directManager?->employee()?->name ?? '—'
+
                 )
                 ->options($this->managerOptions())
                 ->sortable(),
 
             SelectColumn::make(trans('general.tech_manager'), 'tech_manager_id')
                 ->displayUsing(fn ($v, Model $m) =>
-                    optional($m->techManager)?->getTranslation('name', app()->getLocale()) ?? '—'
+                    $m->latestActiveContract()?->position->techManager?->employee()?->name ?? '—'
                 )
                 ->options($this->managerOptions())
                 ->sortable(),

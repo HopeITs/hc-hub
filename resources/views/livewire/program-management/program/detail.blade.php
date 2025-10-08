@@ -17,7 +17,7 @@
                 <div class="flex h-fit space-x-2">
                     <x-forms.toggle-input
                         class="!me-2 text-xl p-2"
-                        :checked="$program->is_active == 1"
+                        :active="$program->is_active"
                         :model-id="$program->id"
                         wire-event="confirmToggleItemStatus"
                     />
@@ -31,12 +31,13 @@
             </div>
 
             <p class="text-md text-gray-500 mt-2">
-                {{ $program->getTranslation('description', app()->getLocale()) }}
+                {{ $program->{'description_' . app()->getLocale()} }}
             </p>
         </div>
+
+
     </div>
 
-    {{-- tabs --}}
     <div class="border-b border-gray-200">
         <nav class="-mb-px flex space-x-6" aria-label="Tabs">
             <a href="#" @click.prevent="activeTab = 'details'"
@@ -118,17 +119,24 @@
                         </tr>
                         </thead>
                         <tbody class="bg-white divide-y">
-                        @foreach ($program->centers as $center)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 font-medium text-gray-900">{{ $center->name }}</td>
-                                <td class="px-6 py-4">{{ $center->city?->getTranslation('name', app()->getLocale()) ?? '-' }}</td>
-                                <td class="px-6 py-4">{{ $center->projectManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</td>
-                                <td class="px-6 py-4">{{ $center->created_at->format('d M, Y') }}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <x-table.edit-btn :href="route('centers.index', ['edit' => $center->id])" class="mx-auto" />
-                                </td>
-                            </tr>
-                        @endforeach
+
+                            @foreach ($program->centers as $center)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-medium text-gray-900">
+                                        {{ $center->name }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ $center->city?->{'name_' . app()->getLocale()} ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4">{{ $center->projectManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</td>
+                                    <td class="px-6 py-4">
+                                        {{ $center->created_at->format('d M, Y') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <x-table.edit-btn :href="route('centers.index', ['edit' => $center->id])" class="mx-auto" />
+                                    </td>
+                                </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -157,10 +165,10 @@
                             @foreach ($employee->contracts as $contract)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 font-medium text-gray-900">
-                                        {{ $employee->getTranslation('name', app()->getLocale()) ?? '-' }}
+                                        {{ $employee->{'name_' . app()->getLocale()} ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        {{ $contract->position?->requiredPosition?->title ?? '—' }}
+                                        {{ $contract->position?->{'title_' . app()->getLocale()} ?? '—' }}
                                     </td>
                                     <td class="px-6 py-4">
                                         {{ $contract->start_date?->format('d M, Y') ?? '—' }}

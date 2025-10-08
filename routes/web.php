@@ -6,17 +6,18 @@ use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, De
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
 use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule};
 use App\Livewire\Position\{PositionCreate, PositionEdit, PositionsModule};
-use App\Livewire\ProgramManagement\{CentersModule, DefaultDeliverablesModule, Program\Create as ProgramCreate, Program\Detail as ProgramDetail, Program\Index as ProgramIndex, Program\Update as ProgramUpdate};
+use App\Livewire\ProgramManagement\{Center\CentersModule, DefaultDeliverable\DefaultDeliverablesModule, Program\Create as ProgramCreate, Program\Detail as ProgramDetail, Program\Index as ProgramIndex, Program\Update as ProgramUpdate};
 use App\Livewire\Settings\{Appearance, Password, Profile};
 use App\Livewire\ChecklistItems\{PendingItems, AllItems, PendingReturns};
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use Livewire\Livewire;
 
+
 Route::group(
     [
         'prefix' => LaravelLocalization::setLocale(),
-    ],
+    'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']],
     function () {
         Livewire::setUpdateRoute(fn($handle) => Route::post('/livewire/update', $handle));
 
@@ -93,6 +94,5 @@ Route::group(
                 });
         });
 
-        require __DIR__ . '/auth.php';
-    },
-);
+    require __DIR__ . '/auth.php';
+});

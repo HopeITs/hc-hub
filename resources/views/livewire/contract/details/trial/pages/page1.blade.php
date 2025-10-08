@@ -4,19 +4,16 @@
     $loc = $locale ?? app()->getLocale();
     $emp = $contract->employee;
 
-    $nameEn = $emp?->getTranslation('name', 'en')
-            ?? $emp?->getTranslation('name', $loc)
-            ?? $emp?->name ?? '—';
-    $nameAr = $emp?->getTranslation('name', 'ar')
-            ?? $emp?->getTranslation('name', $loc)
-            ?? $emp?->name ?? '—';
+      $nameEn = $emp?->name_en ?? '—';
+      $nameAr = $emp?->name_ar ?? '—';
 
-    $cityEn = $emp?->city?->getTranslation('name', 'en')
-            ?? $emp?->city?->name
-            ?? $emp?->place_of_birth ?? '';
-    $cityAr = $emp?->city?->getTranslation('name', 'ar')
-            ?? $emp?->city?->name
-            ?? $emp?->place_of_birth ?? '';
+  $cityEn = $emp?->city?->name_en
+          ?? $emp?->city?->name
+          ?? $emp?->place_of_birth ?? '';
+
+      $cityAr = $emp?->city?->name_ar
+          ?? $emp?->city?->name
+          ?? $emp?->place_of_birth ?? '';
     $pobEn = trim((string) $cityEn);
     $pobAr = trim((string) $cityAr);
 
@@ -26,12 +23,11 @@
     $nationalId = $emp?->national_id;
     $nationalityRaw = (string) ($emp?->nationality ?? '');
 
-    $addressEn = $emp?->getTranslation('address', 'en')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null) ? ($emp->address['en'] ?? reset($emp->address) ?? '') : ($emp->address ?? ''));
-    $addressAr = $emp?->getTranslation('address', 'ar')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null) ? ($emp->address['ar'] ?? reset($emp->address) ?? '') : ($emp->address ?? ''));
+      $addressEn = $emp?->address_en
+          ?? (is_array($emp?->address ?? null) ? ($emp->address['en'] ?? reset($emp->address) ?? '') : ($emp->address ?? ''));
+
+      $addressAr = $emp?->address_ar
+          ?? (is_array($emp?->address ?? null) ? ($emp->address['ar'] ?? reset($emp->address) ?? '') : ($emp->address ?? ''));
 
     $esc = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
 

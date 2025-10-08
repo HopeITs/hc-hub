@@ -45,27 +45,25 @@ class CityModule extends Component
 
     public function render()
     {
-        $table  = (new City())->getTable();         // e.g. hchr_cities
-        $locale = app()->getLocale();
         $sort   = $this->sortField ?: 'id';
         $dir    = $this->sortDirection ?: 'asc';
 
         $query = City::query()
-            ->when($this->search, function ($q) use ($locale) {
+            ->when($this->search, function ($q)  {
                 $term = $this->search;
-                $q->where(function ($w) use ($term, $locale) {
+                $q->where(function ($w) use ($term) {
                     // search() is your app macro used elsewhere
-                    $w->search(["name->$locale", 'code', 'slug'], $term);
+                    $w->search(['name_ar', 'name_en', 'code', 'slug'], $term);
                 });
             });
 
         // Sorting (match your other modules)
         switch ($sort) {
             case 'name_ar':
-                $query->orderBy("name->ar", $dir);
+                $query->orderBy("name_ar", $dir);
                 break;
             case 'name_en':
-                $query->orderBy("name->en", $dir);
+                $query->orderBy("name_en", $dir);
                 break;
             case 'code':
             case 'slug':

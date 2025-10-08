@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\ProgramManagement;
+namespace App\Livewire\ProgramManagement\DefaultDeliverable;
 
 use App\Models\ChecklistItem;
 use App\Models\City;
@@ -36,16 +36,24 @@ class DefaultDeliverablesTable extends LivewireTable
 
     protected function employeeOptions(): array
     {
-        $loc = app()->getLocale();
-        return Employee::query()->orderBy("name->$loc")->get(['id', 'name'])
-            ->mapWithKeys(fn($e) => [$e->id => $e->getTranslation('name', $loc)])->all();
+
+        return Employee::query()->whereHas('contracts',function ($query){
+            $query->whereHas('position',function ($subQuery){
+                $subQuery->whereHas('department',function($q){
+                    $q->whereIn('name' , ['IT', 'Communication', 'HR']);
+                } );
+            });
+        })->orderBy(transColumn('name'))->get(['id', transColumn('name')])
+            ->mapWithKeys(fn($e) => [$e->id => $e->name])->all();
+
+
     }
 
     protected function cityOptions(): array
     {
         $loc = app()->getLocale();
-        return City::query()->whereHas('centers')->orderBy("name->$loc")->get(['id', 'name'])
-            ->mapWithKeys(fn($c) => [$c->id => $c->getTranslation('name', $loc)])->all();
+        return City::query()->whereHas('centers')->orderBy(transColumn('name'))->get(['id', transColumn('name')])
+            ->mapWithKeys(fn($c) => [$c->id => $c->name])->all();
     }
 
     protected function itemOptions(): array
@@ -60,20 +68,20 @@ class DefaultDeliverablesTable extends LivewireTable
         return [
             Column::make('ID', 'id')->sortable(),
 
-            SelectColumn::make(__('general.employee'), 'employee_id')
-                ->displayUsing(fn($v, Model $m) => $m->employee?->getTranslation('name', $loc) ?? '—')
+            SelectColumn::make(trans_choice('general.employee',1), 'employee.name')
+                ->displayUsing(fn($v, Model $m) => $m->employee?->name ?? '—')
                 ->options($this->employeeOptions())
-                ->sortable(),
+                ->sortable()->searchable(),
 
             SelectColumn::make(trans_choice('general.city', 1), 'city_id')
-                ->displayUsing(fn($v, Model $m) => $m->city?->getTranslation('name', $loc) ?? '—')
+                ->displayUsing(fn($v, Model $m) => $m->city?->name ?? '—')
                 ->options($this->cityOptions())
-                ->sortable(),
+                ->sortable()->searchable(),
 
             SelectColumn::make(__('general.item'), 'item_id')
                 ->displayUsing(fn($v, Model $m) => $m->item?->name ?? '—')
                 ->options($this->itemOptions())
-                ->sortable(),
+                ->sortable()->searchable(),
 
             Column::make(__('Actions'), function (Model $m): string {
                 $id = $m->getKey();

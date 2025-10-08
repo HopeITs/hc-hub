@@ -17,8 +17,8 @@
     $EN_SECOND_PARTY_LABEL = '<span class="h-label">second party</span>';
     $AR_SECOND_PARTY_LABEL = '<span class="h-label">الفريق الثاني</span>';
 
-    $empNameEn = $contract->employee?->getTranslation('name', 'en') ?? $contract->employee?->name ?? '—';
-    $empNameAr = $contract->employee?->getTranslation('name', 'ar') ?? $contract->employee?->name ?? '—';
+    $empNameEn = $emp?->name_en ?? '—';
+    $empNameAr = $emp?->name_ar ?? '—';
 
     $EN_FIRST_SIGN = '<strong>Name and Signature</strong><br>Fredy Youssef';
     $AR_FIRST_SIGN = '<strong>الاسم والتوقيع</strong><br>فريدي يوسف';

@@ -19,7 +19,8 @@ class JobLevelModule extends Component
 
     public $item = [
         'id' => null,
-        'name' => [],
+        'name_ar' => '',
+        'name_en' => '',
         'description' => null,
         'grade' => null,
         'email' => null,
@@ -28,8 +29,8 @@ class JobLevelModule extends Component
     protected function rules()
     {
         return [
-            'item.name' => 'required|array|min:1',
-            'item.name.*' => 'required|string|max:255',
+            'item.name_ar' => 'required|string|max:255',
+            'item.name_en' => 'required|string|max:255',
             'item.description' => 'nullable|string',
             'item.grade' => 'nullable|integer',
             'item.email' => [
@@ -44,10 +45,9 @@ class JobLevelModule extends Component
     {
         $this->item = [
             'id' => null,
-            'name' => [
-                'en' => '',
-                'ar' => '',
-            ],
+            'name_ar' => '',
+            'name_en' => '',
+
             'description' => null,
             'grade' => null,
             'email' => null,
@@ -64,7 +64,8 @@ class JobLevelModule extends Component
         $this->modalTitle = __('general.edit');
         $this->item = [
             'id' => $model->id,
-            'name' => $model->getTranslations('name'),
+            'name_ar' => $model->name_ar,
+            'name_en' => $model->name_en,
             'description' => $model->description,
             'grade' => $model->grade,
             'email' => $model->email,
@@ -79,7 +80,8 @@ class JobLevelModule extends Component
         $this->validate();
 
         $data = [
-            'name' => $this->item['name'],
+            'name_ar' => $this->item['name_ar'],
+            'name_en' => $this->item['name_en'],
             'description' => $this->item['description'],
             'grade' => $this->item['grade'],
             'email' => $this->item['email'],
@@ -126,28 +128,28 @@ class JobLevelModule extends Component
 
     public function render()
     {
-        $locale = app()->getLocale();
+
         $sort   = $this->sortField ?: 'id';
         $dir    = $this->sortDirection ?: 'asc';
 
         $query = JobLevel::query()
-            ->when($this->search, function ($q) use ($locale) {
+            ->when($this->search, function ($q)  {
                 $term = $this->search;
 
-                $q->where(function ($w) use ($term, $locale) {
+                $q->where(function ($w) use ($term) {
                     // Reuse your app-wide search() scope like other modules
-                    $w->search(["name->$locale", 'description', 'email'], $term);
+                    $w->search(["name_en","name_ar", 'description', 'email'], $term);
                 });
             });
 
         // Sorting (keep keys in sync with Blade headers)
         switch ($sort) {
             case 'name_ar':
-                $query->orderBy('name->ar', $dir);
+                $query->orderBy('name_ar', $dir);
                 break;
 
             case 'name_en':
-                $query->orderBy('name->en', $dir);
+                $query->orderBy('name_en', $dir);
                 break;
 
             case 'grade':

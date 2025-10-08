@@ -1,0 +1,26 @@
+@include('livewire.contract.export._styles')
+
+<div class="contract-a4 text-gray-900 dark:text-gray-100">
+    <div class="contract-body space-y-">
+        <div wire:key="trial-container-{{ $pageNo }}">
+            @switch($pageNo)
+                @case(1) @include('livewire.contract.export.trial.pages.page1') @break
+                @case(2) @include('livewire.contract.export.trial.pages.page2') @break
+                @case(3) @include('livewire.contract.export.trial.pages.page3') @break
+                @case(4) @include('livewire.contract.export.trial.pages.page4') @break
+            @endswitch
+        </div>
+    </div>
+
+    <div class="contract-footer">{{ $pageNo }} of {{ $totalPages }}</div>
+</div>
+
+@include('livewire.contract.export._pager')
+
+<div class="hidden print:block">
+    @for($i=1; $i <= $totalPages; $i++)
+        <div class="contract-a4 p-8 {{ $i < $totalPages ? 'page-break' : '' }}">
+            @include("livewire.contract.export.trial.pages.page{$i}")
+        </div>
+    @endfor
+</div>

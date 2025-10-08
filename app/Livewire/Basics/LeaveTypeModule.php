@@ -20,14 +20,16 @@ class LeaveTypeModule extends Component
 
     // Form fields
     public $item = [
-        'name' => [],
+        'name_ar' => '',
+        'name_en' => '',
         'base_days' => null,
         'allowed_gender' => null,
         'marital_status' => null,
     ];
 
     protected $rules = [
-        'item.name.*' => 'required|string',
+        'item.name_ar' => 'required|string',
+        'item.name_en' => 'required|string',
         'item.base_days' => 'required|integer',
         'item.allowed_gender' => 'integer',
         'item.marital_status' => 'integer',
@@ -35,7 +37,7 @@ class LeaveTypeModule extends Component
 
     public function render()
     {
-        $items = LeaveType::search(['name'], $this->search)
+        $items = LeaveType::search(['name_ar' , 'name_en'], $this->search)
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(15);
 
@@ -56,7 +58,8 @@ class LeaveTypeModule extends Component
         $this->modalTitle = __('general.edit');
         $this->item = [
             'id' => $model->id,
-            'name' => $model->getTranslations('name'),
+            'name_ar' => $model->name_ar,
+            'name_en' => $model->name_en,
             'base_days' => $model->base_days,
             'allowed_gender' => $model->allowed_gender,
             'marital_status' => $model->marital_status,

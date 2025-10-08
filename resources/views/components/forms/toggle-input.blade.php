@@ -1,3 +1,9 @@
+@props([
+    'active' => false,
+    'wireEvent' => null,
+    'modelId' => null,
+])
+
 <input
     {{ $attributes->merge([
         'type' => 'checkbox',
@@ -5,6 +11,7 @@
         'class' => '!text-green-400 rounded border-green-400 me-1'
     ]) }}
     @checked((bool) $active)
-    wire:click="{{ $wireEvent }}({{ $modelId }})"
+    @if($wireEvent && $modelId)
+        wire:click="{{ $wireEvent }}({{ $modelId }})"
+    @endif
 />
-

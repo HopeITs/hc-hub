@@ -4,7 +4,7 @@
     $isRtl      = app()->getLocale() === 'ar';
     $chevFlip   = $isRtl ? 'scale-x-[-1]' : '';
     $haloAnchor = $isRtl ? 'at_30%_30%' : 'at_70%_30%';
-    $user       = Auth::user();
+    $user       = auth()->user();
     $activeRole = $user->active_role_name ?? __('None');
     $switchTo   = $isRtl ? 'en' : 'ar';
     $localized  = LaravelLocalization::getLocalizedURL($switchTo, null, [], true);

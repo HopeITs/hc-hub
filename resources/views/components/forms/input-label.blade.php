@@ -1,5 +1,5 @@
 @props([
-    'for' => null,
+
     'value' => null,
     'theme' => 'default', // 'default' for auth, 'settings' for profile/settings
 ])
@@ -11,6 +11,6 @@
     };
 @endphp
 
-<label for="{{ $for }}" {{ $attributes->merge(['class' => $baseClass]) }}>
+<label {{ $attributes->merge(['class' => $baseClass]) }}>
     {{ $value ?? $slot }}
 </label>

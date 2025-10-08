@@ -20,8 +20,8 @@
             <div wire:key="title">
                 <x-forms.input-label for="title">@lang('general.title') (EN)
                 </x-forms.input-label>
-                <x-forms.input type="text" wire:model="form.title" id="title"/>
-                <x-error-span>{{ $errors->first('form.title') }}</x-error-span>
+                <x-forms.input type="text" wire:model="form.title_en" id="title"/>
+                <x-error-span>{{ $errors->first('form.title_en') }}</x-error-span>
             </div>
 
             <div wire:key="title-ar">
@@ -96,7 +96,7 @@
 
         <div class="flex justify-end gap-2">
             <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-            <x-modal.cancel-btn/>
+            <x-primary-button :href="route('positions.index')" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
         </div>
     </form>
 

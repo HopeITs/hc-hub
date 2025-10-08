@@ -5,7 +5,7 @@
     $TOP_MARGIN_MM    = 32;
 @endphp
     <!doctype html>
-<html lang="{{ app()->getLocale() }}" dir="ltr">
+<html lang="ar">
 <head>
     <meta charset="utf-8">
     <style>

@@ -44,7 +44,7 @@ class ContractsTable extends LivewireTable
             Column::make('ID', 'id')->sortable(),
 
             Column::make(__('general.employee'), function (Model $m) use ($loc) {
-                return $m->employee?->getTranslation('name', $loc) ?? '—';
+                return $m->employee?->name ?? '—';
             }),
 
             Column::make(trans_choice('general.positions', 1), function (Model $m) {
@@ -54,7 +54,7 @@ class ContractsTable extends LivewireTable
             }),
 
             Column::make(trans_choice('general.contract-type', 1), function (Model $m) use ($loc) {
-                return $m->contractType?->getTranslation('name', $loc) ?? '—';
+                return $m->contractType?->name ?? '—';
             }),
 
             Column::make(trans_choice('general.department', 1), function (Model $m) {
@@ -62,9 +62,7 @@ class ContractsTable extends LivewireTable
             }),
 
             Column::make(trans_choice('general.job-level', 1), function (Model $m) use ($loc) {
-                return $m->position?->jobLevel?->getTranslation('name', $loc)
-                    ?? $m->position?->jobLevel?->name
-                    ?? '—';
+                return $m->position?->jobLevel?->name ?? '—';
             }),
 
             Column::make(__('general.period'), function (Model $m) {

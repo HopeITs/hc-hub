@@ -32,7 +32,7 @@ class ContractExportController extends Controller
             'forPdf'     => true,
         ];
 
-        $pdf = Pdf::loadView('livewire.contract.details.print-dompdf', $viewData)
+        $pdf = Pdf::loadView('livewire.contract.export.print-dompdf', $viewData)
             ->setPaper('a4', 'portrait')
             ->set_option('isHtml5ParserEnabled', true)
             ->set_option('isRemoteEnabled', true)
@@ -49,4 +49,5 @@ class ContractExportController extends Controller
 
         return $pdf->stream($file);
     }
+
 }

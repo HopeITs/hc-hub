@@ -35,7 +35,7 @@ class Update extends Component
     public function render()
     {
         $locale = app()->getLocale();
-        $employees = Employee::orderBy("name->$locale")->get(['id', 'name']);
+        $employees = Employee::orderBy(transColumn('name'))->get(['id', transColumn('name')]);
 
         return view('livewire.program-management.program.form', [
             'title' => $this->form->program->name,

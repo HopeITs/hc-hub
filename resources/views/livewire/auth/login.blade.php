@@ -1,8 +1,8 @@
-<section class="min-h-[86.7dvh] rtl text-right bg-gray-100 flex items-center justify-center px-4">
+<section class="min-h-[86.7dvh]  rtl:text-right bg-gray-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
 
         <div class="text-center mb-6">
-            <x-app-logo class="mx-auto w-36" />
+            <x-app-logo class="mx-auto " />
         </div>
 
         <x-auth-card class="w-96 space-y-6">
@@ -62,7 +62,7 @@
                         <span>{{ __('auth.remember-me') }}</span>
                     </x-forms.input>
 
-                    @if (Route::has('password.request'))
+                    @if (request()->has('password.request'))
                         <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">
                             {{ __('auth.forgot-password') }}
                         </a>

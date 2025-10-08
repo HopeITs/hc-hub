@@ -7,14 +7,10 @@
     $loc = $locale ?? app()->getLocale();
     $emp = $contract->employee;
 
-    $nameEn = $emp?->getTranslation('name', 'en')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—';
+    $nameEn  = $emp?->name_en ?? '—';
 
     $nameAr = $G(
-        $emp?->getTranslation('name', 'ar')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—'
+   $emp?->name_ar ?? '—'
     );
 
     $esc   = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));

@@ -16,7 +16,7 @@
             </x-primary-button>
         </div>
     </div>
-    <livewire:program-management.centers-table/>
+    <livewire:program-management.center.centers-table/>
 
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         <form wire:submit.prevent="save" class="space-y-4">
@@ -32,7 +32,7 @@
                     <x-forms.select-input id="city_id" wire:model="item.city_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach($cities as $city)
-                            <option value="{{ $city->id }}">{{ $city->getTranslation('name', $locale) }}</option>
+                            <option value="{{ $city->id }}">{{ $city->name }}</option>
                         @endforeach
                     </x-forms.select-input>
                     <x-error-span>{{ $errors->first('item.city_id') }}</x-error-span>
@@ -44,9 +44,9 @@
                             <x-forms.input-label for="address_{{ $loc }}">
                                 @lang('general.address') ({{ strtoupper($loc) }})
                             </x-forms.input-label>
-                            <x-forms.textarea id="address_{{ $loc }}" wire:model.defer="item.address.{{ $loc }}"
+                            <x-forms.textarea id="address_{{ $loc }}" wire:model.defer="item.address_{{ $loc }}"
                                               rows="2"/>
-                            <x-error-span>{{ $errors->first('item.address.' . $loc) }}</x-error-span>
+                            <x-error-span>{{ $errors->first('item.address_' . $loc) }}</x-error-span>
                         </div>
                     @endforeach
                 </div>

@@ -6,7 +6,10 @@ use App\Models\Contract;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +21,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+
+        Livewire::setUpdateRoute(function ($handle) {
+            return Route::post('/livewire/update', $handle)
+                ->middleware('web')
+                ->prefix(LaravelLocalization::setLocale());
+        });
+
         Blade::directive('glyph', function ($expr) {
         return '<?php echo app(\App\Support\Arabic::class)->glyphs(' . $expr . '); ?>';
         });
