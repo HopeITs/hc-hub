@@ -41,7 +41,7 @@ class PositionTable extends LivewireTable
             $query->where('city_id', $this->cityId);
         }
 
-        return $query;
+        return $query->orderBy('direct_manager_id')->orderBy('tech_manager_id');
     }
 
     protected function columns(): array

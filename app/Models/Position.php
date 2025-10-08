@@ -3,26 +3,27 @@
 namespace App\Models;
 
 use App\Traits\HasTranslation;
-use Illuminate\Console\Prohibitable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
 
 class Position extends Model
 {
-    use HasFactory , HasTranslation;
+    use HasFactory, HasTranslation;
 
     protected $guarded = ['id'];
 
     protected $casts = [
-        'max_emp' => 'integer',
-        'exist_emp' => 'integer',
-        'is_active' => 'boolean',
+        'max_emp'    => 'integer',
+        'exist_emp'  => 'integer',
+        'is_active'  => 'boolean',
     ];
+
+    // --------------------------------------------
+    // Accessors & Mutators
+    // --------------------------------------------
     protected function title(): Attribute
     {
         return Attribute::make(
@@ -30,9 +31,18 @@ class Position extends Model
             set: fn($value) => $this->setTranslatableAttribute('title', $value)
         );
     }
+
+    // --------------------------------------------
+    // Relationships
+    // --------------------------------------------
     public function contracts(): HasMany
     {
         return $this->hasMany(Contract::class, 'position_id');
+    }
+
+    public function activeContracts(): HasMany
+    {
+        return $this->hasMany(Contract::class, 'position_id')->where('is_active', true);
     }
 
     public function center(): BelongsTo
@@ -60,33 +70,32 @@ class Position extends Model
         return $this->belongsTo(Department::class, 'department_id');
     }
 
-    public function techTeam(): HasMany
+    // direct / tech hierarchy
+    public function directManager(): BelongsTo
     {
-        return $this->hasMany(Position::class, 'tech_manager_id');
-    }
-
-    public function directTeam(): HasMany
-    {
-        return $this->hasMany(Position::class, 'direct_manager_id');
+        return $this->belongsTo(self::class, 'direct_manager_id');
     }
 
     public function techManager(): BelongsTo
     {
-        return $this->belongsTo(Position::class, 'tech_manager_id');
+        return $this->belongsTo(self::class, 'tech_manager_id');
     }
 
-    public function ActiveContracts(): HasMany
+    public function directTeam(): HasMany
     {
-        return $this->hasMany(Contract::class, 'position_id')->where('is_active', 1);
+        return $this->hasMany(self::class, 'direct_manager_id');
     }
 
-    public function directManager(): BelongsTo
+    public function techTeam(): HasMany
     {
-        return $this->belongsTo(Position::class, 'direct_manager_id');
+        return $this->hasMany(self::class, 'tech_manager_id');
     }
 
-    public function employee(): Employee
+    // --------------------------------------------
+    // Helpers
+    // --------------------------------------------
+    public function employee(): ?Employee
     {
-        return $this->activeContracts()->first()->employee;
+        return $this->activeContracts()->first()?->employee;
     }
 }
