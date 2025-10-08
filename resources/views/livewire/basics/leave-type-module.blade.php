@@ -12,7 +12,7 @@
             :showButton="true"
         />
         <div>
-            <x-primary-button wire:click="create">
+            <x-primary-button wire:click="create" :showSpinner="false">
                 @lang('general.add-new')
             </x-primary-button>
         </div>
@@ -35,14 +35,14 @@
                 wire:click="sortBy('base_days')"
                 sortable
                 :direction="$sortField === 'base_days' ? $sortDirection : null">
-                @lang('general.base_days')
+                @lang('general.base-days')
             </x-table.heading>
 
             <x-table.heading
                 wire:click="sortBy('allowed_gender')"
                 sortable
                 :direction="$sortField === 'allowed_gender' ? $sortDirection : null">
-                @lang('general.allowed_gender')
+                @lang('general.allowed-gender')
             </x-table.heading>
 
             <x-table.heading
@@ -97,19 +97,19 @@
                         <x-forms.input-label for="name_{{ $locale }}">
                             @lang('general.name') ({{ strtoupper($locale) }})
                         </x-forms.input-label>
-                        <x-forms.input type="text" wire:model="item.name.{{ $locale }}" id="name_{{ $locale }}"/>
-                        <x-error-span>{{ $errors->first('item.name.' . $locale) }}</x-error-span>
+                        <x-forms.input type="text" wire:model="item.name_{{ $locale }}" id="name_{{ $locale }}"/>
+                        <x-error-span>{{ $errors->first('item.name_' . $locale) }}</x-error-span>
                     </div>
                 @endforeach
 
                 <div>
-                    <x-forms.input-label for="base_days">@lang('general.base_days')</x-forms.input-label>
+                    <x-forms.input-label for="base_days">@lang('general.base-days')</x-forms.input-label>
                     <x-forms.input type="number" wire:model="item.base_days" id="base_days"/>
                     <x-error-span>{{ $errors->first('item.base_days') }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label>@lang('general.allowed_gender')</x-forms.input-label>
+                    <x-forms.input-label>@lang('general.allowed-gender')</x-forms.input-label>
                     <div class="flex justify-between">
                         <x-forms.radio-input id="any_gender" name="allowed_gender" value="{{LeaveType::GENDER_ANY}}"
                                              wire:model="item.allowed_gender">{{LeaveType::getGender(LeaveType::GENDER_ANY)['value']}}</x-forms.radio-input>

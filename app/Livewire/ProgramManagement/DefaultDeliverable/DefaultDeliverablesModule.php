@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\ProgramManagement;
+namespace App\Livewire\ProgramManagement\DefaultDeliverable;
 
 use App\Models\ChecklistItem;
 use App\Models\City;
@@ -49,13 +49,20 @@ class DefaultDeliverablesModule extends Component
         $locale = app()->getLocale();
 
         // Dropdowns for the modal
-        $employees = Employee::orderBy("name->$locale")
-            ->get(['id','name'])
-            ->mapWithKeys(fn ($e) => [$e->id => $e->getTranslation('name', $locale)]);
+        $employees = Employee::whereHas('contracts',function ($query){
+            $query->whereHas('position',function ($subQuery){
+                $subQuery->whereHas('department',function($q){
+                    $q->whereIn('name' , ['IT', 'Communication', 'HR']);
+                } );
+            });
+        })
+        ->orderBy(transColumn('name'))
+            ->get(['id',transColumn('name')])
+            ->mapWithKeys(fn ($e) => [$e->id => $e->name]);
 
         $cities = City::whereHas('centers')
-            ->orderBy("name->$locale")
-            ->get(['id','name']);
+            ->orderBy(transColumn('name'))
+            ->get(['id',transColumn('name')]);
 
         $checklistItems = ChecklistItem::orderBy('order')->get(['id','name']);
 

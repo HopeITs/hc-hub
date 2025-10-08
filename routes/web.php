@@ -2,49 +2,29 @@
 
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
-use App\Livewire\Basics\{
-    ChecklistItemModule,
+use App\Livewire\Basics\{ChecklistItemModule,
     CityModule,
     ContractTypeModule,
     DepartmentModule,
     JobLevelModule,
-    LeaveTypeModule
-};
-use App\Livewire\Contract\{
-    ContractCreate,
-    ContractDetails,
-    ContractEdit,
-    ContractsModule
-};
-use App\Livewire\Employee\{
-    EmployeeCreate,
-    EmployeeEdit,
-    EmployeeModule
-};
-use App\Livewire\Position\{
-    PositionCreate,
-    PositionEdit,
-    PositionsModule
-};
-use App\Livewire\ProgramManagement\{
-    CentersModule,
-    DefaultDeliverablesModule,
+    LeaveTypeModule};
+use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
+use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule};
+use App\Livewire\Position\{PositionCreate, PositionEdit, PositionsModule};
+use App\Livewire\ProgramManagement\{Center\CentersModule,
+    DefaultDeliverable\DefaultDeliverablesModule,
     Program\Create as ProgramCreate,
     Program\Detail as ProgramDetail,
     Program\Index as ProgramIndex,
-    Program\Update as ProgramUpdate
-};
-use App\Livewire\Settings\{
-    Appearance,
-    Password,
-    Profile
-};
+    Program\Update as ProgramUpdate};
+use App\Livewire\Settings\{Appearance, Password, Profile};
 use Illuminate\Support\Facades\Route;
-use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use Livewire\Livewire;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 Route::group([
     'prefix' => LaravelLocalization::setLocale(),
+    'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']
 ], function () {
 
     Livewire::setUpdateRoute(fn ($handle) => Route::post('/livewire/update', $handle));

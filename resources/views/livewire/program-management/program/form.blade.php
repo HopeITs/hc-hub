@@ -39,16 +39,7 @@
                 <x-error-span>{{ $errors->first('form.name') }}</x-error-span>
             </div>
 
-            <div class="col-span-2">
-                <x-forms.input-label for="program_manager_id">@lang('general.program-manager')</x-forms.input-label>
-                <x-forms.select-input id="program_manager_id" wire:model="form.program_manager_id">
-                    <option value="">{{ __('general.select') }}</option>
-                    @foreach($employees as $employee)
-                        <option value="{{ $employee->id }}">{{ $employee->name }}</option>
-                    @endforeach
-                </x-forms.select-input>
-                <x-error-span>{{ $errors->first('form.program_manager_id') }}</x-error-span>
-            </div>
+
 
             @foreach (config('app.supported_locales') as $locale)
                 <div class="col-span-1">
@@ -58,9 +49,9 @@
                     <x-forms.textarea
                         type="text"
                         id="description_{{ $locale }}"
-                        wire:model.defer="form.description.{{ $locale }}"
+                        wire:model.defer="form.description_{{ $locale }}"
                     />
-                    <x-error-span>{{ $errors->first('form.description.' . $locale) }}</x-error-span>
+                    <x-error-span>{{ $errors->first('form.description_' . $locale) }}</x-error-span>
                 </div>
             @endforeach
 
@@ -79,7 +70,8 @@
 
         <div class="flex justify-end space-x-2 pt-4">
             <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-            <x-modal.cancel-btn />
+            <x-primary-button :href="route('programs.index')" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
+
         </div>
     </form>
 </div>

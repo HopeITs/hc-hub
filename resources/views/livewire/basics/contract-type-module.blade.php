@@ -65,8 +65,8 @@
                 <x-table.row>
                     <x-table.cell>{{$item->id}}</x-table.cell>
 
-                    <x-table.cell>{{$item->getTranslation('name' , 'ar')}}</x-table.cell>
-                    <x-table.cell>{{$item->getTranslation('name' , 'en')}}</x-table.cell>
+                    <x-table.cell>{{$item->name_ar}}</x-table.cell>
+                    <x-table.cell>{{$item->name_en}}</x-table.cell>
                     <x-table.cell>
                         <x-badge :color="$place['color']"> {{ $place['value'] }}</x-badge>
                     </x-table.cell>
@@ -99,8 +99,8 @@
                         <x-forms.input-label for="name_{{ $locale }}">@lang('general.name')({{ strtoupper($locale) }})
                         </x-forms.input-label>
                         <x-forms.input type="text" id="name_{{ $locale }}"
-                                       wire:model="item.name.{{ $locale }}"/>
-                        <x-error-span>{{$errors->first('item.name.'.$locale)}}</x-error-span>
+                                       wire:model="item.name_{{ $locale }}"/>
+                        <x-error-span>{{$errors->first('item.name_'.$locale)}}</x-error-span>
                     </div>
                 @endforeach
                 <div>

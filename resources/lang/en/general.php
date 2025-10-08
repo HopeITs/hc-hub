@@ -101,7 +101,7 @@ return [
     'logo' => 'Logo',
     'search' => 'Search',
 
-    'employee' => 'Employees|Employee',
+    'employee' => 'Employee|Employees',
     'photo' => 'Photo',
     'unknown' => 'Unknown',
     'is-board-member' => 'Board Member',

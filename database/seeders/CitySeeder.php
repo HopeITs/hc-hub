@@ -12,12 +12,7 @@ class CitySeeder extends Seeder
         $cities = config('samples.sampleData.cities');
 
         foreach ($cities as $city) {
-            City::create([
-                'name' => $city['name'],
-                'code' => $city['code'],
-                'slug' => $city['slug'],
-                'is_active' => $city['is_active'],
-            ]);
+            City::create($city);
         }
     }
 }

@@ -81,8 +81,8 @@ class ContractEdit extends Component
         return view('livewire.contract.contract-edit', [
             // Match create: employees scoped by user's city
             'employees' => Employee::where('city_id', auth()->user()->profile->city_id)
-                ->select('id','name')
-                ->orderBy("name->$locale")
+                ->select('id',transColumn("name"))
+                ->orderBy(transColumn("name"))
                 ->get(),
 
             // Positions include relations so identity partial can show derived info
@@ -90,12 +90,12 @@ class ContractEdit extends Component
                 'center:id,name,city_id',
                 'program:id,name',
                 'department:id,name',
-                'jobLevel:id,name,grade',
+                'jobLevel:id,'.transColumn("name").',grade',
             ])
                 ->orderBy('id')
                 ->get(['id','center_id','program_id','department_id','job_level_id']),
 
-            'types' => ContractType::select('id','name')->orderBy("name->$locale")->get(),
+            'types' => ContractType::select('id',transColumn("name"))->orderBy(transColumn("name"))->get(),
         ]);
     }
 }

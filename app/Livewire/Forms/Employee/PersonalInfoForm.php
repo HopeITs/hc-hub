@@ -20,19 +20,26 @@ class PersonalInfoForm extends Form
     public ?Employee $employee = null;
 
     public $photo = null;
-    #[Validate(['name.ar' => 'required|string', 'name.en' => 'required|string'])]
-    public $name = [];
+    #[Validate('required|string')]
+    public $name_ar ;
+    #[Validate('required|string')]
+    public $name_en ;
 
     public $id;
+    #[Validate('required|string')]
+    public $father_name_ar ;
+    #[Validate('required|string')]
+    public $father_name_en ;
 
-    #[Validate(['father_name.ar' => 'required|string', 'father_name.en' => 'nullable|string'])]
-    public $father_name = [];
+    #[Validate('required|string')]
+    public $mother_name_ar ;
+    #[Validate('required|string')]
+    public $mother_name_en ;
+    #[Validate('nullable|string')]
+    public $address_ar ;
+    #[Validate('nullable|string')]
+    public $address_en ;
 
-    #[Validate(['mother_name.ar' => 'required|string', 'mother_name.en' => 'nullable|string'])]
-    public $mother_name = [];
-
-    #[Validate(['address' => 'nullable|array', 'address.*' => 'nullable|string'])]
-    public $address = [];
 
     public $email;
 
@@ -163,10 +170,14 @@ class PersonalInfoForm extends Form
         $this->is_board_member = $employee->is_board_member;
         $this->board_member_started_at = $employee->board_member_started_at?->format('Y-m-d');
         $this->board_member_end_at = $employee->board_member_end_at?->format('Y-m-d');
-        $this->name = $employee->getTranslations('name');
-        $this->father_name = $employee->getTranslations('father_name');
-        $this->mother_name = $employee->getTranslations('mother_name');
-        $this->address = $employee->getTranslations('address');
+        $this->name_ar = $employee->name_ar;
+        $this->name_en = $employee->name_en;
+        $this->father_name_en = $employee->father_name_en;
+        $this->father_name_ar = $employee->father_name_ar;
+        $this->mother_name_en = $employee->mother_name_en;
+        $this->mother_name_ar = $employee->mother_name_ar;
+        $this->address_en = $employee->address_en;
+        $this->address_ar = $employee->address_ar;
         $this->username = $employee->username;
         $this->email = $employee->account?->email;
         $this->photo = $employee->getFirstMediaUrl('avatar');

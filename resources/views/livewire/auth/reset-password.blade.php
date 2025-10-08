@@ -3,7 +3,7 @@
 
         {{-- Logo --}}
         <div class="text-center mb-12">
-            <x-app-logo class="mx-auto w-36" />
+            <x-app-logo class="mx-auto" />
         </div>
 
         {{-- Reset Password Card --}}

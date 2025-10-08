@@ -50,7 +50,7 @@ class EmployeeCreate extends Component
 
         return view('livewire.employee.form', [
             'roles' => $roles,
-            'allEmployees' => Employee::select('id', 'name')->get(),
+            'allEmployees' => Employee::select('id', 'name_en', 'name_ar')->get(),
             'isCreateMode' => true,
         ]);
     }

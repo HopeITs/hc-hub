@@ -72,18 +72,18 @@ class ContractCreate extends Component
 
         return view('livewire.contract.contract-create', [
             'employees' => Employee::where('city_id', auth()->user()->profile->city_id)
-                ->select('id','name')->orderBy("name->$locale")->get(),
+                ->select('id',transColumn('name'))->orderBy(transColumn('name'))->get(),
 
             'positions' => Position::with([
                 'center:id,name,city_id',
                 'program:id,name',
                 'department:id,name',
-                'jobLevel:id,name,grade',
+                'jobLevel:id,'.transColumn('name').',grade',
             ])
-                ->orderBy('title')
-                ->get(['id','title','center_id','program_id','department_id','job_level_id']),
+                ->orderBy(transColumn('title'))
+                ->get(['id',transColumn('title'),'center_id','program_id','department_id','job_level_id']),
 
-            'types' => ContractType::select('id','name')->orderBy("name->$locale")->get(),
+            'types' => ContractType::select('id',transColumn('name'))->orderBy(transColumn('name'))->get(),
         ]);
     }
 }

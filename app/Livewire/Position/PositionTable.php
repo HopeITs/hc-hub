@@ -23,7 +23,7 @@ class PositionTable extends LivewireTable
 
     public ?int $centerId = null;
     public ?int $cityId = null;
-
+    public $itemID;
     public function mount(?int $centerId = null, ?int $cityId = null): void
     {
         $this->centerId = $centerId ?? request()->get('center');
@@ -32,7 +32,7 @@ class PositionTable extends LivewireTable
 
     protected function query(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = $this->model()::query()->with(['city', 'program', 'center']);
+        $query = $this->model()::query()->with(['city', 'program', 'center' , 'jobLevel' , 'department']);
 
         if ($this->centerId) {
             $query->where('center_id', $this->centerId);
@@ -47,33 +47,24 @@ class PositionTable extends LivewireTable
     protected function columns(): array
     {
         return [
-            Column::make(__('Title'), 'title')->sortable()->searchable(),
+            Column::make(__('Title'), 'title_en')->sortable()->searchable(),
             Column::make(__('Title') . ' (AR)', 'title_ar')->sortable()->searchable(),
+            SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
+                ->options(City::query()->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
+                ->sortable()     ->searchable(),
+            SelectColumn::make(trans_choice('general.program', 1), 'program.name')
+                ->options(Program::query()->get()->pluck('name', 'name')->toArray())
+                ->sortable()     ->searchable(),
+            SelectColumn::make(trans_choice('general.center', 1), 'center.name')
+                ->options(Center::query()->get()->pluck('name', 'name')->toArray())
+                ->sortable()     ->searchable(),
+            SelectColumn::make(trans_choice('general.department', 1), 'department.name')
+                ->options(Department::query()->get()->pluck('name', 'name')->toArray())
+                ->sortable()     ->searchable(),
 
-            SelectColumn::make(trans_choice('general.city', 1), 'city_id')
-                ->displayUsing(fn($v, Model $m) => $m->city->name ?? '-')
-                ->options(City::pluck('name', 'id')->toArray())
-                ->sortable(),
-
-            SelectColumn::make(trans_choice('general.program', 1), 'program_id')
-                ->displayUsing(fn($v, Model $m) => $m->program->name ?? '-')
-                ->options(Program::pluck('name', 'id')->toArray())
-                ->sortable(),
-
-            SelectColumn::make(trans_choice('general.center', 1), 'center_id')
-                ->displayUsing(fn($v, Model $m) => $m->center->name ?? '-')
-                ->options(Center::pluck('name', 'id')->toArray())
-                ->sortable(),
-
-            SelectColumn::make(trans_choice('general.department', 1), 'department_id')
-                ->displayUsing(fn($v, Model $m) => $m->department->name ?? '-')
-                ->options(Department::pluck('name', 'id')->toArray())
-                ->sortable(),
-
-            SelectColumn::make(trans_choice('general.job-level', 1), 'job_level_id')
-                ->displayUsing(fn($v, Model $m) => $m->jobLevel->name ?? '-')
-                ->options(JobLevel::pluck('name', 'id')->toArray())
-                ->sortable(),
+            SelectColumn::make(trans_choice('general.job-level', 1), 'jobLevel.'.transColumn('name'))
+                ->options(JobLevel::query()->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
+                ->sortable()     ->searchable(),
 
             BooleanColumn::make(__('general.is-active'), 'is_active'),
 
@@ -100,25 +91,7 @@ class PositionTable extends LivewireTable
         ];
     }
 
-    protected function filters(): array
-    {
-        return [
-            SelectFilter::make(trans_choice('general.city', 1), 'city_id')
-                ->options(City::pluck('name', 'id')->toArray()),
 
-            SelectFilter::make(trans_choice('general.program', 1), 'program_id')
-                ->options(Program::pluck('name', 'id')->toArray()),
-
-            SelectFilter::make(trans_choice('general.center', 1), 'center_id')
-                ->options(Center::pluck('name', 'id')->toArray()),
-
-            SelectFilter::make(trans_choice('general.department', 1), 'department_id')
-                ->options(Department::pluck('name', 'id')->toArray()),
-
-            SelectFilter::make(trans_choice('general.job-level', 1), 'job_level_id')
-                ->options(JobLevel::pluck('name', 'id')->toArray()),
-        ];
-    }
 
     protected function actions(): array
     {
