@@ -33,11 +33,11 @@
                                     wire:model.defer="notes.{{ $item->id }}"
                                     wire:key="note-input-{{ $item->id }}"
                                     placeholder="{{ __('general.add_note') }}"
-                                    class="w-full rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    class="w-full rounded-md border-red-500 text-sm focus:border-red-600 focus:ring-red-600">
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <button wire:click="markReceived({{ $item->id }})"
-                                    class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-semibold rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition">
+                                    class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition">
                                     {{ __('general.mark_as_received') }}
                                 </button>
                             </td>

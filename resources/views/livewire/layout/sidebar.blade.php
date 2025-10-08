@@ -1,6 +1,22 @@
 <aside id="cta-button-sidebar"
     class="fixed top-0 left-0 rtl:right-0 z-40 w-64 h-screen pt-4 transition-transform sm:translate-x-0 translate-x-full bg-white border-l border-gray-200 shadow-xl"
     aria-label="Sidebar">
+
+    @php
+        use App\Models\Checklist;
+        use Illuminate\Support\Facades\Auth;
+
+        $employeeId = Auth::user()->profile->id ?? null;
+
+        $pendingDeliversCount = Checklist::where('delivered_id', $employeeId)
+            ->where('delivered_status', '!=', 'delivered')
+            ->count();
+
+        $pendingReturnsCount = Checklist::where('receiver_id', $employeeId)
+            ->where('returned_status', 'pending')
+            ->count();
+    @endphp
+
     <div class="flex flex-col h-full justify-between">
         <div class="h-full px-3 pb-4 bg-white overflow-y-auto">
             <a href="{{ route('home') }}" class="flex justify-center items-center mt-4 mb-8">
@@ -100,13 +116,25 @@
                         <x-slot name="list">
                             <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-delivers')" :active="request()->routeIs('checklist-items.pending-delivers')">
                                 {{ __('general.pending-delivers') }}
+                                @if($pendingDeliversCount > 0)
+                                    <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                        {{ $pendingDeliversCount }}
+                                    </span>
+                                @endif
                             </x-layouts.app.sidebar.nav-item>
+
                             <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-returns')" :active="request()->routeIs('checklist-items.pending-returns')">
                                 {{ __('general.pending_returns') }}
+                                @if($pendingReturnsCount > 0)
+                                    <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                        {{ $pendingReturnsCount }}
+                                    </span>
+                                @endif
                             </x-layouts.app.sidebar.nav-item>
-                            {{-- <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
+
+                            <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
                                 {{ __('general.items') }}
-                            </x-layouts.app.sidebar.nav-item> --}}
+                            </x-layouts.app.sidebar.nav-item>
                         </x-slot>
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole

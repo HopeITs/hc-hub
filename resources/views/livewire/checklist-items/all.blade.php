@@ -41,18 +41,18 @@
                             </td>
                             <td class="px-6 py-4 text-sm">
                                 <span class="px-2 py-1 inline-flex text-xs font-medium rounded-full
-                                    @if(strtolower($item->delivered_status ?? $item->returned_status) === 'delivered')
+                                    @if(strtolower($item->display_status) === 'delivered')
                                         bg-green-100 text-green-700
-                                    @elseif(strtolower($item->delivered_status ?? $item->returned_status) === 'pending')
+                                    @elseif(strtolower($item->display_status) === 'on hold')
                                         bg-yellow-100 text-yellow-700
                                     @else
                                         bg-gray-100 text-gray-700
                                     @endif">
-                                    {{ ucfirst($item->delivered_status ?? $item->returned_status) }}
+                                    {{ $item->display_status }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500">
-                                {{ $item->notes ?: ($item->return_notes ?: '-') }}
+                                {{ $item->notes ?: '-' }}
                             </td>
                         </tr>
                     @endforeach

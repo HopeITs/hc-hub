@@ -19,14 +19,16 @@ class ChecklistForm extends Form
         $isNew = $savedChecklists->isEmpty();
 
         $this->items = $allItems
-            ->map(function ($item) use ($savedChecklists, $isNew) {
+            ->map(function ($item) use ($savedChecklists, $isNew, $defaultDeliverables, $employee) {
                 $saved = $savedChecklists->get($item->id);
+
+                $defaultDeliverer = $defaultDeliverables->first(fn($d) => $d->item_id === $item->id && $d->city_id === $employee->city_id);
 
                 return [
                     'item_id' => $item->id,
                     'item_name' => $item->name,
                     'is_selected' => $isNew || (bool) $saved,
-                    'delivered_id' => $saved?->delivered_id,
+                    'delivered_id' => $saved?->delivered_id ?? $defaultDeliverer?->employee_id,
                     'receiver_id' => $saved?->receiver_id,
                     'delivered_status' => $saved?->delivered_status,
                     'returned_status' => $saved?->returned_status,
