@@ -181,24 +181,24 @@ class Employee extends Model implements HasMedia
             return 0;
         }
 
-        // تجهيز الفترات
+        // Build the time periods for each contract
         $periods = $contracts->map(function ($c) {
             $start = Carbon::parse($c->start_date);
 
-            // تحديد نهاية العقد الفعلية
+            // Determine the actual end date of the contract
             $end = null;
             if ($c->terminated_at) {
-                // في حال الانفصال المبكر
+                // Employee left before the planned end date
                 $end = Carbon::parse($c->terminated_at);
             } elseif ($c->end_date) {
-                // في حال نهاية العقد الطبيعية
+                // Contract ended normally
                 $end = Carbon::parse($c->end_date);
             } else {
-                // عقد مفتوح أو جاري
+                // Contract is still active
                 $end = Carbon::now();
             }
 
-            // تصحيح في حال خطأ بالبيانات (نهاية قبل البداية)
+            // Correct data errors where end date is before start date
             if ($end->lt($start)) {
                 [$start, $end] = [$end, $start];
             }
@@ -206,18 +206,20 @@ class Employee extends Model implements HasMedia
             return compact('start', 'end');
         })->sortBy('start')->values()->toArray();
 
-        // دمج الفترات المتداخلة (بدون حساب الانقطاعات)
+        // Merge overlapping or continuous contract periods
         $merged = [$periods[0]];
         foreach (array_slice($periods, 1) as $p) {
             $last = &$merged[count($merged) - 1];
             if ($p['start']->lte($last['end'])) {
+                // Extend the end date if periods overlap or touch
                 $last['end'] = $p['end']->gt($last['end']) ? $p['end'] : $last['end'];
             } else {
+                // Separate period (gap between contracts)
                 $merged[] = $p;
             }
         }
 
-        // حساب سنوات الخدمة الفعلية (سنوات + أشهر جزئية)
+        // Calculate total service time (in years + fractional months)
         $totalYears = 0;
         foreach ($merged as $m) {
             $years = $m['end']->diffInYears($m['start']);
@@ -225,8 +227,10 @@ class Employee extends Model implements HasMedia
             $totalYears += $years + ($months / 12);
         }
 
+        // Return total years of service rounded to one decimal
         return -1 * round($totalYears, 1);
     }
+
 
 
 
