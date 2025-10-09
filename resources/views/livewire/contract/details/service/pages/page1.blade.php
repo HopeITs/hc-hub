@@ -11,34 +11,12 @@
     $emp = $contract->employee;
 
     // English fields
-    $nameEn = $emp?->getTranslation('name', 'en')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—';
-
-    $cityEn = $emp?->city?->getTranslation('name', 'en')
-        ?? $emp?->city?->name
-        ?? $emp?->place_of_birth ?? '';
-
-    $addressEn = $emp?->getTranslation('address', 'en')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null)
-            ? ($emp->address['en'] ?? reset($emp->address) ?? '')
-            : ($emp->address ?? '') );
-
-    // Arabic fields
-    $nameAr = $Glyphs($emp?->getTranslation('name', 'ar')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—');
-
-    $cityAr = $Glyphs($emp?->city?->getTranslation('name', 'ar')
-        ?? $emp?->city?->name
-        ?? $emp?->place_of_birth ?? '');
-
-    $addressAr = $Glyphs($emp?->getTranslation('address', 'ar')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null)
-            ? ($emp->address['ar'] ?? reset($emp->address) ?? '')
-            : ($emp->address ?? '')));
+    $nameEn =  $emp?->name_en ?? '—';
+    $nameAr =  $Glyphs($emp?->name_ar ??  '—');
+   $cityEn = $emp?->city?->name_en ?? $emp?->place_of_birth ?? '';
+    $cityAr = $Glyphs( $emp?->city?->name_ar ?? $emp?->place_of_birth ?? '');
+    $addressEn = $emp->address_en ?? '';
+    $addressAr = $Glyphs($emp->address_ar ?? '');
 
     // DOB
     $dob = $emp?->dob;

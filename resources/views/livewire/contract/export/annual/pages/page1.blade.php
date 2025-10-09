@@ -11,35 +11,19 @@
     $position = $contract->position;
     $program  = $position?->program;
 
-    // English fields
-    $nameEn = $emp?->getTranslation('name', 'en')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—';
+        $nameEn = $emp?->name_en ?? '—';
+      $nameAr = $emp?->name_ar ?? '—';
 
-    $cityEn = $emp?->city?->getTranslation('name', 'en')
-        ?? $emp?->city?->name
-        ?? $emp?->place_of_birth ?? '';
+      $cityEn = $emp?->city?->name_en
+          ?? $emp?->city?->name
+          ?? $emp?->place_of_birth ?? '—';
 
-    $addressEn = $emp?->getTranslation('address', 'en')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null)
-            ? ($emp->address['en'] ?? reset($emp->address) ?? '')
-            : ($emp->address ?? '') );
+      $cityAr = $emp?->city?->name_ar
+          ?? $emp?->city?->name
+          ?? $emp?->place_of_birth ?? '—';
 
-    // Arabic fields
-    $nameAr = $Glyphs($emp?->getTranslation('name', 'ar')
-        ?? $emp?->getTranslation('name', $loc)
-        ?? $emp?->name ?? '—');
-
-    $cityAr = $Glyphs($emp?->city?->getTranslation('name', 'ar')
-        ?? $emp?->city?->name
-        ?? $emp?->place_of_birth ?? '');
-
-    $addressAr = $Glyphs($emp?->getTranslation('address', 'ar')
-        ?? $emp?->getTranslation('address', $loc)
-        ?? (is_array($emp?->address ?? null)
-            ? ($emp->address['ar'] ?? reset($emp->address) ?? '')
-            : ($emp->address ?? '') ));
+      $addressEn = $emp?->address_en ?? '—';
+      $addressAr = $emp?->address_ar ?? '—';
 
     // DOB
     $dob = $emp?->dob;
@@ -123,19 +107,19 @@
     <div style="line-height: 0.7">
         <x-contract.dual
             :en="'<strong>Ms./Mrs.</strong> '.$esc($nameEn)"
-            :ar="$esc($nameAr).' '.$Glyphs(__('general.text4'))"/>
+            :ar="$escAr($nameAr).' '.$Glyphs(__('general.text4'))"/>
         <x-contract.dual
             :en="'<strong>Date and Place of Birth:</strong> '.$esc($pobEn).' — '.$esc($dobStr)"
-            :ar="$esc($dobStrAr).' — '.$esc($pobAr).$Glyphs(__('general.text5'))"/>
+            :ar="$escAr($dobStrAr).' — '.$escAr($pobAr).$Glyphs(__('general.text5'))"/>
         <x-contract.dual
             :en="'<strong>National ID number:</strong> '.$esc($nationalId)"
-            :ar="$esc(ar_digits($nationalId ?? '')).' '.$Glyphs(__('general.text6'))"/>
+            :ar="$escAr(ar_digits($nationalId ?? '')).' '.$Glyphs(__('general.text6'))"/>
         <x-contract.dual
             :en="'<strong>Nationality:</strong> '.$esc($natEn)"
-            :ar="$esc($natAr).' '.$Glyphs(__('general.text7'))"/>
+            :ar="$escAr($natAr).' '.$Glyphs(__('general.text7'))"/>
         <x-contract.dual
             :en="'<strong>Address:</strong> '.$esc($addressEn)"
-            :ar="$esc($addressAr).' '.$Glyphs(__('general.text8'))"/>
+            :ar="$escAr($addressAr).' '.$Glyphs(__('general.text8'))"/>
     </div>
 </div>
 

@@ -7,8 +7,8 @@
     $L       = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 
     // Employee name
-    $empNameEn = $contract->employee?->getTranslation('name', 'en') ?? $contract->employee?->name ?? '—';
-    $empNameAr = $contract->employee?->getTranslation('name', 'ar') ?? $contract->employee?->name ?? '—';
+    $empNameEn =  $contract->employee?->name_en ?? '—';
+    $empNameAr =  $Glyphs($contract->employee?->name_ar ?? '—');
 
     $esc   = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
     $escAr = fn ($v) => e((string)($v === '' || $v === null ? '—' : $Glyphs($v)));
