@@ -328,6 +328,13 @@ return [
     'receive-by' => 'Receive By',
     'note' => 'Note',
     'received_at' => 'Received at',
+    'my-items' => 'My Items',
+    'done_requests' => 'Done Requests',
+    'no_done_requests' => 'No done requests yet.',
+    'employee' => 'Employee',
+    'action' => 'Action',
+    'counterparty' => 'Counterparty',
+    'request' => 'Request|Requests',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
