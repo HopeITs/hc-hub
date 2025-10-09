@@ -9,25 +9,39 @@
 
     $loc = $locale ?? app()->getLocale();
     $emp = $contract->employee;
-
-    $nameEn = $emp?->getTranslation('name', 'en') ?? $emp?->getTranslation('name', $loc) ?? $emp?->name ?? '—';
-    $nameAr = $Glyphs($emp?->getTranslation('name', 'ar') ?? $emp?->getTranslation('name', $loc) ?? $emp?->name ?? '—');
-
+        $nameEn = $emp?->name_en ?? '—';
+      $nameAr = $emp?->name_ar ?? '—';
     $esc   = fn ($v) => e($v === '' || $v === null ? '—' : $v);
     $escAr = fn ($v) => e($v === '' || $v === null ? '—' : $Glyphs($v));
 @endphp
+<style>
+    .party-container {
+        display: flex;
+        gap: 2rem;
+        width: 100%;
+        margin-top: 2rem;
+    }
 
+    .party-card {
+        flex: 1;
+        padding: 1rem;
+    }
+</style>
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-2"
-                     :en="$L('Important note:').$p('Hope Center Aleppo / Head office is not obligated to any compensation upon the expiry or termination of the contract.')"
-                     :ar="$L($Glyphs('ملاحظة هامة:')).$p($Glyphs('لا يلتزم الفريق الأول بأي تعويضات عند انتهاء عقد المتطوع أو إنهائه.'))"
+                     :en="$L('Important note:')"
+                     :ar="$L($Glyphs(__('general.text33')))"
+    />
+    <x-contract.dual rowClass="mt-2"
+                     :en="$p('Hope Center Aleppo / Head office is not obligated to any compensation upon the expiry or termination of the contract.')"
+                     :ar="$Glyphs(__('general.text34'))"
     />
 </div>
 
 <div class="avoid-break">
     <x-contract.dual rowClass="mt-6"
                      :en="$p('I hereby certify having read and understood the conditions stipulated above and all attached documents and confirm that I accept them all.')"
-                     :ar="$p($Glyphs('أقرّ بأنني قرأت وفهمت شروط العمل المنصوص عليها وكافة المستندات المرفقة وأوافق عليها كلها.'))"
+                     :ar="$p($Glyphs('أقرّ بأنني قرأت وفهمت شروط العمل المنصوص عليها <br> وكافة المستندات المرفقة وأوافق عليها كلها.'))"
     />
 </div>
 
@@ -38,22 +52,42 @@
     />
 </div>
 
-<div class="avoid-break">
-    <x-contract.dual rowClass="mt-10"
-                     :en="$L('First Party').$p('Name and Signature').$p('Fredy Youssef')"
-                     :ar="$L($Glyphs('الفريق الأول')).$p($Glyphs('الاسم والتوقيع')).$p($Glyphs('فريدي يوسف'))"
-                     enClass="text-left" arClass="text-right"
-    />
+<div style="position: absolute; left: 0; text-align: center; width: 50%;margin-top: 35px;">
+    <div style="font-weight:bold; color:#b00; margin-bottom:12px;">
+        Second Party/{{ $Glyphs('الفريق الثاني') }}
+    </div>
+    <div style="margin-bottom:6px;">
+        Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
+    </div>
+    <div>
+        {{ $esc($nameEn) }}/{{ $escAr($nameAr) }}
+    </div>
 </div>
 
-<div class="avoid-break">
-    <x-contract.dual rowClass="mt-10"
-                     :en="$L('Second Party').$p('Name and Signature').$p($esc($nameEn))"
-                     :ar="$L($Glyphs('الفريق الثاني')).$p($Glyphs('الاسم والتوقيع')).$p($escAr($nameAr))"
-                     enClass="text-left" arClass="text-right"
-    />
+<!-- First Party -->
+<div style="position: absolute; right: 0; text-align: center;width: 50%;margin-top: 35px;">
+    <div style="font-weight:bold; color:#b00; margin-bottom:12px;">
+        First Party/{{ $Glyphs('الفريق الأول') }}
+    </div>
+    <div style="margin-bottom:6px;">
+        Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
+    </div>
+    <div>
+        Fredy Youssef/{{ $Glyphs('فريدي يوسف') }}
+    </div>
 </div>
 
-<div class="avoid-break">
-    <x-contract.dual rowClass="mt-8" :en="'Date'" :ar="$Glyphs('التاريخ')"/>
+<!-- Date centered -->
+<div class="avoid-break" style="text-align:right; position: absolute; bottom:35%; right:160px">
+    <div style="margin-bottom:6px;">
+        Date/{{ $Glyphs('التاريخ') }}
+    </div>
 </div>
+
+
+
+
+
+
+
+

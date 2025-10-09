@@ -1,57 +1,65 @@
 @php
-    use Illuminate\Support\Number;
     use App\Support\ArabicText as AR;
 
     $forPdf = $forPdf ?? false;
-    $Glyphs = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
-    $Digits = fn ($s) => $forPdf ? ar_digits((string)$s) : (string)$s;
-    $L      = fn (string $t) => '<span class="h-label">'.$t.'</span>';
-    $asList = fn (array $lines, $start=1) =>
-        '<ol class="list-decimal space-y-3" start="'.$start.'" style="margin:0; padding-left:16px;">'
-        .implode('', array_map(fn($l) => '<li>'.$l.'</li>', $lines))
-        .'</ol>';
+    $Glyphs = fn($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+    $Digits = fn($s) => $forPdf ? ar_digits((string)$s) : (string)$s;
+    $L = fn($t) => '<span class="h-label">'.$t.'</span>';
+    $wrapLtr = fn($v)=>'<span dir="ltr">'.$v.'</span>';
 
-    $amount     = $contract->salary ?? null;
-    $currencyId = (int) ($contract->currency ?? 0);
+    $salary = (float)($contract->salary ?? 0);
+    $salaryFormattedEn = $salary ? number_format($salary,0,'.',',') : '—';
 
-    $CURRENCY = [
-        1 => ['code'=>'SYP','en'=>'Syrian Pounds','ar'=>'ليرة سورية'],
-        2 => ['code'=>'USD','en'=>'US Dollars','ar'=>'دولار أمريكي'],
+    // reusable list builder with offset start
+    $asList = fn(array $lines,string $lang,int $start=1)=>
+        '<ul style="margin:0;padding:0;list-style:none;">'.
+        implode('',array_map(function($l,$i)use($lang,$start){
+            $num=$start+$i;
+            return $lang==='ar'
+                ? '<li style="direction:rtl;text-align:right;position:relative;padding-right:18px;padding-bottom:40px;"><span style="position:absolute;right:0;">.'.$num.'</span>'.$l.'</li>'
+                : '<li style="position:relative;padding-left:16px;padding-bottom:14px;"><span style="position:absolute;left:0;">'.$num.'.</span>'.$l.'</li>';
+        },$lines,array_keys($lines))).
+        '</ul>';
+
+    // Sixth term (continues numbering from previous page)
+    $EN_LIST_6 = [
+        'The first party is committed to paying the second party in exchange for his/her services, a monthly stipend of / '.$salaryFormattedEn.' USD only/.<br><br>',
+        'The second party has to commit, abide and sign the Code of Conduct.',
     ];
-    $cur = $CURRENCY[$currencyId] ?? $CURRENCY[1];
-
-    $amtEn = is_numeric($amount) ? Number::format($amount, locale:'en') : '—';
-    $amtAr = is_numeric($amount) ? $Digits(Number::format($amount, locale:'en')) : '—';
-
-    $EN_LIST_3 = [
-        "The first party commits to pay a monthly stipend of {$amtEn} {$cur['code']} / {$cur['en']} only.",
-        'The volunteer must commit to, abide by, and sign the Code of Conduct.',
-    ];
-    $AR_LIST_3 = [
-        $Glyphs("يلتزم الفريق الأول بدفع مكافأة شهرية مقدارها {$amtAr} {$cur['code']} / {$cur['ar']} فقط لا غير."),
-        $Glyphs('على الفريق الثاني الالتزام والتوقيع على قواعد السلوك الأخلاقي.'),
+    $AR_LIST_6 = [
+        $Glyphs(__('general.text44',['salary'=>$wrapLtr($salaryFormattedEn)])),
+        $Glyphs('على الفريق الثاني الامتثال للقواعد الأخلاقية للتطوع والتقيد بها وتوقيعها.'),
     ];
 
-    $EN_LIST_4 = [
-        'One day stipend will be deducted for repeated delays beyond 3 times per month.',
-        'No leave is permitted during the trial period.',
-        'Absence for valid reasons must not exceed 3 consecutive days, except in cases of death or severe sickness.',
-        'The first party may terminate this contract before its expiry if the volunteer breaches the contract or Code of Conduct. In that case, due amounts will be paid up to termination date.',
+    // Seventh term (reset numbering to 1–4)
+    $EN_LIST_7 = [
+        'The Second party stipend amount will be deducted an amount of one working day in case of repeated delays beyond the specified working hours for more than 3 times a month.',
+        'The volunteer is not entitled to any leave days during the period of trial contract.<br><br>',
+        'If the second party has a strong reason to be absent, he/she must inform the first party, without exceeding 3 days in a row during the contract period with exception of cases regarding death or severe sickness.',
+        'The first party has the right to terminate this contract at any time before its expiry date in case the second party violates the terms of this contract and the volunteering code of conduct, in which case all due amounts must be paid to the second party up to the termination date.',
     ];
-    $AR_LIST_4 = [
-        $Glyphs('يُحسم من مكافأة الفريق الثاني مقدار يوم عمل في حال تكرار التأخر عن الدوام أكثر من 3 مرات في الشهر.'),
-        $Glyphs('لا يحق للمتطوع إجازات خلال فترة العقد التجريبي.'),
-        $Glyphs('في حال الغياب لعذر قوي يجب إعلام الفريق الأول، على أن لا يتجاوز 3 أيام متتالية، باستثناء الوفاة أو المرض الشديد.'),
-        $Glyphs('يحق للفريق الأول إنهاء العقد قبل انتهائه في حال خالف الفريق الثاني شروط العقد أو قواعد السلوك، وتُدفع له جميع مستحقاته حتى تاريخ الإنهاء.'),
+    $AR_LIST_7 = [
+        $Glyphs('يخصم يوم عمل تطوعي للفريق الثاني من المكافأة المالية المخصصة له في حال تكرار التأخير عن موعد الدوام المحدد لأكثر من 3 مرات في الشهر.'),
+        $Glyphs('لا يحق للمتطوع إجازات خلال فترة سريان العقد التجريبي.'),
+        $Glyphs('في حال اضطرار الفريق الثاني للغياب فعليه أخذ موافقة الفريق الأول بذلك على ألا يتجاوز الأمر أكثر من 3 أيام متتالية خلال فترة العقد وذلك ما عدا حالات الوفاة أو المرض الشديد.'),
+        $Glyphs('يحق للفريق الأول إنهاء العقد في أي وقت قبل انتهاء مدته في حال قيام الفريق الثاني بمخالفة بنود هذا العقد والقواعد الأخلاقية للتطوع، وعليه في هذه الحالة يجب أن يدفع للفريق الثاني كافة المبالغ المستحقة حتى تاريخ الإنهاء.'),
     ];
 @endphp
 
-<div class="avoid-break">
-    <x-contract.dual rowClass="mt-1" :en="$L('Third term:')" :ar="$L($Glyphs('البند الثالث:'))"/>
-    <x-contract.dual rowClass="mt-2" :en="$asList($EN_LIST_3,6)" :ar="$asList($AR_LIST_3,6)"/>
+    <!-- Sixth term -->
+<div class="avoid-break mt-4">
+    <x-contract.dual :en="$L('Sixth term:')" :ar="$L($Glyphs('البند السادس:'))"/>
 </div>
 
+<x-contract.dual rowClass="mt-6"
+                 :en="$asList($EN_LIST_6,'en',6)"
+                 :ar="$asList($AR_LIST_6,'ar',6)"/>
+
+<!-- Seventh term -->
 <div class="avoid-break">
-    <x-contract.dual rowClass="mt-5" :en="$L('Fourth term:')" :ar="$L($Glyphs('البند الرابع:'))"/>
-    <x-contract.dual rowClass="mt-2" :en="$asList($EN_LIST_4)" :ar="$asList($AR_LIST_4)"/>
+    <x-contract.dual :en="$L('Seventh term:')" :ar="$L($Glyphs('البند السابع:'))"/>
 </div>
+
+<x-contract.dual
+    :en="$asList($EN_LIST_7,'en',1)"
+    :ar="$asList($AR_LIST_7,'ar',1)"/>

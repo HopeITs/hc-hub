@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             PositionsSeeder::class,
             EmployeeSeeder::class,
             UserRoleSeeder::class,
+            EmployeeContractSeeder::class
 
 
 

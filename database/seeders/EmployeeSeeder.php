@@ -18,6 +18,6 @@ class EmployeeSeeder extends Seeder
         }
 
 
-        Employee::factory(25)->create();
+//        Employee::factory(25)->create();
     }
 }
