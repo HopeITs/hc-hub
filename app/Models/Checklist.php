@@ -13,6 +13,7 @@ class Checklist extends Model
         'item_id',
         'employee_id',
         'delivered_id',
+        'receiver_id',
         'brand',
         'model',
         'serial',
@@ -36,5 +37,15 @@ class Checklist extends Model
     public function item()
     {
         return $this->belongsTo(ChecklistItem::class, 'item_id');
+    }
+
+    public function delivered()
+    {
+        return $this->belongsTo(Employee::class, 'delivered_id');
+    }
+
+    public function receiver()
+    {
+        return $this->belongsTo(Employee::class, 'receiver_id');
     }
 }
