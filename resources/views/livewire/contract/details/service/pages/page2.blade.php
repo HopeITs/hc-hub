@@ -17,11 +17,8 @@
     $startStrAr = $start ? $Digits($start->format('Y/m/d')) : '—';
     $endStrAr   = $end   ? $Digits($end->format('Y/m/d'))   : '—';
 
-    $center = $contract->position?->center;
+    $center = $contract->position?->center?->name ??  '—';
 
-    $center = $center?->getTranslation('name', 'en')
-        ?? $center?->name
-        ?? '—';
 
 @endphp
 

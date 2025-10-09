@@ -107,19 +107,19 @@
     <div style="line-height: 0.7">
         <x-contract.dual
             :en="'<strong>Ms./Mrs.</strong> '.$esc($nameEn)"
-            :ar="$esc($nameAr).' '.$Glyphs(__('general.text4'))"/>
+            :ar="$escAr($nameAr).' '.$Glyphs(__('general.text4'))"/>
         <x-contract.dual
             :en="'<strong>Date and Place of Birth:</strong> '.$esc($pobEn).' — '.$esc($dobStr)"
-            :ar="$esc($dobStrAr).' — '.$esc($pobAr).$Glyphs(__('general.text5'))"/>
+            :ar="$escAr($dobStrAr).' — '.$escAr($pobAr).$Glyphs(__('general.text5'))"/>
         <x-contract.dual
             :en="'<strong>National ID number:</strong> '.$esc($nationalId)"
-            :ar="$esc(ar_digits($nationalId ?? '')).' '.$Glyphs(__('general.text6'))"/>
+            :ar="$escAr(ar_digits($nationalId ?? '')).' '.$Glyphs(__('general.text6'))"/>
         <x-contract.dual
             :en="'<strong>Nationality:</strong> '.$esc($natEn)"
-            :ar="$esc($natAr).' '.$Glyphs(__('general.text7'))"/>
+            :ar="$escAr($natAr).' '.$Glyphs(__('general.text7'))"/>
         <x-contract.dual
             :en="'<strong>Address:</strong> '.$esc($addressEn)"
-            :ar="$esc($addressAr).' '.$Glyphs(__('general.text8'))"/>
+            :ar="$escAr($addressAr).' '.$Glyphs(__('general.text8'))"/>
     </div>
 </div>
 

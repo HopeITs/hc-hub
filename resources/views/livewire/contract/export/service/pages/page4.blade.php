@@ -9,8 +9,8 @@
     $escAr = fn ($v) => e($v === '' || $v === null ? '—' : $Glyphs($v));
 
     $emp = $contract->employee;
-    $nameEn = $emp?->getTranslation('name', 'en') ?? $emp?->name ?? '—';
-    $nameAr = $Glyphs($emp?->getTranslation('name', 'ar') ?? $emp?->name ?? '—');
+    $nameEn =  $emp?->name_en ?? '—';
+    $nameAr =  $Glyphs($emp?->name_ar ??  '—');
 
     // define helper from page 3
     $asList = fn(array $lines, string $lang, int $start = 1) =>
