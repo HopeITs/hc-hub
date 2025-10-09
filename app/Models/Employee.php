@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTranslation;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -168,4 +169,65 @@ class Employee extends Model implements HasMedia
             ->useFallbackUrl('https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=be1f24&background=FFF')
             ->singleFile();
     }
+
+    public function getYearsOfServiceAttribute(): float
+    {
+        $contracts = $this->contracts()
+            ->select(['start_date', 'end_date', 'terminated_at'])
+            ->orderBy('start_date')
+            ->get();
+
+        if ($contracts->isEmpty()) {
+            return 0;
+        }
+
+        // تجهيز الفترات
+        $periods = $contracts->map(function ($c) {
+            $start = Carbon::parse($c->start_date);
+
+            // تحديد نهاية العقد الفعلية
+            $end = null;
+            if ($c->terminated_at) {
+                // في حال الانفصال المبكر
+                $end = Carbon::parse($c->terminated_at);
+            } elseif ($c->end_date) {
+                // في حال نهاية العقد الطبيعية
+                $end = Carbon::parse($c->end_date);
+            } else {
+                // عقد مفتوح أو جاري
+                $end = Carbon::now();
+            }
+
+            // تصحيح في حال خطأ بالبيانات (نهاية قبل البداية)
+            if ($end->lt($start)) {
+                [$start, $end] = [$end, $start];
+            }
+
+            return compact('start', 'end');
+        })->sortBy('start')->values()->toArray();
+
+        // دمج الفترات المتداخلة (بدون حساب الانقطاعات)
+        $merged = [$periods[0]];
+        foreach (array_slice($periods, 1) as $p) {
+            $last = &$merged[count($merged) - 1];
+            if ($p['start']->lte($last['end'])) {
+                $last['end'] = $p['end']->gt($last['end']) ? $p['end'] : $last['end'];
+            } else {
+                $merged[] = $p;
+            }
+        }
+
+        // حساب سنوات الخدمة الفعلية (سنوات + أشهر جزئية)
+        $totalYears = 0;
+        foreach ($merged as $m) {
+            $years = $m['end']->diffInYears($m['start']);
+            $months = $m['end']->diffInMonths($m['start']) % 12;
+            $totalYears += $years + ($months / 12);
+        }
+
+        return -1 * round($totalYears, 1);
+    }
+
+
+
 }
