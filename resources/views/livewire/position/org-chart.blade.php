@@ -3,14 +3,14 @@
     {{-- CEO --}}
     @if(isset($tree['root']))
         <div class="flex flex-col items-center mb-10">
-            <x-org-node :position="$tree['root']" color="blue" size="lg" />
+            <x-org-node :position="$tree['root']" color="primary" size="lg" />
         </div>
     @endif
 
     {{-- Level 1: Board --}}
     <div class="flex flex-row gap-4 mb-10">
         @foreach($tree['board'] as $p)
-            <x-org-node :position="$p" color="indigo" />
+            <x-org-node :position="$p" color="primary" />
         @endforeach
     </div>
 

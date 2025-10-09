@@ -28,14 +28,14 @@ class OrgChart extends Component
         // Level 1 — board
         $board = $positions->filter(fn($p) =>
             $p->direct_manager_id === $root->id &&
-            $p->employee()?->is_board &&
+            $p->employee()?->is_board_member &&
             $p->jobLevel?->grade == 2
         );
 
         // Level 2 — managers
         $managers = $positions->filter(fn($p) =>
             $p->direct_manager_id === $root->id &&
-            $p->employee()?->is_board &&
+            $p->employee()?->is_board_member &&
             in_array($p->jobLevel?->grade, [3, 5])
         );
 
@@ -57,6 +57,7 @@ class OrgChart extends Component
 
     public function render()
     {
+
         return view('livewire.position.org-chart', [
             'tree' => $this->tree,
         ]);
