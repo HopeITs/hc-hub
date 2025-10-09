@@ -1,59 +1,74 @@
 @php
-    $EN_FIFTH_TERM_LABEL = '<span class="h-label">Fifth term:</span>';
-    $AR_FIFTH_TERM_LABEL = '<span class="h-label">البند الخامس:</span>';
+    use App\Support\ArabicText as AR;
 
-    $EN_FIFTH_TEXT = 'I hereby confirm that I have read and understood the work conditions and all the attached documents and I agree to all of the stated.';
-    $AR_FIFTH_TEXT = 'أقر بأنني قرأت وفهمت شروط العمل المنصوص عليها وكافة المستندات المرفقة وأوافق بموجبها على كل ما ورد.';
+    $forPdf  = $forPdf ?? false;
+    $Glyphs  = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+    $Digits  = fn ($s) => $forPdf ? ar_digits((string)$s) : (string)$s;
+    $L       = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 
-    $EN_NOTE_1 = 'This contract was issued on three pages, printed as a single copy, and has only one version secured in the head office in Aleppo.';
-    $AR_NOTE_1 = 'صدر هذا العقد على ثلاث صفحات، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.';
+    // Employee name
+    $empNameEn = $contract->employee?->getTranslation('name', 'en') ?? $contract->employee?->name ?? '—';
+    $empNameAr = $contract->employee?->getTranslation('name', 'ar') ?? $contract->employee?->name ?? '—';
 
-    $EN_NOTE_2 = 'This contract was issued in Arabic and translated into English.';
-    $AR_NOTE_2 = 'صدر هذا العقد بالنسخة العربية وترجم إلى اللغة الإنكليزية.';
-
-    $EN_FIRST_PARTY_LABEL  = '<span class="h-label">first party</span>';
-    $AR_FIRST_PARTY_LABEL  = '<span class="h-label">الفريق الأول</span>';
-
-    $EN_SECOND_PARTY_LABEL = '<span class="h-label">second party</span>';
-    $AR_SECOND_PARTY_LABEL = '<span class="h-label">الفريق الثاني</span>';
-
-    $empNameEn = $emp?->name_en ?? '—';
-    $empNameAr = $emp?->name_ar ?? '—';
-
-    $EN_FIRST_SIGN = '<strong>Name and Signature</strong><br>Fredy Youssef';
-    $AR_FIRST_SIGN = '<strong>الاسم والتوقيع</strong><br>فريدي يوسف';
-
-    $EN_SECOND_SIGN = '<strong>Name and Signature</strong><br>' . e($empNameEn);
-    $AR_SECOND_SIGN = '<strong>الاسم والتوقيع</strong><br>' . e($empNameAr);
-
-    $EN_DATE_LABEL = '<strong>date</strong>';
-    $AR_DATE_LABEL = '<strong>التاريخ</strong>';
+    $esc   = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
+    $escAr = fn ($v) => e((string)($v === '' || $v === null ? '—' : $Glyphs($v)));
 @endphp
 
-<x-contract.dual rowClass="mt-1" :en="$EN_FIFTH_TERM_LABEL" :ar="$AR_FIFTH_TERM_LABEL"/>
-<x-contract.dual :en="$EN_FIFTH_TEXT" :ar="$AR_FIFTH_TEXT"/>
-<x-contract.dual rowClass="mt-2" :en="$EN_NOTE_1" :ar="$AR_NOTE_1"/>
-<x-contract.dual :en="$EN_NOTE_2" :ar="$AR_NOTE_2"/>
+{{-- 5. Clause --}}
+<x-contract.dual rowClass="mt-6 mb-10"
+                 :en="'5. If the second party wishes to terminate the contract, the second party is obliged to inform the first party at least two weeks before the end of the contract period.'"
+                 :ar="'5. في حال رغبة الفريق الثاني بفسخ العقد يلتزم بأن يعلم الفريق الأول قبل أسبوعين على الأقل من انتهاء العقد.'"
+/>
 
-<div class="dual-row mt-6 font-semibold">
-    <div class="dual-col dual-en">{!! $EN_FIRST_PARTY_LABEL !!}</div>
-    <div class="dual-col dual-ar text-right">{!! $AR_FIRST_PARTY_LABEL !!}</div>
-</div>
-<div class="dual-row mt-2">
-    <div class="dual-col dual-en">{!! $EN_FIRST_SIGN !!}</div>
-    <div class="dual-col dual-ar text-right">{!! $AR_FIRST_SIGN !!}</div>
+{{-- Fifth term --}}
+<div class="avoid-break mt-4">
+    <x-contract.dual :en="$L('Fifth term:')" :ar="$L($Glyphs('البند الخامس:'))"/>
 </div>
 
-<div class="dual-row mt-6 font-semibold">
-    <div class="dual-col dual-en">{!! $EN_SECOND_PARTY_LABEL !!}</div>
-    <div class="dual-col dual-ar text-right">{!! $AR_SECOND_PARTY_LABEL !!}</div>
-</div>
-<div class="dual-row mt-2">
-    <div class="dual-col dual-en">{!! $EN_SECOND_SIGN !!}</div>
-    <div class="dual-col dual-ar text-right">{!! $AR_SECOND_SIGN !!}</div>
+<x-contract.dual rowClass="mt-6 mb-6"
+                 :en="'I hereby confirm that I have read and understood the work conditions and all the attached documents and I agree to all of the stated.'"
+                 :ar="$Glyphs('أفيد بأنني قرأت وفهمت شروط العمل المنصوص عليها وكافة المستندات المرفقة وأقر بموافقتي على كل ما ورد.')"
+/>
+
+<x-contract.dual rowClass="mt-2 mb-2"
+                 :en="'This contract was issued on three pages, printed as a single copy, and has only one version secured in the head office in Aleppo.'"
+                 :ar="$Glyphs('صدر هذا العقد على ثلاث صفحات، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.')"
+/>
+
+<x-contract.dual rowClass="mt-2 mb-10"
+                 :en="'This contract was issued in Arabic and translated into English.'"
+                 :ar="$Glyphs('صدر هذا العقد بالنسخة العربية وترجم إلى اللغة الإنكليزية.')"
+/>
+
+<!-- Second Party -->
+<div style="position: absolute; left: 0; text-align: center; width: 50%; margin-top: 35px;">
+    <div style="font-weight:bold; color:#b00; margin-bottom:12px;">
+        Second Party/{{ $Glyphs('الفريق الثاني') }}
+    </div>
+    <div style="margin-bottom:6px;">
+        Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
+    </div>
+    <div>
+        {{ $esc($empNameEn) }}/{{ $escAr($empNameAr) }}
+    </div>
 </div>
 
-<div class="dual-row mt-6">
-    <div class="dual-col dual-en">{!! $EN_DATE_LABEL !!}: __________________</div>
-    <div class="dual-col dual-ar text-right">{!! $AR_DATE_LABEL !!}: __________________</div>
+<!-- First Party -->
+<div style="position: absolute; right: 0; text-align: center; width: 50%; margin-top: 35px;">
+    <div style="font-weight:bold; color:#b00; margin-bottom:12px;">
+        First Party/{{ $Glyphs('الفريق الأول') }}
+    </div>
+    <div style="margin-bottom:6px;">
+        Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
+    </div>
+    <div>
+        Fredy Youssef/{{ $Glyphs('فريدي يوسف') }}
+    </div>
+</div>
+
+<!-- Date -->
+<div class="avoid-break" style="text-align:right; position: absolute; bottom:24%; right:160px;">
+    <div style="margin-bottom:6px;">
+        Date/{{ $Glyphs('التاريخ') }}
+    </div>
 </div>
