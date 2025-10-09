@@ -48,7 +48,7 @@
     $natAr = $Glyphs($NATIONALITY_MAP[$natKey]['ar'] ?? ($nationalityRaw ?: '—'));
 
     // Position and program
-    $positionEN = $position?->title ?? '—';
+    $positionEN = $position?->title_en ?? '—';
     $positionAR = $position?->title_ar ?? '—';
     $program    = $program?->name ?? '—';
 

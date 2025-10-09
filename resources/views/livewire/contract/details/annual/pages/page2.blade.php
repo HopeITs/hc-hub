@@ -10,8 +10,8 @@
     $pos = $contract->position;
     $req = $pos?->requiredPosition;
 
-    $positionTitleEn = $req?->title ?? $pos?->title ?? ('#'.$contract->position_id);
-    $positionTitleAr = $Glyphs($req?->title ?? $pos?->title ?? ('#'.$contract->position_id));
+    $positionTitleEn = $req?->title_en ?? $pos?->title_en ?? ('#'.$contract->position_id);
+    $positionTitleAr = $Glyphs($req?->title_ar ?? $pos?->title_ar ?? ('#'.$contract->position_id));
 
     // Dates
     $startStr   = $contract->start_date ? Carbon::parse($contract->start_date)->format('d/m/Y') : '—';

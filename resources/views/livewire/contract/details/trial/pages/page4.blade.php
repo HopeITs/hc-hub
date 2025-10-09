@@ -6,9 +6,10 @@
     $Digits  = fn ($s) => $forPdf ? ar_digits((string)$s) : (string)$s;
     $L       = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 
-    // Employee name
-    $empNameEn = $contract->employee?->getTranslation('name', 'en') ?? $contract->employee?->name ?? '—';
-    $empNameAr = $contract->employee?->getTranslation('name', 'ar') ?? $contract->employee?->name ?? '—';
+    $emp = $contract->employee;
+
+    $nameEn = $emp?->name_en ?? '—';
+    $nameAr = $emp?->name_ar ?? '—';
 
     $esc   = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
     $escAr = fn ($v) => e((string)($v === '' || $v === null ? '—' : $Glyphs($v)));
@@ -49,7 +50,7 @@
         Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
     </div>
     <div>
-        {{ $esc($empNameEn) }}/{{ $escAr($empNameAr) }}
+        {{ $esc($nameEn) }}/{{ $escAr($nameAr) }}
     </div>
 </div>
 

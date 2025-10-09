@@ -29,7 +29,7 @@
 
     $position   = $contract->position;
     $program    = $position?->program->name ?? '—';
-    $positionEN = $position?->title ?? '—';
+    $positionEN = $position?->title_en ?? '—';
     $positionAR = $position?->title_ar ?? '—';
 
     $placeEn = $program;
@@ -44,31 +44,31 @@
 </div>
 
 {{-- 1 --}}
-<x-contract.dual rowClass="mt-6 mb-10"
+<x-contract.dual rowClass="mt-6 mb-8"
                  :en="'1. The contract period is '.$durationEn.' starting from '.$startStr.' until '.$endStr.' with a possibility to be extended in agreement between the two parties and according to the performance evaluation, under the condition of not exceeding six months period.'"
                  :ar="'1. مدة العقد '.$durationAr.' ابتداءً من '.$startStrAr.' وحتى '.$endStrAr.'، وهي قابلة للتمديد بالاتفاق بين الفريقين ووفقاً لتقييم الأداء، على أن لا تتجاوز مدة العقد ستة أشهر.'"
 />
 
 {{-- 2 --}}
-<x-contract.dual rowClass="mt-6 mb-10"
+<x-contract.dual rowClass="mt-6 mb-8"
                  :en="'2. The trial period ends by confirming a permanent contract with the volunteer or dismissing his/her services according to a clear performance evaluation.'"
                  :ar="'2. تنتهي الفترة التجريبية بتثبيت المتطوع بعقد دائم أو الاعتذار عن الخدمات، وذلك وفق تقييم أداء واضح.'"
 />
 
 {{-- 3 (dynamic position & program) --}}
-<x-contract.dual rowClass="mt-6 mb-10"
+<x-contract.dual rowClass="mt-6 mb-8"
                  :en="'3. The second party is committed to delivering volunteering services as a <strong>'.$esc($positionEN).'</strong> for the program “'.$esc($program).'” according to standard office hours; Monday to Friday from 9:30 AM to 5:30 PM.'"
                  :ar="$Glyphs('3. يلتزم الفريق الثاني بتقديم خدماته التطوعية بصفة <strong>'.$escAr($positionAR).'</strong> في برنامج '.$escAr($program).' وفق الدوام الإداري من الاثنين إلى الجمعة من الساعة 9:30 ص حتى 5:30 م.')"
 />
 
 {{-- Place of Work --}}
-<x-contract.dual rowClass="mt-2 mb-10"
+<x-contract.dual rowClass="mt-2 mb-8"
                  :en="'Place of Work: '.e($placeEn)"
                  :ar="e($placeAr).$Glyphs(' : مكان العمل')"
 />
 
 {{-- 4 --}}
-<x-contract.dual rowClass="mt-6 mb-10"
+<x-contract.dual rowClass="mt-6 mb-6"
                  :en="'4. Saturdays are considered working days when necessary and not treated as extra hours.'"
                  :ar="'4. يُعتبر يوم السبت يوم عمل في حال رأت الإدارة الحاجة لذلك ولا يعتبر ذلك دوام إضافي.'"
 />

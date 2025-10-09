@@ -4,7 +4,6 @@ namespace App\Livewire\Contract;
 
 use App\Livewire\Forms\ContractForm;
 use App\Models\{City, Center, Employee, Position, Program, ContractType};
-use Illuminate\Support\Collection;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
@@ -15,10 +14,9 @@ class ContractCreate extends Component
     public int $step = 1;
     public int $maxStep = 1;
 
-    // Cascading filters (not persisted)
     public ?int $city_id = null;
     public ?int $program_id = null;
-    public ?int $center_id = null;
+    public ?int $center_id = null; // Optional (nullable)
 
     protected array $validatorsByStep = [
         1 => 'validateIdentity',
@@ -31,7 +29,6 @@ class ContractCreate extends Component
         $this->form->setDefaults();
     }
 
-    // ── Reactive resets
     public function updatedCityId(): void
     {
         $this->reset(['form.employee_id', 'program_id', 'center_id', 'form.position_id']);
@@ -47,12 +44,10 @@ class ContractCreate extends Component
         $this->reset(['form.position_id']);
     }
 
-    // ── Navigation
     public function next(): void
     {
-        $method = $this->validatorsByStep[$this->step] ?? null;
-        if ($method && method_exists($this->form, $method)) {
-            $this->form->{$method}();
+        if (method_exists($this->form, $this->validatorsByStep[$this->step] ?? '')) {
+            $this->form->{$this->validatorsByStep[$this->step]}();
         }
 
         if ($this->step < 3) {
@@ -72,54 +67,44 @@ class ContractCreate extends Component
         if ($target <= $this->maxStep) $this->step = $target;
     }
 
-    // ── Submit and redirect to contract details
     public function submit()
     {
         $this->form->validateIdentity();
         $this->form->validateTerms();
         $this->form->validatePay();
 
-        if (!$this->validateCityConsistency()) {
-            return;
-        }
+        if (!$this->validateCityConsistency()) return;
 
-        // Save and get created contract instance
         $contract = $this->form->save();
 
-        // Success message
         LivewireAlert::success(__('general.success-message'));
 
-        // Redirect to contract show route instead of index
         return redirect()->route('contracts.show', ['contract' => $contract->id]);
     }
 
-    // ── Data consistency validation
     private function validateCityConsistency(): bool
     {
         if (!$this->city_id) return true;
 
-        // Check employee-city match
-        if ($this->form->employee_id) {
-            $valid = Employee::where('id', $this->form->employee_id)
+        if ($this->form->employee_id && !Employee::where('id', $this->form->employee_id)
                 ->where('city_id', $this->city_id)
-                ->exists();
-
-            if (!$valid) {
-                $this->addError('form.employee_id', __('validation.custom.employee_id.invalid'));
-                return false;
-            }
+                ->exists()) {
+            $this->addError('form.employee_id', __('validation.custom.employee_id.invalid'));
+            return false;
         }
 
-        // Check position relation chain
+        // Position chain validation
         if ($this->form->position_id) {
             $pos = Position::select('id', 'program_id', 'center_id')->find($this->form->position_id);
-
             if (!$pos) {
                 $this->addError('form.position_id', __('validation.exists', ['attribute' => 'position']));
                 return false;
             }
 
-            $centerCityId = Center::where('id', $pos->center_id)->value('city_id');
+            $centerCityId = $pos->center_id
+                ? Center::where('id', $pos->center_id)->value('city_id')
+                : $this->city_id; // If no center, assume belongs to current city
+
             if ($centerCityId != $this->city_id) {
                 $this->addError('form.position_id', __('validation.custom.position_id.invalid'));
                 return false;
@@ -130,7 +115,7 @@ class ContractCreate extends Component
                 return false;
             }
 
-            if ($this->center_id && (int)$pos->center_id !== (int)$this->center_id) {
+            if ($this->center_id && $pos->center_id && (int)$pos->center_id !== (int)$this->center_id) {
                 $this->addError('form.position_id', __('validation.custom.position_id.center_mismatch'));
                 return false;
             }
@@ -139,56 +124,49 @@ class ContractCreate extends Component
         return true;
     }
 
-    // ── Wizard placeholders
     public function saveIdentity(): void {}
     public function saveTerms(): void {}
     public function savePay(): void {}
     public function save() { return $this->submit(); }
 
-    // ── View data
+
     public function render()
     {
         $locale = app()->getLocale();
-        $cityNameCol = "name_{$locale}";
-        $positionTitleCol = "title_{$locale}";
-        $typeNameCol = "name_{$locale}";
+        $cityCol = "name_{$locale}";
+        $posCol = "title_{$locale}";
+        $typeCol = "name_{$locale}";
 
-        // CITIES
-        $cities = City::query()
-            ->select('id', $cityNameCol)
-            ->orderBy($cityNameCol)
+        $cities = City::select('id', $cityCol)
+            ->orderBy($cityCol)
             ->get()
-            ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityNameCol}));
+            ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
 
-        // EMPLOYEES
         $employees = $this->city_id
-            ? Employee::query()
-                ->where('city_id', $this->city_id)
-                ->select('id', $cityNameCol)
-                ->orderBy($cityNameCol)
+            ? Employee::where('city_id', $this->city_id)
+                ->select('id', $cityCol)
+                ->orderBy($cityCol)
                 ->get()
-                ->map(fn($e) => tap($e, fn() => $e->name = $e->{$cityNameCol}))
+                ->map(fn($e) => tap($e, fn() => $e->name = $e->{$cityCol}))
             : collect();
 
-        // PROGRAMS
         $programs = $this->city_id
-            ? Program::query()
-                ->whereIn('id', Position::query()
-                    ->whereHas('center', fn($q) => $q->where('city_id', $this->city_id))
-                    ->pluck('program_id')
-                    ->unique()
-                )
-                ->select('id', 'name')
+            ? Program::whereIn('id', Position::query()
+                ->where(function ($q) {
+                    $q->whereHas('center', fn($c) => $c->where('city_id', $this->city_id))
+                        ->orWhereNull('center_id');
+                })
+                ->pluck('program_id')
+                ->unique()
+            )->select('id', 'name')
                 ->orderBy('name')
                 ->get()
             : collect();
 
-        // CENTERS
         $centers = ($this->city_id && $this->program_id)
-            ? Center::query()
-                ->where('city_id', $this->city_id)
-                ->whereIn('id', Position::query()
-                    ->where('program_id', $this->program_id)
+            ? Center::where('city_id', $this->city_id)
+                ->whereIn('id', Position::where('program_id', $this->program_id)
+                    ->whereNotNull('center_id')
                     ->pluck('center_id')
                     ->unique()
                 )
@@ -197,23 +175,23 @@ class ContractCreate extends Component
                 ->get()
             : collect();
 
-        // POSITIONS
-        $positions = ($this->city_id && $this->program_id && $this->center_id)
-            ? Position::query()
-                ->where('program_id', $this->program_id)
-                ->where('center_id', $this->center_id)
-                ->select('id', $positionTitleCol)
-                ->orderBy($positionTitleCol)
+        $positions = ($this->city_id && $this->program_id)
+            ? Position::where('program_id', $this->program_id)
+                ->where(function ($q) {
+                    $q->whereHas('center', fn($c) => $c->where('city_id', $this->city_id))
+                        ->orWhereNull('center_id');
+                })
+                ->when($this->center_id, fn($q) => $q->where('center_id', $this->center_id))
+                ->select('id', $posCol)
+                ->orderBy($posCol)
                 ->get()
-                ->map(fn($p) => tap($p, fn() => $p->title = $p->{$positionTitleCol}))
+                ->map(fn($p) => tap($p, fn() => $p->title = $p->{$posCol}))
             : collect();
 
-        // CONTRACT TYPES
-        $types = ContractType::query()
-            ->select('id', $typeNameCol)
-            ->orderBy($typeNameCol)
+        $types = ContractType::select('id', $typeCol)
+            ->orderBy($typeCol)
             ->get()
-            ->map(fn($t) => tap($t, fn() => $t->name = $t->{$typeNameCol}));
+            ->map(fn($t) => tap($t, fn() => $t->name = $t->{$typeCol}));
 
         return view('livewire.contract.contract-create', [
             'cities'     => $cities,

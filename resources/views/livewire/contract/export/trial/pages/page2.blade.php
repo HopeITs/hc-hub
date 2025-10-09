@@ -22,7 +22,7 @@
 
     $position = $contract->position;
     $program  = $position?->program->name ?? '—';
-    $positionEN = $position?->title ?? '—';
+    $positionEN = $position?->title_en ?? '—';
     $positionAR = $position?->title_ar ?? '—';
     $placeEn = $program;
     $placeAr = $program;
@@ -41,7 +41,7 @@
     $EN_LIST_3 = [
         'The contract period is '.$durationEn.' starting from '.$startStr.' until '.$endStr.', with a possibility to be extended in agreement between the two parties and according to the performance evaluation, under the condition of not exceeding six months period.',
         'The trial period ends by confirming a permanent contract with the volunteer or dismissing his/her services according to a clear performance evaluation.',
-        'The second party is committed to delivering volunteering services as a <strong>'.$esc($positionEN).'</strong>. <br>Standard office hours are Monday to Friday, from '.$dailyStart.' to '.$dailyEnd.'. <br><strong>Place of Work:</strong> '.$placeEn.'<Br><br>',
+        'The second party is committed to delivering volunteering services as a <strong>'.$esc($positionEN).'</strong>. <br>Standard office hours are Monday to Friday, from '.$dailyStart.' to '.$dailyEnd.'. <br><strong>Place of Work:</strong> '.$placeEn.'<Br><br><br>',
         'Saturdays are considered working days when necessary and not treated as extra hours.<br><Br><Br>',
         'The second party (the volunteer) is committed to delivering all equipment, materials and documents he/she received immediately to the Hope Center after the termination of this contract according to the receive list of every volunteer, which is regularly updated.',
     ];

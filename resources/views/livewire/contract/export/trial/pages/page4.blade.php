@@ -6,13 +6,11 @@
     $Glyphs = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
     $Digits = fn ($s) => $forPdf ? ar_digits((string)$s) : (string)$s;
     $L      = fn (string $t) => '<span class="h-label">'.$t.'</span>';
-    $escAr  = fn ($v) => e($v === '' || $v === null ? '—' : $Glyphs($v));
 
     $emp = $contract->employee;
-    $nameEn = $emp?->getTranslation('name', 'en') ?? $emp?->name ?? '—';
-    $nameAr = $Glyphs($emp?->getTranslation('name', 'ar') ?? $emp?->name ?? '—');
+    $nameEn = $emp?->name_en ?? '—';
+    $nameAr = $emp?->name_ar ?? '—';
 
-    // start numbering from 5
     $startIndex = 5;
 
     $EN_LIST_5 = [
@@ -39,7 +37,7 @@
         . '</ul>';
 
     $indices = range($startIndex, $startIndex + count($EN_LIST_5) - 1);
-    $esc   = fn ($v) => e($v === '' || $v === null ? '—' : $v);
+    $esc   = fn ($v) => e($v === '' || $v === null ? '—' : $Glyphs($v));
     $escAr = fn ($v) => e($v === '' || $v === null ? '—' : $Glyphs($v));
 @endphp
 
