@@ -51,7 +51,7 @@
                 @if($p->employee() !== null)
                     <x-org-node :position="$p" color="cyan"/>
                 @else
-                    <x-org-empty-node :position="$p" />
+                    <x-org-empty-node :position="$p"/>
                 @endif
 
             @endforeach
@@ -63,13 +63,59 @@
             @foreach($tree['managers'] as $m)
                 <div class="flex flex-col items-center">
                     @if($m->employee() !== null)
-                        <x-org-node :position="$m" />
+                        <x-org-node :position="$m"/>
                     @else
                         <x-org-empty-node :position="$m"/>
                     @endif
 
                     <div class="flex flex-col gap-2 mt-2">
+                        @if($manager_type === 'direct')
+                            @foreach($m->directTeam ?? [] as $t)
+                                @if($t->activeContracts->count() < $t->max_emp)
+                                    @foreach($t->activeContracts as $contract)
+                                        <x-org-node :position="$t" :employee="$contract->employee" color="gray"
+                                                    size="sm"/>
+                                    @endforeach
+                                    @for($i=1;$i<= $t->max_emp - $t->activeContracts->count() ;$i++)
+                                        <x-org-empty-node :position="$t" size="sm"/>
+                                    @endfor
+                                @else
+                                    @foreach($t->activeContracts as $contract)
+                                        <x-org-node :position="$t" :employee="$contract->employee" color="gray"
+                                                    size="sm"/>
+                                        @if($t->techTeam->count() > 0)
+                                            <div class="flex flex-col gap-2 mt-2">
+                                                @foreach($t->directTeam ?? [] as $tt)
+                                                    @if($tt->activeContracts->count() < $tt->max_emp)
+                                                        @foreach($t->activeContracts as $contract)
+                                                            <x-org-node :position="$t" :employee="$contract->employee" color="gray"
+                                                                        size="xs"/>
+                                                        @endforeach
+                                                        @for($i=1;$i<= $t->max_emp - $t->activeContracts->count() ;$i++)
+                                                            <x-org-empty-node :position="$t" size="xs"/>
+                                                        @endfor
+                                                    @else
+                                                        @foreach($tt->activeContracts as $contract)
+                                                            <x-org-node :position="$t" :employee="$contract->employee" color="gray"
+                                                                        size="xs"/>
+{{--                                                            @if($tt->techTeam->count() > 0)--}}
+{{--                                                                <div class="flex flex-col gap-2 mt-2">--}}
 
+{{--                                                                </div>--}}
+{{--                                                            @endif--}}
+                                                        @endforeach
+                                                    @endif
+
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                @endif
+
+                            @endforeach
+                        @else
+
+                        @endif
                         @foreach($tree['teams'][$m->id] ?? [] as $t)
                             @if($t->activeContracts->count() < $t->max_emp)
                                 @foreach($t->activeContracts as $contract)

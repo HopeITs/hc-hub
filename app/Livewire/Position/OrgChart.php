@@ -42,7 +42,7 @@ class OrgChart extends Component
             $query->where('center_id', $this->center_id);
         }
         if ($this->department_id) {
-            $query->where('department_id', $this->department_id);
+            $query->whereIn('department_id',[1,$this->department_id] );
         }
          if ($this->manager_type === 'direct') {
              $query->orderBy('direct_manager_id');
@@ -78,24 +78,13 @@ class OrgChart extends Component
 
 
         // Teams
-        $teams = [];
-        foreach ($managers as $m) {
-            if($this->manager_type === 'direct') {
-                $assistants = $m->directTeam->filter(fn($t) => $t->jobLevel?->grade == 4);
-                $others = $m->directTeam->filter(fn($t) => $t->jobLevel?->grade >= 6);
-                $teams[$m->id] = $assistants->merge($others);
-            }else{
-                $assistants = $m->techTeam->filter(fn($t) => $t->jobLevel?->grade == 4);
-                $others = $m->techTeam->filter(fn($t) => $t->jobLevel?->grade >= 6);
-                $teams[$m->id] = $assistants->merge($others);
-            }
-        }
+
 
         return [
             'root' => $root,
             'board' => $rootAssistant->values(),
             'managers' => $managers->values(),
-            'teams' => $teams,
+
         ];
     }
 

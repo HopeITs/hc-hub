@@ -91,12 +91,12 @@ class Position extends Model
 
     public function directTeam(): HasMany
     {
-        return $this->hasMany(self::class, 'direct_manager_id');
+        return $this->hasMany(self::class, 'direct_manager_id')->orderBy('job_level_id');
     }
 
     public function techTeam(): HasMany
     {
-        return $this->hasMany(self::class, 'tech_manager_id');
+        return $this->hasMany(self::class, 'tech_manager_id')->orderBy('job_level_id');
     }
 
     // --------------------------------------------
