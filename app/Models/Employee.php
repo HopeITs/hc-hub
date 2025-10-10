@@ -78,7 +78,7 @@ class Employee extends Model implements HasMedia
 
     public function positions(): BelongsToMany
     {
-        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours']);
+        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')->withPivot(['id', 'contract_type_id',  'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours' , 'is_active']);
     }
 
     public function scopeInvolvedInProgram($query, $programId)

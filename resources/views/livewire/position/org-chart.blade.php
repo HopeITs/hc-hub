@@ -36,7 +36,11 @@
     {{-- CEO --}}
     @if(isset($tree['root']))
         <div class="flex flex-col items-center mb-10">
-            <x-org-node :position="$tree['root']" color="cyan" size="lg"/>
+            @if($tree['root']->employee() !== null)
+                <x-org-node :position="$tree['root']" color="cyan" size="lg"/>
+            @else
+                <x-org-empty-node :position="$tree['root']" color="cyan" size="lg"/>
+            @endif
         </div>
     @endif
 
@@ -44,7 +48,12 @@
     @if(isset($tree['board']))
         <div class="flex flex-row gap-4 mb-10">
             @foreach($tree['board'] as $p)
-                <x-org-node :position="$p" color="cyan"/>
+                @if($p->employee() !== null)
+                    <x-org-node :position="$p" color="cyan"/>
+                @else
+                    <x-org-empty-node :position="$p" />
+                @endif
+
             @endforeach
         </div>
     @endif
@@ -53,7 +62,12 @@
         <div class="flex flex-row gap-8 justify-center">
             @foreach($tree['managers'] as $m)
                 <div class="flex flex-col items-center">
-                    <x-org-node :position="$m" color="cyan"/>
+                    @if($m->employee() !== null)
+                        <x-org-node :position="$m" />
+                    @else
+                        <x-org-empty-node :position="$m"/>
+                    @endif
+
                     <div class="flex flex-col gap-2 mt-2">
 
                         @foreach($tree['teams'][$m->id] ?? [] as $t)

@@ -4,7 +4,7 @@ use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, DepartmentModule, JobLevelModule, LeaveTypeModule};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
-use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule};
+use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule, EmployeeProfile};
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
 use App\Livewire\ProgramManagement\{Center\CentersModule, DefaultDeliverable\DefaultDeliverablesModule, Program\Create as ProgramCreate, Program\Detail as ProgramDetail, Program\Index as ProgramIndex, Program\Update as ProgramUpdate};
 use App\Livewire\Settings\{Appearance, Password, Profile};
@@ -64,6 +64,7 @@ Route::group(
                     Route::get('/', EmployeeModule::class)->name('index');
                     Route::get('/create', EmployeeCreate::class)->name('create');
                     Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
+                    Route::get('/{employee:username}/show', EmployeeProfile::class)->name('show');
                 });
 
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
