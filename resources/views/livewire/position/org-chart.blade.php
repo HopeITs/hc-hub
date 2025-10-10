@@ -55,8 +55,21 @@
                 <div class="flex flex-col items-center">
                     <x-org-node :position="$m" color="cyan"/>
                     <div class="flex flex-col gap-2 mt-2">
+
                         @foreach($tree['teams'][$m->id] ?? [] as $t)
-                            <x-org-node :position="$t" color="gray" size="sm"/>
+                            @if($t->activeContracts->count() < $t->max_emp)
+                                @foreach($t->activeContracts as $contract)
+                                    <x-org-node :position="$t" :employee="$contract->employee" color="gray" size="sm"/>
+                                @endforeach
+                                @for($i=1;$i<= $t->max_emp - $t->activeContracts->count() ;$i++)
+                                    <x-org-empty-node :position="$t" size="sm"/>
+                                @endfor
+                            @else
+                                @foreach($t->activeContracts as $contract)
+                                    <x-org-node :position="$t" :employee="$contract->employee" color="gray" size="sm"/>
+                                @endforeach
+                            @endif
+
                         @endforeach
                     </div>
                 </div>

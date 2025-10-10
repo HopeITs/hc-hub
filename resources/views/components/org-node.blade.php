@@ -1,4 +1,4 @@
-@props(['position','color'=>'gray','size'=>'md'])
+@props(['position','color'=>'gray','size'=>'md' , 'employee' => null])
 
 @php
     $sizes = [
@@ -6,13 +6,17 @@
         'md' => 'text-sm px-3 py-2 w-44',
         'lg' => 'text-base px-4 py-3 w-52 font-bold',
     ];
+
+    if(!isset($employee)){
+        $employee = $position->employee();
+    }
 @endphp
 
-<div class="rounded-xl border border-{{ $color }}-400 bg-{{ $color }}-50 shadow-sm text-center {{ $sizes[$size] }}" data-tooltip-target="tooltip-default-{{$position->id}}">
-    <div class="font-semibold truncate">
-        {{ $position->employee()?->name ?? '—' }}
+<div class="rounded-xl border border-{{  $employee?->is_board_member ? 'primary' : $color}} bg-white shadow-sm text-center {{ $sizes[$size] }}" data-tooltip-target="tooltip-default-{{$position->id}}">
+    <div class="font-semibold text-{{ $employee?->is_board_member ? 'primary' : 'secondary-dark'}} truncate">
+        {{  $employee->name ?? '—'  }}
     </div>
-    <div class="text-gray-600 text-[11px] truncate">
+    <div class="text-secondary-medium text-[11px] truncate">
         {{ $position->title }}
     </div>
 </div>
