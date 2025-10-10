@@ -43,7 +43,7 @@ class ContractsTable extends LivewireTable
         return [
             Column::make('ID', 'id')->sortable(),
 
-            Column::make(__('general.employee'), function (Model $m) use ($loc) {
+            Column::make(trans_choice('general.employee', 2), function (Model $m) use ($loc) {
                 return $m->employee?->name ?? '—';
             }),
 

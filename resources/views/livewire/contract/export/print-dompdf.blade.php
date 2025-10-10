@@ -22,7 +22,7 @@
             font-size:15px; line-height:1; color:#111; background:#fff;
             direction: ltr;
         }
-        .page-header{ position: relative; top:0; left:0; right:0; height: {{ $HEADER_HEIGHT_MM }}mm; }
+        .page-header{ position: relative; top:3px; left:0; right:0; height: {{ $HEADER_HEIGHT_MM }}mm; }
         .page-header img{ position:absolute; top: -10px ; left:-2px; right:0; width:100%; }
 
         .pdf-page{ page-break-after:always; padding:0 50px; }
@@ -55,6 +55,14 @@
         .mt-6{ margin-top:24px; }  .mt-8{ margin-top:32px; }
         .mt-10{margin-top:40px; }
         ul{ margin:0; padding:0 0 0 14px; } li{ margin:2px 0; }
+        .contract-footer{
+            position: absolute;
+            bottom: 40px;
+            right: 50px;
+            color: gray;
+            font-weight: bold;
+            opacity: 70%;
+        }
     </style>
     <title></title>
 </head>
@@ -74,6 +82,7 @@
             'totalPages'  => $totalPages,
             'forPdf'      => true,
         ])
+        <div class="contract-footer">{{ $i }} of {{ $totalPages }}</div>
     </section>
 @endfor
 

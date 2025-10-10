@@ -9,8 +9,8 @@
     $pos = $contract->position;
     $req = $pos?->requiredPosition;
 
-    $positionTitleEn = $req?->title ?? $pos?->title ?? ('#'.$contract->position_id);
-    $positionTitleAr = $Glyphs($req?->title ?? $pos?->title ?? ('#'.$contract->position_id));
+    $positionTitleEn = $req?->title_en ?? $pos?->title_en ?? ('#'.$contract->position_id);
+    $positionTitleAr = $Glyphs($req?->title_ar ?? $pos?->title_ar ?? ('#'.$contract->position_id));
 
     // Dates (force English numbers)
     $startStr = $contract->start_date ? Carbon::parse($contract->start_date)->format('d/m/Y') : '—';
@@ -33,7 +33,7 @@
     $wrapLtr = fn ($v) => '<span dir="ltr">'.$v.'</span>';
 @endphp
 
-<div class="avoid-break mt-4">
+<div class="avoid-break mt-4" style="line-height: 0.8">
     <x-contract.dual tight
                      :en="'Whereas Christian Hope Center Aleppo - Head office has agreed to this volunteering according to the conditions outlined in this contract,'"
                      :ar="$Glyphs(__('general.text11'))"
@@ -44,26 +44,34 @@
     />
 </div>
 
-<div class="avoid-break mt-4">
+<div class="avoid-break mt-6" style="line-height: 0.6">
     <x-contract.dual
-        :en="$L('Contract type:').'<strong> Volunteer agreement for limited period</strong>'"
-        :ar="$Glyphs(__('general.text14')).' '.$L($Glyphs(__('general.text13')))"
+        :en="$L('Contract type:')"
+        :ar="$L($Glyphs(__('general.text13')))"
     />
-    <x-contract.dual rowClass="mt-2"
+    <x-contract.dual
+        :en="'<strong> Volunteer agreement for limited period</strong>'"
+        :ar="$Glyphs(__('general.text14'))"
+    />
+    <x-contract.dual
                      :en="$L('Place of Work:')"
                      :ar="$L($Glyphs(__('general.text15')))"
     />
-    <x-contract.dual rowClass="mt-2"
+    <x-contract.dual
                      :en="'<strong>Aleppo – Christian Hope Center – Head Office</strong>'"
                      :ar="$Glyphs(__('general.text16'))"
     />
-    <x-contract.dual rowClass="mt-2"
-                     :en="$L('Job description:').' '.$esc($positionTitleEn)"
-                     :ar="$escAr($positionTitleAr).' '.$L($Glyphs(__('general.text17')))"
+    <x-contract.dual
+                     :en="$L('Job description:')"
+                     :ar="$L($Glyphs(__('general.text17')))"
+    />
+    <x-contract.dual
+                     :en="$esc($positionTitleEn)"
+                     :ar="$escAr($positionTitleAr)"
     />
 </div>
 
-<div class="avoid-break mt-4">
+<div class="avoid-break mt-8" style="line-height: 0.6">
     <x-contract.dual
         :en="$L('Duration of the agreement:')"
         :ar="$L($Glyphs('مدة العقد:'))"
@@ -82,12 +90,12 @@
     />
 </div>
 
-<div class="avoid-break mt-4">
+<div class="avoid-break mt-6" style="line-height: 0.7">
     <x-contract.dual
         :en="$L('Volunteer Work Hours:')"
         :ar="$L($Glyphs('ساعات العمل التطوعي:'))"
     />
-    <x-contract.dual rowClass="mt-2"
+    <x-contract.dual rowClass="mt-5"
                      :en="$weeklyHours.' working hours per week, 8 hours per day.'"
                      :ar="$Glyphs(__('general.text23')).' '.$dailyHours.' '.$Glyphs(__('general.text22')).' '.$weeklyHours"
     />
@@ -99,27 +107,25 @@
                      :en="'from 9:30 AM to 5:30 PM.'"
                      :ar="$dailyEnd.' '.$Glyphs(__('general.text26')).' '.$dailyStart.$Glyphs(__('general.text25'))"
     />
-    <x-contract.dual rowClass="mt-2"
+    <x-contract.dual rowClass="mt-8"
                      :en="'Saturdays are considered working days when necessary and not treated as extra hours.'"
                      :ar="$Glyphs('يعتبر يوم السبت يوم عمل في حال رأت الإدارة الحاجة لذلك، ولا يعتبر دوام إضافي.')"
     />
 </div>
 
-<div class="avoid-break ">
+<div class="avoid-break mt-4" style="line-height: 0.7">
     <x-contract.dual
         :en="$L('Stipend and Benefits:')"
         :ar="$L($Glyphs('المكافأة المالية والمزايا:'))"
     />
-    <x-contract.dual rowClass="mt-2"
+    <x-contract.dual
                      :en="'Christian Hope Center is to give a monthly stipend of / '.$salaryFormattedEn.' USD / or its equivalent in Syrian pounds, to be paid in cash to the volunteer at the end of each month.'"
-                     :ar="$Glyphs('يمنح مركز الرجاء المسيحي مكافأة شهرية مقدارها / ')
-         .$wrapLtr($salaryFormattedEn)
-         .$Glyphs(' / دولار أمريكي أو ما يعادلها بالليرة السورية، تمنح نقداً للمتطوع في نهاية كل شهر.')"
+                     :ar="$Glyphs(__('general.text35', ['salary' => $wrapLtr($salaryFormattedEn)]))"
     />
 
 </div>
 
-<div class="avoid-break mt-4">
+<div class="avoid-break mt-6" style="line-height: 0.7">
     <x-contract.dual
         :en="$L('Duties:')"
         :ar="$L($Glyphs('المسؤوليات:'))"
