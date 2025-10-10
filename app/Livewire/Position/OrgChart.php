@@ -9,47 +9,91 @@ use Livewire\Component;
 class OrgChart extends Component
 {
     public array $tree = [];
+    public ?int $city_id = null;
+    public ?int $program_id = null;
+    public ?int $center_id = null;
+    public ?int $department_id = null;
+    public ?string $manager_type = 'direct'; // 'direct', 'tech', or null
 
     public function mount(): void
     {
         $this->tree = $this->buildTree();
     }
 
+    public function updated($property): void
+    {
+        if (in_array($property, ['city_id', 'program_id', 'center_id', 'department_id', 'manager_type'])) {
+            $this->tree = $this->buildTree();
+        }
+    }
+
     private function buildTree(): array
     {
-        $positions = Position::with([
-            'jobLevel',
-            'directTeam.jobLevel',
-        ])->get();
+        $query = Position::with(['jobLevel', 'directTeam.jobLevel']);
 
+
+        if ($this->city_id) {
+            $query->whereIn('city_id',[1, $this->city_id]);
+        }
+        if ($this->program_id) {
+            $query->where('program_id', $this->program_id);
+        }
+        if ($this->center_id) {
+            $query->where('center_id', $this->center_id);
+        }
+        if ($this->department_id) {
+            $query->where('department_id', $this->department_id);
+        }
+         if ($this->manager_type === 'direct') {
+             $query->orderBy('direct_manager_id');
+         } elseif ($this->manager_type === 'tech') {
+             $query->orderBy('tech_manager_id');
+         }
+        $positions = $query->get();
         $root = $positions->firstWhere('direct_manager_id', null);
         if (!$root) return [];
 
         // Level 1 — board
-        $board = $positions->filter(fn($p) =>
-            $p->direct_manager_id === $root->id &&
-            $p->employee()?->is_board_member &&
+        $rootAssistant = $positions->filter(fn($p) => $p->direct_manager_id === $root->id &&
             $p->jobLevel?->grade == 2
         );
 
         // Level 2 — managers
-        $managers = $positions->filter(fn($p) =>
-            $p->direct_manager_id === $root->id &&
-            $p->employee()?->is_board_member &&
-            in_array($p->jobLevel?->grade, [3, 5])
-        );
+        if($this->manager_type === 'direct') {
+            $managers = $positions->filter(fn($p) => $p->direct_manager_id === $root->id &&
+                $p->city_id === 1 &&
+                in_array($p->jobLevel?->grade, [1, 3, 5]) //program manager ||project manager || department manager
+            );
+        }else{
+            $techManagerIds = $positions
+                ->pluck('tech_manager_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            $managers = $positions->whereIn('id', $techManagerIds);
+
+
+        }
+
 
         // Teams
         $teams = [];
         foreach ($managers as $m) {
-            $assistants = $m->directTeam->filter(fn($t) => $t->jobLevel?->grade == 4);
-            $others = $m->directTeam->filter(fn($t) => $t->jobLevel?->grade >= 6);
-            $teams[$m->id] = $assistants->merge($others);
+            if($this->manager_type === 'direct') {
+                $assistants = $m->directTeam->filter(fn($t) => $t->jobLevel?->grade == 4);
+                $others = $m->directTeam->filter(fn($t) => $t->jobLevel?->grade >= 6);
+                $teams[$m->id] = $assistants->merge($others);
+            }else{
+                $assistants = $m->techTeam->filter(fn($t) => $t->jobLevel?->grade == 4);
+                $others = $m->techTeam->filter(fn($t) => $t->jobLevel?->grade >= 6);
+                $teams[$m->id] = $assistants->merge($others);
+            }
         }
 
         return [
             'root' => $root,
-            'board' => $board->values(),
+            'board' => $rootAssistant->values(),
             'managers' => $managers->values(),
             'teams' => $teams,
         ];
@@ -57,7 +101,7 @@ class OrgChart extends Component
 
     public function render()
     {
-
+//dd($this->tree);
         return view('livewire.position.org-chart', [
             'tree' => $this->tree,
         ]);

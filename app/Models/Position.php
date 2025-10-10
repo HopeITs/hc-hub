@@ -42,7 +42,15 @@ class Position extends Model
 
     public function activeContracts(): HasMany
     {
-        return $this->hasMany(Contract::class, 'position_id')->where('is_active', true);
+        return $this->contracts()
+            ->where(function ($q) {
+                $q->where('is_active', true)
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('terminated_at')
+                            ->whereDate('start_date', '<=', now())
+                            ->whereDate('end_date', '>=', now());
+                    });
+            })->with('employee');
     }
 
     public function center(): BelongsTo
@@ -98,4 +106,7 @@ class Position extends Model
     {
         return $this->activeContracts()->first()?->employee;
     }
+
+
+
 }
