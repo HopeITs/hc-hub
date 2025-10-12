@@ -305,6 +305,9 @@ return [
     'action' => 'Action',
     'counterparty' => 'Counterparty',
     'request' => 'Request|Requests',
+    'dates' => 'Dates',
+    'delivered' => 'Delivered',
+    'received' => 'Received',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

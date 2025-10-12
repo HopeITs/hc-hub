@@ -270,6 +270,7 @@ return [
     'action' => 'الإجراء',
     'counterparty' => 'الطرف الآخر',
     'request' => 'طلب|طلبات',
+    'dates' => 'التواريخ',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
