@@ -47,9 +47,9 @@ Route::group(
             Route::get('/',                PositionsModule::class)->name('index');
             Route::get('/create',          PositionCreate::class)->name('create');
             Route::get('/{position}/edit', PositionEdit::class)->name('edit');
-            Route::get('/org-chart', OrgChart::class)->name('org.chart');
-        });
 
+        });
+        Route::get('/org-chart', OrgChart::class)->name('org.chart');
         Route::prefix('programs')->name('programs.')->group(function () {
             Route::get('/',                    ProgramIndex::class)->name('index');
             Route::get('/create',              ProgramCreate::class)->name('create');

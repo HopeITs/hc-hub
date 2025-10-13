@@ -11,10 +11,16 @@
     if(!isset($employee)){
         $employee = $position->employee();
     }
+
+    $class = $employee?->is_board_member ?  "rounded-xl border border-primary  bg-white shadow-sm text-center {$sizes[$size]}" :  "rounded-xl border border-{$color}  bg-white shadow-sm text-center {$sizes[$size]}" ;
 @endphp
 
-<a href="{{route('employees.show',['employee' => $employee->username ?? 0])}}"
-   class="rounded-xl border border-{{  $employee?->is_board_member ? 'primary' : $color}} bg-white shadow-sm text-center {{ $sizes[$size] }}"
+<a {{$attributes->merge([
+    'class' => $class
+])}}
+
+   href="{{route('employees.show',['employee' => $employee->username ?? 0])}}"
+
    data-tooltip-target="tooltip-default-{{$position->id}}">
     <div class="font-semibold text-{{ $employee?->is_board_member ? 'primary' : 'secondary-dark'}} truncate">
         {{  $employee->name ?? '—'  }}

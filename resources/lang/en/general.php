@@ -335,6 +335,7 @@ return [
     'action' => 'Action',
     'counterparty' => 'Counterparty',
     'request' => 'Request|Requests',
+    'orgn-chart' => 'Organization Chart',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

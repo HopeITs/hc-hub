@@ -67,6 +67,7 @@
                     :title="__('general.programs-management')"
                     :active="request()->routeIs('programs.*') ||
                              request()->routeIs('positions.*') ||
+                             request()->routeIs('org.chart') ||
                              request()->routeIs('centers.*')">
 
                     <x-slot name="icon">
@@ -86,9 +87,9 @@
                             {{ __('general.positions') }}
                         </x-layouts.app.sidebar.nav-item>
                         <x-layouts.app.sidebar.nav-item
-                            :href="route('positions.org.chart')"
-                            :active="request()->routeIs('positions.org.chart')">
-                            {{ __('general.positions') }}
+                            :href="route('org.chart')"
+                            :active="request()->routeIs('org.chart')">
+                            {{ __('general.orgn-chart') }}
                         </x-layouts.app.sidebar.nav-item>
 
 

@@ -336,6 +336,7 @@ return [
     'action' => 'الإجراء',
     'counterparty' => 'الطرف الآخر',
     'request' => 'طلب|طلبات',
+    'orgn-chart' => 'هيكلية المؤسسة',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
