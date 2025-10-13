@@ -13,7 +13,7 @@
                         request()->routeIs('cities.*') ||
                         request()->routeIs('contract-types.*') ||
                         request()->routeIs('leave-types.*') ||
-                        request()->routeIs('checklist-items.*') ||
+                        request()->routeIs('basic-checklist-items.*') ||
                         request()->routeIs('departments.*') ||
                         request()->routeIs('job-levels.*')">
                         <x-slot name="icon"><x-icons.home /></x-slot>
@@ -27,7 +27,7 @@
                             <x-layouts.app.sidebar.nav-item :href="route('leave-types.index')" :active="request()->routeIs('leave-types.index')">
                                 {{ trans_choice('general.leave-type', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-                            <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
+                            <x-layouts.app.sidebar.nav-item :href="route('basic-checklist-items.index')" :active="request()->routeIs('basic-checklist-items.index')">
                                 {{ trans_choice('general.checklist-items', 2) }}
                             </x-layouts.app.sidebar.nav-item>
                             <x-layouts.app.sidebar.nav-item :href="route('job-levels.index')" :active="request()->routeIs('job-levels.index')">
