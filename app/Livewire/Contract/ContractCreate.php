@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Contract;
 
+use App\Enums\SalaryPer;
 use App\Livewire\Forms\ContractForm;
+use App\Livewire\Forms\LeaveBalanceForm;
 use App\Models\{City, Center, Employee, Position, Program, ContractType};
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -10,7 +12,7 @@ use Livewire\Component;
 class ContractCreate extends Component
 {
     public ContractForm $form;
-
+    public LeaveBalanceForm $balanceForm;
     public int $step = 1;
     public int $maxStep = 1;
 
@@ -77,6 +79,10 @@ class ContractCreate extends Component
 
         $contract = $this->form->save();
 
+        if($contract->salary_per->value === SalaryPer::Month){
+            $this->balanceForm->store($contract->id);
+        }
+
         LivewireAlert::success(__('general.success-message'));
 
         return redirect()->route('contracts.show', ['contract' => $contract->id]);
@@ -137,7 +143,7 @@ class ContractCreate extends Component
         $posCol = "title_{$locale}";
         $typeCol = "name_{$locale}";
 
-        $cities = City::select('id', $cityCol)
+        $cities = City::select('id', $cityCol)->where('is_active', 1)
             ->orderBy($cityCol)
             ->get()
             ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));

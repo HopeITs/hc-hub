@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SalaryPer;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -44,6 +45,13 @@ class Contract extends Model
     public function leaveBalances()
     {
         return $this->hasMany(LeaveBalance::class, 'contract_id');
+    }
+
+    public function duration(){
+        $start_date = Carbon::parse($this->start_date); // start date
+        $end_date = Carbon::parse($this->end_date); // end date
+
+        return round( $start_date->diffInMonths($end_date),1);
     }
 
 

@@ -46,7 +46,9 @@ class ContractsTable extends LivewireTable
             Column::make(trans_choice('general.employee', 2), function (Model $m) use ($loc) {
                 return $m->employee?->name ?? '—';
             }),
-
+            Column::make('duration', function (Model $m) use ($loc) {
+                return $m->duration() ?? '—';
+            }),
             Column::make(trans_choice('general.positions', 1), function (Model $m) {
                 return $m->position?->title
                     ?? $m->position?->requiredPosition?->title
