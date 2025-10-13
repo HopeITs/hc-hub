@@ -34,6 +34,7 @@ class PendingItems extends Component
         ]);
 
         unset($this->notes[$id]);
+        $this->dispatch('pendingDeliversCount');
         session()->flash('message', __('general.item_marked_delivered'));
     }
 
