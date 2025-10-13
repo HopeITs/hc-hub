@@ -71,7 +71,6 @@
                             {{ __('general.orgn-chart') }}
                         </x-layouts.app.sidebar.nav-item>
 
-
                         <x-layouts.app.sidebar.nav-item
                             :href="route('centers.index')"
                             :active="request()->routeIs('centers.index')" wire:navigate>
@@ -116,15 +115,15 @@
                 @endactiverole
 
                 @activerole('Super Admin', 'General Manager', 'HR-SYR', 'HR-ALP', 'Manager', 'Employee')
-                    <x-layouts.app.sidebar.dropdown-nav-list id="checklist-items" :title="__('general.checklist_items')" :active="request()->routeIs('checklist-items.*')">
+                    <x-layouts.app.sidebar.dropdown-nav-list id="checklist-items" wire:ignore.self
+                        :title="__('general.checklist_items')" :active="request()->routeIs('checklist-items.*')">
                         <x-slot name="icon"><x-icons.clipboard-list class="w-5 h-5" /></x-slot>
                         <x-slot name="list">
                             @if ($isDeliverResponsible)
                                 <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-delivers')" :active="request()->routeIs('checklist-items.pending-delivers')">
                                     {{ __('general.pending-delivers') }}
                                     @if ($pendingDeliversCount > 0)
-                                        <span
-                                            class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
                                             {{ $pendingDeliversCount }}
                                         </span>
                                     @endif
@@ -133,8 +132,7 @@
                                 <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-returns')" :active="request()->routeIs('checklist-items.pending-returns')">
                                     {{ __('general.pending_returns') }}
                                     @if ($pendingReturnsCount > 0)
-                                        <span
-                                            class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
                                             {{ $pendingReturnsCount }}
                                         </span>
                                     @endif
