@@ -66,14 +66,14 @@ class EmployeeTable extends LivewireTable
 
                 )
                 ->options($this->managerOptions())
-                ->sortable(),
+                ->sortable()->searchable(),
 
             SelectColumn::make(trans('general.tech_manager'), 'tech_manager_id')
                 ->displayUsing(fn ($v, Model $m) =>
                     $m->latestActiveContract()?->position->techManager?->employee()?->name ?? '—'
                 )
                 ->options($this->managerOptions())
-                ->sortable(),
+                ->sortable()->searchable(),
 
             Column::make(trans('general.position'), 'contracts.position.title')
                 ->sortable()

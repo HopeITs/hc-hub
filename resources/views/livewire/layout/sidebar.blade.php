@@ -40,23 +40,45 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('general manager', 'super-admin')
-                    <x-layouts.app.sidebar.dropdown-nav-list id="program-management" :title="__('general.programs-management')" :active="request()->routeIs('programs.*') ||
-                        request()->routeIs('positions.*') ||
-                        request()->routeIs('centers.*')">
-                        <x-slot name="icon"><x-icons.layers class="w-5 h-5" /></x-slot>
-                        <x-slot name="list">
-                            <x-layouts.app.sidebar.nav-item :href="route('programs.index')" :active="request()->routeIs('programs.*')">
-                                {{ trans_choice('general.program', 2) }}
-                            </x-layouts.app.sidebar.nav-item>
-                            <x-layouts.app.sidebar.nav-item :href="route('positions.index')" :active="request()->routeIs('positions.*')">
-                                {{ __('general.positions') }}
-                            </x-layouts.app.sidebar.nav-item>
-                            <x-layouts.app.sidebar.nav-item :href="route('centers.index')" :active="request()->routeIs('centers.index')" wire:navigate>
-                                {{ trans_choice('general.center', 2) }}
-                            </x-layouts.app.sidebar.nav-item>
-                        </x-slot>
-                    </x-layouts.app.sidebar.dropdown-nav-list>
+                @activerole('general manager','super-admin')
+                <x-layouts.app.sidebar.dropdown-nav-list
+                    id="program-management"
+                    :title="__('general.programs-management')"
+                    :active="request()->routeIs('programs.*') ||
+                             request()->routeIs('positions.*') ||
+                             request()->routeIs('org.chart') ||
+                             request()->routeIs('centers.*')">
+
+                    <x-slot name="icon">
+                        <x-icons.layers class="w-5 h-5" />
+                    </x-slot>
+
+                    <x-slot name="list">
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('programs.index')"
+                            :active="request()->routeIs('programs.*')">
+                            {{ trans_choice('general.program', 2) }}
+                        </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('positions.index')"
+                            :active="request()->routeIs('positions.*')">
+                            {{ __('general.positions') }}
+                        </x-layouts.app.sidebar.nav-item>
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('org.chart')"
+                            :active="request()->routeIs('org.chart')">
+                            {{ __('general.orgn-chart') }}
+                        </x-layouts.app.sidebar.nav-item>
+
+
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('centers.index')"
+                            :active="request()->routeIs('centers.index')" wire:navigate>
+                            {{ trans_choice('general.center', 2) }}
+                        </x-layouts.app.sidebar.nav-item>
+                    </x-slot>
+                </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
                 @activerole('hr manager', 'general manager', 'super-admin')
@@ -129,6 +151,7 @@
                         </x-slot>
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
+
             </ul>
         </div>
 

@@ -24,11 +24,11 @@ class PositionEdit extends Component
         $programs = Program::where('is_active', true)->get();
         $centers = Center::where('is_active', true)->with('city')->get();
         $jobLevels = JobLevel::orderBy('grade')->get();
-
+        $positions = Position::with(['center', 'program'])->whereNot('id',$this->position->id)->get();
         $departments = Department::all();
 
         $title = $this->form->position->title;
-        return view('livewire.position.form',compact('title','cities','programs','centers','jobLevels','departments'));
+        return view('livewire.position.form',compact('title','cities','programs','centers','jobLevels','departments','positions'));
 
     }
 

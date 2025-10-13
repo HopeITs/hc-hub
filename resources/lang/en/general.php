@@ -335,6 +335,7 @@ return [
     'action' => 'Action',
     'counterparty' => 'Counterparty',
     'request' => 'Request|Requests',
+    'orgn-chart' => 'Organization Chart',
     'dates' => 'Dates',
     'delivered' => 'Delivered',
     'received' => 'Received',

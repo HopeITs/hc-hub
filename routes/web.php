@@ -4,14 +4,15 @@ use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, DepartmentModule, JobLevelModule, LeaveTypeModule};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
-use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule};
-use App\Livewire\Position\{PositionCreate, PositionEdit, PositionsModule};
+use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule, EmployeeProfile};
+use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
 use App\Livewire\ProgramManagement\{Center\CentersModule, DefaultDeliverable\DefaultDeliverablesModule, Program\Create as ProgramCreate, Program\Detail as ProgramDetail, Program\Index as ProgramIndex, Program\Update as ProgramUpdate};
 use App\Livewire\Settings\{Appearance, Password, Profile};
 use App\Livewire\ChecklistItems\{PendingItems, AllItems, PendingReturns, DoneRequests};
 use Illuminate\Support\Facades\Route;
-use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use Livewire\Livewire;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+
 
 Route::group(
     [
@@ -42,22 +43,20 @@ Route::group(
 
             Route::get('/centers', CentersModule::class)->name('centers.index');
 
-            Route::prefix('positions')
-                ->name('positions.')
-                ->group(function () {
-                    Route::get('/', PositionsModule::class)->name('index');
-                    Route::get('/create', PositionCreate::class)->name('create');
-                    Route::get('/{position}/edit', PositionEdit::class)->name('edit');
-                });
+        Route::prefix('positions')->name('positions.')->group(function () {
+            Route::get('/',                PositionsModule::class)->name('index');
+            Route::get('/create',          PositionCreate::class)->name('create');
+            Route::get('/{position}/edit', PositionEdit::class)->name('edit');
 
-            Route::prefix('programs')
-                ->name('programs.')
-                ->group(function () {
-                    Route::get('/', ProgramIndex::class)->name('index');
-                    Route::get('/create', ProgramCreate::class)->name('create');
-                    Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
-                    Route::get('/{program:slug}', ProgramDetail::class)->name('show');
-                });
+        });
+        Route::get('/org-chart', OrgChart::class)->name('org.chart');
+        Route::prefix('programs')->name('programs.')->group(function () {
+            Route::get('/',                    ProgramIndex::class)->name('index');
+            Route::get('/create',              ProgramCreate::class)->name('create');
+            Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
+            Route::get('/{program:slug}',      ProgramDetail::class)->name('show');
+
+        });
 
             Route::prefix('employees')
                 ->name('employees.')
@@ -65,6 +64,7 @@ Route::group(
                     Route::get('/', EmployeeModule::class)->name('index');
                     Route::get('/create', EmployeeCreate::class)->name('create');
                     Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
+                    Route::get('/{employee:username}/show', EmployeeProfile::class)->name('show');
                 });
 
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
@@ -95,6 +95,5 @@ Route::group(
                 });
         });
 
-        require __DIR__ . '/auth.php';
-    },
-);
+    require __DIR__ . '/auth.php';
+});

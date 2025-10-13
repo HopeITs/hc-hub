@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTranslation;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -77,7 +78,7 @@ class Employee extends Model implements HasMedia
 
     public function positions(): BelongsToMany
     {
-        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours']);
+        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')->withPivot(['id', 'contract_type_id',  'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours' , 'is_active']);
     }
 
     public function scopeInvolvedInProgram($query, $programId)
@@ -168,4 +169,69 @@ class Employee extends Model implements HasMedia
             ->useFallbackUrl('https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=be1f24&background=FFF')
             ->singleFile();
     }
+
+    public function getYearsOfServiceAttribute(): float
+    {
+        $contracts = $this->contracts()
+            ->select(['start_date', 'end_date', 'terminated_at'])
+            ->orderBy('start_date')
+            ->get();
+
+        if ($contracts->isEmpty()) {
+            return 0;
+        }
+
+        // Build the time periods for each contract
+        $periods = $contracts->map(function ($c) {
+            $start = Carbon::parse($c->start_date);
+
+            // Determine the actual end date of the contract
+            $end = null;
+            if ($c->terminated_at) {
+                // Employee left before the planned end date
+                $end = Carbon::parse($c->terminated_at);
+            } elseif ($c->end_date) {
+                // Contract ended normally
+                $end = Carbon::parse($c->end_date);
+            } else {
+                // Contract is still active
+                $end = Carbon::now();
+            }
+
+            // Correct data errors where end date is before start date
+            if ($end->lt($start)) {
+                [$start, $end] = [$end, $start];
+            }
+
+            return compact('start', 'end');
+        })->sortBy('start')->values()->toArray();
+
+        // Merge overlapping or continuous contract periods
+        $merged = [$periods[0]];
+        foreach (array_slice($periods, 1) as $p) {
+            $last = &$merged[count($merged) - 1];
+            if ($p['start']->lte($last['end'])) {
+                // Extend the end date if periods overlap or touch
+                $last['end'] = $p['end']->gt($last['end']) ? $p['end'] : $last['end'];
+            } else {
+                // Separate period (gap between contracts)
+                $merged[] = $p;
+            }
+        }
+
+        // Calculate total service time (in years + fractional months)
+        $totalYears = 0;
+        foreach ($merged as $m) {
+            $years = $m['end']->diffInYears($m['start']);
+            $months = $m['end']->diffInMonths($m['start']) % 12;
+            $totalYears += $years + ($months / 12);
+        }
+
+        // Return total years of service rounded to one decimal
+        return -1 * round($totalYears, 1);
+    }
+
+
+
+
 }

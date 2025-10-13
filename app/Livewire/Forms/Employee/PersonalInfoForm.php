@@ -181,7 +181,7 @@ class PersonalInfoForm extends Form
         $this->username = $employee->username;
         $this->email = $employee->account?->email;
         $this->photo = $employee->getFirstMediaUrl('avatar');
-        $this->roles = implode(',' ,$employee->account->roles()->pluck('name')->toArray());
+        $this->roles = implode(',' ,$employee->account?->roles()->pluck('name')->toArray()??[]);
 
     }
 
