@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Enums\Direction;
-use RamonRietdijk\LivewireTables\Enums\SearchScope;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 class DoneRequestsTable extends LivewireTable
@@ -46,7 +45,6 @@ class DoneRequestsTable extends LivewireTable
     protected function columns(): array
     {
         $employeeOptions = Employee::query()
-            ->with('contracts.position.department')
             ->get()
             ->pluck('name', 'name')
             ->unique()
@@ -106,7 +104,15 @@ class DoneRequestsTable extends LivewireTable
                     return '—';
                 })
                 ->sortable()
-                ->searchable(),
+                ->searchable(function (Builder $builder, string $value): void {
+                    $builder->where(function (Builder $query) use ($value) {
+                        $query->whereHas('delivered', function (Builder $q) use ($value) {
+                            $q->where('name_en', $value)->orWhere('name_ar', $value);
+                        })->orWhereHas('receiver', function (Builder $q) use ($value) {
+                            $q->where('name_en', $value)->orWhere('name_ar', $value);
+                        });
+                    });
+                }),
 
             SelectColumn::make(__('general.action'))
                 ->options($actionOptions)
@@ -125,7 +131,13 @@ class DoneRequestsTable extends LivewireTable
                         END {$dir}
                     ");
                 })
-                ->searchable(),
+                ->searchable(function (Builder $builder, string $value): void {
+                    if ($value === 'delivered') {
+                        $builder->where('delivered_status', 'delivered');
+                    } elseif ($value === 'received') {
+                        $builder->where('returned_status', 'received');
+                    }
+                }),
 
             SelectColumn::make(__('general.item'), 'item.name')
                 ->options($itemOptions)
@@ -144,7 +156,31 @@ class DoneRequestsTable extends LivewireTable
                     return '—';
                 })
                 ->sortable()
-                ->searchable(),
+                ->searchable(function (Builder $builder, string $value): void {
+                    $builder->where(function (Builder $query) use ($value) {
+                        $query->orWhere(function (Builder $subQuery) use ($value) {
+                            $subQuery->where('returned_status', 'received')
+                                ->where(function (Builder $nested) use ($value) {
+                                    $nested->whereHas('employee', function (Builder $q) use ($value) {
+                                        $q->where('name_en', $value)->orWhere('name_ar', $value);
+                                    })
+                                    ->orWhereHas('delivered', function (Builder $q) use ($value) {
+                                        $q->where('name_en', $value)->orWhere('name_ar', $value);
+                                    });
+                                });
+                        })->orWhere(function (Builder $subQuery) use ($value) {
+                            $subQuery->where('delivered_status', 'delivered')
+                                ->where(function (Builder $nested) use ($value) {
+                                    $nested->whereHas('receiver', function (Builder $q) use ($value) {
+                                        $q->where('name_en', $value)->orWhere('name_ar', $value);
+                                    })
+                                    ->orWhereHas('employee', function (Builder $q) use ($value) {
+                                        $q->where('name_en', $value)->orWhere('name_ar', $value);
+                                    });
+                                });
+                        });
+                    });
+                }),
 
             Column::make(__('general.dates'))
                 ->displayUsing(function (mixed $value, Model $row): string {
