@@ -194,6 +194,7 @@ class ContractForm extends Form
             $this->contract = Contract::create($payload);
         }
 
+
         return $this->contract;
     }
 
