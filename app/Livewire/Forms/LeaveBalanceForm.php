@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use App\Enums\ContractType;
 use App\Enums\LeaveTypeCases;
 use App\Enums\MaritalStatus;
+use App\Enums\SalaryPer;
 use App\Models\AnnualLeaveRule;
 use App\Models\Contract;
 
@@ -41,6 +42,7 @@ class LeaveBalanceForm extends Form
         $employee = $contract->employee;
         $leaveRule = AnnualLeaveRule::where('years_of_volunteering', '<=', $employee->years_of_service)->orderBy('days', 'desc')->first();
         $duration = $contract->duration();
+        $fullTimeHours = 40;
 
         //handle if contract less than a year to set deserved of yearly leaves
         if ($duration < 12) {
@@ -55,8 +57,8 @@ class LeaveBalanceForm extends Form
             $leaveRule->day_per_month = 1;
             $leaveRule->days = 12;
         }
-        //case: full time
-        if ($contract->contractType->type === ContractType::FullTime) {
+        //case: full time or freelance
+        if (($contract->contractType->type === ContractType::FullTime || $contract->contractType->type === ContractType::Freelance))  {
 
             //yearly leaves:
             LeaveBalance::create([
@@ -99,7 +101,7 @@ class LeaveBalanceForm extends Form
                             ]);
                         }
                     }
-                }else{
+                } else {
                     //leaves for married
                     if ($employee->marital_status === MaritalStatus::Married) {
                         $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED);
@@ -111,6 +113,76 @@ class LeaveBalanceForm extends Form
                                     'contract_id' => $contract->id,
                                     'type_id' => $allowed->id,
                                     'deserved' => $allowed->base_days
+                                ]);
+                            }
+                        }
+                    }
+                }
+
+            }
+
+
+        }
+        else{
+            $workHoursPercentage = $fullTimeHours / $contract->weekly_hours;
+            if ($workHoursPercentage > ($fullTimeHours / 2)) {
+                $leavePercentage = 0.66; //3\2
+            } else {
+                $leavePercentage = 0.5; // 1\2;
+            }
+            //yearly leaves:
+            LeaveBalance::create([
+                'contract_id' => $contract->id,
+                'type_id' => LeaveTypeCases::Annual,//yearly
+                'deserved' => round($deserved * $leavePercentage)
+            ]);
+
+            //while this employee isn't in trial period
+            if ($contract->contract_type_id !== 3 && $contract->contract_type_id !== 4) {
+
+                //full sick:
+                LeaveBalance::create([
+                    'contract_id' => $contract->id,
+                    'type_id' => LeaveTypeCases::FullSick,//yearly
+                    'deserved' => round(min($duration, 12) * $leavePercentage)
+                ]);
+
+                //leaves allowed for all genders and marital status
+                $allowedForAll = $leaveTypes->filter(fn($type) => $type->allowed_gender === LeaveTypeEnum::GENDER_ANY && $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_ANY);
+                foreach ($allowedForAll as $allowed) {
+                    LeaveBalance::create([
+                        'contract_id' => $contract->id,
+                        'type_id' => $allowed->id,
+                        'deserved' => round($deserved * $leavePercentage)
+                    ]);
+                }
+
+                //leaves for singles
+                if ($employee->marital_status === MaritalStatus::Single) {
+                    $allowedForSingle = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_SINGLE);
+                    foreach ($allowedForSingle as $allowed) {
+
+                        //while gender match with allowed gender
+                        if ($employee->gender === $allowed->allowed_gender || $allowed->allowed_gender === LeaveTypeEnum::GENDER_ANY) {
+                            LeaveBalance::create([
+                                'contract_id' => $contract->id,
+                                'type_id' => $allowed->id,
+                                'deserved' => round($deserved * $leavePercentage)
+                            ]);
+                        }
+                    }
+                } else {
+                    //leaves for married
+                    if ($employee->marital_status === MaritalStatus::Married) {
+                        $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED);
+                        foreach ($allowedForMarried as $allowed) {
+
+                            //while gender match with allowed gender
+                            if ($employee->gender === $allowed->allowed_gender || $allowed->allowed_gender === LeaveTypeEnum::GENDER_ANY) {
+                                LeaveBalance::create([
+                                    'contract_id' => $contract->id,
+                                    'type_id' => $allowed->id,
+                                    'deserved' => round($deserved * $leavePercentage)
                                 ]);
                             }
                         }
