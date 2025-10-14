@@ -64,6 +64,8 @@ class PersonalInfoForm extends Form
     #[Validate('integer')]
     public $nationality;
 
+    #[Validate('integer|exists:cities,id')]
+    public $city_id;
     #[Validate('nullable|string')]
     public $civil_registry_office;
 
@@ -108,7 +110,7 @@ class PersonalInfoForm extends Form
     #[Validate('nullable|exists:employees,id')]
     public $tech_manager_id = null;
 
-    public $city_id;
+
 
     public $roles;
 
@@ -122,7 +124,7 @@ class PersonalInfoForm extends Form
             ],
             'email' => [
                 'required',
-                Rule::unique('users', 'email')->ignore($this->employee?->account->id),
+                Rule::unique('users', 'email')->ignore($this->employee?->account?->id),
             ],
             'username' => [
                 'required',

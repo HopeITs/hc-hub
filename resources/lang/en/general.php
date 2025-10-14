@@ -339,6 +339,7 @@ return [
     'dates' => 'Dates',
     'delivered' => 'Delivered',
     'received' => 'Received',
+    'on_hold' => 'On Hold',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
