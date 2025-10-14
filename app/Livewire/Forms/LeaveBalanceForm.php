@@ -40,6 +40,15 @@ class LeaveBalanceForm extends Form
         $leaveTypes = LeaveType::whereNotIn('id', [1, 2])->get();
         $employee = $contract->employee;
         $leaveRule = AnnualLeaveRule::where('years_of_volunteering', '<=', $employee->years_of_service)->orderBy('days', 'desc')->first();
+        $duration = $contract->duration();
+
+        //handle if contract less than a year to set deserved of yearly leaves
+        if ($duration < 12) {
+            $deserved = $duration * $leaveRule->day_per_month;
+        } else {
+            $deserved = $leaveRule->days;
+        }
+
         //handle the period less than 1 year
         if (!isset($leaveRule)) {
             $leaveRule = new AnnualLeaveRule();
@@ -49,12 +58,6 @@ class LeaveBalanceForm extends Form
         //case: full time
         if ($contract->contractType->type === ContractType::FullTime) {
 
-            $duration = $contract->duration();
-            if ($duration < 12) {
-                $deserved = $duration * $leaveRule->day_per_month;
-            } else {
-                $deserved = $leaveRule->days;
-            }
             //yearly leaves:
             LeaveBalance::create([
                 'contract_id' => $contract->id,
