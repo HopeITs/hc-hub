@@ -60,14 +60,6 @@ class DoneRequestsTable extends LivewireTable
             ->sort()
             ->toArray();
 
-        $noteOptions = Checklist::query()
-            ->whereNotNull('notes')
-            ->distinct()
-            ->orderBy('notes')
-            ->pluck('notes', 'notes')
-            ->take(50)
-            ->toArray();
-
         $actionOptions = [
             'delivered' => __('general.delivered'),
             'received' => __('general.received'),
@@ -203,8 +195,7 @@ class DoneRequestsTable extends LivewireTable
                     $builder->orderByRaw("COALESCE(returned_at, delivered_at) {$dir}");
                 }),
 
-            SelectColumn::make(__('general.note'), 'notes')
-                ->options($noteOptions)
+            Column::make(__('general.note'), 'notes')
                 ->sortable()
                 ->searchable(),
         ];
