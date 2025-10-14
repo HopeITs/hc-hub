@@ -12,6 +12,7 @@ use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
 use App\Models\Checklist;
 use App\Models\ChecklistItem;
+use App\Models\City;
 use App\Models\DefaultDeliverable;
 use App\Models\Employee;
 use App\Models\Role;
@@ -206,11 +207,17 @@ class EmployeeEdit extends Component
         }
     }
 
+    public function toggleBoardMember($checked): void
+    {
+        $this->infoForm->is_board_member = (bool)$checked;
+
+    }
+
     public function render()
     {
         $roles = Role::pluck('name', 'id')->toArray();
         $delivereds = Employee::whereIn('id', DefaultDeliverable::pluck('employee_id'))->get();
-
+        $cities = City::where('is_active',true)->pluck(transColumn('name'), 'id')->toArray();
         $employeeChecklistItems = Checklist::with(['item'])
             ->where('employee_id', $this->employee->id)
             ->where(function ($q) {
@@ -221,6 +228,7 @@ class EmployeeEdit extends Component
 
         return view('livewire.employee.form', [
             'roles' => $roles,
+            'cities' => $cities,
             'allEmployees' => Employee::select('id', 'name_en', 'name_ar')->where('id', '!=', $this->employee->id)->get(),
             'delivereds' => $delivereds,
             'employeeChecklistItems' => $employeeChecklistItems,
