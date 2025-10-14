@@ -8,7 +8,7 @@
             </a>
 
             <ul class="space-y-2 font-medium">
-                @activerole('hr', 'hr manager', 'general manager', 'super-admin')
+                @activerole('hr', 'hr manager', 'general manager', 'SUPER ADMIN')
                     <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('dashboard') ||
                         request()->routeIs('cities.*') ||
                         request()->routeIs('contract-types.*') ||
@@ -40,7 +40,7 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('general manager','super-admin')
+                @activerole('general manager','hr', 'hr manager','SUPER ADMIN')
                 <x-layouts.app.sidebar.dropdown-nav-list
                     id="program-management"
                     :title="__('general.programs-management')"
@@ -81,7 +81,7 @@
                 </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('hr manager', 'general manager', 'super-admin')
+                @activerole('hr manager','hr', 'general manager', 'SUPER ADMIN')
                     <x-layouts.app.sidebar.dropdown-nav-list id="employees-management" :title="trans_choice('general.employee-management', 2)"
                         :active="request()->routeIs('employees.*') ||
                             request()->routeIs('contracts.*') ||
@@ -101,7 +101,7 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('employee', 'hr', 'hr manager', 'general manager', 'super-admin')
+                @activerole('employee', 'hr', 'hr manager', 'general manager', 'SUPER ADMIN')
                     <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')" :active="request()->routeIs('my-folders.*') || request()->routeIs('shared-folders.*')">
                         <x-slot name="icon"><x-icons.folder class="w-5 h-5" /></x-slot>
                         <x-slot name="list">
@@ -115,7 +115,7 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('Super Admin', 'General Manager', 'HR-SYR', 'HR-ALP', 'Manager', 'Employee')
+                @activerole('SUPER ADMIN','hr', 'General Manager', 'hr manager', 'Manager', 'Employee')
                     <x-layouts.app.sidebar.dropdown-nav-list id="checklist-items" :title="__('general.checklist_items')" :active="request()->routeIs('checklist-items.*')">
                         <x-slot name="icon"><x-icons.clipboard-list class="w-5 h-5" /></x-slot>
                         <x-slot name="list">

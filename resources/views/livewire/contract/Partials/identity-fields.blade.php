@@ -21,17 +21,7 @@
         <x-error-span class="mt-1">{{ $errors->first('city_id') }}</x-error-span>
     </div>
 
-    <div class="md:col-span-6">
-        <x-forms.input-label for="employee_id">{{ trans_choice('general.employee', 2) }}</x-forms.input-label>
-        <x-forms.select-input id="employee_id" wire:model="form.employee_id"
-                              class="mt-1" :disabled="!$city_id">
-            <option value="">{{ __('general.select') }}</option>
-            @foreach($employees as $e)
-                <option value="{{ $e->id }}">{{ $e->name }}</option>
-            @endforeach
-        </x-forms.select-input>
-        <x-error-span class="mt-1">{{ $errors->first('form.employee_id') }}</x-error-span>
-    </div>
+
 
     <div class="md:col-span-6">
         <x-forms.input-label for="program_id">{{ trans_choice('general.program', 2) }}</x-forms.input-label>
@@ -43,6 +33,17 @@
             @endforeach
         </x-forms.select-input>
         <x-error-span class="mt-1">{{ $errors->first('program_id') }}</x-error-span>
+    </div>
+
+    <div class="md:col-span-6">
+        <x-forms.input-label for="employee_id">{{ trans_choice('general.employee', 2) }}</x-forms.input-label>
+        <x-forms.select-input id="employee_id" wire:model="form.employee_id" class="mt-1">
+            <option value="">{{ __('general.select') }}</option>
+            @foreach($employees as $e)
+                <option value="{{ $e->id }}">{{ $e->name }}</option>
+            @endforeach
+        </x-forms.select-input>
+        <x-error-span class="mt-1">{{ $errors->first('form.employee_id') }}</x-error-span>
     </div>
 
     <div class="md:col-span-6">
