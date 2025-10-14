@@ -213,8 +213,10 @@ class EmployeeEdit extends Component
 
         $employeeChecklistItems = Checklist::with(['item'])
             ->where('employee_id', $this->employee->id)
-            ->where('delivered_status', 'delivered')
-            ->orderByDesc('delivered_at')
+            ->where(function ($q) {
+                $q->whereNull('delivered_status')->orWhereIn('delivered_status', ['delivered', 'pending']);
+            })
+            ->orderByDesc('updated_at')
             ->get();
 
         return view('livewire.employee.form', [

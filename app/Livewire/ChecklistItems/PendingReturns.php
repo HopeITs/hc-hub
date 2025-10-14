@@ -34,6 +34,7 @@ class PendingReturns extends Component
         ]);
 
         unset($this->notes[$id]);
+        $this->dispatch('pendingReturnsCount');
         session()->flash('message', __('general.item_marked_received'));
     }
 
