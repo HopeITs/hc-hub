@@ -188,7 +188,7 @@
         <div class="col-span-full">
             <x-forms.input-label for="roles">{{trans_choice('general.role',2)}}</x-forms.input-label>
 
-            <input class="hidden" wire:model="infoForm.roles" id="roles_hidden">
+            <input class="hidden" wire:model="infoForm.roles"  id="roles_hidden">
             <x-forms.input class="tagify" id="roles" value="{{$infoForm->roles}}"
                            data-whitelist="{{implode(',',$roles)}}"/>
 
