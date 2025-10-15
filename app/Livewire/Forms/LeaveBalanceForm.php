@@ -58,7 +58,7 @@ class LeaveBalanceForm extends Form
             $leaveRule->days = 12;
         }
         //case: full time or freelance
-        if (($contract->contractType->type === ContractType::FullTime || $contract->contractType->type === ContractType::Freelance))  {
+        if (($contract->contractType->type === ContractType::FullTime || $contract->contractType->type === ContractType::Freelance)) {
 
             //yearly leaves:
             LeaveBalance::create([
@@ -104,11 +104,12 @@ class LeaveBalanceForm extends Form
                 } else {
                     //leaves for married
                     if ($employee->marital_status === MaritalStatus::Married) {
-                        $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED);
-                        foreach ($allowedForMarried as $allowed) {
 
-                            //while gender match with allowed gender
-                            if ($employee->gender === $allowed->allowed_gender || $allowed->allowed_gender === LeaveTypeEnum::GENDER_ANY) {
+                        $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED);
+                        $allowedForFemaleMarried = $allowedForMarried->filter(fn($type) => $type->allowed_gender === LeaveTypeEnum::GENDER_FEMALE);
+                        $allowedForOtherMarried = $allowedForMarried->filter(fn($type) => $type->allowed_gender !== LeaveTypeEnum::GENDER_FEMALE);
+                        foreach ($allowedForFemaleMarried as $allowed) {
+                            if ($employee->abilityToTakeLeave($allowed->id)) {
                                 LeaveBalance::create([
                                     'contract_id' => $contract->id,
                                     'type_id' => $allowed->id,
@@ -116,14 +117,21 @@ class LeaveBalanceForm extends Form
                                 ]);
                             }
                         }
+                        foreach ($allowedForOtherMarried as $allowed) {
+                            LeaveBalance::create([
+                                'contract_id' => $contract->id,
+                                'type_id' => $allowed->id,
+                                'deserved' => $allowed->base_days
+                            ]);
+
+                        }
                     }
                 }
 
             }
 
 
-        }
-        else{
+        } else {
             $workHoursPercentage = $fullTimeHours / $contract->weekly_hours;
             if ($workHoursPercentage > ($fullTimeHours / 2)) {
                 $leavePercentage = 0.66; //3\2
@@ -153,7 +161,7 @@ class LeaveBalanceForm extends Form
                     LeaveBalance::create([
                         'contract_id' => $contract->id,
                         'type_id' => $allowed->id,
-                        'deserved' => round($deserved * $leavePercentage)
+                        'deserved' => $deserved > 10 ? round($deserved * $leavePercentage) : $deserved
                     ]);
                 }
 
@@ -174,6 +182,9 @@ class LeaveBalanceForm extends Form
                 } else {
                     //leaves for married
                     if ($employee->marital_status === MaritalStatus::Married) {
+                        //handle mother leave taken once
+
+
                         $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED);
                         foreach ($allowedForMarried as $allowed) {
 
@@ -182,7 +193,7 @@ class LeaveBalanceForm extends Form
                                 LeaveBalance::create([
                                     'contract_id' => $contract->id,
                                     'type_id' => $allowed->id,
-                                    'deserved' => round($deserved * $leavePercentage)
+                                    'deserved' => $deserved > 10 ? round($deserved * $leavePercentage) : $deserved
                                 ]);
                             }
                         }
