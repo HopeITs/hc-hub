@@ -534,7 +534,7 @@ return [
         //1
         ['title_en' => 'Chief Executive Officer', 'title_ar' => 'الرئيس التنفيذي', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => null, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Fredy Youssef
 //2
-        ['title_en' => 'Deputy Chief Executive Officer', 'title_ar' => 'نائب الرئيس التنفيذي', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Safir Salim
+        ['title_en' => 'Deputy Chief Executive Officer', 'title_ar' => 'نائب الرئيس التنفيذي', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => null, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Safir Salim
 //3
         ['title_en' => 'Second Deputy Chief Executive Officer / Program Manager', 'title_ar' => 'نائب ثاني للرئيس التنفيذي / مدير البرنامج', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Rama Daaboul
 //4
