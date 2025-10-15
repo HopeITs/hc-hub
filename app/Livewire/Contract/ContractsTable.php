@@ -47,9 +47,6 @@ class ContractsTable extends LivewireTable
             Column::make(trans_choice('general.employee', 2), function (Model $m) use ($loc) {
                 return $m->employee?->name ?? '—';
             }),
-            Column::make('duration', function (Model $m) use ($loc) {
-                return $m->duration() ?? '—';
-            }),
             Column::make(trans_choice('general.positions', 1), function (Model $m) {
                 return $m->position?->title
                     ?? $m->position?->requiredPosition?->title
@@ -68,12 +65,17 @@ class ContractsTable extends LivewireTable
                 return $m->position?->jobLevel?->name ?? '—';
             }),
 
+            Column::make('duration', function (Model $m) use ($loc) {
+                return $m->duration().' Months' ?? '—';
+            }),
+
             Column::make(__('general.period'), function (Model $m) {
                 return Blade::render('<x-period :start="$start" :end="$end" />', [
                     'start' => $m->start_date,
                     'end'   => $m->end_date,
                 ]);
             })->asHtml(),
+
 
             Column::make(__('general.yearly-leave-days'), 'yearly_leave_days')
                 ->displayUsing(fn ($v) => $v ?? '—')
@@ -105,18 +107,18 @@ class ContractsTable extends LivewireTable
             Column::make(__('Actions'), function (Model $m): string {
                 $view = Blade::render(
                     <<<'BLADE'
-<a href="{{ route('contracts.show', $id) }}"
-   class="inline-flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
-   title="{{ __('general.view') }}">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-         stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
-        <path stroke-linecap="round" stroke-linejoin="round"
-             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-</a>
-BLADE
+            <a href="{{ route('contracts.show', $id) }}"
+               class="inline-flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+               title="{{ __('general.view') }}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </a>
+            BLADE
                     , ['id' => $m->getKey()]
                 );
 
