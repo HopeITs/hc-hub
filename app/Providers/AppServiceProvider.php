@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Contract;
+use App\Observers\ContractObserver;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
@@ -101,5 +102,7 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('notactiverole', function (...$roles) {
             return auth()->check() && ! auth()->user()->activeRoleIs(...$roles);
         });
+
+        Contract::observe(ContractObserver::class);
     }
 }

@@ -29,7 +29,6 @@
     // Labels
     $L = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 
-    // Force English direction for numbers inside Arabic text
     $wrapLtr = fn ($v) => '<span dir="ltr">'.$v.'</span>';
 @endphp
 
@@ -67,7 +66,7 @@
     />
     <x-contract.dual
                      :en="$esc($positionTitleEn)"
-                     :ar="$escAr($positionTitleAr)"
+                     :ar="$esc($positionTitleAr)"
     />
 </div>
 

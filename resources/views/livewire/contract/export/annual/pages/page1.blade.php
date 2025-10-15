@@ -118,8 +118,11 @@
             :en="'<strong>Nationality:</strong> '.$esc($natEn)"
             :ar="$escAr($natAr).' '.$Glyphs(__('general.text7'))"/>
         <x-contract.dual
-            :en="'<strong>Address:</strong> '.$esc($addressEn)"
-            :ar="$escAr($addressAr).' '.$Glyphs(__('general.text8'))"/>
+            :en="'<strong>Address:</strong> '"
+            :ar="$Glyphs(__('general.text8'))"/>
+        <x-contract.dual
+            :en="$esc($addressEn)"
+            :ar="$esc($addressAr)"/>
     </div>
 </div>
 

@@ -4,7 +4,9 @@ namespace App\Livewire\Forms;
 
 use App\Models\Contract;
 use App\Enums\SalaryPer;
+use App\Models\Position;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
@@ -122,11 +124,21 @@ class ContractForm extends Form
     {
         return $this->validate([
             'employee_id' => ['required', 'exists:employees,id'],
-            'position_id' => ['required', 'exists:positions,id'],
+            'position_id' => [
+                'required',
+                'exists:positions,id',
+                function ($attribute, $value, $fail) {
+                    $pos = Position::find($value);
+                    if ($pos && ! $pos->canAssign()) {
+                        $fail(__('This position exceeded the number of max employees.'));
+                    }
+                },
+            ],
             'contract_type_id' => ['required', 'exists:contract_types,id'],
             'is_active' => ['required', 'boolean'],
         ]);
     }
+
 
     public function validateTerms(): array
     {
@@ -166,7 +178,6 @@ class ContractForm extends Form
             'position_id' => $this->position_id,
             'contract_type_id' => $this->contract_type_id,
             'is_active' => (bool) $this->is_active,
-
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'terminated_at' => $this->nullIfEmpty($this->terminated_at),
@@ -175,8 +186,6 @@ class ContractForm extends Form
             'weekly_hours' => (int) $this->weekly_hours,
             'work_days' => $this->work_days,
             'work_hours' => $this->work_hours,
-
-
             'currency' => (int) $this->currency,
             'salary' => $this->salary,
             'salary_per' => (string) $this->salary_per,
@@ -189,21 +198,24 @@ class ContractForm extends Form
         $this->validateTerms();
         $this->validatePay();
 
-        $payload = $this->buildPayload();
+        return DB::transaction(function () {
+            $payload = $this->buildPayload();
 
-        if ($this->contract) {
-            $this->contract->update($payload);
-        } else {
-            $this->contract = Contract::create($payload);
-        }
+            if ($this->contract) {
+                $this->contract->update($payload);
+            } else {
+                $this->contract = Contract::create($payload);
+            }
 
-
-        return $this->contract;
+            return $this->contract;
+        });
     }
 
     public function update(Contract $contract): bool
     {
-        return $contract->update($this->buildPayload());
+        return DB::transaction(function () use ($contract) {
+            return $contract->update($this->buildPayload());
+        });
     }
 
     public function saveIdentity(): void

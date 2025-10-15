@@ -46,6 +46,18 @@ class ContractCreate extends Component
         $this->reset(['form.position_id']);
     }
 
+    public function updatedFormPositionId($value): void
+    {
+        $this->resetErrorBag('form.position_id');
+
+        $pos = \App\Models\Position::find($value);
+
+        if ($pos && ! $pos->canAssign()) {
+            $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
+        }
+    }
+
+
     public function next(): void
     {
         if (method_exists($this->form, $this->validatorsByStep[$this->step] ?? '')) {

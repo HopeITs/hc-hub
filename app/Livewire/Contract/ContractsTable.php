@@ -7,6 +7,7 @@ use App\Models\Contract;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
@@ -148,11 +149,15 @@ BLADE
 
     public function delete(array $payload): void
     {
-        Contract::findOrFail($payload['id'])->delete();
+        DB::transaction(function () use ($payload) {
+            $contract = Contract::findOrFail($payload['id']);
+            $contract->delete();
+        });
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
 
         $this->dispatch('refreshContractsTable');
     }
+
 }

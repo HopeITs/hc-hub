@@ -107,6 +107,20 @@ class Position extends Model
         return $this->activeContracts()->first()?->employee;
     }
 
+    public function canAssign(): bool
+    {
+        return $this->exist_emp < $this->max_emp;
+    }
+    public function inc(): void
+    {
+        $this->increment('exist_emp');
+    }
+    public function dec(): void
+    {
+        if ($this->exist_emp > 0) {
+            $this->decrement('exist_emp');
+        }
+    }
 
 
 }

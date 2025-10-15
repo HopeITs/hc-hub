@@ -59,15 +59,26 @@
     </div>
 
     <div class="md:col-span-6">
-        <x-forms.input-label for="position_id">{{ trans_choice('general.positions', 1) }}</x-forms.input-label>
-        <x-forms.select-input id="position_id" wire:model="form.position_id"
-                              class="mt-1" :disabled="!$city_id || !$program_id">
+        <x-forms.input-label for="position_id">
+            {{ trans_choice('general.positions', 1) }}
+        </x-forms.input-label>
+
+        <x-forms.select-input
+            id="position_id"
+            wire:model.live="form.position_id"
+            class="mt-1"
+            :disabled="!$city_id || !$program_id">
             <option value="">{{ __('general.select') }}</option>
             @foreach($positions as $pos)
-                <option value="{{ $pos->id }}">{{ $pos->title ?? ('#'.$pos->id) }}</option>
+                <option value="{{ $pos->id }}">
+                    {{ $pos->title ?? ('#' . $pos->id) }}
+                </option>
             @endforeach
         </x-forms.select-input>
-        <x-error-span class="mt-1">{{ $errors->first('form.position_id') }}</x-error-span>
+
+        @error('form.position_id')
+        <x-error-span class="mt-1">{{ $message }}</x-error-span>
+        @enderror
     </div>
 
     <div class="md:col-span-6">
