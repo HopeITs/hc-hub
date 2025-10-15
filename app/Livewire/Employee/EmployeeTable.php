@@ -4,6 +4,7 @@ namespace App\Livewire\Employee;
 
 use App\Models\City;
 use App\Models\Employee;
+use App\Models\Position;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
@@ -50,7 +51,7 @@ class EmployeeTable extends LivewireTable
 
             Column::make(trans('general.name'), 'name')
                 ->displayUsing(fn ($v, Model $m) => $m->name) // uses accessor
-                ->sortable(),
+                ->sortable()->searchable(),
 
             Column::make(trans('general.photo'), function (Model $m): string {
                 $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
@@ -77,15 +78,15 @@ class EmployeeTable extends LivewireTable
                 )
                 ->options($this->managerOptions())
                 ->sortable()->searchable(),
+            SelectColumn::make(trans('general.position'), 'contracts.position.'.transColumn('title'))
+                ->options(Position::query()->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
+                ->sortable()->searchable(),
 
-            Column::make(trans('general.position'), 'contracts.position.title')
-                ->sortable()
-               ,
 
             Column::make(trans('general.work_email'))
                 ->displayUsing(fn ($v, Model $m) => $m->account?->email ?? '—'),
 
-            BooleanColumn::make(trans('general.is-active'), 'is_active'),
+            BooleanColumn::make(trans('general.is-active'), 'is_active')->searchable(),
 
             Column::make(__('Actions'), function (Model $model): string {
                 $isActive = $model->is_active ? 1 : 0;
@@ -109,24 +110,7 @@ class EmployeeTable extends LivewireTable
         ];
     }
 
-    protected function filters(): array
-    {
-        $managerOptions = $this->managerOptions();
 
-        return [
-            SelectFilter::make(trans('general.direct_manager'), 'direct_manager_id')
-                ->options($managerOptions),
-
-            SelectFilter::make(trans('general.tech_manager'), 'tech_manager_id')
-                ->options($managerOptions),
-
-            SelectFilter::make(trans('general.status'), 'is_active')
-                ->options([
-                    1 => trans('general.active'),
-                    0 => trans('general.inactive'),
-                ]),
-        ];
-    }
 
     public function confirmDelete($id): void
     {

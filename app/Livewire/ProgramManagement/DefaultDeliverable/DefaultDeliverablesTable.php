@@ -99,14 +99,7 @@ class DefaultDeliverablesTable extends LivewireTable
         ];
     }
 
-    protected function filters(): array
-    {
-        return [
-            SelectFilter::make(__('general.employee'), 'employee_id')->options($this->employeeOptions()),
-            SelectFilter::make(trans_choice('general.city', 1), 'city_id')->options($this->cityOptions()),
-            SelectFilter::make(__('general.item'), 'item_id')->options($this->itemOptions()),
-        ];
-    }
+
 
     public function confirmDelete(int $id): void
     {
