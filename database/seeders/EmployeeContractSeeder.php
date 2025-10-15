@@ -41,7 +41,6 @@ class EmployeeContractSeeder extends Seeder
                 'end_date' => Carbon::parse($data['start_date'])->addYears(1),
                 'terminated_at' => null,
                 'reason_of_termination' => null,
-                'yearly_leave_days' => 12,
                 'salary' => 1000000.00, // مثال، يمكن تعديله حسب الحاجة
                 'currency' => 1, // 1 = SYP
                 'salary_per' => 1, // 1 = شهري
