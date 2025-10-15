@@ -41,7 +41,7 @@ class ContractEdit extends Component
 
     public function updatedCityId(): void
     {
-        $this->reset(['program_id', 'center_id', 'form.position_id']);
+        $this->reset(['form.employee_id', 'program_id', 'center_id', 'form.position_id']);
     }
 
     public function updatedProgramId(): void
@@ -53,6 +53,19 @@ class ContractEdit extends Component
     {
         $this->reset(['form.position_id']);
     }
+
+    public function updatedFormPositionId($value): void
+    {
+        $this->resetErrorBag('form.position_id');
+
+        $pos = Position::find($value);
+
+        if ($pos && ! $pos->canAssign()) {
+            $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
+        }
+    }
+
+    // ── Step navigation ──────────────────────────────────────
 
     public function next(): void
     {
@@ -76,6 +89,8 @@ class ContractEdit extends Component
         $target = max(1, min(3, $target));
         if ($target <= $this->maxStep) $this->step = $target;
     }
+
+    // ── Submit & validation ──────────────────────────────────
 
     public function submit()
     {
@@ -133,68 +148,38 @@ class ContractEdit extends Component
         return true;
     }
 
+    // ── Aliases ──────────────────────────────────────────────
     public function saveIdentity(): void {}
     public function saveTerms(): void {}
     public function savePay(): void {}
     public function save() { return $this->submit(); }
 
+    // ── Render ───────────────────────────────────────────────
+
     public function render()
     {
-        $user = Auth::user();
+        $locale = app()->getLocale();
+        $cityCol = "name_{$locale}";
+        $posCol = "title_{$locale}";
+        $typeCol = "name_{$locale}";
 
-        $roleNameRaw = method_exists($user, 'roles')
-            ? optional($user->roles()->first())->name
-            : ($user->active_role ?? null);
-
-        $activeRoleName = strtoupper(str_replace(' ', '', trim($roleNameRaw ?? '')));
-        $roleArr = $activeRoleName !== '' ? explode('-', $activeRoleName) : [];
-
-        $userEmployee = $user->profile;
-        $userCityId   = optional($userEmployee)->city_id;
-
-        $locale   = app()->getLocale();
-        $cityCol  = "name_{$locale}";
-        $posCol   = "title_{$locale}";
-        $typeCol  = "name_{$locale}";
-        $empCol   = "name_{$locale}";
-
-        $cities = City::select('id', $cityCol)
-            ->where('is_active', 1)
+        $cities = City::select('id', $cityCol)->where('is_active', 1)
             ->orderBy($cityCol)
             ->get()
-            ->map(fn ($c) => tap($c, fn () => $c->name = $c->{$cityCol}));
+            ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
 
-        $employees = collect();
-
-        if (!empty($roleArr) && $roleArr[0] === 'HR') {
-            $cityCode = $roleArr[1] ?? null;
-
-            if ($cityCode === 'SYR') {
-                $employees = Employee::select('id', $empCol)
-                    ->orderBy($empCol)
-                    ->get()
-                    ->map(fn ($e) => tap($e, fn () => $e->name = $e->{$empCol}));
-            } else {
-                $employees = Employee::whereHas('city', fn ($q) => $q->where('code', $cityCode))
-                    ->select('id', $empCol)
-                    ->orderBy($empCol)
-                    ->get()
-                    ->map(fn ($e) => tap($e, fn () => $e->name = $e->{$empCol}));
-            }
-        } else {
-            if ($userCityId) {
-                $employees = Employee::where('city_id', $userCityId)
-                    ->select('id', $empCol)
-                    ->orderBy($empCol)
-                    ->get()
-                    ->map(fn ($e) => tap($e, fn () => $e->name = $e->{$empCol}));
-            }
-        }
+        $employees = $this->city_id
+            ? Employee::where('city_id', $this->city_id)
+                ->select('id', $cityCol)
+                ->orderBy($cityCol)
+                ->get()
+                ->map(fn($e) => tap($e, fn() => $e->name = $e->{$cityCol}))
+            : collect();
 
         $programs = $this->city_id
             ? Program::whereIn('id', Position::query()
                 ->where(function ($q) {
-                    $q->whereHas('center', fn ($c) => $c->where('city_id', $this->city_id))
+                    $q->whereHas('center', fn($c) => $c->where('city_id', $this->city_id))
                         ->orWhereNull('center_id');
                 })
                 ->pluck('program_id')
@@ -217,22 +202,20 @@ class ContractEdit extends Component
             : collect();
 
         $positions = ($this->city_id && $this->program_id)
-            ? Position::where('program_id', $this->program_id)
-                ->where(function ($q) {
-                    $q->whereHas('center', fn ($c) => $c->where('city_id', $this->city_id))
-                        ->orWhereNull('center_id');
-                })
-                ->when($this->center_id, fn ($q) => $q->where('center_id', $this->center_id))
+            ? Position::where([
+                ['program_id', '=', $this->program_id],
+                ['city_id', '=', $this->city_id],
+            ])
                 ->select('id', $posCol)
                 ->orderBy($posCol)
                 ->get()
-                ->map(fn ($p) => tap($p, fn () => $p->title = $p->{$posCol}))
+                ->map(fn($p) => tap($p, fn() => $p->title = $p->{$posCol}))
             : collect();
 
         $types = ContractType::select('id', $typeCol)
             ->orderBy($typeCol)
             ->get()
-            ->map(fn ($t) => tap($t, fn () => $t->name = $t->{$typeCol}));
+            ->map(fn($t) => tap($t, fn() => $t->name = $t->{$typeCol}));
 
         return view('livewire.contract.contract-edit', [
             'cities'     => $cities,
