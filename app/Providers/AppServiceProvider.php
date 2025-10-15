@@ -8,6 +8,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
@@ -76,7 +77,25 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Blade::if('activerole', function (...$roles) {
-            return auth()->check() && auth()->user()->activeRoleIs(...$roles);
+            $user = auth()->user();
+            if (!$user) {
+                return false;
+            }
+
+            $activeRole = strtoupper(trim($user->myRole() ?? ''));
+
+            foreach ($roles as $r) {
+                $normalized = strtoupper(trim($r));
+
+                if (Str::startsWith($activeRole, 'HR-') && Str::startsWith($normalized, 'HR')) {
+                    return true;
+                }
+
+                if ($activeRole === $normalized) {
+                    return true;
+                }
+            }
+            return false;
         });
 
         Blade::if('notactiverole', function (...$roles) {

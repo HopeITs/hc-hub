@@ -26,12 +26,23 @@
 
             </div>
         @endforeach
-
+        <div class="grid md:grid-cols-2 gap-x-6">
         <div wire:key="emp-actual-dob">
             <x-forms.input-label for="dob">@lang('general.actual-dob')</x-forms.input-label>
             <x-forms.date-input wire:model="infoForm.actual_dob" id="actual_dob"/>
             <x-error-span>{{ $errors->first('infoForm.actual_dob') }}</x-error-span>
 
+        </div>
+            <div wire:key="emp-actual-dob">
+                <x-forms.input-label for="city_id">{{trans_choice('general.city',1)}}</x-forms.input-label>
+                <x-forms.select-input wire:model="infoForm.city_id" id="city_id">
+                    @foreach($cities as $id => $city)
+                        <option value="{{$id}}">{{$city}}</option>
+                    @endforeach
+                </x-forms.select-input>
+                <x-error-span>{{ $errors->first('infoForm.city_id') }}</x-error-span>
+
+            </div>
         </div>
 
         <div wire:key="emp-gender">

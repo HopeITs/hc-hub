@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
-
 Route::group(
     [
         'prefix' => LaravelLocalization::setLocale(),
@@ -36,27 +35,31 @@ Route::group(
 
             Route::get('cities', CityModule::class)->name('cities.index');
             Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index');
-            Route::get('checklist-items', ChecklistItemModule::class)->name('checklist-items.index');
+            Route::get('checklist-items-basics', ChecklistItemModule::class)->name('basic-checklist-items.index');
             Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
             Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');
             Route::get('departments', DepartmentModule::class)->name('departments.index');
 
             Route::get('/centers', CentersModule::class)->name('centers.index');
 
-        Route::prefix('positions')->name('positions.')->group(function () {
-            Route::get('/',                PositionsModule::class)->name('index');
-            Route::get('/create',          PositionCreate::class)->name('create');
-            Route::get('/{position}/edit', PositionEdit::class)->name('edit');
+            Route::prefix('positions')
+                ->name('positions.')
+                ->group(function () {
+                    Route::get('/', PositionsModule::class)->name('index');
+                    Route::get('/create', PositionCreate::class)->name('create');
+                    Route::get('/{position}/edit', PositionEdit::class)->name('edit');
+                });
 
-        });
-        Route::get('/org-chart', OrgChart::class)->name('org.chart');
-        Route::prefix('programs')->name('programs.')->group(function () {
-            Route::get('/',                    ProgramIndex::class)->name('index');
-            Route::get('/create',              ProgramCreate::class)->name('create');
-            Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
-            Route::get('/{program:slug}',      ProgramDetail::class)->name('show');
+            Route::get('/org-chart', OrgChart::class)->name('org.chart');
 
-        });
+            Route::prefix('programs')
+                ->name('programs.')
+                ->group(function () {
+                    Route::get('/', ProgramIndex::class)->name('index');
+                    Route::get('/create', ProgramCreate::class)->name('create');
+                    Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
+                    Route::get('/{program:slug}', ProgramDetail::class)->name('show');
+                });
 
             Route::prefix('employees')
                 ->name('employees.')
@@ -95,5 +98,6 @@ Route::group(
                 });
         });
 
-    require __DIR__ . '/auth.php';
-});
+        require __DIR__ . '/auth.php';
+    },
+);

@@ -10,9 +10,10 @@ use Livewire\Component;
 class Sidebar extends Component
 {
     #[On('pendingDeliversCount')]
-    public function refreshPendingDeliversCount()
+    #[On('pendingReturnsCount')]
+    public function refreshCounts(): void
     {
-        // This method only exists to trigger a re-render
+        // Trigger re-render when either event fires
     }
 
     public function render()
@@ -34,12 +35,17 @@ class Sidebar extends Component
                 ->where('returned_status', 'pending')
                 ->count()
             : 0;
+
         $user = Auth::user();
-        return view('livewire.layout.sidebar',compact('user', 'employee',
-                'employeeId',
-                'departmentName',
-                'isDeliverResponsible',
-                'pendingDeliversCount',
-                'pendingReturnsCount'));
+
+        return view('livewire.layout.sidebar', [
+            'user' => $user,
+            'employee' => $employee,
+            'employeeId' => $employeeId,
+            'departmentName' => $departmentName,
+            'isDeliverResponsible' => $isDeliverResponsible,
+            'pendingDeliversCount' => $pendingDeliversCount,
+            'pendingReturnsCount' => $pendingReturnsCount,
+        ]);
     }
 }

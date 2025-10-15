@@ -182,12 +182,10 @@ class ContractCreate extends Component
             : collect();
 
         $positions = ($this->city_id && $this->program_id)
-            ? Position::where('program_id', $this->program_id)
-                ->where(function ($q) {
-                    $q->whereHas('center', fn($c) => $c->where('city_id', $this->city_id))
-                        ->orWhereNull('center_id');
-                })
-                ->when($this->center_id, fn($q) => $q->where('center_id', $this->center_id))
+            ? Position::where([
+                ['program_id', '=', $this->program_id],
+                ['city_id', '=', $this->city_id],
+            ])
                 ->select('id', $posCol)
                 ->orderBy($posCol)
                 ->get()

@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 use App\Models\Contract;
 use App\Enums\SalaryPer;
+use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
@@ -74,7 +75,6 @@ class ContractForm extends Form
         return blank($value) ? null : $value;
     }
 
-    // ─────────────────────────────────────────────────────────
 
     public function setDefaults(): void
     {
@@ -118,7 +118,6 @@ class ContractForm extends Form
         $this->work_hours = is_string($c->work_hours) ? json_decode($c->work_hours, true) ?? [] : $c->work_hours ?? $this->work_hours;
     }
 
-    // ── STEP 1: Identity
     public function validateIdentity(): array
     {
         return $this->validate([
@@ -129,12 +128,20 @@ class ContractForm extends Form
         ]);
     }
 
-    // ── STEP 2: Terms
     public function validateTerms(): array
     {
+        $limit = $this->start_date
+            ? Carbon::parse($this->start_date)->addYear()->toDateString()
+            : null;
+
         return $this->validate([
             'start_date' => ['required', 'date'],
-            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'end_date' => array_filter([
+                'required',
+                'date',
+                'after_or_equal:start_date',
+                $limit ? "before_or_equal:{$limit}" : null,
+            ]),
             'terminated_at' => ['nullable', 'date', 'after_or_equal:start_date'],
             'reason_of_termination' => ['nullable', 'string'],
             'yearly_leave_days' => ['required', 'integer', 'min:0'],
@@ -142,7 +149,7 @@ class ContractForm extends Form
         ]);
     }
 
-    // ── STEP 3: Pay
+
     public function validatePay(): array
     {
         return $this->validate([
@@ -152,17 +159,14 @@ class ContractForm extends Form
         ]);
     }
 
-    // ── Build payload for create/update
     private function buildPayload(): array
     {
         return [
-            // Identity
             'employee_id' => $this->employee_id,
             'position_id' => $this->position_id,
             'contract_type_id' => $this->contract_type_id,
             'is_active' => (bool) $this->is_active,
 
-            // Terms
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'terminated_at' => $this->nullIfEmpty($this->terminated_at),
@@ -172,14 +176,13 @@ class ContractForm extends Form
             'work_days' => $this->work_days,
             'work_hours' => $this->work_hours,
 
-            // Pay
+
             'currency' => (int) $this->currency,
             'salary' => $this->salary,
             'salary_per' => (string) $this->salary_per,
         ];
     }
 
-    // ── Orchestrated save (used by submit)
     public function save(): Contract
     {
         $this->validateIdentity();
@@ -203,7 +206,6 @@ class ContractForm extends Form
         return $contract->update($this->buildPayload());
     }
 
-    // ── Granular saves (if used elsewhere)
     public function saveIdentity(): void
     {
         $this->validateIdentity();

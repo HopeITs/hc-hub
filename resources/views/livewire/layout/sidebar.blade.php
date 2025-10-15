@@ -8,12 +8,12 @@
             </a>
 
             <ul class="space-y-2 font-medium">
-                @activerole('hr', 'hr manager', 'general manager', 'super-admin')
+                @activerole('hr', 'hr manager', 'general manager', 'SUPER ADMIN')
                     <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('dashboard') ||
                         request()->routeIs('cities.*') ||
                         request()->routeIs('contract-types.*') ||
                         request()->routeIs('leave-types.*') ||
-                        request()->routeIs('checklist-items.*') ||
+                        request()->routeIs('basic-checklist-items.*') ||
                         request()->routeIs('departments.*') ||
                         request()->routeIs('job-levels.*')">
                         <x-slot name="icon"><x-icons.home /></x-slot>
@@ -27,7 +27,7 @@
                             <x-layouts.app.sidebar.nav-item :href="route('leave-types.index')" :active="request()->routeIs('leave-types.index')">
                                 {{ trans_choice('general.leave-type', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-                            <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
+                            <x-layouts.app.sidebar.nav-item :href="route('basic-checklist-items.index')" :active="request()->routeIs('basic-checklist-items.index')">
                                 {{ trans_choice('general.checklist-items', 2) }}
                             </x-layouts.app.sidebar.nav-item>
                             <x-layouts.app.sidebar.nav-item :href="route('job-levels.index')" :active="request()->routeIs('job-levels.index')">
@@ -40,7 +40,7 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('general manager','super-admin')
+                @activerole('general manager','hr', 'hr manager','SUPER ADMIN')
                 <x-layouts.app.sidebar.dropdown-nav-list
                     id="program-management"
                     :title="__('general.programs-management')"
@@ -71,7 +71,6 @@
                             {{ __('general.orgn-chart') }}
                         </x-layouts.app.sidebar.nav-item>
 
-
                         <x-layouts.app.sidebar.nav-item
                             :href="route('centers.index')"
                             :active="request()->routeIs('centers.index')" wire:navigate>
@@ -81,7 +80,7 @@
                 </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('hr manager', 'general manager', 'super-admin')
+                @activerole('hr manager','hr', 'general manager', 'SUPER ADMIN')
                     <x-layouts.app.sidebar.dropdown-nav-list id="employees-management" :title="trans_choice('general.employee-management', 2)"
                         :active="request()->routeIs('employees.*') ||
                             request()->routeIs('contracts.*') ||
@@ -101,7 +100,7 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('employee', 'hr', 'hr manager', 'general manager', 'super-admin')
+                @activerole('employee', 'hr', 'hr manager', 'general manager', 'SUPER ADMIN')
                     <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')" :active="request()->routeIs('my-folders.*') || request()->routeIs('shared-folders.*')">
                         <x-slot name="icon"><x-icons.folder class="w-5 h-5" /></x-slot>
                         <x-slot name="list">
@@ -115,16 +114,16 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('Super Admin', 'General Manager', 'HR-SYR', 'HR-ALP', 'Manager', 'Employee')
-                    <x-layouts.app.sidebar.dropdown-nav-list id="checklist-items" :title="__('general.checklist_items')" :active="request()->routeIs('checklist-items.*')">
+                @activerole('SUPER ADMIN','hr', 'General Manager', 'hr manager', 'Manager', 'Employee')
+                    <x-layouts.app.sidebar.dropdown-nav-list id="checklist-items" wire:ignore.self
+                        :title="__('general.checklist_items')" :active="request()->routeIs('checklist-items.*')">
                         <x-slot name="icon"><x-icons.clipboard-list class="w-5 h-5" /></x-slot>
                         <x-slot name="list">
                             @if ($isDeliverResponsible)
                                 <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-delivers')" :active="request()->routeIs('checklist-items.pending-delivers')">
                                     {{ __('general.pending-delivers') }}
                                     @if ($pendingDeliversCount > 0)
-                                        <span
-                                            class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
                                             {{ $pendingDeliversCount }}
                                         </span>
                                     @endif
@@ -133,8 +132,7 @@
                                 <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-returns')" :active="request()->routeIs('checklist-items.pending-returns')">
                                     {{ __('general.pending_returns') }}
                                     @if ($pendingReturnsCount > 0)
-                                        <span
-                                            class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
+                                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
                                             {{ $pendingReturnsCount }}
                                         </span>
                                     @endif

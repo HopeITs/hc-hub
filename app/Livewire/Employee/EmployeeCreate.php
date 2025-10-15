@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee;
 
 use App\Livewire\Forms\Employee\PersonalInfoForm;
+use App\Models\City;
 use App\Models\Employee;
 use App\Models\Role;
 use App\Traits\WithAlerts;
@@ -29,7 +30,7 @@ class EmployeeCreate extends Component
 
     public function toggleBoardMember($checked): void
     {
-        $this->infoForm->is_board_member = (bool) $checked;
+        $this->infoForm->is_board_member = (bool)$checked;
         if (!$this->infoForm->is_board_member) {
             $this->infoForm->board_member_started_at = null;
             $this->infoForm->board_member_end_at = null;
@@ -46,9 +47,11 @@ class EmployeeCreate extends Component
     public function render()
     {
         $roles = Role::pluck('name', 'id')->toArray();
+        $cities = City::where('is_active',true)->where('code', '!=' , '000')->pluck(transColumn('name'), 'id')->toArray();
 
         return view('livewire.employee.form', [
             'roles' => $roles,
+            'cities' => $cities,
             'allEmployees' => Employee::select('id', 'name_en', 'name_ar')->get(),
             'isCreateMode' => true,
             'employeeChecklistItems' => collect(),

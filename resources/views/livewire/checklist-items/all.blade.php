@@ -25,6 +25,9 @@
                             @lang('general.status')
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            @lang('general.delivered_at')
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             @lang('general.notes')
                         </th>
                     </tr>
@@ -50,6 +53,9 @@
                                     @endif">
                                     {{ $item->display_status }}
                                 </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500">
+                                {{ $item->delivered_at ? $item->delivered_at->format('Y-m-d') : '-' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500">
                                 {{ $item->notes ?: '-' }}
