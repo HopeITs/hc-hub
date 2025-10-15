@@ -23,6 +23,7 @@ return [
         ['slug' => 'HSK', 'name_en' => ' Al-Hasakah', 'name_ar' => 'الحسكة', 'is_active' => false, 'code' => '012'],
         ['slug' => 'IDL', 'name_en' => 'Idleb', 'name_ar' => 'إدلب', 'is_active' => false, 'code' => '013'],
         ['slug' => 'RID', 'name_en' => 'Rif Dimashq', 'name_ar' => 'ريف دمشق', 'is_active' => false, 'code' => '014'],
+        ['slug' => 'RHO', 'name_en' => 'Homs rural', 'name_ar' => 'ريف حمص', 'is_active' => true, 'code' => '015'],
     ],
 
     'ContractType' => [
@@ -72,6 +73,8 @@ return [
         ['name' => 'Logistic', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو شراء وتسليم جميع مستلزمات المشاريع الصغيرة للمستفيدين ومشتريات البرامج التابعة لـ Hope Center ومتابعة صيانة المراكز.', 'email' => null],
         ['name' => 'Legal Affairs', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو تنسيق ومتابعة جميع الأمور القانونية التابعة لبرامج Christian Hope Center', 'email' => null],
         ['name' => 'Services/ Keepers', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو استقبال المستفيدين وتوجيههم والاهتمام بنظافة المكان بشكل عام.', 'email' => null],
+        ['name' => 'Assistant', 'description_en' => null, 'description_ar' => null, 'email' => null],
+        ['name' => 'Psychological and spiritual support', 'description_en' => null, 'description_ar' => null, 'email' => null],
     ],
 
     'programs' => [
@@ -184,17 +187,19 @@ return [
     'centers' => [
         ['name' => 'Hope Center/Head Office', 'city_id' => 2, 'address_en' => 'Aleppo', 'address_ar' => 'Aleppo', 'is_active' => true],
         ['name' => 'Hope Center', 'city_id' => 4, 'address_en' => 'Damascus', 'is_active' => true],
-        ['name' => 'Micro Project', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'Homs', 'is_active' => true],
-        ['name' => 'Micro Project', 'city_id' => 4, 'address_en' => 'Damascus', 'address_ar' => 'Damascus', 'is_active' => true],
-        ['name' => 'Micro Project', 'city_id' => 5, 'address_en' => 'Latakia', 'address_ar' => 'Latakia', 'is_active' => true],
-        ['name' => 'Children University', 'city_id' => 2, 'address_en' => 'Homs', 'address_ar' => 'Homs', 'is_active' => true],
-        ['name' => 'Children University', 'city_id' => 3, 'address_en' => 'Aleppo', 'address_ar' => 'Aleppo', 'is_active' => true],
-        ['name' => 'ADISC', 'city_id' => 2, 'address_en' => 'Aleppo', 'address_ar' => 'Aleppo', 'is_active' => true],
-        ['name' => 'HDISC', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'Homs', 'is_active' => true],
-        ['name' => 'DDISC', 'city_id' => 4, 'address_en' => 'Damascus', 'address_ar' => 'Damascus', 'is_active' => true],
-        ['name' => 'LDISC', 'city_id' => 5, 'address_en' => 'Latakia', 'address_ar' => 'Latakia', 'is_active' => false],
-        ['name' => 'Science Zone', 'city_id' => 2, 'address_en' => 'Homs', 'address_ar' => 'Homs', 'is_active' => true],
-        ['name' => 'Science Zone', 'city_id' => 3, 'address_en' => 'Aleppo', 'address_ar' => 'Aleppo', 'is_active' => true],
+        ['name' => 'Hope Center', 'city_id' => 3, 'address_en' => 'Homs', 'is_active' => true],
+        ['name' => 'Micro Project', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true],
+        ['name' => 'Micro Project', 'city_id' => 4, 'address_en' => 'Damascus', 'address_ar' => 'دمشق', 'is_active' => true],
+        ['name' => 'Micro Project', 'city_id' => 5, 'address_en' => 'Latakia', 'address_ar' => 'اللاذقية', 'is_active' => true],
+        ['name' => 'Micro Project', 'city_id' => 16, 'address_en' => 'Homs Rural', 'address_ar' => 'ريف حمص', 'is_active' => true],
+        ['name' => 'Children University', 'city_id' => 2, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true],
+        ['name' => 'Children University', 'city_id' => 3, 'address_en' => 'Aleppo', 'address_ar' => 'حلب', 'is_active' => true],
+        ['name' => 'ADISC', 'city_id' => 2, 'address_en' => 'Aleppo', 'address_ar' => 'حلب', 'is_active' => true],
+        ['name' => 'HDISC', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true],
+        ['name' => 'DDISC', 'city_id' => 4, 'address_en' => 'Damascus', 'address_ar' => 'دمشق', 'is_active' => true],
+        ['name' => 'LDISC', 'city_id' => 5, 'address_en' => 'Latakia', 'address_ar' => 'اللاذقية', 'is_active' => false],
+        ['name' => 'Science Zone', 'city_id' => 2, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true],
+        ['name' => 'Science Zone', 'city_id' => 3, 'address_en' => 'Aleppo', 'address_ar' => 'حلب', 'is_active' => true],
         ['name' => 'Study Zone Al-Nouzha', 'city_id' => 3, 'address_en' => 'Al-Nouzha', 'address_ar' => 'Al-Nouzha', 'is_active' => true],
         ['name' => 'Study Zone Al-Mashta', 'city_id' => 3, 'address_en' => 'Al-Mashta', 'address_ar' => 'Al-Mashta', 'is_active' => true],
         ['name' => 'Study Zone Armenian', 'city_id' => 3, 'address_en' => 'Armenian', 'address_ar' => 'Armenian', 'is_active' => true],
@@ -205,8 +210,8 @@ return [
         ['name' => 'Study Zone Ziraa 2', 'city_id' => 5, 'address_en' => 'Ziraa 2', 'address_ar' => 'Ziraa 2', 'is_active' => true],
         ['name' => 'Study Zone Al-Haram', 'city_id' => 5, 'address_en' => 'Al-Haram', 'address_ar' => 'Al-Haram', 'is_active' => true],
         ['name' => 'Study Zone Tartous', 'city_id' => 6, 'address_en' => 'Tartous', 'address_ar' => 'Tartous', 'is_active' => true],
-        ['name' => 'LEAP Aleppo', 'city_id' => 2, 'address_en' => 'Aleppo', 'address_ar' => 'Aleppo', 'is_active' => true],
-        ['name' => 'LEAP Homs', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'Homs', 'is_active' => true],
+        ['name' => 'LEAP Aleppo', 'city_id' => 2, 'address_en' => 'Aleppo', 'address_ar' => 'حلب', 'is_active' => true],
+        ['name' => 'LEAP Homs', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true],
 
     ],
 
