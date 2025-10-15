@@ -51,17 +51,18 @@ class CentersTable extends LivewireTable
             Column::make('ID', 'id')->sortable(),
 
             Column::make(__('general.center-name'), 'name')
-                ->sortable(),
+                ->sortable()->searchable(),
 
 
-            Column::make(__('general.address'),'city.name')
-                ,
+            SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
+                ->options(City::query()->whereNot('code', '000')->where('is_active',true)->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
+                ->sortable()     ->searchable(),
 
             Column::make(__('general.address'))
                 ->displayUsing(fn($v, Model $m) => $m->address ?: '—'
-                ),
+                )->sortable()->searchable(),
 
-            BooleanColumn::make(__('general.is-active'), 'is_active'),
+            BooleanColumn::make(__('general.is-active'), 'is_active')->searchable(),
 
             // ✅ Positions button with count
             Column::make(__('general.positions'), function (Model $m): string {
@@ -110,16 +111,7 @@ class CentersTable extends LivewireTable
         ];
     }
 
-    protected function filters(): array
-    {
-        return [
-            SelectFilter::make(trans_choice('general.city', 1), 'city_id')
-                ->options($this->cityOptions()),
 
-            SelectFilter::make(__('general.is-active'), 'is_active')
-                ->options([1 => __('general.active'), 0 => __('general.inactive')]),
-        ];
-    }
 
     public function confirmToggleItemStatus($id): void
     {
