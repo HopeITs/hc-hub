@@ -65,14 +65,23 @@ class Employee extends Model implements HasMedia
         return $this->belongsTo(City::class);
     }
 
-    public function contracts()
+    public function allContracts()
     {
         return $this->hasMany(Contract::class, 'employee_id');
     }
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class, 'employee_id')
+            ->where('is_active', true)
+            ->whereDate('start_date', '<=', Carbon::now())
+            ->whereDate('end_date', '>=', Carbon::now());
+
+    }
+
 
     public function latestActiveContract(): Contract|null
     {
-        return $this->contracts()->where('is_active', true)->with(['position', 'leaveBalances'])->latest()->first();
+        return $this->contracts()->with(['position', 'leaveBalances'])->latest()->first();
     }
 
     public function defaultDeliverItems(): Employee|\Illuminate\Database\Eloquent\Relations\HasMany
@@ -82,7 +91,17 @@ class Employee extends Model implements HasMedia
 
     public function positions(): BelongsToMany
     {
-        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')->withPivot(['id', 'contract_type_id', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours', 'is_active']);
+        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')
+            ->withPivot([
+                'id', 'contract_type_id', 'start_date', 'end_date', 'terminated_at',
+                'salary', 'currency', 'weekly_hours', 'work_days', 'work_hours', 'is_active'
+            ])
+            ->wherePivot('is_active', true)
+            ->where(function ($query) {
+                $today = now()->toDateString();
+                $query->whereDate('contracts.start_date', '<=', $today)
+                    ->whereDate('contracts.end_date', '>=', $today);
+            });
     }
 
     public function scopeInvolvedInProgram($query, $programId)
@@ -198,10 +217,11 @@ class Employee extends Model implements HasMedia
 
             // Determine the actual end date of the contract
             $end = null;
+
             if ($c->terminated_at) {
                 // Employee left before the planned end date
                 $end = Carbon::parse($c->terminated_at);
-            } elseif ($c->end_date) {
+            } elseif (today() > $c->end_date) {
                 // Contract ended normally
                 $end = Carbon::parse($c->end_date);
             } else {
