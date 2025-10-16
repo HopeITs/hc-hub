@@ -67,12 +67,12 @@ class Employee extends Model implements HasMedia
 
     public function contracts()
     {
-        return $this->hasMany(Contract::class, 'employee_id')->where('is_active', true);
+        return $this->hasMany(Contract::class, 'employee_id');
     }
 
     public function latestActiveContract(): Contract|null
     {
-        return $this->contracts()->with('position')->latest()->first();
+        return $this->contracts()->where('is_active', true)->with(['position', 'leaveBalances'])->latest()->first();
     }
 
     public function defaultDeliverItems(): Employee|\Illuminate\Database\Eloquent\Relations\HasMany
@@ -165,6 +165,13 @@ class Employee extends Model implements HasMedia
     public function account()
     {
         return $this->hasOne(User::class, 'employee_id');
+    }
+
+    public function availableLeaves()
+    {
+        return $this->latestActiveContract()->leaveBalances()->whereHas('leaveType' , function ($query) {
+            return $query->where('base_days' , '>' , 10);
+        })->get();
     }
 
     public function registerMediaCollections(): void
