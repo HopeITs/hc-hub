@@ -24,7 +24,7 @@ class EmployeeTable extends LivewireTable
     protected function query(): Builder
     {
         return $this->model()::query()
-            ->with(['directManager', 'techManager', 'account', 'media']);
+            ->with([ 'contracts.position.directManager','contracts.position.techManager','account', 'media']);
     }
 
     protected function globalSearchColumns(): array
@@ -36,7 +36,7 @@ class EmployeeTable extends LivewireTable
     {
         return Employee::query()
             ->select(['id', 'name_en', 'name_ar'])
-            ->orderBy('name_'.app()->getLocale(), 'asc')
+            ->orderBy(transColumn('name'), 'asc')
             ->get()
             ->mapWithKeys(fn ($e) => [
                 $e->id => $e->name
@@ -49,7 +49,7 @@ class EmployeeTable extends LivewireTable
         return [
             Column::make('ID', 'id')->sortable(),
 
-            Column::make(trans('general.name'), 'name')
+            Column::make(trans('general.name'), transColumn('name'))
                 ->displayUsing(fn ($v, Model $m) => $m->name) // uses accessor
                 ->sortable()->searchable(),
 
@@ -64,7 +64,7 @@ class EmployeeTable extends LivewireTable
             SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
                 ->options(City::query()->whereNot('code', '000')->where('is_active',true)->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()     ->searchable(),
-            SelectColumn::make(trans('general.direct_manager'), 'direct_manager_id')
+            SelectColumn::make(trans('general.direct_manager'), 'positions.directManger')
                 ->displayUsing(fn ($v, Model $m) =>
                 $m->latestActiveContract()?->position->directManager?->employee()?->name ?? '—'
 
