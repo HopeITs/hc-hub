@@ -7,7 +7,7 @@ use App\Models\{Contract, Department, JobLevel, ContractType, Employee, Position
 use Illuminate\Database\Eloquent\{Builder, Model};
 use Illuminate\Support\Facades\{Blade, DB};
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
-use RamonRietdijk\LivewireTables\Columns\{Column, SelectColumn};
+use RamonRietdijk\LivewireTables\Columns\{BooleanColumn, Column, SelectColumn};
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 class ContractsTable extends LivewireTable
@@ -109,19 +109,8 @@ class ContractsTable extends LivewireTable
                 ->displayUsing(fn($v) => $v ? "{$v} " . __('general.hours') : '—')
                 ->sortable(),
 
-            SelectColumn::make(__('general.status'), 'is_active')
-                ->options([
-                    1 => __('general.active'),
-                    0 => __('general.inactive'),
-                ])
-                ->displayUsing(fn($v) => Blade::render(
-                    '<x-badge :color="$c">{{$t}}</x-badge>',
-                    [
-                        'c' => $v ? 'green' : 'red',
-                        't' => $v ? __('general.active') : __('general.inactive'),
-                    ]
-                ))
-                ->asHtml(),
+            BooleanColumn::make(__('general.status'), 'is_active')->searchable(),
+
 
             Column::make(__('general.actions'), function (Model $m): string {
                 $view = Blade::render(

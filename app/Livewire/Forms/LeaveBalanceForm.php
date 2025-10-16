@@ -3,6 +3,7 @@
 namespace App\Livewire\Forms;
 
 use App\Enums\ContractType;
+use App\Enums\Gender;
 use App\Enums\LeaveTypeCases;
 use App\Enums\MaritalStatus;
 use App\Enums\SalaryPer;
@@ -99,10 +100,9 @@ class LeaveBalanceForm extends Form
                     //leaves for married
                     if ($employee->marital_status === MaritalStatus::Married) {
 
-                        $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED);
-                        $allowedForFemaleMarried = $allowedForMarried->filter(fn($type) => $type->allowed_gender === LeaveTypeEnum::GENDER_FEMALE);
-                        $allowedForOtherMarried = $allowedForMarried->filter(fn($type) => $type->allowed_gender !== LeaveTypeEnum::GENDER_FEMALE);
-                        foreach ($allowedForFemaleMarried as $allowed) {
+                        $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED && $type->allowed_gender === $employee->gender);
+
+                        if ($employee->gender === Gender::Female) {
                             if ($employee->abilityToTakeLeave($allowed->id)) {
                                 LeaveBalance::create([
                                     'contract_id' => $contract->id,
@@ -110,15 +110,15 @@ class LeaveBalanceForm extends Form
                                     'deserved' => $allowed->base_days
                                 ]);
                             }
-                        }
-                        foreach ($allowedForOtherMarried as $allowed) {
+                        } else {
                             LeaveBalance::create([
                                 'contract_id' => $contract->id,
                                 'type_id' => $allowed->id,
                                 'deserved' => $allowed->base_days
                             ]);
-
                         }
+
+
                     }
                 }
 
@@ -173,7 +173,7 @@ class LeaveBalanceForm extends Form
                             ]);
                         }
                     }
-                }else{
+                } else {
                     //leaves for married
                     if ($employee->marital_status === MaritalStatus::Married) {
                         //handle mother leave taken once
