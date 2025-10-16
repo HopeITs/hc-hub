@@ -104,12 +104,6 @@ class ContractCreate extends Component
     {
         if (!$this->city_id) return true;
 
-        if ($this->form->employee_id && !Employee::where('id', $this->form->employee_id)
-                ->where('city_id', $this->city_id)
-                ->exists()) {
-            $this->addError('form.employee_id', __('validation.custom.employee_id.invalid'));
-            return false;
-        }
 
         // Position chain validation
         if ($this->form->position_id) {
