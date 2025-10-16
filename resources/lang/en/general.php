@@ -259,6 +259,7 @@ return [
     'items_from_checklist' => 'All Items',
     'no_items_from_checklist' => 'No items have been assigned from the checklist.',
     'back_to_list' => 'Cancel',
+    'hours' => 'Hours',
     'text1' => 'مركز الرجاء المسيحي - حلب / الإدارة العامة الممثل <strong><br>   في هذا العقد بالسيد فريدي يوسف ',
     'text2' => 'إن السيد فريدي يوسف تم تفويضه من قبل النيابة  <br>  الرسولية اللاتينية  في سوريا لإدارة مركز <br> الرجاء المسيحي وكل البرامج التابعة له ',
     'text3' => '<strong>المشار إليه في هذا العقد  بـ   مركز الرجاء المسيحي – حلب - الإدارة العامة <br>   ',
