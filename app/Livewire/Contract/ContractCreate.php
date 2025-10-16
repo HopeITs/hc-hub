@@ -160,13 +160,22 @@ class ContractCreate extends Component
             ->get()
             ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
 
-        $employees = $this->city_id
-            ? Employee::where('city_id', $this->city_id)
-                ->select('id', $cityCol)
-                ->orderBy($cityCol)
-                ->get()
-                ->map(fn($e) => tap($e, fn() => $e->name = $e->{$cityCol}))
-            : collect();
+        $user = auth()->user();
+        $role = $user->getRoleNames()->first();
+        $roleArr = explode('-', $role);
+        if ($roleArr[0] === 'HR') {
+            if ($roleArr[1] === 'SYR') {
+                $employees = Employee::all();
+            }
+            else
+            {
+                $citySlug = $roleArr[1];
+                $employees = Employee::whereHas('city', function ($query) use ($citySlug) {
+                    $query->where('slug', $citySlug);
+                });
+
+            }
+        }
 
         $programs = $this->city_id
             ? Program::whereIn('id', Position::query()
