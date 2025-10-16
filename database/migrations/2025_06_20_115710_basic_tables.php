@@ -211,7 +211,6 @@ return new class extends Migration
             $table->dateTime('end_date');
             $table->dateTime('terminated_at')->nullable();
             $table->text('reason_of_termination')->nullable();
-            $table->integer('yearly_leave_days')->default(12);
             $table->decimal('salary', 10, 2);
             $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR');
             $table->unsignedTinyInteger('salary_per')->comment('0=Unknown, 1=Month, 2=Hour, 3=Session')->default(0);

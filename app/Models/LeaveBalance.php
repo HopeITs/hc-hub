@@ -24,12 +24,12 @@ class LeaveBalance extends Model
 
     public function leaveType()
     {
-        return $this->belongsTo(LeaveType::class);
+        return $this->belongsTo(LeaveType::class,'type_id');
     }
 
-    public function leaveRequest()
+    public function leaveRequests()
     {
-        return $this->belongsTo(LeaveRequest::class);
+        return $this->hasMany(LeaveRequest::class);
     }
 
 }

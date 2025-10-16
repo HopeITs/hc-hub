@@ -45,7 +45,7 @@ class CityModule extends Component
 
     public function render()
     {
-        $sort   = $this->sortField ?: 'id';
+        $sort   = $this->sortField ?: 'is_active';
         $dir    = $this->sortDirection ?: 'asc';
 
         $query = City::query()
@@ -65,16 +65,17 @@ class CityModule extends Component
             case 'name_en':
                 $query->orderBy("name_en", $dir);
                 break;
+
             case 'code':
             case 'slug':
             case 'is_active':
                 $query->orderBy($sort, $dir);
                 break;
             default: // id
-                $query->orderBy('id', $dir);
+                $query->orderBy('is_active', 'desc');
         }
 
-        $cities = $query->paginate(15);
+        $cities = $query->paginate(16);
 
         return view('livewire.basics.city-module', compact('cities'));
     }

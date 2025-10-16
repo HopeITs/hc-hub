@@ -2,11 +2,28 @@
 
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
-use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, DepartmentModule, JobLevelModule, LeaveTypeModule};
+use App\Livewire\Basics\{ChecklistItemModule,
+    CityModule,
+    ContractTypeModule,
+    DepartmentModule,
+    JobLevelModule,
+    LeaveTypeModule
+};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
-use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule, EmployeeProfile};
+use App\Livewire\Employee\{EmployeeCreate,
+    EmployeeEdit,
+    EmployeeModule,
+    EmployeeProfile,
+    Leave\LeaveRequestModule,
+    Leave\LeaveRequestTable};
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
-use App\Livewire\ProgramManagement\{Center\CentersModule, DefaultDeliverable\DefaultDeliverablesModule, Program\Create as ProgramCreate, Program\Detail as ProgramDetail, Program\Index as ProgramIndex, Program\Update as ProgramUpdate};
+use App\Livewire\ProgramManagement\{Center\CentersModule,
+    DefaultDeliverable\DefaultDeliverablesModule,
+    Program\Create as ProgramCreate,
+    Program\Detail as ProgramDetail,
+    Program\Index as ProgramIndex,
+    Program\Update as ProgramUpdate
+};
 use App\Livewire\Settings\{Appearance, Password, Profile};
 use App\Livewire\ChecklistItems\{PendingItems, AllItems, PendingReturns, DoneRequests};
 use Illuminate\Support\Facades\Route;
@@ -69,7 +86,12 @@ Route::group(
                     Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
                     Route::get('/{employee:username}/show', EmployeeProfile::class)->name('show');
                 });
+            Route::prefix('leaves')
+                ->name('leaves.')
+                ->group(function () {
+                    Route::get('my-leaves', LeaveRequestModule::class)->name('index');
 
+                });
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
             Route::prefix('contracts')
@@ -82,7 +104,7 @@ Route::group(
                 });
 
             Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
-
+            Route::get('my-leaves', LeaveRequestTable::class)->name('leaves.index');
             Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', false)->name('my-folders.index');
             Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', true)->name('shared-folders.index');
 

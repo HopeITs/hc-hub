@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Employee extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia , HasTranslation;
+    use HasFactory, InteractsWithMedia, HasTranslation;
 
     protected $guarded = ['id'];
 
@@ -27,6 +27,7 @@ class Employee extends Model implements HasMedia
         'is_board_member' => 'boolean',
         'children' => 'integer',
     ];
+
     protected function name(): Attribute
     {
         return Attribute::make(
@@ -34,6 +35,7 @@ class Employee extends Model implements HasMedia
             set: fn($value) => $this->setTranslatableAttribute('name', $value)
         );
     }
+
     protected function father_name(): Attribute
     {
         return Attribute::make(
@@ -41,6 +43,7 @@ class Employee extends Model implements HasMedia
             set: fn($value) => $this->setTranslatableAttribute('father_name', $value)
         );
     }
+
     protected function mother_name(): Attribute
     {
         return Attribute::make(
@@ -61,24 +64,25 @@ class Employee extends Model implements HasMedia
     {
         return $this->belongsTo(City::class);
     }
+
     public function contracts()
     {
-        return $this->hasMany(Contract::class, 'employee_id')->where('is_active', true);
+        return $this->hasMany(Contract::class, 'employee_id');
     }
 
-    public function latestActiveContract(): Contract|Null
+    public function latestActiveContract(): Contract|null
     {
-        return $this->contracts()->with('position')->latest()->first();
+        return $this->contracts()->where('is_active', true)->with(['position', 'leaveBalances'])->latest()->first();
     }
 
     public function defaultDeliverItems(): Employee|\Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(DefaultDeliverable::class,'employee_id');
+        return $this->hasMany(DefaultDeliverable::class, 'employee_id');
     }
 
     public function positions(): BelongsToMany
     {
-        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')->withPivot(['id', 'contract_type_id',  'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours' , 'is_active']);
+        return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')->withPivot(['id', 'contract_type_id', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours', 'is_active']);
     }
 
     public function scopeInvolvedInProgram($query, $programId)
@@ -163,6 +167,13 @@ class Employee extends Model implements HasMedia
         return $this->hasOne(User::class, 'employee_id');
     }
 
+    public function availableLeaves()
+    {
+        return $this->latestActiveContract()->leaveBalances()->whereHas('leaveType' , function ($query) {
+            return $query->where('base_days' , '>' , 10);
+        })->get();
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('avatar')
@@ -232,6 +243,17 @@ class Employee extends Model implements HasMedia
     }
 
 
+    public function abilityToTakeLeave($leaveType)
+    {
+        $this->contracts()
+            ->whereHas('leaveBalances.leaveRequests', function ($q) use ($leaveType) {
+                $q->whereHas('leaveBalance', function ($b) use ($leaveType) {
+                    $b->where('type_id', $leaveType);
+                })->where('status', 'approved');
+            })
+            ->exists();
+
+    }
 
 
 }

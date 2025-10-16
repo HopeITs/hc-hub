@@ -20,4 +20,9 @@ class LeaveRequest extends Model
         'status',
         'alternative_employee'
     ];
+
+    public function leaveBalance(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(LeaveBalance::class);
+    }
 }
