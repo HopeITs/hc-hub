@@ -50,17 +50,17 @@ class OrgChart extends Component
              $query->orderBy('tech_manager_id');
          }
         $positions = $query->get();
-        $root = $positions->firstWhere('direct_manager_id', null);
+        $root = $positions->where('direct_manager_id', null);
         if (!$root) return [];
 
         // Level 1 — board
-        $rootAssistant = $positions->filter(fn($p) => $p->direct_manager_id === $root->id &&
+        $rootAssistant = $positions->filter(fn($p) => $p->direct_manager_id === $root[0]->id &&
             $p->jobLevel?->grade == 2
         );
 
         // Level 2 — managers
         if($this->manager_type === 'direct') {
-            $managers = $positions->filter(fn($p) => $p->direct_manager_id === $root->id &&
+            $managers = $positions->filter(fn($p) => $p->direct_manager_id === $root[0]->id &&
                 $p->city_id === 1 &&
                 in_array($p->jobLevel?->grade, [1, 3, 5]) //program manager ||project manager || department manager
             );

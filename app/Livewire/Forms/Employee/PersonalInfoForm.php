@@ -21,24 +21,24 @@ class PersonalInfoForm extends Form
 
     public $photo = null;
     #[Validate('required|string')]
-    public $name_ar ;
+    public $name_ar;
     #[Validate('required|string')]
-    public $name_en ;
+    public $name_en;
 
     public $id;
     #[Validate('required|string')]
-    public $father_name_ar ;
+    public $father_name_ar;
     #[Validate('required|string')]
-    public $father_name_en ;
+    public $father_name_en;
 
     #[Validate('required|string')]
-    public $mother_name_ar ;
+    public $mother_name_ar;
     #[Validate('required|string')]
-    public $mother_name_en ;
+    public $mother_name_en;
     #[Validate('nullable|string')]
-    public $address_ar ;
+    public $address_ar;
     #[Validate('nullable|string')]
-    public $address_en ;
+    public $address_en;
 
 
     public $email;
@@ -109,7 +109,6 @@ class PersonalInfoForm extends Form
     public $direct_manager_id = null;
     #[Validate('nullable|exists:employees,id')]
     public $tech_manager_id = null;
-
 
 
     public $roles;
@@ -183,7 +182,7 @@ class PersonalInfoForm extends Form
         $this->username = $employee->username;
         $this->email = $employee->account?->email;
         $this->photo = $employee->getFirstMediaUrl('avatar');
-        $this->roles = implode(',' ,$employee->account?->roles()->pluck('name')->toArray()??[]);
+        $this->roles = implode(',', $employee->account?->roles()->pluck('name')->toArray() ?? []);
 
     }
 
@@ -200,20 +199,25 @@ class PersonalInfoForm extends Form
 
             if ($this->employee->account) {
                 $this->employee->account->update(['email' => $this->email]);
-                $this->employee->account->syncRoles(json_decode($this->roles));
+
+                if (json_decode($this->roles) !== null) {
+                    $this->employee->account->syncRoles(json_decode($this->roles));
+                    $this->employee->account->roles()->withPivot('is_active')->first()?->pivot->update(['is_active' => true]);
+                }
+
             }
 
         } else {
             $this->city_id = auth()->user()->profile?->city_id ?? 1;
             $this->employee = Employee::create($this->except(['email', 'photo']));
 
-          $user =  User::create([
+            $user = User::create([
                 'email' => $this->email,
                 'password' => Hash::make('HopeCenterHR'),
                 'employee_id' => $this->employee->id,
             ]);
 
-          $user->assignRole(json_decode($this->roles));
+            $user->assignRole(json_decode($this->roles));
         }
 
         if ($this->photo instanceof TemporaryUploadedFile) {

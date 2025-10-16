@@ -13,6 +13,8 @@ return [
     'department' => 'الأقسام|القسم',
     'job-level' => 'المستويات الوظيفية|المستوى الوظيفي',
     'programs-management' => 'إدارة البرامج',
+    'holidays-and-leaves' => 'العطل والاجازات',
+    'my-leaves' => 'اجازاتي',
     'project-manager' => 'مدير المشروع',
     'program' => 'البرنامج|البرامج',
     'export-pdf'=>'تصدير كملف PDF',

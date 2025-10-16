@@ -35,12 +35,15 @@
     </div>
     {{-- CEO --}}
     @if(isset($tree['root']))
-        <div class="flex flex-col items-center mb-10">
-            @if($tree['root']->employee() !== null)
-                <x-org-node :position="$tree['root']" color="cyan" size="lg"/>
-            @else
-                <x-org-empty-node :position="$tree['root']" color="cyan" size="lg"/>
-            @endif
+        <div class="flex gap-4 items-center mb-10">
+            @foreach($tree['root'] as $root)
+                @if($root->employee() !== null)
+                    <x-org-node :position="$root" color="cyan" size="lg"/>
+                @else
+                    <x-org-empty-node :position="$root" color="cyan" size="lg"/>
+                @endif
+            @endforeach
+
         </div>
     @endif
 
