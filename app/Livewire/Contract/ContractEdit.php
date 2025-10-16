@@ -4,6 +4,7 @@ namespace App\Livewire\Contract;
 
 use App\Enums\SalaryPer;
 use App\Livewire\Forms\ContractForm;
+use App\Livewire\Forms\LeaveBalanceForm;
 use App\Models\{City, Center, Employee, Position, Program, ContractType};
 use Illuminate\Support\Facades\Auth;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -12,6 +13,7 @@ use Livewire\Component;
 class ContractEdit extends Component
 {
     public ContractForm $form;
+    public LeaveBalanceForm $balanceForm;
     public \App\Models\Contract $contract;
 
     public int $step = 1;
@@ -33,7 +35,7 @@ class ContractEdit extends Component
         $this->form->setDefaults();
         $this->form->setContract($contract);
 
-        // Initialize cascading filters
+        // Initialize cascading filters from existing contract
         $this->city_id = optional($contract->employee)->city_id;
         $this->program_id = optional($contract->position)->program_id;
         $this->center_id = optional($contract->position)->center_id;
@@ -60,12 +62,12 @@ class ContractEdit extends Component
 
         $pos = Position::find($value);
 
-        if ($pos && ! $pos->canAssign()) {
+        if ($pos && !$pos->canAssign()) {
             $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
         }
     }
 
-    // ── Step navigation ──────────────────────────────────────
+    // ── Step Navigation ────────────────────────────────
 
     public function next(): void
     {
@@ -90,7 +92,7 @@ class ContractEdit extends Component
         if ($target <= $this->maxStep) $this->step = $target;
     }
 
-    // ── Submit & validation ──────────────────────────────────
+    // ── Submit & Validation ────────────────────────────
 
     public function submit()
     {
@@ -100,11 +102,15 @@ class ContractEdit extends Component
 
         if (!$this->validateCityConsistency()) return;
 
-        $this->form->update($this->contract);
+        $updated = $this->form->update($this->contract);
+
+        if ($updated->salary_per->value === SalaryPer::Month) {
+            $this->balanceForm->updateOrCreate($updated->id);
+        }
 
         LivewireAlert::success(__('general.success-message'));
 
-        return redirect()->route('contracts.show', ['contract' => $this->contract->id]);
+        return redirect()->route('contracts.show', ['contract' => $updated->id]);
     }
 
     private function validateCityConsistency(): bool
@@ -148,13 +154,13 @@ class ContractEdit extends Component
         return true;
     }
 
-    // ── Aliases ──────────────────────────────────────────────
+    // ── Aliases ────────────────────────────────────────
     public function saveIdentity(): void {}
     public function saveTerms(): void {}
     public function savePay(): void {}
     public function save() { return $this->submit(); }
 
-    // ── Render ───────────────────────────────────────────────
+    // ── Render ─────────────────────────────────────────
 
     public function render()
     {
@@ -168,13 +174,20 @@ class ContractEdit extends Component
             ->get()
             ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
 
-        $employees = $this->city_id
-            ? Employee::where('city_id', $this->city_id)
-                ->select('id', $cityCol)
-                ->orderBy($cityCol)
-                ->get()
-                ->map(fn($e) => tap($e, fn() => $e->name = $e->{$cityCol}))
-            : collect();
+        $user = auth()->user();
+        $role = $user->activeRole();
+
+        $roleArr = explode('-', $role->name);
+        if ($roleArr[0] === 'HR') {
+            if ($roleArr[1] === 'SYR') {
+                $employees = Employee::all();
+            } else {
+                $citySlug = $roleArr[1];
+                $employees = Employee::whereHas('city', function ($query) use ($citySlug) {
+                    $query->where('slug', $citySlug);
+                })->get();
+            }
+        }
 
         $programs = $this->city_id
             ? Program::whereIn('id', Position::query()
