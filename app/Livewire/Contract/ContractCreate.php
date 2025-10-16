@@ -161,8 +161,9 @@ class ContractCreate extends Component
             ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
 
         $user = auth()->user();
-        $role = $user->getRoleNames()->first();
-        $roleArr = explode('-', $role);
+        $role = $user->activeRole();
+
+        $roleArr = explode('-', $role->name);
         if ($roleArr[0] === 'HR') {
             if ($roleArr[1] === 'SYR') {
                 $employees = Employee::all();
@@ -172,7 +173,7 @@ class ContractCreate extends Component
                 $citySlug = $roleArr[1];
                 $employees = Employee::whereHas('city', function ($query) use ($citySlug) {
                     $query->where('slug', $citySlug);
-                });
+                })->get();
 
             }
         }
