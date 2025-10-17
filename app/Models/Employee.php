@@ -51,6 +51,10 @@ class Employee extends Model implements HasMedia
             set: fn($value) => $this->setTranslatableAttribute('mother_name', $value)
         );
     }
+    public function getDepartmentAttribute()
+    {
+        return $this->latestActiveContract()->position->department;
+    }
 
     protected function address(): Attribute
     {
@@ -81,7 +85,7 @@ class Employee extends Model implements HasMedia
 
     public function latestActiveContract(): Contract|null
     {
-        return $this->contracts()->with(['position', 'leaveBalances'])->latest()->first();
+        return $this->contracts()->with(['position.department', 'leaveBalances'])->latest()->first();
     }
 
     public function defaultDeliverItems(): Employee|\Illuminate\Database\Eloquent\Relations\HasMany
@@ -191,6 +195,11 @@ class Employee extends Model implements HasMedia
         return $this->latestActiveContract()?->leaveBalances()->whereHas('leaveType' , function ($query) {
             return $query->where('base_days' , '>' , 10);
         })->get();
+    }
+
+    public function allAvailableLeaves()
+    {
+        return $this->latestActiveContract()?->leaveBalances()->whereColumn('deserved', '>' , 'used' )->with('leaveType')->get();
     }
 
     public function registerMediaCollections(): void

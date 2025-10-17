@@ -9,7 +9,7 @@
             :showButton="true"
         />
         <div>
-            <x-primary-button :href="route('employees.create')">
+            <x-primary-button :href="route('leaves.create')">
                 @lang('general.add-new')
             </x-primary-button>
         </div>

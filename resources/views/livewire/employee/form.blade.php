@@ -1,5 +1,5 @@
 <div>
-    <livewire:layout.breadcrumbs :title="__('general.add-new')" :crumbs="[
+    <livewire:layout.breadcrumbs :title="$title ?? __('general.add-new')" :crumbs="[
         ['label' => trans_choice('general.employee-management', 2)],
         ['label' => trans_choice('general.employee', 2), 'url' => route('employees.index')],
         ['label' => $title ?? __('general.add-new')],
