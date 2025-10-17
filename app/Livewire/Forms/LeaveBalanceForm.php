@@ -98,24 +98,29 @@ class LeaveBalanceForm extends Form
                     }
                 } else {
                     //leaves for married
+
                     if ($employee->marital_status === MaritalStatus::Married) {
 
                         $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED && $type->allowed_gender === $employee->gender);
 
                         if ($employee->gender === Gender::Female) {
-                            if ($employee->abilityToTakeLeave($allowed->id)) {
+                           foreach ( $allowedForMarried as $allowed) {
+                               if (!$employee->abilityToTakeLeave($allowed->id)) {
+                                   LeaveBalance::create([
+                                       'contract_id' => $contract->id,
+                                       'type_id' => $allowed->id,
+                                       'deserved' => $allowed->base_days
+                                   ]);
+                               }
+                           }
+                        } else {
+                            foreach ( $allowedForMarried as $allowed) {
                                 LeaveBalance::create([
                                     'contract_id' => $contract->id,
                                     'type_id' => $allowed->id,
                                     'deserved' => $allowed->base_days
                                 ]);
                             }
-                        } else {
-                            LeaveBalance::create([
-                                'contract_id' => $contract->id,
-                                'type_id' => $allowed->id,
-                                'deserved' => $allowed->base_days
-                            ]);
                         }
 
 

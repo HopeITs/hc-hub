@@ -188,7 +188,7 @@ class Employee extends Model implements HasMedia
 
     public function availableLeaves()
     {
-        return $this->latestActiveContract()->leaveBalances()->whereHas('leaveType' , function ($query) {
+        return $this->latestActiveContract()?->leaveBalances()->whereHas('leaveType' , function ($query) {
             return $query->where('base_days' , '>' , 10);
         })->get();
     }
@@ -265,7 +265,7 @@ class Employee extends Model implements HasMedia
 
     public function abilityToTakeLeave($leaveType)
     {
-        $this->contracts()
+       return  $this->contracts()
             ->whereHas('leaveBalances.leaveRequests', function ($q) use ($leaveType) {
                 $q->whereHas('leaveBalance', function ($b) use ($leaveType) {
                     $b->where('type_id', $leaveType);

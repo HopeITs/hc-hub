@@ -14,8 +14,9 @@
             </x-primary-button>
         </div>
     </div>
+    @isset($availableLeaves)
     <div class="grid grid-cols-{{$availableLeaves->count()}} gap-4 mb-6">
-        @forelse($availableLeaves as $availableLeave)
+        @foreach($availableLeaves as $availableLeave)
             <div class="flex flex-col gap-2 rounded-2xl shadow-md p-4">
                 <h3 class="font-bold text-secondary-dark">{{$availableLeave->leaveType->name}}</h3>
                 <span class=" flex justify-between px-2 py-1 text-secondary-dark"><span
@@ -23,13 +24,14 @@
                 <span class="rounded-full px-2 py-1 bg-gray-200 text-secondary-dark flex justify-between"><span
                         class="font-semibold text-secondary-medium me-2">Remaining:</span>{{ $availableLeave->deserved - $availableLeave->used}}</span>
             </div>
-        @empty
-            <div class="rounded-2xl shadow-md p-4">
-                No Leaves available for you
-            </div>
-
-        @endforelse
+        @endforeach
     </div>
+    @else
+        <div class="rounded-2xl shadow-md mb-6 text-center font-semibold text-secondary-medium p-4">
+            No Leaves available for you
+        </div>
+
+    @endisset
 
     <livewire:employee.leave.leave-request-table/>
 </div>
