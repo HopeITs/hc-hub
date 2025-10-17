@@ -154,7 +154,7 @@ class ContractCreate extends Component
             ->get()
             ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
 
-        $user = auth()->user();
+        $user = auth()->user()->load('profile');
         $role = $user->activeRole();
 
         $roleArr = explode('-', $role->name);
@@ -171,6 +171,14 @@ class ContractCreate extends Component
 
             }
         }
+        else{
+            $cityId = optional($user->profile)->city_id;
+            if (!$cityId) {
+                abort(403, 'User has no linked employee or city.');
+            }
+            $employees = Employee::where('city_id', $cityId)->get();
+        }
+
 
         $programs = $this->city_id
             ? Program::whereIn('id', Position::query()
