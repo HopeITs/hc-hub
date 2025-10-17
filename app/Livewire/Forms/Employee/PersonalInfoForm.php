@@ -64,7 +64,7 @@ class PersonalInfoForm extends Form
     #[Validate('integer')]
     public $nationality;
 
-    #[Validate('integer|exists:cities,id')]
+    #[Validate('required|exists:cities,id')]
     public $city_id;
     #[Validate('nullable|string')]
     public $civil_registry_office;
@@ -208,7 +208,6 @@ class PersonalInfoForm extends Form
             }
 
         } else {
-            $this->city_id = auth()->user()->profile?->city_id ?? 1;
             $this->employee = Employee::create($this->except(['email', 'photo']));
 
             $user = User::create([
