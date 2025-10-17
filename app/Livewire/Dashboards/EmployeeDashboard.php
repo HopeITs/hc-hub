@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Dashboards;
 
+use Carbon\Carbon;
 use App\Models\{Employee, Contract};
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class EmployeeDashboard extends Component
@@ -15,37 +15,63 @@ class EmployeeDashboard extends Component
     public $joinedOn;
     public $workEmail;
 
+    public function getTodayBirthdaysProperty()
+    {
+        $today = now()->timezone(config('app.timezone'));
+        $day = $today->day;
+        $month = $today->month;
+
+        $locale = app()->getLocale();
+        $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
+        $deptCol  = $locale === 'ar' ? 'name_ar' : 'name_en';
+
+        return Employee::query()
+            ->whereNotNull('dob')
+            ->whereRaw('DAY(dob) = ?', [$day])
+            ->whereRaw('MONTH(dob) = ?', [$month])
+            ->with([
+                'media',
+                'contracts.position.department'
+            ])
+            ->get()
+            ->map(function ($emp) use ($titleCol, $deptCol) {
+                $contract = Contract::with(['position.department'])
+                    ->where('employee_id', $emp->id)
+                    ->orderByDesc('start_date')
+                    ->first();
+
+                $emp->positionTitle  = $contract?->position?->$titleCol ?? null;
+                $emp->departmentName = $contract?->position?->department?->$deptCol ?? null;
+
+                return $emp;
+            });
+    }
+
+
     public function mount(): void
     {
         $locale = app()->getLocale();
         $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
-        $deptCol  = $locale === 'ar' ? 'name_ar'  : 'name_en';
+        $deptCol  = $locale === 'ar' ? 'name_ar' : 'name_en';
 
         $user = auth()->user();
         if (!$user) {
             abort(403, 'Unauthorized');
         }
 
-        // Get employee linked to the logged-in user via profile relation
         $this->employee = $user->profile()->with(['media', 'city'])->first();
 
         if ($this->employee) {
-            // Get earliest contract
             $this->contract = Contract::with(['position.department'])
                 ->where('employee_id', $this->employee->id)
-                ->orderBy('start_date', 'asc')
+                ->orderByDesc('start_date')
                 ->first();
 
-            // Position and department (localized)
             $this->positionTitle  = $this->contract?->position?->$titleCol ?? '—';
             $this->departmentName = $this->contract?->position?->department?->$deptCol ?? '—';
-
-            // Joined On date
             $this->joinedOn = $this->contract?->start_date
                 ? date('d M Y', strtotime($this->contract->start_date))
                 : '—';
-
-            // Work email from the authenticated user
             $this->workEmail = $user->email ?? '—';
         } else {
             $this->positionTitle = $this->departmentName = $this->joinedOn = $this->workEmail = '—';
@@ -61,6 +87,7 @@ class EmployeeDashboard extends Component
             'departmentName' => $this->departmentName,
             'joinedOn'       => $this->joinedOn,
             'workEmail'      => $this->workEmail,
+            'todayBirthdays' => $this->todayBirthdays,
         ]);
     }
 }

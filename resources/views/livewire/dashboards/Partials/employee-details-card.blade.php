@@ -1,14 +1,10 @@
 <div class="w-full h-full max-w-sm bg-white rounded-2xl shadow ring-1 ring-gray-100 overflow-hidden">
-    {{-- Header --}}
     <div class="bg-primary-500 text-white px-6 py-5 flex items-center gap-4">
-        {{-- Avatar --}}
         <img
             src="{{ $employee?->getFirstMediaUrl('avatar') ?: 'https://ui-avatars.com/api/?name=' . urlencode($employee?->name_en ?? 'Employee') }}"
             alt="Employee Avatar"
-            class="h-16 w-16 rounded-full ring-2 ring-gray-700 object-cover"
-        >
+            class="h-16 w-16 rounded-full object-cover">
 
-        {{-- Basic Info --}}
         <div>
             <h2 class="text-lg font-semibold leading-tight">
                 {{ $employee?->name_en ?? 'Employee Name' }}
@@ -23,7 +19,6 @@
         </div>
     </div>
 
-    {{-- Body --}}
     <div class="px-6 py-4 text-gray-700 divide-y divide-gray-100">
         <div class="pb-2">
             <p class="text-xs uppercase text-gray-500 mb-1">Phone Number</p>
