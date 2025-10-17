@@ -47,14 +47,11 @@ class EmployeeDashboard extends Component
             });
     }
 
-    /**
-     * Upcoming birthdays for the next 7 days (excluding today)
-     */
     public function getUpcomingBirthdaysProperty()
     {
         $today = now()->timezone(config('app.timezone'))->startOfDay();
-        $start = $today->copy()->addDay();   // Tomorrow
-        $end   = $today->copy()->addDays(7); // Up to 7 days ahead
+        $start = $today->copy()->addDay();
+        $end   = $today->copy()->addDays(7);
 
         $locale = app()->getLocale();
         $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
@@ -66,12 +63,10 @@ class EmployeeDashboard extends Component
             ->filter(function ($emp) use ($start, $end) {
                 $dob = Carbon::parse($emp->dob)->setYear(now()->year);
 
-                // If the birthday already passed this year, use next year
                 if ($dob->lt($start)) {
                     $dob->addYear();
                 }
 
-                // Use positional argument for inclusive comparison
                 return $dob->isBetween($start, $end, true);
             })
             ->map(function ($emp) use ($titleCol, $deptCol) {
