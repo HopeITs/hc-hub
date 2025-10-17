@@ -1,11 +1,11 @@
 @php
-use App\Enums\LeaveTypeCases;
+    use App\Enums\LeaveTypeCases;
 @endphp
 <div>
     <div class="flex justify-between items-center mb-6">
         <livewire:layout.breadcrumbs
-            :title="__('general.my-leaves')"
-            :crumbs="[
+                :title="__('general.my-leaves')"
+                :crumbs="[
                 ['label' => __('general.leaves-management')],
                 ['label' => __('general.leaves') ],
                 ['label' => $title],
@@ -23,7 +23,7 @@ use App\Enums\LeaveTypeCases;
                 <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
                 <x-forms.select-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                     <option
-                        class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                            class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                         Select Any..
                     </option>
                     @foreach($availableLeaves as $availableLeave)
@@ -36,7 +36,7 @@ use App\Enums\LeaveTypeCases;
                 <x-forms.input-label for="city">{{__('general.alternative_employee')}}</x-forms.input-label>
                 <x-forms.select-input wire:model="form.alternative_employee" id="alternative_employee">
                     <option
-                        class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                            class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                         Select Any..
                     </option>
                     @foreach($alternativeEmployees as $alternativeEmployee)
@@ -57,20 +57,62 @@ use App\Enums\LeaveTypeCases;
                     </div>
                 @endif
             @endif
-            @if($form->unit === 'day')
-                <div class="grid md:grid-cols-2 gap-4 mt-4">
-                    <x-forms.date-input wire:model="form.start_date" label="Start Date"/>
-                    <x-forms.date-input wire:model="form.end_date" label="End Date"/>
+            @if($form->leave_balance_id === null || optional($availableLeaves->find($form->leave_balance_id))->leaveType->id !== LeaveTypeCases::Annual)
+
+                <div>
+                    <x-forms.input-label for="start_date">{{__('general.start-date')}}</x-forms.input-label>
+                    <x-forms.date-input id="start_date" wire:model="form.start_date" label="Start Date"/>
+                    <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
                 </div>
-            @elseif($form->unit === 'hour')
-                <div class="grid md:grid-cols-3 gap-4 mt-4">
-                    <x-forms.date-input wire:model="form.leave_date" label="Leave Date"/>
-                    <x-forms.date-input type="time" wire:model="form.start_hour" label="Start Hour"/>
-                    <x-forms.date-input type="time" wire:model="form.end_hour" label="End Hour"/>
+                <div>
+                    <x-forms.input-label for="end_date">{{__('general.end-date')}}</x-forms.input-label>
+                    <x-forms.date-input id="end_date" wire:model="form.end_date" label="End Date"/>
+                    <x-error-span>{{ $errors->first('form.end_date') }}</x-error-span>
                 </div>
+
+            @else
+
+                @if($form->unit === 'day')
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <x-forms.input-label for="start_date">{{__('general.start-date')}}</x-forms.input-label>
+                            <x-forms.date-input id="start_date" wire:model="form.start_date" label="Start Date"/>
+                            <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
+                        </div>
+                        <div>
+                            <x-forms.input-label for="end_date">{{__('general.end-date')}}</x-forms.input-label>
+                            <x-forms.date-input id="end_date" wire:model="form.end_date" label="End Date"/>
+                            <x-error-span>{{ $errors->first('form.end_date') }}</x-error-span>
+                        </div>
+                    </div>
+                @elseif($form->unit === 'hour')
+
+                    <div>
+                        <x-forms.input-label for="city">{{__('general.leave-date')}}</x-forms.input-label>
+                        <x-forms.date-input wire:model="form.leave_date" label="Leave Date"/>
+                        <x-error-span>{{ $errors->first('form.leave_date') }}</x-error-span>
+                    </div>
+
+                    <div>
+                        <x-forms.input-label for="start_time">{{__('general.start-time')}}</x-forms.input-label>
+                        <x-forms.date-input id="start_time" type="time" wire:model="form.start_hour"
+                                            label="Start Hour"/>
+                        <x-error-span>{{ $errors->first('form.start_hour') }}</x-error-span>
+                    </div>
+                    <div>
+                        <x-forms.input-label for="end_time">{{__('general.end-time')}}</x-forms.input-label>
+                        <x-forms.date-input type="time" id="end_time" wire:model="form.end_hour" label="End Time"/>
+                        <x-error-span>{{ $errors->first('form.end_hour') }}</x-error-span>
+                    </div>
+
+                @endif
+
             @endif
-
-
+            <div class="col-span-full">
+                <x-forms.input-label for="reason">{{__('general.reason')}}</x-forms.input-label>
+                <x-forms.input  id="reason" wire:model="form.reason"/>
+                <x-error-span>{{ $errors->first('form.reason') }}</x-error-span>
+            </div>
         </div>
 
         <div class="flex justify-end gap-2">

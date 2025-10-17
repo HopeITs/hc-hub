@@ -21,6 +21,8 @@ class LeaveBalanceForm extends Form
 
     public $contract_id;
 
+    public $used = 0;
+
 
     protected function rules()
     {
@@ -211,9 +213,9 @@ class LeaveBalanceForm extends Form
     {
         $this->validate();
 
-        $this->balance->update(
-            $this->all()
-        );
+        $this->balance->update([
+           'used' => $this->used,
+       ]);
 
         $this->reset();
     }

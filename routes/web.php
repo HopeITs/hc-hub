@@ -91,7 +91,7 @@ Route::group(
                 ->name('leaves.')
                 ->group(function () {
                     Route::get('my-leaves', LeaveRequestModule::class)->name('index');
-                    Route::get('/create', CreateLeaveRequest::class)->name('create');
+
                 });
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
