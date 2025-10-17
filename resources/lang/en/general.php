@@ -256,6 +256,7 @@ return [
     'file' => 'File',
     'add-item' => 'Add Item',
     'items' => 'Items',
+    'employee-dashboard' => 'Employee Dashboard',
     'items_from_checklist' => 'All Items',
     'no_items_from_checklist' => 'No items have been assigned from the checklist.',
     'back_to_list' => 'Cancel',

@@ -256,6 +256,7 @@ return [
     'delivered_status' => 'حالة التسليم',
     'returned_at' => 'تاريخ الإعادة',
     'returned_status' => 'حالة الإعادة',
+    'employee-dashboard' => 'لوحة تحكم الموظف',
     'attachments' => 'الملحقات',
     'file' => 'الملف',
     'add-item' => 'إضافة عنصر',

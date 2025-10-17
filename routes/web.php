@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
+use App\Livewire\Dashboards\EmployeeDashboard;
 use App\Livewire\Basics\{ChecklistItemModule,
     CityModule,
     ContractTypeModule,
@@ -118,6 +119,9 @@ Route::group(
                     Route::get('/done-requests', DoneRequests::class)->name('done-requests');
                     Route::get('/', AllItems::class)->name('index');
                 });
+
+            Route::get('/employee-dashboard', EmployeeDashboard::class)
+                ->name('employee.dashboard');
         });
 
         require __DIR__ . '/auth.php';

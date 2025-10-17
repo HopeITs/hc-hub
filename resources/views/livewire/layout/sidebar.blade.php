@@ -8,6 +8,16 @@
             </a>
 
             <ul class="space-y-2 font-medium">
+
+                @activerole('SUPER ADMIN')
+                <x-layouts.app.sidebar.nav-item
+                    :href="route('employee.dashboard')"
+                    :active="request()->routeIs('employee.dashboard')">
+                    <x-slot name="icon"><x-icons.home /></x-slot>
+                    {{ __('general.employee-dashboard') }}
+                </x-layouts.app.sidebar.nav-item>
+                @endactiverole
+
                 @activerole('hr', 'general manager', 'SUPER ADMIN')
                     <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('dashboard') ||
                         request()->routeIs('cities.*') ||
