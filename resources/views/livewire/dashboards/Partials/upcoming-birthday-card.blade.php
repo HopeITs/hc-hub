@@ -6,7 +6,7 @@
             class="flex items-center justify-center h-8 w-8 rounded-lg bg-[var(--color-primary-500)] text-white text-lg shadow-sm">
             📅
         </div>
-        <h2 class="text-lg font-extrabold text-[var(--color-primary-700)] tracking-tight">
+        <h2 class="text-lg font-extrabold text-[var(--color-primary)] tracking-tight">
             Upcoming Birthdays
         </h2>
     </div>
