@@ -15,6 +15,9 @@ class EmployeeDashboard extends Component
     public $joinedOn;
     public $workEmail;
 
+    /**
+     * Today's birthdays
+     */
     public function getTodayBirthdaysProperty()
     {
         $today = now()->timezone(config('app.timezone'));
@@ -29,10 +32,7 @@ class EmployeeDashboard extends Component
             ->whereNotNull('dob')
             ->whereRaw('DAY(dob) = ?', [$day])
             ->whereRaw('MONTH(dob) = ?', [$month])
-            ->with([
-                'media',
-                'contracts.position.department'
-            ])
+            ->with(['media', 'contracts.position.department'])
             ->get()
             ->map(function ($emp) use ($titleCol, $deptCol) {
                 $contract = Contract::with(['position.department'])
@@ -46,6 +46,67 @@ class EmployeeDashboard extends Component
                 return $emp;
             });
     }
+
+    /**
+     * Upcoming birthdays for the next 7 days (excluding today)
+     */
+    public function getUpcomingBirthdaysProperty()
+    {
+        $today = now()->timezone(config('app.timezone'))->startOfDay();
+        $start = $today->copy()->addDay();   // Tomorrow
+        $end   = $today->copy()->addDays(7); // Up to 7 days ahead
+
+        $locale = app()->getLocale();
+        $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
+        $deptCol  = $locale === 'ar' ? 'name_ar' : 'name_en';
+
+        return Employee::query()
+            ->whereNotNull('dob')
+            ->get()
+            ->filter(function ($emp) use ($start, $end) {
+                $dob = Carbon::parse($emp->dob)->setYear(now()->year);
+
+                // If the birthday already passed this year, use next year
+                if ($dob->lt($start)) {
+                    $dob->addYear();
+                }
+
+                // Use positional argument for inclusive comparison
+                return $dob->isBetween($start, $end, true);
+            })
+            ->map(function ($emp) use ($titleCol, $deptCol) {
+                $contract = Contract::with(['position.department'])
+                    ->where('employee_id', $emp->id)
+                    ->orderByDesc('start_date')
+                    ->first();
+
+                $emp->positionTitle  = $contract?->position?->$titleCol ?? null;
+                $emp->departmentName = $contract?->position?->department?->$deptCol ?? null;
+
+                $dob = Carbon::parse($emp->dob)->setYear(now()->year);
+                if ($dob->lt(now())) {
+                    $dob->addYear();
+                }
+
+                $daysLeft = (int) now()->diffInDays($dob, false);
+                $emp->upcomingDob = $dob->format('d M');
+
+                if ($daysLeft === 0) {
+                    $emp->daysLeftText = 'Today 🎂';
+                } elseif ($daysLeft === 1) {
+                    $emp->daysLeftText = 'Tomorrow';
+                } else {
+                    $emp->daysLeftText = "In {$daysLeft} days";
+                }
+
+                return $emp;
+            })
+            ->sortBy(fn($emp) => Carbon::parse($emp->dob)->setYear(now()->year)->dayOfYear)
+            ->values();
+    }
+
+
+
 
 
     public function mount(): void
@@ -81,13 +142,14 @@ class EmployeeDashboard extends Component
     public function render()
     {
         return view('livewire.dashboards.employee-dashboard', [
-            'employee'       => $this->employee,
-            'contract'       => $this->contract,
-            'positionTitle'  => $this->positionTitle,
-            'departmentName' => $this->departmentName,
-            'joinedOn'       => $this->joinedOn,
-            'workEmail'      => $this->workEmail,
-            'todayBirthdays' => $this->todayBirthdays,
+            'employee'          => $this->employee,
+            'contract'          => $this->contract,
+            'positionTitle'     => $this->positionTitle,
+            'departmentName'    => $this->departmentName,
+            'joinedOn'          => $this->joinedOn,
+            'workEmail'         => $this->workEmail,
+            'todayBirthdays'    => $this->todayBirthdays,
+            'upcomingBirthdays' => $this->upcomingBirthdays,
         ]);
     }
 }
