@@ -84,7 +84,7 @@ class DoneRequestsTable extends LivewireTable
             ->toArray();
 
         return [
-            SelectColumn::make(__('general.employee'))
+            SelectColumn::make(trans_choice('general.employee',1))
                 ->options($employeeOptions)
                 ->displayUsing(function (mixed $value, Model $row): string {
                     if ($row->returned_status === 'received') {

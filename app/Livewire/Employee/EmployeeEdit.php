@@ -56,7 +56,8 @@ class EmployeeEdit extends Component
         $this->badgeForm->setEmployee($employee);
         $this->attachmentForm->setEmployee($employee);
 
-        $defaultDeliverables = DefaultDeliverable::all();
+        $hasExistingChecklist = Checklist::where('employee_id', $employee->id)->exists();
+        $defaultDeliverables = $hasExistingChecklist ? collect() : DefaultDeliverable::all();
 
         $this->checklistForm->setEmployeeAndAllItems($employee, $this->getChecklistItems(), $defaultDeliverables);
     }
@@ -66,8 +67,11 @@ class EmployeeEdit extends Component
         $this->checklistForm->save();
         $this->successToast();
 
-        $defaultDeliverables = DefaultDeliverable::all();
-        $this->checklistForm->setEmployeeAndAllItems($this->employee->fresh(), $this->getChecklistItems(), $defaultDeliverables);
+        $this->checklistForm->setEmployeeAndAllItems(
+            $this->employee->fresh(),
+            $this->getChecklistItems(),
+            DefaultDeliverable::all()
+        );
     }
 
     public function setActiveTab($tab)
@@ -205,23 +209,48 @@ class EmployeeEdit extends Component
             $this->successToast('Return process initiated.');
             $this->showInitiateReturnModal = false;
         }
+
+        $this->checklistForm->setEmployeeAndAllItems(
+            $this->employee->fresh(),
+            $this->getChecklistItems(),
+            DefaultDeliverable::all()
+        );
+    }
+
+    public function finalizeReturnCycle(int $checklistId)
+    {
+        $checklist = Checklist::findOrFail($checklistId);
+
+        if ($checklist->returned_status === 'received') {
+            $checklist->delete();
+        }
+
+        $this->successToast('Checklist fully reset.');
+
+        $this->checklistForm->setEmployeeAndAllItems(
+            $this->employee->fresh(),
+            $this->getChecklistItems(),
+            DefaultDeliverable::all()
+        );
     }
 
     public function toggleBoardMember($checked): void
     {
         $this->infoForm->is_board_member = (bool)$checked;
-
     }
 
     public function render()
     {
         $roles = Role::pluck('name', 'id')->toArray();
         $delivereds = Employee::whereIn('id', DefaultDeliverable::pluck('employee_id'))->get();
-        $cities = City::where('is_active',true)->pluck(transColumn('name'), 'id')->toArray();
+        $cities = City::where('is_active', true)->pluck(transColumn('name'), 'id')->toArray();
+
         $employeeChecklistItems = Checklist::with(['item'])
             ->where('employee_id', $this->employee->id)
             ->where(function ($q) {
-                $q->whereNull('delivered_status')->orWhereIn('delivered_status', ['delivered', 'pending']);
+                $q->whereNull('delivered_status')
+                    ->orWhereIn('delivered_status', ['delivered', 'pending'])
+                    ->orWhere('returned_status', 'received');
             })
             ->orderByDesc('updated_at')
             ->get();
@@ -229,7 +258,9 @@ class EmployeeEdit extends Component
         return view('livewire.employee.form', [
             'roles' => $roles,
             'cities' => $cities,
-            'allEmployees' => Employee::select('id', 'name_en', 'name_ar')->where('id', '!=', $this->employee->id)->get(),
+            'allEmployees' => Employee::select('id', 'name_en', 'name_ar')
+                ->where('id', '!=', $this->employee->id)
+                ->get(),
             'delivereds' => $delivereds,
             'employeeChecklistItems' => $employeeChecklistItems,
             'isCreateMode' => false,

@@ -21,17 +21,29 @@ class ChecklistForm extends Form
         $this->items = $allItems
             ->map(function ($item) use ($savedChecklists, $isNew, $defaultDeliverables, $employee) {
                 $saved = $savedChecklists->get($item->id);
+                $isFullyReturned = $saved?->returned_status === 'received';
+                $deliveredId = $saved?->delivered_id;
 
-                $defaultDeliverer = $defaultDeliverables->first(fn($d) => $d->item_id === $item->id && $d->city_id === $employee->city_id);
+                if ($isFullyReturned || $deliveredId === null) {
+                    $defaultDeliverer = $defaultDeliverables->first(fn($d) => $d->item_id === $item->id && $d->city_id === $employee->city_id);
+                    $deliveredId = $defaultDeliverer?->employee_id;
+                }
+                if ($isFullyReturned) {
+                    $deliveredId = $defaultDeliverer?->employee_id;
+                }
 
+                $isSelected = $isNew || (bool) $saved;
                 return [
                     'item_id' => $item->id,
                     'item_name' => $item->name,
-                    'is_selected' => $isNew || (bool) $saved,
-                    'delivered_id' => $saved?->delivered_id ?? $defaultDeliverer?->employee_id,
-                    'receiver_id' => $saved?->receiver_id,
-                    'delivered_status' => $saved?->delivered_status,
-                    'returned_status' => $saved?->returned_status,
+                    'is_selected' => $isSelected,
+
+                    'delivered_id' => $deliveredId,
+
+                    'receiver_id' => $isFullyReturned ? null : $saved?->receiver_id,
+
+                    'delivered_status' => $isFullyReturned ? null : $saved?->delivered_status,
+                    'returned_status' => $isFullyReturned ? null : $saved?->returned_status,
                     'can_edit' => true,
                 ];
             })
@@ -49,21 +61,31 @@ class ChecklistForm extends Form
             }
 
             if (!empty($itemData['is_selected'])) {
+                $deliveredId = $itemData['delivered_id'] ?: auth()->user()->profile?->id;
+
+                $isFullyReturned = $existing && $existing->returned_status === 'received';
+
                 $values = [
-                    'delivered_id' => $itemData['delivered_id'] ?: auth()->user()->profile?->id,
+                    'delivered_id' => $deliveredId,
                 ];
 
-                if (!$existing) {
-                    $values['delivered_status'] = 'pending';
-                    $values['delivered_at'] = now();
-                }
+                if ($isFullyReturned || $existing === null || $existing->delivered_status === null) {
+                    $values = array_merge($values, [
+                        'delivered_status' => 'pending',
+                        'delivered_at' => now(),
+                        'receiver_id' => null,
+                        'returned_status' => null,
+                        'returned_at' => null,
+                        'notes' => null,
+                    ]);
+                } else {
+                    $values['delivered_status'] = $existing->delivered_status;
+                    $values['delivered_at'] = $existing->delivered_at;
 
-                if ($existing && $existing->delivered_status === 'delivered') {
                     if (!empty($itemData['receiver_id'])) {
                         $values['receiver_id'] = $itemData['receiver_id'];
-                        if ($existing->returned_status !== 'pending') {
+                        if ($existing->returned_status !== 'pending' && $existing->returned_status !== 'received') {
                             $values['returned_status'] = 'pending';
-                            $values['returned_at'] = now();
                         }
                     } else {
                         $values['receiver_id'] = null;
