@@ -118,12 +118,6 @@
                 @endactiverole
 
                 @activerole('SUPER ADMIN', 'hr', 'General Manager', 'manager', 'Manager', 'Employee')
-                    {{--
-                        الحل النهائي والموثوق:
-                        1. نضع wire:ignore على الـ div الخارجي لضمان بقاء القائمة المنسدلة ثابتة ومفتوحة، متجاهلة تحديثات Livewire.
-                        2. نترك العدادات بالداخل (@livewire) لتحديث نفسها.
-                        3. نستخدم x-data للحفاظ على حالة الفتح/الإغلاق عبر Alpine.js.
-                    --}}
                     <div wire:ignore x-data="{ open: {{ request()->routeIs('checklist-items.*') ? 'true' : 'false' }} }">
                         <x-layouts.app.sidebar.dropdown-nav-list
                             id="checklist-items"
