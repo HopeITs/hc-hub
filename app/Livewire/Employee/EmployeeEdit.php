@@ -209,6 +209,12 @@ class EmployeeEdit extends Component
             $this->successToast('Return process initiated.');
             $this->showInitiateReturnModal = false;
         }
+
+        $this->checklistForm->setEmployeeAndAllItems(
+            $this->employee->fresh(),
+            $this->getChecklistItems(),
+            DefaultDeliverable::all()
+        );
     }
 
     public function finalizeReturnCycle(int $checklistId)
@@ -216,15 +222,7 @@ class EmployeeEdit extends Component
         $checklist = Checklist::findOrFail($checklistId);
 
         if ($checklist->returned_status === 'received') {
-            $checklist->update([
-                'delivered_id' => null,
-                'receiver_id' => null,
-                'delivered_status' => null,
-                'returned_status' => null,
-                'delivered_at' => null,
-                'returned_at' => null,
-                'notes' => null,
-            ]);
+            $checklist->delete();
         }
 
         $this->successToast('Checklist fully reset.');
