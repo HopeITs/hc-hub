@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboards;
 
 use Carbon\Carbon;
 use App\Models\{Employee, Contract};
+use FontLib\Table\Type\name;
 use Livewire\Component;
 
 class EmployeeDashboard extends Component
@@ -15,9 +16,7 @@ class EmployeeDashboard extends Component
     public $joinedOn;
     public $workEmail;
 
-    /**
-     * Today's birthdays
-     */
+    //today's birthday function
     public function getTodayBirthdaysProperty()
     {
         $today = now()->timezone(config('app.timezone'));
@@ -47,6 +46,7 @@ class EmployeeDashboard extends Component
             });
     }
 
+    //upcoming birthdays function
     public function getUpcomingBirthdaysProperty()
     {
         $today = now()->timezone(config('app.timezone'))->startOfDay();
@@ -100,6 +100,129 @@ class EmployeeDashboard extends Component
             ->values();
     }
 
+    //team members function
+    public function getTeamMembersProperty()
+    {
+        if (!$this->contract?->position) {
+            return collect();
+        }
+
+        $locale = app()->getLocale();
+        $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
+        $deptCol  = $locale === 'ar' ? 'name_ar' : 'name_en';
+
+        $position   = $this->contract->position;
+        $cityId     = $position->city_id;
+        $programId  = $position->program_id;
+
+        $members = collect();
+
+        // ------------------------- CEO (fixed) -------------------------
+        $ceo = Employee::query()
+            ->where('name_en', 'Fredy Youssef')
+            ->with(['media', 'contracts.position.jobLevel'])
+            ->first();
+
+        if ($ceo) {
+            $contract = $ceo->latestActiveContract();
+            $ceo->positionTitle = 'Chief Executive Officer';
+            $members->push($ceo);
+        }
+
+        // ------------------------- Direct Manager -------------------------
+        $directManager = null;
+        if ($position?->direct_manager_id) {
+            $managerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])
+                ->find($position->direct_manager_id);
+
+            if ($managerPosition) {
+                $activeContract = $managerPosition->activeContracts()
+                    ->with(['employee.contracts.position.jobLevel'])
+                    ->latest('start_date')
+                    ->first();
+
+                $directManager = $activeContract?->employee;
+
+                if ($directManager) {
+                    $directManager->positionTitle = $activeContract?->position?->$titleCol ?? '—';
+                }
+            }
+        }
+
+        if ($directManager && !$members->contains('id', $directManager->id)) {
+            $members->push($directManager);
+        }
+
+        // ------------------------- Tech Manager -------------------------
+        $techManager = null;
+        if ($position?->tech_manager_id) {
+            $techManagerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])
+                ->find($position->tech_manager_id);
+
+            if ($techManagerPosition) {
+                $activeContract = $techManagerPosition->activeContracts()
+                    ->with(['employee.contracts.position.jobLevel'])
+                    ->latest('start_date')
+                    ->first();
+
+                $techManager = $activeContract?->employee;
+
+                if ($techManager) {
+                    $techManager->positionTitle = $activeContract?->position?->$titleCol ?? '—';
+                }
+            }
+        }
+
+        if ($techManager && !$members->contains('id', $techManager->id)) {
+            $members->push($techManager);
+        }
+
+        // ------------------------- Team Members -------------------------
+        $nameCol = "name_{$locale}";
+
+        $excludeIds = collect([
+            $this->employee?->id,
+            $ceo?->id,
+            $directManager?->id,
+            $techManager?->id,
+        ])->filter()->unique()->all();
+
+        $sameCityEmployees = \App\Models\Employee::query()
+            ->where('city_id', $this->employee?->city_id)
+            ->whereNotIn('id', $excludeIds)
+            ->with([
+                // Ensure we always load the position and job level
+                'contracts.position.jobLevel',
+            ])
+            ->get()
+            ->map(function ($emp) use ($nameCol, $titleCol) {
+                // Pick the latest active contract either from the eager-loaded set or method
+                $contract = $emp->contracts
+                    ->filter(fn($c) =>
+                    ($c->is_active || (
+                            !$c->terminated_at &&
+                            $c->start_date <= now() &&
+                            $c->end_date >= now()
+                        ))
+                    )
+                    ->sortByDesc('start_date')
+                    ->first() ?? $emp->latestActiveContract();
+
+                $emp->displayName = $emp->$nameCol ?? $emp->name_en;
+                $emp->positionTitle = $contract?->position?->$titleCol
+                    ?? $contract?->position?->title_en
+                    ?? '—';
+                $emp->jobLevelGrade = $contract?->position?->jobLevel?->grade ?? 999;
+
+                return $emp;
+            })
+            ->sortBy('jobLevelGrade')
+            ->values();
+
+        return $members->merge($sameCityEmployees)->unique('id')->values();
+
+
+    }
 
 
 

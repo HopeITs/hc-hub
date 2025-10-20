@@ -1,31 +1,31 @@
 <div class="min-h-screen bg-gray-50 rounded-lg p-6">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
         <div>
-            @include('livewire.dashboards.partials.employee-details-card')
+            @include('livewire.dashboards.Partials.employee-details-card')
         </div>
 
         <div>
-            @include('livewire.dashboards.partials.checklist-items-card')
+            @include('livewire.dashboards.Partials.checklist-items-card')
         </div>
 
         <div>
-            @include('livewire.dashboards.partials.my-badges-card')
+            @include('livewire.dashboards.Partials.my-badges-card')
         </div>
 
         <div>
-            @include('livewire.dashboards.partials.news-card')
+            @include('livewire.dashboards.Partials.news-card')
         </div>
 
         <div>
-            @include('livewire.dashboards.partials.notes-checkboxes-card')
+            @include('livewire.dashboards.Partials.notes-checkboxes-card')
         </div>
 
         <div>
-            @include('livewire.dashboards.partials.pending-requests')
+            @include('livewire.dashboards.Partials.pending-requests')
         </div>
 
         <div>
-            @include('livewire.dashboards.partials.team-members-card')
+            @include('livewire.dashboards.Partials.team-members-card')
         </div>
 
         <div>
@@ -33,19 +33,19 @@
         </div>
 
         <div>
-            @include('livewire.dashboards.partials.upcoming-birthday-card')
+            @include('livewire.dashboards.Partials.upcoming-birthday-card')
         </div>
 
         <div>
-            @include('livewire.dashboards.partials.upcoming-holidays-card')
+            @include('livewire.dashboards.Partials.upcoming-holidays-card')
         </div>
 
         <div>
-            @include('livewire.dashboards.partials.upcoming-leaves-card')
+            @include('livewire.dashboards.Partials.upcoming-leaves-card')
         </div>
 
         <div>
-            @include('livewire.dashboards.partials.my-leaves-card')
+            @include('livewire.dashboards.Partials.my-leaves-card')
         </div>
 
 
