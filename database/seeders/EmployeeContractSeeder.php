@@ -13,16 +13,16 @@ class EmployeeContractSeeder extends Seeder
     public function run(): void
     {
         $contracts = [
-            ['employee' => 'fredy.youssef', 'position' => 'Chief Executive Officer', 'start_date' => '2018-01-01'],
-            ['employee' => 'safir.salim', 'position' => 'Deputy Chief Executive Officer', 'start_date' => '2018-01-01'],
-            ['employee' => 'judy.dadaoghlian', 'position' => 'IT Manager', 'start_date' => '2018-01-01'],
-            ['employee' => 'george.abdelnour', 'position' => 'Communication Manager / Syria', 'start_date' => '2018-02-12'],
-            ['employee' => 'lana.abdo', 'position' => 'HR Generalist', 'start_date' => '2018-02-01'],
-            ['employee' => 'majd.zrek', 'position' => 'Legal Affairs Consultant', 'start_date' => '2018-03-01'],
-            ['employee' => 'rama.daaboul', 'position' => 'Second Deputy Chief Executive Officer', 'start_date' => '2018-09-01'],
-            ['employee' => 'magie.najjar', 'position' => 'Center Keeper', 'start_date' => '2018-11-16'],
-            ['employee' => 'shadi.makdessi', 'position' => 'Senior Financial Manager', 'start_date' => '2019-02-01'],
-            ['employee' => 'antoine.arbaji', 'position' => 'Program Manager', 'start_date' => '2019-10-01'],
+            ['employee' => 'fredy.youssef', 'position' => 'Chief Executive Officer', 'start_date' => '2018-01-01','end_date' => '2090-12-31'],
+            ['employee' => 'safir.salim', 'position' => 'Deputy Chief Executive Officer', 'start_date' => '2018-01-01' ,'end_date' => '2090-12-31'],
+            ['employee' => 'judy.dadaoghlian', 'position' => 'IT Manager', 'start_date' => '2018-01-01' ,'end_date' => '2090-12-31'],
+            ['employee' => 'george.abdelnour', 'position' => 'Communication Manager / Syria', 'start_date' => '2018-01-01' ,'end_date' => '2090-12-31'],
+            ['employee' => 'lana.abdo', 'position' => 'HR Generalist', 'start_date' => '2025-02-01'],
+            ['employee' => 'majd.zrek', 'position' => 'Legal Affairs Consultant', 'start_date' => '2025-03-01'],
+            ['employee' => 'rama.daaboul', 'position' => 'Second Deputy Chief Executive Officer', 'start_date' => '2025-09-01'],
+            ['employee' => 'magie.najjar', 'position' => 'Center Keeper', 'start_date' => '2025-11-16'],
+            ['employee' => 'shadi.makdessi', 'position' => 'Senior Financial Manager', 'start_date' => '2025-02-01'],
+            ['employee' => 'antoine.arbaji', 'position' => 'Program Manager', 'start_date' => '2025-10-01'],
         ];
 
         foreach ($contracts as $data) {
@@ -38,7 +38,7 @@ class EmployeeContractSeeder extends Seeder
                 'position_id' => $position->id,
                 'contract_type_id' => 1, // تأكد من وجود نوع عقد بالمعرف 1
                 'start_date' => Carbon::parse($data['start_date']),
-                'end_date' => Carbon::parse($data['start_date'])->addYears(1),
+                'end_date' => array_key_exists('end_date' ,$data) ? Carbon::parse($data['end_date']) : Carbon::parse($data['start_date'])->addYears(1),
                 'terminated_at' => null,
                 'reason_of_termination' => null,
                 'salary' => 1000000.00, // مثال، يمكن تعديله حسب الحاجة

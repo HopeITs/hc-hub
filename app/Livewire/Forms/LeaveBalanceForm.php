@@ -3,6 +3,7 @@
 namespace App\Livewire\Forms;
 
 use App\Enums\ContractType;
+use App\Enums\Gender;
 use App\Enums\LeaveTypeCases;
 use App\Enums\MaritalStatus;
 use App\Enums\SalaryPer;
@@ -19,6 +20,8 @@ class LeaveBalanceForm extends Form
     public ?LeaveBalance $balance = null;
 
     public $contract_id;
+
+    public $used = 0;
 
 
     protected function rules()
@@ -40,7 +43,7 @@ class LeaveBalanceForm extends Form
         $contract = Contract::findOrFail($contractId)->load(['employee', 'contractType']);
         $leaveTypes = LeaveType::whereNotIn('id', [1, 2])->get();
         $employee = $contract->employee;
-        $leaveRule = AnnualLeaveRule::where('years_of_volunteering', '<=', $employee->years_of_service)->orderBy('days', 'desc')->first();
+        $leaveRule = AnnualLeaveRule::where('years_of_volunteering', '<=', $employee->years_of_service)->orderBy('days', 'desc')->first() ?? AnnualLeaveRule::first();
         $duration = $contract->duration();
         $fullTimeHours = 40;
 
@@ -97,13 +100,23 @@ class LeaveBalanceForm extends Form
                     }
                 } else {
                     //leaves for married
+
                     if ($employee->marital_status === MaritalStatus::Married) {
 
-                        $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED);
-                        $allowedForFemaleMarried = $allowedForMarried->filter(fn($type) => $type->allowed_gender === LeaveTypeEnum::GENDER_FEMALE);
-                        $allowedForOtherMarried = $allowedForMarried->filter(fn($type) => $type->allowed_gender !== LeaveTypeEnum::GENDER_FEMALE);
-                        foreach ($allowedForFemaleMarried as $allowed) {
-                            if ($employee->abilityToTakeLeave($allowed->id)) {
+                        $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED && $type->allowed_gender === $employee->gender);
+
+                        if ($employee->gender === Gender::Female) {
+                           foreach ( $allowedForMarried as $allowed) {
+                               if (!$employee->abilityToTakeLeave($allowed->id)) {
+                                   LeaveBalance::create([
+                                       'contract_id' => $contract->id,
+                                       'type_id' => $allowed->id,
+                                       'deserved' => $allowed->base_days
+                                   ]);
+                               }
+                           }
+                        } else {
+                            foreach ( $allowedForMarried as $allowed) {
                                 LeaveBalance::create([
                                     'contract_id' => $contract->id,
                                     'type_id' => $allowed->id,
@@ -111,14 +124,8 @@ class LeaveBalanceForm extends Form
                                 ]);
                             }
                         }
-                        foreach ($allowedForOtherMarried as $allowed) {
-                            LeaveBalance::create([
-                                'contract_id' => $contract->id,
-                                'type_id' => $allowed->id,
-                                'deserved' => $allowed->base_days
-                            ]);
 
-                        }
+
                     }
                 }
 
@@ -173,7 +180,7 @@ class LeaveBalanceForm extends Form
                             ]);
                         }
                     }
-                }else{
+                } else {
                     //leaves for married
                     if ($employee->marital_status === MaritalStatus::Married) {
                         //handle mother leave taken once
@@ -206,9 +213,9 @@ class LeaveBalanceForm extends Form
     {
         $this->validate();
 
-        $this->balance->update(
-            $this->all()
-        );
+        $this->balance->update([
+           'used' => $this->used,
+       ]);
 
         $this->reset();
     }

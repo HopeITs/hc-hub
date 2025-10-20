@@ -15,6 +15,7 @@ use App\Livewire\Employee\{EmployeeCreate,
     EmployeeEdit,
     EmployeeModule,
     EmployeeProfile,
+    Leave\CreateLeaveRequest,
     Leave\LeaveRequestModule,
     Leave\LeaveRequestTable};
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};

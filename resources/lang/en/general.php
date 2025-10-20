@@ -344,6 +344,7 @@ return [
     'delivered' => 'Delivered',
     'received' => 'Received',
     'on_hold' => 'On Hold',
+    'months' => 'Months' ,
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

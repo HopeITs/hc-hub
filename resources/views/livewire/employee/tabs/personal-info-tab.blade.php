@@ -36,8 +36,9 @@
             <div wire:key="emp-actual-dob">
                 <x-forms.input-label for="city_id">{{trans_choice('general.city',1)}}</x-forms.input-label>
                 <x-forms.select-input wire:model="infoForm.city_id" id="city_id">
-                    @foreach($cities as $id => $city)
-                        <option value="{{$id}}">{{$city}}</option>
+                    <option  value="">{{__('general.unknown')}}</option>
+                    @foreach($cities as $cityId => $city)
+                        <option  value="{{$cityId}}">{{$city}}</option>
                     @endforeach
                 </x-forms.select-input>
                 <x-error-span>{{ $errors->first('infoForm.city_id') }}</x-error-span>
