@@ -40,47 +40,36 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('general manager','hr','SUPER ADMIN')
-                <x-layouts.app.sidebar.dropdown-nav-list
-                    id="program-management"
-                    :title="__('general.programs-management')"
-                    :active="request()->routeIs('programs.*') ||
-                             request()->routeIs('positions.*') ||
-                             request()->routeIs('org.chart') ||
-                             request()->routeIs('centers.*')">
+                @activerole('general manager', 'hr', 'SUPER ADMIN')
+                    <x-layouts.app.sidebar.dropdown-nav-list id="program-management" :title="__('general.programs-management')" :active="request()->routeIs('programs.*') ||
+                        request()->routeIs('positions.*') ||
+                        request()->routeIs('org.chart') ||
+                        request()->routeIs('centers.*')">
 
-                    <x-slot name="icon">
-                        <x-icons.layers class="w-5 h-5" />
-                    </x-slot>
+                        <x-slot name="icon">
+                            <x-icons.layers class="w-5 h-5" />
+                        </x-slot>
 
-                    <x-slot name="list">
-                        <x-layouts.app.sidebar.nav-item
-                            :href="route('programs.index')"
-                            :active="request()->routeIs('programs.*')">
-                            {{ trans_choice('general.program', 2) }}
-                        </x-layouts.app.sidebar.nav-item>
+                        <x-slot name="list">
+                            <x-layouts.app.sidebar.nav-item :href="route('programs.index')" :active="request()->routeIs('programs.*')">
+                                {{ trans_choice('general.program', 2) }}
+                            </x-layouts.app.sidebar.nav-item>
 
-                        <x-layouts.app.sidebar.nav-item
-                            :href="route('positions.index')"
-                            :active="request()->routeIs('positions.*')">
-                            {{ __('general.positions') }}
-                        </x-layouts.app.sidebar.nav-item>
-                        <x-layouts.app.sidebar.nav-item
-                            :href="route('org.chart')"
-                            :active="request()->routeIs('org.chart')">
-                            {{ __('general.orgn-chart') }}
-                        </x-layouts.app.sidebar.nav-item>
+                            <x-layouts.app.sidebar.nav-item :href="route('positions.index')" :active="request()->routeIs('positions.*')">
+                                {{ __('general.positions') }}
+                            </x-layouts.app.sidebar.nav-item>
+                            <x-layouts.app.sidebar.nav-item :href="route('org.chart')" :active="request()->routeIs('org.chart')">
+                                {{ __('general.orgn-chart') }}
+                            </x-layouts.app.sidebar.nav-item>
 
-                        <x-layouts.app.sidebar.nav-item
-                            :href="route('centers.index')"
-                            :active="request()->routeIs('centers.index')" wire:navigate>
-                            {{ trans_choice('general.center', 2) }}
-                        </x-layouts.app.sidebar.nav-item>
-                    </x-slot>
-                </x-layouts.app.sidebar.dropdown-nav-list>
+                            <x-layouts.app.sidebar.nav-item :href="route('centers.index')" :active="request()->routeIs('centers.index')" wire:navigate>
+                                {{ trans_choice('general.center', 2) }}
+                            </x-layouts.app.sidebar.nav-item>
+                        </x-slot>
+                    </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('manager','hr', 'general manager', 'SUPER ADMIN')
+                @activerole('manager', 'hr', 'general manager', 'SUPER ADMIN')
                     <x-layouts.app.sidebar.dropdown-nav-list id="employees-management" :title="trans_choice('general.employee-management', 2)"
                         :active="request()->routeIs('employees.*') ||
                             request()->routeIs('contracts.*') ||
@@ -90,10 +79,10 @@
                             <x-layouts.app.sidebar.nav-item :href="route('employees.index')" :active="request()->routeIs('employees.*')">
                                 {{ trans_choice('general.employee', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-                            @activerole('hr','SUPER ADMIN')
-                            <x-layouts.app.sidebar.nav-item :href="route('default-deliverables.index')" :active="request()->routeIs('default-deliverables.index')">
-                                {{ trans_choice('general.default-deliverables', 2) }}
-                            </x-layouts.app.sidebar.nav-item>
+                            @activerole('hr', 'SUPER ADMIN')
+                                <x-layouts.app.sidebar.nav-item :href="route('default-deliverables.index')" :active="request()->routeIs('default-deliverables.index')">
+                                    {{ trans_choice('general.default-deliverables', 2) }}
+                                </x-layouts.app.sidebar.nav-item>
                             @endactiverole
                             <x-layouts.app.sidebar.nav-item :href="route('contracts.index')" :active="request()->routeIs('contracts.*')">
                                 {{ trans_choice('general.contracts', 2) }}
@@ -102,8 +91,7 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                <x-layouts.app.sidebar.dropdown-nav-list id="holidays-management" :title="__('general.holidays-and-leaves')"
-                                                         :active="request()->routeIs('leaves.*')" >
+                <x-layouts.app.sidebar.dropdown-nav-list id="holidays-management" :title="__('general.holidays-and-leaves')" :active="request()->routeIs('leaves.*')">
                     <x-slot name="icon">
                         <x-icons.calendar class="w-5 h-5" />
                     </x-slot>
@@ -129,40 +117,44 @@
                     </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
-                @activerole('SUPER ADMIN','hr', 'General Manager', 'manager', 'Manager', 'Employee')
-                    <x-layouts.app.sidebar.dropdown-nav-list id="checklist-items" wire:ignore.self
-                        :title="__('general.checklist_items')" :active="request()->routeIs('checklist-items.*')">
-                        <x-slot name="icon"><x-icons.clipboard-list class="w-5 h-5" /></x-slot>
-                        <x-slot name="list">
-                            @if ($isDeliverResponsible)
-                                <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-delivers')" :active="request()->routeIs('checklist-items.pending-delivers')">
-                                    {{ __('general.pending-delivers') }}
-                                    @if ($pendingDeliversCount > 0)
-                                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
-                                            {{ $pendingDeliversCount }}
-                                        </span>
-                                    @endif
-                                </x-layouts.app.sidebar.nav-item>
+                @activerole('SUPER ADMIN', 'hr', 'General Manager', 'manager', 'Manager', 'Employee')
+                    {{--
+                        الحل النهائي والموثوق:
+                        1. نضع wire:ignore على الـ div الخارجي لضمان بقاء القائمة المنسدلة ثابتة ومفتوحة، متجاهلة تحديثات Livewire.
+                        2. نترك العدادات بالداخل (@livewire) لتحديث نفسها.
+                        3. نستخدم x-data للحفاظ على حالة الفتح/الإغلاق عبر Alpine.js.
+                    --}}
+                    <div wire:ignore x-data="{ open: {{ request()->routeIs('checklist-items.*') ? 'true' : 'false' }} }">
+                        <x-layouts.app.sidebar.dropdown-nav-list
+                            id="checklist-items"
+                            :title="__('general.checklist_items')"
+                            :active="request()->routeIs('checklist-items.*')"
+                            wire:navigate.hover
+                        >
+                            <x-slot name="icon"><x-icons.clipboard-list class="w-5 h-5" /></x-slot>
+                            <x-slot name="list">
+                                @if ($isDeliverResponsible)
+                                    <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-delivers')" :active="request()->routeIs('checklist-items.pending-delivers')">
+                                        {{ __('general.pending-delivers') }}
+                                        @livewire('checklist-items.pending-delivers-counter')
+                                    </x-layouts.app.sidebar.nav-item>
 
-                                <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-returns')" :active="request()->routeIs('checklist-items.pending-returns')">
-                                    {{ __('general.pending_returns') }}
-                                    @if ($pendingReturnsCount > 0)
-                                        <span class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-red-600 rounded-full">
-                                            {{ $pendingReturnsCount }}
-                                        </span>
-                                    @endif
-                                </x-layouts.app.sidebar.nav-item>
+                                    <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-returns')" :active="request()->routeIs('checklist-items.pending-returns')">
+                                        {{ __('general.pending_returns') }}
+                                        @livewire('checklist-items.pending-returns-counter')
+                                    </x-layouts.app.sidebar.nav-item>
 
-                                <x-layouts.app.sidebar.nav-item :href="route('checklist-items.done-requests')" :active="request()->routeIs('checklist-items.done-requests')">
-                                    {{ __('general.done_requests') }}
-                                </x-layouts.app.sidebar.nav-item>
-                            @endif
+                                    <x-layouts.app.sidebar.nav-item :href="route('checklist-items.done-requests')" :active="request()->routeIs('checklist-items.done-requests')">
+                                        {{ __('general.done_requests') }}
+                                    </x-layouts.app.sidebar.nav-item>
+                                @endif
 
-                            <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
-                                {{ __('general.my-items') }}
-                            </x-layouts.app.sidebar.nav-item>
-                        </x-slot>
-                    </x-layouts.app.sidebar.dropdown-nav-list>
+                                <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
+                                    {{ __('general.my-items') }}
+                                </x-layouts.app.sidebar.nav-item>
+                            </x-slot>
+                        </x-layouts.app.sidebar.dropdown-nav-list>
+                    </div>
                 @endactiverole
 
             </ul>
