@@ -5,6 +5,22 @@
         </div>
 
         <div>
+            @include('livewire.dashboards.Partials.team-members-card')
+        </div>
+
+        <div>
+            @include('livewire.dashboards.Partials.today-birthday-card')
+        </div>
+
+        <div>
+            @include('livewire.dashboards.Partials.upcoming-birthday-card')
+        </div>
+
+        <div>
+            @include('livewire.dashboards.Partials.notes-checkboxes-card')
+        </div>
+
+        <div>
             @include('livewire.dashboards.Partials.checklist-items-card')
         </div>
 
@@ -16,25 +32,12 @@
             @include('livewire.dashboards.Partials.news-card')
         </div>
 
-        <div>
-            @include('livewire.dashboards.Partials.notes-checkboxes-card')
-        </div>
+
 
         <div>
             @include('livewire.dashboards.Partials.pending-requests')
         </div>
 
-        <div>
-            @include('livewire.dashboards.Partials.team-members-card')
-        </div>
-
-        <div>
-            @include('livewire.dashboards.Partials.today-birthday-card')
-        </div>
-
-        <div>
-            @include('livewire.dashboards.Partials.upcoming-birthday-card')
-        </div>
 
         <div>
             @include('livewire.dashboards.Partials.upcoming-holidays-card')
