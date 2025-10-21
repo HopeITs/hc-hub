@@ -1,6 +1,5 @@
 <div class="relative w-full max-w-lg bg-[var(--color-neutral-50)] rounded-3xl shadow-lg overflow-hidden">
 
-    <!-- Header -->
     <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[var(--color-primary-200)] bg-[var(--color-primary-500)] text-white">
         <div class="flex items-center gap-2">
             <div class="flex items-center justify-center h-8 w-8 rounded-lg bg-white/20 text-white shadow-sm">
@@ -14,7 +13,6 @@
         </a>
     </div>
 
-    <!-- Members List -->
     <div class="relative p-5 space-y-3 overflow-y-auto max-h-[400px] scroll-smooth
                 scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)]
                 hover:scrollbar-thumb-[var(--color-primary-400)]">
@@ -57,23 +55,20 @@
                     </div>
                 </div>
 
-                <!-- Right: Actions -->
-                <div class="flex items-center justify-end gap-1 flex-shrink-0">
-                    <!-- Send Email -->
-                    <a href="mailto:{{ $member->work_email ?? '#' }}"
+                <div class="flex items-center justify-end  flex-shrink-0">
+                    <a href="mailto:{{ $member->account->email ?? '#' }}"
                        class="flex items-center justify-center w-8 h-8 rounded-full text-[var(--color-primary-600)]
                               hover:bg-[var(--color-primary-50)] transition"
                        title="Send Email">
                         <x-icons.envelope class="w-4.5 h-4.5" />
                     </a>
 
-                    <!-- View Details (Org Chart Style) -->
                     <a href="{{ route('employees.show', ['employee' => $member->username]) }}"
                        class="flex items-center justify-center w-8 h-8
                               text-[var(--color-primary-600)] bg-white hover:bg-[var(--color-primary-50)]
                               hover:shadow-sm transition"
                        title="View Employee Details">
-                        <x-icons.user class="w-5 h-5" />
+                        <x-icons.user class="w-5.5 h-5.5" />
                     </a>
                 </div>
             </div>
