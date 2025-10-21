@@ -280,6 +280,19 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('employee_notes', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('employee_id');
+            $table->string('type', 20);
+            $table->text('content')->nullable();
+            $table->boolean('is_done')->default(false);
+            $table->string('color', 9)->default('#111827');
+            $table->unsignedInteger('order')->default(0);
+            $table->timestamps();
+            $table->index(['employee_id', 'order']);
+            $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
+        });
     }
 
     /**
@@ -313,5 +326,7 @@ return new class extends Migration
         Schema::dropIfExists('leave_requests');
         Schema::dropIfExists('attachments');
         Schema::dropIfExists('employee_items');
+        Schema::dropIfExists('employee_notes');
+
     }
 };

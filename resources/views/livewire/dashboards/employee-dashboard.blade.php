@@ -17,7 +17,7 @@
         </div>
 
         <div>
-            @include('livewire.dashboards.Partials.notes-checkboxes-card')
+            <livewire:dashboards.employee-notes-card :employee="auth()->id()" />
         </div>
 
         <div>

@@ -21,11 +21,10 @@
             <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-[var(--color-primary-100)]
                         hover:border-[var(--color-primary-300)] hover:shadow-md transition-all duration-150">
 
-                <!-- Left: Avatar + Info -->
                 <div class="flex items-center gap-4 flex-1 min-w-0">
                     <div class="flex items-center justify-center h-14 w-14 flex-shrink-0 rounded-full overflow-hidden
                                 ring-2 ring-[var(--color-primary-500)] bg-[var(--color-primary-500)]
-                                text-white text-base font-semibold uppercase shadow-sm">
+                                text-white text-xl font-semibold uppercase shadow-sm">
                         @if($member->getFirstMediaUrl('profile'))
                             <img
                                 src="{{ $member->getFirstMediaUrl('profile') }}"
