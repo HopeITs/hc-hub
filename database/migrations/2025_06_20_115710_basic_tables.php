@@ -33,6 +33,7 @@ return new class extends Migration
         Schema::create('centers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('weekends')->nullable();
             $table->foreignId('city_id')->nullable()->constrained()->onDelete('restrict');
             $table->text('address_en')->nullable();
             $table->text('address_ar')->nullable();
@@ -54,6 +55,15 @@ return new class extends Migration
             $table->integer('base_days')->default(0);
             $table->unsignedTinyInteger('allowed_gender')->nullable();
             $table->unsignedTinyInteger('marital_status')->nullable();
+            $table->timestamps();
+        });
+        Schema::create('holidays', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable(); // اسم العطلة
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->morphs('holidayable'); // center, city, program, إلخ
+            $table->boolean('is_recurring')->default(false); //for the holidays used always
             $table->timestamps();
         });
         Schema::create('checklist_items', function (Blueprint $table) {
@@ -252,8 +262,9 @@ return new class extends Migration
         Schema::create('leave_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('leave_balance_id')->constrained()->onDelete('restrict');
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
+            $table->enum('type' , ['day', 'hour'])->default('day');
+            $table->dateTime('start_at')->default(today());
+            $table->dateTime('end_at')->default(today());
             $table->text('reason')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('employees')->onDelete('set null');
             $table->timestamp('approved_at')->nullable();
@@ -290,6 +301,7 @@ return new class extends Migration
         Schema::dropIfExists('cities');
         Schema::dropIfExists('programs');
         Schema::dropIfExists('centers');
+        Schema::dropIfExists('holidays');
         Schema::dropIfExists('contract_types');
         Schema::dropIfExists('leave_types');
         Schema::dropIfExists('checklist_items');

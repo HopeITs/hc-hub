@@ -12,7 +12,7 @@ class Center extends Model
 {
     use HasFactory , HasTranslation;
 
-    protected $fillable = ['name', 'city_id', 'program_id', 'address_en', 'address_ar', 'is_active'];
+    protected $guarded = ['id'];
 
     protected function address(): Attribute
     {
@@ -44,5 +44,9 @@ class Center extends Model
     public function projectManager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'project_manager_id');
+    }
+
+    public function holidays() {
+        return $this->morphMany(Holiday::class, 'holidayable');
     }
 }
