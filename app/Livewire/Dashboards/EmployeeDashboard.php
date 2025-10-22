@@ -3,7 +3,7 @@
 namespace App\Livewire\Dashboards;
 
 use Carbon\Carbon;
-use App\Models\{Employee, Contract};
+use App\Models\{Checklist, Employee, Contract};
 use FontLib\Table\Type\name;
 use Livewire\Component;
 
@@ -25,7 +25,7 @@ class EmployeeDashboard extends Component
 
         $locale = app()->getLocale();
         $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
-        $deptCol  = $locale === 'ar' ? 'name_ar' : 'name_en';
+        $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
 
         return Employee::query()
             ->whereNotNull('dob')
@@ -39,7 +39,7 @@ class EmployeeDashboard extends Component
                     ->orderByDesc('start_date')
                     ->first();
 
-                $emp->positionTitle  = $contract?->position?->$titleCol ?? null;
+                $emp->positionTitle = $contract?->position?->$titleCol ?? null;
                 $emp->departmentName = $contract?->position?->department?->$deptCol ?? null;
 
                 return $emp;
@@ -51,11 +51,11 @@ class EmployeeDashboard extends Component
     {
         $today = now()->timezone(config('app.timezone'))->startOfDay();
         $start = $today->copy()->addDay();
-        $end   = $today->copy()->addDays(7);
+        $end = $today->copy()->addDays(7);
 
         $locale = app()->getLocale();
         $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
-        $deptCol  = $locale === 'ar' ? 'name_ar' : 'name_en';
+        $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
 
         return Employee::query()
             ->whereNotNull('dob')
@@ -75,7 +75,7 @@ class EmployeeDashboard extends Component
                     ->orderByDesc('start_date')
                     ->first();
 
-                $emp->positionTitle  = $contract?->position?->$titleCol ?? null;
+                $emp->positionTitle = $contract?->position?->$titleCol ?? null;
                 $emp->departmentName = $contract?->position?->department?->$deptCol ?? null;
 
                 $dob = Carbon::parse($emp->dob)->setYear(now()->year);
@@ -83,7 +83,7 @@ class EmployeeDashboard extends Component
                     $dob->addYear();
                 }
 
-                $daysLeft = (int) now()->diffInDays($dob, false);
+                $daysLeft = (int)now()->diffInDays($dob, false);
                 $emp->upcomingDob = $dob->format('d M');
 
                 if ($daysLeft === 0) {
@@ -109,11 +109,11 @@ class EmployeeDashboard extends Component
 
         $locale = app()->getLocale();
         $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
-        $deptCol  = $locale === 'ar' ? 'name_ar' : 'name_en';
+        $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
 
-        $position   = $this->contract->position;
-        $cityId     = $position->city_id;
-        $programId  = $position->program_id;
+        $position = $this->contract->position;
+        $cityId = $position->city_id;
+        $programId = $position->program_id;
 
         $members = collect();
 
@@ -198,8 +198,7 @@ class EmployeeDashboard extends Component
             ->map(function ($emp) use ($nameCol, $titleCol) {
                 // Pick the latest active contract either from the eager-loaded set or method
                 $contract = $emp->contracts
-                    ->filter(fn($c) =>
-                    ($c->is_active || (
+                    ->filter(fn($c) => ($c->is_active || (
                             !$c->terminated_at &&
                             $c->start_date <= now() &&
                             $c->end_date >= now()
@@ -224,14 +223,26 @@ class EmployeeDashboard extends Component
 
     }
 
+    public function getDeliveredItemsProperty()
+    {
+        if (!$this->employee) {
+            return collect();
+        }
 
+        return Checklist::query()
+            ->with(['item', 'delivered'])
+            ->where('employee_id', $this->employee->id)
+            ->where('delivered_status', 'delivered')
+            ->orderByDesc('delivered_at')
+            ->get();
+    }
 
 
     public function mount(): void
     {
         $locale = app()->getLocale();
         $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
-        $deptCol  = $locale === 'ar' ? 'name_ar' : 'name_en';
+        $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
 
         $user = auth()->user();
         if (!$user) {
@@ -246,7 +257,7 @@ class EmployeeDashboard extends Component
                 ->orderByDesc('start_date')
                 ->first();
 
-            $this->positionTitle  = $this->contract?->position?->$titleCol ?? '—';
+            $this->positionTitle = $this->contract?->position?->$titleCol ?? '—';
             $this->departmentName = $this->contract?->position?->department?->$deptCol ?? '—';
             $this->joinedOn = $this->contract?->start_date
                 ? date('d M Y', strtotime($this->contract->start_date))
@@ -260,14 +271,15 @@ class EmployeeDashboard extends Component
     public function render()
     {
         return view('livewire.dashboards.employee-dashboard', [
-            'employee'          => $this->employee,
-            'contract'          => $this->contract,
-            'positionTitle'     => $this->positionTitle,
-            'departmentName'    => $this->departmentName,
-            'joinedOn'          => $this->joinedOn,
-            'workEmail'         => $this->workEmail,
-            'todayBirthdays'    => $this->todayBirthdays,
+            'employee' => $this->employee,
+            'contract' => $this->contract,
+            'positionTitle' => $this->positionTitle,
+            'departmentName' => $this->departmentName,
+            'joinedOn' => $this->joinedOn,
+            'workEmail' => $this->workEmail,
+            'todayBirthdays' => $this->todayBirthdays,
             'upcomingBirthdays' => $this->upcomingBirthdays,
+            'deliveredItems' => $this->deliveredItems,
         ]);
     }
 }
