@@ -21,7 +21,21 @@ class LeaveBalance extends Model
     {
         return $this->belongsTo(Contract::class);
     }
+    public function getDeservedAttribute()
+    {
+        $hours = $this->deserved;
+        $workDaysCountForWeek = $this->contract->weekly_hours / 5;
+        $days = intdiv($hours, $workDaysCountForWeek);
+        $remaining = $hours % $workDaysCountForWeek;
 
+        $text = $days . " " . trans_choice('general.day',$days);
+
+        if ($remaining > 0) {
+            $text .=  $remaining .  trans_choice('general.day',$remaining);
+        }
+
+        return $text;
+    }
     public function leaveType()
     {
         return $this->belongsTo(LeaveType::class,'type_id');

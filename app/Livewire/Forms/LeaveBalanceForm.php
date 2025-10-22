@@ -46,12 +46,14 @@ class LeaveBalanceForm extends Form
         $leaveRule = AnnualLeaveRule::where('years_of_volunteering', '<=', $employee->years_of_service)->orderBy('days', 'desc')->first() ?? AnnualLeaveRule::first();
         $duration = $contract->duration();
         $fullTimeHours = 40;
+        $workDaysCountForWeek = $contract->weekly_hours / 5;
+
 
         //handle if contract less than a year to set deserved of yearly leaves
         if ($duration < 12) {
-            $deserved = $duration * $leaveRule->day_per_month;
+            $deserved = $duration * $leaveRule->day_per_month * $workDaysCountForWeek;
         } else {
-            $deserved = $leaveRule->days;
+            $deserved = $leaveRule->days * $workDaysCountForWeek;
         }
 
         //case: full time or freelance
@@ -71,7 +73,7 @@ class LeaveBalanceForm extends Form
                 LeaveBalance::create([
                     'contract_id' => $contract->id,
                     'type_id' => LeaveTypeCases::FullSick,//yearly
-                    'deserved' => min($duration, 12)
+                    'deserved' => min($duration, 12)  * $workDaysCountForWeek
                 ]);
 
                 //leaves allowed for all genders and marital status
@@ -80,7 +82,7 @@ class LeaveBalanceForm extends Form
                     LeaveBalance::create([
                         'contract_id' => $contract->id,
                         'type_id' => $allowed->id,
-                        'deserved' => $allowed->base_days
+                        'deserved' => $allowed->base_days * $workDaysCountForWeek
                     ]);
                 }
 
@@ -94,7 +96,7 @@ class LeaveBalanceForm extends Form
                             LeaveBalance::create([
                                 'contract_id' => $contract->id,
                                 'type_id' => $allowed->id,
-                                'deserved' => $allowed->base_days
+                                'deserved' => $allowed->base_days * $workDaysCountForWeek
                             ]);
                         }
                     }
@@ -111,7 +113,7 @@ class LeaveBalanceForm extends Form
                                    LeaveBalance::create([
                                        'contract_id' => $contract->id,
                                        'type_id' => $allowed->id,
-                                       'deserved' => $allowed->base_days
+                                       'deserved' => $allowed->base_days * $workDaysCountForWeek
                                    ]);
                                }
                            }
@@ -120,7 +122,7 @@ class LeaveBalanceForm extends Form
                                 LeaveBalance::create([
                                     'contract_id' => $contract->id,
                                     'type_id' => $allowed->id,
-                                    'deserved' => $allowed->base_days
+                                    'deserved' => $allowed->base_days * $workDaysCountForWeek
                                 ]);
                             }
                         }
@@ -143,7 +145,7 @@ class LeaveBalanceForm extends Form
             LeaveBalance::create([
                 'contract_id' => $contract->id,
                 'type_id' => LeaveTypeCases::Annual,//yearly
-                'deserved' => round($deserved * $leavePercentage)
+                'deserved' => round($deserved)
             ]);
 
             //while this employee isn't in trial period
@@ -153,7 +155,7 @@ class LeaveBalanceForm extends Form
                 LeaveBalance::create([
                     'contract_id' => $contract->id,
                     'type_id' => LeaveTypeCases::FullSick,//yearly
-                    'deserved' => round(min($duration, 12) * $leavePercentage)
+                    'deserved' => round(min($duration, 12) * $leavePercentage) * $workDaysCountForWeek
                 ]);
 
                 //leaves allowed for all genders and marital status
