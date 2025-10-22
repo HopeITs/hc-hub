@@ -9,13 +9,16 @@
                     {{ $notification->created_at->diffForHumans() }}
                 </div>
             </div>
-            <button
-                wire:click="markAsRead('{{ $notification->id }}')"
-                class="text-sm text-primary-600 hover:text-primary-800 hover:underline">
-                Mark as read
-            </button>
+
+            @if (is_null($notification->read_at))
+                <button wire:click="markAsRead('{{ $notification->id }}')"
+                    class="text-sm text-primary-600 hover:text-primary-800 hover:underline">
+                    Mark as read
+                </button>
+            @endif
         </div>
     @empty
         <div class="text-gray-500">No notifications.</div>
     @endforelse
+
 </div>

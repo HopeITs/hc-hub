@@ -98,14 +98,16 @@ class ChecklistForm extends Form
 
                 $checklist = $this->employee->checklists()->updateOrCreate(['item_id' => $itemData['item_id']], $values);
 
-                if (!empty($itemData['delivered_id']) && $itemData['delivered_id'] != auth()->user()->profile?->id) {
+                $currentUserId = auth()->user()->profile?->id;
+
+                if ($existing === null || ($existing->delivered_status === null && $itemData['delivered_id'] && $itemData['delivered_id'] != auth()->user()->profile?->id)) {
                     $deliverer = User::whereHas('profile', fn($q) => $q->where('id', $itemData['delivered_id']))->first();
                     if ($deliverer) {
                         $deliverer->notify(new ChecklistAssigned($checklist, 'deliver'));
                     }
                 }
 
-                if (!empty($itemData['receiver_id']) && $itemData['receiver_id'] != auth()->user()->profile?->id) {
+                if ($existing && $existing->returned_status === null && $itemData['receiver_id'] && $itemData['receiver_id'] != auth()->user()->profile?->id) {
                     $receiver = User::whereHas('profile', fn($q) => $q->where('id', $itemData['receiver_id']))->first();
                     if ($receiver) {
                         $receiver->notify(new ChecklistAssigned($checklist, 'receive'));

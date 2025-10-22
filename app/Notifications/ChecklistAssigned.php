@@ -10,7 +10,7 @@ class ChecklistAssigned extends Notification
 {
     use Queueable;
 
-    protected string $type; // 'deliver' or 'receive'
+    protected string $type;
     protected Checklist $checklist;
 
     public function __construct(Checklist $checklist, string $type)

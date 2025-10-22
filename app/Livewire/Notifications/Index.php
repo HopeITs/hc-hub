@@ -8,7 +8,7 @@ class Index extends Component
 {
     public function render()
     {
-        $notifications = auth()->user()->unreadNotifications;
+        $notifications = auth()->user()->notifications()->latest()->get();
 
         return view('livewire.notifications.index', [
             'notifications' => $notifications,
@@ -18,7 +18,6 @@ class Index extends Component
     public function markAsRead(string $id): void
     {
         $user = auth()->user();
-
         $notification = $user->unreadNotifications()->find($id);
 
         if ($notification) {
