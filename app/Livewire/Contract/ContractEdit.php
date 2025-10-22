@@ -6,7 +6,6 @@ use App\Enums\SalaryPer;
 use App\Livewire\Forms\ContractForm;
 use App\Livewire\Forms\LeaveBalanceForm;
 use App\Models\{City, Center, Employee, Position, Program, ContractType};
-use Illuminate\Support\Facades\Auth;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
@@ -21,7 +20,7 @@ class ContractEdit extends Component
 
     public ?int $city_id = null;
     public ?int $program_id = null;
-    public ?int $center_id = null;
+    public ?int $center_id = null; // Optional (nullable)
 
     protected array $validatorsByStep = [
         1 => 'validateIdentity',
@@ -32,13 +31,14 @@ class ContractEdit extends Component
     public function mount(\App\Models\Contract $contract): void
     {
         $this->contract = $contract;
+
         $this->form->setDefaults();
         $this->form->setContract($contract);
 
         // Initialize cascading filters from existing contract
-        $this->city_id = optional($contract->employee)->city_id;
+        $this->city_id    = optional($contract->employee)->city_id;
         $this->program_id = optional($contract->position)->program_id;
-        $this->center_id = optional($contract->position)->center_id;
+        $this->center_id  = optional($contract->position)->center_id;
     }
 
     public function updatedCityId(): void
@@ -60,14 +60,12 @@ class ContractEdit extends Component
     {
         $this->resetErrorBag('form.position_id');
 
-        $pos = Position::find($value);
+        $pos = \App\Models\Position::find($value);
 
-        if ($pos && !$pos->canAssign()) {
+        if ($pos && ! $pos->canAssign()) {
             $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
         }
     }
-
-    // ── Step Navigation ────────────────────────────────
 
     public function next(): void
     {
@@ -92,8 +90,6 @@ class ContractEdit extends Component
         if ($target <= $this->maxStep) $this->step = $target;
     }
 
-    // ── Submit & Validation ────────────────────────────
-
     public function submit()
     {
         $this->form->validateIdentity();
@@ -105,6 +101,7 @@ class ContractEdit extends Component
         $updated = $this->form->update($this->contract);
 
         if ($updated->salary_per->value === SalaryPer::Month) {
+            // Keep edit-specific behavior for balances
             $this->balanceForm->updateOrCreate($updated->id);
         }
 
@@ -117,13 +114,7 @@ class ContractEdit extends Component
     {
         if (!$this->city_id) return true;
 
-        if ($this->form->employee_id && !Employee::where('id', $this->form->employee_id)
-                ->where('city_id', $this->city_id)
-                ->exists()) {
-            $this->addError('form.employee_id', __('validation.custom.employee_id.invalid'));
-            return false;
-        }
-
+        // Position chain validation
         if ($this->form->position_id) {
             $pos = Position::select('id', 'program_id', 'center_id')->find($this->form->position_id);
             if (!$pos) {
@@ -133,7 +124,7 @@ class ContractEdit extends Component
 
             $centerCityId = $pos->center_id
                 ? Center::where('id', $pos->center_id)->value('city_id')
-                : $this->city_id;
+                : $this->city_id; // If no center, assume belongs to current city
 
             if ($centerCityId != $this->city_id) {
                 $this->addError('form.position_id', __('validation.custom.position_id.invalid'));
@@ -154,19 +145,16 @@ class ContractEdit extends Component
         return true;
     }
 
-    // ── Aliases ────────────────────────────────────────
     public function saveIdentity(): void {}
     public function saveTerms(): void {}
     public function savePay(): void {}
     public function save() { return $this->submit(); }
 
-    // ── Render ─────────────────────────────────────────
-
     public function render()
     {
         $locale = app()->getLocale();
         $cityCol = "name_{$locale}";
-        $posCol = "title_{$locale}";
+        $posCol  = "title_{$locale}";
         $typeCol = "name_{$locale}";
 
         $cities = City::select('id', $cityCol)->where('is_active', 1)
@@ -174,7 +162,7 @@ class ContractEdit extends Component
             ->get()
             ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
 
-        $user = auth()->user();
+        $user = auth()->user()->load('profile');
         $role = $user->activeRole();
 
         $roleArr = explode('-', $role->name);
@@ -187,6 +175,12 @@ class ContractEdit extends Component
                     $query->where('slug', $citySlug);
                 })->get();
             }
+        } else {
+            $cityId = optional($user->profile)->city_id;
+            if (!$cityId) {
+                abort(403, 'User has no linked employee or city.');
+            }
+            $employees = Employee::where('city_id', $cityId)->get();
         }
 
         $programs = $this->city_id
