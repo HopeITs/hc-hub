@@ -20,6 +20,7 @@ class CentersModule extends Component
         'address_ar' => '',
         'address_en' => '',
         'is_active' => true,
+        'weekends' => ''
     ];
 
     protected $rules = [
@@ -27,6 +28,7 @@ class CentersModule extends Component
         'item.city_id' => 'required|exists:cities,id',
         'item.address.en' => 'nullable|string|max:255',
         'item.address.ar' => 'nullable|string|max:255',
+        'item.weekends' => 'required'
     ];
 
     public function render()
@@ -46,6 +48,7 @@ class CentersModule extends Component
             'address_ar' => '',
             'address_en' => '',
             'is_active' => true,
+            'weekends' => ''
         ];
 
         $this->resetValidation();
@@ -65,6 +68,7 @@ class CentersModule extends Component
             'address_ar' => $model->address_ar,
             'address_en' => $model->address_en,
             'is_active' => (bool)$model->is_active,
+            'weekends' => $model->weekends
         ];
 
         $this->resetValidation();
@@ -74,16 +78,11 @@ class CentersModule extends Component
 
     public function save(): void
     {
+
         $this->validate();
 
         $model = Center::findOrNew($this->item['id']);
-        $model->fill([
-            'name' => $this->item['name'],
-            'city_id' => $this->item['city_id'],
-            'is_active' => $this->item['is_active'],
-            'address_ar' => $this->item['address_ar'],
-            'address_en' => $this->item['address_en'],
-        ]);
+        $model->fill($this->item);
         $model->save();
 
         $this->showModal = false;

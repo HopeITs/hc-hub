@@ -51,7 +51,10 @@
                     @endforeach
                 </div>
             </div>
-
+            <x-forms.tags-input wire:model="item.weekends"
+                                :suggestions="['Friday', 'Saturday', 'Sunday', 'Monday' , 'Tuesday' , 'Wednesday','Thursday']"
+                                :force-suggestion="true"
+                                placeholder="Add tags" />
             <div class="flex justify-end gap-2">
                 <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
                 <x-modal.cancel-btn/>
