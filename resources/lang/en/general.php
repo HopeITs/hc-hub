@@ -344,6 +344,9 @@ return [
     'received' => 'Received',
     'on_hold' => 'On Hold',
     'months' => 'Months' ,
+    'notifications' => 'Notifications',
+    'notification_checklist_assigned' => 'Please deliver :item to :employee',
+    'no_notifications' => 'No Notifications Found',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

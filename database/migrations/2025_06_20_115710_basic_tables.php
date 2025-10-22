@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         //basics
@@ -280,6 +279,15 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->morphs('notifiable');
+            $table->text('data');
+            $table->timestamp('read_at')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -313,5 +321,6 @@ return new class extends Migration
         Schema::dropIfExists('leave_requests');
         Schema::dropIfExists('attachments');
         Schema::dropIfExists('employee_items');
+        Schema::dropIfExists('notifications');
     }
 };

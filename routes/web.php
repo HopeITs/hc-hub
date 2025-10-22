@@ -30,6 +30,7 @@ use App\Livewire\ChecklistItems\{PendingItems, AllItems, PendingReturns, DoneReq
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
+use App\Livewire\Notifications\Index as NotificationsIndex;
 
 Route::group(
     [
@@ -119,6 +120,8 @@ Route::group(
                     Route::get('/done-requests', DoneRequests::class)->name('done-requests');
                     Route::get('/', AllItems::class)->name('index');
                 });
+
+                Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
         });
 
         require __DIR__ . '/auth.php';

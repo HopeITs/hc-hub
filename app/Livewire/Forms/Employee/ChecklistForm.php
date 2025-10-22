@@ -5,6 +5,8 @@ namespace App\Livewire\Forms\Employee;
 use App\Models\Checklist;
 use App\Models\Employee;
 use Illuminate\Support\Collection;
+use App\Models\User;
+use App\Notifications\ChecklistAssigned;
 use Livewire\Form;
 
 class ChecklistForm extends Form
@@ -94,7 +96,21 @@ class ChecklistForm extends Form
                     }
                 }
 
-                $this->employee->checklists()->updateOrCreate(['item_id' => $itemData['item_id']], $values);
+                $checklist = $this->employee->checklists()->updateOrCreate(['item_id' => $itemData['item_id']], $values);
+
+                if (!empty($itemData['delivered_id']) && $itemData['delivered_id'] != auth()->user()->profile?->id) {
+                    $deliverer = User::whereHas('profile', fn($q) => $q->where('id', $itemData['delivered_id']))->first();
+                    if ($deliverer) {
+                        $deliverer->notify(new ChecklistAssigned($checklist, 'deliver'));
+                    }
+                }
+
+                if (!empty($itemData['receiver_id']) && $itemData['receiver_id'] != auth()->user()->profile?->id) {
+                    $receiver = User::whereHas('profile', fn($q) => $q->where('id', $itemData['receiver_id']))->first();
+                    if ($receiver) {
+                        $receiver->notify(new ChecklistAssigned($checklist, 'receive'));
+                    }
+                }
             }
         }
     }

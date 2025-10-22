@@ -9,6 +9,9 @@
             display: none !important;
         }
     </style>
+
+    @livewireStyles
+
     <title>@yield('title' , 'Hope HR')</title>
 </head>
 
@@ -51,8 +54,9 @@
 
     <div id="sidebar-overlay" class="fixed inset-0 bg-gray-200 opacity-50 z-30 sm:hidden hidden"></div>
 
-
     @include('partials.scripts')
+
+    @livewireScripts
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -71,7 +75,6 @@
             }
         });
     </script>
-
 </body>
 
 </html>

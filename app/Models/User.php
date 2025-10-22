@@ -17,13 +17,13 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = ['email', 'password', 'employee_id'];
-    protected $hidden   = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
         ];
     }
 
@@ -31,18 +31,6 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Employee::class, 'employee_id');
     }
-
-//    public function roles(): BelongsToMany
-//    {
-//        return $this->belongsToMany(Role::class)
-//            ->withPivot('is_active')
-//            ->withTimestamps();
-//    }
-//
-//    public function permissions(): BelongsToMany
-//    {
-//        return $this->belongsToMany(Permission::class);
-//    }
 
     public function folders(): HasMany
     {
@@ -57,7 +45,7 @@ class User extends Authenticatable
     public function activeRole(): ?Role
     {
         if ($this->relationLoaded('roles')) {
-            return $this->roles->firstWhere(fn ($r) => (bool)($r->pivot->is_active ?? false));
+            return $this->roles->firstWhere(fn($r) => (bool) ($r->pivot->is_active ?? false));
         }
 
         return $this->roles()->wherePivot('is_active', true)->first();
@@ -77,7 +65,9 @@ class User extends Authenticatable
     public function activeRoleIs(string ...$roles): bool
     {
         $current = $this->activeRoleSlug();
-        if (!$current) return false;
+        if (!$current) {
+            return false;
+        }
 
         foreach ($roles as $r) {
             if ($current === Str::slug($r)) {
@@ -97,7 +87,6 @@ class User extends Authenticatable
 
     public function hasMultipleRoles(): bool
     {
-        // Use loaded relation when possible.
         if ($this->relationLoaded('roles')) {
             return $this->roles->count() > 1;
         }
@@ -127,11 +116,9 @@ class User extends Authenticatable
 
     public function hasRole(string $roleName): bool
     {
-        return $this->relationLoaded('roles')
-            ? $this->roles->contains(fn($r) => Str::slug($r->name) === Str::slug($roleName))
-            : $this->roles()->where('name', $roleName)->exists();
+        return $this->relationLoaded('roles') ? $this->roles->contains(fn($r) => Str::slug($r->name) === Str::slug($roleName)) : $this->roles()->where('name', $roleName)->exists();
     }
-//
+
     public function getActiveRoleNameAttribute(): ?string
     {
         return $this->myRole();
@@ -140,9 +127,6 @@ class User extends Authenticatable
     public function initials(): string
     {
         $display = $this->profile?->name ?: '';
-        return Str::of($display)->trim()->explode(' ')
-            ->take(2)
-            ->map(fn ($w) => Str::substr($w, 0, 1))
-            ->implode('');
+        return Str::of($display)->trim()->explode(' ')->take(2)->map(fn($w) => Str::substr($w, 0, 1))->implode('');
     }
 }
