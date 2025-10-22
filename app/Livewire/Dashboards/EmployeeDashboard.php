@@ -117,7 +117,6 @@ class EmployeeDashboard extends Component
 
         $members = collect();
 
-        // ------------------------- CEO (fixed) -------------------------
         $ceo = Employee::query()
             ->where('name_en', 'Fredy Youssef')
             ->with(['media', 'contracts.position.jobLevel'])
@@ -129,7 +128,6 @@ class EmployeeDashboard extends Component
             $members->push($ceo);
         }
 
-        // ------------------------- Direct Manager -------------------------
         $directManager = null;
         if ($position?->direct_manager_id) {
             $managerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])
@@ -153,7 +151,6 @@ class EmployeeDashboard extends Component
             $members->push($directManager);
         }
 
-        // ------------------------- Tech Manager -------------------------
         $techManager = null;
         if ($position?->tech_manager_id) {
             $techManagerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])
@@ -177,7 +174,6 @@ class EmployeeDashboard extends Component
             $members->push($techManager);
         }
 
-        // ------------------------- Team Members -------------------------
         $nameCol = "name_{$locale}";
 
         $excludeIds = collect([
@@ -222,7 +218,7 @@ class EmployeeDashboard extends Component
 
 
     }
-
+    //my checklist items
     public function getDeliveredItemsProperty()
     {
         if (!$this->employee) {
@@ -237,6 +233,19 @@ class EmployeeDashboard extends Component
             ->get();
     }
 
+    //my badges
+    public function getMyBadgesProperty()
+    {
+        if (!$this->employee) {
+            return collect();
+        }
+
+        return \App\Models\Badge::query()
+            ->with('employee')
+            ->where('employee_id', $this->employee->id)
+            ->orderByDesc('date')
+            ->get();
+    }
 
     public function mount(): void
     {
@@ -280,6 +289,7 @@ class EmployeeDashboard extends Component
             'todayBirthdays' => $this->todayBirthdays,
             'upcomingBirthdays' => $this->upcomingBirthdays,
             'deliveredItems' => $this->deliveredItems,
+            'myBadges' => $this->myBadges,
         ]);
     }
 }
