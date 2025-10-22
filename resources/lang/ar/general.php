@@ -342,6 +342,7 @@ return [
     'dates' => 'التواريخ',
     'orgn-chart' => 'هيكلية المؤسسة',
     'on_hold' => 'بالانتظار',
+    'notifications' => 'الاشعارات',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
