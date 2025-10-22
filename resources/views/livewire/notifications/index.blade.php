@@ -10,6 +10,8 @@
                 </div>
             </div>
 
+            <div></div>
+
             @if (is_null($notification->read_at))
                 <button wire:click="markAsRead('{{ $notification->id }}')"
                     class="text-sm text-primary-600 hover:text-primary-800 hover:underline">
