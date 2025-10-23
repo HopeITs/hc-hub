@@ -5,6 +5,10 @@
         </div>
 
         <div>
+            @include('livewire.dashboards.Partials.my-leaves-card')
+        </div>
+
+        <div>
             @include('livewire.dashboards.Partials.team-members-card')
         </div>
 
@@ -32,10 +36,6 @@
             @include('livewire.dashboards.Partials.pending-requests-card')
         </div>
 
-        <div>
-            @include('livewire.dashboards.Partials.news-card')
-        </div>
-
 
         <div>
             @include('livewire.dashboards.Partials.upcoming-holidays-card')
@@ -45,10 +45,12 @@
             @include('livewire.dashboards.Partials.upcoming-leaves-card')
         </div>
 
-        <div>
-            @include('livewire.dashboards.Partials.my-leaves-card')
-        </div>
 
+
+
+        <div>
+            @include('livewire.dashboards.Partials.news-card')
+        </div>
 
     </div>
 </div>
