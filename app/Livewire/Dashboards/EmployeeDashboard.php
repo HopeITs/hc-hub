@@ -247,6 +247,31 @@ class EmployeeDashboard extends Component
             ->get();
     }
 
+    //pending delivers
+    public function getPendingRequestsProperty()
+    {
+        if (!$this->employee) {
+            return collect();
+        }
+
+        return Checklist::with(['item', 'employee'])
+        ->where('delivered_id', $this->employee->id)
+            ->where('delivered_status', 'pending')
+            ->latest()
+            ->get()
+            ->map(function ($checklist) {
+                return [
+                    'id' => $checklist->id,
+                    'item' => $checklist->item?->name ?? '—',
+                    'employee_name' => $checklist->employee?->name ?? '—',
+                    'request_date' => $checklist->created_at->format('Y-m-d'),
+                    'notes' => $checklist->notes ?? null,
+                ];
+            });
+    }
+
+
+
     public function mount(): void
     {
         $locale = app()->getLocale();
@@ -290,6 +315,7 @@ class EmployeeDashboard extends Component
             'upcomingBirthdays' => $this->upcomingBirthdays,
             'deliveredItems' => $this->deliveredItems,
             'myBadges' => $this->myBadges,
+            'pendingRequests' => $this->pendingRequests,
         ]);
     }
 }

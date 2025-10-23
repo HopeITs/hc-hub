@@ -5,6 +5,10 @@
         </div>
 
         <div>
+            @include('livewire.dashboards.Partials.my-leaves-card')
+        </div>
+
+        <div>
             @include('livewire.dashboards.Partials.team-members-card')
         </div>
 
@@ -17,7 +21,7 @@
         </div>
 
         <div>
-            <livewire:dashboards.employee-notes-card :employee="auth()->id()" />
+            <livewire:dashboards.employee-notes-card :employee="auth()->id()"/>
         </div>
 
         <div>
@@ -29,13 +33,7 @@
         </div>
 
         <div>
-            @include('livewire.dashboards.Partials.news-card')
-        </div>
-
-
-
-        <div>
-            @include('livewire.dashboards.Partials.pending-requests')
+            @include('livewire.dashboards.Partials.pending-requests-card')
         </div>
 
 
@@ -47,10 +45,12 @@
             @include('livewire.dashboards.Partials.upcoming-leaves-card')
         </div>
 
-        <div>
-            @include('livewire.dashboards.Partials.my-leaves-card')
-        </div>
 
+
+
+        <div>
+            @include('livewire.dashboards.Partials.news-card')
+        </div>
 
     </div>
 </div>
