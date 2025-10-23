@@ -3,9 +3,11 @@
 namespace App\Livewire\Notifications;
 
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class Index extends Component
 {
+    #[On('notification-read')]
     public function render()
     {
         $notifications = auth()->user()->notifications()->latest()->get();
@@ -23,6 +25,7 @@ class Index extends Component
         if ($notification) {
             $notification->markAsRead();
             $this->dispatch('notification-read');
+            $this->dispatch('$refresh');
         }
     }
 }

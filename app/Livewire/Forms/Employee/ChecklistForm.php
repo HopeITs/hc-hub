@@ -54,8 +54,14 @@ class ChecklistForm extends Form
 
     public function save(): void
     {
+        $newNotificationSent = false;
+        $currentProfileId = auth()->user()->profile?->id;
+
         foreach ($this->items as $itemData) {
             $existing = $this->employee->checklists()->where('item_id', $itemData['item_id'])->first();
+
+            $original_delivered_id = $existing ? $existing->delivered_id : null;
+            $original_receiver_id = $existing ? $existing->receiver_id : null;
 
             if (empty($itemData['is_selected']) && (!$existing || $existing->delivered_status !== 'delivered')) {
                 $this->employee->checklists()->where('item_id', $itemData['item_id'])->delete();
@@ -63,7 +69,7 @@ class ChecklistForm extends Form
             }
 
             if (!empty($itemData['is_selected'])) {
-                $deliveredId = $itemData['delivered_id'] ?: auth()->user()->profile?->id;
+                $deliveredId = $itemData['delivered_id'] ?: $currentProfileId;
 
                 $isFullyReturned = $existing && $existing->returned_status === 'received';
 
@@ -97,23 +103,40 @@ class ChecklistForm extends Form
                 }
 
                 $checklist = $this->employee->checklists()->updateOrCreate(['item_id' => $itemData['item_id']], $values);
+                $checklist->refresh();
 
-                $currentUserId = auth()->user()->profile?->id;
+                $isNewlyAssignedForDelivery = (
+                    !$original_delivered_id ||
+                    ($checklist->delivered_id !== $original_delivered_id && $checklist->delivered_status === 'pending')
+                ) && $checklist->delivered_id && $checklist->delivered_id !== $currentProfileId;
 
-                if ($existing === null || ($existing->delivered_status === null && $itemData['delivered_id'] && $itemData['delivered_id'] != auth()->user()->profile?->id)) {
-                    $deliverer = User::whereHas('profile', fn($q) => $q->where('id', $itemData['delivered_id']))->first();
+                if ($isNewlyAssignedForDelivery) {
+                    $deliverer = User::whereHas('profile', fn($q) => $q->where('id', $checklist->delivered_id))->first();
                     if ($deliverer) {
                         $deliverer->notify(new ChecklistAssigned($checklist, 'deliver'));
+                        $newNotificationSent = true;
                     }
                 }
 
-                if ($existing && $existing->returned_status === null && $itemData['receiver_id'] && $itemData['receiver_id'] != auth()->user()->profile?->id) {
-                    $receiver = User::whereHas('profile', fn($q) => $q->where('id', $itemData['receiver_id']))->first();
+                $isNewlyAssignedForReturn = (
+                    $checklist->receiver_id &&
+                    $checklist->returned_status === 'pending' &&
+                    $checklist->receiver_id !== $original_receiver_id &&
+                    $checklist->receiver_id !== $currentProfileId
+                );
+
+                if ($isNewlyAssignedForReturn) {
+                    $receiver = User::whereHas('profile', fn($q) => $q->where('id', $checklist->receiver_id))->first();
                     if ($receiver) {
                         $receiver->notify(new ChecklistAssigned($checklist, 'receive'));
+                        $newNotificationSent = true;
                     }
                 }
             }
+        }
+
+        if ($newNotificationSent) {
+            $this->component->dispatch('notification-created');
         }
     }
 }

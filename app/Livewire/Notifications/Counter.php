@@ -3,6 +3,7 @@
 namespace App\Livewire\Notifications;
 
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class Counter extends Component
 {
@@ -10,14 +11,16 @@ class Counter extends Component
 
     protected $listeners = ['notification-read' => 'updateCount'];
 
-    public function mount(): void
-    {
-        $this->updateCount();
-    }
-
+    #[On('notification-read')]
+    #[On('notification-created')]
     public function updateCount(): void
     {
         $this->count = auth()->user()->unreadNotifications()->count();
+    }
+
+    public function mount(): void
+    {
+        $this->updateCount();
     }
 
     public function render()
