@@ -4,13 +4,14 @@
     @forelse ($notifications as $notification)
         <div class="flex justify-between items-center bg-gray-100 px-4 py-3 rounded shadow-sm">
             <div class="text-gray-700">
-                {{ $notification->data['message'] ?? 'Notification' }}
-                <div class="text-xs text-gray-500 mt-1">
-                    {{ $notification->created_at->diffForHumans() }}
-                </div>
+                <div class="font-medium">{{ $notification->data['title'] ?? 'Notification' }}</div>
+                <div class="text-sm">{{ $notification->data['body'] ?? '' }}</div>
+                <div class="text-xs text-gray-500 mt-1">{{ $notification->created_at->diffForHumans() }}</div>
             </div>
 
-            <div></div>
+            @if (isset($notification->data['url']))
+                <a href="{{ $notification->data['url'] }}" class="text-sm text-blue-600 hover:underline"></a>
+            @endif
 
             @if (is_null($notification->read_at))
                 <button wire:click="markAsRead('{{ $notification->id }}')"
@@ -22,5 +23,4 @@
     @empty
         <div class="text-gray-500">No notifications.</div>
     @endforelse
-
 </div>

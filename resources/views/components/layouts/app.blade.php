@@ -12,7 +12,7 @@
 
     @livewireStyles
 
-    <title>@yield('title' , 'Hope HR')</title>
+    <title>@yield('title', 'Hope HR')</title>
 </head>
 
 <body class="antialiased min-h-screen bg-white">
@@ -33,6 +33,7 @@
                         </path>
                     </svg>
                 </button>
+                <livewire:notifications.dropdown />
             </div>
         </header>
 
