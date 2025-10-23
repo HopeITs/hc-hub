@@ -10,24 +10,18 @@ class FolderShared extends Notification
 {
     use Queueable;
 
-    protected Folder $folder;
-    protected string $creatorName;
-
-    public function __construct(Folder $folder, string $creatorName)
-    {
-        $this->folder = $folder;
-        $this->creatorName = $creatorName;
-    }
+    public function __construct(public Folder $folder, public string $creatorName) {}
 
     public function via($notifiable): array
     {
         return ['database'];
     }
 
-    public function toDatabase($notifiable): array
+    public function toArray($notifiable): array
     {
         return [
-            'message' => "{$this->creatorName} created folder '{$this->folder->name}' and shared it with you.",
+            'title' => "New Folder Shared: {$this->folder->name}",
+            'body' => "{$this->creatorName} shared the folder '{$this->folder->name}' with you. You can now access it in Shared Folders.",
             'url' => route('shared-folders.index', ['folderId' => $this->folder->id]),
         ];
     }

@@ -1,4 +1,4 @@
-<div wire:poll.10s>
+<div wire:poll>
     <div class="relative">
         <button>
             🔔
@@ -13,13 +13,9 @@
                     <p class="text-sm font-medium">{{ $note->data['title'] ?? 'New Notification' }}</p>
                     <p class="text-xs text-gray-600">{{ $note->data['body'] ?? '' }}</p>
                     @if(isset($note->data['url']))
-                        <a href="{{ $note->data['url'] }}" class="text-xs text-blue-600 hover:underline">
-                            View
-                        </a>
+                        <a href="{{ $note->data['url'] }}" class="text-xs text-blue-600 hover:underline">View</a>
                     @endif
-                    <button wire:click="markAsRead('{{ $note->id }}')" class="block text-xs text-gray-400 mt-1">
-                        Mark as read
-                    </button>
+                    <button wire:click="markAsRead('{{ $note->id }}')" class="block text-xs text-gray-400 mt-1">Mark as read</button>
                 </div>
             @empty
                 <div class="p-2 text-gray-500">No new notifications</div>
