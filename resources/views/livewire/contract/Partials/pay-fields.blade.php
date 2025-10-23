@@ -66,7 +66,7 @@
                             peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
                             peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/30">
                     <div class="text-lg leading-none mb-1">⏱️</div>
-                    <div class="text-sm font-semibold">@lang('general.hour')</div>
+                    <div class="text-sm font-semibold">{{trans_choice('general.hour',1)}}</div>
                 </div>
             </label>
 

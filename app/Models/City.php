@@ -25,6 +25,10 @@ class City extends Model
             set: fn($value) => $this->setTranslatableAttribute('name', $value)
         );
     }
+
+    public function holidays() {
+        return $this->morphMany(Holiday::class, 'holidayable');
+    }
     public function centers()
     {
         return $this->hasMany(Center::class);

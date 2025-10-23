@@ -100,14 +100,22 @@ class ContractEdit extends Component
 
         $updated = $this->form->update($this->contract);
 
-        if ($updated->salary_per->value === SalaryPer::Month) {
-            // Keep edit-specific behavior for balances
-            $this->balanceForm->updateOrCreate($updated->id);
+        if($this->contract->salary_per->value === SalaryPer::Month){
+                if($this->contract->leaveBalances->count() > 0){
+                    $this->balanceForm->update($this->contract->id);
+                }else{
+                    $this->balanceForm->store($this->contract->id);
+                }
+
+        }else{
+            $this->contract->leaveBalances->each(function ($balance) {
+                $balance->delete();
+            });
         }
 
         LivewireAlert::success(__('general.success-message'));
 
-        return redirect()->route('contracts.show', ['contract' => $updated->id]);
+        return redirect()->route('contracts.show', ['contract' => $this->contract->id]);
     }
 
     private function validateCityConsistency(): bool
@@ -148,7 +156,10 @@ class ContractEdit extends Component
     public function saveIdentity(): void {}
     public function saveTerms(): void {}
     public function savePay(): void {}
-    public function save() { return $this->submit(); }
+    public function save() {
+
+        return $this->submit();
+    }
 
     public function render()
     {
@@ -196,13 +207,8 @@ class ContractEdit extends Component
                 ->get()
             : collect();
 
-        $centers = ($this->city_id && $this->program_id)
+        $centers = ($this->city_id)
             ? Center::where('city_id', $this->city_id)
-                ->whereIn('id', Position::where('program_id', $this->program_id)
-                    ->whereNotNull('center_id')
-                    ->pluck('center_id')
-                    ->unique()
-                )
                 ->select('id', 'name')
                 ->orderBy('name')
                 ->get()
