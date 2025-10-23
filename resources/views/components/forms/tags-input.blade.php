@@ -1,13 +1,22 @@
 @props([
     'placeholder' => 'Add tag',
     'suggestions' => [],
-    'forceSuggestion' => false, // new option
+    'forceSuggestion' => false,
 ])
+
+@php
+    // Normalize suggestions into [{key, label}] format
+    $normalized = collect($suggestions)->map(function ($value, $key) {
+        return is_string($key)
+            ? ['key' => $key, 'label' => $value]
+            : ['key' => $value, 'label' => $value];
+    })->values();
+@endphp
 
 <div
     x-data="tagsInput({
         model: @entangle($attributes->wire('model')),
-        suggestions: @js($suggestions),
+        suggestions: @js($normalized),
         forceSuggestion: {{ $forceSuggestion ? 'true' : 'false' }},
     })"
     class="flex flex-wrap items-center gap-2 relative"
@@ -34,7 +43,7 @@
                 <li
                     @mousedown.prevent="selectSuggestion(s)"
                     class="px-3 py-1 cursor-pointer hover:bg-gray-100"
-                    x-text="capitalize(s)"
+                    x-text="s.label"
                 ></li>
             </template>
         </ul>
@@ -45,7 +54,7 @@
         <span
             class="inline-flex mt-2 items-center gap-1 rounded-full bg-gray-200 px-2 py-1 text-sm"
         >
-            <span x-text="capitalize(tag)"></span>
+            <span x-text="displayLabel(tag)"></span>
             <button type="button" @click="remove(i)" class="text-gray-600 hover:text-red-600">×</button>
         </span>
     </template>
@@ -54,7 +63,7 @@
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('tagsInput', ({ model, suggestions = [], forceSuggestion = false }) => ({
-            model, // comma-separated Livewire string
+            model,
             tags: [],
             suggestions,
             filtered: [],
@@ -72,6 +81,7 @@
                     ? this.model.split(',').map(t => t.trim().toLowerCase()).filter(Boolean)
                     : [];
             },
+
             syncToModel() {
                 this.model = this.tags.join(',');
             },
@@ -80,17 +90,19 @@
                 tag = String(tag || '').trim().toLowerCase();
                 if (!tag) return;
 
-                // block non-suggestions if forced
-                if (this.forceSuggestion && !this.suggestions.map(s => s.toLowerCase()).includes(tag)) {
+                const match = this.suggestions.find(s =>
+                    s.key.toLowerCase() === tag || s.label.toLowerCase() === tag
+                );
+
+                const value = match ? match.key.toLowerCase() : tag;
+
+                if (this.forceSuggestion && !match) {
                     this.$refs.input.value = '';
                     this.hideSuggestions();
                     return;
                 }
 
-                tag.split(/[,\n]/).forEach(t => {
-                    t = t.trim();
-                    if (t && !this.tags.includes(t)) this.tags.push(t);
-                });
+                if (!this.tags.includes(value)) this.tags.push(value);
                 this.hideSuggestions();
             },
 
@@ -102,10 +114,12 @@
             },
 
             remove(i) { this.tags.splice(i, 1); },
+
             maybeRemove() {
                 if (this.$refs.input.value === '' && this.tags.length)
                     this.remove(this.tags.length - 1);
             },
+
             paste(e) {
                 const text = (e.clipboardData || window.clipboardData).getData('text');
                 this.add(text);
@@ -116,22 +130,29 @@
             filterSuggestions(value) {
                 const v = value.trim().toLowerCase();
                 if (!v) { this.filtered = []; this.showSuggestions = false; return; }
+
                 this.filtered = this.suggestions
-                    .map(s => s.toLowerCase())
-                    .filter(s => s.includes(v) && !this.tags.includes(s))
+                    .filter(s =>
+                        s.label.toLowerCase().includes(v) &&
+                        !this.tags.includes(s.key.toLowerCase())
+                    )
                     .slice(0, 10);
+
                 this.showSuggestions = this.filtered.length > 0;
             },
+
             selectSuggestion(s) {
-                this.add(s);
+                this.add(s.key);
                 this.$refs.input.value = '';
                 this.hideSuggestions();
             },
+
             hideSuggestions() { this.showSuggestions = false; },
             hideSuggestionsLater() { setTimeout(() => this.hideSuggestions(), 150); },
 
-            capitalize(s) {
-                return s.charAt(0).toUpperCase() + s.slice(1);
+            displayLabel(key) {
+                const match = this.suggestions.find(s => s.key.toLowerCase() === key.toLowerCase());
+                return match ? match.label : key;
             },
         }))
     })

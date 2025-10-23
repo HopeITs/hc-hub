@@ -25,6 +25,10 @@ return [
     'type' => 'النوع',
     'place' => 'المكان',
     'order' => 'الترتيب',
+    'open-at' => 'بداية الدوام',
+    'close-at' => 'نهاية الدوام',
+    'working-hours' => 'ساعات العمل',
+    'from-hour-to-hour' => 'من :from حتى :to',
     'role' => 'الأدوار|الدور',
     'weekly-hours' => 'ساعات العمل الأسبوعية',
     'status' => 'الحالة',
@@ -368,4 +372,14 @@ return [
         'current-password' => 'كلمة المرور الحالية',
         'new-password' => 'كلمة المرور الجديدة',
     ],
+    'weekend-days' => 'العطلة الاسبوعية',
+    'days-of-week' => [
+        'monday' => 'الاثنين',
+        'tuesday' => 'الثلاثاء',
+        'wednesday' => 'الأربعاء',
+        'thursday' => 'الخميس',
+        'friday' => 'الجمعة',
+        'saturday' => 'السبت',
+        'sunday' => 'الأحد',
+    ]
 ];

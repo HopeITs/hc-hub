@@ -20,7 +20,9 @@ class CentersModule extends Component
         'address_ar' => '',
         'address_en' => '',
         'is_active' => true,
-        'weekends' => ''
+        'weekends' => '',
+        'open_at' => null,
+        'close_at' => null,
     ];
 
     protected $rules = [
@@ -28,7 +30,9 @@ class CentersModule extends Component
         'item.city_id' => 'required|exists:cities,id',
         'item.address.en' => 'nullable|string|max:255',
         'item.address.ar' => 'nullable|string|max:255',
-        'item.weekends' => 'required'
+        'item.weekends' => 'required',
+        'item.open_at' => 'required',
+        'item.close_at' => 'required',
     ];
 
     public function render()
@@ -48,7 +52,9 @@ class CentersModule extends Component
             'address_ar' => '',
             'address_en' => '',
             'is_active' => true,
-            'weekends' => ''
+            'weekends' => '',
+            'open_at' => null,
+            'close_at' => null,
         ];
 
         $this->resetValidation();
@@ -68,7 +74,9 @@ class CentersModule extends Component
             'address_ar' => $model->address_ar,
             'address_en' => $model->address_en,
             'is_active' => (bool)$model->is_active,
-            'weekends' => $model->weekends
+            'weekends' => $model->weekends,
+            'open_at' => $model->open_at,
+            'close_at' => $model->close_at,
         ];
 
         $this->resetValidation();

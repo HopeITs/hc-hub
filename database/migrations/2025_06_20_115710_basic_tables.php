@@ -34,6 +34,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('weekends')->nullable();
+            $table->time('open_at')->nullable()->default('09:30');
+            $table->time('close_at')->nullable()->default('17:00');
             $table->foreignId('city_id')->nullable()->constrained()->onDelete('restrict');
             $table->text('address_en')->nullable();
             $table->text('address_ar')->nullable();
