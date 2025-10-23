@@ -13,6 +13,7 @@ class Counter extends Component
 
     #[On('notification-read')]
     #[On('notification-created')]
+
     public function updateCount(): void
     {
         $this->count = auth()->user()->unreadNotifications()->count();

@@ -90,11 +90,13 @@ class ArchivedFilesModule extends Component
                 default => collect(),
             };
 
-            $this->permissionFilterOptions = $collection->mapWithKeys(function ($item) use ($type) {
-                $isTranslatable = in_array($type, ['job_level', 'city', 'center']);
-                $name = $isTranslatable ? $item->getTranslation('name', 'en') : $item->name;
-                return [$item->id => $name];
-            })->toArray();
+            $this->permissionFilterOptions = $collection
+                ->mapWithKeys(function ($item) use ($type) {
+                    $isTranslatable = in_array($type, ['job_level', 'city', 'center']);
+                    $name = $isTranslatable ? $item->getTranslation('name', 'en') : $item->name;
+                    return [$item->id => $name];
+                })
+                ->toArray();
         }
     }
 
@@ -161,11 +163,9 @@ class ArchivedFilesModule extends Component
 
         if ($this->isShared) {
             $query->where(function ($q) {
-                $q->where('is_shared', true)
-                    ->orWhere(function ($subQ) {
-                        $subQ->where('is_shared', false)
-                            ->where('user_id', '!=', auth()->id());
-                    });
+                $q->where('is_shared', true)->orWhere(function ($subQ) {
+                    $subQ->where('is_shared', false)->where('user_id', '!=', auth()->id());
+                });
             });
         } else {
             $query->where('is_shared', false)->where('user_id', auth()->id());
@@ -201,7 +201,7 @@ class ArchivedFilesModule extends Component
         while ($folder) {
             array_unshift($folderLinks, [
                 'label' => $folder->name,
-                'url' => $this->isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id])
+                'url' => $this->isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]),
             ]);
             $folder = $folder->parent;
         }
@@ -249,10 +249,26 @@ class ArchivedFilesModule extends Component
             if ($this->folderForPermissions->user_id !== auth()->id() && !auth()->user()->hasRole('Super Admin')) {
                 abort(403, 'Only the creator can manage permissions.');
             }
-            $permissions = collect($this->selectedUsers);
-            $permissions->push($this->folderForPermissions->user_id);
-            $this->folderForPermissions->users()->sync($permissions->unique()->all());
+
+            $newIds = collect($this->selectedUsers)->unique();
+            $newIds->push($this->folderForPermissions->user_id);
+            $newIds = $newIds->unique();
+
+            $existingIds = $this->folderForPermissions->users->pluck('id');
+            $addedUserIds = $newIds->diff($existingIds);
+
+            $this->folderForPermissions->users()->sync($newIds);
+
+            if ($addedUserIds->isNotEmpty()) {
+                $creatorName = auth()->user()->profile?->name ?? auth()->user()->name;
+                foreach (\App\Models\User::whereIn('id', $addedUserIds)->get() as $user) {
+                    $user->notify(new \App\Notifications\FolderShared($this->folderForPermissions, $creatorName));
+                }
+
+                $this->dispatch('notification-created');
+            }
         }
+
         $this->closePermissionsModal();
         $this->loadContent();
     }
