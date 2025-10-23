@@ -23,9 +23,9 @@
                 <div class="flex flex-col gap-2 rounded-2xl shadow-md p-4">
                     <h3 class="font-bold text-secondary-dark">{{$availableLeave->leaveType->name}}</h3>
                     <span class=" flex justify-between px-2 py-1 text-secondary-dark"><span
-                            class="font-semibold text-secondary-medium text-secondary-dark me-2">Total:</span>{{$availableLeave->deserved}}</span>
+                            class="font-semibold text-secondary-medium text-secondary-dark me-2">Total:</span>{{$availableLeave->deserved_formatted}}</span>
                     <span class="rounded-full px-2 py-1 bg-gray-200 text-secondary-dark flex justify-between"><span
-                            class="font-semibold text-secondary-medium me-2">Remaining:</span>{{ $availableLeave->deserved - $availableLeave->used}}</span>
+                            class="font-semibold text-secondary-medium me-2">Remaining:</span>{{ $availableLeave->remaining}}</span>
                 </div>
             @endforeach
         </div>
