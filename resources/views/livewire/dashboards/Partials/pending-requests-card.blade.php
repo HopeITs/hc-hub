@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center px-6 py-4 bg-[var(--color-primary)]">
         <h3 class="text-lg font-semibold text-white">
-            {{ __('general.pending_checklist_requests') }}
+            {{ __('general.pending-delivers') }}
         </h3>
         <span class="text-sm bg-white/20 px-3 py-1 rounded-full text-white font-medium">
             {{ $pendingRequests->count() }} {{ __('Pending') }}
