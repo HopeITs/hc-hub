@@ -11,7 +11,7 @@ class ContractObserver
 {
     public function creating(Contract $contract): void
     {
-        if (app()->runningInConsole() && app()->environment('local')) {
+        if (app()->runningInConsole() || app()->environment('local')) {
             return;
         }
 
