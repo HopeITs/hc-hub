@@ -17,7 +17,7 @@
         </div>
 
         <div>
-            <livewire:dashboards.employee-notes-card :employee="auth()->id()" />
+            <livewire:dashboards.employee-notes-card :employee="auth()->id()"/>
         </div>
 
         <div>
@@ -29,13 +29,11 @@
         </div>
 
         <div>
-            @include('livewire.dashboards.Partials.news-card')
+            @include('livewire.dashboards.Partials.pending-requests-card')
         </div>
 
-
-
         <div>
-            @include('livewire.dashboards.Partials.pending-requests')
+            @include('livewire.dashboards.Partials.news-card')
         </div>
 
 
