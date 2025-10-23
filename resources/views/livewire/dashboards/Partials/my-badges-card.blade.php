@@ -19,7 +19,6 @@
 @endphp
 
 <div class="w-full max-w-sm bg-white rounded-2xl shadow-md border border-[var(--color-neutral-200)] overflow-hidden">
-    <!-- Header -->
     <div class="px-6 py-3 flex items-center justify-between bg-[var(--color-primary)] text-white">
         <h2 class="text-lg font-bold tracking-wide">{{ __('My Badges') }}</h2>
         <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full">
@@ -27,7 +26,6 @@
         </span>
     </div>
 
-    <!-- Scrollable Content -->
     <div class="max-h-72 overflow-y-auto divide-y divide-[var(--color-neutral-200)] scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent">
         @forelse ($myBadges as $badge)
             @php
@@ -36,7 +34,6 @@
             @endphp
 
             <div class="flex items-start justify-between px-6 py-4 hover:bg-[var(--color-neutral-100)] transition-colors duration-200">
-                <!-- Left Section -->
                 <div class="flex flex-col h-12 justify-between">
                     <span class="text-[var(--color-neutral-900)] font-semibold text-sm">
                         {{ $badge->employee?->$nameCol ?? __('Unknown Employee') }}
@@ -47,7 +44,6 @@
 
                 </div>
 
-                <!-- Right Section -->
                 <div class="flex flex-col h-12 justify-between">
 
                     <span class="mt-1 inline-block px-2.5 py-0.5 text-xs font-semibold border rounded-full {{ $color }}">
