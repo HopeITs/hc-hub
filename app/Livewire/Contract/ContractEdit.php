@@ -101,8 +101,12 @@ class ContractEdit extends Component
         $updated = $this->form->update($this->contract);
 
         if($this->contract->salary_per->value === SalaryPer::Month){
-            // Keep edit-specific behavior for balances
-            $this->balanceForm->update($this->contract->id);
+                if($this->contract->leaveBalances->count() > 0){
+                    $this->balanceForm->update($this->contract->id);
+                }else{
+                    $this->balanceForm->store($this->contract->id);
+                }
+
         }else{
             $this->contract->leaveBalances->each(function ($balance) {
                 $balance->delete();

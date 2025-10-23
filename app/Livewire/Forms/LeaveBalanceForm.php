@@ -200,28 +200,56 @@ class LeaveBalanceForm extends Form
             //leaves for singles
             if ($employee->marital_status === MaritalStatus::Single) {
                 $allowedForSingle = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_SINGLE);
+
+                //delete any previous marriage if exist
+                $contract->leaveBalances->whereIn('type_id',[LeaveTypeCases::MaternityFirst,LeaveTypeCases::MaternitySecond,LeaveTypeCases::Paternity])
+                    ->each(function ($leaveBalances)  {
+                        $leaveBalances->delete();
+                    });
                 foreach ($allowedForSingle as $allowed) {
 
                     //while gender match with allowed gender
                     if ($employee->gender === $allowed->allowed_gender || $allowed->allowed_gender === LeaveTypeEnum::GENDER_ANY) {
-                        $contract->leaveBalances->where('type_id', $allowed->id)->first()->update([
-                            'deserved' => $allowed->base_days * $DailyWorkHours
-                        ]);
+                      $balance =   $contract->leaveBalances->where('type_id', $allowed->id)->first();
+                          if(isset($balance)){
+                              $balance   ->update([
+                                  'deserved' => $allowed->base_days * $DailyWorkHours
+                              ]);
+                          }else{
+                              LeaveBalance::create([
+                                  'contract_id' => $contract->id,
+                                  'type_id' => $allowed->id,
+                                  'deserved' => $allowed->base_days * $DailyWorkHours
+                              ]);
+                          }
+
                     }
                 }
             } else {
                 //leaves for married
-
                 if ($employee->marital_status === MaritalStatus::Married) {
 
+                    //delete marriage leave if exist
+                    $contract->leaveBalances->where('type_id',LeaveTypeCases::Marriage)->first()?->delete();
                     $allowedForMarried = $leaveTypes->filter(fn($type) => $type->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED && $type->allowed_gender === $employee->gender);
-
                     if ($employee->gender === Gender::Female) {
                         foreach ($allowedForMarried as $allowed) {
                             if (!$employee->abilityToTakeLeave($allowed->id)) {
-                                $contract->leaveBalances->where('type_id', $allowed->id)->first()->update([
-                                    'deserved' => $allowed->base_days * $DailyWorkHours
-                                ]);
+                                $balance = $contract->leaveBalances->where('type_id', $allowed->id)->first();
+                                    if(isset($balance)){
+                                        $balance->update([
+                                            'deserved' => $allowed->base_days * $DailyWorkHours
+                                        ]);
+                                    }else{
+                                        //add the leave
+                                        LeaveBalance::create([
+                                            'contract_id' => $contract->id,
+                                            'type_id' => $allowed->id,
+                                            'deserved' => $allowed->base_days * $DailyWorkHours
+                                        ]);
+
+                                    }
+
 
                             }
                         }
