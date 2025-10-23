@@ -193,13 +193,8 @@ class ContractCreate extends Component
                 ->get()
             : collect();
 
-        $centers = ($this->city_id && $this->program_id)
+        $centers = ($this->city_id)
             ? Center::where('city_id', $this->city_id)
-                ->whereIn('id', Position::where('program_id', $this->program_id)
-                    ->whereNotNull('center_id')
-                    ->pluck('center_id')
-                    ->unique()
-                )
                 ->select('id', 'name')
                 ->orderBy('name')
                 ->get()
