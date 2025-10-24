@@ -13,6 +13,7 @@ use App\Models\Contract;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
 use App\Enums\LeaveType as LeaveTypeEnum;
+use Carbon\Carbon;
 use Livewire\Form;
 
 class LeaveBalanceForm extends Form
@@ -42,30 +43,49 @@ class LeaveBalanceForm extends Form
     {
         $contract = Contract::findOrFail($contractId)->load(['employee', 'contractType']);
         $leaveTypes = LeaveType::whereNot('base_days', 12)->get();
-        $employee = $contract->employee->load('contracts');
+        $employee = $contract->employee->load('contracts','allContracts');
         $leaveRule = AnnualLeaveRule::where('years_of_volunteering', '<=', $employee->years_of_service)->orderBy('days', 'desc')->first() ?? AnnualLeaveRule::first();
         $duration = $contract->duration();
         $weekWordDays = 5;
         $DailyWorkHours = $contract->weekly_hours / $weekWordDays;
         $extra = 0;
 
-        //handle to move leaves from trial contract to annual
+
         if ($employee->contracts->count() < 3 && $employee->contracts->count() > 0) {
-            $prevContract = $employee->contracts()->whereNot('id', $contractId)->orderBy('end_date', 'desc')->first();
+            $prevContract = $employee->allContracts()
+                ->whereNot('id', $contractId)
+                ->orderBy('end_date', 'desc')
+                ->first();
+dd($prevContract);
+            if (
+                ($prevContract->contract_type_id === 3 || $prevContract->contract_type_id === 4)
+                && ($prevContract->end_date->year === $contract->start_date->year)
+            ) {
+                $year = $contract->start_date->year;
+                $startOfYear = Carbon::create($year, 1, 1);
+                $endOfPrev = $prevContract->end_date;
+                if ($endOfPrev > $startOfYear) {
+                    $monthsInNewYear = $startOfYear->diffInMonths($endOfPrev) + 1;
 
-            if (($prevContract->contract_type_id === 3 || $prevContract->contract_type_id === 4) && ($prevContract->end_date->year === $contract->start_date->year())) {
-                $prevContracts = $employee->contracts()->whereNot('id', $contractId)->with('leaveBalances')->get();
-                $totalDeserve = $prevContracts
-                    ->flatMap(fn($contract) => $contract->leaveBalances)
-                    ->sum('deserve');
+                    $prevContracts = $employee->contracts()
+                        ->whereNot('id', $contractId)
+                        ->with('leaveBalances')
+                        ->get();
 
-                $totalUsed = $prevContracts
-                    ->flatMap(fn($contract) => $contract->leaveBalances)
-                    ->sum('used');
+                    $totalDeserve = $prevContracts
+                        ->flatMap(fn($contract) => $contract->leaveBalances)
+                        ->sum('deserve');
 
-                $extra = $totalDeserve - $totalUsed;
+                    $totalUsed = $prevContracts
+                        ->flatMap(fn($contract) => $contract->leaveBalances)
+                        ->sum('used');
+
+                    $unused = $totalDeserve - $totalUsed;
+                    $extra = min($unused, $monthsInNewYear);
+                }
             }
         }
+
 
         //handle if contract less than a year to set deserved of yearly leaves
         if ($duration < 12) {
