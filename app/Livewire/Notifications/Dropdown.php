@@ -8,7 +8,11 @@ class Dropdown extends Component
 {
     public function getListeners()
     {
-        return ['notification-created' => '$refresh', 'center-created' => '$refresh'];
+        return [
+            'notification-created' => '$refresh',
+            'center-created' => '$refresh',
+            'center-closed' => '$refresh',
+        ];
     }
 
     public function render()
