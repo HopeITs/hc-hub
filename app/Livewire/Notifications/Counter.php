@@ -14,6 +14,7 @@ class Counter extends Component
     #[On('notification-read')]
     #[On('notification-created')]
     #[On('center-created')]
+    #[On('center-closed')]
 
     public function updateCount(): void
     {
