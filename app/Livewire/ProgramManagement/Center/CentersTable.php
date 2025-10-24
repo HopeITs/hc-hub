@@ -52,6 +52,10 @@ class CentersTable extends LivewireTable
 
             Column::make(__('general.center-name'), 'name')
                 ->sortable()->searchable(),
+            Column::make(__('general.working-hours'), 'open_at')
+                ->displayUsing(fn($v, Model $m) => __('general.from-hour-to-hour', ['from' => $m->open_at_formatted, 'to' => $m->close_at_formatted])
+                )
+                ->sortable(),
 
 
             SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))

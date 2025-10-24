@@ -18,16 +18,16 @@
     </div>
     <livewire:program-management.center.centers-table/>
 
-    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
-        <form wire:submit.prevent="save" class="space-y-4">
-            <div class="space-y-4">
-                <div>
+    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" max-width="3xl" wire:ignore.self>
+        <form wire:submit.prevent="save" class="grid grid-cols-2 gap-4">
+
+                <div class="md:col-span-full">
                     <x-forms.input-label for="name">@lang('general.center-name')</x-forms.input-label>
                     <x-forms.input id="name" type="text" wire:model.defer="item.name"/>
                     <x-error-span>{{ $errors->first('item.name') }}</x-error-span>
                 </div>
 
-                <div>
+            <div class="md:col-span-full">
                     <x-forms.input-label for="city_id">{{ trans_choice('general.city',1) }}</x-forms.input-label>
                     <x-forms.select-input id="city_id" wire:model="item.city_id">
                         <option value="">{{ __('general.select') }}</option>
@@ -38,7 +38,7 @@
                     <x-error-span>{{ $errors->first('item.city_id') }}</x-error-span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+
                     @foreach(config('app.supported_locales') as $loc)
                         <div>
                             <x-forms.input-label for="address_{{ $loc }}">
@@ -49,10 +49,28 @@
                             <x-error-span>{{ $errors->first('item.address_' . $loc) }}</x-error-span>
                         </div>
                     @endforeach
-                </div>
+            <div class="md:col-span-1">
+                <x-forms.input-label for="open_at">@lang('general.open-at')</x-forms.input-label>
+                <x-forms.input id="open_at" type="time" wire:model.defer="item.open_at"/>
+                <x-error-span>{{ $errors->first('item.open_at') }}</x-error-span>
+            </div>
+            <div class="md:col-span-1">
+                <x-forms.input-label for="close_at">@lang('general.close-at')</x-forms.input-label>
+                <x-forms.input id="close_at" type="time" wire:model.defer="item.close_at"/>
+                <x-error-span>{{ $errors->first('item.close_at') }}</x-error-span>
             </div>
 
-            <div class="flex justify-end gap-2">
+            <div class="md:col-span-full">
+                <x-forms.input-label for="weekends">
+                    @lang('general.weekend-days')
+                </x-forms.input-label>
+                <x-forms.tags-input wire:model="item.weekends"
+                                    :suggestions="__('general.days-of-week')"
+                                    :force-suggestion="true"
+                                    placeholder="Add tags"/>
+                <x-error-span>{{ $errors->first('item.weekends') }}</x-error-span>
+            </div>
+            <div class="md:col-span-full  flex justify-end gap-2">
                 <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
                 <x-modal.cancel-btn/>
             </div>

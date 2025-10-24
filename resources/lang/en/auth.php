@@ -8,7 +8,7 @@ return [
     'password' => 'Password',
     'remember-me' => 'Remember Me',
     'forgot-password' => 'Forgot Password?',
-    'copyright' => 'Raja Christian Center - Human Resources Management',
+    'copyright' => 'Christian Hope Center - HRM',
     'failed' => 'Please check your credentials',
 
     'reset-password' => 'Reset Password',

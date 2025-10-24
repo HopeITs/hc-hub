@@ -57,6 +57,7 @@ class ContractCreate extends Component
         }
     }
 
+
     public function next(): void
     {
         if (method_exists($this->form, $this->validatorsByStep[$this->step] ?? '')) {
@@ -71,17 +72,13 @@ class ContractCreate extends Component
 
     public function prev(): void
     {
-        if ($this->step > 1) {
-            $this->step--;
-        }
+        if ($this->step > 1) $this->step--;
     }
 
     public function jumpTo(int $target): void
     {
         $target = max(1, min(3, $target));
-        if ($target <= $this->maxStep) {
-            $this->step = $target;
-        }
+        if ($target <= $this->maxStep) $this->step = $target;
     }
 
     public function submit()
@@ -90,13 +87,11 @@ class ContractCreate extends Component
         $this->form->validateTerms();
         $this->form->validatePay();
 
-        if (!$this->validateCityConsistency()) {
-            return;
-        }
+        if (!$this->validateCityConsistency()) return;
 
         $contract = $this->form->save();
 
-        if ($contract->salary_per->value === SalaryPer::Month) {
+        if($contract->salary_per->value === SalaryPer::Month){
             $this->balanceForm->store($contract->id);
         }
 
@@ -113,9 +108,8 @@ class ContractCreate extends Component
 
     private function validateCityConsistency(): bool
     {
-        if (!$this->city_id) {
-            return true;
-        }
+        if (!$this->city_id) return true;
+
 
         // Position chain validation
         if ($this->form->position_id) {
@@ -175,6 +169,7 @@ class ContractCreate extends Component
                 $employees = Employee::whereHas('city', function ($query) use ($citySlug) {
                     $query->where('slug', $citySlug);
                 })->get();
+
             }
         } else {
             $cityId = optional($user->profile)->city_id;
@@ -183,6 +178,7 @@ class ContractCreate extends Component
             }
             $employees = Employee::where('city_id', $cityId)->get();
         }
+
 
         $programs = $this->city_id
             ? Program::whereIn(
@@ -199,14 +195,12 @@ class ContractCreate extends Component
                 ->get()
             : collect();
 
-        $centers =
-            $this->city_id && $this->program_id
-                ? Center::where('city_id', $this->city_id)
-                    ->whereIn('id', Position::where('program_id', $this->program_id)->whereNotNull('center_id')->pluck('center_id')->unique())
-                    ->select('id', 'name')
-                    ->orderBy('name')
-                    ->get()
-                : collect();
+        $centers = ($this->city_id)
+            ? Center::where('city_id', $this->city_id)
+                ->select('id', 'name')
+                ->orderBy('name')
+                ->get()
+            : collect();
 
         $positions =
             $this->city_id && $this->program_id

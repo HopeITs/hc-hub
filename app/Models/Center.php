@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasTranslation;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,19 @@ class Center extends Model
 {
     use HasFactory , HasTranslation;
 
-    protected $fillable = ['name', 'city_id', 'program_id', 'address_en', 'address_ar', 'is_active'];
+    protected $guarded = ['id'];
+
+
+
+    public function getOpenAtFormattedAttribute(): string
+    {
+        return Carbon::createFromFormat('H:i:s', $this->open_at)->format('H:i');
+    }
+
+    public function getCloseAtFormattedAttribute(): string
+    {
+        return Carbon::createFromFormat('H:i:s', $this->close_at)->format('H:i');
+    }
 
     protected function address(): Attribute
     {
@@ -44,5 +57,9 @@ class Center extends Model
     public function projectManager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'project_manager_id');
+    }
+
+    public function holidays() {
+        return $this->morphMany(Holiday::class, 'holidayable');
     }
 }
