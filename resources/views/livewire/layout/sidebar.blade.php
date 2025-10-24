@@ -10,12 +10,35 @@
             <ul class="space-y-2 font-medium">
 
                 @activerole('SUPER ADMIN')
-                <x-layouts.app.sidebar.nav-item
-                    :href="route('employee.dashboard')"
-                    :active="request()->routeIs('employee.dashboard')">
-                    <x-slot name="icon"><x-icons.home /></x-slot>
-                    {{ __('general.employee-dashboard') }}
-                </x-layouts.app.sidebar.nav-item>
+                <x-layouts.app.sidebar.dropdown-nav-list id="dashboards" :title="__('general.dashboards')"
+                                                         >
+                    <x-slot name="icon"><x-icons.users /></x-slot>
+                    <x-slot name="list">
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('employee.dashboard')"
+                            :active="request()->routeIs('employee.dashboard')">
+                            {{ __('general.employee-dashboard') }}
+                        </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('hr.dashboard')"
+                            :active="request()->routeIs('hr.dashboard')">
+                            {{ __('general.hr-dashboard') }}
+                        </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('manager.dashboard')"
+                            :active="request()->routeIs('manager.dashboard')">
+                            {{ __('general.manager-dashboard') }}
+                        </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('general-admin.dashboard')"
+                            :active="request()->routeIs('general-admin.dashboard')">
+                            {{ __('general.general-admin-dashboard') }}
+                        </x-layouts.app.sidebar.nav-item>
+                    </x-slot>
+                </x-layouts.app.sidebar.dropdown-nav-list>
                 @endactiverole
 
                 @activerole('hr', 'general manager', 'SUPER ADMIN')
