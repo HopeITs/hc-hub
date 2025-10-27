@@ -9,7 +9,10 @@
             display: none !important;
         }
     </style>
-    <title>@yield('title' , 'Hope HR')</title>
+
+    @livewireStyles
+
+    <title>@yield('title', 'Hope HR')</title>
 </head>
 
 <body class="antialiased min-h-screen bg-white">
@@ -30,6 +33,7 @@
                         </path>
                     </svg>
                 </button>
+                <livewire:notifications.dropdown />
             </div>
         </header>
 
@@ -51,8 +55,9 @@
 
     <div id="sidebar-overlay" class="fixed inset-0 bg-gray-200 opacity-50 z-30 sm:hidden hidden"></div>
 
-
     @include('partials.scripts')
+
+    @livewireScripts
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -71,7 +76,6 @@
             }
         });
     </script>
-
 </body>
 
 </html>

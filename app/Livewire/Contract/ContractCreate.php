@@ -52,7 +52,7 @@ class ContractCreate extends Component
 
         $pos = \App\Models\Position::find($value);
 
-        if ($pos && ! $pos->canAssign()) {
+        if ($pos && !$pos->canAssign()) {
             $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
         }
     }
@@ -95,6 +95,12 @@ class ContractCreate extends Component
             $this->balanceForm->store($contract->id);
         }
 
+        \App\Models\User::all()->each(function ($user) use ($contract) {
+            $user->notify(new \App\Notifications\NewEmployeeWelcome($contract->employee));
+        });
+
+        $this->dispatch('notification-created');
+
         LivewireAlert::success(__('general.success-message'));
 
         return redirect()->route('contracts.show', ['contract' => $contract->id]);
@@ -113,21 +119,19 @@ class ContractCreate extends Component
                 return false;
             }
 
-            $centerCityId = $pos->center_id
-                ? Center::where('id', $pos->center_id)->value('city_id')
-                : $this->city_id; // If no center, assume belongs to current city
+            $centerCityId = $pos->center_id ? Center::where('id', $pos->center_id)->value('city_id') : $this->city_id; // If no center, assume belongs to current city
 
             if ($centerCityId != $this->city_id) {
                 $this->addError('form.position_id', __('validation.custom.position_id.invalid'));
                 return false;
             }
 
-            if ($this->program_id && (int)$pos->program_id !== (int)$this->program_id) {
+            if ($this->program_id && (int) $pos->program_id !== (int) $this->program_id) {
                 $this->addError('form.position_id', __('validation.custom.position_id.program_mismatch'));
                 return false;
             }
 
-            if ($this->center_id && $pos->center_id && (int)$pos->center_id !== (int)$this->center_id) {
+            if ($this->center_id && $pos->center_id && (int) $pos->center_id !== (int) $this->center_id) {
                 $this->addError('form.position_id', __('validation.custom.position_id.center_mismatch'));
                 return false;
             }
@@ -139,8 +143,10 @@ class ContractCreate extends Component
     public function saveIdentity(): void {}
     public function saveTerms(): void {}
     public function savePay(): void {}
-    public function save() { return $this->submit(); }
-
+    public function save()
+    {
+        return $this->submit();
+    }
 
     public function render()
     {
@@ -149,10 +155,7 @@ class ContractCreate extends Component
         $posCol = "title_{$locale}";
         $typeCol = "name_{$locale}";
 
-        $cities = City::select('id', $cityCol)->where('is_active', 1)
-            ->orderBy($cityCol)
-            ->get()
-            ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
+        $cities = City::select('id', $cityCol)->where('is_active', 1)->orderBy($cityCol)->get()->map(fn($c) => tap($c, fn() => ($c->name = $c->{$cityCol})));
 
         $user = auth()->user()->load('profile');
         $role = $user->activeRole();
@@ -161,17 +164,14 @@ class ContractCreate extends Component
         if ($roleArr[0] === 'HR') {
             if ($roleArr[1] === 'SYR') {
                 $employees = Employee::all();
-            }
-            else
-            {
+            } else {
                 $citySlug = $roleArr[1];
                 $employees = Employee::whereHas('city', function ($query) use ($citySlug) {
                     $query->where('slug', $citySlug);
                 })->get();
 
             }
-        }
-        else{
+        } else {
             $cityId = optional($user->profile)->city_id;
             if (!$cityId) {
                 abort(403, 'User has no linked employee or city.');
@@ -181,14 +181,16 @@ class ContractCreate extends Component
 
 
         $programs = $this->city_id
-            ? Program::whereIn('id', Position::query()
-                ->where(function ($q) {
-                    $q->whereHas('center', fn($c) => $c->where('city_id', $this->city_id))
-                        ->orWhereNull('center_id');
-                })
-                ->pluck('program_id')
-                ->unique()
-            )->select('id', 'name')
+            ? Program::whereIn(
+                'id',
+                Position::query()
+                    ->where(function ($q) {
+                        $q->whereHas('center', fn($c) => $c->where('city_id', $this->city_id))->orWhereNull('center_id');
+                    })
+                    ->pluck('program_id')
+                    ->unique(),
+            )
+                ->select('id', 'name')
                 ->orderBy('name')
                 ->get()
             : collect();
@@ -200,29 +202,24 @@ class ContractCreate extends Component
                 ->get()
             : collect();
 
-        $positions = ($this->city_id && $this->program_id)
-            ? Position::where([
-                ['program_id', '=', $this->program_id],
-                ['city_id', '=', $this->city_id],
-            ])
-                ->select('id', $posCol)
-                ->orderBy($posCol)
-                ->get()
-                ->map(fn($p) => tap($p, fn() => $p->title = $p->{$posCol}))
-            : collect();
+        $positions =
+            $this->city_id && $this->program_id
+                ? Position::where([['program_id', '=', $this->program_id], ['city_id', '=', $this->city_id]])
+                    ->select('id', $posCol)
+                    ->orderBy($posCol)
+                    ->get()
+                    ->map(fn($p) => tap($p, fn() => ($p->title = $p->{$posCol})))
+                : collect();
 
-        $types = ContractType::select('id', $typeCol)
-            ->orderBy($typeCol)
-            ->get()
-            ->map(fn($t) => tap($t, fn() => $t->name = $t->{$typeCol}));
+        $types = ContractType::select('id', $typeCol)->orderBy($typeCol)->get()->map(fn($t) => tap($t, fn() => ($t->name = $t->{$typeCol})));
 
         return view('livewire.contract.contract-create', [
-            'cities'     => $cities,
-            'employees'  => $employees,
-            'programs'   => $programs,
-            'centers'    => $centers,
-            'positions'  => $positions,
-            'types'      => $types,
+            'cities' => $cities,
+            'employees' => $employees,
+            'programs' => $programs,
+            'centers' => $centers,
+            'positions' => $positions,
+            'types' => $types,
         ]);
     }
 }

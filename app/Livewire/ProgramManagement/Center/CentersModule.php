@@ -4,6 +4,7 @@ namespace App\Livewire\ProgramManagement\Center;
 
 use App\Models\Center;
 use App\Models\City;
+use App\Notifications\NewCenterCreated;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -28,8 +29,8 @@ class CentersModule extends Component
     protected $rules = [
         'item.name' => 'required|string|max:255',
         'item.city_id' => 'required|exists:cities,id',
-        'item.address.en' => 'nullable|string|max:255',
-        'item.address.ar' => 'nullable|string|max:255',
+        'item.address_en' => 'nullable|string|max:255',
+        'item.address_ar' => 'nullable|string|max:255',
         'item.weekends' => 'required',
         'item.open_at' => 'required',
         'item.close_at' => 'required',
@@ -37,7 +38,6 @@ class CentersModule extends Component
 
     public function render()
     {
-        $locale = app()->getLocale();
         $cities = City::orderBy(transColumn('name'))->get(['id', transColumn('name')]);
 
         return view('livewire.program-management.centers-module', compact('cities'));
@@ -86,12 +86,20 @@ class CentersModule extends Component
 
     public function save(): void
     {
-
         $this->validate();
 
         $model = Center::findOrNew($this->item['id']);
+        $isNew = !$model->exists;
+
         $model->fill($this->item);
         $model->save();
+
+        if ($isNew) {
+            foreach (\App\Models\User::all() as $user) {
+                $user->notify(new \App\Notifications\NewCenterCreated($model));
+            }
+            $this->dispatch('center-created');
+        }
 
         $this->showModal = false;
         $this->resetErrorBag();
