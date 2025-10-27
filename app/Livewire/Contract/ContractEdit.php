@@ -59,11 +59,12 @@ class ContractEdit extends Component
     public function updatedFormPositionId($value): void
     {
         $this->resetErrorBag('form.position_id');
+        if ($this->contract->position_id !== $value) {
+            $pos = Position::find($value);
 
-        $pos = \App\Models\Position::find($value);
-
-        if ($pos && ! $pos->canAssign()) {
-            $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
+            if ($pos && !$pos->canAssign()) {
+                $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
+            }
         }
     }
 

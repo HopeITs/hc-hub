@@ -128,9 +128,11 @@ class ContractForm extends Form
                 'required',
                 'exists:positions,id',
                 function ($attribute, $value, $fail) {
-                    $pos = Position::find($value);
-                    if ($pos && ! $pos->canAssign()) {
-                        $fail(__('This position exceeded the number of max employees.'));
+                    if ($this->contract->position_id !== $value) {
+                        $pos = Position::find($value);
+                        if ($pos && !$pos->canAssign()) {
+                            $fail(__('This position exceeded the number of max employees.'));
+                        }
                     }
                 },
             ],
