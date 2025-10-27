@@ -56,7 +56,7 @@
 
 @include('partials.scripts')
 
-@livewireScripts<script>
+<script>
     document.addEventListener('DOMContentLoaded', () => {
         const sidebar = document.getElementById('cta-button-sidebar');
         const toggleButton = document.getElementById('sidebar-toggle');
