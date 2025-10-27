@@ -10,8 +10,6 @@
         }
     </style>
 
-    @livewireStyles
-
     <title>@yield('title', 'Hope HR')</title>
 </head>
 
