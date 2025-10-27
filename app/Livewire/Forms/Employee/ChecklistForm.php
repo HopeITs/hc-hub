@@ -39,11 +39,8 @@ class ChecklistForm extends Form
                     'item_id' => $item->id,
                     'item_name' => $item->name,
                     'is_selected' => $isSelected,
-
                     'delivered_id' => $deliveredId,
-
                     'receiver_id' => $isFullyReturned ? null : $saved?->receiver_id,
-
                     'delivered_status' => $isFullyReturned ? null : $saved?->delivered_status,
                     'returned_status' => $isFullyReturned ? null : $saved?->returned_status,
                     'can_edit' => true,
@@ -58,7 +55,7 @@ class ChecklistForm extends Form
         $currentProfileId = auth()->user()->profile?->id;
 
         foreach ($this->items as $itemData) {
-            $existing = $this->employee->checklists()->where('item_id', $itemData['item_id'])->first();
+            $existing = $this->employee->checklists()->where('item_id', $itemData['item_id'])->latest()->first();
 
             $original_delivered_id = $existing ? $existing->delivered_id : null;
             $original_receiver_id = $existing ? $existing->receiver_id : null;
@@ -79,6 +76,8 @@ class ChecklistForm extends Form
 
                 if ($isFullyReturned || $existing === null || $existing->delivered_status === null) {
                     $values = array_merge($values, [
+                        'item_id' => $itemData['item_id'],
+                        'employee_id' => $this->employee->id,
                         'delivered_status' => 'pending',
                         'delivered_at' => now(),
                         'receiver_id' => null,
@@ -86,6 +85,8 @@ class ChecklistForm extends Form
                         'returned_at' => null,
                         'notes' => null,
                     ]);
+
+                    $checklist = Checklist::create($values);
                 } else {
                     $values['delivered_status'] = $existing->delivered_status;
                     $values['delivered_at'] = $existing->delivered_at;
@@ -100,9 +101,11 @@ class ChecklistForm extends Form
                         $values['returned_status'] = null;
                         $values['returned_at'] = null;
                     }
+
+                    $existing->update($values);
+                    $checklist = $existing;
                 }
 
-                $checklist = $this->employee->checklists()->updateOrCreate(['item_id' => $itemData['item_id']], $values);
                 $checklist->refresh();
 
                 $isNewlyAssignedForDelivery = (
