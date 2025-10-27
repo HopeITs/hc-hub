@@ -35,10 +35,8 @@
         </div>
     </div>
 
-    {{-- The only change is removing "overflow-hidden" from this div --}}
     <div class="p-6 mt-6 bg-white shadow-sm sm:rounded-lg">
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {{-- Folders Loop --}}
             @forelse($folders as $folder)
             <div class="relative group">
                 <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md">
@@ -95,7 +93,6 @@
                 @endif
             @endforelse
 
-            {{-- Files Loop --}}
             @foreach ($files as $file)
             <div class="relative group">
                 <div wire:click="downloadFile({{ $file->id }})" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md cursor-pointer">
@@ -141,7 +138,6 @@
         </div>
     </div>
 
-    {{-- Modals (No changes needed here) --}}
     @if ($showCreateFolderModal)
     <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('showCreateFolderModal', false)"></div>
     <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">

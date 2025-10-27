@@ -295,6 +295,15 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->morphs('notifiable');
+            $table->text('data');
+            $table->timestamp('read_at')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('employee_notes', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('employee_id');
@@ -342,6 +351,6 @@ return new class extends Migration
         Schema::dropIfExists('attachments');
         Schema::dropIfExists('employee_items');
         Schema::dropIfExists('employee_notes');
-
+        Schema::dropIfExists('notifications');
     }
 };

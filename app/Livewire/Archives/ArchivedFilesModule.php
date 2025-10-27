@@ -31,7 +31,7 @@ class ArchivedFilesModule extends Component
     public bool $showDeleteConfirmationModal = false;
     public $itemToDeleteType = null;
     public $itemToDeleteId = null;
-    public string $itemNameToDelete = ''; // Added for specific delete confirmation
+    public string $itemNameToDelete = '';
     public array $filePreviews = [];
     public bool $showPermissionsModal = false;
     public ?Folder $folderForPermissions = null;
@@ -47,8 +47,6 @@ class ArchivedFilesModule extends Component
     public string $permissionFilterValue = '';
     public array $permissionFilterOptions = [];
     public array $activeFilters = [];
-
-    // Added for "Select All" functionality
     public bool $allVisibleUsersSelected = false;
 
     public function mount(bool $isShared, $folderId = null)
@@ -90,11 +88,13 @@ class ArchivedFilesModule extends Component
                 default => collect(),
             };
 
-            $this->permissionFilterOptions = $collection->mapWithKeys(function ($item) use ($type) {
-                $isTranslatable = in_array($type, ['job_level', 'city', 'center']);
-                $name = $isTranslatable ? $item->getTranslation('name', 'en') : $item->name;
-                return [$item->id => $name];
-            })->toArray();
+            $this->permissionFilterOptions = $collection
+                ->mapWithKeys(function ($item) use ($type) {
+                    $isTranslatable = in_array($type, ['job_level', 'city', 'center']);
+                    $name = $isTranslatable ? $item->getTranslation('name', 'en') : $item->name;
+                    return [$item->id => $name];
+                })
+                ->toArray();
         }
     }
 
@@ -155,17 +155,14 @@ class ArchivedFilesModule extends Component
     public function loadContent(): void
     {
         $parentId = $this->currentFolder?->id;
-        // Updated query to efficiently load file count
         $query = Folder::withCount('media as files_count');
         $query->where('parent_id', $parentId);
 
         if ($this->isShared) {
             $query->where(function ($q) {
-                $q->where('is_shared', true)
-                    ->orWhere(function ($subQ) {
-                        $subQ->where('is_shared', false)
-                            ->where('user_id', '!=', auth()->id());
-                    });
+                $q->where('is_shared', true)->orWhere(function ($subQ) {
+                    $subQ->where('is_shared', false)->where('user_id', '!=', auth()->id());
+                });
             });
         } else {
             $query->where('is_shared', false)->where('user_id', auth()->id());
@@ -201,7 +198,7 @@ class ArchivedFilesModule extends Component
         while ($folder) {
             array_unshift($folderLinks, [
                 'label' => $folder->name,
-                'url' => $this->isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id])
+                'url' => $this->isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]),
             ]);
             $folder = $folder->parent;
         }
@@ -249,10 +246,26 @@ class ArchivedFilesModule extends Component
             if ($this->folderForPermissions->user_id !== auth()->id() && !auth()->user()->hasRole('Super Admin')) {
                 abort(403, 'Only the creator can manage permissions.');
             }
-            $permissions = collect($this->selectedUsers);
-            $permissions->push($this->folderForPermissions->user_id);
-            $this->folderForPermissions->users()->sync($permissions->unique()->all());
+
+            $newIds = collect($this->selectedUsers)->unique();
+            $newIds->push($this->folderForPermissions->user_id);
+            $newIds = $newIds->unique();
+
+            $existingIds = $this->folderForPermissions->users->pluck('id');
+            $addedUserIds = $newIds->diff($existingIds);
+
+            $this->folderForPermissions->users()->sync($newIds);
+
+            if ($addedUserIds->isNotEmpty()) {
+                $creatorName = auth()->user()->profile?->name ?? auth()->user()->name;
+                foreach (\App\Models\User::whereIn('id', $addedUserIds)->get() as $user) {
+                    $user->notify(new \App\Notifications\FolderShared($this->folderForPermissions, $creatorName));
+                }
+
+                $this->dispatch('notification-created');
+            }
         }
+
         $this->closePermissionsModal();
         $this->loadContent();
     }
@@ -295,20 +308,20 @@ class ArchivedFilesModule extends Component
     public function confirmFileDeletion($mediaId)
     {
         $this->authorizeSharedAction();
-        $media = Media::findOrFail($mediaId); // Find to get name
+        $media = Media::findOrFail($mediaId);
         $this->itemToDeleteType = 'file';
         $this->itemToDeleteId = $mediaId;
-        $this->itemNameToDelete = $media->name; // Set the name
+        $this->itemNameToDelete = $media->name;
         $this->showDeleteConfirmationModal = true;
     }
 
     public function confirmFolderDeletion($folderId)
     {
         $this->authorizeSharedAction();
-        $folder = Folder::findOrFail($folderId); // Find to get name
+        $folder = Folder::findOrFail($folderId);
         $this->itemToDeleteType = 'folder';
         $this->itemToDeleteId = $folderId;
-        $this->itemNameToDelete = $folder->name; // Set the name
+        $this->itemNameToDelete = $folder->name;
         $this->showDeleteConfirmationModal = true;
     }
 
@@ -321,7 +334,7 @@ class ArchivedFilesModule extends Component
             Folder::findOrFail($this->itemToDeleteId)->delete();
         }
         $this->showDeleteConfirmationModal = false;
-        $this->itemNameToDelete = ''; // Reset name
+        $this->itemNameToDelete = '';
         $this->loadContent();
     }
 
@@ -367,27 +380,22 @@ class ArchivedFilesModule extends Component
         $this->loadContent();
     }
 
-    // New method for "Select All"
     public function toggleSelectAllVisible()
     {
         $visibleUserIds = $this->getVisibleUsersQuery()->pluck('id')->toArray();
         $creatorId = $this->folderForPermissions?->user_id;
 
-        // Exclude the creator from the list of IDs that can be toggled
         $toggleableUserIds = array_diff($visibleUserIds, [$creatorId]);
 
         $this->allVisibleUsersSelected = !$this->allVisibleUsersSelected;
 
         if ($this->allVisibleUsersSelected) {
-            // Add all visible users to the selected list, ensuring no duplicates
             $this->selectedUsers = array_unique(array_merge($this->selectedUsers, $toggleableUserIds));
         } else {
-            // Remove all visible users from the selected list
             $this->selectedUsers = array_diff($this->selectedUsers, $toggleableUserIds);
         }
     }
 
-    // New helper method to get the current user query
     private function getVisibleUsersQuery(): Builder
     {
         $query = User::query()->whereHas('profile');
@@ -404,7 +412,7 @@ class ArchivedFilesModule extends Component
     public function render()
     {
         if ($this->showPermissionsModal) {
-            $query = $this->getVisibleUsersQuery(); // Use the helper
+            $query = $this->getVisibleUsersQuery();
             $users = $query->get();
 
             $creatorId = $this->folderForPermissions?->user_id;

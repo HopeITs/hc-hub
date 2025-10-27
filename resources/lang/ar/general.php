@@ -348,6 +348,9 @@ return [
     'dates' => 'التواريخ',
     'orgn-chart' => 'هيكلية المؤسسة',
     'on_hold' => 'بالانتظار',
+    'notifications' => 'الاشعارات',
+    'notification_checklist_assigned' => 'يرجى تسليم :item إلى :employee',
+    'no_notifications' => 'لا يوجد اشعارات',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
