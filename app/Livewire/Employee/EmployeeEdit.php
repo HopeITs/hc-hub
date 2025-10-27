@@ -243,6 +243,15 @@ class EmployeeEdit extends Component
     {
         $roles = Role::pluck('name', 'id')->toArray();
         $delivereds = Employee::whereIn('id', DefaultDeliverable::pluck('employee_id'))->get();
+        if ($delivereds->isEmpty()) {
+            $delivereds = Employee::whereHas(
+                'contracts', function ($q) {
+                $q->whereHas('position.department', function ($q) {
+                    $q->whereIn('name', ['IT', 'Communication', 'HR']);
+                });
+            }
+            )->get();
+        }
         $cities = City::where('is_active', true)->pluck(transColumn('name'), 'id')->toArray();
 
         $employeeChecklistItems = Checklist::with(['item'])
