@@ -3,7 +3,7 @@
 <head>
     @include('partials.head')
 </head>
-<body class="font-SomarSans bg-gray-100">
+<body class="font-SomarSans h-full  bg-gray-100">
 
 <div class=" flex items-center justify-center px-4">
 
@@ -19,7 +19,7 @@
 
 </div>
 
-<x-layouts.app.footer />
+<x-layouts.app.footer  class="absolute bottom-0"/>
 
 {{--@fluxScripts--}}
 </body>
