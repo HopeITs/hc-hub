@@ -57,10 +57,7 @@ class LeaveBalanceForm extends Form
                 ->orderBy('end_date', 'desc')
                 ->first();
 dd($prevContract);
-            if (
-                ($prevContract->contract_type_id === 3 || $prevContract->contract_type_id === 4)
-                && ($prevContract->end_date->year === $contract->start_date->year)
-            ) {
+            if (($prevContract->contract_type_id === 3 || $prevContract->contract_type_id === 4) && ($prevContract->end_date->year === $contract->start_date->year)) {
                 $year = $contract->start_date->year;
                 $startOfYear = Carbon::create($year, 1, 1);
                 $endOfPrev = $prevContract->end_date;
