@@ -9,11 +9,11 @@ use Livewire\Component;
 
 class EmployeeDashboard extends Component
 {
-    public $employee;
-    public $contract;
-    public $positionTitle;
-    public $departmentName;
-    public $joinedOn;
+        public $employee;
+        public $contract;
+        public $positionTitle;
+        public $departmentName;
+        public $joinedOn;
     public $workEmail;
 
     //today's birthday function

@@ -1,5 +1,10 @@
+@php
+    $phone = preg_replace('/\D+/', '', $member->personal_phone ?? '');
+@endphp
+
 <div class="relative w-full max-w-lg bg-[var(--color-neutral-50)] rounded-3xl shadow-lg overflow-hidden">
 
+    <!-- Header -->
     <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[var(--color-primary-200)] bg-[var(--color-primary-500)] text-white">
         <div class="flex items-center gap-2">
             <div class="flex items-center justify-center h-8 w-8 rounded-lg bg-white/20 text-white shadow-sm">
@@ -7,12 +12,17 @@
             </div>
             <h2 class="text-lg font-extrabold tracking-tight">Team Members</h2>
         </div>
-        <a href="{{ route('org.chart') }}"
-           class="text-[11px] font-semibold text-white/90 hover:text-white transition">
-            View All →
-        </a>
+
+        <div class="flex items-center gap-2">
+
+            <a href="{{ route('org.chart') }}"
+               class="text-[11px] font-semibold text-white/90 hover:text-white transition">
+                View All →
+            </a>
+        </div>
     </div>
 
+    <!-- Members -->
     <div class="relative p-5 space-y-3 overflow-y-auto max-h-[400px] scroll-smooth
                 scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)]
                 hover:scrollbar-thumb-[var(--color-primary-400)]">
@@ -26,15 +36,12 @@
                                 ring-2 ring-[var(--color-primary-500)] bg-[var(--color-primary-500)]
                                 text-white text-xl font-semibold uppercase shadow-sm">
                         @if($member->getFirstMediaUrl('profile'))
-                            <img
-                                src="{{ $member->getFirstMediaUrl('profile') }}"
-                                alt="{{ $member->displayName ?? $member->name }}"
-                                class="h-full w-full object-cover">
+                            <img src="{{ $member->getFirstMediaUrl('profile') }}"
+                                 alt="{{ $member->displayName ?? $member->name }}"
+                                 class="h-full w-full object-cover">
                         @else
-                            {{ Str::of($member->displayName ?? $member->name)
-                                ->trim()
-                                ->split('/\s+/')
-                                ->map(fn($n)=>Str::substr($n,0,1))
+                            {{ collect(explode(' ', $member->displayName ?? $member->name))
+                                ->map(fn($n) => Str::substr($n,0,1))
                                 ->join('') }}
                         @endif
                     </div>
@@ -44,17 +51,13 @@
                             {{ $member->displayName ?? $member->name }}
                         </p>
                         <p class="text-[11px] text-[var(--color-neutral-500)] leading-tight truncate">
-                            {{
-                                collect(explode(' ', $member->positionTitle ?? '—'))
-                                    ->take(3)
-                                    ->join(' ')
-                                . (str_word_count($member->positionTitle ?? '') > 3 ? '...' : '')
-                            }}
+                            {{ Str::limit($member->positionTitle ?? '—', 30) }}
                         </p>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end  flex-shrink-0">
+                <!-- Actions -->
+                <div class="flex items-center justify-end gap-1 flex-shrink-0">
                     <a href="mailto:{{ $member->account->email ?? '#' }}"
                        class="flex items-center justify-center w-8 h-8 rounded-full text-[var(--color-primary-600)]
                               hover:bg-[var(--color-primary-50)] transition"
@@ -62,10 +65,16 @@
                         <x-icons.envelope class="w-4.5 h-4.5" />
                     </a>
 
+                    <!-- Telegram Desktop -->
+                    <a href="tg://resolve?phone={{ $phone }}"
+                       class="flex items-center justify-center w-8 h-8 rounded-full text-sky-500 hover:bg-sky-50 transition"
+                       title="Chat on Telegram">
+                        <x-icons.telegram class="w-5 h-5" />
+                    </a>
+
                     <a href="{{ route('employees.show', ['employee' => $member->username]) }}"
-                       class="flex items-center justify-center w-8 h-8
-                              text-[var(--color-primary-600)] bg-white hover:bg-[var(--color-primary-50)]
-                              hover:shadow-sm transition"
+                       class="flex items-center justify-center w-8 h-8 rounded-full
+                              text-[var(--color-primary-600)] hover:bg-[var(--color-primary-50)] transition"
                        title="View Employee Details">
                         <x-icons.user class="w-5.5 h-5.5" />
                     </a>

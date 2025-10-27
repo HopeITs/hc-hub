@@ -3,6 +3,9 @@
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Dashboards\EmployeeDashboard;
+use App\Livewire\Dashboards\GeneralAdminDashboard;
+use App\Livewire\Dashboards\HrDashboard;
+use App\Livewire\Dashboards\ManagerDashboard;
 use App\Livewire\Basics\{ChecklistItemModule,
     CityModule,
     ContractTypeModule,
@@ -124,6 +127,15 @@ Route::group(
 
             Route::get('/employee-dashboard', EmployeeDashboard::class)
                 ->name('employee.dashboard');
+
+            Route::get('/hr-dashboard', HrDashboard::class)
+                ->name('hr.dashboard');
+
+            Route::get('/manager-dashboard', ManagerDashboard::class)
+                ->name('manager.dashboard');
+
+            Route::get('/general-admin-dashboard', GeneralAdminDashboard::class)
+                ->name('general-admin.dashboard');
 
                 Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
         });
