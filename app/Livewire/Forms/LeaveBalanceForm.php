@@ -51,26 +51,28 @@ class LeaveBalanceForm extends Form
         $extra = 0;
 
 
-        if ($employee->allContracts->count() < 3 && $employee->allContracts->count() > 0) {
+        if ($employee->allContracts->count() <= 3 && $employee->allContracts->count() > 1) {
             $prevContract = $employee->allContracts()
                 ->whereNot('id', $contractId)
                 ->orderBy('end_date', 'desc')
                 ->first();
-
-            if (($prevContract->contract_type_id === 3 || $prevContract->contract_type_id === 4) && ($prevContract->end_date->year === $contract->start_date->year)) {
-                $year = $contract->start_date->year;
-                $startOfYear = Carbon::create($year, 1, 1);
-                $endOfPrev = $prevContract->end_date;
-                if ($endOfPrev > $startOfYear) {
-                    $monthsInNewYear = $startOfYear->diffInMonths($endOfPrev) + 1;
-                    $remain = $prevContract->deserved - $prevContract->used;
-                    if ($remain >= $monthsInNewYear) {
-                        $extra = $monthsInNewYear;
-                    } else {
-                        $extra = $remain;
+            if ($prevContract !== null) {
+                if (($prevContract->contract_type_id === 3 || $prevContract->contract_type_id === 4) && ($prevContract->end_date->year === $contract->start_date->year)) {
+                    $year = $contract->start_date->year;
+                    $startOfYear = Carbon::create($year, 1, 1);
+                    $endOfPrev = $prevContract->end_date;
+                    if ($endOfPrev > $startOfYear) {
+                        $monthsInNewYear = $startOfYear->diffInMonths($endOfPrev) + 1;
+                        $remain = $prevContract->deserved - $prevContract->used;
+                        if ($remain >= $monthsInNewYear) {
+                            $extra = $monthsInNewYear;
+                        } else {
+                            $extra = $remain;
+                        }
                     }
                 }
             }
+
         }
 
 

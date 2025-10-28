@@ -51,7 +51,7 @@
                             class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                             Select Any..
                         </option>
-                        @foreach($allAvailableLeaves as $availableLeave)
+                        @foreach($allAvailableLeaves ?? [] as $availableLeave)
                             <option value="{{$availableLeave->id}}">{{$availableLeave->leaveType->name}}</option>
                         @endforeach
                     </x-forms.select-input>

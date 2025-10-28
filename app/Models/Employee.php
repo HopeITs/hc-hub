@@ -53,7 +53,7 @@ class Employee extends Model implements HasMedia
     }
     public function getDepartmentAttribute()
     {
-        return $this->latestActiveContract()->position->department;
+        return $this->latestActiveContract()?->position->department;
     }
 
     protected function address(): Attribute

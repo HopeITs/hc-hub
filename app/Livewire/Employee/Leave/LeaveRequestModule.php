@@ -34,7 +34,7 @@ class LeaveRequestModule extends Component
         $alternativeEmployees = Employee::where('city_id', $employee->city_id)->where('id', '!=', $employee->id)
             ->whereHas('contracts', function ($query) use ($employee) {
                 $query->whereHas('position.department', function ($query) use ($employee) {
-                    $query->where('id', $employee->department->id);
+                    $query->where('id', $employee->department->id ?? null);
                 });
             })->get();
 
