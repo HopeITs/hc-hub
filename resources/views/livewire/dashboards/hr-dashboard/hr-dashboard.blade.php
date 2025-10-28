@@ -10,31 +10,31 @@
         </div>
 
         <div>
-            <x-dashboard-cards.statistics1/>
+            <x-dashboard-cards.employee-chart-statistics/>
         </div>
 
         <div>
-            <x-dashboard-cards.statistics2/>
+            <x-dashboard-cards.tree-chart-statistics/>
         </div>
 
         <div>
-            <x-dashboard-cards.statistics3/>
+            <x-dashboard-cards.department-employees-statistics/>
         </div>
 
         <div>
-            <x-dashboard-cards.statistics4/>
+            <x-dashboard-cards.contract-type-employees-statistics/>
         </div>
 
         <div>
-            <x-dashboard-cards.statistics5/>
+            <x-dashboard-cards.job-level-employees-statistics/>
         </div>
 
         <div>
-            <x-dashboard-cards.statistics6/>
+            <x-dashboard-cards.salary-per-employee-statistics/>
         </div>
 
         <div>
-            <x-dashboard-cards.statistics7/>
+            <x-dashboard-cards.no-leaves-employees-statistics/>
         </div>
 
         <div>
