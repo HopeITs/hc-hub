@@ -44,9 +44,8 @@ Route::group(
     function () {
         Livewire::setUpdateRoute(fn($handle) => Route::post('/livewire/update', $handle));
 
-        Route::get('/', fn() => view('welcome'))->name('home');
 
-        Route::view('dashboard', 'dashboard')
+        Route::view('/', 'dashboard')
             ->middleware(['auth', 'verified'])
             ->name('dashboard');
 
