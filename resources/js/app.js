@@ -1,15 +1,15 @@
 import '@yaireo/tagify/dist/tagify.css'
 import '../css/app.css';
+import {
+    Chart, BarController, LineController, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend} from 'chart.js';
+    Chart.register(BarController, LineController, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend);import Swal from 'sweetalert2'
+    import 'flowbite';
+    import './password-toggle.js'
+    import './password-strength.js'
+    import Tagify from '@yaireo/tagify'
 
-import Swal from 'sweetalert2'
-import 'flowbite';
-import './password-toggle.js'
-import './password-strength.js'
-import Tagify from '@yaireo/tagify'
-
-window.Swal = Swal
-
-
+    window.Swal = Swal
+    window.Chart = Chart;
 
 document.querySelectorAll('.tagify').forEach((el) => {
     const whitelist = el.dataset.whitelist ? el.dataset.whitelist.split(',') : []
