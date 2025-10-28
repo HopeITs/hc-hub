@@ -43,7 +43,7 @@ class LeaveBalanceForm extends Form
     {
         $contract = Contract::findOrFail($contractId)->load(['employee', 'contractType']);
         $leaveTypes = LeaveType::whereNot('base_days', 12)->get();
-        $employee = $contract->employee->load('contracts','allContracts');
+        $employee = $contract->employee->load('contracts', 'allContracts');
         $leaveRule = AnnualLeaveRule::where('years_of_volunteering', '<=', $employee->years_of_service)->orderBy('days', 'desc')->first() ?? AnnualLeaveRule::first();
         $duration = $contract->duration();
         $weekWordDays = 5;
@@ -51,34 +51,24 @@ class LeaveBalanceForm extends Form
         $extra = 0;
 
 
-        if ($employee->contracts->count() < 3 && $employee->contracts->count() > 0) {
+        if ($employee->allContracts->count() < 3 && $employee->allContracts->count() > 0) {
             $prevContract = $employee->allContracts()
                 ->whereNot('id', $contractId)
                 ->orderBy('end_date', 'desc')
                 ->first();
-dd($prevContract);
+
             if (($prevContract->contract_type_id === 3 || $prevContract->contract_type_id === 4) && ($prevContract->end_date->year === $contract->start_date->year)) {
                 $year = $contract->start_date->year;
                 $startOfYear = Carbon::create($year, 1, 1);
                 $endOfPrev = $prevContract->end_date;
                 if ($endOfPrev > $startOfYear) {
                     $monthsInNewYear = $startOfYear->diffInMonths($endOfPrev) + 1;
-
-                    $prevContracts = $employee->contracts()
-                        ->whereNot('id', $contractId)
-                        ->with('leaveBalances')
-                        ->get();
-
-                    $totalDeserve = $prevContracts
-                        ->flatMap(fn($contract) => $contract->leaveBalances)
-                        ->sum('deserve');
-
-                    $totalUsed = $prevContracts
-                        ->flatMap(fn($contract) => $contract->leaveBalances)
-                        ->sum('used');
-
-                    $unused = $totalDeserve - $totalUsed;
-                    $extra = min($unused, $monthsInNewYear);
+                    $remain = $prevContract->deserved - $prevContract->used;
+                    if ($remain >= $monthsInNewYear) {
+                        $extra = $monthsInNewYear;
+                    } else {
+                        $extra = $remain;
+                    }
                 }
             }
         }
