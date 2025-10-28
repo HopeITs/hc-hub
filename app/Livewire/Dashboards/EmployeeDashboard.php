@@ -3,7 +3,7 @@
 namespace App\Livewire\Dashboards;
 
 use Carbon\Carbon;
-use App\Models\{Checklist, Employee, Contract};
+use App\Models\{Badge, Checklist, Employee, Contract};
 use FontLib\Table\Type\name;
 use Livewire\Component;
 
@@ -183,16 +183,14 @@ class EmployeeDashboard extends Component
             $techManager?->id,
         ])->filter()->unique()->all();
 
-        $sameCityEmployees = \App\Models\Employee::query()
+        $sameCityEmployees = Employee::query()
             ->where('city_id', $this->employee?->city_id)
             ->whereNotIn('id', $excludeIds)
             ->with([
-                // Ensure we always load the position and job level
                 'contracts.position.jobLevel',
             ])
             ->get()
             ->map(function ($emp) use ($nameCol, $titleCol) {
-                // Pick the latest active contract either from the eager-loaded set or method
                 $contract = $emp->contracts
                     ->filter(fn($c) => ($c->is_active || (
                             !$c->terminated_at &&
@@ -240,7 +238,7 @@ class EmployeeDashboard extends Component
             return collect();
         }
 
-        return \App\Models\Badge::query()
+        return Badge::query()
             ->with('employee')
             ->where('employee_id', $this->employee->id)
             ->orderByDesc('date')
