@@ -17,14 +17,12 @@ class AllItems extends Component
 
         return Checklist::with(['employee', 'item'])
             ->where('employee_id', $employee->id)
-            ->where(function ($q) {
-                $q->whereNull('returned_status')->orWhereNot('returned_status', 'received');
-            })
             ->latest('updated_at')
             ->get()
             ->map(function ($item) {
-                $item->display_status = match ($item->delivered_status) {
-                    'delivered' => 'Delivered',
+                $item->display_status = match (true) {
+                    $item->returned_status === 'received' => 'Returned',
+                    $item->delivered_status === 'delivered' => 'Delivered',
                     default => 'On Hold',
                 };
                 return $item;

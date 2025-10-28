@@ -40,24 +40,24 @@ class ContractForm extends Form
     private function toInt($value): int
     {
         if ($value instanceof \BackedEnum) {
-            return (string) $value->value;
+            return (string)$value->value;
         }
-        return (string) $value;
+        return (string)$value;
     }
 
     private function defaultSalaryPer(): int
     {
         if (enum_exists(SalaryPer::class)) {
-            return (int) SalaryPer::Month->value;
+            return (int)SalaryPer::Month->value;
         }
 
-        return defined(SalaryPer::class . '::Month') ? (int) constant(SalaryPer::class . '::Month') : 1; // safe fallback
+        return defined(SalaryPer::class . '::Month') ? (int)constant(SalaryPer::class . '::Month') : 1; // safe fallback
     }
 
     private function allowedSalaryPerValues(): array
     {
         if (enum_exists(SalaryPer::class) && method_exists(SalaryPer::class, 'cases')) {
-            return array_map(fn($case) => $case instanceof \BackedEnum ? (int) $case->value : (int) $case->name, SalaryPer::cases());
+            return array_map(fn($case) => $case instanceof \BackedEnum ? (int)$case->value : (int)$case->name, SalaryPer::cases());
         }
 
         $keys = ['Unknown', 'Month', 'Hour', 'Session'];
@@ -65,7 +65,7 @@ class ContractForm extends Form
         foreach ($keys as $k) {
             $const = SalaryPer::class . '::' . $k;
             if (defined($const)) {
-                $vals[] = (int) constant($const);
+                $vals[] = (int)constant($const);
             }
         }
 
@@ -101,16 +101,16 @@ class ContractForm extends Form
         $this->position_id = $c->position_id;
         $this->contract_type_id = $c->contract_type_id;
 
-        $this->is_active = (bool) $c->is_active;
+        $this->is_active = (bool)$c->is_active;
 
         $this->start_date = optional($c->start_date)?->toDateString();
         $this->end_date = optional($c->end_date)?->toDateString();
         $this->terminated_at = optional($c->terminated_at)?->toDateString();
         $this->reason_of_termination = $c->reason_of_termination;
-        $this->yearly_leave_days = (int) $c->yearly_leave_days;
-        $this->weekly_hours = (int) $c->weekly_hours;
+        $this->yearly_leave_days = (int)$c->yearly_leave_days;
+        $this->weekly_hours = (int)$c->weekly_hours;
 
-        $this->currency = (int) $c->currency;
+        $this->currency = (int)$c->currency;
         $this->salary = $c->salary;
         $this->salary_per = $this->toInt($c->salary_per);
 
@@ -128,12 +128,20 @@ class ContractForm extends Form
                 'required',
                 'exists:positions,id',
                 function ($attribute, $value, $fail) {
-                    if ($this->contract->position_id !== $value) {
+                    if (isset($this->contract)) {
+                        if ($this->contract->position_id !== $value) {
+                            $pos = Position::find($value);
+                            if ($pos && !$pos->canAssign()) {
+                                $fail(__('This position exceeded the number of max employees.'));
+                            }
+                        }
+                    } else {
                         $pos = Position::find($value);
                         if ($pos && !$pos->canAssign()) {
                             $fail(__('This position exceeded the number of max employees.'));
                         }
                     }
+
                 },
             ],
             'contract_type_id' => ['required', 'exists:contract_types,id'],
@@ -179,18 +187,18 @@ class ContractForm extends Form
             'employee_id' => $this->employee_id,
             'position_id' => $this->position_id,
             'contract_type_id' => $this->contract_type_id,
-            'is_active' => (bool) $this->is_active,
+            'is_active' => (bool)$this->is_active,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'terminated_at' => $this->nullIfEmpty($this->terminated_at),
             'reason_of_termination' => $this->nullIfEmpty($this->reason_of_termination),
-            'yearly_leave_days' => (int) $this->yearly_leave_days,
-            'weekly_hours' => (int) $this->weekly_hours,
+            'yearly_leave_days' => (int)$this->yearly_leave_days,
+            'weekly_hours' => (int)$this->weekly_hours,
             'work_days' => $this->work_days,
             'work_hours' => $this->work_hours,
-            'currency' => (int) $this->currency,
+            'currency' => (int)$this->currency,
             'salary' => $this->salary,
-            'salary_per' => (string) $this->salary_per,
+            'salary_per' => (string)$this->salary_per,
         ];
     }
 
@@ -229,7 +237,7 @@ class ContractForm extends Form
                 'employee_id' => $this->employee_id,
                 'position_id' => $this->position_id,
                 'contract_type_id' => $this->contract_type_id,
-                'is_active' => (bool) $this->is_active,
+                'is_active' => (bool)$this->is_active,
             ]);
         }
     }
@@ -244,8 +252,8 @@ class ContractForm extends Form
                 'end_date' => $this->end_date,
                 'terminated_at' => $this->nullIfEmpty($this->terminated_at),
                 'reason_of_termination' => $this->nullIfEmpty($this->reason_of_termination),
-                'yearly_leave_days' => (int) $this->yearly_leave_days,
-                'weekly_hours' => (int) $this->weekly_hours,
+                'yearly_leave_days' => (int)$this->yearly_leave_days,
+                'weekly_hours' => (int)$this->weekly_hours,
                 'work_days' => $this->work_days,
                 'work_hours' => $this->work_hours,
             ]);
@@ -258,9 +266,9 @@ class ContractForm extends Form
 
         if ($this->contract) {
             $this->contract->update([
-                'currency' => (int) $this->currency,
+                'currency' => (int)$this->currency,
                 'salary' => $this->salary,
-                'salary_per' => (string) $this->salary_per,
+                'salary_per' => (string)$this->salary_per,
             ]);
         }
     }
