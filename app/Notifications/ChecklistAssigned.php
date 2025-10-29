@@ -30,13 +30,16 @@ class ChecklistAssigned extends Notification
         $item = $this->checklist->item?->name;
 
         if ($this->type === 'deliver') {
-            $message = "Please deliver {$item} to {$employee}";
+            $title = 'Deliver Item';
+            $body = "Please deliver {$item} to {$employee}";
         } else {
-            $message = "Please receive {$item} from {$employee}";
+            $title = 'Receive Item';
+            $body = "Please receive {$item} from {$employee}";
         }
 
         return [
-            'message' => $message,
+            'title' => $title,
+            'body' => $body,
             'url' => route('checklist-items.pending-delivers'),
         ];
     }
