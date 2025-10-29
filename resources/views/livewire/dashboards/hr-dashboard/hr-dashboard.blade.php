@@ -10,6 +10,12 @@
         </div>
 
         <div>
+            <x-dashboard-cards.team-members-card
+                :contract="$contract"
+                :employee="$employee"/>
+        </div>
+
+        <div>
             <x-dashboard-cards.employee-chart-statistics/>
         </div>
 
@@ -33,11 +39,7 @@
             <x-dashboard-cards.no-leaves-employees-statistics/>
         </div>
 
-        <div>
-            <x-dashboard-cards.team-members-card
-                :contract="$contract"
-                :employee="$employee"/>
-        </div>
+
 
         <div>
             <x-dashboard-cards.today-birthday-card
