@@ -30,7 +30,6 @@ class ContractFactory extends Factory
             'end_date' => $endDate,
             'terminated_at' => null,
             'reason_of_termination' => null,
-            'yearly_leave_days' => 12,
             'salary' => $this->faker->randomFloat(2, 500, 3000),
             'currency' => $this->faker->numberBetween(1, 3), // 1=SYP, 2=USD, 3=EUR
             'salary_per' => $this->faker->numberBetween(1, 3), // 1=Month,2=Hour,3=Session

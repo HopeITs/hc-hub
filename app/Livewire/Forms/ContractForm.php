@@ -25,7 +25,7 @@ class ContractForm extends Form
     public ?string $end_date = null;
     public ?string $terminated_at = null; // nullable
     public ?string $reason_of_termination = null; // nullable
-    public int $yearly_leave_days = 12;
+
     public int $weekly_hours = 40;
 
     // ── Pay
@@ -81,7 +81,6 @@ class ContractForm extends Form
     public function setDefaults(): void
     {
         $this->is_active = true;
-        $this->yearly_leave_days = 12;
         $this->weekly_hours = 40;
         $this->currency = 1; // SYP
         $this->salary_per = $this->defaultSalaryPer();
@@ -107,7 +106,6 @@ class ContractForm extends Form
         $this->end_date = optional($c->end_date)?->toDateString();
         $this->terminated_at = optional($c->terminated_at)?->toDateString();
         $this->reason_of_termination = $c->reason_of_termination;
-        $this->yearly_leave_days = (int)$c->yearly_leave_days;
         $this->weekly_hours = (int)$c->weekly_hours;
 
         $this->currency = (int)$c->currency;
@@ -166,7 +164,6 @@ class ContractForm extends Form
             ]),
             'terminated_at' => ['nullable', 'date', 'after_or_equal:start_date'],
             'reason_of_termination' => ['nullable', 'string'],
-            'yearly_leave_days' => ['required', 'integer', 'min:0'],
             'weekly_hours' => ['required', 'integer', 'min:0'],
         ]);
     }
@@ -192,7 +189,6 @@ class ContractForm extends Form
             'end_date' => $this->end_date,
             'terminated_at' => $this->nullIfEmpty($this->terminated_at),
             'reason_of_termination' => $this->nullIfEmpty($this->reason_of_termination),
-            'yearly_leave_days' => (int)$this->yearly_leave_days,
             'weekly_hours' => (int)$this->weekly_hours,
             'work_days' => $this->work_days,
             'work_hours' => $this->work_hours,
@@ -252,7 +248,6 @@ class ContractForm extends Form
                 'end_date' => $this->end_date,
                 'terminated_at' => $this->nullIfEmpty($this->terminated_at),
                 'reason_of_termination' => $this->nullIfEmpty($this->reason_of_termination),
-                'yearly_leave_days' => (int)$this->yearly_leave_days,
                 'weekly_hours' => (int)$this->weekly_hours,
                 'work_days' => $this->work_days,
                 'work_hours' => $this->work_hours,

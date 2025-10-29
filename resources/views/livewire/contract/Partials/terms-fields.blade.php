@@ -1,5 +1,5 @@
 @php($locale = app()->getLocale())
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
     {{-- Start date --}}
     <div>
@@ -33,23 +33,6 @@
         <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.weekly_hours') }}</x-error-span>
     </div>
 
-    {{-- Yearly leave days --}}
-    <div>
-        <x-forms.input-label for="yearly_leave_days">@lang('general.yearly-leave-days')</x-forms.input-label>
-        <div class="relative mt-1">
-            <x-forms.input
-                id="yearly_leave_days"
-                type="number" min="0"
-                wire:model.defer="form.yearly_leave_days"
-                placeholder="12"
-                class="pr-14"
-            />
-            <span class="absolute inset-y-0 end-3 flex items-center text-xs text-gray-500 pointer-events-none">
-                {{ $locale === 'ar' ? 'يوم/سنة' : 'days/yr' }}
-            </span>
-        </div>
-        <x-error-span class="mt-1 block text-sm">{{ $errors->first('form.yearly_leave_days') }}</x-error-span>
-    </div>
 
     {{-- Terminated at --}}
     <div>

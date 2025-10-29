@@ -19,7 +19,6 @@ class Contract extends Model
         'end_date' => 'date',
         'terminated_at' => 'date',
         'is_active' => 'boolean',
-        'yearly_leave_days' => 'integer',
         'weekly_hours' => 'integer',
         'currency' => 'integer',
         'salary' => 'decimal:2',
