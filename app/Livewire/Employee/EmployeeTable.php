@@ -62,7 +62,7 @@ class EmployeeTable extends LivewireTable
             })->asHtml(),
 
             Column::make(trans('general.years-of-service'), 'years_of_service')->computed()->sortable(),
-
+            Column::make(trans('general.join-at'), 'join_at')->computed()->sortable(),
             SelectColumn::make(trans_choice('general.city', 1), 'city.' . transColumn('name'))
                 ->options(City::query()->whereNot('code', '000')->where('is_active', true)->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()->searchable(),

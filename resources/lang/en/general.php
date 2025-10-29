@@ -355,6 +355,7 @@ return [
     'received' => 'Received',
     'on_hold' => 'On Hold',
     'months' => 'Months',
+    'year' => 'Year|Years',
     'notifications' => 'Notifications',
     'notification_checklist_assigned' => 'Please deliver :item to :employee',
     'no_notifications' => 'No Notifications Found',
@@ -383,6 +384,7 @@ return [
         'new-password' => 'New Password',
     ],
     'weekend-days' => 'Weekend Days',
+    'join-at' => 'Join At',
     'days-of-week' => [
         'monday' => 'Monday',
         'tuesday' => 'Tuesday',
