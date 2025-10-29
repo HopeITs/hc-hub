@@ -18,7 +18,7 @@ class ContractCreate extends Component
 
     public ?int $city_id = null;
     public ?int $program_id = null;
-    public ?int $center_id = null; // Optional (nullable)
+    public ?int $center_id = null;
 
     protected array $validatorsByStep = [
         1 => 'validateIdentity',
@@ -57,7 +57,6 @@ class ContractCreate extends Component
         }
     }
 
-
     public function next(): void
     {
         if (method_exists($this->form, $this->validatorsByStep[$this->step] ?? '')) {
@@ -72,13 +71,17 @@ class ContractCreate extends Component
 
     public function prev(): void
     {
-        if ($this->step > 1) $this->step--;
+        if ($this->step > 1) {
+            $this->step--;
+        }
     }
 
     public function jumpTo(int $target): void
     {
         $target = max(1, min(3, $target));
-        if ($target <= $this->maxStep) $this->step = $target;
+        if ($target <= $this->maxStep) {
+            $this->step = $target;
+        }
     }
 
     public function submit()
@@ -87,17 +90,24 @@ class ContractCreate extends Component
         $this->form->validateTerms();
         $this->form->validatePay();
 
-        if (!$this->validateCityConsistency()) return;
+        if (!$this->validateCityConsistency()) {
+            return;
+        }
 
         $contract = $this->form->save();
 
-        if($contract->salary_per->value === SalaryPer::Month){
+        if ($contract->salary_per->value === SalaryPer::Month) {
             $this->balanceForm->store($contract->id);
         }
 
-        \App\Models\User::all()->each(function ($user) use ($contract) {
-            $user->notify(new \App\Notifications\NewEmployeeWelcome($contract->employee));
-        });
+        $employee = $contract->employee;
+
+        if ($employee->allContracts()->count() === 1) {
+            \App\Models\User::all()->each(function ($user) use ($employee) {
+                $user->notify(new \App\Notifications\NewEmployeeWelcome($employee));
+            });
+        }
+
 
         $this->dispatch('notification-created');
 
@@ -108,10 +118,10 @@ class ContractCreate extends Component
 
     private function validateCityConsistency(): bool
     {
-        if (!$this->city_id) return true;
+        if (!$this->city_id) {
+            return true;
+        }
 
-
-        // Position chain validation
         if ($this->form->position_id) {
             $pos = Position::select('id', 'program_id', 'center_id')->find($this->form->position_id);
             if (!$pos) {
@@ -119,7 +129,7 @@ class ContractCreate extends Component
                 return false;
             }
 
-            $centerCityId = $pos->center_id ? Center::where('id', $pos->center_id)->value('city_id') : $this->city_id; // If no center, assume belongs to current city
+            $centerCityId = $pos->center_id ? Center::where('id', $pos->center_id)->value('city_id') : $this->city_id;
 
             if ($centerCityId != $this->city_id) {
                 $this->addError('form.position_id', __('validation.custom.position_id.invalid'));
@@ -143,6 +153,7 @@ class ContractCreate extends Component
     public function saveIdentity(): void {}
     public function saveTerms(): void {}
     public function savePay(): void {}
+
     public function save()
     {
         return $this->submit();
@@ -169,7 +180,6 @@ class ContractCreate extends Component
                 $employees = Employee::whereHas('city', function ($query) use ($citySlug) {
                     $query->where('slug', $citySlug);
                 })->get();
-
             }
         } else {
             $cityId = optional($user->profile)->city_id;
@@ -178,7 +188,6 @@ class ContractCreate extends Component
             }
             $employees = Employee::where('city_id', $cityId)->get();
         }
-
 
         $programs = $this->city_id
             ? Program::whereIn(
@@ -195,12 +204,7 @@ class ContractCreate extends Component
                 ->get()
             : collect();
 
-        $centers = ($this->city_id)
-            ? Center::where('city_id', $this->city_id)
-                ->select('id', 'name')
-                ->orderBy('name')
-                ->get()
-            : collect();
+        $centers = $this->city_id ? Center::where('city_id', $this->city_id)->select('id', 'name')->orderBy('name')->get() : collect();
 
         $positions =
             $this->city_id && $this->program_id
