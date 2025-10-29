@@ -73,7 +73,7 @@ class LeaveBalanceForm extends Form
 
                                 $remain = $prevContract->leaveBalances[0]->deserved - $prevContract->leaveBalances[0]->used;
                                 if ($remain >= $monthsInNewYear) {
-                                    $extra = $monthsInNewYear;
+                                    $extra = $monthsInNewYear * $DailyWorkHours;
                                 } else {
                                     $extra = $remain;
                                 }
