@@ -2,11 +2,10 @@
 
 namespace App\Livewire\Forms;
 
-use App\Enums\ContractType;
+
 use App\Enums\Gender;
 use App\Enums\LeaveTypeCases;
 use App\Enums\MaritalStatus;
-use App\Enums\SalaryPer;
 use App\Models\AnnualLeaveRule;
 use App\Models\Contract;
 
@@ -64,14 +63,14 @@ class LeaveBalanceForm extends Form
                     if ($prevContract->end_date->year === $contract->start_date->year) {
                         //both contracts in the same year
                         if ($prevContract->start_date->year === $prevContract->end_date->year) {
-
                             $extra = $prevContract->leaveBalances[0]->deserved - $prevContract->leaveBalances[0]->used;
                         } else {    //flip the year
                             $year = $contract->start_date->year;
                             $startOfYear = Carbon::create($year, 1, 1);
                             $endOfPrev = $prevContract->end_date;
                             if ($endOfPrev > $startOfYear) {
-                                $monthsInNewYear = $startOfYear->diffInMonths($endOfPrev) + 1;
+                                $monthsInNewYear = round($startOfYear->diffInMonths($endOfPrev));
+
                                 $remain = $prevContract->leaveBalances[0]->deserved - $prevContract->leaveBalances[0]->used;
                                 if ($remain >= $monthsInNewYear) {
                                     $extra = $monthsInNewYear;

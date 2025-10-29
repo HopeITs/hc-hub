@@ -27,6 +27,7 @@ class ContractsTable extends LivewireTable
                 'position.department',
                 'position.jobLevel',
                 'contractType',
+                'leaveBalances'
             ]);
     }
 
@@ -81,8 +82,8 @@ class ContractsTable extends LivewireTable
             ])
             )->asHtml(),
 
-            Column::make(__('general.yearly-leave-days'), 'yearly_leave_days')
-                ->displayUsing(fn($v) => $v ?? '—')
+            Column::make(__('general.yearly-leave-days'), 'leaveBalances')
+                ->displayUsing(fn($m) => $m[0]->deserved_formatted ?? 0)
                 ->sortable(),
 
             SelectColumn::make(__('general.salary-per'), 'salary_per')
