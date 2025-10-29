@@ -211,7 +211,7 @@ class Employee extends Model implements HasMedia
 
     public function getYearsOfServiceAttribute(): float
     {
-        $contracts = $this->contracts()
+        $contracts = $this->allContracts()
             ->select(['start_date', 'end_date', 'terminated_at'])
             ->orderBy('start_date')
             ->get();

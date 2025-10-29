@@ -53,23 +53,37 @@ class LeaveBalanceForm extends Form
 
         if ($employee->allContracts->count() <= 3 && $employee->allContracts->count() > 1) {
             $prevContract = $employee->allContracts()
-                ->whereNot('id', $contractId)
+                ->whereNot('id', $contractId)->with(['leaveBalances' => function ($query) {
+                    return $query->where('type_id' , LeaveTypeCases::Annual);
+                }])
                 ->orderBy('end_date', 'desc')
                 ->first();
+
             if ($prevContract !== null) {
-                if (($prevContract->contract_type_id === 3 || $prevContract->contract_type_id === 4) && ($prevContract->end_date->year === $contract->start_date->year)) {
-                    $year = $contract->start_date->year;
-                    $startOfYear = Carbon::create($year, 1, 1);
-                    $endOfPrev = $prevContract->end_date;
-                    if ($endOfPrev > $startOfYear) {
-                        $monthsInNewYear = $startOfYear->diffInMonths($endOfPrev) + 1;
-                        $remain = $prevContract->deserved - $prevContract->used;
-                        if ($remain >= $monthsInNewYear) {
-                            $extra = $monthsInNewYear;
-                        } else {
-                            $extra = $remain;
+                if (($prevContract->contract_type_id === 3 || $prevContract->contract_type_id === 4)) {
+                    if ($prevContract->end_date->year === $contract->start_date->year) {
+                        //both contracts in the same year
+                        if ($prevContract->start_date->year === $prevContract->end_date->year) {
+
+                            $extra = $prevContract->leaveBalances[0]->deserved - $prevContract->leaveBalances[0]->used;
+                        } else {    //flip the year
+                            $year = $contract->start_date->year;
+                            $startOfYear = Carbon::create($year, 1, 1);
+                            $endOfPrev = $prevContract->end_date;
+                            if ($endOfPrev > $startOfYear) {
+                                $monthsInNewYear = $startOfYear->diffInMonths($endOfPrev) + 1;
+                                $remain = $prevContract->leaveBalances[0]->deserved - $prevContract->leaveBalances[0]->used;
+                                if ($remain >= $monthsInNewYear) {
+                                    $extra = $monthsInNewYear;
+                                } else {
+                                    $extra = $remain;
+                                }
+                            }
                         }
+
+
                     }
+
                 }
             }
 
