@@ -20,7 +20,6 @@ class NewEmployeeWelcome extends Notification
     public function toArray($notifiable): array
     {
         $name = $this->employee->name;
-        $position = $this->employee->position->title ?? 'a new position';
 
         return [
             'title' => "Welcome $name!",
