@@ -53,7 +53,7 @@ class LeaveBalanceForm extends Form
         if ($employee->allContracts->count() <= 3 && $employee->allContracts->count() > 1) {
             $prevContract = $employee->allContracts()
                 ->whereNot('id', $contractId)->with(['leaveBalances' => function ($query) {
-                    return $query->where('type_id' , LeaveTypeCases::Annual);
+                    return $query->where('type_id', LeaveTypeCases::Annual);
                 }])
                 ->orderBy('end_date', 'desc')
                 ->first();
@@ -201,15 +201,52 @@ class LeaveBalanceForm extends Form
         $duration = $contract->duration();
         $weekWordDays = 5;
         $DailyWorkHours = $contract->weekly_hours / $weekWordDays;
+        $extra = 0;
+
+        if ($employee->allContracts->count() <= 3 && $employee->allContracts->count() > 1) {
+            $prevContract = $employee->allContracts()
+                ->whereNot('id', $contractId)->with(['leaveBalances' => function ($query) {
+                    return $query->where('type_id', LeaveTypeCases::Annual);
+                }])
+                ->orderBy('end_date', 'desc')
+                ->first();
+
+            if ($prevContract !== null) {
+                if (($prevContract->contract_type_id === 3 || $prevContract->contract_type_id === 4)) {
+                    if ($prevContract->end_date->year === $contract->start_date->year) {
+                        //both contracts in the same year
+                        if ($prevContract->start_date->year === $prevContract->end_date->year) {
+                            $extra = $prevContract->leaveBalances[0]->deserved - $prevContract->leaveBalances[0]->used;
+                        } else {    //flip the year
+                            $year = $contract->start_date->year;
+                            $startOfYear = Carbon::create($year, 1, 1);
+                            $endOfPrev = $prevContract->end_date;
+                            if ($endOfPrev > $startOfYear) {
+                                $monthsInNewYear = round($startOfYear->diffInMonths($endOfPrev));
+
+                                $remain = $prevContract->leaveBalances[0]->deserved - $prevContract->leaveBalances[0]->used;
+                                if ($remain >= $monthsInNewYear) {
+                                    $extra = $monthsInNewYear * $DailyWorkHours;
+                                } else {
+                                    $extra = $remain;
+                                }
+                            }
+                        }
 
 
+                    }
+
+                }
+            }
+
+        }
         //handle if contract less than a year to set deserved of yearly leaves
         if ($duration < 12) {
-            $yearly_deserve = round($duration * $leaveRule->day_per_month) * $DailyWorkHours;
+            $yearly_deserve = (round($duration * $leaveRule->day_per_month) * $DailyWorkHours) + $extra;
             $sick_deserve = $duration * $DailyWorkHours;
             $unpaid_deserve = $duration * $DailyWorkHours;
         } else {
-            $yearly_deserve = $leaveRule->days * $DailyWorkHours;
+            $yearly_deserve = $leaveRule->days * $DailyWorkHours + $extra;
             $sick_deserve = 12 * $DailyWorkHours;
             $unpaid_deserve = 12 * $DailyWorkHours;
         }
