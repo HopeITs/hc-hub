@@ -71,13 +71,17 @@ class ContractCreate extends Component
 
     public function prev(): void
     {
-        if ($this->step > 1) $this->step--;
+        if ($this->step > 1) {
+            $this->step--;
+        }
     }
 
     public function jumpTo(int $target): void
     {
         $target = max(1, min(3, $target));
-        if ($target <= $this->maxStep) $this->step = $target;
+        if ($target <= $this->maxStep) {
+            $this->step = $target;
+        }
     }
 
     public function submit()
@@ -86,21 +90,24 @@ class ContractCreate extends Component
         $this->form->validateTerms();
         $this->form->validatePay();
 
-        if (!$this->validateCityConsistency()) return;
+        if (!$this->validateCityConsistency()) {
+            return;
+        }
 
         $contract = $this->form->save();
 
-        if($contract->salary_per->value === SalaryPer::Month){
+        if ($contract->salary_per->value === SalaryPer::Month) {
             $this->balanceForm->store($contract->id);
         }
 
         $employee = $contract->employee;
 
-        if ($employee->contracts()->count() === 1) {
+        if ($employee->allContracts()->count() === 1) {
             \App\Models\User::all()->each(function ($user) use ($employee) {
                 $user->notify(new \App\Notifications\NewEmployeeWelcome($employee));
             });
         }
+
 
         $this->dispatch('notification-created');
 
@@ -111,7 +118,9 @@ class ContractCreate extends Component
 
     private function validateCityConsistency(): bool
     {
-        if (!$this->city_id) return true;
+        if (!$this->city_id) {
+            return true;
+        }
 
         if ($this->form->position_id) {
             $pos = Position::select('id', 'program_id', 'center_id')->find($this->form->position_id);
@@ -195,12 +204,7 @@ class ContractCreate extends Component
                 ->get()
             : collect();
 
-        $centers = ($this->city_id)
-            ? Center::where('city_id', $this->city_id)
-                ->select('id', 'name')
-                ->orderBy('name')
-                ->get()
-            : collect();
+        $centers = $this->city_id ? Center::where('city_id', $this->city_id)->select('id', 'name')->orderBy('name')->get() : collect();
 
         $positions =
             $this->city_id && $this->program_id
