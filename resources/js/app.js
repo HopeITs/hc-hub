@@ -1,8 +1,9 @@
 import '@yaireo/tagify/dist/tagify.css'
 import '../css/app.css';
 import {
-    Chart, BarController, LineController, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend} from 'chart.js';
-    Chart.register(BarController, LineController, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend);import Swal from 'sweetalert2'
+    Chart, BarController, LineController, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Title } from 'chart.js';
+    Chart.register(BarController, LineController, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Title );
+    import Swal from 'sweetalert2'
     import 'flowbite';
     import './password-toggle.js'
     import './password-strength.js'

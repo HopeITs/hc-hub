@@ -1,3 +1,117 @@
-<div class="w-full rounded-2xl border border-[var(--color-neutral-200)] bg-white shadow-sm overflow-hidden">
-    department employees
+<div
+    class="w-full h-[28rem] rounded-2xl bg-white border border-[var(--color-neutral-200)] shadow-md hover:shadow-lg transition-all duration-500 overflow-hidden">
+
+    <div
+        class="flex justify-between items-center px-6 py-4 border-b border-[var(--color-neutral-200)] bg-[var(--color-neutral-50)]">
+        <h2 class="text-lg font-semibold text-[var(--color-neutral-800)] tracking-tight flex items-center gap-2">
+      <span
+          class="inline-block w-2.5 h-2.5 rounded-full bg-[var(--color-primary-500)] shadow-[0_0_8px_var(--color-primary-400)]"></span>
+            Employees per Department
+        </h2>
+        <span class="text-sm text-[var(--color-neutral-500)] font-medium">2025 Overview</span>
+    </div>
+
+    <div class="relative p-3 h-[calc(100%-4.5rem)]">
+        <canvas id="departmentEmployeesChart" style="width:100%;height:100%;"></canvas>
+    </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const canvas = document.getElementById("departmentEmployeesChart");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+
+        const departments = [
+            "Management", "Front Desk", "Teachers", "IT", "Communication",
+            "HR", "Finance", "MEAL", "Fundraising", "Legal Affairs"
+        ];
+        const employees = [8, 4, 15, 6, 5, 9, 7, 3, 2, 4];
+
+        const barColor = getComputedStyle(document.documentElement)
+            .getPropertyValue("--color-primary-500").trim();
+        const neutralGrid = "rgba(0,0,0,0.06)";
+
+        new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: departments,
+                datasets: [{
+                    label: "Employees",
+                    data: employees,
+                    backgroundColor: barColor,
+                    borderColor: barColor,
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    hoverBackgroundColor: barColor,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 800, easing: "easeOutQuart" },
+                events: ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: "Employee Distribution by Department",
+                        color: "var(--color-neutral-700)",
+                        font: {
+                            family: "SomarSans",
+                            size: 16,
+                            weight: "600"
+                        },
+                        padding: { top: 10, bottom: 20 }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        mode: "index",
+                        intersect: false,
+                        backgroundColor: "var(--color-neutral-900)",
+                        borderColor: "var(--color-neutral-700)",
+                        borderWidth: 1,
+                        titleColor: "#ffffff",
+                        bodyColor: "#ffffff",
+                        cornerRadius: 8,
+                        padding: 12,
+                        displayColors: false,
+                        usePointStyle: true,
+                        titleFont: { family: "SomarSans", weight: "600" },
+                        bodyFont: { family: "SomarSans", size: 13 },
+                        callbacks: {
+                            title: (ctx) => ctx[0].label,
+                            label: (ctx) => `${ctx.parsed.y} Employees`
+                        }
+                    }
+                },
+                interaction: { mode: "index", intersect: false },
+                hover: { mode: "index", intersect: false },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            color: "var(--color-neutral-600)",
+                            font: { size: 11, family: "SomarSans", weight: "500" },
+                            padding: 8,
+                            maxRotation: 80,
+                            minRotation: 50,
+                            autoSkip: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: neutralGrid, drawBorder: false },
+                        ticks: {
+                            color: "var(--color-neutral-600)",
+                            font: { size: 12, family: "SomarSans" },
+                            padding: 6
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>

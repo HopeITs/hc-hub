@@ -14,10 +14,6 @@
         </div>
 
         <div>
-            <x-dashboard-cards.tree-chart-statistics/>
-        </div>
-
-        <div>
             <x-dashboard-cards.department-employees-statistics/>
         </div>
 
