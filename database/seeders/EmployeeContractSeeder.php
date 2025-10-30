@@ -44,8 +44,6 @@ class EmployeeContractSeeder extends Seeder
                 'salary' => 1000000.00, // مثال، يمكن تعديله حسب الحاجة
                 'currency' => 1, // 1 = SYP
                 'salary_per' => 1, // 1 = شهري
-                'work_days' => json_encode(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday']),
-                'work_hours' => json_encode(['start' => '09:00', 'end' => '17:00']),
                 'weekly_hours' => 40,
                 'is_active' => true,
             ]);

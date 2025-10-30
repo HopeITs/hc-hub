@@ -34,8 +34,11 @@ class ContractForm extends Form
     public int $salary_per = 1;
 
     // ── Schedule
-    public array $work_days = ['day' => ['from' => 'mon', 'to' => 'fri']];
-    public array $work_hours = ['hour' => ['from' => '09:00', 'to' => '17:00']];
+    public  $work_days_ar ;
+    public  $work_days_en ;
+    public  $work_hours_from ;
+    public  $work_hours_to ;
+
 
     private function toInt($value): int
     {
@@ -111,11 +114,11 @@ class ContractForm extends Form
         $this->currency = (int)$c->currency;
         $this->salary = $c->salary;
         $this->salary_per = $this->toInt($c->salary_per);
+        $this->work_days_ar =  $c->work_days_ar;
+        $this->work_days_en =  $c->work_days_en;
+        $this->work_hours_from =  $c->work_hours_from;
+        $this->work_hours_to =  $c->work_hours_to;
 
-        // Fix for MariaDB/longtext JSON
-        $this->work_days = is_string($c->work_days) ? json_decode($c->work_days, true) ?? [] : $c->work_days ?? $this->work_days;
-
-        $this->work_hours = is_string($c->work_hours) ? json_decode($c->work_hours, true) ?? [] : $c->work_hours ?? $this->work_hours;
     }
 
     public function validateIdentity(): array
@@ -190,8 +193,10 @@ class ContractForm extends Form
             'terminated_at' => $this->nullIfEmpty($this->terminated_at),
             'reason_of_termination' => $this->nullIfEmpty($this->reason_of_termination),
             'weekly_hours' => (int)$this->weekly_hours,
-            'work_days' => $this->work_days,
-            'work_hours' => $this->work_hours,
+            'work_days_ar' => $this->work_days_ar,
+            'work_days_en' => $this->work_days_en,
+            'work_hours_from' => $this->work_hours_from,
+            'work_hours_to' => $this->work_hours_to,
             'currency' => (int)$this->currency,
             'salary' => $this->salary,
             'salary_per' => (string)$this->salary_per,
@@ -249,8 +254,10 @@ class ContractForm extends Form
                 'terminated_at' => $this->nullIfEmpty($this->terminated_at),
                 'reason_of_termination' => $this->nullIfEmpty($this->reason_of_termination),
                 'weekly_hours' => (int)$this->weekly_hours,
-                'work_days' => $this->work_days,
-                'work_hours' => $this->work_hours,
+                'work_days_ar' => $this->work_days_ar,
+                'work_days_en' => $this->work_days_en,
+                'work_hours_from' => $this->work_hours_from,
+                'work_hours_to' => $this->work_hours_to,
             ]);
         }
     }

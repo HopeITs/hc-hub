@@ -226,8 +226,10 @@ return new class extends Migration
             $table->decimal('salary', 10, 2);
             $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR');
             $table->unsignedTinyInteger('salary_per')->comment('0=Unknown, 1=Month, 2=Hour, 3=Session')->default(0);
-            $table->json('work_days');
-            $table->json('work_hours');
+            $table->time('work_hours_from')->nullable()->default('09:30');
+            $table->time('work_hours_to')->nullable()->default('17:00');
+            $table->string('work_days_en')->nullable();
+            $table->string('work_days_ar')->nullable();
             $table->integer('weekly_hours');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
