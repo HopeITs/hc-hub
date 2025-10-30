@@ -1,5 +1,4 @@
 <div class="w-full bg-white rounded-2xl shadow border border-[var(--color-neutral-200)] overflow-hidden">
-    <!-- Header -->
     <div class="flex justify-between items-center px-6 py-4 bg-[var(--color-primary)]">
         <h3 class="text-lg font-semibold text-white">
             {{ __('My Leaves Overview') }}
@@ -9,11 +8,9 @@
         </span>
     </div>
 
-    <!-- Chart Section -->
     <div class="p-6 flex flex-col items-center justify-center">
         <div class="relative w-40 h-40">
             <canvas id="leavesDonutChart"></canvas>
-            <!-- Center label -->
             <div class="absolute inset-0 flex flex-col items-center justify-center">
                 <p class="text-xs text-[var(--color-neutral-500)]">Used</p>
                 <p class="text-xl font-semibold text-[var(--color-primary-600)]">12</p>
@@ -21,7 +18,6 @@
             </div>
         </div>
 
-        <!-- Legend -->
         <div class="mt-4 flex flex-wrap justify-center gap-4 text-sm">
             <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-[var(--color-primary-500)]"></span>

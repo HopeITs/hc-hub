@@ -67,7 +67,7 @@ am5.ready(function() {
     const primaryColor = am5.color(rootStyle.getPropertyValue("--color-primary").trim() || "#2563eb");
     const secondaryColor = am5.color(rootStyle.getPropertyValue("--color-secondary-medium").trim() || "#fbbf24");
     const neutralColor = am5.color(rootStyle.getPropertyValue("--color-neutral-300").trim() || "#9ca3af");
-// Set up data
+
     var data = [{
         category: "Annual",
         value: 60,
@@ -109,11 +109,9 @@ am5.ready(function() {
         }]
     }]
 
-// https://www.amcharts.com/docs/v5/getting-started/#Root_element
     var root = am5.Root.new("chartdiv");
     root.setThemes([am5themes_Animated.new(root)]);
 
-// Create wrapper container
     var container = root.container.children.push(
         am5.Container.new(root, {
             width: am5.p100,
@@ -124,12 +122,8 @@ am5.ready(function() {
     );
 
 
-// ==============================================
-// Column chart
-// ==============================================
 
-// Create chart
-// https://www.amcharts.com/docs/v5/charts/xy-chart/
+
     var columnChart = container.children.push(
         am5xy.XYChart.new(root, {
             width: am5.p100,
@@ -141,8 +135,7 @@ am5.ready(function() {
         })
     );
 
-// Create axes
-// https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+
     var yRenderer = am5xy.AxisRendererY.new(root, { minGridDistance: 20 });
     var yAxis = columnChart.yAxes.push(
         am5xy.CategoryAxis.new(root, {
@@ -161,8 +154,7 @@ am5.ready(function() {
     );
 
 
-// Add series
-// https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+
     var columnSeries = columnChart.series.push(
         am5xy.ColumnSeries.new(root, {
             xAxis,
@@ -180,16 +172,10 @@ am5.ready(function() {
         tooltipText: "{categoryY}: {valueX}"
     });
 
-//series.data.setAll(data);
 
-// Make stuff animate on load
-// https://www.amcharts.com/docs/v5/concepts/animations/
     columnChart.appear(1000, 100);
 
 
-// ==============================================
-// Column chart
-// ==============================================
 
     var pieChart = container.children.push(
         am5percent.PieChart.new(root, {
@@ -202,7 +188,6 @@ am5.ready(function() {
         })
     );
 
-// Create series
     var pieSeries = pieChart.series.push(
         am5percent.PieSeries.new(root, {
             valueField: "value",
@@ -246,7 +231,6 @@ am5.ready(function() {
 
     pieSeries.data.setAll(data);
 
-// Add label
     var label1 = pieChart.seriesContainer.children.push(am5.Label.new(root, {
         text: "",
         fontSize: 35,
@@ -263,7 +247,6 @@ am5.ready(function() {
         dy: 30
     }));
 
-// Pre-select first slice
     pieSeries.events.on("datavalidated", function() {
         pieSeries.slices.getIndex(0).set("active", true);
     });
