@@ -2,9 +2,9 @@ import '@yaireo/tagify/dist/tagify.css'
 import '../css/app.css';
 
     import {
-        Chart, BarController, LineController, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Title
+        Chart,DoughnutController, BarController, LineController, BarElement, LineElement,ArcElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Title
             } from 'chart.js';
-    Chart.register(BarController, LineController, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Title );
+    Chart.register(DoughnutController,BarController, LineController, BarElement, LineElement,ArcElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Title );
 
     import Swal from 'sweetalert2'
 
@@ -63,12 +63,16 @@ document.querySelectorAll('.tagify').forEach((el) => {
 })
 am5.ready(function() {
 
+    const rootStyle = getComputedStyle(document.documentElement);
+    const primaryColor = am5.color(rootStyle.getPropertyValue("--color-primary").trim() || "#2563eb");
+    const secondaryColor = am5.color(rootStyle.getPropertyValue("--color-secondary-medium").trim() || "#fbbf24");
+    const neutralColor = am5.color(rootStyle.getPropertyValue("--color-neutral-300").trim() || "#9ca3af");
 // Set up data
     var data = [{
         category: "Annual",
         value: 60,
         sliceSettings: {
-            fill: am5.color(0xdc4534),
+            fill: primaryColor,
         },
         breakdown: [{
             category: "Full Time Annual",
@@ -81,7 +85,7 @@ am5.ready(function() {
         category: "Service Agreement",
         value: 25,
         sliceSettings: {
-            fill: am5.color(0xd7a700),
+            fill: secondaryColor,
         },
         breakdown: [{
             category: "Onsite Service Agreement",
@@ -94,7 +98,7 @@ am5.ready(function() {
         category: "Trial Period",
         value: 15,
         sliceSettings: {
-            fill: am5.color(0x68ad5c),
+            fill: neutralColor,
         },
         breakdown: [{
             category: "Full Time Trial Period",
@@ -107,19 +111,17 @@ am5.ready(function() {
 
 // https://www.amcharts.com/docs/v5/getting-started/#Root_element
     var root = am5.Root.new("chartdiv");
-
-
-// https://www.amcharts.com/docs/v5/concepts/themes/
-    root.setThemes([
-        am5themes_Animated.new(root)
-    ]);
+    root.setThemes([am5themes_Animated.new(root)]);
 
 // Create wrapper container
-    var container = root.container.children.push(am5.Container.new(root, {
-        width: am5.p100,
-        height: am5.p100,
-        layout: root.verticalLayout
-    }));
+    var container = root.container.children.push(
+        am5.Container.new(root, {
+            width: am5.p100,
+            height: am5.p100,
+            layout: root.verticalLayout,
+            paddingTop: 10
+        })
+    );
 
 
 // ==============================================
@@ -128,45 +130,53 @@ am5.ready(function() {
 
 // Create chart
 // https://www.amcharts.com/docs/v5/charts/xy-chart/
-    var columnChart = container.children.push(am5xy.XYChart.new(root, {
-        width: am5.p100,
-        panX: false,
-        panY: false,
-        wheelX: "none",
-        wheelY: "none",
-        layout: root.horizontalLayout
-    }));
+    var columnChart = container.children.push(
+        am5xy.XYChart.new(root, {
+            width: am5.p100,
+            height: am5.percent(45),
+            panX: false,
+            panY: false,
+            wheelX: "none",
+            wheelY: "none"
+        })
+    );
 
 // Create axes
 // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-    var yRenderer = am5xy.AxisRendererY.new(root, {});
-    var yAxis = columnChart.yAxes.push(am5xy.CategoryAxis.new(root, {
-        categoryField: "category",
-        renderer: yRenderer
-    }));
-
-    yRenderer.grid.template.setAll({
-        location: 1
-    })
-
-    var xAxis = columnChart.xAxes.push(am5xy.ValueAxis.new(root, {
-        renderer: am5xy.AxisRendererX.new(root, {
-            strokeOpacity: 0.1
+    var yRenderer = am5xy.AxisRendererY.new(root, { minGridDistance: 20 });
+    var yAxis = columnChart.yAxes.push(
+        am5xy.CategoryAxis.new(root, {
+            categoryField: "category",
+            renderer: yRenderer
         })
-    }));
+    );
+
+    yRenderer.grid.template.setAll({ location: 1, strokeOpacity: 0.05 });
+
+
+    var xAxis = columnChart.xAxes.push(
+        am5xy.ValueAxis.new(root, {
+            renderer: am5xy.AxisRendererX.new(root, { strokeOpacity: 0.1 })
+        })
+    );
 
 
 // Add series
 // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-    var columnSeries = columnChart.series.push(am5xy.ColumnSeries.new(root, {
-        name: name,
-        xAxis: xAxis,
-        yAxis: yAxis,
-        valueXField: "value",
-        categoryYField: "category"
-    }));
+    var columnSeries = columnChart.series.push(
+        am5xy.ColumnSeries.new(root, {
+            xAxis,
+            yAxis,
+            valueXField: "value",
+            categoryYField: "category",
+            clustered: false
+        })
+    );
 
     columnSeries.columns.template.setAll({
+        height: am5.percent(40),
+        fill: primaryColor,
+        stroke: primaryColor,
         tooltipText: "{categoryY}: {valueX}"
     });
 
@@ -183,8 +193,12 @@ am5.ready(function() {
 
     var pieChart = container.children.push(
         am5percent.PieChart.new(root, {
-            width: am5.p50,
-            innerRadius: am5.percent(50)
+            width: am5.percent(60),
+            height: am5.percent(50),
+            innerRadius: am5.percent(50),
+            align: "center",
+            centerX: am5.percent(-30),
+
         })
     );
 

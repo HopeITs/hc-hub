@@ -39,10 +39,11 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('leavesDonutChart').getContext('2d');
+        const ctx = document.getElementById('leavesDonutChart');
+        if (!ctx) return;
+
         new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -50,9 +51,9 @@
                 datasets: [{
                     data: [12, 10, 2],
                     backgroundColor: [
-                        getComputedStyle(document.documentElement).getPropertyValue('--color-primary-500'),
-                        getComputedStyle(document.documentElement).getPropertyValue('--color-primary-200'),
-                        getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-300')
+                        getComputedStyle(document.documentElement).getPropertyValue('--color-primary-500').trim(),
+                        getComputedStyle(document.documentElement).getPropertyValue('--color-primary-200').trim(),
+                        getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-300').trim()
                     ],
                     borderWidth: 2,
                     borderColor: '#fff',
@@ -64,7 +65,7 @@
                     legend: { display: false },
                     tooltip: { enabled: true }
                 },
-                maintainAspectRatio: false,
+                maintainAspectRatio: false
             }
         });
     });
