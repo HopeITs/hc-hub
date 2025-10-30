@@ -302,7 +302,7 @@ class EmployeeDashboard extends Component
 
     public function render()
     {
-        return view('livewire.dashboards.employee-dashboard', [
+        return view('livewire.dashboards.employee-dashboard.employee-dashboard', [
             'employee' => $this->employee,
             'contract' => $this->contract,
             'positionTitle' => $this->positionTitle,

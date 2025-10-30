@@ -116,7 +116,7 @@ class EmployeeNotesCard extends Component
 
     public function render()
     {
-        return view('livewire.dashboards.employee-notes-card', [
+        return view('livewire.dashboards.employee-dashboard.employee-notes-card', [
             'notes' => $this->notes,
         ]);
     }

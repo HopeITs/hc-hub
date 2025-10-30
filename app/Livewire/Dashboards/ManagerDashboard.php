@@ -303,7 +303,7 @@ class ManagerDashboard extends Component
 
     public function render()
     {
-        return view('livewire.dashboards.employee-dashboard', [
+        return view('livewire.dashboards.manager-dashboard.manager-dashboard', [
             'employee' => $this->employee,
             'contract' => $this->contract,
             'positionTitle' => $this->positionTitle,
