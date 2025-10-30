@@ -76,7 +76,7 @@
                     <div>
                         <span class="font-semibold text-gray-800">@lang('general.program-manager'):</span>
                         <p class="text-gray-600">
-                            {{ $program->programManager?->getTranslation('name', app()->getLocale()) ?? '-' }}
+                            {{ $program->programManager?->name ?? '-' }}
                         </p>
                     </div>
                 </div>

@@ -32,14 +32,17 @@ class Program extends Model implements HasMedia
     {
         return $this->belongsToMany(Center::class, 'positions', 'program_id', 'center_id')->distinct();
     }
+
     public function jobLevels(): BelongsToMany
     {
         return $this->belongsToMany(JobLevel::class, 'positions', 'program_id', 'job_level_id');
     }
+
     public function departments(): BelongsToMany
     {
         return $this->belongsToMany(Department::class, 'positions', 'program_id', 'department_id');
     }
+
     public function positions()
     {
         return $this->hasMany(Position::class);
@@ -77,5 +80,10 @@ class Program extends Model implements HasMedia
                     });
             })
             ->first();
+    }
+
+    public function getProgramManagerAttribute()
+    {
+        return $this->manager();
     }
 }
