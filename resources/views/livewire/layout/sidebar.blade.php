@@ -3,7 +3,7 @@
     aria-label="Sidebar">
     <div class="flex flex-col h-full justify-between">
         <div class="h-full px-3 pb-4 bg-white overflow-y-auto">
-            <a href="{{ route('home') }}" class="flex justify-center items-center mt-4 mb-8">
+            <a href="{{ route('dashboard') }}" class="flex justify-center items-center mt-4 mb-8">
                 <x-app-logo class="md:w-[11rem] md:h-auto object-fit" />
             </a>
 
@@ -12,18 +12,18 @@
                 <x-layouts.app.sidebar.dropdown-nav-list
                     id="dashboards"
                     :title="__('general.dashboards')"
-                    :active="request()->routeIs('employee.dashboard') ||
-        request()->routeIs('hr.dashboard') ||
-        request()->routeIs('manager.dashboard') ||
-        request()->routeIs('general-admin.dashboard')"
-                >
+                    :active="request()->routeIs('dashboard') ||
+                    request()->routeIs('employee.dashboard') ||
+                    request()->routeIs('hr.dashboard') ||
+                    request()->routeIs('manager.dashboard') ||
+                    request()->routeIs('general-admin.dashboard')">
                     <x-slot name="icon"><x-icons.users /></x-slot>
                     <x-slot name="list">
 
                         @activerole('EMPLOYEE', 'SUPER ADMIN')
                         <x-layouts.app.sidebar.nav-item
                             :href="route('employee.dashboard')"
-                            :active="request()->routeIs('employee.dashboard')">
+                            :active=" request()->routeIs('dashboard') || request()->routeIs('employee.dashboard')">
                             {{ __('general.employee-dashboard') }}
                         </x-layouts.app.sidebar.nav-item>
                         @endactiverole
@@ -58,16 +58,18 @@
 
 
                 @activerole('hr', 'general manager', 'SUPER ADMIN')
-                    <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('dashboard') ||
+                    <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')"
+                        :active="
                         request()->routeIs('cities.*') ||
                         request()->routeIs('contract-types.*') ||
                         request()->routeIs('leave-types.*') ||
                         request()->routeIs('basic-checklist-items.*') ||
                         request()->routeIs('departments.*') ||
-                        request()->routeIs('job-levels.*')">
+                        request()->routeIs('job-levels.*')
+                        ">
                         <x-slot name="icon"><x-icons.home /></x-slot>
                         <x-slot name="list">
-                            <x-layouts.app.sidebar.nav-item :href="route('cities.index')" :active="request()->routeIs('cities.index') || request()->routeIs('dashboard')">
+                            <x-layouts.app.sidebar.nav-item :href="route('cities.index')" :active="request()->routeIs('cities.index')">
                                 {{ trans_choice('general.city', 2) }}
                             </x-layouts.app.sidebar.nav-item>
                             <x-layouts.app.sidebar.nav-item :href="route('contract-types.index')" :active="request()->routeIs('contract-types.index')">

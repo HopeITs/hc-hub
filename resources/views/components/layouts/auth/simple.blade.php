@@ -8,7 +8,7 @@
 <div class=" flex items-center justify-center px-4">
 
     <div class="flex w-full max-w-sm flex-col gap-6">
-        <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
+        <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
             <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
         </a>
 
