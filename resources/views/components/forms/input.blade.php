@@ -44,13 +44,6 @@
             {{ $attributes->merge($base) }}
         />
 
-        @if ($showIcon)
-            @if ($type === 'email')
-                <span class="absolute top-2.5 end-3 text-gray-400">
-                    <i class="fa-regular fa-envelope text-sm"></i>
-                </span>
 
-            @endif
-        @endif
     </div>
 @endif
