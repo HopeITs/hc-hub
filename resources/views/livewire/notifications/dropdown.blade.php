@@ -1,4 +1,4 @@
-<div wire:poll>
+<div>
     <div class="relative">
         <button>
             🔔
