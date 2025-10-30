@@ -42,14 +42,6 @@ class LeaveRequestModule extends Component
     }
 
     public function save(){
-        if ($this->form->unit === 'day') {
-            $this->form->start_date = Carbon::parse($this->form->start_date)->startOfDay();
-            $this->form->end_date = Carbon::parse($this->form->end_date)->endOfDay();
-        } elseif ($this->form->unit === 'hour') {
-            $date = Carbon::parse($this->form->leave_date);
-            $this->form->start_date = $date->copy()->setTimeFromTimeString($this->form->start_hour);
-            $this->form->end_date = $date->copy()->setTimeFromTimeString($this->form->end_hour);
-        }
         if (isset($this->form->id)) {
             $this->form->update();
         } else {

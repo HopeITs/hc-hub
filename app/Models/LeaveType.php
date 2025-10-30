@@ -30,4 +30,9 @@ class LeaveType extends Model
     {
         return $this->hasMany(LeaveBalance::class , 'type_id');
     }
+
+    public function isAnnual(): bool
+    {
+        return $this->id === \App\Enums\LeaveTypeCases::Annual;
+    }
 }
