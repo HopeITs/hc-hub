@@ -83,7 +83,10 @@ class ContractCreate extends Component
             $this->step = $target;
         }
     }
-
+    public function updatedFormContractTypeId($value): void
+    {
+        $this->form->updatedContractTypeId($value);
+    }
     public function submit()
     {
         $this->form->validateIdentity();

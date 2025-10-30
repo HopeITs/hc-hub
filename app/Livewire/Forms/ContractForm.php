@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 use App\Models\Contract;
 use App\Enums\SalaryPer;
+use App\Models\ContractType;
 use App\Models\Position;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -21,9 +22,9 @@ class ContractForm extends Form
     public bool $is_active = true;
 
     // ── Terms
-    public ?string $start_date = null;
-    public ?string $end_date = null;
-    public ?string $terminated_at = null; // nullable
+    public  $start_date ;
+    public  $end_date  ;
+    public  $terminated_at = null; // nullable
     public ?string $reason_of_termination = null; // nullable
 
     public int $weekly_hours = 40;
@@ -36,8 +37,22 @@ class ContractForm extends Form
     // ── Schedule
     public  $work_days_ar ;
     public  $work_days_en ;
-    public  $work_hours_from ;
-    public  $work_hours_to ;
+    public  $work_hours_from = '09:30' ;
+    public  $work_hours_to = '17:00';
+    public function updatedContractTypeId($value): void
+    {
+        if (!$value) return;
+
+        $nextMonthStart = Carbon::now()->addMonthNoOverflow()->startOfMonth()->toDateString();
+        // All types share this same start date rule
+        $this->start_date = $nextMonthStart;
+        if($value === 3 || $value === 4){ //trial contract
+            $this->end_date = Carbon::parse($nextMonthStart)->addMonthsNoOverflow(3)->toDateString();
+        }else{
+            $this->end_date = Carbon::now()->endOfYear()->toDateString();
+        }
+
+    }
 
 
     private function toInt($value): int
