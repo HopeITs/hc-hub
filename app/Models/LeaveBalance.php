@@ -77,14 +77,14 @@ class LeaveBalance extends Model
     /**
      * Whether employee can request specific number of hours right now.
      */
-    public function canRequestAnnualLeave(float $requestedHours): bool
+    public function canRequestAnnualLeave($requestedHours): bool
     {
         $eligible = $this->eligibleAnnualLeaveHours();
 
         $used = $this->used ?? 0;
 
         $remaining = $eligible - $used;
-dd($remaining , $requestedHours);
+
         return $requestedHours <= $remaining;
     }
 

@@ -1,5 +1,6 @@
 @php
     use App\Enums\LeaveTypeCases;
+use App\Enums\LeaveRequestStatus;
 @endphp
 <div>
     <div class="flex justify-between items-center mb-6">
@@ -35,8 +36,39 @@
         </div>
 
     @endisset
+    <x-tabs-list>
+        <x-tabs-list-item
+            :active="$statusFilter === 'all'"  active-tab="all">
+            All ({{ $counts['all'] ?? 0 }})
+        </x-tabs-list-item>
 
-    <livewire:employee.leave.leave-request-table/>
+        <x-tabs-list-item
+            :active="$statusFilter === (string) LeaveRequestStatus::Pending"  :active-tab="LeaveRequestStatus::Pending">
+            Pending ({{ $counts['pending'] ?? 0 }})
+        </x-tabs-list-item>
+
+        <x-tabs-list-item
+            :active="$statusFilter === (string) LeaveRequestStatus::Accepted" :active-tab="LeaveRequestStatus::Accepted">
+            Accepted ({{ $counts['accepted'] ?? 0 }})
+        </x-tabs-list-item>
+
+        <x-tabs-list-item
+            :active="$statusFilter === (string) LeaveRequestStatus::Rejected"  :active-tab="LeaveRequestStatus::Rejected">
+            Rejected ({{ $counts['rejected'] ?? 0 }}){{$statusFilter === LeaveRequestStatus::Rejected}}
+        </x-tabs-list-item>
+    </x-tabs-list>
+
+    {{-- Table --}}
+    <div class="mt-4">
+        <livewire:employee.leave.leave-request-table :statusFilter="$statusFilter" key="table-{{ $statusFilter }}" />
+    </div>
+
+
+
+
+
+
+
 
     <x-modal.dialog max-width="6xl" id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
 

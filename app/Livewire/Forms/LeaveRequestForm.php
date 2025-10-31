@@ -199,6 +199,7 @@ class LeaveRequestForm extends Form
             $start = Carbon::parse($this->start_at)->startOfDay();
             $end = Carbon::parse($this->end_at)->endOfDay();
             $days = $start->diffInDaysFiltered(fn (Carbon $date) => !$date->isWeekend(), $end) + 1;
+
             return $days * 8; // 8h per day (adjust as needed)
         }
 
