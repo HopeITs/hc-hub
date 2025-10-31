@@ -36,7 +36,6 @@ class DefaultDeliverablesTable extends LivewireTable
 
     protected function employeeOptions(): array
     {
-
         return Employee::query()->whereHas('contracts',function ($query){
             $query->whereHas('position',function ($subQuery){
                 $subQuery->whereHas('department',function($q){
@@ -45,8 +44,6 @@ class DefaultDeliverablesTable extends LivewireTable
             });
         })->orderBy(transColumn('name'))->get(['id', transColumn('name')])
             ->mapWithKeys(fn($e) => [$e->id => $e->name])->all();
-
-
     }
 
     protected function cityOptions(): array
@@ -87,7 +84,7 @@ class DefaultDeliverablesTable extends LivewireTable
                 $id = $m->getKey();
 
                 $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatchTo(\'program-management.default-deliverables-module\', \'openDefaultDeliverableEdit\', { id: ' . $id . ' })" />'
+                    '<x-table.edit-btn wire:click="$dispatch(\'openDefaultDeliverableEdit\', { id: ' . $id . ' })" />'
                 );
 
                 $deleteBtn = Blade::render(
@@ -98,8 +95,6 @@ class DefaultDeliverablesTable extends LivewireTable
             })->asHtml(),
         ];
     }
-
-
 
     public function confirmDelete(int $id): void
     {
