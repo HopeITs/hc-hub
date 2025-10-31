@@ -1,4 +1,4 @@
-<div class="w-full rounded-2xl border border-[var(--color-neutral-200)] bg-white shadow-md overflow-hidden">
+<div class="w-96 h-full rounded-2xl border border-[var(--color-neutral-200)] bg-white shadow-md overflow-hidden">
     <!-- Header -->
     <div class="flex items-center justify-between px-6 py-4 bg-[var(--color-neutral-50)] border-b border-[var(--color-neutral-200)]">
         <h3 class="font-semibold text-[var(--color-primary)] flex items-center gap-2 text-sm tracking-wide">
@@ -19,7 +19,6 @@
                     <p class="text-xs text-[var(--color-neutral-500)]">Field Officer</p>
                 </div>
             </div>
-            <p class="text-xs font-semibold text-[var(--color-primary)] bg-[var(--color-neutral-100)] border border-[var(--color-primary)] px-3 py-1 rounded-full shadow-sm">No leaves since Oct</p>
         </div>
 
         <div class="group flex items-center justify-between bg-[var(--color-neutral-50)] hover:bg-[var(--color-neutral-100)] border border-[var(--color-neutral-200)] rounded-xl p-4 transition-all duration-200">
@@ -30,7 +29,6 @@
                     <p class="text-xs text-[var(--color-neutral-500)]">Finance Manager</p>
                 </div>
             </div>
-            <p class="text-xs font-semibold text-[var(--color-primary)] bg-[var(--color-neutral-100)] border border-[var(--color-primary)] px-3 py-1 rounded-full shadow-sm">No leaves since Feb</p>
         </div>
 
         <div class="group flex items-center justify-between bg-[var(--color-neutral-50)] hover:bg-[var(--color-neutral-100)] border border-[var(--color-neutral-200)] rounded-xl p-4 transition-all duration-200">
@@ -41,7 +39,6 @@
                     <p class="text-xs text-[var(--color-neutral-500)]">IT Support</p>
                 </div>
             </div>
-            <p class="text-xs font-semibold text-[var(--color-primary)] bg-[var(--color-neutral-100)] border border-[var(--color-primary)] px-3 py-1 rounded-full shadow-sm">No leaves since Jan</p>
         </div>
 
         <div class="group flex items-center justify-between bg-[var(--color-neutral-50)] hover:bg-[var(--color-neutral-100)] border border-[var(--color-neutral-200)] rounded-xl p-4 transition-all duration-200">
@@ -52,7 +49,6 @@
                     <p class="text-xs text-[var(--color-neutral-500)]">HR Specialist</p>
                 </div>
             </div>
-            <p class="text-xs font-semibold text-[var(--color-primary)] bg-[var(--color-neutral-100)] border border-[var(--color-primary)] px-3 py-1 rounded-full shadow-sm">No leaves since Mar</p>
         </div>
     </div>
 
