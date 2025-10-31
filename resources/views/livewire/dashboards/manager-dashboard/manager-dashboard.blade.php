@@ -1,23 +1,35 @@
 <div class="min-h-screen bg-gray-50 rounded-lg p-6">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+
         <div>
-            @include('livewire.dashboards.employee-dashboard.cards.employee-details-card')
+            <x-dashboard-cards.employee-details-card
+                :employee="$employee"
+                :positionTitle="$positionTitle"
+                :departmentName="$departmentName"
+                :joinedOn="$joinedOn"
+                :workEmail="$workEmail"/>
         </div>
 
         <div>
-            @include('livewire.dashboards.employee-dashboard.cards.my-leaves-card')
+            <x-dashboard-cards.my-leaves-card
+                :employee="$employee"
+                :contract="$contract"/>
         </div>
 
         <div>
-            @include('livewire.dashboards.employee-dashboard.cards.team-members-card')
+            <x-dashboard-cards.team-members-card
+                :contract="$contract"
+                :employee="$employee"/>
         </div>
 
         <div>
-            @include('livewire.dashboards.employee-dashboard.cards.today-birthday-card')
+            <x-dashboard-cards.today-birthday-card
+                :todayBirthdays="$todayBirthdays"/>
         </div>
 
         <div>
-            @include('livewire.dashboards.employee-dashboard.cards.upcoming-birthday-card')
+            <x-dashboard-cards.upcoming-birthday-card
+                :upcomingBirthdays="$upcomingBirthdays"/>
         </div>
 
         <div>
@@ -25,29 +37,30 @@
         </div>
 
         <div>
-            @include('livewire.dashboards.employee-dashboard.cards.checklist-items-card')
+            <x-dashboard-cards.checklist-items-card
+                :deliveredItems="$deliveredItems"/>
         </div>
 
         <div>
-            @include('livewire.dashboards.employee-dashboard.cards.my-badges-card')
+            <x-dashboard-cards.my-badges-card
+                :myBadges="$myBadges"/>
         </div>
 
         <div>
-            @include('livewire.dashboards.employee-dashboard.cards.pending-requests-card')
-        </div>
-
-
-        <div>
-            @include('livewire.dashboards.employee-dashboard.cards.upcoming-holidays-card')
+            <x-dashboard-cards.pending-requests-card
+                :pendingRequests="$pendingRequests"/>
         </div>
 
         <div>
-            @include('livewire.dashboards.employee-dashboard.cards.upcoming-leaves-card')
+            <x-dashboard-cards.upcoming-holidays-card/>
         </div>
 
+        <div>
+            <x-dashboard-cards.upcoming-leaves-card/>
+        </div>
 
         <div>
-            @include('livewire.dashboards.employee-dashboard.cards.news-card')
+            <x-dashboard-cards.news-card/>
         </div>
 
     </div>
