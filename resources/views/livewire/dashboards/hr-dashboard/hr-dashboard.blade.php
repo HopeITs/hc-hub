@@ -24,6 +24,10 @@
         </div>
 
         <div>
+            <x-dashboard-cards.no-leaves-employees-statistics/>
+        </div>
+
+        <div>
             <x-dashboard-cards.contract-type-employees-statistics/>
         </div>
 
@@ -34,12 +38,6 @@
         <div>
             <x-dashboard-cards.salary-per-employee-statistics/>
         </div>
-
-        <div>
-            <x-dashboard-cards.no-leaves-employees-statistics/>
-        </div>
-
-
 
         <div>
             <x-dashboard-cards.today-birthday-card
