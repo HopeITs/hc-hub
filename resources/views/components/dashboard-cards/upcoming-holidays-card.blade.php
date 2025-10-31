@@ -1,5 +1,4 @@
 <div class="w-full rounded-2xl border border-[var(--color-neutral-200)] bg-white shadow-sm overflow-hidden">
-    <!-- Header -->
     <div class="flex items-center justify-between px-6 py-4 bg-primary">
         <div class="flex items-center gap-3">
             <div class="flex items-center justify-center w-9 h-9 bg-white/20 rounded-full">
@@ -15,10 +14,8 @@
         </span>
     </div>
 
-    <!-- Content -->
     <div class="p-4 divide-y divide-[var(--color-neutral-100)] max-h-[18rem] overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent">
 
-        <!-- Holiday item -->
         <div class="flex justify-between items-center py-3 hover:bg-[var(--color-neutral-50)] transition">
             <div>
                 <p class="font-semibold text-[var(--color-neutral-900)]">Eid al-Fitr</p>

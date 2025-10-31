@@ -3,8 +3,7 @@
 namespace App\Livewire\Dashboards;
 
 use Carbon\Carbon;
-use App\Models\{Checklist, Employee, Contract};
-use FontLib\Table\Type\name;
+use App\Models\{Badge, Checklist, Employee, Contract};
 use Livewire\Component;
 class HrDashboard extends Component
 {
@@ -15,7 +14,6 @@ class HrDashboard extends Component
     public $joinedOn;
     public $workEmail;
 
-    //today's birthday function
     public function getTodayBirthdaysProperty()
     {
         $today = now()->timezone(config('app.timezone'));
@@ -45,7 +43,6 @@ class HrDashboard extends Component
             });
     }
 
-    //upcoming birthdays function
     public function getUpcomingBirthdaysProperty()
     {
         $today = now()->timezone(config('app.timezone'))->startOfDay();
@@ -99,7 +96,6 @@ class HrDashboard extends Component
             ->values();
     }
 
-    //team members function
     public function getTeamMembersProperty()
     {
         if (!$this->contract?->position) {
@@ -186,12 +182,10 @@ class HrDashboard extends Component
             ->where('city_id', $this->employee?->city_id)
             ->whereNotIn('id', $excludeIds)
             ->with([
-                // Ensure we always load the position and job level
                 'contracts.position.jobLevel',
             ])
             ->get()
             ->map(function ($emp) use ($nameCol, $titleCol) {
-                // Pick the latest active contract either from the eager-loaded set or method
                 $contract = $emp->contracts
                     ->filter(fn($c) => ($c->is_active || (
                             !$c->terminated_at &&
@@ -217,7 +211,6 @@ class HrDashboard extends Component
 
 
     }
-    //my checklist items
     public function getDeliveredItemsProperty()
     {
         if (!$this->employee) {
@@ -232,21 +225,19 @@ class HrDashboard extends Component
             ->get();
     }
 
-    //my badges
     public function getMyBadgesProperty()
     {
         if (!$this->employee) {
             return collect();
         }
 
-        return \App\Models\Badge::query()
+        return Badge::query()
             ->with('employee')
             ->where('employee_id', $this->employee->id)
             ->orderByDesc('date')
             ->get();
     }
 
-    //pending delivers
     public function getPendingRequestsProperty()
     {
         if (!$this->employee) {

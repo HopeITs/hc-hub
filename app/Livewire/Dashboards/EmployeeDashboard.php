@@ -4,7 +4,6 @@ namespace App\Livewire\Dashboards;
 
 use Carbon\Carbon;
 use App\Models\{Badge, Checklist, Employee, Contract};
-use FontLib\Table\Type\name;
 use Livewire\Component;
 
 class EmployeeDashboard extends Component
@@ -16,7 +15,6 @@ class EmployeeDashboard extends Component
         public $joinedOn;
     public $workEmail;
 
-    //today's birthday function
     public function getTodayBirthdaysProperty()
     {
         $today = now()->timezone(config('app.timezone'));
@@ -46,7 +44,6 @@ class EmployeeDashboard extends Component
             });
     }
 
-    //upcoming birthdays function
     public function getUpcomingBirthdaysProperty()
     {
         $today = now()->timezone(config('app.timezone'))->startOfDay();
@@ -100,7 +97,6 @@ class EmployeeDashboard extends Component
             ->values();
     }
 
-    //team members function
     public function getTeamMembersProperty()
     {
         if (!$this->contract?->position) {
@@ -216,7 +212,6 @@ class EmployeeDashboard extends Component
 
 
     }
-    //my checklist items
     public function getDeliveredItemsProperty()
     {
         if (!$this->employee) {
@@ -231,7 +226,6 @@ class EmployeeDashboard extends Component
             ->get();
     }
 
-    //my badges
     public function getMyBadgesProperty()
     {
         if (!$this->employee) {
@@ -245,7 +239,6 @@ class EmployeeDashboard extends Component
             ->get();
     }
 
-    //pending delivers
     public function getPendingRequestsProperty()
     {
         if (!$this->employee) {
