@@ -14,6 +14,7 @@ import '../css/app.css';
     import './password-strength.js'
     import './contract-type-employees-chart.js';
     import './job-levels-employees.js';
+    import './employees-by-pay-type.js'
 
 
 import Tagify from '@yaireo/tagify'

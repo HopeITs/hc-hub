@@ -66,57 +66,6 @@ if (document.getElementById("chartdiv")) {
         );
 
 
-        var columnChart = container.children.push(
-            am5xy.XYChart.new(root, {
-                width: am5.p100,
-                height: am5.percent(45),
-                panX: false,
-                panY: false,
-                wheelX: "none",
-                wheelY: "none"
-            })
-        );
-
-
-        var yRenderer = am5xy.AxisRendererY.new(root, {minGridDistance: 20});
-        var yAxis = columnChart.yAxes.push(
-            am5xy.CategoryAxis.new(root, {
-                categoryField: "category",
-                renderer: yRenderer
-            })
-        );
-
-        yRenderer.grid.template.setAll({location: 1, strokeOpacity: 0.05});
-
-
-        var xAxis = columnChart.xAxes.push(
-            am5xy.ValueAxis.new(root, {
-                renderer: am5xy.AxisRendererX.new(root, {strokeOpacity: 0.1})
-            })
-        );
-
-
-        var columnSeries = columnChart.series.push(
-            am5xy.ColumnSeries.new(root, {
-                xAxis,
-                yAxis,
-                valueXField: "value",
-                categoryYField: "category",
-                clustered: false
-            })
-        );
-
-        columnSeries.columns.template.setAll({
-            height: am5.percent(40),
-            fill: primaryColor,
-            stroke: primaryColor,
-            tooltipText: "{categoryY}: {valueX}"
-        });
-
-
-        columnChart.appear(1000, 100);
-
-
         var pieChart = container.children.push(
             am5percent.PieChart.new(root, {
                 width: am5.percent(60),
@@ -190,6 +139,57 @@ if (document.getElementById("chartdiv")) {
         pieSeries.events.on("datavalidated", function () {
             pieSeries.slices.getIndex(0).set("active", true);
         });
+
+        var columnChart = container.children.push(
+            am5xy.XYChart.new(root, {
+                width: am5.p100,
+                height: am5.percent(45),
+                panX: false,
+                panY: false,
+                wheelX: "none",
+                wheelY: "none"
+            })
+        );
+
+
+        var yRenderer = am5xy.AxisRendererY.new(root, {minGridDistance: 20});
+        var yAxis = columnChart.yAxes.push(
+            am5xy.CategoryAxis.new(root, {
+                categoryField: "category",
+                renderer: yRenderer
+            })
+        );
+
+        yRenderer.grid.template.setAll({location: 1, strokeOpacity: 0.05});
+
+
+        var xAxis = columnChart.xAxes.push(
+            am5xy.ValueAxis.new(root, {
+                renderer: am5xy.AxisRendererX.new(root, {strokeOpacity: 0.1})
+            })
+        );
+
+
+        var columnSeries = columnChart.series.push(
+            am5xy.ColumnSeries.new(root, {
+                xAxis,
+                yAxis,
+                valueXField: "value",
+                categoryYField: "category",
+                clustered: false
+            })
+        );
+
+        columnSeries.columns.template.setAll({
+            height: am5.percent(40),
+            fill: primaryColor,
+            stroke: primaryColor,
+            tooltipText: "{categoryY}: {valueX}"
+        });
+
+
+        columnChart.appear(1000, 100);
+
         root._logo?.dispose();
 
     });
