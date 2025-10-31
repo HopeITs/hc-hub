@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Employee\Leave;
 
+use App\Enums\LeaveRequestStatus;
 use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
@@ -19,6 +20,36 @@ class LeaveRequestModule extends Component
     public $showModal = false;
     public $modalTitle = 'Modal title';
 
+    public string $statusFilter = 'all';
+    public array $counts = [];
+
+    public function mount()
+    {
+        $this->refreshCounts();
+    }
+
+    public function setActiveTab(string $status)
+    {
+        $this->statusFilter = $status;
+        $this->dispatch('$refresh');
+    }
+
+    public function refreshCounts(): void
+    {
+        $employee = auth()->user()->profile;
+
+        // Collect all leave requests through the relationship chain:
+        $leaveRequests = \App\Models\LeaveRequest::whereHas('leaveBalance.contract', function ($query) use ($employee) {
+            $query->where('employee_id', $employee->id);
+        });
+
+        $this->counts = [
+            'all' => (clone $leaveRequests)->count(),
+            'pending' => (clone $leaveRequests)->where('status', \App\Enums\LeaveRequestStatus::Pending)->count(),
+            'accepted' => (clone $leaveRequests)->where('status', \App\Enums\LeaveRequestStatus::Accepted)->count(),
+            'rejected' => (clone $leaveRequests)->where('status', \App\Enums\LeaveRequestStatus::Rejected)->count(),
+        ];
+    }
     public function create()
     {
         $this->form->reset();
@@ -41,15 +72,17 @@ class LeaveRequestModule extends Component
         return view('livewire.employee.leave.index',compact('availableLeaves','allAvailableLeaves','alternativeEmployees'));
     }
 
+    public function getCountsProperty()
+    {
+        return [
+            'all' => LeaveRequest::count(),
+            'pending' => LeaveRequest::where('status', LeaveRequestStatus::Pending)->count(),
+            'accepted' =>LeaveRequest::where('status', LeaveRequestStatus::Accepted)->count(),
+            'rejected' => LeaveRequest::where('status', LeaveRequestStatus::Rejected)->count(),
+        ];
+    }
+
     public function save(){
-        if ($this->form->unit === 'day') {
-            $this->form->start_date = Carbon::parse($this->form->start_date)->startOfDay();
-            $this->form->end_date = Carbon::parse($this->form->end_date)->endOfDay();
-        } elseif ($this->form->unit === 'hour') {
-            $date = Carbon::parse($this->form->leave_date);
-            $this->form->start_date = $date->copy()->setTimeFromTimeString($this->form->start_hour);
-            $this->form->end_date = $date->copy()->setTimeFromTimeString($this->form->end_hour);
-        }
         if (isset($this->form->id)) {
             $this->form->update();
         } else {

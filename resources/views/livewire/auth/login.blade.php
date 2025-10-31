@@ -58,9 +58,9 @@
                 @endif
 
                 <div class="flex items-center justify-between text-sm text-gray-600">
-                    <x-forms.input type="checkbox" id="remember" model="remember">
-                        <span>{{ __('auth.remember-me') }}</span>
-                    </x-forms.input>
+                    <x-forms.checkbox-input type="checkbox" id="remember" model="remember">
+                    {{ __('auth.remember-me') }}
+                    </x-forms.checkbox-input>
 
                     @if (request()->has('password.request'))
                         <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">

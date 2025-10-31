@@ -1,1 +1,1 @@
-<p class="mt-2 text-sm text-red-600"><span class="font-medium">{{$slot}}</span>
+<span class="mt-3 text-sm text-red-600 font-medium block ">{{$slot}}</span>

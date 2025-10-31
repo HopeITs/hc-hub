@@ -51,6 +51,7 @@ class Employee extends Model implements HasMedia
             set: fn($value) => $this->setTranslatableAttribute('mother_name', $value)
         );
     }
+
     public function getDepartmentAttribute()
     {
         return $this->latestActiveContract()?->position->department;
@@ -73,6 +74,7 @@ class Employee extends Model implements HasMedia
     {
         return $this->hasMany(Contract::class, 'employee_id');
     }
+
     public function contracts()
     {
         return $this->hasMany(Contract::class, 'employee_id')
@@ -172,17 +174,17 @@ class Employee extends Model implements HasMedia
 
     public function jobLevels(): BelongsToMany
     {
-        return $this->belongsToMany(JobLevel::class, 'contracts', 'employee_id', 'job_level_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours']);
+        return $this->belongsToMany(JobLevel::class, 'contracts', 'employee_id', 'job_level_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'work_days', 'work_hours']);
     }
 
     public function contractTypes(): BelongsToMany
     {
-        return $this->belongsToMany(ContractType::class, 'contracts', 'employee_id', 'contract_type_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours']);
+        return $this->belongsToMany(ContractType::class, 'contracts', 'employee_id', 'contract_type_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours',  'work_days', 'work_hours']);
     }
 
     public function departments(): BelongsToMany
     {
-        return $this->belongsToMany(Department::class, 'contracts', 'employee_id', 'department_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'yearly_leave_days', 'work_days', 'work_hours']);
+        return $this->belongsToMany(Department::class, 'contracts', 'employee_id', 'department_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'work_days', 'work_hours']);
     }
 
     public function account()
@@ -192,14 +194,14 @@ class Employee extends Model implements HasMedia
 
     public function availableLeaves()
     {
-        return $this->latestActiveContract()?->leaveBalances()->whereHas('leaveType' , function ($query) {
-            return $query->where('base_days' , '>' , 10);
+        return $this->latestActiveContract()?->leaveBalances()->whereHas('leaveType', function ($query) {
+            return $query->where('base_days', '>', 10);
         })->get();
     }
 
     public function allAvailableLeaves()
     {
-        return $this->latestActiveContract()?->leaveBalances()->whereColumn('deserved', '>' , 'used' )->with('leaveType')->get();
+        return $this->latestActiveContract()?->leaveBalances()->whereColumn('deserved', '>', 'used')->with('leaveType')->get();
     }
 
     public function registerMediaCollections(): void
@@ -209,7 +211,12 @@ class Employee extends Model implements HasMedia
             ->singleFile();
     }
 
-    public function getYearsOfServiceAttribute(): float
+    public function getJoinAtAttribute()
+    {
+        return $this->allContracts()->first()?->start_date->format('d-M-Y') ?? '-';
+    }
+
+    public function getYearsOfServiceAttribute()
     {
         $contracts = $this->allContracts()
             ->select(['start_date', 'end_date', 'terminated_at'])
@@ -217,7 +224,7 @@ class Employee extends Model implements HasMedia
             ->get();
 
         if ($contracts->isEmpty()) {
-            return 0;
+            return 0 . ' ' . trans_choice('general.year', 0);
         }
 
         // Build the time periods for each contract
@@ -266,15 +273,15 @@ class Employee extends Model implements HasMedia
             $months = $m['end']->diffInMonths($m['start']) % 12;
             $totalYears += $years + ($months / 12);
         }
-
+        $result = -1 * round($totalYears, 1);
         // Return total years of service rounded to one decimal
-        return -1 * round($totalYears, 1);
+        return $result .' ' . trans_choice('general.year', $result);
     }
 
 
     public function abilityToTakeLeave($leaveType)
     {
-       return  $this->contracts()
+        return $this->contracts()
             ->whereHas('leaveBalances.leaveRequests', function ($q) use ($leaveType) {
                 $q->whereHas('leaveBalance', function ($b) use ($leaveType) {
                     $b->where('type_id', $leaveType);

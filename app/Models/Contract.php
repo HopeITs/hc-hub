@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\SalaryPer;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -19,14 +20,20 @@ class Contract extends Model
         'end_date' => 'date',
         'terminated_at' => 'date',
         'is_active' => 'boolean',
-        'yearly_leave_days' => 'integer',
         'weekly_hours' => 'integer',
         'currency' => 'integer',
         'salary' => 'decimal:2',
         'salary_per' => SalaryPer::class,
-        'work_days' => 'array',
-        'work_hours' => 'array',
+
     ];
+    protected function work_days(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->getTranslatableAttribute('work_days'),
+            set: fn($value) => $this->setTranslatableAttribute('work_days', $value)
+        );
+    }
+
 
     public function employee()
     {
