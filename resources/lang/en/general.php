@@ -111,7 +111,7 @@ return [
     'logo' => 'Logo',
     'search' => 'Search',
     'yearly-leave-days' => 'Yearly Leave Days',
-    'terminated-at'=>'Terminated At',
+    'terminated-at' => 'Terminated At',
     'reason-of-termination' => 'Reason of Termination',
     'optional' => 'Optional',
     'salary' => 'Salary',
@@ -305,7 +305,7 @@ return [
     'text29' => 'في حال تجاوز المتطوع أيام الإجازات المحددة له <br> والتي تتناسب مع العقد سواءً إجازات عادية <br> أو مرضية، يتم منحه إجازة لا تتجاوز  مدتها 12 <br> يوم يتم خصم قيمتها من المكافأة المالية <br>الشهرية المخصصة له.',
     'text30' => ' يقر المتطوع ويتعهد بالإلتزام  <br> التالية: بالمستندات المرفقة   ',
     'text31' => 'يلتزم الفريق الثاني (المتطوّع) عند رغبته بمغادرة <br> العمل التطوعي خلال مدة سريان العقد بأن <br>  يبلغ الفريق الأول بذلك بشكل خطي قبل مدة شهر. ',
-    'text32' => ' يلتزم الفريق الثاني (المتطوع) عند انتهاء أو<br>  إنهاء فترة تطوعه بتسليم جميع التجهيزات والمواد <br> والوثائق المؤتمن عليها إلى مركز الرجاء <br> المسيحي، وذلك استناداً لقائمة الاستلام الشخصية <br>  لكل متطوع والتي يتم تحديثها دوريًا.' ,
+    'text32' => ' يلتزم الفريق الثاني (المتطوع) عند انتهاء أو<br>  إنهاء فترة تطوعه بتسليم جميع التجهيزات والمواد <br> والوثائق المؤتمن عليها إلى مركز الرجاء <br> المسيحي، وذلك استناداً لقائمة الاستلام الشخصية <br>  لكل متطوع والتي يتم تحديثها دوريًا.',
     'text33' => 'ملاحظة هامة: ',
     'text34' => 'لا يلتزم الفريق الأول بأي تعويضات عند انتهاء عقد <Br> المتطوع او إنهائه.  ',
     'text35' => 'يمنح مركز الرجاء المسيحي شهرياً للسيد/ة مكافأة <br>  دولار / :salary وقدرها  /  <br> أو ما يعادلها بالليرة السورية تمنح <br> نقداً في نهاية كل شهر.  ',
@@ -362,6 +362,11 @@ return [
     'notifications' => 'Notifications',
     'notification_checklist_assigned' => 'Please deliver :item to :employee',
     'no_notifications' => 'No Notifications Found',
+    'news-management' => 'News Management',
+    'news' => 'News',
+    'category' => 'Category',
+    'display_duration' => 'Display Duration',
+    'published_at' => 'Published At',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
@@ -396,5 +401,5 @@ return [
         'friday' => 'Friday',
         'saturday' => 'Saturday',
         'sunday' => 'Sunday',
-    ]
+    ],
 ];

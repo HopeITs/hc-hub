@@ -137,6 +137,8 @@ Route::group(
                 ->name('general-admin.dashboard');
 
                 Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
+
+                Route::get('/news', \App\Livewire\News\NewsModule::class)->name('news.index')->middleware('auth');
         });
 
         require __DIR__ . '/auth.php';
