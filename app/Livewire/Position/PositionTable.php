@@ -24,6 +24,7 @@ class PositionTable extends LivewireTable
     public ?int $centerId = null;
     public ?int $cityId = null;
     public $itemID;
+
     public function mount(?int $centerId = null, ?int $cityId = null): void
     {
         $this->centerId = $centerId ?? request()->get('center');
@@ -35,10 +36,10 @@ class PositionTable extends LivewireTable
         $query = $this->model()::query()->with(['city', 'program', 'center' , 'jobLevel' , 'department']);
 
         if ($this->centerId) {
-            $query->where('center_id', $this->centerId);
+            $query->where('positions.center_id', $this->centerId);
         }
         if ($this->cityId) {
-            $query->where('city_id', $this->cityId);
+            $query->where('positions.city_id', $this->cityId);
         }
 
         return $query->orderBy('direct_manager_id')->orderBy('tech_manager_id');
@@ -96,13 +97,9 @@ class PositionTable extends LivewireTable
         ];
     }
 
-
-
     protected function actions(): array
     {
-        return [
-
-        ];
+        return [];
     }
 
     public function confirmDelete($id)
@@ -146,5 +143,4 @@ class PositionTable extends LivewireTable
         LivewireAlert::title(__('general.item-updated'))
             ->success()->toast()->position('top-start')->show();
     }
-
 }
