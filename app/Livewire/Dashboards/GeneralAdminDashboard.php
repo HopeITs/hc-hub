@@ -3,8 +3,7 @@
 namespace App\Livewire\Dashboards;
 
 use Carbon\Carbon;
-use App\Models\{Checklist, Employee, Contract};
-use FontLib\Table\Type\name;
+use App\Models\{Badge, Checklist, Employee, Contract};
 use Livewire\Component;
 class GeneralAdminDashboard extends Component
 {
@@ -15,7 +14,6 @@ class GeneralAdminDashboard extends Component
     public $joinedOn;
     public $workEmail;
 
-    //today's birthday function
     public function getTodayBirthdaysProperty()
     {
         $today = now()->timezone(config('app.timezone'));
@@ -45,7 +43,6 @@ class GeneralAdminDashboard extends Component
             });
     }
 
-    //upcoming birthdays function
     public function getUpcomingBirthdaysProperty()
     {
         $today = now()->timezone(config('app.timezone'))->startOfDay();
@@ -99,7 +96,6 @@ class GeneralAdminDashboard extends Component
             ->values();
     }
 
-    //team members function
     public function getTeamMembersProperty()
     {
         if (!$this->contract?->position) {
@@ -191,7 +187,6 @@ class GeneralAdminDashboard extends Component
             ])
             ->get()
             ->map(function ($emp) use ($nameCol, $titleCol) {
-                // Pick the latest active contract either from the eager-loaded set or method
                 $contract = $emp->contracts
                     ->filter(fn($c) => ($c->is_active || (
                             !$c->terminated_at &&
@@ -217,7 +212,6 @@ class GeneralAdminDashboard extends Component
 
 
     }
-    //my checklist items
     public function getDeliveredItemsProperty()
     {
         if (!$this->employee) {
@@ -239,7 +233,7 @@ class GeneralAdminDashboard extends Component
             return collect();
         }
 
-        return \App\Models\Badge::query()
+        return Badge::query()
             ->with('employee')
             ->where('employee_id', $this->employee->id)
             ->orderByDesc('date')

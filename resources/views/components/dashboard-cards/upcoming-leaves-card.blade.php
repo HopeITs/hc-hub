@@ -1,6 +1,5 @@
 <div class="w-full bg-gradient-to-b from-white to-[var(--color-neutral-50)] rounded-3xl shadow-xl border border-[var(--color-neutral-200)] overflow-hidden">
 
-    <!-- Header -->
     <div class="flex items-center justify-between px-6 py-4 bg-primary">
         <div class="flex items-center gap-3">
             <div class="flex items-center justify-center w-9 h-9 bg-white/20 rounded-full">
@@ -16,10 +15,8 @@
         </span>
     </div>
 
-    <!-- Content -->
     <div class="p-6 max-h-[22rem] overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-[var(--color-primary-200)] scrollbar-track-transparent">
 
-        <!-- Leave Item -->
         <div class="group flex items-start gap-4 p-4 bg-white border border-[var(--color-neutral-200)] rounded-2xl shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200">
             <div class="flex flex-col items-center">
                 <div class="w-3.5 h-3.5 rounded-full bg-[var(--color-success-500)] border-2 border-black shadow"></div>

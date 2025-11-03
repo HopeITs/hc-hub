@@ -18,7 +18,6 @@
             scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)]
             hover:scrollbar-thumb-[var(--color-primary-400)]">
 
-        <!-- Employee Left -->
         <div
             class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-[var(--color-primary-100)]
                 hover:border-[var(--color-primary-300)] hover:shadow transition">
@@ -33,7 +32,6 @@
             </div>
         </div>
 
-        <!-- Employee Joined -->
         <div
             class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-[var(--color-primary-100)]
                 hover:border-[var(--color-primary-300)] hover:shadow transition">
@@ -48,7 +46,6 @@
             </div>
         </div>
 
-        <!-- Promotion -->
         <div
             class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-[var(--color-primary-100)]
                 hover:border-[var(--color-primary-300)] hover:shadow transition">
@@ -63,7 +60,6 @@
             </div>
         </div>
 
-        <!-- New Center -->
         <div
             class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-[var(--color-primary-100)]
                 hover:border-[var(--color-primary-300)] hover:shadow transition">
@@ -78,12 +74,5 @@
             </div>
         </div>
 
-        <!-- Empty State Example -->
-        <!--
-        <div class="flex flex-col items-center justify-center text-[var(--color-neutral-500)] text-sm py-10">
-            <div class="text-4xl mb-2">🗞️</div>
-            <p class="font-medium">No recent company updates</p>
-        </div>
-        -->
     </div>
 </div>

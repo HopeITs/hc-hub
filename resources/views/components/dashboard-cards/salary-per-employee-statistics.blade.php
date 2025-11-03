@@ -5,10 +5,8 @@
     </div>
 
     <div class="p-6 flex flex-col items-center justify-center">
-        <!-- Chart container -->
         <div id="salaryTypePieChart" class="w-[320px] h-[320px] relative"></div>
 
-        <!-- Legend (auto-filled dynamically) -->
         <div id="salaryTypeLegend" class="mt-4 flex flex-wrap justify-center gap-4 text-sm"></div>
     </div>
 </div>

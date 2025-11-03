@@ -1,7 +1,6 @@
 <div
     class="relative w-full max-w-sm h-[340px] bg-white rounded-3xl shadow-md ring-1 ring-[var(--color-primary-200)] overflow-hidden">
 
-    <!-- Header -->
     <div class="flex items-center justify-between px-5 pt-4 pb-3 bg-[var(--color-primary-50)] border-b border-[var(--color-primary-100)]">
         <div class="flex items-center gap-2">
             <div
@@ -23,17 +22,14 @@
     </span>
     </div>
 
-    <!-- Body -->
     <div
         class="relative p-5 space-y-3 overflow-y-auto scroll-smooth max-h-[270px]
            scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)]
            hover:scrollbar-thumb-[var(--color-primary-400)]">
 
-        <!-- Contract Row -->
         <div
             class="flex items-center justify-between p-3 bg-[var(--color-neutral-50)] rounded-2xl border border-[var(--color-neutral-200)] hover:border-[var(--color-primary-300)] hover:shadow-sm transition">
 
-            <!-- Left section -->
             <div class="flex items-center gap-3">
                 <img
                     src="https://randomuser.me/api/portraits/men/8.jpg"
@@ -49,14 +45,12 @@
                 </div>
             </div>
 
-            <!-- Right section -->
             <div class="flex flex-col items-center gap-3">
                 <span
                     class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[var(--color-primary-50)] text-[var(--color-primary-700)] border border-[var(--color-primary-100)] whitespace-nowrap">
                     22 days left
                 </span>
 
-                <!-- View Button -->
                 <a href="#"
                    class="flex items-center gap-1 text-[11px] font-semibold text-[var(--color-primary-700)] hover:text-[var(--color-primary-600)] transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
@@ -70,7 +64,6 @@
             </div>
         </div>
 
-        <!-- Urgent Contract -->
         <div
             class="flex items-center justify-between p-3 bg-[var(--color-neutral-50)] rounded-2xl border border-[var(--color-neutral-200)] hover:border-[var(--color-primary-300)] hover:shadow-sm transition">
             <div class="flex items-center gap-3">
