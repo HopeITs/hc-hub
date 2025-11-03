@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
+use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,9 +29,34 @@ class LeaveRequestTable extends LivewireTable
 
     protected function query(): Builder
     {
-        $query = $this->model()::query()
+        $user = auth()->user();
+        $role = $user->activeRole()?->name; // assuming activeRole() returns a Role model
+        $query = LeaveRequest::query()
             ->with('leaveBalance.contract.employee')
             ->orderBy('created_at', 'desc');
+
+        if ($role) {
+            if ($role !== 'HR-SYR' &&  str_starts_with($role, 'HR-')) {
+
+                // Extract city code from role, e.g. HR-ALP → ALP
+                $cityCode = substr($role, 3);
+
+                // Join or filter based on the employee’s city code
+                $query->whereHas('leaveBalance.contract.employee.city', function ($q) use ($cityCode) {
+                    $q->where('slug', $cityCode);
+                });
+            } else {
+                // Not HR – show only own requests
+                $query->whereHas('leaveBalance.contract', function ($q) use ($user) {
+                    $q->where('employee_id', $user->profile->id);
+                });
+            }
+        } else {
+            // Fallback: not HR, no active role
+            $query->whereHas('leaveBalance.contract', function ($q) use ($user) {
+                $q->where('employee_id', $user->profile->id);
+            });
+        }
 
         if ($this->statusFilter !== 'all') {
             $query->where('status', $this->statusFilter);
@@ -39,15 +65,21 @@ class LeaveRequestTable extends LivewireTable
         return $query;
     }
 
+
     protected function columns(): array
     {
+        $user = auth()->user();
         return [
-            Column::make('ID', 'id')->sortable(),
+
 
             SelectColumn::make(trans_choice('general.leave-type', 1), 'leaveBalance.leaveType.' . transColumn('name'))
                 ->options(LeaveType::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()
                 ->searchable(),
+            SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee.' . transColumn('name'))
+                ->options(Employee::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
+                ->sortable()
+                ->searchable()->visible(str_starts_with($user->activeRole()?->name, 'HR-')),
 
             Column::make(__('general.status'), function (mixed $value, Model $model): string {
                 $status = LeaveRequestStatus::getLocalizedName($value->status);

@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LeaveBalance extends Model
 {
@@ -18,9 +19,9 @@ class LeaveBalance extends Model
         'used'
     ];
 
-    public function contract()
+    public function contract(): BelongsTo
     {
-        return $this->belongsTo(Contract::class);
+        return $this->belongsTo(Contract::class,'contract_id');
     }
     public function getDeservedFormattedAttribute(): string
     {
@@ -109,10 +110,11 @@ class LeaveBalance extends Model
         return $text;
 
     }
-    public function leaveType()
+    public function leaveType(): BelongsTo
     {
         return $this->belongsTo(LeaveType::class,'type_id');
     }
+
 
     public function leaveRequests()
     {
