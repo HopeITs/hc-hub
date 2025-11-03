@@ -11,6 +11,7 @@ class BadgeForm extends Form
     public ?Employee $employee = null;
 
     public array $badges = [];
+
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
@@ -82,10 +83,14 @@ class BadgeForm extends Form
 
     public function save(): void
     {
-        $this->validate();
+        $badge = collect($this->badges)->last(fn($b) => empty($b['id']));
 
-        collect($this->badges)->each(function ($badgeData) {
-            $this->employee->badges()->updateOrCreate(['id' => $badgeData['id'] ?? null], $badgeData);
-        });
+        if (!$badge || !$this->employee) {
+            return;
+        }
+
+        $this->employee->badges()->create($badge);
+
+        $this->setEmployee($this->employee->fresh());
     }
 }
