@@ -270,6 +270,7 @@ return [
     'manager-dashboard' => 'Manager Dashboard',
     'general-admin-dashboard' => 'General Admin Dashboard',
     'dashboards' => 'Dashboards',
+    'contract-statistics' => 'Contract Statistics',
     'items_from_checklist' => 'All Items',
     'no_items_from_checklist' => 'No items have been assigned from the checklist.',
     'back_to_list' => 'Cancel',

@@ -21,6 +21,7 @@ return [
     'my-profile' => 'ملفي الشخصي',
     'my-account' => 'الحساب الشخصي',
     'dashboard' => 'لوحة التحكم',
+    'contract-statistics' => 'إحصائيات العقود',
     'name' => 'الاسم',
     'type' => 'النوع',
     'place' => 'المكان',

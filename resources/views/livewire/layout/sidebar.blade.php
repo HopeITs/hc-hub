@@ -15,6 +15,7 @@
                     :active="request()->routeIs('dashboard') ||
                     request()->routeIs('employee.dashboard') ||
                     request()->routeIs('hr.dashboard') ||
+                    request()->routeIs('contract-statistics') ||
                     request()->routeIs('manager.dashboard') ||
                     request()->routeIs('general-admin.dashboard')">
                     <x-slot name="icon"><x-icons.users /></x-slot>
@@ -33,6 +34,12 @@
                             :href="route('hr.dashboard')"
                             :active="request()->routeIs('hr.dashboard')">
                             {{ __('general.hr-dashboard') }}
+                        </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item
+                            :href="route('contract-statistics')"
+                            :active="request()->routeIs('contract-statistics')">
+                            {{ __('general.contract-statistics') }}
                         </x-layouts.app.sidebar.nav-item>
                         @endactiverole
 

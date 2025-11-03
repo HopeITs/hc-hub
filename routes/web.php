@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
+use App\Livewire\Dashboards\ContractStatistics;
 use App\Livewire\Dashboards\EmployeeDashboard;
 use App\Livewire\Dashboards\GeneralAdminDashboard;
 use App\Livewire\Dashboards\HrDashboard;
@@ -135,6 +136,9 @@ Route::group(
 
             Route::get('/general-admin-dashboard', GeneralAdminDashboard::class)
                 ->name('general-admin.dashboard');
+
+            Route::get('/contract-statistics', ContractStatistics::class)
+                ->name('contract-statistics');
 
                 Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
         });
