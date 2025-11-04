@@ -1,142 +1,170 @@
-<div class=" mx-auto py-8">
-    <div class="grid grid-cols-4 sm:grid-cols-12 gap-6 px-4">
-        <div class="col-span-4 sm:col-span-3">
-            <div class="bg-white shadow rounded-lg p-6">
-                <div class="flex flex-col items-center">
-                    <img src="{{$employee->getFirstMediaUrl('avatar')}}"
-                         class=" size-32 border border-1 border-primary rounded-full object-cover mb-3"/>
+<div class="min-h-screen bg-[var(--color-neutral-100)] py-8 px-6 font-sans text-[var(--color-neutral-800)]">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-                    <h1 class="text-xl text-secondary-dark font-bold">{{$employee->name}}</h1>
-                    <p class="text-secondary-light">{{$employee->positions()->latest()->first()->title}}</p>
+        <div class="lg:col-span-4">
+            <div class="bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl overflow-hidden">
+                <div class="p-8 flex flex-col items-center text-center relative">
+                    @if($employee->getFirstMediaUrl('avatar'))
+                        <img src="{{$employee->getFirstMediaUrl('avatar')}}"
+                             class="w-28 h-28 rounded-full object-cover border-4 border-[var(--color-primary)] shadow-sm transition-all duration-300 hover:scale-105">
+                    @else
+                        <div class="w-28 h-28 flex items-center justify-center text-[var(--color-primary)] text-3xl font-bold border-4 border-[var(--color-primary)] rounded-full">
+                            {{ strtoupper(substr($employee->name_en,0,2)) }}
+                        </div>
+                    @endif
 
+                    <h1 class="mt-4 text-xl font-semibold text-[var(--color-secondary-dark)] tracking-tight">{{$employee->name_en}}</h1>
+                    <p class="text-[var(--color-primary)] text-sm font-medium">{{$employee->positions()->latest()->first()->title ?? '—'}}</p>
+                    <p class="text-[var(--color-secondary-light)] text-xs mt-1">Employee ID: {{$employee->id}}</p>
                 </div>
-                <hr class="my-6 border-t border-gray-300">
-                <div class="flex flex-col">
-                    @isset($employee->skills)
-                        <span class="text-gray-700 uppercase font-bold tracking-wider mb-2">Skills</span>
-                        <ul>
-                            @foreach(json_decode($employee->skills) as $skill)
-                                <li class="mb-2">{{$skill}}</li>
-                            @endforeach
 
+                <div class="border-t border-[var(--color-neutral-200)] px-8 py-6 space-y-6 text-sm">
+                    <div>
+                        <h2 class="uppercase text-[var(--color-secondary-medium)] text-[10px] font-semibold mb-2 tracking-widest">Contact</h2>
+                        <ul class="space-y-1">
+                            <li><span class="font-medium">Email:</span> {{$employee->personal_email ?? 'N/A'}}</li>
+                            <li><span class="font-medium">Phone:</span> {{$employee->personal_phone ?? 'N/A'}}</li>
+                            <li><span class="font-medium">Address:</span> {{$employee->address_ar ?? 'N/A'}}</li>
                         </ul>
+                    </div>
 
-                        <hr class="my-6 border-t border-gray-300">
-                    @endisset
-                    @isset($employee->interests)
-                        <span class="text-gray-700 uppercase font-bold tracking-wider  mb-2">Interests</span>
-                        <ul>
-                            @foreach(json_decode($employee->interests) as $interest)
-                                <li class="mb-2">{{$interest}}</li>
-                            @endforeach
-
+                    <div>
+                        <h2 class="uppercase text-[var(--color-secondary-medium)] text-[10px] font-semibold mb-2 tracking-widest">National Details</h2>
+                        <ul class="space-y-1">
+                            <li><span class="font-medium">National ID:</span> {{$employee->national_number ?? 'N/A'}}</li>
+                            <li><span class="font-medium">Nationality:</span> {{$employee->nationality ?? 'N/A'}}</li>
+                            <li><span class="font-medium">Marital Status:</span> {{$employee->marital_status ?? 'N/A'}}</li>
                         </ul>
-                    @endisset
+                    </div>
+
+                    <div>
+                        <h2 class="uppercase text-[var(--color-secondary-medium)] text-[10px] font-semibold mb-2 tracking-widest">Civil Registry</h2>
+                        <ul class="space-y-1">
+                            <li><span class="font-medium">Office:</span> {{$employee->civil_registry_office ?? 'N/A'}}</li>
+                            <li><span class="font-medium">Registry No:</span> {{$employee->civil_registry_number ?? 'N/A'}}</li>
+                            <li><span class="font-medium">Place of Birth:</span> {{$employee->place_and_birth_date ?? 'N/A'}}</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-span-4 sm:col-span-9">
-            <div class="bg-white shadow rounded-lg p-6">
-                <h2 class="text-xl font-bold mb-4">About Me</h2>
-                <p class="text-gray-700">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed finibus est
-                    vitae tortor ullamcorper, ut vestibulum velit convallis. Aenean posuere risus non velit egestas
-                    suscipit. Nunc finibus vel ante id euismod. Vestibulum ante ipsum primis in faucibus orci luctus
-                    et ultrices posuere cubilia Curae; Aliquam erat volutpat. Nulla vulputate pharetra tellus, in
-                    luctus risus rhoncus id.
+
+        <div class="lg:col-span-8 space-y-6">
+
+            <div class="bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8 hover:shadow-lg transition-shadow duration-300">
+                <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
+                    <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
+                    About {{$employee->name_en}}
+                </h2>
+                <p class="text-[var(--color-secondary-medium)] text-sm leading-relaxed">
+                    {{$employee->about ?? 'This employee has not yet added a bio. Add one to tell their story, experience, and achievements.'}}
                 </p>
+            </div>
 
-                <h3 class="font-semibold text-center mt-3 -mb-2">
-                    Find me on
-                </h3>
-                <div class="flex justify-center items-center gap-6 my-6">
-                    <a class="text-gray-700 hover:text-orange-600" aria-label="Visit TrendyMinds LinkedIn" href=""
-                       target="_blank">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="h-6">
-                            <path fill="currentColor"
-                                  d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z">
-                            </path>
-                        </svg>
-                    </a>
-                    <a class="text-gray-700 hover:text-orange-600" aria-label="Visit TrendyMinds YouTube" href=""
-                       target="_blank">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="h-6">
-                            <path fill="currentColor"
-                                  d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z">
-                            </path>
-                        </svg>
-                    </a>
-                    <a class="text-gray-700 hover:text-orange-600" aria-label="Visit TrendyMinds Facebook" href=""
-                       target="_blank">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="h-6">
-                            <path fill="currentColor"
-                                  d="m279.14 288 14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z">
-                            </path>
-                        </svg>
-                    </a>
-                    <a class="text-gray-700 hover:text-orange-600" aria-label="Visit TrendyMinds Instagram" href=""
-                       target="_blank">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="h-6">
-                            <path fill="currentColor"
-                                  d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z">
-                            </path>
-                        </svg>
-                    </a>
-                    <a class="text-gray-700 hover:text-orange-600" aria-label="Visit TrendyMinds Twitter" href=""
-                       target="_blank">
-                        <svg class="h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                            <path fill="currentColor"
-                                  d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z">
-                            </path>
-                        </svg>
-                    </a>
+            <div class="bg-[var(--color-neutral-50)] border border-[var(--color-neutral-200)] rounded-2xl shadow-sm p-8">
+                <h2 class="text-lg font-bold text-[var(--color-primary)] mb-5 flex items-center gap-2">
+                    <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
+                    Personal Information
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 text-sm">
+                    <p><span class="font-medium">Birth Date:</span> {{ $employee->actual_dob ?? 'N/A' }}</p>
+                    <p><span class="font-medium">Years of Service:</span> {{ $employee->years_of_service ?? 'N/A' }}</p>
+                    <p><span class="font-medium">City ID:</span> {{ $employee->city_id ?? 'N/A' }}</p>
+                    <p><span class="font-medium">Work Phone:</span> {{ $employee->work_phone ?? 'N/A' }}</p>
+                    <p><span class="font-medium">Board Member:</span> {{ $employee->is_board_member ? 'Yes' : 'No' }}</p>
+                    <p><span class="font-medium">Board Since:</span> {{ $employee->board_member_started_at ?? '—' }}</p>
                 </div>
+            </div>
 
+            <div class="bg-white border border-[var(--color-neutral-200)] rounded-2xl shadow-md p-8">
+                <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-4 flex items-center gap-2">
+                    <span class="inline-block w-1.5 h-5 bg-[var(--color-secondary-medium)] rounded"></span>
+                    Family Details
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 text-sm">
+                    <p><span class="font-medium">Father’s Name:</span> {{$employee->father_name_ar ?? 'N/A'}}</p>
+                    <p><span class="font-medium">Mother’s Name:</span> {{$employee->mother_name_ar ?? 'N/A'}}</p>
+                </div>
+            </div>
 
-                <h2 class="text-xl font-bold mt-6 mb-4">Experience</h2>
-                <div class="mb-6">
-                    <div class="flex justify-between flex-wrap gap-2 w-full">
-                        <span class="text-gray-700 font-bold">Web Developer</span>
-                        <p>
-                            <span class="text-gray-700 mr-2">at ABC Company</span>
-                            <span class="text-gray-700">2017 - 2019</span>
-                        </p>
+            @if($employee->skills || $employee->interests)
+                <div class="bg-white border border-[var(--color-neutral-200)] rounded-2xl shadow-md p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        @isset($employee->skills)
+                            <div>
+                                <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
+                                    <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
+                                    Skills
+                                </h2>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach(json_decode($employee->skills) as $skill)
+                                        <span class="px-3 py-1 text-xs font-medium bg-[var(--color-primary-50)] text-[var(--color-primary-700)] border border-[var(--color-primary-200)] rounded-full hover:bg-[var(--color-primary-100)] transition">
+                                            {{$skill}}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endisset
+
+                        @isset($employee->interests)
+                            <div>
+                                <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
+                                    <span class="inline-block w-1.5 h-5 bg-[var(--color-secondary-medium)] rounded"></span>
+                                    Interests
+                                </h2>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach(json_decode($employee->interests) as $interest)
+                                        <span class="px-3 py-1 text-xs font-medium bg-[var(--color-neutral-100)] text-[var(--color-secondary-dark)] border border-[var(--color-neutral-200)] rounded-full hover:bg-[var(--color-neutral-200)] transition">
+                                            {{$interest}}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endisset
                     </div>
-                    <p class="mt-2">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed finibus est vitae
-                        tortor ullamcorper, ut vestibulum velit convallis. Aenean posuere risus non velit egestas
-                        suscipit.
-                    </p>
                 </div>
-                <div class="mb-6">
-                    <div class="flex justify-between flex-wrap gap-2 w-full">
-                        <span class="text-gray-700 font-bold">Web Developer</span>
-                        <p>
-                            <span class="text-gray-700 mr-2">at ABC Company</span>
-                            <span class="text-gray-700">2017 - 2019</span>
-                        </p>
+            @endif
+
+            <div class="bg-white border border-[var(--color-neutral-200)] rounded-2xl shadow-md p-8">
+                <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-8 flex items-center gap-2">
+                    <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
+                    Experience Timeline
+                </h2>
+
+                <div class="relative pl-8 before:content-[''] before:absolute before:top-0 before:left-3 before:w-[2px] before:h-full before:bg-[var(--color-neutral-200)]">
+
+                    <div class="relative mb-10 last:mb-0 group">
+                        <div class="absolute -left-[7px] top-1 w-4 h-4 rounded-full border-[3px] border-white bg-[var(--color-primary)] shadow-sm group-hover:scale-110 transition-transform duration-300"></div>
+
+                        <div class="ml-6 bg-[var(--color-neutral-50)] border border-[var(--color-neutral-200)] rounded-xl px-5 py-4 shadow-sm hover:shadow-md transition">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                <h3 class="text-[var(--color-secondary-dark)] font-semibold text-sm sm:text-base">
+                                    Web Developer at ABC Company
+                                </h3>
+                                <span class="text-[var(--color-secondary-medium)] text-xs sm:text-sm">2017 – 2019</span>
+                            </div>
+                            <p class="mt-2 text-[var(--color-secondary-light)] text-sm leading-relaxed">
+                                Developed and maintained enterprise-level web systems with Laravel and Vue.js.
+                            </p>
+                        </div>
                     </div>
-                    <p class="mt-2">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed finibus est vitae
-                        tortor ullamcorper, ut vestibulum velit convallis. Aenean posuere risus non velit egestas
-                        suscipit.
-                    </p>
-                </div>
-                <div class="mb-6">
-                    <div class="flex justify-between flex-wrap gap-2 w-full">
-                        <span class="text-gray-700 font-bold">Web Developer</span>
-                        <p>
-                            <span class="text-gray-700 mr-2">at ABC Company</span>
-                            <span class="text-gray-700">2017 - 2019</span>
-                        </p>
+
+                    <div class="relative mb-10 last:mb-0 group">
+                        <div class="absolute -left-[7px] top-1 w-4 h-4 rounded-full border-[3px] border-white bg-[var(--color-primary)] shadow-sm group-hover:scale-110 transition-transform duration-300"></div>
+                        <div class="ml-6 bg-[var(--color-neutral-50)] border border-[var(--color-neutral-200)] rounded-xl px-5 py-4 shadow-sm hover:shadow-md transition">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                <h3 class="text-[var(--color-secondary-dark)] font-semibold text-sm sm:text-base">
+                                    Frontend Engineer at TechNova
+                                </h3>
+                                <span class="text-[var(--color-secondary-medium)] text-xs sm:text-sm">2019 – Present</span>
+                            </div>
+                            <p class="mt-2 text-[var(--color-secondary-light)] text-sm leading-relaxed">
+                                Built scalable front-end architecture and refined UI systems across web platforms.
+                            </p>
+                        </div>
                     </div>
-                    <p class="mt-2">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed finibus est vitae
-                        tortor ullamcorper, ut vestibulum velit convallis. Aenean posuere risus non velit egestas
-                        suscipit.
-                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-

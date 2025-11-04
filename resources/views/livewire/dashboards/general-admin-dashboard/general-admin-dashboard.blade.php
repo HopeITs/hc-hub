@@ -2,24 +2,49 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
 
         <div>
-            <x-dashboard-cards.employee-details-card
-                :employee="$employee"
-                :positionTitle="$positionTitle"
-                :departmentName="$departmentName"
-                :joinedOn="$joinedOn"
-                :workEmail="$workEmail"/>
+            <x-dashboard-cards.leave-request-card/>
+        </div>
+
+
+        <div>
+            <x-dashboard-cards.upcoming-leaves-card/>
         </div>
 
         <div>
-            <x-dashboard-cards.my-leaves-card
-                :employee="$employee"
-                :contract="$contract"/>
+            <x-dashboard-cards.news-card/>
         </div>
 
         <div>
-            <x-dashboard-cards.team-members-card
-                :contract="$contract"
-                :employee="$employee"/>
+            <x-dashboard-cards.upcoming-holidays-card/>
+        </div>
+
+        <div>
+            <livewire:dashboards.general-admin-notes-card :employee="auth()->id()"/>
+        </div>
+
+        <div>
+            <x-dashboard-cards.employee-chart-statistics/>
+        </div>
+
+        <div>
+            <x-dashboard-cards.department-employees-statistics/>
+        </div>
+
+
+        <div>
+            <x-dashboard-cards.contract-type-employees-statistics/>
+        </div>
+
+        <div>
+            <x-dashboard-cards.job-level-employees-statistics/>
+        </div>
+
+        <div>
+            <x-dashboard-cards.salary-per-employee-statistics/>
+        </div>
+
+        <div>
+            <x-dashboard-cards.team-members-card/>
         </div>
 
         <div>
@@ -32,36 +57,7 @@
                 :upcomingBirthdays="$upcomingBirthdays"/>
         </div>
 
-        <div>
-            <livewire:dashboards.employee-notes-card :employee="auth()->id()"/>
-        </div>
 
-        <div>
-            <x-dashboard-cards.checklist-items-card
-                :deliveredItems="$deliveredItems"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.my-badges-card
-                :myBadges="$myBadges"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.pending-requests-card
-                :pendingRequests="$pendingRequests"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.upcoming-holidays-card/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.upcoming-leaves-card/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.news-card/>
-        </div>
 
     </div>
 </div>
