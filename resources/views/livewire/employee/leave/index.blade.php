@@ -12,15 +12,15 @@ use App\Enums\LeaveRequestStatus;
             ]"
             :showButton="true"
         />
-        @activerole('Employee')
+
         <div>
             <x-primary-button wire:click="create">
                 @lang('general.add-new')
             </x-primary-button>
         </div>
-        @endactiverole
+
     </div>
-    @activerole('Employee')
+
     @isset($availableLeaves)
         <div class="grid grid-cols-{{$availableLeaves->count()}} gap-4 mb-6">
             @foreach($availableLeaves as $availableLeave)
@@ -63,7 +63,7 @@ use App\Enums\LeaveRequestStatus;
         </div>
 
     @endisset
-    @endactiverole
+
     <x-tabs-list>
         <x-tabs-list-item
             :active="$statusFilter === 'all'" active-tab="all">
@@ -90,7 +90,7 @@ use App\Enums\LeaveRequestStatus;
 
     {{-- Table --}}
     <div class="mt-4">
-        <livewire:employee.leave.leave-request-table :statusFilter="$statusFilter" key="table-{{ $statusFilter }}"/>
+        <livewire:employee.leave.my-leave-request-table :statusFilter="$statusFilter" key="table-{{ $statusFilter }}"/>
     </div>
 
 

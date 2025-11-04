@@ -17,7 +17,7 @@ use RamonRietdijk\LivewireTables\Columns\DateColumn;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
-class LeaveRequestTable extends LivewireTable
+class MyLeaveRequestTable extends LivewireTable
 {
     protected string $model = LeaveRequest::class;
     public LeaveRequestForm $form;
@@ -38,38 +38,15 @@ class LeaveRequestTable extends LivewireTable
     protected function query(): Builder
     {
         $user = auth()->user();
-        $role = $user->activeRole()?->name; // assuming activeRole() returns a Role model
         $query = LeaveRequest::query()
             ->with(['leaveBalance.contract.employee', 'leaveBalance.contract.position'])
             ->orderBy('created_at', 'desc');
 
-        if ($role) {
-            if ($role !== 'HR-SYR' && str_starts_with($role, 'HR-')) {
 
-                // Extract city code from role, e.g. HR-ALP → ALP
-                $cityCode = substr($role, 3);
-
-                // Join or filter based on the employee’s city code
-                $query->whereHas('leaveBalance.contract.employee.city', function ($q) use ($cityCode) {
-                    $q->where('slug', $cityCode);
-                });
-            } elseif ($role === 'Manager') {
-
-                $query->whereHas('leaveBalance.contract.position.', function ($q) use ($user) {
-                    $q->where('direct_manager_id', $user->profile->id);
-                });
-            } else {
-                // Not HR – show only own requests
-                $query->whereHas('leaveBalance.contract', function ($q) use ($user) {
-                    $q->where('employee_id', $user->profile->id);
-                });
-            }
-        } else {
-            // Fallback: not HR, no active role
             $query->whereHas('leaveBalance.contract', function ($q) use ($user) {
                 $q->where('employee_id', $user->profile->id);
             });
-        }
+
 
         if ($this->statusFilter !== 'all') {
             $query->where('status', $this->statusFilter);
@@ -89,10 +66,6 @@ class LeaveRequestTable extends LivewireTable
                 ->options(LeaveType::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()
                 ->searchable(),
-            SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee.' . transColumn('name'))
-                ->options(Employee::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
-                ->sortable()
-                ->searchable()->visible(str_starts_with($user->activeRole()?->name, 'HR-') || $user->activeRole()?->name === 'Manager'),
             SelectColumn::make(trans_choice('general.type', 1), 'type')
                 ->options(['hour' => trans_choice('general.hour', 1), 'day' => trans_choice('general.day', 1)])
                 ->displayUsing(fn($v, Model $m) => trans_choice('general.' . $m->type, 1))
