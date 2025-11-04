@@ -114,7 +114,19 @@ class LeaveRequestForm extends Form
      */
     public function store(): void
     {
+
         $this->validate();
+
+
+        if($this->type === 'hour') {
+            $start_at = $this->start_hour .' '. $this->leave_date;
+            $this->start_at = Carbon::createFromFormat('H:i Y-m-d', $start_at);
+
+            $end_at = $this->end_hour .' '. $this->leave_date;
+            $this->end_at = Carbon::createFromFormat('H:i Y-m-d', $end_at);
+        }
+
+
         $leaveBalance = $this->getLeaveBalance();
 
         // --- Handle Annual Leave Accrual ---

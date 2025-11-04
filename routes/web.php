@@ -19,9 +19,10 @@ use App\Livewire\Employee\{EmployeeCreate,
     EmployeeEdit,
     EmployeeModule,
     EmployeeProfile,
+    Leave\AllLeaveRequestModule,
     Leave\CreateLeaveRequest,
-    Leave\LeaveRequestModule,
-    Leave\LeaveRequestTable};
+    Leave\MyLeaveRequestModule,
+    Leave\MyLeaveRequestTable};
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
 use App\Livewire\ProgramManagement\{Center\CentersModule,
     DefaultDeliverable\DefaultDeliverablesModule,
@@ -95,8 +96,8 @@ Route::group(
             Route::prefix('leaves')
                 ->name('leaves.')
                 ->group(function () {
-                    Route::get('/', LeaveRequestModule::class)->name('index');
-
+                    Route::get('/', MyLeaveRequestModule::class)->name('index');
+                    Route::get('/all', AllLeaveRequestModule::class)->name('all');
                 });
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
@@ -110,7 +111,7 @@ Route::group(
                 });
 
             Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
-            Route::get('my-leaves', LeaveRequestTable::class)->name('leaves.index');
+            Route::get('my-leaves', MyLeaveRequestTable::class)->name('leaves.index');
             Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', false)->name('my-folders.index');
             Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', true)->name('shared-folders.index');
 

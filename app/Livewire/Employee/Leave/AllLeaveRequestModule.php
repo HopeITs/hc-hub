@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
-class LeaveRequestModule extends Component
+class AllLeaveRequestModule extends Component
 {
 
     public LeaveBalance $leaveBalance;
@@ -19,7 +19,7 @@ class LeaveRequestModule extends Component
     public LeaveRequestForm $form;
     public $showModal = false;
     public $modalTitle = 'Modal title';
-
+    protected $listeners = ['editLeaveRequest' => 'edit'];
     public string $statusFilter = 'all';
     public array $counts = [];
 
@@ -85,7 +85,7 @@ class LeaveRequestModule extends Component
                 });
             })->get();
 
-        return view('livewire.employee.leave.index', compact('availableLeaves', 'allAvailableLeaves', 'alternativeEmployees'));
+        return view('livewire.employee.leave.all', compact('availableLeaves', 'allAvailableLeaves', 'alternativeEmployees'));
     }
 
     public function getCountsProperty()

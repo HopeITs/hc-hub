@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LeaveRequestStatus;
 use App\Traits\HasTranslation;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -179,7 +180,7 @@ class Employee extends Model implements HasMedia
 
     public function contractTypes(): BelongsToMany
     {
-        return $this->belongsToMany(ContractType::class, 'contracts', 'employee_id', 'contract_type_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours',  'work_days', 'work_hours']);
+        return $this->belongsToMany(ContractType::class, 'contracts', 'employee_id', 'contract_type_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'work_days', 'work_hours']);
     }
 
     public function departments(): BelongsToMany
@@ -196,7 +197,17 @@ class Employee extends Model implements HasMedia
     {
         return $this->latestActiveContract()?->leaveBalances()->whereHas('leaveType', function ($query) {
             return $query->where('base_days', '>', 10);
-        })->get();
+        })       ->withCount([
+            'leaveRequests as pending_requests_count' => function ($query) {
+                $query->where('status', LeaveRequestStatus::Pending);
+            },
+            'leaveRequests as approved_requests_count' => function ($query) {
+                $query->where('status', LeaveRequestStatus::Accepted);
+            },
+            'leaveRequests as rejected_requests_count' => function ($query) {
+                $query->where('status', LeaveRequestStatus::Rejected);
+            },
+        ])->get();
     }
 
     public function allAvailableLeaves()
@@ -268,14 +279,26 @@ class Employee extends Model implements HasMedia
 
         // Calculate total service time (in years + fractional months)
         $totalYears = 0;
+        $totalMonths = 0;
         foreach ($merged as $m) {
-            $years = $m['end']->diffInYears($m['start']);
-            $months = $m['end']->diffInMonths($m['start']) % 12;
-            $totalYears += $years + ($months / 12);
+            $years = floor($m['start']->diffInYears($m['end']));
+
+            $months = $m['start']->diffInMonths($m['end']) % 12;
+            $totalYears += $years;
+            $totalMonths += $months;
         }
-        $result = -1 * round($totalYears, 1);
+        $result = '';
+        if ($totalYears > 0) {
+            $result = $totalYears . ' ' . trans_choice('general.year', $totalYears) . ' ';
+        }
+        if ($totalMonths > 0) {
+            $result .= $totalMonths . ' ' . trans_choice('general.month', $totalMonths);
+        }
+        if($result === ''){
+            $result = $totalYears . ' ' . trans_choice('general.year', $totalYears);
+        }
         // Return total years of service rounded to one decimal
-        return $result .' ' . trans_choice('general.year', $result);
+        return $result;
     }
 
 
