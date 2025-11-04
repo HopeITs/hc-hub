@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->nullableMorphs('newsable', 'newsable_index');
             $table->string('photo')->nullable();
-            $table->enum('display_duration', ['1_hour', '2_hours', '3_hours', '4_hours', '5_hours', '6_hours', '7_hours', '8_hours', '1_day', '2_days', '3_days', '4_days', '5_days', '6_days', '1_week'])->default('1_day');
+            $table->timestamp('display_until')->nullable();
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
         });

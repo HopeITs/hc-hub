@@ -34,7 +34,9 @@ class NewsTable extends LivewireTable
             Column::make(__('general.target_group'), 'newsable_name')->sortable(
                 fn (Builder $query, Direction $direction) => $query->orderBy('newsable_type', $direction->value)
             ),
-            Column::make(__('general.display_duration'), 'display_duration')->sortable(),
+            Column::make(__('general.display_until'), 'display_until')
+                ->displayUsing(fn ($v) => $v ? $v->format('Y-m-d') : __('general.always_display'))
+                ->sortable(),
             Column::make(__('general.published_at'), 'published_at')
                 ->displayUsing(fn ($v) => optional($v)->diffForHumans())
                 ->sortable(),

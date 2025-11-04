@@ -372,6 +372,7 @@ return [
     'target_group' => 'Target Group',
     'target_entity' => 'Entity',
     'select_entity' => 'Select Entity',
+    'display_until' => 'Display Date',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

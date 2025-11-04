@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\City;
 use App\Models\Center;
 use App\Models\Program;
+use Carbon\Carbon;
 
 class NewsModule extends Component
 {
@@ -26,7 +27,7 @@ class NewsModule extends Component
         'newsable_type' => '',
         'newsable_id' => null,
         'photo' => '',
-        'display_duration' => '1_day',
+        'display_until' => '',
         'published_at' => '',
     ];
 
@@ -36,9 +37,16 @@ class NewsModule extends Component
             'item.title' => ['required', 'string', 'max:255'],
             'item.description' => ['nullable', 'string'],
             'item.newsable_type' => ['nullable', 'string', Rule::in(['App\\Models\\City', 'App\\Models\\Center', 'App\\Models\\Program'])],
-            'item.newsable_id' => [Rule::requiredIf(!empty($this->item['newsable_type'])), 'nullable', 'integer'],
-            'item.display_duration' => ['required', 'string'],
-            'item.photo' => ['nullable', Rule::when($this->item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile, ['image', 'max:2048'])],
+            'item.newsable_id' => [
+                Rule::requiredIf(!empty($this->item['newsable_type'])),
+                'nullable',
+                'integer',
+            ],
+            'item.display_until' => ['nullable', 'date', 'after:yesterday'],
+            'item.photo' => [
+                'nullable',
+                Rule::when($this->item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile, ['image', 'max:2048']),
+            ],
         ];
     }
 
@@ -76,7 +84,7 @@ class NewsModule extends Component
             'newsable_type' => '',
             'newsable_id' => null,
             'photo' => '',
-            'display_duration' => '1_day',
+            'display_until' => '',
             'published_at' => '',
         ];
         $this->modalTitle = __('general.add-new');
@@ -87,6 +95,7 @@ class NewsModule extends Component
     {
         $news = News::findOrFail($id);
         $this->item = $news->toArray();
+        $this->item['display_until'] = optional($news->display_until)->format('Y-m-d') ?? '';
         $this->item['newsable_type'] = $news->newsable_type ?? '';
         $this->item['newsable_id'] = $news->newsable_id;
 
@@ -118,6 +127,10 @@ class NewsModule extends Component
             $dataToFill['newsable_type'] = null;
             $dataToFill['newsable_id'] = null;
         }
+
+        $dataToFill['display_until'] = !empty($dataToFill['display_until'])
+            ? Carbon::createFromFormat('Y-m-d', $dataToFill['display_until'])
+            : null;
 
         $news->fill($dataToFill);
         $news->photo = $photoPath;
