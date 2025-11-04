@@ -30,11 +30,9 @@
                         @endactiverole
 
                         @activerole('HR', 'SUPER ADMIN')
-                        <x-layouts.app.sidebar.nav-item
-                            :href="route('hr.dashboard')"
-                            :active="request()->routeIs('hr.dashboard')">
-                            {{ __('general.hr-dashboard') }}
-                        </x-layouts.app.sidebar.nav-item>
+                            <x-layouts.app.sidebar.nav-item :href="route('hr.dashboard')" :active="request()->routeIs('hr.dashboard')">
+                                {{ __('general.hr-dashboard') }}
+                            </x-layouts.app.sidebar.nav-item>
 
                         <x-layouts.app.sidebar.nav-item
                             :href="route('contract-statistics')"
@@ -207,6 +205,13 @@
                             </x-slot>
                         </x-layouts.app.sidebar.dropdown-nav-list>
                     </div>
+                @endactiverole
+
+                @activerole('SUPER ADMIN', 'General Manager', 'HR', 'HR-SYR', 'HR-ALP')
+                    <x-layouts.app.sidebar.nav-item :href="route('news.index')" :active="request()->routeIs('news.*')">
+                        <x-slot name="icon"><x-icons.newspaper class="w-5 h-5" /></x-slot>
+                        {{ __('general.news-management') }}
+                    </x-layouts.app.sidebar.nav-item>
                 @endactiverole
 
             </ul>
