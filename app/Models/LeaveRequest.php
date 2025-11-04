@@ -9,20 +9,29 @@ class LeaveRequest extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'id',
-        'leave_balance_id',
-        'start_date',
-        'end_date',
-        'reason',
-        'approved_by',
-        'approved_at',
-        'status',
-        'alternative_employee'
+    protected $guarded = ['id'];
+
+    protected $casts = [
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
     ];
 
     public function leaveBalance(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(LeaveBalance::class);
+    }
+
+    public function getDurationAttribute(): string
+    {
+
+        if($this->type === 'hour'){
+
+            $duration = $this->start_at->floatDiffInRealHours($this->end_at);
+            return  $duration . ' ' . trans_choice('general.hour',$duration);
+        }else{
+
+            $duration = $this->start_at->diffInWeekdays($this->end_at);
+            return  $duration . ' ' . trans_choice('general.day',$duration);
+        }
     }
 }
