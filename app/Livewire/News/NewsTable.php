@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
+use RamonRietdijk\LivewireTables\Enums\Direction;
 
 class NewsTable extends LivewireTable
 {
     protected string $model = News::class;
-
     protected $listeners = ['delete', 'refreshNewsTable' => '$refresh'];
 
     protected function query(): Builder
@@ -23,7 +23,7 @@ class NewsTable extends LivewireTable
 
     protected function globalSearchColumns(): array
     {
-        return ['title', 'category', 'description'];
+        return ['title', 'description'];
     }
 
     protected function columns(): array
@@ -31,7 +31,9 @@ class NewsTable extends LivewireTable
         return [
             Column::make('ID', 'id')->sortable(),
             Column::make(__('general.title'), 'title')->sortable()->searchable(),
-            Column::make(__('general.category'), 'category')->sortable()->searchable(),
+            Column::make(__('general.target_group'), 'newsable_name')->sortable(
+                fn (Builder $query, Direction $direction) => $query->orderBy('newsable_type', $direction->value)
+            ),
             Column::make(__('general.display_duration'), 'display_duration')->sortable(),
             Column::make(__('general.published_at'), 'published_at')
                 ->displayUsing(fn ($v) => optional($v)->diffForHumans())
@@ -40,6 +42,7 @@ class NewsTable extends LivewireTable
                 $id = $m->getKey();
                 $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openNewsEdit\', { id: '.$id.' })" />');
                 $deleteBtn = Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />');
+
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
             })->asHtml(),
         ];

@@ -1,10 +1,6 @@
 <div>
     <div class="flex justify-between items-center mb-6">
-        <livewire:layout.breadcrumbs
-            :title="__('general.news')"
-            :crumbs="[['label'=>__('general.news-management')]]"
-            :showButton="true"
-        />
+        <livewire:layout.breadcrumbs :title="__('general.news')" :crumbs="[['label'=>__('general.news-management')]]" :showButton="true" />
         <x-primary-button type="button" wire:click.prevent="create">@lang('general.add-new')</x-primary-button>
     </div>
 
@@ -25,24 +21,50 @@
                     <x-error-span>{{ $errors->first('item.description') }}</x-error-span>
                 </div>
 
-                <div class="col-span-2">
-                    <x-forms.input-label for="category">@lang('general.category')</x-forms.input-label>
-                    <x-forms.input id="category" type="text" wire:model="item.category" />
-                    <x-error-span>{{ $errors->first('item.category') }}</x-error-span>
+                <div class="col-span-2 sm:col-span-1">
+                    <x-forms.input-label for="newsable_type">@lang('general.target_type')</x-forms.input-label>
+                    <x-forms.select-input id="newsable_type" wire:model.live="item.newsable_type">
+                        <option value="">@lang('general.all_org')</option>
+                        <option value="App\Models\City">@lang('general.city')</option>
+                        <option value="App\Models\Center">@lang('general.center')</option>
+                        <option value="App\Models\Program">@lang('general.program')</option>
+                    </x-forms.select-input>
+                    <x-error-span>{{ $errors->first('item.newsable_type') }}</x-error-span>
                 </div>
+
+                @if (!empty($item['newsable_type']))
+                    <div class="col-span-2 sm:col-span-1">
+                        <x-forms.input-label for="newsable_id">@lang('general.target_entity')</x-forms.input-label>
+                        <x-forms.select-input id="newsable_id" wire:model="item.newsable_id">
+                            <option value="">@lang('general.select_entity')</option>
+                            @if ($item['newsable_type'] === 'App\Models\City')
+                                @foreach ($cities as $city)
+                                    <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                @endforeach
+                            @elseif ($item['newsable_type'] === 'App\Models\Center')
+                                @foreach ($centers as $center)
+                                    <option value="{{ $center->id }}">{{ $center->name }}</option>
+                                @endforeach
+                            @elseif ($item['newsable_type'] === 'App\Models\Program')
+                                @foreach ($programs as $program)
+                                    <option value="{{ $program->id }}">{{ $program->name }}</option>
+                                @endforeach
+                            @endif
+                        </x-forms.select-input>
+                        <x-error-span>{{ $errors->first('item.newsable_id') }}</x-error-span>
+                    </div>
+                @else
+                    <div class="col-span-2 sm:col-span-1"></div>
+                @endif
 
                 <div class="col-span-2">
                     <x-forms.input-label for="photo">@lang('general.photo')</x-forms.input-label>
                     <input type="file" id="photo" wire:model="item.photo" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
-
                     @if ($item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
-                        {{-- Preview for newly selected file --}}
                         <img src="{{ $item['photo']->temporaryUrl() }}" class="h-16 mt-2 rounded">
-                    @elseif($item['photo'])
-                        {{-- Preview for existing file --}}
+                    @elseif(is_string($item['photo']))
                         <img src="{{ Storage::url($item['photo']) }}" class="h-16 mt-2 rounded">
                     @endif
-
                     <x-error-span>{{ $errors->first('item.photo') }}</x-error-span>
                 </div>
 

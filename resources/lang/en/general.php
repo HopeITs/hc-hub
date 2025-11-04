@@ -367,6 +367,11 @@ return [
     'category' => 'Category',
     'display_duration' => 'Display Duration',
     'published_at' => 'Published At',
+    'target_type' => 'Target Type',
+    'all_org' => 'All',
+    'target_group' => 'Target Group',
+    'target_entity' => 'Entity',
+    'select_entity' => 'Select Entity',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

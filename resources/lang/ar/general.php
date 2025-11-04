@@ -364,6 +364,11 @@ return [
     'category' => 'الفئة',
     'display_duration' => 'مدة العرض',
     'published_at' => 'تاريخ النشر',
+    'target_type' => 'نوع الجهة',
+    'all_org' => 'الكل',
+    'target_group' => 'الجهة المستهدفة',
+    'target_entity' => 'الكيان',
+    'select_entity' => 'اختر الكيان',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
