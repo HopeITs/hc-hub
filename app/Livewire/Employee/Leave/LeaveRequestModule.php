@@ -19,7 +19,7 @@ class LeaveRequestModule extends Component
     public LeaveRequestForm $form;
     public $showModal = false;
     public $modalTitle = 'Modal title';
-
+    protected $listeners = ['editLeaveRequest' => 'edit'];
     public string $statusFilter = 'all';
     public array $counts = [];
 

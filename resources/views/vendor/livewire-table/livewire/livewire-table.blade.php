@@ -4,8 +4,17 @@
 >
     @include('livewire-table::bar.bar')
     <div
-        class="overflow-x-auto bg-white border border-primary-200 dark:bg-primary-900 dark:border-primary-700 shadow-xs rounded-md overscroll-x-none">
+            class="overflow-x-auto bg-white border border-secondary-dark  shadow-xs rounded-md overscroll-x-none">
         @include('livewire-table::table.table')
     </div>
     {{ $paginator->links('livewire-table::pagination.pagination') }}
+
+    @isset($showModal)
+        @if($showModal)
+          {!! $modalBody !!}
+        @endif
+
+    @endisset
 </div>
+
+

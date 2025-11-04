@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
+use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
@@ -19,10 +20,14 @@ use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 class LeaveRequestTable extends LivewireTable
 {
     protected string $model = LeaveRequest::class;
-
+    public LeaveRequestForm $form;
     public string $statusFilter = 'all';
+    public $showModal = false;
+    public $modalTitle = 'Modal title';
 
     protected $listeners = ['filterStatus' => 'setStatusFilter'];
+
+    public $modalBody = '';
 
     public function setStatusFilter(string $status): void
     {
@@ -35,11 +40,11 @@ class LeaveRequestTable extends LivewireTable
         $user = auth()->user();
         $role = $user->activeRole()?->name; // assuming activeRole() returns a Role model
         $query = LeaveRequest::query()
-            ->with(['leaveBalance.contract.employee','leaveBalance.contract.position'])
+            ->with(['leaveBalance.contract.employee', 'leaveBalance.contract.position'])
             ->orderBy('created_at', 'desc');
 
         if ($role) {
-            if ($role !== 'HR-SYR' &&  str_starts_with($role, 'HR-')) {
+            if ($role !== 'HR-SYR' && str_starts_with($role, 'HR-')) {
 
                 // Extract city code from role, e.g. HR-ALP → ALP
                 $cityCode = substr($role, 3);
@@ -48,16 +53,12 @@ class LeaveRequestTable extends LivewireTable
                 $query->whereHas('leaveBalance.contract.employee.city', function ($q) use ($cityCode) {
                     $q->where('slug', $cityCode);
                 });
-            }
-            elseif($role === 'Manager'){
+            } elseif ($role === 'Manager') {
 
                 $query->whereHas('leaveBalance.contract.position.', function ($q) use ($user) {
                     $q->where('direct_manager_id', $user->profile->id);
                 });
-            }
-
-
-            else {
+            } else {
                 // Not HR – show only own requests
                 $query->whereHas('leaveBalance.contract', function ($q) use ($user) {
                     $q->where('employee_id', $user->profile->id);
@@ -93,8 +94,8 @@ class LeaveRequestTable extends LivewireTable
                 ->sortable()
                 ->searchable()->visible(str_starts_with($user->activeRole()?->name, 'HR-') || $user->activeRole()?->name === 'Manager'),
             SelectColumn::make(trans_choice('general.type', 1), 'type')
-                ->options(['hour' => trans_choice('general.hour',1) , 'day' => trans_choice('general.day',1)])
-                ->displayUsing(fn($v, Model $m) => trans_choice('general.'.$m->type ,1))
+                ->options(['hour' => trans_choice('general.hour', 1), 'day' => trans_choice('general.day', 1)])
+                ->displayUsing(fn($v, Model $m) => trans_choice('general.' . $m->type, 1))
                 ->sortable()
                 ->searchable(),
 
@@ -132,7 +133,7 @@ class LeaveRequestTable extends LivewireTable
                 );
 
                 $editBtn = Blade::render(
-                    '<x-table.edit-btn href="' . route('employees.edit', $model->getKey()) . '" />'
+                    '<x-table.edit-btn wire:click="edit(' . $model->getKey() . ')" />'
                 );
 
                 $deleteBtn = Blade::render(
@@ -155,6 +156,28 @@ class LeaveRequestTable extends LivewireTable
             ->withCancelButton(__('general.cancel'))
             ->show();
     }
+
+    public function edit($id)
+    {
+        $model = LeaveRequest::findOrFail($id);
+
+
+        $this->form->setLeaveRequest($model);
+        $employee = auth()->user()->profile;
+        $modalTitle = __('general.edit');
+        $form = $this->form;
+        $availableLeaves = auth()->user()->profile->availableLeaves();
+        $allAvailableLeaves = $employee->allAvailableLeaves();
+        $alternativeEmployees = Employee::where('city_id', $employee->city_id)->where('id', '!=', $employee->id)
+            ->whereHas('contracts', function ($query) use ($employee) {
+                $query->whereHas('position.department', function ($query) use ($employee) {
+                    $query->where('id', $employee->department->id ?? null);
+                });
+            })->get();
+        $this->modalBody = Blade::render('livewire.employee.leave.form',compact('modalTitle','form','allAvailableLeaves','alternativeEmployees','availableLeaves'));
+        $this->showModal = true;
+    }
+
 
     public function delete($payload): void
     {
