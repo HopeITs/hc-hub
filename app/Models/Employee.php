@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LeaveRequestStatus;
 use App\Traits\HasTranslation;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -196,7 +197,17 @@ class Employee extends Model implements HasMedia
     {
         return $this->latestActiveContract()?->leaveBalances()->whereHas('leaveType', function ($query) {
             return $query->where('base_days', '>', 10);
-        })->get();
+        })       ->withCount([
+            'leaveRequests as pending_requests_count' => function ($query) {
+                $query->where('status', LeaveRequestStatus::Pending);
+            },
+            'leaveRequests as approved_requests_count' => function ($query) {
+                $query->where('status', LeaveRequestStatus::Accepted);
+            },
+            'leaveRequests as rejected_requests_count' => function ($query) {
+                $query->where('status', LeaveRequestStatus::Rejected);
+            },
+        ])->get();
     }
 
     public function allAvailableLeaves()
