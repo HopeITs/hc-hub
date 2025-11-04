@@ -4,9 +4,14 @@ namespace App\Livewire\News;
 
 use Livewire\Component;
 use App\Models\News;
+use Livewire\WithFileUploads;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class NewsModule extends Component
 {
+    use WithFileUploads;
+
     protected $listeners = ['openNewsEdit' => 'edit'];
 
     public bool $showModal = false;
@@ -28,8 +33,13 @@ class NewsModule extends Component
             'item.title' => ['required', 'string', 'max:255'],
             'item.description' => ['nullable', 'string'],
             'item.category' => ['nullable', 'string', 'max:255'],
-            'item.photo' => ['nullable', 'string'],
             'item.display_duration' => ['required', 'string'],
+            'item.photo' => [
+                'nullable',
+                Rule::when($this->item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile, [
+                    'image', 'max:2048'
+                ])
+            ],
         ];
     }
 
@@ -70,7 +80,23 @@ class NewsModule extends Component
             ? News::findOrFail($this->item['id'])
             : new News();
 
-        $news->fill($this->item);
+        $photoPath = $news->photo;
+
+        if ($this->item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+            if ($news->photo) {
+                Storage::disk('public')->delete($news->photo);
+            }
+            $photoPath = $this->item['photo']->store('news', 'public');
+        } elseif (empty($this->item['photo']) && $news->photo) {
+            Storage::disk('public')->delete($news->photo);
+            $photoPath = null;
+        }
+
+        $dataToFill = $this->item;
+        unset($dataToFill['photo']);
+
+        $news->fill($dataToFill);
+        $news->photo = $photoPath;
         $news->published_at = now();
         $news->save();
 

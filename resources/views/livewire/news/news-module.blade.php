@@ -34,9 +34,15 @@
                 <div class="col-span-2">
                     <x-forms.input-label for="photo">@lang('general.photo')</x-forms.input-label>
                     <input type="file" id="photo" wire:model="item.photo" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
-                    @if($item['photo'] && !($item['photo'] instanceof \Livewire\TemporaryUploadedFile))
+
+                    @if ($item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
+                        {{-- Preview for newly selected file --}}
+                        <img src="{{ $item['photo']->temporaryUrl() }}" class="h-16 mt-2 rounded">
+                    @elseif($item['photo'])
+                        {{-- Preview for existing file --}}
                         <img src="{{ Storage::url($item['photo']) }}" class="h-16 mt-2 rounded">
                     @endif
+
                     <x-error-span>{{ $errors->first('item.photo') }}</x-error-span>
                 </div>
 
