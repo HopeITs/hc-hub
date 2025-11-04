@@ -155,7 +155,7 @@
                     </x-slot>
                     <x-slot name="list">
                         <x-layouts.app.sidebar.nav-item :href="route('leaves.index')" :active="request()->routeIs('leaves.index')">
-                            {{ __('general.my-leaves') }}
+                            @activerole('HR') {{ 'All Leaves' }} @else     {{ __('general.my-leaves') }}@endactiverole
                         </x-layouts.app.sidebar.nav-item>
 
                     </x-slot>
@@ -202,7 +202,7 @@
                                 @endif
 
                                 <x-layouts.app.sidebar.nav-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
-                                    {{ __('general.my-items') }}
+                              {{ __('general.my-items') }}
                                 </x-layouts.app.sidebar.nav-item>
                             </x-slot>
                         </x-layouts.app.sidebar.dropdown-nav-list>

@@ -36,20 +36,36 @@ class LeaveRequestModule extends Component
 
     public function refreshCounts(): void
     {
-        $employee = auth()->user()->profile;
-
+        $user = auth()->user();
+        $employee = $user->profile;
+        $role = $user->activeRole()?->name;
         // Collect all leave requests through the relationship chain:
-        $leaveRequests = \App\Models\LeaveRequest::whereHas('leaveBalance.contract', function ($query) use ($employee) {
-            $query->where('employee_id', $employee->id);
+        $leaveRequests = LeaveRequest::whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
+            if ($role === 'HR-SYR') {
+                return true;
+            } elseif (str_starts_with($role, 'HR-')) {
+                // Extract city code from role, e.g. HR-ALP → ALP
+                $cityCode = substr($role, 3);
+                $query->whereHas('employee', function ($q) use ($cityCode) {
+                    $q->whereHas('city', function ($qq) use ($cityCode) {
+                        $qq->where('slug', $cityCode);
+                    });
+                });
+
+            } else {
+                $query->where('employee_id', $employee->id);
+            }
+
         });
 
         $this->counts = [
             'all' => (clone $leaveRequests)->count(),
-            'pending' => (clone $leaveRequests)->where('status', \App\Enums\LeaveRequestStatus::Pending)->count(),
-            'accepted' => (clone $leaveRequests)->where('status', \App\Enums\LeaveRequestStatus::Accepted)->count(),
-            'rejected' => (clone $leaveRequests)->where('status', \App\Enums\LeaveRequestStatus::Rejected)->count(),
+            'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)->count(),
+            'accepted' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Accepted)->count(),
+            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(),
         ];
     }
+
     public function create()
     {
         $this->form->reset();
@@ -69,7 +85,7 @@ class LeaveRequestModule extends Component
                 });
             })->get();
 
-        return view('livewire.employee.leave.index',compact('availableLeaves','allAvailableLeaves','alternativeEmployees'));
+        return view('livewire.employee.leave.index', compact('availableLeaves', 'allAvailableLeaves', 'alternativeEmployees'));
     }
 
     public function getCountsProperty()
@@ -77,12 +93,13 @@ class LeaveRequestModule extends Component
         return [
             'all' => LeaveRequest::count(),
             'pending' => LeaveRequest::where('status', LeaveRequestStatus::Pending)->count(),
-            'accepted' =>LeaveRequest::where('status', LeaveRequestStatus::Accepted)->count(),
+            'accepted' => LeaveRequest::where('status', LeaveRequestStatus::Accepted)->count(),
             'rejected' => LeaveRequest::where('status', LeaveRequestStatus::Rejected)->count(),
         ];
     }
 
-    public function save(){
+    public function save()
+    {
         if (isset($this->form->id)) {
             $this->form->update();
         } else {
@@ -99,7 +116,6 @@ class LeaveRequestModule extends Component
             ->toast()
             ->position('top-start')
             ->show();
-
 
 
     }

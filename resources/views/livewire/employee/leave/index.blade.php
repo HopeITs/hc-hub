@@ -12,12 +12,15 @@ use App\Enums\LeaveRequestStatus;
             ]"
             :showButton="true"
         />
+        @activerole('Employee')
         <div>
             <x-primary-button wire:click="create">
                 @lang('general.add-new')
             </x-primary-button>
         </div>
+        @endactiverole
     </div>
+    @activerole('Employee')
     @isset($availableLeaves)
         <div class="grid grid-cols-{{$availableLeaves->count()}} gap-4 mb-6">
             @foreach($availableLeaves as $availableLeave)
@@ -36,38 +39,35 @@ use App\Enums\LeaveRequestStatus;
         </div>
 
     @endisset
+    @endactiverole
     <x-tabs-list>
         <x-tabs-list-item
-            :active="$statusFilter === 'all'"  active-tab="all">
+            :active="$statusFilter === 'all'" active-tab="all">
             All ({{ $counts['all'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
-            :active="$statusFilter === (string) LeaveRequestStatus::Pending"  :active-tab="LeaveRequestStatus::Pending">
+            :active="$statusFilter === (string) LeaveRequestStatus::Pending" :active-tab="LeaveRequestStatus::Pending">
             Pending ({{ $counts['pending'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
-            :active="$statusFilter === (string) LeaveRequestStatus::Accepted" :active-tab="LeaveRequestStatus::Accepted">
+            :active="$statusFilter === (string) LeaveRequestStatus::Accepted"
+            :active-tab="LeaveRequestStatus::Accepted">
             Accepted ({{ $counts['accepted'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
-            :active="$statusFilter === (string) LeaveRequestStatus::Rejected"  :active-tab="LeaveRequestStatus::Rejected">
+            :active="$statusFilter === (string) LeaveRequestStatus::Rejected"
+            :active-tab="LeaveRequestStatus::Rejected">
             Rejected ({{ $counts['rejected'] ?? 0 }}){{$statusFilter === LeaveRequestStatus::Rejected}}
         </x-tabs-list-item>
     </x-tabs-list>
 
     {{-- Table --}}
     <div class="mt-4">
-        <livewire:employee.leave.leave-request-table :statusFilter="$statusFilter" key="table-{{ $statusFilter }}" />
+        <livewire:employee.leave.leave-request-table :statusFilter="$statusFilter" key="table-{{ $statusFilter }}"/>
     </div>
-
-
-
-
-
-
 
 
     <x-modal.dialog max-width="6xl" id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
@@ -158,7 +158,8 @@ use App\Enums\LeaveRequestStatus;
                         </div>
                         <div>
                             <x-forms.input-label for="end_time">{{__('general.end-time')}}</x-forms.input-label>
-                            <x-forms.date-input type="time" id="end_time" wire:model.live="form.end_hour" label="End Time"/>
+                            <x-forms.date-input type="time" id="end_time" wire:model.live="form.end_hour"
+                                                label="End Time"/>
                             <x-error-span>{{ $errors->first('form.end_hour') }}</x-error-span>
                         </div>
 
