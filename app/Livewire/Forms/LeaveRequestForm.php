@@ -49,7 +49,7 @@ class LeaveRequestForm extends Form
     public function rules()
     {
         $employee = auth()->user()->profile;
-        $maxHours = ($employee->latestActiveContract()->week_hours / 5) / 2;
+        $maxHours = ($employee->latestActiveContract()->weekly_hours / 5) / 2;
 
         $rules = [
             'type' => ['required', Rule::in(['day', 'hour'])],
@@ -57,23 +57,44 @@ class LeaveRequestForm extends Form
             'leave_balance_id' => ['required', 'exists:leave_balances,id'],
         ];
 
+        // Fetch center open and close times
+        $center = $employee->latestActiveContract()->position->center;
+        $centerOpenTime = Carbon::parse($center->open_at ?? '09:00');
+        $centerCloseTime = Carbon::parse($center->close_at ?? '16:30');
+
         if ($this->type === 'hour') {
-            $rules['start_hour'] = ['required', 'date_format:H:i'];
+            $rules['start_hour'] = ['required', 'date_format:H:i', function ($attribute, $value, $fail) use ($centerOpenTime, $centerCloseTime) {
+                $start = Carbon::createFromFormat('H:i', $value);
+
+                // Check if start hour is within center's working hours
+                if ($start->lessThan($centerOpenTime)) {
+                    $fail(__('Start hour must be within the center\'s working hours.'));
+                }
+            }];
+
             $rules['end_hour'] = [
                 'required',
                 'date_format:H:i',
-                function ($attribute, $value, $fail) use ($maxHours) {
+                function ($attribute, $value, $fail) use ($centerOpenTime, $centerCloseTime,$maxHours) {
                     if (!$this->start_hour || !$this->end_hour) return;
 
                     $start = Carbon::createFromFormat('H:i', $this->start_hour);
-                    $end = Carbon::createFromFormat('H:i', $this->end_hour);
+                    $end = Carbon::createFromFormat('H:i', $value);
 
+                    // Check if end hour is within center's working hours
+                    if ($end->greaterThan($centerCloseTime)) {
+                        $fail(__('End hour must be within the center\'s working hours.'));
+                        return;
+                    }
+
+                    // Check that end hour is after start hour
                     if ($end->lessThanOrEqualTo($start)) {
                         $fail(__('End hour must be after start hour.'));
                         return;
                     }
 
-                    $duration = $end->floatDiffInHours($start);
+                    $duration = $start->DiffInHours($end);
+
                     if ($duration > $maxHours) {
                         $fail(__('Duration must not exceed :max hours.', ['max' => $maxHours]));
                     }
@@ -88,6 +109,7 @@ class LeaveRequestForm extends Form
 
         return $rules;
     }
+
 
     /**
      * Set form state from an existing leave request

@@ -175,14 +175,14 @@ use App\Enums\LeaveRequestStatus;
                         </div>
 
                         <div>
-                            <x-forms.input-label for="start_time">{{__('general.start-time')}}</x-forms.input-label>
-                            <x-forms.date-input id="start_time" type="time" wire:model.live="form.start_hour"
+                            <x-forms.input-label for="start_time">{{__('general.start-time')}} (24)</x-forms.input-label>
+                            <x-forms.date-input id="start_time" type="time" min="09:00" max="21:00" wire:model.live="form.start_hour"
                                                 label="Start Hour"/>
                             <x-error-span>{{ $errors->first('form.start_hour') }}</x-error-span>
                         </div>
                         <div>
-                            <x-forms.input-label for="end_time">{{__('general.end-time')}}</x-forms.input-label>
-                            <x-forms.date-input type="time" id="end_time" wire:model.live="form.end_hour"
+                            <x-forms.input-label for="end_time">{{__('general.end-time')}}(24)</x-forms.input-label>
+                            <x-forms.date-input type="time" id="end_time"  min="09:00" max="21:00" wire:model.live="form.end_hour"
                                                 label="End Time"/>
                             <x-error-span>{{ $errors->first('form.end_hour') }}</x-error-span>
                         </div>
