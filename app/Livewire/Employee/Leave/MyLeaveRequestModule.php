@@ -7,6 +7,7 @@ use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
+use App\Models\News;
 use Carbon\Carbon;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -19,7 +20,8 @@ class MyLeaveRequestModule extends Component
     public LeaveRequestForm $form;
     public $showModal = false;
     public $modalTitle = 'Modal title';
-    protected $listeners = ['editLeaveRequest' => 'edit'];
+
+    protected $listeners = ['openRequestLeaveEdit' => 'edit'];
     public string $statusFilter = 'all';
     public array $counts = [];
 
@@ -73,6 +75,13 @@ class MyLeaveRequestModule extends Component
         $this->modalTitle = __('general.add-new');
     }
 
+    public function edit(LeaveRequest $id): void
+    {
+        $this->form->setLeaveRequest($id);
+        $this->modalTitle = __('general.edit');
+        $this->showModal = true;
+    }
+
     public function render()
     {
         $employee = auth()->user()->profile;
@@ -101,6 +110,8 @@ class MyLeaveRequestModule extends Component
     public function save()
     {
         if (isset($this->form->id)) {
+            $leaveRequest = LeaveRequest::find($this->form->id);
+            $this->form->setLeaveRequest($leaveRequest);
             $this->form->update();
         } else {
 
