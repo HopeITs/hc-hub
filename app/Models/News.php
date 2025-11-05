@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class News extends Model
@@ -16,6 +15,7 @@ class News extends Model
         'photo',
         'display_until',
         'published_at',
+        'event_date',
         'newsable_id',
         'newsable_type',
     ];
@@ -23,6 +23,7 @@ class News extends Model
     protected $casts = [
         'published_at' => 'datetime',
         'display_until' => 'datetime',
+        'event_date' => 'date',
     ];
 
     public function newsable(): MorphTo
@@ -48,10 +49,11 @@ class News extends Model
             'City' => trans_choice('general.city', 1),
             'Center' => trans_choice('general.center', 1),
             'Program' => trans_choice('general.program', 1),
+            'Employee' => trans_choice('general.employee', 1),
             default => $relation->name ?? __('general.n_a'),
         };
 
-        if (in_array($type, ['City', 'Center', 'Program'])) {
+        if (in_array($type, ['City', 'Center', 'Program', 'Employee'])) {
             return $name . ': ' . $relation->name;
         }
 

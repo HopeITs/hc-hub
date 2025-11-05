@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('photo')->nullable();
             $table->timestamp('display_until')->nullable();
             $table->timestamp('published_at')->nullable();
+            $table->date('event_date')->nullable();
             $table->timestamps();
         });
     }

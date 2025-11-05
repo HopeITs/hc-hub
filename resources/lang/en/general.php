@@ -378,6 +378,7 @@ return [
     'city' => 'City|Cities',
     'center' => 'Center|Centers',
     'program' => 'Program|Programs',
+    'event_date' => 'Event Date',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
