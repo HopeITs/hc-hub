@@ -25,9 +25,9 @@
                     <x-forms.input-label for="newsable_type">@lang('general.target_type')</x-forms.input-label>
                     <x-forms.select-input id="newsable_type" wire:model.live="item.newsable_type">
                         <option value="">@lang('general.all_org')</option>
-                        <option value="App\Models\City">@lang('general.city')</option>
-                        <option value="App\Models\Center">@lang('general.center')</option>
-                        <option value="App\Models\Program">@lang('general.program')</option>
+                        <option value="App\Models\City">{{ trans_choice('general.city', 1) }}</option>
+                        <option value="App\Models\Center">{{ trans_choice('general.center', 1) }}</option>
+                        <option value="App\Models\Program">{{ trans_choice('general.program', 1) }}</option>
                     </x-forms.select-input>
                     <x-error-span>{{ $errors->first('item.newsable_type') }}</x-error-span>
                 </div>
