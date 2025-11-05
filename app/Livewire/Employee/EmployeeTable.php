@@ -61,6 +61,7 @@ class EmployeeTable extends LivewireTable
                     : '<div class="h-12 w-12 rounded-full bg-gray-200"></div>';
             })->asHtml(),
 
+            Column::make(trans('general.years-of-service'), 'years_of_service_formatted')->computed()->sortable(),
             Column::make(trans('general.years-of-service'), 'years_of_service')->computed()->sortable(),
             Column::make(trans('general.join-at'), 'join_at')->computed()->sortable(),
             SelectColumn::make(trans_choice('general.city', 1), 'city.' . transColumn('name'))
