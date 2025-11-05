@@ -1,67 +1,58 @@
-<div class="min-h-screen bg-gray-50 rounded-lg p-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+<div class="space-y-10">
 
-        <div>
-            <x-dashboard-cards.employee-details-card
-                :employee="$employee"
-                :positionTitle="$positionTitle"
-                :departmentName="$departmentName"
-                :joinedOn="$joinedOn"
-                :workEmail="$workEmail"/>
+
+    <div class="grid grid-cols-3 gap-6 items-stretch">
+        <div class="col-span-2 grid grid-rows-2 gap-6 h-full">
+            <div class="bg-secondary-medium rounded-xl flex items-center justify-center text-white font-semibold h-68">
+                <x-dashboard-cards.my-leaves-card/>
+            </div>
+
+            <div class="bg-secondary-dark rounded-xl flex items-center justify-center text-white font-semibold h-68">
+                2
+            </div>
         </div>
 
-        <div>
-            <x-dashboard-cards.my-leaves-card
-                :employee="$employee"
-                :contract="$contract"/>
+        <div class="bg-red-300 rounded-xl flex items-center justify-center text-white font-semibold h-full">
+            3
         </div>
-
-        <div>
-            <x-dashboard-cards.team-members-card
-                :contract="$contract"
-                :employee="$employee"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.today-birthday-card
-                :todayBirthdays="$todayBirthdays"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.upcoming-birthday-card
-                :upcomingBirthdays="$upcomingBirthdays"/>
-        </div>
-
-        <div>
-            <livewire:dashboards.employee-notes-card :employee="auth()->id()"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.checklist-items-card
-                :deliveredItems="$deliveredItems"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.my-badges-card
-                :myBadges="$myBadges"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.pending-requests-card
-                :pendingRequests="$pendingRequests"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.upcoming-holidays-card/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.upcoming-leaves-card/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.news-card/>
-        </div>
-
     </div>
+
+
+    <div class="grid grid-cols-3 gap-6">
+
+        <div class="bg-secondary-medium rounded-xl flex items-center justify-center text-white font-semibold row-span-2 h-full">
+            4
+        </div>
+
+        <div class="bg-secondary-light h-70 rounded-xl flex items-center justify-center text-white font-semibold">
+            5
+        </div>
+
+        <div class="bg-secondary-dark h-70 rounded-xl flex items-center justify-center text-white font-semibold">
+            6
+        </div>
+
+        <div class="bg-secondary-dark/80 h-70 rounded-xl flex items-center justify-center text-white font-semibold">
+            7
+        </div>
+
+        <div class="bg-secondary-light/80 h-70 rounded-xl flex items-center justify-center text-white font-semibold">
+            8
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-6">
+        <div class="bg-secondary-medium rounded-xl flex items-center justify-center text-white font-semibold h-60">
+            9
+        </div>
+
+        <div class="bg-secondary-dark rounded-xl flex items-center justify-center text-white font-semibold h-60">
+            10
+        </div>
+
+        <div class="bg-secondary-light rounded-xl flex items-center justify-center text-white font-semibold h-60">
+            11
+        </div>
+    </div>
+
 </div>

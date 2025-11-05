@@ -1,68 +1,118 @@
-<div class="w-full bg-white rounded-2xl shadow border border-[var(--color-neutral-200)] overflow-hidden">
-    <div class="flex justify-between items-center px-6 py-4 bg-[var(--color-primary)]">
-        <h3 class="text-lg font-semibold text-white">
-            {{ __('My Leaves Overview') }}
+<div class="w-full h-full bg-white rounded-xl shadow-sm border p-2 border-gray-200 py-6 px-8 flex flex-col justify-between space-y-4">
+
+    <div class="flex justify-between items-center">
+        <h3 class="text-base font-semibold text-gray-600">
+            {{ __('My Leaves') }}
         </h3>
-        <span class="text-sm bg-white/20 px-3 py-1 rounded-full text-white font-medium">
-            2025
-        </span>
+        <button class="bg-[#C71C1C] hover:bg-[#A11919] text-white text-sm font-medium px-3 py-1.5 rounded-md transition">
+            + Leave Request
+        </button>
     </div>
 
-    <div class="p-6 flex flex-col items-center justify-center">
-        <div class="relative w-40 h-40">
-            <canvas id="leavesDonutChart"></canvas>
-            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                <p class="text-xs text-[var(--color-neutral-500)]">Used</p>
-                <p class="text-xl font-semibold text-[var(--color-primary-600)]">12</p>
-                <p class="text-xs text-[var(--color-neutral-500)]">of 24 Days</p>
+    <div class="grid grid-cols-2 items-center gap-6">
+
+        <div class="flex items-end space-x-6">
+            <div class="flex items-end -mb-3.5">
+                <span class="text-[125px] font-extrabold text-secondary-medium leading-none">12</span>
+                <span class="text-3xl text-secondary-medium font-semibold mb-2">/25</span>
+            </div>
+
+            <div class="border-l border-secondary-medium h-26"></div>
+
+            <div class="flex flex-col justify-between min-w-full">
+                <h4 class="text-secondary-medium font-bold text-md">
+                    Annual Leave
+                </h4>
+                <div class="border-b border-3 border-primary w-6"></div>
+                <ul class="mt-2 space-y-0.2 text-secondary-light text-xs leading-relaxed">
+                    <li class="text-secondary-light">
+                        <span>USED:</span>
+                        <span ><strong class="text-secondary-dark">12</strong> days & <strong class="text-secondary-dark">4</strong> hours</span>
+                    </li>
+                    <li>
+                        <span>REMAINING:</span> <strong class="text-secondary-dark">12</strong> days & <strong class="text-secondary-dark">4</strong> hours
+                    </li>
+                    <li>
+                        <span> PENDING:</span> <strong class="text-secondary-dark">1</strong> day
+                    </li>
+                    <li>
+                        <span> TOTAL:</span> <strong class="text-secondary-dark">25</strong> days
+                    </li>
+                </ul>
             </div>
         </div>
 
-        <div class="mt-4 flex flex-wrap justify-center gap-4 text-sm">
-            <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-[var(--color-primary-500)]"></span>
-                <span class="text-[var(--color-neutral-700)]">Used</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-[var(--color-primary-200)]"></span>
-                <span class="text-[var(--color-neutral-700)]">Remaining</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-[var(--color-neutral-300)]"></span>
-                <span class="text-[var(--color-neutral-700)]">Pending</span>
+
+        <div class="flex flex-col items-end justify-end">
+            <div class="relative w-56 h-40 -mb-2">
+                <canvas id="leavesGaugeChart"></canvas>
+                <div class="absolute inset-0 flex flex-col items-center justify-end">
+                    <p class="text-[#C71C1C] mb-3 -ml-6 text-4xl font-bold">
+                        50 <span class="text-sm -ml-2">%</span>
+                    </p>
+                </div>
             </div>
         </div>
+
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('leavesDonutChart');
-        if (!ctx) return;
+    document.addEventListener("DOMContentLoaded", function () {
+        const canvas = document.getElementById("leavesGaugeChart");
+        const ctx = canvas.getContext("2d");
+        const value = 50;
 
         new Chart(ctx, {
-            type: 'doughnut',
+            type: "doughnut",
             data: {
-                labels: ['Used', 'Remaining', 'Pending'],
                 datasets: [{
-                    data: [12, 10, 2],
-                    backgroundColor: [
-                        getComputedStyle(document.documentElement).getPropertyValue('--color-primary-500').trim(),
-                        getComputedStyle(document.documentElement).getPropertyValue('--color-primary-200').trim(),
-                        getComputedStyle(document.documentElement).getPropertyValue('--color-neutral-300').trim()
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#fff',
-                    cutout: '70%'
-                }]
+                    data: [0],
+                    backgroundColor: ["transparent"],
+                }],
             },
             options: {
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
+                cutout: "70%",
+                circumference: 180,
+                rotation: 270,
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { left: 15, right: 15, top: 5, bottom: 5 }
                 },
-                maintainAspectRatio: false
-            }
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                animation: false,
+            },
+            plugins: [{
+                id: 'customGauge',
+                afterDraw(chart) {
+                    const { width, height } = chart.chartArea;
+                    const centerX = width / 2;
+                    const centerY = height * 0.9;
+                    const radius = Math.min(width, height * 2) / 2.25;
+                    const thickness = radius * 0.24;
+                    const startAngle = Math.PI;
+                    const endAngle = 2 * Math.PI;
+                    const percentAngle = startAngle + (value / 100) * Math.PI;
+
+                    ctx.save();
+                    ctx.lineWidth = thickness;
+                    ctx.lineCap = "round";
+
+
+                    ctx.strokeStyle = "#dcddde";
+                    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                    ctx.stroke();
+
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = "#C71C1C";
+                    ctx.arc(centerX, centerY, radius, startAngle, percentAngle);
+                    ctx.stroke();
+
+                    ctx.restore();
+                }
+            }]
         });
     });
 </script>
