@@ -1,68 +1,63 @@
+<div class="space-y-10">
 
-<div class="min-h-screen bg-gray-50 rounded-lg p-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
 
-        <div>
-            <x-dashboard-cards.employee-details-card
-                :employee="$employee"
-                :positionTitle="$positionTitle"
-                :departmentName="$departmentName"
-                :joinedOn="$joinedOn"
-                :workEmail="$workEmail"/>
+    <div class="grid grid-cols-3 gap-6 items-stretch">
+        <div class="col-span-2 grid grid-rows-2 gap-6 h-full">
+            <div class="bg-secondary-medium rounded-xl flex items-center justify-center text-white font-semibold h-68">
+                <x-dashboard-cards.my-leaves-card/>
+            </div>
+
+            <div class="bg-secondary-dark rounded-xl flex items-center justify-center text-white font-semibold h-68">
+                <livewire:dashboards.employee-notes-card :employee="auth()->id()"/>
+            </div>
         </div>
 
-        <div>
-            <x-dashboard-cards.my-leaves-card
-                :employee="$employee"
-                :contract="$contract"/>
+        <div class="bg-red-300 rounded-xl flex items-center justify-center text-white font-semibold h-full">
+            <x-dashboard-cards.team-members-card/>
+        </div>
+    </div>
+
+
+    <div class="grid grid-cols-3 gap-6">
+
+        <div class="bg-secondary-medium rounded-xl flex items-center justify-center text-white font-semibold row-span-2 h-full">
+            <x-dashboard-cards.news-card/>
         </div>
 
-        <div>
-            <x-dashboard-cards.team-members-card
-                :contract="$contract"
-                :employee="$employee"/>
-        </div>
-
-        <div>
+        <div class="bg-secondary-light h-70 rounded-xl flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.today-birthday-card
                 :todayBirthdays="$todayBirthdays"/>
         </div>
 
-        <div>
+        <div class="bg-secondary-dark h-70 rounded-xl flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.upcoming-birthday-card
                 :upcomingBirthdays="$upcomingBirthdays"/>
         </div>
 
-        <div>
-            <livewire:dashboards.employee-notes-card :employee="auth()->id()"/>
+        <div class="bg-secondary-dark/80 h-70 rounded-xl flex items-center justify-center text-white font-semibold">
+            <x-dashboard-cards.upcoming-holidays-card/>
         </div>
 
-        <div>
-            <x-dashboard-cards.checklist-items-card
-                :deliveredItems="$deliveredItems"/>
+        <div class="bg-secondary-light/80 h-70 rounded-xl flex items-center justify-center text-white font-semibold">
+            <x-dashboard-cards.upcoming-leaves-card/>
         </div>
+    </div>
 
-        <div>
-            <x-dashboard-cards.my-badges-card
-                :myBadges="$myBadges"/>
-        </div>
-
-        <div>
+    <div class="grid grid-cols-3 gap-6">
+        <div class="bg-secondary-medium rounded-xl flex items-center justify-center text-white font-semibold h-60">
             <x-dashboard-cards.pending-requests-card
                 :pendingRequests="$pendingRequests"/>
         </div>
 
-        <div>
-            <x-dashboard-cards.upcoming-holidays-card/>
+        <div class="bg-secondary-dark rounded-xl flex items-center justify-center text-white font-semibold h-60">
+            <x-dashboard-cards.checklist-items-card
+            :deliveredItems="$deliveredItems"/>
         </div>
 
-        <div>
-            <x-dashboard-cards.upcoming-leaves-card/>
+        <div class="bg-secondary-light rounded-xl flex items-center justify-center text-white font-semibold h-60">
+            <x-dashboard-cards.my-badges-card
+                :myBadges="$myBadges"/>
         </div>
-
-        <div>
-            <x-dashboard-cards.news-card/>
-        </div>
-
     </div>
+
 </div>
