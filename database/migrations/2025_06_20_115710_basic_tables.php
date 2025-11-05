@@ -367,6 +367,6 @@ return new class extends Migration
         Schema::dropIfExists('employee_items');
         Schema::dropIfExists('employee_notes');
         Schema::dropIfExists('notifications');
-        Schema::dropIfExists('hchr_news');
+        Schema::dropIfExists('news');
     }
 };
