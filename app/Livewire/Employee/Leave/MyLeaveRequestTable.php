@@ -27,7 +27,7 @@ class MyLeaveRequestTable extends LivewireTable
 
     protected $listeners = ['filterStatus' => 'setStatusFilter'];
 
-    public $modalBody = '';
+
 
     public function setStatusFilter(string $status): void
     {
@@ -105,9 +105,8 @@ class MyLeaveRequestTable extends LivewireTable
                     '" wire-event="confirmToggleItemStatus" />'
                 );
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="edit(' . $model->getKey() . ')" />'
-                );
+                $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: ' . $model->getKey(). ' })" />');
+
 
                 $deleteBtn = Blade::render(
                     '<x-table.delete-btn :modelId="' . $model->getKey() . '" />'
@@ -147,7 +146,6 @@ class MyLeaveRequestTable extends LivewireTable
                     $query->where('id', $employee->department->id ?? null);
                 });
             })->get();
-        $this->modalBody = Blade::render('livewire.employee.leave.form',compact('modalTitle','form','allAvailableLeaves','alternativeEmployees','availableLeaves'));
         $this->showModal = true;
     }
 

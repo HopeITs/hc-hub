@@ -129,6 +129,12 @@ class LeaveRequestForm extends Form
             'status',
             'type',
         ]));
+        // Handle hour-based requests
+        if ($leaveRequest->type === 'hour') {
+            $this->leave_date = Carbon::parse($leaveRequest->start_at)->toDateString();
+            $this->start_hour = Carbon::parse($leaveRequest->start_at)->format('H:i');
+            $this->end_hour = Carbon::parse($leaveRequest->end_at)->format('H:i');
+        }
     }
 
     /**
@@ -183,7 +189,7 @@ class LeaveRequestForm extends Form
     public function update(): void
     {
         $this->validate();
-        $leaveBalance = $this->getLeaveBalance();
+        $leaveBalance = $this->leaveRequest->leaveBalance;
 
         if ($leaveBalance->isAnnual()) {
             $requestedHours = $this->calculateRequestedHours();
@@ -193,18 +199,16 @@ class LeaveRequestForm extends Form
                 ]);
             }
         }
+        if($this->type === 'hour') {
 
-        $this->leaveRequest->update([
-            'leave_balance_id' => $this->leave_balance_id,
-            'type' => $this->type,
-            'start_at' => $this->start_at ?? $this->combineDateTime($this->leave_date, $this->start_hour),
-            'end_at' => $this->end_at ?? $this->combineDateTime($this->leave_date, $this->end_hour),
-            'reason' => $this->reason,
-            'alternative_employee' => $this->alternative_employee,
-            'approved_by' => $this->approved_by,
-            'approved_at' => $this->approved_at,
-            'status' => $this->status,
-        ]);
+            $start_at = $this->start_hour .' '. $this->leave_date;
+            $this->start_at = Carbon::createFromFormat('H:i Y-m-d', $start_at);
+
+            $end_at = $this->end_hour .' '. $this->leave_date;
+            $this->end_at = Carbon::createFromFormat('H:i Y-m-d', $end_at);
+        }
+        dd($this->all());
+        $this->leaveRequest->update($this->all());
 
         $this->resetForm();
     }
@@ -240,10 +244,7 @@ class LeaveRequestForm extends Form
         return 0;
     }
 
-    protected function getLeaveBalance(): LeaveBalance
-    {
-        return LeaveBalance::findOrFail($this->leave_balance_id);
-    }
+
 
     protected function resetForm(): void
     {
