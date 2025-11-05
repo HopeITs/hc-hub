@@ -197,7 +197,7 @@ class Employee extends Model implements HasMedia
     {
         return $this->latestActiveContract()?->leaveBalances()->whereHas('leaveType', function ($query) {
             return $query->where('base_days', '>', 10);
-        })       ->withCount([
+        })->withCount([
             'leaveRequests as pending_requests_count' => function ($query) {
                 $query->where('status', LeaveRequestStatus::Pending);
             },
@@ -227,7 +227,7 @@ class Employee extends Model implements HasMedia
         return $this->allContracts()->first()?->start_date->format('d-M-Y') ?? '-';
     }
 
-    public function getYearsOfServiceAttribute()
+    public function getYearsOfServiceFormattedAttribute(): string
     {
         $contracts = $this->allContracts()
             ->select(['start_date', 'end_date', 'terminated_at'])
@@ -294,13 +294,76 @@ class Employee extends Model implements HasMedia
         if ($totalMonths > 0) {
             $result .= $totalMonths . ' ' . trans_choice('general.month', $totalMonths);
         }
-        if($result === ''){
+        if ($result === '') {
             $result = $totalYears . ' ' . trans_choice('general.year', $totalYears);
         }
         // Return total years of service rounded to one decimal
         return $result;
     }
 
+    public function getYearsOfServiceAttribute(): int
+    {
+        $contracts = $this->allContracts()
+            ->select(['start_date', 'end_date', 'terminated_at'])
+            ->orderBy('start_date')
+            ->get();
+
+        if ($contracts->isEmpty()) {
+            return 0 ;
+        }
+
+        // Build the time periods for each contract
+        $periods = $contracts->map(function ($c) {
+            $start = Carbon::parse($c->start_date);
+
+            // Determine the actual end date of the contract
+            $end = null;
+
+            if ($c->terminated_at) {
+                // Employee left before the planned end date
+                $end = Carbon::parse($c->terminated_at);
+            } elseif (today() > $c->end_date) {
+                // Contract ended normally
+                $end = Carbon::parse($c->end_date);
+            } else {
+                // Contract is still active
+                $end = Carbon::now();
+            }
+
+            // Correct data errors where end date is before start date
+            if ($end->lt($start)) {
+                [$start, $end] = [$end, $start];
+            }
+
+            return compact('start', 'end');
+        })->sortBy('start')->values()->toArray();
+
+        // Merge overlapping or continuous contract periods
+        $merged = [$periods[0]];
+        foreach (array_slice($periods, 1) as $p) {
+            $last = &$merged[count($merged) - 1];
+            if ($p['start']->lte($last['end'])) {
+                // Extend the end date if periods overlap or touch
+                $last['end'] = $p['end']->gt($last['end']) ? $p['end'] : $last['end'];
+            } else {
+                // Separate period (gap between contracts)
+                $merged[] = $p;
+            }
+        }
+
+        // Calculate total service time (in years + fractional months)
+        $totalYears = 0;
+
+        foreach ($merged as $m) {
+            $years = $m['start']->diffInYears($m['end']);
+            $months = $m['start']->diffInMonths($m['end']) % 12;
+            $totalYears += $years + ($months / 12);
+
+        }
+
+        return $totalYears;
+
+    }
 
     public function abilityToTakeLeave($leaveType)
     {

@@ -44,11 +44,17 @@ class News extends Model
         $relation = $this->newsable;
         $type = class_basename($this->newsable_type);
 
-        return match ($type) {
-            'City' => __('general.city') . ': ' . $relation->name,
-            'Center' => __('general.center') . ': ' . $relation->name,
-            'Program' => __('general.program') . ': ' . $relation->name,
+        $name = match ($type) {
+            'City' => trans_choice('general.city', 1),
+            'Center' => trans_choice('general.center', 1),
+            'Program' => trans_choice('general.program', 1),
             default => $relation->name ?? __('general.n_a'),
         };
+
+        if (in_array($type, ['City', 'Center', 'Program'])) {
+            return $name . ': ' . $relation->name;
+        }
+
+        return $name;
     }
 }

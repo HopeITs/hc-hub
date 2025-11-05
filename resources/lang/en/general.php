@@ -373,7 +373,11 @@ return [
     'target_group' => 'Target Group',
     'target_entity' => 'Entity',
     'select_entity' => 'Select Entity',
-    'display_until' => 'Display Date',
+    'display_until' => 'Display Until Date',
+    'always_display' => 'Always Display',
+    'city' => 'City|Cities',
+    'center' => 'Center|Centers',
+    'program' => 'Program|Programs',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
