@@ -25,9 +25,10 @@
                     <x-forms.input-label for="newsable_type">@lang('general.target_type')</x-forms.input-label>
                     <x-forms.select-input id="newsable_type" wire:model.live="item.newsable_type">
                         <option value="">@lang('general.all_org')</option>
-                        <option value="App\Models\City">@lang('general.city')</option>
-                        <option value="App\Models\Center">@lang('general.center')</option>
-                        <option value="App\Models\Program">@lang('general.program')</option>
+                        <option value="App\Models\City">{{ trans_choice('general.city', 1) }}</option>
+                        <option value="App\Models\Center">{{ trans_choice('general.center', 1) }}</option>
+                        <option value="App\Models\Program">{{ trans_choice('general.program', 1) }}</option>
+                        <option value="App\Models\Employee">{{ trans_choice('general.employee', 1) }}</option>
                     </x-forms.select-input>
                     <x-error-span>{{ $errors->first('item.newsable_type') }}</x-error-span>
                 </div>
@@ -49,6 +50,10 @@
                                 @foreach ($programs as $program)
                                     <option value="{{ $program->id }}">{{ $program->name }}</option>
                                 @endforeach
+                            @elseif ($item['newsable_type'] === 'App\Models\Employee')
+                                @foreach ($employees as $employee)
+                                    <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                                @endforeach
                             @endif
                         </x-forms.select-input>
                         <x-error-span>{{ $errors->first('item.newsable_id') }}</x-error-span>
@@ -69,13 +74,17 @@
                     <x-error-span>{{ $errors->first('item.photo') }}</x-error-span>
                 </div>
 
-                <div class="col-span-2">
-                    <x-forms.input-label for="display_until">@lang('general.display_until')
-                        (@lang('general.optional'))</x-forms.input-label>
+                <div class="col-span-2 sm:col-span-1">
+                    <x-forms.input-label for="display_until">@lang('general.display_until') (@lang('general.optional'))</x-forms.input-label>
                     <x-forms.input id="display_until" type="date" wire:model="item.display_until" />
                     <x-error-span>{{ $errors->first('item.display_until') }}</x-error-span>
                 </div>
 
+                <div class="col-span-2 sm:col-span-1">
+                    <x-forms.input-label for="event_date">@lang('general.event_date') (@lang('general.optional'))</x-forms.input-label>
+                    <x-forms.input id="event_date" type="date" wire:model="item.event_date" />
+                    <x-error-span>{{ $errors->first('item.event_date') }}</x-error-span>
+                </div>
             </div>
 
             <div class="flex justify-end gap-2">

@@ -370,8 +370,12 @@ return [
     'target_group' => 'الجهة المستهدفة',
     'target_entity' => 'الكيان',
     'select_entity' => 'اختر الكيان',
-    'display_until' => 'التاريخ',
     'display_until' => 'تاريخ انتهاء العرض',
+    'always_display' => 'عرض دائم',
+    'city' => 'المدينة|المدن',
+    'center' => 'المركز|المراكز',
+    'program' => 'البرنامج|البرامج',
+    'event_date' => 'تاريخ الحدث',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',

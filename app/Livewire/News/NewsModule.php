@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\City;
 use App\Models\Center;
 use App\Models\Program;
+use App\Models\Employee;
 use Carbon\Carbon;
 
 class NewsModule extends Component
@@ -29,6 +30,7 @@ class NewsModule extends Component
         'photo' => '',
         'display_until' => '',
         'published_at' => '',
+        'event_date' => '',
     ];
 
     protected function rules()
@@ -36,16 +38,29 @@ class NewsModule extends Component
         return [
             'item.title' => ['required', 'string', 'max:255'],
             'item.description' => ['nullable', 'string'],
-            'item.newsable_type' => ['nullable', 'string', Rule::in(['App\\Models\\City', 'App\\Models\\Center', 'App\\Models\\Program'])],
+            'item.newsable_type' => [
+                'nullable',
+                'string',
+                Rule::in([
+                    'App\\Models\\City',
+                    'App\\Models\\Center',
+                    'App\\Models\\Program',
+                    'App\\Models\\Employee',
+                ]),
+            ],
             'item.newsable_id' => [
                 Rule::requiredIf(!empty($this->item['newsable_type'])),
                 'nullable',
                 'integer',
             ],
-            'item.display_until' => ['nullable', 'date', 'after:yesterday'],
+            'item.display_until' => ['nullable', 'date', 'after_or_equal:today'],
+            'item.event_date' => ['nullable', 'date'],
             'item.photo' => [
                 'nullable',
-                Rule::when($this->item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile, ['image', 'max:2048']),
+                Rule::when(
+                    $this->item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile,
+                    ['image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048']
+                ),
             ],
         ];
     }
@@ -65,12 +80,18 @@ class NewsModule extends Component
         return Program::get(['id', 'name']);
     }
 
+    public function getEmployeesProperty()
+    {
+        return Employee::all()->map(fn($e) => (object)['id' => $e->id, 'name' => $e->name]);
+    }
+
     public function render()
     {
         return view('livewire.news.news-module', [
             'cities' => $this->cities,
             'centers' => $this->centers,
             'programs' => $this->programs,
+            'employees' => $this->employees,
         ]);
     }
 
@@ -86,6 +107,7 @@ class NewsModule extends Component
             'photo' => '',
             'display_until' => '',
             'published_at' => '',
+            'event_date' => '',
         ];
         $this->modalTitle = __('general.add-new');
         $this->showModal = true;
@@ -96,6 +118,7 @@ class NewsModule extends Component
         $news = News::findOrFail($id);
         $this->item = $news->toArray();
         $this->item['display_until'] = optional($news->display_until)->format('Y-m-d') ?? '';
+        $this->item['event_date'] = optional($news->event_date)->format('Y-m-d') ?? '';
         $this->item['newsable_type'] = $news->newsable_type ?? '';
         $this->item['newsable_id'] = $news->newsable_id;
 
@@ -130,6 +153,10 @@ class NewsModule extends Component
 
         $dataToFill['display_until'] = !empty($dataToFill['display_until'])
             ? Carbon::createFromFormat('Y-m-d', $dataToFill['display_until'])
+            : null;
+
+        $dataToFill['event_date'] = !empty($dataToFill['event_date'])
+            ? Carbon::createFromFormat('Y-m-d', $dataToFill['event_date'])
             : null;
 
         $news->fill($dataToFill);
