@@ -318,6 +318,19 @@ return new class extends Migration
             $table->index(['employee_id', 'order']);
             $table->foreign('employee_id')->references('id')->on('employees')->cascadeOnDelete();
         });
+
+        Schema::create('news', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->nullableMorphs('newsable', 'newsable_index');
+            $table->string('photo')->nullable();
+            $table->timestamp('display_until')->nullable();
+            $table->timestamp('published_at')->nullable();
+            $table->date('event_date')->nullable();
+            $table->timestamps();
+        });
+
     }
 
     /**
@@ -354,5 +367,6 @@ return new class extends Migration
         Schema::dropIfExists('employee_items');
         Schema::dropIfExists('employee_notes');
         Schema::dropIfExists('notifications');
+        Schema::dropIfExists('hchr_news');
     }
 };

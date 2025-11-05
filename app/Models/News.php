@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class News extends Model
 {
-    protected $table = 'hchr_news';
+    protected $table = 'news';
 
     protected $fillable = [
         'title',

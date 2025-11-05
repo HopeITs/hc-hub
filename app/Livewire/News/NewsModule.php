@@ -53,11 +53,14 @@ class NewsModule extends Component
                 'nullable',
                 'integer',
             ],
-            'item.display_until' => ['nullable', 'date'],
+            'item.display_until' => ['nullable', 'date', 'after_or_equal:today'],
             'item.event_date' => ['nullable', 'date'],
             'item.photo' => [
                 'nullable',
-                Rule::when($this->item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile, ['image', 'max:2048']),
+                Rule::when(
+                    $this->item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile,
+                    ['image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048']
+                ),
             ],
         ];
     }
