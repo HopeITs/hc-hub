@@ -37,6 +37,8 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use App\Livewire\Notifications\Index as NotificationsIndex;
+use App\Livewire\Employee\EmployeeStatistics;
+
 
 Route::group(
     [
@@ -144,6 +146,9 @@ Route::group(
                 Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
 
                 Route::get('/news', \App\Livewire\News\NewsModule::class)->name('news.index')->middleware('auth');
+
+                Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
+
         });
 
         require __DIR__ . '/auth.php';
