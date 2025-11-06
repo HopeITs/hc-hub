@@ -1,21 +1,20 @@
 <div class="space-y-10">
 
 
-    <div class="grid grid-cols-3 gap-6 items-stretch">
+    <div class="grid grid-cols-3 gap-15 items-stretch">
         <div class="col-span-2 grid grid-rows-2 gap-6 h-full">
-            <div class="bg-secondary-medium rounded-xl flex items-center justify-center text-white font-semibold h-68">
+            <div class=" rounded-xl flex items-center justify-center text-white font-semibold h-68">
                 <x-dashboard-cards.my-leaves-card/>
             </div>
 
-            <div class="bg-secondary-dark rounded-xl flex items-center justify-center text-white font-semibold h-68">
+            <div class=" rounded-xl flex items-center justify-center text-white font-semibold h-68">
                 <livewire:dashboards.employee-notes-card :employee="auth()->id()"/>
 
             </div>
         </div>
 
         <div class="bg-red-300 rounded-xl flex items-center justify-center text-white font-semibold h-full">
-{{--            <x-dashboard-cards.team-members-card/>--}}
-        3
+            <x-dashboard-cards.team-members-card/>
         </div>
     </div>
 

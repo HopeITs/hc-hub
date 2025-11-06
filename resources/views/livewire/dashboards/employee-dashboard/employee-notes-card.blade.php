@@ -89,7 +89,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center py-6 text-gray-400">
+                                <td colspan="4" class="text-center py-6 pt-19 text-gray-400">
                                     <p>No notes yet. Click <span class="text-red-600 font-medium">“Add Note”</span> to get started!</p>
                                 </td>
                             </tr>
