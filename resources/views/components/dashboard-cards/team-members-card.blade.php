@@ -1,8 +1,8 @@
 @php
-    $phone = preg_replace('/\D+/', '', $member->personal_phone ?? '');
+    $query = request()->get('search');
 @endphp
 
-<div class="relative w-full max-w-lg bg-[var(--color-neutral-50)] rounded-3xl shadow-lg overflow-hidden">
+<div x-data="{ search: '' }" class="relative w-full max-w-lg bg-[var(--color-neutral-50)] rounded-3xl shadow-lg overflow-hidden">
 
     <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[var(--color-primary-200)] bg-[var(--color-primary-500)] text-white">
         <div class="flex items-center gap-2">
@@ -11,22 +11,36 @@
             </div>
             <h2 class="text-lg font-extrabold tracking-tight">Team Members</h2>
         </div>
-
         <div class="flex items-center gap-2">
-
-            <a href="{{ route('org.chart') }}"
-               class="text-[11px] font-semibold text-white/90 hover:text-white transition">
+            <a href="{{ route('org.chart') }}" class="text-[11px] font-semibold text-white/90 hover:text-white transition">
                 View All →
             </a>
         </div>
     </div>
 
-    <div class="relative p-5 space-y-3 overflow-y-auto max-h-[400px] scroll-smooth
+    <div class="px-5 pt-4 pb-2">
+        <div class="relative">
+            <input x-model="search"
+                   type="text"
+                   placeholder="Search team members..."
+                   class="w-full text-sm rounded-xl border border-[var(--color-primary-200)] bg-white pl-10 pr-3 py-2 focus:ring-2 focus:ring-[var(--color-primary-400)] focus:border-[var(--color-primary-400)] outline-none transition"
+            >
+            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-primary-400)]">
+                <x-icons.search class="w-4 h-4" />
+            </div>
+        </div>
+    </div>
+
+    <div class="relative p-5 pt-2 space-y-3 overflow-y-auto max-h-[400px] scroll-smooth
                 scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)]
                 hover:scrollbar-thumb-[var(--color-primary-400)]">
 
         @forelse($this->teamMembers as $member)
-            <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-[var(--color-primary-100)]
+            @php
+                $phone = preg_replace('/\D+/', '', $member->personal_phone ?? '');
+            @endphp
+            <div x-show="!search || '{{ strtolower($member->displayName ?? $member->name) }}'.includes(search.toLowerCase()) || '{{ strtolower($member->positionTitle ?? '') }}'.includes(search.toLowerCase())"
+                 class="flex items-center justify-between p-4 bg-white rounded-2xl border border-[var(--color-primary-100)]
                         hover:border-[var(--color-primary-300)] hover:shadow-md transition-all duration-150">
 
                 <div class="flex items-center gap-4 flex-1 min-w-0">

@@ -9,12 +9,7 @@
     </div>
     {{ $paginator->links('livewire-table::pagination.pagination') }}
 
-    @isset($showModal)
-        @if($showModal)
-          {!! $modalBody !!}
-        @endif
 
-    @endisset
 </div>
 
 
