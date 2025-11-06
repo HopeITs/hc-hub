@@ -1,13 +1,13 @@
 <div class="space-y-10">
 
 
-    <div class="grid grid-cols-3 gap-15 items-stretch">
-        <div class="col-span-2 grid grid-rows-2 gap-6 h-full">
-            <div class=" rounded-xl flex items-center justify-center text-white font-semibold h-68">
+    <div class="grid grid-cols-3">
+        <div class="col-span-2 grid grid-rows-2 gap-8 h-full">
+            <div class=" rounded-xl flex items-center justify-start text-white font-semibold h-68">
                 <x-dashboard-cards.my-leaves-card/>
             </div>
 
-            <div class=" rounded-xl flex items-center justify-center text-white font-semibold h-68">
+            <div class=" rounded-xl flex items-center justify-start text-white font-semibold h-68">
                 <livewire:dashboards.employee-notes-card :employee="auth()->id()"/>
 
             </div>

@@ -2,8 +2,8 @@
     <div
         x-data="notesBoard()"
         x-init="init(@js($this->notes->pluck('id')))"
-        class="relative">
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col h-68 min-w-3xl">
+        class="relative ">
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col h-68 w-[720px]">
             <div class="flex items-center justify-between px-6 pt-6 shrink-0">
                 <div class="flex pt-2 items-center gap-2">
                     <h2 class="text-md font-semibold text-secondary-medium">Notes</h2>
@@ -30,10 +30,10 @@
                     <table class="w-full text-sm text-gray-700 border-collapse">
                         <thead class="sticky top-0 z-10 bg-white">
                         <tr class="border-b border-b-secondary-light text-gray-500">
-                            <th class="w-10 text-center font-medium"></th>
-                            <th class="font-medium text-left"></th>
-                            <th class="px-3 text-right font-medium">Actions</th>
-                            <th class="text-center font-medium w-16">Done!</th>
+                            <th class=" py-1 w-10 text-center font-medium"></th>
+                            <th class="py-1 font-medium text-left"></th>
+                            <th class="py-1 px-3 text-right font-medium">Actions</th>
+                            <th class="py-1 text-center font-medium w-16">Done!</th>
                         </tr>
                         </thead>
 
@@ -135,7 +135,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Note Content</label>
                         <textarea
                             x-model="modalContent"
-                            placeholder="Write something meaningful..."
+                            placeholder="Write Your Note..."
                             class="block w-full h-28 rounded-lg border border-gray-300 text-sm text-gray-800 py-2 px-3 resize-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition"
                         ></textarea>
                     </div>
