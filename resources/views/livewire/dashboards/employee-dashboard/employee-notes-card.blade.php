@@ -27,6 +27,7 @@
 
             <div class="px-6 py-4 flex-1 overflow-hidden">
                 <div class="max-h-46 overflow-y-auto pr-1 pt-1 custom-scrollbar">
+
                     <table class="w-full text-sm text-gray-700 border-collapse">
                         <thead class="sticky top-0 z-10 bg-white">
                         <tr class="border-b border-b-secondary-light text-gray-500">
