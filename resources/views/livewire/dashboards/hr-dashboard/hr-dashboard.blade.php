@@ -6,7 +6,7 @@
         </div>
 
         <div>
-            <x-dashboard-cards.soon-ending-contracts-card/>
+            <livewire:dashboard.soon-ending-contracts-card />
         </div>
 
         <div>
@@ -53,7 +53,6 @@
             <livewire:dashboards.hr-notes-card :employee="auth()->id()"/>
         </div>
 
-
         <div>
             <x-dashboard-cards.pending-requests-card
                 :pendingRequests="$pendingRequests"/>
@@ -70,8 +69,6 @@
         <div>
             <x-dashboard-cards.news-card/>
         </div>
-
-
 
     </div>
 </div>
