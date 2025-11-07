@@ -43,8 +43,7 @@
         </div>
 
         <div class="bg-secondary-light/80 h-70 rounded-xl flex items-center justify-center text-white font-semibold">
-{{--            <x-dashboard-cards.upcoming-leaves-card/>--}}
-        8
+            <x-dashboard-cards.upcoming-leaves-card/>
         </div>
     </div>
 

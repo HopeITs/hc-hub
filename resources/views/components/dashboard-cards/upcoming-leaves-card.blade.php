@@ -1,76 +1,54 @@
-<div class="w-full bg-gradient-to-b from-white to-[var(--color-neutral-50)] rounded-3xl shadow-xl border border-[var(--color-neutral-200)] overflow-hidden">
-
-    <div class="flex items-center justify-between px-6 py-4 bg-primary">
-        <div class="flex items-center gap-3">
-            <div class="flex items-center justify-center w-9 h-9 bg-white/20 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+<div class="w-full h-full max-w-md bg-white rounded-xl shadow-md ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
+        <div class="flex items-center gap-2">
+            <h3 class="text-sm font-semibold text-[#58595B]">
+                Upcoming Leaves
+            </h3>
+            <span class="text-secondary-light text-sm font-medium">
+                4
+            </span>
+            <div class="flex items-center justify-center w-7 h-7 rounded-md  text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
+                    <path fill-rule="evenodd" d="M5.25 3A2.25 2.25 0 003 5.25v13.5A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V5.25A2.25 2.25 0 0018.75 3H5.25zM6 6h12v1.5H6V6zm0 3h12v1.5H6V9zm0 3h7.5v1.5H6V12zm0 3h7.5v1.5H6V15z" clip-rule="evenodd" />
                 </svg>
             </div>
-            <h3 class="text-lg font-semibold text-white tracking-wide">Upcoming Leaves</h3>
         </div>
-        <span class="text-xs font-semibold text-[var(--color-primary-700)] bg-white px-3 py-1 rounded-full shadow-sm">
-            4 Scheduled
-        </span>
     </div>
 
-    <div class="p-6 max-h-[22rem] overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-[var(--color-primary-200)] scrollbar-track-transparent">
-
-        <div class="group flex items-start gap-4 p-4 bg-white border border-[var(--color-neutral-200)] rounded-2xl shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200">
-            <div class="flex flex-col items-center">
-                <div class="w-3.5 h-3.5 rounded-full bg-[var(--color-success-500)] border-2 border-black shadow"></div>
-                <div class="flex-1 w-px bg-[var(--color-neutral-200)] mt-2"></div>
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto px-6 pb-4 space-y-4 scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-primary-400)]">
+        <!-- Leave Item -->
+        <div class="pb-3  border-b border-b-secondary-soft">
+            <div class="flex justify-between items-center">
+                <p class="text-xs font-bold text-[#58595B]">Fredy Youssef</p>
+                <span class="text-[11px] h-5 w-18 font-medium tracking-wide mt-4 text-center text-white bg-primary px-2 py-0.5 rounded-full">Approved</span>
             </div>
-            <div class="flex-1">
-                <div class="flex justify-between items-center">
-                    <p class="text-sm font-semibold text-[var(--color-neutral-900)]">Youssef Kharbout</p>
-                    <span class="text-xs font-semibold text-[var(--color-success-600)] bg-[var(--color-success-50)] px-2 py-0.5 rounded-full">Approved</span>
-                </div>
-                <p class="text-xs text-[var(--color-neutral-600)] mt-1">Annual Leave • Mar 12 → Mar 18</p>
-            </div>
+            <p class="text-[10px] font-light -mt-1 text-gray-500">Annual Leave 12 Mar – 18 Mar</p>
         </div>
 
-        <div class="group flex items-start gap-4 p-4 bg-white border border-[var(--color-neutral-200)] rounded-2xl shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200">
-            <div class="flex flex-col items-center">
-                <div class="w-3.5 h-3.5 rounded-full bg-[var(--color-warning-400)] border-2 border-black shadow"></div>
-                <div class="flex-1 w-px bg-[var(--color-neutral-200)] mt-2"></div>
+        <div class="pb-3  border-b border-b-secondary-soft">
+            <div class="flex justify-between items-center">
+                <p class="text-xs font-bold text-[#58595B]">Fredy Youssef</p>
+                <span class="text-[11px] h-5 w-18 font-medium tracking-wide mt-4 text-center text-white bg-primary px-2 py-0.5 rounded-full">Approved</span>
             </div>
-            <div class="flex-1">
-                <div class="flex justify-between items-center">
-                    <p class="text-sm font-semibold text-[var(--color-neutral-900)]">Rita Isbejerian</p>
-                    <span class="text-xs font-semibold text-[var(--color-warning-700)] bg-[var(--color-warning-50)] px-2 py-0.5 rounded-full">Pending</span>
-                </div>
-                <p class="text-xs text-[var(--color-neutral-600)] mt-1">Sick Leave • Feb 10 → Feb 12</p>
-            </div>
+            <p class="text-[10px] font-light -mt-1 text-gray-500">Annual Leave 12 Mar – 18 Mar</p>
         </div>
 
-        <div class="group flex items-start gap-4 p-4 bg-white border border-[var(--color-neutral-200)] rounded-2xl shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200">
-            <div class="flex flex-col items-center">
-                <div class="w-3.5 h-3.5 rounded-full bg-[var(--color-success-500)] border-2 border-black shadow"></div>
-                <div class="flex-1 w-px bg-[var(--color-neutral-200)] mt-2"></div>
+        <div class="pb-3  border-b border-b-secondary-soft">
+            <div class="flex justify-between items-center">
+                <p class="text-xs font-bold text-[#58595B]">Fredy Youssef</p>
+                <span class="text-[11px] h-5 w-18 font-medium tracking-wide mt-4 text-center text-white bg-secondary-light px-2 py-0.5 rounded-full">Pending</span>
             </div>
-            <div class="flex-1">
-                <div class="flex justify-between items-center">
-                    <p class="text-sm font-semibold text-[var(--color-neutral-900)]">Mai Youssef</p>
-                    <span class="text-xs font-semibold text-[var(--color-success-600)] bg-[var(--color-success-50)] px-2 py-0.5 rounded-full">Approved</span>
-                </div>
-                <p class="text-xs text-[var(--color-neutral-600)] mt-1">Maternity Leave • Apr 5 → Jun 5</p>
-            </div>
+            <p class="text-[10px] font-light -mt-1 text-gray-500">Annual Leave 12 Mar – 18 Mar</p>
         </div>
 
-        <div class="group flex items-start gap-4 p-4 bg-white border border-[var(--color-neutral-200)] rounded-2xl shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-200">
-            <div class="flex flex-col items-center">
-                <div class="w-3.5 h-3.5 rounded-full bg-[var(--color-error-500)] border-2 border-black shadow"></div>
+        <div class="pb-3  border-b border-b-secondary-soft">
+            <div class="flex justify-between items-center">
+                <p class="text-xs font-bold text-[#58595B]">Fredy Youssef</p>
+                <span class="text-[11px] h-5 w-18 font-medium tracking-wide mt-4 text-center text-white bg-primary px-2 py-0.5 rounded-full">Approved</span>
             </div>
-            <div class="flex-1">
-                <div class="flex justify-between items-center">
-                    <p class="text-sm font-semibold text-[var(--color-neutral-900)]">Rami Nassar</p>
-                    <span class="text-xs font-semibold text-[var(--color-error-600)] bg-[var(--color-error-50)] px-2 py-0.5 rounded-full">Rejected</span>
-                </div>
-                <p class="text-xs text-[var(--color-neutral-600)] mt-1">Emergency Leave • Jan 27 → Jan 29</p>
-            </div>
+            <p class="text-[10px] font-light -mt-1 text-gray-500">Annual Leave 12 Mar – 18 Mar</p>
         </div>
-
     </div>
 </div>
