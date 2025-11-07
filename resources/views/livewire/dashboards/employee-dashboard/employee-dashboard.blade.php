@@ -21,9 +21,8 @@
 
     <div class="grid grid-cols-3 gap-6">
 
-        <div class="bg-secondary-medium rounded-xl flex items-center justify-center text-white font-semibold row-span-2 h-full">
-{{--            <x-dashboard-cards.news-card/>--}}
-        4
+        <div class=" rounded-xl flex items-center justify-center text-white font-semibold row-span-2 h-full">
+            <x-dashboard-cards.news-card/>
         </div>
 
         <div class="bg-secondary-light h-70 rounded-xl flex items-center justify-center text-white font-semibold">
