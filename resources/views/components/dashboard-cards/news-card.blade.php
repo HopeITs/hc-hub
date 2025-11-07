@@ -42,7 +42,7 @@
                 </a>
             </div>
         @empty
-            <div class="flex flex-col items-center justify-center text-[var(--color-neutral-500)] text-sm py-10">
+            <div class="flex flex-col items-center justify-center text-[var(--color-neutral-500)] text-sm py-40">
                 <div class="text-4xl mb-2">🗞️</div>
                 <p class="font-medium">No recent company updates</p>
             </div>
