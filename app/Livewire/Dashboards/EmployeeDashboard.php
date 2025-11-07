@@ -84,14 +84,70 @@ class EmployeeDashboard extends Component
                 $news->event_title = $news->title;
                 $news->event_description = $news->description;
                 $news->event_timestamp = $timestamp;
-                $news->image_url = $news->photo
-                    ? Storage::url($news->photo)
-                    : '/images/news-default.png';
+                $news->image_url = $news->photo ? Storage::url($news->photo) : '/images/news-default.png';
 
                 return $news;
             });
 
         return $birthdays->merge($newsItems)->sortByDesc('event_timestamp')->values();
+    }
+
+    public function getUpcomingEventsProperty()
+    {
+        $start = now()->timezone(config('app.timezone'))->addDay()->startOfDay();
+        $end = $start->copy()->addDays(7)->endOfDay();
+
+        $locale = app()->getLocale();
+        $employeeId = $this->employee->id ?? null;
+        $cityId = $this->employee->city_id ?? null;
+        $centerId = $this->contract->position->center_id ?? null;
+        $programId = $this->contract->position->program_id ?? null;
+
+        return News::query()
+            ->where(function ($q) use ($start, $end) {
+                $q->whereBetween('event_date', [$start, $end])->orWhereBetween('published_at', [$start, $end]);
+            })
+            ->where(function ($q) use ($cityId, $centerId, $programId, $employeeId) {
+                $q->whereNull('newsable_type')
+                    ->orWhere(function ($q2) use ($employeeId) {
+                        $q2->where('newsable_type', Employee::class)->where('newsable_id', $employeeId);
+                    })
+                    ->orWhere(function ($q2) use ($cityId) {
+                        $q2->where('newsable_type', City::class)->where('newsable_id', $cityId);
+                    })
+                    ->orWhere(function ($q2) use ($centerId) {
+                        $q2->where('newsable_type', Center::class)->where('newsable_id', $centerId);
+                    })
+                    ->orWhere(function ($q2) use ($programId) {
+                        $q2->where('newsable_type', Program::class)->where('newsable_id', $programId);
+                    });
+            })
+            ->where(function ($q) {
+                $q->whereNull('display_until')->orWhere('display_until', '>=', now()->startOfDay());
+            })
+            ->get()
+            ->map(function ($news) {
+                $timestamp = $news->event_date ?? $news->published_at;
+                if (!$timestamp instanceof Carbon) {
+                    $timestamp = Carbon::parse($timestamp);
+                }
+
+                $daysLeft = now()->diffInDays($timestamp, false);
+
+                $news->event_title = $news->title;
+                $news->event_description = $news->description;
+                $news->event_timestamp = $timestamp;
+                $news->image_url = $news->photo ? \Storage::url($news->photo) : '/images/news-default.png';
+                $news->daysLeftText = match ($daysLeft) {
+                    0 => 'Today 🎉',
+                    1 => 'Tomorrow',
+                    default => "In {$daysLeft} days",
+                };
+
+                return $news;
+            })
+            ->sortBy('event_timestamp')
+            ->values();
     }
 
     public function getUpcomingBirthdaysProperty()
@@ -158,11 +214,7 @@ class EmployeeDashboard extends Component
             return collect();
         }
 
-        return Badge::query()
-            ->with('employee')
-            ->where('employee_id', $this->employee->id)
-            ->orderByDesc('date')
-            ->get();
+        return Badge::query()->with('employee')->where('employee_id', $this->employee->id)->orderByDesc('date')->get();
     }
 
     public function getPendingRequestsProperty()
@@ -225,9 +277,7 @@ class EmployeeDashboard extends Component
 
             $this->positionTitle = $this->contract?->position?->$titleCol ?? '—';
             $this->departmentName = $this->contract?->position?->department?->$deptCol ?? '—';
-            $this->joinedOn = $this->contract?->start_date
-                ? date('d M Y', strtotime($this->contract->start_date))
-                : '—';
+            $this->joinedOn = $this->contract?->start_date ? date('d M Y', strtotime($this->contract->start_date)) : '—';
             $this->workEmail = $user->email ?? '—';
         } else {
             $this->positionTitle = $this->departmentName = $this->joinedOn = $this->workEmail = '—';
@@ -244,7 +294,7 @@ class EmployeeDashboard extends Component
             'joinedOn' => $this->joinedOn,
             'workEmail' => $this->workEmail,
             'todayEvents' => $this->todayEvents,
-            'upcomingBirthdays' => $this->upcomingBirthdays,
+            'upcomingEvents' => $this->upcomingEvents,
             'deliveredItems' => $this->deliveredItems,
             'myBadges' => $this->myBadges,
             'pendingRequests' => $this->pendingRequests,

@@ -28,7 +28,7 @@
         </div>
 
         <div class="bg-secondary-dark h-70 rounded-xl flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-birthday-card :upcomingBirthdays="$upcomingBirthdays" />
+            <x-dashboard-cards.upcoming-event-card :upcomingEvents="$upcomingEvents" />
         </div>
 
         <div class="bg-secondary-dark/80 h-70 rounded-xl flex items-center justify-center text-white font-semibold">
