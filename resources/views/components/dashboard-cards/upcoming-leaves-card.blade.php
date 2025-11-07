@@ -21,32 +21,32 @@
         <!-- Leave Item -->
         <div class="pb-3  border-b border-b-secondary-soft">
             <div class="flex justify-between items-center">
-                <p class="text-xs font-bold text-[#58595B]">Fredy Youssef</p>
-                <span class="text-[11px] h-5 w-18 font-medium tracking-wide mt-4 text-center text-white bg-primary px-2 py-0.5 rounded-full">Approved</span>
+                <p class="text-[13px] font-bold text-[#58595B]">Fredy Youssef</p>
+                <span class="text-[10px] h-4 w-15 font-medium tracking-wide mt-4 text-center text-white bg-primary px-1  rounded-full">Approved</span>
             </div>
             <p class="text-[10px] font-light -mt-1 text-gray-500">Annual Leave 12 Mar – 18 Mar</p>
         </div>
 
         <div class="pb-3  border-b border-b-secondary-soft">
             <div class="flex justify-between items-center">
-                <p class="text-xs font-bold text-[#58595B]">Fredy Youssef</p>
-                <span class="text-[11px] h-5 w-18 font-medium tracking-wide mt-4 text-center text-white bg-primary px-2 py-0.5 rounded-full">Approved</span>
+                <p class="text-[13px] font-bold text-[#58595B]">Safir Salim</p>
+                <span class="text-[10px] h-4 w-15 font-medium tracking-wide mt-4 text-center text-white bg-primary px-1  rounded-full">Approved</span>
             </div>
             <p class="text-[10px] font-light -mt-1 text-gray-500">Annual Leave 12 Mar – 18 Mar</p>
         </div>
 
         <div class="pb-3  border-b border-b-secondary-soft">
             <div class="flex justify-between items-center">
-                <p class="text-xs font-bold text-[#58595B]">Fredy Youssef</p>
-                <span class="text-[11px] h-5 w-18 font-medium tracking-wide mt-4 text-center text-white bg-secondary-light px-2 py-0.5 rounded-full">Pending</span>
+                <p class="text-[13px] font-bold text-[#58595B]">Rama Daaboul</p>
+                <span class="text-[10px] h-4 w-15 font-medium tracking-wide mt-4 text-center text-white bg-secondary-light px-1  rounded-full">Approved</span>
             </div>
             <p class="text-[10px] font-light -mt-1 text-gray-500">Annual Leave 12 Mar – 18 Mar</p>
         </div>
 
         <div class="pb-3  border-b border-b-secondary-soft">
             <div class="flex justify-between items-center">
-                <p class="text-xs font-bold text-[#58595B]">Fredy Youssef</p>
-                <span class="text-[11px] h-5 w-18 font-medium tracking-wide mt-4 text-center text-white bg-primary px-2 py-0.5 rounded-full">Approved</span>
+                <p class="text-[13px] font-bold text-[#58595B]">Mai Youssef</p>
+                <span class="text-[10px] h-4 w-15 font-medium tracking-wide mt-4 text-center text-white bg-primary px-1  rounded-full">Approved</span>
             </div>
             <p class="text-[10px] font-light -mt-1 text-gray-500">Annual Leave 12 Mar – 18 Mar</p>
         </div>

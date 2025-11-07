@@ -1,8 +1,7 @@
 <div class="space-y-10">
 
-
-    <div class="grid grid-cols-3">
-        <div class="col-span-2 grid grid-rows-2 gap-8 h-full">
+    <div class="grid grid-cols-3 gap-6">
+        <div class="col-span-2 grid grid-rows-2 gap-6 h-full">
             <div class=" rounded-xl flex items-center justify-start text-white font-semibold h-68">
                 <x-dashboard-cards.my-leaves-card/>
             </div>
@@ -13,7 +12,7 @@
             </div>
         </div>
 
-        <div class="bg-red-300 rounded-xl flex items-center justify-center text-white font-semibold h-full">
+        <div class="rounded-xl flex items-center justify-center text-white font-semibold h-full">
             <x-dashboard-cards.team-members-card/>
         </div>
     </div>
@@ -25,13 +24,13 @@
             <x-dashboard-cards.news-card/>
         </div>
 
-        <div class="bg-secondary-light h-70 rounded-xl flex items-center justify-center text-white font-semibold">
-{{--            <x-dashboard-cards.today-birthday-card--}}
-{{--                :todayBirthdays="$todayBirthdays"/>--}}
-        5
+        <div class="bg-secondary-light h-70 w-full rounded-xl flex items-center justify-center text-white font-semibold">
+            <x-dashboard-cards.today-birthday-card
+                :todayBirthdays="$todayBirthdays"/>
+
         </div>
 
-        <div class="bg-secondary-dark h-70 rounded-xl flex items-center justify-center text-white font-semibold">
+        <div class="bg-secondary-dark h-70  rounded-xl flex items-center justify-center text-white font-semibold">
 {{--            <x-dashboard-cards.upcoming-birthday-card--}}
 {{--                :upcomingBirthdays="$upcomingBirthdays"/>--}}
         6

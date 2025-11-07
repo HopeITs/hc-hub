@@ -3,10 +3,10 @@
 @endphp
 
 <div x-data="{ search: '' }"
-     class="relative w-full h-full min-w-sm bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
+     class="relative w-full h-full  bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
 
     <!-- Header -->
-    <div class="flex items-center justify-between gap-6 px-6 py-8">
+    <div class="flex items-center justify-between gap-6 px-6 py-6">
         <h2 class="text-sm font-semibold text-secondary-medium flex items-center gap-2 whitespace-nowrap">
             Contact The Team
         </h2>
