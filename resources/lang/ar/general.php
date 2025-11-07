@@ -376,6 +376,7 @@ return [
     'center' => 'المركز|المراكز',
     'program' => 'البرنامج|البرامج',
     'event_date' => 'تاريخ الحدث',
+    'company_news' => 'الاخبار',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
