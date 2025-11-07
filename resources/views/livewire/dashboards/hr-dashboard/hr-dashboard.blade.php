@@ -28,7 +28,7 @@
         </div>
 
         <div>
-            <x-dashboard-cards.contract-type-employees-statistics/>
+            <livewire:dashboard.contract-type-employees-statistics/>
         </div>
 
         <div>
