@@ -25,15 +25,13 @@
         </div>
 
         <div class="bg-secondary-light h-70 w-full rounded-xl flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.today-birthday-card
-                :todayBirthdays="$todayBirthdays"/>
+            <x-dashboard-cards.today-events-card/>
 
         </div>
 
         <div class="bg-secondary-dark h-70  rounded-xl flex items-center justify-center text-white font-semibold">
-{{--            <x-dashboard-cards.upcoming-birthday-card--}}
-{{--                :upcomingBirthdays="$upcomingBirthdays"/>--}}
-        6
+            <x-dashboard-cards.upcoming-events-card/>
+
         </div>
 
         <div class="bg-secondary-dark/80 h-70 rounded-xl flex items-center justify-center text-white font-semibold">
