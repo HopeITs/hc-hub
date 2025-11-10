@@ -2,9 +2,24 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
-if (document.getElementById("jobLevelsChart")) {
+const dynamicLabels = window.jobLevelLabels || [];
+const dynamicCounts = window.employeeCounts || [];
+
+const chartData = dynamicLabels.map((label, index) => {
+    const colorIndex = (index % 8) + 1;
+    const colorVar = `--color-primary-${colorIndex * 100}`;
+    const color = getComputedStyle(document.documentElement).getPropertyValue(colorVar.trim()) || "#dc2626";
+
+    return {
+        category: label,
+        value: dynamicCounts[index],
+        color: am5.color(color),
+    };
+});
+
+
+if (document.getElementById("jobLevelsChart") && chartData.length > 0) {
     am5.ready(function () {
-        // === Theme colors ===
         const rootStyle = getComputedStyle(document.documentElement);
         const primaryColor1 = am5.color(rootStyle.getPropertyValue("--color-primary100").trim() || "#dc2626");
         const primaryColor2 = am5.color(rootStyle.getPropertyValue("--color-primary-200").trim() || "#dc2626");
@@ -15,12 +30,10 @@ if (document.getElementById("jobLevelsChart")) {
         const primaryColor7 = am5.color(rootStyle.getPropertyValue("--color-primary-700").trim() || "#dc2626");
         const primaryColor8 = am5.color(rootStyle.getPropertyValue("--color-primary-800").trim() || "#dc2626");
 
-        // === Root ===
         const root = am5.Root.new("jobLevelsChart");
 
         root.setThemes([am5themes_Animated.new(root)]);
 
-        // === Chart ===
         const chart = root.container.children.push(
             am5xy.XYChart.new(root, {
                 panX: false,
@@ -35,19 +48,8 @@ if (document.getElementById("jobLevelsChart")) {
             })
         );
 
-        // === Data ===
-        const data = [
-            { category: "Program Manager", value: 7, color: primaryColor1 },
-            { category: "Program Manager Assistant", value: 10, color: primaryColor2 },
-            { category: "Project Manager", value: 15, color: primaryColor3 },
-            { category: "Project Manager Assistant", value: 25, color: primaryColor4 },
-            { category: "Department Manager", value: 35, color: primaryColor5 },
-            { category: "Team", value: 37, color: primaryColor6 },
-            { category: "Service Agreement", value: 19, color: primaryColor7 },
-            { category: "Keepers", value: 6, color: primaryColor8 },
-        ];
+        const data = chartData;
 
-        // === Category Axis (Y) ===
         const yRenderer = am5xy.AxisRendererY.new(root, {
             inversed: true,
             minGridDistance: 20,
@@ -69,7 +71,6 @@ if (document.getElementById("jobLevelsChart")) {
         );
         yAxis.data.setAll(data);
 
-        // === Value Axis (X) ===
         const xRenderer = am5xy.AxisRendererX.new(root, {
             strokeOpacity: 0.1,
         });
@@ -80,7 +81,6 @@ if (document.getElementById("jobLevelsChart")) {
             })
         );
 
-        // === Series: Horizontal Bars ===
         const series = chart.series.push(
             am5xy.ColumnSeries.new(root, {
                 name: "Employees",
@@ -95,7 +95,6 @@ if (document.getElementById("jobLevelsChart")) {
             })
         );
 
-        // === Bar Style ===
         series.columns.template.setAll({
             height: am5.percent(60),
             cornerRadiusTR: 6,
@@ -106,7 +105,6 @@ if (document.getElementById("jobLevelsChart")) {
 
         series.data.setAll(data);
 
-        // === Inside labels ===
         series.bullets.push(() =>
             am5.Bullet.new(root, {
                 locationX: 0.5,
@@ -121,11 +119,9 @@ if (document.getElementById("jobLevelsChart")) {
             })
         );
 
-        // === Animations ===
         series.appear(1000);
         chart.appear(1000, 100);
 
-        // === Remove watermark ===
         root._logo?.dispose();
     });
 }

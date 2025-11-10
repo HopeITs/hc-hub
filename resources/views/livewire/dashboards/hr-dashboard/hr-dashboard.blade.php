@@ -32,7 +32,7 @@
         </div>
 
         <div>
-            <x-dashboard-cards.job-level-employees-statistics/>
+            <livewire:dashboard.job-level-employee-statistics/>
         </div>
 
         <div>
