@@ -3,9 +3,8 @@
 @endphp
 
 <div x-data="{ search: '' }"
-     class="relative w-full h-full  bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
+     class="relative w-full h-full  bg-white rounded-3xl shadow-sm overflow-hidden flex flex-col">
 
-    <!-- Header -->
     <div class="flex items-center justify-between gap-6 px-6 py-6">
         <h2 class="text-sm font-semibold text-secondary-medium flex items-center gap-2 whitespace-nowrap">
             Contact The Team
@@ -25,7 +24,6 @@
         </div>
     </div>
 
-    <!-- Scrollable section (fixed height so it doesn’t shrink when filtering) -->
     <div class="relative px-6 pt-2 space-y-3 overflow-y-auto flex-grow
                 scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent
                 hover:scrollbar-thumb-[var(--color-primary-300)] min-h-[440px] max-h-[440px]">
@@ -103,7 +101,6 @@
         @endforelse
     </div>
 
-    <!-- Footer flush at bottom -->
     <div class="border-t border-[var(--color-neutral-200)] bg-[var(--color-neutral-50)] px-6 py-3 text-center mt-auto">
         <a href="{{ route('org.chart') }}"
            class="text-[12px] font-semibold text-[var(--color-primary-500)] hover:underline">

@@ -24,22 +24,21 @@
             <x-dashboard-cards.news-card/>
         </div>
 
-        <div class="bg-secondary-light h-70 w-full rounded-xl flex items-center justify-center text-white font-semibold">
+        <div class="h-70 flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.today-events-card/>
 
         </div>
 
-        <div class="bg-secondary-dark h-70  rounded-xl flex items-center justify-center text-white font-semibold">
+        <div class="h-70 flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.upcoming-events-card/>
 
         </div>
 
-        <div class="bg-secondary-dark/80 h-70 rounded-xl flex items-center justify-center text-white font-semibold">
-{{--            <x-dashboard-cards.upcoming-holidays-card/>--}}
-        7
+        <div class=" h-70 flex items-center justify-center text-white font-semibold">
+            <x-dashboard-cards.upcoming-holidays-card/>
         </div>
 
-        <div class="bg-secondary-light/80 h-70 rounded-xl flex items-center justify-center text-white font-semibold">
+        <div class=" h-70 flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.upcoming-leaves-card/>
         </div>
     </div>

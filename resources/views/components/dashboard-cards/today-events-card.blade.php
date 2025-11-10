@@ -1,4 +1,4 @@
-<div class="js-today-events w-full h-full max-w-md bg-white rounded-xl shadow-md ring-1 ring-gray-200 overflow-hidden relative">
+<div class="js-today-events w-full h-full max-w-md bg-white rounded-3xl shadow-sm ring-1 ring-gray-200 overflow-hidden relative">
     <div class="flex items-center justify-between px-7 pt-6">
         <div class="flex items-center gap-2">
             <span class="text-[13px] font-medium text-[#58595B]">Today's Events</span>
@@ -16,14 +16,13 @@
             <div class="swiper-slide">
                 <div class="relative h-[240px] flex flex-col items-center justify-center">
                     <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <div class="w-[200px] h-[200px] rounded-full bg-gradient-to-b from-secondary-soft to-transparent"></div>
                     </div>
 
                     <span class="confetti-anchor relative inline-flex">
                         <img
                             src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=320&auto=format&fit=crop"
                             alt="Layla Thompson"
-                            class="relative z-10 w-16 h-16 rounded-full object-cover">
+                            class="relative z-10 w-18 h-18 rounded-full object-cover">
                     </span>
 
                     <div class="mt-2 z-10 text-center">
@@ -44,14 +43,13 @@
             <div class="swiper-slide">
                 <div class="relative h-[240px] flex flex-col items-center justify-center">
                     <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <div class="w-[200px] h-[200px] rounded-full bg-gradient-to-b from-blue-100 to-transparent"></div>
                     </div>
 
                     <span class="confetti-anchor relative inline-flex">
                         <img
                             src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=320&q=80"
                             alt="Daniel Ortiz"
-                            class="relative z-10 w-16 h-16 rounded-full object-cover">
+                            class="relative z-10 w-18 h-18 rounded-full object-cover">
 
                     </span>
 
@@ -73,14 +71,13 @@
             <div class="swiper-slide">
                 <div class="relative h-[240px] flex flex-col items-center justify-center">
                     <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <div class="w-[200px] h-[200px] rounded-full bg-gradient-to-b from-violet-100 to-transparent"></div>
                     </div>
 
                     <span class="confetti-anchor relative inline-flex">
             <img
                 src="https://static.addiyar.com/storage/attachments/2069/prmwanes_628145_large.jpg"
                 alt="Saint Celebration"
-                class="relative z-10 w-16 h-16 rounded-full object-cover">
+                class="relative z-10 w-18 h-18 rounded-full object-cover">
         </span>
 
                     <div class="mt-2 z-10 text-center">

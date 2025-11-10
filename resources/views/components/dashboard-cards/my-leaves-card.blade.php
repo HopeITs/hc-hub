@@ -1,4 +1,4 @@
-<div class="max-w-full h-full bg-white rounded-xl shadow-sm border p-2 border-gray-200 py-6 px-8 flex flex-col justify-between space-y-4">
+<div class="max-w-full h-full bg-white rounded-3xl shadow-sm border p-2 border-gray-200 py-6 px-8 flex flex-col justify-between space-y-4">
 
     <div class="flex justify-between items-center">
         <h3 class="text-base font-semibold text-gray-600">

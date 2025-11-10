@@ -1,4 +1,4 @@
-<div class="w-full h-full max-w-md bg-white rounded-xl shadow-md ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
+<div class="w-full h-full max-w-md bg-white rounded-3xl shadow-sm ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
     <!-- Header -->
     <div class="flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
         <div class="flex items-center gap-2">

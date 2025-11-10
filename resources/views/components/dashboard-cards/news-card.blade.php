@@ -6,7 +6,7 @@
         ->filter(fn($n) => !$n->is_expired);
 @endphp
 
-<div class="relative w-full h-full max-w-md py-6 bg-white rounded-xl shadow-sm flex flex-col overflow-hidden">
+<div class="relative w-full h-full max-w-md py-6 bg-white rounded-3xl shadow-sm flex flex-col overflow-hidden">
     <div class="flex items-center justify-between px-6 pt-5 pb-1 flex-shrink-0">
         <div class="flex items-center gap-2">
             <h2 class="text-lg font-base text-[#58595B]">
