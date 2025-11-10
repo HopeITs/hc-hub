@@ -20,7 +20,7 @@
         </div>
 
         <div>
-            <x-dashboard-cards.department-employees-statistics/>
+            <livewire:dashboard.department-employee-statistics />
         </div>
 
         <div>
