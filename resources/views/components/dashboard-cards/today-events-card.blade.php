@@ -1,75 +1,128 @@
-<div
-    class="relative w-full h-[300px] max-w-xs bg-[var(--color-neutral-50)] rounded-2xl shadow-lg ring-1 ring-[var(--color-primary-500)] overflow-hidden">
-    <div class="absolute inset-0 bg-[url('/images/confetti.svg')] bg-cover bg-center opacity-10 pointer-events-none">
+<div class="js-today-events w-full h-full max-w-md bg-white rounded-3xl shadow-sm ring-1 ring-gray-200 overflow-hidden relative">
+    <div class="flex items-center justify-between px-7 pt-6">
+        <div class="flex items-center gap-2">
+            <span class="text-[13px] font-medium text-[#58595B]">Today's Events</span>
+            <span class="text-[13px] font-light text-secondary-light">6/6/2026</span>
+            <img
+                src="/assets/icons/birthday-cake.svg"
+                alt="Birthday watermark icon"
+                class="w-5 h-5 select-none">
+        </div>
     </div>
 
-    <div
-        class="relative px-4 py-5 border-b border-[var(--color-primary)] flex items-center justify-between bg-[var(--color-primary)]">
-        <span class="text-xl animate-bounce">📅</span>
-        <h2 class="text-lg font-bold text-[var(--color-white)] tracking-tight">Today’s Events</h2>
-        <span class="text-[10px] text-[var(--color-neutral-100)] font-medium">{{ now()->format('d M Y') }}</span>
-    </div>
+    <div class="swiper">
+        <div class="swiper-wrapper">
 
-    <div
-        class="relative p-4 space-y-3 overflow-y-auto bg-[var(--color-neutral-50)] scroll-smooth max-h-[220px] scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-primary-400)]">
-        @forelse($todayEvents as $event)
-            @if ($event->event_type === 'birthday')
-                <div
-                    class="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1 border border-[var(--color-primary-100)]">
-                    <div class="relative">
-                        <img src="{{ $event->getFirstMediaUrl('avatar') ?: 'https://ui-avatars.com/api/?name=' . urlencode($event->name_en ?? ($event->name_ar ?? 'Employee')) }}"
-                            alt="{{ $event->name_en ?? $event->name_ar }}"
-                            class="h-12 w-12 rounded-full object-cover ring-2 ring-[var(--color-primary-500)] shadow-sm">
+            <div class="swiper-slide">
+                <div class="relative h-[240px] flex flex-col items-center justify-center">
+                    <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
                     </div>
 
-                    <div class="flex-1">
-                        <p class="text-sm font-bold text-[var(--color-neutral-800)] leading-tight">
-                            {{ $event->name_en ?? $event->name_ar }}
-                        </p>
-                        @if ($event->positionTitle || $event->departmentName)
-                            <p class="text-[11px] text-[var(--color-neutral-500)]">
-                                {{ $event->positionTitle ?? '' }}
-                                @if ($event->departmentName)
-                                    <span class="text-[var(--color-neutral-400)]"> · {{ $event->departmentName }}</span>
-                                @endif
-                            </p>
-                        @endif
-                        <p class="text-sm text-[var(--color-primary-600)] font-semibold mt-0.5">
-                            {{ $event->event_title }} 🎉
-                        </p>
+                    <span class="confetti-anchor relative inline-flex">
+                        <img
+                            src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?q=80&w=320&auto=format&fit=crop"
+                            alt="Layla Thompson"
+                            class="relative z-10 w-18 h-18 rounded-full object-cover">
+                    </span>
+
+                    <div class="mt-2 z-10 text-center">
+                        <p class="font-semibold text-[14px] text-[#58595B]">Layla Thompson</p>
+                        <p class="text-[9.5px] tracking-wider font-light text-[#58595B]">Marketing Specialist</p>
+                        <p class="text-[9px] text-gray-400 mt-1">Happy Birthday! 🎉</p>
+                    </div>
+
+                    <div class="pointer-events-none absolute right-0 -bottom-2 opacity-10">
+                        <img
+                            src="/assets/icons/birthday-cake.svg"
+                            alt="Birthday watermark icon"
+                            class="w-20 h-20 select-none">
                     </div>
                 </div>
-            @elseif ($event->event_type === 'news')
-                <div
-                    class="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1 border border-[var(--color-primary-100)]">
-                    <div class="relative">
-                        <img src="{{ $event->image_url }}" alt="{{ $event->event_title }}"
-                            class="h-12 w-12 rounded-full object-cover ring-2 ring-[var(--color-primary-500)] shadow-sm">
-                    </div>
-
-                    <div class="flex-1">
-                        <p class="text-sm font-bold text-[var(--color-neutral-800)] leading-tight">
-                            {{ $event->event_title }}
-                        </p>
-                        <p class="text-[11px] text-[var(--color-neutral-500)] mt-0.5 line-clamp-2">
-                            {{ $event->event_description }}
-                        </p>
-                        <p class="text-[10px] text-[var(--color-primary-600)] font-semibold mt-0.5">
-                            News Post
-                        </p>
-                    </div>
-                </div>
-            @endif
-        @empty
-            <div class="flex flex-col items-center justify-center text-[var(--color-neutral-500)] text-sm py-8">
-                <div class="text-3xl mb-1">🥳</div>
-                <p class="font-medium">No events today</p>
             </div>
-        @endforelse
-    </div>
 
-    <div class="absolute bottom-0 left-0 w-full bg-[var(--color-primary-500)] text-center py-1.5">
-        <p class="text-[10px] font-semibold text-white tracking-wide uppercase">Celebrate your team and stay informed!
-        </p>
+            <div class="swiper-slide">
+                <div class="relative h-[240px] flex flex-col items-center justify-center">
+                    <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    </div>
+
+                    <span class="confetti-anchor relative inline-flex">
+                        <img
+                            src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&w=320&q=80"
+                            alt="Daniel Ortiz"
+                            class="relative z-10 w-18 h-18 rounded-full object-cover">
+
+                    </span>
+
+                    <div class="mt-2 z-10 text-center">
+                        <p class="font-semibold text-[14px] text-[#58595B]">Daniel Ortiz</p>
+                        <p class="text-[9.5px] tracking-wider font-light text-[#58595B]">Project Coordinator</p>
+                        <p class="text-[9px] text-gray-400 mt-1">5-Year Work Anniversary 🎊</p>
+                    </div>
+
+                    <div class="pointer-events-none absolute right-1 -bottom-3 opacity-10">
+                        <img
+                            src="/assets/icons/event.svg"
+                            alt="Event watermark icon"
+                            class="w-20 h-20 select-none">
+                    </div>
+                </div>
+            </div>
+
+            <div class="swiper-slide">
+                <div class="relative h-[240px] flex flex-col items-center justify-center">
+                    <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    </div>
+
+                    <span class="confetti-anchor relative inline-flex">
+            <img
+                src="https://static.addiyar.com/storage/attachments/2069/prmwanes_628145_large.jpg"
+                alt="Saint Celebration"
+                class="relative z-10 w-18 h-18 rounded-full object-cover">
+        </span>
+
+                    <div class="mt-2 z-10 text-center">
+                        <p class="font-semibold text-[14px] text-[#58595B]">Feast of St. Maron</p>
+                        <p class="text-[9.5px] tracking-wider font-light text-[#58595B]">Community Chapel – 10 AM</p>
+                        <p class="text-[9px] text-gray-400 mt-1">Saint’s Day Celebration ✨</p>
+                    </div>
+
+                    <div class="pointer-events-none absolute right-1 -bottom-3 opacity-10">
+                        <img
+                            src="/assets/icons/event.svg"
+                            alt="Saint Day watermark icon"
+                            class="w-20 h-20 select-none">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="swiper-pagination !bottom-5"></div>
     </div>
 </div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        new Swiper(".js-today-events .swiper", {
+            slidesPerView: 1,
+            loop: true,
+            autoplay: { delay: 4500, disableOnInteraction: false },
+            pagination: { el: ".js-today-events .swiper-pagination", clickable: true },
+        });
+    });
+</script>
+
+<style>
+    .js-today-events .swiper-pagination-bullet {
+        width: 6px;
+        height: 6px;
+        background: #d1d5db;
+        opacity: 1;
+    }
+    .js-today-events .swiper-pagination-bullet-active {
+        background: #6b7280;
+    }
+</style>
