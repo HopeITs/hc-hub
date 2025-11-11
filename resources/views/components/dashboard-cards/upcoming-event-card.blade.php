@@ -1,3 +1,4 @@
+@props(['upcomingEvents'])
 <div
     class="relative w-full max-w-sm h-[340px] bg-[var(--color-neutral-50)] rounded-3xl shadow-lg ring-1 ring-[var(--color-primary-400)] overflow-hidden">
 

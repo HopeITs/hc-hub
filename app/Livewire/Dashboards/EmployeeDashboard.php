@@ -294,7 +294,7 @@ class EmployeeDashboard extends Component
             'joinedOn' => $this->joinedOn,
             'workEmail' => $this->workEmail,
             'todayEvents' => $this->todayEvents,
-            'upcomingEvents' => $this->upcomingEvents,
+            'upcomingEvents' => $this->getUpcomingEventsProperty(),
             'deliveredItems' => $this->deliveredItems,
             'myBadges' => $this->myBadges,
             'pendingRequests' => $this->pendingRequests,
