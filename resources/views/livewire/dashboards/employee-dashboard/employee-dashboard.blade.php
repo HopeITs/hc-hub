@@ -19,43 +19,40 @@
 
     <div class="grid grid-cols-3 gap-6">
 
-        <div
-            class=" rounded-xl flex items-center justify-center text-white font-semibold row-span-2 h-full">
-            <x-dashboard-cards.news-card />
+        <div class=" rounded-xl flex items-center justify-center text-white font-semibold row-span-2 h-full">
+            <x-dashboard-cards.news-card/>
         </div>
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.today-events-card
-                :todayBirthdays="$todayEvents"/>
+            <x-dashboard-cards.today-events-card/>
 
         </div>
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-event-card
-                :upcomingEvents="$upcomingEvents"/>
+            <x-dashboard-cards.upcoming-events-card/>
 
         </div>
 
         <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-holidays-card />
+            <x-dashboard-cards.upcoming-holidays-card/>
         </div>
 
         <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-leaves-card />
+            <x-dashboard-cards.upcoming-leaves-card/>
         </div>
     </div>
 
     <div class="grid grid-cols-3 gap-6">
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.pending-requests-card />
+            <x-dashboard-cards.pending-requests-card :pending-requests="$pendingRequests"/>
         </div>
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.checklist-items-card />
+            <x-dashboard-cards.checklist-items-card :delivered-items="$deliveredItems"/>
         </div>
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.my-badges-card />
+            <x-dashboard-cards.my-badges-card :my-badges="$myBadges"/>
         </div>
     </div>
 
