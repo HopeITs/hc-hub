@@ -45,17 +45,20 @@
 
     <div class="grid grid-cols-3 gap-6">
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.pending-requests-card/>
+            <x-dashboard-cards.pending-requests-card
+            :pending-requests="$pendingRequests"/>
 
         </div>
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.checklist-items-card/>
+            <x-dashboard-cards.checklist-items-card
+            :delivered-items="$deliveredItems"/>
 
         </div>
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-           <x-dashboard-cards.my-badges-card/>
+           <x-dashboard-cards.my-badges-card
+           :my-badges="$myBadges"/>
 
         </div>
     </div>
