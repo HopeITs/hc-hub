@@ -1,15 +1,15 @@
 <div class="w-full h-full max-w-md bg-primary rounded-3xl shadow-sm ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
     <!-- Header -->
     <div class="flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
-        <div class="flex items-center gap-2">
+        <div class="flex justify-center items-center gap-3">
             <h3 class="text-sm font-semibold text-white">
-                Upcoming Events
+                Upcoming Holidays
             </h3>
             <span class="text-white text-sm font-medium">
                 10
             </span>
-            <div class="text-white">
-                <x-icons.calendar/>
+            <div class="text-red-500 w-3.5 h-3.5 mb-2 text-sm">
+                <img src="{{ asset('assets/icons/christmas-tree.svg') }}" alt="Notes icon">
             </div>
         </div>
     </div>

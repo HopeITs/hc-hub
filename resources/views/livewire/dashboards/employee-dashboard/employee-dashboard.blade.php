@@ -44,22 +44,19 @@
     </div>
 
     <div class="grid grid-cols-3 gap-6">
-        <div class="bg-secondary-medium rounded-xl flex items-center justify-center text-white font-semibold h-60">
-{{--            <x-dashboard-cards.pending-requests-card--}}
-{{--                :pendingRequests="$pendingRequests"/>--}}
-        9
+        <div class="h-70 flex items-center justify-center text-white font-semibold">
+            <x-dashboard-cards.pending-requests-card/>
+
         </div>
 
-        <div class="bg-secondary-dark rounded-xl flex items-center justify-center text-white font-semibold h-60">
-{{--            <x-dashboard-cards.checklist-items-card--}}
-{{--            :deliveredItems="$deliveredItems"/>--}}
-        10
+        <div class="h-70 flex items-center justify-center text-white font-semibold">
+            <x-dashboard-cards.checklist-items-card/>
+
         </div>
 
-        <div class="bg-secondary-light rounded-xl flex items-center justify-center text-white font-semibold h-60">
-{{--            <x-dashboard-cards.my-badges-card--}}
-{{--                :myBadges="$myBadges"/>--}}
-        11
+        <div class="h-70 flex items-center justify-center text-white font-semibold">
+           <x-dashboard-cards.my-badges-card/>
+
         </div>
     </div>
 

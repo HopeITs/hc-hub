@@ -1,41 +1,55 @@
-@php
-    $locale = app()->getLocale();
-    $nameCol = "name_{$locale}";
-@endphp
-
-<div class="w-full bg-[var(--color-neutral-50)] rounded-3xl shadow-md overflow-hidden border border-[var(--color-neutral-200)]">
-    <div class="px-6 py-4 flex items-center justify-between"
-         style="background: var(--color-primary); color: var(--color-white);">
-        <h2 class="text-xl font-bold tracking-wide">{{ __('Personal Inventory') }}</h2>
-        <span class="text-sm opacity-90">{{ $deliveredItems->count() }} {{ __('items') }}</span>
+<div class="w-full h-full max-w-md bg-white rounded-3xl shadow-sm  overflow-hidden flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 pt-5 pb-10 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <h3 class="text-sm font-semibold text-[#58595B]">
+                Personal Inventory
+            </h3>
+            <span class="text-secondary-light text-sm font-medium">
+                5
+            </span>
+            <div class="text-red-500 w-3.5 h-3.5 text-sm">
+                <img src="{{ asset('assets/icons/personal-inventory.svg') }}" alt="Notes icon">
+            </div>
+        </div>
     </div>
 
-    <div class="divide-y divide-[var(--color-neutral-200)]">
-        @forelse ($deliveredItems as $item)
-            <div class="flex items-center justify-between px-6 py-4 hover:bg-[var(--color-neutral-100)] transition-colors duration-200">
-                <div class="flex flex-col">
-                    <span class="text-[var(--color-neutral-800)] font-semibold text-base">
-                        {{ $item->item?->name ?? 'Item #'.$item->item_id }}
-                    </span>
-
-                    <span class="text-sm text-[var(--color-neutral-500)]">
-                        {{ __('Delivered by') }}
-                        <strong class="text-[var(--color-neutral-700)]">
-                            {{ $item->delivered?->$nameCol ?? __('Unknown') }}
-                        </strong>
-                    </span>
-                </div>
-
-                <div class="text-right">
-                    <span class="text-sm text-[var(--color-neutral-600)]">
-                        {{ optional($item->delivered_at)->format('d M Y, h:i A') }}
-                    </span>
-                </div>
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto px-6 space-y-2 scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-primary-400)]">
+        <!-- Leave Item -->
+        <div class="pb-2 border-b border-b-secondary-light">
+            <div class="flex justify-between items-center">
+                <p class="text-[11px] font-bold text-[#58595B]">ID Paper</p>
+                <span class="text-[9px] h-2 w-15 font-normal tracking-wide pb-1 text-center text-[#58595B]  px-1 ">20/12/2026</span>
             </div>
-        @empty
-            <div class="text-center py-10 text-[var(--color-neutral-400)] text-sm">
-                {{ __('No delivered items found.') }}
+        </div>
+
+        <div class="pb-2 border-b border-b-secondary-light">
+            <div class="flex justify-between items-center">
+                <p class="text-[11px] font-bold text-[#58595B]">Email</p>
+                <span class="text-[9px] h-2 w-15 font-normal tracking-wide pb-1 text-center text-[#58595B]  px-1 ">20/12/2026</span>
             </div>
-        @endforelse
+        </div>
+
+        <div class="pb-2 border-b border-b-secondary-light">
+            <div class="flex justify-between items-center">
+                <p class="text-[11px] font-bold text-[#58595B]">Email Signature</p>
+                <span class="text-[9px] h-2 w-15 font-normal tracking-wide pb-1 text-center text-[#58595B]  px-1 ">20/12/2026</span>
+            </div>
+        </div>
+
+        <div class="pb-2 border-b border-b-secondary-light">
+            <div class="flex justify-between items-center">
+                <p class="text-[11px] font-bold text-[#58595B]">Laptop</p>
+                <span class="text-[9px] h-2 w-15 font-normal tracking-wide pb-1 text-center text-[#58595B] px-1 ">20/12/2026</span>
+            </div>
+        </div>
+
+        <div class="pb-2 border-b border-b-secondary-light">
+            <div class="flex justify-between items-center">
+                <p class="text-[11px] font-bold text-[#58595B]">Hard Disk</p>
+                <span class="text-[9px] h-2 w-15 font-normal tracking-wide pb-1 text-center text-[#58595B]  px-1 ">20/12/2026</span>
+            </div>
+        </div>
     </div>
 </div>

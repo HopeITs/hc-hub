@@ -8,10 +8,8 @@
             <span class="text-secondary-light text-sm font-medium">
                 4
             </span>
-            <div class="flex items-center justify-center w-7 h-7 rounded-md  text-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
-                    <path fill-rule="evenodd" d="M5.25 3A2.25 2.25 0 003 5.25v13.5A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V5.25A2.25 2.25 0 0018.75 3H5.25zM6 6h12v1.5H6V6zm0 3h12v1.5H6V9zm0 3h7.5v1.5H6V12zm0 3h7.5v1.5H6V15z" clip-rule="evenodd" />
-                </svg>
+            <div class="text-red-500 w-4 h-4 text-sm">
+                <img src="{{ asset('assets/icons/upcoming-leaves.svg') }}" alt="Notes icon">
             </div>
         </div>
     </div>

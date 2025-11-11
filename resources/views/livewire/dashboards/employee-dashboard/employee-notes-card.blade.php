@@ -10,8 +10,8 @@
                     <span class="text-sm font-medium text-secondary-light px-2 py-0.5 rounded-full">
                         {{ $this->notes->count() }}
                     </span>
-                    <div class="text-red-500 text-sm">
-                        <x-icons.check-circle/>
+                    <div class="text-red-500 w-3.5 h-3.5 text-sm">
+                        <img src="{{ asset('assets/icons/notes.svg') }}" alt="Notes icon">
                     </div>
                 </div>
 
