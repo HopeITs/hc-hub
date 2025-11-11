@@ -12,15 +12,15 @@
     <div class="grid grid-cols-3 gap-4 px-6 py-5 bg-[var(--color-neutral-50)]">
         <div class="flex flex-col items-center justify-center rounded-xl bg-white shadow-sm p-3 border border-[var(--color-neutral-200)]">
             <p class="text-xs uppercase tracking-wide text-[var(--color-neutral-600)]">New</p>
-            <p class="text-2xl font-bold text-[var(--color-primary-500)] mt-1">+32</p>
+            <p id="stat-new" class="text-2xl font-bold text-[var(--color-primary-500)] mt-1">0</p>
         </div>
         <div class="flex flex-col items-center justify-center rounded-xl bg-white shadow-sm p-3 border border-[var(--color-neutral-200)]">
             <p class="text-xs uppercase tracking-wide text-[var(--color-neutral-600)]">Ended</p>
-            <p class="text-2xl font-bold text-[var(--color-secondary-medium)] mt-1">12</p>
+            <p id="stat-ended" class="text-2xl font-bold text-[var(--color-secondary-medium)] mt-1">0</p>
         </div>
         <div class="flex flex-col items-center justify-center rounded-xl bg-white shadow-sm p-3 border border-[var(--color-neutral-200)]">
             <p class="text-xs uppercase tracking-wide text-[var(--color-neutral-600)]">Terminated</p>
-            <p class="text-2xl font-bold text-neutral-300 mt-1">5</p>
+            <p id="stat-terminated" class="text-2xl font-bold text-neutral-300 mt-1">0</p>
         </div>
     </div>
 
@@ -29,8 +29,9 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
         const el = document.getElementById("employeeChart");
         const select = document.querySelector("select");
         if (!el) return;
@@ -58,35 +59,25 @@
         gradientNeutral.addColorStop(0, `${neutral}60`);
         gradientNeutral.addColorStop(1, `${neutral}00`);
 
-        const datasets = {
-            monthly: {
-                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-                new: [12, 18, 22, 30, 28, 35],
-                ended: [5, 7, 6, 9, 10, 12],
-                terminated: [1, 3, 2, 4, 3, 5]
-            },
-            quarterly: {
-                labels: ["Q1", "Q2", "Q3", "Q4"],
-                new: [52, 68, 75, 80],
-                ended: [18, 22, 25, 28],
-                terminated: [6, 8, 7, 9]
-            },
-            yearly: {
-                labels: ["2021", "2022", "2023", "2024", "2025"],
-                new: [180, 200, 240, 260, 290],
-                ended: [60, 75, 80, 90, 100],
-                terminated: [20, 22, 25, 26, 28]
-            }
-        };
+        async function fetchData(mode = "monthly") {
+            const res = await fetch(`/employee-statistics/${mode}`);
+            return res.json();
+        }
+
+        const data = await fetchData("monthly");
+
+        document.getElementById("stat-new").textContent = `+${data.new.at(-1)}`;
+        document.getElementById("stat-ended").textContent = data.ended.at(-1);
+        document.getElementById("stat-terminated").textContent = data.terminated.at(-1);
 
         const chart = new Chart(ctx, {
             type: "line",
             data: {
-                labels: datasets.monthly.labels,
+                labels: data.labels,
                 datasets: [
                     {
                         label: "New Employees",
-                        data: datasets.monthly.new,
+                        data: data.new,
                         borderColor: primary,
                         backgroundColor: gradientPrimary,
                         tension: 0.4,
@@ -98,7 +89,7 @@
                     },
                     {
                         label: "Ended",
-                        data: datasets.monthly.ended,
+                        data: data.ended,
                         borderColor: secondary,
                         backgroundColor: gradientSecondary,
                         tension: 0.4,
@@ -110,7 +101,7 @@
                     },
                     {
                         label: "Terminated",
-                        data: datasets.monthly.terminated,
+                        data: data.terminated,
                         borderColor: neutral,
                         backgroundColor: gradientNeutral,
                         tension: 0.4,
@@ -171,14 +162,18 @@
             }
         });
 
-        select.addEventListener("change", (e) => {
+        select.addEventListener("change", async (e) => {
             const mode = e.target.value.toLowerCase();
-            const data = datasets[mode];
+            const data = await fetchData(mode);
 
             chart.data.labels = data.labels;
             chart.data.datasets[0].data = data.new;
             chart.data.datasets[1].data = data.ended;
             chart.data.datasets[2].data = data.terminated;
+
+            document.getElementById("stat-new").textContent = `+${data.new.at(-1)}`;
+            document.getElementById("stat-ended").textContent = data.ended.at(-1);
+            document.getElementById("stat-terminated").textContent = data.terminated.at(-1);
 
             chart.update();
         });

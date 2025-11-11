@@ -6,7 +6,7 @@
         </div>
 
         <div>
-            <x-dashboard-cards.soon-ending-contracts-card/>
+            <livewire:dashboard.soon-ending-contracts-card />
         </div>
 
         <div>
@@ -20,7 +20,7 @@
         </div>
 
         <div>
-            <x-dashboard-cards.department-employees-statistics/>
+            <livewire:dashboard.department-employee-statistics />
         </div>
 
         <div>
@@ -28,11 +28,11 @@
         </div>
 
         <div>
-            <x-dashboard-cards.contract-type-employees-statistics/>
+            <livewire:dashboard.contract-type-employees-statistics/>
         </div>
 
         <div>
-            <x-dashboard-cards.job-level-employees-statistics/>
+            <livewire:dashboard.job-level-employee-statistics/>
         </div>
 
         <div>
