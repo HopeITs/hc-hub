@@ -8,7 +8,7 @@
         :showButton="true"
     />
 
-    <form class="space-y-4" wire:submit.prevent="save">
+    <x-forms.form-body wire:submit.prevent="save">
         <div class="grid grid-cols-2 gap-4">
             <div class="col-span-2">
                 <x-forms.input-label for="logo">@lang('general.logo')</x-forms.input-label>
@@ -73,5 +73,5 @@
             <x-primary-button :href="route('programs.index')" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
 
         </div>
-    </form>
+    </x-forms.form-body>
 </div>
