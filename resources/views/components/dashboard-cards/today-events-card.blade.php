@@ -10,22 +10,18 @@
         ->get()
         ->filter(fn($e) => optional($e->actual_dob)->format('m-d') === $today->format('m-d'))
         ->map(function ($employee) {
-            $contract = $employee->contracts()
-                ->where('is_active', true)
-                ->whereDate('start_date', '<=', now())
-                ->whereDate('end_date', '>=', now())
-                ->with('position')
-                ->latest()
-                ->first();
+            $contract = $employee->latestActiveContract();
 
-            $position = $contract?->position?->name ?? '';
+            $positionTitle = $contract?->position?->title ?? '';
+            $departmentName = $contract?->position?->department?->name ?? '';
 
             $photo = $employee->getFirstMediaUrl('avatar') ?: 'https://ui-avatars.com/api/?name=' . urlencode($employee->name) . '&color=be1f24&background=FFF';
 
             return [
                 'type' => 'birthday',
                 'name' => $employee->name,
-                'position' => $position,
+                'position' => $positionTitle,
+                'department' => $departmentName,
                 'message' => 'Happy Birthday! 🎉',
                 'photo' => $photo,
             ];
@@ -40,6 +36,7 @@
                 'type' => 'event',
                 'name' => $news->title,
                 'position' => $news->newsable_name ?? '',
+                'department' => '',
                 'message' => strip_tags($news->description ?? 'Event Today'),
                 'photo' => $photo,
             ];
@@ -73,9 +70,13 @@
 
                         <div class="mt-2 z-10 text-center">
                             <p class="font-semibold text-[14px] text-[#58595B]">{{ $event['name'] }}</p>
-                            @if(!empty($event['position']))
-                                <p class="text-[9.5px] tracking-wider font-light text-[#58595B]">{{ $event['position'] }}</p>
+
+                            @if(!empty($event['position']) || !empty($event['department']))
+                                <p class="text-[9.5px] tracking-wider font-light text-[#58595B]">
+                                    {{ trim($event['position'] . (!empty($event['department']) ? ' • ' . $event['department'] : '')) }}
+                                </p>
                             @endif
+
                             <p class="text-[9px] text-gray-400 mt-1">{{ $event['message'] }}</p>
                         </div>
 
