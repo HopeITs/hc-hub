@@ -143,6 +143,7 @@ return [
     'skills-and-interests' => 'Skills & Interests',
     'courses' => 'Courses',
     'issuing-organization' => 'Issuing Organization',
+    'and' => ':attr1 & :attr2',
     'date' => 'Date',
     'approved' => 'Approved',
     'not-approved' => 'Not Approved',

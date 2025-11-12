@@ -62,6 +62,7 @@ return [
     'allowed-gender' => 'الجنس المسموح به',
     'marital-status' => 'الحالة الاجتماعية',
     'any' => 'أي',
+    'and' => ':attr1 و :attr2',
     'attachment' => 'المرفق',
     'male' => 'ذكر',
     'female' => 'أنثى',

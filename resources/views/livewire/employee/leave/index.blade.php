@@ -5,12 +5,12 @@ use App\Enums\LeaveRequestStatus;
 <div>
     <div class="flex justify-between items-center mb-6">
         <livewire:layout.breadcrumbs
-            :title="__('general.my-leaves')"
-            :crumbs="[
+                :title="__('general.my-leaves')"
+                :crumbs="[
                 ['label' => __('general.holidays-and-leaves')],
 
             ]"
-            :showButton="true"
+                :showButton="true"
         />
 
         <div>
@@ -20,41 +20,49 @@ use App\Enums\LeaveRequestStatus;
         </div>
 
     </div>
-<x-leave-card/>
+
     @isset($availableLeaves)
-        <div class="grid grid-cols-{{$availableLeaves->count()}} gap-4 mb-6">
+        <div class="flex gap-4 mb-6">
             @foreach($availableLeaves as $availableLeave)
-                <div class="flex flex-col gap-2 rounded-2xl shadow-md p-4">
-                    <h3 class="font-bold text-xl text-secondary-dark">{{$availableLeave->leaveType->name}}</h3>
+                <x-leave-card :title="$availableLeave->leaveType->name"
+                              :total="$availableLeave->deserved_formatted"
+                              :remaining="$availableLeave->remaining"
+                              :total-days="$availableLeave->intTotal"
+                              :remaining-days="$availableLeave->intRemaining"
+                              :is-annual="$availableLeave->isAnnual()"
 
-                    <span class=" flex justify-between px-2 py-1 text-secondary-dark"><span
-                            class="font-semibold text-secondary-medium text-secondary-dark me-2">Total:</span>{{$availableLeave->deserved_formatted}}</span>
-                    <span class="rounded-lg px-2 py-1 bg-gray-200 text-secondary-dark flex justify-between"><span
-                            class="font-semibold text-secondary-medium me-2">Remaining:</span>{{ $availableLeave->remaining}}</span>
+                />
+{{--                <div class="flex flex-col gap-2 rounded-2xl shadow-md p-4">--}}
+{{--                    <h3 class="font-bold text-xl text-secondary-dark">{{$availableLeave->leaveType->name}}</h3>--}}
 
-                    <div class="flex justify-between">
-                        <div class="rounded-md px-2 py-1 bg-purple-100 text-purple flex justify-between">
-                            <span class="font-semibold text-purple me-2">
-                                 <x-icons.clock class="text-purple"/>
-                            </span>
-                            <span>{{ $availableLeave->pending_requests_count}}</span>
-                        </div>
-                        <div class="rounded-md px-2 py-1 bg-green-100 text-green flex justify-between">
-                            <span class="font-semibold text-green me-2">
-                                  <x-icons.check-circle class="text-green"/>
-                            </span>
-                            <span>{{ $availableLeave->approved_requests_count}}</span>
-                        </div>
-                        <div class="rounded-md px-2 py-1 bg-red-100 text-red flex justify-between">
-                            <span class="font-semibold text-red me-2">
-                                   <x-icons.close-circle class="!text-red bg-red"/>
-                            </span>
-                            <span>{{ $availableLeave->rejected_requests_count}}</span>
-                        </div>
-                    </div>
+{{--                    <span class=" flex justify-between px-2 py-1 text-secondary-dark"><span--}}
+{{--                                class="font-semibold text-secondary-medium text-secondary-dark me-2">Total:</span>{{$availableLeave->deserved_formatted}}</span>--}}
+{{--                    <span class="rounded-lg px-2 py-1 bg-gray-200 text-secondary-dark flex justify-between"><span--}}
+{{--                                class="font-semibold text-secondary-medium me-2">Remaining:</span>{{ $availableLeave->remaining}}</span>--}}
+
+{{--                    <div class="flex justify-between">--}}
+{{--                        <div class="rounded-md px-2 py-1 bg-purple-100 text-purple flex justify-between">--}}
+{{--                            <span class="font-semibold text-purple me-2">--}}
+{{--                                 <x-icons.clock class="text-purple"/>--}}
+{{--                            </span>--}}
+{{--                            <span>{{ $availableLeave->pending_requests_count}}</span>--}}
+{{--                        </div>--}}
+{{--                        <div class="rounded-md px-2 py-1 bg-green-100 text-green flex justify-between">--}}
+{{--                            <span class="font-semibold text-green me-2">--}}
+{{--                                  <x-icons.check-circle class="text-green"/>--}}
+{{--                            </span>--}}
+{{--                            <span>{{ $availableLeave->approved_requests_count}}</span>--}}
+{{--                        </div>--}}
+{{--                        <div class="rounded-md px-2 py-1 bg-red-100 text-red flex justify-between">--}}
+{{--                            <span class="font-semibold text-red me-2">--}}
+{{--                                   <x-icons.close-circle class="!text-red bg-red"/>--}}
+{{--                            </span>--}}
+{{--                            <span>{{ $availableLeave->rejected_requests_count}}</span>--}}
+{{--                        </div>--}}
+{{--                    </div>--}}
 
 
-                </div>
+{{--                </div>--}}
             @endforeach
         </div>
     @else
@@ -66,24 +74,25 @@ use App\Enums\LeaveRequestStatus;
 
     <x-tabs-list>
         <x-tabs-list-item
-            :active="$statusFilter === 'all'" active-tab="all">
+                :active="$statusFilter === 'all'" active-tab="all">
             All ({{ $counts['all'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
-            :active="$statusFilter === (string) LeaveRequestStatus::Pending" :active-tab="LeaveRequestStatus::Pending">
+                :active="$statusFilter === (string) LeaveRequestStatus::Pending"
+                :active-tab="LeaveRequestStatus::Pending">
             Pending ({{ $counts['pending'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
-            :active="$statusFilter === (string) LeaveRequestStatus::Accepted"
-            :active-tab="LeaveRequestStatus::Accepted">
+                :active="$statusFilter === (string) LeaveRequestStatus::Accepted"
+                :active-tab="LeaveRequestStatus::Accepted">
             Accepted ({{ $counts['accepted'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
-            :active="$statusFilter === (string) LeaveRequestStatus::Rejected"
-            :active-tab="LeaveRequestStatus::Rejected">
+                :active="$statusFilter === (string) LeaveRequestStatus::Rejected"
+                :active-tab="LeaveRequestStatus::Rejected">
             Rejected ({{ $counts['rejected'] ?? 0 }}){{$statusFilter === LeaveRequestStatus::Rejected}}
         </x-tabs-list-item>
     </x-tabs-list>
@@ -104,7 +113,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
                     <x-forms.select-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                         <option
-                            class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                                class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                             Select Any..
                         </option>
                         @foreach($allAvailableLeaves ?? [] as $availableLeave)
@@ -117,7 +126,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-forms.input-label for="city">{{__('general.alternative_employee')}}</x-forms.input-label>
                     <x-forms.select-input wire:model="form.alternative_employee" id="alternative_employee">
                         <option
-                            class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                                class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                             Select Any..
                         </option>
                         @foreach($alternativeEmployees as $alternativeEmployee)
@@ -175,14 +184,17 @@ use App\Enums\LeaveRequestStatus;
                         </div>
 
                         <div>
-                            <x-forms.input-label for="start_time">{{__('general.start-time')}} (24)</x-forms.input-label>
-                            <x-forms.date-input id="start_time" type="time" min="09:00" max="21:00" wire:model.live="form.start_hour"
+                            <x-forms.input-label for="start_time">{{__('general.start-time')}}(24)
+                            </x-forms.input-label>
+                            <x-forms.date-input id="start_time" type="time" min="09:00" max="21:00"
+                                                wire:model.live="form.start_hour"
                                                 label="Start Hour"/>
                             <x-error-span>{{ $errors->first('form.start_hour') }}</x-error-span>
                         </div>
                         <div>
                             <x-forms.input-label for="end_time">{{__('general.end-time')}}(24)</x-forms.input-label>
-                            <x-forms.date-input type="time" id="end_time"  min="09:00" max="21:00" wire:model.live="form.end_hour"
+                            <x-forms.date-input type="time" id="end_time" min="09:00" max="21:00"
+                                                wire:model.live="form.end_hour"
                                                 label="End Time"/>
                             <x-error-span>{{ $errors->first('form.end_hour') }}</x-error-span>
                         </div>

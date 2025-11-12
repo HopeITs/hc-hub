@@ -20,8 +20,17 @@ class LeaveBalance extends Model
 
     public function contract(): BelongsTo
     {
-        return $this->belongsTo(Contract::class,'contract_id');
+        return $this->belongsTo(Contract::class, 'contract_id');
     }
+    public function getIntTotalAttribute(): int
+    {
+        $hours = $this->deserved;
+        $workDaysCountForWeek = $this->contract->weekly_hours / 5;
+        $days = intdiv($hours, $workDaysCountForWeek);
+
+        return round($days);
+    }
+
     public function getDeservedFormattedAttribute(): string
     {
         $hours = $this->deserved;
@@ -29,10 +38,10 @@ class LeaveBalance extends Model
         $days = intdiv($hours, $workDaysCountForWeek);
         $remaining = $hours % $workDaysCountForWeek;
 
-        $text = $days . " " . trans_choice('general.day',$days) . " ";
+        $text = $days . " " . trans_choice('general.day', $days) . " ";
 
         if ($remaining > 0) {
-            $text .=  $remaining . " " .  trans_choice('general.hour',$remaining);
+            $text .= $remaining . " " . trans_choice('general.hour', $remaining);
         }
 
         return $text;
@@ -70,7 +79,7 @@ class LeaveBalance extends Model
         $sectionsPassed = floor($monthsPassed / $sectionMonths) + 1;
 
         // Cap at total
-        return  round(min($sectionsPassed * $hoursPerSection, $totalHours));
+        return round(min($sectionsPassed * $hoursPerSection, $totalHours));
     }
 
 
@@ -93,25 +102,39 @@ class LeaveBalance extends Model
         return $this->leaveType->id === \App\Enums\LeaveTypeCases::Annual;
     }
 
+    public function getIntRemainingAttribute(): int{
+        $remaining = $this->deserved - $this->used;
+        $workDaysCountForWeek = $this->contract->weekly_hours / 5;
+        $days = intdiv($remaining, $workDaysCountForWeek);
 
-    public function getRemainingAttribute(): string{
+        return round($days);
+    }
+    public function getRemainingAttribute(): string
+    {
         $remaining = $this->deserved - $this->used;
         $workDaysCountForWeek = $this->contract->weekly_hours / 5;
         $days = intdiv($remaining, $workDaysCountForWeek);
         $remaining = $remaining % $workDaysCountForWeek;
-
-        $text = $days . " " . trans_choice('general.day',$days) . " ";
+        $text = '';
+        if ($days > 0) {
+            $text = '<strong class="text-secondary-dark">' . $days . '</strong>' . " " . trans_choice('general.day', $days) . " ";
+        }
+        $result = $text;
 
         if ($remaining > 0) {
-            $text .=  $remaining . " " .  trans_choice('general.hour',$remaining);
+            if ($text !== '')
+                $result = __('general.and', ['attr1' => $text, 'attr2' => '<strong class="text-secondary-dark">' . $remaining . '</strong>' . " " . trans_choice('general.hour', $remaining)]);
+            else
+                $result = '<strong class="text-secondary-dark">' . $remaining . '</strong>'  . " " . trans_choice('general.hour', $remaining);
         }
 
-        return $text;
+        return $result;
 
     }
+
     public function leaveType(): BelongsTo
     {
-        return $this->belongsTo(LeaveType::class,'type_id');
+        return $this->belongsTo(LeaveType::class, 'type_id');
     }
 
 
