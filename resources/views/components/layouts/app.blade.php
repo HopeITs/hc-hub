@@ -41,7 +41,7 @@
                     {{ session('status') }}
                 </div>
             @endif
-            <div class="px-4 py-6 w-11/12  shadow rounded-lg min-h-full">
+            <div class="px-4 py-6 w-11/12  min-h-full">
                 {{ $slot }}
             </div>
         </main>
