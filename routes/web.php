@@ -24,13 +24,13 @@ use App\Livewire\Employee\{EmployeeCreate,
     Leave\MyLeaveRequestModule,
     Leave\MyLeaveRequestTable};
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
-use App\Livewire\ProgramManagement\{Center\CentersModule,
+use App\Livewire\ProgramManagement\{Center\CenterDetails,
+    Center\CentersModule,
     DefaultDeliverable\DefaultDeliverablesModule,
     Program\Create as ProgramCreate,
     Program\Detail as ProgramDetail,
     Program\Index as ProgramIndex,
-    Program\Update as ProgramUpdate
-};
+    Program\Update as ProgramUpdate};
 use App\Livewire\Settings\{Appearance, Password, Profile};
 use App\Livewire\ChecklistItems\{PendingItems, AllItems, PendingReturns, DoneRequests};
 use Illuminate\Support\Facades\Route;
@@ -86,6 +86,9 @@ Route::group(
                     Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
                     Route::get('/{program:slug}', ProgramDetail::class)->name('show');
                 });
+
+            Route::get('/program-management/centers/{center}', CenterDetails::class)
+                ->name('centers.show');
 
             Route::prefix('employees')
                 ->name('employees.')

@@ -1,0 +1,174 @@
+<div class="relative isolate">
+    <!-- Background visuals (solid colors only) -->
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+        <div class="absolute -top-24 -left-32 h-72 w-72 rounded-full blur-3xl bg-primary-100 dark:bg-primary-200/20"></div>
+        <div class="absolute -bottom-32 -right-24 h-80 w-80 rounded-full blur-3xl bg-neutral-100 dark:bg-neutral-800/20"></div>
+    </div>
+
+    <div class="space-y-10">
+        {{-- Header / Hero --}}
+        <div class="grid gap-6 md:grid-cols-[1fr_auto] items-start">
+            <div class="relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-xl">
+                <div class="absolute inset-0 opacity-50 bg-neutral-100 dark:bg-neutral-800"></div>
+
+                <div class="relative flex flex-col gap-3">
+                    <div class="inline-flex items-center gap-2 self-start rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-300 shadow-sm">
+                        <i class="ti ti-map-pin"></i>
+                        <span>Located in <span class="font-semibold text-neutral-900 dark:text-white">{{ optional($center->city)->name ?? '—' }}</span></span>
+                    </div>
+
+                    <h1 class="text-3xl/tight md:text-4xl/tight font-black tracking-tight text-neutral-900 dark:text-white">
+                        {{ $center->name }}
+                    </h1>
+                    <p class="text-neutral-600 dark:text-neutral-300 max-w-prose">
+                        the main office in charge of Hope Center in Syria.
+                    </p>
+
+                    <div class="mt-2 flex flex-wrap gap-3">
+                        <a href="{{ route('centers.index') }}"
+                           class="group relative inline-flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-5 py-2.5 text-neutral-800 dark:text-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+                            <i class="ti ti-arrow-left text-lg"></i>
+                            <span class="font-semibold">Back to Centers</span>
+                        </a>
+
+                        <a href="{{ route('positions.index', ['center' => $center->id]) }}"
+                           class="group relative inline-flex items-center gap-2 rounded-xl px-5 py-2.5 bg-primary-500 text-white hover:bg-primary-600 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0">
+                            <i class="ti ti-briefcase z-10 text-lg"></i>
+                            <span class="z-10 font-semibold">View Positions</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick metrics card -->
+            <div class="relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-xl">
+                <div class="absolute inset-0 opacity-40 bg-neutral-100 dark:bg-neutral-800"></div>
+                <div class="relative grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Total Employees</p>
+                        <p class="mt-1 text-2xl font-extrabold text-neutral-900 dark:text-white">
+                            {{ $totalEmployees ?? collect($programData)->sum('count') }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Programs</p>
+                        <p class="mt-1 text-2xl font-extrabold text-neutral-900 dark:text-white">
+                            {{ is_countable($programData) ? count($programData) : 0 }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tabs / Segmented control --}}
+        <div class="relative">
+            <div class="inline-flex rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-1 shadow-lg">
+                <button
+                    wire:click="switchTab('contracts')"
+                    class="ui-tab group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 {{ $activeTab === 'contracts' ? 'bg-primary-500 text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
+                    <i class="ti ti-category-2 z-10"></i>
+                    <span class="z-10">By Contract Type</span>
+                </button>
+                <button
+                    wire:click="switchTab('programs')"
+                    class="ui-tab group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 {{ $activeTab === 'programs' ? 'bg-primary-500 text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
+                    <i class="ti ti-layout-grid z-10"></i>
+                    <span class="z-10">By Program</span>
+                </button>
+            </div>
+        </div>
+
+        {{-- Tab Content --}}
+        <div class="pt-2">
+            @if ($activeTab === 'contracts')
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7">
+                    @foreach ($contractData as $type => $categories)
+                        @php $__total = array_sum($categories); @endphp
+                        <div class="group relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                            <div class="relative flex items-center justify-between gap-4">
+                                <h3 class="text-lg font-bold capitalize text-neutral-900 dark:text-white">{{ $type }}</h3>
+                                <span class="inline-flex items-center gap-1 rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1 text-xs font-semibold text-primary-700 dark:text-primary-300">
+                                    <i class="ti ti-users"></i>
+                                    {{ $__total }} total
+                                </span>
+                            </div>
+
+                            <div class="relative mt-5 space-y-3">
+                                @foreach ($categories as $label => $count)
+                                    @php $__pct = $__total ? round(($count / $__total) * 100) : 0; @endphp
+                                    <div class="space-y-1.5">
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-neutral-600 dark:text-neutral-300">{{ $label }}</span>
+                                            <span class="font-semibold text-neutral-900 dark:text-white">{{ $count }}</span>
+                                        </div>
+                                        <div class="h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
+                                            <div class="h-full rounded-full bg-primary-500" style="width: {{ $__pct }}%"></div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <div class="relative mt-6 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
+                                <span>Distribution</span>
+                                <span class="font-medium">100%</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+            @elseif ($activeTab === 'programs')
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7">
+                    @forelse ($programData as $program)
+                        <div class="group relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                            <h3 class="relative text-lg font-extrabold text-neutral-900 dark:text-white">
+                                {{ $program['program'] ?? 'Unassigned Program' }}
+                            </h3>
+
+                            <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Total Employees</p>
+                            <p class="text-3xl font-black tracking-tight text-primary-600 dark:text-primary-400">
+                                {{ $program['count'] }}
+                            </p>
+
+                            <div class="mt-4 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                                <i class="ti ti-sparkles"></i>
+                                <span>Program health snapshot</span>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-span-full">
+                            <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-12 text-center shadow-sm">
+                                <div class="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 dark:bg-neutral-800 shadow">
+                                    <i class="ti ti-info-circle text-2xl text-neutral-500 dark:text-neutral-300"></i>
+                                </div>
+                                <p class="text-lg font-semibold text-neutral-800 dark:text-white">No programs found for this center</p>
+                                <p class="mt-1 text-neutral-600 dark:text-neutral-300">Try assigning employees to programs to populate this view.</p>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
+            @endif
+        </div>
+
+        {{-- Loading state (Livewire) --}}
+        <div wire:loading.delay.class.remove="hidden" class="hidden">
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7">
+                @for ($i = 0; $i < 6; $i++)
+                    <div class="animate-pulse rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow">
+                        <div class="h-6 w-1/3 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+                        <div class="mt-5 space-y-3">
+                            <div class="h-3 w-full rounded bg-neutral-200 dark:bg-neutral-700"></div>
+                            <div class="h-3 w-5/6 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+                            <div class="h-3 w-2/3 rounded bg-neutral-200 dark:bg-neutral-700"></div>
+                        </div>
+                    </div>
+                @endfor
+            </div>
+        </div>
+
+        <style>
+            @media (prefers-reduced-motion: reduce) {
+                .ui-tab, a { transition: none !important; }
+            }
+        </style>
+    </div>
+</div>

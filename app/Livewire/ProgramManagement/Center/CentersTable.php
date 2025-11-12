@@ -92,11 +92,18 @@ class CentersTable extends LivewireTable
 
                 $toggleBtn = Blade::render('<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $isActive . '" :model-id="' . $m->getKey() . '" wire-event="confirmToggleItemStatus" />');
 
+                $viewUrl = route('centers.show', $m->getKey());
+                $viewBtn = Blade::render(
+                    '<a href="' . $viewUrl . '" class="inline-flex text-primary items-center justify-center p-2 text-xl rounded-lg border hover:bg-primary-100 me-2" title="' . e(__('general.view')) . '">
+                               details
+                            </a>'
+                );
+
                 $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openCenterEdit\', { id: ' . $m->getKey() . ' })" />');
 
                 $deleteBtn = Blade::render('<x-table.delete-btn :modelId="' . $m->getKey() . '" />');
 
-                return $toggleBtn . $editBtn . $deleteBtn;
+                return $toggleBtn . $viewBtn . $editBtn . $deleteBtn;
             })->asHtml(),
         ];
     }
