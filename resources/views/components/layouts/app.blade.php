@@ -15,13 +15,13 @@
 
 <body class="antialiased min-h-screen bg-white">
 
-    <livewire:layout.sidebar />
+<livewire:layout.sidebar/>
 
-    <div class="flex flex-col min-h-screen sm:ms-60">
+<div class="flex flex-col min-h-screen sm:ms-60">
 
-        <header class="fixed top-0 w-full bg-gray-100 sm:ms-60 z-10">
-            <div class="px-4 py-3 flex justify-end sm:hidden">
-                <button id="sidebar-toggle" type="button"
+    <header class="fixed top-0 w-full bg-gray-100 sm:ms-60 z-10">
+        <div class="px-4 py-3 flex justify-end sm:hidden">
+            <button id="sidebar-toggle" type="button"
                     class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
                 <span class="sr-only">Open sidebar</span>
                 <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
@@ -31,27 +31,31 @@
                     </path>
                 </svg>
             </button>
-        <livewire:notifications.dropdown />
-            </div>
+            <livewire:notifications.dropdown/>
+        </div>
     </header>
 
-        <main class="pt-20 bg-gray-100 flex-grow flex flex-col items-center">
-            @if (session('status'))
-                <div class="alert alert-success">
-                    {{ session('status') }}
-                </div>
-            @endif
-            <div class="px-4 py-6 w-11/12  min-h-full">
-                {{ $slot }}
+
+    <main class="{{ View::hasSection('greeting') ? '' : 'pt-20 ' }} bg-gray-100 flex-grow flex flex-col items-center">
+
+
+        @if (session('status'))
+            <div class="alert alert-success">
+                {{ session('status') }}
             </div>
-        </main>
+        @endif
+        <div class="px-4 py-6 w-11/12  min-h-full">
+            @yield('greeting')
+            {{ $slot }}
+        </div>
+    </main>
 
-        <footer class="bg-gray-100">
-            <x-layouts.app.footer />
-        </footer>
-    </div>
+    <footer class="bg-gray-100">
+        <x-layouts.app.footer/>
+    </footer>
+</div>
 
-    <div id="sidebar-overlay" class="fixed inset-0 bg-gray-200 opacity-50 z-30 sm:hidden hidden"></div>
+<div id="sidebar-overlay" class="fixed inset-0 bg-gray-200 opacity-50 z-30 sm:hidden hidden"></div>
 
 
 @include('partials.scripts')
@@ -62,10 +66,10 @@
         const toggleButton = document.getElementById('sidebar-toggle');
         const overlay = document.getElementById('sidebar-overlay');
 
-            const toggleSidebar = () => {
-                sidebar?.classList.toggle('translate-x-full');
-                overlay?.classList.toggle('hidden');
-            };
+        const toggleSidebar = () => {
+            sidebar?.classList.toggle('translate-x-full');
+            overlay?.classList.toggle('hidden');
+        };
 
         if (toggleButton && sidebar && overlay) {
             toggleButton.addEventListener('click', toggleSidebar);
@@ -73,7 +77,7 @@
         }
     });
 </script>
-    @stack('scripts')
+@stack('scripts')
 </body>
 
 </html>

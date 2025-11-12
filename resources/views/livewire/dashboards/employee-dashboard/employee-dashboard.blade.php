@@ -1,3 +1,9 @@
+@section('greeting')
+    <div class="flex justify-start py-4">
+        <h1 class="text-secondary-dark font-bold" >{{'Hello, '. auth()->user()->profile->name }}</h1>
+    </div>
+
+@endsection
 <div class="space-y-10">
 
     <div class="grid grid-cols-3 gap-6">
