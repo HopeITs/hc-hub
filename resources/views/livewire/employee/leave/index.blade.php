@@ -20,7 +20,7 @@ use App\Enums\LeaveRequestStatus;
         </div>
 
     </div>
-
+<x-leave-card/>
     @isset($availableLeaves)
         <div class="grid grid-cols-{{$availableLeaves->count()}} gap-4 mb-6">
             @foreach($availableLeaves as $availableLeave)
