@@ -2,47 +2,62 @@
 
     <div class="space-y-10">
         {{-- Header / Hero --}}
-        <div class="grid gap-6 md:grid-cols-[1fr_auto] items-start">
-            <div class="relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-xl">
+        <div class="grid h-45 gap-6 md:grid-cols-[1fr_auto] items-start">
+            <div class="relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-sm">
                 <div class="absolute inset-0 opacity-50 bg-neutral-100 dark:bg-neutral-800"></div>
 
                 <div class="relative flex flex-col gap-3">
                     <div class="flex flex-row w-full ">
-                        <h1 class=" font-black tracking-tight w-2/3 text-neutral-900 dark:text-white">
+                        <h1 class="text-3xl font-black  w-2/3 text-neutral-900 dark:text-white">
                             {{ $center->name }}
                         </h1>
                         <div class=" flex flex-row justify-end items-center h-12 w-1/3  gap-3">
                             <a href="{{ route('centers.index') }}"
-                               class="group relative inline-flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-800 dark:text-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+                               class="group relative inline-flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-800 dark:text-white shadow-sm transition-all duration-300  active:translate-y-0">
                                 <span class="font-semibold text-[12px]">Back</span>
                             </a>
 
                             <a href="{{ route('positions.index', ['center' => $center->id]) }}"
-                               class="group relative flex items-center gap-2 rounded-xl px-3 py-2 bg-primary-500 text-white hover:bg-primary-600 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0">
+                               class="group relative flex items-center gap-2 rounded-xl px-3 py-2 bg-primary-500 text-white hover:bg-primary-600 shadow-lg transition-all duration-300 hover:shadow-xl ">
                                 <span class="z-10 text-[12px] font-semibold">View Positions</span>
                             </a>
                         </div>
                     </div>
 
-                    <p class="text-neutral-600 dark:text-neutral-300 max-w-prose line-clamp-3">
+                    <p class="text-neutral-600 h-18 dark:text-neutral-300 max-w-prose line-clamp-2">
                         <span>Located in <span class="font-semibold text-neutral-900 dark:text-white">{{ optional($center->city)->name ?? '—' }}</span></span>
                         ,And It's the main office in charge of Hope Center in Syria.
                     </p>
+
+
+                    <div class="relative mt-2 -ml-1">
+                        <div class="inline-flex rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-1 shadow-lg">
+                            <button
+                                wire:click="switchTab('contracts')"
+                                class="ui-tab group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300  {{ $activeTab === 'contracts' ? 'bg-primary-500 text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
+                                <span class="z-10">Employees per Contract Type</span>
+                            </button>
+                            <button
+                                wire:click="switchTab('programs')"
+                                class="ui-tab group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 {{ $activeTab === 'programs' ? 'bg-primary-500 text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
+                                <span class="z-10">Employees per Program</span>
+                            </button>
+                        </div>
+                    </div>
 
                 </div>
             </div>
 
             <!-- Quick metrics card -->
-            <div class="relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-xl">
-                <div class="absolute inset-0 opacity-40 bg-neutral-100 dark:bg-neutral-800"></div>
-                <div class="relative grid grid-cols-2 gap-4">
-                    <div>
+            <div class=" w-full h-full  relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-sm">
+                <div class="relative grid grid-rows-2 gap-4">
+                    <div >
                         <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Total Employees</p>
                         <p class="mt-1 text-2xl font-extrabold text-neutral-900 dark:text-white">
                             {{ $totalEmployees ?? collect($programData)->sum('count') }}
                         </p>
                     </div>
-                    <div>
+                    <div >
                         <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Programs</p>
                         <p class="mt-1 text-2xl font-extrabold text-neutral-900 dark:text-white">
                             {{ is_countable($programData) ? count($programData) : 0 }}
@@ -52,26 +67,9 @@
             </div>
         </div>
 
-        {{-- Tabs / Segmented control --}}
-        <div class="relative">
-            <div class="inline-flex rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-1 shadow-lg">
-                <button
-                    wire:click="switchTab('contracts')"
-                    class="ui-tab group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 {{ $activeTab === 'contracts' ? 'bg-primary-500 text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
-                    <i class="ti ti-category-2 z-10"></i>
-                    <span class="z-10">By Contract Type</span>
-                </button>
-                <button
-                    wire:click="switchTab('programs')"
-                    class="ui-tab group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 {{ $activeTab === 'programs' ? 'bg-primary-500 text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
-                    <i class="ti ti-layout-grid z-10"></i>
-                    <span class="z-10">By Program</span>
-                </button>
-            </div>
-        </div>
 
         {{-- Tab Content --}}
-        <div class="pt-2">
+        <div class="pt-14">
             @if ($activeTab === 'contracts')
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7">
                     @foreach ($contractData as $type => $categories)
@@ -117,10 +115,6 @@
                                 {{ $program['count'] }}
                             </p>
 
-                            <div class="mt-4 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-                                <i class="ti ti-sparkles"></i>
-                                <span>Program health snapshot</span>
-                            </div>
                         </div>
                     @empty
                         <div class="col-span-full">
