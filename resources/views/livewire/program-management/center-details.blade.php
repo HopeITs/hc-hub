@@ -1,9 +1,4 @@
 <div class="relative isolate">
-    <!-- Background visuals (solid colors only) -->
-    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
-        <div class="absolute -top-24 -left-32 h-72 w-72 rounded-full blur-3xl bg-primary-100 dark:bg-primary-200/20"></div>
-        <div class="absolute -bottom-32 -right-24 h-80 w-80 rounded-full blur-3xl bg-neutral-100 dark:bg-neutral-800/20"></div>
-    </div>
 
     <div class="space-y-10">
         {{-- Header / Hero --}}
@@ -12,31 +7,28 @@
                 <div class="absolute inset-0 opacity-50 bg-neutral-100 dark:bg-neutral-800"></div>
 
                 <div class="relative flex flex-col gap-3">
-                    <div class="inline-flex items-center gap-2 self-start rounded-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-600 dark:text-neutral-300 shadow-sm">
-                        <i class="ti ti-map-pin"></i>
-                        <span>Located in <span class="font-semibold text-neutral-900 dark:text-white">{{ optional($center->city)->name ?? '—' }}</span></span>
+                    <div class="flex flex-row w-full ">
+                        <h1 class=" font-black tracking-tight w-2/3 text-neutral-900 dark:text-white">
+                            {{ $center->name }}
+                        </h1>
+                        <div class=" flex flex-row justify-end items-center h-12 w-1/3  gap-3">
+                            <a href="{{ route('centers.index') }}"
+                               class="group relative inline-flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-800 dark:text-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+                                <span class="font-semibold text-[12px]">Back</span>
+                            </a>
+
+                            <a href="{{ route('positions.index', ['center' => $center->id]) }}"
+                               class="group relative flex items-center gap-2 rounded-xl px-3 py-2 bg-primary-500 text-white hover:bg-primary-600 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0">
+                                <span class="z-10 text-[12px] font-semibold">View Positions</span>
+                            </a>
+                        </div>
                     </div>
 
-                    <h1 class="text-3xl/tight md:text-4xl/tight font-black tracking-tight text-neutral-900 dark:text-white">
-                        {{ $center->name }}
-                    </h1>
-                    <p class="text-neutral-600 dark:text-neutral-300 max-w-prose">
-                        the main office in charge of Hope Center in Syria.
+                    <p class="text-neutral-600 dark:text-neutral-300 max-w-prose line-clamp-3">
+                        <span>Located in <span class="font-semibold text-neutral-900 dark:text-white">{{ optional($center->city)->name ?? '—' }}</span></span>
+                        ,And It's the main office in charge of Hope Center in Syria.
                     </p>
 
-                    <div class="mt-2 flex flex-wrap gap-3">
-                        <a href="{{ route('centers.index') }}"
-                           class="group relative inline-flex items-center gap-2 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-5 py-2.5 text-neutral-800 dark:text-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
-                            <i class="ti ti-arrow-left text-lg"></i>
-                            <span class="font-semibold">Back to Centers</span>
-                        </a>
-
-                        <a href="{{ route('positions.index', ['center' => $center->id]) }}"
-                           class="group relative inline-flex items-center gap-2 rounded-xl px-5 py-2.5 bg-primary-500 text-white hover:bg-primary-600 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0">
-                            <i class="ti ti-briefcase z-10 text-lg"></i>
-                            <span class="z-10 font-semibold">View Positions</span>
-                        </a>
-                    </div>
                 </div>
             </div>
 

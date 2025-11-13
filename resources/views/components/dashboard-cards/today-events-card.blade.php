@@ -90,10 +90,23 @@
                 </div>
             @empty
                 <div class="swiper-slide">
-                    <div class="h-[240px] flex items-center justify-center text-center text-sm text-gray-400">
-                        No events today
+                    <div class="relative h-[240px] flex items-center justify-center text-center text-sm text-gray-400 overflow-hidden">
+
+                        <!-- Confetti Background -->
+                        <img
+                            autoplay
+                            loop
+                            muted
+                            playsinline
+                            src="/assets/GIF/01-Confetti.gif"
+                            class="absolute inset-0 w-full h-full object-cover pointer-events-none">
+
+                        </img>
+
+
                     </div>
                 </div>
+
             @endforelse
         </div>
 
