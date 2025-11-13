@@ -108,10 +108,6 @@
                                 @endforeach
                             </div>
 
-                            <div class="relative mt-6 flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-                                <span>Distribution</span>
-                                <span class="font-medium">100%</span>
-                            </div>
                         </div>
                     @endforeach
                 </div>

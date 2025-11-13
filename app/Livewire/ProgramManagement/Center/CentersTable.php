@@ -94,8 +94,17 @@ class CentersTable extends LivewireTable
 
                 $viewUrl = route('centers.show', $m->getKey());
                 $viewBtn = Blade::render(
-                    '<a href="' . $viewUrl . '" class="inline-flex text-primary items-center justify-center p-2 text-xl rounded-lg border hover:bg-primary-100 me-2" title="' . e(__('general.view')) . '">
-                               details
+                    '<a href="' . $viewUrl . '"
+                                class="inline-flex items-center justify-center p-2 text-xl rounded-lg  text-black"
+                                title="' . e(__('general.view')) . '">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     fill="none" viewBox="0 0 24 24"
+                                     stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M2.25 12s3.75-7.5 9.75-7.5 9.75 7.5 9.75 7.5-3.75 7.5-9.75 7.5S2.25 12 2.25 12z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
                             </a>'
                 );
 
