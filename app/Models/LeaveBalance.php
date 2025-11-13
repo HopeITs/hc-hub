@@ -22,6 +22,7 @@ class LeaveBalance extends Model
     {
         return $this->belongsTo(Contract::class, 'contract_id');
     }
+
     public function getIntTotalAttribute(): int
     {
         $hours = $this->deserved;
@@ -38,13 +39,17 @@ class LeaveBalance extends Model
         $days = intdiv($hours, $workDaysCountForWeek);
         $remaining = $hours % $workDaysCountForWeek;
 
-        $text = $days . " " . trans_choice('general.day', $days) . " ";
+        return $this->getFormattedLabel($days, $remaining);
+    }
 
-        if ($remaining > 0) {
-            $text .= $remaining . " " . trans_choice('general.hour', $remaining);
-        }
+    public function getUsedFormattedAttribute(): string
+    {
+        $hours = $this->used;
+        $workDaysCountForWeek = $this->contract->weekly_hours / 5;
+        $days = intdiv($hours, $workDaysCountForWeek);
+        $remaining = $hours % $workDaysCountForWeek;
 
-        return $text;
+        return $this->getFormattedLabel($days, $remaining);
     }
 
     public function eligibleAnnualLeaveHours(?Carbon $contractStart = null, ?Carbon $contractEnd = null): int
@@ -102,19 +107,27 @@ class LeaveBalance extends Model
         return $this->leaveType->id === \App\Enums\LeaveTypeCases::Annual;
     }
 
-    public function getIntRemainingAttribute(): int{
+    public function getIntRemainingAttribute(): int
+    {
         $remaining = $this->deserved - $this->used;
         $workDaysCountForWeek = $this->contract->weekly_hours / 5;
         $days = intdiv($remaining, $workDaysCountForWeek);
 
         return round($days);
     }
+
     public function getRemainingAttribute(): string
     {
         $remaining = $this->deserved - $this->used;
         $workDaysCountForWeek = $this->contract->weekly_hours / 5;
         $days = intdiv($remaining, $workDaysCountForWeek);
         $remaining = $remaining % $workDaysCountForWeek;
+        return $this->getFormattedLabel($days, $remaining);
+
+    }
+
+    public function getFormattedLabel($days, $remaining): string
+    {
         $text = '';
         if ($days > 0) {
             $text = '<strong class="text-secondary-dark">' . $days . '</strong>' . " " . trans_choice('general.day', $days) . " ";
@@ -125,11 +138,13 @@ class LeaveBalance extends Model
             if ($text !== '')
                 $result = __('general.and', ['attr1' => $text, 'attr2' => '<strong class="text-secondary-dark">' . $remaining . '</strong>' . " " . trans_choice('general.hour', $remaining)]);
             else
-                $result = '<strong class="text-secondary-dark">' . $remaining . '</strong>'  . " " . trans_choice('general.hour', $remaining);
+                $result = '<strong class="text-secondary-dark">' . $remaining . '</strong>' . " " . trans_choice('general.hour', $remaining);
+        }
+        if($text === ''){
+            $result = '<strong class="text-secondary-dark">0</strong>'. ' ' . trans_choice('general.day', $days);
         }
 
         return $result;
-
     }
 
     public function leaveType(): BelongsTo

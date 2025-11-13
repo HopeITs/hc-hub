@@ -30,6 +30,7 @@ use App\Enums\LeaveRequestStatus;
                               :total-days="$availableLeave->intTotal"
                               :remaining-days="$availableLeave->intRemaining"
                               :is-annual="$availableLeave->isAnnual()"
+                              :used="$availableLeave->used_formatted"
 
                 />
 {{--                <div class="flex flex-col gap-2 rounded-2xl shadow-md p-4">--}}

@@ -195,20 +195,38 @@ class Employee extends Model implements HasMedia
 
     public function availableLeaves()
     {
-        return $this->latestActiveContract()?->leaveBalances()->whereHas('leaveType', function ($query) {
-            return $query->where('base_days', '>', 10);
-        })->withCount([
-            'leaveRequests as pending_requests_count' => function ($query) {
-                $query->where('status', LeaveRequestStatus::Pending);
-            },
-            'leaveRequests as approved_requests_count' => function ($query) {
-                $query->where('status', LeaveRequestStatus::Accepted);
-            },
-            'leaveRequests as rejected_requests_count' => function ($query) {
-                $query->where('status', LeaveRequestStatus::Rejected);
-            },
-        ])->get();
+
+        $leaves = $this->latestActiveContract()?->leaveBalances()
+            ->whereHas('leaveType', fn ($q) => $q->where('base_days', '>', 10))
+            ->with(['leaveRequests' => fn ($q) => $q->pending()
+                ->select('id','leave_balance_id','type','start_at','end_at') // keep it lean
+            ])
+            ->get();
+
+        // Attach sums per balance
+        $leaves->each(function ($balance) {
+            $pendingHours = $balance->leaveRequests
+                ->where('type', 'hour')
+                ->sum(fn ($r) => $r->duration_value);
+
+            $pendingDays = $balance->leaveRequests
+                ->reject(fn ($r) => $r->type === 'hour')
+                ->sum(fn ($r) => $r->duration_value);
+
+            // expose whatever you need on the model instance
+            $balance->pending_requests_hours_sum = $pendingHours;
+            $balance->pending_requests_days_sum  = $pendingDays;
+
+            // OPTIONAL: convert hours to days using your workday length
+            $hoursPerDay = config('hr.workday_hours', 8);
+            $balance->pending_requests_days_equivalent =
+                $pendingDays + ($pendingHours / $hoursPerDay);
+        });
+
+        return $leaves;
     }
+
+
 
     public function allAvailableLeaves()
     {
