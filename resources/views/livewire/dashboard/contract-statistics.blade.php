@@ -22,18 +22,18 @@
     <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-end">
         <div>
             <label for="city" class="block text-sm font-medium text-neutral-700 mb-1">City</label>
-            <select id="city" wire:model="selectedCity"
+            <select id="city" wire:model.lazy="selectedCity"
                     class="w-full rounded-xl border border-neutral-200 bg-white text-neutral-800 shadow-sm focus:ring-4 focus:ring-primary-200 px-3 py-2 transition">
                 <option value="">All Cities</option>
                 @foreach($cities as $city)
-                    <option value="{{ $city->id }}">{{ $city->name_en }}</option>
+                    <option value="{{ $city->id }}">{{ $city->name }}</option>
                 @endforeach
             </select>
         </div>
 
         <div>
             <label for="program" class="block text-sm font-medium text-neutral-700 mb-1">Program</label>
-            <select id="program" wire:model="selectedProgram"
+            <select id="program" wire:model.lazy="selectedProgram"
                     class="w-full rounded-xl border border-neutral-200 bg-white text-neutral-800 shadow-sm focus:ring-4 focus:ring-primary-200 px-3 py-2 transition">
                 <option value="">All Programs</option>
                 @foreach($programs as $program)
@@ -43,31 +43,35 @@
         </div>
     </div>
 
-    <div wire:loading.flex class="justify-center py-6">
+    <div wire:loading.flex wire:target="applyFilters, resetFilters" class="justify-center py-6">
         <div class="text-sm text-neutral-500 flex items-center gap-2">
             <div class="h-2 w-2 bg-primary-500 rounded-full animate-pulse"></div>
             Updating statistics...
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" wire:loading.remove>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" wire:loading.remove wire:target="applyFilters, resetFilters">
         @forelse ($cards as $card)
             <article class="relative overflow-hidden rounded-3xl bg-white border border-neutral-200 shadow-md hover:shadow-lg transition-transform hover:-translate-y-1">
                 <div class="absolute top-0 left-0 w-full h-1.5 {{ $card['color'] }}"></div>
 
                 <div class="flex justify-between items-start mt-2 p-4 border-b border-neutral-200">
                     <div class="flex flex-col gap-2">
-                        <h3 class="text-lg font-bold text-neutral-900 leading-tight">{{ $card['program'] }}</h3>
+                        <h3 class="text-lg font-bold text-neutral-900 leading-tight">{{ $card['name'] }}</h3>
                         <div class="text-sm text-neutral-500">
                             Employees:
                             <span class="font-bold text-primary-600">{{ $card['employees'] }}</span>
                         </div>
                     </div>
                     <div class="text-right flex flex-col gap-2">
-                        <span class="px-2 py-0.5 text-xs rounded-full {{ $card['color'] }} text-white font-medium">Program</span>
-                        <p class="text-sm text-neutral-500">
-                            Centers: <span class="font-bold text-neutral-700">{{ $card['centers'] }}</span>
-                        </p>
+                        <span class="px-2 py-0.5 text-xs rounded-full {{ $card['color'] }} text-white font-medium">
+                            {{ $cardType === 'program' ? 'Program' : 'Center' }}
+                        </span>
+                        @if ($card['centers'] !== null)
+                            <p class="text-sm text-neutral-500">
+                                Centers: <span class="font-bold text-neutral-700">{{ $card['centers'] }}</span>
+                            </p>
+                        @endif
                     </div>
                 </div>
 
@@ -108,7 +112,9 @@
                 </div>
             </article>
         @empty
-            <p class="col-span-full text-center text-neutral-500 py-8">No data found for the selected filters.</p>
+            <div class="col-span-full text-center text-neutral-500 py-8">
+                <p>No data found for the selected filters.</p>
+            </div>
         @endforelse
     </div>
 </div>
