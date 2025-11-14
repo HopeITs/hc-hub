@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
-use App\Livewire\Dashboards\ContractStatistics;
+use App\Livewire\Dashboard\ContractStatistics;
 use App\Livewire\Dashboards\EmployeeDashboard;
 use App\Livewire\Dashboards\GeneralAdminDashboard;
 use App\Livewire\Dashboards\HrDashboard;
