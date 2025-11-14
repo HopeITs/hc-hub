@@ -60,7 +60,7 @@
 
 
         <div x-cloak x-show="open" x-transition.duration.160ms.origin.bottom @click.outside="open=false"
-             class="z-50 absolute mb-2 bottom-full w-full
+             class="z-50 absolute mb-2 top-full w-full
                    rounded-3xl border border-gray-200/70 bg-white/80 backdrop-blur-xl
                    shadow-[0_25px_80px_-20px_rgba(2,6,23,0.35)] ring-1 ring-black/5"
              :class="$store.dir.rtl ? 'right-0' : 'left-0'" role="menu">

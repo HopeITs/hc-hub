@@ -257,8 +257,8 @@
             </ul>
         </div>
 
-        <div class="px-3 pb-4">
-            <x-layouts.app.sidebar.profile-card :user="$user"/>
-        </div>
+{{--        <div class="px-3 pb-4">--}}
+{{--            <x-layouts.app.sidebar.profile-card :user="$user"/>--}}
+{{--        </div>--}}
     </div>
 </aside>
