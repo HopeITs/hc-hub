@@ -2,8 +2,6 @@
     <div class="mb-8 flex items-center justify-between">
         <h1 class="text-3xl font-bold text-neutral-800 tracking-tight">Contract Statistics</h1>
         <div class="flex items-center gap-3">
-
-
             <button wire:click="resetFilters"
                     type="button"
                     class="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white text-neutral-700 px-5 py-2 font-semibold hover:bg-neutral-100 transition">
@@ -99,7 +97,7 @@
                 </div>
 
                 <div class="flex justify-end p-3">
-                    <a href="javascript:void(0)" class="text-sm font-semibold text-primary-600 hover:underline">
+                    <a href="{{ isset($card['slug']) ? route('programs.show', ['program' => $card['slug']]) : 'javascript:void(0)' }}" class="text-sm font-semibold text-primary-600 hover:underline">
                         View Details →
                     </a>
                 </div>
