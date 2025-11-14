@@ -60,22 +60,23 @@ return [
     ],
 
     'departments' => [
-        ['name' => 'Management', 'description_en' => null, 'description_ar' => null, 'email' => 'headoffice@hcsyria.org'],
-        ['name' => 'Front Desk', 'description_en' => null, 'description_ar' => null, 'email' => null],
-        ['name' => 'Teachers', 'description_en' => null, 'description_ar' => null, 'email' => null],
-        ['name' => 'Companion/Coach', 'description_en' => null, 'description_ar' => null, 'email' => null],
-        ['name' => 'IT', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو تطوير التطبيقات البرمجية من أجل حفظ وعرض بيانات المؤسسة وإنشاء تقارير وإحصائيات ومتابعة صيانة الأمور الالكترونية وملحقاتها في المراكز.', 'email' => 'it@hcsyria.org'],
-        ['name' => 'Communication', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو العمل على توثيق النشاطات التي تقوم بها البرامج التابعة لـ Christian Hope Center أو يشرف عليها أو يكون شريكاً في إدارتها أو تنفيذها، وذلك من خلال التصوير التوثيقي للصور والفيديو، باستخدام كافة الكاميرات والمعدات التي يؤمنها له المركز.', 'email' => 'ct@hcsyria.org'],
-        ['name' => 'HR', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو التواصل مع مدراء المشاريع في المحافظة ومساعدتهم في جميع المسائل المتعلقة بالموارد البشرية.', 'email' => null],
-        ['name' => 'Finance', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو إدارة الشؤون المالية لمشاريع مؤسسة "Christian Hope Center “في سوريا، بما في ذلك إعداد الميزانيات والتقارير المالية، ومتابعة الحسابات، وضمان الشفافية والكفاءة في العمليات المالية', 'email' => 'finance@hcsyria.org'],
-        ['name' => 'MEAL', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو متابعة وتقييم سير آلية المشاريع التابعة لـ Christian Hope Center في سوريا وضمان فعاليتها وكفاءتها واستدامتها بحيث تكون مطابقة للـ proposals المُرسلة للممولين.', 'email' => null],
-        ['name' => 'Fundraising', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو التواصل مع الجهات المانحة ومتابعة المشاريع الممولة في سوريا بعد التنسيق مع الإدارة العامة.', 'email' => 'pr@hcsyria.org'],
-        ['name' => 'Logistic', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو شراء وتسليم جميع مستلزمات المشاريع الصغيرة للمستفيدين ومشتريات البرامج التابعة لـ Hope Center ومتابعة صيانة المراكز.', 'email' => null],
-        ['name' => 'Legal Affairs', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو تنسيق ومتابعة جميع الأمور القانونية التابعة لبرامج Christian Hope Center', 'email' => null],
-        ['name' => 'Services/ Keepers', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو استقبال المستفيدين وتوجيههم والاهتمام بنظافة المكان بشكل عام.', 'email' => null],
-        ['name' => 'Assistant', 'description_en' => null, 'description_ar' => null, 'email' => null],
-        ['name' => 'Psychological and spiritual support', 'description_en' => null, 'description_ar' => null, 'email' => null],
+        ['name' => 'Management', 'code' => 'MG', 'description_en' => null, 'description_ar' => null, 'email' => 'headoffice@hcsyria.org'],
+        ['name' => 'Front Desk', 'code' => 'FD', 'description_en' => null, 'description_ar' => null, 'email' => null],
+        ['name' => 'Teachers', 'code' => 'TC', 'description_en' => null, 'description_ar' => null, 'email' => null],
+        ['name' => 'Companion/Coach', 'code' => 'CC', 'description_en' => null, 'description_ar' => null, 'email' => null],
+        ['name' => 'Information Technology', 'code' => 'IT', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو تطوير التطبيقات البرمجية من أجل حفظ وعرض بيانات المؤسسة وإنشاء تقارير وإحصائيات ومتابعة صيانة الأمور الالكترونية وملحقاتها في المراكز.', 'email' => 'it@hcsyria.org'],
+        ['name' => 'Communication', 'code' => 'CT', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو العمل على توثيق النشاطات التي تقوم بها البرامج التابعة لـ Christian Hope Center أو يشرف عليها أو يكون شريكاً في إدارتها أو تنفيذها، وذلك من خلال التصوير التوثيقي للصور والفيديو، باستخدام كافة الكاميرات والمعدات التي يؤمنها له المركز.', 'email' => 'ct@hcsyria.org'],
+        ['name' => 'Human Resource', 'code' => 'HR', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو التواصل مع مدراء المشاريع في المحافظة ومساعدتهم في جميع المسائل المتعلقة بالموارد البشرية.', 'email' => null],
+        ['name' => 'Finance', 'code' => 'FN', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو إدارة الشؤون المالية لمشاريع مؤسسة "Christian Hope Center “في سوريا، بما في ذلك إعداد الميزانيات والتقارير المالية، ومتابعة الحسابات، وضمان الشفافية والكفاءة في العمليات المالية', 'email' => 'finance@hcsyria.org'],
+        ['name' => 'MEAL', 'code' => 'MEAL', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو متابعة وتقييم سير آلية المشاريع التابعة لـ Christian Hope Center في سوريا وضمان فعاليتها وكفاءتها واستدامتها بحيث تكون مطابقة للـ proposals المُرسلة للممولين.', 'email' => null],
+        ['name' => 'Fundraising', 'code' => 'FR', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو التواصل مع الجهات المانحة ومتابعة المشاريع الممولة في سوريا بعد التنسيق مع الإدارة العامة.', 'email' => 'pr@hcsyria.org'],
+        ['name' => 'Logistic', 'code' => 'LG', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو شراء وتسليم جميع مستلزمات المشاريع الصغيرة للمستفيدين ومشتريات البرامج التابعة لـ Hope Center ومتابعة صيانة المراكز.', 'email' => null],
+        ['name' => 'Legal Affairs', 'code' => 'LA', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو تنسيق ومتابعة جميع الأمور القانونية التابعة لبرامج Christian Hope Center', 'email' => null],
+        ['name' => 'Services/ Keepers', 'code' => 'SK', 'description_en' => null, 'description_ar' => 'الهدف الرئيسي من هذا العمل التطوعي هو استقبال المستفيدين وتوجيههم والاهتمام بنظافة المكان بشكل عام.', 'email' => null],
+        ['name' => 'Assistant', 'code' => 'AS', 'description_en' => null, 'description_ar' => null, 'email' => null],
+        ['name' => 'Psychological and spiritual support', 'code' => 'PS', 'description_en' => null, 'description_ar' => null, 'email' => null],
     ],
+
 
     'programs' => [
         [
@@ -186,11 +187,9 @@ return [
 
     'centers' => [
         ['name' => 'Hope Center/Head Office', 'city_id' => 2, 'address_en' => 'Aleppo', 'address_ar' => 'حلب', 'is_active' => true , 'weekends' => 'saturday,sunday'],
-        ['name' => 'Hope Center', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => 'saturday,sunday'],
-        ['name' => 'Hope Center', 'city_id' => 4, 'address_en' => 'Damascus', 'address_ar' => 'دمشق', 'is_active' => true , 'weekends' => 'saturday,sunday'],
-        ['name' => 'Micro Project', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true , 'weekends' => 'saturday,sunday'],
-        ['name' => 'Micro Project', 'city_id' => 4, 'address_en' => 'Damascus', 'address_ar' => 'دمشق', 'is_active' => true , 'weekends' => 'saturday,sunday'],
-        ['name' => 'Micro Project', 'city_id' => 5, 'address_en' => 'Latakia', 'address_ar' => 'Latakia', 'is_active' => true , 'weekends' => 'saturday,sunday'],
+        ['name' => 'Hope Center/Micro - Homs', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => 'saturday,sunday'],
+        ['name' => 'Hope Center/Micro - Damascus', 'city_id' => 4, 'address_en' => 'Damascus', 'address_ar' => 'دمشق', 'is_active' => true , 'weekends' => 'saturday,sunday'],
+        ['name' => 'Hope Center/Micro - Latakia', 'city_id' => 5, 'address_en' => 'Latakia', 'address_ar' => 'Latakia', 'is_active' => true , 'weekends' => 'saturday,sunday'],
         ['name' => 'Micro Project', 'city_id' => 16, 'address_en' => 'Homs rural', 'address_ar' => 'ريف حمص', 'is_active' => true , 'weekends' => 'saturday,sunday'],
         ['name' => 'Children University', 'city_id' => 2, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true , 'weekends' => 'sunday'],
         ['name' => 'Children University', 'city_id' => 3, 'address_en' => 'Aleppo', 'address_ar' => 'حلب', 'is_active' => true , 'weekends' => 'sunday'],
@@ -532,57 +531,57 @@ return [
         // Aleppo (city_id = 2)
         // -------------------------------
         //1
-        ['title_en' => 'Chief Executive Officer', 'title_ar' => 'الرئيس التنفيذي', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => null, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Fredy Youssef
+        ['title_en' => 'Chief Executive Officer', 'title_ar' => 'الرئيس التنفيذي', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => null, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Fredy Youssef
 //2
-        ['title_en' => 'Deputy Chief Executive Officer', 'title_ar' => 'نائب الرئيس التنفيذي', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => null, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Safir Salim
+        ['title_en' => 'Deputy Chief Executive Officer', 'title_ar' => 'نائب الرئيس التنفيذي', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => null, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Safir Salim
 //3
-        ['title_en' => 'Second Deputy Chief Executive Officer / Program Manager', 'title_ar' => 'نائب ثاني للرئيس التنفيذي / مدير البرنامج', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Rama Daaboul
+        ['title_en' => 'Second Deputy Chief Executive Officer / Program Manager', 'title_ar' => 'نائب ثاني للرئيس التنفيذي / مدير البرنامج', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Rama Daaboul
 //4
-        ['title_en' => 'Senior Financial Manager', 'title_ar' => 'المدير المالي الأول', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Shadi Makdessi
+        ['title_en' => 'Senior Financial Manager', 'title_ar' => 'المدير المالي الأول', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Shadi Makdessi
 //5
-        ['title_en' => 'IT Manager', 'title_ar' => 'مدير تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Judy Dadaoghlian
+        ['title_en' => 'IT Manager', 'title_ar' => 'مدير تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Judy Dadaoghlian
 //6
-        ['title_en' => 'Projects and Fundraising Manager', 'title_ar' => 'مدير المشاريع وجمع التبرعات', 'program_id' => 1, 'department_id' => 10, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Projects and Fundraising Manager', 'title_ar' => 'مدير المشاريع وجمع التبرعات', 'program_id' => 1, 'department_id' => 10, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 //7
-        ['title_en' => 'Communication Manager', 'title_ar' => 'مدير التواصل', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Communication Manager', 'title_ar' => 'مدير التواصل', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 //8
         ['title_en' => 'Associate Communication Manager', 'title_ar' => 'مدير التواصل المساعد', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 7, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // George Abdelnour
 //9
-        ['title_en' => 'HR Generalist', 'title_ar' => 'مسؤول الموارد البشرية', 'program_id' => 1, 'department_id' => 7, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Lana Abdo
+        ['title_en' => 'HR Generalist', 'title_ar' => 'مسؤول الموارد البشرية', 'program_id' => 1, 'department_id' => 7, 'job_level_id' => 3, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Lana Abdo
 //10
-        ['title_en' => 'Legal Affairs Consultant', 'title_ar' => 'مستشار الشؤون القانونية', 'program_id' => 2, 'department_id' => 12, 'job_level_id' => 3, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Majd Zrek
+        ['title_en' => 'Legal Affairs Consultant', 'title_ar' => 'مستشار الشؤون القانونية', 'program_id' => 2, 'department_id' => 12, 'job_level_id' => 3, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Majd Zrek
 //11
-        ['title_en' => 'Program Manager / Micro Projects', 'title_ar' => 'مدير البرامج / المشاريع الصغيرة', 'program_id' => 2, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Antoine Arbaji
+        ['title_en' => 'Program Manager / Micro Projects', 'title_ar' => 'مدير البرامج / المشاريع الصغيرة', 'program_id' => 2, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // Antoine Arbaji
 //12
-        ['title_en' => 'MEAL Manager', 'title_ar' => 'مدير المتابعة والتقييم والمساءلة والتعلم', 'program_id' => 1, 'department_id' => 9, 'job_level_id' => 5, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'MEAL Manager', 'title_ar' => 'مدير المتابعة والتقييم والمساءلة والتعلم', 'program_id' => 1, 'department_id' => 9, 'job_level_id' => 5, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 //13
-        ['title_en' => 'Accountant', 'title_ar' => 'محاسب', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 4, 'tech_manager_id' => 4, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Accountant', 'title_ar' => 'محاسب', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 4, 'tech_manager_id' => 4, 'max_emp' => 1, 'exist_emp' => 0],
 //14
-        ['title_en' => 'IT Specialist', 'title_ar' => 'متخصص تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 5, 'tech_manager_id' => 5, 'max_emp' => 3, 'exist_emp' => 0],
+        ['title_en' => 'IT Specialist', 'title_ar' => 'متخصص تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 5, 'tech_manager_id' => 5, 'max_emp' => 3, 'exist_emp' => 0],
 //15
-        ['title_en' => 'Communication Officer / Videographer', 'title_ar' => 'مسؤول تواصل / مصور فيديو', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Communication Officer / Videographer', 'title_ar' => 'مسؤول تواصل / مصور فيديو', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 1, 'exist_emp' => 0],
         //16
-        ['title_en' => 'Communication Officer / Photographer', 'title_ar' => 'مسؤول تواصل / مصور فوتوغرافي', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Communication Officer / Photographer', 'title_ar' => 'مسؤول تواصل / مصور فوتوغرافي', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 1, 'exist_emp' => 0],
         //17
-        ['title_en' => 'Communication Officer / Designer', 'title_ar' => 'مسؤول تواصل / مصمم', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Communication Officer / Designer', 'title_ar' => 'مسؤول تواصل / مصمم', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 1, 'exist_emp' => 0],
         //18
-        ['title_en' => 'Public Relations Officer', 'title_ar' => 'مسؤول علاقات عامة', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 2, 'exist_emp' => 0],
+        ['title_en' => 'Public Relations Officer', 'title_ar' => 'مسؤول علاقات عامة', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 2, 'exist_emp' => 0],
 //19
-        ['title_en' => 'LEAP Program Manager', 'title_ar' => 'مدير برنامج LEAP', 'program_id' => 11, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'LEAP Program Manager', 'title_ar' => 'مدير برنامج LEAP', 'program_id' => 11, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 24, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
         //20
-        ['title_en' => 'LEAP  Manager', 'title_ar' => 'مدير  LEAP', 'program_id' => 11, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'LEAP  Manager', 'title_ar' => 'مدير  LEAP', 'program_id' => 11, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 24, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 //21
-        ['title_en' => 'Study Zone General Manager', 'title_ar' => 'مدير منطقة الدراسة', 'program_id' => 8, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => null, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Study Zone General Manager', 'title_ar' => 'مدير منطقة الدراسة', 'program_id' => 8, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 //22
-        ['title_en' => 'Study Zone Manager', 'title_ar' => 'مدير منطقة الدراسة', 'program_id' => 8, 'department_id' => 2, 'job_level_id' => 3, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 21, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Study Zone Manager', 'title_ar' => 'مدير منطقة الدراسة', 'program_id' => 8, 'department_id' => 2, 'job_level_id' => 3, 'city_id' => 2, 'center_id' => 13, 'direct_manager_id' => 21, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 //23
-        ['title_en' => 'Children University Manager', 'title_ar' => 'مدير جامعة الأطفال', 'program_id' => 10, 'department_id' => 2, 'job_level_id' => 4, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 5, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Children University Manager', 'title_ar' => 'مدير جامعة الأطفال', 'program_id' => 10, 'department_id' => 2, 'job_level_id' => 4, 'city_id' => 2, 'center_id' => 6, 'direct_manager_id' => 5, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 //24
-        ['title_en' => 'Case Manager', 'title_ar' => 'مدير الحالة', 'program_id' => 10, 'department_id' => 2, 'job_level_id' => 4, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 21, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Case Manager', 'title_ar' => 'مدير الحالة', 'program_id' => 10, 'department_id' => 2, 'job_level_id' => 4, 'city_id' => 2, 'center_id' => 6, 'direct_manager_id' => 21, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 
-        ['title_en' => 'Legal Affairs Consultant', 'title_ar' => 'مستشار الشؤون القانونية', 'program_id' => 1, 'department_id' => 12, 'job_level_id' => 4, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 10, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // same Majd Zrek role mapped here
+        ['title_en' => 'Legal Affairs Consultant', 'title_ar' => 'مستشار الشؤون القانونية', 'program_id' => 2, 'department_id' => 12, 'job_level_id' => 4, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 10, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 1], // same Majd Zrek role mapped here
 
-        ['title_en' => 'Logistic Officer', 'title_ar' => 'مسؤول المشتريات', 'program_id' => 1, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 2, 'center_id' => null, 'direct_manager_id' => 3, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Logistic Officer', 'title_ar' => 'مسؤول المشتريات', 'program_id' => 2, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 3, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 
         // -------------------------------
         // Damascus (city_id = 4)
@@ -595,24 +594,24 @@ return [
         ['title_en' => 'ICDL Trainer', 'title_ar' => 'مدرب ICDL', 'program_id' => 7, 'department_id' => 4, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 8, 'direct_manager_id' => 25, 'tech_manager_id' => 4],
         ['title_en' => 'Companion', 'title_ar' => 'مرافق', 'program_id' => 7, 'department_id' => 1, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 8, 'direct_manager_id' => 25, 'tech_manager_id' => null],
 
-        ['title_en' => 'Project Manager', 'title_ar' => 'مدير مشروع', 'program_id' => 8, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 4, 'center_id' => 24, 'direct_manager_id' => 6, 'tech_manager_id' => null],
-        ['title_en' => 'Project Team Member', 'title_ar' => 'عضو في فريق البرنامج', 'program_id' => 8, 'department_id' => 1, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 24, 'direct_manager_id' => 32, 'tech_manager_id' => 6],
-        ['title_en' => 'Center Keeper', 'title_ar' => 'مدبرة مركز', 'program_id' => 8, 'department_id' => 13, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 24, 'direct_manager_id' => 32, 'tech_manager_id' => null],
+        ['title_en' => 'Project Manager', 'title_ar' => 'مدير مشروع', 'program_id' => 8, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 4, 'center_id' => 18, 'direct_manager_id' => 6, 'tech_manager_id' => null],
+        ['title_en' => 'Project Team Member', 'title_ar' => 'عضو في فريق البرنامج', 'program_id' => 8, 'department_id' => 1, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 18, 'direct_manager_id' => 32, 'tech_manager_id' => 6],
+        ['title_en' => 'Center Keeper', 'title_ar' => 'مدبرة مركز', 'program_id' => 8, 'department_id' => 13, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 18, 'direct_manager_id' => 32, 'tech_manager_id' => null],
 
         ['title_en' => 'Project Manager', 'title_ar' => 'مدير مشروع', 'program_id' => 2, 'department_id' => 1, 'job_level_id' => 2, 'city_id' => 4, 'center_id' => 4, 'direct_manager_id' => 6, 'tech_manager_id' => null],
         ['title_en' => 'Field Officer', 'title_ar' => 'مسؤول ميداني', 'program_id' => 2, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 4, 'direct_manager_id' => 35, 'tech_manager_id' => 22],
         ['title_en' => 'Field Officer Assistant', 'title_ar' => 'مساعد مسؤول ميداني', 'program_id' => 2, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 4, 'direct_manager_id' => 36, 'tech_manager_id' => 22],
         ['title_en' => 'Center Keeper', 'title_ar' => 'مدبرة مركز', 'program_id' => 2, 'department_id' => 13, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 4, 'direct_manager_id' => 35, 'tech_manager_id' => null],
 
-        ['title_en' => 'Design Manager', 'title_ar' => 'مدير التصميم', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 3, 'city_id' => 4, 'center_id' => 2, 'direct_manager_id' => 6, 'tech_manager_id' => 4],
-        ['title_en' => 'Legal Affairs Consultant', 'title_ar' => 'مستشار الشؤون القانوينة', 'program_id' => 1, 'department_id' => 12, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 2, 'direct_manager_id' => 6, 'tech_manager_id' => 13],
-        ['title_en' => 'HR Manager', 'title_ar' => 'مسؤول الموارد البشرية', 'program_id' => 1, 'department_id' => 7, 'job_level_id' => 3, 'city_id' => 4, 'center_id' => 2, 'direct_manager_id' => 6, 'tech_manager_id' => null],
-        ['title_en' => 'Logistic Officer', 'title_ar' => 'مسؤول المشتريات', 'program_id' => 1, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 2, 'direct_manager_id' => 6, 'tech_manager_id' => 22],
-        ['title_en' => 'Accountant', 'title_ar' => 'محاسب', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 2, 'direct_manager_id' => 6, 'tech_manager_id' => 14],
-        ['title_en' => 'MEAL Manager', 'title_ar' => 'مسؤول مراقبة وتقييم', 'program_id' => 1, 'department_id' => 9, 'job_level_id' => 3, 'city_id' => 4, 'center_id' => 2, 'direct_manager_id' => 6, 'tech_manager_id' => 9],
-        ['title_en' => 'IT Specialist', 'title_ar' => 'متخصص تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 2, 'direct_manager_id' => 35, 'tech_manager_id' => 4],
-        ['title_en' => 'Communication Officer / Photographer', 'title_ar' => 'مسؤول تواصل / مصور', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 2, 'direct_manager_id' => 6, 'tech_manager_id' => 7],
-        ['title_en' => 'Public Relations Officer', 'title_ar' => 'مسؤول علاقات عامة', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 2, 'direct_manager_id' => 6, 'tech_manager_id' => 7],
+        ['title_en' => 'Design Manager', 'title_ar' => 'مدير التصميم', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 3, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 6, 'tech_manager_id' => 4],
+        ['title_en' => 'Legal Affairs Consultant', 'title_ar' => 'مستشار الشؤون القانوينة', 'program_id' => 1, 'department_id' => 12, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 6, 'tech_manager_id' => 13],
+        ['title_en' => 'HR Manager', 'title_ar' => 'مسؤول الموارد البشرية', 'program_id' => 1, 'department_id' => 7, 'job_level_id' => 3, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 6, 'tech_manager_id' => null],
+        ['title_en' => 'Logistic Officer', 'title_ar' => 'مسؤول المشتريات', 'program_id' => 1, 'department_id' => 11, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 6, 'tech_manager_id' => 22],
+        ['title_en' => 'Accountant', 'title_ar' => 'محاسب', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 6, 'tech_manager_id' => 14],
+        ['title_en' => 'MEAL Manager', 'title_ar' => 'مسؤول مراقبة وتقييم', 'program_id' => 1, 'department_id' => 9, 'job_level_id' => 3, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 6, 'tech_manager_id' => 9],
+        ['title_en' => 'IT Specialist', 'title_ar' => 'متخصص تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 35, 'tech_manager_id' => 4],
+        ['title_en' => 'Communication Officer / Photographer', 'title_ar' => 'مسؤول تواصل / مصور', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 6, 'tech_manager_id' => 7],
+        ['title_en' => 'Public Relations Officer', 'title_ar' => 'مسؤول علاقات عامة', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 6, 'tech_manager_id' => 7],
     ],
 
 

@@ -11,11 +11,8 @@ class Department extends Model
 {
     use HasFactory , HasTranslation;
 
-    protected $fillable = [
-        'name',
-        'description_en',
-        'description_ar',
-        'email'
+    protected $guarded = [
+   'id'
     ];
     protected function description(): Attribute
     {

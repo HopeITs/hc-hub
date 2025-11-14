@@ -2,12 +2,12 @@
     {{-- Header --}}
     <div class="flex justify-between">
         <livewire:layout.breadcrumbs
-                :title="trans_choice('general.department', 2)"
-                :crumbs="[
+            :title="trans_choice('general.department', 2)"
+            :crumbs="[
                 ['label' => __('general.project-basics')],
                 ['label' => trans_choice('general.department', 2)],
             ]"
-                :showButton="true"
+            :showButton="true"
         />
         <div>
             <x-primary-button wire:click="create">
@@ -33,6 +33,7 @@
                 @lang('general.department-name')
             </x-table.heading>
 
+            <x-table.heading>@lang('general.code')</x-table.heading>
             <x-table.heading>@lang('general.department-description')</x-table.heading>
 
             <x-table.heading
@@ -53,12 +54,15 @@
                     <x-table.cell class="w-1/12">{{ $item->id }}</x-table.cell>
 
                     {{-- Name --}}
-                    <x-table.cell class="w-2/12">
+                    <x-table.cell class="w-4/12">
                         {{ $item->name }}
+                    </x-table.cell>
+                    <x-table.cell class="w-1/12">
+                        {{ $item->code }}
                     </x-table.cell>
 
                     {{-- Description --}}
-                    <x-table.cell class="w-6/12"  title="{{ $item->{'description_' . app()->getLocale()} }}">
+                    <x-table.cell class="w-3/12" title="{{ $item->{'description_' . app()->getLocale()} }}">
                         <span class="line-clamp-1">
                             {{ $item->{'description_' . app()->getLocale()} ?: '-' }}
                         </span>
@@ -72,8 +76,8 @@
                     {{-- Actions --}}
                     <x-table.cell class=" whitespace-nowrap text-center">
                         <div class="inline-flex items-center justify-center space-x-1 rtl:space-x-reverse">
-                            <x-table.edit-btn wire:click="edit({{ $item->id }})" />
-                            <x-table.delete-btn :modelId="$item->id" />
+                            <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
+                            <x-table.delete-btn :modelId="$item->id"/>
                         </div>
                     </x-table.cell>
                 </tr>
@@ -82,12 +86,7 @@
             @endforelse
         </x-slot>
 
-
-
-
-        <x-slot name="pagination">
-            {{ $departments->links() }}
-        </x-slot>
+        <x-slot name="pagination">{{ $departments->links() }}</x-slot>
     </x-table>
 
     {{-- Modal --}}
@@ -99,13 +98,20 @@
                     <x-forms.input-label for="name">
                         @lang('general.department-name')
                     </x-forms.input-label>
-                    <x-forms.input type="text" id="name" wire:model="item.name" />
+                    <x-forms.input type="text" id="name" wire:model="item.name"/>
                     <x-error-span>{{ $errors->first('item.name') }}</x-error-span>
                 </div>
-                {{-- Email --}}
                 <div class="col-span-1">
+                    <x-forms.input-label for="code">
+                        @lang('general.code')
+                    </x-forms.input-label>
+                    <x-forms.input type="text" id="code" wire:model="item.code"/>
+                    <x-error-span>{{ $errors->first('item.code') }}</x-error-span>
+                </div>
+                {{-- Email --}}
+                <div class="col-span-2">
                     <x-forms.input-label for="email">@lang('general.department-email')</x-forms.input-label>
-                    <x-forms.input type="email" id="email" wire:model="item.email" />
+                    <x-forms.input type="email" id="email" wire:model="item.email"/>
                     <x-error-span>{{ $errors->first('item.email') }}</x-error-span>
                 </div>
 
@@ -114,14 +120,14 @@
                     <x-forms.input-label for="description_en">
                         @lang('general.department-description') (EN)
                     </x-forms.input-label>
-                    <x-forms.textarea type="text" id="description_en" wire:model="item.description_en" />
+                    <x-forms.textarea type="text" id="description_en" wire:model="item.description_en"/>
                     <x-error-span>{{ $errors->first('item.description_en') }}</x-error-span>
                 </div>
                 <div class="col-span-2">
                     <x-forms.input-label for="description_ar">
                         @lang('general.department-description') (AR)
                     </x-forms.input-label>
-                    <x-forms.textarea type="text" id="description_ar" wire:model="item.description_ar" />
+                    <x-forms.textarea type="text" id="description_ar" wire:model="item.description_ar"/>
                     <x-error-span>{{ $errors->first('item.description_ar') }}</x-error-span>
                 </div>
             </div>
