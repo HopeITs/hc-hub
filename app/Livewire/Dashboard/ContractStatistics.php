@@ -88,14 +88,12 @@ class ContractStatistics extends Component
                     'name' => $program->name,
                     'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
                     'color' => 'bg-primary-500',
-                    'slug' => $program->slug,
+                    'program_slug' => $program->slug,
                 ] + $this->getCardBreakdown($contractsQuery);
             }
 
         } elseif (!$this->selectedCity && $this->selectedProgram) {
             $this->cardType = 'center';
-            $currentProgramSlug = optional(Program::find($this->selectedProgram))->slug;
-
             $centers = Center::where('is_active', true)
                 ->whereHas('positions', fn($q) => $q->where('program_id', $this->selectedProgram))
                 ->orderBy('name')
@@ -112,7 +110,7 @@ class ContractStatistics extends Component
                     'name' => $center->name,
                     'centers' => null,
                     'color' => 'bg-green-500',
-                    'slug' => $currentProgramSlug,
+                    'center_id' => $center->id,
                 ] + $this->getCardBreakdown($contractsQuery);
             }
 
@@ -137,14 +135,12 @@ class ContractStatistics extends Component
                     'name' => $program->name,
                     'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
                     'color' => 'bg-primary-500',
-                    'slug' => $program->slug,
+                    'program_slug' => $program->slug,
                 ] + $this->getCardBreakdown($contractsQuery);
             }
 
         } elseif ($this->selectedCity && $this->selectedProgram) {
             $this->cardType = 'center';
-            $currentProgramSlug = optional(Program::find($this->selectedProgram))->slug;
-
             $centers = Center::where('is_active', true)
                 ->where('city_id', $this->selectedCity)
                 ->whereHas('positions', fn($q) => $q->where('program_id', $this->selectedProgram))
@@ -163,7 +159,7 @@ class ContractStatistics extends Component
                     'name' => $center->name,
                     'centers' => null,
                     'color' => 'bg-green-500',
-                    'slug' => $currentProgramSlug,
+                    'center_id' => $center->id,
                 ] + $this->getCardBreakdown($contractsQuery);
             }
         }

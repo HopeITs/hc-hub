@@ -97,9 +97,19 @@
                 </div>
 
                 <div class="flex justify-end p-3">
-                    <a href="{{ isset($card['slug']) ? route('programs.show', ['program' => $card['slug']]) : 'javascript:void(0)' }}" class="text-sm font-semibold text-primary-600 hover:underline">
-                        View Details →
-                    </a>
+                    @if ($cardType === 'program' && isset($card['program_slug']))
+                        <a href="{{ route('programs.show', ['program' => $card['program_slug']]) }}" class="text-sm font-semibold text-primary-600 hover:underline">
+                            View Details →
+                        </a>
+                    @elseif ($cardType === 'center' && isset($card['center_id']))
+                        <a href="{{ route('centers.show', $card['center_id']) }}" class="text-sm font-semibold text-primary-600 hover:underline">
+                            View Details →
+                        </a>
+                    @else
+                        <a href="javascript:void(0)" class="text-sm font-semibold text-primary-600 hover:underline">
+                            View Details →
+                        </a>
+                    @endif
                 </div>
             </article>
         @empty
