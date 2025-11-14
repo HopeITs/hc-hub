@@ -12,7 +12,7 @@
 
     </div>
 
-    <form wire:submit.prevent="save" class="space-y-4">
+    <x-forms.form-body wire:submit.prevent="save">
         <x-forms.errors-validation-list/>
         <div class="grid md:grid-cols-2 gap-4">
 
@@ -131,6 +131,6 @@
             <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
             <x-primary-button :href="route('positions.index')" class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
         </div>
-    </form>
+    </x-forms.form-body>
 
 </div>

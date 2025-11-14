@@ -39,14 +39,13 @@
             <x-dashboard-cards.salary-per-employee-statistics/>
         </div>
 
+        {{-- 🔁 Updated from birthday → event --}}
         <div>
-            <x-dashboard-cards.today-birthday-card
-                :todayBirthdays="$todayBirthdays"/>
+            <x-dashboard-cards.today-events-card :todayEvents="$todayEvents"/>
         </div>
 
         <div>
-            <x-dashboard-cards.upcoming-birthday-card
-                :upcomingBirthdays="$upcomingBirthdays"/>
+            <x-dashboard-cards.upcoming-event-card :upcomingEvents="$upcomingEvents"/>
         </div>
 
         <div>
@@ -54,8 +53,7 @@
         </div>
 
         <div>
-            <x-dashboard-cards.pending-requests-card
-                :pendingRequests="$pendingRequests"/>
+            <x-dashboard-cards.pending-requests-card :pendingRequests="$pendingRequests"/>
         </div>
 
         <div>

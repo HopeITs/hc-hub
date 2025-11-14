@@ -62,6 +62,7 @@ return [
     'allowed-gender' => 'الجنس المسموح به',
     'marital-status' => 'الحالة الاجتماعية',
     'any' => 'أي',
+    'and' => ':attr1 و :attr2',
     'attachment' => 'المرفق',
     'male' => 'ذكر',
     'female' => 'أنثى',
@@ -376,6 +377,7 @@ return [
     'center' => 'المركز|المراكز',
     'program' => 'البرنامج|البرامج',
     'event_date' => 'تاريخ الحدث',
+    'company_news' => 'الاخبار',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',

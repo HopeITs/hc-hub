@@ -143,6 +143,7 @@ return [
     'skills-and-interests' => 'Skills & Interests',
     'courses' => 'Courses',
     'issuing-organization' => 'Issuing Organization',
+    'and' => ':attr1 & :attr2',
     'date' => 'Date',
     'approved' => 'Approved',
     'not-approved' => 'Not Approved',
@@ -379,6 +380,7 @@ return [
     'center' => 'Center|Centers',
     'program' => 'Program|Programs',
     'event_date' => 'Event Date',
+    'company_news' => 'News',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

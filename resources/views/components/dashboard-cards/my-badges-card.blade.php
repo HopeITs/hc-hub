@@ -3,11 +3,10 @@
     $nameCol = "name_{$locale}";
 
     $badgeColors = [
-        'unknown' => 'bg-gray-100 text-gray-600 border-gray-300',
-        'reward' => 'bg-green-100 text-green-700 border-green-300',
-        'warning' => 'bg-red-100 text-red-700 border-red-300',
-        'bonus' => 'bg-blue-100 text-blue-700 border-blue-300',
-
+        'unknown' => 'text-[#58595B]',
+        'reward' => 'text-green-600',
+        'warning' => 'text-primary',
+        'bonus' => 'text-blue-600',
     ];
 
     $badgeTypes = [
@@ -18,49 +17,40 @@
     ];
 @endphp
 
-<div class="w-full max-w-sm bg-white rounded-2xl shadow-md border border-[var(--color-neutral-200)] overflow-hidden">
-    <div class="px-6 py-3 flex items-center justify-between bg-[var(--color-primary)] text-white">
-        <h2 class="text-lg font-bold tracking-wide">{{ __('My Badges') }}</h2>
-        <span class="text-xs bg-white/20 px-2.5 py-0.5 rounded-full">
-            {{ $myBadges->count() }} {{ __('Badges') }}
-        </span>
+<div class="w-full h-full max-w-md bg-white rounded-3xl shadow-sm overflow-hidden flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 pt-5 pb-10 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <h3 class="text-sm font-semibold text-[#58595B]">
+                {{ __('Badges and warnings') }}
+            </h3>
+            <span class="text-secondary-light text-sm font-medium">
+                {{ $myBadges->count() }}
+            </span>
+            <div class="text-red-500 w-4 h-4 text-sm">
+                <img src="{{ asset('assets/icons/badges.svg') }}" alt="Badges icon">
+            </div>
+        </div>
     </div>
 
-    <div class="max-h-72 overflow-y-auto divide-y divide-[var(--color-neutral-200)] scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent">
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto px-6 pb-4 space-y-2 scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-primary-400)]">
         @forelse ($myBadges as $badge)
             @php
-                $typeName = $badgeTypes[$badge->type] ?? __('Unknown');
-                $color = $badgeColors[strtolower($typeName)] ?? 'bg-[var(--color-neutral-100)] text-[var(--color-neutral-700)] border-[var(--color-neutral-200)]';
+                $typeName = $badgeTypes[$badge->type] ?? 'Unknown';
+                $colorClass = $badgeColors[strtolower($typeName)] ?? 'text-[#58595B]';
             @endphp
 
-            <div class="flex items-start justify-between px-6 py-4 hover:bg-[var(--color-neutral-100)] transition-colors duration-200">
-                <div class="flex flex-col h-12 justify-between">
-                    <span class="text-[var(--color-neutral-900)] font-semibold text-sm">
-                        {{ $badge->employee?->$nameCol ?? __('Unknown Employee') }}
-                    </span>
-                    <p class="text-xs text-[var(--color-neutral-600)] italic">
-                        “{{ $badge->reason ?? __('No reason provided') }}”
-                    </p>
-
-                </div>
-
-                <div class="flex flex-col h-12 justify-between">
-
-                    <span class="mt-1 inline-block px-2.5 py-0.5 text-xs font-semibold border rounded-full {{ $color }}">
-                        {{ $typeName }}
-                    </span>
-
-                    <div class="text-right text-xs text-[var(--color-neutral-600)] font-medium whitespace-nowrap">
-                        {{ optional($badge->date)->format('d M Y') }}
-                    </div>
-
-
-
-                </div>
-
+            <div class="flex justify-between items-center pb-2 border-b border-b-secondary-light" wire:key="badge-{{ $badge->id }}">
+                <p class="text-[11px] font-bold uppercase {{ $colorClass }}">
+                    {{ $badge->reason ?? __('No reason provided') }}
+                </p>
+                <span class="text-[9px] text-[#888]">
+                    {{ optional($badge->date)->format('d/m/Y') }}
+                </span>
             </div>
         @empty
-            <div class="text-center py-10 text-[var(--color-neutral-400)] text-sm">
+            <div class="text-center text-[11px] italic text-secondary-light py-4">
                 {{ __('No badges found.') }}
             </div>
         @endforelse

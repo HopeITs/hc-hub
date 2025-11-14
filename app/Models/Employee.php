@@ -101,7 +101,7 @@ class Employee extends Model implements HasMedia
         return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')
             ->withPivot([
                 'id', 'contract_type_id', 'start_date', 'end_date', 'terminated_at',
-                'salary', 'currency', 'weekly_hours', 'work_days', 'work_hours', 'is_active'
+                'salary', 'currency', 'weekly_hours', transColumn('work_days'), 'work_hours_from','work_hours_to', 'is_active'
             ])
             ->wherePivot('is_active', true)
             ->where(function ($query) {

@@ -1,3 +1,4 @@
+@props(['upcomingEvents'])
 <div
     class="relative w-full max-w-sm h-[340px] bg-[var(--color-neutral-50)] rounded-3xl shadow-lg ring-1 ring-[var(--color-primary-400)] overflow-hidden">
 
@@ -7,7 +8,7 @@
             📅
         </div>
         <h2 class="text-lg font-extrabold text-[var(--color-primary)] tracking-tight">
-            Upcoming Birthdays
+            Upcoming Events
         </h2>
     </div>
 
@@ -15,45 +16,42 @@
 
     <div class="relative p-5 space-y-4 overflow-y-auto scroll-smooth max-h-[270px]
                 scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-primary-400)]">
-        @forelse($upcomingBirthdays as $emp)
+        @forelse($upcomingEvents as $event)
             <div
                 class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-[var(--color-primary-100)] hover:border-[var(--color-primary-300)] hover:shadow transition">
                 <div class="relative">
                     <img
-                        src="{{ $emp?->getFirstMediaUrl('avatar') ?: 'https://ui-avatars.com/api/?name=' . urlencode($emp?->name_en ?? $emp?->name_ar ?? 'Employee') }}"
-                        alt="{{ $emp->name_en ?? $emp->name_ar }}"
+                        src="{{ $event->image_url }}"
+                        alt="{{ $event->event_title }}"
                         class="h-12 w-12 rounded-full object-cover ring-2 ring-[var(--color-primary-500)]"
                     >
                 </div>
 
                 <div class="flex-1">
                     <p class="text-sm font-bold text-[var(--color-neutral-800)] leading-tight">
-                        {{ $emp->name_en ?? $emp->name_ar }}
+                        {{ $event->event_title }}
                     </p>
 
-                    @if($emp->positionTitle || $emp->departmentName)
-                        <p class="text-xs text-[var(--color-neutral-500)] mt-0.5">
-                            {{ $emp->positionTitle ?? '' }}
-                            @if($emp->departmentName)
-                                <span class="text-[var(--color-neutral-400)]">· {{ $emp->departmentName }}</span>
-                            @endif
+                    @if ($event->event_description)
+                        <p class="text-xs text-[var(--color-neutral-600)] mt-0.5 line-clamp-2">
+                            {{ $event->event_description }}
                         </p>
                     @endif
 
                     <div class="flex flex-col items-end mt-1">
                         <p class="text-sm text-[var(--color-primary-600)] font-semibold flex items-center gap-1 self-start">
-                            🎉 <span>{{ $emp->upcomingDob }}</span>
+                            🗓️ <span>{{ $event->event_timestamp->format('d M') }}</span>
                         </p>
                         <p class="text-[11px] font-medium text-[var(--color-secondary-700)] italic mt-0.5">
-                            {{ $emp->daysLeftText }}
+                            {{ $event->daysLeftText }}
                         </p>
                     </div>
                 </div>
             </div>
         @empty
             <div class="flex flex-col items-center justify-center text-[var(--color-neutral-500)] text-sm py-10">
-                <div class="text-4xl mb-2">🎈</div>
-                <p class="font-medium">No upcoming birthdays this week</p>
+                <div class="text-4xl mb-2">📭</div>
+                <p class="font-medium">No upcoming events</p>
             </div>
         @endforelse
     </div>

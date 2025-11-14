@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class News extends Model
+class News extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
     protected $table = 'news';
 
     protected $fillable = [
@@ -58,5 +63,10 @@ class News extends Model
         }
 
         return $name;
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('news-image')->singleFile();
     }
 }

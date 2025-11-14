@@ -155,7 +155,7 @@ class LeaveRequestForm extends Form
         }
 
 
-        $leaveBalance = $this->getLeaveBalance();
+        $leaveBalance = LeaveBalance::find($this->leave_balance_id);
 
         // --- Handle Annual Leave Accrual ---
         if ($leaveBalance->isAnnual()) {

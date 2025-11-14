@@ -171,7 +171,7 @@
                                                          :title="__('general.holidays-and-leaves')"
                                                          :active="request()->routeIs('leaves.*')">
                     <x-slot name="icon">
-                        <x-icons.calendar class="w-5 h-5"/>
+                        <x-icons.calendar class="w-5 text-gray-400 h-5"/>
                     </x-slot>
                     <x-slot name="list">
                         @activerole('HR')

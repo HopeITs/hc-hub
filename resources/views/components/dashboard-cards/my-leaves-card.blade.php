@@ -1,11 +1,14 @@
-<div class="w-full h-full bg-white rounded-xl shadow-sm border p-2 border-gray-200 py-6 px-8 flex flex-col justify-between space-y-4">
+<div class="max-w-full h-full w-full bg-white rounded-3xl shadow-sm border p-2 border-gray-200 py-6 px-8 flex flex-col justify-between space-y-4">
 
     <div class="flex justify-between items-center">
         <h3 class="text-base font-semibold text-gray-600">
             {{ __('My Leaves') }}
         </h3>
-        <button class="bg-[#C71C1C] hover:bg-[#A11919] text-white text-sm font-medium px-3 py-1.5 rounded-md transition">
-            + Leave Request
+        <button class="bg-[#C71C1C] hover:bg-[#A11919] text-white text-xs flex flex-row gap-2 font-medium px-3 py-2 rounded-md transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+             Leave Request
         </button>
     </div>
 

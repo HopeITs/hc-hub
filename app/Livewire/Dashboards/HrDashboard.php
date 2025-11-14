@@ -79,7 +79,7 @@ class HrDashboard extends Component
                     $dob->addYear();
                 }
 
-                $daysLeft = (int)now()->diffInDays($dob, false);
+                $daysLeft = (int) now()->diffInDays($dob, false);
                 $emp->upcomingDob = $dob->format('d M');
 
                 if ($daysLeft === 0) {
@@ -125,11 +125,11 @@ class HrDashboard extends Component
 
         $directManager = null;
         if ($position?->direct_manager_id) {
-            $managerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])
-                ->find($position->direct_manager_id);
+            $managerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])->find($position->direct_manager_id);
 
             if ($managerPosition) {
-                $activeContract = $managerPosition->activeContracts()
+                $activeContract = $managerPosition
+                    ->activeContracts()
                     ->with(['employee.contracts.position.jobLevel'])
                     ->latest('start_date')
                     ->first();
@@ -148,11 +148,11 @@ class HrDashboard extends Component
 
         $techManager = null;
         if ($position?->tech_manager_id) {
-            $techManagerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])
-                ->find($position->tech_manager_id);
+            $techManagerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])->find($position->tech_manager_id);
 
             if ($techManagerPosition) {
-                $activeContract = $techManagerPosition->activeContracts()
+                $activeContract = $techManagerPosition
+                    ->activeContracts()
                     ->with(['employee.contracts.position.jobLevel'])
                     ->latest('start_date')
                     ->first();
@@ -171,35 +171,21 @@ class HrDashboard extends Component
 
         $nameCol = "name_{$locale}";
 
-        $excludeIds = collect([
-            $this->employee?->id,
-            $ceo?->id,
-            $directManager?->id,
-            $techManager?->id,
-        ])->filter()->unique()->all();
+        $excludeIds = collect([$this->employee?->id, $ceo?->id, $directManager?->id, $techManager?->id])
+            ->filter()
+            ->unique()
+            ->all();
 
         $sameCityEmployees = \App\Models\Employee::query()
             ->where('city_id', $this->employee?->city_id)
             ->whereNotIn('id', $excludeIds)
-            ->with([
-                'contracts.position.jobLevel',
-            ])
+            ->with(['contracts.position.jobLevel'])
             ->get()
             ->map(function ($emp) use ($nameCol, $titleCol) {
-                $contract = $emp->contracts
-                    ->filter(fn($c) => ($c->is_active || (
-                            !$c->terminated_at &&
-                            $c->start_date <= now() &&
-                            $c->end_date >= now()
-                        ))
-                    )
-                    ->sortByDesc('start_date')
-                    ->first() ?? $emp->latestActiveContract();
+                $contract = $emp->contracts->filter(fn($c) => $c->is_active || (!$c->terminated_at && $c->start_date <= now() && $c->end_date >= now()))->sortByDesc('start_date')->first() ?? $emp->latestActiveContract();
 
                 $emp->displayName = $emp->$nameCol ?? $emp->name_en;
-                $emp->positionTitle = $contract?->position?->$titleCol
-                    ?? $contract?->position?->title_en
-                    ?? '—';
+                $emp->positionTitle = $contract?->position?->$titleCol ?? ($contract?->position?->title_en ?? '—');
                 $emp->jobLevelGrade = $contract?->position?->jobLevel?->grade ?? 999;
 
                 return $emp;
@@ -208,8 +194,6 @@ class HrDashboard extends Component
             ->values();
 
         return $members->merge($sameCityEmployees)->unique('id')->values();
-
-
     }
     public function getDeliveredItemsProperty()
     {
@@ -231,11 +215,7 @@ class HrDashboard extends Component
             return collect();
         }
 
-        return Badge::query()
-            ->with('employee')
-            ->where('employee_id', $this->employee->id)
-            ->orderByDesc('date')
-            ->get();
+        return Badge::query()->with('employee')->where('employee_id', $this->employee->id)->orderByDesc('date')->get();
     }
 
     public function getPendingRequestsProperty()
@@ -260,7 +240,126 @@ class HrDashboard extends Component
             });
     }
 
+    public function getTodayEventsProperty()
+    {
+        $today = now()->timezone(config('app.timezone'))->startOfDay();
+        $todayDate = $today->toDateString();
+        $locale = app()->getLocale();
+        $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
+        $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
+        $employeeId = $this->employee->id ?? null;
+        $cityId = $this->employee->city_id ?? null;
+        $centerId = $this->contract->position->center_id ?? null;
+        $programId = $this->contract->position->program_id ?? null;
 
+        $birthdays = Employee::query()
+            ->whereNotNull('dob')
+            ->whereRaw('DAY(dob) = ?', [$today->day])
+            ->whereRaw('MONTH(dob) = ?', [$today->month])
+            ->with(['media', 'contracts.position.department'])
+            ->get()
+            ->map(function ($emp) use ($titleCol, $deptCol, $today) {
+                $contract = Contract::with(['position.department'])
+                    ->where('employee_id', $emp->id)
+                    ->orderByDesc('start_date')
+                    ->first();
+
+                $emp->positionTitle = $contract?->position?->$titleCol ?? null;
+                $emp->departmentName = $contract?->position?->department?->$deptCol ?? null;
+                $emp->event_type = 'birthday';
+                $emp->event_title = 'Happy Birthday!';
+                $emp->event_description = trim(($emp->positionTitle ? $emp->positionTitle . ' · ' : '') . ($emp->departmentName ?? ''));
+                $emp->event_timestamp = $today;
+
+                return $emp;
+            });
+
+        $newsItems = \App\Models\News::query()
+            ->where(function ($q) use ($todayDate) {
+                $q->whereDate('event_date', $todayDate)->orWhereDate('published_at', $todayDate);
+            })
+            ->where(function ($q) use ($employeeId, $cityId, $centerId, $programId) {
+                $q->whereNull('newsable_type')
+                    ->orWhere(function ($q2) use ($employeeId) {
+                        $q2->where('newsable_type', Employee::class)->where('newsable_id', $employeeId);
+                    })
+                    ->orWhere(function ($q2) use ($cityId) {
+                        $q2->where('newsable_type', \App\Models\City::class)->where('newsable_id', $cityId);
+                    })
+                    ->orWhere(function ($q2) use ($centerId) {
+                        $q2->where('newsable_type', \App\Models\Center::class)->where('newsable_id', $centerId);
+                    })
+                    ->orWhere(function ($q2) use ($programId) {
+                        $q2->where('newsable_type', \App\Models\Program::class)->where('newsable_id', $programId);
+                    });
+            })
+            ->where(function ($q) {
+                $q->whereNull('display_until')->orWhere('display_until', '>=', now()->startOfDay());
+            })
+            ->with('media')
+            ->get()
+            ->map(function ($news) {
+                $timestamp = $news->event_date ?? $news->published_at;
+                $timestamp = $timestamp instanceof \Carbon\Carbon ? $timestamp : \Carbon\Carbon::parse($timestamp);
+                $news->event_type = 'news';
+                $news->event_title = $news->title;
+                $news->event_description = $news->description;
+                $news->event_timestamp = $timestamp;
+                $news->image_url = $news->photo ? asset('storage/' . $news->photo) : '/images/news-default.png';
+
+                return $news;
+            });
+
+        return $birthdays->merge($newsItems)->sortByDesc('event_timestamp')->values();
+    }
+
+    public function getUpcomingEventsProperty()
+    {
+        $today = now()->timezone(config('app.timezone'))->startOfDay();
+        $start = $today->copy()->addDay();
+        $end = $today->copy()->addWeeks(7);
+        $locale = app()->getLocale();
+        $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
+        $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
+
+        return Employee::query()
+            ->whereNotNull('dob')
+            ->get()
+            ->filter(function ($emp) use ($start, $end) {
+                $dob = \Carbon\Carbon::parse($emp->dob)->setYear(now()->year);
+                if ($dob->lt($start)) {
+                    $dob->addYear();
+                }
+                return $dob->isBetween($start, $end, true);
+            })
+            ->map(function ($emp) use ($titleCol, $deptCol) {
+                $contract = Contract::with(['position.department'])
+                    ->where('employee_id', $emp->id)
+                    ->orderByDesc('start_date')
+                    ->first();
+
+                $emp->positionTitle = $contract?->position?->$titleCol ?? null;
+                $emp->departmentName = $contract?->position?->department?->$deptCol ?? null;
+                $dob = \Carbon\Carbon::parse($emp->dob)->setYear(now()->year);
+                if ($dob->lt(now())) {
+                    $dob->addYear();
+                }
+                $daysLeft = now()->diffInDays($dob, false);
+                $emp->event_type = 'birthday';
+                $emp->event_title = '🎂 Upcoming Birthday';
+                $emp->event_description = ($emp->positionTitle ? $emp->positionTitle . ' · ' : '') . ($emp->departmentName ?? '');
+                $emp->event_timestamp = $dob;
+                $emp->upcomingDob = $dob->format('d M');
+                $emp->daysLeftText = match ($daysLeft) {
+                    0 => 'Today 🎂',
+                    1 => 'Tomorrow',
+                    default => "In {$daysLeft} days",
+                };
+                return $emp;
+            })
+            ->sortBy(fn($emp) => $emp->event_timestamp)
+            ->values();
+    }
 
     public function mount(): void
     {
@@ -273,7 +372,10 @@ class HrDashboard extends Component
             abort(403, 'Unauthorized');
         }
 
-        $this->employee = $user->profile()->with(['media', 'city'])->first();
+        $this->employee = $user
+            ->profile()
+            ->with(['media', 'city'])
+            ->first();
 
         if ($this->employee) {
             $this->contract = Contract::with(['position.department'])
@@ -283,9 +385,7 @@ class HrDashboard extends Component
 
             $this->positionTitle = $this->contract?->position?->$titleCol ?? '—';
             $this->departmentName = $this->contract?->position?->department?->$deptCol ?? '—';
-            $this->joinedOn = $this->contract?->start_date
-                ? date('d M Y', strtotime($this->contract->start_date))
-                : '—';
+            $this->joinedOn = $this->contract?->start_date ? date('d M Y', strtotime($this->contract->start_date)) : '—';
             $this->workEmail = $user->email ?? '—';
         } else {
             $this->positionTitle = $this->departmentName = $this->joinedOn = $this->workEmail = '—';
@@ -301,8 +401,8 @@ class HrDashboard extends Component
             'departmentName' => $this->departmentName,
             'joinedOn' => $this->joinedOn,
             'workEmail' => $this->workEmail,
-            'todayBirthdays' => $this->todayBirthdays,
-            'upcomingBirthdays' => $this->upcomingBirthdays,
+            'todayEvents' => $this->todayEvents,
+            'upcomingEvents' => $this->upcomingEvents,
             'deliveredItems' => $this->deliveredItems,
             'myBadges' => $this->myBadges,
             'pendingRequests' => $this->pendingRequests,
