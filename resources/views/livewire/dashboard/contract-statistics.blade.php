@@ -2,14 +2,7 @@
     <div class="mb-8 flex items-center justify-between">
         <h1 class="text-3xl font-bold text-neutral-800 tracking-tight">Contract Statistics</h1>
         <div class="flex items-center gap-3">
-            <button wire:click="applyFilters"
-                    type="button"
-                    class="inline-flex items-center gap-2 rounded-xl bg-primary-500 text-white px-5 py-2 font-semibold shadow hover:bg-primary-600 transition-transform hover:scale-105">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M10 18h4v-2h-4v2Zm-7-8v2h18v-2H3Zm3-6v2h12V4H6Zm-3 16h18v-2H3v2Z"/>
-                </svg>
-                Apply
-            </button>
+
 
             <button wire:click="resetFilters"
                     type="button"
