@@ -1,8 +1,7 @@
 <div class="relative isolate">
 
     <div class="space-y-10">
-        {{-- Header / Hero --}}
-        <div class="grid h-45 gap-6 md:grid-cols-[1fr_auto] items-start">
+        <div class="grid h-full gap-6 md:grid-cols-[1fr_auto] items-start">
             <div class="relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-sm">
                 <div class="absolute inset-0 opacity-50 bg-neutral-100 dark:bg-neutral-800"></div>
 
@@ -48,18 +47,17 @@
                 </div>
             </div>
 
-            <!-- Quick metrics card -->
-            <div class=" w-full h-full  relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-sm">
+            <div class=" w-full h-full text-center flex items-center  relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl px-4 shadow-sm">
                 <div class="relative grid grid-rows-2 gap-4">
                     <div >
-                        <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Total Employees</p>
-                        <p class="mt-1 text-2xl font-extrabold text-neutral-900 dark:text-white">
+                        <p class="text-[14px] font-semibold tracking-wide text-neutral-500 dark:text-neutral-400">Total Employees</p>
+                        <p class=" text-2xl font-bold text-secondary-dark dark:text-white">
                             {{ $totalEmployees ?? collect($programData)->sum('count') }}
                         </p>
                     </div>
                     <div >
-                        <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Programs</p>
-                        <p class="mt-1 text-2xl font-extrabold text-neutral-900 dark:text-white">
+                        <p class="text-[14px]  font-semibold tracking-wide text-neutral-500 dark:text-neutral-400">Programs</p>
+                        <p class="mt-1 text-2xl font-bold text-secondary-dark dark:text-white">
                             {{ is_countable($programData) ? count($programData) : 0 }}
                         </p>
                     </div>
@@ -68,8 +66,7 @@
         </div>
 
 
-        {{-- Tab Content --}}
-        <div class="pt-14">
+        <div class="pt-4">
             @if ($activeTab === 'contracts')
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7">
                     @foreach ($contractData as $type => $categories)
@@ -77,7 +74,7 @@
                         <div class="group relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
                             <div class="relative flex items-center justify-between gap-4">
                                 <h3 class="text-lg font-bold capitalize text-neutral-900 dark:text-white">{{ $type }}</h3>
-                                <span class="inline-flex items-center gap-1 rounded-full bg-neutral-100 dark:bg-neutral-800 px-3 py-1 text-xs font-semibold text-primary-700 dark:text-primary-300">
+                                <span class="inline-flex  items-center gap-1  px-3 py-2 text-[13px] font-semibold text-secondary-dark dark:text-primary-300">
                                     <i class="ti ti-users"></i>
                                     {{ $__total }} total
                                 </span>
@@ -106,12 +103,12 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-7">
                     @forelse ($programData as $program)
                         <div class="group relative overflow-hidden rounded-3xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-                            <h3 class="relative text-lg font-extrabold text-neutral-900 dark:text-white">
+                            <h3 class="relative text-lg font-extrabold text-secondary-dark dark:text-white">
                                 {{ $program['program'] ?? 'Unassigned Program' }}
                             </h3>
 
-                            <p class="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Total Employees</p>
-                            <p class="text-3xl font-black tracking-tight text-primary-600 dark:text-primary-400">
+                            <p class="mt-1 text-sm text-secondary-light dark:text-neutral-300">Total Employees</p>
+                            <p class="text-3xl font-black mt-3 tracking-normal text-primary dark:text-primary-400">
                                 {{ $program['count'] }}
                             </p>
 
@@ -131,7 +128,6 @@
             @endif
         </div>
 
-        {{-- Loading state (Livewire) --}}
         <div wire:loading.delay.class.remove="hidden" class="hidden">
             <div class="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7">
                 @for ($i = 0; $i < 6; $i++)
