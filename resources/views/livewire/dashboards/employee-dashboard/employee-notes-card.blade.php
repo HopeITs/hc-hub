@@ -56,11 +56,7 @@
                                         @click="openEditModal({{ $note->id }}, @js($note->content))"
                                         class="inline-flex items-center justify-center text-gray-500 hover:text-primary transition"
                                         title="Edit Note">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
-                                             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                  d="M15.232 5.232a2.5 2.5 0 0 1 3.536 3.536L8.5 19H5v-3.5l10.232-10.268z"/>
-                                        </svg>
+                                        <img class="w-5.5 h-5.5 pt-1 pb-1" src="{{asset('assets/icons/Edit.svg')}}" alt="">
                                     </button>
 
                                     <button

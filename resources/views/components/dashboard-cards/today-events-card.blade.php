@@ -50,7 +50,7 @@
         <div class="flex items-center gap-2">
             <span class="text-[13px] font-medium text-[#58595B]">Today's Events</span>
             <span class="text-[13px] font-light text-secondary-light">{{ now()->format('n/j/Y') }}</span>
-            <img src="/assets/icons/birthday-cake.svg" alt="Birthday watermark icon" class="w-5 h-5 select-none">
+            <x-icons.event class="ml-1 mb-0.5 text-secondary-medium"/>
         </div>
     </div>
 

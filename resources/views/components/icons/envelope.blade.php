@@ -1,9 +1,6 @@
-<svg
-    {{ $attributes->merge(['class' => 'w-4 h-4', 'fill' => 'none', 'stroke' => 'currentColor', 'stroke-width' => '1.8']) }}
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round"
-          d="M3 6.75A1.5 1.5 0 0 1 4.5 5.25h15a1.5 1.5 0 0 1 1.5 1.5v10.5a1.5 1.5 0 0 1-1.5 1.5h-15a1.5 1.5 0 0 1-1.5-1.5V6.75z" />
-    <path stroke-linecap="round" stroke-linejoin="round"
-          d="M3.75 7.5 12 13.5l8.25-6" />
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9.57 7.6" {{ $attributes->merge(['class' => 'size-3']) }}>
+
+    <g id="Layer_1-2" data-name="Layer 1">
+        <path fill="currentColor" d="M8.04,0H1.53C.69,0,0,.69,0,1.53v3.8c0,1.25,1.02,2.27,2.27,2.27h5.04c1.25,0,2.27-1.02,2.27-2.27V1.53c0-.85-.69-1.53-1.53-1.53ZM7.78,1.01l-2.5,2.86c-.13.15-.3.23-.5.23s-.37-.08-.5-.23L1.79,1.01h5.99ZM7.31,6.59H2.27c-.69,0-1.25-.56-1.25-1.25V1.67l2.51,2.87c.32.37.78.57,1.26.57s.94-.21,1.26-.57l2.51-2.87v3.66c0,.69-.56,1.25-1.25,1.25Z"/>
+    </g>
 </svg>
