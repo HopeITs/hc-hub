@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\LeaveRequestStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -24,6 +25,10 @@ class LeaveRequest extends Model
 
     public function getDurationAttribute(): string
     {
+        $weekend = $this->leaveBalance->contract->position->center->weekends;
+        $weekends = explode(',',$weekend);
+
+Carbon::setWeekend($weekends);
 
         if($this->type === 'hour'){
 
@@ -44,6 +49,8 @@ class LeaveRequest extends Model
 // Numeric duration (no unit suffix)
     public function getDurationValueAttribute(): float
     {
+        $weekend = $this->leaveBalance->contract->position->center->weekends;
+        dd($weekend);
         if ($this->type === 'hour') {
             return $this->start_at->floatDiffInRealHours($this->end_at);
         }
