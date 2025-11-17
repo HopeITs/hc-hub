@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
-use App\Livewire\Dashboards\ContractStatistics;
+use App\Livewire\Dashboard\ContractStatistics;
 use App\Livewire\Dashboards\EmployeeDashboard;
 use App\Livewire\Dashboards\GeneralAdminDashboard;
 use App\Livewire\Dashboards\HrDashboard;
@@ -22,9 +22,11 @@ use App\Livewire\Employee\{EmployeeCreate,
     Leave\AllLeaveRequestModule,
     Leave\CreateLeaveRequest,
     Leave\MyLeaveRequestModule,
-    Leave\MyLeaveRequestTable};
+    Leave\MyLeaveRequestTable
+};
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
-use App\Livewire\ProgramManagement\{Center\CentersModule,
+use App\Livewire\ProgramManagement\{Center\CenterDetails,
+    Center\CentersModule,
     DefaultDeliverable\DefaultDeliverablesModule,
     Program\Create as ProgramCreate,
     Program\Detail as ProgramDetail,
@@ -65,8 +67,13 @@ Route::group(
             Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
             Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');
             Route::get('departments', DepartmentModule::class)->name('departments.index');
-
-            Route::get('/centers', CentersModule::class)->name('centers.index');
+            Route::prefix('centers')
+                ->name('centers.')
+                ->group(function () {
+                    Route::get('/', CentersModule::class)->name('index');
+                    Route::get('/{center}', CenterDetails::class)
+                        ->name('show');
+                });
 
             Route::prefix('positions')
                 ->name('positions.')
@@ -86,6 +93,7 @@ Route::group(
                     Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
                     Route::get('/{program:slug}', ProgramDetail::class)->name('show');
                 });
+
 
             Route::prefix('employees')
                 ->name('employees.')
@@ -143,11 +151,11 @@ Route::group(
             Route::get('/contract-statistics', ContractStatistics::class)
                 ->name('contract-statistics');
 
-                Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
+            Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
 
-                Route::get('/news', \App\Livewire\News\NewsModule::class)->name('news.index')->middleware('auth');
+            Route::get('/news', \App\Livewire\News\NewsModule::class)->name('news.index')->middleware('auth');
 
-                Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
+            Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
 
         });
 

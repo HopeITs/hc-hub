@@ -50,7 +50,7 @@
         <div class="flex items-center gap-2">
             <span class="text-[13px] font-medium text-[#58595B]">Today's Events</span>
             <span class="text-[13px] font-light text-secondary-light">{{ now()->format('n/j/Y') }}</span>
-            <img src="/assets/icons/birthday-cake.svg" alt="Birthday watermark icon" class="w-5 h-5 select-none">
+            <x-icons.event class="ml-1 mb-0.5 text-secondary-medium"/>
         </div>
     </div>
 
@@ -90,10 +90,23 @@
                 </div>
             @empty
                 <div class="swiper-slide">
-                    <div class="h-[240px] flex items-center justify-center text-center text-sm text-gray-400">
-                        No events today
+                    <div class="relative h-[240px] flex items-center justify-center text-center text-sm text-gray-400 overflow-hidden">
+
+                        <!-- Confetti Background -->
+                        <img
+                            autoplay
+                            loop
+                            muted
+                            playsinline
+                            src="/assets/GIF/01-Confetti.gif"
+                            class="absolute inset-0 w-full h-full object-cover pointer-events-none">
+
+                        </img>
+
+
                     </div>
                 </div>
+
             @endforelse
         </div>
 

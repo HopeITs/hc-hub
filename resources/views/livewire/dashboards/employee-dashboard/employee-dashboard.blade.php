@@ -1,9 +1,34 @@
-@section('greeting')
-    <div class="flex justify-start py-4">
-        <h1 class="text-secondary-dark font-bold" >{{'Hello, '. auth()->user()->profile->name }}</h1>
-    </div>
+@php
+    $employee = auth()->user()->profile;
 
+    // Extract first name
+    $firstName = explode(' ', $employee->name)[0];
+
+    // Get latest active contract
+    $contract = $employee->latestActiveContract();
+
+    // Choose correct title depending on locale
+    $locale = app()->getLocale();
+    $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
+
+    // Determine final display title
+    $positionTitle = $contract?->position?->$titleCol
+        ?? $contract?->position?->title_en
+        ?? '—';
+@endphp
+
+@section('greeting')
+    <div class="py-4">
+        <h1 class="text-secondary-dark font-semibold text-[23px]">
+            Hello {{ $firstName }},
+        </h1>
+
+        <p class="text-secondary-light text-[15px]">
+            {{ $positionTitle }}
+        </p>
+    </div>
 @endsection
+
 <div class="space-y-10">
 
     <div class="grid grid-cols-3 gap-6">

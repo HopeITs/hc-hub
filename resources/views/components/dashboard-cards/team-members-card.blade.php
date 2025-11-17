@@ -67,27 +67,26 @@
 
                 <div class="flex items-center gap-2 ml-4 flex-shrink-0">
                     <a href="{{ route('employees.show', ['employee' => $member->username]) }}"
-                       class="text-secondary-light hover:text-primary transition"
                        title="View Profile">
-                        <x-icons.user class="w-5 h-5"/>
+                    <x-icons.user class=" text-secondary-light hover:text-primary transition"/>
                     </a>
 
                     <a href="tel:{{ $phone }}"
-                       class="text-secondary-light hover:text-primary transition"
                        title="Call">
-                        <x-icons.phone class="w-3 h-3"/>
+                        <x-icons.phone class=" text-secondary-light hover:text-primary transition"/>
                     </a>
 
                     <a href="tg://resolve?phone={{ $phone }}"
                        class="text-secondary-light hover:text-primary transition"
                        title="Chat on Telegram">
-                        <x-icons.telegram class="w-3.5 h-3.5"/>
+                        <x-icons.telegram class=" text-secondary-light hover:text-primary transition"/>
                     </a>
 
                     <a href="mailto:{{ $member->account->email ?? '#' }}"
                        class="text-secondary-light hover:text-primary transition"
                        title="Send Email">
-                        <x-icons.envelope class="w-2 h-2"/>
+                        <x-icons.envelope class="text-secondary-light hover:text-primary transition"/>
+
                     </a>
 
                 </div>

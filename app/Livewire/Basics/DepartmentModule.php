@@ -4,6 +4,8 @@ namespace App\Livewire\Basics;
 
 use App\Models\Department;
 use App\Traits\SortableTable;
+
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -18,17 +20,28 @@ class DepartmentModule extends Component
     public $search = '';
     public $item = [
         'name' => '',
+        'code' => '',
         'description_ar' => '',
         'description_en' => '',
         'email' => null,
     ];
 
-    protected $rules = [
-        'item.name' => 'required|string|max:255',
-        'item.description_ar' => 'nullable|string',
-        'item.description_en' => 'nullable|string',
-        'item.email' => 'nullable|email|max:255',
-    ];
+    public function rules()
+    {
+        return [
+            'item.name' => 'required|string|max:255',
+            'item.code' => [
+                'required',
+                'string',
+                'max:5',
+                Rule::unique('departments', 'code')
+                    ->ignore($this->item['id'] ?? null),
+            ],
+            'item.description_ar' => 'nullable|string',
+            'item.description_en' => 'nullable|string',
+            'item.email' => 'nullable|email|max:255',
+        ];
+    }
 
     public function render()
     {
@@ -41,7 +54,7 @@ class DepartmentModule extends Component
                 $term = $this->search;
 
                 // Search only in name column
-                $q->search(['name'], $term);
+                $q->search(['name','code'], $term);
             });
 
         // Sorting
@@ -64,6 +77,7 @@ class DepartmentModule extends Component
     {
         $this->item = [
             'name' => '',
+            'code' => '',
             'description_ar' => '',
             'description_en' => '',
             'email' => null,
@@ -80,6 +94,7 @@ class DepartmentModule extends Component
         $this->item = [
             'id' => $model->id,
             'name' =>  $model->name,
+            'code' => $model->code,
             'description_ar' => $model->description_ar,
             'description_en' => $model->description_en,
             'email' => $model->email,
@@ -96,6 +111,7 @@ class DepartmentModule extends Component
 
         $data = [
             'name' => $this->item['name'] ?? '',
+            'code' => $this->item['code'] ?? '',
             'description_en' => $this->item['description_en'],
             'description_ar' => $this->item['description_ar'],
             'email' => $this->item['email'],

@@ -8,12 +8,8 @@
             <span class="text-secondary-light text-sm font-medium">
                 10
             </span>
-            <div class="flex items-center justify-center w-7 h-7 rounded-md  text-primary">
-                <img
-                    src="/assets/icons/birthday-cake.svg"
-                    alt="Birthday watermark icon"
-                    class="w-5 h-5 select-none">
-            </div>
+            <x-icons.event class="ml-1 mb-0.5 text-secondary-medium"/>
+
         </div>
     </div>
 
