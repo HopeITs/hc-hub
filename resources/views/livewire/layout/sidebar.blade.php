@@ -132,7 +132,7 @@
                         </x-layouts.app.sidebar.nav-item>
 
                         <x-layouts.app.sidebar.nav-item :href="route('centers.index')"
-                                                        :active="request()->routeIs('centers.index')" wire:navigate>
+                                                        :active="request()->routeIs('centers.*')" wire:navigate>
                             {{ trans_choice('general.center', 2) }}
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>
