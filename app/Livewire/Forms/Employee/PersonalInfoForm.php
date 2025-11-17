@@ -5,8 +5,6 @@ namespace App\Livewire\Forms\Employee;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-
-
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -40,9 +38,7 @@ class PersonalInfoForm extends Form
     #[Validate('nullable|string')]
     public $address_en;
 
-
     public $email;
-
 
     public $national_number;
 
@@ -102,7 +98,6 @@ class PersonalInfoForm extends Form
     #[Validate('boolean')]
     public $is_active = true;
 
-
     public $username;
 
     #[Validate('nullable|exists:employees,id')]
@@ -110,9 +105,22 @@ class PersonalInfoForm extends Form
     #[Validate('nullable|exists:employees,id')]
     public $tech_manager_id = null;
 
-
     public $roles;
 
+    #[Validate('nullable|string')]
+    public $whatsapp_work;
+
+    #[Validate('nullable|string')]
+    public $telegram_work;
+
+    #[Validate('nullable|url')]
+    public $facebook;
+
+    #[Validate('nullable|url')]
+    public $instagram;
+
+    #[Validate('nullable|url')]
+    public $linkedin;
 
     public function rules()
     {
@@ -131,7 +139,6 @@ class PersonalInfoForm extends Form
             ],
         ];
     }
-
 
     protected function buildWorkEmail(?string $username): ?string
     {
@@ -183,13 +190,15 @@ class PersonalInfoForm extends Form
         $this->email = $employee->account?->email;
         $this->photo = $employee->getFirstMediaUrl('avatar');
         $this->roles = implode(',', $employee->account?->roles()->pluck('name')->toArray() ?? []);
-
+        $this->whatsapp_work = $employee->whatsapp_work ?? null;
+        $this->telegram_work = $employee->telegram_work ?? null;
+        $this->facebook = $employee->facebook ?? null;
+        $this->instagram = $employee->instagram ?? null;
+        $this->linkedin = $employee->linkedin ?? null;
     }
-
 
     public function saveInformation(): Employee
     {
-
         $this->email = $this->buildWorkEmail($this->username);
 
         $this->validate();
@@ -204,9 +213,7 @@ class PersonalInfoForm extends Form
                     $this->employee->account->syncRoles(json_decode($this->roles));
                     $this->employee->account->roles()->withPivot('is_active')->first()?->pivot->update(['is_active' => true]);
                 }
-
             }
-
         } else {
             $this->employee = Employee::create($this->except(['email', 'photo']));
 
@@ -225,9 +232,6 @@ class PersonalInfoForm extends Form
                 ->toMediaCollection('avatar');
         }
 
-
         return $this->employee;
     }
-
-
 }

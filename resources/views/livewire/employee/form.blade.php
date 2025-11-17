@@ -7,10 +7,13 @@
 
     <x-tab.form activeTab="information">
         <x-tab.list>
-            <x-tab.item :title="__('general.information')"  activeTab="information" :active="$activeTab === 'information'">
+            <x-tab.item :title="__('general.information')" activeTab="information" :active="$activeTab === 'information'">
                 <x-icons.user class="w-5 h-5 mr-2" />
             </x-tab.item>
-            <x-tab.item :title="__('general.education')"  :disabled="!isset($infoForm->id)" activeTab="education" :active="$activeTab === 'education'">
+            <x-tab.item :title="'Contact'" activeTab="contact" :active="$activeTab === 'contact'">
+                <x-icons.user class="w-5 h-5 mr-2" />
+            </x-tab.item>
+            <x-tab.item :title="__('general.education')" :disabled="!isset($infoForm->id)" activeTab="education" :active="$activeTab === 'education'">
                 <x-icons.education class="w-5 h-5 mr-2" />
             </x-tab.item>
             <x-tab.item :title="__('general.courses')" activeTab="courses" :disabled="!isset($infoForm->id)" :active="$activeTab === 'courses'">
@@ -38,8 +41,10 @@
 
         <div class="flex-grow w-full">
             <x-tab.container activeTab="information">
-                @if($activeTab === 'information')
+                @if ($activeTab === 'information')
                     @include('livewire.employee.tabs.personal-info-tab')
+                @elseif($activeTab === 'contact')
+                    @include('livewire.employee.tabs.contact-info-fields')
                 @elseif($activeTab === 'education')
                     @include('livewire.employee.tabs.education-fields')
                 @elseif($activeTab === 'courses')
