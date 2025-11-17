@@ -31,7 +31,7 @@ class LeaveRequest extends Model
             return  $duration . ' ' . trans_choice('general.hour',$duration);
         }else{
 
-            $duration = $this->start_at->diffInWeekdays($this->end_at);
+            $duration = $this->start_at->diffInWeekdays($this->end_at) + 1;
             return  $duration . ' ' . trans_choice('general.day',$duration);
         }
     }

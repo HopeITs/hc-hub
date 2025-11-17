@@ -84,7 +84,7 @@ class ContractsTable extends LivewireTable
 
             Column::make(__('general.yearly-leave-days'), 'leaveBalances')
                 ->displayUsing(fn($m) => $m[0]->deserved_formatted ?? 0)
-                ->sortable(),
+                ->sortable()->asHtml(),
 
             SelectColumn::make(__('general.salary-per'), 'salary_per')
                 ->options(

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -201,27 +202,26 @@ class Employee extends Model implements HasMedia
             ->with(['leaveRequests' => fn ($q) => $q->pending()
                 ->select('id','leave_balance_id','type','start_at','end_at') // keep it lean
             ])
+            // Sum days
+            ->withSum(
+                ['leaveRequests as pending_days' => function ($q) {
+                    $q->where('status', LeaveRequestStatus::Pending)
+                        ->where('type', 'day');
+                }],
+                DB::raw('DATEDIFF(end_at, start_at) + 1')
+            )
+
+            // Sum hours
+            ->withSum(
+                ['leaveRequests as pending_hours' => function ($q) {
+                    $q->where('status', LeaveRequestStatus::Pending)
+                        ->where('type', 'hour');
+                }],
+                DB::raw('TIMESTAMPDIFF(HOUR, start_at, end_at)')
+            )
             ->get();
 
-        // Attach sums per balance
-        $leaves->each(function ($balance) {
-            $pendingHours = $balance->leaveRequests
-                ->where('type', 'hour')
-                ->sum(fn ($r) => $r->duration_value);
 
-            $pendingDays = $balance->leaveRequests
-                ->reject(fn ($r) => $r->type === 'hour')
-                ->sum(fn ($r) => $r->duration_value);
-
-            // expose whatever you need on the model instance
-            $balance->pending_requests_hours_sum = $pendingHours;
-            $balance->pending_requests_days_sum  = $pendingDays;
-
-            // OPTIONAL: convert hours to days using your workday length
-            $hoursPerDay = config('hr.workday_hours', 8);
-            $balance->pending_requests_days_equivalent =
-                $pendingDays + ($pendingHours / $hoursPerDay);
-        });
 
         return $leaves;
     }

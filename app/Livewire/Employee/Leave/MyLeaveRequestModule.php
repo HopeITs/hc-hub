@@ -93,7 +93,7 @@ class MyLeaveRequestModule extends Component
                     $query->where('id', $employee->department->id ?? null);
                 });
             })->get();
-//dd($availableLeaves);
+
         return view('livewire.employee.leave.index', compact('availableLeaves', 'allAvailableLeaves', 'alternativeEmployees'));
     }
 
