@@ -1,25 +1,59 @@
 <div>
-    <div class="relative">
-        <button>
-            🔔
-            @if($notifications->count())
-                <span class="absolute top-0 right-0 h-2 w-2 bg-red-600 rounded-full"></span>
-            @endif
-        </button>
+    @forelse($notifications as $note)
 
-        <div class="absolute mt-2 w-64 bg-white shadow rounded">
-            @forelse($notifications as $note)
-                <div class="p-2 border-b">
-                    <p class="text-sm font-medium">{{ $note->data['title'] ?? 'New Notification' }}</p>
-                    <p class="text-xs text-gray-600">{{ $note->data['body'] ?? '' }}</p>
-                    @if(isset($note->data['url']))
-                        <a href="{{ $note->data['url'] }}" class="text-xs text-blue-600 hover:underline">View</a>
+        @php
+            $isUnread = is_null($note->read_at);
+        @endphp
+
+        <div
+            class="p-3 border-b hover:bg-neutral-100 dark:hover:bg-neutral-800 transition
+                   @if($isUnread)
+                       bg-primary-50 border-l-4 border-primary-500
+                   @endif">
+
+            <div class="flex items-start gap-2">
+
+                @if($isUnread)
+                    <span class="mt-1 inline-block w-2 h-2 bg-primary-500 rounded-full"></span>
+                @endif
+
+                <div class="flex-1">
+
+                    <p class="text-sm font-semibold
+                              @if($isUnread)
+                                  text-neutral-900 dark:text-white
+                              @else
+                                  text-neutral-800 dark:text-neutral-200
+                              @endif">
+                        {{ $note->data['title'] ?? 'Notification' }}
+                    </p>
+
+                    <p class="text-xs mt-1
+                              @if($isUnread)
+                                  text-neutral-700 dark:text-neutral-300
+                              @else
+                                  text-neutral-600 dark:text-neutral-400
+                              @endif">
+                        {{ $note->data['body'] ?? '' }}
+                    </p>
+
+
+                    @if ($isUnread)
+                        <button wire:click="markAsRead('{{ $note->id }}')"
+                                class="text-xs text-primary-600 hover:underline ml-2">
+                            Mark as read
+                        </button>
                     @endif
-                    <button wire:click="markAsRead('{{ $note->id }}')" class="block text-xs text-gray-400 mt-1">Mark as read</button>
+
                 </div>
-            @empty
-                <div class="p-2 text-gray-500">No new notifications</div>
-            @endforelse
+
+            </div>
+
         </div>
-    </div>
+
+    @empty
+        <div class="p-4 text-center text-neutral-500 dark:text-neutral-400">
+            No notifications available
+        </div>
+    @endforelse
 </div>

@@ -35,32 +35,7 @@
         </div>
     </header>
 
-    <div id="quick-access-bar"
-         class="fixed h-10 top-0 right-0 w-[1265px] sm:ms-60 z-30 bg-white/70 backdrop-blur-xl border-b border-gray-200 px-4 py-2
-            flex items-center justify-end gap-5 ">
-
-        {{-- Icon 1 --}}
-        <button class="p-2 rounded-xl hover:bg-gray-100 transition">
-            <x-icons.document-text class="w-4 h-4 text-gray-700"/>
-        </button>
-
-        {{-- Icon 2 --}}
-        <button class="p-2 rounded-xl hover:bg-gray-100 transition">
-            <x-icons.envelope class="w-4 h-4 text-gray-700"/>
-        </button>
-
-        {{-- Icon 3 --}}
-        <button class="p-2 rounded-xl hover:bg-gray-100 transition">
-            <x-icons.attachment class="w-5 h-5 text-gray-700"/>
-        </button>
-
-        {{-- Profile Placeholder --}}
-        <div class="p-2 rounded-full  hover:bg-gray-100 transition">
-            <img src="{{ auth()->user()->profile->getFirstMediaUrl('avatar') }}"
-                 class="w-7 h-7 ring-1 ring-primary rounded-full border object-cover">
-        </div>
-    </div>
-
+    <livewire:layout.header/>
 
     <main class="{{ View::hasSection('greeting') ? '' : 'pt-[120px] ' }} bg-gray-100 flex-grow flex flex-col items-center">
 
@@ -70,7 +45,7 @@
                 {{ session('status') }}
             </div>
         @endif
-        <div class="px-4 py-6 w-11/12  min-h-full">
+        <div class="px-4 pb-6 w-11/12  min-h-full">
             @yield('greeting')
             {{ $slot }}
         </div>

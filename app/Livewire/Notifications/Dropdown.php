@@ -17,13 +17,36 @@ class Dropdown extends Component
 
     public function render()
     {
+        $user = auth()->user();
+
+        $unread = $user->unreadNotifications()
+            ->latest()
+            ->take(3)
+            ->get();
+
+        if ($unread->count() < 3) {
+            $remaining = 3 - $unread->count();
+
+            $read = $user->readNotifications()
+                ->latest()
+                ->take($remaining)
+                ->get();
+        } else {
+            $read = collect();
+        }
+
+        $notifications = $unread->merge($read);
+
         return view('livewire.notifications.dropdown', [
-            'notifications' => auth()->user()->unreadNotifications()->take(5)->get()
+            'notifications' => $notifications,
         ]);
     }
 
     public function markAsRead($id): void
     {
-        auth()->user()->unreadNotifications()->where('id', $id)->update(['read_at' => now()]);
+        auth()->user()
+            ->notifications()
+            ->where('id', $id)
+            ->update(['read_at' => now()]);
     }
 }
