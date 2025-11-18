@@ -35,8 +35,9 @@
         </div>
     </header>
 
+    <livewire:layout.header/>
 
-    <main class="{{ View::hasSection('greeting') ? '' : 'pt-20 ' }} bg-gray-100 flex-grow flex flex-col items-center">
+    <main class="{{ View::hasSection('greeting') ? '' : 'pt-[120px] ' }} bg-gray-100 flex-grow flex flex-col items-center">
 
 
         @if (session('status'))
@@ -44,7 +45,7 @@
                 {{ session('status') }}
             </div>
         @endif
-        <div class="px-4 py-6 w-11/12  min-h-full">
+        <div class="px-4 pb-6 w-11/12  min-h-full">
             @yield('greeting')
             {{ $slot }}
         </div>

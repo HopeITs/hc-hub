@@ -213,8 +213,7 @@
                         id="checklist-items"
                         :title="__('general.checklist_items')"
                         :active="request()->routeIs('checklist-items.*')"
-                        wire:navigate.hover
-                    >
+                        wire:navigate.hover>
                         <x-slot name="icon">
                             <x-icons.clipboard-list class="w-5 h-5"/>
                         </x-slot>
@@ -257,8 +256,8 @@
             </ul>
         </div>
 
-        <div class="px-3 pb-4">
-            <x-layouts.app.sidebar.profile-card :user="$user"/>
-        </div>
+{{--        <div class="px-3 pb-4">--}}
+{{--            <x-layouts.app.sidebar.profile-card :user="$user"/>--}}
+{{--        </div>--}}
     </div>
 </aside>
