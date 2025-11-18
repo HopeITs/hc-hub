@@ -18,7 +18,7 @@
 @endphp
 
 @section('greeting')
-    <div class="py-4">
+    <div class="py-4 pt-26">
         <h1 class="text-secondary-dark font-semibold text-[23px]">
             Hello {{ $firstName }},
         </h1>
