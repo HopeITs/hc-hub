@@ -9,11 +9,6 @@
             <livewire:dashboard.soon-ending-contracts-card />
         </div>
 
-        <div>
-            <x-dashboard-cards.team-members-card
-                :contract="$contract"
-                :employee="$employee"/>
-        </div>
 
         <div>
             <x-dashboard-cards.employee-chart-statistics/>
@@ -39,34 +34,6 @@
             <x-dashboard-cards.salary-per-employee-statistics/>
         </div>
 
-        {{-- 🔁 Updated from birthday → event --}}
-        <div>
-            <x-dashboard-cards.today-events-card :todayEvents="$todayEvents"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.upcoming-event-card :upcomingEvents="$upcomingEvents"/>
-        </div>
-
-        <div>
-            <livewire:dashboards.hr-notes-card :employee="auth()->id()"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.pending-requests-card :pendingRequests="$pendingRequests"/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.upcoming-holidays-card/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.upcoming-leaves-card/>
-        </div>
-
-        <div>
-            <x-dashboard-cards.news-card/>
-        </div>
 
     </div>
 </div>

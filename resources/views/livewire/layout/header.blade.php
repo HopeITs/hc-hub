@@ -11,24 +11,27 @@
 @endphp
 
 <nav
-    class="relative shadow-sm top-0 z-30 w-full overflow-visible bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-    <div class="px-3 py-1  lg:px-5 lg:pl-3">
+    class="fixed inset-x-0 top-0 z-10 w-full bg-white border-b border-gray-200
+           dark:bg-gray-800 dark:border-gray-700  overflow-visible backdrop-blur">
+
+<div class="px-3 py-1  lg:px-5 lg:pl-3">
         <div class="flex items-center justify-end">
 
             <div class="flex w-0.5/4 justify-between items-center">
                 <x-layouts.app.notification/>
                 <button class="pl-6 p-2">
                     <a href="{{ $localized }}"
-                       class="flex items-center gap-2 px-1 py-2 rounded-xl text-sm font-medium
+                        class="flex items-center gap-2 px-1 py-2 rounded-xl text-sm font-medium
                                                     text-gray-800 hover:shadow-sm">
-                        <svg class="size-4 mb-0.5 text-gray-700" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor"
-                             stroke-width="1.8">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/>
-                        </svg>
+                            <svg class="size-4 mb-0.5 text-gray-700" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="1.8">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/>
+                            </svg>
                         <span
-                            class="font-medium">{{ $switchTo === 'ar' ? 'AR' : 'EN' }}</span>
+                            class="font-medium">{{ $switchTo === 'ar' ? 'AR' : 'EN' }}
+                        </span>
                     </a>
                 </button>
 
