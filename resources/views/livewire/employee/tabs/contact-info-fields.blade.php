@@ -29,9 +29,12 @@
 
         <div class="col-span-full">
             <x-forms.input-label for="roles">{{ trans_choice('general.role', 2) }}</x-forms.input-label>
-            <input class="hidden" wire:model="infoForm.roles" id="roles_hidden">
-            <x-forms.input class="tagify" id="roles" value="{{ $infoForm->roles }}"
-                data-whitelist="{{ implode(',', $roles) }}" />
+            <input type="hidden" wire:model="infoForm.roles" id="roles_hidden">
+            <div wire:ignore>
+                <x-forms.input class="tagify" id="roles"
+                    value="{{ $infoForm->roles }}"
+                    data-whitelist="{{ implode(',', $roles) }}" />
+            </div>
             <x-error-span>{{ $errors->first('infoForm.roles') }}</x-error-span>
         </div>
     </div>
@@ -89,4 +92,37 @@
         <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
         <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
     </div>
+
+    <script>
+        document.addEventListener("livewire:load", () => {
+            window.initTagifyRoles = function () {
+                const input = document.querySelector('#roles');
+                if (input && !input.classList.contains('tagify-initialized')) {
+                    const whitelist = input.dataset.whitelist.split(',');
+                    const tagify = new Tagify(input, {
+                        whitelist: whitelist,
+                        dropdown: {
+                            enabled: 0,
+                            classname: "tags-look",
+                        }
+                    });
+                    input.classList.add('tagify-initialized');
+
+                    tagify.on('change', e => {
+                        document.getElementById('roles_hidden').value = e.detail.value;
+                        Livewire.find(input.closest('[wire\\:id]').getAttribute('wire:id'))
+                            .set('infoForm.roles', e.detail.value);
+                    });
+                }
+            };
+
+            window.initTagifyRoles();
+        });
+
+        document.addEventListener('tab-switched', function (e) {
+            if (e.detail === 'contact') {
+                window.initTagifyRoles();
+            }
+        });
+    </script>
 </form>
