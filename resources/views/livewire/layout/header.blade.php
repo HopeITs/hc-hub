@@ -11,7 +11,7 @@
 @endphp
 
 <nav
-    class="fixed inset-x-0 top-0 z-10 w-full bg-white border-b border-gray-200
+    class="fixed inset-x-0 top-0 z-10 w-full bg-white
            dark:bg-gray-800 dark:border-gray-700  overflow-visible backdrop-blur">
 
 <div class="px-3 py-1  lg:px-5 lg:pl-3">
@@ -50,8 +50,7 @@
                                     class="group flex w-full items-center gap-3 px-3 py-2 rounded-3xl
                                        ">
                                 <span
-                                    class="relative inline-grid place-items-center rounded-full p-[2px] shrink-0
-                                             bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
+                                    class="relative inline-grid place-items-center rounded-full p-[2px] shrink-0">
                                     <img class="size-8 border border-1 border-primary rounded-full object-cover"
                                          src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt="user"/>
                                     <span
@@ -75,7 +74,7 @@
 
                                     <div class="relative flex items-center gap-3">
                                                 <span
-                                                    class="p-[3px] rounded-full shrink-0 bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
+                                                    class="p-[3px] rounded-full shrink-0 ">
                                                     <img
                                                         class="size-12 border border-1 border-primary rounded-full object-cover"
                                                         src="{{ $user->profile->getFirstMediaUrl('avatar') }}"
