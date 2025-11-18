@@ -184,11 +184,11 @@
 
             <div x-show="activeTab === 'employees'" x-cloak>
                 @if ($employees && $employees->isNotEmpty())
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
                         @foreach ($employees as $employee)
                             <div class="group relative flex flex-col justify-center items-center text-center
-                            rounded-3xl border border-neutral-300 bg-white p-6
+                            rounded-3xl border border-neutral-300 bg-white py-6
                             shadow-sm hover:shadow-xl transition-all duration-300">
 
                                 <div class="flex text-[35px] items-center justify-center size-26  flex-shrink-0 rounded-full overflow-hidden
