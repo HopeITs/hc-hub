@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         //basics
@@ -145,6 +144,11 @@ return new class extends Migration
             $table->string('work_phone')->nullable();
             $table->string('personal_phone')->nullable();
             $table->string('personal_email')->nullable();
+            $table->string('whatsapp_work')->nullable();
+            $table->string('telegram_work')->nullable();
+            $table->string('facebook')->nullable();
+            $table->string('instagram')->nullable();
+            $table->string('linkedin')->nullable();
             $table->text('address_en')->nullable();
             $table->text('address_ar')->nullable();
             $table->string('skills')->nullable();
@@ -267,7 +271,7 @@ return new class extends Migration
         Schema::create('leave_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('leave_balance_id')->constrained()->onDelete('restrict');
-            $table->enum('type' , ['day', 'hour'])->default('day');
+            $table->enum('type', ['day', 'hour'])->default('day');
             $table->dateTime('start_at')->default(today());
             $table->dateTime('end_at')->default(today());
             $table->text('reason')->nullable();
@@ -331,7 +335,6 @@ return new class extends Migration
             $table->date('event_date')->nullable();
             $table->timestamps();
         });
-
     }
 
     /**

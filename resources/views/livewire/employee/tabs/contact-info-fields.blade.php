@@ -27,11 +27,10 @@
             <x-error-span>{{ $errors->first('infoForm.work_phone') }}</x-error-span>
         </div>
 
-        <div class="col-span-full">
+        <div class="col-span-full" wire:ignore>
             <x-forms.input-label for="roles">{{ trans_choice('general.role', 2) }}</x-forms.input-label>
-            <input class="hidden" wire:model="infoForm.roles" id="roles_hidden">
-            <x-forms.input class="tagify" id="roles" value="{{ $infoForm->roles }}"
-                data-whitelist="{{ implode(',', $roles) }}" />
+            <input type="text" id="roles" placeholder="Add roles..." />
+            <input type="hidden" id="roles_hidden" wire:model="infoForm.roles" />
             <x-error-span>{{ $errors->first('infoForm.roles') }}</x-error-span>
         </div>
     </div>
@@ -89,4 +88,37 @@
         <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
         <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
     </div>
+
+    @push('scripts')
+        <script src="https://unpkg.com/@yaireo/tagify"></script>
+        <script>
+            document.addEventListener('livewire:load', () => {
+                const input = document.getElementById('roles');
+                const hidden = document.getElementById('roles_hidden');
+
+                const tagify = new Tagify(input, {
+                    whitelist: @json(array_values($roles)),
+                    enforceWhitelist: false,
+                    dropdown: {
+                        maxItems: 20,
+                        classname: "tagify-dropdown",
+                        enabled: 0,
+                        closeOnSelect: false
+                    }
+                });
+
+                tagify.addTags(@json(explode(',', $infoForm->roles)));
+
+                tagify.on('change', () => {
+                    const value = tagify.value.map(tag => tag.value).join(',');
+                    Livewire.find('{{ $this->id }}').set('infoForm.roles', value);
+                });
+
+                Livewire.on('refreshTagify', () => {
+                    tagify.removeAllTags();
+                    tagify.addTags(@json(explode(',', $infoForm->roles)));
+                });
+            });
+        </script>
+    @endpush
 </form>
