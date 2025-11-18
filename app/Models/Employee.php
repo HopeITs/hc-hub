@@ -196,36 +196,40 @@ class Employee extends Model implements HasMedia
 
     public function availableLeaves()
     {
-
         $leaves = $this->latestActiveContract()?->leaveBalances()
             ->whereHas('leaveType', fn ($q) => $q->where('base_days', '>', 10))
             ->with(['leaveRequests' => fn ($q) => $q->pending()
-                ->select('id','leave_balance_id','type','start_at','end_at') // keep it lean
+                ->select('id','leave_balance_id','type','start_at','end_at')
             ])
-            // Sum days
-            ->withSum(
-                ['leaveRequests as pending_days' => function ($q) {
-                    $q->where('status', LeaveRequestStatus::Pending)
-                        ->where('type', 'day');
-                }],
-                DB::raw('DATEDIFF(end_at, start_at) + 1')
-            )
-
-            // Sum hours
-            ->withSum(
-                ['leaveRequests as pending_hours' => function ($q) {
-                    $q->where('status', LeaveRequestStatus::Pending)
-                        ->where('type', 'hour');
-                }],
-                DB::raw('TIMESTAMPDIFF(HOUR, start_at, end_at)')
-            )
             ->get();
 
+        // Now compute pending durations using the real accessor logic
+        foreach ($leaves as $leave) {
 
+            $pendingDays = 0;
+            $pendingHours = 0;
+
+            foreach ($leave->leaveRequests as $req) {
+
+                if ($req->type === 'day') {
+                    $weekends = array_map('intval', explode(',', $req->leaveBalance->contract->position->center->weekends));
+
+                   Carbon::setWeekendDays($weekends);
+
+                    $pendingDays += $req->start_at->diffInWeekDays($req->end_at) + 1;
+                }
+
+                if ($req->type === 'hour') {
+                    $pendingHours += $req->start_at->floatDiffInRealHours($req->end_at);
+                }
+            }
+
+            $leave->pending_days = $pendingDays;
+            $leave->pending_hours = $pendingHours;
+        }
 
         return $leaves;
     }
-
 
 
     public function allAvailableLeaves()
