@@ -21,7 +21,7 @@ class CentersModule extends Component
         'address_ar' => '',
         'address_en' => '',
         'is_active' => true,
-        'weekends' => '',
+        'weekends' => [],
         'open_at' => null,
         'close_at' => null,
     ];
@@ -31,7 +31,7 @@ class CentersModule extends Component
         'item.city_id' => 'required|exists:cities,id',
         'item.address_en' => 'nullable|string|max:255',
         'item.address_ar' => 'nullable|string|max:255',
-        'item.weekends' => 'required',
+        'item.weekends' => 'required|array',
         'item.open_at' => 'required',
         'item.close_at' => 'required',
     ];
@@ -52,7 +52,7 @@ class CentersModule extends Component
             'address_ar' => '',
             'address_en' => '',
             'is_active' => true,
-            'weekends' => '',
+            'weekends' => [],
             'open_at' => null,
             'close_at' => null,
         ];
@@ -74,7 +74,7 @@ class CentersModule extends Component
             'address_ar' => $model->address_ar,
             'address_en' => $model->address_en,
             'is_active' => (bool)$model->is_active,
-            'weekends' => $model->weekends,
+            'weekends' => explode(',',$model->weekends),
             'open_at' => $model->open_at,
             'close_at' => $model->close_at,
         ];
@@ -88,6 +88,7 @@ class CentersModule extends Component
     {
         $this->validate();
 
+        $this->item['weekends'] = implode(',',$this->item['weekends']);
         $model = Center::findOrNew($this->item['id']);
         $isNew = !$model->exists;
 
