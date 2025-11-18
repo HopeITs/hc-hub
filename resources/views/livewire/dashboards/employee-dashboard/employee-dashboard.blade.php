@@ -54,6 +54,15 @@
             <x-dashboard-cards.news-card/>
         </div>
 
+
+        <div class=" h-70 flex items-center justify-center text-white font-semibold">
+            <x-dashboard-cards.upcoming-holidays-card/>
+        </div>
+
+        <div class=" h-70 flex items-center justify-center text-white font-semibold">
+            <x-dashboard-cards.upcoming-leaves-card/>
+        </div>
+
         <div class="h-70 flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.today-events-card/>
 
@@ -62,14 +71,6 @@
         <div class="h-70 flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.upcoming-events-card/>
 
-        </div>
-
-        <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-holidays-card/>
-        </div>
-
-        <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-leaves-card/>
         </div>
     </div>
 
