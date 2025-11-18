@@ -23,7 +23,7 @@
                 </x-forms.input-label>
                 <x-forms.input type="text" wire:model="infoForm.name_{{ $locale }}"
                     id="name_{{ $locale }}" />
-                <x-error-span>{{ $errors->first('infoForm.name_.' . $locale) }}</x-error-span>
+                <x-error-span>{{ $errors->first('infoForm.name_' . $locale) }}</x-error-span>
             </div>
         @endforeach
 
@@ -207,7 +207,13 @@
     </div>
 
     <div class="flex justify-end space-x-2 ">
-        <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
+
+        <x-primary-button type="button" wire:click="saveInformation" x-on:click="$wire.setActiveTab('contact')"
+            class="!w-auto">
+            @lang('general.next')
+        </x-primary-button>
+
         <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
     </div>
+
 </form>
