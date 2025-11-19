@@ -116,6 +116,7 @@ class LeaveRequestForm extends Form
      */
     public function setLeaveRequest(LeaveRequest $leaveRequest): void
     {
+
         $this->leaveRequest = $leaveRequest;
         $this->fill($leaveRequest->only([
             'id',
@@ -134,6 +135,9 @@ class LeaveRequestForm extends Form
             $this->leave_date = Carbon::parse($leaveRequest->start_at)->toDateString();
             $this->start_hour = Carbon::parse($leaveRequest->start_at)->format('H:i');
             $this->end_hour = Carbon::parse($leaveRequest->end_at)->format('H:i');
+        }else{
+            $this->start_at = Carbon::parse($leaveRequest->start_at)->toDateString();
+            $this->end_at = Carbon::parse($leaveRequest->end_at)->toDateString();
         }
     }
 

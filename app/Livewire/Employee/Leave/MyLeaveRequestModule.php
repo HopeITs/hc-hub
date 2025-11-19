@@ -75,9 +75,10 @@ class MyLeaveRequestModule extends Component
         $this->showModal = true;
     }
 
-    public function edit(LeaveRequest $leaveRequest)
+    public function edit(LeaveRequest $id)
     {
-        $this->form->setLeaveRequest($leaveRequest);
+
+        $this->form->setLeaveRequest($id);
         $this->modalTitle = __('general.edit');
         $this->showModal = true;
     }
@@ -105,13 +106,13 @@ class MyLeaveRequestModule extends Component
         $html = $this->confirmationMessage();
 
         LivewireAlert::title(__('general.confirmation'))
+            ->timer(null)
+            ->question()
             ->html($html)
-            ->timer(0)
-            ->toast(false)
-            ->showCancelButton(true)
-            ->showConfirmButton(true)
+            ->withConfirmButton(__('general.save'))
             ->onConfirm('processSave')
-            ->show();
+            ->withCancelButton(__('general.cancel')) ->show();
+
     }
 
     public function processSave()
@@ -149,7 +150,7 @@ class MyLeaveRequestModule extends Component
         $reason = $this->form->reason;
 
         return Blade::render(
-            '<x-leave-request-confirmation
+            '<x-alerts.leave-request-confirmation
                 :type="$type"
                 :leave_type="$leaveTypeName"
                 :start="$start"
