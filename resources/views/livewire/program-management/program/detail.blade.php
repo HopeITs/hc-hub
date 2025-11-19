@@ -1,192 +1,243 @@
-<div class="space-y-8" x-data="{ activeTab: 'details' }">
-    <livewire:layout.breadcrumbs :title="__('general.programs-management')" :crumbs="[
-        ['label' => __('general.programs-management')],
-        ['label' => trans_choice('general.program', 2), 'url' => route('programs.index')],
-        ['label' => $program->name],
-    ]" />
+<div class="relative isolate" x-data="{ activeTab: 'details' }">
 
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div class="w-full">
-            <div class="flex justify-between">
-                <div class="flex items-center gap-3">
-                    <h1 class="text-3xl font-bold text-gray-800">{{ $program->name }}</h1>
-                    <span class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                        {{ $program->code . '-' . $program->slug }}
-                    </span>
-                </div>
-                <div class="flex h-fit space-x-2">
-                    <x-forms.toggle-input
-                        class="!me-2 text-xl p-2"
-                        :active="$program->is_active"
-                        :model-id="$program->id"
-                        wire-event="confirmToggleItemStatus"
-                    />
+    <div class="space-y-10">
+        <div class="grid gap-6 md:grid-cols-[1fr_auto] items-start">
 
-                    <x-table.edit-btn
-                        class="!p-0 me-2"
-                        :href="route('programs.edit', ['program' => $program->slug])"
-                    />
-                    <x-table.delete-btn class="!p-0" :modelId="$program->id" />
+            <div
+                class="relative overflow-hidden rounded-3xl border border-neutral-200 bg-white backdrop-blur-xl p-6 shadow-sm">
+                <div class="absolute inset-0 opacity-50 bg-neutral-100"></div>
+
+                <div class="relative flex flex-col gap-3">
+
+                    <div class="flex w-full justify-between items-start">
+                        <div>
+                            <h1 class="text-3xl font-black text-neutral-900">
+                                {{ $program->name }}
+                            </h1>
+                            <span
+                                class="mt-1 inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-primary-700 bg-primary-50 rounded-xl border border-primary-200">
+                                {{ $program->code }}-{{ $program->slug }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <x-forms.toggle-input
+                                class="!me-2 text-xl p-2"
+                                :active="$program->is_active"
+                                :model-id="$program->id"
+                                wire-event="confirmToggleItemStatus"
+                            />
+
+                            <x-table.edit-btn
+                                class="!p-0 me-2"
+                                :href="route('programs.edit', ['program' => $program->slug])"
+                            />
+
+                            <x-table.delete-btn class="!p-0" :modelId="$program->id"/>
+                        </div>
+                    </div>
+
+                    <p class="text-neutral-600 dark:text-neutral-400 max-w-prose line-clamp-3">
+                        {{ $program->{'description_' . app()->getLocale()} }}
+                    </p>
+
+                    <div class="relative mt-3 -ml-1">
+                        <div
+                            class="inline-flex rounded-2xl border border-neutral-200 bg-white backdrop-blur-xl p-1 shadow-lg">
+                            <button
+                                @click="activeTab = 'details'"
+                                class="ui-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all
+                                duration-300
+                                "
+                                :class="activeTab === 'details'
+                                    ? 'bg-primary-500 text-white'
+                                    : 'text-neutral-700'">
+                                Project Info
+                            </button>
+
+                            <button
+                                @click="activeTab = 'centers'"
+                                class="ui-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all
+                                duration-300
+                                "
+                                :class="activeTab === 'centers'
+                                    ? 'bg-primary-500 text-white'
+                                    : 'text-neutral-700'">
+                                Centers
+                            </button>
+
+                            <button
+                                @click="activeTab = 'employees'"
+                                class="ui-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all
+                                duration-300
+                                "
+                                :class="activeTab === 'employees'
+                                    ? 'bg-primary-500 text-white'
+                                    : 'text-neutral-700'">
+                                Employees
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
-            <p class="text-md text-gray-500 mt-2">
-                {{ $program->{'description_' . app()->getLocale()} }}
-            </p>
-        </div>
-
-
-    </div>
-
-    <div class="border-b border-gray-200">
-        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-            <a href="#" @click.prevent="activeTab = 'details'"
-               :class="{
-                   'border-primary text-primary': activeTab === 'details',
-                   'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'details'
-               }"
-               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-                @lang('general.project-info')
-            </a>
-            <a href="#" @click.prevent="activeTab = 'centers'"
-               :class="{
-                   'border-primary text-primary': activeTab === 'centers',
-                   'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'centers'
-               }"
-               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-                {{ trans_choice('general.center', 2) }}
-            </a>
-            <a href="#" @click.prevent="activeTab = 'employees'"
-               :class="{
-                   'border-primary text-primary': activeTab === 'employees',
-                   'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'employees'
-               }"
-               class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-                {{ trans_choice('general.employee', 2) }}
-            </a>
-        </nav>
-    </div>
-
-    {{-- tab content --}}
-    <div class="bg-white rounded-lg p-6 shadow-sm border">
-        <div x-show="activeTab === 'details'" x-cloak>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm">
-                <div class="flex items-start gap-3">
-                    <x-icon name="user-circle" class="w-5 h-5 text-gray-400 mt-0.5" />
+            <div
+                class="w-full h-full text-center flex items-center rounded-3xl border border-neutral-200 bg-white backdrop-blur-xl px-4 shadow-sm">
+                <div class="relative grid grid-rows-2 gap-4 mx-auto">
                     <div>
-                        <span class="font-semibold text-gray-800">@lang('general.program-manager'):</span>
-                        <p class="text-gray-600">
-                            {{ $program->programManager?->name ?? '-' }}
+                        <p class="text-[14px] font-semibold text-neutral-500">Total Employees</p>
+                        <p class="text-2xl font-bold text-secondary-dark">
+                            {{ $employees->count() }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-[14px] font-semibold text-neutral-500">Centers</p>
+                        <p class="text-2xl font-bold text-secondary-dark">
+                            {{ $program->centers->count() }}
                         </p>
                     </div>
                 </div>
-                <div class="flex items-start gap-3">
-                    <x-icon name="arrows-pointing-in" class="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                        <span class="font-semibold text-gray-800">@lang('general.slug'):</span>
-                        <p class="text-gray-600">{{ $program->slug }}</p>
+            </div>
+
+        </div>
+
+
+        <div class="pt-1">
+
+            <div x-show="activeTab === 'details'" x-cloak>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-7">
+
+                    <div
+                        class="group relative overflow-hidden rounded-3xl border border-neutral-200 bg-white backdrop-blur-xl p-6 shadow-md">
+                        <div class="flex items-start gap-3">
+
+                            <div>
+                                <p class="font-semibold text-neutral-900">Program Manager</p>
+                                <p class="text-neutral-600">
+                                    {{ $program->programManager?->name ?? '—' }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <x-icon name="calendar" class="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                        <span class="font-semibold text-gray-800">@lang('general.start-date'):</span>
-                        <p class="text-gray-600">{{ $program->start_date?->format('d M, Y') ?? '—' }}</p>
+
+                    <div
+                        class="group relative overflow-hidden rounded-3xl border bg-white backdrop-blur-xl p-6 shadow-md">
+                        <div class="flex items-start gap-3">
+                            <div>
+                                <p class="font-semibold text-neutral-900">Start Date</p>
+                                <p class="text-neutral-600">
+                                    {{ $program->start_date?->format('d M, Y') ?? '—' }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="flex items-start gap-3">
-                    <x-icon name="calendar" class="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                        <span class="font-semibold text-gray-800">@lang('general.end-date'):</span>
-                        <p class="text-gray-600">{{ $program->end_date?->format('d M, Y') ?? __('general.active') }}</p>
+
+                    <div
+                        class="group relative overflow-hidden rounded-3xl border bg-white backdrop-blur-xl p-6 shadow-md">
+                        <div class="flex items-start gap-3">
+                            <div>
+                                <p class="font-semibold text-neutral-900">End Date</p>
+                                <p class="text-neutral-600">
+                                    {{ $program->end_date?->format('d M, Y') ?? 'Active' }}
+                                </p>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
-        </div>
 
-        {{-- centers tab --}}
-        <div x-show="activeTab === 'centers'" x-cloak>
-            @if ($program->centers->isNotEmpty())
-                <div class="overflow-x-auto border rounded-lg">
-                    <table class="w-full text-sm text-left text-gray-500">
-                        <thead class="text-xs text-gray-700 bg-gray-50 border-b">
-                        <tr>
-                            <th class="px-6 py-3 font-medium">@lang('general.name')</th>
-                            <th class="px-6 py-3 font-medium">@lang('general.city')</th>
-                            <th class="px-6 py-3 font-medium">@lang('general.project-manager')</th>
-                            <th class="px-6 py-3 font-medium">@lang('general.created_at')</th>
-                            <th class="px-6 py-3 font-medium text-center"></th>
-                        </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y">
 
-                            @foreach ($program->centers as $center)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-medium text-gray-900">
-                                        {{ $center->name }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ $center->city?->{'name_' . app()->getLocale()} ?? '-' }}
-                                    </td>
-                                    <td class="px-6 py-4">{{ $center->projectManager?->getTranslation('name', app()->getLocale()) ?? '-' }}</td>
-                                    <td class="px-6 py-4">
-                                        {{ $center->created_at->format('d M, Y') }}
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <x-table.edit-btn :href="route('centers.index', ['edit' => $center->id])" class="mx-auto" />
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="text-center py-12">
-                    <p class="text-gray-500">@lang('general.no-centers')</p>
-                </div>
-            @endif
-        </div>
+            <div x-show="activeTab === 'centers'" x-cloak>
+                @if ($program->centers->isNotEmpty())
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+                        @foreach ($program->centers as $center)
+                            <a href="{{ route('centers.show', $center->id) }}"
+                               class="group relative rounded-3xl border bg-white backdrop-blur-xl p-6 shadow hover:-translate-y-1 hover:shadow-xl transition">
 
-        {{-- employees tab --}}
-        <div x-show="activeTab === 'employees'" x-cloak>
-            @if ($employees && $employees->isNotEmpty())
-                <div class="overflow-x-auto border rounded-lg">
-                    <table class="w-full text-sm text-left text-gray-500">
-                        <thead class="text-xs text-gray-700 bg-gray-50 border-b">
-                        <tr>
-                            <th class="px-6 py-3 font-medium">@lang('general.employee-name')</th>
-                            <th class="px-6 py-3 font-medium">@lang('general.position')</th>
-                            <th class="px-6 py-3 font-medium">@lang('general.contract-start')</th>
-                            <th class="px-6 py-3 font-medium">@lang('general.contract-end')</th>
-                        </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y">
-                        @foreach ($employees as $employee)
-                            @foreach ($employee->contracts as $contract)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 font-medium text-gray-900">
-                                        {{ $employee->{'name_' . app()->getLocale()} ?? '-' }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ $contract->position?->{'title_' . app()->getLocale()} ?? '—' }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ $contract->start_date?->format('d M, Y') ?? '—' }}
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        {{ $contract->end_date?->format('d M, Y') ?? __('general.active') }}
-                                    </td>
-                                </tr>
-                            @endforeach
+                                <h3 class="text-lg font-bold text-neutral-900">
+                                    {{ $center->name }}
+                                </h3>
+
+                                <p class="mt-1 text-neutral-500 text-sm">
+                                    {{ $center->city?->{'name_' . app()->getLocale()} ?? '—' }}
+                                </p>
+
+                                <p class="mt-2 text-sm text-neutral-700">
+                                    Manager: <span class="font-semibold">
+                                        {{ $center->projectManager?->name ?? '—' }}
+                                    </span>
+                                </p>
+
+                            </a>
                         @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="text-center py-12">
-                    <p class="text-gray-500">@lang('general.no-employees')</p>
-                </div>
-            @endif
+                    </div>
+                @else
+                    <div class="text-center py-12 text-neutral-500">
+                        No centers assigned to this program.
+                    </div>
+                @endif
+            </div>
+
+
+            <div x-show="activeTab === 'employees'" x-cloak>
+                @if ($employees && $employees->isNotEmpty())
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+                        @foreach ($employees as $employee)
+                            <div class="group relative flex flex-col justify-center items-center text-center
+                            rounded-3xl border border-neutral-300 bg-white py-6
+                            shadow-sm hover:shadow-xl transition-all duration-300">
+
+                                <div class="flex text-[35px] items-center justify-center size-26  flex-shrink-0 rounded-full overflow-hidden
+                                    bg-white border-2 border-primary text-primary font-medium uppercase ">
+                                    @if($employee->getFirstMediaUrl('profile'))
+                                        <img src="{{ $employee->getFirstMediaUrl('profile') }}"
+                                             alt="{{ $employee->displayName ?? $employee->name }}"
+                                             class="h-full w-full object-cover">
+                                    @else
+                                        {{ collect(explode(' ', $employee->displayName ?? $employee->name))
+                                            ->map(fn($n) => Str::substr($n, 0, 1))
+                                            ->join('') }}
+                                    @endif
+                                </div>
+
+
+                                <h3 class="text-lg font-bold text-secondary-dark mt-3 mb-1">
+                                    {{ $employee->{'name_' . app()->getLocale()} }}
+                                </h3>
+
+                                <div class="space-y-3 text-sm text-neutral-600 mt-2 w-full">
+                                    @foreach ($employee->contracts as $contract)
+                                        <div class="border-t first:border-none pt-3">
+                                            <p class="font-semibold text-neutral-600">
+                                                {{ $contract->position?->{'title_' . app()->getLocale()} }}
+                                            </p>
+                                            <p class="font-light text-neutral-600 text-sm">
+                                                {{ $contract->start_date?->format('d M Y') }} →
+                                                {{ $contract->end_date?->format('d M Y') ?? __('general.active') }}
+                                            </p>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                            </div>
+                        @endforeach
+
+                    </div>
+
+                @else
+                    <div class="text-center py-12 text-neutral-500">
+                        No employees assigned to this program.
+                    </div>
+                @endif
+            </div>
+
+
         </div>
+
     </div>
+
 </div>
