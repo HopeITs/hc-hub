@@ -22,9 +22,10 @@ use App\Enums\LeaveRequestStatus;
     </div>
 
     @isset($availableLeaves)
-        <div class="flex gap-4 mb-6">
+        <div class="grid grid-cols-5  gap-6 mb-6">
             @foreach($availableLeaves as $availableLeave)
-                <x-leave-card :title="$availableLeave->leaveType->name"
+                <x-leave-card class="{{$loop->first ? 'col-span-2' : 'col-span-1'}}"
+                                :title="$availableLeave->leaveType->name"
                               :total="$availableLeave->deserved_formatted"
                               :remaining="$availableLeave->remaining"
                               :total-days="$availableLeave->intTotal"
@@ -34,37 +35,7 @@ use App\Enums\LeaveRequestStatus;
                               :pending="formatDuration($availableLeave->pending_days , $availableLeave->pending_hours)"
 
                 />
-{{--                <div class="flex flex-col gap-2 rounded-2xl shadow-md p-4">--}}
-{{--                    <h3 class="font-bold text-xl text-secondary-dark">{{$availableLeave->leaveType->name}}</h3>--}}
 
-{{--                    <span class=" flex justify-between px-2 py-1 text-secondary-dark"><span--}}
-{{--                                class="font-semibold text-secondary-medium text-secondary-dark me-2">Total:</span>{{$availableLeave->deserved_formatted}}</span>--}}
-{{--                    <span class="rounded-lg px-2 py-1 bg-gray-200 text-secondary-dark flex justify-between"><span--}}
-{{--                                class="font-semibold text-secondary-medium me-2">Remaining:</span>{{ $availableLeave->remaining}}</span>--}}
-
-{{--                    <div class="flex justify-between">--}}
-{{--                        <div class="rounded-md px-2 py-1 bg-purple-100 text-purple flex justify-between">--}}
-{{--                            <span class="font-semibold text-purple me-2">--}}
-{{--                                 <x-icons.clock class="text-purple"/>--}}
-{{--                            </span>--}}
-{{--                            <span>{{ $availableLeave->pending_requests_count}}</span>--}}
-{{--                        </div>--}}
-{{--                        <div class="rounded-md px-2 py-1 bg-green-100 text-green flex justify-between">--}}
-{{--                            <span class="font-semibold text-green me-2">--}}
-{{--                                  <x-icons.check-circle class="text-green"/>--}}
-{{--                            </span>--}}
-{{--                            <span>{{ $availableLeave->approved_requests_count}}</span>--}}
-{{--                        </div>--}}
-{{--                        <div class="rounded-md px-2 py-1 bg-red-100 text-red flex justify-between">--}}
-{{--                            <span class="font-semibold text-red me-2">--}}
-{{--                                   <x-icons.close-circle class="!text-red bg-red"/>--}}
-{{--                            </span>--}}
-{{--                            <span>{{ $availableLeave->rejected_requests_count}}</span>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-
-
-{{--                </div>--}}
             @endforeach
         </div>
     @else

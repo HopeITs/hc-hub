@@ -197,7 +197,7 @@ class Employee extends Model implements HasMedia
     public function availableLeaves()
     {
         $leaves = $this->latestActiveContract()?->leaveBalances()
-            ->whereHas('leaveType', fn ($q) => $q->where('base_days', '>', 10))
+//            ->whereHas('leaveType', fn ($q) => $q->where('base_days', '>', 10))
             ->with(['leaveRequests' => fn ($q) => $q->pending()
                 ->select('id','leave_balance_id','type','start_at','end_at')
             ])

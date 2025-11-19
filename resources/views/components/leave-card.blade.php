@@ -9,7 +9,9 @@
     'isAnnual' => false
 
 ])
-<div class="flex items-end space-x-6 bg-white rounded-2xl py-4 px-6 w-fit">
+<div {{$attributes->merge([
+    'class' => 'flex items-end space-x-8 bg-white rounded-2xl py-4 px-6 w-full'
+]) }}>
     @if($isAnnual)
         <div class="flex items-end -mb-3.5">
             <span class="text-[125px] font-extrabold text-secondary-medium leading-none">{{$remainingDays}}</span>
@@ -23,7 +25,7 @@
             {{$title}}
         </h4>
         <div class="border-b border-3 border-primary w-6"></div>
-        <ul class="mt-2 space-y-0.2 text-secondary-light text-xs leading-relaxed">
+        <ul class="mt-3 space-y-0.2 text-secondary-light text-xs leading-relaxed">
             <li class="text-secondary-light">
                 <span>USED:</span>
                 <span>{!! $used !!}</span>
