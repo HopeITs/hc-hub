@@ -234,6 +234,4 @@ input[type="date"]::-moz-focus-inner {
 ::-webkit-clear-button {
     color: var(--color-primary);
 }
-.tagify__input {
 
-}

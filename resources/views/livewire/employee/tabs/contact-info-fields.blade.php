@@ -27,16 +27,6 @@
             <x-error-span>{{ $errors->first('infoForm.work_phone') }}</x-error-span>
         </div>
 
-        <div class="col-span-full">
-            <x-forms.input-label for="roles">{{ trans_choice('general.role', 2) }}</x-forms.input-label>
-            <input type="hidden" wire:model="infoForm.roles" id="roles_hidden">
-            <div wire:ignore>
-                <x-forms.input class="tagify" id="roles"
-                    value="{{ $infoForm->roles }}"
-                    data-whitelist="{{ implode(',', $roles) }}" />
-            </div>
-            <x-error-span>{{ $errors->first('infoForm.roles') }}</x-error-span>
-        </div>
     </div>
 
     <div class="grid md:grid-cols-2 gap-x-6 gap-y-3 border-b pb-8 mb-8">
@@ -126,3 +116,6 @@
         });
     </script>
 </form>
+
+
+

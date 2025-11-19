@@ -240,7 +240,7 @@ return [
     'personal_phone' => 'Personal Phone',
     'work_phone' => 'Work Phone',
     'personal_email' => 'Personal Email',
-    'board_member' => 'Board Member',
+    'membership' => 'Membership',
     'is_board_member' => 'Is Board Member',
     'board_member_started_at' => 'Board Member Started At',
     'board_member_end_at' => 'Board Member End At',

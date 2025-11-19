@@ -19,7 +19,7 @@
                      src="{{ $oldFile}}" alt="Current profile photo"/>
             @else
                 <div class="size-24  rounded-full  flex border border-1 border-primary items-center justify-center">
-                    <x-icons.user class="size-20 text-secondary-medium"/>
+                    <x-icons.user class="size-14  text-primary"/>
 
                 </div>
             @endif
@@ -70,7 +70,7 @@
     @endif
     <div>
         <input {{ $attributes->merge([
-            'class' => 'block w-full text-sm text-slate-500 px-4 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100',
+            'class' => 'block w-full text-sm text-slate-500 px-4 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-secondary-light file:text-white hover:file:bg-secondary-medium',
             'type' => 'file',
             'value' => $fileName
         ]) }}/>

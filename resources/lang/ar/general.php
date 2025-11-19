@@ -248,7 +248,7 @@ return [
     'personal_phone' => 'الهاتف الشخصي',
     'work_phone' => 'هاتف العمل',
     'personal_email' => 'البريد الشخصي الإلكتروني',
-    'board_member' => 'عضوية مجلس الإدارة',
+    'membership' => 'العضوية',
     'is_board_member' => 'عضو مجلس إدارة',
     'board_member_started_at' => 'تاريخ بدء العضوية',
     'board_member_end_at' => 'تاريخ انتهاء العضوية',

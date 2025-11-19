@@ -156,7 +156,43 @@
             <x-error-span>{{ $errors->first('infoForm.place_of_registration') }}</x-error-span>
         </div>
     </div>
+    <div class="grid md:grid-cols-1 gap-x-6 gap-y-3 border-b pb-8 mb-8">
+        <x-heading-label class="col-span-1 ">@lang('general.membership')</x-heading-label>
 
+        <div class="col-span-full">
+            <x-forms.input-label for="roles">{{ trans_choice('general.role', 2) }}</x-forms.input-label>
+            <input type="hidden" wire:model="infoForm.roles" id="roles_hidden">
+            <div wire:ignore>
+                <x-forms.input class="tagify" id="roles"
+                               value="{{ $infoForm->roles }}"
+                               data-whitelist="{{ implode(',', $roles) }}" />
+            </div>
+            <x-error-span>{{ $errors->first('infoForm.roles') }}</x-error-span>
+        </div>
+        <div class=" col-span-1 flex items-center space-x-2">
+            <x-forms.input type="checkbox" wire:model.live="infoForm.is_board_member"
+                           wire:change="toggleBoardMember($event.target.checked)" value="1" id="is_board_member" />
+            <x-forms.input-label for="is_board_member">@lang('general.is_board_member')</x-forms.input-label>
+            <x-error-span>{{ $errors->first('infoForm.is_board_member') }}</x-error-span>
+        </div>
+
+        <div class="col-span-1 grid  md:grid-cols-2 gap-x-6 gap-y-3"
+             wire:key="board-member-{{ (int) data_get($infoForm, 'is_board_member') }}">
+            <div>
+                <x-forms.input-label for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>
+                <x-forms.date-input wire:model.live="infoForm.board_member_started_at" id="board_member_started_at"
+                                    :required="data_get($infoForm, 'is_board_member')" value="{{ data_get($infoForm, 'is_board_member') ?? null }}" />
+                <x-error-span>{{ $errors->first('infoForm.board_member_started_at') }}</x-error-span>
+            </div>
+
+            <div>
+                <x-forms.input-label for="board_member_end_at">@lang('general.board_member_end_at')</x-forms.input-label>
+                <x-forms.date-input wire:model.live="infoForm.board_member_end_at" id="board_member_end_at"
+                                    value="{{ data_get($infoForm, 'is_board_member') ?? null }}" />
+                <x-error-span>{{ $errors->first('infoForm.board_member_end_at') }}</x-error-span>
+            </div>
+        </div>
+    </div>
     <div class="border-b pb-8 mb-8">
         <x-heading-label>@lang('general.skills_and_interests')</x-heading-label>
 
@@ -179,32 +215,7 @@
         </div>
     </div>
 
-    <div class="grid md:grid-cols-1 gap-x-6 gap-y-3 border-b pb-8 mb-8">
-        <x-heading-label class="col-span-1 ">@lang('general.board_member')</x-heading-label>
-        <div class=" col-span-1 flex items-center space-x-2">
-            <x-forms.input type="checkbox" wire:model.live="infoForm.is_board_member"
-                wire:change="toggleBoardMember($event.target.checked)" value="1" id="is_board_member" />
-            <x-forms.input-label for="is_board_member">@lang('general.is_board_member')</x-forms.input-label>
-            <x-error-span>{{ $errors->first('infoForm.is_board_member') }}</x-error-span>
-        </div>
 
-        <div class="col-span-1 grid  md:grid-cols-2 gap-x-6 gap-y-3"
-            wire:key="board-member-{{ (int) data_get($infoForm, 'is_board_member') }}">
-            <div>
-                <x-forms.input-label for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>
-                <x-forms.date-input wire:model.live="infoForm.board_member_started_at" id="board_member_started_at"
-                    :required="data_get($infoForm, 'is_board_member')" value="{{ data_get($infoForm, 'is_board_member') ?? null }}" />
-                <x-error-span>{{ $errors->first('infoForm.board_member_started_at') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="board_member_end_at">@lang('general.board_member_end_at')</x-forms.input-label>
-                <x-forms.date-input wire:model.live="infoForm.board_member_end_at" id="board_member_end_at"
-                    value="{{ data_get($infoForm, 'is_board_member') ?? null }}" />
-                <x-error-span>{{ $errors->first('infoForm.board_member_end_at') }}</x-error-span>
-            </div>
-        </div>
-    </div>
 
     <div class="flex justify-end space-x-2 ">
 
