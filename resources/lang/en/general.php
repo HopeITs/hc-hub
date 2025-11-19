@@ -267,7 +267,7 @@ return [
     'add-item' => 'Add Item',
     'items' => 'Items',
     'employee-dashboard' => 'Employee Dashboard',
-    'hr-dashboard' => 'HR Dashboard',
+    'general-statistics' => 'General Statistics',
     'manager-dashboard' => 'Manager Dashboard',
     'general-admin-dashboard' => 'General Admin Dashboard',
     'dashboards' => 'Dashboards',

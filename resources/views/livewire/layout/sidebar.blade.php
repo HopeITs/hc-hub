@@ -14,10 +14,9 @@
                     :title="__('general.dashboards')"
                     :active="request()->routeIs('dashboard') ||
                     request()->routeIs('employee.dashboard') ||
-                    request()->routeIs('hr.dashboard') ||
-                    request()->routeIs('contract-statistics') ||
-                    request()->routeIs('manager.dashboard') ||
-                    request()->routeIs('general-admin.dashboard')">
+                    request()->routeIs('general-statistics') ||
+                    request()->routeIs('contract-statistics')
+                    ">
                     <x-slot name="icon">
                         <x-icons.users/>
                     </x-slot>
@@ -32,8 +31,8 @@
                         @endactiverole
 
                         @activerole('HR', 'SUPER ADMIN')
-                            <x-layouts.app.sidebar.nav-item :href="route('hr.dashboard')" :active="request()->routeIs('hr.dashboard')">
-                                {{ __('general.hr-dashboard') }}
+                            <x-layouts.app.sidebar.nav-item :href="route('general-statistics')" :active="request()->routeIs('general-statistics')">
+                                {{ __('general.general-statistics') }}
                             </x-layouts.app.sidebar.nav-item>
 
                         <x-layouts.app.sidebar.nav-item
@@ -43,21 +42,6 @@
                         </x-layouts.app.sidebar.nav-item>
                         @endactiverole
 
-                        @activerole('MANAGER', 'SUPER ADMIN')
-                        <x-layouts.app.sidebar.nav-item
-                            :href="route('manager.dashboard')"
-                            :active="request()->routeIs('manager.dashboard')">
-                            {{ __('general.manager-dashboard') }}
-                        </x-layouts.app.sidebar.nav-item>
-                        @endactiverole
-
-                        @activerole('GENERAL ADMIN', 'SUPER ADMIN')
-                        <x-layouts.app.sidebar.nav-item
-                            :href="route('general-admin.dashboard')"
-                            :active="request()->routeIs('general-admin.dashboard')">
-                            {{ __('general.general-admin-dashboard') }}
-                        </x-layouts.app.sidebar.nav-item>
-                        @endactiverole
 
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>

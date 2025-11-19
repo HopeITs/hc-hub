@@ -266,7 +266,7 @@ return [
     'returned_at' => 'تاريخ الإعادة',
     'returned_status' => 'حالة الإعادة',
     'employee-dashboard' => 'لوحة تحكم الموظف',
-    'hr-dashboard' => 'لوحة تحكم مسؤول الموارد البشرية',
+    'general-statistics' => 'الإحصائيات العامة',
     'manager-dashboard' => 'لوحة تحكم المدير',
     'general-admin-dashboard' => 'لوحة تحكم المسؤول العام',
     'dashboards' => 'لوحات التحكم',
