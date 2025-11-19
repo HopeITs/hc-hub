@@ -64,10 +64,20 @@
                 <x-forms.input-label for="weekends">
                     @lang('general.weekend-days')
                 </x-forms.input-label>
-                <x-forms.tags-input wire:model="item.weekends"
-                                    :suggestions="__('general.days-of-week')"
-                                    :force-suggestion="true"
-                                    placeholder="Add tags"/>
+                <div class="flex gap-x-4">
+                    @foreach(__('general.days-of-week') as $key => $day)
+                        <x-forms.checkbox-input id="weekends-{{$key}}" type="checkbox" :value="$key" wire:model="item.weekends">
+                            {{$day}}
+                        </x-forms.checkbox-input>
+                    @endforeach
+
+
+                </div>
+
+{{--                <x-forms.tags-input wire:model="item.weekends"--}}
+{{--                                    :suggestions="__('general.days-of-week')"--}}
+{{--                                    :force-suggestion="true"--}}
+{{--                                    placeholder="Add tags"/>--}}
                 <x-error-span>{{ $errors->first('item.weekends') }}</x-error-span>
             </div>
             <div class="md:col-span-full  flex justify-end gap-2">
