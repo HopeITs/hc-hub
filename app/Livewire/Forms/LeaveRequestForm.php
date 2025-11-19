@@ -188,7 +188,7 @@ class LeaveRequestForm extends Form
      */
     public function update(): void
     {
-        dd($this->all());
+
         $this->validate();
         $leaveBalance = $this->leaveRequest->leaveBalance;
 

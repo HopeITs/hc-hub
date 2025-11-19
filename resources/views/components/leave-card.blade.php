@@ -13,7 +13,7 @@
     @if($isAnnual)
         <div class="flex items-end -mb-3.5">
             <span class="text-[125px] font-extrabold text-secondary-medium leading-none">{{$remainingDays}}</span>
-            <span class="text-3xl text-secondary-medium font-semibold mb-2">/{{$totalDays}}</span>
+            <span class="text-3xl text-secondary-medium font-semibold mb-4">/{{$totalDays}}</span>
         </div>
 
         <div class="border-l border-secondary-medium h-26"></div>

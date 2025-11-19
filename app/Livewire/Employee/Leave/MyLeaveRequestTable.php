@@ -25,7 +25,7 @@ class MyLeaveRequestTable extends LivewireTable
     public $showModal = false;
     public $modalTitle = 'Modal title';
 
-    protected $listeners = ['filterStatus' => 'setStatusFilter'];
+    protected $listeners = ['filterStatus' => 'setStatusFilter',    'processSave' => 'processSave',];
 
 
 

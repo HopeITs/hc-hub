@@ -212,7 +212,7 @@ use App\Enums\LeaveRequestStatus;
             </div>
 
             <div class="flex justify-end gap-2">
-                <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
+                <x-primary-button  type="button" wire:click="confirmSave"  class="!w-auto">@lang('general.save')</x-primary-button>
                 <x-primary-button :href="route('leaves.index')"
                                   class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
             </div>

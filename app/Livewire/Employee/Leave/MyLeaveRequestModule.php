@@ -7,21 +7,24 @@ use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
-use App\Models\News;
+use Blade;
 use Carbon\Carbon;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 class MyLeaveRequestModule extends Component
 {
-
     public LeaveBalance $leaveBalance;
     public LeaveRequest $leaveRequest;
     public LeaveRequestForm $form;
     public $showModal = false;
     public $modalTitle = 'Modal title';
 
-    protected $listeners = ['openRequestLeaveEdit' => 'edit'];
+    protected $listeners = [
+        'openRequestLeaveEdit' => 'edit',
+        'processSave' => 'processSave'
+    ];
+
     public string $statusFilter = 'all';
     public array $counts = [];
 
@@ -41,23 +44,20 @@ class MyLeaveRequestModule extends Component
         $user = auth()->user();
         $employee = $user->profile;
         $role = $user->activeRole()?->name;
-        // Collect all leave requests through the relationship chain:
+
         $leaveRequests = LeaveRequest::whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
             if ($role === 'HR-SYR') {
-                return true;
-            } elseif (str_starts_with($role, 'HR-')) {
-                // Extract city code from role, e.g. HR-ALP → ALP
-                $cityCode = substr($role, 3);
-                $query->whereHas('employee', function ($q) use ($cityCode) {
-                    $q->whereHas('city', function ($qq) use ($cityCode) {
-                        $qq->where('slug', $cityCode);
-                    });
-                });
+                return;
+            }
 
+            if (str_starts_with($role, 'HR-')) {
+                $cityCode = substr($role, 3);
+                $query->whereHas('employee.city', fn($city) =>
+                $city->where('slug', $cityCode)
+                );
             } else {
                 $query->where('employee_id', $employee->id);
             }
-
         });
 
         $this->counts = [
@@ -71,13 +71,13 @@ class MyLeaveRequestModule extends Component
     public function create()
     {
         $this->form->reset();
-        $this->showModal = true;
         $this->modalTitle = __('general.add-new');
+        $this->showModal = true;
     }
 
-    public function edit(LeaveRequest $id): void
+    public function edit(LeaveRequest $leaveRequest)
     {
-        $this->form->setLeaveRequest($id);
+        $this->form->setLeaveRequest($leaveRequest);
         $this->modalTitle = __('general.edit');
         $this->showModal = true;
     }
@@ -85,49 +85,105 @@ class MyLeaveRequestModule extends Component
     public function render()
     {
         $employee = auth()->user()->profile;
-        $availableLeaves = auth()->user()->profile->availableLeaves();
+        $availableLeaves = $employee->availableLeaves();
         $allAvailableLeaves = $employee->allAvailableLeaves();
-        $alternativeEmployees = Employee::where('city_id', $employee->city_id)->where('id', '!=', $employee->id)
-            ->whereHas('contracts', function ($query) use ($employee) {
-                $query->whereHas('position.department', function ($query) use ($employee) {
-                    $query->where('id', $employee->department->id ?? null);
-                });
-            })->get();
 
-        return view('livewire.employee.leave.index', compact('availableLeaves', 'allAvailableLeaves', 'alternativeEmployees'));
+        $alternativeEmployees = Employee::where('city_id', $employee->city_id)
+            ->where('id', '!=', $employee->id)
+            ->whereHas('contracts.position.department', fn($q) =>
+            $q->where('id', $employee->department->id ?? null)
+            )
+            ->get();
+
+        return view('livewire.employee.leave.index', compact(
+            'availableLeaves', 'allAvailableLeaves', 'alternativeEmployees'
+        ));
     }
 
-    public function getCountsProperty()
+    public function confirmSave()
     {
-        return [
-            'all' => LeaveRequest::count(),
-            'pending' => LeaveRequest::where('status', LeaveRequestStatus::Pending)->count(),
-            'accepted' => LeaveRequest::where('status', LeaveRequestStatus::Accepted)->count(),
-            'rejected' => LeaveRequest::where('status', LeaveRequestStatus::Rejected)->count(),
-        ];
+        $html = $this->confirmationMessage();
+
+        LivewireAlert::title(__('general.confirmation'))
+            ->html($html)
+            ->timer(0)
+            ->toast(false)
+            ->showCancelButton(true)
+            ->showConfirmButton(true)
+            ->onConfirm('processSave')
+            ->show();
     }
 
-    public function save()
+    public function processSave()
     {
-        if (isset($this->form->id)) {
-            $leaveRequest = LeaveRequest::find($this->form->id);
-            $this->form->setLeaveRequest($leaveRequest);
+        if ($this->form->id) {
             $this->form->update();
         } else {
-
             $this->form->store();
-
-
         }
 
         $this->showModal = false;
         $this->form->reset();
+
         LivewireAlert::title(__('general.success-message'))
             ->success()
             ->toast()
             ->position('top-start')
             ->show();
 
+        $this->refreshCounts();
+    }
 
+    protected function confirmationMessage(): string
+    {
+        $leaveTypeName = LeaveBalance::find($this->form->leave_balance_id)
+            ->leaveType
+            ->name ?? 'N/A';
+
+        $type = $this->form->type;
+
+        $start = $this->resolveStart();
+        $end = $this->resolveEnd();
+        $duration = $this->resolveDuration();
+        $date = $this->form->leave_date;
+        $reason = $this->form->reason;
+
+        return Blade::render(
+            '<x-leave-request-confirmation
+                :type="$type"
+                :leave_type="$leaveTypeName"
+                :start="$start"
+                :end="$end"
+                :duration="$duration"
+                :reason="$reason"
+                :date="$date"
+            />',
+            compact('type', 'leaveTypeName', 'start', 'end', 'duration', 'reason', 'date')
+        );
+    }
+
+    protected function resolveStart()
+    {
+        return $this->form->type === 'day'
+            ? Carbon::parse($this->form->start_at)->format('d-m-Y')
+            : $this->form->start_hour;
+    }
+
+    protected function resolveEnd()
+    {
+        return $this->form->type === 'day'
+            ? Carbon::parse($this->form->end_at)->format('d-m-Y')
+            : $this->form->end_hour;
+    }
+
+    protected function resolveDuration()
+    {
+        if ($this->form->type === 'day') {
+            return Carbon::parse($this->form->start_at)
+                    ->diffInDays(Carbon::parse($this->form->end_at)) + 1;
+        }
+
+        return Carbon::parse($this->form->start_hour)
+            ->floatDiffInHours(Carbon::parse($this->form->end_hour));
     }
 }
