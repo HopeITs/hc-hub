@@ -19,7 +19,10 @@ class AllLeaveRequestModule extends Component
     public LeaveRequestForm $form;
     public $showModal = false;
     public $modalTitle = 'Modal title';
-    protected $listeners = ['editLeaveRequest' => 'edit'];
+    protected $listeners = [
+        'openRequestLeaveEdit' => 'edit',
+        'processSave' => 'processSave'
+    ];
     public string $statusFilter = 'all';
     public array $counts = [];
 
@@ -53,27 +56,33 @@ class AllLeaveRequestModule extends Component
                 });
 
             } else {
-                $query->where('employee_id', $employee->id);
+                //is manager
+                $query->whereHas('employee', function ($q) use ($employee) {
+                    $q->whereHas('positions', function ($qq) use ($employee) {
+                        $currentPositions = $employee->positions->modelKeys();
+                        $qq->whereIn('direct_manager_id', $currentPositions)->orWhereIn('tech_manager_id', $currentPositions);
+                    });
+                });
             }
 
         });
 
-        $this->counts = [
-            'all' => (clone $leaveRequests)->count(),
+        $this->counts = ['all' => (clone $leaveRequests)->count(),
             'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)->count(),
             'accepted' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Accepted)->count(),
-            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(),
-        ];
+            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(),];
     }
 
-    public function create()
+    public
+    function create()
     {
         $this->form->reset();
         $this->showModal = true;
         $this->modalTitle = __('general.add-new');
     }
 
-    public function render()
+    public
+    function render()
     {
         $employee = auth()->user()->profile;
         $availableLeaves = auth()->user()->profile->availableLeaves();
@@ -88,7 +97,8 @@ class AllLeaveRequestModule extends Component
         return view('livewire.employee.leave.all', compact('availableLeaves', 'allAvailableLeaves', 'alternativeEmployees'));
     }
 
-    public function getCountsProperty()
+    public
+    function getCountsProperty()
     {
         return [
             'all' => LeaveRequest::count(),
@@ -98,7 +108,8 @@ class AllLeaveRequestModule extends Component
         ];
     }
 
-    public function save()
+    public
+    function save()
     {
         if (isset($this->form->id)) {
             $this->form->update();

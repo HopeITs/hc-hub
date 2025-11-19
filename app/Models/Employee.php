@@ -159,15 +159,6 @@ class Employee extends Model implements HasMedia
         return $this->hasMany(Attachment::class);
     }
 
-    public function techManager()
-    {
-        return $this->belongsTo(Employee::class, 'tech_manager_id');
-    }
-
-    public function directManager()
-    {
-        return $this->belongsTo(Employee::class, 'direct_manager_id');
-    }
 
     public function items()
     {

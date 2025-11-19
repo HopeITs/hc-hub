@@ -158,12 +158,12 @@
                         <x-icons.calendar class="w-5 text-gray-400 h-5"/>
                     </x-slot>
                     <x-slot name="list">
-                        @activerole('HR')
+                        @notactiverole('Employee')
                         <x-layouts.app.sidebar.nav-item :href="route('leaves.all')"
                                                         :active="request()->routeIs('leaves.all')">
                             {{ 'All Leaves' }}
                         </x-layouts.app.sidebar.nav-item>
-                        @endactiverole
+                        @endnotactiverole
                         <x-layouts.app.sidebar.nav-item :href="route('leaves.index')"
                                                         :active="request()->routeIs('leaves.index')">
                             {{ __('general.my-leaves') }}

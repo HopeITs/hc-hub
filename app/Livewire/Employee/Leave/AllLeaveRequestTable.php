@@ -38,37 +38,44 @@ class AllLeaveRequestTable extends LivewireTable
     protected function query(): Builder
     {
         $user = auth()->user();
-        $role = $user->activeRole()?->name; // assuming activeRole() returns a Role model
+        $role = $user->activeRole()?->name;
+        $employee = $user->profile;
         $query = LeaveRequest::query()
             ->with(['leaveBalance.contract.employee', 'leaveBalance.contract.position'])
             ->orderBy('created_at', 'desc');
 
-        if ($role) {
-            if ($role !== 'HR-SYR' && str_starts_with($role, 'HR-')) {
-
-                // Extract city code from role, e.g. HR-ALP → ALP
+        if ($role === 'HR-SYR') {
+            return true;
+        } elseif (str_starts_with($role, 'HR-')) {
+            // Extract city code from role, e.g. HR-ALP → ALP
+            $query->whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
                 $cityCode = substr($role, 3);
-
-                // Join or filter based on the employee’s city code
-                $query->whereHas('leaveBalance.contract.employee.city', function ($q) use ($cityCode) {
-                    $q->where('slug', $cityCode);
+                $query->whereHas('employee', function ($q) use ($cityCode) {
+                    $q->whereHas('city', function ($qq) use ($cityCode) {
+                        $qq->where('slug', $cityCode);
+                    });
                 });
-            } elseif ($role === 'Manager') {
+            });
 
-                $query->whereHas('leaveBalance.contract.position.', function ($q) use ($user) {
-                    $q->where('direct_manager_id', $user->profile->id);
-                });
-            }
         } else {
-            // Fallback: not HR, no active role
-            $query->whereHas('leaveBalance.contract', function ($q) use ($user) {
-                $q->where('employee_id', $user->profile->id);
+            //is manager
+            $query->whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
+                $query->whereHas('employee', function ($q) use ($employee) {
+                    $q->whereHas('positions', function ($qq) use ($employee) {
+                        $currentPositions = $employee->positions->modelKeys();
+                        $qq->whereIn('direct_manager_id', $currentPositions)->orWhereIn('tech_manager_id', $currentPositions);
+                    });
+                });
             });
         }
 
         if ($this->statusFilter !== 'all') {
             $query->where('status', $this->statusFilter);
         }
+
+
+
+
 
         return $query;
     }
