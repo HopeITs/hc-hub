@@ -196,7 +196,7 @@ return [
     'relations.daughter' => 'Daughter',
     'relations.son' => 'Son',
     'relations.other' => 'Other',
-    'show-more' => 'Show More',
+    'show-more' => 'More',
     'identity-org' => 'Identity Info',
     'terms-status' => 'Terms Status',
     'Pay-schedule' => 'Pay Schedule',
@@ -381,6 +381,8 @@ return [
     'program' => 'Program|Programs',
     'event_date' => 'Event Date',
     'company_news' => 'News',
+    'all-badges' => 'All Badges',
+    'badges' => 'Badges',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
@@ -415,6 +417,5 @@ return [
         4 => 'Thursday',
         5 => 'Friday',
         6 => 'Saturday',
-
     ],
 ];

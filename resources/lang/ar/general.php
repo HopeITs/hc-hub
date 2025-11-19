@@ -198,7 +198,7 @@ return [
     'relations.daughter' => 'ابنة',
     'relations.son' => 'ابن',
     'relations.other' => 'آخر',
-    'show-more' => 'عرض المزيد',
+    'show-more' => ' المزيد',
     'identity-org' => 'معلومات الهوية',
     'terms-status' => 'حالة الشروط',
     'Pay-schedule' => 'جدول الدفع',
@@ -386,6 +386,8 @@ return [
     'online' => 'عبر الإنترنت',
     'total' => 'المجموع',
     'no-data-filters' => 'لا توجد بيانات مطابقة للمرشحات المحددة.',
+    'badges-management' => 'إدارة الشارات',
+    'all-badges' => 'كل الشارات',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
@@ -420,6 +422,5 @@ return [
         4 => 'الخميس',
         5 => 'الجمعة',
         6 => 'السبت',
-
     ],
 ];

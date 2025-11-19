@@ -152,6 +152,8 @@ Route::group(
 
             Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
 
+            Route::get('/badges', \App\Livewire\Badges\BadgesModule::class)->name('badges.index');
+
         });
 
         require __DIR__ . '/auth.php';
