@@ -45,7 +45,7 @@ class AllLeaveRequestTable extends LivewireTable
             ->orderBy('created_at', 'desc');
 
         if ($role === 'HR-SYR') {
-            return true;
+            return $query;
         } elseif (str_starts_with($role, 'HR-')) {
             // Extract city code from role, e.g. HR-ALP → ALP
             $query->whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
