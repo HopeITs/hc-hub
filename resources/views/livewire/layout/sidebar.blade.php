@@ -1,5 +1,5 @@
 <aside id="cta-button-sidebar"
-       class="fixed top-0 left-0 rtl:right-0 z-40 w-64 h-screen pt-4 transition-transform sm:translate-x-0 translate-x-full bg-white border-l border-gray-200 shadow-xl"
+       class="fixed top-0 left-0 rtl:right-0 z-40 w-64 h-screen pt-4 transition-transform sm:translate-x-0 translate-x-full bg-white border-l border-gray-200"
        aria-label="Sidebar">
     <div class="flex flex-col h-full justify-between">
         <div class="h-full px-3 pb-4 bg-white overflow-y-auto">
@@ -213,8 +213,7 @@
                         id="checklist-items"
                         :title="__('general.checklist_items')"
                         :active="request()->routeIs('checklist-items.*')"
-                        wire:navigate.hover
-                    >
+                        wire:navigate.hover>
                         <x-slot name="icon">
                             <x-icons.clipboard-list class="w-5 h-5"/>
                         </x-slot>
@@ -257,8 +256,8 @@
             </ul>
         </div>
 
-        <div class="px-3 pb-4">
-            <x-layouts.app.sidebar.profile-card :user="$user"/>
-        </div>
+{{--        <div class="px-3 pb-4">--}}
+{{--            <x-layouts.app.sidebar.profile-card :user="$user"/>--}}
+{{--        </div>--}}
     </div>
 </aside>

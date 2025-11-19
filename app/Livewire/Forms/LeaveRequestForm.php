@@ -14,7 +14,7 @@ use Livewire\Form;
 class LeaveRequestForm extends Form
 {
     public ?LeaveRequest $leaveRequest = null;
-    public ?LeaveBalance $leaveBalance = null;
+
 
     #[Validate('required|exists:leave_balances,id')]
     public $leave_balance_id = null;
@@ -188,6 +188,7 @@ class LeaveRequestForm extends Form
      */
     public function update(): void
     {
+        dd($this->all());
         $this->validate();
         $leaveBalance = $this->leaveRequest->leaveBalance;
 
@@ -207,7 +208,7 @@ class LeaveRequestForm extends Form
             $end_at = $this->end_hour .' '. $this->leave_date;
             $this->end_at = Carbon::createFromFormat('H:i Y-m-d', $end_at);
         }
-        dd($this->all());
+
         $this->leaveRequest->update($this->all());
 
         $this->resetForm();

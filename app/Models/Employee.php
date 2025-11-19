@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -195,20 +196,41 @@ class Employee extends Model implements HasMedia
 
     public function availableLeaves()
     {
-        return $this->latestActiveContract()?->leaveBalances()->whereHas('leaveType', function ($query) {
-            return $query->where('base_days', '>', 10);
-        })->withCount([
-            'leaveRequests as pending_requests_count' => function ($query) {
-                $query->where('status', LeaveRequestStatus::Pending);
-            },
-            'leaveRequests as approved_requests_count' => function ($query) {
-                $query->where('status', LeaveRequestStatus::Accepted);
-            },
-            'leaveRequests as rejected_requests_count' => function ($query) {
-                $query->where('status', LeaveRequestStatus::Rejected);
-            },
-        ])->get();
+        $leaves = $this->latestActiveContract()?->leaveBalances()
+            ->whereHas('leaveType', fn ($q) => $q->where('base_days', '>', 10))
+            ->with(['leaveRequests' => fn ($q) => $q->pending()
+                ->select('id','leave_balance_id','type','start_at','end_at')
+            ])
+            ->get();
+
+        // Now compute pending durations using the real accessor logic
+        foreach ($leaves as $leave) {
+
+            $pendingDays = 0;
+            $pendingHours = 0;
+
+            foreach ($leave->leaveRequests as $req) {
+
+                if ($req->type === 'day') {
+                    $weekends = array_map('intval', explode(',', $req->leaveBalance->contract->position->center->weekends));
+
+                   Carbon::setWeekendDays($weekends);
+
+                    $pendingDays += $req->start_at->diffInWeekDays($req->end_at) + 1;
+                }
+
+                if ($req->type === 'hour') {
+                    $pendingHours += $req->start_at->floatDiffInRealHours($req->end_at);
+                }
+            }
+
+            $leave->pending_days = $pendingDays;
+            $leave->pending_hours = $pendingHours;
+        }
+
+        return $leaves;
     }
+
 
     public function allAvailableLeaves()
     {

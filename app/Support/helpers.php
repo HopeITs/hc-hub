@@ -34,3 +34,31 @@ if (! function_exists('transColumn')) {
         return $base.'_'.$locale;
     }
 }
+
+if (! function_exists('formatDuration')) {
+     function formatDuration($days, $hours)
+    {
+        $days = (int) $days;
+        $hours = (int) $hours;
+
+        // Normalize: 26 hours = 1 day 2 hours
+        if ($hours >= 24) {
+            $days += intdiv($hours, 24);
+            $hours = $hours % 24;
+        }
+
+        $parts = [];
+
+        if ($days > 0) {
+            $parts[] = '<strong class="text-secondary-dark">'.$days.'</strong>' . ' ' . trans_choice('general.day',$days);
+        }
+
+        if ($hours > 0) {
+            $parts[] = '<strong class="text-secondary-dark">'.$hours.'</strong>' . ' ' . trans_choice('general.hour',$hours);
+
+        }
+
+        return implode(' ', $parts) ?: '0 '.trans_choice('general.day',2);
+    }
+
+}

@@ -18,7 +18,7 @@
 @endphp
 
 @section('greeting')
-    <div class="py-4">
+    <div class="py-4 pt-26">
         <h1 class="text-secondary-dark font-semibold text-[23px]">
             Hello {{ $firstName }},
         </h1>
@@ -54,6 +54,15 @@
             <x-dashboard-cards.news-card/>
         </div>
 
+
+        <div class=" h-70 flex items-center justify-center text-white font-semibold">
+            <x-dashboard-cards.upcoming-holidays-card/>
+        </div>
+
+        <div class=" h-70 flex items-center justify-center text-white font-semibold">
+            <x-dashboard-cards.upcoming-leaves-card/>
+        </div>
+
         <div class="h-70 flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.today-events-card/>
 
@@ -62,14 +71,6 @@
         <div class="h-70 flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.upcoming-events-card/>
 
-        </div>
-
-        <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-holidays-card/>
-        </div>
-
-        <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-leaves-card/>
         </div>
     </div>
 
