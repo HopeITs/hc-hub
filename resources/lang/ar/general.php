@@ -259,6 +259,8 @@ return [
     'start_date' => 'تاريخ البدء',
     'end_date' => 'تاريخ الانتهاء',
     'current_salary' => 'الراتب الحالي',
+    'duration' => 'المدة',
+    'all-leaves'    =>  'جميع الإجازات',
     'new_salary' => 'الراتب الجديد',
     'related_evaluation' => 'التقييم المرتبط',
     'delivered_at' => 'تاريخ التسليم',

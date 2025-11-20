@@ -24,6 +24,22 @@ class LeaveRequest extends Model
     {
         return $this->belongsTo(LeaveBalance::class);
     }
+    public function leaveType(): \Illuminate\Database\Eloquent\Relations\HasOneThrough|LeaveRequest
+    {
+        return $this->hasOneThrough(
+            LeaveType::class,      // final model you want
+            LeaveBalance::class,   // intermediate model
+            'id',                  // LeaveBalance.id
+            'id',                  // LeaveType.id
+            'leave_balance_id',    // LeaveRequest.leave_balance_id
+            'type_id'        // LeaveBalance.leave_type_id
+        );
+    }
+
+    public function alternativeEmployee(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'alternative_employee_id');
+    }
 
 //    public function getDurationAttribute(): string
 //    {

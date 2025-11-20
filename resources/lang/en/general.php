@@ -241,6 +241,8 @@ return [
     'work_phone' => 'Work Phone',
     'personal_email' => 'Personal Email',
     'membership' => 'Membership',
+    'duration' => 'Duration',
+    'all-leaves'    =>  'All Leaves',
     'is_board_member' => 'Is Board Member',
     'board_member_started_at' => 'Board Member Started At',
     'board_member_end_at' => 'Board Member End At',

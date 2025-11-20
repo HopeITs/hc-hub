@@ -28,7 +28,6 @@ class AllLeaveRequestTable extends LivewireTable
     protected $listeners = ['filterStatus' => 'setStatusFilter'];
 
 
-
     public function setStatusFilter(string $status): void
     {
         $this->statusFilter = $status;
@@ -73,10 +72,6 @@ class AllLeaveRequestTable extends LivewireTable
             $query->where('status', $this->statusFilter);
         }
 
-
-
-
-
         return $query;
     }
 
@@ -108,7 +103,13 @@ class AllLeaveRequestTable extends LivewireTable
                     {$status['value']}
                 </span>";
             })->asHtml(),
-
+            DateColumn::make(__('general.request_date'), 'created_at')
+                ->format('d-m-Y H:i') // keep it; used for default/export/sort context
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    if (!$value) return '-';
+                    return $model->created_at->format('d-m-Y');
+                })
+                ->sortable(),
 
             DateColumn::make(__('general.start-date'), 'start_at')
                 ->format('d-m-Y H:i') // keep it; used for default/export/sort context
@@ -126,21 +127,25 @@ class AllLeaveRequestTable extends LivewireTable
                 ->sortable(),
 
             Column::make(__('Actions'), function (Model $model): string {
-                $isActive = $model->is_active ? 1 : 0;
 
-                $toggleBtn = Blade::render(
-                    '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $isActive .
-                    '" :model-id="' . $model->getKey() .
-                    '" wire-event="confirmToggleItemStatus" />'
-                );
-                $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: ' . $model->getKey(). ' })" />');
+                $decisionBtn = '';
+                $editBtn = '';
+
+                if ($model->status === LeaveRequestStatus::Pending) {
+                    $decisionBtn = Blade::render('<x-table.decision-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: ' . $model->getKey() . ' })" />');
+                }
+                if ($model->status !== LeaveRequestStatus::Pending) {
+                    $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: ' . $model->getKey() . ' })" />');
+                }
+
+                $showBtn = Blade::render('<x-table.show-btn wire:click="$dispatch(\'openShowRequestLeave\', { id: ' . $model->getKey() . ' })" />');
 
 
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn :modelId="' . $model->getKey() . '" />'
-                );
+//                $deleteBtn = Blade::render(
+//                    '<x-table.delete-btn :modelId="' . $model->getKey() . '" />'
+//                );
 
-                return $toggleBtn . $editBtn . $deleteBtn;
+                return $decisionBtn . $editBtn . $showBtn;
             })->asHtml(),
 
         ];

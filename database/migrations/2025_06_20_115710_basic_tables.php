@@ -278,8 +278,9 @@ return new class extends Migration {
             $table->foreignId('approved_by')->nullable()->constrained('employees')->onDelete('set null');
             $table->timestamp('approved_at')->nullable();
             $table->boolean('hr_approved')->default(false);
+            $table->text('reject_reason')->nullable();
             $table->tinyInteger('status')->default(0)->comment('0:pending, 1:approved , 2:rejected');
-            $table->foreignId('alternative_employee')->nullable()->constrained('employees')->onDelete('set null');
+            $table->foreignId('alternative_employee_id')->nullable()->constrained('employees')->onDelete('set null');
             $table->timestamps();
         });
 

@@ -17,18 +17,29 @@ class AllLeaveRequestModule extends Component
     public LeaveBalance $leaveBalance;
     public LeaveRequest $leaveRequest;
     public LeaveRequestForm $form;
-    public $showModal = false;
+    public $formModal = false;
     public $modalTitle = 'Modal title';
     protected $listeners = [
         'openRequestLeaveEdit' => 'edit',
+        'openShowRequestLeave' => 'show',
         'processSave' => 'processSave'
     ];
     public string $statusFilter = 'all';
+    public $selectedLeave;
+    public $showModal = false;
     public array $counts = [];
 
     public function mount()
     {
         $this->refreshCounts();
+    }
+
+    public function show($id)
+    {
+        $this->selectedLeave = LeaveRequest::with(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee'])->findOrFail($id);
+
+        $this->modalTitle = 'Leave Details';
+        $this->showModal = true;
     }
 
     public function setActiveTab(string $status)
@@ -73,16 +84,14 @@ class AllLeaveRequestModule extends Component
             'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(),];
     }
 
-    public
-    function create()
+    public function create()
     {
         $this->form->reset();
-        $this->showModal = true;
+        $this->formModal = true;
         $this->modalTitle = __('general.add-new');
     }
 
-    public
-    function render()
+    public function render()
     {
         $employee = auth()->user()->profile;
         $availableLeaves = auth()->user()->profile->availableLeaves();
@@ -97,8 +106,7 @@ class AllLeaveRequestModule extends Component
         return view('livewire.employee.leave.all', compact('availableLeaves', 'allAvailableLeaves', 'alternativeEmployees'));
     }
 
-    public
-    function getCountsProperty()
+    public function getCountsProperty()
     {
         return [
             'all' => LeaveRequest::count(),
@@ -108,8 +116,7 @@ class AllLeaveRequestModule extends Component
         ];
     }
 
-    public
-    function save()
+    public function save()
     {
         if (isset($this->form->id)) {
             $this->form->update();
@@ -120,7 +127,7 @@ class AllLeaveRequestModule extends Component
 
         }
 
-        $this->showModal = false;
+        $this->formModal = false;
         $this->form->reset();
         LivewireAlert::title(__('general.success-message'))
             ->success()
@@ -130,4 +137,33 @@ class AllLeaveRequestModule extends Component
 
 
     }
+
+    public function confirmDelete($id)
+    {
+
+
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->confirmButtonColor(config('samples.styles.colors.primary'))
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete($id)
+    {
+
+        LeaveRequest::find($id['id'])->delete();
+        $this->showModal = false;
+        $this->refreshCounts();
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
+
+    }
+
 }
