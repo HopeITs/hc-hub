@@ -43,21 +43,9 @@ class MyLeaveRequestModule extends Component
     {
         $user = auth()->user();
         $employee = $user->profile;
-        $role = $user->activeRole()?->name;
 
-        $leaveRequests = LeaveRequest::whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
-            if ($role === 'HR-SYR') {
-                return;
-            }
-
-            if (str_starts_with($role, 'HR-')) {
-                $cityCode = substr($role, 3);
-                $query->whereHas('employee.city', fn($city) =>
-                $city->where('slug', $cityCode)
-                );
-            } else {
+        $leaveRequests = LeaveRequest::whereHas('leaveBalance.contract', function ($query) use ( $employee) {
                 $query->where('employee_id', $employee->id);
-            }
         });
 
         $this->counts = [
