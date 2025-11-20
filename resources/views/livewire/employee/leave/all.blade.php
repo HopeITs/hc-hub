@@ -184,15 +184,15 @@ use App\Enums\LeaveRequestStatus;
 
 
                     @if($selectedLeave->type === 'day')
-                    <div>
-                        <x-forms.input-label>{{ __('general.start-date') }}</x-forms.input-label>
-                        <p class="text-gray-700">{{ $selectedLeave->start_at->format('d-M-Y') }}</p>
-                    </div>
+                        <div>
+                            <x-forms.input-label>{{ __('general.start-date') }}</x-forms.input-label>
+                            <p class="text-gray-700">{{ $selectedLeave->start_at->format('d-M-Y') }}</p>
+                        </div>
 
-                    <div>
-                        <x-forms.input-label>{{ __('general.end-date') }}</x-forms.input-label>
-                        <p class="text-gray-700">{{ $selectedLeave->end_at->format('d-M-Y') }}</p>
-                    </div>
+                        <div>
+                            <x-forms.input-label>{{ __('general.end-date') }}</x-forms.input-label>
+                            <p class="text-gray-700">{{ $selectedLeave->end_at->format('d-M-Y') }}</p>
+                        </div>
                         <div>
                             <x-forms.input-label>{{ __('general.duration') }}</x-forms.input-label>
                             <p class="text-gray-700">{{ $selectedLeave->duration }}</p>
@@ -240,5 +240,116 @@ use App\Enums\LeaveRequestStatus;
             </div>
         @endif
     </x-modal.dialog>
+
+    <x-modal.dialog id="decisionModal" :title="$modalTitle" wire:model.defer="decisionModal" wire:ignore.self>
+        @if($decisionLeave)
+            <div class="space-y-6">
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <x-forms.input-label>{{ __('general.name') }}</x-forms.input-label>
+                        <p class="text-gray-700">{{ $decisionLeave->leaveBalance->contract->employee->name }}</p>
+                    </div>
+
+                    <div>
+                        <x-forms.input-label>{{ __('general.request_date') }}</x-forms.input-label>
+                        <p class="text-gray-700">{{ $decisionLeave->created_at->format('d-M-Y') }}</p>
+                    </div>
+
+                    <div>
+                        <x-forms.input-label>{{ __('general.type') }}</x-forms.input-label>
+                        <p class="text-gray-700">{{ $decisionLeave->leaveType->name }}</p>
+                    </div>
+
+                    <div>
+                        <x-forms.input-label>{{ __('general.alternative_employee') }}</x-forms.input-label>
+                        <p class="text-gray-700">
+                            {{ optional($decisionLeave->alternativeEmployee)->name ?? '—' }}
+                        </p>
+                    </div>
+
+                    @if($decisionLeave->type === 'day')
+                        <div>
+                            <x-forms.input-label>{{ __('general.during-period') }}</x-forms.input-label>
+                            <p class="text-gray-700">{{ $decisionLeave->start_at->format('d-M-Y') .' → '. $decisionLeave->end_at->format('d-M-Y')}}</p>
+                        </div>
+
+                        <div>
+                            <x-forms.input-label>{{ __('general.duration') }}</x-forms.input-label>
+                            <p class="text-gray-700">{{ $decisionLeave->duration }}</p>
+                        </div>
+                    @else
+
+
+                        <div>
+                            <x-forms.input-label>{{ __('general.during-period') }}</x-forms.input-label>
+                            <div class="text-gray-700 flex items-center space-x-2"><x-icons.calendar class="!size-4"/><span>
+                                    {{$decisionLeave->start_at->format('d-M-Y') }}
+                                </span></div>
+                            <div class="text-gray-700 flex items-center space-x-2"><x-icons.clock class="!size-4"/><span>{{$decisionLeave->start_at->format('H:i') .' → '. $decisionLeave->end_at->format('H:i') }}</span></div>
+                        </div>
+                        <div>
+                            <x-forms.input-label>{{ __('general.duration') }}</x-forms.input-label>
+                            <p class="text-gray-700">{{ $decisionLeave->duration }}</p>
+                        </div>
+
+                    @endif
+
+                    <div class="col-span-full">
+                        <x-forms.input-label>{{ __('general.reason') }}</x-forms.input-label>
+                        <p class="text-gray-700">{{ $decisionLeave->reason }}</p>
+                    </div>
+                </div>
+
+                {{-- Decision Section --}}
+                @if($decisionLeave->status === LeaveRequestStatus::Pending)
+                    <div class="border-t pt-4 space-y-4">
+
+                        <x-forms.input-label>{{ __('general.action') }}</x-forms.input-label>
+
+                        <div class="flex gap-6">
+                            <label class="flex items-center space-x-2">
+                                <x-forms.radio-input :value="LeaveRequestStatus::Accepted" wire:model.live="form.status">
+                                    {{ __('general.accept') }}
+                                </x-forms.radio-input>
+
+                            </label>
+
+                            <label class="flex items-center space-x-2">
+                                <x-forms.radio-input :value="LeaveRequestStatus::Rejected" wire:model.live="form.status">
+                                    {{ __('general.reject') }}
+                                </x-forms.radio-input>
+
+                            </label>
+                        </div>
+
+                        @if((int)$form->status === LeaveRequestStatus::Rejected)
+                            <div>
+                                <x-forms.input-label>{{ __('general.reject_reason') }}</x-forms.input-label>
+                                <x-forms.input wire:model="reject_reason"/>
+                                <x-error-span>{{ $errors->first('rejectReason') }}</x-error-span>
+                            </div>
+                        @endif
+
+
+                    </div>
+                @endif
+
+                <div class="flex space-x-2 justify-end mt-4">
+
+                    <x-primary-button wire:click="submitDecision" class="!w-auto">
+                        {{ __('general.save') }}
+                    </x-primary-button>
+
+                    <x-primary-button wire:click="$set('decisionModal', false)"
+                                      class="!bg-secondary-light !w-auto">
+                        {{ __('general.cancel') }}
+                    </x-primary-button>
+                </div>
+
+            </div>
+        @endif
+    </x-modal.dialog>
+
 
 </div>

@@ -41,27 +41,6 @@ class LeaveRequest extends Model
         return $this->belongsTo(Employee::class, 'alternative_employee_id');
     }
 
-//    public function getDurationAttribute(): string
-//    {
-//        $weekend = $this->leaveBalance->contract->position->center->weekends;
-//
-//        $weekends = array_map(function ($day) {
-//            return Carbon::parse($day)->dayOfWeek;
-//        }, explode(',', $weekend));
-//
-//
-//        Carbon::setWeekendDays($weekends);
-//
-//        if($this->type === 'hour'){
-//
-//            $duration = $this->start_at->floatDiffInRealHours($this->end_at);
-//            return  $duration . ' ' . trans_choice('general.hour',$duration);
-//        }else{
-//
-//            $duration = $this->start_at->diffInWeekdays($this->end_at);
-//            return  $duration . ' ' . trans_choice('general.day',$duration);
-//        }
-//    }
 
     public function getDurationAttribute(): string
     {

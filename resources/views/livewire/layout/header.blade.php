@@ -84,6 +84,7 @@
                                             <div
                                                 class="text-sm font-semibold text-gray-900 truncate">{{ $user->profile?->name }}</div>
                                             <div class="text-xs text-gray-500 truncate">{{ $user->email }}</div>
+                                            <div class="text-xs bg-secondary-medium w-fit truncate text-center text-white px-2 py-1  rounded-full">{{ $user->myRole() }}</div>
                                         </div>
                                     </div>
 

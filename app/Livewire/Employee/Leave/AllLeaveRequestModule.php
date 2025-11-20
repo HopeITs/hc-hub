@@ -22,11 +22,14 @@ class AllLeaveRequestModule extends Component
     protected $listeners = [
         'openRequestLeaveEdit' => 'edit',
         'openShowRequestLeave' => 'show',
+        'openDecisionRequestLeave' => 'openDecision',
         'processSave' => 'processSave'
     ];
     public string $statusFilter = 'all';
     public $selectedLeave;
     public $showModal = false;
+    public $decisionModal = false;
+    public $decisionLeave;
     public array $counts = [];
 
     public function mount()
@@ -41,6 +44,31 @@ class AllLeaveRequestModule extends Component
         $this->modalTitle = 'Leave Details';
         $this->showModal = true;
     }
+
+    public function openDecision(LeaveRequest $id)
+    {
+        $this->form->setDecisionLeave($id);
+        $this->decisionLeave = $id->load(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee']);
+
+        $this->modalTitle = 'Leave Decision';
+        $this->decisionModal = true;
+    }
+
+    public function submitDecision()
+    {
+        $this->form->submitDecision();
+
+        $this->decisionModal = false;
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
+
+        $this->dispatch('$refresh');
+    }
+
 
     public function setActiveTab(string $status)
     {

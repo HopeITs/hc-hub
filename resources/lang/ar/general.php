@@ -5,8 +5,6 @@ return [
     'contracts' => 'العقود',
     'basic-management' => 'الإدارة الأساسية',
     'project-basics' => 'أساسيات المشروع',
-    'city' => 'المدن|المدينة',
-    'center' => 'المراكز|المركز',
     'contract-type' => 'أنواع العقود|نوع العقد',
     'leave-type' => 'أنواع الإجازات|نوع الإجازة',
     'checklist-items' => 'عناصر القائمة|عنصر القائمة',
@@ -16,7 +14,7 @@ return [
     'holidays-and-leaves' => 'العطل والاجازات',
     'my-leaves' => 'اجازاتي',
     'project-manager' => 'مدير المشروع',
-    'program' => 'البرنامج|البرامج',
+
     'export-pdf' => 'تصدير كملف PDF',
     'my-profile' => 'ملفي الشخصي',
     'my-account' => 'الحساب الشخصي',
@@ -353,7 +351,7 @@ return [
     'received_at' => 'سلمت عند',
     'done_requests' => 'الطلبات المنجزة',
     'no_done_requests' => 'لا توجد طلبات منجزة بعد.',
-    'employee' => 'الموظف',
+
     'action' => 'الإجراء',
     'counterparty' => 'الطرف الآخر',
     'request' => 'طلب|طلبات',
@@ -387,6 +385,11 @@ return [
     'trial' => 'تجريبي',
     'online' => 'عبر الإنترنت',
     'total' => 'المجموع',
+
+    'accept' => 'قبول' ,
+    'reject' => 'رفض' ,
+    'reject-reason' => 'سبب الرفض',
+    'during-period' => 'خلال مدة',
     'no-data-filters' => 'لا توجد بيانات مطابقة للمرشحات المحددة.',
     'profile' => [
         'settings' => 'إعدادات الحساب',
