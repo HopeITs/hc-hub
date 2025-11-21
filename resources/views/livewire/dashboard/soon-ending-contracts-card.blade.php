@@ -1,74 +1,69 @@
-<div
-    class="relative w-full max-w-sm h-[340px] bg-white rounded-3xl shadow-md ring-1 ring-[var(--color-primary-200)] overflow-hidden">
+@php
+    $locale = app()->getLocale();
+    $titleField = 'title_' . $locale;
+@endphp
 
-    <div class="flex items-center justify-between px-5 pt-4 pb-3 bg-[var(--color-primary-50)] border-b border-[var(--color-primary-100)]">
-        <div class="flex items-center gap-2">
-            <div
-                class="flex items-center justify-center h-8 w-8 rounded-lg bg-[var(--color-primary-500)] text-white shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M9 12h6m-6 4h6m-2 4h6a2 2 0 002-2V6a2 2 0 00-2-2H8l-6 6v12a2 2 0 002 2h10z"/>
-                </svg>
-            </div>
-            <h2 class="text-[17px] font-extrabold text-[var(--color-primary-700)] tracking-tight">
-                Contracts Ending Soon
-            </h2>
-        </div>
+<div class="relative w-full bg-white rounded-3xl shadow-sm overflow-hidden">
 
-        <span
-            class="text-[11px] font-semibold bg-[var(--color-primary-100)] text-[var(--color-primary-700)] px-3 py-0.5 rounded-full shadow-sm">
-            {{ $contracts->count() }} Ending Soon
-        </span>
+    <!-- Header -->
+    <div class="flex items-center gap-2 px-6 pt-6 pb-4">
+        <h2 class="text-lg font-semibold text-[var(--color-neutral-800)]">
+            Contracts Ending Soon
+        </h2>
+        <x-icons.document-text class="w-5 h-5 text-primary"/>
     </div>
 
-    <div
-        class="relative p-5 space-y-3 overflow-y-auto scroll-smooth max-h-[270px]
-           scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)]
-           hover:scrollbar-thumb-[var(--color-primary-400)]">
+    <!-- Scrollable List -->
+    <div class="px-6 pb-6 max-h-[300px] overflow-y-auto scrollbar-thin
+                scrollbar-thumb-[var(--color-primary-300)]
+                scrollbar-track-[var(--color-neutral-100)]">
 
         @forelse ($contracts as $contract)
-            <div
-                class="flex items-center justify-between p-3 bg-[var(--color-neutral-50)] rounded-2xl border border-[var(--color-neutral-200)] hover:border-[var(--color-primary-300)] hover:shadow-sm transition">
-                <div class="flex items-center gap-3">
-                    <img src="{{ $contract->employee_photo }}"
-                         alt="{{ $contract->employee_name }}"
-                         class="h-10 w-10 rounded-full object-cover ring-1 ring-[var(--color-primary-200)]">
+            <div class="flex items-center justify-between py-4 border-b border-[var(--color-neutral-200)] last:border-0">
 
-                    <div>
-                        <p class="text-sm font-semibold text-[var(--color-neutral-800)] leading-tight">
+                <div class="flex items-center gap-3">
+
+                    <!-- Avatar (identical logic to Team Members card) -->
+                    <div class="flex items-center justify-center h-11 w-11 flex-shrink-0 rounded-full overflow-hidden
+                                bg-[var(--color-primary-500)] text-white font-semibold uppercase shadow-sm">
+
+                        @if($contract->employee_photo)
+                            <img src="{{ $contract->employee_photo }}"
+                                 alt="{{ $contract->employee_name }}"
+                                 class="h-full w-full object-cover">
+                        @else
+                            {{
+                                collect(explode(' ', $contract->employee_name))
+                                    ->map(fn($n) => Str::substr($n, 0, 1))
+                                    ->join('')
+                            }}
+                        @endif
+
+                    </div>
+
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-[var(--color-neutral-800)] truncate">
                             {{ $contract->employee_name }}
                         </p>
-                        <p class="text-xs text-[var(--color-neutral-500)]">
-                            {{ $contract->department_title }} — {{ $contract->city_name }}
-                        </p>
-                        <p class="text-[11px] text-[var(--color-primary-600)] mt-0.5 font-medium">
-                            Ends on {{ \Carbon\Carbon::parse($contract->end_date)->toDateString() }}
+
+                        <p class="text-xs text-[var(--color-neutral-500)] truncate">
+                            {{ $contract->position->$titleField }}
                         </p>
                     </div>
                 </div>
 
-                <div class="flex flex-col items-center gap-3">
-                    <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full
-                        @if ($contract->days_left <= 7)
-                            bg-red-50 text-red-700 border border-red-100
-                        @else
-                            bg-[var(--color-primary-50)] text-[var(--color-primary-700)] border border-[var(--color-primary-100)]
-                        @endif whitespace-nowrap">
-                        {{ $contract->days_left }} {{ $contract->days_left === 1 ? 'day' : 'days' }} left
-                    </span>
+                <!-- Right Side: End Date + View -->
+                <div class="flex flex-col items-end">
+                    <p class="text-sm font-semibold text-primary whitespace-nowrap">
+                        {{ \Carbon\Carbon::parse($contract->end_date)->format('d/m/Y') }}
+                    </p>
 
                     <a href="{{ $contract->view_route }}"
-                       class="flex items-center gap-1 text-[11px] font-semibold text-[var(--color-primary-700)] hover:text-[var(--color-primary-600)] transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                        <span>View</span>
+                       class="text-[12px] mt-0.5 text-secondary-light font-light underline-offset-2 hover:underline">
+                        View
                     </a>
                 </div>
+
             </div>
         @empty
             <div class="text-center p-4 text-sm text-[var(--color-neutral-500)]">
