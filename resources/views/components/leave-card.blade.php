@@ -26,25 +26,19 @@
         </h4>
         <div class="border-b border-3 border-primary w-6"></div>
         <ul class="mt-3 space-y-0.2 text-secondary-light text-xs leading-relaxed">
-            <li class="text-secondary-light">
-                <span>USED:</span>
-                <span>{!! $used !!}</span>
-                {{--                <span ><strong class="text-secondary-dark">12</strong> days & <strong class="text-secondary-dark">4</strong> hours</span>--}}
+            <li class="text-secondary-light text-start">
+                <span>@lang('general.used-leave', ['attr' => $used ]) </span>
+
             </li>
             <li>
-                <span>REMAINING:</span>
-                <span>{!! $remaining !!}</span>
-                {{--                <strong class="text-secondary-dark">12</strong> days & <strong class="text-secondary-dark">4</strong> hours--}}
+                <span>@lang('general.remaining-leave', ['attr' => $remaining ]) </span>
             </li>
             <li>
-                <span> PENDING:</span>
-                <span>{!! $pending !!}</span>
-                {{--                <strong class="text-secondary-dark">1</strong> day--}}
+                <span>@lang('general.pending-leave', ['attr' => $pending ]) </span>
+
             </li>
             <li>
-                <span> TOTAL:</span>
-                <span>{!! $total !!}</span>
-                {{--                <strong class="text-secondary-dark">25</strong> days--}}
+                <span>@lang('general.total-leave', ['attr' => $total ]) </span>
             </li>
         </ul>
     </div>

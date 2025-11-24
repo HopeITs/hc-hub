@@ -45,23 +45,44 @@ class LeaveRequest extends Model
     public function getDurationAttribute(): string
     {
         $weekends = array_map('intval', explode(',', $this->leaveBalance->contract->position->center->weekends));
-
         Carbon::setWeekendDays($weekends);
 
+        // Hour-based leave: show hours + minutes
         if ($this->type === 'hour') {
-            $duration = $this->start_at->floatDiffInRealHours($this->end_at);
-            return $duration.' '.trans_choice('general.hour', $duration);
+            $floatHours = $this->start_at->floatDiffInRealHours($this->end_at);
+
+            $hours   = (int) $floatHours;
+            $minutes = (int) round(($floatHours - $hours) * 60);
+
+            // 60 minutes rolls into an extra hour
+            if ($minutes >= 60) {
+                $hours   += intdiv($minutes, 60);
+                $minutes = $minutes % 60;
+            }
+
+            $parts = [];
+
+            if ($hours > 0) {
+                $parts[] = $hours.' '.trans_choice('general.hour', $hours);
+            }
+
+            if ($minutes > 0) {
+                $parts[] = $minutes.' '.trans_choice('general.minute', $minutes);
+            }
+
+            // Fallback if both are zero (unlikely but safe)
+            return implode(' ', $parts) ?: '0 '.trans_choice('general.minute', 2);
         }
 
+        // Day-based leave (unchanged)
         $start = $this->start_at;
         $end   = $this->end_at;
 
         // Include the end date
-        $duration = $start->diffInWeekDays($end) + 1 ;
+        $days = $start->diffInWeekDays($end) + 1;
 
-        return $duration.' '.trans_choice('general.day', $duration);
+        return $days.' '.trans_choice('general.day', $days);
     }
-
 
     public function scopePending($q)
     {
