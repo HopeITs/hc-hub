@@ -14,8 +14,8 @@ import '../css/app.css';
     import './password-strength.js'
     import './contract-type-employees-chart.js';
     import './job-levels-employees.js';
-    import './employees-by-pay-type.js'
-
+    import './donut-chart.js'
+    import './scatter-chart.js'
 
 import Tagify from '@yaireo/tagify'
 
@@ -40,13 +40,11 @@ document.querySelectorAll('.tagify').forEach((el) => {
 
     const hidden = document.getElementById(el.id + '_hidden')
 
-    // preload existing values from Livewire into Tagify
     if (hidden.value) {
         try {
             const values = JSON.parse(hidden.value)
             tagify.addTags(values)
         } catch (e) {
-            // if backend sent CSV instead of JSON
             tagify.addTags(hidden.value.split(','))
         }
     }

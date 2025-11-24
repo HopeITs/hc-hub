@@ -1,4 +1,4 @@
-<div class="w-96 h-full rounded-2xl border border-[var(--color-neutral-200)] bg-white shadow-md overflow-hidden">
+<div class="w-full h-full rounded-3xl border border-[var(--color-neutral-200)] bg-white shadow-sm overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 bg-[var(--color-neutral-50)] border-b border-[var(--color-neutral-200)]">
         <h3 class="font-semibold text-[var(--color-primary)] flex items-center gap-2 text-sm tracking-wide">
             <span class="inline-flex items-center justify-center w-7 h-7 bg-[var(--color-primary)] text-white rounded-lg text-xs shadow">🏆</span>
