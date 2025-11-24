@@ -67,6 +67,8 @@ class MyLeaveRequestModule extends Component
     {
 
         $this->form->setLeaveRequest($id);
+
+
         $this->modalTitle = __('general.edit');
         $this->showModal = true;
     }

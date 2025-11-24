@@ -22,6 +22,8 @@ class LeaveRequestForm extends Form
 
     public $id = null;
 
+    public $employee_id = null;
+
     // For hour-based requests
     public $leave_date = null;
     public $start_hour = null;
