@@ -5,12 +5,12 @@ use App\Enums\LeaveRequestStatus;
 <div>
     <div class="flex justify-between items-center mb-6">
         <livewire:layout.breadcrumbs
-                :title="__('general.my-leaves')"
-                :crumbs="[
+            :title="__('general.my-leaves')"
+            :crumbs="[
                 ['label' => __('general.holidays-and-leaves')],
 
             ]"
-                :showButton="true"
+            :showButton="true"
         />
 
         <div>
@@ -25,7 +25,7 @@ use App\Enums\LeaveRequestStatus;
         <div class="grid grid-cols-5  gap-6 mb-6">
             @foreach($availableLeaves as $availableLeave)
                 <x-leave-card class="{{$loop->first ? 'col-span-2' : 'col-span-1'}}"
-                                :title="$availableLeave->leaveType->name"
+                              :title="$availableLeave->leaveType->name"
                               :total="$availableLeave->deserved_formatted"
                               :remaining="$availableLeave->remaining"
                               :total-days="$availableLeave->intTotal"
@@ -47,25 +47,25 @@ use App\Enums\LeaveRequestStatus;
 
     <x-tabs-list>
         <x-tabs-list-item
-                :active="$statusFilter === 'all'" active-tab="all">
+            :active="$statusFilter === 'all'" active-tab="all">
             All ({{ $counts['all'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
-                :active="$statusFilter === (string) LeaveRequestStatus::Pending"
-                :active-tab="LeaveRequestStatus::Pending">
+            :active="$statusFilter === (string) LeaveRequestStatus::Pending"
+            :active-tab="LeaveRequestStatus::Pending">
             Pending ({{ $counts['pending'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
-                :active="$statusFilter === (string) LeaveRequestStatus::Accepted"
-                :active-tab="LeaveRequestStatus::Accepted">
+            :active="$statusFilter === (string) LeaveRequestStatus::Accepted"
+            :active-tab="LeaveRequestStatus::Accepted">
             Accepted ({{ $counts['accepted'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
-                :active="$statusFilter === (string) LeaveRequestStatus::Rejected"
-                :active-tab="LeaveRequestStatus::Rejected">
+            :active="$statusFilter === (string) LeaveRequestStatus::Rejected"
+            :active-tab="LeaveRequestStatus::Rejected">
             Rejected ({{ $counts['rejected'] ?? 0 }}){{$statusFilter === LeaveRequestStatus::Rejected}}
         </x-tabs-list-item>
     </x-tabs-list>
@@ -86,7 +86,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
                     <x-forms.select-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                         <option
-                                class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                            class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                             Select Any..
                         </option>
                         @foreach($allAvailableLeaves ?? [] as $availableLeave)
@@ -99,7 +99,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-forms.input-label for="city">{{__('general.alternative_employee')}}</x-forms.input-label>
                     <x-forms.select-input wire:model="form.alternative_employee" id="alternative_employee">
                         <option
-                                class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                            class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                             Select Any..
                         </option>
                         @foreach($alternativeEmployees as $alternativeEmployee)
@@ -183,7 +183,8 @@ use App\Enums\LeaveRequestStatus;
             </div>
 
             <div class="flex justify-end gap-2">
-                <x-primary-button  type="button" wire:click="confirmSave"  class="!w-auto">@lang('general.save')</x-primary-button>
+                <x-primary-button type="button" wire:click="confirmSave"
+                                  class="!w-auto">@lang('general.save')</x-primary-button>
                 <x-primary-button :href="route('leaves.index')"
                                   class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
             </div>
