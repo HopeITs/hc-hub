@@ -326,8 +326,8 @@ use App\Enums\LeaveRequestStatus;
                         @if((int)$form->status === LeaveRequestStatus::Rejected)
                             <div>
                                 <x-forms.input-label>{{ __('general.reject_reason') }}</x-forms.input-label>
-                                <x-forms.input wire:model="reject_reason"/>
-                                <x-error-span>{{ $errors->first('rejectReason') }}</x-error-span>
+                                <x-forms.input wire:model="form.reject_reason"/>
+                                <x-error-span>{{ $errors->first('form.reject_reason') }}</x-error-span>
                             </div>
                         @endif
 

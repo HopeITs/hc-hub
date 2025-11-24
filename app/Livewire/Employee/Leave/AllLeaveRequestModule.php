@@ -57,7 +57,7 @@ class AllLeaveRequestModule extends Component
     public function submitDecision()
     {
         $this->form->submitDecision();
-
+        $this->refreshCounts();
         $this->decisionModal = false;
 
         LivewireAlert::title(__('general.success-message'))

@@ -265,7 +265,7 @@ return new class extends Migration {
             $table->foreignId('contract_id')->constrained()->onDelete('cascade');
             $table->foreignId('type_id')->constrained('leave_types')->onDelete('restrict');
             $table->integer('deserved');
-            $table->integer('used')->default(0);
+            $table->float('used')->default(0);
             $table->timestamps();
         });
         Schema::create('leave_requests', function (Blueprint $table) {

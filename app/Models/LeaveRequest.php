@@ -84,6 +84,38 @@ class LeaveRequest extends Model
         return $days.' '.trans_choice('general.day', $days);
     }
 
+    public function getDurationInHoursAttribute(): float
+    {
+        // Determine weekend days from the center
+        $weekends = array_map('intval', explode(',', $this->leaveBalance->contract->position->center->weekends));
+        Carbon::setWeekendDays($weekends);
+
+        // For hour-type leave, we already have precise decimal hours
+        if ($this->type === 'hour') {
+            return $this->start_at->floatDiffInRealHours($this->end_at);
+        }
+
+        // For day-type leave: calculate days
+        $start = $this->start_at;
+        $end   = $this->end_at;
+
+        // Include the end date
+        $days = $start->diffInWeekDays($end) + 1;
+
+        // Get weekly hours from contract
+        $weeklyHours = (float) $this->leaveBalance->contract->weekly_hours;
+
+        // Hours per workday
+        $hoursPerDay = $weeklyHours / 5;
+
+        // Total hours for this leave
+        return $days * $hoursPerDay;
+    }
+
+
+
+
+
     public function scopePending($q)
     {
         return $q->where('status', LeaveRequestStatus::Pending);

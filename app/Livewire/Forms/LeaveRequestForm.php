@@ -160,21 +160,30 @@ class LeaveRequestForm extends Form
     {
         if (!$this->decisionLeave) return;
 
-        if ($this->decision === 'accepted') {
+        if ((int)$this->status === LeaveRequestStatus::Accepted) {
+
             $this->decisionLeave->update([
                 'status' => LeaveRequestStatus::Accepted,
                 'reject_reason' => null,
+                'approved_at' => now(),
+                'approved_by' => auth()->user()->profile->id,
             ]);
+            $this->decisionLeave->leaveBalance->update([
+                'used' =>   $this->decisionLeave->leaveBalance->used + $this->decisionLeave->duration_in_hours
+            ]);
+
         }
 
-        if ($this->decision === 'rejected') {
+        if ( (int)$this->status ===  LeaveRequestStatus::Rejected) {
             $this->validate([
-                'rejectReason' => 'required|string|max:255'
+                'reject_reason' => 'required|string|max:255'
             ]);
 
             $this->decisionLeave->update([
                 'status' => LeaveRequestStatus::Rejected,
-                'reject_reason' => $this->rejectReason,
+                'reject_reason' => $this->reject_reason,
+                'approved_at' => now(),
+                'approved_by' => auth()->user()->profile->id,
             ]);
         }
 
