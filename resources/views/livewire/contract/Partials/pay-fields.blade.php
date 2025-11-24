@@ -13,16 +13,16 @@
                            min="0"
                            wire:model.defer="form.salary"
                            placeholder="0.00"
-                           class="mt-1 text-right font-mono tabular-nums"
-                           class="!rounded-e-none"/>
+                           class="mt-1 text-right font-mono tabular-nums !rounded-e-none"/>
             <x-error-span class="mt-1 block text-sm">
                 {{ $errors->first('form.salary') }}
             </x-error-span>
         </div>
 
 
-        <div class="col-span-2 flex flex-col justify-end" >
-            <x-forms.select-input id="currency" wire:model="form.currency" class="!border-s-none !rounded-s-none ">
+        <div class="col-span-2 flex flex-col" >
+            <x-forms.input-label class="invisible">@lang('general.salary')</x-forms.input-label>
+            <x-forms.select-input id="currency" wire:model="form.currency" class="mt-1 !border-s-none !rounded-s-none ">
                 <option value="0">Unknown</option>
                 <option value="1">SYP</option>
                 <option value="2">USD</option>
