@@ -1,74 +1,51 @@
-<div class="w-full h-[28rem] rounded-2xl bg-white border border-[var(--color-neutral-200)] shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-    <div class="flex justify-between items-center px-6 py-5 border-b border-[var(--color-neutral-200)] bg-gradient-to-r from-[var(--color-neutral-50)] to-white">
-        <h2 class="text-xl font-semibold text-[var(--color-neutral-800)] tracking-tight">Employee Statistics</h2>
+<div class="w-full h-full rounded-3xl bg-white border border-neutral-200 shadow-sm hover:shadow-md transition-all duration-300 p-6 flex flex-col">
+
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-[18px] font-semibold text-secondary-medium flex items-center gap-2">
+            Employee Statistics
+            <x-icons.document-text class="w-5 mb-1 h-5 text-primary"/>
+        </h2>
+
         <select
-            class="text-sm border border-[var(--color-neutral-200)] rounded-lg px-3 py-1.5 text-[var(--color-neutral-700)] bg-white shadow-sm hover:bg-[var(--color-neutral-50)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-300)] transition">
+            class="text-xs border border-neutral-300 rounded-xl px-4 py-1.5 bg-white shadow-sm text-neutral-700">
             <option>Monthly</option>
             <option>Quarterly</option>
             <option>Yearly</option>
         </select>
     </div>
 
-    <div class="grid grid-cols-3 gap-4 px-6 py-5 bg-[var(--color-neutral-50)]">
-        <div class="flex flex-col items-center justify-center rounded-xl bg-white shadow-sm p-3 border border-[var(--color-neutral-200)]">
-            <p class="text-xs uppercase tracking-wide text-[var(--color-neutral-600)]">New</p>
-            <p id="stat-new" class="text-2xl font-bold text-[var(--color-primary-500)] mt-1">0</p>
-        </div>
-        <div class="flex flex-col items-center justify-center rounded-xl bg-white shadow-sm p-3 border border-[var(--color-neutral-200)]">
-            <p class="text-xs uppercase tracking-wide text-[var(--color-neutral-600)]">Ended</p>
-            <p id="stat-ended" class="text-2xl font-bold text-[var(--color-secondary-medium)] mt-1">0</p>
-        </div>
-        <div class="flex flex-col items-center justify-center rounded-xl bg-white shadow-sm p-3 border border-[var(--color-neutral-200)]">
-            <p class="text-xs uppercase tracking-wide text-[var(--color-neutral-600)]">Terminated</p>
-            <p id="stat-terminated" class="text-2xl font-bold text-neutral-300 mt-1">0</p>
-        </div>
-    </div>
-
-    <div class="relative px-6 pb-6 h-[calc(100%-12rem)]">
+    <div class=" max-h-[125px]">
         <canvas id="employeeChart"></canvas>
     </div>
+
+    <div id="chartLegend" class="flex items-center gap-6 ml-3 mt-6 text-sm text-neutral-600 font-medium"></div>
+
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('js/chart.umd.js') }}"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
-        const el = document.getElementById("employeeChart");
+
+        const canvas = document.getElementById("employeeChart");
         const select = document.querySelector("select");
-        if (!el) return;
+        if (!canvas) return;
+        if (typeof Chart === "undefined") return console.error("Chart.js not loaded.");
 
-        const ctx = el.getContext("2d");
+        const ctx = canvas.getContext("2d");
 
-        if (Chart && Chart.Filler) {
-            Chart.register(Chart.Filler);
-        }
-
-        const primary = getComputedStyle(document.documentElement).getPropertyValue("--color-primary-500").trim();
-        const primaryLight = getComputedStyle(document.documentElement).getPropertyValue("--color-primary-300").trim();
-        const secondary = getComputedStyle(document.documentElement).getPropertyValue("--color-secondary-medium").trim();
-        const neutral = getComputedStyle(document.documentElement).getPropertyValue("--color-neutral-300").trim();
-
-        const gradientPrimary = ctx.createLinearGradient(0, 0, 0, 400);
-        gradientPrimary.addColorStop(0, `${primaryLight}80`);
-        gradientPrimary.addColorStop(1, `${primaryLight}00`);
-
-        const gradientSecondary = ctx.createLinearGradient(0, 0, 0, 400);
-        gradientSecondary.addColorStop(0, `${secondary}60`);
-        gradientSecondary.addColorStop(1, `${secondary}00`);
-
-        const gradientNeutral = ctx.createLinearGradient(0, 0, 0, 400);
-        gradientNeutral.addColorStop(0, `${neutral}60`);
-        gradientNeutral.addColorStop(1, `${neutral}00`);
+        const styles = getComputedStyle(document.documentElement);
+        const primary   = styles.getPropertyValue("--color-primary-500").trim();
+        const secondary = styles.getPropertyValue("--color-secondary-medium").trim();
+        const neutral   = styles.getPropertyValue("--color-neutral-300").trim();
 
         async function fetchData(mode = "monthly") {
             const res = await fetch(`/employee-statistics/${mode}`);
+            if (!res.ok) return { labels: [], new: [], ended: [], terminated: [] };
             return res.json();
         }
 
-        const data = await fetchData("monthly");
-
-        document.getElementById("stat-new").textContent = `+${data.new.at(-1)}`;
-        document.getElementById("stat-ended").textContent = data.ended.at(-1);
-        document.getElementById("stat-terminated").textContent = data.terminated.at(-1);
+        let data = await fetchData("monthly");
 
         const chart = new Chart(ctx, {
             type: "line",
@@ -79,103 +56,143 @@
                         label: "New Employees",
                         data: data.new,
                         borderColor: primary,
-                        backgroundColor: gradientPrimary,
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 2.5,
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 2,
                         pointBackgroundColor: primary,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
+                        pointRadius: 3,
+                        pointHoverRadius: 6
                     },
                     {
                         label: "Ended",
                         data: data.ended,
                         borderColor: secondary,
-                        backgroundColor: gradientSecondary,
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 2.5,
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 2,
                         pointBackgroundColor: secondary,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
+                        pointRadius: 3,
+                        pointHoverRadius: 6
                     },
                     {
                         label: "Terminated",
                         data: data.terminated,
                         borderColor: neutral,
-                        backgroundColor: gradientNeutral,
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 2.5,
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 2,
                         pointBackgroundColor: neutral,
-                        pointRadius: 5,
-                        pointHoverRadius: 7
-                    }
+                        pointRadius: 3,
+                        pointHoverRadius: 6
+                    },
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: { mode: "index", intersect: false },
                 plugins: {
-                    legend: {
-                        position: "top",
-                        align: "end",
-                        labels: {
-                            usePointStyle: true,
-                            color: getComputedStyle(document.documentElement).getPropertyValue("--color-neutral-700"),
-                            padding: 15,
-                            font: { size: 13, family: "SomarSans" }
-                        }
-                    },
+                    legend: { display: false },
                     tooltip: {
+                        enabled: true,
+                        mode: "index",
+                        intersect: false,
                         backgroundColor: "#fff",
-                        titleColor: getComputedStyle(document.documentElement).getPropertyValue("--color-neutral-900"),
-                        bodyColor: getComputedStyle(document.documentElement).getPropertyValue("--color-neutral-700"),
-                        borderColor: getComputedStyle(document.documentElement).getPropertyValue("--color-neutral-200"),
+                        titleColor: "#111",
+                        bodyColor: "#444",
+                        borderColor: "rgba(0,0,0,0.1)",
                         borderWidth: 1,
-                        padding: 12,
-                        cornerRadius: 8,
-                        boxPadding: 6,
-                        displayColors: true,
-                        usePointStyle: true
+                        padding: 10,
+                        cornerRadius: 6,
+                        displayColors: true
                     }
+
                 },
                 scales: {
                     x: {
-                        grid: { color: "rgba(220,221,222,0.5)", drawBorder: false },
+                        grid: {
+                            color: "rgba(220,221,222,0.5)",
+                            drawBorder: false,
+                            drawOnChartArea: true
+                        },
                         ticks: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue("--color-neutral-600"),
-                            font: { size: 13, family: "Lato" }
+                            color: styles.getPropertyValue("--color-secondary-dark"),
+                            font: {
+                                size: 12,
+                                weight: "bold",
+                            }
                         }
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: "rgba(220,221,222,0.5)", drawBorder: false },
+                        grid: {
+                            color: "rgba(220,221,222,0.5)",
+                            drawBorder: false,
+                            drawOnChartArea: true
+                        },
                         ticks: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue("--color-neutral-600"),
-                            font: { size: 13, family: "Lato" },
-                            padding: 8
+                            stepSize: 1,
+                            color: styles.getPropertyValue("--color-secondary-dark"),
+                            font: {
+                                size: 12,
+                                weight: "bold",
+                            },
+                            callback: value => Number.isInteger(value) ? value : ""
                         }
                     }
                 }
             }
         });
 
-        select.addEventListener("change", async (e) => {
+        function renderLegend(chartInstance) {
+            const legendBox = document.getElementById("chartLegend");
+            legendBox.innerHTML = "";
+
+            chartInstance.data.datasets.forEach((ds, index) => {
+                const item = document.createElement("div");
+                item.className = "flex items-center gap-1 cursor-pointer select-none";
+
+                const isHidden = chartInstance.isDatasetVisible(index) === false;
+
+                const dot = document.createElement("span");
+                dot.className = "w-2.5 h-2.5 rounded-full inline-block";
+                dot.style.backgroundColor = isHidden ? "transparent" : ds.borderColor;
+                dot.style.border = `2px solid ${ds.borderColor}`;
+
+                const label = document.createElement("span");
+                label.textContent = ds.label;
+                label.className = "text-xs";
+                label.style.opacity = isHidden ? 0.4 : 1;
+
+                item.appendChild(dot);
+                item.appendChild(label);
+
+                item.addEventListener("click", () => {
+                    const meta = chartInstance.getDatasetMeta(index);
+
+                    meta.hidden = meta.hidden === null ? !chartInstance.data.datasets[index].hidden : null;
+
+                    chartInstance.update();
+                    renderLegend(chartInstance);
+                });
+
+                legendBox.appendChild(item);
+            });
+        }
+
+
+        renderLegend(chart);
+
+        select.addEventListener("change", async e => {
             const mode = e.target.value.toLowerCase();
-            const data = await fetchData(mode);
+            const newData = await fetchData(mode);
 
-            chart.data.labels = data.labels;
-            chart.data.datasets[0].data = data.new;
-            chart.data.datasets[1].data = data.ended;
-            chart.data.datasets[2].data = data.terminated;
-
-            document.getElementById("stat-new").textContent = `+${data.new.at(-1)}`;
-            document.getElementById("stat-ended").textContent = data.ended.at(-1);
-            document.getElementById("stat-terminated").textContent = data.terminated.at(-1);
+            chart.data.labels = newData.labels;
+            chart.data.datasets[0].data = newData.new;
+            chart.data.datasets[1].data = newData.ended;
+            chart.data.datasets[2].data = newData.terminated;
 
             chart.update();
+            renderLegend(chart);
         });
     });
 </script>
