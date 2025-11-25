@@ -12,39 +12,49 @@ class ContractTypeEmployeesStatistics extends Component
 
     public function mount()
     {
+        // Mapping of main donut sections → contract type IDs
         $groups = [
-            'Annual' => [1, 2],
-            'Trial Period' => [3, 4],
+            'Annual'          => [1, 2],
+            'Trial Period'    => [3, 4],
             'Service Agreement' => [5, 6],
         ];
 
+        // Contract type names indexed by ID
         $types = ContractType::pluck('name_en', 'id');
 
-        $contracts = Contract::select('id', 'contract_type_id')->get();
+        // All contracts loaded once
+        $contracts = Contract::select('contract_type_id')->get();
 
-        $mapped = [];
+        $this->chartData = collect($groups)->map(function ($typeIds, $mainCategory) use ($types, $contracts) {
 
-        foreach ($groups as $mainCategory => $typeIds) {
+            // count contracts per main category
+            $total = $contracts->whereIn('contract_type_id', $typeIds)->count();
 
-            $filtered = $contracts->whereIn('contract_type_id', $typeIds);
+            // Build breakdown list
+            $breakdown = collect($typeIds)->map(function ($typeId) use ($types, $contracts) {
 
-            $breakdown = [];
+                // Original DB label
+                $label = $types[$typeId] ?? 'Unknown';
 
-            foreach ($typeIds as $typeId) {
-                $breakdown[] = [
-                    'category' => $types[$typeId] ?? "Unknown",
-                    'value' => $contracts->where('contract_type_id', $typeId)->count(),
+                // Shortened labels
+                $label = match (strtolower($label)) {
+                    'online agreement contract' => 'Online',
+                    'onsite agreement contract' => 'Onsite',
+                    default => $label,
+                };
+
+                return [
+                    'category' => $label,
+                    'value'    => $contracts->where('contract_type_id', $typeId)->count(),
                 ];
-            }
+            });
 
-            $mapped[] = [
-                'category' => $mainCategory,
-                'value' => $filtered->count(),
-                'breakdown' => $breakdown,
+            return [
+                'category'  => $mainCategory,
+                'value'     => $total,
+                'breakdown' => $breakdown->values(),
             ];
-        }
-
-        $this->chartData = $mapped;
+        })->values();
     }
 
     public function render()
