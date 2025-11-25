@@ -43,10 +43,10 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" wire:loading.remove wire:target="applyFilters, resetFilters">
         @forelse ($cards as $card)
-            <article class="relative overflow-hidden rounded-3xl bg-white border border-neutral-200 shadow-md hover:shadow-lg transition-transform hover:-translate-y-1">
+            <article class="relative overflow-hidden rounded-3xl bg-white border border-neutral-200 shadow-md hover:shadow-lg transition-transform hover:-translate-y-1 flex flex-col">
                 <div class="absolute top-0 left-0 w-full h-1.5 {{ $card['color'] }}"></div>
 
-                <div class="flex justify-between items-start mt-2 p-4 border-b border-neutral-200">
+                <div class="flex justify-between items-start mt-2 p-4 border-b border-neutral-200 min-h-[110px]">
                     <div class="flex flex-col gap-2">
                         <h3 class="text-lg font-bold text-neutral-900 leading-tight">{{ $card['name'] }}</h3>
                         <div class="text-sm text-neutral-500">
@@ -96,7 +96,7 @@
                     @endforeach
                 </div>
 
-                <div class="flex justify-end p-3">
+                <div class="flex justify-end p-3 mt-auto">
                     @if ($cardType === 'program' && isset($card['program_slug']))
                         <a href="{{ route('programs.show', ['program' => $card['program_slug']]) }}" class="text-sm font-semibold text-primary-600 hover:underline">
                             @lang('general.show-more') →
