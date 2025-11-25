@@ -3,44 +3,54 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\Contract;
-use Illuminate\Support\Collection;
+use App\Models\ContractType;
 use Livewire\Component;
 
 class ContractTypeEmployeesStatistics extends Component
 {
-    public Collection $statistics;
+    public $chartData;
 
-    public function mount(): void
+    public function mount()
     {
-        $contracts = Contract::with('contractType')->where('is_active', true)->get();
+        $groups = [
+            'Annual' => [1, 2],
+            'Trial Period' => [3, 4],
+            'Service Agreement' => [5, 6],
+        ];
 
-        $grouped = $contracts->groupBy(fn($c) => $c->contractType?->name ?? 'Unknown');
+        $types = ContractType::pluck('name_en', 'id');
 
-        $this->statistics = $grouped
-            ->map(function ($contracts, $typeName) {
-                $breakdown = collect([
-                    'Full Time' => $contracts->where('weekly_hours', '>', 30),
-                    'Part Time' => $contracts->where('weekly_hours', '<=', 30),
-                ])
-                    ->map(function ($group, $label) use ($typeName) {
-                        return [
-                            'category' => "$label - $typeName",
-                            'value' => $group->count(),
-                        ];
-                    })
-                    ->values();
+        $contracts = Contract::select('id', 'contract_type_id')->get();
 
-                return [
-                    'category' => $typeName,
-                    'value' => $contracts->count(),
-                    'breakdown' => $breakdown,
+        $mapped = [];
+
+        foreach ($groups as $mainCategory => $typeIds) {
+
+            $filtered = $contracts->whereIn('contract_type_id', $typeIds);
+
+            $breakdown = [];
+
+            foreach ($typeIds as $typeId) {
+                $breakdown[] = [
+                    'category' => $types[$typeId] ?? "Unknown",
+                    'value' => $contracts->where('contract_type_id', $typeId)->count(),
                 ];
-            })
-            ->values();
+            }
+
+            $mapped[] = [
+                'category' => $mainCategory,
+                'value' => $filtered->count(),
+                'breakdown' => $breakdown,
+            ];
+        }
+
+        $this->chartData = $mapped;
     }
 
     public function render()
     {
-        return view('livewire.dashboard.contract-type-employees-statistics');
+        return view('livewire.dashboard.contract-type-employees-statistics', [
+            'chartData' => $this->chartData,
+        ]);
     }
 }

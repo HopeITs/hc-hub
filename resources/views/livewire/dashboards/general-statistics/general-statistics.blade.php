@@ -23,7 +23,7 @@
             </div>
 
             <div class="col-start-2 row-start-3  h-68">
-                <x-dashboard-cards.no-leaves-employees-statistics/>
+                <livewire:dashboard.no-leaves-employees-statistics/>
             </div>
 
             <div class="col-start-3 row-start-3 h-68">
