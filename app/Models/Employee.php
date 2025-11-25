@@ -187,6 +187,7 @@ class Employee extends Model implements HasMedia
 
     public function availableLeaves()
     {
+
         $leaves = $this->latestActiveContract()?->leaveBalances()
 //            ->whereHas('leaveType', fn ($q) => $q->where('base_days', '>', 10))
             ->with(['leaveRequests' => fn ($q) => $q->pending()
@@ -195,29 +196,33 @@ class Employee extends Model implements HasMedia
             ->get();
 
         // Now compute pending durations using the real accessor logic
-        foreach ($leaves as $leave) {
 
-            $pendingDays = 0;
-            $pendingHours = 0;
+        if($leaves?->count() > 0){
+            foreach ($leaves as $leave) {
 
-            foreach ($leave->leaveRequests as $req) {
+                $pendingDays = 0;
+                $pendingHours = 0;
 
-                if ($req->type === 'day') {
-                    $weekends = array_map('intval', explode(',', $req->leaveBalance->contract->position->center->weekends));
+                foreach ($leave->leaveRequests as $req) {
 
-                   Carbon::setWeekendDays($weekends);
+                    if ($req->type === 'day') {
+                        $weekends = array_map('intval', explode(',', $req->leaveBalance->contract->position->center->weekends));
 
-                    $pendingDays += $req->start_at->diffInWeekDays($req->end_at) + 1;
+                        Carbon::setWeekendDays($weekends);
+
+                        $pendingDays += $req->start_at->diffInWeekDays($req->end_at) + 1;
+                    }
+
+                    if ($req->type === 'hour') {
+                        $pendingHours += $req->start_at->floatDiffInRealHours($req->end_at);
+                    }
                 }
 
-                if ($req->type === 'hour') {
-                    $pendingHours += $req->start_at->floatDiffInRealHours($req->end_at);
-                }
+                $leave->pending_days = $pendingDays;
+                $leave->pending_hours = $pendingHours;
             }
-
-            $leave->pending_days = $pendingDays;
-            $leave->pending_hours = $pendingHours;
         }
+
 
         return $leaves;
     }

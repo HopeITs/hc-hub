@@ -64,22 +64,28 @@ class AllLeaveRequestModule extends Component
         $this->modalTitle = 'Leave Details';
         $this->showModal = true;
     }
-
     public function edit(LeaveRequest $id)
     {
-
         $this->form->setLeaveRequest($id);
+
         $employee = $id->leaveBalance->contract->employee;
 
-        $this->allAvailableLeaves = $employee->availableLeaves();
+        // hydrate dependent lists
+        $this->allAvailableLeaves = $employee->latestActiveContract()?->leaveBalances()->with('leaveType')->get();
         $this->alternativeEmployees = Employee::query()
             ->where('city_id', $employee->city_id)
             ->where('id', '!=', $employee->id)
-            ->whereHas('contracts.position.department', fn($q) => $q->where('id', $employee->department?->id)
-            )->get();
+            ->whereHas('contracts.position.department', fn($q) => $q->where('id', $employee->department?->id))
+            ->get();
+        // hydrate form values
+
+        $this->form->employee_id = $employee->id;
+        $this->form->leave_balance_id = (int) $id->leave_balance_id;   // <-- REQUIRED
+//dd($this->allAvailableLeaves);
         $this->modalTitle = __('general.edit');
         $this->formModal = true;
     }
+
 
     public function updatedFormEmployeeId($employeeId)
     {
