@@ -164,6 +164,12 @@
                             {{ 'All Leaves' }}
                         </x-layouts.app.sidebar.nav-item>
                         @endnotactiverole
+                        @activerole('HR')
+                        <x-layouts.app.sidebar.nav-item :href="route('leaves.balance')"
+                                                        :active="request()->routeIs('leaves.balance')">
+                            {{ __('general.balance') }}
+                        </x-layouts.app.sidebar.nav-item>
+                        @endactiverole
                         <x-layouts.app.sidebar.nav-item :href="route('leaves.index')"
                                                         :active="request()->routeIs('leaves.index')">
                             {{ __('general.my-leaves') }}

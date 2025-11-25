@@ -21,9 +21,9 @@ use App\Livewire\Employee\{EmployeeCreate,
     EmployeeProfile,
     Leave\AllLeaveRequestModule,
     Leave\CreateLeaveRequest,
+    Leave\EmpLeaveBalanceModule,
     Leave\MyLeaveRequestModule,
-    Leave\MyLeaveRequestTable
-};
+    Leave\MyLeaveRequestTable};
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
 use App\Livewire\ProgramManagement\{Center\CenterDetails,
     Center\CentersModule,
@@ -108,6 +108,7 @@ Route::group(
                 ->group(function () {
                     Route::get('/', MyLeaveRequestModule::class)->name('index');
                     Route::get('/all', AllLeaveRequestModule::class)->name('all');
+                    Route::get('/balance', EmpLeaveBalanceModule::class)->name('balance');
                 });
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 

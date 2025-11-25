@@ -18,7 +18,10 @@ class LeaveBalanceForm extends Form
     public ?LeaveBalance $balance = null;
     public $contract_id;
     public $used = 0;
-
+    public $deserved ;
+    public $operation = 'sum' ;
+    public $unit = 'hour';
+    public $amount = 0;
     protected function rules()
     {
         return [
@@ -304,5 +307,9 @@ class LeaveBalanceForm extends Form
                 $balance->update(['deserved' => $deserved]);
             }
         }
+    }
+
+    public function updateAnnualLeaves(){
+        dd($this->all());
     }
 }
