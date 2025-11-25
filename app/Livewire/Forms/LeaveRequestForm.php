@@ -104,7 +104,7 @@ class LeaveRequestForm extends Form
                 },
             ];
 
-            $rules['leave_date'] = ['required', 'after_or_equal:today'];
+            $rules['leave_date'] = ['required'];
         } else {
             $rules['start_at'] = ['required', 'after_or_equal:today'];
             $rules['end_at'] = ['required', 'after_or_equal:start_at'];
@@ -171,12 +171,12 @@ class LeaveRequestForm extends Form
                 'approved_by' => auth()->user()->profile->id,
             ]);
             $this->decisionLeave->leaveBalance->update([
-                'used' =>   $this->decisionLeave->leaveBalance->used + $this->decisionLeave->duration_in_hours
+                'used' => $this->decisionLeave->leaveBalance->used + $this->decisionLeave->duration_in_hours
             ]);
 
         }
 
-        if ( (int)$this->status ===  LeaveRequestStatus::Rejected) {
+        if ((int)$this->status === LeaveRequestStatus::Rejected) {
             $this->validate([
                 'reject_reason' => 'required|string|max:255'
             ]);
@@ -262,9 +262,28 @@ class LeaveRequestForm extends Form
 
             $end_at = $this->end_hour . ' ' . $this->leave_date;
             $this->end_at = Carbon::createFromFormat('H:i Y-m-d', $end_at);
+        } else {
+            $this->start_at = Carbon::createFromFormat('Y-m-d', $this->start_at)->startOfDay();
+            $this->end_at = Carbon::createFromFormat('Y-m-d', $this->end_at)->startOfDay();
         }
 
-        $this->leaveRequest->update($this->all());
+        if ((int)$this->leaveRequest->status === LeaveRequestStatus::Accepted) {
+            if (!(($this->leaveRequest->start_at->isSameAs('Y-m-d H:i', $this->start_at)) && ($this->leaveRequest->end_at->isSameAs('Y-m-d H:i', $this->end_at)))) {
+                $this->leaveRequest->leaveBalance->update([
+                    'used' => $this->leaveRequest->leaveBalance->used - $this->leaveRequest->duration_in_hours
+                ]);
+                $this->leaveRequest->update($this->all());
+                $this->leaveRequest->leaveBalance->update([
+                    'used' => $this->leaveRequest->leaveBalance->used + $this->leaveRequest->duration_in_hours
+                ]);
+            } else {
+                $this->leaveRequest->update($this->all());
+            }
+
+        } else {
+            $this->leaveRequest->update($this->all());
+        }
+
 
         $this->resetForm();
     }

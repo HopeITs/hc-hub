@@ -80,8 +80,8 @@ class AllLeaveRequestModule extends Component
         // hydrate form values
 
         $this->form->employee_id = $employee->id;
-        $this->form->leave_balance_id = (int) $id->leave_balance_id;   // <-- REQUIRED
-//dd($this->allAvailableLeaves);
+        $this->form->leave_balance_id = (int) $id->leave_balance_id;
+
         $this->modalTitle = __('general.edit');
         $this->formModal = true;
     }
@@ -232,7 +232,7 @@ class AllLeaveRequestModule extends Component
             $this->form->store();
         }
 
-        $this->showModal = false;
+        $this->formModal = false;
         $this->form->reset();
 
         LivewireAlert::title(__('general.success-message'))
