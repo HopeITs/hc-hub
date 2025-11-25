@@ -28,28 +28,13 @@ class EmpLeaveBalanceModule extends Component
     ];
 
 
-
-
-
-
-
-
-
     public function edit(LeaveBalance $id)
     {
-
+        $this->form->setLeaveBalance($id);
 
         $this->modalTitle = __('general.edit');
         $this->showModal = true;
     }
-
-
-
-
-
-
-
-
 
 
     public function render()
@@ -57,7 +42,6 @@ class EmpLeaveBalanceModule extends Component
 
         return view('livewire.employee.leave.balance');
     }
-
 
 
     public function confirmSave()
@@ -70,7 +54,7 @@ class EmpLeaveBalanceModule extends Component
             ->html($html)
             ->withConfirmButton(__('general.save'))
             ->onConfirm('processSave')
-            ->withCancelButton(__('general.cancel')) ->show();
+            ->withCancelButton(__('general.cancel'))->show();
 
     }
 

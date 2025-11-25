@@ -19,7 +19,7 @@ use App\Enums\LeaveRequestStatus;
 
     {{-- Table --}}
     <div class="mt-4">
-        <livewire:employee.leave.emp-leave-balance-table  key="table-balance"/>
+        <livewire:employee.leave.emp-leave-balance-table key="table-balance"/>
     </div>
 
 
@@ -27,8 +27,64 @@ use App\Enums\LeaveRequestStatus;
 
         <form wire:submit.prevent="save" class="space-y-4">
             <x-forms.errors-validation-list/>
-            <div class="grid md:grid-cols-2 gap-4">
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="md:col-span-1">
+                    <x-forms.input-label for="employee">{{__('general.name')}}</x-forms.input-label>
+                    <p>{{$form->balance?->contract->employee->name}}</p>
+                </div>
+                <div class="md:col-span-2">
+                    <x-forms.input-label for="employee">{{__('general.years-of-service')}}</x-forms.input-label>
+                    <p>{{$form->balance?->contract->employee->years_of_service}}</p>
+                </div>
+                <div class="md:col-span-1">
+                    <x-forms.input-label for="employee">{{__('general.deserved')}}</x-forms.input-label>
+                    <p>{!! $form->balance?->deserved_formatted!!}</p>
+                </div>
+                <div class="md:col-span-1">
+                    <x-forms.input-label for="employee">{{__('general.used')}}</x-forms.input-label>
+                    <p>{!! $form->balance?->used_formatted!!}</p>
+                </div>
+                <div class="md:col-span-1">
+                    <x-forms.input-label for="employee">{{__('general.remaining')}}</x-forms.input-label>
+                    <p>{!!  $form->balance?->remaining!!}</p>
+                </div>
 
+                <div>
+                    <x-forms.input-label>@lang('general.operation')</x-forms.input-label>
+                    <div class="flex gap-x-4">
+                        <x-forms.radio-input id="sum" name="operation" value="sum"
+                                             wire:model="form.operation">{{'Add'}}</x-forms.radio-input>
+                        <x-forms.radio-input id="sub" name="operation" value="sub"
+                                             wire:model="form.operation">{{'SUB'}}</x-forms.radio-input>
+
+                    </div>
+
+                    <x-error-span>{{ $errors->first('form.operation') }}</x-error-span>
+                </div>
+                <div>
+                    <x-forms.input-label>@lang('general.unit')</x-forms.input-label>
+                    <div class="flex gap-x-4">
+                        <x-forms.radio-input id="sum" name="unit" value="hour"
+                                             wire:model="form.unit">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
+                        <x-forms.radio-input id="sub" name="unit" value="day"
+                                             wire:model="form.unit">{{trans_choice('general.day',1)}}</x-forms.radio-input>
+
+                    </div>
+
+                    <x-error-span>{{ $errors->first('form.unit') }}</x-error-span>
+                </div>
+                <div>
+                    <x-forms.input-label>@lang('general.amount')</x-forms.input-label>
+                    <x-forms.input wire:model="form.amount" type="numeric"/>
+
+                    <x-error-span>{{ $errors->first('form.unit') }}</x-error-span>
+                </div>
+                <div>
+
+                    <x-forms.checkbox-input type="checkbox" wire:model="form.amount" >@lang('general.add-as-badge')</x-forms.checkbox-input>
+
+                    <x-error-span>{{ $errors->first('form.unit') }}</x-error-span>
+                </div>
             </div>
             <div class="flex justify-end gap-2">
                 <x-primary-button type="button" wire:click="confirmSave"

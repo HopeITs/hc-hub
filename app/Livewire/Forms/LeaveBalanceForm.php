@@ -32,6 +32,7 @@ class LeaveBalanceForm extends Form
     public function setLeaveBalance(LeaveBalance $balance): void
     {
         $this->balance = $balance;
+
     }
 
     /** ------------------------------------------------------------
