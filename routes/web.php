@@ -7,32 +7,11 @@ use App\Livewire\Dashboards\EmployeeDashboard;
 use App\Livewire\Dashboards\GeneralAdminDashboard;
 use App\Livewire\Dashboards\GeneralStatistics;
 use App\Livewire\Dashboards\ManagerDashboard;
-use App\Livewire\Basics\{ChecklistItemModule,
-    CityModule,
-    ContractTypeModule,
-    DepartmentModule,
-    JobLevelModule,
-    LeaveTypeModule
-};
+use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, DepartmentModule, JobLevelModule, LeaveTypeModule};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
-use App\Livewire\Employee\{EmployeeCreate,
-    EmployeeEdit,
-    EmployeeModule,
-    EmployeeProfile,
-    Leave\AllLeaveRequestModule,
-    Leave\CreateLeaveRequest,
-    Leave\EmpLeaveBalanceModule,
-    Leave\MyLeaveRequestModule,
-    Leave\MyLeaveRequestTable};
+use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule, EmployeeProfile, Leave\AllLeaveRequestModule, Leave\CreateLeaveRequest, Leave\EmpLeaveBalanceModule, Leave\MyLeaveRequestModule, Leave\MyLeaveRequestTable};
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
-use App\Livewire\ProgramManagement\{Center\CenterDetails,
-    Center\CentersModule,
-    DefaultDeliverable\DefaultDeliverablesModule,
-    Program\Create as ProgramCreate,
-    Program\Detail as ProgramDetail,
-    Program\Index as ProgramIndex,
-    Program\Update as ProgramUpdate
-};
+use App\Livewire\ProgramManagement\{Center\CenterDetails, Center\CentersModule, DefaultDeliverable\DefaultDeliverablesModule, Program\Create as ProgramCreate, Program\Detail as ProgramDetail, Program\Index as ProgramIndex, Program\Update as ProgramUpdate};
 use App\Livewire\Settings\{Appearance, Password, Profile};
 use App\Livewire\ChecklistItems\{PendingItems, AllItems, PendingReturns, DoneRequests};
 use Illuminate\Support\Facades\Route;
@@ -41,7 +20,6 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use App\Livewire\Notifications\Index as NotificationsIndex;
 use App\Livewire\Employee\EmployeeStatistics;
 
-
 Route::group(
     [
         'prefix' => LaravelLocalization::setLocale(),
@@ -49,7 +27,6 @@ Route::group(
     ],
     function () {
         Livewire::setUpdateRoute(fn($handle) => Route::post('/livewire/update', $handle));
-
 
         Route::view('/', 'dashboard')
             ->middleware(['auth', 'verified'])
@@ -71,8 +48,8 @@ Route::group(
                 ->name('centers.')
                 ->group(function () {
                     Route::get('/', CentersModule::class)->name('index');
-                    Route::get('/{center}', CenterDetails::class)
-                        ->name('show');
+                    Route::get('/create', \App\Livewire\ProgramManagement\Center\CenterCreate::class)->name('create'); // ✅ Add this
+                    Route::get('/{center}', CenterDetails::class)->name('show');
                 });
 
             Route::prefix('positions')
@@ -93,7 +70,6 @@ Route::group(
                     Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
                     Route::get('/{program:slug}', ProgramDetail::class)->name('show');
                 });
-
 
             Route::prefix('employees')
                 ->name('employees.')
@@ -137,22 +113,17 @@ Route::group(
                     Route::get('/', AllItems::class)->name('index');
                 });
 
-            Route::get('/employee-dashboard', EmployeeDashboard::class)
-                ->name('employee.dashboard');
+            Route::get('/employee-dashboard', EmployeeDashboard::class)->name('employee.dashboard');
 
-            Route::get('/general-statistics', GeneralStatistics::class)
-                ->name('general-statistics');
+            Route::get('/general-statistics', GeneralStatistics::class)->name('general-statistics');
 
-
-            Route::get('/contract-statistics', ContractStatistics::class)
-                ->name('contract-statistics');
+            Route::get('/contract-statistics', ContractStatistics::class)->name('contract-statistics');
 
             Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
 
             Route::get('/news', \App\Livewire\News\NewsModule::class)->name('news.index')->middleware('auth');
 
             Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
-
         });
 
         require __DIR__ . '/auth.php';
