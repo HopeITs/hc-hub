@@ -45,7 +45,10 @@
 
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
-
+                <x-layouts.app.sidebar.single-item :href="route('org.chart')" :active="request()->routeIs('org.chart')">
+                    <x-slot name="icon"><x-icons.code-fork class="w-5 h-5" /></x-slot>
+                    {{ __('general.orgn-chart') }}
+                </x-layouts.app.sidebar.single-item>
 
                 @activerole('hr', 'general manager', 'SUPER ADMIN')
                 <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')"
@@ -93,7 +96,6 @@
                 <x-layouts.app.sidebar.dropdown-nav-list id="program-management"
                                                          :title="__('general.programs-management')" :active="request()->routeIs('programs.*') ||
                         request()->routeIs('positions.*') ||
-                        request()->routeIs('org.chart') ||
                         request()->routeIs('centers.*')">
 
                     <x-slot name="icon">
@@ -110,10 +112,7 @@
                                                         :active="request()->routeIs('positions.*')">
                             {{ __('general.positions') }}
                         </x-layouts.app.sidebar.nav-item>
-                        <x-layouts.app.sidebar.nav-item :href="route('org.chart')"
-                                                        :active="request()->routeIs('org.chart')">
-                            {{ __('general.orgn-chart') }}
-                        </x-layouts.app.sidebar.nav-item>
+
 
                         <x-layouts.app.sidebar.nav-item :href="route('centers.index')"
                                                         :active="request()->routeIs('centers.*')" wire:navigate>
