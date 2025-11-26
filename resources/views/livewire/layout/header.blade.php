@@ -8,23 +8,26 @@
     $localized = LaravelLocalization::getLocalizedURL($switchTo, null, [], true);
 @endphp
 
-<nav class="fixed inset-x-0 top-0 z-10 w-full bg-white dark:bg-gray-800 dark:border-gray-700 backdrop-blur">
-    <div class="px-3 py-1 lg:px-5 lg:pl-3">
+<nav dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
+     class="fixed inset-x-0 top-0 z-10 w-full bg-white dark:bg-gray-800 backdrop-blur">
 
+    <div class="px-3 py-1 lg:px-5 lg:ps-3">
         <div class="flex items-center justify-end gap-3">
 
             <a href="{{ $localized }}"
-               class="flex items-center text-xs font-medium mt-1  text-secondary-light hover:text-secondary-dark transition">
+               class="flex items-center text-xs font-medium mt-1 text-secondary-light hover:text-secondary-dark transition">
                 {{ $switchTo === 'ar' ? 'AR' : 'EN' }}
             </a>
 
             <a href="https://docs.google.com/document/d/1jQ8kl4mo1ARDBO17l-jqXp5hux9wn3--/edit"
                target="_blank" rel="noopener"
-               class=" pr-1 pl-3 border-x border-r-secondary-soft">
-                <x-icons.guide class="text-secondary-light hover:text-secondary-dark mr-2 transition"/>
+               class="pe-1 ps-3 border-x border-e-secondary-soft">
+                <x-icons.guide class="text-secondary-light hover:text-secondary-dark me-2 transition"/>
             </a>
 
-            <a href="https://hcsyria.org/home" target="_blank" rel="noopener" class=" pr-3 border-r border-r-secondary-soft">
+            <a href="https://hcsyria.org/home"
+               target="_blank" rel="noopener"
+               class="pe-3 border-e border-e-secondary-soft">
                 <x-icons.homepage class="text-secondary-light hover:text-secondary-dark transition"/>
             </a>
 
@@ -34,25 +37,28 @@
                 <div x-data="roleDropdown()" x-init="$store.dir = { rtl: @js($isRtl) }"
                      class="relative" @keydown.escape.window="open=false">
 
-                    <button @click="toggle()" :aria-expanded="open" aria-haspopup="menu"
-                            class="flex items-center">
+                    <button @click="toggle()" :aria-expanded="open"
+                            aria-haspopup="menu" class="flex items-center">
+
                         <span class="relative inline-grid place-items-center rounded-full p-[2px] shrink-0">
                             <img class="size-8 border border-primary rounded-full object-cover"
                                  src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt="user"/>
-                            <span class="absolute bottom-0.5 {{ $isRtl ? 'left-1' : 'right-0.5' }}
+
+                            <span class="absolute bottom-0.5 {{ $isRtl ? 'start-1' : 'end-0.5' }}
                                          size-2 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                         </span>
                     </button>
 
                     <div x-cloak x-show="open" x-transition.duration.160ms.origin.bottom
                          @click.outside="open=false"
+                         :class="$store.dir.rtl ? 'start-0' : 'end-0'"
                          class="z-50 absolute top-full mt-2 w-[250px] rounded-3xl border bg-white
                                 shadow-[0_25px_80px_-20px_rgba(2,6,23,0.35)] ring-1 ring-black/5"
-                         :class="$store.dir.rtl ? 'left-0' : 'right-0'" role="menu">
+                         role="menu">
 
                         <div class="relative px-5 pt-5 pb-4">
                             <div class="pointer-events-none absolute inset-0 opacity-[0.07]
-                                        bg-[radial-gradient(1200px_400px_{{ $isRtl ? 'at_90%_-20%' : 'at_10%_-20%' }},theme(colors.primary.500/.6),transparent_40%)]">
+                                    bg-[radial-gradient(1200px_400px_{{ $isRtl ? 'at_90%_-20%' : 'at_10%_-20%' }},theme(colors.primary.500/.6),transparent_40%)]">
                             </div>
 
                             <div class="relative flex items-center gap-3">
@@ -60,6 +66,7 @@
                                     <img class="size-12 border border-primary rounded-full object-cover"
                                          src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt="user">
                                 </span>
+
                                 <div class="min-w-0">
                                     <div class="text-sm font-semibold text-gray-900 truncate">
                                         {{ $user->profile?->name }}
@@ -75,7 +82,8 @@
                             <a href="{{ route('settings.profile') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium
                                       text-gray-800 hover:bg-gray-100/90 hover:shadow-sm transition">
-                                <svg class="size-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <svg class="size-4 text-gray-700" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="1.8">
                                     <circle cx="12" cy="8" r="4"/>
                                     <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
                                 </svg>
@@ -86,16 +94,18 @@
                         <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
                         @if ($user->hasMultipleRoles())
-                            <div class="px-5 py-4" id="roleFlyout">
+                            <div class="px-5 py-4">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">
                                         {{ __('Switch role') }}
                                     </div>
 
-                                    <button @click="rolesOpen = !rolesOpen" class="inline-flex items-center gap-2
-                                            rounded-xl border border-gray-200 px-3 py-1.5 text-xs font-medium
-                                            hover:border-primary-400 hover:bg-primary-50/70 transition">
-                                        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <button @click="rolesOpen = !rolesOpen"
+                                            class="inline-flex items-center gap-2 rounded-xl border border-gray-200
+                                                   px-3 py-1.5 text-xs font-medium hover:border-primary-400
+                                                   hover:bg-primary-50/70 transition">
+                                        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                             stroke-width="1.8">
                                             <path d="M16 3h5v5"/>
                                             <path d="M4 20l16-16"/>
                                             <path d="M21 16v5h-5"/>
@@ -135,7 +145,6 @@
                     </div>
                 </div>
             @endauth
-
         </div>
     </div>
 </nav>
@@ -151,11 +160,4 @@
             },
         }
     }
-    document.addEventListener('DOMContentLoaded', () => {
-        if (window.Livewire?.on) {
-            Livewire.on('role-switched', ({role}) => {
-                document.getElementById('activeRolePill')?.replaceChildren(document.createTextNode(role));
-            });
-        }
-    });
 </script>
