@@ -124,6 +124,9 @@ Route::group(
             Route::get('/news', \App\Livewire\News\NewsModule::class)->name('news.index')->middleware('auth');
 
             Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
+
+            Route::get('/news/create', \App\Livewire\News\NewsCreate::class)->name('news.create');
+
         });
 
         require __DIR__ . '/auth.php';
