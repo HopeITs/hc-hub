@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-[18px] font-semibold text-secondary-medium flex items-center gap-2">
             Employees per Department
-            <x-icons.document-text class="w-5 mb-1 h-5 text-primary"/>
+            <x-icons.chart class="w-5 mb-1 h-5 text-primary"/>
         </h2>
     </div>
 
