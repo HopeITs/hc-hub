@@ -1,16 +1,16 @@
-{{-- resources/views/livewire/program-management/center/center-create.blade.php --}}
 <div>
-    <livewire:layout.breadcrumbs
-        :title="__('general.add-new')"
-        :crumbs="[
-            ['label' => __('general.programs-management')],
-            ['label' => __('general.centers'), 'route' => 'centers.index'],
-            ['label' => __('general.add-new')],
-        ]"
-    />
+    <div class="flex justify-between items-center mb-6">
+        <livewire:layout.breadcrumbs
+            :title="__('general.centers')"
+            :crumbs="[
+                ['label' => __('general.programs-management')],
+                ['label' => __('general.centers'), 'route' => 'centers.index'],
+                ['label' => __('general.add-new')],
+            ]"
+        />
+    </div>
 
-    <form wire:submit.prevent="save" class="grid grid-cols-2 gap-4 bg-white dark:bg-neutral-900 border p-6 rounded-xl shadow-md">
-
+    <form wire:submit.prevent="save" class="grid grid-cols-2 gap-4">
         <div class="md:col-span-full">
             <x-forms.input-label for="name">@lang('general.center-name')</x-forms.input-label>
             <x-forms.input id="name" type="text" wire:model.defer="item.name"/>
@@ -38,13 +38,13 @@
             </div>
         @endforeach
 
-        <div>
+        <div class="md:col-span-1">
             <x-forms.input-label for="open_at">@lang('general.open-at')</x-forms.input-label>
             <x-forms.input id="open_at" type="time" wire:model.defer="item.open_at"/>
             <x-error-span>{{ $errors->first('item.open_at') }}</x-error-span>
         </div>
 
-        <div>
+        <div class="md:col-span-1">
             <x-forms.input-label for="close_at">@lang('general.close-at')</x-forms.input-label>
             <x-forms.input id="close_at" type="time" wire:model.defer="item.close_at"/>
             <x-error-span>{{ $errors->first('item.close_at') }}</x-error-span>
@@ -52,10 +52,10 @@
 
         <div class="md:col-span-full">
             <x-forms.input-label for="weekends">@lang('general.weekend-days')</x-forms.input-label>
-            <div class="flex gap-x-4">
+            <div class="flex gap-x-4 flex-wrap">
                 @foreach(__('general.days-of-week') as $key => $day)
-                    <x-forms.checkbox-input id="weekends-{{$key}}" :value="$key" wire:model="item.weekends">
-                        {{$day}}
+                    <x-forms.checkbox-input id="weekends-{{$key}}" type="checkbox" :value="$key" wire:model="item.weekends">
+                        {{ $day }}
                     </x-forms.checkbox-input>
                 @endforeach
             </div>
@@ -63,10 +63,14 @@
         </div>
 
         <div class="md:col-span-full flex justify-end gap-2">
-            <x-primary-button type="submit">@lang('general.save')</x-primary-button>
-            <a href="{{ route('centers.index') }}" class="text-sm underline text-gray-600 dark:text-gray-300">
+            <x-primary-button type="submit" class="!w-auto">
+                @lang('general.save')
+            </x-primary-button>
+
+            <x-primary-button type="button" class="!w-auto !bg-gray-200 !text-black hover:!bg-gray-300"
+                              onclick="window.location='{{ route('centers.index') }}'">
                 @lang('general.cancel')
-            </a>
+            </x-primary-button>
         </div>
     </form>
 </div>
