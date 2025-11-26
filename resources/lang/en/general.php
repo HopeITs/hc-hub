@@ -430,4 +430,18 @@ return [
         6 => 'Saturday',
 
     ],
+    'balance' => 'Leave Balance',
+    'deserved' => 'Deserved Yearly Balance',
+    'used' => 'Used',
+    'remaining' => 'Remaining',
+    'operation' => 'Operation',
+    'sum' => 'Add' ,
+    'sub' => 'Deduction',
+    'unit' => 'Unit',
+    'amount' => 'Amount',
+    'add-as-badge' => 'Add As Badge',
+    'confirmation' => 'Confirmation',
+    'yes' => 'Yes',
+    'no' => 'No'
+
 ];

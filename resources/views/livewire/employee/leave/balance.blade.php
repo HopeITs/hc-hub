@@ -53,9 +53,9 @@ use App\Enums\LeaveRequestStatus;
                     <x-forms.input-label>@lang('general.operation')</x-forms.input-label>
                     <div class="flex gap-x-4">
                         <x-forms.radio-input id="sum" name="operation" value="sum"
-                                             wire:model="form.operation">{{'Add'}}</x-forms.radio-input>
+                                             wire:model="form.operation">{{__('general.sum')}}</x-forms.radio-input>
                         <x-forms.radio-input id="sub" name="operation" value="sub"
-                                             wire:model="form.operation">{{'SUB'}}</x-forms.radio-input>
+                                             wire:model="form.operation">{{__('general.sub')}}</x-forms.radio-input>
 
                     </div>
 
