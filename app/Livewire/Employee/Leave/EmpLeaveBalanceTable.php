@@ -64,17 +64,17 @@ class EmpLeaveBalanceTable extends LivewireTable
                 ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
                 ->sortable()->searchable(),
             Column::make(trans('general.years-of-service'), 'years_of_service_formatted')->computed()->sortable(),
-            Column::make('Deserved', function (mixed $value, Model $model) {
+            Column::make(__('general.deserved'), function (mixed $value, Model $model) {
                 return $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->deserved_formatted;
             })->asHtml(),
-            Column::make('Used', function (mixed $value, Model $model) {
+            Column::make(__('general.used'), function (mixed $value, Model $model) {
                 return $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->used_formatted;
             })->asHtml(),
-            Column::make('Remaining', function (mixed $value, Model $model) {
+            Column::make(__('general.remaining'), function (mixed $value, Model $model) {
                 return $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->remaining;
             })->asHtml(),
 
-            Column::make(__('Actions'), function (Model $model): string {
+            Column::make(__('general.actions'), function (Model $model): string {
                 $editBtn = '';
                 if (isset($model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()->id)) {
                     $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openEdit\', { id: ' . $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()->id . ' })" />');

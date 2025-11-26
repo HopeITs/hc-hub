@@ -435,7 +435,7 @@ return [
     'used' => 'Used',
     'remaining' => 'Remaining',
     'operation' => 'Operation',
-    'sum' => 'Add' ,
+    'sum' => 'Add',
     'sub' => 'Deduction',
     'unit' => 'Unit',
     'amount' => 'Amount',
@@ -449,6 +449,11 @@ return [
     'end-at' => 'End At',
     'start-time' => 'Start Time',
     'end-time' => 'End Time',
+    'seen-by-hr' => 'Seen By HR',
+    'actions' => 'Actions',
+    'search-all-columns' => 'Search All Columns',
+    'no-available-data' => 'No available data',
+
 
 
 ];

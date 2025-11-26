@@ -87,7 +87,7 @@ class CentersTable extends LivewireTable
             })->asHtml(),
 
             // Actions
-            Column::make(__('Actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m): string {
                 $isActive = $m->is_active ? 1 : 0;
 
                 $toggleBtn = Blade::render('<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $isActive . '" :model-id="' . $m->getKey() . '" wire-event="confirmToggleItemStatus" />');

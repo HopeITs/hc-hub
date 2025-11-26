@@ -125,7 +125,7 @@ class AllLeaveRequestTable extends LivewireTable
                     return $model->type === 'hour' ? $model->end_at->format('H:i d-m-Y') : $model->end_at->format('d-m-Y');
                 })
                 ->sortable(),
-            Column::make(__('HR Approved'), function (Model $model): string {
+            Column::make(__('general.seen-by-hr'), function (Model $model): string {
                 $isActive = $model->hr_approved ? 1 : 0;
 
                 $toggleBtn = Blade::render(
@@ -135,7 +135,7 @@ class AllLeaveRequestTable extends LivewireTable
                 );
                 return $toggleBtn;
             })->visible(str_contains($user->activeRole(),'HR-'))->asHtml(),
-            Column::make(__('Actions'), function (Model $model): string {
+            Column::make(__('general.actions'), function (Model $model): string {
 
                 $decisionBtn = '';
                 $editBtn = '';

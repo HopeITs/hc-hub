@@ -1,7 +1,7 @@
 @php($actions = $this->resolveActions()->filter(fn ($action): bool => ! $action->isStandalone()))
 
 <div class="px-2 py-0.5 text-black dark:text-white">
-    <x-livewire-table::dropdown size="sm" label="{{ __('Actions') }}">
+    <x-livewire-table::dropdown size="sm" label="{{ __('general.actions') }}">
         <x-slot name="icon">
             <!-- Icon "play" (outline) from https://heroicons.com -->
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">

@@ -451,5 +451,10 @@ return [
     'end-at' => 'تاريخ الانتهاء',
     'start-time' => 'وقت البدء',
     'end-time' => 'وقت الانتهاء',
+    'seen-by-hr' => 'مراجَع من الـ HR',
+    'actions' => 'الإجراءات',
+    'search-all-columns' => 'البحث في جميع الأعمدة',
+    'no-available-data' => 'لا توجد بيانات متاحة',
+
 
 ];

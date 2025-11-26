@@ -111,7 +111,7 @@ class EmployeeTable extends LivewireTable
 
             BooleanColumn::make(trans('general.is-active'), 'is_active')->searchable(),
 
-            Column::make(__('Actions'), function (Model $model): string {
+            Column::make(__('general.actions'), function (Model $model): string {
                 $isActive = $model->is_active ? 1 : 0;
 
                 $toggleBtn = Blade::render(

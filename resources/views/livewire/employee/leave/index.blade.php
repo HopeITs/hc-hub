@@ -40,7 +40,7 @@ use App\Enums\LeaveRequestStatus;
         </div>
     @else
         <div class="rounded-2xl shadow-md mb-6 text-center font-semibold text-secondary-medium p-4">
-            No Leaves available for you
+          @lang('general.no-available-data')
         </div>
 
     @endisset
@@ -48,25 +48,26 @@ use App\Enums\LeaveRequestStatus;
     <x-tabs-list>
         <x-tabs-list-item
             :active="$statusFilter === 'all'" active-tab="all">
-            All ({{ $counts['all'] ?? 0 }})
+             {{ __('general.all') . ' ('. $counts['all'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
             :active="$statusFilter === (string) LeaveRequestStatus::Pending"
             :active-tab="LeaveRequestStatus::Pending">
-            Pending ({{ $counts['pending'] ?? 0 }})
+             {{ LeaveRequestStatus::getLocalizedName(0)['value'] . ' ('.$counts['pending'] ?? 0  }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
             :active="$statusFilter === (string) LeaveRequestStatus::Accepted"
             :active-tab="LeaveRequestStatus::Accepted">
-            Accepted ({{ $counts['accepted'] ?? 0 }})
+            {{ LeaveRequestStatus::getLocalizedName(1)['value'] . ' ('.$counts['accepted'] ?? 0  }})
+
         </x-tabs-list-item>
 
         <x-tabs-list-item
             :active="$statusFilter === (string) LeaveRequestStatus::Rejected"
             :active-tab="LeaveRequestStatus::Rejected">
-            Rejected ({{ $counts['rejected'] ?? 0 }}){{$statusFilter === LeaveRequestStatus::Rejected}}
+            {{ LeaveRequestStatus::getLocalizedName(2)['value'] . ' ('.$counts['rejected'] ?? 0  }})
         </x-tabs-list-item>
     </x-tabs-list>
 
@@ -87,7 +88,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-forms.select-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                         <option
                             class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
-                            Select Any..
+                            @lang('general.select')
                         </option>
                         @foreach($allAvailableLeaves ?? [] as $availableLeave)
                             <option value="{{$availableLeave->id}}">{{$availableLeave->leaveType->name}}</option>
@@ -100,7 +101,8 @@ use App\Enums\LeaveRequestStatus;
                     <x-forms.select-input wire:model="form.alternative_employee" id="alternative_employee">
                         <option
                             class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
-                            Select Any..
+
+                            @lang('general.select')
                         </option>
                         @foreach($alternativeEmployees as $alternativeEmployee)
                             <option value="{{$alternativeEmployee->id}}">{{$alternativeEmployee->name}}</option>
@@ -112,10 +114,10 @@ use App\Enums\LeaveRequestStatus;
                 @if($form->leave_balance_id !== null)
                     @if(optional($availableLeaves->find($form->leave_balance_id))->leaveType->id === LeaveTypeCases::Annual)
                         <div class="mt-4">
-                            <x-forms.input-label>Leave Type</x-forms.input-label>
+                            <x-forms.input-label>{{trans_choice('general.leave-type',1)}}</x-forms.input-label>
                             <div class="flex gap-4">
-                                <x-forms.radio-input wire:model.live="form.type" value="day">Day</x-forms.radio-input>
-                                <x-forms.radio-input wire:model.live="form.type" value="hour">Hour</x-forms.radio-input>
+                                <x-forms.radio-input wire:model.live="form.type" value="day">{{trans_choice('general.day',1)}}</x-forms.radio-input>
+                                <x-forms.radio-input wire:model.live="form.type" value="hour">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
                             </div>
                         </div>
                     @endif

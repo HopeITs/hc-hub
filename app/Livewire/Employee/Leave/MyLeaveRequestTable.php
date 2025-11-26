@@ -95,8 +95,8 @@ class MyLeaveRequestTable extends LivewireTable
                     return $model->type === 'hour' ? $model->end_at->format('H:i d-m-Y') : $model->end_at->format('d-m-Y');
                 })
                 ->sortable(),
-            BooleanColumn::make('Seen by HR', 'hr_approved'),
-            Column::make(__('Actions'), function (Model $model): string {
+            BooleanColumn::make(__('general.seen-by-hr'), 'hr_approved'),
+            Column::make(__('general.actions'), function (Model $model): string {
 
                 if ($model->status === LeaveRequestStatus::Pending) {
                     $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: ' . $model->getKey() . ' })" />');

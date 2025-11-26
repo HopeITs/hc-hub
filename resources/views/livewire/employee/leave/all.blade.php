@@ -75,7 +75,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-forms.select-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                         <option
                             class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
-                            Select Any..
+                            @lang('general.select')..
                         </option>
                         @foreach($allAvailableLeaves ?? [] as $availableLeave)
                             <option value="{{$availableLeave->id}}" @selected($form->leave_balance_id === $availableLeave->id)>{{$availableLeave->leaveType->name}}</option>
@@ -88,7 +88,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-forms.select-input wire:model.live="form.alternative_employee" id="alternative_employee">
                         <option
                             class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
-                            Select Any..
+                            @lang('general.select')..
                         </option>
                         @foreach($alternativeEmployees as $emp)
                             <option value="{{ $emp->id }}" @selected($form->alternative_employee === $emp->id)>{{ $emp->name }}</option>

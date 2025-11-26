@@ -12,7 +12,7 @@
                 <x-forms.select-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                     <option
                         class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
-                        Select Any..
+                        @lang('general.select')..
                     </option>
                     @foreach($allAvailableLeaves ?? [] as $availableLeave)
                         <option value="{{$availableLeave->id}}">{{$availableLeave->leaveType->name}}</option>
@@ -25,7 +25,7 @@
                 <x-forms.select-input wire:model="form.alternative_employee" id="alternative_employee">
                     <option
                         class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
-                        Select Any..
+                        @lang('general.select')..
                     </option>
                     @foreach($alternativeEmployees as $alternativeEmployee)
                         <option value="{{$alternativeEmployee->id}}">{{$alternativeEmployee->name}}</option>
@@ -39,8 +39,8 @@
                     <div class="mt-4">
                         <x-forms.input-label>Leave Type</x-forms.input-label>
                         <div class="flex gap-4">
-                            <x-forms.radio-input wire:model.live="form.type" value="day">Day</x-forms.radio-input>
-                            <x-forms.radio-input wire:model.live="form.type" value="hour">Hour</x-forms.radio-input>
+                            <x-forms.radio-input wire:model.live="form.type" value="day">{{trans_choice('general.day',1)}}</x-forms.radio-input>
+                            <x-forms.radio-input wire:model.live="form.type" value="hour">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
                         </div>
                     </div>
                 @endif
