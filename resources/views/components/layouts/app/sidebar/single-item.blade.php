@@ -6,10 +6,8 @@
             'class' => "
                 group flex items-center w-full p-2 rounded-lg transition duration-150
                 font-medium text-secondary-light bg-white
-
                 hover:text-secondary-dark hover:font-bold hover:bg-secondary-soft
-
-                " . ($active ? 'text-secondary-dark font-bold bg-secondary-soft' : '')
+                " . ($active ? ' !text-primary !font-bold' : '')
         ]) }}
     >
 

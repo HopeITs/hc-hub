@@ -164,7 +164,7 @@
                             {{ __('general.all-leaves')}}
                         </x-layouts.app.sidebar.nav-item>
                         @endnotactiverole
-                        @activerole('HR')
+                        @activerole('HR' , 'Super Admin')
                         <x-layouts.app.sidebar.nav-item :href="route('leaves.balance')"
                                                         :active="request()->routeIs('leaves.balance')">
                             {{ __('general.balance') }}
