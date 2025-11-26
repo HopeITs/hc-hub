@@ -39,7 +39,7 @@
                 sortable
                 wire:click="sortBy('grade')"
                 :direction="$sortField === 'grade' ? $sortDirection : null"
-            >@lang('general.grade')</x-table.heading>
+            ><div class="ltr:pl-12 rtl:pr-12">@lang('general.grade')</div></x-table.heading>
 
             <x-table.heading
                 sortable
@@ -56,7 +56,7 @@
                     <x-table.cell>{{ $item->id }}</x-table.cell>
                     <x-table.cell>{{ $item->name_ar }}</x-table.cell>
                     <x-table.cell>{{ $item->name_en }}</x-table.cell>
-                    <x-table.cell>{{ $item->grade }}</x-table.cell>
+                    <x-table.cell><div class="text-center">{{ $item->grade }}</div></x-table.cell>
                     <x-table.cell>{{ $item->email ?? '-' }}</x-table.cell>
                     <x-table.cell>
                         <x-table.edit-btn wire:click="edit({{ $item->id }})"></x-table.edit-btn>

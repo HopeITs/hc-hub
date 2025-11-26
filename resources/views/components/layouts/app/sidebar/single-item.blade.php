@@ -1,13 +1,32 @@
-@props(['active' => false])
+@props(['active' => false, 'icon' => null])
 
 <li>
-    <a {{ $attributes->merge([
-             'class' =>'relative flex text-base
-         items-center p-2 w-full text-secondary-dark  transition duration-75 rounded-lg group hover:font-extrabold hover:text-primary   transition-all transition-discrete ease-in-out duration-700  ' . ($active ? ' !text-primary !font-bold  bg-gray-100' : '')
-         ]) }}
+    <a
+        {{ $attributes->merge([
+            'class' => "
+                group flex items-center w-full p-2 rounded-lg transition duration-150
+                font-medium text-secondary-light bg-white
+
+                hover:text-secondary-dark hover:font-bold hover:bg-secondary-soft
+
+                " . ($active ? 'text-secondary-dark font-bold bg-secondary-soft' : '')
+        ]) }}
     >
-        {{ $icon ?? '' }}
-        <span class=" flex-1 ms-3 text-left rtl:text-right whitespace-nowrap">{{ $slot }}</span>
+
+        {{-- Icon --}}
+        <span class="size-4 shrink-0 text-inherit group-hover:text-inherit">
+            {!! $icon !!}
+        </span>
+
+        {{-- Label --}}
+        <span
+            class="
+                text-sm flex-1 ms-3 rtl:me-3 text-left rtl:text-right whitespace-nowrap
+                text-inherit group-hover:text-inherit
+            "
+        >
+            {{ $slot }}
+        </span>
 
     </a>
 </li>
