@@ -6,10 +6,10 @@
 <div class="w-full h-full bg-white rounded-3xl shadow-sm overflow-hidden">
 
     <div class="flex items-center gap-2 px-6 pt-6 pb-4">
-        <h2 class="text-lg font-semibold text-[var(--color-neutral-800)]">
+        <h2 class="text-[18px] font-semibold text-secondary-medium">
             No Leaves Employees
         </h2>
-        <x-icons.document-text class="w-5 h-5 text-primary"/>
+        <x-icons.no-leaves class=" mb-0.5 text-primary"/>
     </div>
 
     <div class="px-6 pb-6 max-h-[300px] overflow-y-auto scrollbar-thin

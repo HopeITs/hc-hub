@@ -6,10 +6,10 @@
 <div class="w-full h-full bg-white rounded-3xl shadow-sm overflow-hidden">
 
     <div class="flex items-center gap-2 px-6 pt-6 pb-4">
-        <h2 class="text-lg font-semibold text-[var(--color-neutral-800)]">
+        <h2 class="text-[18px] font-semibold text-secondary-medium">
             Contracts Ending Soon
         </h2>
-        <x-icons.document-text class="w-5 h-5 text-primary"/>
+        <x-icons.contracts class="mb-0.5 ml-1 text-primary"/>
     </div>
 
     <div class="px-6 pb-6 max-h-[300px] overflow-y-auto scrollbar-thin
@@ -54,10 +54,6 @@
                         {{ \Carbon\Carbon::parse($contract->end_date)->format('d/m/Y') }}
                     </p>
 
-                    <a href="{{ $contract->view_route }}"
-                       class="text-[12px] mt-0.5 text-secondary-light font-light underline-offset-2 hover:underline">
-                        View
-                    </a>
                 </div>
 
             </div>
