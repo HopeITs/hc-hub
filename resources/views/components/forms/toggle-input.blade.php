@@ -8,7 +8,7 @@
     {{ $attributes->merge([
         'type' => 'checkbox',
         'role' => 'switch',
-        'class' => '!text-green-400 rounded border-green-400 me-1'
+        'class' => '!text-green-400 rounded border-green-400 mr-2 me-1'
     ]) }}
     @checked((bool) $active)
     @if($wireEvent && $modelId)
