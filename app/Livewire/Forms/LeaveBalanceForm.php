@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Enums\BadgeType;
 use App\Enums\Gender;
 use App\Enums\LeaveTypeCases;
 use App\Enums\MaritalStatus;
@@ -22,6 +23,8 @@ class LeaveBalanceForm extends Form
     public $operation = 'sum' ;
     public $unit = 'hour';
     public $amount = 0;
+    public $add_badge = false;
+    public $notes = null;
     protected function rules()
     {
         return [
@@ -45,11 +48,10 @@ class LeaveBalanceForm extends Form
         $leaveRule = $this->getAnnualLeaveRule($employee);
         $leaveTypes = LeaveType::whereNot('base_days', 12)->get();
 
-        $duration = $contract->duration();
-        $dailyWorkHours = $contract->weekly_hours / 5;
-        $extra = $this->calculateExtraLeave($employee, $contract, $dailyWorkHours);
+        $dailyWorkHours = $contract->work_hour_per_day;
+        $extra = $this->calculateExtraLeave($employee, $contract);
 
-        [$yearly, $sick, $unpaid] = $this->calculateDeservedLeaves($duration, $leaveRule, $dailyWorkHours, $extra);
+        [$yearly, $sick, $unpaid] = $this->calculateDeservedLeaves($contract->duration, $leaveRule, $dailyWorkHours, $extra);
 
         // Annual leave
         LeaveBalance::create([
@@ -80,11 +82,10 @@ class LeaveBalanceForm extends Form
         $leaveRule = $this->getAnnualLeaveRule($employee);
         $leaveTypes = LeaveType::whereNot('base_days', 12)->get();
 
-        $duration = $contract->duration();
-        $dailyWorkHours = $contract->weekly_hours / 5;
-        $extra = $this->calculateExtraLeave($employee, $contract, $dailyWorkHours);
+        $dailyWorkHours = $contract->work_hour_per_day ;
+        $extra = $this->calculateExtraLeave($employee, $contract);
 
-        [$yearly, $sick, $unpaid] = $this->calculateDeservedLeaves($duration, $leaveRule, $dailyWorkHours, $extra);
+        [$yearly, $sick, $unpaid] = $this->calculateDeservedLeaves($contract->duration, $leaveRule, $dailyWorkHours, $extra);
 
         // Annual
         $contract->leaveBalances->where('type_id', LeaveTypeCases::Annual)->first()?->update(['deserved' => $yearly]);
@@ -113,7 +114,7 @@ class LeaveBalanceForm extends Form
             ?? AnnualLeaveRule::first();
     }
 
-    private function calculateExtraLeave($employee, $contract, $dailyWorkHours): float
+    private function calculateExtraLeave($employee, $contract): float
     {
         $extra = 0;
 
@@ -145,7 +146,7 @@ class LeaveBalanceForm extends Form
             if ($endOfPrev > $startOfYear) {
                 $monthsInNewYear = round($startOfYear->diffInMonths($endOfPrev));
                 $remain = $prevBalance->deserved - $prevBalance->used;
-                $extra = $remain >= $monthsInNewYear ? $monthsInNewYear * $dailyWorkHours : $remain;
+                $extra = $remain >= $monthsInNewYear ? $monthsInNewYear * $contract->work_hour_per_day : $remain;
             }
         }
 
@@ -311,6 +312,32 @@ class LeaveBalanceForm extends Form
     }
 
     public function updateAnnualLeaves(){
-        dd($this->all());
+        $this->validate([
+            'operation' => 'required|in:sum,sub',
+            'unit' => 'required|in:hour,day',
+            'amount' => 'required|numeric|min:0',
+            'add_badge' => 'required|boolean',
+            'notes' => $this->add_badge ? 'required|string' : 'nullable'
+        ]);
+        if($this->unit === 'day'){
+            $amount = $this->amount * $this->balance->contract->work_hour_per_day;
+        }else{
+            $amount = $this->amount;
+        }
+        if($this->operation === 'sum'){
+            $this->balance->update(['deserved' => $this->balance->deserved + $amount]);
+
+        }else{
+            $this->balance->update(['deserved' => $this->balance->deserved - $amount]);
+        }
+        if($this->add_badge){
+            $this->balance->contract->employee->badges()->create([
+                'type' => $this->operation === 'sum' ? BadgeType::Reward : BadgeType::Warning,
+                'date' => now(),
+                'notes' => $this->notes
+            ]);
+        }
+
+
     }
 }

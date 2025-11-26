@@ -60,13 +60,10 @@ class EmpLeaveBalanceModule extends Component
 
     public function processSave()
     {
-        if ($this->form->id) {
-            $this->form->update();
-        } else {
-            $this->form->store();
-        }
+        $this->form->updateAnnualLeaves();
 
-        $this->formModal = false;
+
+        $this->showModal = false;
         $this->form->reset();
 
         LivewireAlert::title(__('general.success-message'))
@@ -75,34 +72,28 @@ class EmpLeaveBalanceModule extends Component
             ->position('top-start')
             ->show();
 
-        $this->refreshCounts();
+
     }
 
     protected function confirmationMessage(): string
     {
-        $leaveTypeName = LeaveBalance::find($this->form->leave_balance_id)
-            ->leaveType
-            ->name ?? 'N/A';
 
-        $type = $this->form->type;
+        $name = $this->form->balance->contract->employee->name;
+        $operation = __('general.'.$this->form->operation);
+        $amount = $this->form->amount . ' ' . trans_choice('general.'.$this->form->unit , $this->form->amount) ;
+        $add_badge = $this->form->add_badge ? __('general.yes') :  __('general.no');
+        $notes = $add_badge ? $this->form->notes : '';
 
-        $start = $this->resolveStart();
-        $end = $this->resolveEnd();
-        $duration = $this->resolveDuration();
-        $date = $this->form->leave_date;
-        $reason = $this->form->reason;
 
         return Blade::render(
-            '<x-alerts.leave-request-confirmation
-                :type="$type"
-                :leave_type="$leaveTypeName"
-                :start="$start"
-                :end="$end"
-                :duration="$duration"
-                :reason="$reason"
-                :date="$date"
-            />',
-            compact('type', 'leaveTypeName', 'start', 'end', 'duration', 'reason', 'date')
+            '<x-alerts.leave-balance-confirmation
+                :name="$name"
+                :operation="$operation"
+                :amount="$amount"
+                :add_badge="$add_badge"
+                :notes="$notes"
+
+            />',compact('name', 'operation', 'amount', 'add_badge', 'notes')
         );
     }
 

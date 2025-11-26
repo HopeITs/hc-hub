@@ -54,11 +54,16 @@ class Contract extends Model
         return $this->hasMany(LeaveBalance::class, 'contract_id');
     }
 
-    public function duration(){
+    public function getDurationAttribute(){
         $start_date = Carbon::parse($this->start_date); // start date
         $end_date = Carbon::parse($this->end_date); // end date
 
         return round( $start_date->diffInMonths($end_date),1);
+    }
+
+    public function getWorkHourPerDayAttribute(): int
+    {
+        return $this->weekly_hours / 5;
     }
 
 

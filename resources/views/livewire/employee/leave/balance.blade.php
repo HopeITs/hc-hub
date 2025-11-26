@@ -76,20 +76,25 @@ use App\Enums\LeaveRequestStatus;
                 <div>
                     <x-forms.input-label>@lang('general.amount')</x-forms.input-label>
                     <x-forms.input wire:model="form.amount" type="numeric"/>
-
                     <x-error-span>{{ $errors->first('form.unit') }}</x-error-span>
                 </div>
                 <div>
-
-                    <x-forms.checkbox-input type="checkbox" wire:model="form.amount" >@lang('general.add-as-badge')</x-forms.checkbox-input>
-
-                    <x-error-span>{{ $errors->first('form.unit') }}</x-error-span>
+                    <x-forms.checkbox-input type="checkbox"
+                                            wire:model.live="form.add_badge">@lang('general.add-as-badge')</x-forms.checkbox-input>
+                    <x-error-span>{{ $errors->first('form.add_badge') }}</x-error-span>
                 </div>
+                @if($form->add_badge)
+                    <div class="col-span-2">
+                        <x-forms.input-label>@lang('general.note')</x-forms.input-label>
+                        <x-forms.input wire:model="form.notes" :required="$form->add_badge"/>
+                        <x-error-span>{{ $errors->first('form.notes') }}</x-error-span>
+                    </div>
+                @endif
             </div>
             <div class="flex justify-end gap-2">
                 <x-primary-button type="button" wire:click="confirmSave"
                                   class="!w-auto">@lang('general.save')</x-primary-button>
-                <x-primary-button :href="route('leaves.index')"
+                <x-primary-button :href="route('leaves.balance')"
                                   class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
             </div>
         </form>
