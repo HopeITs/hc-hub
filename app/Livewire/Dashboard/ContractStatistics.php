@@ -21,19 +21,13 @@ class ContractStatistics extends Component
     public $cards = [];
     public string $cardType = 'program';
 
-    private function getTranslatableColumn(string $baseColumn): string
-    {
-        return app()->getLocale() === 'ar' ? "{$baseColumn}_ar" : "{$baseColumn}_en";
-    }
-
     public function mount(): void
     {
         $this->cities = City::where('is_active', true)
-            ->orderBy($this->getTranslatableColumn('name'))
+            ->orderBy(transColumn('name'))
             ->get();
 
         $this->programs = Program::where('is_active', true)
-            ->orderBy('name')
             ->get();
     }
 
@@ -42,7 +36,7 @@ class ContractStatistics extends Component
         return (clone $query)
             ->whereHas('contractType', function ($q) use ($tokens) {
                 foreach ($tokens as $t) {
-                    $q->where('name_en', 'like', "%{$t}%");
+                    $q->where(transColumn('name'), 'like', "%{$t}%");
                 }
             })
             ->count();
@@ -76,7 +70,8 @@ class ContractStatistics extends Component
 
         if (!$this->selectedCity && !$this->selectedProgram) {
             $this->cardType = 'program';
-            $programs = Program::where('is_active', true)->orderBy('name')->get();
+            $programs = Program::where('is_active', true)
+                ->get();
 
             foreach ($programs as $program) {
                 $positionsQuery = Position::where('program_id', $program->id);
@@ -85,18 +80,17 @@ class ContractStatistics extends Component
                     ->whereHas('position', fn($q) => $q->where('program_id', $program->id));
 
                 $this->cards[] = [
-                    'name' => $program->name,
-                    'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
-                    'color' => 'bg-primary-500',
-                    'program_slug' => $program->slug,
-                ] + $this->getCardBreakdown($contractsQuery);
+                        'name' => $program->slug,
+                        'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
+                        'color' => 'bg-primary-500',
+                        'program_slug' => $program->slug,
+                    ] + $this->getCardBreakdown($contractsQuery);
             }
 
         } elseif (!$this->selectedCity && $this->selectedProgram) {
             $this->cardType = 'center';
             $centers = Center::where('is_active', true)
                 ->whereHas('positions', fn($q) => $q->where('program_id', $this->selectedProgram))
-                ->orderBy('name')
                 ->get();
 
             foreach ($centers as $center) {
@@ -107,23 +101,22 @@ class ContractStatistics extends Component
                     );
 
                 $this->cards[] = [
-                    'name' => $center->name,
-                    'centers' => null,
-                    'color' => 'bg-green-500',
-                    'center_id' => $center->id,
-                ] + $this->getCardBreakdown($contractsQuery);
+                        'name' => $center->name,
+                        'centers' => null,
+                        'color' => 'bg-green-500',
+                        'center_id' => $center->id,
+                    ] + $this->getCardBreakdown($contractsQuery);
             }
 
         } elseif ($this->selectedCity && !$this->selectedProgram) {
             $this->cardType = 'program';
             $programs = Program::where('is_active', true)
                 ->whereHas('positions', fn($q) => $q->where('city_id', $this->selectedCity))
-                ->orderBy('name')
                 ->get();
 
             foreach ($programs as $program) {
                 $positionsQuery = Position::where('program_id', $program->id)
-                                          ->where('city_id', $this->selectedCity);
+                    ->where('city_id', $this->selectedCity);
 
                 $contractsQuery = Contract::where('is_active', true)
                     ->whereHas('position', fn($q) => $q
@@ -132,11 +125,11 @@ class ContractStatistics extends Component
                     );
 
                 $this->cards[] = [
-                    'name' => $program->name,
-                    'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
-                    'color' => 'bg-primary-500',
-                    'program_slug' => $program->slug,
-                ] + $this->getCardBreakdown($contractsQuery);
+                        'name' => $program->name,
+                        'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
+                        'color' => 'bg-primary-500',
+                        'program_slug' => $program->slug,
+                    ] + $this->getCardBreakdown($contractsQuery);
             }
 
         } elseif ($this->selectedCity && $this->selectedProgram) {
@@ -144,7 +137,6 @@ class ContractStatistics extends Component
             $centers = Center::where('is_active', true)
                 ->where('city_id', $this->selectedCity)
                 ->whereHas('positions', fn($q) => $q->where('program_id', $this->selectedProgram))
-                ->orderBy('name')
                 ->get();
 
             foreach ($centers as $center) {
@@ -156,16 +148,15 @@ class ContractStatistics extends Component
                     );
 
                 $this->cards[] = [
-                    'name' => $center->name,
-                    'centers' => null,
-                    'color' => 'bg-green-500',
-                    'center_id' => $center->id,
-                ] + $this->getCardBreakdown($contractsQuery);
+                        'name' => $center->name,
+                        'centers' => null,
+                        'color' => 'bg-green-500',
+                        'center_id' => $center->id,
+                    ] + $this->getCardBreakdown($contractsQuery);
             }
         }
     }
 
-    public function applyFilters(): void {}
 
     public function resetFilters(): void
     {
@@ -176,7 +167,7 @@ class ContractStatistics extends Component
     public function render(): View
     {
         $this->loadData();
-
+//        dd($this->cards, $this->programs);
         return view('livewire.dashboard.contract-statistics', [
             'cards' => $this->cards,
             'cities' => $this->cities,

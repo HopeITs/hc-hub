@@ -388,6 +388,12 @@ return [
     'reject' => 'Reject',
     'reject-reason' => 'Reject Reason',
     'during-period' => 'During Period',
+    'annual' => 'Annual',
+    'service' => 'Service',
+    'trial' => 'Trial',
+    'total' => 'Total',
+    'online' => 'Online',
+    'reset' => 'Reset',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
