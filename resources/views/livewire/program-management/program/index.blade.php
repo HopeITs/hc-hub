@@ -4,11 +4,13 @@
                                      :crumbs="[['label' => trans_choice('general.program', 2)]]"
                                      :showButton="true" />
 
-        <div>
-            <x-primary-button href="{{ route('programs.create') }}">
-                @lang('general.add-new')
-            </x-primary-button>
-        </div>
+        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+            <div>
+                <x-primary-button href="{{ route('programs.create') }}">
+                    @lang('general.add-new')
+                </x-primary-button>
+            </div>
+        @endif
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -56,17 +58,18 @@
                         @lang('general.show-more')
                     </a>
 
-                    <div class="flex justify-between items-center">
+                    @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+                        <div class="flex justify-between items-center">
+                            <x-forms.toggle-input
+                                :active="$program->is_active"
+                                :model-id="$program->id"
+                                wire-event="confirmToggleItemStatus"
+                            />
 
-                        <x-forms.toggle-input
-                            :active="$program->is_active"
-                            :model-id="$program->id"
-                            wire-event="confirmToggleItemStatus"
-                        />
-
-                        <x-table.edit-btn :href="route('programs.edit', ['program' => $program->slug])" />
-                        <x-table.delete-btn class="!p-0" :modelId="$program->id" />
-                    </div>
+                            <x-table.edit-btn :href="route('programs.edit', ['program' => $program->slug])" />
+                            <x-table.delete-btn class="!p-0" :modelId="$program->id" />
+                        </div>
+                    @endif
                 </div>
             </x-card>
         @endforeach
