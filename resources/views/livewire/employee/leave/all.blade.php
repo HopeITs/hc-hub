@@ -25,24 +25,26 @@ use App\Enums\LeaveRequestStatus;
     <x-tabs-list>
         <x-tabs-list-item
             :active="$statusFilter === 'all'" active-tab="all">
-            All ({{ $counts['all'] ?? 0 }})
+            {{ __('general.all') . ' ('. $counts['all'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
-            :active="$statusFilter === (string) LeaveRequestStatus::Pending" :active-tab="LeaveRequestStatus::Pending">
-            Pending ({{ $counts['pending'] ?? 0 }})
+            :active="$statusFilter === (string) LeaveRequestStatus::Pending"
+            :active-tab="LeaveRequestStatus::Pending">
+            {{ LeaveRequestStatus::getLocalizedName(0)['value'] . ' ('.$counts['pending'] ?? 0  }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
             :active="$statusFilter === (string) LeaveRequestStatus::Accepted"
             :active-tab="LeaveRequestStatus::Accepted">
-            Accepted ({{ $counts['accepted'] ?? 0 }})
+            {{ LeaveRequestStatus::getLocalizedName(1)['value'] . ' ('.$counts['accepted'] ?? 0  }})
+
         </x-tabs-list-item>
 
         <x-tabs-list-item
             :active="$statusFilter === (string) LeaveRequestStatus::Rejected"
             :active-tab="LeaveRequestStatus::Rejected">
-            Rejected ({{ $counts['rejected'] ?? 0 }}){{$statusFilter === LeaveRequestStatus::Rejected}}
+            {{ LeaveRequestStatus::getLocalizedName(2)['value'] . ' ('.$counts['rejected'] ?? 0  }})
         </x-tabs-list-item>
     </x-tabs-list>
 
@@ -350,7 +352,7 @@ use App\Enums\LeaveRequestStatus;
 
                         @if((int)$form->status === LeaveRequestStatus::Rejected)
                             <div>
-                                <x-forms.input-label>{{ __('general.reject_reason') }}</x-forms.input-label>
+                                <x-forms.input-label>{{ __('general.reject-reason') }}</x-forms.input-label>
                                 <x-forms.input wire:model="form.reject_reason"/>
                                 <x-error-span>{{ $errors->first('form.reject_reason') }}</x-error-span>
                             </div>
