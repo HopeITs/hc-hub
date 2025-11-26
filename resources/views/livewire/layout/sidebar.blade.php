@@ -161,7 +161,7 @@
                         @notactiverole('Employee')
                         <x-layouts.app.sidebar.nav-item :href="route('leaves.all')"
                                                         :active="request()->routeIs('leaves.all')">
-                            {{ 'All Leaves' }}
+                            {{ __('general.all-leaves')}}
                         </x-layouts.app.sidebar.nav-item>
                         @endnotactiverole
                         @activerole('HR')

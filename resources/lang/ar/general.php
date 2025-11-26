@@ -444,5 +444,12 @@ return [
     'add-as-badge' => 'إضافة كشارة',
     'confirmation' => 'تأكيد',
     'yes' => 'نعم',
-    'no' => 'لا'
+    'no' => 'لا',
+    'alternative-employee' => 'الموظف البديل',
+    'leave-date' => 'تاريخ الإجازة',
+    'start-at' => 'تاريخ البدء',
+    'end-at' => 'تاريخ الانتهاء',
+    'start-time' => 'وقت البدء',
+    'end-time' => 'وقت الانتهاء',
+
 ];

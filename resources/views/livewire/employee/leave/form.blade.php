@@ -21,7 +21,7 @@
                 <x-error-span>{{ $errors->first('form.leave_balance_id') }}</x-error-span>
             </div>
             <div class="md:col-span-1">
-                <x-forms.input-label for="city">{{__('general.alternative_employee')}}</x-forms.input-label>
+                <x-forms.input-label for="city">{{__('general.alternative-employee')}}</x-forms.input-label>
                 <x-forms.select-input wire:model="form.alternative_employee" id="alternative_employee">
                     <option
                         class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>

@@ -442,6 +442,13 @@ return [
     'add-as-badge' => 'Add As Badge',
     'confirmation' => 'Confirmation',
     'yes' => 'Yes',
-    'no' => 'No'
+    'no' => 'No',
+    'alternative-employee' => 'Alternative Employee',
+    'leave-date' => 'Leave Date',
+    'start-at' => 'Start At',
+    'end-at' => 'End At',
+    'start-time' => 'Start Time',
+    'end-time' => 'End Time',
+
 
 ];
