@@ -23,7 +23,7 @@
         align-items: center;
         justify-content: center;
         outline: none !important;
-        border-radius: 100%;
+        border-radius: 25%;
     }
 
 
