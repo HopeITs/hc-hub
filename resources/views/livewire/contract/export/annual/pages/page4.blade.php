@@ -68,7 +68,7 @@
 <div class="avoid-break mt-6" style="line-height: 0.8">
     <x-contract.dual
         :en="$L('Termination of the Contract:').$p('Hope Center Aleppo / Head office has the right to terminate this contract during the effective period, by informing the volunteer through a written termination notice one month in advance.')"
-        :ar="$L($Glyphs('إنهاء العقد:')).$p($Glyphs('يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل انتهاء مدته وذلك بإعلام الفريق الثاني خطياً قبل شهر.'))"
+        :ar="$L($Glyphs('إنهاء العقد:')).$p($Glyphs('يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل <br> انتهاء مدته وذلك بإعلام الفريق الثاني <br> خطياً قبل شهر.'))"
     />
 </div>
 
