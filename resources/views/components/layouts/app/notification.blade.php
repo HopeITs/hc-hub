@@ -2,7 +2,7 @@
 <button id="dropdownNotificationButton"
         data-dropdown-toggle="dropdownNotification"
         type="button"
-        class="relative cursor-pointer inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+        class="relative cursor-pointer me-3 inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
 
     <x-icons.notification class=" text-secondary-light hover:text-secondary-dark transition"/>
     <!-- Unread Counter -->
