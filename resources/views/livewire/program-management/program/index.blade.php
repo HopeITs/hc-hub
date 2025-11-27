@@ -1,6 +1,5 @@
 <div class="space-y-10">
 
-    {{-- HEADER --}}
     <div class="flex items-center justify-between mb-6">
         <livewire:layout.breadcrumbs
             :title="__('general.programs-management')"
@@ -15,37 +14,26 @@
     </div>
 
 
-    {{-- PROGRAM GRID --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
         @foreach ($items as $program)
             <div class="rounded-3xl bg-white shadow-sm border border-gray-200 hover:shadow-md transition">
 
-                {{-- HEADER --}}
-                <div class="py-3.5 px-5 flex justify-between items-center">
-                    <div>
-                        <h2 class="font-bold text-secondary-dark text-xl">
+                <div class=" mt-3 py-2 px-5.5 flex justify-between items-center">
+                        <h2 class="font-bold w-[240px] text-secondary-dark text-xl">
                             {{ $program->name }}
                         </h2>
 
-                        {{-- PROGRAM SLUG BADGE --}}
-                        <span class="mt-2 inline-block text-xs font-medium px-2 py-0.5
+                        <span class=" text-xs font-medium px-2 py-0.5
                                      border border-secondary-light text-secondary-dark bg-white rounded-3xl">
                             {{ $program->code . '-' . $program->slug }}
                         </span>
-                    </div>
 
-                    {{-- ACTIVE DOT --}}
-                    <span class="h-2.5 w-2.5 rounded-full
-                        {{ $program->is_active ? 'bg-green-400' : 'bg-gray-400' }}">
-                    </span>
                 </div>
 
 
-                {{-- MINI CARD GRID --}}
                 <div class="px-5 pt-2 pb-4 grid grid-cols-1 gap-3">
 
-                    {{-- PROGRAM MANAGER (Full width) --}}
                     <div class="flex  items-start p-3 rounded-lg border border-gray-100 bg-gray-100">
                         <x-icons.user class="w-4 h-4 text-gray-400 mr-2" />
                         <div class="flex flex-col gap-1">
@@ -57,10 +45,8 @@
                     </div>
 
 
-                    {{-- ROW 2: CITIES + EMPLOYEES --}}
                     <div class="grid grid-cols-2 gap-3">
 
-                        {{-- Cities --}}
                         <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-gray-100">
                             <x-icons.map-pin class="w-4 h-4 text-gray-400 mr-2" />
                             <div class="flex flex-col gap-1">
@@ -71,7 +57,6 @@
                             </div>
                         </div>
 
-                        {{-- Employees --}}
                         <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-gray-100">
                             <x-icons.users class="w-4 h-4 text-gray-400 mr-2" />
                             <div class="flex flex-col gap-1">
@@ -85,10 +70,8 @@
                     </div>
 
 
-                    {{-- ROW 3: START DATE + END DATE --}}
                     <div class="grid grid-cols-2 gap-3">
 
-                        {{-- Start Date --}}
                         <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-gray-100">
                             <x-icons.calendar class="w-4 h-4 text-gray-400 mr-2" />
                             <div class="flex flex-col gap-1">
@@ -99,7 +82,6 @@
                             </div>
                         </div>
 
-                        {{-- End Date --}}
                         <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-gray-100">
                             <x-icons.calendar class="w-4 h-4 text-gray-400 mr-2" />
                             <div class="flex flex-col gap-1">
@@ -114,26 +96,34 @@
 
                 </div>
 
+                <div class="border-t border-secondary-soft  flex items-center justify-center px-5 py-2 ">
+                    <div class="flex flex-row items-center justify-between w-[200px]">
+                        <div class="p-2">
+                            <a href="{{ route('programs.show', $program->slug) }}"
+                               class="text-secondary-medium hover:underline text-sm font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                     class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12
+                                   s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
 
-                {{-- FOOTER --}}
-                <div class="border-t border-secondary-soft px-5 py-3 flex items-center justify-between">
+                            </a>
+                        </div>
 
-                    <a href="{{ route('programs.show', $program->slug) }}"
-                       class="text-primary hover:underline text-sm font-medium">
-                        @lang('general.show-more')
-                    </a>
+                        <div class="p-2">
+                            <x-forms.toggle-input
+                                :active="$program->is_active"
+                                :model-id="$program->id"
+                                wire-event="confirmToggleItemStatus"
+                            />
+                        </div>
+                        <x-table.edit-btn :href="route('programs.edit', $program->slug)" class=" text-secondary-medium text-center" />
 
-                    <div class="flex items-center ">
-
-                        <x-forms.toggle-input
-                            :active="$program->is_active"
-                            :model-id="$program->id"
-                            wire-event="confirmToggleItemStatus"
-                        />
-
-                        <x-table.edit-btn :href="route('programs.edit', $program->slug)" class="ltr:ml-1 text-center" />
-
-                        <x-table.delete-btn :modelId="$program->id" class="mb-0.5" />
+                        <x-table.delete-btn :modelId="$program->id"  />
                     </div>
                 </div>
 
@@ -143,7 +133,6 @@
     </div>
 
 
-    {{-- LOAD MORE --}}
     @if ($items->count() >= $perPage)
         <div class="text-center pt-4">
             <button wire:click="loadMore"

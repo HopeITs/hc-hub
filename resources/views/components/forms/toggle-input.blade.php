@@ -7,11 +7,45 @@
 <input
     {{ $attributes->merge([
         'type' => 'checkbox',
-        'role' => 'switch',
-        'class' => '!text-green-400 rounded border-green-400 mr-2 me-1'
+        'class' => 'checkbox-transparent'
     ]) }}
     @checked((bool) $active)
     @if($wireEvent && $modelId)
         wire:click="{{ $wireEvent }}({{ $modelId }})"
     @endif
 />
+
+<style>
+
+    .checkbox-transparent {
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        outline: none !important;
+        border-radius: 100%;
+    }
+
+
+    .checkbox-transparent:checked {
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+
+
+    .checkbox-transparent:checked::after {
+        content: "✔";
+        font-size: 11px;
+        color: var(--color-primary, #d00);
+        border: 1px solid var(--color-primary) !important;
+        padding: 0 4px ;
+        border-radius: 25%;
+        font-weight: bold;
+
+    }
+
+
+
+
+
+</style>
