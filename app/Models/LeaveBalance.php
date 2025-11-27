@@ -11,12 +11,7 @@ class LeaveBalance extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'contract_id',
-        'type_id',
-        'deserved',
-        'used'
-    ];
+    protected $guarded = ['id'];
 
     public function contract(): BelongsTo
     {

@@ -127,7 +127,7 @@ use App\Enums\LeaveRequestStatus;
                     <div>
                         <x-forms.input-label for="start_at">{{__('general.start-date')}}</x-forms.input-label>
                         <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
-                        <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
+                        <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
                     </div>
                     <div>
                         <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>

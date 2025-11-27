@@ -365,7 +365,6 @@ return [
     'on_hold' => 'بالانتظار',
     'notifications' => 'الاشعارات',
     'notification_checklist_assigned' => 'يرجى تسليم :item إلى :employee',
-    'no_notifications' => 'لا يوجد اشعارات',
     'news-management' => 'إدارة الأخبار',
     'news' => 'الأخبار',
     'category' => 'الفئة',
@@ -455,6 +454,8 @@ return [
     'actions' => 'الإجراءات',
     'search-all-columns' => 'البحث في جميع الأعمدة',
     'no-available-data' => 'لا توجد بيانات متاحة',
-
+    'no-notifications' => 'لا توجد إشعارات',
+    'mark-as-read' => 'تعيين كمقروء',
+    'view-all' => 'عرض الكل',
 
 ];
