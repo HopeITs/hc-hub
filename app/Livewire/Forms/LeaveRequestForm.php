@@ -224,7 +224,7 @@ class LeaveRequestForm extends Form
             }
         }
 
-        LeaveRequest::create([
+       $this->leaveRequest = LeaveRequest::create([
             'leave_balance_id' => $this->leave_balance_id,
             'type' => $this->type,
             'start_at' => $this->start_at ?? $this->combineDateTime($this->leave_date, $this->start_hour),

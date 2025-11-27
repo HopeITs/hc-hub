@@ -7,6 +7,8 @@ use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
+use App\Models\User;
+use App\Notifications\NewLeaveRequest;
 use Blade;
 use Carbon\Carbon;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -110,6 +112,17 @@ class MyLeaveRequestModule extends Component
             $this->form->update();
         } else {
             $this->form->store();
+            $leaveRequest = $this->form->leaveRequest->load('leaveBalance.contract.position');
+            $directManage = $leaveRequest->leaveBalance->contract->position->directManager?->employee()->account;
+            $techManager = $leaveRequest->leaveBalance->contract->position->techManager?->employee()->account;
+            $city = $leaveRequest->leaveBalance->contract->employee->city;
+            $hr = User::whereHas('roles', function ($query) use ($city) {
+                $query->where('name', 'HR-' . $city->slug);
+            })->first();
+            isset($directManage) ? $directManage->notify(new NewLeaveRequest($leaveRequest)) : '';
+            isset($techManager) ? $techManager->notify(new NewLeaveRequest($leaveRequest)) : '';
+            isset($hr) ? $hr->notify(new NewLeaveRequest($leaveRequest)) : '';
+
         }
 
         $this->showModal = false;
@@ -129,12 +142,12 @@ class MyLeaveRequestModule extends Component
         $balance = LeaveBalance::find($this->form->leave_balance_id);
         $leaveTypeName = $balance->leaveType->name ?? 'N/A';
         $weekends = $leaveBalance->contract->position->center->weekends ?? '0,6';
-        $type =  $this->form->type;
+        $type = $this->form->type;
 
         $start = $this->resolveStart();
         $end = $this->resolveEnd();
         $durationVal = $this->resolveDuration($weekends);
-        $duration = $type === 'day' ? $durationVal . ' ' .  trans_choice('general.day', $durationVal) :  $durationVal . ' ' . trans_choice('general.hour', $durationVal);
+        $duration = $type === 'day' ? $durationVal . ' ' . trans_choice('general.day', $durationVal) : $durationVal . ' ' . trans_choice('general.hour', $durationVal);
         $date = $this->form->leave_date;
         $reason = $this->form->reason;
 
