@@ -106,7 +106,7 @@ class LeaveRequestForm extends Form
 
             $rules['leave_date'] = ['required'];
         } else {
-            $rules['start_at'] = ['required', 'after_or_equal:today'];
+            $rules['start_at'] = ['required', 'after_or_equal:'.today()->format('d-m-Y')];
             $rules['end_at'] = ['required', 'after_or_equal:start_at'];
         }
 
@@ -209,16 +209,17 @@ class LeaveRequestForm extends Form
             $this->end_at = Carbon::createFromFormat('H:i Y-m-d', $end_at);
         }
 
-
+        $this->validateMaxDuration();
         $leaveBalance = LeaveBalance::find($this->leave_balance_id);
 
         // --- Handle Annual Leave Accrual ---
         if ($leaveBalance->isAnnual()) {
-            $requestedHours = $this->calculateRequestedHours();
+            $dailyWorkHour = $leaveBalance->contract->work_hour_per_day;
+            $requestedHours = $this->calculateRequestedHours($dailyWorkHour);
 
             if (!$leaveBalance->canRequestAnnualLeave($requestedHours)) {
                 throw ValidationException::withMessages([
-                    'leave_balance_id' => __('You have exceeded your accrued annual leave allowance.'),
+                    'leave_balance_id' => __('validation.annual-leave-max-date'),
                 ]);
             }
         }
@@ -248,10 +249,12 @@ class LeaveRequestForm extends Form
         $leaveBalance = $this->leaveRequest->leaveBalance;
 
         if ($leaveBalance->isAnnual()) {
-            $requestedHours = $this->calculateRequestedHours();
+            $dailyWorkHour = $leaveBalance->contract->work_hour_per_day;
+            $requestedHours = $this->calculateRequestedHours($dailyWorkHour);
+
             if (!$leaveBalance->canRequestAnnualLeave($requestedHours)) {
                 throw ValidationException::withMessages([
-                    'leave_balance_id' => __('You have exceeded your accrued annual leave allowance.'),
+                    'leave_balance_id' => __('validation.annual-leave-max-date'),
                 ]);
             }
         }
@@ -266,7 +269,7 @@ class LeaveRequestForm extends Form
             $this->start_at = Carbon::createFromFormat('Y-m-d', $this->start_at)->startOfDay();
             $this->end_at = Carbon::createFromFormat('Y-m-d', $this->end_at)->startOfDay();
         }
-
+        $this->validateMaxDuration();
         if ((int)$this->leaveRequest->status === LeaveRequestStatus::Accepted) {
             if (!(($this->leaveRequest->start_at->isSameAs('Y-m-d H:i', $this->start_at)) && ($this->leaveRequest->end_at->isSameAs('Y-m-d H:i', $this->end_at)))) {
                 $this->leaveRequest->leaveBalance->update([
@@ -300,7 +303,7 @@ class LeaveRequestForm extends Form
     /**
      * Calculate requested hours depending on leave type
      */
-    protected function calculateRequestedHours(): float
+    protected function calculateRequestedHours($dailyWorkHour = 8): float
     {
         if ($this->type === 'hour') {
             $start = $this->combineDateTime($this->leave_date, $this->start_hour);
@@ -313,7 +316,7 @@ class LeaveRequestForm extends Form
             $end = Carbon::parse($this->end_at)->endOfDay();
             $days = $start->diffInDaysFiltered(fn(Carbon $date) => !$date->isWeekend(), $end) + 1;
 
-            return $days * 8; // 8h per day (adjust as needed)
+            return $days * $dailyWorkHour;
         }
 
         return 0;
@@ -338,4 +341,63 @@ class LeaveRequestForm extends Form
             'type',
         ]);
     }
+
+    protected function validateMaxDuration()
+    {
+        $leaveBalance = LeaveBalance::find($this->leave_balance_id);
+        $leaveType = $leaveBalance->leaveType;
+
+        if ($leaveBalance->isAnnual()) {
+            return;
+        }
+
+        $baseDays = $leaveType->base_days;
+
+        $start = Carbon::parse($this->start_at)->startOfDay();
+        $end   = Carbon::parse($this->end_at)->startOfDay();
+
+        if ($end->lessThan($start)) {
+            return;
+        }
+
+        // Calendar Days for maternity
+        $maternityTypes = [
+            LeaveTypeCases::MaternityFirst,
+            LeaveTypeCases::MaternitySecond,
+        ];
+
+        if (in_array($leaveType->id, $maternityTypes)) {
+            $days = $start->diffInDays($end) + 1;
+
+            if ($days > $baseDays) {
+                throw ValidationException::withMessages([
+                    'end_at' => __('validation.leave-max-date', [
+                        'days' => $days,
+                        'max'  => $baseDays
+                    ])
+                ]);
+            }
+
+            return;
+        }
+
+      //other leaves get the weekend from the center
+
+        $weekends = explode(',', $leaveBalance->contract->position->center->weekends ?? '0,6'); //0 and 6 is for Saturday and Sunday
+        $weekends = array_map('intval', $weekends);
+
+        $days = $start->diffInDaysFiltered(function (Carbon $date) use ($weekends) {
+                return !in_array($date->dayOfWeek, $weekends);
+            }, $end) + 1;
+
+        if ($days > $baseDays) {
+            throw ValidationException::withMessages([
+                'end_at' => __("validation.leave-max-date", [
+                    'days' => $days,
+                    'max'  => $baseDays
+                ])
+            ]);
+        }
+    }
+
 }
