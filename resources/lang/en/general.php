@@ -395,6 +395,8 @@ return [
     'total' => 'Total',
     'online' => 'Online',
     'reset' => 'Reset',
+    'statistics' => 'Statistics',
+    'leaves-management'=>'Leaves Management',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',

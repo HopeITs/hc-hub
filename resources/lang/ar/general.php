@@ -396,6 +396,7 @@ return [
     'reject-reason' => 'سبب الرفض',
     'during-period' => 'خلال مدة',
     'no-data-filters' => 'لا توجد بيانات مطابقة للمرشحات المحددة.',
+    'leaves-management' => 'ادارة الاجازات',
     'profile' => [
         'settings' => 'إعدادات الحساب',
         'manage-settings' => 'إدارة حسابك ومعلوماتك الشخصية',
