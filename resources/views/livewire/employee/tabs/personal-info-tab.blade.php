@@ -196,29 +196,22 @@
     <div class="border-b pb-8 mb-8">
         <x-heading-label>@lang('general.skills_and_interests')</x-heading-label>
 
-        <div class="md:col-span-2">
+        <div class="md:col-span-2" wire:ignore>
             <x-forms.input-label for="skills">@lang('general.skills')</x-forms.input-label>
             <input class="hidden" wire:model="infoForm.skills" id="skills_hidden">
-            <x-forms.input class="tagify" type="text" data-enforceWhitelist="0" value="{{ $infoForm->skills }}"
-                data-whitelist="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking ,Problem Solving, Adaptability, Willingness to learn,Active listening,Emotion Intelligence,Creativity , Data analysis     "
-                id="skills" />
+            <x-forms.input class="tagify" type="text" value="" data-enforceWhitelist="0" data-whitelist="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking ,Problem Solving, Adaptability, Willingness to learn,Active listening,Emotion Intelligence,Creativity , Data analysis" id="skills" />
             <x-error-span>{{ $errors->first('infoForm.skills') }}</x-error-span>
         </div>
 
-        <div class="md:col-span-2">
+        <div class="md:col-span-2" wire:ignore>
             <x-forms.input-label for="interests">@lang('general.interests')</x-forms.input-label>
             <input class="hidden" wire:model="infoForm.interests" id="interests_hidden">
-            <x-forms.input class="tagify" data-enforceWhitelist="1" value="{{ $infoForm->interests }}"
-                data-whitelist="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling"
-                type="text" id="interests" />
+            <x-forms.input class="tagify" type="text" value="" data-enforceWhitelist="0" data-whitelist="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling" id="interests" />
             <x-error-span>{{ $errors->first('infoForm.interests') }}</x-error-span>
         </div>
     </div>
 
-
-
     <div class="flex justify-end space-x-2 ">
-
         <x-primary-button type="button" wire:click="saveInformation" x-on:click="$wire.setActiveTab('contact')"
             class="!w-auto">
             @lang('general.next')
@@ -228,3 +221,45 @@
     </div>
 
 </form>
+
+@push('scripts')
+<script src="https://unpkg.com/@yaireo/tagify"></script>
+<script>
+    function setupTagify(textInputId, hiddenInputId, initialJson) {
+        const input = document.getElementById(textInputId);
+        const hidden = document.getElementById(hiddenInputId);
+        if (input && input._tagify) {
+            input._tagify.destroy();
+        }
+        const tagify = new Tagify(input, {});
+        input._tagify = tagify;
+        try {
+            const arr = Array.isArray(initialJson) ? initialJson : (initialJson ? JSON.parse(initialJson) : []);
+            if (Array.isArray(arr)) {
+                tagify.removeAllTags();
+                tagify.addTags(arr);
+                hidden.value = JSON.stringify(arr);
+                hidden.dispatchEvent(new Event('input'));
+            }
+        } catch (e) {}
+        const sync = () => {
+            const values = tagify.value.map(t => t.value);
+            hidden.value = JSON.stringify(values);
+            hidden.dispatchEvent(new Event('input'));
+        };
+        tagify.on('add', sync);
+        tagify.on('remove', sync);
+        tagify.on('edit', sync);
+        tagify.on('invalid', sync);
+        return tagify;
+    }
+    function initAllTagify() {
+        const skillsJson = @json($infoForm->skills ?? '[]');
+        const interestsJson = @json($infoForm->interests ?? '[]');
+        setupTagify('skills', 'skills_hidden', skillsJson);
+        setupTagify('interests', 'interests_hidden', interestsJson);
+    }
+    document.addEventListener('DOMContentLoaded', initAllTagify);
+    document.addEventListener('livewire:navigated', initAllTagify);
+</script>
+@endpush

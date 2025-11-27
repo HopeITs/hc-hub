@@ -80,7 +80,7 @@ class DefaultDeliverablesTable extends LivewireTable
                 ->options($this->itemOptions())
                 ->sortable()->searchable(),
 
-            Column::make(__('Actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m): string {
                 $id = $m->getKey();
 
                 $editBtn = Blade::render(

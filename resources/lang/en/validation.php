@@ -181,5 +181,9 @@ return [
         ],
 
         'g-recaptcha-response' => 'captcha (I\'m not a robot)',
+        'leave_balance_id' => 'Leave Type'
+
     ],
+    'leave-max-date' => 'The total leave duration (:days days) exceeds the allowed (:max days).',
+    'annual-leave-max-date' => 'You have exceeded your accrued annual leave allowance.'
 ];

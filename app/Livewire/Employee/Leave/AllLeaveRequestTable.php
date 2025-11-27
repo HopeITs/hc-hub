@@ -25,8 +25,7 @@ class AllLeaveRequestTable extends LivewireTable
     public $showModal = false;
     public $modalTitle = 'Modal title';
 
-    protected $listeners = ['filterStatus' => 'setStatusFilter'];
-
+    protected $listeners = ['filterStatus' => 'setStatusFilter' , 'toggleItemStatusConfirmed'];
 
 
     public function setStatusFilter(string $status): void
@@ -38,31 +37,34 @@ class AllLeaveRequestTable extends LivewireTable
     protected function query(): Builder
     {
         $user = auth()->user();
-        $role = $user->activeRole()?->name; // assuming activeRole() returns a Role model
+        $role = $user->activeRole()?->name;
+        $employee = $user->profile;
         $query = LeaveRequest::query()
             ->with(['leaveBalance.contract.employee', 'leaveBalance.contract.position'])
             ->orderBy('created_at', 'desc');
 
-        if ($role) {
-            if ($role !== 'HR-SYR' && str_starts_with($role, 'HR-')) {
-
-                // Extract city code from role, e.g. HR-ALP → ALP
+        if ($role === 'HR-SYR') {
+            return $query;
+        } elseif (str_starts_with($role, 'HR-')) {
+            // Extract city code from role, e.g. HR-ALP → ALP
+            $query->whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
                 $cityCode = substr($role, 3);
-
-                // Join or filter based on the employee’s city code
-                $query->whereHas('leaveBalance.contract.employee.city', function ($q) use ($cityCode) {
-                    $q->where('slug', $cityCode);
+                $query->whereHas('employee', function ($q) use ($cityCode) {
+                    $q->whereHas('city', function ($qq) use ($cityCode) {
+                        $qq->where('slug', $cityCode);
+                    });
                 });
-            } elseif ($role === 'Manager') {
+            });
 
-                $query->whereHas('leaveBalance.contract.position.', function ($q) use ($user) {
-                    $q->where('direct_manager_id', $user->profile->id);
-                });
-            }
         } else {
-            // Fallback: not HR, no active role
-            $query->whereHas('leaveBalance.contract', function ($q) use ($user) {
-                $q->where('employee_id', $user->profile->id);
+            //is manager
+            $query->whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
+                $query->whereHas('employee', function ($q) use ($employee) {
+                    $q->whereHas('positions', function ($qq) use ($employee) {
+                        $currentPositions = $employee->positions->modelKeys();
+                        $qq->whereIn('direct_manager_id', $currentPositions)->orWhereIn('tech_manager_id', $currentPositions);
+                    });
+                });
             });
         }
 
@@ -101,7 +103,13 @@ class AllLeaveRequestTable extends LivewireTable
                     {$status['value']}
                 </span>";
             })->asHtml(),
-
+            DateColumn::make(__('general.request_date'), 'created_at')
+                ->format('d-m-Y H:i') // keep it; used for default/export/sort context
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    if (!$value) return '-';
+                    return $model->created_at->format('d-m-Y');
+                })
+                ->sortable(),
 
             DateColumn::make(__('general.start-date'), 'start_at')
                 ->format('d-m-Y H:i') // keep it; used for default/export/sort context
@@ -117,23 +125,32 @@ class AllLeaveRequestTable extends LivewireTable
                     return $model->type === 'hour' ? $model->end_at->format('H:i d-m-Y') : $model->end_at->format('d-m-Y');
                 })
                 ->sortable(),
-
-            Column::make(__('Actions'), function (Model $model): string {
-                $isActive = $model->is_active ? 1 : 0;
+            Column::make(__('general.seen-by-hr'), function (Model $model): string {
+                $isActive = $model->hr_approved ? 1 : 0;
 
                 $toggleBtn = Blade::render(
                     '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $isActive .
                     '" :model-id="' . $model->getKey() .
                     '" wire-event="confirmToggleItemStatus" />'
                 );
-                $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: ' . $model->getKey(). ' })" />');
+                return $toggleBtn;
+            })->visible(str_contains($user->activeRole(),'HR-'))->asHtml(),
+            Column::make(__('general.actions'), function (Model $model): string {
+
+                $decisionBtn = '';
+                $editBtn = '';
+
+                if ($model->status === LeaveRequestStatus::Pending) {
+                    $decisionBtn = Blade::render('<x-table.decision-btn wire:click="$dispatch(\'openDecisionRequestLeave\', { id: ' . $model->getKey() . ' })" />');
+                }
+                if ($model->status !== LeaveRequestStatus::Pending) {
+                    $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: ' . $model->getKey() . ' })" />');
+                }
+
+                $showBtn = Blade::render('<x-table.show-btn wire:click="$dispatch(\'openShowRequestLeave\', { id: ' . $model->getKey() . ' })" />');
 
 
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn :modelId="' . $model->getKey() . '" />'
-                );
-
-                return $toggleBtn . $editBtn . $deleteBtn;
+                return $decisionBtn . $editBtn . $showBtn;
             })->asHtml(),
 
         ];
@@ -176,6 +193,27 @@ class AllLeaveRequestTable extends LivewireTable
         LeaveRequest::find($payload['id'])?->delete();
 
         LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
+    public function confirmToggleItemStatus($id): void
+    {
+        LivewireAlert::title(__('general.toggle-status'))
+            ->text(__('general.confirm-status-change'))
+            ->question()
+            ->withConfirmButton(__('general.save'))
+            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function toggleItemStatusConfirmed($payload): void
+    {
+        $item = LeaveRequest::findOrFail($payload['id']);
+        $item->hr_approved = !$item->hr_approved;
+        $item->save();
+
+        LivewireAlert::title(__('general.item-updated'))
             ->success()->toast()->position('top-start')->show();
     }
 

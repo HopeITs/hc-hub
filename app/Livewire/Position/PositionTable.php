@@ -74,7 +74,7 @@ class PositionTable extends LivewireTable
 
             BooleanColumn::make(__('general.is-active'), 'is_active'),
 
-            Column::make(__('Actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m): string {
                 $isActive = $m->is_active ? 1 : 0;
 
                 $toggleBtn = Blade::render(

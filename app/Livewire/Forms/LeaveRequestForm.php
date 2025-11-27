@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Enums\LeaveRequestStatus;
 use App\Enums\LeaveTypeCases;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
@@ -14,12 +15,14 @@ use Livewire\Form;
 class LeaveRequestForm extends Form
 {
     public ?LeaveRequest $leaveRequest = null;
-
+    public ?LeaveRequest $decisionLeave = null;
 
     #[Validate('required|exists:leave_balances,id')]
     public $leave_balance_id = null;
 
     public $id = null;
+
+    public $employee_id = null;
 
     // For hour-based requests
     public $leave_date = null;
@@ -38,9 +41,9 @@ class LeaveRequestForm extends Form
 
     #[Validate('nullable|exists:employees,id')]
     public $approved_by = null;
-
+    public $reject_reason = null;
     public $approved_at = null;
-    public $status = 0; // 0 = pending
+    public $status = LeaveRequestStatus::Pending;
     public $type = 'day'; // matches DB column enum ['day', 'hour']
 
     /**
@@ -75,7 +78,7 @@ class LeaveRequestForm extends Form
             $rules['end_hour'] = [
                 'required',
                 'date_format:H:i',
-                function ($attribute, $value, $fail) use ($centerOpenTime, $centerCloseTime,$maxHours) {
+                function ($attribute, $value, $fail) use ($centerOpenTime, $centerCloseTime, $maxHours) {
                     if (!$this->start_hour || !$this->end_hour) return;
 
                     $start = Carbon::createFromFormat('H:i', $this->start_hour);
@@ -101,9 +104,9 @@ class LeaveRequestForm extends Form
                 },
             ];
 
-            $rules['leave_date'] = ['required', 'after_or_equal:today'];
+            $rules['leave_date'] = ['required'];
         } else {
-            $rules['start_at'] = ['required', 'after_or_equal:today'];
+            $rules['start_at'] = ['required', 'after_or_equal:'.today()->format('d-m-Y')];
             $rules['end_at'] = ['required', 'after_or_equal:start_at'];
         }
 
@@ -116,6 +119,7 @@ class LeaveRequestForm extends Form
      */
     public function setLeaveRequest(LeaveRequest $leaveRequest): void
     {
+
         $this->leaveRequest = $leaveRequest;
         $this->fill($leaveRequest->only([
             'id',
@@ -134,7 +138,58 @@ class LeaveRequestForm extends Form
             $this->leave_date = Carbon::parse($leaveRequest->start_at)->toDateString();
             $this->start_hour = Carbon::parse($leaveRequest->start_at)->format('H:i');
             $this->end_hour = Carbon::parse($leaveRequest->end_at)->format('H:i');
+        } else {
+            $this->start_at = Carbon::parse($leaveRequest->start_at)->toDateString();
+            $this->end_at = Carbon::parse($leaveRequest->end_at)->toDateString();
         }
+    }
+
+    public function setDecisionLeave(LeaveRequest $leaveRequest): void
+    {
+
+        $this->decisionLeave = $leaveRequest;
+        $this->fill($leaveRequest->only([
+            'id',
+            'approved_by',
+            'approved_at',
+            'status',
+            'reject_reason'
+        ]));
+
+    }
+
+    public function submitDecision()
+    {
+        if (!$this->decisionLeave) return;
+
+        if ((int)$this->status === LeaveRequestStatus::Accepted) {
+
+            $this->decisionLeave->update([
+                'status' => LeaveRequestStatus::Accepted,
+                'reject_reason' => null,
+                'approved_at' => now(),
+                'approved_by' => auth()->user()->profile->id,
+            ]);
+            $this->decisionLeave->leaveBalance->update([
+                'used' => $this->decisionLeave->leaveBalance->used + $this->decisionLeave->duration_in_hours
+            ]);
+
+        }
+
+        if ((int)$this->status === LeaveRequestStatus::Rejected) {
+            $this->validate([
+                'reject_reason' => 'required|string|max:255'
+            ]);
+
+            $this->decisionLeave->update([
+                'status' => LeaveRequestStatus::Rejected,
+                'reject_reason' => $this->reject_reason,
+                'approved_at' => now(),
+                'approved_by' => auth()->user()->profile->id,
+            ]);
+        }
+
+
     }
 
     /**
@@ -146,24 +201,25 @@ class LeaveRequestForm extends Form
         $this->validate();
 
 
-        if($this->type === 'hour') {
-            $start_at = $this->start_hour .' '. $this->leave_date;
+        if ($this->type === 'hour') {
+            $start_at = $this->start_hour . ' ' . $this->leave_date;
             $this->start_at = Carbon::createFromFormat('H:i Y-m-d', $start_at);
 
-            $end_at = $this->end_hour .' '. $this->leave_date;
+            $end_at = $this->end_hour . ' ' . $this->leave_date;
             $this->end_at = Carbon::createFromFormat('H:i Y-m-d', $end_at);
         }
 
-
+        $this->validateMaxDuration();
         $leaveBalance = LeaveBalance::find($this->leave_balance_id);
 
         // --- Handle Annual Leave Accrual ---
         if ($leaveBalance->isAnnual()) {
-            $requestedHours = $this->calculateRequestedHours();
+            $dailyWorkHour = $leaveBalance->contract->work_hour_per_day;
+            $requestedHours = $this->calculateRequestedHours($dailyWorkHour);
 
             if (!$leaveBalance->canRequestAnnualLeave($requestedHours)) {
                 throw ValidationException::withMessages([
-                    'leave_balance_id' => __('You have exceeded your accrued annual leave allowance.'),
+                    'leave_balance_id' => __('validation.annual-leave-max-date'),
                 ]);
             }
         }
@@ -188,28 +244,49 @@ class LeaveRequestForm extends Form
      */
     public function update(): void
     {
-        dd($this->all());
+
         $this->validate();
         $leaveBalance = $this->leaveRequest->leaveBalance;
 
         if ($leaveBalance->isAnnual()) {
-            $requestedHours = $this->calculateRequestedHours();
+            $dailyWorkHour = $leaveBalance->contract->work_hour_per_day;
+            $requestedHours = $this->calculateRequestedHours($dailyWorkHour);
+
             if (!$leaveBalance->canRequestAnnualLeave($requestedHours)) {
                 throw ValidationException::withMessages([
-                    'leave_balance_id' => __('You have exceeded your accrued annual leave allowance.'),
+                    'leave_balance_id' => __('validation.annual-leave-max-date'),
                 ]);
             }
         }
-        if($this->type === 'hour') {
+        if ($this->type === 'hour') {
 
-            $start_at = $this->start_hour .' '. $this->leave_date;
+            $start_at = $this->start_hour . ' ' . $this->leave_date;
             $this->start_at = Carbon::createFromFormat('H:i Y-m-d', $start_at);
 
-            $end_at = $this->end_hour .' '. $this->leave_date;
+            $end_at = $this->end_hour . ' ' . $this->leave_date;
             $this->end_at = Carbon::createFromFormat('H:i Y-m-d', $end_at);
+        } else {
+            $this->start_at = Carbon::createFromFormat('Y-m-d', $this->start_at)->startOfDay();
+            $this->end_at = Carbon::createFromFormat('Y-m-d', $this->end_at)->startOfDay();
+        }
+        $this->validateMaxDuration();
+        if ((int)$this->leaveRequest->status === LeaveRequestStatus::Accepted) {
+            if (!(($this->leaveRequest->start_at->isSameAs('Y-m-d H:i', $this->start_at)) && ($this->leaveRequest->end_at->isSameAs('Y-m-d H:i', $this->end_at)))) {
+                $this->leaveRequest->leaveBalance->update([
+                    'used' => $this->leaveRequest->leaveBalance->used - $this->leaveRequest->duration_in_hours
+                ]);
+                $this->leaveRequest->update($this->all());
+                $this->leaveRequest->leaveBalance->update([
+                    'used' => $this->leaveRequest->leaveBalance->used + $this->leaveRequest->duration_in_hours
+                ]);
+            } else {
+                $this->leaveRequest->update($this->all());
+            }
+
+        } else {
+            $this->leaveRequest->update($this->all());
         }
 
-        $this->leaveRequest->update($this->all());
 
         $this->resetForm();
     }
@@ -226,7 +303,7 @@ class LeaveRequestForm extends Form
     /**
      * Calculate requested hours depending on leave type
      */
-    protected function calculateRequestedHours(): float
+    protected function calculateRequestedHours($dailyWorkHour = 8): float
     {
         if ($this->type === 'hour') {
             $start = $this->combineDateTime($this->leave_date, $this->start_hour);
@@ -237,14 +314,13 @@ class LeaveRequestForm extends Form
         if ($this->type === 'day') {
             $start = Carbon::parse($this->start_at)->startOfDay();
             $end = Carbon::parse($this->end_at)->endOfDay();
-            $days = $start->diffInDaysFiltered(fn (Carbon $date) => !$date->isWeekend(), $end) + 1;
+            $days = $start->diffInDaysFiltered(fn(Carbon $date) => !$date->isWeekend(), $end) + 1;
 
-            return $days * 8; // 8h per day (adjust as needed)
+            return $days * $dailyWorkHour;
         }
 
         return 0;
     }
-
 
 
     protected function resetForm(): void
@@ -265,4 +341,63 @@ class LeaveRequestForm extends Form
             'type',
         ]);
     }
+
+    protected function validateMaxDuration()
+    {
+        $leaveBalance = LeaveBalance::find($this->leave_balance_id);
+        $leaveType = $leaveBalance->leaveType;
+
+        if ($leaveBalance->isAnnual()) {
+            return;
+        }
+
+        $baseDays = $leaveType->base_days;
+
+        $start = Carbon::parse($this->start_at)->startOfDay();
+        $end   = Carbon::parse($this->end_at)->startOfDay();
+
+        if ($end->lessThan($start)) {
+            return;
+        }
+
+        // Calendar Days for maternity
+        $maternityTypes = [
+            LeaveTypeCases::MaternityFirst,
+            LeaveTypeCases::MaternitySecond,
+        ];
+
+        if (in_array($leaveType->id, $maternityTypes)) {
+            $days = $start->diffInDays($end) + 1;
+
+            if ($days > $baseDays) {
+                throw ValidationException::withMessages([
+                    'end_at' => __('validation.leave-max-date', [
+                        'days' => $days,
+                        'max'  => $baseDays
+                    ])
+                ]);
+            }
+
+            return;
+        }
+
+      //other leaves get the weekend from the center
+
+        $weekends = explode(',', $leaveBalance->contract->position->center->weekends ?? '0,6'); //0 and 6 is for Saturday and Sunday
+        $weekends = array_map('intval', $weekends);
+
+        $days = $start->diffInDaysFiltered(function (Carbon $date) use ($weekends) {
+                return !in_array($date->dayOfWeek, $weekends);
+            }, $end) + 1;
+
+        if ($days > $baseDays) {
+            throw ValidationException::withMessages([
+                'end_at' => __("validation.leave-max-date", [
+                    'days' => $days,
+                    'max'  => $baseDays
+                ])
+            ]);
+        }
+    }
+
 }

@@ -36,29 +36,46 @@ if (! function_exists('transColumn')) {
 }
 
 if (! function_exists('formatDuration')) {
-     function formatDuration($days, $hours)
+    function formatDuration($days, $hours)
     {
+        // Accept decimal hours
         $days = (int) $days;
-        $hours = (int) $hours;
 
-        // Normalize: 26 hours = 1 day 2 hours
-        if ($hours >= 24) {
-            $days += intdiv($hours, 24);
-            $hours = $hours % 24;
+        // Split hours into whole hours + fractional minutes
+        $wholeHours = (int) $hours;
+        $minutes = (int) round(($hours - $wholeHours) * 60);
+
+        // Handle 60 minutes → +1 hour
+        if ($minutes >= 60) {
+            $wholeHours += intdiv($minutes, 60);
+            $minutes = $minutes % 60;
+        }
+
+        // Now normalize hours into days
+        if ($wholeHours >= 24) {
+            $days += intdiv($wholeHours, 24);
+            $wholeHours = $wholeHours % 24;
         }
 
         $parts = [];
 
         if ($days > 0) {
-            $parts[] = '<strong class="text-secondary-dark">'.$days.'</strong>' . ' ' . trans_choice('general.day',$days);
+            $parts[] = '<strong class="text-secondary-dark">'.$days.'</strong> '.
+                trans_choice('general.day', $days);
         }
 
-        if ($hours > 0) {
-            $parts[] = '<strong class="text-secondary-dark">'.$hours.'</strong>' . ' ' . trans_choice('general.hour',$hours);
-
+        if ($wholeHours > 0) {
+            $parts[] = '<strong class="text-secondary-dark">'.$wholeHours.'</strong> '.
+                trans_choice('general.hour', $wholeHours);
         }
 
-        return implode(' ', $parts) ?: '0 '.trans_choice('general.day',2);
+        if ($minutes > 0) {
+            $parts[] = '<strong class="text-secondary-dark">'.$minutes.'</strong> '.
+                trans_choice('general.minute', $minutes);
+        }
+
+        return implode(' ', $parts) ?: '0 '.trans_choice('general.day', 2);
     }
+
 
 }

@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use Carbon\Carbon;
+use Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
@@ -17,16 +18,128 @@ class AllLeaveRequestModule extends Component
     public LeaveBalance $leaveBalance;
     public LeaveRequest $leaveRequest;
     public LeaveRequestForm $form;
-    public $showModal = false;
+    public $formModal = false;
     public $modalTitle = 'Modal title';
-    protected $listeners = ['editLeaveRequest' => 'edit'];
+    protected $listeners = [
+        'openRequestLeaveEdit' => 'edit',
+        'openShowRequestLeave' => 'show',
+        'openDecisionRequestLeave' => 'openDecision',
+        'processSave' => 'processSave'
+    ];
     public string $statusFilter = 'all';
+    public $selectedLeave;
+    public $showModal = false;
+    public $decisionModal = false;
+    public $decisionLeave;
     public array $counts = [];
+    public $employees = [];
+    public $allAvailableLeaves = [];
+    public $alternativeEmployees = [];
 
     public function mount()
     {
+
         $this->refreshCounts();
+        $user = auth()->user();
+        if (str_contains($user->activeRole()->name, 'HR-')) {
+            $cityCode = explode('-', $user->activeRole()->name)[1];
+
+            if ($cityCode === 'SYR') {
+                $this->employees = Employee::with('contracts.leaveBalances.leaveType')->get();
+            } else {
+                $this->employees = Employee::whereHas('city', function ($query) use ($cityCode) {
+                    $query->where('code', $cityCode);
+
+
+                })->with('contracts.leaveBalances.leaveType')->get();
+            }
+        }
+
     }
+
+    public function show($id)
+    {
+        $this->selectedLeave = LeaveRequest::with(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee'])->findOrFail($id);
+
+        $this->modalTitle = 'Leave Details';
+        $this->showModal = true;
+    }
+    public function edit(LeaveRequest $id)
+    {
+        $this->form->setLeaveRequest($id);
+
+        $employee = $id->leaveBalance->contract->employee;
+
+        // hydrate dependent lists
+        $this->allAvailableLeaves = $employee->latestActiveContract()?->leaveBalances()->with('leaveType')->get();
+        $this->alternativeEmployees = Employee::query()
+            ->where('city_id', $employee->city_id)
+            ->where('id', '!=', $employee->id)
+            ->whereHas('contracts.position.department', fn($q) => $q->where('id', $employee->department?->id))
+            ->get();
+        // hydrate form values
+
+        $this->form->employee_id = $employee->id;
+        $this->form->leave_balance_id = (int) $id->leave_balance_id;
+
+        $this->modalTitle = __('general.edit');
+        $this->formModal = true;
+    }
+
+
+    public function updatedFormEmployeeId($employeeId)
+    {
+        if (!$employeeId) {
+            $this->allAvailableLeaves = [];
+            $this->alternativeEmployees = [];
+            $this->form->leave_balance_id = null;
+            return;
+        }
+
+        $employee = Employee::with(['contracts.leaveBalances.leaveType', 'city'])
+            ->find($employeeId);
+
+        // Available leaves
+        $this->allAvailableLeaves = $employee->availableLeaves();
+
+        // Alternative employees
+        $this->alternativeEmployees = Employee::where('city_id', $employee->city_id)
+            ->where('id', '!=', $employee->id)
+            ->whereHas('contracts.position.department', function ($q) use ($employee) {
+                $q->where('id', $employee->department?->id);
+            })
+            ->get();
+
+        // Reset dependent dropdowns
+        $this->form->leave_balance_id = null;
+        $this->form->alternative_employee = null;
+    }
+
+
+    public function openDecision(LeaveRequest $id)
+    {
+        $this->form->setDecisionLeave($id);
+        $this->decisionLeave = $id->load(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee']);
+
+        $this->modalTitle = 'Leave Decision';
+        $this->decisionModal = true;
+    }
+
+    public function submitDecision()
+    {
+        $this->form->submitDecision();
+        $this->refreshCounts();
+        $this->decisionModal = false;
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
+
+        $this->dispatch('$refresh');
+    }
+
 
     public function setActiveTab(string $status)
     {
@@ -53,39 +166,38 @@ class AllLeaveRequestModule extends Component
                 });
 
             } else {
-                $query->where('employee_id', $employee->id);
+                //is manager
+                $query->whereHas('employee', function ($q) use ($employee) {
+                    $q->whereHas('positions', function ($qq) use ($employee) {
+                        $currentPositions = $employee->positions->modelKeys();
+                        $qq->whereIn('direct_manager_id', $currentPositions)->orWhereIn('tech_manager_id', $currentPositions);
+                    });
+                });
             }
 
         });
 
-        $this->counts = [
-            'all' => (clone $leaveRequests)->count(),
+        $this->counts = ['all' => (clone $leaveRequests)->count(),
             'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)->count(),
             'accepted' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Accepted)->count(),
-            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(),
-        ];
+            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(),];
     }
 
     public function create()
     {
         $this->form->reset();
-        $this->showModal = true;
+        $this->formModal = true;
         $this->modalTitle = __('general.add-new');
     }
 
     public function render()
     {
-        $employee = auth()->user()->profile;
-        $availableLeaves = auth()->user()->profile->availableLeaves();
-        $allAvailableLeaves = $employee->allAvailableLeaves();
-        $alternativeEmployees = Employee::where('city_id', $employee->city_id)->where('id', '!=', $employee->id)
-            ->whereHas('contracts', function ($query) use ($employee) {
-                $query->whereHas('position.department', function ($query) use ($employee) {
-                    $query->where('id', $employee->department->id ?? null);
-                });
-            })->get();
+        $employees = $this->employees;
+        $allAvailableLeaves = $this->allAvailableLeaves;
+        $alternativeEmployees = $this->alternativeEmployees;
 
-        return view('livewire.employee.leave.all', compact('availableLeaves', 'allAvailableLeaves', 'alternativeEmployees'));
+
+        return view('livewire.employee.leave.all', compact('employees', 'allAvailableLeaves', 'alternativeEmployees'));
     }
 
     public function getCountsProperty()
@@ -98,25 +210,120 @@ class AllLeaveRequestModule extends Component
         ];
     }
 
-    public function save()
+    public function confirmSave()
     {
-        if (isset($this->form->id)) {
+        $html = $this->confirmationMessage();
+
+        LivewireAlert::title(__('general.confirmation'))
+            ->timer(null)
+            ->question()
+            ->html($html)
+            ->withConfirmButton(__('general.save'))
+            ->onConfirm('processSave')
+            ->withCancelButton(__('general.cancel')) ->show();
+
+    }
+
+    public function processSave()
+    {
+        if ($this->form->id) {
             $this->form->update();
         } else {
-
             $this->form->store();
-
-
         }
 
-        $this->showModal = false;
+        $this->formModal = false;
         $this->form->reset();
+
         LivewireAlert::title(__('general.success-message'))
             ->success()
             ->toast()
             ->position('top-start')
             ->show();
 
+        $this->refreshCounts();
+    }
+
+    protected function confirmationMessage(): string
+    {
+        $leaveTypeName = LeaveBalance::find($this->form->leave_balance_id)
+            ->leaveType
+            ->name ?? 'N/A';
+
+        $type = $this->form->type;
+
+        $start = $this->resolveStart();
+        $end = $this->resolveEnd();
+        $duration = $this->resolveDuration();
+        $date = $this->form->leave_date;
+        $reason = $this->form->reason;
+
+        return Blade::render(
+            '<x-alerts.leave-request-confirmation
+                :type="$type"
+                :leave_type="$leaveTypeName"
+                :start="$start"
+                :end="$end"
+                :duration="$duration"
+                :reason="$reason"
+                :date="$date"
+            />',
+            compact('type', 'leaveTypeName', 'start', 'end', 'duration', 'reason', 'date')
+        );
+    }
+
+
+    public function confirmDelete($id)
+    {
+
+
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->confirmButtonColor(config('samples.styles.colors.primary'))
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete($id)
+    {
+
+        LeaveRequest::find($id['id'])->delete();
+        $this->showModal = false;
+        $this->refreshCounts();
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
 
     }
+
+    protected function resolveStart()
+    {
+        return $this->form->type === 'day'
+            ? Carbon::parse($this->form->start_at)->format('d-m-Y')
+            : $this->form->start_hour;
+    }
+
+    protected function resolveEnd()
+    {
+        return $this->form->type === 'day'
+            ? Carbon::parse($this->form->end_at)->format('d-m-Y')
+            : $this->form->end_hour;
+    }
+
+    protected function resolveDuration()
+    {
+        if ($this->form->type === 'day') {
+            return Carbon::parse($this->form->start_at)
+                    ->diffInDays(Carbon::parse($this->form->end_at)) + 1;
+        }
+
+        return Carbon::parse($this->form->start_hour)
+            ->floatDiffInHours(Carbon::parse($this->form->end_hour));
+    }
+
 }

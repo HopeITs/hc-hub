@@ -1,7 +1,7 @@
 @php($allActions = $this->resolveActions())
 
 @if($allActions->isNotEmpty())
-    <x-livewire-table::dropdown label="{{ __('Actions') }}">
+    <x-livewire-table::dropdown label="{{ __('general.actions') }}">
         <x-slot name="icon">
             <!-- Icon "play" (outline) from https://heroicons.com -->
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
