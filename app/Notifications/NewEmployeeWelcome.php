@@ -19,11 +19,18 @@ class NewEmployeeWelcome extends Notification
 
     public function toArray($notifiable): array
     {
-        $name = $this->employee->name;
+        $emp = $this->employee;
 
         return [
-            'title' => "Welcome $name!",
-            'body'  => "Let's Welcome $name to the team, We’re excited to have them join us!",
+            'title' => [
+                'en' => "Welcome $emp->name_en!",
+                'ar' => "مرحبًا بـ$emp->name_ar!"
+            ],
+
+            'body' => [
+                'en' => "Let's welcome $emp->name_en to the team, we’re excited to have them join us!",
+                'ar' => "دعونا نرحب بـ$emp->name_ar في الفريق، نحن متحمسون لانضمامهم إلينا!"
+            ],
             'url'   => route('employees.edit', $this->employee->id),
         ];
     }

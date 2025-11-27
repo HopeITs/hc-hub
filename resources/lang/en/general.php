@@ -454,6 +454,9 @@ return [
     'actions' => 'Actions',
     'search-all-columns' => 'Search All Columns',
     'no-available-data' => 'No available data',
+    'no-notifications' => 'No Notifications',
+    'mark-as-read' => 'Mark as read',
+    'view-all' => 'View All'
 
 
 

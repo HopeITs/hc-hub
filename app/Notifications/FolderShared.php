@@ -20,8 +20,15 @@ class FolderShared extends Notification
     public function toArray($notifiable): array
     {
         return [
-            'title' => "New Folder Shared: {$this->folder->name}",
-            'body' => "{$this->creatorName} shared the folder '{$this->folder->name}' with you. You can now access it in Shared Folders.",
+            'title' => [
+                'en' => "New Folder Shared: {$this->folder->name}",
+                'ar' => "تمت مشاركة مجلد جديد: {$this->folder->name}",
+            ],
+
+            'body' => [
+                'en' => "{$this->creatorName} shared the folder '{$this->folder->name}' with you. You can now access it in Shared Folders.",
+                'ar' => "{$this->creatorName} قام بمشاركة المجلد '{$this->folder->name}' معك. يمكنك الآن الوصول إليه ضمن المجلدات المشتركة.",
+            ],
             'url' => route('shared-folders.index', ['folderId' => $this->folder->id]),
         ];
     }
