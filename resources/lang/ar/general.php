@@ -457,6 +457,7 @@ return [
     'no-available-data' => 'لا توجد بيانات متاحة',
     'no-notifications' => 'لا توجد إشعارات',
     'mark-as-read' => 'تعيين كمقروء',
+    'mark-all-read' => 'تعيين الكل كمقروء',
     'view-all' => 'عرض الكل',
 
 ];

@@ -29,7 +29,7 @@ class NewCenterCreated extends Notification
                 'en' => "Center \"{$this->center->name}\" has been created.",
                 'ar' => "تم إنشاء المركز \"{$this->center->name}\".",
             ],
-            'url' => route('centers.index'),
+
         ];
     }
 }

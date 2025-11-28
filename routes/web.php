@@ -43,9 +43,9 @@ Route::group(
         Livewire::setUpdateRoute(fn($handle) => Route::post('/livewire/update', $handle));
 
 
-        Route::view('/', 'dashboard')
-            ->middleware(['auth', 'verified'])
-            ->name('dashboard');
+//        Route::view('/', 'dashboard')
+//            ->middleware(['auth', 'verified'])
+//            ->name('dashboard');
 
         Route::middleware(['auth'])->group(function () {
             Route::redirect('settings', 'settings/profile');
@@ -129,8 +129,8 @@ Route::group(
                     Route::get('/', AllItems::class)->name('index');
                 });
 
-            Route::get('/employee-dashboard', EmployeeDashboard::class)
-                ->name('employee.dashboard');
+            Route::get('/', EmployeeDashboard::class)
+                ->name('dashboard');
 
             Route::get('/general-statistics', GeneralStatistics::class)
                 ->name('general-statistics');

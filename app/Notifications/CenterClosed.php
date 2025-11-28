@@ -29,7 +29,7 @@ class CenterClosed extends Notification
                 'en' => "The center located in {$this->center->city->name_en} is now inactive.",
                 'ar' => "المركز الموجود في {$this->center->city->name_ar} أصبح غير فعّال.",
             ],
-            'url' => route('centers.index'),
+
         ];
     }
 }

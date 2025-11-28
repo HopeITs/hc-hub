@@ -31,7 +31,7 @@ class NewEmployeeWelcome extends Notification
                 'en' => "Let's welcome $emp->name_en to the team, we’re excited to have them join us!",
                 'ar' => "دعونا نرحب بـ$emp->name_ar في الفريق، نحن متحمسون لانضمامهم إلينا!"
             ],
-            'url'   => route('employees.edit', $this->employee->id),
+            'url'   => route('employees.show', $this->employee->username),
         ];
     }
 }

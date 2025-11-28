@@ -10,9 +10,9 @@
             <ul class="space-y-2 font-medium">
 
                 {{-- 1. Employee Dashboard (Seen by all) --}}
-                <x-layouts.app.sidebar.single-item :href="route('employee.dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('employee.dashboard')">
-                    <x-slot name="icon"><x-icons.dashboard class="w-5 h-5" /></x-slot>
-                    Dashboard
+                <x-layouts.app.sidebar.single-item :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('employee.dashboard')">
+                    <x-slot name="icon"><x-icons.dashboard class="size-5" /></x-slot>
+                    @lang('general.dashboard')
                 </x-layouts.app.sidebar.single-item>
 
                 {{-- Statistics (HR + Super Admin only - kept as per logic) --}}
@@ -42,7 +42,7 @@
                 @endactiverole
 
                 <x-layouts.app.sidebar.single-item :href="route('org.chart')" :active="request()->routeIs('org.chart')">
-                    <x-slot name="icon"><x-icons.code-fork class="w-5 h-5" /></x-slot>
+                    <x-slot name="icon"><x-icons.code-fork class="size-5" /></x-slot>
                     {{ __('general.orgn-chart') }}
                 </x-layouts.app.sidebar.single-item>
 
@@ -110,7 +110,7 @@
                         request()->routeIs('positions.*') ||
                         request()->routeIs('centers.*')">
                     <x-slot name="icon">
-                        <x-icons.layers class="w-5 h-5"/>
+                        <x-icons.layers class="size-5"/>
                     </x-slot>
 
                     <x-slot name="list">
@@ -135,7 +135,7 @@
                 {{-- Centers for everyone else (Single item) --}}
                 @notactiverole('SUPER ADMIN', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
                 <x-layouts.app.sidebar.single-item :href="route('centers.index')" :active="request()->routeIs('centers.*')">
-                    <x-slot name="icon"><x-icons.layers class="w-5 h-5" /></x-slot>
+                    <x-slot name="icon"><x-icons.layers class="size-5" /></x-slot>
                     {{ trans_choice('general.center', 2) }}
                 </x-layouts.app.sidebar.single-item>
                 @endnotactiverole
@@ -198,7 +198,7 @@
 
                 {{-- My Leaves: Single Item OUTSIDE for ALL --}}
                 <x-layouts.app.sidebar.single-item :href="route('leaves.index')" :active="request()->routeIs('leaves.index')">
-                    <x-slot name="icon"><x-icons.calendar class="w-5 h-5" /></x-slot>
+                    <x-slot name="icon"><x-icons.calendar class="size-5" /></x-slot>
                     {{ __('general.my-leaves') }}
                 </x-layouts.app.sidebar.single-item>
 
@@ -206,7 +206,7 @@
                 <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')"
                                                          :active="request()->routeIs('my-folders.*') || request()->routeIs('shared-folders.*')">
                     <x-slot name="icon">
-                        <x-icons.folder class="w-5 h-5"/>
+                        <x-icons.folder class="size-5"/>
                     </x-slot>
                     <x-slot name="list">
                         <x-layouts.app.sidebar.nav-item :href="route('my-folders.index')"
@@ -222,14 +222,14 @@
 
                 {{-- 7. Checklist Items -> My items (All, Single) --}}
                 <x-layouts.app.sidebar.single-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
-                    <x-slot name="icon"><x-icons.clipboard-list class="w-5 h-5" /></x-slot>
+                    <x-slot name="icon"><x-icons.clipboard-list class="size-5" /></x-slot>
                     My items
                 </x-layouts.app.sidebar.single-item>
 
                 {{-- 8. News Management (Super Admin, Managers, HRs) --}}
                 @activerole('SUPER ADMIN', 'General Manager', 'general manager', 'Manager', 'manager', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
                 <x-layouts.app.sidebar.single-item :href="route('news.index')" :active="request()->routeIs('news.*')">
-                    <x-slot name="icon"><x-icons.newspaper class="w-5 h-5" /></x-slot>
+                    <x-slot name="icon"><x-icons.newspaper class="size-5" /></x-slot>
                     {{ __('general.news-management') }}
                 </x-layouts.app.sidebar.single-item>
                 @endactiverole

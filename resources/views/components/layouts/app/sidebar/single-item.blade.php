@@ -12,7 +12,7 @@
     >
 
         {{-- Icon --}}
-        <span class="size-4 shrink-0 text-inherit group-hover:text-inherit">
+        <span class="size-5 shrink-0 text-inherit group-hover:text-inherit">
             {!! $icon !!}
         </span>
 

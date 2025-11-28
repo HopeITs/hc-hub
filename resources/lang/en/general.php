@@ -16,7 +16,6 @@ return [
     'export-pdf' => 'Export PDF',
     'my-profile' => 'My Profile',
     'my-account' => 'Personal Account',
-    'dashboard' => 'Dashboard',
     'name_en' => 'EN Name',
     'name_ar' => 'AR Name',
     'type' => 'Type',
@@ -272,7 +271,7 @@ return [
     'file' => 'File',
     'add-item' => 'Add Item',
     'items' => 'Items',
-    'employee-dashboard' => 'Employee Dashboard',
+    'dashboard' => 'Dashboard',
     'general-statistics' => 'General Statistics',
     'manager-dashboard' => 'Manager Dashboard',
     'general-admin-dashboard' => 'General Admin Dashboard',
@@ -458,6 +457,7 @@ return [
     'no-available-data' => 'No available data',
     'no-notifications' => 'No Notifications',
     'mark-as-read' => 'Mark as read',
+    'mark-all-read' => 'Mark all read',
     'view-all' => 'View All'
 
 
