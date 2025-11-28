@@ -11,6 +11,7 @@ use App\Models\Contract;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
 use App\Enums\LeaveType as LeaveTypeEnum;
+use App\Notifications\ActionLeaveBalance;
 use Carbon\Carbon;
 use Livewire\Form;
 
@@ -19,12 +20,13 @@ class LeaveBalanceForm extends Form
     public ?LeaveBalance $balance = null;
     public $contract_id;
     public $used = 0;
-    public $deserved ;
-    public $operation = 'sum' ;
+    public $deserved;
+    public $operation = 'sum';
     public $unit = 'hour';
     public $amount = 0;
     public $add_badge = false;
     public $notes = null;
+
     protected function rules()
     {
         return [
@@ -82,7 +84,7 @@ class LeaveBalanceForm extends Form
         $leaveRule = $this->getAnnualLeaveRule($employee);
         $leaveTypes = LeaveType::whereNot('base_days', 12)->get();
 
-        $dailyWorkHours = $contract->work_hour_per_day ;
+        $dailyWorkHours = $contract->work_hour_per_day;
         $extra = $this->calculateExtraLeave($employee, $contract);
 
         [$yearly, $sick, $unpaid] = $this->calculateDeservedLeaves($contract->duration, $leaveRule, $dailyWorkHours, $extra);
@@ -171,7 +173,7 @@ class LeaveBalanceForm extends Form
         foreach ([
                      LeaveTypeCases::FullSick => $sick,
                      LeaveTypeCases::HalfSick => $sick,
-                     LeaveTypeCases::Unpaid   => $unpaid,
+                     LeaveTypeCases::Unpaid => $unpaid,
                  ] as $type => $deserved) {
             LeaveBalance::create([
                 'contract_id' => $contract->id,
@@ -186,7 +188,7 @@ class LeaveBalanceForm extends Form
         $updates = [
             LeaveTypeCases::FullSick => $sick,
             LeaveTypeCases::HalfSick => $sick,
-            LeaveTypeCases::Unpaid   => $unpaid,
+            LeaveTypeCases::Unpaid => $unpaid,
         ];
 
         foreach ($updates as $type => $deserved) {
@@ -196,8 +198,7 @@ class LeaveBalanceForm extends Form
 
     private function createSpecificLeaves($employee, $contract, $leaveTypes, $dailyWorkHours): void
     {
-        $allowedForAll = $leaveTypes->filter(fn($t) =>
-            $t->allowed_gender === LeaveTypeEnum::GENDER_ANY &&
+        $allowedForAll = $leaveTypes->filter(fn($t) => $t->allowed_gender === LeaveTypeEnum::GENDER_ANY &&
             $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_ANY
         );
 
@@ -266,8 +267,7 @@ class LeaveBalanceForm extends Form
 
     private function createMarriedLeaves($employee, $contract, $leaveTypes, $dailyWorkHours): void
     {
-        $types = $leaveTypes->filter(fn($t) =>
-            $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED &&
+        $types = $leaveTypes->filter(fn($t) => $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED &&
             $t->allowed_gender === $employee->gender
         );
 
@@ -292,8 +292,7 @@ class LeaveBalanceForm extends Form
     {
         $contract->leaveBalances->where('type_id', LeaveTypeCases::Marriage)->first()?->delete();
 
-        $types = $leaveTypes->filter(fn($t) =>
-            $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED &&
+        $types = $leaveTypes->filter(fn($t) => $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED &&
             $t->allowed_gender === $employee->gender
         );
 
@@ -311,7 +310,8 @@ class LeaveBalanceForm extends Form
         }
     }
 
-    public function updateAnnualLeaves(){
+    public function updateAnnualLeaves()
+    {
         $this->validate([
             'operation' => 'required|in:sum,sub',
             'unit' => 'required|in:hour,day',
@@ -319,18 +319,18 @@ class LeaveBalanceForm extends Form
             'add_badge' => 'required|boolean',
             'notes' => $this->add_badge ? 'required|string' : 'nullable'
         ]);
-        if($this->unit === 'day'){
+        if ($this->unit === 'day') {
             $amount = $this->amount * $this->balance->contract->work_hour_per_day;
-        }else{
+        } else {
             $amount = $this->amount;
         }
-        if($this->operation === 'sum'){
+        if ($this->operation === 'sum') {
             $this->balance->update(['deserved' => $this->balance->deserved + $amount]);
 
-        }else{
+        } else {
             $this->balance->update(['deserved' => $this->balance->deserved - $amount]);
         }
-        if($this->add_badge){
+        if ($this->add_badge) {
             $this->balance->contract->employee->badges()->create([
                 'type' => $this->operation === 'sum' ? BadgeType::Reward : BadgeType::Warning,
                 'date' => now(),
@@ -338,6 +338,37 @@ class LeaveBalanceForm extends Form
             ]);
         }
 
+        //Notify
+        $balance = $this->balance->load('contract.position');
+        $directManage = $balance->contract->position->directManager?->employee()->account;
+        $techManager = $balance->contract->position->techManager?->employee()->account;
+        $employee = $balance->contract->employee->account;
+        isset($directManage) ? $directManage->notify(new ActionLeaveBalance(
+            balance: $this->balance,
+            operation: $this->operation,
+            unit: $this->unit,
+            amount: $this->amount,
+            notes: $this->notes,
+            recipientType: 'manager'
+        )) : '';
+
+        isset($techManager) ? $techManager->notify(new ActionLeaveBalance(
+            balance: $this->balance,
+            operation: $this->operation,
+            unit: $this->unit,
+            amount: $this->amount,
+            notes: $this->notes,
+            recipientType: 'manager'
+        )) : '';
+
+        $employee->notify(new ActionLeaveBalance(
+            balance: $this->balance,
+            operation: $this->operation,
+            unit: $this->unit,
+            amount: $this->amount,
+            notes: $this->notes,
+            recipientType: 'employee'
+        ));
 
     }
 }
