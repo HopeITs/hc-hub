@@ -10,7 +10,7 @@
             <ul class="space-y-2 font-medium">
 
                 <x-layouts.app.sidebar.single-item :href="route('employee.dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('employee.dashboard')">
-                    <x-slot name="icon"><x-icons.users class="w-5 h-5" /></x-slot>
+                    <x-slot name="icon"><x-icons.dashboard class="w-5 h-5" /></x-slot>
                     Dashboard
                 </x-layouts.app.sidebar.single-item>
 
@@ -21,7 +21,7 @@
                     :active="request()->routeIs('general-statistics') ||
                              request()->routeIs('contract-statistics')">
                     <x-slot name="icon">
-                        <x-icons.users/>
+                        <x-icons.statistics/>
                     </x-slot>
                     <x-slot name="list">
                         <x-layouts.app.sidebar.nav-item
@@ -159,7 +159,7 @@
                 @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN')
                 <x-layouts.app.sidebar.dropdown-nav-list id="leaves-management"
                                                          title="Leaves Management"
-                                                         :active="(request()->routeIs('leaves.all') || request()->routeIs('leaves.balance'))">
+                                                         :active="(request()->routeIs('leaves.all') || request()->routeIs('leaves.balance') || request()->routeIs('leaves.index'))">
                     <x-slot name="icon">
                         <x-icons.calendar class="w-5 text-gray-400 h-5"/>
                     </x-slot>
@@ -172,6 +172,11 @@
                         <x-layouts.app.sidebar.nav-item :href="route('leaves.balance')"
                                                         :active="request()->routeIs('leaves.balance')">
                             {{ __('general.balance') }}
+                        </x-layouts.app.sidebar.nav-item>
+
+                        <x-layouts.app.sidebar.nav-item :href="route('leaves.index')"
+                                                        :active="request()->routeIs('leaves.index')">
+                            {{ __('general.my-leaves') }}
                         </x-layouts.app.sidebar.nav-item>
                     </x-slot>
                 </x-layouts.app.sidebar.dropdown-nav-list>
