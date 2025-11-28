@@ -5,13 +5,7 @@ use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Dashboard\ContractStatistics;
 use App\Livewire\Dashboards\EmployeeDashboard;
 use App\Livewire\Dashboards\GeneralStatistics;
-use App\Livewire\Basics\{ChecklistItemModule,
-    CityModule,
-    ContractTypeModule,
-    DepartmentModule,
-    JobLevelModule,
-    LeaveTypeModule
-};
+use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, DepartmentModule, JobLevelModule, LeaveTypeModule};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
 use App\Livewire\Employee\{EmployeeCreate,
     EmployeeEdit,
@@ -69,8 +63,8 @@ Route::group(
                 ->name('centers.')
                 ->group(function () {
                     Route::get('/', CentersModule::class)->name('index');
-                    Route::get('/{center}', CenterDetails::class)
-                        ->name('show');
+                    Route::get('/create', \App\Livewire\ProgramManagement\Center\CenterCreate::class)->name('create'); // ✅ Add this
+                    Route::get('/{center}', CenterDetails::class)->name('show');
                 });
 
             Route::prefix('positions')
@@ -150,6 +144,8 @@ Route::group(
             Route::get('/news', \App\Livewire\News\NewsModule::class)->name('news.index')->middleware('auth');
 
             Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
+
+            Route::get('/news/create', \App\Livewire\News\NewsCreate::class)->name('news.create');
 
         });
 

@@ -6,11 +6,13 @@
             :crumbs="[['label' => trans_choice('general.program', 2)]]"
         />
 
-        <a href="{{ route('programs.create') }}"
-           class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium shadow
+        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+            <a href="{{ route('programs.create') }}"
+               class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium shadow
                   hover:opacity-93 transition">
             @lang('general.add-new')
         </a>
+        @endif
     </div>
 
 
@@ -114,6 +116,7 @@
                             </a>
                         </div>
 
+                        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
                         <div class="p-2">
                             <x-forms.toggle-input
                                 :active="$program->is_active"
@@ -121,17 +124,15 @@
                                 wire-event="confirmToggleItemStatus"
                             />
                         </div>
-                        <x-table.edit-btn :href="route('programs.edit', $program->slug)" class=" text-secondary-medium text-center" />
+                            <x-table.edit-btn :href="route('programs.edit', $program->slug)" class=" text-secondary-medium text-center" />
 
                         <x-table.delete-btn :modelId="$program->id"  />
-                    </div>
+                    </div>@endif
                 </div>
 
             </div>
         @endforeach
-
     </div>
-
 
     @if ($items->count() >= $perPage)
         <div class="text-center pt-4">
@@ -142,5 +143,4 @@
             </button>
         </div>
     @endif
-
 </div>
