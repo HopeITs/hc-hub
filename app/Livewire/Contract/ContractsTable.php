@@ -107,7 +107,7 @@ class ContractsTable extends LivewireTable
 
 
             Column::make(__('general.weekly-hours'), 'weekly_hours')
-                ->displayUsing(fn($v) => $v ? "{$v} " . __('general.hours') : '—')
+                ->displayUsing(fn($v) => $v ? "{$v} " . trans_choice('general.hour',2) : '—')
                 ->sortable(),
 
             BooleanColumn::make(__('general.status'), 'is_active')->searchable(),

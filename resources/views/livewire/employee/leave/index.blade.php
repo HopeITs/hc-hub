@@ -85,7 +85,7 @@ use App\Enums\LeaveRequestStatus;
 
                 <div class="md:col-span-1">
                     <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
-                    <x-forms.select-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
+                    <x-forms.select-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
                         <option
                             class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                             @lang('general.select')
@@ -126,12 +126,12 @@ use App\Enums\LeaveRequestStatus;
 
                     <div>
                         <x-forms.input-label for="start_at">{{__('general.start-date')}}</x-forms.input-label>
-                        <x-forms.date-input id="start_at" wire:model.live="form.start_at" label="Start Date"/>
-                        <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
+                        <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
+                        <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
                     </div>
                     <div>
                         <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>
-                        <x-forms.date-input id="end_at" wire:model.live="form.end_at" label="End Date"/>
+                        <x-forms.date-input id="end_at" wire:model="form.end_at" label="End Date"/>
                         <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
                     </div>
 
@@ -141,12 +141,12 @@ use App\Enums\LeaveRequestStatus;
                         <div class="col-span-full grid md:grid-cols-2 gap-4">
                             <div>
                                 <x-forms.input-label for="start_at">{{__('general.start-date')}}</x-forms.input-label>
-                                <x-forms.date-input id="start_at" wire:model.live="form.start_at" label="Start Date"/>
+                                <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
                                 <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
                             </div>
                             <div>
                                 <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>
-                                <x-forms.date-input id="end_at" wire:model.live="form.end_at" label="End Date"/>
+                                <x-forms.date-input id="end_at" wire:model="form.end_at" label="End Date"/>
                                 <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
                             </div>
                         </div>
@@ -179,7 +179,7 @@ use App\Enums\LeaveRequestStatus;
                 @endif
                 <div class="col-span-full">
                     <x-forms.input-label for="reason">{{__('general.reason')}}</x-forms.input-label>
-                    <x-forms.input id="reason" wire:model="form.reason"/>
+                    <x-forms.input id="reason" wire:model="form.reason" required/>
                     <x-error-span>{{ $errors->first('form.reason') }}</x-error-span>
                 </div>
             </div>

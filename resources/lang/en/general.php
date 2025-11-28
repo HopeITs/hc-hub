@@ -290,7 +290,7 @@ return [
     'text7' => 'الجنسية : <Strong>',
     'text8' => 'العنوان : <Strong>',
     'text9' => '<strong>”  المتطوع “  المشار إليه في هذا العقد  ',
-    'text10' => 'بما أن المتطوع قد ذكر أنه يتمتع بالمؤهلات  <br>المناسبة  لمنصب :position <br> (المؤهلات مرفقة بتوصيف العمل التطوعي).  <br><br><br> “:program” عليه تقدم للتطوع لدى <br> بصفة :position ابتداءاً من <br> تاريخ  توقيع هذا العقد. ',
+    'text10' => 'بما أن المتطوع قد ذكر أنه يتمتع بالمؤهلات  <br>المناسبة  لمنصب :position <br> (المؤهلات مرفقة بتوصيف العمل التطوعي).  <br><br><br> “:program” عليه تقدم للتطوع لدى <br>  ابتداءاً من  تاريخ  توقيع هذا العقد.  <strong>:position</strong> بصفة',
     'text11' => 'وبما أن مركز الرجاء المسيحي - حلب - الإدارة العامة  قد وافق على هذا التطوع بالشروط <br> المنصوص عليها في هذا العقد. <br> ',
     'text12' => 'تم العقد بين الطرفين والقبول المشترك لما يلي:',
     'text13' => 'نوع العقد: ',
@@ -456,6 +456,9 @@ return [
     'actions' => 'Actions',
     'search-all-columns' => 'Search All Columns',
     'no-available-data' => 'No available data',
+    'no-notifications' => 'No Notifications',
+    'mark-as-read' => 'Mark as read',
+    'view-all' => 'View All'
 
 
 

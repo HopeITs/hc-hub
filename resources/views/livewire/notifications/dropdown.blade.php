@@ -25,7 +25,7 @@
                               @else
                                   text-neutral-800 dark:text-neutral-200
                               @endif">
-                        {{ $note->data['title'] ?? 'Notification' }}
+                        {{ $note->data['title'][app()->getLocale()] ?? 'Notification' }}
                     </p>
 
                     <p class="text-xs mt-1
@@ -34,14 +34,14 @@
                               @else
                                   text-neutral-600 dark:text-neutral-400
                               @endif">
-                        {{ $note->data['body'] ?? '' }}
+                        {{ $note->data['body'][app()->getLocale()] ?? '' }}
                     </p>
 
 
                     @if ($isUnread)
                         <button wire:click="markAsRead('{{ $note->id }}')"
                                 class="text-xs text-primary-600 hover:underline ml-2">
-                            Mark as read
+                          @lang('general.mark-as-read')
                         </button>
                     @endif
 

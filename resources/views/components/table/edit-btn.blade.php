@@ -1,7 +1,7 @@
 @if($attributes->has('href'))
     <a {{
     $attributes->merge([
-        'class' => 'cursor-pointer p-2 inline-flex items-center'
+        'class' => 'cursor-pointer p-2 text-secondary-medium inline-flex items-center'
     ])
 }}>
         <x-icons.edit/>
@@ -10,7 +10,7 @@
 
     <button {{
     $attributes->merge([
-        'class' => 'cursor-pointer p-2 inline-flex items-center'
+        'class' => 'cursor-pointer text-secondary-medium p-2 inline-flex items-center'
     ])
 }}>
         <x-icons.edit/>

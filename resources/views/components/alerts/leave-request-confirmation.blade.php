@@ -8,16 +8,16 @@
     'date' => ''
 
 ])
-<div class='flex flex-col justify-start items-start'>
-    <span><b>Leave:</b> {{$leave_type}}</span>
-    <span> <b>Type:</b> {{$type}}</span>
+<div class='flex flex-col justify-start items-start space-y-2'>
+    <span><b>{{trans_choice('general.leave-type',1) }}:</b> {{$leave_type}}</span>
+    <span> <b>@lang('general.type'):</b> {{trans_choice('general.'.$type,1)}}</span>
     @if($type === 'day')
-        <span> <b>Dates:</b> {{$start  .' → '. $end}} </span>
-        <span> <b>Duration:</b> {{$duration}} day(s) </span>
+        <span> <b>@lang('general.leave-date'):</b> {{$start  .' → '. $end}} </span>
+        <span> <b>@lang('general.duration'):</b> {{$duration}}  </span>
     @else
-        <span><b>Date:</b> {{$date}}</span>
-        <span><b>Time:</b>{{$start  .' → '. $end}}</span>
-        <span><b>Duration:</b> {{$duration}} hour(s)</span>
+        <span><b>@lang('general.leave-date'):</b> {{$date}}</span>
+        <span><b>@lang('general.time'):</b>{{$start  .' → '. $end}}</span>
+        <span><b>@lang('general.duration'):</b> {{$duration}} </span>
     @endif
-    <span> <b>Reason:</b> {{$reason}}</span>
+    <span> <b>@lang('general.reason'):</b> {{$reason}}</span>
 </div>

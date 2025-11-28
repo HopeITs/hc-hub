@@ -20,8 +20,15 @@ class CenterClosed extends Notification
     public function toArray($notifiable): array
     {
         return [
-            'title' => __('Center ":name" sadly has been closed.', ['name' => $this->center->name]),
-            'body' => __('The center located in :city is now inactive.', ['city' => $this->center->city->name]),
+            'title' => [
+                'en' => "Center \"{$this->center->name}\" has sadly been closed.",
+                'ar' => "المركز \"{$this->center->name}\" تم إغلاقه للأسف.",
+            ],
+
+            'body' => [
+                'en' => "The center located in {$this->center->city->name_en} is now inactive.",
+                'ar' => "المركز الموجود في {$this->center->city->name_ar} أصبح غير فعّال.",
+            ],
             'url' => route('centers.index'),
         ];
     }

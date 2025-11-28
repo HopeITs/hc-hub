@@ -1,5 +1,5 @@
 <div class="space-y-4">
-    <h2 class="text-xl font-semibold text-gray-800">Notifications</h2>
+    <h2 class="text-xl font-semibold text-gray-800">@lang('general.notifications')</h2>
 
     @forelse ($notifications as $notification)
         <div class="flex justify-between items-center bg-gray-100 px-4 py-3 rounded shadow-sm">
@@ -14,6 +14,6 @@
             @endif
         </div>
     @empty
-        <div class="text-gray-500">No notifications.</div>
+        <div class="text-gray-500">@lang('general.no-notifications')</div>
     @endforelse
 </div>

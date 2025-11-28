@@ -334,7 +334,7 @@ use App\Enums\LeaveRequestStatus;
 
                         <div class="flex gap-6">
                             <label class="flex items-center space-x-2">
-                                <x-forms.radio-input :value="LeaveRequestStatus::Accepted"
+                                <x-forms.radio-input :value="LeaveRequestStatus::Accepted" id="accept"
                                                      wire:model.live="form.status">
                                     {{ __('general.accept') }}
                                 </x-forms.radio-input>
@@ -342,7 +342,7 @@ use App\Enums\LeaveRequestStatus;
                             </label>
 
                             <label class="flex items-center space-x-2">
-                                <x-forms.radio-input :value="LeaveRequestStatus::Rejected"
+                                <x-forms.radio-input :value="LeaveRequestStatus::Rejected" id="reject"
                                                      wire:model.live="form.status">
                                     {{ __('general.reject') }}
                                 </x-forms.radio-input>

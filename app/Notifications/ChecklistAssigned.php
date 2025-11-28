@@ -26,20 +26,33 @@ class ChecklistAssigned extends Notification
 
     public function toDatabase($notifiable): array
     {
-        $employee = $this->checklist->employee?->name;
+        $employee = $this->checklist->employee;
         $item = $this->checklist->item?->name;
 
         if ($this->type === 'deliver') {
-            $title = 'Deliver Item';
-            $body = "Please deliver {$item} to {$employee}";
+            $titleEn = 'Deliver Item';
+            $titleAr = 'تسليم عنصر';
+
+            $bodyEn  = "Please deliver {$item} to {$employee?->name_en}";
+            $bodyAr  = "يرجى تسليم {$item} إلى {$employee?->name_ar}";
         } else {
-            $title = 'Receive Item';
-            $body = "Please receive {$item} from {$employee}";
+            $titleEn = 'Receive Item';
+            $titleAr = 'استلام عنصر';
+
+            $bodyEn  = "Please receive {$item} from {$employee?->name_en}";
+            $bodyAr  = "يرجى استلام {$item} من {$employee?->name_ar}";
         }
 
         return [
-            'title' => $title,
-            'body' => $body,
+            'title' => [
+                'en' => $titleEn,
+                'ar' => $titleAr,
+            ],
+
+            'body' => [
+                'en' => $bodyEn,
+                'ar' => $bodyAr,
+            ],
             'url' => route('checklist-items.pending-delivers'),
         ];
     }

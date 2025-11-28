@@ -112,6 +112,11 @@ class Employee extends Model implements HasMedia
             });
     }
 
+    public function getDirectManagerAttribute()
+    {
+        $this->latestActiveContract()->position->directManager->employee();
+    }
+
     public function scopeInvolvedInProgram($query, $programId)
     {
         return $query->whereHas('contracts.position.center', function ($q) use ($programId) {
