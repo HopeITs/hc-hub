@@ -52,7 +52,6 @@ class NewLeaveRequest extends Notification
         $employee = $leaveRequest->leaveBalance->contract->employee;
 
         $leaveType = $leaveRequest->leaveBalance->leaveType;
-        $duration = $leaveRequest->duration;
         return [
             'title' => [
                 'en' => "New Leave Request",

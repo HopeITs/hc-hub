@@ -7,6 +7,8 @@ use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
+use App\Models\User;
+use App\Notifications\ActionLeaveRequest;
 use Carbon\Carbon;
 use Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -128,6 +130,18 @@ class AllLeaveRequestModule extends Component
     public function submitDecision()
     {
         $this->form->submitDecision();
+
+        //Notify
+        $leaveRequest = $this->form->decisionLeave->load('leaveBalance.contract.employee.city');
+        $city = $leaveRequest->leaveBalance->contract->employee->city;
+        $hr = User::whereHas('roles', function ($query) use ($city) {
+            $query->where('name', 'HR-' . $city->slug);
+        })->first();
+        $employee = $leaveRequest->leaveBalance->contract->employee->account;
+        isset($hr) ? $hr->notify(new ActionLeaveRequest($leaveRequest ,'hr')) : '';
+        isset($employee) ? $employee->notify(new ActionLeaveRequest($leaveRequest)) : '';
+        $this->dispatch('notification-created');
+
         $this->refreshCounts();
         $this->decisionModal = false;
 

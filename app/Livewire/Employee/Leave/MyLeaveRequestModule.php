@@ -112,6 +112,8 @@ class MyLeaveRequestModule extends Component
             $this->form->update();
         } else {
             $this->form->store();
+
+            //Notify
             $leaveRequest = $this->form->leaveRequest->load('leaveBalance.contract.position');
             $directManage = $leaveRequest->leaveBalance->contract->position->directManager?->employee()->account;
             $techManager = $leaveRequest->leaveBalance->contract->position->techManager?->employee()->account;
@@ -122,7 +124,7 @@ class MyLeaveRequestModule extends Component
             isset($directManage) ? $directManage->notify(new NewLeaveRequest($leaveRequest)) : '';
             isset($techManager) ? $techManager->notify(new NewLeaveRequest($leaveRequest)) : '';
             isset($hr) ? $hr->notify(new NewLeaveRequest($leaveRequest)) : '';
-
+            $this->dispatch('notification-created');
         }
 
         $this->showModal = false;
