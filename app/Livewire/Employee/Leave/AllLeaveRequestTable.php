@@ -7,6 +7,7 @@ use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
+use App\Notifications\HRSawLeaveRequest;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -126,14 +127,17 @@ class AllLeaveRequestTable extends LivewireTable
                 })
                 ->sortable(),
             Column::make(__('general.seen-by-hr'), function (Model $model): string {
-                $isActive = $model->hr_approved ? 1 : 0;
+                if($model->status !== LeaveRequestStatus::Pending){
+                    $isActive = $model->hr_approved ? 1 : 0;
 
-                $toggleBtn = Blade::render(
-                    '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $isActive .
-                    '" :model-id="' . $model->getKey() .
-                    '" wire-event="confirmToggleItemStatus" />'
-                );
-                return $toggleBtn;
+                    $toggleBtn = Blade::render(
+                        '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $isActive .
+                        '" :model-id="' . $model->getKey() .
+                        '" wire-event="confirmToggleItemStatus" />'
+                    );
+                    return $toggleBtn;
+                }
+                return '';
             })->visible(str_contains($user->activeRole(),'HR-'))->asHtml(),
             Column::make(__('general.actions'), function (Model $model): string {
 
@@ -212,6 +216,19 @@ class AllLeaveRequestTable extends LivewireTable
         $item = LeaveRequest::findOrFail($payload['id']);
         $item->hr_approved = !$item->hr_approved;
         $item->save();
+
+        //Notify
+        $leaveRequest = $item->load('leaveBalance.contract.position');
+        $directManage = $leaveRequest->leaveBalance->contract->position->directManager?->employee()->account;
+        $techManager = $leaveRequest->leaveBalance->contract->position->techManager?->employee()->account;
+        $employee = $leaveRequest->leaveBalance->contract->employee->account;
+
+        isset($directManage) ? $directManage->notify(new HRSawLeaveRequest($leaveRequest , 'manager')) : '';
+        isset($techManager) ? $techManager->notify(new HRSawLeaveRequest($leaveRequest , 'manager')) : '';
+        isset($employee) ? $employee->notify(new HRSawLeaveRequest($leaveRequest , 'employee')) : '';
+        $this->dispatch('notification-created');
+
+
 
         LivewireAlert::title(__('general.item-updated'))
             ->success()->toast()->position('top-start')->show();
