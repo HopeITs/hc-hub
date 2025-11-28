@@ -60,8 +60,8 @@ class NewLeaveRequest extends Notification
             ],
 
             'body' => [
-                'en' => "$employee->name_en has submitted a $leaveType->name_en request with a duration of $duration",
-                'ar' => " قام $employee->name_ar بتقديم طلب $leaveType->name_ar لمدة $duration",
+                'en' => "$employee->name_en has submitted a $leaveType->name_en request",
+                'ar' => " قام $employee->name_ar بتقديم طلب $leaveType->name_ar",
             ],
 
             'url'   => route('leaves.all'),

@@ -41,9 +41,14 @@
                     @if ($isUnread)
                         <button wire:click="markAsRead('{{ $note->id }}')"
                                 class="text-xs text-primary-600 hover:underline ml-2">
-                          @lang('general.mark-as-read')
+                            @lang('general.mark-as-read')
                         </button>
                     @endif
+                    <a href="{{$note->data['url']}}" @if ($isUnread) wire:click="markAsRead('{{ $note->id }}')"
+                       @endif
+                       class="text-xs text-primary-600 hover:underline ml-2">
+                        @lang('general.show-more')
+                    </a>
 
                 </div>
 
@@ -53,7 +58,7 @@
 
     @empty
         <div class="p-4 text-center text-neutral-500 dark:text-neutral-400">
-            No notifications available
+            @lang('general.no-notifications')
         </div>
     @endforelse
 </div>
