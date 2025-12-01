@@ -39,7 +39,6 @@ class BadgesModule extends Component
             'is_salary' => $b->is_salary ?? false,
         ];
 
-        // MODIFICATION: Removed Badge ID from the title
         $this->modalTitle = __('general.badges');
         $this->showModal = true;
     }

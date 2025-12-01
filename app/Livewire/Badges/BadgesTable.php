@@ -48,7 +48,7 @@ class BadgesTable extends LivewireTable
             SelectColumn::make(trans_choice('general.program', 1), 'program_id')
                 ->options($this->programOptions())
                 ->displayUsing(fn($v, Model $m) => $m->employee?->latestActiveContract()?->position?->program?->name ?? '—')
-                ->sortable()
+                // ->sortable()
                 ->searchable(function (Builder $query, $value) {
                     $query->whereHas('employee.contracts.position.program', function ($q) use ($value) {
                         $q->where('id', $value);
@@ -58,7 +58,7 @@ class BadgesTable extends LivewireTable
             SelectColumn::make(trans_choice('general.department', 1), 'department_id')
                 ->options($this->departmentOptions())
                 ->displayUsing(fn($v, Model $m) => $m->employee?->latestActiveContract()?->position?->department?->name ?? '—')
-                ->sortable()
+                // ->sortable()
                 ->searchable(function (Builder $query, $value) {
                     $query->whereHas('employee.contracts.position.department', function ($q) use ($value) {
                         $q->where('id', $value);
