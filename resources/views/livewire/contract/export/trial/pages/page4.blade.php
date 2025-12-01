@@ -47,7 +47,7 @@
                  :ar="$asList($AR_LIST_5, $indices, 'ar')"
 />
 <div class="avoid-break mt-4">
-    <x-contract.dual :en="$L('Fifth term:')" :ar="$L($Glyphs('البند الخامس:'))"/>
+    <x-contract.dual :en="$L('Sixth term:')" :ar="$L($Glyphs('البند السادس:'))"/>
 </div>
 
 <div class="avoid-break mt-4">
