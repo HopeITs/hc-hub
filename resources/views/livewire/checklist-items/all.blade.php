@@ -15,19 +15,19 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            @lang('general.employee')
+                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            {{trans_choice('general.employee',2)}}
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="px-6 py-3ltr:text-left rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             @lang('general.item')
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             @lang('general.status')
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             @lang('general.delivered_at')
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                             @lang('general.notes')
                         </th>
                     </tr>
@@ -42,8 +42,8 @@
                             <td class="px-6 py-4 text-sm text-gray-800">
                                 {{ $item->item->name }}
                             </td>
-                            <td class="px-6 py-4 text-sm">
-                                <span class="px-2 py-1 inline-flex text-xs font-medium rounded-full
+                            <td class="pl-6 pr-2 py-4 text-sm">
+                                <span class="px-2 py-1 inline-flex text-xs ltr:-ml-2 rtl:text-right font-medium rounded-full
                                     @if(strtolower($item->display_status) === 'delivered')
                                         bg-green-100 text-green-700
                                     @elseif(strtolower($item->display_status) === 'on hold')
@@ -54,7 +54,7 @@
                                     {{ $item->display_status }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-500">
+                            <td class="px-6 py-4 text-sm  text-gray-500">
                                 {{ $item->delivered_at ? $item->delivered_at->format('Y-m-d') : '-' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500">
