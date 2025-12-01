@@ -4,16 +4,8 @@ use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Dashboard\ContractStatistics;
 use App\Livewire\Dashboards\EmployeeDashboard;
-use App\Livewire\Dashboards\GeneralAdminDashboard;
 use App\Livewire\Dashboards\GeneralStatistics;
-use App\Livewire\Dashboards\ManagerDashboard;
-use App\Livewire\Basics\{ChecklistItemModule,
-    CityModule,
-    ContractTypeModule,
-    DepartmentModule,
-    JobLevelModule,
-    LeaveTypeModule
-};
+use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, DepartmentModule, JobLevelModule, LeaveTypeModule};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
 use App\Livewire\Employee\{EmployeeCreate,
     EmployeeEdit,
@@ -21,9 +13,9 @@ use App\Livewire\Employee\{EmployeeCreate,
     EmployeeProfile,
     Leave\AllLeaveRequestModule,
     Leave\CreateLeaveRequest,
+    Leave\EmpLeaveBalanceModule,
     Leave\MyLeaveRequestModule,
-    Leave\MyLeaveRequestTable
-};
+    Leave\MyLeaveRequestTable};
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
 use App\Livewire\ProgramManagement\{Center\CenterDetails,
     Center\CentersModule,
@@ -51,9 +43,9 @@ Route::group(
         Livewire::setUpdateRoute(fn($handle) => Route::post('/livewire/update', $handle));
 
 
-        Route::view('/', 'dashboard')
-            ->middleware(['auth', 'verified'])
-            ->name('dashboard');
+//        Route::view('/', 'dashboard')
+//            ->middleware(['auth', 'verified'])
+//            ->name('dashboard');
 
         Route::middleware(['auth'])->group(function () {
             Route::redirect('settings', 'settings/profile');
@@ -71,8 +63,8 @@ Route::group(
                 ->name('centers.')
                 ->group(function () {
                     Route::get('/', CentersModule::class)->name('index');
-                    Route::get('/{center}', CenterDetails::class)
-                        ->name('show');
+                    Route::get('/create', \App\Livewire\ProgramManagement\Center\CenterCreate::class)->name('create'); // ✅ Add this
+                    Route::get('/{center}', CenterDetails::class)->name('show');
                 });
 
             Route::prefix('positions')
@@ -108,6 +100,7 @@ Route::group(
                 ->group(function () {
                     Route::get('/', MyLeaveRequestModule::class)->name('index');
                     Route::get('/all', AllLeaveRequestModule::class)->name('all');
+                    Route::get('/balance', EmpLeaveBalanceModule::class)->name('balance');
                 });
             Route::get('/default-deliverables', DefaultDeliverablesModule::class)->name('default-deliverables.index');
 
@@ -136,8 +129,8 @@ Route::group(
                     Route::get('/', AllItems::class)->name('index');
                 });
 
-            Route::get('/employee-dashboard', EmployeeDashboard::class)
-                ->name('employee.dashboard');
+            Route::get('/', EmployeeDashboard::class)
+                ->name('dashboard');
 
             Route::get('/general-statistics', GeneralStatistics::class)
                 ->name('general-statistics');
@@ -153,6 +146,8 @@ Route::group(
             Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
 
             Route::get('/badges', \App\Livewire\Badges\BadgesModule::class)->name('badges.index');
+
+            Route::get('/news/create', \App\Livewire\News\NewsCreate::class)->name('news.create');
 
         });
 

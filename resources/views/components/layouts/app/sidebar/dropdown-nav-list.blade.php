@@ -9,28 +9,52 @@
     $ariaExpanded = $active ? 'true' : 'false';
 @endphp
 
-<li >
+<li>
     <button
         type="button"
-        class="flex items-center w-full p-2 text-base text-secondary-dark transition duration-75 rounded-lg group hover:bg-gray-100 hover:font-extrabold {{$active ? ' bg-gray-100' : ''}}"
-        aria-controls="{{$id}}"
-        data-collapse-toggle="{{$id}}"
-        aria-expanded="{{$ariaExpanded}}"
+        aria-controls="{{ $id }}"
+        data-collapse-toggle="{{ $id }}"
+        aria-expanded="{{ $ariaExpanded }}"
 
+        class=" cursor-pointer
+            group flex items-center w-full p-2 rounded-lg transition duration-150
+
+            font-medium text-secondary-light bg-white
+            hover:text-secondary-dark hover:font-bold hover:bg-secondary-soft
+
+            {{ $active ? 'text-secondary-dark font-bold bg-secondary-soft' : '' }}
+        "
     >
-       {{$icon}}
-        <span class="text-sm flex-1 ms-3 text-left rtl:text-right whitespace-nowrap {{$active ? ' font-extrabold' : ''}}">{{ $title }}</span>
-        <svg class="size-3 text-secondary-dark text-extrabold" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="m19 9-7 7-7-7"/>
-        </svg>
+        {{-- Icon --}}
+        <span class="size-4 shrink-0 text-inherit group-hover:text-inherit">
+            {{ $icon }}
+        </span>
 
-        {{--        <i class="fa-solid {{ $active ? 'fa-chevron-down' : 'fa-chevron-up' }} "></i>--}}
+        {{-- Label --}}
+        <span
+            class="
+                text-sm flex-1 ms-3 rtl:me-3 text-left rtl:text-right whitespace-nowrap
+                text-inherit group-hover:text-inherit
+            "
+        >
+            {{ $title }}
+        </span>
+
+        {{-- Chevron --}}
+        <svg
+            class="
+                size-3 shrink-0 text-inherit group-hover:text-inherit
+            "
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.9"
+        >
+            <path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"/>
+        </svg>
     </button>
-    <ul id="{{$id}}" class="{{ $isActive }} px-4  ">
+
+    <ul id="{{ $id }}" class="{{ $isActive }} ps-4">
         {{ $list }}
     </ul>
 </li>
-
-
-
-

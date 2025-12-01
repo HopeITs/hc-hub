@@ -1,115 +1,114 @@
 <div
-    class="w-full h-[28rem] rounded-2xl bg-white border border-[var(--color-neutral-200)] shadow-md hover:shadow-lg transition-all duration-500 overflow-hidden">
+    class="w-full h-full rounded-3xl bg-white border border-neutral-200 shadow-sm hover:shadow-md transition-all duration-300 p-6 flex flex-col">
 
-    <div
-        class="flex justify-between items-center px-6 py-4 border-b border-[var(--color-neutral-200)] bg-[var(--color-neutral-50)]">
-        <h2 class="text-lg font-semibold text-[var(--color-neutral-800)] tracking-tight flex items-center gap-2">
-            <span class="inline-block w-2.5 h-2.5 rounded-full bg-[var(--color-primary-500)] shadow-[0_0_8px_var(--color-primary-400)]"></span>
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-[18px] font-semibold text-secondary-medium flex items-center gap-2">
             Employees per Department
+            <x-icons.chart class="w-5 mb-1 h-5 text-primary"/>
         </h2>
-        <span class="text-sm text-[var(--color-neutral-500)] font-medium">2025 Overview</span>
     </div>
 
-    <div class="relative p-3 h-[calc(100%-4.5rem)]">
-        <canvas id="departmentEmployeesChart" style="width:100%;height:100%;"></canvas>
+    <div class="relative flex-1 min-h-[200px]">
+        <canvas id="departmentEmployeesChart" class="w-full h-full"></canvas>
     </div>
+
 </div>
 
 @push('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const canvas = document.getElementById("departmentEmployeesChart");
-        if (!canvas) return;
-        const ctx = canvas.getContext("2d");
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
 
-        const departments = @json($departmentLabels);
-        const employees = @json($employeeCounts);
+            const ctx = document.getElementById("departmentEmployeesChart");
+            if (!ctx) return;
 
-        const barColor = getComputedStyle(document.documentElement)
-            .getPropertyValue("--color-primary-500").trim();
-        const neutralGrid = "rgba(0,0,0,0.06)";
+            const departments = @json($departmentLabels);
+            const employees   = @json($employeeCounts);
 
-        new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: departments,
-                datasets: [{
-                    label: "Employees",
-                    data: employees,
-                    backgroundColor: barColor,
-                    borderColor: barColor,
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    hoverBackgroundColor: barColor,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: { duration: 800, easing: "easeOutQuart" },
-                events: ["mousemove", "mouseout", "click", "touchstart", "touchmove"],
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        text: "Employee Distribution by Department",
-                        color: "var(--color-neutral-700)",
-                        font: {
-                            family: "SomarSans",
-                            size: 16,
-                            weight: "600"
+            const primaryColor = "#be1f24";
+            const gridColor    = "#dcddde";
+
+            new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: departments,
+                    datasets: [
+                        {
+                            data: employees,
+                            backgroundColor: primaryColor,
+                            borderColor: primaryColor,
+                            borderWidth: 0.1,
+                            borderRadius: 10,
+
+                            barPercentage: 0.07,
+                            categoryPercentage: 0.4
                         },
-                        padding: { top: 10, bottom: 20 }
-                    },
-                    tooltip: {
-                        enabled: true,
-                        mode: "index",
-                        intersect: false,
-                        backgroundColor: "var(--color-neutral-900)",
-                        borderColor: "var(--color-neutral-700)",
-                        borderWidth: 1,
-                        titleColor: "#ffffff",
-                        bodyColor: "#ffffff",
-                        cornerRadius: 8,
-                        padding: 12,
-                        displayColors: false,
-                        usePointStyle: true,
-                        titleFont: { family: "SomarSans", weight: "600" },
-                        bodyFont: { family: "SomarSans", size: 13 },
-                        callbacks: {
-                            title: (ctx) => ctx[0].label,
-                            label: (ctx) => `${ctx.parsed.y} Employees`
+
+                        {
+                            type: "line",
+                            data: employees,
+                            borderWidth: 0,
+                            pointBackgroundColor: primaryColor,
+                            pointBorderColor: primaryColor,
+                            pointRadius: 3.6,
+                            pointHoverRadius: 6,
+                            tension: 0
                         }
-                    }
+                    ]
                 },
-                interaction: { mode: "index", intersect: false },
-                hover: { mode: "index", intersect: false },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            color: "var(--color-neutral-600)",
-                            font: { size: 11, family: "SomarSans", weight: "500" },
-                            padding: 8,
-                            maxRotation: 80,
-                            minRotation: 50,
-                            autoSkip: false
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    plugins: {
+                        legend: { display: false },
+
+                        tooltip: {
+                            enabled: true,
+                            backgroundColor: "#1f2937",
+                            titleColor: "#fff",
+                            bodyColor: "#fff",
+                            padding: 10,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: (ctx) => `${ctx.parsed.y} Employees`
+                            }
                         }
                     },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: neutralGrid, drawBorder: false },
-                        ticks: {
-                            color: "var(--color-neutral-600)",
-                            font: { size: 12, family: "SomarSans" },
-                            padding: 6
+
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: "#6b7280",
+                                font: { size: 12, family: "SomarSans" },
+                                padding: 10
+                            }
+                        },
+
+                        y: {
+                            beginAtZero: true,
+
+                            grid: {
+                                color: gridColor,
+                                drawBorder: false
+                            },
+
+                            ticks: {
+                                color: "#6b7280",
+                                font: { size: 12, family: "SomarSans" },
+                                padding: 6,
+
+                                callback: function(value) {
+                                    return Number.isInteger(value) ? value : null;
+                                }
+                            }
                         }
                     }
                 }
-            }
+            });
+
         });
-    });
-</script>
+    </script>
 @endpush

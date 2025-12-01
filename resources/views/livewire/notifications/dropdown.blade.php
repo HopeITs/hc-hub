@@ -8,7 +8,7 @@
         <div
             class="p-3 border-b hover:bg-neutral-100 dark:hover:bg-neutral-800 transition
                    @if($isUnread)
-                       bg-primary-50 border-l-4 border-primary-500
+                       bg-primary-50 border-s-4 border-primary-500
                    @endif">
 
             <div class="flex items-start gap-2">
@@ -17,7 +17,8 @@
                     <span class="mt-1 inline-block w-2 h-2 bg-primary-500 rounded-full"></span>
                 @endif
 
-                <div class="flex-1">
+                <a class="flex-1" @if(array_key_exists('url' ,$note->data)) href="{{$note->data['url']}}"@endif  @if ($isUnread) wire:click="markAsRead('{{ $note->id }}')"
+                    @endif>
 
                     <p class="text-sm font-semibold
                               @if($isUnread)
@@ -25,7 +26,7 @@
                               @else
                                   text-neutral-800 dark:text-neutral-200
                               @endif">
-                        {{ $note->data['title'] ?? 'Notification' }}
+                        {{ $note->data['title'][app()->getLocale()] ?? 'Notification' }}
                     </p>
 
                     <p class="text-xs mt-1
@@ -34,18 +35,19 @@
                               @else
                                   text-neutral-600 dark:text-neutral-400
                               @endif">
-                        {{ $note->data['body'] ?? '' }}
+                        {{ $note->data['body'][app()->getLocale()] ?? '' }}
                     </p>
 
 
-                    @if ($isUnread)
-                        <button wire:click="markAsRead('{{ $note->id }}')"
-                                class="text-xs text-primary-600 hover:underline ml-2">
-                            Mark as read
-                        </button>
-                    @endif
+{{--                    @if ($isUnread)--}}
+{{--                        <button wire:click="markAsRead('{{ $note->id }}')"--}}
+{{--                                class="text-xs text-primary-600 hover:underline ml-2">--}}
+{{--                            @lang('general.mark-as-read')--}}
+{{--                        </button>--}}
+{{--                    @endif--}}
 
-                </div>
+
+                </a>
 
             </div>
 
@@ -53,7 +55,7 @@
 
     @empty
         <div class="p-4 text-center text-neutral-500 dark:text-neutral-400">
-            No notifications available
+            @lang('general.no-notifications')
         </div>
     @endforelse
 </div>

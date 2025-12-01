@@ -11,12 +11,7 @@ class LeaveBalance extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'contract_id',
-        'type_id',
-        'deserved',
-        'used'
-    ];
+    protected $guarded = ['id'];
 
     public function contract(): BelongsTo
     {
@@ -45,9 +40,10 @@ class LeaveBalance extends Model
     public function getUsedFormattedAttribute(): string
     {
         $hours = $this->used;
-        $workDaysCountForWeek = $this->contract->weekly_hours / 5;
-        $days = intdiv($hours, $workDaysCountForWeek);
-        $remaining = $hours % $workDaysCountForWeek;
+        $workHoursPerDay = $this->contract->weekly_hours / 5;
+
+        $days = floor($hours / $workHoursPerDay);
+        $remaining = $hours - ($days * $workHoursPerDay);
 
         return $this->getFormattedLabel($days, $remaining);
     }
@@ -118,34 +114,80 @@ class LeaveBalance extends Model
 
     public function getRemainingAttribute(): string
     {
-        $remaining = $this->deserved - $this->used;
-        $workDaysCountForWeek = $this->contract->weekly_hours / 5;
-        $days = intdiv($remaining, $workDaysCountForWeek);
-        $remaining = $remaining % $workDaysCountForWeek;
-        return $this->getFormattedLabel($days, $remaining);
+        $remainingHours = $this->deserved - $this->used;
+        $workHoursPerDay = $this->contract->weekly_hours / 5;
 
+        // Whole days
+        $days = floor($remainingHours / $workHoursPerDay);
+
+        // Remaining decimal hours
+        $remaining = $remainingHours - ($days * $workHoursPerDay);
+
+        return $this->getFormattedLabel($days, $remaining);
     }
+
 
     public function getFormattedLabel($days, $remaining): string
     {
+        // Split remaining into hours + minutes
+        $hours = (int) $remaining;
+        $minutes = (int) round(($remaining - $hours) * 60);
+
+        // Normalize: 60 minutes → +1 hour
+        if ($minutes >= 60) {
+            $hours += intdiv($minutes, 60);
+            $minutes = $minutes % 60;
+        }
+
+        // -------------------------------------------
+        // Build the original text for days
+        // -------------------------------------------
         $text = '';
         if ($days > 0) {
-            $text = '<strong class="text-secondary-dark">' . $days . '</strong>' . " " . trans_choice('general.day', $days) . " ";
+            $text = '<strong class="text-secondary-dark">'.$days.'</strong>' . ' ' .
+                trans_choice('general.day', $days) . ' ';
         }
+
         $result = $text;
 
-        if ($remaining > 0) {
-            if ($text !== '')
-                $result = __('general.and', ['attr1' => $text, 'attr2' => '<strong class="text-secondary-dark">' . $remaining . '</strong>' . " " . trans_choice('general.hour', $remaining)]);
-            else
-                $result = '<strong class="text-secondary-dark">' . $remaining . '</strong>' . " " . trans_choice('general.hour', $remaining);
+        // -------------------------------------------
+        // Now handle hours + minutes
+        // -------------------------------------------
+        if ($hours > 0 || $minutes > 0) {
+
+            $timeText = [];
+
+            if ($hours > 0) {
+                $timeText[] = '<strong class="text-secondary-dark">'.$hours.'</strong>' . ' ' .
+                    trans_choice('general.hour', $hours);
+            }
+
+            if ($minutes > 0) {
+                $timeText[] = '<strong class="text-secondary-dark">'.$minutes.'</strong>' . ' ' .
+                    trans_choice('general.minute', $minutes);
+            }
+
+            $finalTime = implode(' ', $timeText);
+
+            if ($text !== '') {
+                $result = __('general.and', [
+                    'attr1' => $text,
+                    'attr2' => $finalTime
+                ]);
+            } else {
+                $result = $finalTime;
+            }
         }
-        if($text === ''){
-            $result = '<strong class="text-secondary-dark">0</strong>'. ' ' . trans_choice('general.day', $days);
+
+        // Original fallback behavior
+        if ($text === '' && $hours === 0 && $minutes === 0) {
+            $result = '<strong class="text-secondary-dark">0</strong>' . ' ' .
+                trans_choice('general.day', $days);
         }
 
         return $result;
     }
+
 
     public function leaveType(): BelongsTo
     {

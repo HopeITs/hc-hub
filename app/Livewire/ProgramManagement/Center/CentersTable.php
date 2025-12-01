@@ -39,7 +39,7 @@ class CentersTable extends LivewireTable
 
         return City::query()->whereHas('centers')
             ->orderBy(transColumn('name'))
-            ->get(['id', transColumn( 'name')])
+            ->get(['id', transColumn('name')])
             ->mapWithKeys(fn($c) => [$c->id => $c->name])
             ->all();
     }
@@ -47,6 +47,7 @@ class CentersTable extends LivewireTable
     protected function columns(): array
     {
         $locale = app()->getLocale();
+        $isHR = auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP');
 
         return [
             Column::make('ID', 'id')->sortable(),
@@ -54,17 +55,26 @@ class CentersTable extends LivewireTable
             Column::make(__('general.center-name'), 'name')
                 ->sortable()->searchable(),
             Column::make(__('general.working-hours'), 'open_at')
-                ->displayUsing(fn($v, Model $m) => __('general.from-hour-to-hour', ['from' => $m->open_at_formatted, 'to' => $m->close_at_formatted])
-                )
-                ->sortable(),
+                ->displayUsing(fn($v, Model $m) => __('general.from-hour-to-hour', [
+                    'from' => $m->open_at_formatted,
+                    'to' => $m->close_at_formatted,
+                ]))->sortable(),
 
-            SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
-                ->options(City::query()->whereNot('code', '000')->where('is_active',true)->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
-                ->sortable()     ->searchable(),
+            SelectColumn::make(trans_choice('general.city', 1), 'city.' . transColumn('name'))
+                ->options(City::query()
+                    ->whereNot('code', '000')
+                    ->where('is_active', true)
+                    ->get()
+                    ->pluck(transColumn('name'), transColumn('name'))
+                    ->toArray()
+                )
+                ->sortable()
+                ->searchable(),
 
             Column::make(__('general.address'))
-                ->displayUsing(fn($v, Model $m) => $m->address ?: '—'
-                )->sortable()->searchable(),
+                ->displayUsing(fn($v, Model $m) => $m->address ?: '—')
+                ->sortable()
+                ->searchable(),
 
             BooleanColumn::make(__('general.is-active'), 'is_active')->searchable(),
 
@@ -86,12 +96,7 @@ class CentersTable extends LivewireTable
                 );
             })->asHtml(),
 
-            // Actions
-            Column::make(__('Actions'), function (Model $m): string {
-                $isActive = $m->is_active ? 1 : 0;
-
-                $toggleBtn = Blade::render('<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $isActive . '" :model-id="' . $m->getKey() . '" wire-event="confirmToggleItemStatus" />');
-
+            Column::make(__('general.actions'), function (Model $m) use ($isHR): string {
                 $viewUrl = route('centers.show', $m->getKey());
                 $viewBtn = Blade::render(
                     '<a href="' . $viewUrl . '"
@@ -108,9 +113,21 @@ class CentersTable extends LivewireTable
                             </a>'
                 );
 
-                $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openCenterEdit\', { id: ' . $m->getKey() . ' })" />');
+                if (!$isHR) {
+                    return $viewBtn;
+                }
 
-                $deleteBtn = Blade::render('<x-table.delete-btn :modelId="' . $m->getKey() . '" />');
+                $toggleBtn = Blade::render(
+                    '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . ($m->is_active ? 1 : 0) . '" :model-id="' . $m->getKey() . '" wire-event="confirmToggleItemStatus" />'
+                );
+
+                $editBtn = Blade::render(
+                    '<x-table.edit-btn wire:click="$dispatch(\'openCenterEdit\', { id: ' . $m->getKey() . ' })" />'
+                );
+
+                $deleteBtn = Blade::render(
+                    '<x-table.delete-btn :modelId="' . $m->getKey() . '" />'
+                );
 
                 return $toggleBtn . $viewBtn . $editBtn . $deleteBtn;
             })->asHtml(),

@@ -28,7 +28,10 @@
             </x-table.heading>
 
             <x-table.heading>
-                @lang('general.name')
+                @lang('general.name_en')
+            </x-table.heading>
+            <x-table.heading>
+                @lang('general.name_ar')
             </x-table.heading>
 
             <x-table.heading
@@ -64,7 +67,8 @@
                 @endphp
                 <tr>
                     <x-table.cell>{{ $item->id }}</x-table.cell>
-                    <x-table.cell>{{ $item->name }}</x-table.cell>
+                    <x-table.cell>{{ $item->name_en }}</x-table.cell>
+                    <x-table.cell>{{ $item->name_ar }}</x-table.cell>
                     <x-table.cell>{{ $item->base_days }}</x-table.cell>
                     <x-table.cell>
                         <x-badge :color="$gender['color']">{{ $gender['value'] }}</x-badge>

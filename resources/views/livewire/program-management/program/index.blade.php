@@ -1,82 +1,146 @@
-<div>
-    <div class="flex justify-between">
-        <livewire:layout.breadcrumbs :title="__('general.programs-management')"
-                                     :crumbs="[['label' => trans_choice('general.program', 2)]]"
-                                     :showButton="true" />
+<div class="space-y-10">
 
-        <div>
-            <x-primary-button href="{{ route('programs.create') }}">
-                @lang('general.add-new')
-            </x-primary-button>
-        </div>
+    <div class="flex items-center justify-between mb-6">
+        <livewire:layout.breadcrumbs
+            :title="__('general.programs-management')"
+            :crumbs="[['label' => trans_choice('general.program', 2)]]"
+        />
+
+        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+            <a href="{{ route('programs.create') }}"
+               class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium shadow
+                  hover:opacity-93 transition">
+            @lang('general.add-new')
+        </a>
+        @endif
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
         @foreach ($items as $program)
-            <x-card class="col-span-1 {{ $program->is_active ? '!border-red-200' : '' }}"
-                    :title="$program->name">
-                <x-slot name="icon">
-                    <span class="bg-primary-100 text-primary-800 text-xs h-fit font-medium px-2.5 py-0.5 rounded-full">
-                        {{ $program->code . '-' . $program->slug }}
-                    </span>
-                </x-slot>
+            <div class="rounded-3xl bg-white shadow-sm border border-gray-200 hover:shadow-md transition">
 
-                <div class="text-gray-400 mb-4 gap-x-4 gap-y-2">
-                    <x-icon-label-info :label="__('general.program-manager')" class="md:col-span-2"
-                                       :info="$program->program_manager_name ?? '-'">
-                        <x-icons.user class="!size-4 !text-gray-400 me-2" />
-                    </x-icon-label-info>
+                <div class=" mt-3 py-2 px-5.5 flex justify-between items-center">
+                        <h2 class="font-bold w-[240px] text-secondary-dark text-xl">
+                            {{ $program->name }}
+                        </h2>
 
-                    <div class="flex justify-between">
-                        <x-icon-label-info :label="trans_choice('general.city', 2)"
-                                           :info="$program->cities_count">
-                            <x-icons.map-pin class="me-2" />
-                        </x-icon-label-info>
+                        <span class=" text-xs font-medium px-2 py-0.5
+                                     border border-secondary-light text-secondary-dark bg-white rounded-3xl">
+                            {{ $program->code . '-' . $program->slug }}
+                        </span>
 
-                        <x-icon-label-info :label="trans_choice('general.employee', 2)"
-                                           :info="$program->contracts_count">
-                            <x-icons.users class="!size-4 !text-gray-400 me-2" />
-                        </x-icon-label-info>
-                    </div>
-
-                    <x-icon-label-info class="md:col-span-2" :label="__('general.start-date')"
-                                       :info="$program->start_date?->format('M, Y')">
-                        <x-icons.calendar class="me-2" />
-                    </x-icon-label-info>
-
-                    <x-icon-label-info class="md:col-span-2" :label="__('general.end-date')"
-                                       :info="$program->end_date !== null ? $program->end_date?->format('M, Y') : __('general.active')">
-                        <x-icons.calendar class="me-2" />
-                    </x-icon-label-info>
                 </div>
 
-                <div class="flex justify-between items-end mt-4 pt-4 border-t-1 border-gray-200">
-                    <a class="text-primary underline"
-                       href="{{ route('programs.show', ['program' => $program->slug]) }}">
-                        @lang('general.show-more')
-                    </a>
 
-                    <div class="flex justify-between items-center">
+                <div class="px-5 pt-2 pb-4 grid grid-cols-1 gap-3">
 
-                        <x-forms.toggle-input
-                            :active="$program->is_active"
-                            :model-id="$program->id"
-                            wire-event="confirmToggleItemStatus"
-                        />
-
-                        <x-table.edit-btn :href="route('programs.edit', ['program' => $program->slug])" />
-                        <x-table.delete-btn class="!p-0" :modelId="$program->id" />
+                    <div class="flex  items-start p-3 rounded-lg border border-gray-100 bg-gray-100">
+                        <x-icons.user class="w-4 h-4 text-gray-400 mr-2" />
+                        <div class="flex flex-col gap-1">
+                            <span class="text-gray-500 mt-0.5 text-xs">{{ __('general.program-manager') }}</span>
+                            <span class="font-semibold text-secondary-dark text-sm">
+                                {{ $program->program_manager_name ?? '-' }}
+                            </span>
+                        </div>
                     </div>
+
+
+                    <div class="grid grid-cols-2 gap-3">
+
+                        <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-gray-100">
+                            <x-icons.map-pin class="w-4 h-4 text-gray-400 mr-2" />
+                            <div class="flex flex-col gap-1">
+                                <span class="text-gray-500 mt-0.5  text-xs">{{ trans_choice('general.city', 2) }}</span>
+                                <span class="font-semibold text-gray-800 text-sm">
+                                    {{ $program->cities_count }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-gray-100">
+                            <x-icons.users class="w-4 h-4 text-gray-400 mr-2" />
+                            <div class="flex flex-col gap-1">
+                                <span class="text-gray-500 mt-0.5  text-xs">{{ trans_choice('general.employee', 2) }}</span>
+                                <span class="font-semibold text-gray-800 text-sm">
+                                    {{ $program->contracts_count }}
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="grid grid-cols-2 gap-3">
+
+                        <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-gray-100">
+                            <x-icons.calendar class="w-4 h-4 text-gray-400 mr-2" />
+                            <div class="flex flex-col gap-1">
+                                <span class="text-gray-500 mt-0.5  text-xs">{{ __('general.start-date') }}</span>
+                                <span class="font-semibold text-gray-800 text-sm">
+                                    {{ $program->start_date?->format('M, Y') ?? '-' }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start p-3 rounded-lg border border-gray-100 bg-gray-100">
+                            <x-icons.calendar class="w-4 h-4 text-gray-400 mr-2" />
+                            <div class="flex flex-col gap-1">
+                                <span class="text-gray-500 mt-0.5  text-xs">{{ __('general.end-date') }}</span>
+                                <span class="font-semibold text-gray-800 text-sm">
+                                    {{ $program->end_date ? $program->end_date?->format('M, Y') : __('general.active') }}
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
                 </div>
-            </x-card>
+
+                <div class="border-t border-secondary-soft  flex items-center justify-center px-5 py-2 ">
+                    <div class="flex flex-row items-center justify-between w-[200px]">
+                        <div class="p-2">
+                            <a href="{{ route('programs.show', $program->slug) }}"
+                               class="text-secondary-medium hover:underline text-sm font-medium">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                     class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12
+                                   s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+
+                            </a>
+                        </div>
+
+                        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+                        <div class="p-2">
+                            <x-forms.toggle-input
+                                :active="$program->is_active"
+                                :model-id="$program->id"
+                                wire-event="confirmToggleItemStatus"
+                            />
+                        </div>
+                            <x-table.edit-btn :href="route('programs.edit', $program->slug)" class=" text-secondary-medium text-center" />
+
+                        <x-table.delete-btn :modelId="$program->id"  />
+                    </div>@endif
+                </div>
+
+            </div>
         @endforeach
     </div>
 
     @if ($items->count() >= $perPage)
-        <div class="py-4 mt-4 text-center">
-            <x-outline-button class="text-sm" wire:click="loadMore">
+        <div class="text-center pt-4">
+            <button wire:click="loadMore"
+                    class="px-4 py-1.5 rounded-lg bg-white border border-primary-300
+                           text-primary-600 text-sm hover:bg-primary-50 transition">
                 @lang('general.show-more')
-            </x-outline-button>
+            </button>
         </div>
     @endif
 </div>

@@ -35,7 +35,7 @@ class NewsTable extends LivewireTable
             Column::make(__('general.display_until'), 'display_until')->displayUsing(fn($v) => $v ? $v->format('Y-m-d') : __('general.always_display'))->sortable(),
             Column::make(__('general.event_date'), 'event_date')->displayUsing(fn($v) => $v ? $v->format('Y-m-d') : __('general.n_a'))->sortable(),
             Column::make(__('general.published_at'), 'published_at')->displayUsing(fn($v) => optional($v)->diffForHumans())->sortable(),
-            Column::make(__('Actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m): string {
                 $id = $m->getKey();
                 $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openNewsEdit\', { id: ' . $id . ' })" />');
                 $deleteBtn = Blade::render('<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />');

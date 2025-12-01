@@ -20,9 +20,16 @@ class NewCenterCreated extends Notification
     public function toArray($notifiable): array
     {
         return [
-            'title' => __('We have a new center, established in :city.', ['city' => $this->center->city->name]),
-            'body' => __('Center ":name" has been created.', ['name' => $this->center->name]),
-            'url' => route('centers.index'),
+            'title' => [
+                'en' => "We have a new center, established in {$this->center->city->name_en}.",
+                'ar' => "لقد تم إنشاء مركز جديد في {$this->center->city->name_ar}.",
+            ],
+
+            'body' => [
+                'en' => "Center \"{$this->center->name}\" has been created.",
+                'ar' => "تم إنشاء المركز \"{$this->center->name}\".",
+            ],
+
         ];
     }
 }

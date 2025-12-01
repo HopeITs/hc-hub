@@ -110,13 +110,14 @@
             :ar="$escAr($nameAr).' '.$Glyphs(__('general.text4'))"/>
         <x-contract.dual
             :en="'<strong>Date and Place of Birth:</strong> '.$esc($pobEn).' — '.$esc($dobStr)"
-            :ar="$escAr($dobStrAr).' — '.$escAr($pobAr).$Glyphs(__('general.text5'))"/>
+            :ar="($dobStrAr).' — '.$escAr($pobAr).$Glyphs(__('general.text5'))"/>
+
         <x-contract.dual
             :en="'<strong>National ID number:</strong> '.$esc($nationalId)"
             :ar="$escAr(ar_digits($nationalId ?? '')).' '.$Glyphs(__('general.text6'))"/>
         <x-contract.dual
             :en="'<strong>Nationality:</strong> '.$esc($natEn)"
-            :ar="$escAr($natAr).' '.$Glyphs(__('general.text7'))"/>
+            :ar="($natAr).' '.$Glyphs(__('general.text7'))"/>
         <x-contract.dual
             :en="'<strong>Address:</strong> '"
             :ar="$Glyphs(__('general.text8'))"/>

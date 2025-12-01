@@ -19,7 +19,7 @@ class DepartmentEmployeeStatistics extends Component
         $departments = $employees
             ->map(function ($employee) {
                 $contract = $employee->contracts->sortByDesc('start_date')->first();
-                return optional($contract?->position?->department)->name;
+                return optional($contract?->position?->department)->code;
             })
             ->filter()
             ->countBy()

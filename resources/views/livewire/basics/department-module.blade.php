@@ -9,11 +9,14 @@
             ]"
             :showButton="true"
         />
-        <div>
-            <x-primary-button wire:click="create">
-                @lang('general.add-new')
-            </x-primary-button>
-        </div>
+
+        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+            <div>
+                <x-primary-button wire:click="create">
+                    @lang('general.add-new')
+                </x-primary-button>
+            </div>
+        @endif
     </div>
 
     {{-- Table --}}
@@ -75,10 +78,12 @@
 
                     {{-- Actions --}}
                     <x-table.cell class=" whitespace-nowrap text-center">
-                        <div class="inline-flex items-center justify-center space-x-1 rtl:space-x-reverse">
-                            <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
-                            <x-table.delete-btn :modelId="$item->id"/>
-                        </div>
+                        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+                            <div class="inline-flex items-center justify-center space-x-1 rtl:space-x-reverse">
+                                <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
+                                <x-table.delete-btn :modelId="$item->id"/>
+                            </div>
+                        @endif
                     </x-table.cell>
                 </tr>
             @empty
@@ -108,6 +113,7 @@
                     <x-forms.input type="text" id="code" wire:model="item.code"/>
                     <x-error-span>{{ $errors->first('item.code') }}</x-error-span>
                 </div>
+
                 {{-- Email --}}
                 <div class="col-span-2">
                     <x-forms.input-label for="email">@lang('general.department-email')</x-forms.input-label>

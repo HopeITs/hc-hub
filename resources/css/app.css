@@ -119,7 +119,7 @@ body {
     --color-accent-foreground: var(--color-white);
 
     --color-primary: #be1f24;
-    --color-secondary-dark: #414042;
+    --color-secondary-dark: #58595b;
     --color-secondary-medium: #6d6e71;
     --color-secondary-light: #939598;
     --color-secondary-soft: #dcddde;
@@ -215,9 +215,6 @@ select {
         --tw-ring-color: transparent;
     }
 }
-
-
-
 /* Target Firefox “Today” button */
 input[type="date"]::-moz-focus-inner {
     color: var(--color-primary);
@@ -235,3 +232,10 @@ input[type="date"]::-moz-focus-inner {
     color: var(--color-primary);
 }
 
+div:where(.swal2-icon).swal2-question  {
+    border-color: var(--color-primary) !important;
+    color: var(--color-primary) !important;
+}
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm){
+    background-color: var(--color-primary) !important;
+}

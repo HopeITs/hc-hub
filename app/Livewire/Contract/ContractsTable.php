@@ -72,7 +72,7 @@ class ContractsTable extends LivewireTable
                 ->options(JobLevel::pluck($name, $name)->toArray())
                 ->sortable()->searchable(),
 
-            Column::make(__('general.duration'), fn(Model $m) => $m->duration() . ' ' . __('general.months'))
+            Column::make(__('general.duration'), fn(Model $m) => $m->duration . ' ' . __('general.months'))
                 ->sortable(),
 
             Column::make(__('general.period'), fn(Model $m) =>
@@ -107,7 +107,7 @@ class ContractsTable extends LivewireTable
 
 
             Column::make(__('general.weekly-hours'), 'weekly_hours')
-                ->displayUsing(fn($v) => $v ? "{$v} " . __('general.hours') : '—')
+                ->displayUsing(fn($v) => $v ? "{$v} " . trans_choice('general.hour',2) : '—')
                 ->sortable(),
 
             BooleanColumn::make(__('general.status'), 'is_active')->searchable(),
