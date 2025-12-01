@@ -200,7 +200,7 @@ return [
     'relations.daughter' => 'Daughter',
     'relations.son' => 'Son',
     'relations.other' => 'Other',
-    'show-more' => 'More',
+    'show-more' => 'Show More',
     'identity-org' => 'Identity Info',
     'terms-status' => 'Terms Status',
     'Pay-schedule' => 'Pay Schedule',

@@ -196,7 +196,7 @@ return [
     'relations.daughter' => 'ابنة',
     'relations.son' => 'ابن',
     'relations.other' => 'آخر',
-    'show-more' => ' المزيد',
+    'show-more' => 'إظهار المزيد',
     'identity-org' => 'معلومات الهوية',
     'terms-status' => 'حالة الشروط',
     'Pay-schedule' => 'جدول الدفع',
