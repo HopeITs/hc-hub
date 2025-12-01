@@ -1,7 +1,7 @@
 @include('livewire.contract.details._styles')
 
 <div class="contract-a4 text-gray-900 dark:text-gray-100">
-    <div class="contract-body space-y-">
+    <div class="contract-body space-y-4">
         <div wire:key="service-container-{{ $pageNo }}">
             @switch($pageNo)
                 @case(1) @include('livewire.contract.details.service.pages.page1') @break

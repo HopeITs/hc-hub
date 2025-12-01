@@ -31,7 +31,7 @@
                  :ar="$Glyphs('تُعتبر مقدمة هذا العقد جزءاً لا يتجزأ من هذا العقد.')"/>
 
 {{-- Second term --}}
-<div class="avoid-break mt-4">
+<div class="avoid-break mt-18">
     <x-contract.dual :en="$L('Second term:')" :ar="$L($Glyphs('البند الثاني:'))"/>
 </div>
 <x-contract.dual rowClass="mt-2 mb-6"
@@ -39,21 +39,21 @@
                  :ar="$Glyphs('على الفريق الثاني الالتزام بالقيام بكافة الأعمال التطوعية المتفق عليها مع الفريق الأول وكافة ما يطلب منه من خدمات.')"/>
 
 {{-- Third term --}}
-<div class="avoid-break mt-4">
+<div class="avoid-break mt-18">
     <x-contract.dual :en="$L('Third term:')" :ar="$L($Glyphs('البند الثالث:'))"/>
 </div>
 
 {{-- 1 --}}
-<x-contract.dual rowClass="mt-2 mb-6"
+<x-contract.dual rowClass="mt-2 mb-18"
                  :en="'1. The contract is considered valid from '.$startStr.' until '.$endStr.' and the first two months are considered a trial period for the second party where the first party is entitled to terminate the contract and not continue with the second party.'"
                  :ar="'1. تبدأ مدة هذا العقد  <br> اعتباراً من '.$startStrAr.' <br>  وتنتهي في '.$endStrAr.' <Br> ويُعتبر أول شهرين مدةً تجريبية للفريق الثاني يحق فيها للفريق الأول إنهاء العقد وعدم الاستمرار مع الفريق الثاني.'"/>
 
 {{-- 2 --}}
-<x-contract.dual rowClass="mt-2 mb-6"
+<x-contract.dual rowClass="mt-2 mb-14"
                  :en="'This contract will not be renewed without a written agreement of both parties, whereas each party shall inform the other of the contract termination one month prior to the end of the contract.'"
                  :ar="$Glyphs('لا يتُجدّد هذا العقد لمدة أخرى إلا بموافقة الفريقين خطياً، على أن يُعلم كل فريق  الآخر بعدم التمديد قبل شهر من انتهاء العقد.')"/>
 
 {{-- 3 --}}
-<x-contract.dual rowClass="mt-2 mb-6"
+<x-contract.dual rowClass="mt-2 "
                  :en="'Place of Work: '.$center"
                  :ar="$center.' :مكان العمل'"/>
