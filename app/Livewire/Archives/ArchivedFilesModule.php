@@ -89,10 +89,8 @@ class ArchivedFilesModule extends Component
             };
 
             $this->permissionFilterOptions = $collection
-                ->mapWithKeys(function ($item) use ($type) {
-                    $isTranslatable = in_array($type, ['job_level', 'city', 'center']);
-                    $name = $isTranslatable ? $item->getTranslation('name', 'en') : $item->name;
-                    return [$item->id => $name];
+                ->mapWithKeys(function ($item) {
+                    return [$item->id => $item->name];
                 })
                 ->toArray();
         }
