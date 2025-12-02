@@ -32,7 +32,7 @@
     $dobStr   = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
     $dobStrAr = $Digits($dobStr);
 
-    $nationalId = $emp?->national_id;
+    $nationalId = $emp?->national_number;
 
     $nationalityRaw = (string) ($emp?->nationality ?? '');
     $natKey = strtoupper(trim($nationalityRaw));

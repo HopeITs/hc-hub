@@ -35,7 +35,7 @@
     // Other info
     $pobEn  = trim((string) $cityEn);
     $pobAr  = trim((string) $cityAr);
-    $nationalId = $emp?->national_id;
+    $nationalId = $emp?->national_number;
 
     $nationalityRaw = (string) ($emp?->nationality ?? '');
     $natKey = strtoupper(trim($nationalityRaw));
