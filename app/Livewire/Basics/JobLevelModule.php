@@ -33,11 +33,7 @@ class JobLevelModule extends Component
             'item.name_en' => 'required|string|max:255',
             'item.description' => 'nullable|string',
             'item.grade' => 'nullable|integer',
-            'item.email' => [
-                'nullable',
-                'email',
-                Rule::unique('job_levels', 'email')->ignore($this->item['id']),
-            ],
+            'item.email' => ['nullable', 'email', Rule::unique('job_levels', 'email')->ignore($this->item['id'])],
         ];
     }
 
@@ -93,13 +89,12 @@ class JobLevelModule extends Component
             JobLevel::create($data);
         }
 
+        $this->sortField = 'grade';
+        $this->sortDirection = 'asc';
         $this->showModal = false;
         $this->reset('item');
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
+
+        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
     }
 
     public function confirmDelete($id)
@@ -117,30 +112,22 @@ class JobLevelModule extends Component
     public function delete($id)
     {
         JobLevel::find($id['id'])->delete();
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
+        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
     }
-
-
 
     public function render()
     {
+        $sort = $this->sortField ?: 'id';
+        $dir = $this->sortDirection ?: 'asc';
 
-        $sort   = $this->sortField ?: 'id';
-        $dir    = $this->sortDirection ?: 'asc';
+        $query = JobLevel::query()->when($this->search, function ($q) {
+            $term = $this->search;
 
-        $query = JobLevel::query()
-            ->when($this->search, function ($q)  {
-                $term = $this->search;
-
-                $q->where(function ($w) use ($term) {
-                    // Reuse your app-wide search() scope like other modules
-                    $w->search(["name_en","name_ar", 'description', 'email'], $term);
-                });
+            $q->where(function ($w) use ($term) {
+                // Reuse your app-wide search() scope like other modules
+                $w->search(['name_en', 'name_ar', 'description', 'email'], $term);
             });
+        });
 
         // Sorting (keep keys in sync with Blade headers)
         switch ($sort) {
@@ -157,7 +144,8 @@ class JobLevelModule extends Component
                 $query->orderBy($sort, $dir);
                 break;
 
-            default: // id
+            default:
+                // id
                 $query->orderBy('id', $dir);
         }
 
