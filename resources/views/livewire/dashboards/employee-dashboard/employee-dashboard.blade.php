@@ -20,7 +20,7 @@
 @section('greeting')
     <div class="py-4 pt-26">
         <h1 class="text-secondary-dark font-semibold text-[23px]">
-            Hello {{ $firstName }},
+            @lang('general.greeting') {{ $firstName }},
         </h1>
 
         <p class="text-secondary-light text-[15px]">
