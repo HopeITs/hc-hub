@@ -1,8 +1,14 @@
+<svg {{
+    $attributes->merge([
+        'class' => 'size-4 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'
+    ])
+}}
+     aria-hidden="true"
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 20.81 15.37"
+     fill="currentColor">
 
-
-<svg {{$attributes->merge([
-    'class' => 'size-4 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'
-])}}
-  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-    <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3.05A2.5 2.5 0 1 1 9 5.5M19.5 17h.5a1 1 0 0 0 1-1 3 3 0 0 0-3-3h-1m0-3.05a2.5 2.5 0 1 0-2-4.45m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3 1 1 0 0 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/>
+    <path d="M11.37,10.7c-2.38-2.11-4.63-3.09-7.87-2.04-2.51.82-4.8,6.03-2.63,6.71h19.66c1.88-5.68-5.75-9.89-9.15-4.66ZM1.84,13.81c-.25-5.41,8.69-5.03,8.56,0H1.84ZM12.35,13.81c-.6-5.18,6.81-5.07,6.62,0h-6.62Z"/>
+    <path d="M17.61.96c-3.51-3.21-7.93,2.44-4.75,5.33,3.38,3.09,8.29-2.1,4.75-5.33ZM14.06,2.1c2.05-1.63,4.07,1.43,2.47,3.05-1.68,1.7-4.28-1.61-2.47-3.05Z"/>
+    <path d="M4.93,7.02c5.65,1.82,6.36-8.2-.09-6.75-3.08.69-3.06,5.73.09,6.75ZM7.13,2.1c1.89,1.51-.52,5.02-2.47,3.05-1.59-1.6.41-4.7,2.47-3.05Z"/>
 </svg>
