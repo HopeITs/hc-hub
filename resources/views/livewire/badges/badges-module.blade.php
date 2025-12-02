@@ -1,5 +1,4 @@
-<!-- resources/views/livewire/badges/badges-module.blade.php -->
-<div x-data @open-badge.window="$wire.openBadge($event.detail.id)">
+<div x-data @open-badge-modal.window="$wire.openBadgeModal($event.detail.id)">
     <div class="flex items-center justify-between mb-6">
         <livewire:layout.breadcrumbs :title="__('general.all-badges')" :crumbs="[['label' => __('general.all-badges')]]" :showButton="false" />
     </div>
@@ -8,6 +7,7 @@
         <livewire:badges.badges-table />
     </div>
 
+    {{-- Modal triggered by the View button in BadgesTable --}}
     <x-modal.dialog id="badgeDetails" :title="$modalTitle" wire:model="showModal">
         <x-slot name="title">
             <span class="text-red-600 dark:text-red-400">{{ $modalTitle }}</span>
@@ -65,7 +65,7 @@
                         </div>
                     </div>
                     <div>
-                        <x-forms.input-label class="text-red-600 dark:text-red-400">@lang('general.new_salary')</x-forms.input-label>
+                        <x-forms.input-label class="text-red-600 dark:text-red-400">@lang('general.new-salary')</x-forms.input-label>
                         <div>
                             @if(!empty($badge['new_salary']))
                                 {{ number_format((float)$badge['new_salary'], 2) }} {{ $badge['currency'] ?? '' }}
