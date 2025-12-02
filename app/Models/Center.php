@@ -39,10 +39,6 @@ class Center extends Model
         return $this->belongsTo(City::class);
     }
 
-    public function program(): BelongsTo
-    {
-        return $this->belongsTo(Program::class);
-    }
 
     public function positions()
     {
@@ -54,12 +50,5 @@ class Center extends Model
         return $this->hasManyThrough(Contract::class, Position::class);
     }
 
-    public function projectManager(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class, 'project_manager_id');
-    }
 
-    public function holidays() {
-        return $this->morphMany(Holiday::class, 'holidayable');
-    }
 }
