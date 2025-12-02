@@ -1,11 +1,12 @@
 <svg {{
     $attributes->merge([
-    'class' => 'size-4 text-secondary-dark'
-        ])
-    }}
+        'class' => 'size-4 text-secondary-light transition-colors'
+    ])
+}}
      aria-hidden="true"
-     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-          stroke-width="1.9"
-          d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5"/>
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 19.53 16.33"
+     fill="currentColor">
+
+    <path d="M2.43.19c1.15-.26,6.08-.26,7.23,0,1.72.39,1.88,2.26,2.88,2.57,2.32.71,6.27-1.2,6.75,2.98.31,2.65.87,9.9-2.52,10.34-2.94.39-10.59.27-13.66,0-1.88-.17-2.67-.52-2.91-2.54S-.11,4.05.22,2.26C.39,1.34,1.54.39,2.43.19ZM10.11,2.56c-.23-.32-.59-.5-.98-.5H2.77c-.26,0-.52.1-.7.29h0c-.19.19-.29.44-.29.7v6.13c0,.11.09,3.39.05,4.76,0,.31.24.57.55.57h14.39c1.29,0,1.17-6.17.83-8.93-.08-.64-.61-1.12-1.26-1.13l-4.29-.05c-.43-.05-.81-.28-1.06-.62l-.87-1.22Z" />
 </svg>

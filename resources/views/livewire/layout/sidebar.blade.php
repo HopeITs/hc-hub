@@ -11,7 +11,7 @@
 
                 {{-- 1. Employee Dashboard (Seen by all) --}}
                 <x-layouts.app.sidebar.single-item :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('employee.dashboard')">
-                    <x-slot name="icon"><x-icons.dashboard class="size-5" /></x-slot>
+                    <x-slot name="icon"><x-icons.dashboard class="size-4" /></x-slot>
                     @lang('general.dashboard')
                 </x-layouts.app.sidebar.single-item>
 
@@ -54,7 +54,7 @@
                             {{-- Cities (All) --}}<x-layouts.app.sidebar.nav-item :href="route('cities.index')" :active="request()->routeIs('cities.index')">
                                 {{ trans_choice('general.city', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-    {{-- Contract Types (HR + Super Admin) --}}
+                        {{-- Contract Types (HR + Super Admin) --}}
                         @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN')                        <x-layouts.app.sidebar.nav-item :href="route('contract-types.index')" :active="request()->routeIs('contract-types.index')">
                                 {{ trans_choice('general.contract-type', 2) }}
                             </x-layouts.app.sidebar.nav-item>
@@ -87,7 +87,7 @@
                         request()->routeIs('centers.*')">
 
                         <x-slot name="icon">
-                            <x-icons.layers class="size-5" />
+                            <x-icons.layers />
                         </x-slot>
 
                     <x-slot name="list">
@@ -147,7 +147,7 @@
                 @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN', 'Manager', 'manager', 'General Manager', 'general manager')
                 <x-layouts.app.sidebar.dropdown-nav-list id="leaves-management" title="Leaves Management" :active="(request()->routeIs('leaves.all') || request()->routeIs('leaves.balance'))">
                     <x-slot name="icon">
-                        <x-icons.calendar class="w-5 text-gray-400 h-5"/>
+                        <x-icons.calendar />
                     </x-slot>
                     <x-slot name="list">
                         {{-- All Leaves: Managers, HRs, Super Admin --}}
@@ -168,7 +168,7 @@
                 {{-- My Leaves: Single Item OUTSIDE for ALL --}}
                     <x-layouts.app.sidebar.single-item :href="route('leaves.index')" :active="request()->routeIs('leaves.index')">
                         <x-slot name="icon">
-                            <x-icons.calendar class="size-5" />
+                            <x-icons.my-leaves />
 
                         </x-slot>
                                 {{ __('general.my-leaves') }}
@@ -177,7 +177,7 @@
                             {{-- 6. Archived Files (All) --}}
                     <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')" :active="request()->routeIs('my-folders.*') || request()->routeIs('shared-folders.*')">
                             <x-slot name="icon">
-                                <x-icons.folder class="size-5" />
+                                <x-icons.archived/>
                             </x-slot>
                             <x-slot name="list">
 
@@ -196,14 +196,14 @@
 
                 {{-- 7. Checklist Items -> My items (All, Single) --}}
                 <x-layouts.app.sidebar.single-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
-                    <x-slot name="icon"><x-icons.clipboard-list class="size-5" /></x-slot>
+                    <x-slot name="icon"><x-icons.clipboard-list class="size-4" /></x-slot>
                     My items
                 </x-layouts.app.sidebar.single-item>
 
                 {{-- 8. News Management (Super Admin, Managers, HRs) --}}
                 @activerole('SUPER ADMIN', 'General Manager', 'general manager', 'Manager', 'manager', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
                 <x-layouts.app.sidebar.single-item :href="route('news.index')" :active="request()->routeIs('news.*')">
-                    <x-slot name="icon"><x-icons.newspaper class="size-5" /></x-slot>
+                    <x-slot name="icon"><x-icons.newspaper class="size-4" /></x-slot>
                     {{ __('general.news-management') }}
                 </x-layouts.app.sidebar.single-item>
                 @endactiverole
@@ -211,7 +211,7 @@
 
                 @activerole('SUPER ADMIN', 'HR', 'HR-SYR', 'HR-ALP')
                     <x-layouts.app.sidebar.single-item :href="route('badges.index')" :active="request()->routeIs('badges.*')">
-                        <x-slot name="icon"><x-icons.clipboard-list class="w-5 h-5" /></x-slot>
+                        <x-slot name="icon" class="text-secondary-light"><img src="{{ asset('assets/icons/badges.svg') }}" alt="Badges icon"></x-slot>
                         {{ __('general.all-badges') }}
                     </x-layouts.app.sidebar.single-item>
                 @endactiverole

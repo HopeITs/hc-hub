@@ -1,10 +1,13 @@
 <svg {{
     $attributes->merge([
-    'class' => 'size-4 text-secondary-dark'
-        ])
-    }}
-     aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-     width="24" height="24" fill="none" viewBox="0 0 24 24">
-    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M5.005 11.19V12l6.998 4.042L19 12v-.81M5 16.15v.81L11.997 21l6.998-4.042v-.81M12.003 3 5.005 7.042l6.998 4.042L19 7.042 12.003 3Z"/>
+        'class' => 'size-4 text-secondary-light transition-colors'
+    ])
+}}
+     aria-hidden="true"
+     xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 17.22 18.26"
+     fill="currentColor">
+
+    <path d="M13.62,9.52c-2.58-1.66-3.82,1.11-5.17.87-.45-.08-1.26-.95-1.93-1.18C2.72,7.88-.53,14.36.07,17.61l.52.64h16.54c.41-3.23-.67-6.9-3.52-8.74ZM7.8,16.7H1.96c.03-7.04,7.14-8.6,5.84,0ZM9.35,16.7c-1.09-8.56,5.93-7.21,6.23,0h-6.23Z"/>
+    <path d="M9.11,9.29C15.55,8.85,13.91-.75,8.1.05c-5.99.82-5.15,9.67,1.02,9.25ZM7.69,1.99c4.5-.99,5.47,5.14,1.38,5.68-3.64.48-4.48-5-1.38-5.68Z"/>
 </svg>
