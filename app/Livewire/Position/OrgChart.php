@@ -22,7 +22,7 @@ class OrgChart extends Component
     public ?int $program_id = null;
     public ?int $center_id = null;
     public ?int $department_id = null;
-    public ?string $manager_type = 'direct'; // 'direct', 'tech', or null
+    public ?string $manager_type = 'tech'; // 'direct', 'tech', or null
 
     public function mount(): void
     {
@@ -67,54 +67,54 @@ class OrgChart extends Component
 
     private function buildTree(): array
     {
-        $query = Position::with(['jobLevel', 'directTeam.jobLevel', 'directTeam.directTeam'])
-            ->where('city_id', 1)
-            ->when($this->city_id, fn($query) => $query->orwhere('city_id', $this->city_id))
-            ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
-            ->when($this->center_id, fn($query) => $query->where('center_id', $this->center_id))
-            ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id));
-//dd($query->get());
 
-        if ($this->manager_type === 'direct') {
-            $query->orderBy('direct_manager_id');
-        } elseif ($this->manager_type === 'tech') {
-            $query->orderBy('tech_manager_id');
-        }
-        $positions = $query->get();
-        $root = $positions->where('direct_manager_id', null);
-        if (!$root) return [];
+        $root = Position::where('direct_manager_id', null)->get();
+
 
         // Level 1 — board
-        $rootAssistant = $positions->filter(fn($p) => $p->direct_manager_id === $root[0]->id &&
-            $p->jobLevel?->grade == 2
-        );
+        $rootAssistant = Position::where('direct_manager_id', $root[0]->id)
+            ->whereHas('jobLevel', function ($query) {
+            $query->where('grade', 2);
+        })->get();
 
-        // Level 2 — managers
+        $managers = Position::where('direct_manager_id', $root[0]->id)
+            ->whereNotIn('id', $rootAssistant->pluck('id'))
+            ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
+            ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
+//            ->whereHas('jobLevel', function ($query) {
+//            $query->whereIn('grade', [1,5]);
+//        })
+            ->where('city_id',1);
+
         if ($this->manager_type === 'direct') {
-            $managers = $positions->filter(fn($p) => $p->direct_manager_id === $root[0]->id &&
-                $p->city_id === 1 &&
-                in_array($p->jobLevel?->grade, [1, 3, 5]) //program manager ||project manager || department manager
-            );
-        } else {
-            $techManagerIds = $positions
-                ->pluck('tech_manager_id')
-                ->filter()
-                ->unique()
-                ->values();
-
-            $managers = $positions->whereIn('id', $techManagerIds);
-
-
+          $managers->with(['directTeam'=> function ($query) {
+                $query->whereNotNull('direct_manager_id')
+                    ->with('activeContracts')
+                    ->when($this->city_id, fn($query) => $query->where('city_id', $this->city_id))
+                    ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
+                    ->when($this->center_id, fn($query) => $query->where('center_id', $this->center_id))
+                    ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
+                    ->orderBy('direct_manager_id');
+            }]);
+        }else{
+            $managers->with(['techTeam'=> function ($query) {
+                $query
+                    ->whereNotNull('tech_manager_id')
+                    ->with('activeContracts')
+                    ->when($this->city_id, fn($query) => $query->where('city_id', $this->city_id))
+                    ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
+                    ->when($this->center_id, fn($query) => $query->where('center_id', $this->center_id))
+                    ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
+                    ->orderBy('tech_manager_id');
+            }]);
         }
 
 
-        // Teams
-
-
+//dd($managers->get());
         return [
             'root' => $root,
-            'board' => $rootAssistant->values(),
-            'managers' => $managers->values(),
+            'rootAssistant' => $rootAssistant,
+            'managers' => $managers->get()
 
         ];
     }

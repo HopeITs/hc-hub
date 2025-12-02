@@ -555,7 +555,7 @@ return [
 //4
         [
             'title_en' => 'Senior Financial Manager', 'title_ar' => 'المدير المالي الأول',
-            'program_id' => 1, 'department_id' => 8, 'job_level_id' => 3,
+            'program_id' => 1, 'department_id' => 8, 'job_level_id' => 5,
             'city_id' => 1, 'center_id' => 1,
             'direct_manager_id' => 1, 'tech_manager_id' => null,
             'max_emp' => 1, 'exist_emp' => 1
@@ -563,14 +563,14 @@ return [
 //5
         [
             'title_en' => 'IT Manager', 'title_ar' => 'مدير تكنولوجيا المعلومات',
-            'program_id' => 1, 'department_id' => 5, 'job_level_id' => 3,
+            'program_id' => 1, 'department_id' => 5, 'job_level_id' => 5,
             'city_id' => 1, 'center_id' => 1,
             'direct_manager_id' => 1, 'tech_manager_id' => null,
             'max_emp' => 1, 'exist_emp' => 1], // Judy Dadaoghlian
 //6
         [
             'title_en' => 'Projects and Fundraising Manager', 'title_ar' => 'مدير المشاريع وجمع التبرعات',
-            'program_id' => 1, 'department_id' => 10, 'job_level_id' => 3,
+            'program_id' => 1, 'department_id' => 10, 'job_level_id' => 5,
             'city_id' => 1, 'center_id' => 1,
             'direct_manager_id' => 1, 'tech_manager_id' => null,
             'max_emp' => 1, 'exist_emp' => 0
@@ -578,7 +578,7 @@ return [
 //7
         [
             'title_en' => 'Communication Manager', 'title_ar' => 'مدير التواصل',
-            'program_id' => 1, 'department_id' => 6, 'job_level_id' => 3,
+            'program_id' => 1, 'department_id' => 6, 'job_level_id' => 5,
             'city_id' => 1, 'center_id' => 1,
             'direct_manager_id' => 1, 'tech_manager_id' => null,
             'max_emp' => 1, 'exist_emp' => 0
