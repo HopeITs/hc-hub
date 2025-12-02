@@ -3,16 +3,16 @@
 namespace App\Livewire\Notifications;
 
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class Dropdown extends Component
 {
-    public function getListeners()
+    #[On('notification-read')]
+    #[On('notification-created')]
+    #[On('center-created')]
+    #[On('center-closed')]
+    public function refreshList()
     {
-        return [
-            'notification-created' => '$refresh',
-            'center-created' => '$refresh',
-            'center-closed' => '$refresh',
-        ];
     }
 
     public function render()
@@ -24,21 +24,12 @@ class Dropdown extends Component
             ->take(3)
             ->get();
 
-        if ($unread->count() < 3) {
-            $remaining = 3 - $unread->count();
-
-            $read = $user->readNotifications()
-                ->latest()
-                ->take($remaining)
-                ->get();
-        } else {
-            $read = collect();
-        }
-
-        $notifications = $unread->merge($read);
+        $read = $unread->count() < 3
+            ? $user->readNotifications()->latest()->take(3 - $unread->count())->get()
+            : collect();
 
         return view('livewire.notifications.dropdown', [
-            'notifications' => $notifications,
+            'notifications' => $unread->merge($read),
         ]);
     }
 
@@ -48,5 +39,8 @@ class Dropdown extends Component
             ->notifications()
             ->where('id', $id)
             ->update(['read_at' => now()]);
+
+        $this->dispatch('notification-read');
+        $this->dispatch('$refresh');
     }
 }

@@ -49,7 +49,7 @@
     $AR_LIST_3 = [
         $Glyphs(__('general.text39',['duration'=>$durationAr,'start'=>$startStr,'end'=>$endStr])),
         $Glyphs(__('general.text40')),
-        $Glyphs(__('general.text41',['position'=>$positionAR,'program'=>$program])).'<br>'.$Glyphs(__('general.text24')).'<br>'.$dailyEnd.' '.$Glyphs(__('general.text26')).' '.$dailyStart.$Glyphs(__('general.text25')).'<br>'.$placeAr.$Glyphs(' : مكان العمل'),
+        $Glyphs(__('general.text41',['position'=>$positionAR,'program'=>$program])).'<br>'.$Glyphs(__('general.text24')).'<br>'.$dailyEnd.' '.$Glyphs(__('general.text26')).' '.$dailyStart.$Glyphs(__('general.text25')).'<br>'.$Glyphs('  : مكان العمل<br>').$placeAr,
         $Glyphs(__('general.text42')),
         $Glyphs(__('general.text43')),
     ];

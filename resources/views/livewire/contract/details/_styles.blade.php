@@ -5,9 +5,10 @@
         max-width: 100%;
         margin: 0 auto;
         background: #fff url('{{ asset('assets/img/header.svg') }}') no-repeat top center;
-        background-size:95%;
-        padding: 28mm 18mm 18mm;
+        background-size:93%;
+        padding: 35mm 10mm 10mm 10mm ;
         box-shadow: 0 8px 24px rgba(0,0,0,.06);
+        background-position: center 8mm;
         border-radius: 16px;
         position: relative;
         direction: ltr;
@@ -17,6 +18,7 @@
 
     .contract-body{
         margin-top: 2mm;
+
         flex: 1;
         overflow: hidden;
     }

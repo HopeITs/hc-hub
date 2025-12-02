@@ -44,8 +44,8 @@
                 <div class="flex items-center gap-3 min-w-0 flex-1">
                     <div class="flex items-center justify-center h-10 w-10 flex-shrink-0 rounded-full overflow-hidden
                                 bg-[var(--color-primary-500)] text-white font-semibold uppercase shadow-sm">
-                        @if($member->getFirstMediaUrl('profile'))
-                            <img src="{{ $member->getFirstMediaUrl('profile') }}"
+                        @if($member->getFirstMediaUrl('avatar'))
+                            <img src="{{ $member->getFirstMediaUrl('avatar') }}"
                                  alt="{{ $member->displayName ?? $member->name }}"
                                  class="h-full w-full object-cover">
                         @else

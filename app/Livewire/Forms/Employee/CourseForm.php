@@ -20,31 +20,34 @@ class CourseForm extends Form
         $this->employee = $employee->load('courses');
 
         // Seed existing rows
-        $this->courses = $employee->courses()
-            ->select('id','title', 'issuing_organization', 'issue_date', 'is_approved')
+        $this->courses = $employee
+            ->courses()
+            ->select('id', 'title', 'issuing_organization', 'issue_date', 'is_approved')
             ->get()
-            ->map(fn ($c) => [
-                'id' => $c->id,
-                'title'                => $c->title,
-                'issuing_organization' => $c->issuing_organization,
-                'issue_date'                 => optional($c->issue_date)->toDateString(), // Y-m-d for <input type="date">
-                'is_approved'          => (int) $c->is_approved,
-                'course_attachment' => $c->getFirstMediaUrl('file'),
-                'file_name' => $c->getFirstMedia('file')->file_name ?? null,
-            ])->toArray();
-
+            ->map(
+                fn($c) => [
+                    'id' => $c->id,
+                    'title' => $c->title,
+                    'issuing_organization' => $c->issuing_organization,
+                    'issue_date' => optional($c->issue_date)->toDateString(), // Y-m-d for <input type="date">
+                    'is_approved' => (int) $c->is_approved,
+                    'course_attachment' => $c->getFirstMediaUrl('file'),
+                    'file_name' => $c->getFirstMedia('file')->file_name ?? null,
+                ],
+            )
+            ->toArray();
     }
 
     public function rules(): array
     {
         return [
-            'courses'                              => ['array'],
-            'courses.*.id' => ['nullable','exists:courses,id'],
-            'courses.*.title'                      => ['required', 'string', 'max:255'],
-            'courses.*.issuing_organization'       => ['required', 'string', 'max:255'],
-            'courses.*.issue_date'                       => ['nullable', 'date'],
-            'courses.*.is_approved'                => ['nullable', 'boolean'],
-            'courses.*.course_attachment'           => ['nullable'],
+            'courses' => ['array'],
+            'courses.*.id' => ['nullable', 'exists:courses,id'],
+            'courses.*.title' => ['required', 'string', 'max:255'],
+            'courses.*.issuing_organization' => ['required', 'string', 'max:255'],
+            'courses.*.issue_date' => ['nullable', 'date'],
+            'courses.*.is_approved' => ['nullable', 'boolean'],
+            'courses.*.course_attachment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ];
     }
 
@@ -52,23 +55,24 @@ class CourseForm extends Form
     {
         $this->courses[] = [
             'id' => null,
-            'title'                => '',
+            'title' => '',
             'issuing_organization' => '',
-            'issue_date'                 => null,
-            'is_approved'          => 0,
+            'issue_date' => null,
+            'is_approved' => 0,
             'course_attachment' => null,
             'file_name' => null,
         ];
     }
 
-    public function remove(int $index , $id=null): void
+    public function remove(int $index, $id = null): void
     {
-
-        if (!array_key_exists($index, $this->courses)) return;
+        if (!array_key_exists($index, $this->courses)) {
+            return;
+        }
 
         unset($this->courses[$index]);
 
-        if(isset($id)){
+        if (isset($id)) {
             Course::find($id)->delete();
         }
         // Reindex so Blade indexes and array keys stay aligned
@@ -79,23 +83,21 @@ class CourseForm extends Form
     {
         $this->validate();
 
-        foreach ($this->courses as $index  => $course) {
-            if(array_key_exists('id', $course) && isset($course['id'])) {
-
+        foreach ($this->courses as $index => $course) {
+            if (array_key_exists('id', $course) && isset($course['id'])) {
                 $this->course = Course::find($course['id']);
                 $this->course->update($course);
-            }else{
+            } else {
                 $course['employee_id'] = $this->employee->id;
-                $this->course  = Course::create($course);
+                $this->course = Course::create($course);
             }
 
             if ($course['course_attachment'] instanceof TemporaryUploadedFile) {
-                $this->course->addMedia($course['course_attachment']->getRealPath())
-                    ->usingFileName('course-file-'.$index .'.' . $course['course_attachment']->getClientOriginalExtension())
+                $this->course
+                    ->addMedia($course['course_attachment']->getRealPath())
+                    ->usingFileName('course-file-' . $index . '.' . $course['course_attachment']->getClientOriginalExtension())
                     ->toMediaCollection('file');
             }
-
         }
-
     }
 }

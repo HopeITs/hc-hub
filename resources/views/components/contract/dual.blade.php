@@ -9,7 +9,6 @@
 
 @php
     $rowClasses = trim('dual-row '.($rowClass ?: '').($tight ? ' dual-tight' : ''));
-    // drop text-[15px]; keep semantic classes
     $enClasses  = trim('dual-en '.($enClass ?: ''));
     $arClasses  = trim('dual-ar '.($arClass ?: ''));
 @endphp

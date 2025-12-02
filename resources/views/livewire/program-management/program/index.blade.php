@@ -6,13 +6,11 @@
             :crumbs="[['label' => trans_choice('general.program', 2)]]"
         />
 
-        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
-            <a href="{{ route('programs.create') }}"
-               class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium shadow
+        <a href="{{ route('programs.create') }}"
+           class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium shadow
                   hover:opacity-93 transition">
             @lang('general.add-new')
         </a>
-        @endif
     </div>
 
 
@@ -22,11 +20,11 @@
             <div class="rounded-3xl bg-white shadow-sm border border-gray-200 hover:shadow-md transition">
 
                 <div class=" mt-3 py-2 px-5.5 flex justify-between items-center">
-                        <h2 class="font-bold w-[240px] text-secondary-dark text-xl">
-                            {{ $program->name }}
-                        </h2>
+                    <h2 class="font-bold w-[240px] text-secondary-dark text-xl">
+                        {{ $program->name }}
+                    </h2>
 
-                        <span class=" text-xs font-medium px-2 py-0.5
+                    <span class=" text-xs font-medium px-2 py-0.5
                                      border border-secondary-light text-secondary-dark bg-white rounded-3xl">
                             {{ $program->code . '-' . $program->slug }}
                         </span>
@@ -116,7 +114,6 @@
                             </a>
                         </div>
 
-                        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
                         <div class="p-2">
                             <x-forms.toggle-input
                                 :active="$program->is_active"
@@ -124,10 +121,10 @@
                                 wire-event="confirmToggleItemStatus"
                             />
                         </div>
-                            <x-table.edit-btn :href="route('programs.edit', $program->slug)" class=" text-secondary-medium text-center" />
+                        <x-table.edit-btn :href="route('programs.edit', $program->slug)" class=" text-secondary-medium text-center" />
 
                         <x-table.delete-btn :modelId="$program->id"  />
-                    </div>@endif
+                    </div>
                 </div>
 
             </div>
@@ -137,8 +134,8 @@
     @if ($items->count() >= $perPage)
         <div class="text-center pt-4">
             <button wire:click="loadMore"
-                    class="px-4 py-1.5 rounded-lg bg-white border border-primary-300
-                           text-primary-600 text-sm hover:bg-primary-50 transition">
+                    class="px-4 py-1.5 rounded-lg bg-white border border-secondary-light
+                           text-secondary-dark text-sm hover:bg-primary-50 transition">
                 @lang('general.show-more')
             </button>
         </div>
