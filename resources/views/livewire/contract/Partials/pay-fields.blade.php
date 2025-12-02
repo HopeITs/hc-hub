@@ -3,7 +3,7 @@
 <div class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 ">
 
 
-    <div class="col-span-8 grid grid-cols-9">
+    <div class="col-span-7 grid grid-cols-9">
 
         <div class="col-span-7 flex flex-col">
             <x-forms.input-label for="salary">@lang('general.salary')</x-forms.input-label>
@@ -37,7 +37,7 @@
     </div>
 
     {{-- Salary per --}}
-    <div class="col-span-4">
+    <div class="col-span-5">
         <x-forms.input-label for="salary_per">@lang('general.salary-per')</x-forms.input-label>
 
         <div class="mt-1 grid grid-cols-3 gap-2" role="radiogroup" aria-labelledby="salary_per">
@@ -68,7 +68,7 @@
             {{-- Session --}}
             <label class="group cursor-pointer ">
                 <input type="radio" class="peer sr-only" wire:model="form.salary_per" value="3"/>
-                <div class="flex justify-center items-center rounded-lg border border-gray-300 bg-white p-2 text-center text-gray-700
+                <div class="flex justify-center items-center rounded-lg border border-gray-300 bg-white py-2 text-center text-gray-700
                             shadow-sm transition
                             peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
                             peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/30">
