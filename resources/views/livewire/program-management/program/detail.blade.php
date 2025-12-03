@@ -188,13 +188,13 @@
 
                         @foreach ($employees as $employee)
                             <div class="group relative flex flex-col justify-center items-center text-center
-                            rounded-3xl border border-neutral-300 bg-white py-6
+                            rounded-3xl border border-neutral-300 bg-white py-6 px-4
                             shadow-sm hover:shadow-xl transition-all duration-300">
 
-                                <div class="flex text-[35px] items-center justify-center size-26  flex-shrink-0 rounded-full overflow-hidden
-                                    bg-white border-2 border-primary text-primary font-medium uppercase ">
-                                    @if($employee->getFirstMediaUrl('avatar'))
-                                        <img src="{{ $employee->getFirstMediaUrl('avatar') }}"
+                                <div class="flex items-center justify-center w-20 h-20 rounded-full overflow-hidden
+                                    bg-white border-2 border-primary text-primary font-medium uppercase text-2xl">
+                                    @if($employee->getFirstMediaUrl('profile'))
+                                        <img src="{{ $employee->getFirstMediaUrl('profile') }}"
                                              alt="{{ $employee->displayName ?? $employee->name }}"
                                              class="h-full w-full object-cover">
                                     @else
