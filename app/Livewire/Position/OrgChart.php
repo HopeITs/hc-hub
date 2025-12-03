@@ -53,16 +53,9 @@ class OrgChart extends Component
 
     public function fitToScreen()
     {
-        // كل مدير يخفّض الأسكيل قليلاً مع سقف أعلى وأدنى
         $count = $this->managersCount;
-
-        // معادلة ديناميكية مناسبة
         $scale = 1.22 - ($count * 0.05);
-
-        // لا نسمح بأعلى من 1 ولا أقل من 0.3
         $this->scale = max(0.3, min(1.0, $scale));
-
-        // إعادة تموضع البان
         $this->dispatch('reset-pan');
     }
 
