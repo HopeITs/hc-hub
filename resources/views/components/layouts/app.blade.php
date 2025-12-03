@@ -14,7 +14,14 @@
 </head>
 
 <body class="antialiased min-h-screen bg-white">
+<div id="page-gif-overlay"
+     class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-[9999]">
 
+    <video autoplay loop muted playsinline class="w-74 h-74">
+        <source src="{{ asset('assets/GIF/hr-website.mp4') }}" type="video/mp4">
+    </video>
+
+</div>
 <livewire:layout.sidebar/>
 
 <div class="flex flex-col min-h-screen sm:ms-60">
@@ -79,6 +86,18 @@
     });
 </script>
 @stack('scripts')
+<script>
+    window.addEventListener('load', () => {
+        const overlay = document.getElementById('page-gif-overlay');
+        if (overlay) {
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.6s ease';
+                setTimeout(() => overlay.style.display = 'none', 300);
+            }, 4000); // <-- duration before hiding (in milliseconds)
+        }
+    });
+</script>
 </body>
 
 </html>

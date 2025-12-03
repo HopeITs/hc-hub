@@ -239,7 +239,9 @@ return [
     'centers-text' => "وهو المكتب الرئيسي المسؤول عن مركز الرجاء في سوريا.",
     'employees-by-contract-type' => 'الموظفون حسب نوع العقد',
     'employees-by-program' => 'الموظفون حسب البرنامج',
-
+    'contact' => 'التواصل',
+    'items' => 'الممتلكات',
+    'months' => 'شهر',
 
 
     'identity-org' => 'معلومات الهوية',
