@@ -100,6 +100,7 @@ class OrgChart extends Component
 
         if (in_array($property, ['city_id', 'program_id', 'center_id', 'department_id', 'manager_type'])) {
             $this->tree = $this->buildTree();
+            $this->fitToScreen();
         }
     }
 
