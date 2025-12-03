@@ -64,7 +64,7 @@
         </div>
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.today-events-card/>
+            <livewire:news.today-events-card />
 
         </div>
 
