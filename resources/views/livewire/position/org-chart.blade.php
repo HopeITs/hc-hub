@@ -53,14 +53,7 @@
 
         <button wire:click="fitToScreen" class="px-3 py-1 bg-gray-200 rounded">Fit</button>
 
-{{--        <button--}}
-{{--            @click="!document.fullscreenElement--}}
-{{--                ? document.documentElement.requestFullscreen()--}}
-{{--                : document.exitFullscreen()"--}}
-{{--            class="px-3 py-1 bg-gray-200 rounded"--}}
-{{--        >--}}
-{{--            Fullscreen--}}
-{{--        </button>--}}
+
     </div>
 
     <!-- Pan + Zoom Wrapper -->
