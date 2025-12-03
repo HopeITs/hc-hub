@@ -227,6 +227,17 @@ return [
     'no-events-today-text'=> 'Check back tomorrow for updates.',
     'personal-inventory' => 'Personal Inventory',
     'badges-warnings' => 'Badges and warnings',
+    'employees-per-department' => 'Employees and Departments',
+    'employees-per-salary-type' => 'Employees by Pay Type',
+    'employees-statistics' => 'Employees Statistics',
+    'monthly' => 'Monthly',
+    'quarterly' => 'Quarterly',
+    'yearly' => 'Yearly',
+    'employees-per-job-level' => 'Employees per Job Level',
+    'soon-ending-contracts' => 'Contracts Ending Soon',
+    'no-leaves-employees' => 'No Leaves Employees',
+    'contract-type-employees' => 'Contract Type Employees ',
+
 
 
     'identity-org' => 'Identity Info',

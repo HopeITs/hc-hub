@@ -222,7 +222,16 @@ return [
     'no-events-today-text'=> 'تحقق مرة أخرى غدًا للحصول على التحديثات.',
     'personal-inventory' => 'الممتلكات الشخصية',
     'badges-warnings' => 'الشارات والتنبيهات',
-
+    'employees-per-department' => 'الموظفون حسب كل قسم',
+    'employees-per-salary-type' => 'الموظفون حسب طريقة القبض',
+    'employees-statistics' => 'إحصائيات الموظفين',
+    'monthly' => 'شهرياً',
+    'quarterly' => 'ربع سنوياً',
+    'yearly' => 'سنوياً',
+    'employees-per-job-level' => 'الموظفون حسب المستوى الوظيفي',
+    'soon-ending-contracts' => 'العقود التي سنتنتهي قريباً',
+    'no-leaves-employees' => 'الموظفون الذين لم يأخذوا إجازة',
+    'contract-type-employees' => 'الموظفون حسب نوع العقد ',
 
 
 

@@ -3,7 +3,7 @@
 
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-[18px] font-semibold text-secondary-medium flex items-center gap-2">
-            Employees per Job Level
+            @lang('general.employees-per-job-level')
             <x-icons.chart class="w-5 mb-1 h-5 text-primary"/>
         </h2>
 

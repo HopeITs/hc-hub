@@ -62,29 +62,25 @@ if (document.getElementById("chartdiv")) {
         pieSeries.slices.template.setAll({
             templateField: "sliceSettings",
             strokeOpacity: 0,
+            fillOpacity: 10,
             cornerRadius: 10,
             innerCornerRadius: 10,
-
+            tooltipText: ""
         });
 
-        // donut labels
-        var label1 = pieChart.seriesContainer.children.push(
-            am5.Label.new(root, {
-                text: "",
-                fontSize: 18,
-                fontWeight: "bold",
-                centerX: am5.p50,
-                centerY: am5.p50
-            })
-        );
+        pieSeries.set("tooltip", null);
+        pieSeries.slices.template.set("tooltipText", "");
+        pieSeries.ticks.template.set("tooltipText", "");
+        pieSeries.labels.template.set("tooltipText", "");
 
-        var label2 = pieChart.seriesContainer.children.push(
+
+        // donut labels
+        var centerLabel = pieChart.seriesContainer.children.push(
             am5.Label.new(root, {
                 text: "",
-                fontSize: 11,
                 centerX: am5.p50,
                 centerY: am5.p50,
-                dy: 17
+                textAlign: "center"
             })
         );
 
@@ -156,6 +152,8 @@ if (document.getElementById("chartdiv")) {
             })
         );
 
+        dotChart.set("layer", 1);
+
         // Dots
         dotSeries.bullets.push(function (root, series, dataItem) {
             return am5.Bullet.new(root, {
@@ -186,17 +184,17 @@ if (document.getElementById("chartdiv")) {
 
             dotSeries.data.setAll(slice.dataItem.dataContext.breakdown);
 
-            label1.setAll({
+            centerLabel.setAll({
                 fill: color,
-                text: root.numberFormatter.format(
-                    slice.dataItem.get("valuePercentTotal"),
-                    "#.'%'"
-                ),
-                dy:-4
-
+                text:
+                    "[fontSize:20][bold]" +
+                    root.numberFormatter.format(slice.dataItem.get("valuePercentTotal"), "#.'%'") +
+                    "[/]\n" +
+                    "[fontSize:12]" +
+                    slice.dataItem.get("category") +
+                    "[/]"
             });
 
-            label2.set("text", slice.dataItem.get("category"));
 
             dotSeries.strokes.template.setAll({
                 strokeOpacity: 0,
@@ -218,6 +216,12 @@ if (document.getElementById("chartdiv")) {
             currentSlice = slice;
         });
 
+        dotSeries.set("tooltip", null);
+        dotSeries.bulletsContainer.set("tooltipText", "");
+        xAxis.get("renderer").labels.template.set("tooltipText", "");
+        yAxis.get("renderer").labels.template.set("tooltipText", "");
+
+
         pieSeries.labels.template.set("forceHidden", true);
         pieSeries.ticks.template.set("forceHidden", true);
 
@@ -232,4 +236,5 @@ if (document.getElementById("chartdiv")) {
 
         root._logo?.dispose();
     });
+
 }
