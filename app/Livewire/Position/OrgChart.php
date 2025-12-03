@@ -22,6 +22,7 @@ class OrgChart extends Component
     public ?int $program_id = null;
     public ?int $center_id = null;
     public ?int $department_id = null;
+    public float $scale = 1.0;
     public ?string $manager_type = 'tech'; // 'direct', 'tech', or null
 
     public function mount(): void
@@ -31,6 +32,25 @@ class OrgChart extends Component
         $this->centers = Center::where('is_active', true)->get();
         $this->departments = Department::all();
         $this->tree = $this->buildTree();
+    }
+
+    public function zoomIn()
+    {
+        if ($this->scale < 2) { // حد أعلى
+            $this->scale += 0.1;
+        }
+    }
+
+    public function zoomOut()
+    {
+        if ($this->scale > 0.3) { // حد أدنى
+            $this->scale -= 0.1;
+        }
+    }
+
+    public function resetZoom()
+    {
+        $this->scale = 1;
     }
 
     public function updated($property): void
