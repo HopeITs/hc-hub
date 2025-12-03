@@ -3,11 +3,11 @@
     $titleField = 'title_' . $locale;
 @endphp
 
-<div class="w-full h-full bg-white rounded-3xl shadow-sm overflow-hidden">
+<div class="w-full h-full bg-white rounded-3xl shadow-sm overflow-y-auto">
 
     <div class="flex items-center gap-2 px-6 pt-6 pb-4">
         <h2 class="text-[18px] font-semibold text-secondary-medium">
-            Contracts Ending Soon
+            @lang('general.soon-ending-contracts')
         </h2>
         <x-icons.contracts class="mb-0.5 ml-1 text-primary"/>
     </div>

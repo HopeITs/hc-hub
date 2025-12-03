@@ -14,10 +14,6 @@
                             <h1 class="text-3xl font-black text-neutral-900">
                                 {{ $program->name }}
                             </h1>
-                            <span
-                                class="mt-1 inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-primary-700 bg-primary-50 rounded-xl border border-primary-200">
-                                {{ $program->code }}-{{ $program->slug }}
-                            </span>
                         </div>
 
                         <div class="flex items-center gap-3">
@@ -46,35 +42,35 @@
                             class="inline-flex rounded-2xl border border-neutral-200 bg-white backdrop-blur-xl p-1 shadow-lg">
                             <button
                                 @click="activeTab = 'details'"
-                                class="ui-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all
+                                class="ui-tab cursor-pointer px-4 py-2 rounded-xl text-sm font-semibold transition-all
                                 duration-300
                                 "
                                 :class="activeTab === 'details'
                                     ? 'bg-primary-500 text-white'
                                     : 'text-neutral-700'">
-                                Project Info
+                                @lang('general.project-info')
                             </button>
 
                             <button
                                 @click="activeTab = 'centers'"
-                                class="ui-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all
+                                class="ui-tab cursor-pointer px-4 py-2 rounded-xl text-sm font-semibold transition-all
                                 duration-300
                                 "
                                 :class="activeTab === 'centers'
                                     ? 'bg-primary-500 text-white'
                                     : 'text-neutral-700'">
-                                Centers
+                                {{trans_choice('general.center' , 1)}}
                             </button>
 
                             <button
                                 @click="activeTab = 'employees'"
-                                class="ui-tab px-4 py-2 rounded-xl text-sm font-semibold transition-all
+                                class="ui-tab cursor-pointer px-4 py-2 rounded-xl text-sm font-semibold transition-all
                                 duration-300
                                 "
                                 :class="activeTab === 'employees'
                                     ? 'bg-primary-500 text-white'
                                     : 'text-neutral-700'">
-                                Employees
+                                {{trans_choice('general.employee' , 2)}}
                             </button>
                         </div>
                     </div>
@@ -86,14 +82,14 @@
                 class="w-full h-full text-center flex items-center rounded-3xl border border-neutral-200 bg-white backdrop-blur-xl px-4 shadow-sm">
                 <div class="relative grid grid-rows-2 gap-4 mx-auto">
                     <div>
-                        <p class="text-[14px] font-semibold text-neutral-500">Total Employees</p>
+                        <p class="text-[14px] font-semibold text-neutral-500">@lang('general.total-employees')</p>
                         <p class="text-2xl font-bold text-secondary-dark">
                             {{ $employees->count() }}
                         </p>
                     </div>
 
                     <div>
-                        <p class="text-[14px] font-semibold text-neutral-500">Centers</p>
+                        <p class="text-[14px] font-semibold text-neutral-500">{{trans_choice('general.center' , 1)}}</p>
                         <p class="text-2xl font-bold text-secondary-dark">
                             {{ $program->centers->count() }}
                         </p>
@@ -114,7 +110,7 @@
                         <div class="flex items-start gap-3">
 
                             <div>
-                                <p class="font-semibold text-neutral-900">Program Manager</p>
+                                <p class="font-semibold text-neutral-900">@lang('general.program-manager')</p>
                                 <p class="text-neutral-600">
                                     {{ $program->programManager?->name ?? '—' }}
                                 </p>
@@ -126,7 +122,7 @@
                         class="group relative overflow-hidden rounded-3xl border bg-white backdrop-blur-xl p-6 shadow-md">
                         <div class="flex items-start gap-3">
                             <div>
-                                <p class="font-semibold text-neutral-900">Start Date</p>
+                                <p class="font-semibold text-neutral-900">@lang('general.start-date')</p>
                                 <p class="text-neutral-600">
                                     {{ $program->start_date?->format('d M, Y') ?? '—' }}
                                 </p>
@@ -138,9 +134,9 @@
                         class="group relative overflow-hidden rounded-3xl border bg-white backdrop-blur-xl p-6 shadow-md">
                         <div class="flex items-start gap-3">
                             <div>
-                                <p class="font-semibold text-neutral-900">End Date</p>
+                                <p class="font-semibold text-neutral-900">@lang('general.end-date')</p>
                                 <p class="text-neutral-600">
-                                    {{ $program->end_date?->format('d M, Y') ?? 'Active' }}
+                                    {{ $program->end_date?->format('d M, Y') ?? __('general.active') }}
                                 </p>
                             </div>
                         </div>
@@ -162,11 +158,12 @@
                                 </h3>
 
                                 <p class="mt-1 text-neutral-500 text-sm">
+                                    {{trans_choice('general.city' , 2)}}:
                                     {{ $center->city?->{'name_' . app()->getLocale()} ?? '—' }}
                                 </p>
 
                                 <p class="mt-2 text-sm text-neutral-700">
-                                    Manager: <span class="font-semibold">
+                                    @lang('general.manager'): <span class="font-semibold">
                                         {{ $center->projectManager?->name ?? '—' }}
                                     </span>
                                 </p>
@@ -176,7 +173,7 @@
                     </div>
                 @else
                     <div class="text-center py-12 text-neutral-500">
-                        No centers assigned to this program.
+                        @lang('general.no-centers')
                     </div>
                 @endif
             </div>
@@ -188,13 +185,13 @@
 
                         @foreach ($employees as $employee)
                             <div class="group relative flex flex-col justify-center items-center text-center
-                            rounded-3xl border border-neutral-300 bg-white py-6 px-4
-                            shadow-sm hover:shadow-xl transition-all duration-300">
+                            rounded-3xl border border-neutral-300 bg-white py-6
+                            shadow-sm hover:shadow-md transition-all duration-300">
 
-                                <div class="flex items-center justify-center w-20 h-20 rounded-full overflow-hidden
-                                    bg-white border-2 border-primary text-primary font-medium uppercase text-2xl">
-                                    @if($employee->getFirstMediaUrl('profile'))
-                                        <img src="{{ $employee->getFirstMediaUrl('profile') }}"
+                                <div class="flex text-[35px] items-center justify-center size-26  flex-shrink-0 rounded-full overflow-hidden
+                                    bg-white border-2 border-primary text-primary font-medium uppercase ">
+                                    @if($employee->getFirstMediaUrl('avatar'))
+                                        <img src="{{ $employee->getFirstMediaUrl('avatar') }}"
                                              alt="{{ $employee->displayName ?? $employee->name }}"
                                              class="h-full w-full object-cover">
                                     @else
@@ -209,15 +206,11 @@
                                     {{ $employee->{'name_' . app()->getLocale()} }}
                                 </h3>
 
-                                <div class="space-y-3 text-sm text-neutral-600 mt-2 w-full">
+                                <div class="space-y-3 text-xs text-secondary-dark mt-3 w-full">
                                     @foreach ($employee->contracts as $contract)
-                                        <div class="border-t first:border-none pt-3">
-                                            <p class="font-semibold text-neutral-600">
+                                        <div class="border-t first:border-none pt-2">
+                                            <p class="font-semibold text-secondary-light">
                                                 {{ $contract->position?->{'title_' . app()->getLocale()} }}
-                                            </p>
-                                            <p class="font-light text-neutral-600 text-sm">
-                                                {{ $contract->start_date?->format('d M Y') }} →
-                                                {{ $contract->end_date?->format('d M Y') ?? __('general.active') }}
                                             </p>
                                         </div>
                                     @endforeach
@@ -230,7 +223,7 @@
 
                 @else
                     <div class="text-center py-12 text-neutral-500">
-                        No employees assigned to this program.
+                        @lang('general.no-employees')
                     </div>
                 @endif
             </div>

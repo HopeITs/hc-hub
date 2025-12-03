@@ -2,7 +2,7 @@
 
     <div class="flex items-center gap-4 mt-3">
         <h3 class="text-[18px] font-semibold text-secondary-medium">
-            Employees by Pay Type
+            @lang('general.employees-per-salary-type')
         </h3>
 
         <x-icons.chart class="w-5 mb-1 h-5 text-primary"/>
@@ -18,7 +18,7 @@
                 data-percentage="{{ $highlightPercentage }}"
             ></div>
 
-            <div class="flex flex-row justify-center items-center  ml-40 gap-8 mt-10">
+            <div class="flex flex-row justify-center items-center  ms-40 gap-8 mt-10">
                 @foreach($series as $item)
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full"

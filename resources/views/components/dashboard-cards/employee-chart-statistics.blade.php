@@ -2,15 +2,15 @@
 
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-[18px] font-semibold text-secondary-medium flex items-center gap-2">
-            Employee Statistics
+            @lang('general.employees-statistics')
             <x-icons.chart class="w-5 mb-1 h-5 text-primary"/>
         </h2>
 
         <select
             class="text-xs border border-neutral-300 rounded-xl px-4 py-1.5 bg-white shadow-sm text-neutral-700">
-            <option>Monthly</option>
-            <option>Quarterly</option>
-            <option>Yearly</option>
+            <option>@lang('general.monthly')</option>
+            <option>@lang('general.quarterly')</option>
+            <option>@lang('general.yearly')</option>
         </select>
     </div>
 
