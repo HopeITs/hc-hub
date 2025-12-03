@@ -244,6 +244,7 @@ return [
     'centers-text' => "And It's the main office in charge of Hope Center in Syria.",
     'employees-by-contract-type' => 'Employees By Contract Type',
     'employees-by-program' => 'Employees By Program',
+    'contact' => 'Contact',
 
 
 

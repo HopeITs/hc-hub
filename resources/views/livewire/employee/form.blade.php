@@ -10,7 +10,7 @@
             <x-tab.item :title="__('general.information')" activeTab="information" :active="$activeTab === 'information'">
                 <x-icons.user />
             </x-tab.item>
-            <x-tab.item :title="'Contact'" activeTab="contact" :active="$activeTab === 'contact'">
+            <x-tab.item :title="__('general.contact')" activeTab="contact" :active="$activeTab === 'contact'">
                 <x-icons.contact/>
             </x-tab.item>
             <x-tab.item :title="__('general.education')" :disabled="!isset($infoForm->id)" activeTab="education" :active="$activeTab === 'education'">
