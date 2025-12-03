@@ -16,7 +16,7 @@
                 </x-layouts.app.sidebar.single-item>
 
                 {{-- Statistics (HR + Super Admin only - kept as per logic) --}}
-                @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN')<x-layouts.app.sidebar.dropdown-nav-list id="statistics" title="Statistics" :active="request()->routeIs('general-statistics') ||
+                @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN')<x-layouts.app.sidebar.dropdown-nav-list id="statistics" title="{{__('general.statistics')}}" :active="request()->routeIs('general-statistics') ||
                     request()->routeIs('contract-statistics')">
                     <x-slot name="icon">
                         <x-icons.statistics />
@@ -145,7 +145,7 @@
                 {{-- 5. Leave Management (Holidays and leaves) --}}
                 {{-- Visible to: HR, Super Admin, AND Managers --}}
                 @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN', 'Manager', 'manager', 'General Manager', 'general manager')
-                <x-layouts.app.sidebar.dropdown-nav-list id="leaves-management" title="Leaves Management" :active="(request()->routeIs('leaves.all') || request()->routeIs('leaves.balance'))">
+                <x-layouts.app.sidebar.dropdown-nav-list id="leaves-management" title="{{__('general.leaves-management')}}" :active="(request()->routeIs('leaves.all') || request()->routeIs('leaves.balance'))">
                     <x-slot name="icon">
                         <x-icons.calendar />
                     </x-slot>
@@ -197,7 +197,7 @@
                 {{-- 7. Checklist Items -> My items (All, Single) --}}
                 <x-layouts.app.sidebar.single-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
                     <x-slot name="icon"><x-icons.clipboard-list class="size-4" /></x-slot>
-                    My items
+                    @lang('general.my-items')
                 </x-layouts.app.sidebar.single-item>
 
                 {{-- 8. News Management (Super Admin, Managers, HRs) --}}

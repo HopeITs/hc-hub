@@ -22,7 +22,7 @@
     <div class="flex items-center justify-between px-6 pt-5 pb-10 flex-shrink-0">
         <div class="flex items-center gap-3">
             <h3 class="text-sm font-semibold text-[#58595B]">
-                {{ __('Badges and warnings') }}
+                {{ __('general.badges-warnings') }}
             </h3>
             <span class="text-secondary-light text-sm font-medium">
                 {{ $myBadges->count() }}
