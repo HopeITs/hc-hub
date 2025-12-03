@@ -55,7 +55,7 @@
     {{-- Header --}}
     <div class="flex items-center justify-between px-7 pt-6">
         <div class="flex items-center gap-2">
-            <span class="text-[13px] font-medium text-[#58595B]">Today's Events</span>
+            <span class="text-[13px] font-medium text-[#58595B]">@lang('general.today-events')</span>
             <span class="text-[13px] font-light text-secondary-light">{{ now()->format('n/j/Y') }}</span>
             <x-icons.event class="ml-1 mb-0.5 text-secondary-medium"/>
         </div>
@@ -116,9 +116,9 @@
 
                         <x-icons.event class="w-10 h-10 text-gray-300 mb-3"/>
 
-                        <p class="text-[14px] font-medium text-gray-500">No events today</p>
+                        <p class="text-[14px] font-medium text-gray-500">@lang('general.no-events-today')</p>
 
-                        <p class="text-[11px] text-gray-400 mt-1">Check back tomorrow for updates.</p>
+                        <p class="text-[11px] text-gray-400 mt-1">@lang('general.no-events-today-text')</p>
                     </div>
                 </div>
 

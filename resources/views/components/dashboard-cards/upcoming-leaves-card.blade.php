@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
         <div class="flex items-center gap-2">
             <h3 class="text-sm font-semibold text-[#58595B]">
-                Upcoming Leaves
+                @lang('general.upcoming-leaves')
             </h3>
             <span class="text-secondary-light text-sm font-medium">
                 4

@@ -10,8 +10,8 @@
     <div class="flex items-center justify-between px-6 pt-5 pb-1 flex-shrink-0">
         <div class="flex items-center gap-3">
             <h2 class="text-md font-base text-[#58595B]">
-                {{ __('News') ?? 'News' }}
-                <span class="text-secondary-light text-md ml-1">
+                {{ __('general.news') }}
+                <span class="text-secondary-light text-md ms-1">
                     {{ $newsItems->count() }}
                 </span>
             </h2>
@@ -35,13 +35,13 @@
                     {{ $news->description ?? 'Since 2013 (officially established in 2018), Christian Hope Center has been dedicated to supporting Christian...' }}
                 </p>
                 <a href="{{ route('news.index', $news->id) }}" class="text-xs flex justify-end font-semibold text-primary mt-2   underline">
-                    Read More →
+                    @lang('general.read-more') →
                 </a>
             </div>
         @empty
             <div class="flex flex-col items-center justify-center text-[var(--color-neutral-500)] text-sm py-40">
                 <div class="text-4xl mb-2">🗞️</div>
-                <p class="font-medium">No recent company updates</p>
+                <p class="font-medium">@lang('general.no-news-text')</p>
             </div>
         @endforelse
     </div>
