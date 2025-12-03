@@ -78,21 +78,56 @@
                                     @foreach($t->activeContracts as $contract)
                                         <x-org-node :position="$t" :employee="$contract->employee" color="gray"
                                                     size="sm"/>
+                                        @if($contract->position->directTeam->count() > 0)
+                                            @foreach($contract->position->directTeam ?? [] as $subTeam)
+                                                @if($subTeam->activeContracts->count() < $subTeam->max_emp)
+                                                    @foreach($subTeam->activeContracts as $subContract)
+                                                        <x-org-node :position="$subContract"
+                                                                    :employee="$subContract->employee" color="gray"
+                                                                    size="sm"/>
+                                                    @endforeach
+                                                    @for($i=1;$i<= $subTeam->max_emp - $subTeam->activeContracts->count() ;$i++)
+                                                        <x-org-empty-node :position="$subTeam" size="sm"/>
+                                                    @endfor
+                                                @endif
+                                            @endforeach
+                                        @endif
                                     @endforeach
                                     @for($i=1;$i<= $t->max_emp - $t->activeContracts->count() ;$i++)
                                         <x-org-empty-node :position="$t" size="sm"/>
+
+                                        @if($t->directTeam->count() > 0)
+                                            <div
+                                                class=" border-s-1 border-secondary-dark ms-3 ps-2 flex flex-col gap-2 ">
+                                                @foreach($t->directTeam ?? [] as $subTeam)
+                                                    @if($subTeam->activeContracts->count() < $subTeam->max_emp)
+                                                        @foreach($subTeam->activeContracts as $subContract)
+                                                            <x-org-node :position="$subContract"
+                                                                        :employee="$subContract->employee" color="gray"
+                                                                        size="sm"/>
+                                                        @endforeach
+                                                        @for($i=1;$i<= $subTeam->max_emp - $subTeam->activeContracts->count() ;$i++)
+                                                            <x-org-empty-node :position="$subTeam" size="sm"/>
+                                                        @endfor
+                                                    @endif
+                                                @endforeach
+                                            </div>
+
+                                        @endif
                                     @endfor
                                 @else
                                     @foreach($t->activeContracts as $contract)
                                         <x-org-node :position="$t" :employee="$contract->employee" color="gray"
                                                     size="sm"/>
-                                        @if($t->techTeam->count() > 0)
-                                            <div class="flex flex-col gap-2 mt-2">
+
+                                        @if($t->directTeam->count() > 0)
+                                            <div class="flex flex-row gap-2 mt-2">
                                                 @foreach($t->directTeam ?? [] as $tt)
                                                     @if($tt->activeContracts->count() < $tt->max_emp)
                                                         @foreach($tt->activeContracts as $contract)
                                                             @dump('hi')
-                                                            <x-org-node class="ps-4" :position="$contract" :employee="$contract->employee" color="gray"
+                                                            <x-org-node class="ps-4" :position="$contract"
+                                                                        :employee="$contract->employee" color="gray"
                                                                         size="xs"/>
                                                         @endforeach
                                                         @for($i=1;$i<= $tt->max_emp - $tt->activeContracts->count() ;$i++)
@@ -100,13 +135,14 @@
                                                         @endfor
                                                     @else
                                                         @foreach($tt->activeContracts as $contract)
-                                                            <x-org-node :position="$t" :employee="$contract->employee" color="gray"
+                                                            <x-org-node :position="$t" :employee="$contract->employee"
+                                                                        color="gray"
                                                                         size="xs"/>
-{{--                                                            @if($tt->techTeam->count() > 0)--}}
-{{--                                                                <div class="flex flex-col gap-2 mt-2">--}}
+                                                            {{--                                                            @if($tt->techTeam->count() > 0)--}}
+                                                            {{--                                                                <div class="flex flex-col gap-2 mt-2">--}}
 
-{{--                                                                </div>--}}
-{{--                                                            @endif--}}
+                                                            {{--                                                                </div>--}}
+                                                            {{--                                                            @endif--}}
                                                         @endforeach
                                                     @endif
 
@@ -123,21 +159,56 @@
                                     @foreach($t->activeContracts as $contract)
                                         <x-org-node :position="$t" :employee="$contract->employee" color="gray"
                                                     size="sm"/>
+                                        @if($contract->position->directTeam->count() > 0)
+                                            @foreach($contract->position->directTeam ?? [] as $subTeam)
+                                                @if($subTeam->activeContracts->count() < $subTeam->max_emp)
+                                                    @foreach($subTeam->activeContracts as $subContract)
+                                                        <x-org-node :position="$subContract"
+                                                                    :employee="$subContract->employee" color="gray"
+                                                                    size="sm"/>
+                                                    @endforeach
+                                                    @for($i=1;$i<= $subTeam->max_emp - $subTeam->activeContracts->count() ;$i++)
+                                                        <x-org-empty-node :position="$subTeam" size="sm"/>
+                                                    @endfor
+                                                @endif
+                                            @endforeach
+                                        @endif
                                     @endforeach
                                     @for($i=1;$i<= $t->max_emp - $t->activeContracts->count() ;$i++)
                                         <x-org-empty-node :position="$t" size="sm"/>
+
+                                        @if($t->techTeam->count() > 0)
+                                            <div
+                                                class=" border-s-1 border-secondary-dark ms-3 ps-2 flex flex-col gap-2 ">
+                                                @foreach($t->techTeam ?? [] as $subTeam)
+                                                    @if($subTeam->activeContracts->count() < $subTeam->max_emp)
+                                                        @foreach($subTeam->activeContracts as $subContract)
+                                                            <x-org-node :position="$subContract"
+                                                                        :employee="$subContract->employee" color="gray"
+                                                                        size="sm"/>
+                                                        @endforeach
+                                                        @for($i=1;$i<= $subTeam->max_emp - $subTeam->activeContracts->count() ;$i++)
+                                                            <x-org-empty-node :position="$subTeam" size="sm"/>
+                                                        @endfor
+                                                    @endif
+                                                @endforeach
+                                            </div>
+
+                                        @endif
                                     @endfor
                                 @else
                                     @foreach($t->activeContracts as $contract)
                                         <x-org-node :position="$t" :employee="$contract->employee" color="gray"
                                                     size="sm"/>
+
                                         @if($t->techTeam->count() > 0)
-                                            <div class="flex flex-col gap-2 mt-2">
-                                                @foreach($t->directTeam ?? [] as $tt)
+                                            <div class="flex flex-row gap-2 mt-2">
+                                                @foreach($t->techTeam ?? [] as $tt)
                                                     @if($tt->activeContracts->count() < $tt->max_emp)
                                                         @foreach($tt->activeContracts as $contract)
                                                             @dump('hi')
-                                                            <x-org-node class="ps-4" :position="$contract" :employee="$contract->employee" color="gray"
+                                                            <x-org-node class="ps-4" :position="$contract"
+                                                                        :employee="$contract->employee" color="gray"
                                                                         size="xs"/>
                                                         @endforeach
                                                         @for($i=1;$i<= $tt->max_emp - $tt->activeContracts->count() ;$i++)
@@ -145,13 +216,9 @@
                                                         @endfor
                                                     @else
                                                         @foreach($tt->activeContracts as $contract)
-                                                            <x-org-node :position="$t" :employee="$contract->employee" color="gray"
+                                                            <x-org-node :position="$t" :employee="$contract->employee"
+                                                                        color="gray"
                                                                         size="xs"/>
-                                                            {{--                                                            @if($tt->techTeam->count() > 0)--}}
-                                                            {{--                                                                <div class="flex flex-col gap-2 mt-2">--}}
-
-                                                            {{--                                                                </div>--}}
-                                                            {{--                                                            @endif--}}
                                                         @endforeach
                                                     @endif
 
