@@ -20,9 +20,6 @@ class TodayEventsCard extends Component
     {
         $today = Carbon::today();
 
-        // ------------------------------
-        // Collect Birthdays
-        // ------------------------------
         $birthdays = Employee::whereNotNull('actual_dob')
             ->get()
             ->filter(fn($e) => optional($e->actual_dob)->format('m-d') === $today->format('m-d'))
@@ -36,9 +33,6 @@ class TodayEventsCard extends Component
                                 ?: 'https://ui-avatars.com/api/?name=' . urlencode($employee->name) . '&color=be1f24&background=FFF',
             ]);
 
-        // ------------------------------
-        // Collect Event News
-        // ------------------------------
         $newsEvents = News::whereDate('event_date', $today)
             ->latest()
             ->get()
@@ -50,10 +44,6 @@ class TodayEventsCard extends Component
                 'message'    => strip_tags($news->description ?? 'Event Today'),
                 'photo'      => $news->photo ? asset('storage/' . $news->photo) : '/assets/icons/event.svg',
             ]);
-
-        // ------------------------------
-        // Merge All Events
-        // ------------------------------
         $this->events = $birthdays->concat($newsEvents)->toArray();
     }
 
