@@ -61,6 +61,8 @@ return [
     | before the file is stored permanently. All file uploads are directed to
     | a global endpoint for temporary storage. You may configure this below:
     |
+    | **FIX: Added 'pdf' to 'preview_mimes' to allow Livewire to handle temporary PDF uploads.**
+    |
     */
 
     'temporary_file_upload' => [
@@ -72,6 +74,7 @@ return [
             'png', 'gif', 'bmp', 'svg', 'wav', 'mp4',
             'mov', 'avi', 'wmv', 'mp3', 'm4a',
             'jpg', 'jpeg', 'mpga', 'webp', 'wma',
+            'pdf', // <--- THIS IS THE FIX
         ],
         'max_upload_time' => 5, // Max duration (in minutes) before an upload is invalidated...
         'cleanup' => true, // Should cleanup temporary uploads older than 24 hrs...

@@ -11,7 +11,11 @@ class BadgesModule extends Component
     public string $modalTitle = '';
     public array $badge = [];
 
-    public function openBadge(int $id): void
+    protected $listeners = [
+        'open-badge-modal' => 'openBadgeModal',
+    ];
+
+    public function openBadgeModal(int $id): void
     {
         $b = Badge::with([
             'employee',
@@ -32,9 +36,10 @@ class BadgesModule extends Component
             'notes' => $b->notes,
             'program' => $b->employee?->latestActiveContract()?->position?->program?->name,
             'department' => $b->employee?->latestActiveContract()?->position?->department?->name,
+            'is_salary' => $b->is_salary ?? false,
         ];
 
-        $this->modalTitle = __('general.badges') . ' #' . $b->id;
+        $this->modalTitle = __('general.badges');
         $this->showModal = true;
     }
 
