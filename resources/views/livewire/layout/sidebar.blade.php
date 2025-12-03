@@ -66,7 +66,7 @@
                             <x-layouts.app.sidebar.nav-item :href="route('basic-checklist-items.index')" :active="request()->routeIs('basic-checklist-items.index')">
                                 {{ trans_choice('general.checklist-items', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-    {{-- Job Levels (HR + Super Admin) --}}
+                        {{-- Job Levels (HR + Super Admin) --}}
                         @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN')                        <x-layouts.app.sidebar.nav-item :href="route('job-levels.index')" :active="request()->routeIs('job-levels.index')">
                                 {{ trans_choice('general.job-level', 2) }}
                             </x-layouts.app.sidebar.nav-item>
@@ -211,7 +211,7 @@
 
                 @activerole('SUPER ADMIN', 'HR', 'HR-SYR', 'HR-ALP')
                     <x-layouts.app.sidebar.single-item :href="route('badges.index')" :active="request()->routeIs('badges.*')">
-                        <x-slot name="icon" class="text-secondary-light"><img src="{{ asset('assets/icons/badges.svg') }}" alt="Badges icon"></x-slot>
+                        <x-slot name="icon" class="text-secondary-light"><x-icons.badges class="size-4" /></x-slot>
                         {{ __('general.all-badges') }}
                     </x-layouts.app.sidebar.single-item>
                 @endactiverole
