@@ -31,66 +31,93 @@ class CenterDetails extends Component
      */
     protected function loadContractData(): void
     {
-        // fetch all active contracts in this center
+        $locale = app()->getLocale();
+
+        // Fetch all active contracts for this center
         $contracts = $this->center->positions()
-            ->with(['contracts' => function ($query) {
-                $query->where('is_active', true)
-                    ->whereDate('start_date', '<=', now())
-                    ->whereDate('end_date', '>=', now());
-            }, 'contracts.contractType'])
+            ->with([
+                'contracts' => function ($query) {
+                    $query->where('is_active', true)
+                        ->whereDate('start_date', '<=', now())
+                        ->whereDate('end_date', '>=', now());
+                },
+                'contracts.contractType'
+            ])
             ->get()
             ->pluck('contracts')
             ->flatten();
 
-        // group by contract type
+        // Group contracts by contract_type_id and count unique employees
         $grouped = $contracts->groupBy('contract_type_id')
             ->map(fn($group) => $group->unique('employee_id')->count());
 
-        // fetch labels for each contract type
+        if ($grouped->isEmpty()) {
+            $this->contractData = [];
+            return;
+        }
+
+        // Load all related contract types
         $contractTypes = ContractType::whereIn('id', $grouped->keys())
-            ->get(['id', 'name_en', 'name_ar', 'type', 'place']);
+            ->get()
+            ->keyBy('id');
 
-        $labels = $contractTypes->mapWithKeys(function ($ct) {
-            $name = $ct->name ?? $ct->name_en ?? $ct->name_ar ?? 'Unknown';
-            return [$ct->id => strtolower($name)];
-        });
-
-        // initialize structure
+        // Prepare groups (card titles are the only thing written by hand)
         $data = [
             'annual' => [
-                'Annual Full Time' => 0,
-                'Annual Part Time' => 0,
+                'label' => $locale === 'ar' ? 'عقد سنوي' : 'Annual',
+                'items' => [],
             ],
             'service' => [
-                'Online Service Agreement' => 0,
-                'Onsite Service Agreement' => 0,
+                'label' => $locale === 'ar' ? 'عقد اتفاق خدمة' : 'Service',
+                'items' => [],
             ],
             'trial' => [
-                'Trial Full Time' => 0,
-                'Trial Part Time' => 0,
+                'label' => $locale === 'ar' ? 'عقد تجريبي' : 'Trial',
+                'items' => [],
             ],
         ];
 
-        // classify
         foreach ($grouped as $typeId => $count) {
-            $label = $labels[$typeId] ?? '';
-            if (str_contains($label, 'annual') && str_contains($label, 'full')) {
-                $data['annual']['Annual Full Time'] += $count;
-            } elseif (str_contains($label, 'annual') && str_contains($label, 'part')) {
-                $data['annual']['Annual Part Time'] += $count;
-            } elseif (str_contains($label, 'online')) {
-                $data['service']['Online Service Agreement'] += $count;
-            } elseif (str_contains($label, 'onsite')) {
-                $data['service']['Onsite Service Agreement'] += $count;
-            } elseif (str_contains($label, 'trial') && str_contains($label, 'full')) {
-                $data['trial']['Trial Full Time'] += $count;
-            } elseif (str_contains($label, 'trial') && str_contains($label, 'part')) {
-                $data['trial']['Trial Part Time'] += $count;
+            /** @var \App\Models\ContractType|null $ct */
+            $ct = $contractTypes->get($typeId);
+            if (!$ct) {
+                continue;
             }
+
+            // Use English name to detect the group (annual / service / trial)
+            $nameEn = strtolower($ct->name_en ?? '');
+            $displayName = $locale === 'ar'
+                ? ($ct->name_ar ?: $ct->name_en)
+                : ($ct->name_en ?: $ct->name_ar);
+
+            $groupKey = null;
+            if (str_contains($nameEn, 'annual')) {
+                $groupKey = 'annual';
+            } elseif (str_contains($nameEn, 'agreement')) {
+                $groupKey = 'service';
+            } elseif (str_contains($nameEn, 'trial')) {
+                $groupKey = 'trial';
+            }
+
+            // Unknown type → skip or put in a separate group if you like
+            if (!$groupKey) {
+                continue;
+            }
+
+            $data[$groupKey]['items'][] = [
+                'label' => $displayName,
+                'count' => $count,
+            ];
         }
 
-        $this->contractData = $data;
+        // Remove empty groups so you don't get empty cards
+        $this->contractData = array_filter(
+            $data,
+            fn ($group) => !empty($group['items'])
+        );
     }
+
+
 
     /**
      * Load employee counts by program for this center.

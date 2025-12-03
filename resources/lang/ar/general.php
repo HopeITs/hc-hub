@@ -234,6 +234,11 @@ return [
     'contract-type-employees' => 'الموظفون حسب نوع العقد ',
     'total-employees' => ' الموظفين',
     'manager' => 'المدير',
+    'view-positions' => 'إظهار المناصب',
+    'located-in' => 'يقع في ',
+    'centers-text' => "وهو المكتب الرئيسي المسؤول عن مركز الرجاء في سوريا.",
+    'employees-by-contract-type' => 'الموظفون حسب نوع العقد',
+    'employees-by-program' => 'الموظفون حسب البرنامج',
 
 
 
