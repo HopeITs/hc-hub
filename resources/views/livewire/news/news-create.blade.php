@@ -27,10 +27,10 @@
             <x-forms.input-label>@lang('general.target_type')</x-forms.input-label>
             <x-forms.select-input wire:model="item.newsable_type">
                 <option value="">@lang('general.all_org')</option>
-                <option value="App\Models\City">{{ trans_choice('general.city', 1) }}</option>
-                <option value="App\Models\Center">{{ trans_choice('general.center', 1) }}</option>
-                <option value="App\Models\Program">{{ trans_choice('general.program', 1) }}</option>
-                <option value="App\Models\Employee">{{ trans_choice('general.employee', 1) }}</option>
+                <option value="{{ \App\Models\City::class }}">{{ trans_choice('general.city', 1) }}</option>
+                <option value="{{ \App\Models\Center::class }}">{{ trans_choice('general.center', 1) }}</option>
+                <option value="{{ \App\Models\Program::class }}">{{ trans_choice('general.program', 1) }}</option>
+                <option value="{{ \App\Models\Employee::class }}">{{ trans_choice('general.employee', 1) }}</option>
             </x-forms.select-input>
             <x-error-span>{{ $errors->first('item.newsable_type') }}</x-error-span>
         </div>
@@ -40,7 +40,7 @@
                 <x-forms.input-label>@lang('general.target_entity')</x-forms.input-label>
                 <x-forms.select-input wire:model="item.newsable_id">
                     <option value="">@lang('general.select_entity')</option>
-                    @foreach(${$item['newsable_type']::class} ?? [] as $entity)
+                    @foreach($this->entities as $entity)
                         <option value="{{ $entity->id }}">{{ $entity->name }}</option>
                     @endforeach
                 </x-forms.select-input>

@@ -36,6 +36,17 @@ class NewsCreate extends Component
         'item.photo' => 'nullable|image|max:2048',
     ];
 
+    public function getEntitiesProperty()
+    {
+        return match($this->item['newsable_type'] ?? '') {
+            City::class => City::select('id', 'name_en as name')->get(),
+            Center::class => Center::select('id', 'name')->get(),
+            Program::class => Program::select('id', 'name')->get(),
+            Employee::class => Employee::select('id', 'name_en as name')->get(),
+            default => collect(),
+        };
+    }
+
     public function save()
     {
         $this->validate();
@@ -52,7 +63,7 @@ class NewsCreate extends Component
 
         $news->save();
 
-        if (!empty($this->item['photo'])) {
+        if ($this->item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
             $news->addMedia($this->item['photo'])->toMediaCollection('news-image');
         }
 

@@ -218,6 +218,15 @@ return [
     'save-changes' => 'Save Changes',
     'delete-note' => 'Delete Note',
     'delete-note-text' => 'you sure you want to delete this note? This action cannot be undone.',
+    'read-more' => 'Read More',
+    'upcoming-events' => 'Upcoming Events',
+    'today-events' => 'Today Events',
+    'upcoming-leaves' => 'Upcoming Leaves',
+    'no-news-text' => 'No recent company updates',
+    'no-events-today' => 'No events today',
+    'no-events-today-text'=> 'Check back tomorrow for updates.',
+    'personal-inventory' => 'Personal Inventory',
+    'badges-warnings' => 'Badges and warnings',
 
 
     'identity-org' => 'Identity Info',

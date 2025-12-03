@@ -213,6 +213,15 @@ return [
     'save-changes' => 'حفظ التغييرات',
     'delete-note' => 'حذف الملاحظة',
     'delete-note-text' => 'هل أنت متأكد من أنك تريد حذف هذه الملاحظة؟ لا يمكن التراجع عن هذا الإجراء.',
+    'read-more' => 'اقرأ المزيد',
+    'upcoming-events' => ' الأحداث القادمة',
+    'today-events' => 'أحداث اليوم',
+    'upcoming-leaves' => 'الإجازات القادمة',
+    'no-news-text' => 'لا يوجد أي اخبار أو تحديثات',
+    'no-events-today' => 'لا يوجد أحداث اليوم',
+    'no-events-today-text'=> 'تحقق مرة أخرى غدًا للحصول على التحديثات.',
+    'personal-inventory' => 'الممتلكات الشخصية',
+    'badges-warnings' => 'الشارات والتنبيهات',
 
 
 
@@ -286,6 +295,7 @@ return [
     'returned_at' => 'تاريخ الإعادة',
     'returned_status' => 'حالة الإعادة',
     'employee-dashboard' => 'لوحة تحكم الموظف',
+    'statistics' => 'الإحصائيات',
     'general-statistics' => 'الإحصائيات العامة',
     'manager-dashboard' => 'لوحة تحكم المدير',
     'general-admin-dashboard' => 'لوحة تحكم المسؤول العام',
@@ -293,7 +303,7 @@ return [
     'attachments' => 'الملحقات',
     'file' => 'الملف',
     'add-item' => 'إضافة عنصر',
-    'my-items' => 'عناصري',
+    'my-items' => 'ممتلكاتي',
     'day' => 'يوم|أيام',
     'hour' => 'ساعات|ساعة',
     'minute' => 'دقيقة|دقائق',
