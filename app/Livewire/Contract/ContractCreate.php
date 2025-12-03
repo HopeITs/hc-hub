@@ -83,10 +83,12 @@ class ContractCreate extends Component
             $this->step = $target;
         }
     }
+
     public function updatedFormContractTypeId($value): void
     {
         $this->form->updatedContractTypeId($value);
     }
+
     public function submit()
     {
         $this->form->validateIdentity();
@@ -133,18 +135,20 @@ class ContractCreate extends Component
             }
 
             $centerCityId = $pos->center_id ? Center::where('id', $pos->center_id)->value('city_id') : $this->city_id;
-
-            if ($centerCityId != $this->city_id) {
-                $this->addError('form.position_id', __('validation.custom.position_id.invalid'));
-                return false;
+            if ($this->city_id !== 1) {
+                if ($centerCityId != $this->city_id) {
+                    $this->addError('form.position_id', __('validation.custom.position_id.invalid'));
+                    return false;
+                }
             }
 
-            if ($this->program_id && (int) $pos->program_id !== (int) $this->program_id) {
+
+            if ($this->program_id && (int)$pos->program_id !== (int)$this->program_id) {
                 $this->addError('form.position_id', __('validation.custom.position_id.program_mismatch'));
                 return false;
             }
 
-            if ($this->center_id && $pos->center_id && (int) $pos->center_id !== (int) $this->center_id) {
+            if ($this->center_id && $pos->center_id && (int)$pos->center_id !== (int)$this->center_id) {
                 $this->addError('form.position_id', __('validation.custom.position_id.center_mismatch'));
                 return false;
             }
@@ -153,9 +157,17 @@ class ContractCreate extends Component
         return true;
     }
 
-    public function saveIdentity(): void {}
-    public function saveTerms(): void {}
-    public function savePay(): void {}
+    public function saveIdentity(): void
+    {
+    }
+
+    public function saveTerms(): void
+    {
+    }
+
+    public function savePay(): void
+    {
+    }
 
     public function save()
     {
@@ -169,7 +181,7 @@ class ContractCreate extends Component
         $posCol = "title_{$locale}";
         $typeCol = "name_{$locale}";
 
-        $cities = City::select('id', $cityCol)->where('is_active', 1)->orderBy($cityCol)->get()->map(fn($c) => tap($c, fn() => ($c->name = $c->{$cityCol})));
+        $cities = City::select('id', $cityCol)->where('is_active', 1)->get()->map(fn($c) => tap($c, fn() => ($c->name = $c->{$cityCol})));
 
         $user = auth()->user()->load('profile');
         $role = $user->activeRole();
@@ -196,9 +208,9 @@ class ContractCreate extends Component
             ? Program::whereIn(
                 'id',
                 Position::query()
-                    ->where(function ($q) {
-                        $q->whereHas('center', fn($c) => $c->where('city_id', $this->city_id))->orWhereNull('center_id');
-                    })
+//                    ->where(function ($q) {
+//                        $q->whereHas('center', fn($c) => $c->where('city_id', $this->city_id))->orWhereNull('center_id');
+//                    })
                     ->pluck('program_id')
                     ->unique(),
             )
@@ -207,15 +219,15 @@ class ContractCreate extends Component
                 ->get()
             : collect();
 
-        $centers = $this->city_id ? Center::where('city_id', $this->city_id)->select('id', 'name')->orderBy('name')->get() : collect();
+        $centers = $this->city_id !== 1 ? Center::where('city_id', $this->city_id)->select('id', 'name')->get() : Center::select('id', 'name')->get();
 
         $positions =
             $this->city_id && $this->program_id
                 ? Position::where([['program_id', '=', $this->program_id], ['city_id', '=', $this->city_id]])
-                    ->select('id', $posCol)
-                    ->orderBy($posCol)
-                    ->get()
-                    ->map(fn($p) => tap($p, fn() => ($p->title = $p->{$posCol})))
+                ->select('id', $posCol)
+                ->orderBy($posCol)
+                ->get()
+                ->map(fn($p) => tap($p, fn() => ($p->title = $p->{$posCol})))
                 : collect();
 
         $types = ContractType::select('id', $typeCol)->orderBy($typeCol)->get()->map(fn($t) => tap($t, fn() => ($t->name = $t->{$typeCol})));
