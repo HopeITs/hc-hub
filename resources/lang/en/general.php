@@ -237,6 +237,8 @@ return [
     'soon-ending-contracts' => 'Contracts Ending Soon',
     'no-leaves-employees' => 'No Leaves Employees',
     'contract-type-employees' => 'Contract Type Employees ',
+    'total-employees' => 'Total Employees',
+    'manager' => 'Manager',
 
 
 

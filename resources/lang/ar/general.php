@@ -41,8 +41,8 @@ return [
     'board-member-end-at' => 'تاريخ انتهاء العضوية',
     'grade' => 'الدرجة',
     'email' => 'البريد الإلكتروني',
-    'active' => 'نشط',
-    'inactive' => 'غير نشط',
+    'active' => 'فعّال',
+    'inactive' => 'غير فعّال',
     'toggle-status' => 'تبديل الحالة',
     'confirm-status-change' => 'هل أنت متأكد أنك تريد تغيير الحالة؟',
     'confirm-delete-item' => 'هل أنت متأكد أنك تريد حذف العنصر بشكل نهائي؟',
@@ -232,6 +232,8 @@ return [
     'soon-ending-contracts' => 'العقود التي سنتنتهي قريباً',
     'no-leaves-employees' => 'الموظفون الذين لم يأخذوا إجازة',
     'contract-type-employees' => 'الموظفون حسب نوع العقد ',
+    'total-employees' => ' الموظفين',
+    'manager' => 'المدير',
 
 
 
