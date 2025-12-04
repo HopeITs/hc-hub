@@ -15,11 +15,11 @@
 
 <body class="antialiased min-h-screen bg-white">
 
-<div id="page-gif-overlay" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-[9999]">
-    <video autoplay loop muted playsinline class="w-74 h-74">
-        <source src="{{ asset('assets/GIF/hr-website.mp4') }}" type="video/mp4">
-    </video>
-</div>
+{{--<div id="page-gif-overlay" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-[9999]">--}}
+{{--    <video autoplay loop muted playsinline class="w-74 h-74">--}}
+{{--        <source src="{{ asset('assets/GIF/hr-website.mp4') }}" type="video/mp4">--}}
+{{--    </video>--}}
+{{--</div>--}}
 <livewire:layout.sidebar/>
 
 <div class="flex flex-col min-h-screen sm:ms-60">

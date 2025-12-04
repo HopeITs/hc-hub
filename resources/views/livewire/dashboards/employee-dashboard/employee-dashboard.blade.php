@@ -56,7 +56,7 @@
 
 
         <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-holidays-card/>
+            <livewire:dashboards.calendar-card />
         </div>
 
         <div class=" h-70 flex items-center justify-center text-white font-semibold">
