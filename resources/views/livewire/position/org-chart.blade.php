@@ -126,16 +126,19 @@
                 @if(isset($tree['managers']))
                     <div class="flex flex-row gap-8 justify-center">
                         @foreach($tree['managers'] as $m)
-                            <div class="flex flex-col items-center justify-start">
+                            <div
+                                class="flex flex-col items-center justify-start border-1 border-gray-200 shadow-md rounded-3xl p-2 h-fit">
                                 @if($m->employee() !== null)
                                     <x-org-node :position="$m"/>
                                 @else
                                     <x-org-empty-node :position="$m"/>
                                 @endif
-
-                                <div class="flex  {{$m->job_level_id === 5 ? ' flex-col items-start justify-start' : ' flex-row items-start justify-start'}}  gap-2 mt-2">
-                                    <x-org-section :team="$m->{$manager_type.'Team'}" :managerType="$manager_type"/>
-                                </div>
+                                @if($m->{$manager_type.'Team'}->count() > 0)
+                                    <div
+                                        class="flex  {{$m->job_level_id === 5 ? ' flex-col items-start justify-start' : ' flex-row items-start justify-start'}}  gap-2 mt-2">
+                                        <x-org-section :team="$m->{$manager_type.'Team'}" :managerType="$manager_type"/>
+                                    </div>
+                                @endif
                             </div>
                         @endforeach
                     </div>

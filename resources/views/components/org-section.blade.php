@@ -1,7 +1,7 @@
 @props(['team' , 'managerType'])
 
 @foreach($team ?? [] as $t)
-<div class="space-y-2 space-x-2">
+<div class="flex flex-col items-center gap-2">
     @foreach($t->activeContracts as $contract)
         <x-org-node :position="$t" :employee="$contract->employee" color="gray"
                     size="sm"/>
