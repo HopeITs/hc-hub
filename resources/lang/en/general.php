@@ -508,7 +508,13 @@ return [
     'no-notifications' => 'No Notifications',
     'mark-as-read' => 'Mark as read',
     'mark-all-read' => 'Mark all read',
-    'view-all' => 'View All'
+    'view-all' => 'View All',
+    'all-programs' => 'All Programs',
+    'all-centers' => 'All Centers',
+    'all-departments' => 'All Departments',
+    'direct' => 'Direct Manager',
+    'tech' => 'Technical Manager',
+    'fit' =>  'Fit'
 
 
 

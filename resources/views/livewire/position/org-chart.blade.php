@@ -11,14 +11,14 @@
             </x-forms.select-input>
 
             <x-forms.select-input wire:model.live="program_id" label="Program">
-                <option value="">All Program</option>
+                <option value="">@lang('general.all-programs')</option>
                 @foreach($programs as $program)
                     <option value="{{ $program->id }}">{{ $program->name }}</option>
                 @endforeach
             </x-forms.select-input>
 
             <x-forms.select-input wire:model.live="center_id" label="Center">
-                <option value="">All Centers</option>
+                <option value="">@lang('general.all-centers')</option>
                 @foreach($centers as $center)
                     <option value="{{ $center->id }}">{{ $center->name }}</option>
 
@@ -26,15 +26,15 @@
             </x-forms.select-input>
 
             <x-forms.select-input wire:model.live="department_id" label="Department">
-                <option value="">All Departments</option>
+                <option value="">@lang('general.all-departments')</option>
                 @foreach($departments as $dept)
                     <option value="{{ $dept->id }}">{{ $dept->name }}</option>
                 @endforeach
             </x-forms.select-input>
 
             <x-forms.select-input wire:model.live="manager_type" label="Manager Type">
-                <option value="direct">Direct Managers</option>
-                <option value="tech">Tech Managers</option>
+                <option value="direct">@lang('general.direct-manager')</option>
+                <option value="tech">@lang('general.tech-manager')</option>
             </x-forms.select-input>
 
         </div>
@@ -48,9 +48,9 @@
 
         <button wire:click="zoomIn" class="px-3 py-1 bg-gray-200 rounded">+</button>
 
-        <button wire:click="resetZoom" class="px-3 py-1 bg-gray-200 rounded">Reset</button>
+        <button wire:click="resetZoom" class="px-3 py-1 bg-gray-200 rounded">@lang('general.reset')</button>
 
-        <button wire:click="fitToScreen" class="px-3 py-1 bg-gray-200 rounded">Fit</button>
+        <button wire:click="fitToScreen" class="px-3 py-1 bg-gray-200 rounded">@lang('general.fit')</button>
 
 
     </div>
