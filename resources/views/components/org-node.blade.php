@@ -2,17 +2,17 @@
 
 @php
     $sizes = [
-        'xs' => 'text-xs px-2 py-1 w-28',
-        'sm' => 'text-xs px-2 py-1 w-32',
+        'xs' => 'text-xs px-2 py-1 w-28 text-[8px]',
+        'sm' => 'text-xs px-2 py-2 w-36 text-[10px]',
         'md' => 'text-sm px-3 py-2 w-44',
-        'lg' => 'text-base px-4 py-3 w-52 font-bold',
+        'lg' => 'text-base px-4 py-3 w-52',
     ];
 
     if(!isset($employee)){
         $employee = $position->employee();
     }
 
-    $class = $employee?->is_board_member ?  "rounded-xl border border-primary  bg-white shadow-sm text-center {$sizes[$size]}" :  "rounded-xl border border-{$color}  bg-white shadow-sm text-center {$sizes[$size]}" ;
+    $class =   "rounded-2xl   bg-white shadow-sm text-center {$sizes[$size]}" ;
 @endphp
 
 <a {{$attributes->merge([
@@ -22,10 +22,10 @@
    href="{{route('employees.show',['employee' => $employee->username ?? 0])}}"
 
    data-tooltip-target="tooltip-default-{{$position->id.'-'.$employee->id}}">
-    <div class="font-semibold text-{{ $employee?->is_board_member ? 'primary' : 'secondary-dark'}} truncate">
+    <div class="text-{{ $employee?->is_board_member ? 'primary font-bold' : 'secondary-medium font-semibold'}} truncate">
         {{  $employee->name ?? '—'  }}
     </div>
-    <div class="text-secondary-medium text-[11px] truncate">
+    <div class="text-secondary-medium  truncate">
         {{ $position->title . ' - ' . $position->city->slug }}
     </div>
 
