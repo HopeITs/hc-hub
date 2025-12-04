@@ -113,36 +113,21 @@ class OrgChart extends Component
             ->whereNotIn('id', $rootAssistant->pluck('id'))
             ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
             ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
-//            ->whereHas('jobLevel', function ($query) {
-//            $query->whereIn('grade', [1,5]);
-//        })
             ->where('city_id', 1);
 
-        if ($this->manager_type === 'direct') {
-            $managers->with(['directTeam' => function ($query) {
-                $query->whereNotNull('direct_manager_id')
+
+            $managers->with([$this->manager_type.'Team' => function ($query) {
+                $query->whereNotNull($this->manager_type.'_manager_id')
                     ->with('activeContracts')
                     ->when($this->city_id, fn($query) => $query->where('city_id', $this->city_id))
                     ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
                     ->when($this->center_id, fn($query) => $query->where('center_id', $this->center_id))
                     ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
-                    ->orderBy('direct_manager_id');
+                    ->orderBy('job_level_id');
             }]);
-        } else {
-            $managers->with(['techTeam' => function ($query) {
-                $query
-                    ->whereNotNull('tech_manager_id')
-                    ->with('activeContracts')
-                    ->when($this->city_id, fn($query) => $query->where('city_id', $this->city_id))
-                    ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
-                    ->when($this->center_id, fn($query) => $query->where('center_id', $this->center_id))
-                    ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
-                    ->orderBy('tech_manager_id');
-            }]);
-        }
 
         $this->managersCount = $managers->count();
-
+//dd($managers->get());
         return [
             'root' => $root,
             'rootAssistant' => $rootAssistant,

@@ -133,7 +133,7 @@
                                     <x-org-empty-node :position="$m"/>
                                 @endif
 
-                                <div class="flex flex-col gap-2 mt-2">
+                                <div class="flex {{$m->job_level_id === 5 ? ' flex-col' : ' flex-row '}}  gap-2 mt-2">
                                     <x-org-section :team="$m->{$manager_type.'Team'}" :managerType="$manager_type"/>
                                 </div>
                             </div>
