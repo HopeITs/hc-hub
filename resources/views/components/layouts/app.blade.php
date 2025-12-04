@@ -94,10 +94,10 @@
 
         setTimeout(() => {
             overlay.style.display = "none";
-        }, 600);
+        }, 300);
     }
 
-    const MIN_TIME = 3500;
+    const MIN_TIME = 3200;
     const start = performance.now();
 
     function scheduleHide() {
