@@ -113,9 +113,6 @@ class OrgChart extends Component
             ->whereNotIn('id', $rootAssistant->pluck('id'))
             ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
             ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
-//            ->whereHas('jobLevel', function ($query) {
-//            $query->whereIn('grade', [1,5]);
-//        })
             ->where('city_id', 1);
 
 
@@ -126,11 +123,11 @@ class OrgChart extends Component
                     ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
                     ->when($this->center_id, fn($query) => $query->where('center_id', $this->center_id))
                     ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
-                    ->orderBy('direct_manager_id');
+                    ->orderBy('job_level_id');
             }]);
 
         $this->managersCount = $managers->count();
-
+//dd($managers->get());
         return [
             'root' => $root,
             'rootAssistant' => $rootAssistant,
