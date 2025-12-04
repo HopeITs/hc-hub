@@ -1,4 +1,4 @@
-@props(['position','color'=>'gray','size'=>'md' , 'employee' => null])
+@props(['position','color'=>'gray','size'=>'md' , 'employee' => null , 'isManager' => false])
 
 @php
     $sizes = [
@@ -22,7 +22,7 @@
    href="{{route('employees.show',['employee' => $employee->username ?? 0])}}"
 
    data-tooltip-target="tooltip-default-{{$position->id.'-'.$employee->id}}">
-    <div class="text-{{ $employee?->is_board_member ? 'primary font-bold' : 'secondary-medium font-semibold'}} truncate">
+    <div class="{{$isManager ? 'font-bold' :''}} text-{{ $employee?->is_board_member ? 'primary font-bold' : 'secondary-medium'}} truncate">
         {{  $employee->name ?? '—'  }}
     </div>
     <div class="text-secondary-medium  truncate">

@@ -143,7 +143,7 @@
                                     <div class="h-8"></div>
                                 @endif
                                 @if($m->employee() !== null)
-                                    <x-org-node :position="$m"  size="lg"/>
+                                    <x-org-node :position="$m"  size="lg" :is-manager="$m->{$manager_type.'Team'}->count() > 0"/>
                                 @else
                                     <x-org-empty-node :position="$m" size="lg"/>
                                 @endif
