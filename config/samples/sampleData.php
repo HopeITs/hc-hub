@@ -607,7 +607,7 @@ return [
 //11
         ['title_en' => 'Project Manager / Micro Projects', 'title_ar' => 'مدير / المشاريع الصغيرة',
             'program_id' => 2, 'department_id' => 2, 'job_level_id' => 3,
-            'city_id' => 1, 'center_id' => 1,
+            'city_id' => 2, 'center_id' => 1,
             'direct_manager_id' => 10, 'tech_manager_id' => 10, 'max_emp' => 1, 'exist_emp' => 0], // Antoine Arbaji
         //12
         [
@@ -707,7 +707,7 @@ return [
             'direct_manager_id' => 30, 'tech_manager_id' => 18],
         ['title_en' => 'Center Keeper', 'title_ar' => 'مدبرة مركز', 'program_id' => 7, 'department_id' => 13, 'job_level_id' => 8, 'city_id' => 4, 'center_id' => 8,
             'direct_manager_id' => 30, 'tech_manager_id' => null],
-        ['title_en' => 'English Teacher', 'title_ar' => 'استاذ لغة انجليزية', 'program_id' => 7, 'department_id' => 3, 'job_level_id' =>6, 'city_id' => 4, 'center_id' => 8,
+        ['title_en' => 'English Teacher', 'title_ar' => 'استاذ لغة انجليزية', 'program_id' => 7, 'department_id' => 3, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 8,
             'direct_manager_id' => 30, 'tech_manager_id' => 18],
         ['title_en' => 'ICDL Trainer', 'title_ar' => 'مدرب ICDL', 'program_id' => 7, 'department_id' => 4, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 8,
             'direct_manager_id' => 30, 'tech_manager_id' => 18],
@@ -748,7 +748,20 @@ return [
         ['title_en' => 'Communication Officer / Photographer', 'title_ar' => 'مسؤول تواصل / مصور', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 3,
             'direct_manager_id' => 40, 'tech_manager_id' => 7],
         ['title_en' => 'Public Relations Officer', 'title_ar' => 'مسؤول علاقات عامة', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 5, 'city_id' => 4, 'center_id' => 3,
-            'direct_manager_id' =>40, 'tech_manager_id' => 6],
+            'direct_manager_id' => 40, 'tech_manager_id' => 6],
+
+        ['title_en' => 'Project Manager / Micro Projects', 'title_ar' => 'مدير / المشاريع الصغيرة',
+            'program_id' => 2, 'department_id' => 2, 'job_level_id' => 3,
+            'city_id' => 3, 'center_id' => 1,
+            'direct_manager_id' => 10, 'tech_manager_id' => 10, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Project Manager / Micro Projects', 'title_ar' => 'مدير / المشاريع الصغيرة',
+            'program_id' => 2, 'department_id' => 2, 'job_level_id' => 3,
+            'city_id' => 5, 'center_id' => 1,
+            'direct_manager_id' => 10, 'tech_manager_id' => 10, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Project Manager / Micro Projects', 'title_ar' => 'مدير / المشاريع الصغيرة',
+            'program_id' => 2, 'department_id' => 2, 'job_level_id' => 3,
+            'city_id' => 16, 'center_id' => 1,
+            'direct_manager_id' => 10, 'tech_manager_id' => 10, 'max_emp' => 1, 'exist_emp' => 0],
     ],
 
 

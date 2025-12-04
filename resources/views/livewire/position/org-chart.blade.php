@@ -126,16 +126,34 @@
                 @if(isset($tree['managers']))
                     <div class="flex flex-row gap-8 justify-center">
                         @foreach($tree['managers'] as $m)
-                            <div class="flex flex-col items-center">
+                            <div
+                                x-data="{ open: @js(!($collapsed[$m->id] ?? true)) }"
+                                x-on:toggle-{{$m->id}}.window="open = !open"
+                                class="flex flex-col items-center justify-start border-1 border-gray-200 shadow-md rounded-3xl p-2 h-fit"
+                            >
+                                <button
+                                    class="text-xs text-primary underline mb-1 ms-auto p-1"
+                                    wire:click="toggleCollapse({{ $m->id }})"
+                                    x-on:click="open = !open"
+                                >
+                                    <span x-show="open"><x-icons.zoom-in/></span>
+                                    <span x-show="!open"><x-icons.zoom-out/></span>
+                                </button>
                                 @if($m->employee() !== null)
                                     <x-org-node :position="$m"/>
                                 @else
                                     <x-org-empty-node :position="$m"/>
                                 @endif
-
-                                <div class="flex {{$m->job_level_id === 5 ? ' flex-col' : ' flex-row '}}  gap-2 mt-2">
-                                    <x-org-section :team="$m->{$manager_type.'Team'}" :managerType="$manager_type"/>
-                                </div>
+                                @if($m->{$manager_type.'Team'}->count() > 0)
+                                    <div
+                                        x-show="open"
+                                        x-collapse
+                                        x-transition.opacity
+                                        class="flex {{$m->job_level_id === 5 ? 'flex-col' : 'flex-row'}} gap-2 mt-2"
+                                    >
+                                        <x-org-section :team="$m->{$manager_type.'Team'}" :managerType="$manager_type"/>
+                                    </div>
+                                @endif
                             </div>
                         @endforeach
                     </div>

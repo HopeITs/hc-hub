@@ -22,9 +22,15 @@ class OrgChart extends Component
     public ?int $program_id = null;
     public ?int $center_id = null;
     public ?int $department_id = null;
-    public  $scale = 1.0;
+    public $scale = 1.0;
     public int $managersCount = 10;
-    public ?string $manager_type = 'tech'; // 'direct', 'tech', or null
+    public ?string $manager_type = 'direct'; // 'direct', 'tech', or null
+    public array $collapsed = [];
+    public function toggleCollapse($id)
+    {
+        // collapse if open and open if collapsed
+        $this->collapsed[$id] = !($this->collapsed[$id] ?? true);
+    }
 
     public function mount(): void
     {
@@ -113,18 +119,19 @@ class OrgChart extends Component
             ->whereNotIn('id', $rootAssistant->pluck('id'))
             ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
             ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
-            ->where('city_id', 1);
+            ->where('city_id', 1)
+            ->orderBy('job_level_id');
 
 
-            $managers->with([$this->manager_type.'Team' => function ($query) {
-                $query->whereNotNull($this->manager_type.'_manager_id')
-                    ->with('activeContracts')
-                    ->when($this->city_id, fn($query) => $query->where('city_id', $this->city_id))
-                    ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
-                    ->when($this->center_id, fn($query) => $query->where('center_id', $this->center_id))
-                    ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
-                    ->orderBy('job_level_id');
-            }]);
+        $managers->with([$this->manager_type . 'Team' => function ($query) {
+            $query->whereNotNull($this->manager_type . '_manager_id')
+                ->with('activeContracts')
+                ->when($this->city_id, fn($query) => $query->where('city_id', $this->city_id))
+                ->when($this->program_id, fn($query) => $query->where('program_id', $this->program_id))
+                ->when($this->center_id, fn($query) => $query->where('center_id', $this->center_id))
+                ->when($this->department_id, fn($query) => $query->where('department_id', $this->department_id))
+                ->orderBy('job_level_id');
+        }]);
 
         $this->managersCount = $managers->count();
 //dd($managers->get());
