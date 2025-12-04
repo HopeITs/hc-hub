@@ -182,6 +182,7 @@ return new class extends Migration {
             $table->string('specialization');
             $table->unsignedTinyInteger('degree')->nullable();
             $table->unsignedTinyInteger('status')->default(0);
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
 

@@ -1,9 +1,9 @@
 @php
-use App\Enums\EducationType;
-use App\Enums\EducationStatus;
-use Illuminate\Support\Facades\DB;
+    use App\Enums\EducationType;
+    use App\Enums\EducationStatus;
+    use Illuminate\Support\Facades\DB;
 
-$fields = DB::table('education_fields')->pluck('name')->toArray();
+    $fields = DB::table('education_fields')->orderBy('name')->pluck('name')->toArray();
 @endphp
 
 <form wire:submit.prevent="saveEducation" class="space-y-6">
@@ -23,14 +23,16 @@ $fields = DB::table('education_fields')->pluck('name')->toArray();
 
                 <div>
                     <x-forms.input-label for="education_field_{{ $index }}">@lang('general.field-of-study')</x-forms.input-label>
-                    <x-forms.select-input
+                    <select
                         id="education_field_{{ $index }}"
-                        wire:model.defer="educationForm.educations.{{ $index }}.name">
+                        wire:model.defer="educationForm.educations.{{ $index }}.name"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
+                    >
                         <option value="">-- @lang('general.select') --</option>
                         @foreach($fields as $field)
                             <option value="{{ $field }}">{{ $field }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </select>
                     <x-error-span>{{ $errors->first("educationForm.educations.$index.name") }}</x-error-span>
                 </div>
 
@@ -77,6 +79,16 @@ $fields = DB::table('education_fields')->pluck('name')->toArray();
                                         :file-name="$education['file_name']"
                                         accept=".pdf"/>
                 </div>
+
+                <div class="md:col-span-2">
+                    <x-forms.input-label for="education_notes_{{ $index }}">@lang('general.notes')</x-forms.input-label>
+                    <x-forms.textarea
+                        id="education_notes_{{ $index }}"
+                        wire:model.defer="educationForm.educations.{{ $index }}.notes"
+                        rows="3"/>
+                    <x-error-span>{{ $errors->first("educationForm.educations.$index.notes") }}</x-error-span>
+                </div>
+
             </div>
         </div>
     @endforeach

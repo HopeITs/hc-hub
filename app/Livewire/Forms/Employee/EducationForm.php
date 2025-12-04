@@ -32,6 +32,7 @@ class EducationForm extends Form
                 'status' => $e->status,
                 'edu_attachment' => $e->getFirstMediaUrl('file'),
                 'file_name' => $e->getFirstMedia('file')->file_name ?? null,
+                'notes' => $e->notes,
             ])->toArray();
     }
 
@@ -45,6 +46,7 @@ class EducationForm extends Form
             'educations.*.degree' => ['required', Rule::in(EducationType::getValues())],
             'educations.*.status' => ['required', Rule::in(EducationStatus::getValues())],
             'educations.*.edu_attachment' => ['nullable'],
+            'educations.*.notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
@@ -58,6 +60,7 @@ class EducationForm extends Form
             'status' => EducationStatus::Graduated,
             'edu_attachment' => null,
             'file_name' => null,
+            'notes' => '',
         ];
     }
 
