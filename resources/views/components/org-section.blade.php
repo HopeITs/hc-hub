@@ -3,7 +3,7 @@
 @foreach($team ?? [] as $t)
     <div class="flex flex-col items-center gap-2">
         @foreach($t->activeContracts as $contract)
-            <x-org-node :position="$t" :employee="$contract->employee"
+            <x-org-node :position="$t" :employee="$contract->employee" :is-manager="$contract->position->{$managerType.'Team'}->count() > 0"
                         size="sm"/>
             @if($contract->position->{$managerType.'Team'}->count() > 0)
                 <div
