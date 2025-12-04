@@ -25,6 +25,12 @@ class OrgChart extends Component
     public $scale = 1.0;
     public int $managersCount = 10;
     public ?string $manager_type = 'direct'; // 'direct', 'tech', or null
+    public array $collapsed = [];
+    public function toggleCollapse($id)
+    {
+        // collapse if open and open if collapsed
+        $this->collapsed[$id] = !($this->collapsed[$id] ?? true);
+    }
 
     public function mount(): void
     {
