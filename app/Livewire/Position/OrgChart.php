@@ -24,7 +24,7 @@ class OrgChart extends Component
     public ?int $department_id = null;
     public  $scale = 1.0;
     public int $managersCount = 10;
-    public ?string $manager_type = 'tech'; // 'direct', 'tech', or null
+    public ?string $manager_type = 'direct'; // 'direct', 'tech', or null
 
     public function mount(): void
     {

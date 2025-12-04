@@ -1,6 +1,6 @@
 @props(['subTeams' , 'managerType'])
 
-<div class=" border-s-1 border-secondary-dark ms-3 ps-2 flex flex-col gap-2 ">
+<div class="  flex flex-col gap-2 mt-2 ">
     @foreach($subTeams ?? [] as $subTeam)
 
         @foreach($subTeam->activeContracts as $subContract)
