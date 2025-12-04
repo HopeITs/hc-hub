@@ -5,7 +5,6 @@
         <div class="grid grid-cols-5 gap-4 mb-6">
 
             <x-forms.select-input wire:model.live="city_id" label="City">
-                <option value="">All Cities</option>
                 @foreach($cities as $city)
                     <option value="{{ $city->id }}">{{ $city->name }}</option>
                 @endforeach
@@ -114,9 +113,9 @@
                     <div class="flex flex-row gap-4 mb-10">
                         @foreach($tree['rootAssistant'] as $p)
                             @if($p->employee() !== null)
-                                <x-org-node :position="$p" />
+                                <x-org-node :position="$p"   size="lg" />
                             @else
-                                <x-org-empty-node :position="$p"/>
+                                <x-org-empty-node :position="$p" size="lg"/>
                             @endif
                         @endforeach
                     </div>
@@ -131,6 +130,7 @@
                                 x-on:toggle-{{$m->id}}.window="open = !open"
                                 class="flex flex-col items-center justify-start bg-white shadow-md rounded-3xl p-2 h-fit"
                             >
+                                @if($m->{$manager_type.'Team'}->count() > 0)
                                 <button
                                     class="text-xs text-primary underline mb-1 ms-auto p-1"
                                     wire:click="toggleCollapse({{ $m->id }})"
@@ -139,10 +139,13 @@
                                     <span x-show="open"><x-icons.zoom-in/></span>
                                     <span x-show="!open"><x-icons.zoom-out/></span>
                                 </button>
-                                @if($m->employee() !== null)
-                                    <x-org-node :position="$m"/>
                                 @else
-                                    <x-org-empty-node :position="$m"/>
+                                    <div class="h-8"></div>
+                                @endif
+                                @if($m->employee() !== null)
+                                    <x-org-node :position="$m"  size="lg"/>
+                                @else
+                                    <x-org-empty-node :position="$m" size="lg"/>
                                 @endif
                                 @if($m->{$manager_type.'Team'}->count() > 0)
                                     <div

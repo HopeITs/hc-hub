@@ -3,9 +3,9 @@
 @php
     $sizes = [
         'xs' => 'text-xs px-2 py-1 w-28 text-[8px]',
-        'sm' => 'text-xs px-2 py-1 w-32 text-[10px]',
-        'md' => 'text-sm px-3 py-2 w-44 text-sm',
-        'lg' => 'text-base px-4 py-3 w-52 text-md',
+        'sm' => 'text-xs px-2 py-2 w-36 text-[10px]',
+        'md' => 'text-sm px-3 py-2 w-44',
+        'lg' => 'text-base px-4 py-3 w-52',
     ];
 
     if(!isset($employee)){
