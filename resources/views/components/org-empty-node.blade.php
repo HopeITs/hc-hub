@@ -2,18 +2,18 @@
 
 @php
     $sizes = [
-                'xs' => 'text-xs px-2 py-1 w-28',
-        'sm' => 'text-xs px-2 py-1 w-32',
-        'md' => 'text-sm px-3 py-2 w-44',
-        'lg' => 'text-base px-4 py-3 w-52 font-bold',
+         'xs' => 'text-xs px-2 py-1 w-28 text-[8px]',
+        'sm' => 'text-xs px-2 py-1 w-32 text-[10px]',
+        'md' => 'text-sm px-3 py-2 w-44 text-sm',
+        'lg' => 'text-base px-4 py-3 w-52 text-md',
     ];
 @endphp
 
-<div class="h-fit rounded-xl border border-{{ $color }}-200 bg-{{ $color }}-100 shadow-sm text-center {{ $sizes[$size] }}" data-tooltip-target="tooltip-default-{{$position->id}}">
+<div class="h-fit rounded-2xl  bg-{{ $color }}-100 shadow-sm text-center {{ $sizes[$size] }}" data-tooltip-target="tooltip-default-{{$position->id}}">
     <div class="font-semibold truncate">
         {{  '—' }}
     </div>
-    <div class="text-gray-600 text-[11px] truncate">
+    <div class="text-secondary-medium truncate">
         {{ $position->title . ' - ' . $position->city->slug }}
     </div>
 

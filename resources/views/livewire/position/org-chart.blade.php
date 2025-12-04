@@ -101,9 +101,9 @@
                     <div class="flex gap-4 items-center mb-10">
                         @foreach($tree['root'] as $root)
                             @if($root->employee() !== null)
-                                <x-org-node :position="$root" color="cyan" size="lg"/>
+                                <x-org-node :position="$root"  size="lg"/>
                             @else
-                                <x-org-empty-node :position="$root" color="cyan" size="lg"/>
+                                <x-org-empty-node :position="$root"  size="lg"/>
                             @endif
                         @endforeach
                     </div>
@@ -114,7 +114,7 @@
                     <div class="flex flex-row gap-4 mb-10">
                         @foreach($tree['rootAssistant'] as $p)
                             @if($p->employee() !== null)
-                                <x-org-node :position="$p" color="cyan"/>
+                                <x-org-node :position="$p" />
                             @else
                                 <x-org-empty-node :position="$p"/>
                             @endif
@@ -129,7 +129,7 @@
                             <div
                                 x-data="{ open: @js(!($collapsed[$m->id] ?? true)) }"
                                 x-on:toggle-{{$m->id}}.window="open = !open"
-                                class="flex flex-col items-center justify-start border-1 border-gray-200 shadow-md rounded-3xl p-2 h-fit"
+                                class="flex flex-col items-center justify-start bg-white shadow-md rounded-3xl p-2 h-fit"
                             >
                                 <button
                                     class="text-xs text-primary underline mb-1 ms-auto p-1"
