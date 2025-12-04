@@ -619,13 +619,13 @@ return [
         ], // Majd Zrek
 
 //13
-        ['title_en' => 'MEAL Manager', 'title_ar' => 'مدير المتابعة والتقييم والمساءلة والتعلم',
-            'program_id' => 1, 'department_id' => 9, 'job_level_id' => 5, 'city_id' => 1, 'center_id' => 1,
-            'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+        ['title_en' => 'Training Manager', 'title_ar' => 'مدير برنامج التدريب',
+            'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 1,
+            'direct_manager_id' => 1, 'tech_manager_id' => 1, 'max_emp' => 1, 'exist_emp' => 0],
         //14
         ['title_en' => 'LEAP Program Manager', 'title_ar' => 'مدير برنامج LEAP',
             'program_id' => 13, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 24,
-            'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+            'direct_manager_id' => 13, 'tech_manager_id' => 13, 'max_emp' => 1, 'exist_emp' => 0],
         //15
         ['title_en' => 'Study Zone General Manager', 'title_ar' => 'مدير منطقة الدراسة',
             'program_id' => 8, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 1,
@@ -633,7 +633,7 @@ return [
         //16
         ['title_en' => 'Children University Program Manager', 'title_ar' => 'مدير برنامج جامعة الأطفال',
             'program_id' => 10, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 6,
-            'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+            'direct_manager_id' => 13, 'tech_manager_id' => 13, 'max_emp' => 1, 'exist_emp' => 0],
         //17
         ['title_en' => 'Children University Manager', 'title_ar' => 'مدير جامعة الأطفال',
             'program_id' => 10, 'department_id' => 2, 'job_level_id' => 3, 'city_id' => 2, 'center_id' => 6,
@@ -641,7 +641,7 @@ return [
 //18
         ['title_en' => 'DISC Program Manager', 'title_ar' => 'مدير برنامج الديسك',
             'program_id' => 7, 'department_id' => 12, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 8,
-            'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
+            'direct_manager_id' => 13, 'tech_manager_id' => 13, 'max_emp' => 1, 'exist_emp' => 0],
 
         //19
         ['title_en' => 'DISC Project Manager', 'title_ar' => 'مدير  الديسك',
@@ -742,7 +742,7 @@ return [
         ['title_en' => 'Accountant', 'title_ar' => 'محاسب', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 3,
             'direct_manager_id' => 40, 'tech_manager_id' => 4],
         ['title_en' => 'MEAL Manager', 'title_ar' => 'مسؤول مراقبة وتقييم', 'program_id' => 1, 'department_id' => 9, 'job_level_id' => 5, 'city_id' => 4, 'center_id' => 3,
-            'direct_manager_id' => 40, 'tech_manager_id' => 13],
+            'direct_manager_id' => 40, 'tech_manager_id' => null],
         ['title_en' => 'IT Specialist', 'title_ar' => 'متخصص تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 3,
             'direct_manager_id' => 40, 'tech_manager_id' => 5],
         ['title_en' => 'Communication Officer / Photographer', 'title_ar' => 'مسؤول تواصل / مصور', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 3,
