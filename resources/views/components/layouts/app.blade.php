@@ -14,13 +14,11 @@
 </head>
 
 <body class="antialiased min-h-screen bg-white">
-<div id="page-gif-overlay"
-     class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-[9999]">
 
+<div id="page-gif-overlay" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-[9999]">
     <video autoplay loop muted playsinline class="w-74 h-74">
         <source src="{{ asset('assets/GIF/hr-website.mp4') }}" type="video/mp4">
     </video>
-
 </div>
 <livewire:layout.sidebar/>
 
@@ -87,17 +85,35 @@
 </script>
 @stack('scripts')
 <script>
-    window.addEventListener('load', () => {
+    function hidePreloader() {
         const overlay = document.getElementById('page-gif-overlay');
-        if (overlay) {
-            setTimeout(() => {
-                overlay.style.opacity = '0';
-                overlay.style.transition = 'opacity 0.6s ease';
-                setTimeout(() => overlay.style.display = 'none', 300);
-            }, 4000); // <-- duration before hiding (in milliseconds)
-        }
-    });
+        if (!overlay) return;
+
+        overlay.style.transition = "opacity 0.6s ease";
+        overlay.style.opacity = "0";
+
+        setTimeout(() => {
+            overlay.style.display = "none";
+        }, 600);
+    }
+
+    const MIN_TIME = 3500;
+    const start = performance.now();
+
+    function scheduleHide() {
+        const elapsed = performance.now() - start;
+        const remaining = MIN_TIME - elapsed;
+
+        setTimeout(hidePreloader, remaining > 0 ? remaining : 0);
+    }
+
+    document.addEventListener("DOMContentLoaded", scheduleHide);
+    document.addEventListener("livewire:load", scheduleHide);
+
+    setTimeout(hidePreloader, MIN_TIME + 1000);
 </script>
+
+
 </body>
 
 </html>
