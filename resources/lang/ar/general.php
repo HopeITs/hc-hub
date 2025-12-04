@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'field-of-study' => 'مجال الدراسة',
+    'specialization' => 'الاختصاص',
+    'degree' => 'الدرجة العلمية',
+    'education-status' => 'حالة التعليم',
     'project-name' => 'هوب سنتر لإدارة الموارد البشرية',
     'contracts' => 'العقود',
     'basic-management' => 'الإدارة الأساسية',

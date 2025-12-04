@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'field-of-study' => 'Field of Study',
+    'specialization' => 'Specialization',
+    'degree' => 'Degree',
+    'education-status' => 'Education Status',
     'project-name' => 'Hope HR',
     'contracts' => 'Contracts',
     'basic-management' => 'Basic Management',
