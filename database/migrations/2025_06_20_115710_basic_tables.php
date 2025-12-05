@@ -168,15 +168,24 @@ return new class extends Migration {
             $table->boolean('is_approved')->default(false);
             $table->timestamps();
         });
+
+        Schema::create('education_fields', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
         Schema::create('educations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->string('title');
-            $table->string('university');
-            $table->unsignedTinyInteger('type')->nullable()->comment('0 = Unknown, 1 = Primary_School, 2 = High_School, 3 = Institute, 4 = University, 5 = Master, 6 = PHD');
-            $table->year('graduation_year')->nullable();
+            $table->string('name');
+            $table->string('specialization');
+            $table->unsignedTinyInteger('degree')->nullable();
+            $table->unsignedTinyInteger('status')->default(0);
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
+
         Schema::create('experiences', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
@@ -358,6 +367,7 @@ return new class extends Migration {
         Schema::dropIfExists('employees');
         Schema::dropIfExists('courses');
         Schema::dropIfExists('educations');
+        Schema::dropIfExists('education_fields');
         Schema::dropIfExists('experiences');
         Schema::dropIfExists('relatives');
         Schema::dropIfExists('checklist');

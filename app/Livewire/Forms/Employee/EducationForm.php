@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Forms\Employee;
 
+use App\Enums\EducationType;
+use App\Enums\EducationStatus;
 use App\Models\Education;
 use App\Models\Employee;
 use Illuminate\Validation\Rule;
@@ -13,41 +15,38 @@ class EducationForm extends Form
     public ?Employee $employee = null;
     public ?Education $education = null;
 
-    /** @var array<int, array{title:string|null, university:string|null, type:int|string|null, graduation_year:int|string|null}> */
     public array $educations = [];
 
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
 
-        // Seed current values
         $this->educations = $this->employee->educations()
-            ->select('id','title', 'university', 'type', 'graduation_year')
+            ->select('id', 'name', 'specialization', 'degree', 'status' , 'notes')
             ->get()
             ->map(fn($e) => [
                 'id' => $e->id,
-                'title' => $e->title,
-                'university' => $e->university,
-                'type' => $e->type,
-                'graduation_year' => $e->graduation_year,
+                'name' => $e->name,
+                'specialization' => $e->specialization,
+                'degree' => $e->degree,
+                'status' => $e->status,
                 'edu_attachment' => $e->getFirstMediaUrl('file'),
                 'file_name' => $e->getFirstMedia('file')->file_name ?? null,
+                'notes' => $e->notes,
             ])->toArray();
-
     }
 
     public function rules(): array
     {
-        $currentYear = (int)now()->year;
-
         return [
             'educations' => ['array'],
-            'educations.*.id' => ['nullable','exists:educations,id'],
-            'educations.*.title' => ['required', 'string', 'max:255'],
-            'educations.*.university' => ['required', 'string', 'max:255'],
-            'educations.*.type' => ['nullable', 'integer', 'between:0,6'],
-            'educations.*.graduation_year' => ['nullable', 'integer', 'digits:4', 'max:' . $currentYear],
+            'educations.*.id' => ['nullable', 'exists:educations,id'],
+            'educations.*.name' => ['required', 'string', 'max:255'],
+            'educations.*.specialization' => ['nullable', 'string', 'max:255'],
+            'educations.*.degree' => ['required', Rule::in(EducationType::getValues())],
+            'educations.*.status' => ['required', Rule::in(EducationStatus::getValues())],
             'educations.*.edu_attachment' => ['nullable'],
+            'educations.*.notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
@@ -55,25 +54,26 @@ class EducationForm extends Form
     {
         $this->educations[] = [
             'id' => null,
-            'title' => '',
-            'university' => '',
-            'type' => null,
-            'graduation_year' => null,
+            'name' => '',
+            'specialization' => '',
+            'degree' => null,
+            'status' => EducationStatus::Graduated,
             'edu_attachment' => null,
             'file_name' => null,
+            'notes' => '',
         ];
     }
 
-    public function removeEducation(int $index , $id = null): void
+    public function removeEducation(int $index, $id = null): void
     {
         if (!array_key_exists($index, $this->educations)) return;
 
         unset($this->educations[$index]);
 
-        if(isset($id)){
-           Education::find($id)?->delete();
+        if (isset($id)) {
+            Education::find($id)?->delete();
         }
-        // Reindex so Blade indexes and array keys stay aligned
+
         $this->educations = array_values($this->educations);
     }
 
@@ -81,23 +81,21 @@ class EducationForm extends Form
     {
         $this->validate();
 
-        foreach ($this->educations as $index  => $education) {
-            if(array_key_exists('id', $education) && isset($education['id'])) {
-             $this->education = Education::find($education['id']);
-             $this->education->update($education);
-            }else{
-                $education['employee_id'] = $this->employee->id;
-                $this->education  = Education::create($education);
+        foreach ($this->educations as $index => $education) {
+            if (isset($education['id'])) {
+                $this->education = Education::find($education['id']);
+                $this->education->update($education);
+            } else {
+
+                $this->employee->educations()->create($education);
+
             }
 
             if ($education['edu_attachment'] instanceof TemporaryUploadedFile) {
                 $this->education->addMedia($education['edu_attachment']->getRealPath())
-                    ->usingFileName('edu-file-'.$index .'.' . $education['edu_attachment']->getClientOriginalExtension())
+                    ->usingFileName('edu-file-' . $index . '.' . $education['edu_attachment']->getClientOriginalExtension())
                     ->toMediaCollection('file');
             }
-
         }
-
-
     }
 }

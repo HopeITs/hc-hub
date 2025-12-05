@@ -61,6 +61,16 @@
                     </x-forms.select-input>
                     <x-error-span>{{ $errors->first("experienceForm.experiences.$index.type") }}</x-error-span>
                 </div>
+
+                <div>
+                    <x-forms.input-label for="exp_attachment_{{ $index }}">@lang('general.attachment')</x-forms.input-label>
+                    <x-forms.file-input wire:model="experienceForm.experiences.{{ $index }}.exp_attachment"
+                                        name="experienceForm.experiences.{{ $index }}.exp_attachment"
+                                        preview-type="pdf"
+                                        :old-file="$experience['exp_attachment']"
+                                        :file-name="$experience['file_name']"
+                                        accept=".pdf"/>
+                </div>
             </div>
         </div>
     @endforeach
