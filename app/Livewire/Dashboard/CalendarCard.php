@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Dashboards;
+namespace App\Livewire\Dashboard;
 
 use Carbon\Carbon;
 use Livewire\Component;
