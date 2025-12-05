@@ -54,7 +54,7 @@
                     {{ $badge->reason ?? __('No reason provided') }}
                 </p>
 
-                <span class="text-[9px] text-[#888]">
+                <span class=" text-[10px] sm:text-[10px] md:text-[11px] text-[#888]">
                     {{ optional($badge->date)->format('d/m/Y') }}
                 </span>
             </div>

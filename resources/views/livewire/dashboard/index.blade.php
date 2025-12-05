@@ -27,8 +27,8 @@
 
 <div class="space-y-10">
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="col-span-2 grid grid-rows-2 gap-6 h-full">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 grid grid-rows-2 gap-6 h-full">
             <div class=" rounded-xl flex items-center justify-start text-white font-semibold h-68">
                 <x-dashboard-cards.my-leaves-card />
             </div>
@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <div class="rounded-xl flex items-center justify-center text-white font-semibold h-full">
+        <div class="w-full rounded-xl text-white font-semibold h-full">
             <x-dashboard-cards.team-members-card />
         </div>
     </div>

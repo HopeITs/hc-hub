@@ -40,7 +40,7 @@
                         {{ $item->item?->name ?? 'Item #'.$item->item_id }}
                     </p>
 
-                    <span class="text-[8px] md:text-[9px] text-[#58595B]">
+                    <span class=" text-[10px] sm:text-[10px] md:text-[11px] text-[#58595B]">
                         {{ optional($item->delivered_at)->format('d/m/Y') }}
                     </span>
                 </div>

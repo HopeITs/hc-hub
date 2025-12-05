@@ -35,7 +35,7 @@
                     {{ ucfirst($req['item']) }}
                 </p>
 
-                <span class="sm:text-[11px] md:text-[9px] text-[#888]">
+                <span class=" text-[10px] sm:text-[10px] md:text-[11px] text-[#888]">
                     {{ $req['request_date'] }}
                 </span>
             </div>

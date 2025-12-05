@@ -27,7 +27,7 @@
         <div class="pb-3  border-b border-b-secondary-soft">
             <div class="flex justify-between items-center">
                 <p class="text-[13px] font-bold text-[#58595B]">Safir Salim</p>
-                <span class="text-[10px] h-4 w-15 font-medium tracking-wide mt-4 text-center text-secondary-light px-1  rounded-full">8/6/2026</span>
+                <span class=" text-[10px] sm:text-[10px] md:text-[11px] h-4 w-15 font-medium tracking-wide mt-4 text-center text-secondary-light px-1  rounded-full">8/6/2026</span>
             </div>
             <p class="text-[10px] font-light -mt-1 text-gray-500">Deputy Chief Executive Officer</p>
         </div>
@@ -35,7 +35,7 @@
         <div class="pb-3  border-b border-b-secondary-soft">
             <div class="flex justify-between items-center">
                 <p class="text-[13px] font-bold text-[#58595B]">Judy Dadaoghlian</p>
-                <span class="text-[10px] h-4 w-15 font-medium tracking-wide mt-4 text-center text-secondary-light px-1  rounded-full">10/6/2026</span>
+                <span class=" text-[10px] sm:text-[10px] md:text-[11px] h-4 w-15 font-medium tracking-wide mt-4 text-center text-secondary-light px-1  rounded-full">10/6/2026</span>
             </div>
             <p class="text-[10px] font-light -mt-1 text-gray-500">IT Manager</p>
         </div>
@@ -43,7 +43,7 @@
         <div class="pb-3  border-b border-b-secondary-soft">
             <div class="flex justify-between items-center">
                 <p class="text-[13px] font-bold text-[#58595B]">Rama Daaboul</p>
-                <span class="text-[10px] h-4 w-15 font-medium tracking-wide mt-4 text-center text-secondary-light px-1  rounded-full">3/6/2026</span>
+                <span class=" text-[10px] sm:text-[10px] md:text-[11px] h-4 w-15 font-medium tracking-wide mt-4 text-center text-secondary-light px-1  rounded-full">3/6/2026</span>
             </div>
             <p class="text-[10px] font-light -mt-1 text-gray-500">Second Deputy Chief Executive Officer</p>
         </div>
