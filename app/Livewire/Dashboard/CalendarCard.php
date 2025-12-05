@@ -56,7 +56,7 @@ class CalendarCard extends Component
             $calendar->push($this->formatDay($date, false));
         }
 
-        return view('livewire.dashboards.calendar-card', [
+        return view('livewire.dashboard.calendar-card', [
             'calendar' => $calendar,
         ]);
     }

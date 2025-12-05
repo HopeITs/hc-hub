@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Dashboards;
+namespace App\Livewire\Statistics;
 
 use Carbon\Carbon;
 use App\Models\{Badge, Checklist, Employee, Contract};
@@ -48,7 +48,7 @@ class GeneralStatistics extends Component
 
     public function render()
     {
-        return view('livewire.dashboards.general-statistics.general-statistics', [
+        return view('livewire.general-statistics.general-statistics', [
             'employee' => $this->employee,
             'contract' => $this->contract,
             'positionTitle' => $this->positionTitle,
