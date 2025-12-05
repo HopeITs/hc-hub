@@ -1,5 +1,5 @@
 <div
-    class="relative w-full max-w-sm h-[340px] bg-[var(--color-neutral-50)] rounded-3xl shadow-md ring-1 ring-primary overflow-hidden">
+    class="relative w-full  h-[340px] bg-[var(--color-neutral-50)] rounded-3xl shadow-md ring-1 ring-primary overflow-hidden">
 
     <div class="flex items-center justify-between px-5 pt-4 pb-3">
         <div class="flex items-center gap-2">

@@ -3,7 +3,7 @@
     $nameCol = "name_{$locale}";
 @endphp
 
-<div class="w-full h-full max-w-md bg-white rounded-3xl shadow-sm overflow-hidden flex flex-col">
+<div class="w-full h-full  bg-white rounded-3xl shadow-sm overflow-hidden flex flex-col">
     <!-- Header -->
     <div class="flex items-center justify-between px-6 pt-5 pb-10 flex-shrink-0">
         <div class="flex items-center gap-3">
