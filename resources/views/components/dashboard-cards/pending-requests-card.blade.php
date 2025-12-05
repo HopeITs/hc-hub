@@ -1,6 +1,5 @@
 <div class="w-full h-full bg-white rounded-3xl shadow-sm overflow-hidden flex flex-col
             max-w-full md:max-w-md  md:h-full">
-
     <!-- Header -->
     <div class="flex items-center justify-between
                 px-4 md:px-6 pt-4 md:pt-5 pb-6 md:pb-10 flex-shrink-0">

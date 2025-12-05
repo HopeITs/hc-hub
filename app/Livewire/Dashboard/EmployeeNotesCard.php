@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Livewire\Dashboards;
+namespace App\Livewire\Dashboard;
 
 use App\Models\EmployeeNote;
 use Livewire\Component;
-use Livewire\Attributes\On;
 
 class EmployeeNotesCard extends Component
 {
@@ -88,7 +87,7 @@ class EmployeeNotesCard extends Component
 
     public function render()
     {
-        return view('livewire.dashboards.employee-dashboard.employee-notes-card', [
+        return view('livewire.dashboard.employee-notes-card', [
             'notes' => $this->notes,
         ]);
     }

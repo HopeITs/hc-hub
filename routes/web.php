@@ -3,7 +3,7 @@
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Dashboard\ContractStatistics;
-use App\Livewire\Dashboards\EmployeeDashboard;
+
 use App\Livewire\Dashboards\GeneralStatistics;
 use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, DepartmentModule, JobLevelModule, LeaveTypeModule};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
@@ -129,7 +129,7 @@ Route::group(
                     Route::get('/', AllItems::class)->name('index');
                 });
 
-            Route::get('/', EmployeeDashboard::class)
+            Route::get('/', \App\Livewire\Dashboard\Index::class)
                 ->name('dashboard');
 
             Route::get('/general-statistics', GeneralStatistics::class)

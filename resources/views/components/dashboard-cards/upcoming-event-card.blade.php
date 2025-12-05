@@ -1,6 +1,6 @@
 @props(['upcomingEvents'])
 <div
-    class="relative w-full max-w-sm h-[340px] bg-[var(--color-neutral-50)] rounded-3xl shadow-lg ring-1 ring-[var(--color-primary-400)] overflow-hidden">
+    class="relative w-full  h-[340px] bg-[var(--color-neutral-50)] rounded-3xl shadow-lg ring-1 ring-[var(--color-primary-400)] overflow-hidden">
 
     <div class="flex items-center gap-2 px-5 pt-4 pb-2">
         <div

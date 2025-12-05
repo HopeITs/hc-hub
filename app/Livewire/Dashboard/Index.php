@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Livewire\Dashboards;
+namespace App\Livewire\Dashboard;
 
+use App\Models\{Badge, Center, Checklist, City, Contract, Employee, News, Program};
 use Carbon\Carbon;
-use App\Models\{Badge, Checklist, Employee, Contract, News, City, Center, Program};
-use Livewire\Component;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Component;
 
-class EmployeeDashboard extends Component
+class Index extends Component
 {
     public $employee;
     public $contract;
@@ -388,7 +388,7 @@ class EmployeeDashboard extends Component
 
     public function render()
     {
-        return view('livewire.dashboards.employee-dashboard.employee-dashboard', [
+        return view('livewire.dashboard.index', [
             'employee' => $this->employee,
             'contract' => $this->contract,
             'positionTitle' => $this->positionTitle,

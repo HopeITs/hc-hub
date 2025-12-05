@@ -1,5 +1,5 @@
-<div>
-    <div class="js-today-events w-full h-full max-w-md bg-white rounded-3xl shadow-sm ring-1 ring-gray-200 overflow-hidden relative">
+<div class="w-full h-full bg-white rounded-3xl shadow-sm ring-1 ring-gray-200 overflow-hidden relative">
+    <div class="js-today-events ">
         <div class="flex items-center justify-between px-7 pt-6">
             <div class="flex items-center gap-2">
                 <span class="text-[13px] font-medium text-[#58595B]">@lang('general.today-events')</span>

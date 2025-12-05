@@ -34,7 +34,7 @@
             </div>
 
             <div class=" rounded-xl flex items-center justify-start text-white font-semibold h-68">
-                <livewire:dashboards.employee-notes-card :employee="auth()->id()" />
+                <livewire:dashboard.employee-notes-card :employee="auth()->id()" />
             </div>
         </div>
 
@@ -52,7 +52,7 @@
 
 
         <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <livewire:dashboards.calendar-card />
+            <livewire:dashboard.calendar-card />
         </div>
 
         <div class=" h-70 flex items-center justify-center text-white font-semibold">

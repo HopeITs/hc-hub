@@ -9,11 +9,21 @@
 @endphp
 
 <nav dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
-     class="fixed inset-x-0 top-0 z-10 w-full bg-white dark:bg-gray-800 backdrop-blur">
+     class="fixed inset-x-0 top-0 z-10 w-screen md:w-full bg-white dark:bg-gray-800 backdrop-blur">
 
     <div class="px-3 py-1 lg:px-5 lg:ps-3">
         <div class="flex items-center justify-end gap-3">
-
+            <button
+                wire:click="$dispatch('sidebar.toggle')"
+                type="button"
+                class="sm:hidden me-auto text-heading bg-transparent border border-transparent
+           hover:bg-secondary-medium rounded-base p-2"
+            >
+                <span class="sr-only">Open sidebar</span>
+                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M5 7h14M5 12h14M5 17h10"/>
+                </svg>
+            </button>
             <a href="{{ $localized }}"
                class="flex items-center text-xs font-medium mt-1 text-secondary-light hover:text-secondary-dark transition">
                 {{ $switchTo === 'ar' ? 'AR' : 'EN' }}

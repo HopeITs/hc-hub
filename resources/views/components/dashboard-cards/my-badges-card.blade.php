@@ -1,6 +1,23 @@
-<div class="w-full h-full bg-white rounded-3xl shadow-sm overflow-hidden flex flex-col
-            max-w-full md:max-w-md">
+@php
+    $locale = app()->getLocale();
+    $nameCol = "name_{$locale}";
 
+    $badgeColors = [
+        'unknown' => 'text-[#58595B]',
+        'reward' => 'text-green-600',
+        'warning' => 'text-primary',
+        'bonus' => 'text-blue-600',
+    ];
+
+    $badgeTypes = [
+        0 => 'Unknown',
+        1 => 'Warning',
+        2 => 'Reward',
+        3 => 'Bonus',
+    ];
+@endphp
+
+<div class="w-full h-full max-w-md bg-white rounded-3xl shadow-sm overflow-hidden flex flex-col">
     <!-- Header -->
     <div class="flex items-center justify-between px-4 md:px-6 pt-4 pb-6 md:pt-5 md:pb-10 flex-shrink-0">
         <div class="flex items-center gap-2 md:gap-3">
