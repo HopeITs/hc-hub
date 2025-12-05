@@ -11,7 +11,7 @@
     }"
         x-cloak
         @click.outside="open = false"
-        class="fixed top-0 z-40 w-64 h-full pt-4 bg-white border-e border-gray-200
+        class="fixed top-0 z-40 w-64 h-full pt-4 bg-white
            transition-transform duration-300
            md:translate-x-0"
         :class="{
