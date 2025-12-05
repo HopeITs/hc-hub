@@ -9,21 +9,24 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Education extends Model implements HasMedia
 {
-    use HasFactory , InteractsWithMedia;
+    use HasFactory, InteractsWithMedia;
 
     protected $table = 'educations';
 
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'degree' => 'integer',
+        'status' => 'integer',
+    ];
 
     public function employee()
     {
         return $this->belongsTo(Employee::class);
     }
 
-
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('file')
-            ->singleFile();
+        $this->addMediaCollection('file')->singleFile();
     }
 }

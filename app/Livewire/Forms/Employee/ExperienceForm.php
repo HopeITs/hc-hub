@@ -5,6 +5,7 @@ namespace App\Livewire\Forms\Employee;
 use App\Models\Employee;
 use App\Models\Experience;
 use Livewire\Form;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ExperienceForm extends Form
 {
@@ -27,6 +28,8 @@ class ExperienceForm extends Form
                 'end_date' => $exp->end_date?->format('Y-m-d'),
                 'place' => $exp->place,
                 'type' => $exp->type,
+                'exp_attachment' => $exp->getFirstMediaUrl('file'),
+                'file_name' => $exp->getFirstMedia('file')?->file_name,
             ])->toArray();
     }
 
@@ -40,7 +43,8 @@ class ExperienceForm extends Form
             'experiences.*.start_date' => ['required', 'date'],
             'experiences.*.end_date' => ['nullable', 'date', 'after_or_equal:experiences.*.start_date'],
             'experiences.*.place' => ['integer'],
-            'experiences.*.type' => [ 'integer'],
+            'experiences.*.type' => ['integer'],
+            'experiences.*.exp_attachment' => ['nullable'], // added
         ];
     }
 
@@ -54,6 +58,8 @@ class ExperienceForm extends Form
             'end_date' => null,
             'place' => '',
             'type' => '',
+            'exp_attachment' => null,
+            'file_name' => null,
         ];
     }
 
@@ -76,7 +82,7 @@ class ExperienceForm extends Form
     {
         $this->validate();
 
-        foreach ($this->experiences as $experienceData) {
+        foreach ($this->experiences as $index => $experienceData) {
             if(array_key_exists('id', $experienceData) && isset($experienceData['id'])) {
                 $this->experience = Experience::find($experienceData['id']);
                 $this->experience->update($experienceData);
@@ -85,6 +91,11 @@ class ExperienceForm extends Form
                 $this->experience  = Experience::create($experienceData);
             }
 
+            if ($experienceData['exp_attachment'] instanceof TemporaryUploadedFile) {
+                $this->experience->addMedia($experienceData['exp_attachment']->getRealPath())
+                    ->usingFileName('exp-file-' . $index . '.' . $experienceData['exp_attachment']->getClientOriginalExtension())
+                    ->toMediaCollection('file');
+            }
         }
     }
 }
