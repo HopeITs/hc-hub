@@ -1,4 +1,4 @@
-<svg {{ $attributes->merge(['class' => 'size-3 mr-2']) }} xmlns="http://www.w3.org/2000/svg"
+<svg {{ $attributes->merge(['class' => 'size-3 mr-2.5']) }} xmlns="http://www.w3.org/2000/svg"
      fill="currentColor"
      viewBox="0 0 14.65 13.37"
      stroke="currentColor">

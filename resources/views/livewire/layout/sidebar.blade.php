@@ -9,13 +9,11 @@
 
             <ul class="space-y-2 font-medium">
 
-                {{-- 1. Employee Dashboard (Seen by all) --}}
                 <x-layouts.app.sidebar.single-item :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('employee.dashboard')">
                     <x-slot name="icon"><x-icons.dashboard class="size-4" /></x-slot>
                     @lang('general.dashboard')
                 </x-layouts.app.sidebar.single-item>
 
-                {{-- Statistics (HR + Super Admin only - kept as per logic) --}}
                 @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN')<x-layouts.app.sidebar.dropdown-nav-list id="statistics" title="{{__('general.statistics')}}" :active="request()->routeIs('general-statistics') ||
                     request()->routeIs('contract-statistics')">
                     <x-slot name="icon">

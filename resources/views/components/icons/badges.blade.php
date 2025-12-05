@@ -1,5 +1,5 @@
 <svg {{ $attributes->merge([
-    'class' => 'size-4 text-inherit',
+    'class' => 'size-4 mr-2 text-inherit',
     'fill' => 'currentColor',
     'viewBox' => '0 0 20.32 22.84'
 ]) }} xmlns="http://www.w3.org/2000/svg">
