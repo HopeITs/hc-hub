@@ -1,7 +1,6 @@
-<div class="bg-white rounded-[32px] p-7 shadow-sm w-full max-w-3xl h-full mx-auto">
+<div class="bg-white rounded-[32px] py-4 px-7 shadow-sm w-full max-w-3xl h-full mx-auto">
 
-    {{-- HEADER (matches design) --}}
-    <div class="flex items-center gap-3 mb-5 ml-2.5 leading-none">
+    <div class="flex items-center gap-2 m-2.5 leading-none">
         <h2 class="text-[16px] font-semibold text-secondary-dark">Calender</h2>
 
         <span class="text-primary">
@@ -12,8 +11,7 @@
         </span>
     </div>
 
-    {{-- MONTH BAR --}}
-    <div class="flex justify-between items-center px-3 mb-1">
+    <div class="flex justify-between items-center px-3 my-1">
         <p class="text-[13px] font-normal text-secondary-dark">
             {{ $current->format('F Y') }}
         </p>
@@ -26,8 +24,7 @@
 
     <div class="border-t w-[290px] ml-3 border-secondary-medium mb-2"></div>
 
-    {{-- WEEKDAY LETTERS --}}
-    <div class="grid grid-cols-7 text-center font-medium mb-2 text-[12px] text-secondary-medium tracking-wide">
+    <div class="grid grid-cols-7 text-center font-medium mb-1 text-[12px] text-secondary-dark tracking-wide">
         <span>Mo</span>
         <span>Tu</span>
         <span>We</span>
@@ -37,30 +34,50 @@
         <span>Su</span>
     </div>
 
-    {{-- DAYS GRID (matches spacing + font in design) --}}
-    <div class="grid grid-cols-7 text-center gap-y-1.5 text-[12px] text-gray-400">
+    <div class="grid grid-cols-7 text-center font-light gap-y-1.5 text-[11px]">
 
-        @foreach ($days as $day)
+        @foreach ($calendar as $day)
             @php
-                if ($day) {
-                    $isToday = $day->isToday();
-                    $isRed = $day->day >= 23;
+                $wrapperClasses = "size-5 flex items-center justify-center transition";
+
+                if ($day['circleFill']) {
+                    $wrapperClasses .= " rounded-full {$day['circleFill']}";
                 }
+
+                if (count($day['tooltip']) > 0) {
+                    $wrapperClasses .= " cursor-pointer";
+                }
+
+                $numberClasses = "{$day['numberColor']} {$day['fontWeight']}";
             @endphp
 
-            {{-- Empty slot --}}
-            @if(!$day)
-                <div></div>
-            @else
-                <div class="
-                    @if($isToday) text-secondary-dark font-extrabold @endif
-                    @if($isRed) text-primary font-extrabold @endif
-                ">
-                    {{ $day->day }}
-                </div>
-            @endif
+            <div class="relative group flex justify-center">
 
+                <div class="{{ $wrapperClasses }}">
+                    <div class="flex flex-col items-center leading-none">
+
+                <span class="{{ $numberClasses }}">
+                    {{ $day['day'] }}
+                </span>
+
+                        @if($day['underline'])
+                            <div class="w-full border-b {{ $day['underlineColor'] }} mt-[-1px]"></div>
+                        @endif
+
+                    </div>
+                </div>
+
+                @if(count($day['tooltip']) > 0)
+                    <div class="absolute bottom-7 left-1/2 -translate-x-1/2 bg-white text-secondary-dark text-[10px] px-2 py-1 rounded shadow hidden group-hover:block whitespace-nowrap z-20">
+                        @foreach($day['tooltip'] as $t)
+                            <div>{{ $t }}</div>
+                        @endforeach
+                    </div>
+                @endif
+
+            </div>
         @endforeach
 
     </div>
+
 </div>
