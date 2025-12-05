@@ -9,11 +9,16 @@
 @endphp
 
 <nav dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
-     class="fixed inset-x-0 top-0 z-10 w-full bg-white dark:bg-gray-800 backdrop-blur">
+     class="fixed inset-x-0 top-0 z-50 w-full bg-white dark:bg-gray-800 backdrop-blur">
 
     <div class="px-3 py-1 lg:px-5 lg:ps-3">
         <div class="flex items-center justify-end gap-3">
-
+            <button data-drawer-target="top-bar-sidebar" data-drawer-toggle="top-bar-sidebar" aria-controls="top-bar-sidebar" type="button" class="sm:hidden text-heading bg-transparent box-border border border-transparent hover:bg-neutral-secondary-medium focus:ring-4 focus:ring-neutral-tertiary font-medium leading-5 rounded-base text-sm p-2 focus:outline-none">
+                <span class="sr-only">Open sidebar</span>
+                <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M5 7h14M5 12h14M5 17h10"/>
+                </svg>
+            </button>
             <a href="{{ $localized }}"
                class="flex items-center text-xs font-medium mt-1 text-secondary-light hover:text-secondary-dark transition">
                 {{ $switchTo === 'ar' ? 'AR' : 'EN' }}
