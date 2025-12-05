@@ -42,7 +42,7 @@ class EducationForm extends Form
             'educations' => ['array'],
             'educations.*.id' => ['nullable', 'exists:educations,id'],
             'educations.*.name' => ['required', 'string', 'max:255'],
-            'educations.*.specialization' => ['required', 'string', 'max:255'],
+            'educations.*.specialization' => ['nullable', 'string', 'max:255'],
             'educations.*.degree' => ['required', Rule::in(EducationType::getValues())],
             'educations.*.status' => ['required', Rule::in(EducationStatus::getValues())],
             'educations.*.edu_attachment' => ['nullable'],

@@ -69,7 +69,14 @@
                     </x-forms.select-input>
                     <x-error-span>{{ $errors->first("educationForm.educations.$index.status") }}</x-error-span>
                 </div>
-
+                <div class="md:col-span-2">
+                    <x-forms.input-label for="education_notes_{{ $index }}">@lang('general.notes')</x-forms.input-label>
+                    <x-forms.textarea
+                        id="education_notes_{{ $index }}"
+                        wire:model.defer="educationForm.educations.{{ $index }}.notes"
+                        rows="3"/>
+                    <x-error-span>{{ $errors->first("educationForm.educations.$index.notes") }}</x-error-span>
+                </div>
                 <div>
                     <x-forms.input-label for="edu_attachment_{{ $index }}">@lang('general.attachment')</x-forms.input-label>
                     <x-forms.file-input wire:model="educationForm.educations.{{ $index }}.edu_attachment"
@@ -80,14 +87,7 @@
                                         accept=".pdf"/>
                 </div>
 
-                <div class="md:col-span-2">
-                    <x-forms.input-label for="education_notes_{{ $index }}">@lang('general.notes')</x-forms.input-label>
-                    <x-forms.textarea
-                        id="education_notes_{{ $index }}"
-                        wire:model.defer="educationForm.educations.{{ $index }}.notes"
-                        rows="3"/>
-                    <x-error-span>{{ $errors->first("educationForm.educations.$index.notes") }}</x-error-span>
-                </div>
+
 
             </div>
         </div>
