@@ -9,6 +9,20 @@ use Livewire\Component;
 
 class Sidebar extends Component
 {
+
+    public bool $open = false;
+
+    protected $listeners = ['sidebar.toggle' => 'toggle'];
+
+    public function toggle()
+    {
+        $this->open = !$this->open;
+    }
+
+    public function close()
+    {
+        $this->open = false;
+    }
     #[On('pendingDeliversCount')]
     #[On('pendingReturnsCount')]
     public function refreshCounts(): void
