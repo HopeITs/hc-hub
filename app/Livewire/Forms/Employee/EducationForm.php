@@ -22,7 +22,7 @@ class EducationForm extends Form
         $this->employee = $employee;
 
         $this->educations = $this->employee->educations()
-            ->select('id', 'name', 'specialization', 'degree', 'status')
+            ->select('id', 'name', 'specialization', 'degree', 'status' , 'notes')
             ->get()
             ->map(fn($e) => [
                 'id' => $e->id,
@@ -86,8 +86,9 @@ class EducationForm extends Form
                 $this->education = Education::find($education['id']);
                 $this->education->update($education);
             } else {
-                $education['employee_id'] = $this->employee->id;
-                $this->education = Education::create($education);
+
+                $this->employee->educations()->create($education);
+
             }
 
             if ($education['edu_attachment'] instanceof TemporaryUploadedFile) {
