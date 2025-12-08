@@ -51,13 +51,19 @@
 
             <div class="md:col-span-1">
                 <x-forms.input-label for="open_at">@lang('general.open-at')</x-forms.input-label>
-                <x-forms.input id="open_at" type="time" wire:model.defer="item.open_at" />
+                <x-forms.input id="open_at" type="hidden" wire:model.defer="item.open_at" />
+                <div class="mt-2" wire:ignore>
+                    <clock-timepicker id="open_at_picker" format="HH:mm"></clock-timepicker>
+                </div>
                 <x-error-span>{{ $errors->first('item.open_at') }}</x-error-span>
             </div>
 
             <div class="md:col-span-1">
                 <x-forms.input-label for="close_at">@lang('general.close-at')</x-forms.input-label>
-                <x-forms.input id="close_at" type="time" wire:model.defer="item.close_at" />
+                <x-forms.input id="close_at" type="hidden" wire:model.defer="item.close_at" />
+                <div class="mt-2" wire:ignore>
+                    <clock-timepicker id="close_at_picker" format="HH:mm"></clock-timepicker>
+                </div>
                 <x-error-span>{{ $errors->first('item.close_at') }}</x-error-span>
             </div>
 
@@ -81,5 +87,48 @@
                 <x-modal.cancel-btn />
             </div>
         </form>
+
+        <script type="module">
+            if (!customElements.get('clock-timepicker')) {
+                import('https://unpkg.com/clock-timepicker/dist/clock-timepicker.js');
+            }
+
+            function __attachClockSync(inputId, pickerId) {
+                var input = document.getElementById(inputId);
+                var picker = document.getElementById(pickerId);
+                if (!input || !picker || picker.dataset.bound === '1') return;
+
+                var toPicker = function() {
+                    if (input.value) picker.value = input.value;
+                };
+                var toInput = function() {
+                    input.value = picker.value || '';
+                    input.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                    input.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
+                };
+
+                toPicker();
+                picker.addEventListener('change', toInput);
+                picker.addEventListener('input', toInput);
+                picker.dataset.bound = '1';
+            }
+
+            function __initClockPickers() {
+                __attachClockSync('open_at', 'open_at_picker');
+                __attachClockSync('close_at', 'close_at_picker');
+            }
+
+            document.addEventListener('DOMContentLoaded', __initClockPickers);
+            document.addEventListener('livewire:load', function() {
+                __initClockPickers();
+                if (window.Livewire && Livewire.hook) {
+                    Livewire.hook('message.processed', __initClockPickers);
+                }
+            });
+        </script>
     </x-modal.dialog>
 </div>
