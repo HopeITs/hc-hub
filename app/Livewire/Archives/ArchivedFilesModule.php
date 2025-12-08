@@ -66,10 +66,10 @@ class ArchivedFilesModule extends Component
     {
         return [
             'department' => 'Department',
-            'job_level' => 'Job Level',
-            'program' => 'Program',
-            'center' => 'Center',
-            'city' => 'City',
+            'job_level'  => 'Job Level',
+            'program'    => 'Program',
+            'center'     => 'Center',
+            'city'       => 'City',
         ];
     }
 
@@ -81,18 +81,23 @@ class ArchivedFilesModule extends Component
         if ($type) {
             $collection = match ($type) {
                 'department' => Department::all(),
-                'program' => Program::all(),
-                'job_level' => JobLevel::all(),
-                'center' => Center::all(),
-                'city' => City::all(),
-                default => collect(),
+                'program'    => Program::all(),
+                'job_level'  => JobLevel::all(),
+                'center'     => Center::all(),
+                'city'       => City::all(),
+                default      => collect(),
             };
 
             $this->permissionFilterOptions = $collection
-                ->mapWithKeys(function ($item) {
-                    return [$item->id => $item->name];
-                })
+                ->mapWithKeys(fn($item) => [$item->id => ($item->name ?? $item->name_en ?? $item->name_ar ?? (string)$item->id)])
                 ->toArray();
+        }
+    }
+
+    public function updatedPermissionFilterValue($value)
+    {
+        if ($this->permissionFilterType && $value) {
+            $this->addFilter();
         }
     }
 
@@ -103,15 +108,16 @@ class ArchivedFilesModule extends Component
         }
 
         $this->activeFilters[] = [
-            'type' => $this->permissionFilterType,
-            'value' => $this->permissionFilterValue,
+            'type'       => $this->permissionFilterType,
+            'value'      => $this->permissionFilterValue,
             'type_label' => $this->permissionFilterCategories[$this->permissionFilterType],
-            'value_label' => $this->permissionFilterOptions[$this->permissionFilterValue],
+            'value_label'=> $this->permissionFilterOptions[$this->permissionFilterValue] ?? $this->permissionFilterValue,
         ];
 
         $this->permissionFilterType = '';
         $this->permissionFilterValue = '';
         $this->permissionFilterOptions = [];
+        $this->allVisibleUsersSelected = false;
     }
 
     public function removeFilter($index)
@@ -119,6 +125,7 @@ class ArchivedFilesModule extends Component
         if (isset($this->activeFilters[$index])) {
             unset($this->activeFilters[$index]);
             $this->activeFilters = array_values($this->activeFilters);
+            $this->allVisibleUsersSelected = false;
         }
     }
 
@@ -133,10 +140,11 @@ class ArchivedFilesModule extends Component
                 $q->whereHas('profile.contracts.position', function ($positionQuery) use ($filter) {
                     match ($filter['type']) {
                         'department' => $positionQuery->where('department_id', $filter['value']),
-                        'job_level' => $positionQuery->where('job_level_id', $filter['value']),
-                        'program' => $positionQuery->where('program_id', $filter['value']),
-                        'center' => $positionQuery->where('center_id', $filter['value']),
-                        'city' => $positionQuery->where('city_id', $filter['value']),
+                        'job_level'  => $positionQuery->where('job_level_id', $filter['value']),
+                        'program'    => $positionQuery->where('program_id', $filter['value']),
+                        'center'     => $positionQuery->where('center_id', $filter['value']),
+                        'city'       => $positionQuery->where('city_id', $filter['value']),
+                        default      => null,
                     };
                 });
             }
@@ -278,6 +286,7 @@ class ArchivedFilesModule extends Component
         $this->permissionFilterValue = '';
         $this->permissionFilterOptions = [];
         $this->activeFilters = [];
+        $this->allVisibleUsersSelected = false;
     }
 
     public function updatedFilesToUpload()
@@ -400,7 +409,10 @@ class ArchivedFilesModule extends Component
 
         if (trim($this->userSearch)) {
             $query->whereHas('profile', function ($q) {
-                $q->where('name', 'like', '%' . $this->userSearch . '%');
+                $q->where(function ($s) {
+                    $s->where('name_en', 'like', '%' . $this->userSearch . '%')
+                      ->orWhere('name_ar', 'like', '%' . $this->userSearch . '%');
+                });
             });
         }
 
