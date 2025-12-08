@@ -30,7 +30,7 @@
     <!-- Team List -->
     <div class="relative px-6 pt-2 space-y-3 overflow-y-auto flex-grow
                 scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent
-                hover:scrollbar-thumb-[var(--color-primary-300)] min-h-[440px] max-h-[440px]">
+                hover:scrollbar-thumb-[var(--color-primary-300)] max-h-[440px]">
 
         @forelse($this->teamMembers as $member)
 
