@@ -64,46 +64,15 @@ class CalendarCard extends Component
 
     private function formatDay(Carbon $date, bool $isCurrentMonth)
     {
-
-        $fakeHolidays = [
-            '2025-12-26' => 'Boxing Day',
-            '2025-12-29' => 'National Day',
-        ];
-
-        $fakeSaints = [
-            '2025-12-15' => 'St. Verena Day',
-            '2025-12-20' => 'St. Ignatius Feast',
-        ];
-
-        $fakeEvents = [
-            '2025-12-04' => ['Doctor Appointment'],
-            '2025-12-11' => ['Workshop'],
-            '2025-12-24' => ['Family Dinner'],
-            '2025-12-31' => ['New Year Event'],
-        ];
-
-        $fakeHolidays['2025-12-30'] = 'End of Year Cleaning Day';
-        $fakeEvents['2025-12-30'] = ['Office Celebration'];
-
-        $fakeHolidays['2025-12-28'] = 'Remembrance Day';
-        $fakeSaints['2025-12-28'] = 'St. Marcus Feast';
-
-        $fakeSaints['2025-12-17'] = 'St. Helena Feast';
-        $fakeEvents['2025-12-17'] = ['Community Gathering'];
-
-        $fakeHolidays['2025-12-22'] = 'Unity Day';
-        $fakeSaints['2025-12-22'] = 'St. Clement';
-        $fakeEvents['2025-12-22'] = ['Charity Event'];
-
-        $fakeHolidays['2025-12-25'] = 'Christmas Day';
-        $fakeSaints['2025-12-25'] = 'St. Example Patron';
-        $fakeEvents['2025-12-25'] = ['Gift Exchange'];
+        $fakeHolidays = config('samples.calendar.holidays', []);
+        $fakeEvents   = config('samples.calendar.events', []);
+        $fakeSaints   = config('samples.calendar.saints', []);
 
         $iso = $date->toDateString();
 
-        $isHoliday = isset($fakeHolidays[$iso]);
-        $isSaint   = isset($fakeSaints[$iso]);
-        $hasEvent  = isset($fakeEvents[$iso]);
+        $isHoliday = array_key_exists($iso, $fakeHolidays);
+        $isSaint   = array_key_exists($iso, $fakeSaints);
+        $hasEvent  = array_key_exists($iso, $fakeEvents);
         $isToday   = $date->isToday();
 
         $numberColor = $isCurrentMonth ? 'text-secondary-light' : 'text-secondary-soft';
@@ -114,7 +83,6 @@ class CalendarCard extends Component
         $circleFill = null;
         $circle = false;
         $textColorOverride = null;
-
 
         if ($isToday) {
 
@@ -137,7 +105,6 @@ class CalendarCard extends Component
             }
 
         } else {
-
 
             if ($isHoliday) {
                 $numberColor = 'text-primary';
@@ -162,12 +129,23 @@ class CalendarCard extends Component
             }
         }
 
+
         $tooltip = [];
 
-        if ($isHoliday) $tooltip[] = $fakeHolidays[$iso];
-        if ($isSaint)   $tooltip[] = $fakeSaints[$iso];
-        if ($hasEvent)  foreach ($fakeEvents[$iso] as $e) $tooltip[] = $e;
+        if ($isHoliday) {
+            $tooltip[] = $fakeHolidays[$iso];
+        }
 
+        if ($isSaint) {
+            $tooltip[] = $fakeSaints[$iso];
+        }
+
+        if ($hasEvent) {
+            $events = is_array($fakeEvents[$iso]) ? $fakeEvents[$iso] : [$fakeEvents[$iso]];
+            foreach ($events as $e) {
+                $tooltip[] = $e;
+            }
+        }
 
         return [
             'date'           => $date,
@@ -186,5 +164,6 @@ class CalendarCard extends Component
             'tooltip'        => $tooltip,
         ];
     }
+
 
 }
