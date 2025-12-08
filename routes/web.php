@@ -2,11 +2,16 @@
 
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
-use App\Livewire\Dashboard\ContractStatistics;
-
-use App\Livewire\Dashboards\GeneralStatistics;
-use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, DepartmentModule, JobLevelModule, LeaveTypeModule};
+use App\Livewire\Basics\{ChecklistItemModule,
+    CityModule,
+    ContractTypeModule,
+    DepartmentModule,
+    JobLevelModule,
+    LeaveTypeModule};
+use App\Livewire\ChecklistItems\{AllItems, DoneRequests, PendingItems, PendingReturns};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
+use App\Livewire\Statistics\ContractStatistics;
+use App\Livewire\Statistics\GeneralStatistics;
 use App\Livewire\Employee\{EmployeeCreate,
     EmployeeEdit,
     EmployeeModule,
@@ -16,6 +21,7 @@ use App\Livewire\Employee\{EmployeeCreate,
     Leave\EmpLeaveBalanceModule,
     Leave\MyLeaveRequestModule,
     Leave\MyLeaveRequestTable};
+use App\Livewire\Employee\EmployeeStatistics;
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
 use App\Livewire\ProgramManagement\{Center\CenterDetails,
     Center\CentersModule,
@@ -23,15 +29,11 @@ use App\Livewire\ProgramManagement\{Center\CenterDetails,
     Program\Create as ProgramCreate,
     Program\Detail as ProgramDetail,
     Program\Index as ProgramIndex,
-    Program\Update as ProgramUpdate
-};
+    Program\Update as ProgramUpdate};
 use App\Livewire\Settings\{Appearance, Password, Profile};
-use App\Livewire\ChecklistItems\{PendingItems, AllItems, PendingReturns, DoneRequests};
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
-use App\Livewire\Notifications\Index as NotificationsIndex;
-use App\Livewire\Employee\EmployeeStatistics;
 
 
 Route::group(

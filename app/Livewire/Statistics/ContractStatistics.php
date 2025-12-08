@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Livewire\Dashboard;
+namespace App\Livewire\Statistics;
 
-use App\Models\City;
-use App\Models\Program;
-use App\Models\Contract;
 use App\Models\Center;
+use App\Models\City;
+use App\Models\Contract;
 use App\Models\Position;
-use Livewire\Component;
+use App\Models\Program;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Component;
 
 class ContractStatistics extends Component
 {
