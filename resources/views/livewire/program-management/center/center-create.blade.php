@@ -1,44 +1,46 @@
 <div>
     <div class="flex justify-between items-center mb-6">
-        <livewire:layout.breadcrumbs :title="__('general.centers')" :crumbs="[
-            ['label' => __('general.programs-management')],
-            ['label' => __('general.centers'), 'route' => 'centers.index'],
-            ['label' => __('general.add-new')],
-        ]" />
+        <livewire:layout.breadcrumbs
+            :title="__('general.centers')"
+            :crumbs="[
+                ['label' => __('general.programs-management')],
+                ['label' => __('general.centers'), 'route' => 'centers.index'],
+                ['label' => __('general.add-new')],
+            ]"
+        />
     </div>
 
     <form wire:submit.prevent="save" class="grid grid-cols-2 gap-4">
         <div class="md:col-span-full">
             <x-forms.input-label for="name">@lang('general.center-name')</x-forms.input-label>
-            <x-forms.input id="name" type="text" wire:model.defer="item.name" />
+            <x-forms.input id="name" type="text" wire:model.defer="item.name"/>
             <x-error-span>{{ $errors->first('item.name') }}</x-error-span>
         </div>
 
         <div class="md:col-span-full">
-            <x-forms.input-label for="city_id">{{ trans_choice('general.city', 1) }}</x-forms.input-label>
+            <x-forms.input-label for="city_id">{{ trans_choice('general.city',1) }}</x-forms.input-label>
             <x-forms.select-input id="city_id" wire:model="item.city_id">
                 <option value="">{{ __('general.select') }}</option>
-                @foreach ($cities as $city)
+                @foreach($cities as $city)
                     <option value="{{ $city->id }}">{{ $city->name }}</option>
                 @endforeach
             </x-forms.select-input>
             <x-error-span>{{ $errors->first('item.city_id') }}</x-error-span>
         </div>
 
-        @foreach (config('app.supported_locales') as $loc)
+        @foreach(config('app.supported_locales') as $loc)
             <div>
                 <x-forms.input-label for="address_{{ $loc }}">
                     @lang('general.address') ({{ strtoupper($loc) }})
                 </x-forms.input-label>
-                <x-forms.textarea id="address_{{ $loc }}" wire:model.defer="item.address_{{ $loc }}"
-                    rows="2" />
+                <x-forms.textarea id="address_{{ $loc }}" wire:model.defer="item.address_{{ $loc }}" rows="2"/>
                 <x-error-span>{{ $errors->first('item.address_' . $loc) }}</x-error-span>
             </div>
         @endforeach
 
         <div class="md:col-span-1">
             <x-forms.input-label for="open_at">@lang('general.open-at')</x-forms.input-label>
-            <x-forms.input id="open_at" type="hidden" wire:model.defer="item.open_at" />
+            <x-forms.input id="open_at" type="hidden" wire:model.defer="item.open_at"/>
             <div class="mt-2" wire:ignore>
                 <clock-timepicker id="open_at_picker" format="HH:mm"></clock-timepicker>
             </div>
@@ -47,7 +49,7 @@
 
         <div class="md:col-span-1">
             <x-forms.input-label for="close_at">@lang('general.close-at')</x-forms.input-label>
-            <x-forms.input id="close_at" type="hidden" wire:model.defer="item.close_at" />
+            <x-forms.input id="close_at" type="hidden" wire:model.defer="item.close_at"/>
             <div class="mt-2" wire:ignore>
                 <clock-timepicker id="close_at_picker" format="HH:mm"></clock-timepicker>
             </div>
@@ -57,9 +59,8 @@
         <div class="md:col-span-full">
             <x-forms.input-label for="weekends">@lang('general.weekend-days')</x-forms.input-label>
             <div class="flex gap-x-4 flex-wrap">
-                @foreach (__('general.days-of-week') as $key => $day)
-                    <x-forms.checkbox-input id="weekends-{{ $key }}" type="checkbox" :value="$key"
-                        wire:model="item.weekends">
+                @foreach(__('general.days-of-week') as $key => $day)
+                    <x-forms.checkbox-input id="weekends-{{$key}}" type="checkbox" :value="$key" wire:model="item.weekends">
                         {{ $day }}
                     </x-forms.checkbox-input>
                 @endforeach
@@ -73,7 +74,7 @@
             </x-primary-button>
 
             <x-primary-button type="button" class="!w-auto !bg-gray-200 !text-black hover:!bg-gray-300"
-                onclick="window.location='{{ route('centers.index') }}'">
+                              onclick="window.location='{{ route('centers.index') }}'">
                 @lang('general.cancel')
             </x-primary-button>
         </div>
@@ -84,41 +85,40 @@
             import('https://unpkg.com/clock-timepicker/dist/clock-timepicker.js');
         }
 
-        function __attachClockSync(inputId, pickerId) {
-            var input = document.getElementById(inputId);
+        function __bindClock(hiddenId, pickerId) {
+            var hidden = document.getElementById(hiddenId);
             var picker = document.getElementById(pickerId);
-            if (!input || !picker || picker.dataset.bound === '1') return;
+            if (!hidden || !picker || picker.dataset.bound === '1') return;
 
-            var toPicker = function() {
-                if (input.value) picker.value = input.value;
-            };
-            var toInput = function() {
-                input.value = picker.value || '';
-                input.dispatchEvent(new Event('input', {
-                    bubbles: true
-                }));
-                input.dispatchEvent(new Event('change', {
-                    bubbles: true
-                }));
-            };
+            if (hidden.value) picker.value = hidden.value;
 
-            toPicker();
-            picker.addEventListener('change', toInput);
-            picker.addEventListener('input', toInput);
+            function setHidden(val){
+                hidden.value = val || '';
+                hidden.dispatchEvent(new Event('input', {bubbles: true}));
+                hidden.dispatchEvent(new Event('change', {bubbles: true}));
+            }
+
+            picker.addEventListener('change', function(){ setHidden(picker.value || ''); });
+            picker.addEventListener('input', function(){ setHidden(picker.value || ''); });
+
             picker.dataset.bound = '1';
         }
 
-        function __initClockPickers() {
-            __attachClockSync('open_at', 'open_at_picker');
-            __attachClockSync('close_at', 'close_at_picker');
+        function __initTimePickers() {
+            __bindClock('open_at', 'open_at_picker');
+            __bindClock('close_at', 'close_at_picker');
         }
 
-        document.addEventListener('DOMContentLoaded', __initClockPickers);
-        document.addEventListener('livewire:load', function() {
-            __initClockPickers();
+        document.addEventListener('DOMContentLoaded', __initTimePickers);
+        document.addEventListener('livewire:load', function () {
+            __initTimePickers();
             if (window.Livewire && Livewire.hook) {
-                Livewire.hook('message.processed', __initClockPickers);
+                Livewire.hook('message.processed', __initTimePickers);
             }
         });
     </script>
+
+    <style>
+        clock-timepicker{--clock-timepicker-accent-color:#be1f24}
+    </style>
 </div>

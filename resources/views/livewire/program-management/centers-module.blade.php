@@ -93,42 +93,41 @@
                 import('https://unpkg.com/clock-timepicker/dist/clock-timepicker.js');
             }
 
-            function __attachClockSync(inputId, pickerId) {
-                var input = document.getElementById(inputId);
+            function __bindClock(hiddenId, pickerId) {
+                var hidden = document.getElementById(hiddenId);
                 var picker = document.getElementById(pickerId);
-                if (!input || !picker || picker.dataset.bound === '1') return;
+                if (!hidden || !picker || picker.dataset.bound === '1') return;
 
-                var toPicker = function() {
-                    if (input.value) picker.value = input.value;
-                };
-                var toInput = function() {
-                    input.value = picker.value || '';
-                    input.dispatchEvent(new Event('input', {
-                        bubbles: true
-                    }));
-                    input.dispatchEvent(new Event('change', {
-                        bubbles: true
-                    }));
-                };
+                if (hidden.value) picker.value = hidden.value;
 
-                toPicker();
-                picker.addEventListener('change', toInput);
-                picker.addEventListener('input', toInput);
+                function setHidden(val){
+                    hidden.value = val || '';
+                    hidden.dispatchEvent(new Event('input', {bubbles: true}));
+                    hidden.dispatchEvent(new Event('change', {bubbles: true}));
+                }
+
+                picker.addEventListener('change', function(){ setHidden(picker.value || ''); });
+                picker.addEventListener('input', function(){ setHidden(picker.value || ''); });
+
                 picker.dataset.bound = '1';
             }
 
-            function __initClockPickers() {
-                __attachClockSync('open_at', 'open_at_picker');
-                __attachClockSync('close_at', 'close_at_picker');
+            function __initTimePickers() {
+                __bindClock('open_at', 'open_at_picker');
+                __bindClock('close_at', 'close_at_picker');
             }
 
-            document.addEventListener('DOMContentLoaded', __initClockPickers);
-            document.addEventListener('livewire:load', function() {
-                __initClockPickers();
+            document.addEventListener('DOMContentLoaded', __initTimePickers);
+            document.addEventListener('livewire:load', function () {
+                __initTimePickers();
                 if (window.Livewire && Livewire.hook) {
-                    Livewire.hook('message.processed', __initClockPickers);
+                    Livewire.hook('message.processed', __initTimePickers);
                 }
             });
         </script>
     </x-modal.dialog>
+
+    <style>
+        clock-timepicker{--clock-timepicker-accent-color:#be1f24}
+    </style>
 </div>
