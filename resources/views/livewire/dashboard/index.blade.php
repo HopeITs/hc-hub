@@ -57,7 +57,8 @@
         </div>
 
         <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-leaves-card/>
+            <livewire:dashboard.upcoming-leaves-card/>
+
         </div>
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">

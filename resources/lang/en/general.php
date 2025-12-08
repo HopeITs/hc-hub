@@ -518,7 +518,9 @@ return [
     'all-departments' => 'All Departments',
     'direct' => 'Direct Manager',
     'tech' => 'Technical Manager',
-    'fit' =>  'Fit'
+    'fit' =>  'Fit',
+    'today' =>  'Today',
+    'tomorrow' => 'Tomorrow'
 
 
 

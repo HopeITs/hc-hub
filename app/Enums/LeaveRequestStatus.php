@@ -13,9 +13,9 @@ final class LeaveRequestStatus extends Enum
     public static function getLocalizedName(int $value): array
     {
         $val =  match ($value) {
-            self::Accepted => ['text' => ['en' => 'Accepted', 'ar' => 'مقبول'] , 'color' => 'green'],
-            self::Rejected => ['text' => ['en' => 'Rejected', 'ar' => 'مرفوض'] , 'color' => 'red'],
-            default =>['text' =>  ['en' => 'Pending', 'ar' => 'قيد المراجعة'],'color' => 'purple'],
+            self::Accepted => ['text' => ['en' => 'Accepted', 'ar' => 'مقبول'] , 'color' => 'primary'],
+            self::Rejected => ['text' => ['en' => 'Rejected', 'ar' => 'مرفوض'] , 'color' => 'secondary-medium'],
+            default =>['text' =>  ['en' => 'Pending', 'ar' => 'قيد المراجعة'],'color' => 'secondary-light'],
         };
         $result = [
             'value' => $val['text'][app()->getLocale()],
