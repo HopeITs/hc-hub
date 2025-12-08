@@ -3,7 +3,7 @@
     $titleField = 'title_' . $locale;
 @endphp
 
-<div class="w-full h-full bg-white rounded-3xl shadow-sm overflow-y-auto">
+<div class="w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-y-auto">
 
     <div class="flex items-center gap-2 px-6 pt-6 pb-4">
         <h2 class="text-[18px] font-semibold text-secondary-medium">

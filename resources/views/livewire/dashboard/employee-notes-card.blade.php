@@ -3,7 +3,7 @@
         x-data="notesBoard()"
         x-init="init(@js($this->notes->pluck('id')))"
         class="relative w-full ">
-        <div class="bg-white rounded-3xl border border-gray-200 shadow-sm flex flex-col h-68 w-full">
+        <div class="bg-white rounded-3xl border border-gray-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] flex flex-col h-68 w-full">
             <div class="flex items-center justify-between px-6 pt-6 shrink-0">
                 <div class="flex pt-2 items-center gap-2">
                     <h2 class="text-md font-semibold text-secondary-medium">@lang('general.note')</h2>

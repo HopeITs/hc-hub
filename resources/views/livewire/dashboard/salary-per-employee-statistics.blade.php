@@ -1,4 +1,4 @@
-<div class="w-full h-full bg-white rounded-[32px] shadow-sm border border-gray-200 px-6 py-3 flex flex-col">
+<div class="w-full h-full bg-white rounded-[32px] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border border-gray-200 px-6 py-3 flex flex-col">
 
     <div class="flex items-center gap-4 mt-3">
         <h3 class="text-[18px] font-semibold text-secondary-medium">

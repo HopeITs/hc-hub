@@ -79,7 +79,7 @@
                  NEW CARD DESIGN
             ======================== --}}
             <article class="border border-secondary-soft rounded-3xl bg-white
-                            shadow-sm hover:shadow-md transition-all duration-200
+                            shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] hover:shadow-md transition-all duration-200
                             hover:-translate-y-1 flex flex-col">
 
                 {{-- HEADER --}}
@@ -96,7 +96,7 @@
                     </div>
 
                     <div class="text-right">
-                        <span class="inline-block px-2 py-1 text-[10px] font-semibold text-white rounded-3xl
+                        <span class="inline-block px-2 py-1 text-[10px] font-semibold text-white rounded-md
                                      {{ $card['color'] }}">
                             {{ $cardType === 'program'
                                 ? trans_choice('general.program', 1)
