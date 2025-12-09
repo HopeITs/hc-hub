@@ -1,33 +1,37 @@
-<div class="min-h-screen pb-4 px-6 bg-[var(--color-neutral-50)] font-sans text-[var(--color-neutral-800)]">
-    <div class="max-w-7xl mx-auto">
+@php
+    $nameField = 'name_' . app()->getLocale();
+@endphp
 
-        <div class="grid grid-cols-3 grid-rows-4 gap-4">
+<div class="min-h-screen  pb-4 px-6 bg-[var(--color-neutral-50)] font-sans text-[var(--color-neutral-800)]">
+    <div class="max-w-7xl  mx-auto">
 
-            <div class="row-span-2 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8 flex flex-col items-center text-center">
+        <div class="grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto gap-4">
+
+            <div class="lg:row-span-2 bg-white border border-[var(--color-neutral-200)] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8 flex flex-col justify-center items-center text-center">
                 @if($employee->getFirstMediaUrl('avatar'))
                     <img src="{{$employee->getFirstMediaUrl('avatar')}}"
                          class="w-28 h-28 rounded-full object-cover border-4 border-[var(--color-primary)] shadow-sm">
                 @else
                     <div class="w-28 h-28 flex items-center justify-center text-[var(--color-primary)] text-3xl font-bold border-4 border-[var(--color-primary)] rounded-full">
-                        {{ strtoupper(substr($employee->name_en,0,2)) }}
+                        {{ strtoupper(substr($employee->$nameField,0,2)) }}
                     </div>
                 @endif
 
                 <h1 class="mt-4 text-xl font-semibold text-[var(--color-secondary-dark)] tracking-tight">
-                    {{$employee->name_en}}
+                    {{$employee->$nameField}}
                 </h1>
-                <p class="text-[var(--color-primary)] text-sm font-medium">
+                <p class="mt-2 text-[var(--color-primary)] text-sm font-medium">
                     {{$employee->positions()->latest()->first()->title ?? '—'}}
                 </p>
-                <p class="text-[var(--color-secondary-light)] text-xs">
+                <p class="text-[var(--color-secondary-light)] text-xs mt-2">
                     Employee ID: {{$employee->id}}
                 </p>
             </div>
 
-            <div class="col-span-2 col-start-2 row-start-1 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
+            <div class="lg:col-span-2 lg:col-start-2 lg:row-start-1 bg-white border border-[var(--color-neutral-200)] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
-                    Employment Overview
+                    @lang('general.employment-overview')
                 </h2>
                 <ul class="text-sm space-y-1">
                     <li><strong>Name:</strong> {{ $employee->name_en }}</li>
@@ -38,7 +42,7 @@
                 </ul>
             </div>
 
-            <div class="col-start-2 row-start-2 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
+            <div class="lg:col-start-2 lg:row-start-2 bg-white border border-[var(--color-neutral-200)] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
                     Bio & Birthday
@@ -49,7 +53,7 @@
                 <p class="mt-3 text-sm"><strong>Birthday:</strong> {{ $employee->actual_dob ?? 'N/A' }}</p>
             </div>
 
-            <div class="col-start-3 row-start-2 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
+            <div class="lg:col-start-3 lg:row-start-2 bg-white border border-[var(--color-neutral-200)] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
                     Contact
@@ -61,7 +65,7 @@
                 </ul>
             </div>
 
-            <div class="col-start-2 row-start-3 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
+            <div class="lg:col-start-2 lg:row-start-3 bg-white border border-[var(--color-neutral-200)] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
                     Skills & Interests
@@ -82,7 +86,7 @@
                 </div>
             </div>
 
-            <div class="col-start-3 row-start-3 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
+            <div class="lg:col-start-3 lg:row-start-3 bg-white border border-[var(--color-neutral-200)] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-secondary-medium)] rounded"></span>
                     Personal Life
@@ -102,7 +106,7 @@
                 </ul>
             </div>
 
-            <div class="row-span-2 col-start-1 row-start-3 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
+            <div class="lg:row-span-2 lg:col-start-1 lg:row-start-3 bg-white border border-[var(--color-neutral-200)] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
                     National ID
@@ -117,7 +121,7 @@
                 </ul>
             </div>
 
-            <div class="col-start-2 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
+            <div class="lg:col-start-2 bg-white border border-[var(--color-neutral-200)] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
                     Badges
@@ -125,7 +129,7 @@
                 <p class="text-sm text-[var(--color-secondary-light)]">Badge list…</p>
             </div>
 
-            <div class="col-start-3 row-start-4 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
+            <div class="lg:col-start-3 lg:row-start-4 bg-white border border-[var(--color-neutral-200)] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
                     Attachments
@@ -135,8 +139,7 @@
 
         </div>
 
-        {{-- CARD 10 --}}
-        <div class=" bg-white border mt-4 border-[var(--color-neutral-200)] shadow-md rounded-3xl p-8">
+        <div class=" bg-white border mt-4 border-[var(--color-neutral-200)] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-3xl p-8">
             <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                 <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
                 Contract Information

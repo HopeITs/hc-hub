@@ -439,6 +439,7 @@ return [
     'company_news' => 'الاخبار',
     'reset' => 'إعادة تعيين',
     'updating-statistics' => 'جاري تحديث الإحصائيات…',
+    'saving' => 'جاري الحفظ',
     'annual' => 'سنوي',
     'service' => 'خدمة',
     'trial' => 'تجريبي',

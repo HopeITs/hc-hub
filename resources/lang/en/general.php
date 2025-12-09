@@ -413,6 +413,7 @@ return [
     'orgn-chart' => 'Organization Chart',
     'my-leaves' => 'My Leaves',
     'dates' => 'Dates',
+    'saving' => 'Saving',
     'delivered' => 'Delivered',
     'received' => 'Received',
     'on_hold' => 'On Hold',
