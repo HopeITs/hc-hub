@@ -9,6 +9,9 @@
         <h2 class="text-[18px] font-semibold text-secondary-medium">
             @lang('general.soon-ending-contracts')
         </h2>
+        <span class="text-secondary-light sm:text-[20px] md:text-sm font-medium">
+                {{ $contracts->count() }}
+            </span>
         <x-icons.contracts class="mb-0.5 ml-1 text-primary"/>
     </div>
 

@@ -3,16 +3,21 @@
     $titleField = 'title_' . $locale;
 @endphp
 
-<div class="w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
+<div class="relative w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
 
     <div class="flex items-center gap-2 px-6 pt-6 pb-4">
         <h2 class="text-[18px] font-semibold text-secondary-medium">
             @lang('general.no-leaves-employees')
         </h2>
+        <span class="text-secondary-light sm:text-[20px] md:text-sm font-medium">
+                {{ $noLeavesEmployees->count() }}
+            </span>
         <x-icons.no-leaves class=" mb-0.5 text-primary"/>
     </div>
 
-    <div class="px-6  overflow-y-auto ">
+    <div class="relative px-6 pb-6 pt-2 space-y-3 overflow-y-auto flex-grow
+                scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent
+                hover:scrollbar-thumb-[var(--color-primary-300)] max-h-[440px] ">
 
         @forelse ($noLeavesEmployees as $emp)
             <div class="flex items-center justify-between py-4 border-b border-[var(--color-neutral-200)] last:border-0">
