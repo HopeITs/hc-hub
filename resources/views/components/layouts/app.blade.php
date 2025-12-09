@@ -72,33 +72,38 @@
 </script>
 @stack('scripts')
 <script>
-    function hidePreloader() {
-        const overlay = document.getElementById('page-gif-overlay');
-        if (!overlay) return;
+    if (typeof window.preloaderScriptLoaded === 'undefined') {
+        window.preloaderScriptLoaded = true;
 
-        overlay.style.transition = "opacity 0.6s ease";
-        overlay.style.opacity = "0";
+        function hidePreloader() {
+            const overlay = document.getElementById('page-gif-overlay');
+            if (!overlay) return;
 
-        setTimeout(() => {
-            overlay.style.display = "none";
-        }, 300);
+            overlay.style.transition = "opacity 0.6s ease";
+            overlay.style.opacity = "0";
+
+            setTimeout(() => {
+                overlay.style.display = "none";
+            }, 300);
+        }
+
+        const MIN_TIME = 3200;
+        const start = performance.now();
+
+        function scheduleHide() {
+            const elapsed = performance.now() - start;
+            const remaining = MIN_TIME - elapsed;
+
+            setTimeout(hidePreloader, remaining > 0 ? remaining : 0);
+        }
+
+        document.addEventListener("DOMContentLoaded", scheduleHide);
+        document.addEventListener("livewire:load", scheduleHide);
+
+        setTimeout(hidePreloader, MIN_TIME + 1000);
     }
-
-    const MIN_TIME = 3200;
-    const start = performance.now();
-
-    function scheduleHide() {
-        const elapsed = performance.now() - start;
-        const remaining = MIN_TIME - elapsed;
-
-        setTimeout(hidePreloader, remaining > 0 ? remaining : 0);
-    }
-
-    document.addEventListener("DOMContentLoaded", scheduleHide);
-    document.addEventListener("livewire:load", scheduleHide);
-
-    setTimeout(hidePreloader, MIN_TIME + 1000);
 </script>
+
 
 
 </body>
