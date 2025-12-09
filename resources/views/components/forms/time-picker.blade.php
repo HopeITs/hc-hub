@@ -17,8 +17,8 @@
 
     (function bindClock(instanceId, pickerId) {
         function __bind() {
-            var hidden = document.getElementById(instanceId);
-            var picker = document.getElementById(pickerId);
+            let hidden = document.getElementById(instanceId);
+            let picker = document.getElementById(pickerId);
             if (!hidden || !picker || picker.dataset.bound === '1') return;
 
             if (hidden.value) picker.value = hidden.value;
@@ -45,6 +45,4 @@
     })(@json($id), @json($pickerId));
 </script>
 
-<style>
-    clock-timepicker { --clock-timepicker-accent-color: #be1f24 }
-</style>
+

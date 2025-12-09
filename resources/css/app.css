@@ -239,3 +239,5 @@ div:where(.swal2-icon).swal2-question  {
 div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm){
     background-color: var(--color-primary) !important;
 }
+
+clock-timepicker { --clock-timepicker-accent-color: #be1f24 }
