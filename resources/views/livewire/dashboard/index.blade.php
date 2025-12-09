@@ -25,12 +25,12 @@
     </div>
 @endsection
 
-<div class="space-y-10">
+<div class="space-y-6">
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 {{ $hasLeaves ? 'grid grid-rows-2 gap-6' : '' }}  h-full">
+        <div class="lg:col-span-2 flex flex-col gap-6 h-full">
             @if($hasLeaves)
-                <div class=" rounded-xl flex items-center justify-start text-white font-semibold h-68">
+                <div class=" rounded-xl flex items-center justify-start text-white font-semibold ">
                     <livewire:dashboard.my-leaves-card/>
                 </div>
             @endif
@@ -39,7 +39,7 @@
             </div>
         </div>
 
-        <div class="w-full rounded-xl text-white font-semibold  {{$hasLeaves ? 'h-full' : 'h-68'}}">
+        <div class="w-full rounded-xl text-white font-semibold  {{$hasLeaves ? 'h-[97%]' : 'h-68'}}">
             <x-dashboard-cards.team-members-card/>
         </div>
     </div>

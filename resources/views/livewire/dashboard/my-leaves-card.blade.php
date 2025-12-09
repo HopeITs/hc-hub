@@ -1,4 +1,4 @@
-<div class=" h-full w-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border p-2 border-gray-200 py-6 px-8 flex flex-col justify-between space-y-4">
+<div class=" w-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border p-2 border-gray-200 py-6 px-8 flex flex-col justify-between space-y-4 min-h-[330px] sm:min-h-[360px] md:min-h-0">
 
     <div class="flex justify-between items-center">
         <h3 class="text-base font-semibold text-gray-600">
@@ -10,7 +10,7 @@
         </a>
     </div>
 
-    <div class="grid grid-cols-2 items-center gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-10 md:gap-6">
 
         <div class="flex items-end space-x-6">
             <div class="flex items-end -mb-3.5">
@@ -45,11 +45,11 @@
         </div>
 
 
-        <div class="flex flex-col items-end justify-end">
-            <div class="relative w-56 h-40 -mb-2">
+        <div class="flex flex-col items-center md:items-end justify-center md:justify-end">
+            <div class="relative w-56 h-40 ml-10 md:mb-2">
                 <canvas id="leavesGaugeChart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-end">
-                    <p class="text-[#C71C1C] mb-3 -ml-6 rtl:-ml-10 text-4xl font-bold">
+                    <p class="text-primary mb-3 -ml-6 rtl:-ml-10 text-4xl font-bold">
                         {{$percentage}} <span class="text-sm rtl:-mr-1.5 ltr:-ml-2">%</span>
                     </p>
                 </div>

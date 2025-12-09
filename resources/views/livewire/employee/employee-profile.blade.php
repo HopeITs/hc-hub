@@ -1,10 +1,8 @@
 <div class="min-h-screen pb-4 px-6 bg-[var(--color-neutral-50)] font-sans text-[var(--color-neutral-800)]">
     <div class="max-w-7xl mx-auto">
 
-        {{-- ============ GRID ============ --}}
         <div class="grid grid-cols-3 grid-rows-4 gap-4">
 
-            {{-- CARD 0 — MAIN PROFILE --}}
             <div class="row-span-2 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8 flex flex-col items-center text-center">
                 @if($employee->getFirstMediaUrl('avatar'))
                     <img src="{{$employee->getFirstMediaUrl('avatar')}}"
@@ -26,7 +24,6 @@
                 </p>
             </div>
 
-            {{-- CARD 6 — POSITION ROW (spans 2 columns) --}}
             <div class="col-span-2 col-start-2 row-start-1 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
@@ -41,7 +38,6 @@
                 </ul>
             </div>
 
-            {{-- CARD 1 — BIO --}}
             <div class="col-start-2 row-start-2 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
@@ -53,7 +49,6 @@
                 <p class="mt-3 text-sm"><strong>Birthday:</strong> {{ $employee->actual_dob ?? 'N/A' }}</p>
             </div>
 
-            {{-- CARD 3 — CONTACT --}}
             <div class="col-start-3 row-start-2 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
@@ -66,7 +61,6 @@
                 </ul>
             </div>
 
-            {{-- CARD 2 --}}
             <div class="col-start-2 row-start-3 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
@@ -88,7 +82,6 @@
                 </div>
             </div>
 
-            {{-- CARD 4 --}}
             <div class="col-start-3 row-start-3 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-secondary-medium)] rounded"></span>
@@ -109,7 +102,6 @@
                 </ul>
             </div>
 
-            {{-- CARD 7 --}}
             <div class="row-span-2 col-start-1 row-start-3 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
@@ -125,7 +117,6 @@
                 </ul>
             </div>
 
-            {{-- CARD 8 --}}
             <div class="col-start-2 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
@@ -134,7 +125,6 @@
                 <p class="text-sm text-[var(--color-secondary-light)]">Badge list…</p>
             </div>
 
-            {{-- CARD 9 --}}
             <div class="col-start-3 row-start-4 bg-white border border-[var(--color-neutral-200)] shadow-md rounded-2xl p-8">
                 <h2 class="text-lg font-bold text-[var(--color-secondary-dark)] mb-3 flex items-center gap-2">
                     <span class="inline-block w-1.5 h-5 bg-[var(--color-primary)] rounded"></span>
