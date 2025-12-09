@@ -1,5 +1,15 @@
-@extends('errors::minimal')
+@extends('errors.layout')
 
-@section('title', __('Server Error'))
-@section('code', '500')
-@section('message', __('Server Error'))
+@section('title', '500 Server Error')
+
+@section('content')
+    <img src="{{ asset('assets/errors/500.png') }}" class="error-image">
+
+    <div class="title">Server Error</div>
+
+    <div class="message">
+        Something went wrong on our side. Please try again later.
+    </div>
+
+    <a href="{{ url('/') }}" class="btn-home">Go Home</a>
+@endsection
