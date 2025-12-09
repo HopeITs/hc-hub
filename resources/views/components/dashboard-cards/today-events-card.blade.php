@@ -1,4 +1,4 @@
-<div class="w-full h-full bg-white rounded-3xl shadow-sm ring-1 ring-gray-200 overflow-hidden relative">
+<div class="w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ring-1 ring-gray-200 overflow-hidden relative">
     <div class="js-today-events ">
         <div class="flex items-center justify-between px-7 pt-6">
             <div class="flex items-center gap-2">

@@ -1,4 +1,4 @@
-<div class="bg-white rounded-[32px] py-4 px-7 shadow-sm w-full max-w-3xl h-full mx-auto">
+<div class="bg-white rounded-[32px] py-4 px-7 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] w-full max-w-3xl h-full mx-auto">
 
     <div class="flex items-center gap-2 m-2.5 leading-none">
         <h2 class="text-[16px] font-semibold text-secondary-dark">Calender</h2>

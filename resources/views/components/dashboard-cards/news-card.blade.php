@@ -13,7 +13,7 @@
 
 
 
-<div class="relative w-full h-full  py-6 bg-white rounded-3xl shadow-sm flex flex-col overflow-hidden">
+<div class="relative w-full h-full  py-6 bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] flex flex-col overflow-hidden">
     <div class="flex items-center justify-between px-6 pt-5 pb-1 flex-shrink-0">
         <div class="flex items-center gap-3">
             <h2 class="text-md font-base text-[#58595B]">

@@ -5,7 +5,7 @@
 @endphp
 
 <div x-data="{ search: '' }"
-     class="relative w-full h-full bg-white rounded-3xl shadow-sm overflow-hidden flex flex-col">
+     class="relative w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
 
     <!-- Header -->
     <div class="flex items-center justify-between gap-6 px-6 py-6">
@@ -30,7 +30,7 @@
     <!-- Team List -->
     <div class="relative px-6 pt-2 space-y-3 overflow-y-auto flex-grow
                 scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent
-                hover:scrollbar-thumb-[var(--color-primary-300)] min-h-[440px] max-h-[440px]">
+                hover:scrollbar-thumb-[var(--color-primary-300)] max-h-[440px]">
 
         @forelse($this->teamMembers as $member)
 

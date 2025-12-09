@@ -9,15 +9,15 @@
 @endphp
 
 <nav dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
-     class="fixed inset-x-0 top-0 z-10 w-screen md:w-full bg-white dark:bg-gray-800 backdrop-blur">
+     class="fixed inset-x-0 top-0 z-10 w-screen md:w-full  bg-white dark:bg-gray-800 backdrop-blur">
 
     <div class="px-3 py-1 lg:px-5 lg:ps-3">
-        <div class="flex items-center justify-end gap-3">
+        <div class="flex items-center justify-end gap-3 md:pe-0 pe-4">
             <button
                 wire:click="$dispatch('sidebar.toggle')"
                 type="button"
-                class="sm:hidden me-auto text-heading bg-transparent border border-transparent
-           hover:bg-secondary-medium rounded-base p-2"
+                class="sm:hidden me-auto text-heading text-secondary-light bg-transparent border border-transparent
+           hover:text-secondary-dark transition cursor-pointer rounded-base p-2"
             >
                 <span class="sr-only">Open sidebar</span>
                 <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@
                             aria-haspopup="menu" class="flex items-center">
 
                         <span class="relative inline-grid place-items-center rounded-full p-[2px] shrink-0">
-                            <img class="size-8 border border-primary rounded-full object-cover"
+                            <img class="size-7.5 border border-primary rounded-full object-cover"
                                  src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt="user"/>
 
                             <span class="absolute bottom-0.5 {{ $isRtl ? 'start-1' : 'end-0.5' }}
@@ -61,7 +61,7 @@
 
                     <div x-cloak x-show="open" x-transition.duration.160ms.origin.bottom
                          @click.outside="open=false"
-                         :class="$store.dir.rtl ? 'start-0' : 'end-0'"
+                         :class="$store.dir.rtl ? 'end-0' : 'end-0'"
                          class="z-50 absolute top-full mt-2 w-[250px] rounded-3xl border bg-white
                                 shadow-[0_25px_80px_-20px_rgba(2,6,23,0.35)] ring-1 ring-black/5"
                          role="menu">

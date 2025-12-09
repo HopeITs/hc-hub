@@ -1,6 +1,6 @@
 @props(['upcomingEvents' => collect()])
 
-<div class="w-full h-full bg-white rounded-3xl shadow-sm ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
+<div class="w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
     <div class="flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
         <div class="flex items-center gap-2">
             <h3 class="text-sm font-semibold text-[#58595B]">

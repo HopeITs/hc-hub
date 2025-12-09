@@ -1,20 +1,21 @@
-<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-    <div class="mb-8 flex items-center justify-between">
-        <h1 class="text-3xl font-bold text-neutral-800 tracking-tight">@lang('general.contract-statistics')</h1>
-        <div class="flex items-center gap-3">
-            <button wire:click="resetFilters"
-                    type="button"
-                    class="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white text-neutral-700 px-5 py-2 font-semibold hover:bg-neutral-100 transition">
-                @lang('general.reset')
-            </button>
-        </div>
-    </div>
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8  py-12">
 
-    <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 items-end">
-        <div>
-            <label for="city" class="block text-sm font-medium text-neutral-700 mb-1">{{ trans_choice('general.city', 1) }}</label>
-            <select id="city" wire:model.lazy="selectedCity"
-                    class="w-full rounded-xl border border-neutral-200 bg-white text-neutral-800 shadow-sm focus:ring-4 focus:ring-primary-200 px-3 py-2 transition">
+    <div class="mb-12 ">
+        <h1 class="text-4xl font-black text-neutral-900 tracking-tight mb-6">
+            @lang('general.contract-statistics')
+        </h1>
+
+
+        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-end">
+
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-secondary-dark uppercase tracking-wide">
+                {{ trans_choice('general.city', 1) }}
+            </label>
+
+            <select wire:model.lazy="selectedCity"
+                    class="w-full border border-secondary-soft rounded-lg px-4 py-2.5
+                           text-neutral-900 bg-white focus:ring-primary focus:ring-2 transition">
                 <option value="">{{ __('general.all') }} {{ trans_choice('general.city', 2) }}</option>
                 @foreach($cities as $city)
                     <option value="{{ $city->id }}">{{ $city->name }}</option>
@@ -22,100 +23,174 @@
             </select>
         </div>
 
-        <div>
-            <label for="program" class="block text-sm font-medium text-neutral-700 mb-1">{{ trans_choice('general.program', 1) }}</label>
-            <select id="program" wire:model.lazy="selectedProgram"
-                    class="w-full rounded-xl border border-neutral-200 bg-white text-neutral-800 shadow-sm focus:ring-4 focus:ring-primary-200 px-3 py-2 transition">
-                <option value="">{{ __('general.all') }} {{ trans_choice('general.program', 2) }}</option>
-                @foreach($programs as $program)
-                    <option value="{{ $program->id }}">{{ $program->name }}</option>
-                @endforeach
-            </select>
+            <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-secondary-dark uppercase tracking-wide">
+                    {{ trans_choice('general.program', 1) }}
+                </label>
+
+                <select wire:model.lazy="selectedProgram"
+                        class="w-full border border-secondary-soft rounded-lg px-4 py-2.5
+                           text-neutral-900 bg-white focus:ring-primary focus:ring-2 transition">
+                    <option value="">{{ __('general.all') }} {{ trans_choice('general.program', 2) }}</option>
+                    @foreach($programs as $program)
+                        <option value="{{ $program->id }}">{{ $program->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="flex sm:col-span-2 lg:col-span-1 justify-start lg:justify-start">
+                <button wire:click="resetFilters"
+                        class="px-4 py-3 text-sm text-secondary-dark font-semibold border border-secondary-soft
+           rounded-lg bg-white hover:shadow-sm cursor-pointer transition w-full sm:w-auto
+           flex items-center justify-center">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         class="w-5 h-5"
+                         fill="currentColor">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M18.364 3.05762C18.7782 3.05762 19.114 3.3934 19.114 3.80762V8.05026C19.114 8.46447 18.7782 8.80026 18.364 8.80026H14.1213C13.7071 8.80026 13.3713 8.46447 13.3713 8.05026C13.3713 7.63604 13.7071 7.30026 14.1213 7.30026H16.4817C13.6363 5.05718 9.4987 5.24825 6.87348 7.87348C4.04217 10.7048 4.04217 15.2952 6.87348 18.1265C9.70478 20.9578 14.2952 20.9578 17.1265 18.1265C19.0234 16.2297 19.6504 13.5428 19.0039 11.1219C18.897 10.7217 19.1348 10.3106 19.535 10.2038C19.9352 10.0969 20.3462 10.3347 20.4531 10.7349C21.2321 13.6518 20.478 16.8964 18.1872 19.1872C14.7701 22.6043 9.2299 22.6043 5.81282 19.1872C2.39573 15.7701 2.39573 10.2299 5.81282 6.81282C9.04483 3.5808 14.1762 3.40576 17.614 6.28768V3.80762C17.614 3.3934 17.9497 3.05762 18.364 3.05762Z"/>
+                    </svg>
+
+                </button>
+
+            </div>
         </div>
     </div>
 
-    <div wire:loading.flex wire:target="applyFilters, resetFilters" class="justify-center py-6">
-        <div class="text-sm text-neutral-500 flex items-center gap-2">
-            <div class="h-2 w-2 bg-primary-500 rounded-full animate-pulse"></div>
+
+    <div wire:loading.flex wire:target="applyFilters, resetFilters" class="justify-center py-10">
+        <div class="text-sm text-secondary-dark flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
             @lang('general.updating-statistics')
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" wire:loading.remove wire:target="applyFilters, resetFilters">
-        @forelse ($cards as $card)
-            <article class="relative overflow-hidden rounded-3xl bg-white border border-neutral-200 shadow-md hover:shadow-lg transition-transform hover:-translate-y-1 flex flex-col">
-                <div class="absolute top-0 left-0 w-full h-1.5 {{ $card['color'] }}"></div>
 
-                <div class="flex justify-between items-start mt-2 p-4 border-b border-neutral-200 min-h-[110px]">
-                    <div class="flex flex-col gap-2">
-                        <h3 class="text-lg font-bold text-neutral-900 leading-tight">{{ $card['name'] }}</h3>
-                        <div class="text-sm text-neutral-500">
-                            {{ trans_choice('general.employee', 2) }}:
-                            <span class="font-bold text-primary-600">{{ $card['employees'] }}</span>
-                        </div>
-                    </div>
-                    <div class="text-right flex flex-col gap-2">
-                        <span class="px-2 py-0.5 text-xs rounded-full {{ $card['color'] }} text-white font-medium">
-                            {{ $cardType === 'program' ? trans_choice('general.program', 1) : trans_choice('general.center', 1) }}
+    <div wire:loading.remove wire:target="applyFilters, resetFilters"
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
+
+        @forelse ($cards as $card)
+
+            <article class="border border-secondary-soft rounded-3xl bg-white
+                            shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] hover:shadow-md transition-all duration-200
+                            hover:-translate-y-1 flex flex-col">
+
+
+                <div class="p-6 flex justify-between items-start border-b  border-secondary-soft">
+                    <div class="flex flex-col">
+                        <span class="text-lg font-black text-neutral-900">
+                            {{ $card['name'] }}
                         </span>
+
+                        <span class="text-[13px] text-secondary-dark mt-1.5">
+                            {{ trans_choice('general.employee', 2) }}:
+                            <span class="font-bold text-primary">{{ $card['employees'] }}</span>
+                        </span>
+                    </div>
+
+                    <div class="text-right">
+                        <span class="inline-block px-2 py-1 text-[10px] font-semibold text-white rounded-md
+                                     {{ $card['color'] }}">
+                            {{ $cardType === 'program'
+                                ? trans_choice('general.program', 1)
+                                : trans_choice('general.center', 1) }}
+                        </span>
+
                         @if ($card['centers'] !== null)
-                            <p class="text-sm text-neutral-500">
-                                {{ trans_choice('general.center', 2) }}: <span class="font-bold text-neutral-700">{{ $card['centers'] }}</span>
+                            <p class="text-[13px] text-center text-secondary-dark mt-[10.2px]">
+                                {{ trans_choice('general.center', 2) }}:
+                                <span class="font-semibold text-neutral-800">{{ $card['centers'] }}</span>
                             </p>
                         @endif
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2 p-3">
-                    @foreach (['annual' => __('general.annual'), 'service' => __('general.service'), 'trial' => __('general.trial')] as $key => $label)
+
+                <div class="grid grid-cols-3 gap-3 p-4">
+
+                    @foreach ([
+                        'annual'  => __('general.annual'),
+                        'service' => __('general.service'),
+                        'trial'   => __('general.trial')
+                    ] as $key => $label)
+
                         @php
                             $data = $card[$key];
                             $isService = $key === 'service';
+
                             $total = $isService
-                                ? ($data['online'] + $data['onsite'])
-                                : ($data['full'] + $data['part']);
+                                ? $data['online'] + $data['onsite']
+                                : $data['full'] + $data['part'];
                         @endphp
 
-                        <div class="rounded-xl bg-neutral-50 border border-neutral-200 p-2.5 shadow-inner hover:bg-neutral-100 transition">
-                            <p class="text-xs font-semibold text-neutral-800 border-b border-neutral-200 pb-1 mb-1">{{ $label }}</p>
+                        <div class="rounded-2xl bg-neutral-50 border border-neutral-200
+                    p-3 shadow-inner hover:bg-neutral-100 transition">
+
+                            <p class="text-xs font-semibold text-neutral-800
+                      border-b border-neutral-200 pb-1 mb-1">
+                                {{ $label }}
+                            </p>
+
                             <div class="space-y-0.5 text-xs">
+
                                 @if ($isService)
-                                    <div class="flex justify-between"><span class="text-neutral-600">@lang('general.online')</span><span class="font-semibold text-neutral-800">{{ $data['online'] }}</span></div>
-                                    <div class="flex justify-between"><span class="text-neutral-600">@lang('general.onsite')</span><span class="font-semibold text-neutral-800">{{ $data['onsite'] }}</span></div>
+                                    <div class="flex justify-between">
+                                        <span class="text-neutral-600">@lang('general.online')</span>
+                                        <span class="font-semibold text-neutral-800">{{ $data['online'] }}</span>
+                                    </div>
+
+                                    <div class="flex justify-between">
+                                        <span class="text-neutral-600">@lang('general.onsite')</span>
+                                        <span class="font-semibold text-neutral-800">{{ $data['onsite'] }}</span>
+                                    </div>
                                 @else
-                                    <div class="flex justify-between"><span class="text-neutral-600">@lang('general.full-time')</span><span class="font-semibold text-neutral-800">{{ $data['full'] }}</span></div>
-                                    <div class="flex justify-between"><span class="text-neutral-600">@lang('general.part-time')</span><span class="font-semibold text-neutral-800">{{ $data['part'] }}</span></div>
+                                    <div class="flex justify-between">
+                                        <span class="text-neutral-600">@lang('general.full-time')</span>
+                                        <span class="font-semibold text-neutral-800">{{ $data['full'] }}</span>
+                                    </div>
+
+                                    <div class="flex justify-between">
+                                        <span class="text-neutral-600">@lang('general.part-time')</span>
+                                        <span class="font-semibold text-neutral-800">{{ $data['part'] }}</span>
+                                    </div>
                                 @endif
 
                                 <div class="border-t border-neutral-200 pt-1 mt-1 flex justify-between">
                                     <span class="text-neutral-600">@lang('general.total')</span>
-                                    <span class="font-bold text-primary-500">{{ $total }}</span>
+                                    <span class="font-bold text-primary">{{ $total }}</span>
                                 </div>
+
                             </div>
                         </div>
                     @endforeach
                 </div>
 
-                <div class="flex justify-end p-3 mt-auto">
-                    @if ($cardType === 'program' && isset($card['program_slug']))
-                        <a href="{{ route('programs.show', ['program' => $card['program_slug']]) }}" class="text-sm font-semibold text-primary-600 hover:underline">
-                            @lang('general.show-more') →
-                        </a>
-                    @elseif ($cardType === 'center' && isset($card['center_id']))
-                        <a href="{{ route('centers.show', $card['center_id']) }}" class="text-sm font-semibold text-primary-600 hover:underline">
-                            @lang('general.show-more') →
-                        </a>
-                    @else
-                        <a href="javascript:void(0)" class="text-sm font-semibold text-primary-600 hover:underline">
-                            @lang('general.show-more') →
-                        </a>
-                    @endif
+
+
+
+                <div class="p-4 border-t border-secondary-soft">
+                    <a href="{{ $cardType === 'program'
+                                ? route('programs.show', ['program' => $card['program_slug']])
+                                : ($cardType === 'center'
+                                    ? route('centers.show', $card['center_id'])
+                                    : '#') }}"
+                       class="text-sm flex justify-end font-semibold text-primary hover:underline">
+                        @lang('general.show-more') →
+                    </a>
                 </div>
+
             </article>
+
+
         @empty
-            <div class="col-span-full text-center text-neutral-500 py-8">
-                <p>@lang('general.no-data-filters')</p>
+
+            <div class="col-span-full text-center py-10 text-secondary-dark">
+                @lang('general.no-data-filters')
             </div>
+
         @endforelse
+
     </div>
+
 </div>

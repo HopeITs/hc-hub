@@ -366,6 +366,7 @@ class Index extends Component
     {
         return view('livewire.dashboard.index', [
             'employee' => $this->employee,
+            'hasLeaves' => $this->employee->availableLeaves()->count() > 0,
             'contract' => $this->contract,
             'positionTitle' => $this->positionTitle,
             'departmentName' => $this->departmentName,
