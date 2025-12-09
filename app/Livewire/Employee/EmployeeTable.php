@@ -53,6 +53,9 @@ class EmployeeTable extends LivewireTable
             Column::make(trans('general.name'), transColumn('name'))
                 ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
                 ->sortable()->searchable(),
+            Column::make(trans('general.role'), 'account')
+                ->displayUsing(fn($v, Model $m) => $m->account?->myRole()) // uses accessor
+                ->sortable()->searchable(),
 
             Column::make(trans('general.photo'), function (Model $m): string {
                 $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it

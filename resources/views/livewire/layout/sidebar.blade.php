@@ -39,7 +39,7 @@
                     </x-layouts.app.sidebar.single-item>
 
                     {{-- Statistics (HR + Super Admin only - kept as per logic) --}}
-                    @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN')
+                    @activerole('HR',  'SUPER ADMIN')
                     <x-layouts.app.sidebar.dropdown-nav-list id="statistics" title="{{__('general.statistics')}}"
                                                              :active="request()->routeIs('general-statistics') ||
                     request()->routeIs('contract-statistics')">
@@ -87,7 +87,7 @@
                                 {{ trans_choice('general.city', 2) }}
                             </x-layouts.app.sidebar.nav-item>
                             {{-- Contract Types (HR + Super Admin) --}}
-                            @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN')
+                            @activerole('HR',  'SUPER ADMIN')
                             <x-layouts.app.sidebar.nav-item :href="route('contract-types.index')"
                                                             :active="request()->routeIs('contract-types.index')">
                                 {{ trans_choice('general.contract-type', 2) }}

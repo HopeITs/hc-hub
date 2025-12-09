@@ -114,10 +114,7 @@ class User extends Authenticatable
         });
     }
 
-    public function hasRole(string $roleName): bool
-    {
-        return $this->relationLoaded('roles') ? $this->roles->contains(fn($r) => Str::slug($r->name) === Str::slug($roleName)) : $this->roles()->where('name', $roleName)->exists();
-    }
+
 
     public function getActiveRoleNameAttribute(): ?string
     {
