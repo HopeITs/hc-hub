@@ -53,7 +53,7 @@ class User extends Authenticatable
 
     public function myRole(): ?string
     {
-        return $this->activeRole()?->name;
+        return $this->activeRole()?->name ?? $this->roles()->first()->name;
     }
 
     public function activeRoleSlug(): ?string

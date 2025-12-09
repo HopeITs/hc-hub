@@ -40,7 +40,7 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 
 Route::get('cities', CityModule::class)->name('cities.index');
-Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index')->middleware('role:HR|SUPER ADMIN');
+Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index')->middleware('role:HR|super-admin');
 Route::get('checklist-items-basics', ChecklistItemModule::class)->name('basic-checklist-items.index');
 Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
 Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');

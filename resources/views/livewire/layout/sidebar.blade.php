@@ -38,8 +38,8 @@
                         @lang('general.dashboard')
                     </x-layouts.app.sidebar.single-item>
 
-                    {{-- Statistics (HR + Super Admin only - kept as per logic) --}}
-                    @activerole('HR',  'SUPER ADMIN')
+                    {{-- Statistics (HR + super-admin only - kept as per logic) --}}
+                    @activerole('HR',  'super-admin')
                     <x-layouts.app.sidebar.dropdown-nav-list id="statistics" title="{{__('general.statistics')}}"
                                                              :active="request()->routeIs('general-statistics') ||
                     request()->routeIs('contract-statistics')">
@@ -86,8 +86,8 @@
                                                             :active="request()->routeIs('cities.index')">
                                 {{ trans_choice('general.city', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-                            {{-- Contract Types (HR + Super Admin) --}}
-                            @activerole('HR',  'SUPER ADMIN')
+                            {{-- Contract Types (HR + super-admin) --}}
+                            @activerole('HR',  'super-admin')
                             <x-layouts.app.sidebar.nav-item :href="route('contract-types.index')"
                                                             :active="request()->routeIs('contract-types.index')">
                                 {{ trans_choice('general.contract-type', 2) }}
@@ -103,8 +103,8 @@
                                                             :active="request()->routeIs('basic-checklist-items.index')">
                                 {{ trans_choice('general.checklist-items', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-                            {{-- Job Levels (HR + Super Admin) --}}
-                            @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN')
+                            {{-- Job Levels (HR + super-admin) --}}
+                            @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'super-admin')
                             <x-layouts.app.sidebar.nav-item :href="route('job-levels.index')"
                                                             :active="request()->routeIs('job-levels.index')">
                                 {{ trans_choice('general.job-level', 2) }}
@@ -122,8 +122,8 @@
 
 
                     {{-- 3. Program Management --}}
-                    {{-- Dropdown visible to HR & Super Admin --}}
-                    @activerole('SUPER ADMIN', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
+                    {{-- Dropdown visible to HR & super-admin --}}
+                    @activerole('super-admin', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
                     <x-layouts.app.sidebar.dropdown-nav-list id="program-management"
                                                              :title="__('general.programs-management')" :active="request()->routeIs('programs.*') ||
                         request()->routeIs('positions.*') ||
@@ -154,7 +154,7 @@
                     @endactiverole
 
                     {{-- Centers for everyone else (Single item) --}}
-                    @notactiverole('SUPER ADMIN', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
+                    @notactiverole('super-admin', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
                     <x-layouts.app.sidebar.single-item :href="route('centers.index')"
                                                        :active="request()->routeIs('centers.*')">
                         <x-slot name="icon">
@@ -164,8 +164,8 @@
                     </x-layouts.app.sidebar.single-item>
                     @endnotactiverole
 
-                    {{-- 4. Employee Management (Super Admin + HR) --}}
-                    @activerole('SUPER ADMIN', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
+                    {{-- 4. Employee Management (super-admin + HR) --}}
+                    @activerole('super-admin', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
                     <x-layouts.app.sidebar.dropdown-nav-list id="employees-management"
                                                              :title="trans_choice('general.employee-management', 2)"
                                                              :active="request()->routeIs('employees.*') ||
@@ -194,8 +194,8 @@
                     @endactiverole
 
                     {{-- 5. Leave Management (Holidays and leaves) --}}
-                    {{-- Visible to: HR, Super Admin, AND Managers --}}
-                    @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN', 'Manager', 'manager', 'General Manager', 'general manager')
+                    {{-- Visible to: HR, super-admin, AND Managers --}}
+                    @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'super-admin', 'manager', 'manager', 'general-manager', 'general manager')
                     <x-layouts.app.sidebar.dropdown-nav-list id="leaves-management"
                                                              title="{{__('general.leaves-management')}}"
                                                              :active="(request()->routeIs('leaves.all') || request()->routeIs('leaves.balance'))">
@@ -203,14 +203,14 @@
                             <x-icons.calendar/>
                         </x-slot>
                         <x-slot name="list">
-                            {{-- All Leaves: Managers, HRs, Super Admin --}}
+                            {{-- All Leaves: Managers, HRs, super-admin --}}
                             <x-layouts.app.sidebar.nav-item :href="route('leaves.all')"
                                                             :active="request()->routeIs('leaves.all')">
                                 {{ __('general.all-leaves')}}
                             </x-layouts.app.sidebar.nav-item>
 
-                            {{-- Balance: ONLY HR + Super Admin (Managers excluded) --}}
-                            @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'SUPER ADMIN')
+                            {{-- Balance: ONLY HR + super-admin (Managers excluded) --}}
+                            @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'super-admin')
                             <x-layouts.app.sidebar.nav-item :href="route('leaves.balance')"
                                                             :active="request()->routeIs('leaves.balance')">
                                 {{ __('general.balance') }}
@@ -262,8 +262,8 @@
                         @lang('general.my-items')
                     </x-layouts.app.sidebar.single-item>
 
-                    {{-- 8. News Management (Super Admin, Managers, HRs) --}}
-                    @activerole('SUPER ADMIN', 'General Manager', 'general manager', 'Manager', 'manager', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
+                    {{-- 8. News Management (super-admin, Managers, HRs) --}}
+                    @activerole('super-admin', 'general-manager', 'general manager', 'manager', 'manager', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
                     <x-layouts.app.sidebar.single-item :href="route('news.index')"
                                                        :active="request()->routeIs('news.*')">
                         <x-slot name="icon">
@@ -274,7 +274,7 @@
                     @endactiverole
 
 
-                    @activerole('SUPER ADMIN', 'HR', 'HR-SYR', 'HR-ALP')
+                    @activerole('super-admin', 'HR', 'HR-SYR', 'HR-ALP')
                     <x-layouts.app.sidebar.single-item :href="route('badges.index')"
                                                        :active="request()->routeIs('badges.*')">
                         <x-slot name="icon" class="text-secondary-light">

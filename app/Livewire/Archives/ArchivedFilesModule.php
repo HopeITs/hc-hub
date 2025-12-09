@@ -54,7 +54,7 @@ class ArchivedFilesModule extends Component
         $this->isShared = $isShared;
         if ($folderId) {
             $folder = Folder::with('users')->find($folderId);
-            if ($folder && !auth()->user()->hasRole('Super Admin') && !$folder->users->contains(auth()->id())) {
+            if ($folder && !auth()->user()->hasRole('super-admin') && !$folder->users->contains(auth()->id())) {
                 abort(403, 'You do not have permission to access this folder.');
             }
             $this->currentFolder = $folder;
@@ -153,7 +153,7 @@ class ArchivedFilesModule extends Component
 
     private function authorizeSharedAction(): void
     {
-        if ($this->isShared && !auth()->user()->hasRole('Super Admin')) {
+        if ($this->isShared && !auth()->user()->hasRole('super-admin')) {
             abort(403, 'You are not authorized to perform this action in Shared Folders.');
         }
     }
@@ -174,7 +174,7 @@ class ArchivedFilesModule extends Component
             $query->where('is_shared', false)->where('user_id', auth()->id());
         }
 
-        if (!auth()->user()->hasRole('Super Admin')) {
+        if (!auth()->user()->hasRole('super-admin')) {
             $query->whereHas('users', fn($q) => $q->where('user_id', auth()->id()));
         }
 
@@ -238,7 +238,7 @@ class ArchivedFilesModule extends Component
     public function editPermissions(int $folderId)
     {
         $folder = Folder::findOrFail($folderId);
-        if ($folder->user_id !== auth()->id() && !auth()->user()->hasRole('Super Admin')) {
+        if ($folder->user_id !== auth()->id() && !auth()->user()->hasRole('super-admin')) {
             abort(403, 'Only the creator can manage permissions.');
         }
         $this->folderForPermissions = $folder;
@@ -249,7 +249,7 @@ class ArchivedFilesModule extends Component
     public function savePermissions()
     {
         if ($this->folderForPermissions) {
-            if ($this->folderForPermissions->user_id !== auth()->id() && !auth()->user()->hasRole('Super Admin')) {
+            if ($this->folderForPermissions->user_id !== auth()->id() && !auth()->user()->hasRole('super-admin')) {
                 abort(403, 'Only the creator can manage permissions.');
             }
 

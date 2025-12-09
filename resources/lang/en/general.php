@@ -242,7 +242,7 @@ return [
     'no-leaves-employees' => 'No Leaves Employees',
     'contract-type-employees' => 'Contract Type Employees ',
     'total-employees' => 'Total Employees',
-    'manager' => 'Manager',
+    'manager' => 'manager',
     'view-positions' => 'View Positions',
     'located-in' => 'Located In',
     'centers-text' => "And It's the main office in charge of Hope Center in Syria.",
