@@ -40,19 +40,13 @@
 
         <div class="md:col-span-1">
             <x-forms.input-label for="open_at">@lang('general.open-at')</x-forms.input-label>
-            <x-forms.input id="open_at" type="hidden" wire:model.defer="item.open_at"/>
-            <div class="mt-2" wire:ignore>
-                <clock-timepicker id="open_at_picker" format="HH:mm"></clock-timepicker>
-            </div>
+            <x-forms.time-picker id="open_at" wire-model="item.open_at" format="HH:mm" />
             <x-error-span>{{ $errors->first('item.open_at') }}</x-error-span>
         </div>
 
         <div class="md:col-span-1">
             <x-forms.input-label for="close_at">@lang('general.close-at')</x-forms.input-label>
-            <x-forms.input id="close_at" type="hidden" wire:model.defer="item.close_at"/>
-            <div class="mt-2" wire:ignore>
-                <clock-timepicker id="close_at_picker" format="HH:mm"></clock-timepicker>
-            </div>
+            <x-forms.time-picker id="close_at" wire-model="item.close_at" format="HH:mm" />
             <x-error-span>{{ $errors->first('item.close_at') }}</x-error-span>
         </div>
 
@@ -79,46 +73,4 @@
             </x-primary-button>
         </div>
     </form>
-
-    <script type="module">
-        if (!customElements.get('clock-timepicker')) {
-            import('https://unpkg.com/clock-timepicker/dist/clock-timepicker.js');
-        }
-
-        function __bindClock(hiddenId, pickerId) {
-            var hidden = document.getElementById(hiddenId);
-            var picker = document.getElementById(pickerId);
-            if (!hidden || !picker || picker.dataset.bound === '1') return;
-
-            if (hidden.value) picker.value = hidden.value;
-
-            function setHidden(val){
-                hidden.value = val || '';
-                hidden.dispatchEvent(new Event('input', {bubbles: true}));
-                hidden.dispatchEvent(new Event('change', {bubbles: true}));
-            }
-
-            picker.addEventListener('change', function(){ setHidden(picker.value || ''); });
-            picker.addEventListener('input', function(){ setHidden(picker.value || ''); });
-
-            picker.dataset.bound = '1';
-        }
-
-        function __initTimePickers() {
-            __bindClock('open_at', 'open_at_picker');
-            __bindClock('close_at', 'close_at_picker');
-        }
-
-        document.addEventListener('DOMContentLoaded', __initTimePickers);
-        document.addEventListener('livewire:load', function () {
-            __initTimePickers();
-            if (window.Livewire && Livewire.hook) {
-                Livewire.hook('message.processed', __initTimePickers);
-            }
-        });
-    </script>
-
-    <style>
-        clock-timepicker{--clock-timepicker-accent-color:#be1f24}
-    </style>
 </div>
