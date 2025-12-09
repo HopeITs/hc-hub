@@ -28,18 +28,19 @@
 <div class="space-y-10">
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 grid grid-rows-2 gap-6 h-full">
+        <div class="lg:col-span-2 {{ $hasLeaves ? 'grid grid-rows-2 gap-6' : '' }}  h-full">
+            @if($hasLeaves)
+                <div class=" rounded-xl flex items-center justify-start text-white font-semibold h-68">
+                    <livewire:dashboard.my-leaves-card/>
+                </div>
+            @endif
             <div class=" rounded-xl flex items-center justify-start text-white font-semibold h-68">
-                <x-dashboard-cards.my-leaves-card />
-            </div>
-
-            <div class=" rounded-xl flex items-center justify-start text-white font-semibold h-68">
-                <livewire:dashboard.employee-notes-card :employee="auth()->id()" />
+                <livewire:dashboard.employee-notes-card :employee="auth()->id()"/>
             </div>
         </div>
 
-        <div class="w-full rounded-xl text-white font-semibold h-full">
-            <x-dashboard-cards.team-members-card />
+        <div class="w-full rounded-xl text-white font-semibold  {{$hasLeaves ? 'h-full' : 'h-68'}}">
+            <x-dashboard-cards.team-members-card/>
         </div>
     </div>
 
@@ -52,15 +53,16 @@
 
 
         <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <livewire:dashboard.calendar-card />
+            <livewire:dashboard.calendar-card/>
         </div>
 
         <div class=" h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-leaves-card/>
+            <livewire:dashboard.upcoming-leaves-card/>
+
         </div>
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-            <livewire:news.today-events-card />
+            <livewire:news.today-events-card/>
 
         </div>
 
