@@ -30,7 +30,7 @@ class TodayEventsCard extends Component
                 'department' => $employee->latestActiveContract()?->position?->department?->name ?? '',
                 'message'    => 'Happy Birthday! 🎉',
                 'photo'      => $employee->getFirstMediaUrl('avatar')
-                                ?: 'https://ui-avatars.com/api/?name=' . urlencode($employee->name) . '&color=be1f24&background=FFF',
+                    ?: 'https://ui-avatars.com/api/?name=' . urlencode($employee->name) . '&color=be1f24&background=FFF',
             ]);
 
         $newsEvents = News::whereDate('event_date', $today)
@@ -41,9 +41,10 @@ class TodayEventsCard extends Component
                 'name'       => $news->title,
                 'position'   => $news->newsable_name ?? '',
                 'department' => '',
-                'message'    => strip_tags($news->description ?? 'Event Today'),
-                'photo'      => $news->photo ? asset('storage/' . $news->photo) : '/assets/icons/event.svg',
+                'message'    => strip_tags($news->description ?? ''),
+                'photo'      => $news->getFirstMediaUrl('news-image') ?: '/assets/icons/event.svg',
             ]);
+
         $this->events = $birthdays->concat($newsEvents)->toArray();
     }
 

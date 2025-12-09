@@ -95,31 +95,28 @@ class Index extends Component
     public function getUpcomingEventsProperty()
     {
         $start = now()->timezone(config('app.timezone'))->addDay()->startOfDay();
-        $end = $start->copy()->addDays(7)->endOfDay();
+        $end = $start->copy()->addDays(6)->endOfDay();
 
-        $locale = app()->getLocale();
         $employeeId = $this->employee->id ?? null;
         $cityId = $this->employee->city_id ?? null;
         $centerId = $this->contract->position->center_id ?? null;
         $programId = $this->contract->position->program_id ?? null;
 
         return News::query()
-            ->where(function ($q) use ($start, $end) {
-                $q->whereBetween('event_date', [$start, $end])->orWhereBetween('published_at', [$start, $end]);
-            })
+            ->whereBetween('event_date', [$start, $end])
             ->where(function ($q) use ($cityId, $centerId, $programId, $employeeId) {
                 $q->whereNull('newsable_type')
                     ->orWhere(function ($q2) use ($employeeId) {
-                        $q2->where('newsable_type', Employee::class)->where('newsable_id', $employeeId);
+                        $q2->where('newsable_type', \App\Models\Employee::class)->where('newsable_id', $employeeId);
                     })
                     ->orWhere(function ($q2) use ($cityId) {
-                        $q2->where('newsable_type', City::class)->where('newsable_id', $cityId);
+                        $q2->where('newsable_type', \App\Models\City::class)->where('newsable_id', $cityId);
                     })
                     ->orWhere(function ($q2) use ($centerId) {
-                        $q2->where('newsable_type', Center::class)->where('newsable_id', $centerId);
+                        $q2->where('newsable_type', \App\Models\Center::class)->where('newsable_id', $centerId);
                     })
                     ->orWhere(function ($q2) use ($programId) {
-                        $q2->where('newsable_type', Program::class)->where('newsable_id', $programId);
+                        $q2->where('newsable_type', \App\Models\Program::class)->where('newsable_id', $programId);
                     });
             })
             ->where(function ($q) {
@@ -127,11 +124,7 @@ class Index extends Component
             })
             ->get()
             ->map(function ($news) {
-                $timestamp = $news->event_date ?? $news->published_at;
-                if (!$timestamp instanceof Carbon) {
-                    $timestamp = Carbon::parse($timestamp);
-                }
-
+                $timestamp = $news->event_date;
                 $daysLeft = now()->diffInDays($timestamp, false);
 
                 $news->event_title = $news->title;
@@ -139,7 +132,6 @@ class Index extends Component
                 $news->event_timestamp = $timestamp;
                 $news->image_url = $news->photo ? \Storage::url($news->photo) : '/images/news-default.png';
                 $news->daysLeftText = match ($daysLeft) {
-                    0 => 'Today 🎉',
                     1 => 'Tomorrow',
                     default => "In {$daysLeft} days",
                 };
@@ -268,11 +260,11 @@ class Index extends Component
 
         $directManager = null;
         if ($position?->direct_manager_id) {
-            $managerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])
-                ->find($position->direct_manager_id);
+            $managerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])->find($position->direct_manager_id);
 
             if ($managerPosition) {
-                $activeContract = $managerPosition->activeContracts()
+                $activeContract = $managerPosition
+                    ->activeContracts()
                     ->with(['employee.contracts.position.jobLevel'])
                     ->latest('start_date')
                     ->first();
@@ -291,11 +283,11 @@ class Index extends Component
 
         $techManager = null;
         if ($position?->tech_manager_id) {
-            $techManagerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])
-                ->find($position->tech_manager_id);
+            $techManagerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])->find($position->tech_manager_id);
 
             if ($techManagerPosition) {
-                $activeContract = $techManagerPosition->activeContracts()
+                $activeContract = $techManagerPosition
+                    ->activeContracts()
                     ->with(['employee.contracts.position.jobLevel'])
                     ->latest('start_date')
                     ->first();
@@ -314,35 +306,21 @@ class Index extends Component
 
         $nameCol = "name_{$locale}";
 
-        $excludeIds = collect([
-            $this->employee?->id,
-            $ceo?->id,
-            $directManager?->id,
-            $techManager?->id,
-        ])->filter()->unique()->all();
+        $excludeIds = collect([$this->employee?->id, $ceo?->id, $directManager?->id, $techManager?->id])
+            ->filter()
+            ->unique()
+            ->all();
 
         $sameCityEmployees = Employee::query()
             ->where('city_id', $this->employee?->city_id)
             ->whereNotIn('id', $excludeIds)
-            ->with([
-                'contracts.position.jobLevel',
-            ])
+            ->with(['contracts.position.jobLevel'])
             ->get()
             ->map(function ($emp) use ($nameCol, $titleCol) {
-                $contract = $emp->contracts
-                    ->filter(fn($c) => ($c->is_active || (
-                            !$c->terminated_at &&
-                            $c->start_date <= now() &&
-                            $c->end_date >= now()
-                        ))
-                    )
-                    ->sortByDesc('start_date')
-                    ->first() ?? $emp->latestActiveContract();
+                $contract = $emp->contracts->filter(fn($c) => $c->is_active || (!$c->terminated_at && $c->start_date <= now() && $c->end_date >= now()))->sortByDesc('start_date')->first() ?? $emp->latestActiveContract();
 
                 $emp->displayName = $emp->$nameCol ?? $emp->name_en;
-                $emp->positionTitle = $contract?->position?->$titleCol
-                    ?? $contract?->position?->title_en
-                    ?? '—';
+                $emp->positionTitle = $contract?->position?->$titleCol ?? ($contract?->position?->title_en ?? '—');
                 $emp->jobLevelGrade = $contract?->position?->jobLevel?->grade ?? 999;
 
                 return $emp;
@@ -351,8 +329,6 @@ class Index extends Component
             ->values();
 
         return $members->merge($sameCityEmployees)->unique('id')->values();
-
-
     }
 
     public function mount(): void
