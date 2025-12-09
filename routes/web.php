@@ -44,16 +44,9 @@ Route::group(
     function () {
         Livewire::setUpdateRoute(fn($handle) => Route::post('/livewire/update', $handle));
 
-
-//        Route::view('/', 'dashboard')
-//            ->middleware(['auth', 'verified'])
-//            ->name('dashboard');
-
         Route::middleware(['auth'])->group(function () {
-            Route::redirect('settings', 'settings/profile');
-            Route::get('settings/profile', Profile::class)->name('settings.profile');
+            Route::redirect('settings', 'settings/password');
             Route::get('settings/password', Password::class)->name('settings.password');
-            Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
 
             Route::get('cities', CityModule::class)->name('cities.index');
             Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index');

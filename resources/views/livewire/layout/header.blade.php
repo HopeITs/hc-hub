@@ -89,7 +89,7 @@
                         <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
                         <div class="px-2 py-2">
-                            <a href="{{ route('settings.profile') }}"
+                            <a href="{{ route('settings.password') }}"
                                class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium
                                       text-gray-800 hover:bg-gray-100/90 hover:shadow-sm transition">
                                 <svg class="size-4 text-gray-700" viewBox="0 0 24 24" fill="none"
