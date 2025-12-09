@@ -37,14 +37,19 @@ class NewsCreate extends Component
     ];
 
     public function getEntitiesProperty()
+{
+    return match($this->item['newsable_type'] ?? '') {
+        City::class => City::all(),
+        Center::class => Center::select('id', 'name')->get(),
+        Program::class => Program::select('id', 'name')->get(),
+        Employee::class => Employee::all(),
+        default => collect(),
+    };
+}
+
+    public function updatedItemNewsableType($value): void
     {
-        return match($this->item['newsable_type'] ?? '') {
-            City::class => City::select('id', 'name_en as name')->get(),
-            Center::class => Center::select('id', 'name')->get(),
-            Program::class => Program::select('id', 'name')->get(),
-            Employee::class => Employee::select('id', 'name_en as name')->get(),
-            default => collect(),
-        };
+        $this->item['newsable_id'] = '';
     }
 
     public function save()
@@ -75,10 +80,10 @@ class NewsCreate extends Component
     public function render()
     {
         return view('livewire.news.news-create', [
-            'cities' => City::select('id', 'name_en as name')->get(),
+            'cities' => City::select('id')->get(),
             'centers' => Center::select('id', 'name')->get(),
             'programs' => Program::select('id', 'name')->get(),
-            'employees' => Employee::select('id', 'name_en as name')->get(),
+            'employees' => Employee::select('id')->get(),
         ]);
     }
 }
