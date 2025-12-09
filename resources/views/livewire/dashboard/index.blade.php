@@ -61,12 +61,10 @@
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">
             <livewire:news.today-events-card />
-
         </div>
 
         <div class="h-70 flex items-center justify-center text-white font-semibold">
-            <x-dashboard-cards.upcoming-events-card/>
-
+            <x-dashboard-cards.upcoming-events-card :upcoming-events="$upcomingEvents"/>
         </div>
     </div>
 

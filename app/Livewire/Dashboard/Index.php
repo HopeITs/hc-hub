@@ -103,7 +103,7 @@ class Index extends Component
         $programId = $this->contract->position->program_id ?? null;
 
         return News::query()
-            ->whereBetween('event_date', [$start, $end])
+            ->whereBetween('event_date', [$start->toDateString(), $end->toDateString()])
             ->where(function ($q) use ($cityId, $centerId, $programId, $employeeId) {
                 $q->whereNull('newsable_type')
                     ->orWhere(function ($q2) use ($employeeId) {
