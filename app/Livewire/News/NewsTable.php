@@ -52,7 +52,8 @@ class NewsTable extends LivewireTable
                 ->sortable(),
             Column::make(__('general.actions'), function (Model $m): string {
                 $id = $m->getKey();
-                $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openNewsEdit\', { id: ' . $id . ' })" />');
+                $editUrl = route('news.edit', ['news' => $id]);
+                $editBtn = Blade::render('<x-table.edit-btn href="' . $editUrl . '" />');
                 $deleteBtn = Blade::render('<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />');
 
                 return '<div class="flex items-center justify-center gap-2">' . $editBtn . $deleteBtn . '</div>';

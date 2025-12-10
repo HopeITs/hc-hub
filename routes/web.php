@@ -2,39 +2,19 @@
 
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
-use App\Livewire\Basics\{ChecklistItemModule,
-    CityModule,
-    ContractTypeModule,
-    DepartmentModule,
-    JobLevelModule,
-    LeaveTypeModule};
+use App\Livewire\Basics\{ChecklistItemModule, CityModule, ContractTypeModule, DepartmentModule, JobLevelModule, LeaveTypeModule};
 use App\Livewire\ChecklistItems\{AllItems, DoneRequests, PendingItems, PendingReturns};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
 use App\Livewire\Statistics\ContractStatistics;
 use App\Livewire\Statistics\GeneralStatistics;
-use App\Livewire\Employee\{EmployeeCreate,
-    EmployeeEdit,
-    EmployeeModule,
-    EmployeeProfile,
-    Leave\AllLeaveRequestModule,
-    Leave\CreateLeaveRequest,
-    Leave\EmpLeaveBalanceModule,
-    Leave\MyLeaveRequestModule,
-    Leave\MyLeaveRequestTable};
+use App\Livewire\Employee\{EmployeeCreate, EmployeeEdit, EmployeeModule, EmployeeProfile, Leave\AllLeaveRequestModule, Leave\CreateLeaveRequest, Leave\EmpLeaveBalanceModule, Leave\MyLeaveRequestModule, Leave\MyLeaveRequestTable};
 use App\Livewire\Employee\EmployeeStatistics;
 use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
-use App\Livewire\ProgramManagement\{Center\CenterDetails,
-    Center\CentersModule,
-    DefaultDeliverable\DefaultDeliverablesModule,
-    Program\Create as ProgramCreate,
-    Program\Detail as ProgramDetail,
-    Program\Index as ProgramIndex,
-    Program\Update as ProgramUpdate};
+use App\Livewire\ProgramManagement\{Center\CenterDetails, Center\CentersModule, DefaultDeliverable\DefaultDeliverablesModule, Program\Create as ProgramCreate, Program\Detail as ProgramDetail, Program\Index as ProgramIndex, Program\Update as ProgramUpdate};
 use App\Livewire\Settings\{Appearance, Password, Profile};
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
-
 
 Route::group(
     [
@@ -44,10 +24,9 @@ Route::group(
     function () {
         Livewire::setUpdateRoute(fn($handle) => Route::post('/livewire/update', $handle));
 
-
-//        Route::view('/', 'dashboard')
-//            ->middleware(['auth', 'verified'])
-//            ->name('dashboard');
+        //        Route::view('/', 'dashboard')
+        //            ->middleware(['auth', 'verified'])
+        //            ->name('dashboard');
 
         Route::middleware(['auth'])->group(function () {
             Route::redirect('settings', 'settings/profile');
@@ -87,7 +66,6 @@ Route::group(
                     Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
                     Route::get('/{program:slug}', ProgramDetail::class)->name('show');
                 });
-
 
             Route::prefix('employees')
                 ->name('employees.')
@@ -131,15 +109,11 @@ Route::group(
                     Route::get('/', AllItems::class)->name('index');
                 });
 
-            Route::get('/', \App\Livewire\Dashboard\Index::class)
-                ->name('dashboard');
+            Route::get('/', \App\Livewire\Dashboard\Index::class)->name('dashboard');
 
-            Route::get('/general-statistics', GeneralStatistics::class)
-                ->name('general-statistics');
+            Route::get('/general-statistics', GeneralStatistics::class)->name('general-statistics');
 
-
-            Route::get('/contract-statistics', ContractStatistics::class)
-                ->name('contract-statistics');
+            Route::get('/contract-statistics', ContractStatistics::class)->name('contract-statistics');
 
             Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
 
@@ -150,7 +124,7 @@ Route::group(
             Route::get('/badges', \App\Livewire\Badges\BadgesModule::class)->name('badges.index');
 
             Route::get('/news/create', \App\Livewire\News\NewsCreate::class)->name('news.create');
-
+            Route::get('/news/{news}/edit', \App\Livewire\News\NewsCreate::class)->name('news.edit');
         });
 
         require __DIR__ . '/auth.php';
