@@ -32,7 +32,7 @@ class CourseForm extends Form
                     'notes' => $c->notes,
                     // 'start_date' => optional($c->start_date)->toDateString(),
                     'end_date' => optional($c->end_date)->toDateString(),
-                    'has_certificate' => (int)$c->has_certificate,
+                    'has_certificate' => (int) $c->has_certificate,
                     'duration' => $c->duration,
                     // 'cost' => $c->cost,
                     'status' => $c->status,
@@ -104,7 +104,9 @@ class CourseForm extends Form
         $this->validate();
 
         foreach ($this->courses as $index => $course) {
-            $data = collect($course)->except(['course_attachment', 'file_name', 'id'])->toArray();
+            $data = collect($course)
+                ->except(['course_attachment', 'file_name', 'id'])
+                ->toArray();
 
             if (array_key_exists('id', $course) && isset($course['id'])) {
                 $this->course = Course::find($course['id']);
@@ -116,11 +118,15 @@ class CourseForm extends Form
 
             if ($course['course_attachment'] instanceof TemporaryUploadedFile) {
                 $this->course->clearMediaCollection('file');
+
                 $this->course
                     ->addMedia($course['course_attachment']->getRealPath())
                     ->usingFileName('course-file-' . $this->course->id . '.' . $course['course_attachment']->getClientOriginalExtension())
+                    ->preservingOriginal()
                     ->toMediaCollection('file');
             }
         }
+
+        $this->setEmployee($this->employee);
     }
 }
