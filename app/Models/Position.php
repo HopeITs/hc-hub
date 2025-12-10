@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Position extends Model
 {
-    use HasFactory, HasTranslation;
+    use HasFactory, HasTranslation, LogsActivity;
 
     protected $guarded = ['id'];
 
@@ -24,6 +26,7 @@ class Position extends Model
     // --------------------------------------------
     // Accessors & Mutators
     // --------------------------------------------
+
     protected function title(): Attribute
     {
         return Attribute::make(
@@ -35,6 +38,7 @@ class Position extends Model
     // --------------------------------------------
     // Relationships
     // --------------------------------------------
+
     public function contracts(): HasMany
     {
         return $this->hasMany(Contract::class, 'position_id');
@@ -50,7 +54,8 @@ class Position extends Model
                             ->whereDate('start_date', '<=', now())
                             ->whereDate('end_date', '>=', now());
                     });
-            })->with('employee');
+            })
+            ->with('employee');
     }
 
     public function center(): BelongsTo
@@ -78,7 +83,6 @@ class Position extends Model
         return $this->belongsTo(Department::class, 'department_id');
     }
 
-    // direct / tech hierarchy
     public function directManager(): BelongsTo
     {
         return $this->belongsTo(self::class, 'direct_manager_id');
@@ -102,6 +106,7 @@ class Position extends Model
     // --------------------------------------------
     // Helpers
     // --------------------------------------------
+
     public function employee(): ?Employee
     {
         return $this->activeContracts()->first()?->employee;
@@ -111,10 +116,12 @@ class Position extends Model
     {
         return $this->exist_emp < $this->max_emp;
     }
+
     public function inc(): void
     {
         $this->increment('exist_emp');
     }
+
     public function dec(): void
     {
         if ($this->exist_emp > 0) {
@@ -122,5 +129,28 @@ class Position extends Model
         }
     }
 
+    // --------------------------------------------
+    // Activity Logging
+    // --------------------------------------------
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('position')
+            ->logOnly([
+                'title',              // translatable
+                'center_id',
+                'program_id',
+                'city_id',
+                'job_level_id',
+                'department_id',
+                'direct_manager_id',
+                'tech_manager_id',
+                'max_emp',
+                'exist_emp',
+                'is_active',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Contract;
 use App\Observers\ContractObserver;
+use App\Services\ActivityLogger;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
@@ -18,7 +19,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        //
+        $this->app->singleton(ActivityLogger::class, function ($app) {
+            return new ActivityLogger();
+        });
     }
 
     public function boot(): void

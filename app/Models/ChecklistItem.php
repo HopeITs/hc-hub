@@ -4,16 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class ChecklistItem extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
-        'id',
         'name',
         'order',
-        // 'department_id'
     ];
 
     public function checklist()
@@ -21,13 +21,20 @@ class ChecklistItem extends Model
         return $this->belongsTo(Checklist::class);
     }
 
-    public function defaultDeliverable(){
-        return $this->hasMany(DefaultDeliverable::class ,'item_id');
+    public function defaultDeliverable()
+    {
+        return $this->hasMany(DefaultDeliverable::class, 'item_id');
     }
 
-    // public function department()
-    // {
-    //     return $this->belongsTo(Department::class);
-    // }
-
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('checklist_item')
+            ->logOnly([
+                'name',
+                'order',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 }

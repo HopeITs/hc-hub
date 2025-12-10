@@ -6,13 +6,13 @@ use App\Traits\HasTranslation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\LogOptions;
 
 class LeaveType extends Model
 {
-    use HasFactory,HasTranslation;
+    use HasFactory,HasTranslation, LogsActivity;
 
     protected $fillable = [
-        'id',
         'name_en',
         'name_ar',
         'base_days',
@@ -34,5 +34,21 @@ class LeaveType extends Model
     public function isAnnual(): bool
     {
         return $this->id === \App\Enums\LeaveTypeCases::Annual;
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('leave_type')
+            ->logOnly([
+                'name',           // translatable field
+                'name_en',
+                'name_ar',
+                'base_days',
+                'allowed_gender',
+                'marital_status',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }

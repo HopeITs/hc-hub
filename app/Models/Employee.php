@@ -10,13 +10,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Employee extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, HasTranslation;
+    use HasFactory, InteractsWithMedia, HasTranslation, LogsActivity;
 
     protected $guarded = ['id'];
 
@@ -397,5 +399,27 @@ class Employee extends Model implements HasMedia
 
     }
 
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('employee')
+            ->logOnly([
+                'name',
+                'father_name',
+                'mother_name',
+                'address',
+                'city_id',
+                'dob',
+                'actual_dob',
+                'board_member_started_at',
+                'board_member_end_at',
+                'is_active',
+                'is_board_member',
+                'children',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 
 }

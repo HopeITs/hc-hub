@@ -11,21 +11,25 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, LogsActivity;
 
     protected $fillable = ['email', 'password', 'employee_id'];
+
     protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
         ];
     }
+
 
     public function profile(): BelongsTo
     {
@@ -41,6 +45,10 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Folder::class);
     }
+
+    // -----------------------------------------
+    // Role Helpers
+    // -----------------------------------------
 
     public function activeRole(): ?Role
     {
@@ -82,6 +90,7 @@ class User extends Authenticatable
         if ($this->relationLoaded('roles')) {
             return $this->roles->filter(fn($r) => empty($r->pivot->is_active));
         }
+
         return $this->roles()->wherePivot('is_active', false)->get();
     }
 
@@ -90,6 +99,7 @@ class User extends Authenticatable
         if ($this->relationLoaded('roles')) {
             return $this->roles->count() > 1;
         }
+
         return $this->roles()->limit(2)->count() > 1;
     }
 
@@ -101,9 +111,11 @@ class User extends Authenticatable
             }
 
             $ids = $this->roles()->pluck('roles.id')->all();
+
             if (!empty($ids)) {
                 $this->roles()->updateExistingPivot($ids, ['is_active' => false]);
             }
+
             $this->roles()->updateExistingPivot($roleId, ['is_active' => true]);
 
             if ($this->relationLoaded('roles')) {
@@ -114,19 +126,28 @@ class User extends Authenticatable
         });
     }
 
-    public function hasRole(string $roleName): bool
-    {
-        return $this->relationLoaded('roles') ? $this->roles->contains(fn($r) => Str::slug($r->name) === Str::slug($roleName)) : $this->roles()->where('name', $roleName)->exists();
-    }
-
-    public function getActiveRoleNameAttribute(): ?string
-    {
-        return $this->myRole();
-    }
-
     public function initials(): string
     {
         $display = $this->profile?->name ?: '';
-        return Str::of($display)->trim()->explode(' ')->take(2)->map(fn($w) => Str::substr($w, 0, 1))->implode('');
+        return Str::of($display)
+            ->trim()
+            ->explode(' ')
+            ->take(2)
+            ->map(fn($w) => Str::substr($w, 0, 1))
+            ->implode('');
+    }
+
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('user')
+            ->logOnly([
+                'email',
+                'employee_id',
+                'email_verified_at',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }

@@ -6,10 +6,12 @@ use App\Traits\HasTranslation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class JobLevel extends Model
 {
-    use HasFactory , HasTranslation;
+    use HasFactory, HasTranslation, LogsActivity;
 
     protected $fillable = [
         'name_en',
@@ -26,9 +28,25 @@ class JobLevel extends Model
             set: fn($value) => $this->setTranslatableAttribute('name', $value)
         );
     }
+
     public function positions()
     {
         return $this->hasMany(Position::class, 'job_level_id');
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('job_level')
+            ->logOnly([
+                'name',        // translatable accessor
+                'name_en',
+                'name_ar',
+                'description', // translatable field
+                'grade',
+                'email',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 }

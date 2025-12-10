@@ -8,10 +8,12 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Carbon;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class LeaveRequest extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $guarded = ['id'];
 
@@ -113,13 +115,25 @@ class LeaveRequest extends Model
     }
 
 
-
-
-
     public function scopePending($q)
     {
         return $q->where('status', LeaveRequestStatus::Pending);
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('leave_request')
+            ->logOnly([
+                'leave_balance_id',
+                'start_at',
+                'end_at',
+                'type',
+                'status',
+                'alternative_employee_id',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 
 }

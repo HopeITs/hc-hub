@@ -5,12 +5,14 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class News extends Model implements HasMedia
 {
-    use InteractsWithMedia;
+    use InteractsWithMedia, LogsActivity;
 
     protected $table = 'news';
 
@@ -68,5 +70,23 @@ class News extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('news-image')->singleFile();
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('news')
+            ->logOnly([
+                'title',
+                'description',
+                'photo',
+                'display_until',
+                'published_at',
+                'event_date',
+                'newsable_id',
+                'newsable_type',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }

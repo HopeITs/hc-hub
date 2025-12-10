@@ -6,18 +6,20 @@ use App\Traits\HasTranslation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class City extends Model
 {
-    use HasFactory ,HasTranslation;
+    use HasFactory, HasTranslation, LogsActivity;
 
     protected $fillable = [
-        'id',
         'name_en',
         'name_ar',
         'code',
-        'is_active'
+        'is_active',
     ];
+
     protected function name(): Attribute
     {
         return Attribute::make(
@@ -26,15 +28,33 @@ class City extends Model
         );
     }
 
-    public function holidays() {
+    public function holidays()
+    {
         return $this->morphMany(Holiday::class, 'holidayable');
     }
+
     public function centers()
     {
         return $this->hasMany(Center::class);
     }
+
     public function positions()
     {
         return $this->hasMany(Position::class);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('city')
+            ->logOnly([
+                'name',
+                'name_en',
+                'name_ar',
+                'code',
+                'is_active',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }
