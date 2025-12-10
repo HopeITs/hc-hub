@@ -2,14 +2,27 @@
 
 @section('title', '401 Unauthorized')
 
+@section('page-background')
+    <style>
+        body {
+            background: url('{{ asset('assets/errors/401.png') }}') no-repeat center center;
+            background-size: cover;
+            position: relative;
+            top:0;
+        }
+    </style>
+@endsection
+
 @section('content')
-    <img src="{{ asset('assets/errors/401.png') }}" class="error-image">
+    <div class="content-box">
+        <div class="title">Not Authorized
+            <br>
+            “You don’t have access to this page.”</div>
 
-    <div class="title">Unauthorized</div>
+        <div class="message">
+            It looks like your account doesn’t have permission to view this content. If you think this is a mistake, please reach out to your administrator.
+        </div>
 
-    <div class="message">
-        You are not authorized to access this page.
+        <a href="{{ url('/') }}" class="btn-home">Go back home</a>
     </div>
-
-    <a href="{{ route('login') }}" class="btn-home">Login</a>
 @endsection

@@ -4,10 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title')</title>
+    @yield('page-background')
 
     <style>
         html, body {
-            background-color: #fff;
+            background-color: #f3f4f6;
             color: #333;
             font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
             "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -15,39 +16,52 @@
             height: 100%;
         }
 
-        .full-banner {
-            width: 100%;
-            display: block;
-        }
-
-        .content-box {
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: center;
-            padding: 40px 20px;
-        }
-
         .title {
-            font-size: 32px;
-            font-weight: 600;
+            font-size: 21px;
+            font-weight: 700;
             margin-top: 20px;
+            color: #58595b;
         }
 
         .message {
             font-size: 18px;
             color: #666;
-            margin: 15px 0 25px 0;
+            margin: 5px 0 25px 0;
+
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+
+            white-space: normal;
         }
+
 
         .btn-home {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #c0392b;
-            color: #fff;
+            color: #be1f24;
             border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
+            font-weight:400;
+            font-size: 11px;
+            text-decoration: underline;
         }
+
+        .content-box {
+            position: absolute;
+            left: 50%;
+            bottom: 10px;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 700px;
+
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+        }
+
+
+
     </style>
 </head>
 

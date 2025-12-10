@@ -2,14 +2,26 @@
 
 @section('title', '500 Server Error')
 
+@section('page-background')
+    <style>
+        body {
+            background: url('{{ asset('assets/errors/404.png') }}') no-repeat center center;
+            background-size: cover;
+            position: relative;
+            top:0;
+        }
+    </style>
+@endsection
+
 @section('content')
-    <img src="{{ asset('assets/errors/500.png') }}" class="error-image">
+    <div class="content-box">
+        <div class="title">Internal Server Error<br>
+            “We hit an unexpected error.”</div>
 
-    <div class="title">Server Error</div>
+        <div class="message">
+            It’s not you. It’s us. Try refreshing the page, or come back a little later.
+        </div>
 
-    <div class="message">
-        Something went wrong on our side. Please try again later.
+        <a href="{{ url('/') }}" class="btn-home">Go to homepage</a>
     </div>
-
-    <a href="{{ url('/') }}" class="btn-home">Go Home</a>
 @endsection

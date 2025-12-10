@@ -2,16 +2,26 @@
 
 @section('title', '404 Not Found')
 
-@section('banner')
-    <img src="{{ asset('assets/errors/404.png') }}" class="full-banner">
+@section('page-background')
+    <style>
+        body {
+            background: url('{{ asset('assets/errors/404.png') }}') no-repeat center center;
+            background-size: cover;
+            position: relative;
+            top:0;
+        }
+    </style>
 @endsection
 
 @section('content')
-    <div class="title">Page Not Found</div>
+        <div class="content-box">
+            <div class="title">Not Found <br>
+                “Well… this is awkward.”</div>
 
-    <div class="message">
-        The page you're looking for doesn't exist or may have been moved.
-    </div>
+            <div class="message">
+                We can’t find the page you were looking for. It might have been removed, renamed, or never existed in the first place.
+            </div>
 
-    <a href="{{ url('/') }}" class="btn-home">Go Home</a>
+            <a href="{{ url('/') }}" class="btn-home">Return To Dashboard</a>
+        </div>
 @endsection
