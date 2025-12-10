@@ -40,6 +40,7 @@ class RoleMiddleware
             }
 
         }
+
         if (!$user->hasAnyRole($roles)) {
             throw UnauthorizedException::forRoles($roles);
         }

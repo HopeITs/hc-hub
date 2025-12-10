@@ -39,22 +39,20 @@
                     </x-layouts.app.sidebar.single-item>
 
                     {{-- Statistics (HR + super-admin only - kept as per logic) --}}
-                    @activerole('HR',  'super-admin')
+                    @activerole('HR','super-admin')
                     <x-layouts.app.sidebar.dropdown-nav-list id="statistics" title="{{__('general.statistics')}}"
-                                                             :active="request()->routeIs('general-statistics') ||
-                    request()->routeIs('contract-statistics')">
+                                                             :active="request()->routeIs('statistics.general') || request()->routeIs('statistics.contract')">
                         <x-slot name="icon">
                             <x-icons.statistics/>
                         </x-slot>
                         <x-slot name="list">
-
-                            <x-layouts.app.sidebar.nav-item :href="route('general-statistics')"
-                                                            :active="request()->routeIs('general-statistics')">
+                            <x-layouts.app.sidebar.nav-item :href="route('statistics.general')"
+                                                            :active="request()->routeIs('statistics.general')">
                                 {{ __('general.general-statistics') }}
                             </x-layouts.app.sidebar.nav-item>
 
-                            <x-layouts.app.sidebar.nav-item :href="route('contract-statistics')"
-                                                            :active="request()->routeIs('contract-statistics')">
+                            <x-layouts.app.sidebar.nav-item :href="route('statistics.contract')"
+                                                            :active="request()->routeIs('statistics.contract')">
                                 {{ __('general.contract-statistics') }}
                             </x-layouts.app.sidebar.nav-item>
                         </x-slot>
@@ -87,7 +85,7 @@
                                 {{ trans_choice('general.city', 2) }}
                             </x-layouts.app.sidebar.nav-item>
                             {{-- Contract Types (HR + super-admin) --}}
-                            @activerole('HR',  'super-admin')
+                            @activerole('HR','super-admin')
                             <x-layouts.app.sidebar.nav-item :href="route('contract-types.index')"
                                                             :active="request()->routeIs('contract-types.index')">
                                 {{ trans_choice('general.contract-type', 2) }}
@@ -104,7 +102,7 @@
                                 {{ trans_choice('general.checklist-items', 2) }}
                             </x-layouts.app.sidebar.nav-item>
                             {{-- Job Levels (HR + super-admin) --}}
-                            @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'super-admin')
+                            @activerole('HR', 'super-admin')
                             <x-layouts.app.sidebar.nav-item :href="route('job-levels.index')"
                                                             :active="request()->routeIs('job-levels.index')">
                                 {{ trans_choice('general.job-level', 2) }}
@@ -123,7 +121,7 @@
 
                     {{-- 3. Program Management --}}
                     {{-- Dropdown visible to HR & super-admin --}}
-                    @activerole('super-admin', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
+                    @activerole('super-admin', 'HR')
                     <x-layouts.app.sidebar.dropdown-nav-list id="program-management"
                                                              :title="__('general.programs-management')" :active="request()->routeIs('programs.*') ||
                         request()->routeIs('positions.*') ||
@@ -154,7 +152,7 @@
                     @endactiverole
 
                     {{-- Centers for everyone else (Single item) --}}
-                    @notactiverole('super-admin', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
+                    @notactiverole('super-admin', 'HR')
                     <x-layouts.app.sidebar.single-item :href="route('centers.index')"
                                                        :active="request()->routeIs('centers.*')">
                         <x-slot name="icon">

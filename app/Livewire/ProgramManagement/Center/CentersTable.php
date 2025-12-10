@@ -47,7 +47,8 @@ class CentersTable extends LivewireTable
     protected function columns(): array
     {
         $locale = app()->getLocale();
-        $isHR = auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP');
+        $user = auth()->user();
+        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin') ;
 
         return [
             Column::make('ID', 'id')->sortable(),

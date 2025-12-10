@@ -2,13 +2,8 @@
 
 use App\Http\Controllers\ContractExportController;
 use App\Livewire\Archives\ArchivedFilesModule;
-use App\Livewire\Basics\{ChecklistItemModule,
-    CityModule,
-    ContractTypeModule,
-    DepartmentModule,
-    JobLevelModule,
-    LeaveTypeModule
-};
+use App\Livewire\Dashboard\Index as DashboardIndex;
+
 use App\Livewire\ChecklistItems\{AllItems, DoneRequests, PendingItems, PendingReturns};
 use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
 use App\Livewire\Statistics\ContractStatistics;
@@ -18,21 +13,12 @@ use App\Livewire\Employee\{EmployeeCreate,
     EmployeeModule,
     EmployeeProfile,
     Leave\AllLeaveRequestModule,
-    Leave\CreateLeaveRequest,
     Leave\EmpLeaveBalanceModule,
     Leave\MyLeaveRequestModule,
     Leave\MyLeaveRequestTable
 };
 use App\Livewire\Employee\EmployeeStatistics;
-use App\Livewire\Position\{OrgChart, PositionCreate, PositionEdit, PositionsModule};
-use App\Livewire\ProgramManagement\{Center\CenterDetails,
-    Center\CentersModule,
-    DefaultDeliverable\DefaultDeliverablesModule,
-    Program\Create as ProgramCreate,
-    Program\Detail as ProgramDetail,
-    Program\Index as ProgramIndex,
-    Program\Update as ProgramUpdate
-};
+use App\Livewire\ProgramManagement\DefaultDeliverable\DefaultDeliverablesModule;
 use App\Livewire\Settings\{Appearance, Password, Profile};
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
@@ -49,8 +35,17 @@ Route::group(
 
 
         Route::middleware(['auth'])->group(function () {
-            Route::get('/', \App\Livewire\Dashboard\Index::class)
+            Route::get('/', DashboardIndex::class)
                 ->name('dashboard');
+            Route::prefix('statistics')
+                ->name('statistics.')
+                ->middleware('role:HR|super-admin')
+                ->group(function () {
+                    Route::get('/general', GeneralStatistics::class)->name('general');
+                    Route::get('/contract', ContractStatistics::class)->name('contract');
+                });
+
+
 
             Route::redirect('settings', 'settings/profile');
             Route::get('settings/profile', Profile::class)->name('settings.profile');
@@ -61,24 +56,7 @@ Route::group(
             //Basic project routes
             require __DIR__ . '/basic-project.php';
 
-            Route::prefix('positions')
-                ->name('positions.')
-                ->group(function () {
-                    Route::get('/', PositionsModule::class)->name('index');
-                    Route::get('/create', PositionCreate::class)->name('create');
-                    Route::get('/{position}/edit', PositionEdit::class)->name('edit');
-                });
-
-
-            Route::prefix('programs')
-                ->name('programs.')
-                ->group(function () {
-                    Route::get('/', ProgramIndex::class)->name('index');
-                    Route::get('/create', ProgramCreate::class)->name('create');
-                    Route::get('/edit/{program:slug}', ProgramUpdate::class)->name('edit');
-                    Route::get('/{program:slug}', ProgramDetail::class)->name('show');
-                });
-
+            require __DIR__ . '/projects-management.php';
 
             Route::prefix('employees')
                 ->name('employees.')
@@ -119,16 +97,11 @@ Route::group(
                     Route::get('/pending-delivers', PendingItems::class)->name('pending-delivers');
                     Route::get('/pending-returns', PendingReturns::class)->name('pending-returns');
                     Route::get('/done-requests', DoneRequests::class)->name('done-requests');
-                    Route::get('/', AllItems::class)->name('index');
+                    Route::get('/all', AllItems::class)->name('index');
                 });
 
 
-            Route::get('/general-statistics', GeneralStatistics::class)
-                ->name('general-statistics');
 
-
-            Route::get('/contract-statistics', ContractStatistics::class)
-                ->name('contract-statistics');
 
             Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
 
