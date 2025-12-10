@@ -535,8 +535,30 @@ return [
     'tech' => 'Technical Manager',
     'fit' =>  'Fit',
     'today' =>  'Today',
-    'tomorrow' => 'Tomorrow'
+    'tomorrow' => 'Tomorrow',
 
+    '404-title1' => 'Not Found',
+    '404-title2' => '“Well… this is awkward.”',
+    '404-message' => 'We can’t find the page you were looking for. It might have been removed, renamed, or never existed in the first place.',
+    '404-button' => 'Return To Dashboard',
 
+    '403-title1' => 'Forbidden',
+    '403-title2' => '“You don’t have permission to view this page.”',
+    '403-message' => 'You might not have the required permissions to open this page. If something feels off, contact your administrator for help.',
+    '403-button' => 'Go to Safety',
 
+    '401-title1' => 'Not Authorized',
+    '401-title2' => '“You don’t have access to this page.”',
+    '401-message' => 'It looks like your account doesn’t have permission to view this content. If you think this is a mistake, please reach out to your administrator.',
+    '401-button' => 'Go back home',
+
+    '419-title1' => 'Page Expired ',
+    '419-title2' => '“Your session timed out.”',
+    '419-message' => 'It looks like your session has expired. Refresh the page or sign in again to continue where you left off.',
+    '419-button' => 'Go Back To Dashboard',
+
+    '500-title1' => 'Internal Server Error',
+    '500-title2' => '“We hit an unexpected error.”',
+    '500-message' => 'It’s not you. It’s us. Try refreshing the page, or come back a little later.',
+    '500-button' => 'Go to homepage',
 ];

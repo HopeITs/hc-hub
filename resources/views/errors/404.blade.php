@@ -15,13 +15,13 @@
 
 @section('content')
         <div class="content-box">
-            <div class="title">Not Found <br>
-                “Well… this is awkward.”</div>
+            <div class="title">@lang('general.404-title1') <br>
+                @lang('general.404-title2')</div>
 
             <div class="message">
-                We can’t find the page you were looking for. It might have been removed, renamed, or never existed in the first place.
+                @lang('general.404-message')
             </div>
 
-            <a href="{{ url('/') }}" class="btn-home">Return To Dashboard</a>
+            <a href="{{ url('/') }}" class="btn-home">@lang('general.404-button')</a>
         </div>
 @endsection

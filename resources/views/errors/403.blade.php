@@ -15,13 +15,13 @@
 
 @section('content')
     <div class="content-box">
-        <div class="title">Forbidden<br>
-            “You don’t have permission to view this page.”</div>
+        <div class="title">@lang('general.403-title1')<br>
+            @lang('general.403-title2')</div>
 
         <div class="message">
-            You might not have the required permissions to open this page. If something feels off, contact your administrator for help.
+            @lang('general.403-message')
         </div>
 
-        <a href="{{ url('/') }}" class="btn-home">Go to Safety</a>
+        <a href="{{ url('/') }}" class="btn-home">@lang('general.403-button')</a>
     </div>
 @endsection

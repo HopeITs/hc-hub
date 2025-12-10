@@ -15,13 +15,13 @@
 
 @section('content')
     <div class="content-box">
-        <div class="title">Internal Server Error<br>
-            “We hit an unexpected error.”</div>
+        <div class="title">@lang('general.500-title1')<br>
+            @lang('general.500-title2')</div>
 
         <div class="message">
-            It’s not you. It’s us. Try refreshing the page, or come back a little later.
+            @lang('general.500-message')
         </div>
 
-        <a href="{{ url('/') }}" class="btn-home">Go to homepage</a>
+        <a href="{{ url('/') }}" class="btn-home">@lang('general.500-button')</a>
     </div>
 @endsection

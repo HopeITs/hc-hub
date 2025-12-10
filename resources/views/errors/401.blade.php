@@ -15,14 +15,13 @@
 
 @section('content')
     <div class="content-box">
-        <div class="title">Not Authorized
-            <br>
-            “You don’t have access to this page.”</div>
+        <div class="title">@lang('general.401-title1')<br>
+            @lang('general.401-title2')</div>
 
         <div class="message">
-            It looks like your account doesn’t have permission to view this content. If you think this is a mistake, please reach out to your administrator.
+            @lang('general.401-message')
         </div>
 
-        <a href="{{ url('/') }}" class="btn-home">Go back home</a>
+        <a href="{{ url('/') }}" class="btn-home">@lang('general.401-button')</a>
     </div>
 @endsection
