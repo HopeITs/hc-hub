@@ -47,6 +47,7 @@ class EmployeeTable extends LivewireTable
 
     protected function columns(): array
     {
+        $user = auth()->user();
         return [
             Column::make('ID', 'id')->sortable(),
 
@@ -131,8 +132,8 @@ class EmployeeTable extends LivewireTable
                     '<x-table.delete-btn :modelId="' . $model->getKey() . '" />'
                 );
 
-                return $toggleBtn . $editBtn . $deleteBtn;
-            })->asHtml(),
+                return $toggleBtn . $editBtn ;
+            })->visible($user->activeRoleIs('HR'))->asHtml(),
         ];
     }
 

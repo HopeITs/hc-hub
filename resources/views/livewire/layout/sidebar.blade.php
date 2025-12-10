@@ -163,7 +163,7 @@
                     @endnotactiverole
 
                     {{-- 4. Employee Management (super-admin + HR) --}}
-                    @activerole('super-admin', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
+                    @activerole('super-admin', 'HR','general-manager')
                     <x-layouts.app.sidebar.dropdown-nav-list id="employees-management"
                                                              :title="trans_choice('general.employee-management', 2)"
                                                              :active="request()->routeIs('employees.*') ||
