@@ -193,7 +193,7 @@
 
                     {{-- 5. Leave Management (Holidays and leaves) --}}
                     {{-- Visible to: HR, super-admin, AND Managers --}}
-                    @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'super-admin', 'manager', 'manager', 'general-manager', 'general manager')
+                    @activerole('HR', 'super-admin', 'manager', 'general-manager')
                     <x-layouts.app.sidebar.dropdown-nav-list id="leaves-management"
                                                              title="{{__('general.leaves-management')}}"
                                                              :active="(request()->routeIs('leaves.all') || request()->routeIs('leaves.balance'))">
@@ -208,7 +208,7 @@
                             </x-layouts.app.sidebar.nav-item>
 
                             {{-- Balance: ONLY HR + super-admin (Managers excluded) --}}
-                            @activerole('HR', 'hr', 'HR-SYR', 'HR-ALP', 'super-admin')
+                            @activerole('HR', 'super-admin')
                             <x-layouts.app.sidebar.nav-item :href="route('leaves.balance')"
                                                             :active="request()->routeIs('leaves.balance')">
                                 {{ __('general.balance') }}
@@ -261,7 +261,7 @@
                     </x-layouts.app.sidebar.single-item>
 
                     {{-- 8. News Management (super-admin, Managers, HRs) --}}
-                    @activerole('super-admin', 'general-manager', 'general manager', 'manager', 'manager', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
+                    @activerole('HR','super-admin', 'general-manager',  'manager')
                     <x-layouts.app.sidebar.single-item :href="route('news.index')"
                                                        :active="request()->routeIs('news.*')">
                         <x-slot name="icon">
@@ -272,7 +272,7 @@
                     @endactiverole
 
 
-                    @activerole('super-admin', 'HR', 'HR-SYR', 'HR-ALP')
+                    @activerole('super-admin', 'HR')
                     <x-layouts.app.sidebar.single-item :href="route('badges.index')"
                                                        :active="request()->routeIs('badges.*')">
                         <x-slot name="icon" class="text-secondary-light">

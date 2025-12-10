@@ -54,20 +54,20 @@ Route::group(
             require __DIR__ . '/basic-project.php';
 
             require __DIR__ . '/projects-management.php';
+
             require __DIR__ . '/employees-management.php';
 
             Route::prefix('leaves')
                 ->name('leaves.')
                 ->group(function () {
                     Route::get('/', MyLeaveRequestModule::class)->name('index');
-                    Route::get('/all', AllLeaveRequestModule::class)->name('all');
-                    Route::get('/balance', EmpLeaveBalanceModule::class)->name('balance');
+                    Route::get('/all', AllLeaveRequestModule::class)->name('all')->middleware('role:HR|super-admin|manager|general-manager');
+                    Route::get('/balance', EmpLeaveBalanceModule::class)->name('balance')->middleware('role:HR|super-admin|general-manager');
                 });
 
 
 
             Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
-            Route::get('my-leaves', MyLeaveRequestTable::class)->name('leaves.index');
             Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', false)->name('my-folders.index');
             Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', true)->name('shared-folders.index');
 
