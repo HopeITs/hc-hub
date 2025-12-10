@@ -1,6 +1,16 @@
 <?php
 
 return [
+    'granted_by' => 'Granted By',
+    'organization' => 'Organization',
+    'cost' => 'Cost',
+    'e.g_20_hours_2_weeks' => 'eg: 20 hours, 2 weeks, etc.. ',
+    'has_certificate' => 'Has Certificate',
+    'pending' => 'Pending',
+    'rejected' => 'Rejected',
+    'in_progress' => 'In Progress',
+    'finished' => 'Finished',
+    'certificate_attachment' => 'Certificate Attachment',
     'field-of-study' => 'Field of Study',
     'specialization' => 'Specialization',
     'degree' => 'Degree',
@@ -309,7 +319,7 @@ return [
     'not_approved' => 'Not Approved',
     'job_title' => 'Job Title',
     'role' => 'Role|Roles',
-    'end_date' => 'Start Date',
+    'end_date' => 'End Date',
     'start_date' => 'Start Date',
     'current_salary' => 'Current Salary',
     'new_salary' => 'New Salary',

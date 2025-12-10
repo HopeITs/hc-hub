@@ -1,6 +1,16 @@
 <?php
 
 return [
+    'granted_by' => 'مُنح بواسطة',
+    'organization' => 'الجهة',
+    'cost' => 'التكلفة',
+    'e.g_20_hours_2_weeks' => 'مثال: 20 ساعة، أسبوعان، إلخ..',
+    'has_certificate' => 'يحتوي على شهادة',
+    'pending' => 'قيد الانتظار',
+    'rejected' => 'مرفوض',
+    'in_progress' => 'جارٍ التنفيذ',
+    'finished' => 'مكتمل',
+    'certificate_attachment' => 'مرفق الشهادة',
     'field-of-study' => 'مجال الدراسة',
     'specialization' => 'الاختصاص',
     'degree' => 'الدرجة العلمية',
@@ -213,7 +223,7 @@ return [
     'add-new-note' => 'أضف ملاحظة جديدة',
     'edit-note' => 'تعديل الملاحظة',
     'note-content' => 'محتوى الملاحظة',
-    'write-your-note'=>'اكتب ملاحظتك',
+    'write-your-note' => 'اكتب ملاحظتك',
     'save-changes' => 'حفظ التغييرات',
     'delete-note' => 'حذف الملاحظة',
     'delete-note-text' => 'هل أنت متأكد من أنك تريد حذف هذه الملاحظة؟ لا يمكن التراجع عن هذا الإجراء.',
@@ -223,7 +233,7 @@ return [
     'upcoming-leaves' => 'الإجازات القادمة',
     'no-news-text' => 'لا يوجد أي اخبار أو تحديثات',
     'no-events-today' => 'لا يوجد أحداث اليوم',
-    'no-events-today-text'=> 'تحقق مرة أخرى غدًا للحصول على التحديثات.',
+    'no-events-today-text' => 'تحقق مرة أخرى غدًا للحصول على التحديثات.',
     'personal-inventory' => 'الممتلكات الشخصية',
     'badges-warnings' => 'الشارات والتنبيهات',
     'employees-per-department' => 'الموظفون حسب كل قسم',
@@ -240,13 +250,12 @@ return [
     'manager' => 'المدير',
     'view-positions' => 'إظهار المناصب',
     'located-in' => 'يقع في ',
-    'centers-text' => "وهو المكتب الرئيسي المسؤول عن مركز الرجاء في سوريا.",
+    'centers-text' => 'وهو المكتب الرئيسي المسؤول عن مركز الرجاء في سوريا.',
     'employees-by-contract-type' => 'الموظفون حسب نوع العقد',
     'employees-by-program' => 'الموظفون حسب البرنامج',
     'contact' => 'التواصل',
     'items' => 'الممتلكات',
     'months' => 'شهر',
-
 
     'identity-org' => 'معلومات الهوية',
     'terms-status' => 'حالة الشروط',
@@ -309,7 +318,7 @@ return [
     'end_date' => 'تاريخ الانتهاء',
     'current_salary' => 'الراتب الحالي',
     'duration' => 'المدة',
-    'all-leaves'    =>  'جميع الإجازات',
+    'all-leaves' => 'جميع الإجازات',
     'new_salary' => 'الراتب الجديد',
     'related_evaluation' => 'التقييم المرتبط',
     'delivered_at' => 'تاريخ التسليم',
@@ -446,8 +455,8 @@ return [
     'online' => 'عبر الإنترنت',
     'total' => 'المجموع',
 
-    'accept' => 'قبول' ,
-    'reject' => 'رفض' ,
+    'accept' => 'قبول',
+    'reject' => 'رفض',
     'reject-reason' => 'سبب الرفض',
     'during-period' => 'خلال مدة',
     'no-data-filters' => 'لا توجد بيانات مطابقة للمرشحات المحددة.',
@@ -488,7 +497,6 @@ return [
         4 => 'الخميس',
         5 => 'الجمعة',
         6 => 'السبت',
-
     ],
     'balance' => 'رصيد الإجازات',
     'deserved' => 'الرصيد السنوي المستحق',
@@ -523,7 +531,6 @@ return [
     'direct' => 'المدير المباشر',
     'tech' => 'المدير التقني',
     'fit' => 'مناسب',
-    'today' =>  'اليوم',
-    'tomorrow' => 'غداً'
-
+    'today' => 'اليوم',
+    'tomorrow' => 'غداً',
 ];
