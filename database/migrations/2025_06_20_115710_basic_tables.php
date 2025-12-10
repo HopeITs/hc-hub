@@ -160,7 +160,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create("course_categories", function(Blueprint $table) {
+        Schema::create('course_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name_en');
             $table->string('name_ar');
@@ -313,6 +313,8 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->string('category')->nullable();
+            $table->string('file_path')->nullable();
             $table->timestamps();
         });
 

@@ -1,6 +1,14 @@
 <?php
 
 return [
+    'choose' => 'اختر',
+    'name' => 'الاسم',
+    'personal_documents' => 'أوراق شخصية',
+    'education_certificate' => 'شهادة علمية',
+    'experience_certificate' => 'شهادة خبرة',
+    'cv' => 'السيرة الذاتية',
+    'contract' => 'عقد',
+    'other' => 'أخرى',
     'course' => 'الدورة التدريبية',
     'granted_by' => 'مُنح بواسطة',
     'organization' => 'الجهة',

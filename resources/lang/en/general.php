@@ -1,6 +1,14 @@
 <?php
 
 return [
+    'choose' => 'Choose',
+    'name' => 'Name',
+    'personal_documents' => 'Personal Documents',
+    'education_certificate' => 'Education Certificate',
+    'experience_certificate' => 'Experience Certificate',
+    'cv' => 'CV',
+    'contract' => 'Contract',
+    'other' => 'Other',
     'course' => 'Course',
     'granted_by' => 'Granted By',
     'organization' => 'Organization',
@@ -229,7 +237,7 @@ return [
     'add-new-note' => 'Add New Note',
     'edit-note' => 'Edit Note',
     'note-content' => 'Note Content',
-    'write-your-note'=>'Write Your Note',
+    'write-your-note' => 'Write Your Note',
     'save-changes' => 'Save Changes',
     'delete-note' => 'Delete Note',
     'delete-note-text' => 'you sure you want to delete this note? This action cannot be undone.',
@@ -239,7 +247,7 @@ return [
     'upcoming-leaves' => 'Upcoming Leaves',
     'no-news-text' => 'No recent company updates',
     'no-events-today' => 'No events today',
-    'no-events-today-text'=> 'Check back tomorrow for updates.',
+    'no-events-today-text' => 'Check back tomorrow for updates.',
     'personal-inventory' => 'Personal Inventory',
     'badges-warnings' => 'Badges and warnings',
     'employees-per-department' => 'Employees and Departments',
@@ -260,8 +268,6 @@ return [
     'employees-by-contract-type' => 'Employees By Contract Type',
     'employees-by-program' => 'Employees By Program',
     'contact' => 'Contact',
-
-
 
     'identity-org' => 'Identity Info',
     'terms-status' => 'Terms Status',
@@ -461,7 +467,7 @@ return [
     'online' => 'Online',
     'reset' => 'Reset',
     'statistics' => 'Statistics',
-    'leaves-management'=>'Leaves Management',
+    'leaves-management' => 'Leaves Management',
     'profile' => [
         'settings' => 'Account Settings',
         'manage-settings' => 'Manage your account and personal information',
@@ -496,7 +502,6 @@ return [
         4 => 'Thursday',
         5 => 'Friday',
         6 => 'Saturday',
-
     ],
     'balance' => 'Leave Balance',
     'deserved' => 'Deserved Yearly Balance',
@@ -530,10 +535,7 @@ return [
     'all-departments' => 'All Departments',
     'direct' => 'Direct Manager',
     'tech' => 'Technical Manager',
-    'fit' =>  'Fit',
-    'today' =>  'Today',
-    'tomorrow' => 'Tomorrow'
-
-
-
+    'fit' => 'Fit',
+    'today' => 'Today',
+    'tomorrow' => 'Tomorrow',
 ];
