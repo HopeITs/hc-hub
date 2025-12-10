@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'course' => 'الدورة التدريبية',
     'granted_by' => 'مُنح بواسطة',
     'organization' => 'الجهة',
     'cost' => 'التكلفة',

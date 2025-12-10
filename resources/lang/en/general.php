@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'course' => 'Course',
     'granted_by' => 'Granted By',
     'organization' => 'Organization',
     'cost' => 'Cost',
