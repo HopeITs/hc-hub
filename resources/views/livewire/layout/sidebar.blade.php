@@ -121,7 +121,7 @@
 
                     {{-- 3. Program Management --}}
                     {{-- Dropdown visible to HR & super-admin --}}
-                    @activerole('super-admin', 'HR')
+                    @activerole('super-admin', 'HR' , 'manager','general-manager')
                     <x-layouts.app.sidebar.dropdown-nav-list id="program-management"
                                                              :title="__('general.programs-management')" :active="request()->routeIs('programs.*') ||
                         request()->routeIs('positions.*') ||
@@ -136,12 +136,12 @@
                                                             :active="request()->routeIs('programs.*')">
                                 {{ trans_choice('general.program', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-
+                            @activerole('super-admin', 'HR')
                             <x-layouts.app.sidebar.nav-item :href="route('positions.index')"
                                                             :active="request()->routeIs('positions.*')">
                                 {{ __('general.positions') }}
                             </x-layouts.app.sidebar.nav-item>
-
+                            @endactiverole
 
                             <x-layouts.app.sidebar.nav-item :href="route('centers.index')"
                                                             :active="request()->routeIs('centers.*')" wire:navigate>
