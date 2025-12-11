@@ -1,5 +1,5 @@
 <div class="w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col
-            max-w-full md:max-w-md  md:h-full">
+            max-w-full md:max-w-md lg:max-w-full md:h-full">
     <!-- Header -->
     <div class="flex items-center justify-between
                 px-4 md:px-6 pt-4 md:pt-5 pb-6 md:pb-10 flex-shrink-0">
