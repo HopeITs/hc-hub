@@ -50,20 +50,17 @@ class EmployeeTable extends LivewireTable
         $user = auth()->user();
         return [
             Column::make('ID', 'id')->sortable(),
-
-            Column::make(trans('general.name'), transColumn('name'))
-                ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
-                ->sortable()->searchable(),
-            Column::make(trans('general.role'), 'account')
-                ->displayUsing(fn($v, Model $m) => $m->account?->myRole()) // uses accessor
-                ->sortable()->searchable(),
-
             Column::make(trans('general.photo'), function (Model $m): string {
                 $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
                 return $src
                     ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="size-12 border border-1 border-primary rounded-full object-cover" />'
                     : '<div class="h-12 w-12 rounded-full bg-gray-200"></div>';
             })->asHtml(),
+            Column::make(trans('general.name'), transColumn('name'))
+                ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
+                ->sortable()->searchable(),
+            Column::make(trans_choice('general.role', 1), 'account')
+                ->displayUsing(fn($v, Model $m) => $m->account?->myRole()),
 
             Column::make(trans('general.years-of-service'), 'years_of_service_formatted')->computed()->sortable(),
 
@@ -77,15 +74,15 @@ class EmployeeTable extends LivewireTable
                 ->options($this->managerOptions())
                 ->sortable()
                 ->searchable(function (Builder $builder, mixed $search, SearchScope $scope): void {
-                     $builder->whereHas('positions', function (Builder $builder) use ($search) {
-                         $builder->whereHas('directManager', function (Builder $builder) use ($search) {
-                             $builder->whereHas('contracts', function (Builder $builder) use ($search) {
-                                 $builder->whereHas('employee', function (Builder $builder) use ($search) {
-                                         $builder->where('id', $search);
-                                     });
-                             });
-                         });
-                     });
+                    $builder->whereHas('positions', function (Builder $builder) use ($search) {
+                        $builder->whereHas('directManager', function (Builder $builder) use ($search) {
+                            $builder->whereHas('contracts', function (Builder $builder) use ($search) {
+                                $builder->whereHas('employee', function (Builder $builder) use ($search) {
+                                    $builder->where('id', $search);
+                                });
+                            });
+                        });
+                    });
 
                 }),
             SelectColumn::make(trans('general.tech_manager'), function (mixed $value, Model $model) {
@@ -140,7 +137,7 @@ class EmployeeTable extends LivewireTable
 
                 // Wrap everything in a flex row
                 return '<div class="flex items-center gap-1">' .
-                    $toggleBtn . $viewBtn . $editBtn  .
+                    $toggleBtn . $viewBtn . $editBtn .
                     '</div>';
 
             })->visible($user->activeRoleIs('HR') || $user->activeRoleIs('super-admin'))->asHtml(),
