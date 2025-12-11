@@ -10,6 +10,7 @@ return [
     'basic-management' => 'الإدارة الأساسية',
     'project-basics' => 'أساسيات المشروع',
     'contract-type' => 'أنواع العقود|نوع العقد',
+    'activity-log' => 'سجل الأنشطة',
     'leave-type' => 'أنواع الإجازات|نوع الإجازة',
     'checklist-items' => 'عناصر القائمة|عنصر القائمة',
     'department' => 'الأقسام|القسم',

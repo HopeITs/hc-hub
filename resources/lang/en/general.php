@@ -9,6 +9,7 @@ return [
     'contracts' => 'Contracts',
     'basic-management' => 'Basic Management',
     'project-basics' => 'Project Basics',
+    'activity-log' => 'Activity Log',
     'contract-type' => 'Contract Type|Contract Types',
     'leave-type' => 'Leave Type|Leave Types',
     'checklist-items' => 'Checklist Item|Checklist Items',

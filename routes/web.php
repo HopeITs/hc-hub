@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContractExportController;
+use App\Livewire\ActivityLog\ActivityLogModule;
 use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Basics\{ChecklistItemModule,
     CityModule,
@@ -143,6 +144,10 @@ Route::group(
             Route::get('/badges', \App\Livewire\Badges\BadgesModule::class)->name('badges.index');
 
             Route::get('/news/create', \App\Livewire\News\NewsCreate::class)->name('news.create');
+
+            Route::get('/activity-log', ActivityLogModule::class)
+                ->name('activity-log.index');
+
 
         });
 

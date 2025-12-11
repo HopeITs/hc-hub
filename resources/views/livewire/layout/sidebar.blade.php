@@ -284,6 +284,16 @@
                     </x-layouts.app.sidebar.single-item>
                     @endactiverole
 
+                    @activerole('SUPER ADMIN', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
+                    <x-layouts.app.sidebar.single-item
+                        :href="route('activity-log.index')"
+                        :active="request()->routeIs('activity-log.*')">
+                        <x-slot name="icon">
+                            <x-icons.clock class="size-4"/>
+                        </x-slot>
+                        {{ __('general.activity-log') }}
+                    </x-layouts.app.sidebar.single-item>
+                    @endactiverole
 
                 </ul>
             </div>
