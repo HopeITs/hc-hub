@@ -68,11 +68,11 @@
 
                     <!-- Name + Position -->
                     <div class="min-w-0">
-                        <p class="text-xs font-bold text-secondary-medium truncate">
+                        <p class="text-[10px] font-bold text-secondary-medium truncate">
                             {{ $member->displayName ?? $member->name }}
                         </p>
 
-                        <p class="text-2xs font-light text-secondary-light truncate">
+                        <p class="text-xs font-light text-secondary-light truncate">
                             {{ Str::limit($memberTitle, 40) }}
                         </p>
                     </div>
