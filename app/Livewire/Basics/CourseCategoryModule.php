@@ -33,10 +33,7 @@ class CourseCategoryModule extends Component
     public function mount(): void
     {
         $user = auth()->user();
-        abort_unless(
-            $user && $user->activeRoleIs('SUPER ADMIN', 'HR', 'hr', 'HR-SYR', 'HR-ALP'),
-            403
-        );
+
 
         $this->isCreatePage = false;
         $this->resetCreateForm();

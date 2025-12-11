@@ -88,7 +88,7 @@ Route::group(
             Route::get('/news/create', \App\Livewire\News\NewsCreate::class)->name('news.create');
             Route::get('/news/{news}/edit', \App\Livewire\News\NewsCreate::class)->name('news.edit');
 
-            Route::get('course-categories', CourseCategoryModule::class)->name('course-categories.index');
+            Route::get('/course-categories', CourseCategoryModule::class)->name('course-categories.index');
         });
 
         require __DIR__ . '/auth.php';

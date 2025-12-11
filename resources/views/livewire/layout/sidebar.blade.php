@@ -277,7 +277,7 @@
                         </x-layouts.app.sidebar.single-item>
                     @endactiverole
 
-                    @activerole('SUPER ADMIN', 'HR', 'hr', 'HR-SYR', 'HR-ALP')
+                    @activerole('super-admin', 'HR')
                         <x-layouts.app.sidebar.single-item :href="route('course-categories.index')" :active="request()->routeIs('course-categories.index')">
                             <x-slot name="icon">
                                 <span
