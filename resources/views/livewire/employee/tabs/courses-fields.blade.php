@@ -26,22 +26,20 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div class="md:col-span-2 flex justify-end">
-                    <x-primary-button type="button"
-                        :showSpinner="false"
+                    <x-primary-button type="button" :showSpinner="false"
                         wire:click="removeCourse({{ $index }} , {{ $course['id'] ?? 'null' }})">
-                        <x-icons.trash/>
+                        <x-icons.trash />
                     </x-primary-button>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="course_category_{{ $index }}">@lang('general.category')</x-forms.input-label>
-                    <select
-                        id="course_category_{{ $index }}"
+                    <x-forms.input-label
+                        for="course_category_{{ $index }}">@lang('general.category')</x-forms.input-label>
+                    <select id="course_category_{{ $index }}"
                         wire:model.defer="courseForm.courses.{{ $index }}.category_id"
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
-                    >
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-opacity-50">
                         <option value="">-- @lang('general.select') --</option>
-                        @foreach($courseCategories as $id => $label)
+                        @foreach ($courseCategories as $id => $label)
                             <option value="{{ $id }}">{{ $label }}</option>
                         @endforeach
                     </select>
@@ -50,22 +48,18 @@
 
                 <div>
                     <x-forms.input-label for="course_title_{{ $index }}">@lang('general.title')</x-forms.input-label>
-                    <x-forms.input
-                        id="course_title_{{ $index }}"
-                        type="text"
+                    <x-forms.input id="course_title_{{ $index }}" type="text"
                         wire:model.defer="courseForm.courses.{{ $index }}.title" />
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.title") }}</x-error-span>
                 </div>
 
                 <div>
                     <x-forms.input-label for="course_org_{{ $index }}">@lang('general.organization')</x-forms.input-label>
-                    <select
-                        id="course_org_{{ $index }}"
+                    <select id="course_org_{{ $index }}"
                         wire:model.defer="courseForm.courses.{{ $index }}.organization"
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
-                    >
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-opacity-50">
                         <option value="">-- @lang('general.select') --</option>
-                        @foreach($organizationOptions as $value => $label)
+                        @foreach ($organizationOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
                     </select>
@@ -74,13 +68,11 @@
 
                 <div>
                     <x-forms.input-label for="course_place_{{ $index }}">@lang('general.place')</x-forms.input-label>
-                    <select
-                        id="course_place_{{ $index }}"
+                    <select id="course_place_{{ $index }}"
                         wire:model.defer="courseForm.courses.{{ $index }}.place"
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
-                    >
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-opacity-50">
                         <option value="">-- @lang('general.select') --</option>
-                        @foreach($placeOptions as $value => $label)
+                        @foreach ($placeOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
                     </select>
@@ -88,19 +80,17 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label for="course_granted_by_{{ $index }}">@lang('general.granted_by')</x-forms.input-label>
-                    <x-forms.input
-                        id="course_granted_by_{{ $index }}"
-                        type="text"
+                    <x-forms.input-label
+                        for="course_granted_by_{{ $index }}">@lang('general.granted_by')</x-forms.input-label>
+                    <x-forms.input id="course_granted_by_{{ $index }}" type="text"
                         wire:model.defer="courseForm.courses.{{ $index }}.granted_by" />
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.granted_by") }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="course_end_date_{{ $index }}">@lang('general.end_date')</x-forms.input-label>
-                    <x-forms.input
-                        id="course_end_date_{{ $index }}"
-                        type="date"
+                    <x-forms.input-label
+                        for="course_end_date_{{ $index }}">@lang('general.end_date')</x-forms.input-label>
+                    <x-forms.input id="course_end_date_{{ $index }}" type="date"
                         wire:model.defer="courseForm.courses.{{ $index }}.end_date" />
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.end_date") }}</x-error-span>
                 </div>
@@ -109,22 +99,19 @@
                     <x-forms.input-label for="course_duration_{{ $index }}">
                         @lang('general.duration') (@lang('general.e.g_20_hours_2_weeks'))
                     </x-forms.input-label>
-                    <x-forms.input
-                        id="course_duration_{{ $index }}"
-                        type="text"
+                    <x-forms.input id="course_duration_{{ $index }}" type="text"
                         wire:model.defer="courseForm.courses.{{ $index }}.duration" />
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.duration") }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="course_status_{{ $index }}">@lang('general.status')</x-forms.input-label>
-                    <select
-                        id="course_status_{{ $index }}"
+                    <x-forms.input-label
+                        for="course_status_{{ $index }}">@lang('general.status')</x-forms.input-label>
+                    <select id="course_status_{{ $index }}"
                         wire:model.defer="courseForm.courses.{{ $index }}.status"
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-opacity-50"
-                    >
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring focus:ring-opacity-50">
                         <option value="">-- @lang('general.select') --</option>
-                        @foreach($statusOptions as $value => $label)
+                        @foreach ($statusOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
                     </select>
@@ -132,42 +119,43 @@
                 </div>
 
                 <div class="md:col-span-2">
-                    <x-forms.input-label for="course_certificate_{{ $index }}">@lang('general.has_certificate')</x-forms.input-label>
+                    <x-forms.input-label for="course_certificate_yes_{{ $index }}">
+                        @lang('general.has_certificate')
+                    </x-forms.input-label>
+
                     <div class="flex space-x-6 mt-2">
-                        <label class="inline-flex items-center text-sm font-medium text-gray-700">
-                            <input type="radio" name="course_certificate_{{ $index }}" value="1"
-                                   wire:model.defer="courseForm.courses.{{ $index }}.has_certificate"
-                                   class="text-primary-600 focus:ring-primary-500 border-gray-300" />
-                            <span class="ml-2">@lang('general.yes')</span>
-                        </label>
-                        <label class="inline-flex items-center text-sm font-medium text-gray-700">
-                            <input type="radio" name="course_certificate_{{ $index }}" value="0"
-                                   wire:model.defer="courseForm.courses.{{ $index }}.has_certificate"
-                                   class="text-primary-600 focus:ring-primary-500 border-gray-300" />
-                            <span class="ml-2">@lang('general.no')</span>
-                        </label>
+                        <x-forms.radio-input id="course_certificate_yes_{{ $index }}"
+                            name="course_certificate_{{ $index }}"
+                            wire:model.defer="courseForm.courses.{{ $index }}.has_certificate" value="1">
+                            @lang('general.yes')
+                        </x-forms.radio-input>
+
+                        <x-forms.radio-input id="course_certificate_no_{{ $index }}"
+                            name="course_certificate_{{ $index }}"
+                            wire:model.defer="courseForm.courses.{{ $index }}.has_certificate" value="0">
+                            @lang('general.no')
+                        </x-forms.radio-input>
                     </div>
-                    <x-error-span>{{ $errors->first("courseForm.courses.$index.has_certificate") }}</x-error-span>
+
+                    <x-error-span>
+                        {{ $errors->first("courseForm.courses.$index.has_certificate") }}
+                    </x-error-span>
                 </div>
 
                 <div class="md:col-span-2">
-                    <x-forms.input-label for="course_notes_{{ $index }}">@lang('general.notes')</x-forms.input-label>
-                    <x-forms.textarea
-                        id="course_notes_{{ $index }}"
-                        wire:model.defer="courseForm.courses.{{ $index }}.notes"
-                        rows="3"/>
+                    <x-forms.input-label
+                        for="course_notes_{{ $index }}">@lang('general.notes')</x-forms.input-label>
+                    <x-forms.textarea id="course_notes_{{ $index }}"
+                        wire:model.defer="courseForm.courses.{{ $index }}.notes" rows="3" />
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.notes") }}</x-error-span>
                 </div>
 
                 <div class="md:col-span-2">
-                    <x-forms.input-label for="course_attachment_{{ $index }}">@lang('general.certificate_attachment')</x-forms.input-label>
-                    <x-forms.file-input
-                        wire:model="courseForm.courses.{{ $index }}.course_attachment"
-                        name="courseForm.courses.{{ $index }}.course_attachment"
-                        previewType="pdf"
-                        :oldFile="$course['course_attachment'] ?? null"
-                        :fileName="$course['file_name'] ?? null"
-                        accept=".pdf, .jpg, .jpeg, .png" />
+                    <x-forms.input-label
+                        for="course_attachment_{{ $index }}">@lang('general.certificate_attachment')</x-forms.input-label>
+                    <x-forms.file-input wire:model="courseForm.courses.{{ $index }}.course_attachment"
+                        name="courseForm.courses.{{ $index }}.course_attachment" previewType="pdf"
+                        :oldFile="$course['course_attachment'] ?? null" :fileName="$course['file_name'] ?? null" accept=".pdf, .jpg, .jpeg, .png" />
                 </div>
 
             </div>
