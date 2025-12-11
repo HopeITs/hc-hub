@@ -406,8 +406,10 @@ class Employee extends Model implements HasMedia
             ->useLogName('employee')
             ->logOnly([
                 'name',
-                'father_name',
-                'mother_name',
+                'father_name_en',
+                'mother_name_en',
+                'father_name_ar',
+                'mother_name_ar',
                 'address',
                 'city_id',
                 'dob',

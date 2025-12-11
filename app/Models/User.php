@@ -46,9 +46,6 @@ class User extends Authenticatable
         return $this->belongsToMany(Folder::class);
     }
 
-    // -----------------------------------------
-    // Role Helpers
-    // -----------------------------------------
 
     public function activeRole(): ?Role
     {
@@ -132,14 +129,9 @@ class User extends Authenticatable
                 });
             }
         });
+
     }
 
-
-
-    public function getActiveRoleNameAttribute(): ?string
-    {
-        return $this->myRole();
-    }
 
     public function initials(): string
     {

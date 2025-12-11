@@ -27,13 +27,13 @@ class Contract extends Model
         'salary_per'      => SalaryPer::class,
     ];
 
-    protected function work_days(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->getTranslatableAttribute('work_days'),
-            set: fn($value) => $this->setTranslatableAttribute('work_days', $value)
-        );
-    }
+//    protected function work_days(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn() => $this->getTranslatableAttribute('work_days'),
+//            set: fn($value) => $this->setTranslatableAttribute('work_days', $value)
+//        );
+//    }
 
     public function employee()
     {
@@ -84,7 +84,8 @@ class Contract extends Model
                 'currency',
                 'salary',
                 'salary_per',
-                'work_days',
+                'work_days_en',
+                'work_days_ar',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
