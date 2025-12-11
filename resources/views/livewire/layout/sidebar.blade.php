@@ -5,16 +5,16 @@
      x-cloak
 >
     <aside
-        x-data="{
+            x-data="{
         rtl: {{ app()->getLocale() === 'ar' ? 'true' : 'false' }},
         open: @entangle('open').live
     }"
-        x-cloak
-        @click.outside="open = false"
-        class="fixed top-0 z-40 w-64 h-full pt-4 bg-white
+            x-cloak
+            @click.outside="open = false"
+            class="fixed top-0 z-40 w-64 h-full pt-4 bg-white
            transition-transform duration-300
            md:translate-x-0"
-        :class="{
+            :class="{
             // MOBILE ONLY behavior (< md)
             'translate-x-0': open,
             '-translate-x-full': !open && !rtl,
@@ -249,6 +249,42 @@
                             </x-layouts.app.sidebar.nav-item>
                         </x-slot>
                     </x-layouts.app.sidebar.dropdown-nav-list>
+
+
+                    @if ($isDeliverResponsible)
+                        <x-layouts.app.sidebar.dropdown-nav-list
+                                id="checklist-items"
+                                :title="__('general.checklist_items')"
+                                :active="request()->routeIs('checklist-items.*')"
+                        >
+                            <x-slot name="icon">
+                                <x-icons.clipboard-list class="size-4"/>
+                            </x-slot>
+                            <x-slot name="list">
+
+                                <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-delivers')"
+                                                                :active="request()->routeIs('checklist-items.pending-delivers')">
+                                    {{ __('general.pending-delivers') }}
+                                    @livewire('checklist-items.pending-delivers-counter')
+                                </x-layouts.app.sidebar.nav-item>
+
+                                <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-returns')"
+                                                                :active="request()->routeIs('checklist-items.pending-returns')">
+                                    {{ __('general.pending_returns') }}
+                                    @livewire('checklist-items.pending-returns-counter')
+                                </x-layouts.app.sidebar.nav-item>
+
+                                <x-layouts.app.sidebar.nav-item :href="route('checklist-items.done-requests')"
+                                                                :active="request()->routeIs('checklist-items.done-requests')">
+                                    {{ __('general.done_requests') }}
+                                </x-layouts.app.sidebar.nav-item>
+
+
+                            </x-slot>
+                        </x-layouts.app.sidebar.dropdown-nav-list>
+
+                    @endif
+
 
 
                     {{-- 7. Checklist Items -> My items (All, Single) --}}
