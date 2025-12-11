@@ -28,7 +28,7 @@
             </div>
         @empty
             <div class="flex flex-col items-center justify-center text-[var(--color-neutral-500)] text-sm py-16">
-                <div class="text-4xl mb-2">📅</div>
+                <div class="text-4xl mb-2"><x-icons.event class=" text-secondary-medium"/></div>
                 <p class="font-medium">@lang('general.no-events-today')</p>
             </div>
         @endforelse
