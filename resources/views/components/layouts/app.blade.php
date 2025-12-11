@@ -17,7 +17,7 @@
 
 <div id="page-gif-overlay" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-[9999]">
     <video autoplay loop muted playsinline class="w-74 h-74">
-        <source src="{{ asset('assets/GIF/hr-website.mp4') }}" type="video/mp4">
+        <source src="{{ asset('assets/GIF/hr-website-1.mp4') }}" type="video/mp4">
     </video>
 </div>
 <livewire:layout.sidebar/>
@@ -84,10 +84,10 @@
 
             setTimeout(() => {
                 overlay.style.display = "none";
-            }, 300);
+            }, 200);
         }
 
-        const MIN_TIME = 3200;
+        const MIN_TIME = 2500;
         const start = performance.now();
 
         function scheduleHide() {

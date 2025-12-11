@@ -38,7 +38,7 @@ class AllLeaveRequestTable extends LivewireTable
     protected function query(): Builder
     {
         $user = auth()->user();
-        $role = $user->activeRole()?->name;
+        $role = $user->myRole();
         $employee = $user->profile;
         $query = LeaveRequest::query()
             ->with(['leaveBalance.contract.employee', 'leaveBalance.contract.position'])
@@ -90,7 +90,7 @@ class AllLeaveRequestTable extends LivewireTable
             SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee.' . transColumn('name'))
                 ->options(Employee::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()
-                ->searchable()->visible(str_starts_with($user->activeRole()?->name, 'HR-') || $user->activeRole()?->name === 'Manager'),
+                ->searchable()->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
             SelectColumn::make(trans_choice('general.type', 1), 'type')
                 ->options(['hour' => trans_choice('general.hour', 1), 'day' => trans_choice('general.day', 1)])
                 ->displayUsing(fn($v, Model $m) => trans_choice('general.' . $m->type, 1))
@@ -138,7 +138,7 @@ class AllLeaveRequestTable extends LivewireTable
                     return $toggleBtn;
                 }
                 return '';
-            })->visible(str_contains($user->activeRole(),'HR-'))->asHtml(),
+            })->visible(str_contains($user->myRole(),'HR-'))->asHtml(),
             Column::make(__('general.actions'), function (Model $model): string {
 
                 $decisionBtn = '';

@@ -47,11 +47,15 @@ class EmployeeTable extends LivewireTable
 
     protected function columns(): array
     {
+        $user = auth()->user();
         return [
             Column::make('ID', 'id')->sortable(),
 
             Column::make(trans('general.name'), transColumn('name'))
                 ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
+                ->sortable()->searchable(),
+            Column::make(trans('general.role'), 'account')
+                ->displayUsing(fn($v, Model $m) => $m->account?->myRole()) // uses accessor
                 ->sortable()->searchable(),
 
             Column::make(trans('general.photo'), function (Model $m): string {
@@ -115,9 +119,15 @@ class EmployeeTable extends LivewireTable
                 $isActive = $model->is_active ? 1 : 0;
 
                 $toggleBtn = Blade::render(
-                    '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $isActive .
+                    '<x-forms.toggle-input class="text-xl p-2 m-2" active="' . $isActive .
                     '" :model-id="' . $model->getKey() .
                     '" wire-event="confirmToggleItemStatus" />'
+                );
+
+                $viewBtn = Blade::render(
+                    '<a  href="' . route('employees.show', ['employee' => $model->username]) . '" class="p-2 " title="View Profile">
+                                <x-icons.eye class="text-secondary-light hover:text-primary transition" />
+                            </a>'
                 );
 
                 $editBtn = Blade::render(
@@ -128,8 +138,13 @@ class EmployeeTable extends LivewireTable
                     '<x-table.delete-btn :modelId="' . $model->getKey() . '" />'
                 );
 
-                return $toggleBtn . $editBtn . $deleteBtn;
-            })->asHtml(),
+                // Wrap everything in a flex row
+                return '<div class="flex items-center gap-1">' .
+                    $toggleBtn . $viewBtn . $editBtn  .
+                    '</div>';
+
+            })->visible($user->activeRoleIs('HR'))->asHtml(),
+
         ];
     }
 

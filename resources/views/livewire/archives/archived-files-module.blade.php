@@ -13,7 +13,7 @@
                 </x-primary-button>
             @endif
 
-            @if ($currentFolder && (!$isShared || ($isShared && auth()->user()->hasRole('Super Admin'))))
+            @if ($currentFolder && (!$isShared || ($isShared && auth()->user()->hasRole('super-admin'))))
                 <div
                     x-data="{ uploading: false, progress: 0 }"
                     x-on:livewire-upload-start="uploading = true"
@@ -49,7 +49,7 @@
                     @endif
                 </a>
 
-                @if (!$isShared && ($folder->user_id === auth()->id() || auth()->user()->hasRole('Super Admin')))
+                @if (!$isShared && ($folder->user_id === auth()->id() || auth()->user()->hasRole('super-admin')))
                 <div x-data="{ open: false }" @click.away="open = false" class="absolute top-2 right-2">
                     <button @click="open = !open" class="p-1 rounded-full hover:bg-secondary-soft ">
                         <svg class="w-5 h-5 text-secondary-medium"
@@ -109,7 +109,7 @@
                     <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $file->name }}</span>
                 </div>
 
-                @if (!$isShared && ($currentFolder->user_id === auth()->id() || auth()->user()->hasRole('Super Admin')))
+                @if (!$isShared && ($currentFolder->user_id === auth()->id() || auth()->user()->hasRole('super-admin')))
                 <div x-data="{ open: false }" @click.away="open = false" class="absolute top-2 right-2">
                     <button @click="open = !open" class="p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400">
                         <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 8a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>

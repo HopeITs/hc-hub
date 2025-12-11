@@ -1,62 +1,74 @@
 <x-slot:title>
-    إعدادات الحساب
+    {{ __('general.profile.settings') }}
 </x-slot:title>
 
-        <div class="grid md:grid-cols-4 pl-30">
+<div class="w-full px-10 py-8 space-y-8">
 
-            {{-- Sidebar Tabs --}}
-            <aside class="bg-gray-50 dark:bg-gray-900 p-6 border-e border-gray-200 dark:border-gray-700">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-8">
-                    {{ __('general.profile.settings') }}
-                </h3>
+    <h1 class="text-3xl font-bold text-secondary-dark">
+        {{ __('general.my-account') }}
+    </h1>
 
-                <x-settings.tab-navigation
-                    :tabs="[
-                        ['label' => __('general.profile.profile'), 'route' => 'settings.profile'],
-                        ['label' => __('general.profile.Password'), 'route' => 'settings.password'],
-                    ]"
+    <div class="w-full bg-white rounded-2xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border border-neutral-200 p-6 max-w-3xl">
+
+        <form wire:submit.prevent="updatePassword" class="space-y-8">
+
+            <div class="w-full">
+                <label class="text-sm font-semibold text-secondary-dark mb-1 block">
+                    {{ __('general.profile.current-password') }}
+                </label>
+
+                <x-forms.password-input
+                    id="current_password"
+                    model="current_password"
+                    autocomplete="current-password"
+                    class="rounded-xl border border-neutral-300 focus:border-primary focus:ring-primary w-full"
                 />
-            </aside>
+            </div>
 
-            {{-- Form Content --}}
-            <div class="col-span-3 p-10 space-y-8">
-                <form wire:submit.prevent="updatePassword" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                    {{-- Current Password --}}
-                    <x-forms.password-input
-                        id="current_password"
-                        label="{{ __('general.profile.current-password') }}"
-                        model="current_password"
-                        autocomplete="current-password"
-                    />
+                <div>
+                    <label class="text-sm font-semibold text-secondary-dark mb-1 block">
+                        {{ __('general.profile.new-password') }}
+                    </label>
 
-                    {{-- New Password --}}
                     <x-forms.password-input
                         id="password"
-                        label="{{ __('general.profile.new-password') }}"
                         model="password"
                         autocomplete="new-password"
+                        class="rounded-xl border border-neutral-300 focus:border-primary focus:ring-primary w-full"
                     />
+                </div>
 
-                    {{-- Confirm Password --}}
+                <div>
+                    <label class="text-sm font-semibold text-secondary-dark mb-1 block">
+                        {{ __('auth.confirm-password') }}
+                    </label>
+
                     <x-forms.password-input
                         id="password_confirmation"
-                        label="{{ __('auth.confirm-password') }}"
                         model="password_confirmation"
                         autocomplete="new-password"
+                        class="rounded-xl border border-neutral-300 focus:border-primary focus:ring-primary w-full"
                     />
+                </div>
 
-                    {{-- Submit --}}
-                    <div class="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4 pt-6">
-                        <x-primary-button class="w-full sm:w-44 h-11 text-base">
-                            {{ __('general.profile.save') }}
-                        </x-primary-button>
-
-                        <x-action-message on="password-updated" class="text-sm text-green-600 dark:text-green-400">
-                            {{ __('general.profile.got-saved') }}
-                        </x-action-message>
-                    </div>
-
-                </form>
             </div>
-        </div>
+
+            <div class="flex justify-end">
+                <x-primary-button
+                    class="text-sm font-semibold rounded-lg bg-primary hover:bg-primary/90 transition shadow-sm">
+                    {{ __('general.profile.save') }}
+                </x-primary-button>
+
+                <x-action-message
+                    on="password-updated"
+                    class="text-sm text-green-600 ml-4 self-center">
+                    {{ __('general.profile.got-saved') }}
+                </x-action-message>
+            </div>
+
+        </form>
+
+    </div>
+</div>

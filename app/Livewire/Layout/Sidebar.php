@@ -34,9 +34,9 @@ class Sidebar extends Component
     {
         $employee = Auth::user()->profile ?? null;
         $employeeId = $employee->id ?? null;
-        $departmentName = $employee?->contracts()->with('position.department')->first()?->position?->department?->name;
+        $departmentName = $employee?->contracts()->with('position.department')->first()?->position?->department?->code;
 
-        $isDeliverResponsible = in_array($departmentName, ['IT', 'Communication', 'HR']);
+        $isDeliverResponsible = in_array($departmentName, ['IT', 'CT', 'HR']);
 
         $pendingDeliversCount = $employeeId
             ? Checklist::where('delivered_id', $employeeId)

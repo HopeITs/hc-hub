@@ -87,7 +87,7 @@
                     </a>
 
                     <a href="tel:{{ $phone }}" title="Call">
-                        <x-icons.phone class="text-secondary-light hover:text-primary transition"/>
+                        <x-icons.phone class="text-secondary-light ml-0.5 hover:text-primary transition"/>
                     </a>
 
                     <a href="tg://resolve?phone={{ $phone }}"
@@ -99,7 +99,7 @@
                     <a href="mailto:{{ $member->account->email ?? '#' }}"
                        class="text-secondary-light hover:text-primary transition"
                        title="Send Email">
-                        <x-icons.envelope class="text-secondary-light hover:text-primary transition"/>
+                        <x-icons.envelope class="text-secondary-light ml-1 hover:text-primary transition"/>
                     </a>
 
                 </div>

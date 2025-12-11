@@ -12,19 +12,22 @@
         <x-slot name="headings">
             <x-table.heading
                 sortable
-            >ID</x-table.heading>
+            >ID
+            </x-table.heading>
 
             <x-table.heading
                 sortable
                 wire:click="sortBy('name_ar')"
                 :direction="$sortField === 'name_ar' ? $sortDirection : null"
-            >@lang('general.name')(AR)</x-table.heading>
+            >@lang('general.name')(AR)
+            </x-table.heading>
 
             <x-table.heading
                 sortable
                 wire:click="sortBy('name_en')"
                 :direction="$sortField === 'name_en' ? $sortDirection : null"
-            >@lang('general.name')(EN)</x-table.heading>
+            >@lang('general.name')(EN)
+            </x-table.heading>
 
             <x-table.heading
                 sortable
@@ -38,13 +41,14 @@
                 :direction="$sortField === 'slug' ? $sortDirection : null"
             >@lang('general.slug')</x-table.heading>
 
-            @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
-                <x-table.heading
-                    sortable
-                    wire:click="sortBy('is_active')"
-                    :direction="$sortField === 'is_active' ? $sortDirection : null"
-                >@lang('general.status')</x-table.heading>
-            @endif
+
+            @activerole('HR')
+            <x-table.heading
+                sortable
+                wire:click="sortBy('is_active')"
+                :direction="$sortField === 'is_active' ? $sortDirection : null"
+            >@lang('general.status')</x-table.heading>
+            @endactiverole
         </x-slot>
 
         <x-slot name="body">
@@ -56,13 +60,13 @@
                     <x-table.cell>{{ $item->code ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->slug ?? '-' }}</x-table.cell>
 
-                    @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+                    @activerole('HR')
                         <x-table.cell-status
                             :active="$item->is_active"
                             :model-id="$item->id"
                             wire-event="confirmToggleItemStatus"
                         />
-                    @endif
+                    @endactiverole
                 </tr>
             @empty
                 <x-table.no-data/>

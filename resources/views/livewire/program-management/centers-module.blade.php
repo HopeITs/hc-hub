@@ -7,13 +7,13 @@
             ['label' => __('general.centers'), 'route' => 'centers.index'],
         ]" :showButton="true" />
 
-        @if (auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+        @activerole('HR','super-admin')
             <div class="flex items-center gap-2">
                 <x-primary-button href="{{ route('centers.create') }}">
                     @lang('general.add-new')
                 </x-primary-button>
             </div>
-        @endif
+        @endactiverole
     </div>
 
     <livewire:program-management.center.centers-table />

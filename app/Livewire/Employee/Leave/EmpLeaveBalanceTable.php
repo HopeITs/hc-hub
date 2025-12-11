@@ -32,8 +32,8 @@ class EmpLeaveBalanceTable extends LivewireTable
     protected function query(): Builder
     {
         $user = auth()->user();
-        $role = $user->activeRole()?->name;
-        $employee = $user->profile;
+        $role = $user->myRole();
+
         $query = Employee::query()
             ->whereHas('contracts.leaveBalances' , function ($query) {
                 return $query->where('type_id', LeaveTypeCases::Annual);
