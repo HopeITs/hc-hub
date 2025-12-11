@@ -66,16 +66,12 @@
 
                     <div class="col-span-2">
                         <x-forms.input-label>@lang('general.photo')</x-forms.input-label>
-                        <input type="file" wire:model.live="item.photo"
-                            class="block w-full text-sm text-gray-900 border rounded-lg" />
-
-                        @if ($item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
-                            <img src="{{ $item['photo']->temporaryUrl() }}" class="h-16 mt-2 rounded" />
-                        @elseif(is_string($item['photo']) && !empty($item['photo']))
-                            <img src="{{ Storage::url($item['photo']) }}" class="h-16 mt-2 rounded" />
-                        @endif
-
-                        <x-error-span>{{ $errors->first('item.photo') }}</x-error-span>
+                        <x-forms.file-input wire:model.live="item.photo" name="item.photo" previewType="image"
+                            :oldFile="is_string($item['photo']) && !empty($item['photo'])
+                                ? Storage::url($item['photo'])
+                                : null" :fileName="is_string($item['photo']) && !empty($item['photo'])
+                                ? basename($item['photo'])
+                                : null" accept=".jpg,.jpeg,.png,.gif,.webp" />
                     </div>
 
                     <div class="col-span-2 sm:col-span-1">

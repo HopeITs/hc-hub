@@ -1,12 +1,6 @@
 <div>
     <div class="flex justify-between items-center mb-6">
-        <livewire:layout.breadcrumbs
-            :title="__('general.news')"
-            :crumbs="[
-                ['label' => __('general.news-management')],
-                ['label' => __('general.add-new')],
-            ]"
-        />
+        <livewire:layout.breadcrumbs :title="__('general.news')" :crumbs="[['label' => __('general.news-management')], ['label' => __('general.add-new')]]" />
     </div>
 
     <form wire:submit.prevent="save" class="grid grid-cols-2 gap-4">
@@ -40,7 +34,7 @@
                 <x-forms.input-label>@lang('general.target_entity')</x-forms.input-label>
                 <x-forms.select-input wire:model.live="item.newsable_id">
                     <option value="">@lang('general.select_entity')</option>
-                    @foreach($this->entities as $entity)
+                    @foreach ($this->entities as $entity)
                         <option value="{{ $entity->id }}">{{ $entity->name }}</option>
                     @endforeach
                 </x-forms.select-input>
@@ -50,11 +44,8 @@
 
         <div class="col-span-2">
             <x-forms.input-label>@lang('general.photo')</x-forms.input-label>
-            <input type="file" wire:model.live="item.photo" class="block w-full text-sm text-gray-900 border rounded-lg" />
-            @if ($item['photo'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
-                <img src="{{ $item['photo']->temporaryUrl() }}" class="h-16 mt-2 rounded" />
-            @endif
-            <x-error-span>{{ $errors->first('item.photo') }}</x-error-span>
+            <x-forms.file-input wire:model.live="item.photo" name="item.photo" previewType="image" :oldFile="$news?->getFirstMediaUrl('news-image') ?: null"
+                :fileName="$news?->getFirstMedia('news-image')?->file_name" accept=".jpg,.jpeg,.png,.gif,.webp" />
         </div>
 
         <div class="col-span-2 sm:col-span-1">
