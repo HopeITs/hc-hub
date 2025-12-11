@@ -143,7 +143,7 @@ class EmployeeTable extends LivewireTable
                     $toggleBtn . $viewBtn . $editBtn  .
                     '</div>';
 
-            })->visible($user->activeRoleIs('HR'))->asHtml(),
+            })->visible($user->activeRoleIs('HR') || $user->activeRoleIs('super-admin'))->asHtml(),
 
         ];
     }
