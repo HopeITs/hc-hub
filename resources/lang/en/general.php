@@ -579,4 +579,5 @@ return [
     '500-title2' => '“We hit an unexpected error.”',
     '500-message' => 'It’s not you. It’s us. Try refreshing the page, or come back a little later.',
     '500-button' => 'Go to homepage',
+    'course-category' => 'Course Category|Course Categories',
 ];
