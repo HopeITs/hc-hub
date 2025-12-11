@@ -22,7 +22,6 @@
                         id="email"
                         type="email"
                         model="email"
-                        update="live"
                         placeholder="email@example.com"
                         autocomplete="email"
                     />
@@ -40,22 +39,22 @@
                     <x-forms.input-error field="password" />
                 </div>
 
-                @if(count($roleOptions) > 0)
-                    <div>
-                        <x-forms.input-label for="role_id" :value="__('Login as role')" />
-                        <select id="role_id"
-                                wire:model="selectedRoleId"
-                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500">
-                            <option value="">{{ __('Choose a role') }}</option>
-                            @foreach($roleOptions as $opt)
-                                <option value="{{ $opt['id'] }}">{{ $opt['name'] }}</option>
-                            @endforeach
-                        </select>
-                        <p class="text-xs text-gray-500 mt-1">
-                            {{ __('This will be your active role for this session.') }}
-                        </p>
-                    </div>
-                @endif
+{{--                @if(count($roleOptions) > 0)--}}
+{{--                    <div>--}}
+{{--                        <x-forms.input-label for="role_id" :value="__('Login as role')" />--}}
+{{--                        <select id="role_id"--}}
+{{--                                wire:model="selectedRoleId"--}}
+{{--                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500">--}}
+{{--                            <option value="">{{ __('Choose a role') }}</option>--}}
+{{--                            @foreach($roleOptions as $opt)--}}
+{{--                                <option value="{{ $opt['id'] }}">{{ $opt['name'] }}</option>--}}
+{{--                            @endforeach--}}
+{{--                        </select>--}}
+{{--                        <p class="text-xs text-gray-500 mt-1">--}}
+{{--                            {{ __('This will be your active role for this session.') }}--}}
+{{--                        </p>--}}
+{{--                    </div>--}}
+{{--                @endif--}}
 
                 <div class="flex items-center justify-between text-sm text-gray-600">
                     <x-forms.checkbox-input type="checkbox" id="remember" model="remember">

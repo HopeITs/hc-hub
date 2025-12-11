@@ -87,7 +87,7 @@
             }, 200);
         }
 
-        const MIN_TIME = 1700;
+        const MIN_TIME = 1500;
         const start = performance.now();
 
         function scheduleHide() {
