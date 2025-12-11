@@ -67,11 +67,18 @@
                     <div class="col-span-2">
                         <x-forms.input-label>@lang('general.photo')</x-forms.input-label>
                         <x-forms.file-input wire:model.live="item.photo" name="item.photo" previewType="image"
-                            :oldFile="is_string($item['photo']) && !empty($item['photo'])
-                                ? Storage::url($item['photo'])
-                                : null" :fileName="is_string($item['photo']) && !empty($item['photo'])
-                                ? basename($item['photo'])
-                                : null" accept=".jpg,.jpeg,.png,.gif,.webp" />
+                            :oldFile="$item['photo'] instanceof
+                            \Livewire\Features\SupportFileUploads\TemporaryUploadedFile
+                                ? $item['photo']
+                                : (is_string($item['photo']) && !empty($item['photo'])
+                                    ? Storage::url($item['photo'])
+                                    : null)" :fileName="$item['photo'] instanceof
+                            \Livewire\Features\SupportFileUploads\TemporaryUploadedFile
+                                ? $item['photo']->getClientOriginalName() ?? null
+                                : (is_string($item['photo']) && !empty($item['photo'])
+                                    ? basename($item['photo'])
+                                    : null)" accept=".jpg,.jpeg,.png,.gif,.webp" />
+                        <x-error-span>{{ $errors->first('item.photo') }}</x-error-span>
                     </div>
 
                     <div class="col-span-2 sm:col-span-1">
