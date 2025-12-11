@@ -11,18 +11,14 @@ use App\Livewire\ChecklistItems\{AllItems, DoneRequests, PendingItems, PendingRe
 use App\Livewire\Statistics\ContractStatistics;
 use App\Livewire\Statistics\GeneralStatistics;
 use App\Livewire\Employee\{
-    Leave\AllLeaveRequestModule,
-    Leave\EmpLeaveBalanceModule,
-    Leave\MyLeaveRequestModule,
-    Leave\MyLeaveRequestTable
-};
+    Leave\AllLeaveRequestModule,  Leave\EmpLeaveBalanceModule, Leave\MyLeaveRequestModule, Leave\MyLeaveRequestTable};
 use App\Livewire\Employee\EmployeeStatistics;
 
 use App\Livewire\Settings\{Appearance, Password, Profile};
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
-
+use App\Livewire\Basics\CourseCategoryModule;
 
 Route::group(
     [
@@ -94,7 +90,9 @@ Route::group(
             Route::get('/badges', \App\Livewire\Badges\BadgesModule::class)->name('badges.index');
 
             Route::get('/news/create', \App\Livewire\News\NewsCreate::class)->name('news.create');
+            Route::get('/news/{news}/edit', \App\Livewire\News\NewsCreate::class)->name('news.edit');
 
+            Route::get('/course-categories', CourseCategoryModule::class)->name('course-categories.index');
             Route::get('/activity-log', ActivityLogModule::class)
                 ->name('activity-log.index');
 

@@ -8,10 +8,13 @@
             ]"
             :showButton="true"
         />
+
         <div>
+            @activerole('HR','super-admin')
             <x-primary-button wire:click="create">
                 @lang('general.add-new')
             </x-primary-button>
+            @endactiverole
         </div>
     </div>
 
@@ -60,7 +63,7 @@
                     <x-table.cell>{{ $item->email ?? '-' }}</x-table.cell>
                     <x-table.cell>
                         <x-table.edit-btn wire:click="edit({{ $item->id }})"></x-table.edit-btn>
-                        <x-table.delete-btn :modelId="$item->id"/>
+{{--                        <x-table.delete-btn :modelId="$item->id"/>--}}
                     </x-table.cell>
                 </tr>
             @empty

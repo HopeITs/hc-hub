@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Livewire\Forms\Employee;
 
 use App\Models\Course;
@@ -12,25 +11,29 @@ class CourseForm extends Form
     public ?Employee $employee = null;
     public ?Course $course = null;
 
-    /** @var array<int, array{title:string|null, issuing_organization:string|null, date:string|null, is_approved:int|bool|null}> */
     public array $courses = [];
 
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee->load('courses');
 
-        // Seed existing rows
         $this->courses = $employee
             ->courses()
-            ->select('id', 'title', 'issuing_organization', 'issue_date', 'is_approved')
+            ->select('id', 'category_id', 'title', 'organization', 'place', 'granted_by', 'notes', 'start_date', 'end_date', 'has_certificate', 'duration', 'cost', 'status')
             ->get()
             ->map(
                 fn($c) => [
                     'id' => $c->id,
+                    'category_id' => $c->category_id,
                     'title' => $c->title,
-                    'issuing_organization' => $c->issuing_organization,
-                    'issue_date' => optional($c->issue_date)->toDateString(), // Y-m-d for <input type="date">
-                    'is_approved' => (int) $c->is_approved,
+                    'organization' => $c->organization,
+                    'place' => $c->place,
+                    'granted_by' => $c->granted_by,
+                    'notes' => $c->notes,
+                    'end_date' => optional($c->end_date)->toDateString(),
+                    'has_certificate' => (int) $c->has_certificate,
+                    'duration' => $c->duration,
+                    'status' => $c->status,
                     'course_attachment' => $c->getFirstMediaUrl('file'),
                     'file_name' => $c->getFirstMedia('file')->file_name ?? null,
                 ],
@@ -43,10 +46,16 @@ class CourseForm extends Form
         return [
             'courses' => ['array'],
             'courses.*.id' => ['nullable', 'exists:courses,id'],
+            'courses.*.category_id' => ['required', 'exists:course_categories,id'],
             'courses.*.title' => ['required', 'string', 'max:255'],
-            'courses.*.issuing_organization' => ['required', 'string', 'max:255'],
-            'courses.*.issue_date' => ['nullable', 'date'],
-            'courses.*.is_approved' => ['nullable', 'boolean'],
+            'courses.*.organization' => ['required', 'string', 'max:255'],
+            'courses.*.place' => ['nullable', 'integer', 'min:1', 'max:2'],
+            'courses.*.granted_by' => ['nullable', 'string', 'max:255'],
+            'courses.*.notes' => ['nullable', 'string'],
+            'courses.*.end_date' => ['required', 'date', 'after_or_equal:courses.*.start_date'],
+            'courses.*.has_certificate' => ['nullable', 'boolean'],
+            'courses.*.duration' => ['nullable', 'string', 'max:255'],
+            'courses.*.status' => ['required', 'integer', 'min:1', 'max:5'],
             'courses.*.course_attachment' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ];
     }
@@ -55,10 +64,16 @@ class CourseForm extends Form
     {
         $this->courses[] = [
             'id' => null,
+            'category_id' => null,
             'title' => '',
-            'issuing_organization' => '',
-            'issue_date' => null,
-            'is_approved' => 0,
+            'organization' => '',
+            'place' => null,
+            'granted_by' => null,
+            'notes' => null,
+            'end_date' => null,
+            'has_certificate' => 0,
+            'duration' => null,
+            'status' => 5,
             'course_attachment' => null,
             'file_name' => null,
         ];
@@ -75,7 +90,6 @@ class CourseForm extends Form
         if (isset($id)) {
             Course::find($id)->delete();
         }
-        // Reindex so Blade indexes and array keys stay aligned
         $this->courses = array_values($this->courses);
     }
 
@@ -84,20 +98,29 @@ class CourseForm extends Form
         $this->validate();
 
         foreach ($this->courses as $index => $course) {
+            $data = collect($course)
+                ->except(['course_attachment', 'file_name', 'id'])
+                ->toArray();
+
             if (array_key_exists('id', $course) && isset($course['id'])) {
                 $this->course = Course::find($course['id']);
-                $this->course->update($course);
+                $this->course->update($data);
             } else {
-                $course['employee_id'] = $this->employee->id;
-                $this->course = Course::create($course);
+                $data['employee_id'] = $this->employee->id;
+                $this->course = Course::create($data);
             }
 
             if ($course['course_attachment'] instanceof TemporaryUploadedFile) {
+                $this->course->clearMediaCollection('file');
+
                 $this->course
                     ->addMedia($course['course_attachment']->getRealPath())
-                    ->usingFileName('course-file-' . $index . '.' . $course['course_attachment']->getClientOriginalExtension())
+                    ->usingFileName('course-file-' . $this->course->id . '.' . $course['course_attachment']->getClientOriginalExtension())
+                    ->preservingOriginal()
                     ->toMediaCollection('file');
             }
         }
+
+        $this->setEmployee($this->employee);
     }
 }

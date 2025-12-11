@@ -11,11 +11,13 @@
             ]"
             :showButton="true"
         />
+        @activerole('HR','super-admin')
         <div>
             <x-primary-button wire:click="create" :showSpinner="false">
                 @lang('general.add-new')
             </x-primary-button>
         </div>
+        @endactiverole
     </div>
 
     <x-table>
@@ -54,8 +56,9 @@
                 :direction="$sortField === 'marital_status' ? $sortDirection : null">
                 @lang('general.marital_status')
             </x-table.heading>
-
-            <x-table.heading />
+            @activerole('HR','super-admin')
+            <x-table.heading/>
+            @endactiverole
         </x-slot>
 
 
@@ -76,10 +79,12 @@
                     <x-table.cell>
                         <x-badge :color="$marital['color']">{{ $marital['value'] }}</x-badge>
                     </x-table.cell>
+                    @activerole('HR','super-admin')
                     <x-table.cell>
                         <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
-                        <x-table.delete-btn :modelId="$item->id"/>
+                        {{--                        <x-table.delete-btn :modelId="$item->id"/>--}}
                     </x-table.cell>
+                    @endactiverole
                 </tr>
             @empty
                 <x-table.no-data/>

@@ -159,13 +159,29 @@ return new class extends Migration {
             $table->dateTime('board_member_end_at')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('course_categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('name_en');
+            $table->string('name_ar');
+            $table->timestamps();
+        });
+
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->foreignId('category_id')->nullable()->constrained('course_categories')->onDelete('set null');
             $table->string('title');
-            $table->string('issuing_organization');
-            $table->dateTime('issue_date')->nullable();
-            $table->boolean('is_approved')->default(false);
+            $table->string('organization')->nullable();
+            $table->unsignedTinyInteger('place')->nullable()->comment('1:online, 2:onsite');
+            $table->string('granted_by')->nullable();
+            $table->text('notes')->nullable();
+            $table->dateTime('start_date')->nullable();
+            $table->dateTime('end_date')->nullable();
+            $table->boolean('has_certificate')->default(false);
+            $table->string('duration')->nullable();
+            $table->decimal('cost', 10, 2)->nullable();
+            $table->unsignedTinyInteger('status')->default(1)->comment('1:pending, 2:approved, 3:rejected, 4:in progress, 5:finished');
             $table->timestamps();
         });
 
@@ -297,6 +313,8 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->string('category')->nullable();
+            $table->string('file_path')->nullable();
             $table->timestamps();
         });
 
@@ -365,6 +383,7 @@ return new class extends Migration {
         Schema::dropIfExists('annual_leave_rules');
 
         Schema::dropIfExists('employees');
+        Schema::dropIfExists('course_categories');
         Schema::dropIfExists('courses');
         Schema::dropIfExists('educations');
         Schema::dropIfExists('education_fields');

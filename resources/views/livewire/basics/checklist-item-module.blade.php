@@ -13,13 +13,13 @@
             :showButton="true"
         />
 
-        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+        @activerole('HR','super-admin')
             <div>
                 <x-primary-button wire:click="create">
                     @lang('general.add-new')
                 </x-primary-button>
             </div>
-        @endif
+        @endactiverole
     </div>
 
     <x-table>
@@ -38,9 +38,9 @@
                 @lang('general.order')
             </x-table.heading>
 
-            @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+            @activerole('HR','super-admin')
                 <x-table.heading/>
-            @endif
+            @endactiverole
         </x-slot>
 
         <x-slot name="body">
@@ -55,12 +55,12 @@
                         <x-badge :color="$order['color']"> {{ $order['value'] }}</x-badge>
                     </x-table.cell>
 
-                    @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
+                    @activerole('HR','super-admin')
                         <x-table.cell>
                             <x-table.edit-btn wire:click="edit({{ $item->id }})" />
                             <x-table.delete-btn :modelId="$item->id" />
                         </x-table.cell>
-                    @endif
+                  @endactiverole
                 </tr>
             @empty
                 <x-table.no-data />
