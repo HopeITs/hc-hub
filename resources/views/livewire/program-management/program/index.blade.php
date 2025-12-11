@@ -135,7 +135,7 @@
         <div class="text-center pt-4">
             <button wire:click="loadMore"
                     class="px-4 py-1.5 rounded-lg bg-white border border-secondary-light
-                           text-secondary-dark text-sm hover:bg-primary-50 transition">
+                           text-secondary-dark text-sm hover:bg-primary hover:text-white cursor-pointer transition">
                 @lang('general.show-more')
             </button>
         </div>

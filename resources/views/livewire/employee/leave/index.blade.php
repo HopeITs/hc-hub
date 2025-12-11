@@ -22,20 +22,25 @@ use App\Enums\LeaveRequestStatus;
     </div>
 
     @isset($availableLeaves)
-        <div class="grid grid-cols-5  gap-6 mb-6">
+        <div class="grid
+            grid-cols-1
+            sm:grid-cols-2
+            lg:grid-cols-3
+            xl:grid-cols-5
+            gap-6
+            mb-6">
             @foreach($availableLeaves as $availableLeave)
-                <x-leave-card class="{{$loop->first ? 'col-span-2' : 'col-span-1'}}"
-                              :title="$availableLeave->leaveType->name"
-                              :total="$availableLeave->deserved_formatted"
-                              :remaining="$availableLeave->remaining"
-                              :total-days="$availableLeave->intTotal"
-                              :remaining-days="$availableLeave->intRemaining"
-                              :is-annual="$availableLeave->isAnnual()"
-                              :used="$availableLeave->used_formatted"
-                              :pending="formatDuration($availableLeave->pending_days , $availableLeave->pending_hours)"
-
+                <x-leave-card
+                    class="{{ $loop->first ? 'col-span-1 xl:col-span-2' : 'col-span-1' }}"
+                    :title="$availableLeave->leaveType->name"
+                    :total="$availableLeave->deserved_formatted"
+                    :remaining="$availableLeave->remaining"
+                    :total-days="$availableLeave->intTotal"
+                    :remaining-days="$availableLeave->intRemaining"
+                    :is-annual="$availableLeave->isAnnual()"
+                    :used="$availableLeave->used_formatted"
+                    :pending="formatDuration($availableLeave->pending_days , $availableLeave->pending_hours)"
                 />
-
             @endforeach
         </div>
     @else
@@ -77,8 +82,14 @@ use App\Enums\LeaveRequestStatus;
     </div>
 
 
-    <x-modal.dialog max-width="6xl" id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
-
+    <x-modal.dialog
+        max-width="6xl"
+        id="showModal"
+        :title="$modalTitle"
+        wire:model.defer="showModal"
+        wire:ignore.self
+        class="flex items-center justify-center px-2">
+        <div class="w-full max-h-[60vh] overflow-y-auto bg-white rounded-2xl px-6 py-4 md:px-10 md:py-6">
         <form wire:submit.prevent="save" class="space-y-4">
             <x-forms.errors-validation-list/>
             <div class="grid md:grid-cols-2 gap-4">
@@ -184,12 +195,21 @@ use App\Enums\LeaveRequestStatus;
                 </div>
             </div>
 
-            <div class="flex justify-end gap-2">
-                <x-primary-button type="button" wire:click="confirmSave"
-                                  class="!w-auto">@lang('general.save')</x-primary-button>
-                <x-primary-button :href="route('leaves.index')"
-                                  class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
+            <div class="flex justify-end gap-2 pt-4">
+                <x-primary-button
+                    type="button"
+                    wire:click="confirmSave"
+                    class="!w-auto">
+                    @lang('general.save')
+                </x-primary-button>
+
+                <x-primary-button
+                    :href="route('leaves.index')"
+                    class="!bg-secondary-light !w-auto">
+                    @lang('general.cancel')
+                </x-primary-button>
             </div>
         </form>
+        </div>
     </x-modal.dialog>
 </div>
