@@ -1,27 +1,53 @@
 import '@yaireo/tagify/dist/tagify.css'
 import '../css/app.css';
+import {initFlowbite} from 'flowbite';
 
-    import {
-        Chart,DoughnutController, BarController, LineController, BarElement, LineElement,ArcElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Title
-            } from 'chart.js';
-    Chart.register(DoughnutController,BarController, LineController, BarElement, LineElement,ArcElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Title );
+import {
+    Chart,
+    DoughnutController,
+    BarController,
+    LineController,
+    BarElement,
+    LineElement,
+    ArcElement,
+    PointElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip,
+    Legend,
+    Title
+} from 'chart.js';
 
-    import Swal from 'sweetalert2'
+Chart.register(DoughnutController, BarController, LineController, BarElement, LineElement, ArcElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Title);
 
-    import 'flowbite';
+import Swal from 'sweetalert2'
 
-    import './password-toggle.js'
-    import './password-strength.js'
-    import './contract-type-employees-chart.js';
-    import './job-levels-employees.js';
-    import './donut-chart.js'
-    import './scatter-chart.js'
+import 'flowbite';
+
+import './password-toggle.js'
+import './password-strength.js'
+import './contract-type-employees-chart.js';
+import './job-levels-employees.js';
+import './donut-chart.js'
+import './scatter-chart.js'
 
 import Tagify from '@yaireo/tagify'
 
 
-    window.Swal = Swal
-    window.Chart = Chart;
+window.Swal = Swal
+window.Chart = Chart;
+
+Livewire.hook('commit', ({component, commit, respond, succeed, fail}) => {
+    succeed(({snapshot, effect}) => {
+        queueMicrotask(() => {
+            initFlowbite();
+        })
+    })
+})
+
+document.addEventListener('livewire:navigated', () => {
+    initFlowbite();
+})
 
 if (typeof window.preloaderScriptLoaded === 'undefined') {
     window.preloaderScriptLoaded = true;
@@ -87,7 +113,7 @@ document.querySelectorAll('.tagify').forEach((el) => {
     function sync() {
         const values = tagify.value.map(t => t.value)
         hidden.value = JSON.stringify(values)
-        hidden.dispatchEvent(new Event('input', { bubbles: true }))
+        hidden.dispatchEvent(new Event('input', {bubbles: true}))
     }
 
     tagify.on('add', sync)
