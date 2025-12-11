@@ -10,13 +10,13 @@
             :showButton="true"
         />
 
-        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
-            <div>
-                <x-primary-button wire:click="create">
-                    @lang('general.add-new')
-                </x-primary-button>
-            </div>
-        @endif
+        @activerole('HR','super-admin')
+        <div>
+            <x-primary-button wire:click="create">
+                @lang('general.add-new')
+            </x-primary-button>
+        </div>
+        @endactiverole
     </div>
 
     {{-- Table --}}
@@ -45,8 +45,9 @@
                 :direction="$sortField === 'email' ? $sortDirection : null">
                 @lang('general.department-email')
             </x-table.heading>
-
+            @activerole('HR','super-admin')
             <x-table.heading/>
+            @endactiverole
         </x-slot>
 
 
@@ -77,14 +78,16 @@
                     </x-table.cell>
 
                     {{-- Actions --}}
+                    @activerole('HR','super-admin')
                     <x-table.cell class=" whitespace-nowrap text-center">
-                        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
-                            <div class="inline-flex items-center justify-center space-x-1 rtl:space-x-reverse">
-                                <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
-                                <x-table.delete-btn :modelId="$item->id"/>
-                            </div>
-                        @endif
+
+                        <div class="inline-flex items-center justify-center space-x-1 rtl:space-x-reverse">
+                            <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
+                            {{--                                <x-table.delete-btn :modelId="$item->id"/>--}}
+                        </div>
+
                     </x-table.cell>
+                    @endactiverole
                 </tr>
             @empty
                 <x-table.no-data/>

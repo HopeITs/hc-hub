@@ -14,34 +14,39 @@
             :showButton="true"
         />
 
-        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
-            <div>
-                <x-primary-button wire:click="create">
-                    @lang('general.add-new')
-                </x-primary-button>
-            </div>
-        @endif
+        @activerole('HR', 'super-admin')
+        <div>
+            <x-primary-button wire:click="create">
+                @lang('general.add-new')
+            </x-primary-button>
+        </div>
+        @endactiverole
     </div>
 
     <x-table>
         <x-slot name="headings">
-            <x-table.heading sortable wire:click="sortBy('id')" :direction="$sortField === 'id' ? $sortDirection : null">
+            <x-table.heading sortable wire:click="sortBy('id')"
+                             :direction="$sortField === 'id' ? $sortDirection : null">
                 ID
             </x-table.heading>
 
-            <x-table.heading sortable wire:click="sortBy('name_ar')" :direction="$sortField === 'name_ar' ? $sortDirection : null">
+            <x-table.heading sortable wire:click="sortBy('name_ar')"
+                             :direction="$sortField === 'name_ar' ? $sortDirection : null">
                 @lang('general.name')(AR)
             </x-table.heading>
 
-            <x-table.heading sortable wire:click="sortBy('name_en')" :direction="$sortField === 'name_en' ? $sortDirection : null">
+            <x-table.heading sortable wire:click="sortBy('name_en')"
+                             :direction="$sortField === 'name_en' ? $sortDirection : null">
                 @lang('general.name')(EN)
             </x-table.heading>
 
-            <x-table.heading sortable wire:click="sortBy('place')" :direction="$sortField === 'place' ? $sortDirection : null">
+            <x-table.heading sortable wire:click="sortBy('place')"
+                             :direction="$sortField === 'place' ? $sortDirection : null">
                 @lang('general.place')
             </x-table.heading>
 
-            <x-table.heading sortable wire:click="sortBy('type')" :direction="$sortField === 'type' ? $sortDirection : null">
+            <x-table.heading sortable wire:click="sortBy('type')"
+                             :direction="$sortField === 'type' ? $sortDirection : null">
                 @lang('general.type')
             </x-table.heading>
 
@@ -66,16 +71,17 @@
                     <x-table.cell>
                         <x-badge :color="$type['color']">{{ $type['value'] }}</x-badge>
                     </x-table.cell>
-
+                    @activerole('HR', 'super-admin')
                     <x-table.cell>
-                        @if(auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP'))
-                            <x-table.edit-btn wire:click="edit({{ $item->id }})" />
-                            <x-table.delete-btn :modelId="$item->id" />
-                        @endif
+
+                        <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
+{{--                        <x-table.delete-btn :modelId="$item->id"/>--}}
+
                     </x-table.cell>
+                    @endactiverole
                 </x-table.row>
             @empty
-                <x-table.no-data />
+                <x-table.no-data/>
             @endforelse
         </x-slot>
 
@@ -92,7 +98,7 @@
                         <x-forms.input-label for="name_{{ $locale }}">
                             @lang('general.name')({{ strtoupper($locale) }})
                         </x-forms.input-label>
-                        <x-forms.input type="text" id="name_{{ $locale }}" wire:model="item.name_{{ $locale }}" />
+                        <x-forms.input type="text" id="name_{{ $locale }}" wire:model="item.name_{{ $locale }}"/>
                         <x-error-span>{{ $errors->first('item.name_'.$locale) }}</x-error-span>
                     </div>
                 @endforeach
@@ -100,15 +106,18 @@
                 <div>
                     <x-forms.input-label for="type">@lang('general.type')</x-forms.input-label>
                     <div class="flex space-x-2">
-                        <x-forms.radio-input id="full" name="type" value="{{ ContractType::FullTime }}" wire:model="item.type">
+                        <x-forms.radio-input id="full" name="type" value="{{ ContractType::FullTime }}"
+                                             wire:model="item.type">
                             {{ ContractType::getLocalizedName(ContractType::FullTime)['value'] }}
                         </x-forms.radio-input>
 
-                        <x-forms.radio-input id="part" name="type" value="{{ ContractType::PartTime }}" wire:model="item.type">
+                        <x-forms.radio-input id="part" name="type" value="{{ ContractType::PartTime }}"
+                                             wire:model="item.type">
                             {{ ContractType::getLocalizedName(ContractType::PartTime)['value'] }}
                         </x-forms.radio-input>
 
-                        <x-forms.radio-input id="freelance" name="type" value="{{ ContractType::Freelance }}" wire:model="item.type">
+                        <x-forms.radio-input id="freelance" name="type" value="{{ ContractType::Freelance }}"
+                                             wire:model="item.type">
                             {{ ContractType::getLocalizedName(ContractType::Freelance)['value'] }}
                         </x-forms.radio-input>
                     </div>
@@ -118,11 +127,13 @@
                 <div>
                     <x-forms.input-label for="place">@lang('general.place')</x-forms.input-label>
                     <div class="flex space-x-2">
-                        <x-forms.radio-input id="onsite" name="place" value="{{ ContractPlace::Onsite }}" wire:model="item.place">
+                        <x-forms.radio-input id="onsite" name="place" value="{{ ContractPlace::Onsite }}"
+                                             wire:model="item.place">
                             {{ ContractPlace::getLocalizedName(ContractPlace::Onsite)['value'] }}
                         </x-forms.radio-input>
 
-                        <x-forms.radio-input id="online" name="place" value="{{ ContractPlace::Online }}" wire:model="item.place">
+                        <x-forms.radio-input id="online" name="place" value="{{ ContractPlace::Online }}"
+                                             wire:model="item.place">
                             {{ ContractPlace::getLocalizedName(ContractPlace::Online)['value'] }}
                         </x-forms.radio-input>
                     </div>
@@ -134,7 +145,7 @@
                 <x-primary-button type="submit" class="!w-auto">
                     @lang('general.save')
                 </x-primary-button>
-                <x-modal.cancel-btn />
+                <x-modal.cancel-btn/>
             </div>
         </form>
     </x-modal.dialog>

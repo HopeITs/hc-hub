@@ -17,7 +17,7 @@ final class ChecklistItemOrder extends Enum
         $val =  match ($value) {
             self::ProbationContract => ['text' => ['en' => 'Probation Contract', 'ar' => 'عقد تجريبي'] , 'color' => 'green'],
             self::AnnualContract => ['text' => ['en' => 'Annual Contract', 'ar' => 'عقد سنوي (بعد التثبيت)'] , 'color' => 'blue'],
-            self::Resignation =>['text' =>  ['en' => 'Resignation / End of Service', 'ar' => 'استقالة / إنهاء خدمة'],'color' => 'purple'],
+            self::Resignation =>['text' =>  ['en' => 'Resignation / End of Service', 'ar' => 'استقالة / إنهاء خدمة'],'color' => 'primary'],
             default => ['text' => ['en' => 'Unknown', 'ar' => 'غير معروف'] , 'color' => 'gray'],
         };
         $result = [
