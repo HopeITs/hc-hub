@@ -282,7 +282,7 @@
                             <x-slot name="icon">
                                 <span
                                     class="{{ request()->routeIs('course-categories.index') ? 'text-red-600 fill-red-600 stroke-red-600' : '' }}">
-                                    <x-icons.layers class="size-5" />
+                                    <x-icons.layers class="size-4" />
                                 </span>
                             </x-slot>
                             {{ __('Course Categories') }}
