@@ -52,7 +52,7 @@ class DefaultDeliverablesModule extends Component
         $employees = Employee::whereHas('contracts',function ($query){
             $query->whereHas('position',function ($subQuery){
                 $subQuery->whereHas('department',function($q){
-                    $q->whereIn('name' , ['IT', 'Communication', 'HR']);
+                    $q->whereIn('code' , ['IT', 'CT', 'HR']);
                 } );
             });
         })

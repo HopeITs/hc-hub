@@ -114,26 +114,11 @@ class ContractsTable extends LivewireTable
 
 
             Column::make(__('general.actions'), function (Model $m): string {
-                $view = Blade::render(
-                    '<a href="{{ route(\'contracts.show\', $id) }}"
-                        class="inline-flex items-center justify-center w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
-                        title="{{ __(\'general.view\') }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                            class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12
-                                   s-3.75 6.75-9.75 6.75S2.25 12 2.25 12z" />
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </a>', ['id' => $m->getKey()]
-                );
-
+                $view = Blade::render('<x-table.show-btn :href="route(\'contracts.show\', $id)" />', ['id' => $m->getKey()]);
                 $edit = Blade::render('<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />', ['id' => $m->getKey()]);
                 $delete = Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $m->getKey()]);
 
-                return '<div class="flex items-center justify-center gap-2">' . $view . $edit . $delete . '</div>';
+                return '<div class="flex items-center justify-center gap-2">' . $view . $edit  . '</div>';
             })->asHtml(),
         ];
     }

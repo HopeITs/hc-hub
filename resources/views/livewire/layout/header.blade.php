@@ -82,6 +82,7 @@
                                         {{ $user->profile?->name }}
                                     </div>
                                     <div class="text-xs text-gray-500 truncate">{{ $user->email }}</div>
+                                    <div class="text-xs text-gray-500 truncate">{{ $user->myRole() }}</div>
                                 </div>
                             </div>
                         </div>

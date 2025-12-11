@@ -16,10 +16,9 @@ class UpcomingLeavesCard extends Component
     {
         $user = auth()->user()->load('profile');
 
-        $role = $user->activeRole()?->name;
+        $role = $user->myRole();
         $query = LeaveRequest::
-        whereDate('start_at', '>=', Carbon::now())
-          ;
+        whereDate('start_at', '>=', Carbon::now());
         if ($role === 'HR-SYR') {
             $query->whereIn('status', [LeaveRequestStatus::Accepted, LeaveRequestStatus::Pending]);
         } elseif (str_starts_with($role, 'HR-')) {
@@ -39,7 +38,7 @@ class UpcomingLeavesCard extends Component
                 ]);
         }
 
-        $this->upcomingLeaves = $query ->orderBy('start_at')->get();
+        $this->upcomingLeaves = $query->orderBy('start_at')->get();
 
 
     }

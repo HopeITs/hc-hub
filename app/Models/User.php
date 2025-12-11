@@ -53,7 +53,7 @@ class User extends Authenticatable
 
     public function myRole(): ?string
     {
-        return $this->activeRole()?->name;
+        return $this->activeRole()?->name ?? $this->roles()->first()->name;
     }
 
     public function activeRoleSlug(): ?string
@@ -64,13 +64,21 @@ class User extends Authenticatable
 
     public function activeRoleIs(string ...$roles): bool
     {
-        $current = $this->activeRoleSlug();
-        if (!$current) {
+        $user = auth()->user();
+        if (!$user) {
             return false;
         }
 
+        $activeRole = strtoupper(trim($user->myRole() ?? ''));
+
         foreach ($roles as $r) {
-            if ($current === Str::slug($r)) {
+            $normalized = strtoupper(trim($r));
+
+            if (Str::startsWith($activeRole, 'HR-') && Str::startsWith($normalized, 'HR')) {
+                return true;
+            }
+
+            if ($activeRole === $normalized) {
                 return true;
             }
         }
@@ -114,10 +122,7 @@ class User extends Authenticatable
         });
     }
 
-    public function hasRole(string $roleName): bool
-    {
-        return $this->relationLoaded('roles') ? $this->roles->contains(fn($r) => Str::slug($r->name) === Str::slug($roleName)) : $this->roles()->where('name', $roleName)->exists();
-    }
+
 
     public function getActiveRoleNameAttribute(): ?string
     {
