@@ -16,7 +16,7 @@ class LeaveType
 
         $val =  match ($status) {
             self::GENDER_MALE => ['text' => ['en' => 'Male', 'ar' => 'ذكر'] , 'color' => 'blue'],
-            self::GENDER_FEMALE => ['text' => ['en' => 'Female', 'ar' => 'انثى'] , 'color' => 'pink'],
+            self::GENDER_FEMALE => ['text' => ['en' => 'Female', 'ar' => 'انثى'] , 'color' => 'yellow'],
             default =>['text' =>  ['en' => 'All', 'ar' => 'الكل '],'color' => 'green'],
         };
         $result = [
@@ -34,7 +34,7 @@ class LeaveType
 
         $val =  match ($status) {
             self::MARITAL_STATUS_SINGLE => ['text' => ['en' => 'Single', 'ar' => 'أعزب'] , 'color' => 'yellow'],
-            self::MARITAL_STATUS_MARRIED => ['text' => ['en' => 'Married', 'ar' => 'متزوج'] , 'color' => 'purple'],
+            self::MARITAL_STATUS_MARRIED => ['text' => ['en' => 'Married', 'ar' => 'متزوج'] , 'color' => 'gray'],
             default =>['text' =>  ['en' => 'All', 'ar' => 'الكل '],'color' => 'green'],
         };
         $result = [

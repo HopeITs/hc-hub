@@ -42,7 +42,7 @@
             >@lang('general.slug')</x-table.heading>
 
 
-            @activerole('HR')
+            @activerole('HR','super-admin')
             <x-table.heading
                 sortable
                 wire:click="sortBy('is_active')"
@@ -60,12 +60,12 @@
                     <x-table.cell>{{ $item->code ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->slug ?? '-' }}</x-table.cell>
 
-                    @activerole('HR')
-                        <x-table.cell-status
-                            :active="$item->is_active"
-                            :model-id="$item->id"
-                            wire-event="confirmToggleItemStatus"
-                        />
+                    @activerole('HR','super-admin')
+                    <x-table.cell-status
+                        :active="$item->is_active"
+                        :model-id="$item->id"
+                        wire-event="confirmToggleItemStatus"
+                    />
                     @endactiverole
                 </tr>
             @empty
