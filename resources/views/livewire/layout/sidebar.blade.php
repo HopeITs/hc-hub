@@ -323,7 +323,7 @@
                         :href="route('activity-log.index')"
                         :active="request()->routeIs('activity-log.*')">
                         <x-slot name="icon">
-                            <x-icons.clock class="size-4"/>
+                            <x-icons.activity-log class="size-4"/>
                         </x-slot>
                         {{ __('general.activity-log') }}
                     </x-layouts.app.sidebar.single-item>
