@@ -69,6 +69,45 @@
                 {{ $categories->links() }}
             </div>
         </div>
+
+        @if($showFormModal)
+            <div class="fixed inset-0 z-50 flex items-center justify-center">
+                <div class="absolute inset-0 bg-black/50" wire:click="backToIndex"></div>
+                <div class="relative bg-white rounded-lg shadow max-w-2xl w-full mx-4">
+                    <div class="flex items-center justify-between border-b px-6 py-4">
+                        <h2 class="text-lg font-semibold">
+                            {{ $editingId ? __('general.edit') : __('general.add-new') }}
+                        </h2>
+                        <button type="button" class="text-gray-500 hover:text-gray-800" wire:click="backToIndex">&times;</button>
+                    </div>
+
+                    <div class="p-6">
+                        <form wire:submit.prevent="save" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="col-span-2 sm:col-span-1">
+                                    <x-forms.input-label for="name_en">{{ __('Name (EN)') }}</x-forms.input-label>
+                                    <x-forms.input id="name_en" type="text" wire:model.live="name_en" />
+                                    <x-error-span>{{ $errors->first('name_en') }}</x-error-span>
+                                </div>
+
+                                <div class="col-span-2 sm:col-span-1">
+                                    <x-forms.input-label for="name_ar">{{ __('Name (AR)') }}</x-forms.input-label>
+                                    <x-forms.input id="name_ar" type="text" wire:model.live="name_ar" />
+                                    <x-error-span>{{ $errors->first('name_ar') }}</x-error-span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end gap-2">
+                                <x-primary-button type="submit">@lang('general.save')</x-primary-button>
+                                <x-secondary-button type="button" wire:click="backToIndex">
+                                    @lang('general.cancel')
+                                </x-secondary-button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
     @else
         <div class="flex justify-between items-center mb-6">
             <livewire:layout.breadcrumbs

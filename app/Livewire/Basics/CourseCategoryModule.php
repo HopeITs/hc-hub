@@ -38,11 +38,8 @@ class CourseCategoryModule extends Component
             403
         );
 
-        $this->isCreatePage = request()->boolean('create');
-
-        if ($this->isCreatePage) {
-            $this->resetCreateForm();
-        }
+        $this->isCreatePage = false;
+        $this->resetCreateForm();
     }
 
     public function updatingSearch(): void
@@ -52,7 +49,8 @@ class CourseCategoryModule extends Component
 
     public function create(): void
     {
-        redirect()->to(route('course-categories.index', ['create' => 1]));
+        $this->resetCreateForm();
+        $this->showFormModal = true;
     }
 
     public function edit(int $id): void
@@ -61,21 +59,14 @@ class CourseCategoryModule extends Component
         $this->editingId = $cat->id;
         $this->name_en = (string) ($cat->name_en ?? '');
         $this->name_ar = (string) ($cat->name_ar ?? '');
-
-        redirect()->to(route('course-categories.index', ['create' => 1, 'edit' => $id]));
+        $this->showFormModal = true;
     }
 
     public function save(): void
     {
         $this->validate();
 
-        if (request()->filled('edit')) {
-            $id = (int) request()->query('edit');
-            CourseCategory::whereKey($id)->update([
-                'name_en' => $this->name_en,
-                'name_ar' => $this->name_ar,
-            ]);
-        } elseif ($this->editingId) {
+        if ($this->editingId) {
             CourseCategory::whereKey($this->editingId)->update([
                 'name_en' => $this->name_en,
                 'name_ar' => $this->name_ar,
@@ -89,12 +80,15 @@ class CourseCategoryModule extends Component
 
         $this->dispatch('notify', type: 'success', message: __('Saved successfully'));
 
-        redirect()->to(route('course-categories.index'));
+        $this->showFormModal = false;
+        $this->resetCreateForm();
+        $this->dispatch('refreshTable');
     }
 
     public function backToIndex(): void
     {
-        redirect()->to(route('course-categories.index'));
+        $this->showFormModal = false;
+        $this->resetCreateForm();
     }
 
     public function confirmDelete(int $id): void
@@ -144,17 +138,9 @@ class CourseCategoryModule extends Component
 
     protected function resetCreateForm(): void
     {
-        if (request()->filled('edit')) {
-            $id = (int) request()->query('edit');
-            $cat = CourseCategory::findOrFail($id);
-            $this->editingId = $cat->id;
-            $this->name_en = (string) ($cat->name_en ?? '');
-            $this->name_ar = (string) ($cat->name_ar ?? '');
-        } else {
-            $this->editingId = null;
-            $this->name_en = '';
-            $this->name_ar = '';
-        }
+        $this->editingId = null;
+        $this->name_en = '';
+        $this->name_ar = '';
     }
 
     public function render(): View
