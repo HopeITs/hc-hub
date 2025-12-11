@@ -23,7 +23,7 @@
 <livewire:layout.sidebar/>
 
 
-<div class="flex flex-col min-h-screen sm:ms-60">
+<div class="flex flex-col min-h-screen md:ms-60">
 
 
 
@@ -37,7 +37,7 @@
                 {{ session('status') }}
             </div>
         @endif
-        <div class="px-4 pb-6 w-11/12  min-h-full">
+        <div class="px-4 pb-6 max-lg:w-full md:w-11/12  min-h-full">
             @yield('greeting')
             {{ $slot }}
         </div>

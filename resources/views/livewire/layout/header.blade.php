@@ -16,7 +16,7 @@
             <button
                 wire:click="$dispatch('sidebar.toggle')"
                 type="button"
-                class="sm:hidden me-auto text-heading text-secondary-light bg-transparent border border-transparent
+                class="md:hidden me-auto text-heading text-secondary-light bg-transparent border border-transparent
            hover:text-secondary-dark transition cursor-pointer rounded-base p-2"
             >
                 <span class="sr-only">Open sidebar</span>
