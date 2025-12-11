@@ -47,7 +47,8 @@ class CentersTable extends LivewireTable
     protected function columns(): array
     {
         $locale = app()->getLocale();
-        $isHR = auth()->user()?->hasRole('HR-SYR') || auth()->user()?->hasRole('HR-ALP');
+        $user = auth()->user();
+        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin') ;
 
         return [
             Column::make('ID', 'id')->sortable(),
@@ -94,7 +95,7 @@ class CentersTable extends LivewireTable
                     $badge .
                     '</a>'
                 );
-            })->asHtml(),
+            })->asHtml()->visible($user->activeRoleIs('HR') || $user->activeRoleIs('super-admin')),
 
             Column::make(__('general.actions'), function (Model $m) use ($isHR): string {
                 $viewUrl = route('centers.show', $m->getKey());
@@ -129,7 +130,7 @@ class CentersTable extends LivewireTable
                     '<x-table.delete-btn :modelId="' . $m->getKey() . '" />'
                 );
 
-                return $toggleBtn . $viewBtn . $editBtn . $deleteBtn;
+                return $toggleBtn . $viewBtn . $editBtn ;
             })->asHtml(),
         ];
     }

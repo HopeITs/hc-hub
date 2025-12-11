@@ -47,11 +47,15 @@ class EmployeeTable extends LivewireTable
 
     protected function columns(): array
     {
+        $user = auth()->user();
         return [
             Column::make('ID', 'id')->sortable(),
 
             Column::make(trans('general.name'), transColumn('name'))
                 ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
+                ->sortable()->searchable(),
+            Column::make(trans('general.role'), 'account')
+                ->displayUsing(fn($v, Model $m) => $m->account?->myRole()) // uses accessor
                 ->sortable()->searchable(),
 
             Column::make(trans('general.photo'), function (Model $m): string {
@@ -112,7 +116,6 @@ class EmployeeTable extends LivewireTable
             BooleanColumn::make(trans('general.is-active'), 'is_active')->searchable(),
 
             Column::make(__('general.actions'), function (Model $model): string {
-
                 $isActive = $model->is_active ? 1 : 0;
 
                 $toggleBtn = Blade::render(
@@ -137,10 +140,10 @@ class EmployeeTable extends LivewireTable
 
                 // Wrap everything in a flex row
                 return '<div class="flex items-center gap-1">' .
-                    $toggleBtn . $viewBtn . $editBtn . $deleteBtn .
+                    $toggleBtn . $viewBtn . $editBtn  .
                     '</div>';
 
-            })->asHtml(),
+            })->visible($user->activeRoleIs('HR'))->asHtml(),
 
         ];
     }

@@ -43,8 +43,8 @@ class AllLeaveRequestModule extends Component
 
         $this->refreshCounts();
         $user = auth()->user();
-        if (str_contains($user->activeRole()->name, 'HR-')) {
-            $cityCode = explode('-', $user->activeRole()->name)[1];
+        if (str_contains($user->myRole(), 'HR-')) {
+            $cityCode = explode('-', $user->myRole())[1];
 
             if ($cityCode === 'SYR') {
                 $this->employees = Employee::with('contracts.leaveBalances.leaveType')->get();
@@ -165,7 +165,7 @@ class AllLeaveRequestModule extends Component
     {
         $user = auth()->user();
         $employee = $user->profile;
-        $role = $user->activeRole()?->name;
+        $role = $user->myRole();
         // Collect all leave requests through the relationship chain:
         $leaveRequests = LeaveRequest::whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
             if ($role === 'HR-SYR') {

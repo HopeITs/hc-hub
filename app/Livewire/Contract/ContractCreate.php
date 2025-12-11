@@ -184,9 +184,9 @@ class ContractCreate extends Component
         $cities = City::select('id', $cityCol)->where('is_active', 1)->get()->map(fn($c) => tap($c, fn() => ($c->name = $c->{$cityCol})));
 
         $user = auth()->user()->load('profile');
-        $role = $user->activeRole();
+        $role = $user->myRole();
 
-        $roleArr = explode('-', $role->name);
+        $roleArr = explode('-', $role);
         if ($roleArr[0] === 'HR') {
             if ($roleArr[1] === 'SYR') {
                 $employees = Employee::all();

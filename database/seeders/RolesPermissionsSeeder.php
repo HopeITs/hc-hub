@@ -12,16 +12,16 @@ class RolesPermissionsSeeder extends Seeder
     public function run(): void
     {
         //Roles:
-        Role::create(['name' => 'Super Admin']);
-        Role::create(['name' => 'General Manager']);
+        Role::create(['name' => 'super-admin']);
+        Role::create(['name' => 'general-manager']);
         Role::create(['name' => 'HR-SYR']);
         Role::create(['name' => 'HR-ALP']);
         Role::create(['name' => 'HR-HMS']);
         Role::create(['name' => 'HR-DMS']);
         Role::create(['name' => 'HR-LAT']);
         Role::create(['name' => 'HR-TAR']);
-        Role::create(['name' => 'Manager']);
-        Role::create(['name' => 'Employee']);
+        Role::create(['name' => 'manager']);
+        Role::create(['name' => 'employee']);
 
 
 
