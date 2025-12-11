@@ -16,16 +16,20 @@ class Course extends Model implements HasMedia
     protected $guarded = [
         'id',
     ];
-
     protected $casts = [
-        'issue_date' => 'datetime',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+        'has_certificate' => 'boolean',
     ];
 
     public function employee()
     {
         return $this->belongsTo(Employee::class);
     }
-
+    public function category()
+    {
+        return $this->belongsTo(CourseCategory::class, 'category_id');
+    }
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('file')

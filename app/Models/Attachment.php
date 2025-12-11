@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AttachmentCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
@@ -16,11 +17,21 @@ class Attachment extends Model implements HasMedia
     protected $fillable = [
         'employee_id',
         'name',
+        'category',
+    ];
+
+    protected $casts = [
+        'category' => AttachmentCategory::class,
     ];
 
     public function employee()
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('file')->singleFile();
     }
 
     public function getActivitylogOptions(): LogOptions
