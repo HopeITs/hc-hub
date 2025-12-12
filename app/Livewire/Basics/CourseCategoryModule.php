@@ -36,7 +36,10 @@ class CourseCategoryModule extends Component
     {
         $this->resetForm();
     }
-
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
     public function create(): void
     {
         $this->resetForm();
@@ -50,8 +53,8 @@ class CourseCategoryModule extends Component
 
         $this->item = [
             'id' => $cat->id,
-            'name_en' => (string) ($cat->name_en ?? ''),
-            'name_ar' => (string) ($cat->name_ar ?? ''),
+            'name_en' => (string)($cat->name_en ?? ''),
+            'name_ar' => (string)($cat->name_ar ?? ''),
         ];
 
         $this->modalTitle = __('general.edit');
@@ -92,7 +95,7 @@ class CourseCategoryModule extends Component
 
     public function delete(array $payload): void
     {
-        $id = (int) ($payload['id'] ?? 0);
+        $id = (int)($payload['id'] ?? 0);
         $cat = CourseCategory::withCount('courses')->findOrFail($id);
 
         if ($cat->courses_count > 0) {
@@ -125,7 +128,7 @@ class CourseCategoryModule extends Component
                 });
             })
             ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(15);
+            ->paginate(15)->withQueryString();
 
         return view('livewire.basics.course-category-module', compact('items'));
     }
