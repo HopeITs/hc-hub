@@ -72,37 +72,49 @@
 </script>
 @stack('scripts')
 <script>
-    if (typeof window.preloaderScriptLoaded === 'undefined') {
-        window.preloaderScriptLoaded = true;
+    function hidePreloader() {
+        const overlay = document.getElementById('page-gif-overlay');
+        if (!overlay) return;
 
-        function hidePreloader() {
-            const overlay = document.getElementById('page-gif-overlay');
-            if (!overlay) return;
+        overlay.style.transition = "opacity 0.6s ease";
+        overlay.style.opacity = "0";
 
-            overlay.style.transition = "opacity 0.6s ease";
-            overlay.style.opacity = "0";
-
-            setTimeout(() => {
-                overlay.style.display = "none";
-            }, 200);
-        }
-
-        const MIN_TIME = 1500;
-        const start = performance.now();
-
-        function scheduleHide() {
-            const elapsed = performance.now() - start;
-            const remaining = MIN_TIME - elapsed;
-
-            setTimeout(hidePreloader, remaining > 0 ? remaining : 0);
-        }
-
-        document.addEventListener("DOMContentLoaded", scheduleHide);
-        document.addEventListener("livewire:load", scheduleHide);
-
-        setTimeout(hidePreloader, MIN_TIME + 1000);
+        setTimeout(() => {
+            overlay.style.display = "none";
+        }, 600);
     }
+
+    function showPreloader() {
+        const overlay = document.getElementById('page-gif-overlay');
+        if (!overlay) return;
+
+        overlay.style.display = "flex";
+        overlay.style.opacity = "1";
+    }
+
+    const MIN_TIME = 1500;
+    let startTime = performance.now();
+
+    function scheduleHide() {
+        const elapsed = performance.now() - startTime;
+        const remaining = MIN_TIME - elapsed;
+
+        setTimeout(hidePreloader, remaining > 0 ? remaining : 0);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        startTime = performance.now();
+        scheduleHide();
+    });
+
+    document.addEventListener('livewire:navigated', () => {
+        startTime = performance.now();
+        scheduleHide();
+    });
+
+    setTimeout(hidePreloader, 3000);
 </script>
+
 
 
 
