@@ -35,22 +35,24 @@ class EmpLeaveBalanceTable extends LivewireTable
         $role = $user->myRole();
 
         $query = Employee::query()
-            ->whereHas('contracts.leaveBalances' , function ($query) {
+            ->whereHas('contracts.leaveBalances', function ($query) {
                 return $query->where('type_id', LeaveTypeCases::Annual);
             });
 
-        if ($role === 'HR-SYR') {
-            return $query;
-        } else {
-
-            $cityCode = substr($role, 3);
-            $query->whereHas('city', function ($qq) use ($cityCode) {
-                $qq->where('slug', $cityCode);
-
-            });
-
-        }
-
+            if ($role === 'HR-SYR' || $role === 'super-admin' || $role === 'general-manager') {
+                return $query;
+            } else if ($role === 'manager') {
+                $query->whereHas('positions', function ($qq) use ($user) {
+                    $managerPos = $user->profile->positions()->pluck('id')->toArray();
+                    $qq->whereIn('direct_manager_id', $managerPos)->orWhere('tech_manager_id', $managerPos);
+                });
+            }
+            else {
+                $cityCode = substr($role, 3);
+                $query->whereHas('city', function ($qq) use ($cityCode) {
+                    $qq->where('slug', $cityCode);
+                });
+            }
 
         return $query;
     }
