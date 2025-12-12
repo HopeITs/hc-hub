@@ -45,7 +45,7 @@ use App\Enums\LeaveRequestStatus;
         </div>
     @else
         <div class="rounded-2xl shadow-md mb-6 text-center font-semibold text-secondary-medium p-4">
-          @lang('general.no-available-data')
+            @lang('general.no-available-data')
         </div>
 
     @endisset
@@ -53,13 +53,13 @@ use App\Enums\LeaveRequestStatus;
     <x-tabs-list>
         <x-tabs-list-item
             :active="$statusFilter === 'all'" active-tab="all">
-             {{ __('general.all') . ' ('. $counts['all'] ?? 0 }})
+            {{ __('general.all') . ' ('. $counts['all'] ?? 0 }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
             :active="$statusFilter === (string) LeaveRequestStatus::Pending"
             :active-tab="LeaveRequestStatus::Pending">
-             {{ LeaveRequestStatus::getLocalizedName(0)['value'] . ' ('.$counts['pending'] ?? 0  }})
+            {{ LeaveRequestStatus::getLocalizedName(0)['value'] . ' ('.$counts['pending'] ?? 0  }})
         </x-tabs-list-item>
 
         <x-tabs-list-item
@@ -90,126 +90,137 @@ use App\Enums\LeaveRequestStatus;
         wire:ignore.self
         class="flex items-center justify-center px-2">
         <div class="w-full max-h-[60vh] overflow-y-auto bg-white rounded-2xl px-6 py-4 md:px-10 md:py-6">
-        <form wire:submit.prevent="save" class="space-y-4">
-            <x-forms.errors-validation-list/>
-            <div class="grid md:grid-cols-2 gap-4">
+            <form wire:submit.prevent="save" class="space-y-4">
+                <x-forms.errors-validation-list/>
+                <div class="grid md:grid-cols-2 gap-4">
 
-                <div class="md:col-span-1">
-                    <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
-                    <x-forms.select-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
-                        <option
-                            class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
-                            @lang('general.select')
-                        </option>
-                        @foreach($allAvailableLeaves ?? [] as $availableLeave)
-                            <option value="{{$availableLeave->id}}">{{$availableLeave->leaveType->name}}</option>
-                        @endforeach
-                    </x-forms.select-input>
-                    <x-error-span>{{ $errors->first('form.leave_balance_id') }}</x-error-span>
-                </div>
-                <div class="md:col-span-1">
-                    <x-forms.input-label for="city">{{__('general.alternative-employee')}}</x-forms.input-label>
-                    <x-forms.select-input wire:model="form.alternative_employee" id="alternative_employee">
-                        <option
-                            class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
-
-                            @lang('general.select')
-                        </option>
-                        @foreach($alternativeEmployees as $alternativeEmployee)
-                            <option value="{{$alternativeEmployee->id}}">{{$alternativeEmployee->name}}</option>
-                        @endforeach
-                    </x-forms.select-input>
-                    <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
-                </div>
-
-                @if($form->leave_balance_id !== null)
-                    @if(optional($availableLeaves->find($form->leave_balance_id))->leaveType->id === LeaveTypeCases::Annual)
-                        <div class="mt-4">
-                            <x-forms.input-label>{{trans_choice('general.leave-type',1)}}</x-forms.input-label>
-                            <div class="flex gap-4">
-                                <x-forms.radio-input wire:model.live="form.type" value="day">{{trans_choice('general.day',1)}}</x-forms.radio-input>
-                                <x-forms.radio-input wire:model.live="form.type" value="hour">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
-                            </div>
-                        </div>
-                    @endif
-                @endif
-                @if($form->leave_balance_id === null || optional($availableLeaves->find($form->leave_balance_id))->leaveType->id !== LeaveTypeCases::Annual)
-
-                    <div>
-                        <x-forms.input-label for="start_at">{{__('general.start-date')}}</x-forms.input-label>
-                        <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
-                        <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
+                    <div class="md:col-span-1">
+                        <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
+                        <x-forms.select-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
+                            @if($allAvailableLeaves->count() > 0)
+                                <option
+                                    class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                                    @lang('general.select')
+                                </option>
+                                @foreach($allAvailableLeaves  as $availableLeave)
+                                    <option
+                                        value="{{$availableLeave->id}}">{{$availableLeave->leaveType->name}}</option>
+                                @endforeach
+                            @else
+                                <option
+                                    class="text-gray-400" disabled>
+                                    @lang('general.no-available-data')
+                                </option>
+                            @endif
+                        </x-forms.select-input>
+                        <x-error-span>{{ $errors->first('form.leave_balance_id') }}</x-error-span>
                     </div>
-                    <div>
-                        <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>
-                        <x-forms.date-input id="end_at" wire:model="form.end_at" label="End Date"/>
-                        <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
+                    <div class="md:col-span-1">
+                        <x-forms.input-label for="city">{{__('general.alternative-employee')}}</x-forms.input-label>
+                        <x-forms.select-input wire:model="form.alternative_employee" id="alternative_employee">
+                            <option
+                                class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+
+                                @lang('general.select')
+                            </option>
+                            @foreach($alternativeEmployees as $alternativeEmployee)
+                                <option value="{{$alternativeEmployee->id}}">{{$alternativeEmployee->name}}</option>
+                            @endforeach
+                        </x-forms.select-input>
+                        <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
                     </div>
 
-                @else
+                    @if($form->leave_balance_id !== null)
+                        @if(optional($availableLeaves->find($form->leave_balance_id))->leaveType->id === LeaveTypeCases::Annual)
+                            <div class="mt-4">
+                                <x-forms.input-label>{{trans_choice('general.leave-type',1)}}</x-forms.input-label>
+                                <div class="flex gap-4">
+                                    <x-forms.radio-input wire:model.live="form.type"
+                                                         value="day">{{trans_choice('general.day',1)}}</x-forms.radio-input>
+                                    <x-forms.radio-input wire:model.live="form.type"
+                                                         value="hour">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
+                                </div>
+                            </div>
+                        @endif
+                    @endif
+                    @if($form->leave_balance_id === null || optional($availableLeaves->find($form->leave_balance_id))->leaveType->id !== LeaveTypeCases::Annual)
 
-                    @if($form->type === 'day')
-                        <div class="col-span-full grid md:grid-cols-2 gap-4">
+                        <div>
+                            <x-forms.input-label for="start_at">{{__('general.start-date')}}</x-forms.input-label>
+                            <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
+                            <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
+                        </div>
+                        <div>
+                            <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>
+                            <x-forms.date-input id="end_at" wire:model="form.end_at" label="End Date"/>
+                            <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
+                        </div>
+
+                    @else
+
+                        @if($form->type === 'day')
+                            <div class="col-span-full grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <x-forms.input-label
+                                        for="start_at">{{__('general.start-date')}}</x-forms.input-label>
+                                    <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
+                                    <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
+                                </div>
+                                <div>
+                                    <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>
+                                    <x-forms.date-input id="end_at" wire:model="form.end_at" label="End Date"/>
+                                    <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
+                                </div>
+                            </div>
+                        @elseif($form->type === 'hour')
+
                             <div>
-                                <x-forms.input-label for="start_at">{{__('general.start-date')}}</x-forms.input-label>
-                                <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
-                                <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
+                                <x-forms.input-label for="city">{{__('general.leave-date')}}</x-forms.input-label>
+                                <x-forms.date-input wire:model.live="form.leave_date" label="Leave Date"/>
+                                <x-error-span>{{ $errors->first('form.leave_date') }}</x-error-span>
+                            </div>
+
+                            <div>
+                                <x-forms.input-label for="start_time">{{__('general.start-time')}}(24)
+                                </x-forms.input-label>
+                                <x-forms.date-input id="start_time" type="time" min="09:00" max="21:00"
+                                                    wire:model.live="form.start_hour"
+                                                    label="Start Hour"/>
+                                <x-error-span>{{ $errors->first('form.start_hour') }}</x-error-span>
                             </div>
                             <div>
-                                <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>
-                                <x-forms.date-input id="end_at" wire:model="form.end_at" label="End Date"/>
-                                <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
+                                <x-forms.input-label for="end_time">{{__('general.end-time')}}(24)</x-forms.input-label>
+                                <x-forms.date-input type="time" id="end_time" min="09:00" max="21:00"
+                                                    wire:model.live="form.end_hour"
+                                                    label="End Time"/>
+                                <x-error-span>{{ $errors->first('form.end_hour') }}</x-error-span>
                             </div>
-                        </div>
-                    @elseif($form->type === 'hour')
 
-                        <div>
-                            <x-forms.input-label for="city">{{__('general.leave-date')}}</x-forms.input-label>
-                            <x-forms.date-input wire:model.live="form.leave_date" label="Leave Date"/>
-                            <x-error-span>{{ $errors->first('form.leave_date') }}</x-error-span>
-                        </div>
-
-                        <div>
-                            <x-forms.input-label for="start_time">{{__('general.start-time')}}(24)
-                            </x-forms.input-label>
-                            <x-forms.date-input id="start_time" type="time" min="09:00" max="21:00"
-                                                wire:model.live="form.start_hour"
-                                                label="Start Hour"/>
-                            <x-error-span>{{ $errors->first('form.start_hour') }}</x-error-span>
-                        </div>
-                        <div>
-                            <x-forms.input-label for="end_time">{{__('general.end-time')}}(24)</x-forms.input-label>
-                            <x-forms.date-input type="time" id="end_time" min="09:00" max="21:00"
-                                                wire:model.live="form.end_hour"
-                                                label="End Time"/>
-                            <x-error-span>{{ $errors->first('form.end_hour') }}</x-error-span>
-                        </div>
+                        @endif
 
                     @endif
-
-                @endif
-                <div class="col-span-full">
-                    <x-forms.input-label for="reason">{{__('general.reason')}}</x-forms.input-label>
-                    <x-forms.input id="reason" wire:model="form.reason" required/>
-                    <x-error-span>{{ $errors->first('form.reason') }}</x-error-span>
+                    <div class="col-span-full">
+                        <x-forms.input-label for="reason">{{__('general.reason')}}</x-forms.input-label>
+                        <x-forms.input id="reason" wire:model="form.reason" required/>
+                        <x-error-span>{{ $errors->first('form.reason') }}</x-error-span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="flex justify-end gap-2 pt-4">
-                <x-primary-button
-                    type="button"
-                    wire:click="confirmSave"
-                    class="!w-auto">
-                    @lang('general.save')
-                </x-primary-button>
+                <div class="flex justify-end gap-2 pt-4">
+                    <x-primary-button
+                        type="button"
+                        wire:click="confirmSave"
+                        class="!w-auto">
+                        @lang('general.save')
+                    </x-primary-button>
 
-                <x-primary-button
-                    :href="route('leaves.index')"
-                    class="!bg-secondary-light !w-auto">
-                    @lang('general.cancel')
-                </x-primary-button>
-            </div>
-        </form>
+                    <x-primary-button
+                        :href="route('leaves.index')"
+                        class="!bg-secondary-light !w-auto">
+                        @lang('general.cancel')
+                    </x-primary-button>
+                </div>
+            </form>
         </div>
     </x-modal.dialog>
 </div>

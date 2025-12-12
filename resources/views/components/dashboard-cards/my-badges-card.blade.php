@@ -17,7 +17,7 @@
     ];
 @endphp
 
-<div class="w-full h-full max-w-md bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
+<div class="w-full h-full max-w-md lg:max-w-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
     <!-- Header -->
     <div class="flex items-center justify-between px-4 md:px-6 pt-4 pb-6 md:pt-5 md:pb-10 flex-shrink-0">
         <div class="flex items-center gap-2 md:gap-3">
