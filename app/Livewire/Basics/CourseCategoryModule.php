@@ -16,27 +16,25 @@ class CourseCategoryModule extends Component
     public string $search = '';
     public int $perPage = 10;
 
-    public ?int $editingId = null;
-    public string $name_en = '';
-    public string $name_ar = '';
+    public bool $showModal = false;
+    public string $modalTitle = 'Modal title';
 
-    public bool $showFormModal = false;
-    public bool $isCreatePage = false;
-
-    protected array $rules = [
-        'name_en' => ['required', 'string', 'max:255'],
-        'name_ar' => ['required', 'string', 'max:255'],
+    public array $item = [
+        'id' => null,
+        'name_en' => '',
+        'name_ar' => '',
     ];
 
-    protected $listeners = ['deleteItem' => 'deleteItem', 'refreshTable' => '$refresh'];
+    protected array $rules = [
+        'item.name_en' => ['required', 'string', 'max:255'],
+        'item.name_ar' => ['required', 'string', 'max:255'],
+    ];
+
+    protected $listeners = ['delete' => 'delete', 'refreshTable' => '$refresh'];
 
     public function mount(): void
     {
-        $user = auth()->user();
-
-
-        $this->isCreatePage = false;
-        $this->resetCreateForm();
+        $this->resetForm();
     }
 
     public function updatingSearch(): void
@@ -46,46 +44,52 @@ class CourseCategoryModule extends Component
 
     public function create(): void
     {
-        $this->resetCreateForm();
-        $this->showFormModal = true;
+        $this->resetForm();
+        $this->modalTitle = __('general.add-new');
+        $this->showModal = true;
     }
 
     public function edit(int $id): void
     {
         $cat = CourseCategory::findOrFail($id);
-        $this->editingId = $cat->id;
-        $this->name_en = (string) ($cat->name_en ?? '');
-        $this->name_ar = (string) ($cat->name_ar ?? '');
-        $this->showFormModal = true;
+
+        $this->item = [
+            'id' => $cat->id,
+            'name_en' => (string) ($cat->name_en ?? ''),
+            'name_ar' => (string) ($cat->name_ar ?? ''),
+        ];
+
+        $this->modalTitle = __('general.edit');
+        $this->showModal = true;
     }
 
     public function save(): void
     {
         $this->validate();
 
-        if ($this->editingId) {
-            CourseCategory::whereKey($this->editingId)->update([
-                'name_en' => $this->name_en,
-                'name_ar' => $this->name_ar,
+        if (!empty($this->item['id'])) {
+            CourseCategory::findOrFail($this->item['id'])->update([
+                'name_en' => $this->item['name_en'],
+                'name_ar' => $this->item['name_ar'],
             ]);
         } else {
             CourseCategory::create([
-                'name_en' => $this->name_en,
-                'name_ar' => $this->name_ar,
+                'name_en' => $this->item['name_en'],
+                'name_ar' => $this->item['name_ar'],
             ]);
         }
 
-        $this->dispatch('notify', type: 'success', message: __('Saved successfully'));
+        $this->showModal = false;
+        $this->resetForm();
 
-        $this->showFormModal = false;
-        $this->resetCreateForm();
+        $this->dispatch('notify', type: 'success', message: __('Saved successfully'));
         $this->dispatch('refreshTable');
     }
 
     public function backToIndex(): void
     {
-        $this->showFormModal = false;
-        $this->resetCreateForm();
+        $this->showModal = false;
+        $this->resetForm();
     }
 
     public function confirmDelete(int $id): void
@@ -94,12 +98,12 @@ class CourseCategoryModule extends Component
             ->text(__('general.confirm-delete-item'))
             ->question()
             ->withConfirmButton(__('general.delete'))
-            ->onConfirm('deleteItem', ['id' => $id])
+            ->onConfirm('delete', ['id' => $id])
             ->withCancelButton(__('general.cancel'))
             ->show();
     }
 
-    public function deleteItem(array $payload): void
+    public function delete(array $payload): void
     {
         $id = (int) ($payload['id'] ?? 0);
         $cat = CourseCategory::withCount('courses')->findOrFail($id);
@@ -133,11 +137,13 @@ class CourseCategoryModule extends Component
             ->paginate($this->perPage);
     }
 
-    protected function resetCreateForm(): void
+    protected function resetForm(): void
     {
-        $this->editingId = null;
-        $this->name_en = '';
-        $this->name_ar = '';
+        $this->item = [
+            'id' => null,
+            'name_en' => '',
+            'name_ar' => '',
+        ];
     }
 
     public function render(): View
