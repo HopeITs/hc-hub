@@ -53,7 +53,7 @@
     </div>
 
     <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
-        <x-primary-button type="submit">@lang('general.save')</x-primary-button>
+        <x-primary-button type="submit">@lang('general.save-checklist')</x-primary-button>
         <x-secondary-button :href="route('employees.index')">@lang('general.cancel')</x-secondary-button>
     </div>
 </form>
