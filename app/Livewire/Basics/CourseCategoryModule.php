@@ -5,16 +5,16 @@ namespace App\Livewire\Basics;
 use App\Models\CourseCategory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Livewire\WithPagination;
 use Livewire\Component;
+use Livewire\WithPagination;
+use App\Traits\SortableTable;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 
 class CourseCategoryModule extends Component
 {
-    use WithPagination;
+    use WithPagination, SortableTable;
 
     public string $search = '';
-    public int $perPage = 10;
 
     public bool $showModal = false;
     public string $modalTitle = 'Modal title';
@@ -30,16 +30,11 @@ class CourseCategoryModule extends Component
         'item.name_ar' => ['required', 'string', 'max:255'],
     ];
 
-    protected $listeners = ['delete' => 'delete', 'refreshTable' => '$refresh'];
+    protected $listeners = ['delete' => 'delete'];
 
     public function mount(): void
     {
         $this->resetForm();
-    }
-
-    public function updatingSearch(): void
-    {
-        $this->resetPage();
     }
 
     public function create(): void
@@ -81,15 +76,7 @@ class CourseCategoryModule extends Component
 
         $this->showModal = false;
         $this->resetForm();
-
-        $this->dispatch('notify', type: 'success', message: __('Saved successfully'));
-        $this->dispatch('refreshTable');
-    }
-
-    public function backToIndex(): void
-    {
-        $this->showModal = false;
-        $this->resetForm();
+        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
     }
 
     public function confirmDelete(int $id): void
@@ -109,32 +96,13 @@ class CourseCategoryModule extends Component
         $cat = CourseCategory::withCount('courses')->findOrFail($id);
 
         if ($cat->courses_count > 0) {
-            $this->dispatch('notify', type: 'error', message: __('Cannot delete: category has courses.'));
+            LivewireAlert::title(__('general.error'))->text(__('Cannot delete: category has courses.'))->error()->toast()->position('top-start')->show();
             return;
         }
 
         $cat->delete();
 
-        if ($this->categories->count() === 0 && $this->page > 1) {
-            $this->previousPage();
-        }
-
-        $this->dispatch('notify', type: 'success', message: __('Deleted successfully'));
-        $this->dispatch('refreshTable');
-    }
-
-    public function getCategoriesProperty()
-    {
-        return CourseCategory::query()
-            ->withCount('courses')
-            ->when($this->search, function (Builder $q) {
-                $q->where(function (Builder $qq) {
-                    $qq->where('name_en', 'like', "%{$this->search}%")
-                       ->orWhere('name_ar', 'like', "%{$this->search}%");
-                });
-            })
-            ->orderBy('name_en')
-            ->paginate($this->perPage);
+        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
     }
 
     protected function resetForm(): void
@@ -148,8 +116,17 @@ class CourseCategoryModule extends Component
 
     public function render(): View
     {
-        return view('livewire.basics.course-category-module', [
-            'categories' => $this->categories,
-        ])->title(__('Course Categories'));
+        $items = CourseCategory::query()
+            ->withCount('courses')
+            ->when($this->search, function (Builder $q) {
+                $q->where(function (Builder $qq) {
+                    $qq->where('name_en', 'like', "%{$this->search}%")
+                        ->orWhere('name_ar', 'like', "%{$this->search}%");
+                });
+            })
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate(15);
+
+        return view('livewire.basics.course-category-module', compact('items'));
     }
 }
