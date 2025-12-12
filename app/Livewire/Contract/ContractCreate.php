@@ -187,22 +187,34 @@ class ContractCreate extends Component
         $role = $user->myRole();
 
         $roleArr = explode('-', $role);
+
         if ($roleArr[0] === 'HR') {
+
             if ($roleArr[1] === 'SYR') {
-                $employees = Employee::all();
+                $employees = Employee::where('is_active', 1)->get();
             } else {
                 $citySlug = $roleArr[1];
-                $employees = Employee::whereHas('city', function ($query) use ($citySlug) {
-                    $query->where('slug', $citySlug);
-                })->get();
+
+                $employees = Employee::where('is_active', 1)
+                    ->whereHas('city', function ($query) use ($citySlug) {
+                        $query->where('slug', $citySlug);
+                    })
+                    ->get();
             }
+
         } else {
+
             $cityId = optional($user->profile)->city_id;
+
             if (!$cityId) {
                 abort(403, 'User has no linked employee or city.');
             }
-            $employees = Employee::where('city_id', $cityId)->get();
+
+            $employees = Employee::where('is_active', 1)
+                ->where('city_id', $cityId)
+                ->get();
         }
+
 
         $programs = $this->city_id
             ? Program::whereIn(
