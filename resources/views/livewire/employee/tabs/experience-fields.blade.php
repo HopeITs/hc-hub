@@ -82,7 +82,7 @@
     </div>
 
     <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
-        <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
+        <x-primary-button type="submit" class="!w-auto">@lang('general.save-experience')</x-primary-button>
         <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
     </div>
 </form>

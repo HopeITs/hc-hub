@@ -150,7 +150,7 @@
 
     <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
         <x-primary-button type="submit" class="!w-auto" wire:loading.attr="disabled" wire:target="saveCourses">
-            @lang('general.save')
+            @lang('general.save-courses')
         </x-primary-button>
         <x-secondary-button :href="route('employees.index')" class="!w-auto">
             @lang('general.cancel')
