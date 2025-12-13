@@ -51,10 +51,10 @@ class MyLeaveRequestModule extends Component
         });
 
         $this->counts = [
-            'all' => (clone $leaveRequests)->count(),
-            'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)->count(),
-            'accepted' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Accepted)->count(),
-            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(),
+            'all' => (clone $leaveRequests)?->count(),
+            'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)?->count(),
+            'accepted' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Accepted)?->count(),
+            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)?->count(),
         ];
     }
 

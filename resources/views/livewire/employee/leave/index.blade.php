@@ -97,7 +97,7 @@ use App\Enums\LeaveRequestStatus;
                     <div class="md:col-span-1">
                         <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
                         <x-forms.select-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
-                            @if($allAvailableLeaves->count() > 0)
+                            @if($allAvailableLeaves?->count() > 0)
                                 <option
                                     class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                                     @lang('general.select')
