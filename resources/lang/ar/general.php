@@ -236,7 +236,7 @@ return [
     'quarterly' => 'ربع سنوياً',
     'yearly' => 'سنوياً',
     'employees-per-job-level' => 'الموظفون حسب المستوى الوظيفي',
-    'soon-ending-contracts' => 'العقود التي سنتنتهي قريباً',
+    'soon-ending-contracts' => 'العقود التي ستنتهي قريباً',
     'no-leaves-employees' => 'الموظفون الذين لم يأخذوا إجازة',
     'contract-type-employees' => 'الموظفون حسب نوع العقد ',
     'total-employees' => ' الموظفين',
