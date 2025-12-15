@@ -79,7 +79,7 @@ class ChecklistForm extends Form
                         'item_id' => $itemData['item_id'],
                         'employee_id' => $this->employee->id,
                         'delivered_status' => 'pending',
-                        'delivered_at' => now(),
+                        'delivered_at' => null,
                         'receiver_id' => null,
                         'returned_status' => null,
                         'returned_at' => null,
