@@ -54,7 +54,6 @@
                             class="relative h-[240px] flex flex-col items-center justify-center text-center text-sm text-gray-400 px-6">
                             <x-icons.event class="w-10 h-10 text-gray-300 mb-3" />
                             <p class="text-[14px] font-medium text-gray-500">@lang('general.no-events-today')</p>
-                            <p class="text-[11px] text-gray-400 mt-1">@lang('general.no-events-today-text')</p>
                         </div>
                     </div>
                 @endforelse

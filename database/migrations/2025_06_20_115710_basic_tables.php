@@ -124,8 +124,6 @@ return new class extends Migration {
             $table->string('name_en');
             $table->string('name_ar');
             $table->string('username')->unique();
-            $table->string('actual_job')->nullable();
-            $table->double('years_of_service')->nullable();
             $table->char('national_number')->unique()->nullable();
             $table->dateTime('actual_dob')->nullable();
             $table->dateTime('dob')->nullable();
@@ -226,14 +224,16 @@ return new class extends Migration {
             $table->foreignId('item_id')->nullable()->onDelete('restrict');
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->foreignId('delivered_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('receiver_id')->nullable()->constrained('employees')->onDelete('cascade');
             $table->string('brand')->nullable();
             $table->string('model')->nullable();
             $table->string('serial')->nullable();
             $table->dateTime('delivered_at')->nullable();
-            $table->string('delivered_status')->nullable();
+            $table->enum('delivered_status', ['pending', 'delivered'])->default('pending');
             $table->dateTime('returned_at')->nullable();
-            $table->string('returned_status')->nullable();
+            $table->enum('returned_status', ['pending', 'received'])->nullable();
             $table->text('notes')->nullable();
+            $table->text('return_notes')->nullable();
             $table->timestamps();
         });
         Schema::create('default_deliverables', function (Blueprint $table) {

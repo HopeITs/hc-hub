@@ -36,7 +36,8 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $item->delivered_at ? $item->delivered_at->format('Y-m-d') : '-' }}
+                                {{-- Fix: Only show date if status is delivered AND date exists --}}
+                                {{ $item->delivered_status === 'delivered' && $item->delivered_at ? $item->delivered_at->format('Y-m-d') : '-' }}
                             </td>
                         </tr>
                     @endforeach
