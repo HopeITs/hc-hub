@@ -226,14 +226,16 @@ return new class extends Migration {
             $table->foreignId('item_id')->nullable()->onDelete('restrict');
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->foreignId('delivered_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('receiver_id')->constrained('employees')->onDelete('cascade')->nullable();
             $table->string('brand')->nullable();
             $table->string('model')->nullable();
             $table->string('serial')->nullable();
             $table->dateTime('delivered_at')->nullable();
-            $table->string('delivered_status')->nullable();
+            $table->enum('delivered_status', ['pending', 'delivered'])->default('pending');
             $table->dateTime('returned_at')->nullable();
-            $table->string('returned_status')->nullable();
+            $table->enum('returned_status', ['pending', 'received'])->nullable();
             $table->text('notes')->nullable();
+            $table->text('return_notes')->nullable();
             $table->timestamps();
         });
         Schema::create('default_deliverables', function (Blueprint $table) {
