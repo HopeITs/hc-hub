@@ -29,7 +29,7 @@
                 {{ $switchTo === 'ar' ? 'AR' : 'EN' }}
             </a>
 
-            <a href="https://docs.google.com/document/d/1jQ8kl4mo1ARDBO17l-jqXp5hux9wn3--/edit"
+            <a href="https://docs.google.com/document/d/1AcrvWNBzoD-bTem3Gy_35EtDgwD-SXST/edit?usp=sharing&ouid=105248334092459549739&rtpof=true&sd=true"
                target="_blank" rel="noopener"
                class="pe-1 ps-3 border-x border-e-secondary-soft">
                 <x-icons.guide class="text-secondary-light hover:text-secondary-dark me-2 transition"/>
