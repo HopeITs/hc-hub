@@ -20,6 +20,7 @@ class ArchivedFilesModule extends Component
 {
     use WithFileUploads;
 
+    public User $user; // Store authenticated user once
     public bool $isShared;
     public ?Folder $currentFolder = null;
     public Collection $folders;
@@ -51,10 +52,12 @@ class ArchivedFilesModule extends Component
 
     public function mount(bool $isShared, $folderId = null)
     {
+        $this->user = auth()->user();
         $this->isShared = $isShared;
+
         if ($folderId) {
             $folder = Folder::with('users')->find($folderId);
-            if ($folder && !auth()->user()->hasRole('super-admin') && !$folder->users->contains(auth()->id())) {
+            if ($folder && !$this->user->hasRole('super-admin') && !$folder->users->contains($this->user->id)) {
                 abort(403, 'You do not have permission to access this folder.');
             }
             $this->currentFolder = $folder;
@@ -153,7 +156,7 @@ class ArchivedFilesModule extends Component
 
     private function authorizeSharedAction(): void
     {
-        if ($this->isShared && !auth()->user()->hasRole('super-admin')) {
+        if ($this->isShared && !$this->user->hasRole('super-admin')) {
             abort(403, 'You are not authorized to perform this action in Shared Folders.');
         }
     }
@@ -167,15 +170,15 @@ class ArchivedFilesModule extends Component
         if ($this->isShared) {
             $query->where(function ($q) {
                 $q->where('is_shared', true)->orWhere(function ($subQ) {
-                    $subQ->where('is_shared', false)->where('user_id', '!=', auth()->id());
+                    $subQ->where('is_shared', false)->where('user_id', '!=', $this->user->id);
                 });
             });
         } else {
-            $query->where('is_shared', false)->where('user_id', auth()->id());
+            $query->where('is_shared', false)->where('user_id', $this->user->id);
         }
 
-        if (!auth()->user()->hasRole('super-admin')) {
-            $query->whereHas('users', fn($q) => $q->where('user_id', auth()->id()));
+        if (!$this->user->hasRole('super-admin')) {
+            $query->whereHas('users', fn($q) => $q->where('user_id', $this->user->id));
         }
 
         $this->folders = $query->orderBy('name')->get();
@@ -225,10 +228,10 @@ class ArchivedFilesModule extends Component
         $folder = Folder::create([
             'name' => $this->newFolderName,
             'parent_id' => $this->currentFolder?->id,
-            'user_id' => auth()->id(),
+            'user_id' => $this->user->id,
             'is_shared' => $this->isShared,
         ]);
-        $folder->users()->attach(auth()->id());
+        $folder->users()->attach($this->user->id);
 
         $this->showCreateFolderModal = false;
         $this->newFolderName = '';
@@ -238,7 +241,7 @@ class ArchivedFilesModule extends Component
     public function editPermissions(int $folderId)
     {
         $folder = Folder::findOrFail($folderId);
-        if ($folder->user_id !== auth()->id() && !auth()->user()->hasRole('super-admin')) {
+        if ($folder->user_id !== $this->user->id && !$this->user->hasRole('super-admin')) {
             abort(403, 'Only the creator can manage permissions.');
         }
         $this->folderForPermissions = $folder;
@@ -249,7 +252,7 @@ class ArchivedFilesModule extends Component
     public function savePermissions()
     {
         if ($this->folderForPermissions) {
-            if ($this->folderForPermissions->user_id !== auth()->id() && !auth()->user()->hasRole('super-admin')) {
+            if ($this->folderForPermissions->user_id !== $this->user->id && !$this->user->hasRole('super-admin')) {
                 abort(403, 'Only the creator can manage permissions.');
             }
 
@@ -263,8 +266,8 @@ class ArchivedFilesModule extends Component
             $this->folderForPermissions->users()->sync($newIds);
 
             if ($addedUserIds->isNotEmpty()) {
-                $creatorName = auth()->user()->profile?->name ?? auth()->user()->name;
-                foreach (\App\Models\User::whereIn('id', $addedUserIds)->get() as $user) {
+                $creatorName = $this->user->profile?->name ?? $this->user->name;
+                foreach (User::whereIn('id', $addedUserIds)->get() as $user) {
                     $user->notify(new \App\Notifications\FolderShared($this->folderForPermissions, $creatorName));
                 }
 
