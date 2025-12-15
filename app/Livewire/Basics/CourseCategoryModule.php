@@ -16,6 +16,11 @@ class CourseCategoryModule extends Component
 
     public string $search = '';
 
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
     public bool $showModal = false;
     public string $modalTitle = 'Modal title';
 
@@ -120,8 +125,7 @@ class CourseCategoryModule extends Component
             ->withCount('courses')
             ->when($this->search, function (Builder $q) {
                 $q->where(function (Builder $qq) {
-                    $qq->where('name_en', 'like', "%{$this->search}%")
-                        ->orWhere('name_ar', 'like', "%{$this->search}%");
+                    $qq->where('name_en', 'like', "%{$this->search}%")->orWhere('name_ar', 'like', "%{$this->search}%");
                 });
             })
             ->orderBy($this->sortField, $this->sortDirection)
