@@ -226,7 +226,7 @@ return new class extends Migration {
             $table->foreignId('item_id')->nullable()->onDelete('restrict');
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->foreignId('delivered_id')->constrained('employees')->onDelete('cascade');
-            $table->foreignId('receiver_id')->constrained('employees')->onDelete('cascade')->nullable();
+            $table->foreignId('receiver_id')->nullable()->constrained('employees')->onDelete('cascade');
             $table->string('brand')->nullable();
             $table->string('model')->nullable();
             $table->string('serial')->nullable();
