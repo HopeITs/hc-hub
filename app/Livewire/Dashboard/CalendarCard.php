@@ -133,11 +133,16 @@ class CalendarCard extends Component
         $tooltip = [];
 
         if ($isHoliday) {
-            $tooltip[] = $fakeHolidays[$iso];
+            foreach ($fakeHolidays[$iso] as $h) {
+                $tooltip[] = $h;
+            }
         }
 
+
         if ($isSaint) {
-            $tooltip[] = $fakeSaints[$iso];
+            foreach ($fakeSaints[$iso] as $s) {
+                $tooltip[] = $s;
+            }
         }
 
         if ($hasEvent) {

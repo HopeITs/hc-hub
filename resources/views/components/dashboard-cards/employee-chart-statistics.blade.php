@@ -8,9 +8,9 @@
 
         <select
             class="text-xs border border-neutral-300 rounded-xl px-4 py-1.5 bg-white shadow-sm text-neutral-700">
-            <option>@lang('general.monthly')</option>
-            <option>@lang('general.quarterly')</option>
-            <option>@lang('general.yearly')</option>
+            <option value="monthly">@lang('general.monthly')</option>
+            <option value="quarterly">@lang('general.quarterly')</option>
+            <option value="yearly">@lang('general.yearly')</option>
         </select>
     </div>
 
@@ -183,7 +183,7 @@
         renderLegend(chart);
 
         select.addEventListener("change", async e => {
-            const mode = e.target.value.toLowerCase();
+            const mode = e.target.value;
             const newData = await fetchData(mode);
 
             chart.data.labels = newData.labels;
