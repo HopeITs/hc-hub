@@ -28,6 +28,7 @@ class OrgChart extends Component
     public array $collapsed = [];
     public function toggleCollapse($id)
     {
+
         // collapse if open and open if collapsed
         $this->collapsed[$id] = !($this->collapsed[$id] ?? true);
     }
@@ -40,6 +41,24 @@ class OrgChart extends Component
         $this->departments = Department::all();
         $this->tree = $this->buildTree();
 
+    }
+
+    public function expandAll()
+    {
+        foreach ($this->collapsed as $id => $value) {
+            $this->collapsed[$id] = false;
+        }
+
+        $this->dispatch('expand-all');
+    }
+
+    public function collapseAll()
+    {
+        foreach ($this->collapsed as $id => $value) {
+            $this->collapsed[$id] = true;
+        }
+
+        $this->dispatch('collapse-all');
     }
 
     public function zoomIn()

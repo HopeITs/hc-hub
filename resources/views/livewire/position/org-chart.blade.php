@@ -42,15 +42,15 @@
 
     <!-- Controls -->
     <div class="flex items-center gap-3 mb-4">
-        <button wire:click="zoomOut" class="px-3 py-1 bg-gray-200 rounded">-</button>
+        <button wire:click="zoomOut" class="px-3 py-1 bg-secondary-medium text-white font-bold hover:font-extrabold hover:bg-secondary-light transition ease-in duration-300  rounded">-</button>
 
-        <span class="text-sm">{{ floor($scale * 100) }}%</span>
+        <span class="text-sm font-bold text-secondary-dark">{{ floor($scale * 100) }}%</span>
 
-        <button wire:click="zoomIn" class="px-3 py-1 bg-gray-200 rounded">+</button>
-
-        <button wire:click="resetZoom" class="px-3 py-1 bg-gray-200 rounded">@lang('general.reset')</button>
-
-        <button wire:click="fitToScreen" class="px-3 py-1 bg-gray-200 rounded">@lang('general.fit')</button>
+        <button wire:click="zoomIn" class="px-3 py-1 bg-secondary-medium text-white hover:font-extrabold hover:bg-secondary-light transition ease-in duration-300  rounded">+</button>
+        <button wire:click="resetZoom" class="px-3 py-1 bg-secondary-medium text-white  hover:font-extrabold hover:bg-secondary-light transition ease-in duration-300  rounded">@lang('general.reset')</button>
+        <button wire:click="fitToScreen" class="px-3 py-1 bg-secondary-medium text-white  hover:font-extrabold hover:bg-secondary-light transition ease-in duration-300  rounded">@lang('general.fit')</button>
+        <button wire:click="expandAll" class="px-3 py-1 bg-secondary-medium text-white  hover:font-extrabold hover:bg-secondary-light transition ease-in duration-300  rounded">@lang('general.expand-all')</button>
+        <button wire:click="collapseAll" class="px-3 py-1 bg-secondary-medium text-white  hover:font-extrabold hover:bg-secondary-light transition ease-in duration-300  rounded">@lang('general.collapse-all')</button>
 
 
     </div>
@@ -127,7 +127,8 @@
                         @foreach($tree['managers'] as $m)
                             <div
                                 x-data="{ open: @js(!($collapsed[$m->id] ?? true)) }"
-                                x-on:toggle-{{$m->id}}.window="open = !open"
+                                x-on:expand-all.window="open = true"
+                                x-on:collapse-all.window="open = false"
                                 class="flex flex-col items-center justify-start bg-white shadow-md rounded-3xl p-2 h-fit"
                             >
                                 @if($m->{$manager_type.'Team'}->count() > 0)
