@@ -32,7 +32,7 @@ if (document.getElementById("chartdiv")) {
                 width: am5.p100,
                 height: am5.p100,
                 layout: root.horizontalLayout,
-                paddingTop: 0,
+                paddingTop: 10,
                 paddingLeft: 0,
                 paddingRight: 0,
                 paddingBottom: 0
@@ -44,8 +44,8 @@ if (document.getElementById("chartdiv")) {
         // ============================
         var pieChart = container.children.push(
             am5percent.PieChart.new(root, {
-                width: am5.percent(40),
-                height: am5.percent(80),
+                width: am5.percent(30),
+                height: am5.percent(70),
                 innerRadius: am5.percent(80),
                 align: "center",
                 centerX: am5.p50
@@ -80,7 +80,8 @@ if (document.getElementById("chartdiv")) {
                 text: "",
                 centerX: am5.p50,
                 centerY: am5.p50,
-                textAlign: "center"
+                textAlign: "center",
+                fontSize: 16,
             })
         );
 
@@ -121,7 +122,7 @@ if (document.getElementById("chartdiv")) {
             am5xy.ValueAxis.new(root, {
                 renderer: am5xy.AxisRendererY.new(root, {
                     strokeOpacity: 0.05,
-                    minGridDistance: 1
+                    minGridDistance: 25
                 })
             })
         );
