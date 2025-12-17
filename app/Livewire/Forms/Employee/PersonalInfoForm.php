@@ -209,8 +209,10 @@ class PersonalInfoForm extends Form
             if ($this->employee->account) {
                 $this->employee->account->update(['email' => $this->email]);
 
-                if (json_decode($this->roles) !== null) {
-                    $this->employee->account->syncRoles(json_decode($this->roles));
+                if ($this->roles !==  null || $this->roles !== '') {
+                    $roles = explode(',', $this->roles);
+
+                    $this->employee->account->syncRoles($roles);
                     $this->employee->account->roles()->withPivot('is_active')->first()?->pivot->update(['is_active' => true]);
                 }
             }

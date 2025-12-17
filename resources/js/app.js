@@ -56,11 +56,7 @@ document.querySelectorAll('.tagify').forEach((el) => {
     const tagify = new Tagify(el, {
         whitelist,
         enforceWhitelist,
-        dropdown: {
 
-            enabled: 0,
-
-        }
 
     })
 

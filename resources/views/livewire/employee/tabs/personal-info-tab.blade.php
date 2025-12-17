@@ -2,9 +2,7 @@
     use App\Enums\MaritalStatus;
     use App\Enums\Nationality;
 @endphp
-@section('css')
-    <link href="https://unpkg.com/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css">
-@endsection
+
 <form wire:submit.prevent="saveInformation" class="flex flex-col space-y-6">
     <x-forms.errors-validation-list />
 
@@ -161,12 +159,15 @@
 
         <div class="col-span-full">
             <x-forms.input-label for="roles">{{ trans_choice('general.role', 2) }}</x-forms.input-label>
-            <input type="hidden" wire:model="infoForm.roles" id="roles_hidden">
-            <div wire:ignore>
-                <x-forms.input class="tagify" id="roles"
-                               value="{{ $infoForm->roles }}"
-                               data-whitelist="{{ implode(',', $roles) }}" />
-            </div>
+            <x-forms.tags-input    placeholder='Add tag'
+                                   :suggestions="implode(',', $roles)"
+                                   :forceSuggestion=true wire:model="infoForm.roles" />
+{{--            <input type="hidden" wire:model="infoForm.roles" id="roles_hidden">--}}
+{{--            <div wire:ignore>--}}
+{{--                <x-forms.input class="tagify" id="roles"--}}
+{{--                               value="{{ $infoForm->roles }}"--}}
+{{--                               data-whitelist="{{ implode(',', $roles) }}" />--}}
+{{--            </div>--}}
             <x-error-span>{{ $errors->first('infoForm.roles') }}</x-error-span>
         </div>
         <div class=" col-span-1 flex items-center space-x-2">
@@ -198,15 +199,21 @@
 
         <div class="md:col-span-2" wire:ignore>
             <x-forms.input-label for="skills">@lang('general.skills')</x-forms.input-label>
-            <input class="hidden" wire:model="infoForm.skills" id="skills_hidden">
-            <x-forms.input class="tagify" type="text" value="" data-enforceWhitelist="0" data-whitelist="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking ,Problem Solving, Adaptability, Willingness to learn,Active listening,Emotion Intelligence,Creativity , Data analysis" id="skills" />
+            <x-forms.tags-input    placeholder='Add tag'
+                                   suggestions="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking,Problem Solving,Adaptability,Willingness to learn,Active listening,Emotion Intelligence,Creativity,Data analysis"
+                                   :forceSuggestion=true wire:model="infoForm.skills" />
+{{--            <input class="hidden" wire:model="infoForm.skills" id="skills_hidden">--}}
+{{--            <x-forms.input class="tagify" type="text" value="" data-enforceWhitelist="1" data-whitelist="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking ,Problem Solving, Adaptability, Willingness to learn,Active listening,Emotion Intelligence,Creativity , Data analysis" id="skills" />--}}
             <x-error-span>{{ $errors->first('infoForm.skills') }}</x-error-span>
         </div>
 
         <div class="md:col-span-2" wire:ignore>
             <x-forms.input-label for="interests">@lang('general.interests')</x-forms.input-label>
-            <input class="hidden" wire:model="infoForm.interests" id="interests_hidden">
-            <x-forms.input class="tagify" type="text" value="" data-enforceWhitelist="0" data-whitelist="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling" id="interests" />
+            <x-forms.tags-input    placeholder='Add tag'
+            suggestions="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling"
+            :forceSuggestion=true wire:model="infoForm.interests" />
+{{--            <input class="hidden" wire:model="infoForm.interests" id="interests_hidden">--}}
+{{--            <x-forms.input class="tagify" type="text" value="" data-enforceWhitelist="1" data-whitelist="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling" id="interests" />--}}
             <x-error-span>{{ $errors->first('infoForm.interests') }}</x-error-span>
         </div>
     </div>
@@ -222,44 +229,44 @@
 
 </form>
 
-@push('scripts')
-<script src="https://unpkg.com/@yaireo/tagify"></script>
-<script>
-    function setupTagify(textInputId, hiddenInputId, initialJson) {
-        const input = document.getElementById(textInputId);
-        const hidden = document.getElementById(hiddenInputId);
-        if (input && input._tagify) {
-            input._tagify.destroy();
-        }
-        const tagify = new Tagify(input, {});
-        input._tagify = tagify;
-        try {
-            const arr = Array.isArray(initialJson) ? initialJson : (initialJson ? JSON.parse(initialJson) : []);
-            if (Array.isArray(arr)) {
-                tagify.removeAllTags();
-                tagify.addTags(arr);
-                hidden.value = JSON.stringify(arr);
-                hidden.dispatchEvent(new Event('input'));
-            }
-        } catch (e) {}
-        const sync = () => {
-            const values = tagify.value.map(t => t.value);
-            hidden.value = JSON.stringify(values);
-            hidden.dispatchEvent(new Event('input'));
-        };
-        tagify.on('add', sync);
-        tagify.on('remove', sync);
-        tagify.on('edit', sync);
-        tagify.on('invalid', sync);
-        return tagify;
-    }
-    function initAllTagify() {
-        const skillsJson = @json($infoForm->skills ?? '[]');
-        const interestsJson = @json($infoForm->interests ?? '[]');
-        setupTagify('skills', 'skills_hidden', skillsJson);
-        setupTagify('interests', 'interests_hidden', interestsJson);
-    }
-    document.addEventListener('DOMContentLoaded', initAllTagify);
-    document.addEventListener('livewire:navigated', initAllTagify);
-</script>
-@endpush
+{{--@push('scripts')--}}
+{{--<script src="https://unpkg.com/@yaireo/tagify"></script>--}}
+{{--<script>--}}
+{{--    function setupTagify(textInputId, hiddenInputId, initialJson) {--}}
+{{--        const input = document.getElementById(textInputId);--}}
+{{--        const hidden = document.getElementById(hiddenInputId);--}}
+{{--        if (input && input._tagify) {--}}
+{{--            input._tagify.destroy();--}}
+{{--        }--}}
+{{--        const tagify = new Tagify(input, {});--}}
+{{--        input._tagify = tagify;--}}
+{{--        try {--}}
+{{--            const arr = Array.isArray(initialJson) ? initialJson : (initialJson ? JSON.parse(initialJson) : []);--}}
+{{--            if (Array.isArray(arr)) {--}}
+{{--                tagify.removeAllTags();--}}
+{{--                tagify.addTags(arr);--}}
+{{--                hidden.value = JSON.stringify(arr);--}}
+{{--                hidden.dispatchEvent(new Event('input'));--}}
+{{--            }--}}
+{{--        } catch (e) {}--}}
+{{--        const sync = () => {--}}
+{{--            const values = tagify.value.map(t => t.value);--}}
+{{--            hidden.value = JSON.stringify(values);--}}
+{{--            hidden.dispatchEvent(new Event('input'));--}}
+{{--        };--}}
+{{--        tagify.on('add', sync);--}}
+{{--        tagify.on('remove', sync);--}}
+{{--        tagify.on('edit', sync);--}}
+{{--        tagify.on('invalid', sync);--}}
+{{--        return tagify;--}}
+{{--    }--}}
+{{--    function initAllTagify() {--}}
+{{--        const skillsJson = @json($infoForm->skills ?? '[]');--}}
+{{--        const interestsJson = @json($infoForm->interests ?? '[]');--}}
+{{--        setupTagify('skills', 'skills_hidden', skillsJson);--}}
+{{--        setupTagify('interests', 'interests_hidden', interestsJson);--}}
+{{--    }--}}
+{{--    document.addEventListener('DOMContentLoaded', initAllTagify);--}}
+{{--    document.addEventListener('livewire:navigated', initAllTagify);--}}
+{{--</script>--}}
+{{--@endpush--}}

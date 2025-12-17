@@ -150,6 +150,7 @@ body {
 
 
     --color-black: #414042;
+    --tag-remove-btn-bg--hover: #be1f24;
 
 
 }
@@ -177,8 +178,8 @@ body {
 }
 :root{
 
-    --livewire-progress-bar-color: var(--color-primary-400);
-    --tagify-dd-color-primary: var(--color-primary-400);
+    --livewire-progress-bar-color: var(--color-primary);
+    --tagify-dd-color-primary: var(--color-primary);
 }
 [data-flux-field]:not(ui-radio, ui-checkbox) {
     @apply grid gap-2;
@@ -241,3 +242,6 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm){
 }
 
 clock-timepicker { --clock-timepicker-accent-color: #be1f24 }
+option:hover {
+    background-color: var(--color-primary) !important;
+}

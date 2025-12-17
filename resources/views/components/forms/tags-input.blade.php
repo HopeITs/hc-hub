@@ -6,6 +6,7 @@
 
 @php
     // Normalize suggestions into [{key, label}] format
+    $suggestions = explode(',',$suggestions);
     $normalized = collect($suggestions)->map(function ($value, $key) {
         return is_string($key)
             ? ['key' => $key, 'label' => $value]
@@ -52,10 +53,10 @@
     <!-- current tags -->
     <template x-for="(tag, i) in tags" :key="i">
         <span
-            class="inline-flex mt-2 items-center gap-1 rounded-full bg-gray-200 px-2 py-1 text-sm"
+            class="inline-flex mt-2 items-center shadow-md gap-1 text-secondary-dark rounded-full bg-gray-100 px-2 py-1 text-sm"
         >
             <span x-text="displayLabel(tag)"></span>
-            <button type="button" @click="remove(i)" class="text-gray-600 hover:text-red-600">×</button>
+            <button type="button" @click="remove(i)" class=" hover:text-primary">×</button>
         </span>
     </template>
 </div>

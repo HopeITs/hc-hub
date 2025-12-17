@@ -260,16 +260,16 @@ export default {
                 lato: ['Lato' , 'sans-serif'],
                 FontAwesome: ['FontAwesome'],
             },
-            animation: {
-                'progress-bar-animated': 'progress-bar-stripes 1s linear infinite',
-                ripple: 'ripple 2s infinite',
-                pulsate1: 'pulsate1 2s infinite forwards',
-            },
+            // animation: {
+            //     'progress-bar-animated': 'progress-bar-stripes 1s linear infinite',
+            //     ripple: 'ripple 2s infinite',
+            //     pulsate1: 'pulsate1 2s infinite forwards',
+            // },
             keyframes: {
-                'progress-bar-stripes': {
-                    '0%': { backgroundPosition: '1rem 0' },
-                    '100%': { backgroundPosition: '0 0' },
-                },
+                // 'progress-bar-stripes': {
+                //     '0%': { backgroundPosition: '1rem 0' },
+                //     '100%': { backgroundPosition: '0 0' },
+                // },
                 ripple: {
                     '0%': {
                         boxShadow: '0 0 0 0 rgba(0, 0, 0, 0.1)',
