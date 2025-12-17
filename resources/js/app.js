@@ -1,4 +1,4 @@
-import '@yaireo/tagify/dist/tagify.css'
+
 import '../css/app.css';
 import {initFlowbite} from 'flowbite';
 
@@ -31,7 +31,7 @@ import './job-levels-employees.js';
 import './donut-chart.js'
 import './scatter-chart.js'
 
-import Tagify from '@yaireo/tagify'
+
 
 
 window.Swal = Swal
@@ -49,38 +49,7 @@ document.addEventListener('livewire:navigated', () => {
     initFlowbite();
 })
 
-document.querySelectorAll('.tagify').forEach((el) => {
-    const whitelist = el.dataset.whitelist ? el.dataset.whitelist.split(',') : []
-    const enforceWhitelist = el.dataset.enforcewhitelist !== "0"
 
-    const tagify = new Tagify(el, {
-        whitelist,
-        enforceWhitelist,
-
-
-    })
-
-    const hidden = document.getElementById(el.id + '_hidden')
-
-    if (hidden.value) {
-        try {
-            const values = JSON.parse(hidden.value)
-            tagify.addTags(values)
-        } catch (e) {
-            tagify.addTags(hidden.value.split(','))
-        }
-    }
-
-    function sync() {
-        const values = tagify.value.map(t => t.value)
-        hidden.value = JSON.stringify(values)
-        hidden.dispatchEvent(new Event('input', {bubbles: true}))
-    }
-
-    tagify.on('add', sync)
-    tagify.on('remove', sync)
-    tagify.on('edit', sync)
-})
 
 
 

@@ -179,7 +179,7 @@ body {
 :root{
 
     --livewire-progress-bar-color: var(--color-primary);
-    --tagify-dd-color-primary: var(--color-primary);
+
 }
 [data-flux-field]:not(ui-radio, ui-checkbox) {
     @apply grid gap-2;

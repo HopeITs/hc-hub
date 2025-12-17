@@ -8,7 +8,6 @@
     "dependencies": {
         "@amcharts/amcharts5": "^5.14.3",
         "@tailwindcss/postcss": "^4.1.11",
-        "@yaireo/tagify": "^4.35.4",
         "alpinejs": "^3.14.9",
         "axios": "^1.7.4",
         "chart.js": "^4.5.1",

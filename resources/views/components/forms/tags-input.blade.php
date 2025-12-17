@@ -26,6 +26,8 @@
         x-ref="input"
         type="text"
         :placeholder="$placeholder"
+        @focus="showAllSuggestions()"
+        @click="showAllSuggestions()"
         @input="filterSuggestions($event.target.value)"
         @keydown.enter.prevent="addFromInput()"
         @keydown.tab.prevent="addFromInput()"
@@ -76,7 +78,13 @@
                 this.$watch('model', () => this.syncFromModel());
                 this.$watch('tags', () => this.syncToModel());
             },
+            showAllSuggestions() {
+                this.filtered = this.suggestions
+                    .filter(s => !this.tags.includes(s.key.toLowerCase()))
+                    .slice(0, 10);
 
+                this.showSuggestions = this.filtered.length > 0;
+            },
             syncFromModel() {
                 this.tags = typeof this.model === 'string'
                     ? this.model.split(',').map(t => t.trim().toLowerCase()).filter(Boolean)
