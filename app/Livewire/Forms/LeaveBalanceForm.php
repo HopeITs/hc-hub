@@ -247,7 +247,7 @@ class LeaveBalanceForm extends Form
 
         $contract->leaveBalances
             ->whereIn('type_id', [LeaveTypeCases::MaternityFirst, LeaveTypeCases::MaternitySecond, LeaveTypeCases::Paternity])
-            ->each->delete();
+            ->each(fn($balance) => $balance->delete());
 
         foreach ($types as $type) {
             if ($employee->gender === $type->allowed_gender || $type->allowed_gender === LeaveTypeEnum::GENDER_ANY) {
@@ -270,7 +270,6 @@ class LeaveBalanceForm extends Form
         $types = $leaveTypes->filter(fn($t) => $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED &&
             $t->allowed_gender === $employee->gender
         );
-
         foreach ($types as $type) {
             if ($employee->gender === Gender::Female && !$employee->abilityToTakeLeave($type->id)) {
                 LeaveBalance::create([
@@ -300,13 +299,18 @@ class LeaveBalanceForm extends Form
             $balance = $contract->leaveBalances->where('type_id', $type->id)->first();
             $deserved = $type->base_days * $dailyWorkHours;
 
+
             if ($employee->gender === Gender::Female && !$employee->abilityToTakeLeave($type->id)) {
                 $balance
                     ? $balance->update(['deserved' => $deserved])
                     : LeaveBalance::create(['contract_id' => $contract->id, 'type_id' => $type->id, 'deserved' => $deserved]);
-            } elseif ($employee->gender === Gender::Male && $balance) {
-                $balance->update(['deserved' => $deserved]);
+            } elseif ($employee->gender === Gender::Male) {
+                $balance
+                    ? $balance->update(['deserved' => $deserved]) :
+                    LeaveBalance::create(['contract_id' => $contract->id, 'type_id' => $type->id, 'deserved' => $deserved]);
             }
+
+
         }
     }
 

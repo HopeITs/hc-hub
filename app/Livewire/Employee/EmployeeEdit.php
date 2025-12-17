@@ -10,6 +10,7 @@ use App\Livewire\Forms\Employee\EducationForm;
 use App\Livewire\Forms\Employee\ExperienceForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
+use App\Livewire\Forms\LeaveBalanceForm;
 use App\Models\Checklist;
 use App\Models\ChecklistItem;
 use App\Models\City;
@@ -35,6 +36,7 @@ class EmployeeEdit extends Component
     public RelativeForm $relativeForm;
     public BadgeForm $badgeForm;
     public AttachmentForm $attachmentForm;
+    public LeaveBalanceForm $balanceForm;
 
     public $activeTab = 'information';
     public $title = '';
@@ -81,7 +83,21 @@ class EmployeeEdit extends Component
 
     public function saveInformation()
     {
+
+
         $this->infoForm->saveInformation();
+        $employee = $this->infoForm->employee;
+        if($employee->wasChanged('gender') || $employee->wasChanged('marital_status')){
+            if($employee->contracts()->exists()){
+                $contract = $employee->contracts()->whereHas('leaveBalances')->first();
+                if(isset($contract)){
+                    if ($contract->leaveBalances()->exists()) {
+                        $this->balanceForm->update($contract->id);
+                    }else{
+                        $this->balanceForm->store($contract->id);
+                    }
+                }
+            }        }
         $this->successToast();
         return $this->redirect(route('employees.index'), navigate: true);
     }
