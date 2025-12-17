@@ -76,12 +76,12 @@
         const overlay = document.getElementById('page-gif-overlay');
         if (!overlay) return;
 
-        overlay.style.transition = "opacity 0.6s ease";
+        overlay.style.transition = "opacity 0.8s ease";
         overlay.style.opacity = "0";
 
         setTimeout(() => {
             overlay.style.display = "none";
-        }, 600);
+        }, 100);
     }
 
     function showPreloader() {
@@ -112,8 +112,9 @@
         scheduleHide();
     });
 
-    setTimeout(hidePreloader, 3000);
+    setTimeout(hidePreloader, 2000);
 </script>
+
 
 
 
