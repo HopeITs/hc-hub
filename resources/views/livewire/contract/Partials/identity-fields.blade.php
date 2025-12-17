@@ -1,8 +1,8 @@
 @php($locale = app()->getLocale())
 
 <div class="md:col-span-12 mb-4">
-    <div class="bg-primary-100 border border-primary-500 text-primary-600 text-sm rounded-lg p-3">
-        <strong>@lang('general.note')</strong>
+    <div class="bg-white border border-secondary-light text-secondary-dark text-sm rounded-lg p-3">
+        <strong class="text-primary">@lang('general.note'):</strong>
         @lang('general.note-text1') —
         @lang('general.note-text2').
     </div>
