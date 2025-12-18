@@ -58,9 +58,9 @@
 
     </div>
 </div>
-
+@push('js')
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    function initChart() {
         const canvas = document.getElementById("leavesGaugeChart");
         const ctx = canvas.getContext("2d");
         const value = '{{$percentage}}';
@@ -80,15 +80,15 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
-                    padding: { left: 15, right: 15, top: 5, bottom: 5 }
+                    padding: {left: 15, right: 15, top: 5, bottom: 5}
                 },
-                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                plugins: {legend: {display: false}, tooltip: {enabled: false}},
                 animation: false,
             },
             plugins: [{
                 id: 'customGauge',
                 afterDraw(chart) {
-                    const { width, height } = chart.chartArea;
+                    const {width, height} = chart.chartArea;
                     const centerX = width / 2;
                     const centerY = height * 0.9;
                     const radius = Math.min(width, height * 2) / 2.25;
@@ -116,5 +116,7 @@
                 }
             }]
         });
-    });
+    }
+    document.addEventListener('livewire:navigated', initChart)
 </script>
+@endpush
