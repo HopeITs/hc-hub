@@ -175,7 +175,7 @@
                                 : ($cardType === 'center'
                                     ? route('centers.show', $card['center_id'])
                                     : '#') }}"
-                       class="text-sm flex justify-end font-semibold text-primary hover:underline">
+                       class="text-xs flex justify-end  text-primary hover:underline">
                         @lang('general.show-more') →
                     </a>
                 </div>
