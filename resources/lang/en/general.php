@@ -615,4 +615,5 @@ return [
     'course-category' => 'Course Category|Course Categories',
     'collapse-all' => 'Collapse All',
     'expand-all' => 'Expand All',
+    'calendar' => 'Calendar'
 ];

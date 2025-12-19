@@ -616,5 +616,6 @@ return [
     'course-category' => 'تصنيفات الدورات|تصنيف الدورات',
     'collapse-all' => 'طيّ الكل',
     'expand-all' => 'توسيع الكل',
+    'calendar' => 'رزنامة'
 
 ];

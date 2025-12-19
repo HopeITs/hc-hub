@@ -1,7 +1,7 @@
 <div class="bg-white rounded-[32px] py-4 px-7 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] w-full max-w-3xl h-full mx-auto">
 
     <div class="flex items-center gap-2 m-2.5 leading-none">
-        <h2 class="text-[16px] font-semibold text-secondary-dark">Calender</h2>
+        <h2 class="text-[16px] font-semibold text-secondary-dark">@lang('general.calendar')</h2>
 
         <span class="text-primary">
             <svg class="size-5 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -22,10 +22,10 @@
         </div>
     </div>
 
-    <div class="border-t w-[290px] ml-3 border-secondary-medium mb-2"></div>
+    <div class="border-t w-full  border-secondary-medium mb-2"></div>
 
     <div class="grid grid-cols-7 text-center font-medium mb-1 text-[12px] text-secondary-dark tracking-wide">
-        <span>Mo</span>
+        <span>{{substr(__('general.days-of-week.1'), 0,2)}} </span>
         <span>Tu</span>
         <span>We</span>
         <span>Th</span>

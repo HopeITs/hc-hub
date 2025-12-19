@@ -42,10 +42,7 @@
         <div class="w-full rounded-xl text-white font-semibold  {{$hasLeaves ? 'h-[97%]' : 'h-68'}}">
             <x-dashboard-cards.team-members-card/>
         </div>
-    </div>
 
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         <div class=" rounded-xl flex items-center justify-center text-white font-semibold row-span-2 h-full">
             <x-dashboard-cards.news-card/>
@@ -68,9 +65,7 @@
         <div class="h-70 flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.upcoming-events-card :upcoming-events="$upcomingEvents"/>
         </div>
-    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="h-70 flex items-center justify-center text-white font-semibold">
             <x-dashboard-cards.pending-requests-card :pending-requests="$pendingRequests"/>
         </div>
@@ -83,5 +78,8 @@
             <x-dashboard-cards.my-badges-card :my-badges="$myBadges"/>
         </div>
     </div>
+
+
+
 
 </div>
