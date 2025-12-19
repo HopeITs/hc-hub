@@ -21,10 +21,11 @@
                     <x-forms.input
                         id="email"
                         type="email"
-                        model="email"
+                        wire:model.debounce.500ms="email"
                         placeholder="email@example.com"
                         autocomplete="email"
                     />
+
                     <x-forms.input-error field="email" />
                 </div>
 
@@ -35,7 +36,9 @@
                         model="password"
                         placeholder="••••••••"
                         autocomplete="current-password"
+                        :disabled="$employeeInactive"
                     />
+
                     <x-forms.input-error field="password" />
                 </div>
 
@@ -67,9 +70,17 @@
                         </a>
                     @endif
                 </div>
-                <x-primary-button class="w-full">
-                    {{ __('auth.sign-in') }}
-                </x-primary-button>
+                @if($employeeInactive)
+                    <div class="text-center text-primary text-sm font-semibold">
+                        {{ $inactiveMessage }}
+                    </div>
+                @endif
+                @if(!$employeeInactive)
+                    <x-primary-button class="w-full">
+                        {{ __('auth.sign-in') }}
+                    </x-primary-button>
+                @endif
+
 
             </form>
 
