@@ -229,14 +229,14 @@ return [
             'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
         [
-            'name_en' => 'Full Sick Leave',
+            'name_en' => 'Full Sick',
             'name_ar' => 'مرضية كاملة',
             'base_days' => 12,
             'allowed_gender' => LeaveType::GENDER_ANY,
             'marital_status' => LeaveType::MARITAL_STATUS_ANY,
         ],
         [
-            'name_en' => 'Partial Sick Leave',
+            'name_en' => 'Partial Sick',
             'name_ar' => 'مرضية جزئية',
             'base_days' => 12,
             'allowed_gender' => LeaveType::GENDER_ANY,
@@ -244,7 +244,7 @@ return [
         ],
         [
             'name_en' => 'Maternity 1',
-            'name_ar' => 'إجازة أمومة 1',
+            'name_ar' => ' أمومة 1',
             'base_days' => 120,
             'allowed_gender' => LeaveType::GENDER_FEMALE,
             'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
@@ -258,7 +258,7 @@ return [
         ],
         [
             'name_en' => 'Paternity',
-            'name_ar' => 'إجازة أبوة',
+            'name_ar' => ' أبوة',
             'base_days' => 15,
             'allowed_gender' => LeaveType::GENDER_MALE,
             'marital_status' => LeaveType::MARITAL_STATUS_MARRIED,
