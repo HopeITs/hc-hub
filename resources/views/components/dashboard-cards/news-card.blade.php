@@ -46,9 +46,8 @@
                 </a>
             </div>
         @empty
-            <div class="flex flex-col items-center justify-center text-[var(--color-neutral-500)] text-sm py-40">
-                <div class="text-4xl mb-2">🗞️</div>
-                <p class="font-medium">@lang('general.no-news-text')</p>
+            <div class="flex flex-col items-center justify-center  text-sm font-light text-secondary-light h-full">
+                <span>@lang('general.no-available-data')</span>
             </div>
         @endforelse
     </div>

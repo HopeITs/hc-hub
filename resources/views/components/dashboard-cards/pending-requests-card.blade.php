@@ -40,8 +40,8 @@
                 </span>
             </div>
         @empty
-            <div class="text-center text-[10px] md:text-[11px] italic text-secondary-light py-4">
-                {{ __('general.no_pending_requests') }}
+            <div class="flex flex-col items-center justify-center  text-sm font-light text-secondary-light h-full">
+                <span>@lang('general.no-available-data')</span>
             </div>
         @endforelse
     </div>

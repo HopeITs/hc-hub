@@ -23,7 +23,7 @@
             class="flex-1 overflow-y-auto px-6 pb-4 space-y-4 scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-primary-400)]">
         <!-- Leave Item -->
 
-        @foreach($upcomingLeaves as $upcomingLeave)
+        @forelse($upcomingLeaves as $upcomingLeave)
             <div class="pb-3  border-b border-b-secondary-soft">
                 <div class="flex justify-between items-center">
                     <p class="text-[13px] font-bold text-[#58595B]">{{$upcomingLeave->leaveBalance->contract->employee->name}}</p>
@@ -63,7 +63,11 @@
                     </p>
                 @endif
             </div>
-        @endforeach
+        @empty
+            <div class="flex flex-col items-center justify-center  text-sm font-light text-secondary-light h-full">
+                <span>@lang('general.no-available-data')</span>
+            </div>
+        @endforelse
 
     </div>
 </div>

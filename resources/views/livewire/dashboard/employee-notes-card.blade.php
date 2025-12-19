@@ -97,8 +97,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center py-6 pt-19 text-gray-400">
-                                    <p>@lang('general.no-notes-1') <span class="text-red-600 font-medium">“@lang('general.add-note')”</span> @lang('general.no-notes-2') </p>
+                                <td colspan="4" class="text-center py-6 pt-19 text-secondary-light font-light text-sm">
+                                    <p>@lang('general.no-notes-1') <span class="text-red-600 font-light">“@lang('general.add-note')”</span> @lang('general.no-notes-2') </p>
                                 </td>
                             </tr>
                         @endforelse

@@ -61,9 +61,9 @@
                     <!-- Avatar -->
                     <div class="flex items-center justify-center h-10 w-10 flex-shrink-0 rounded-full overflow-hidden
                                 bg-[var(--color-primary-500)] text-white font-semibold uppercase shadow-sm">
-                            <img src="{{ $member->getFirstMediaUrl('avatar') }}"
-                                 alt="{{ $member->displayName ?? $member->name }}"
-                                 class="h-full w-full object-cover">
+                        <img src="{{ $member->getFirstMediaUrl('avatar') }}"
+                             alt="{{ $member->displayName ?? $member->name }}"
+                             class="h-full w-full object-cover">
                     </div>
 
                     <!-- Name + Position -->
@@ -106,11 +106,11 @@
             </div>
 
         @empty
-            <div class="flex flex-col items-center justify-center text-[var(--color-neutral-500)] text-sm py-10">
-                <div class="text-3xl mb-1">👤</div>
-                <p class="font-medium">No team members found</p>
+            <div class="flex flex-col items-center justify-center  text-sm font-light text-secondary-light h-full">
+                <span>@lang('general.no-available-data')</span>
             </div>
         @endforelse
+
     </div>
 
     <!-- Footer -->
