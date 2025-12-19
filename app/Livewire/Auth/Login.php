@@ -28,34 +28,49 @@ class Login extends Component
     public ?int $selectedRoleId = null;
     public array $roleOptions = [];
 
+    /** NEW */
+    public bool $employeeInactive = false;
+    public string $inactiveMessage = '';
+
     public function render()
     {
-        if ($this->email !== '' && empty($this->roleOptions)) {
-            $user = User::where('email', $this->email)->with('roles')->first();
-            if ($user && $user->roles()->count() > 1) {
-                $this->roleOptions = $user->roles
-                    ->map(fn($r) => ['id' => $r->id, 'name' => $r->name])
-                    ->values()
-                    ->all();
-            }
-        }
-
         return view('livewire.auth.login');
     }
 
     public function updatedEmail(): void
     {
-        $this->selectedRoleId = null;
-        $this->roleOptions = [];
+        $this->reset([
+            'selectedRoleId',
+            'roleOptions',
+            'employeeInactive',
+            'inactiveMessage',
+        ]);
+
+        if ($this->email === '') {
+            return;
+        }
 
         $user = User::query()
             ->where('email', $this->email)
-            ->with('roles')
+            ->with(['roles', 'profile'])
             ->first();
 
-        if ($user && $user->roles()->count() > 1) {
+        // Unknown email or no employee → do nothing (no leaks)
+        if (!$user || !$user->profile) {
+            return;
+        }
+
+        // Employee exists but inactive → block immediately
+        if (!$user->profile->is_active) {
+            $this->employeeInactive = true;
+            $this->inactiveMessage = __('You cannot access this website anymore');
+            return;
+        }
+
+        // Normal role handling
+        if ($user->roles()->count() > 1) {
             $this->roleOptions = $user->roles
-                ->map(fn($r) => ['id' => $r->id, 'name' => $r->name])
+                ->map(fn ($r) => ['id' => $r->id, 'name' => $r->name])
                 ->values()
                 ->all();
         }
@@ -64,9 +79,25 @@ class Login extends Component
     public function login(): void
     {
         $this->validate();
+
+        // HARD BACKEND GUARD (cannot be bypassed)
+        $user = User::query()
+            ->where('email', $this->email)
+            ->with('profile')
+            ->first();
+
+        if ($user && $user->profile && !$user->profile->is_active) {
+            $this->employeeInactive = true;
+            $this->inactiveMessage = __('You cannot access this website anymore');
+            return;
+        }
+
         $this->ensureIsNotRateLimited();
 
-        if (!Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        if (!Auth::attempt(
+            ['email' => $this->email, 'password' => $this->password],
+            $this->remember
+        )) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -82,21 +113,21 @@ class Login extends Component
 
         DB::transaction(function () use ($user) {
             $allIds = $user->roles()->pluck('roles.id')->all();
+
             if ($allIds) {
                 $user->roles()->updateExistingPivot($allIds, ['is_active' => false]);
             }
 
             $roleIdToActivate = null;
 
-            if ($this->selectedRoleId && $user->roles()->where('roles.id', $this->selectedRoleId)->exists()) {
+            if ($this->selectedRoleId &&
+                $user->roles()->where('roles.id', $this->selectedRoleId)->exists()) {
                 $roleIdToActivate = $this->selectedRoleId;
             } else {
                 $ids = $user->roles()->pluck('roles.id');
-                if ($ids->count() === 1) {
-                    $roleIdToActivate = $ids->first();
-                } else {
-                    $roleIdToActivate = $user->roles()->orderBy('roles.id')->pluck('roles.id')->first();
-                }
+                $roleIdToActivate = $ids->count() === 1
+                    ? $ids->first()
+                    : $ids->sort()->first();
             }
 
             if ($roleIdToActivate) {
@@ -105,7 +136,10 @@ class Login extends Component
             }
         });
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(
+            default: route('dashboard', absolute: false),
+            navigate: true
+        );
     }
 
     protected function ensureIsNotRateLimited(): void
@@ -128,6 +162,8 @@ class Login extends Component
 
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email) . '|' . request()->ip());
+        return Str::transliterate(
+            Str::lower($this->email) . '|' . request()->ip()
+        );
     }
 }
