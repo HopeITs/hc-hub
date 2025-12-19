@@ -39,7 +39,7 @@
             </div>
         </div>
 
-        <div class="w-full rounded-xl text-white font-semibold  {{$hasLeaves ? 'h-[97%]' : 'h-68'}}">
+        <div class="w-full rounded-xl text-white font-semibold  {{$hasLeaves ? 'h-full' : 'h-68'}}">
             <x-dashboard-cards.team-members-card/>
         </div>
 

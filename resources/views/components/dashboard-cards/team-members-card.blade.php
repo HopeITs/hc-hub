@@ -114,7 +114,7 @@
     </div>
 
     <!-- Footer -->
-    <div class="border-t border-[var(--color-neutral-200)] bg-[var(--color-neutral-50)] px-6 py-3 text-center mt-auto">
+    <div class="border-t border-[var(--color-neutral-200)] bg-white px-6 py-3 text-center mt-auto">
         <a href="{{ route('org.chart') }}"
            class="text-[12px] font-semibold text-[var(--color-primary-500)] hover:underline">
             @lang('general.view-all') →
