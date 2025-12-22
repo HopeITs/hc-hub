@@ -161,11 +161,10 @@ class Employee extends Model implements HasMedia
         return $this->hasMany(Checklist::class);
     }
 
-    public function attachments()
+    public function employeeAttachments()
     {
-        return $this->hasMany(Attachment::class);
+        return $this->getMedia('attachments');
     }
-
 
     public function items()
     {
@@ -242,6 +241,8 @@ class Employee extends Model implements HasMedia
         $this->addMediaCollection('avatar')
             ->useFallbackUrl('https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=be1f24&background=FFF')
             ->singleFile();
+
+        $this->addMediaCollection('attachments');
     }
 
     public function getJoinAtAttribute()

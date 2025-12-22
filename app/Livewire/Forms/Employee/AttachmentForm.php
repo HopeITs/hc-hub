@@ -3,7 +3,6 @@
 namespace App\Livewire\Forms\Employee;
 
 use App\Enums\AttachmentCategory;
-use App\Models\Attachment;
 use App\Models\Employee;
 use Livewire\Form;
 use Livewire\WithFileUploads;
@@ -27,8 +26,8 @@ class AttachmentForm extends Form
             $rules["attachments.{$index}.category"] = ['nullable', Rule::in(array_keys(AttachmentCategory::options()))];
             $fileValidation = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'];
 
-            if (empty($item['id']) || (!empty($item['file']) && $item['file'] instanceof TemporaryUploadedFile)) {
-                $fileValidation[] = 'required_if:attachments.' . $index . '.id,null';
+            if (empty($item['media_id']) || (!empty($item['file']) && $item['file'] instanceof TemporaryUploadedFile)) {
+                $fileValidation[] = 'required_if:attachments.' . $index . '.media_id,null';
             }
 
             $rules["attachments.{$index}.file"] = $fileValidation;
@@ -41,16 +40,14 @@ class AttachmentForm extends Form
     {
         $this->employee = $employee;
         $this->attachments = $employee
-            ->attachments()
-            ->select('id', 'name', 'category')
-            ->get()
+            ->getMedia('attachments')
             ->map(
-                fn(Attachment $a) => [
-                    'id' => $a->id,
-                    'name' => $a->name,
-                    'category' => $a->category?->value ?? '',
-                    'old_file_url' => $a->getFirstMediaUrl('file'),
-                    'file_name' => $a->getFirstMedia('file')->file_name ?? null,
+                fn($media) => [
+                    'media_id' => $media->id,
+                    'name' => $media->getCustomProperty('name', ''),
+                    'category' => $media->getCustomProperty('category', ''),
+                    'old_file_url' => $media->getUrl(),
+                    'file_name' => $media->file_name,
                     'file' => null,
                 ],
             )
@@ -64,7 +61,7 @@ class AttachmentForm extends Form
     public function addAttachment(): void
     {
         $this->attachments[] = [
-            'id' => null,
+            'media_id' => null,
             'name' => '',
             'category' => '',
             'old_file_url' => null,
@@ -73,13 +70,12 @@ class AttachmentForm extends Form
         ];
     }
 
-    public function removeAttachment(int $index, ?int $id = null): void
+    public function removeAttachment(int $index, $mediaId = null): void
     {
-        if ($id) {
-            $attachment = Attachment::find($id);
-            if ($attachment) {
-                $attachment->clearMediaCollection('file');
-                $attachment->delete();
+        if ($mediaId) {
+            $media = $this->employee->media()->find($mediaId);
+            if ($media) {
+                $media->delete();
             }
         }
 
@@ -96,22 +92,33 @@ class AttachmentForm extends Form
         $this->validate();
 
         foreach ($this->attachments as $index => $item) {
-            $data = collect($item)
-                ->except(['file', 'old_file_url', 'file_name', 'id'])
-                ->toArray();
-
-            $attachment = Attachment::updateOrCreate(['id' => $item['id']], $data + ['employee_id' => $this->employee->id]);
-
             if ($item['file'] instanceof TemporaryUploadedFile) {
-                $attachment->clearMediaCollection('file');
-
-                $attachment
+                $media = $this->employee
                     ->addMedia($item['file']->getRealPath())
-                    ->usingFileName('attachment-' . $attachment->id . '.' . $item['file']->getClientOriginalExtension())
+                    ->usingFileName($item['file']->getClientOriginalName())
                     ->preservingOriginal()
-                    ->toMediaCollection('file');
+                    ->withCustomProperties([
+                        'name' => $item['name'],
+                        'category' => $item['category']
+                    ])
+                    ->toMediaCollection('attachments');
+
+                if ($item['media_id']) {
+                    $oldMedia = $this->employee->media()->find($item['media_id']);
+                    if ($oldMedia) {
+                        $oldMedia->delete();
+                    }
+                }
+            } elseif ($item['media_id']) {
+                $media = $this->employee->media()->find($item['media_id']);
+                if ($media) {
+                    $media->setCustomProperty('name', $item['name']);
+                    $media->setCustomProperty('category', $item['category']);
+                    $media->save();
+                }
             }
         }
+
         $this->setEmployee($this->employee->fresh());
     }
 }

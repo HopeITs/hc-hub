@@ -309,14 +309,14 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('attachments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->string('category')->nullable();
-            $table->string('file_path')->nullable();
-            $table->timestamps();
-        });
+        // Schema::create('attachments', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+        //     $table->string('name');
+        //     $table->string('category')->nullable();
+        //     $table->string('file_path')->nullable();
+        //     $table->timestamps();
+        // });
 
         Schema::create('employee_items', function (Blueprint $table) {
             $table->id();

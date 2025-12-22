@@ -3,7 +3,7 @@
     @foreach ($attachmentForm->attachments as $index => $attachment)
 
         <input type="hidden"
-               wire:model="attachmentForm.attachments.{{ $index }}.id">
+               wire:model="attachmentForm.attachments.{{ $index }}.media_id">
 
         <div wire:key="attachment-{{ $index }}"
              class="relative border-b pb-6 mb-6">
@@ -12,7 +12,7 @@
 
                 <div class="md:col-span-2 flex justify-end">
                     <x-primary-button type="button" :showSpinner="false"
-                        wire:click="removeAttachment({{ $index }}, {{ $attachment['id'] ?? 'null' }})">
+                        wire:click="removeAttachment({{ $index }}, {{ $attachment['media_id'] ?? 'null' }})">
                         <x-icons.trash />
                     </x-primary-button>
                 </div>
