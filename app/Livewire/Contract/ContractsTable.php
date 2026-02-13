@@ -53,23 +53,23 @@ class ContractsTable extends LivewireTable
             Column::make('ID', 'id')->sortable()->searchable(),
 
             SelectColumn::make(trans_choice('general.employee', 1), 'employee.' . $name)
-                ->options(Employee::pluck($name, $name)->toArray())
+                ->options(Employee::orderBy($name)->pluck($name, $name)->toArray())
                 ->sortable()->searchable(),
 
             SelectColumn::make(trans_choice('general.positions', 1), 'position.' . $title)
-                ->options(Position::pluck($title, $title)->toArray())
+                ->options(Position::orderBy($title)->pluck($title, $title)->toArray())
                 ->sortable()->searchable(),
 
             SelectColumn::make(trans_choice('general.contract-type', 1), 'contractType.' . $name)
-                ->options(ContractType::pluck($name, $name)->toArray())
+                ->options(ContractType::orderBy($name)->pluck($name, $name)->toArray())
                 ->sortable()->searchable(),
 
             SelectColumn::make(trans_choice('general.department', 1), 'position.department.name')
-                ->options(Department::pluck('name', 'name')->toArray())
+                ->options(Department::orderBy('name')->pluck('name', 'name')->toArray())
                 ->sortable()->searchable(),
 
             SelectColumn::make(trans_choice('general.job-level', 1), 'position.jobLevel.' . $name)
-                ->options(JobLevel::pluck($name, $name)->toArray())
+                ->options(JobLevel::orderBy($name)->pluck($name, $name)->toArray())
                 ->sortable()->searchable(),
 
             Column::make(__('general.duration'), fn(Model $m) => $m->duration . ' ' . __('general.months'))
