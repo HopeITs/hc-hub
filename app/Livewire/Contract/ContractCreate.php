@@ -212,8 +212,9 @@ class ContractCreate extends Component
                 abort(403, 'User has no linked employee or city.');
             }
 
-            $employees = Employee::where('is_active', 1)->orderBy($empCol)
+            $employees = Employee::where('is_active', 1)
                 ->where('city_id', $cityId)
+                ->orderBy($empCol)
                 ->get();
         }
 
