@@ -21,13 +21,13 @@ class PositionCreate extends Component
     public PositionForm $form;
     public function render()
     {
-        $cities = City::where('is_active', true)->get();
-        $programs = Program::where('is_active', true)->get();
-        $centers = Center::where('is_active', true)->with('city')->get();
+        $cities = City::where('is_active', true)->orderBy(transColumn('name'))->get();
+        $programs = Program::where('is_active', true)->orderBy('name')->get();
+        $centers = Center::where('is_active', true)->with('city')->orderBy('name')->get();
         $jobLevels = JobLevel::orderBy('grade')->get();
-        $positions = Position::where('is_active', true)->with(['center', 'program'])->get();
+        $positions = Position::where('is_active', true)->with(['center', 'program'])->orderBy(transColumn('title'))->get();
 
-        $departments = Department::all();
+        $departments = Department::orderby('name')->get();
         $title = __('general.add-new');
         return view('livewire.position.form',compact('title','cities','programs','centers','jobLevels','departments','positions'));
     }
