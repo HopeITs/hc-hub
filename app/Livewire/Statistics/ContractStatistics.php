@@ -28,6 +28,7 @@ class ContractStatistics extends Component
             ->get();
 
         $this->programs = Program::where('is_active', true)
+            ->orderby('name')
             ->get();
     }
 
