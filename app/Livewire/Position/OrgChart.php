@@ -35,7 +35,7 @@ class OrgChart extends Component
 
     public function mount(): void
     {
-        $this->cities = City::where('is_active', true)->orderby(transColumn('name'))->get();
+        $this->cities = City::where('is_active', true)->get();
         $this->programs = Program::where('is_active', true)->orderby('name')->get();
         $this->centers = Center::where('is_active', true)->orderby('name')->get();
         $this->departments = Department::orderBy('name')->get();

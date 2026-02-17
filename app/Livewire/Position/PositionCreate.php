@@ -21,7 +21,7 @@ class PositionCreate extends Component
     public PositionForm $form;
     public function render()
     {
-        $cities = City::where('is_active', true)->orderBy(transColumn('name'))->get();
+        $cities = City::where('is_active', true)->get();
         $programs = Program::where('is_active', true)->orderBy('name')->get();
         $centers = Center::where('is_active', true)->with('city')->orderBy('name')->get();
         $jobLevels = JobLevel::orderBy('grade')->get();
