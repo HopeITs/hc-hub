@@ -103,7 +103,7 @@ class EmployeeTable extends LivewireTable
 
                 }),
             SelectColumn::make(trans('general.position'), 'contracts.position.' . transColumn('title'))
-                ->options(Position::query()->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
+                ->options(Position::query()->orderby(transColumn('title'),'asc')->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
                 ->sortable()->searchable(),
 
 

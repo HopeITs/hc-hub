@@ -182,7 +182,6 @@ class ContractEdit extends Component
 
         $cities = City::select('id', $cityCol)
             ->where('is_active', 1)
-            ->orderBy($cityCol)
             ->get()
             ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
 

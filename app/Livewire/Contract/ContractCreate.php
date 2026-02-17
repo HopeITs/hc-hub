@@ -234,7 +234,7 @@ class ContractCreate extends Component
                 ->get()
             : collect();
 
-        $centers = $this->city_id !== 1 ? Center::where('city_id', $this->city_id)->select('id', 'name')->get() : Center::select('id', 'name')->get();
+        $centers = $this->city_id !== 1 ? Center::where('city_id', $this->city_id)->select('id', 'name')->orderby('name')->get() : Center::select('id', 'name')->orderby('name')->get();
 
         $positions =
             $this->city_id && $this->program_id

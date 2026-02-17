@@ -69,7 +69,7 @@ class ContractsTable extends LivewireTable
                 ->sortable()->searchable(),
 
             SelectColumn::make(trans_choice('general.job-level', 1), 'position.jobLevel.' . $name)
-                ->options(JobLevel::orderBy($name)->pluck($name, $name)->toArray())
+                ->options(JobLevel::orderBy('grade')->pluck($name, $name)->toArray())
                 ->sortable()->searchable(),
 
             Column::make(__('general.duration'), fn(Model $m) => $m->duration . ' ' . __('general.months'))

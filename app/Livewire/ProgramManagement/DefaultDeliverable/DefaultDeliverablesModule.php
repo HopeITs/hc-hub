@@ -61,7 +61,6 @@ class DefaultDeliverablesModule extends Component
             ->mapWithKeys(fn ($e) => [$e->id => $e->name]);
 
         $cities = City::whereHas('centers')
-            ->orderBy(transColumn('name'))
             ->get(['id',transColumn('name')]);
 
         $checklistItems = ChecklistItem::orderBy('order')->get(['id','name']);

@@ -49,7 +49,7 @@ class DefaultDeliverablesTable extends LivewireTable
     protected function cityOptions(): array
     {
         $loc = app()->getLocale();
-        return City::query()->whereHas('centers')->orderBy(transColumn('name'))->get(['id', transColumn('name')])
+        return City::query()->whereHas('centers')->get(['id', transColumn('name')])
             ->mapWithKeys(fn($c) => [$c->id => $c->name])->all();
     }
 
