@@ -24,7 +24,6 @@ class ContractStatistics extends Component
     public function mount(): void
     {
         $this->cities = City::where('is_active', true)
-            ->orderBy(transColumn('name'))
             ->get();
 
         $this->programs = Program::where('is_active', true)
