@@ -282,7 +282,7 @@ return [
     'no-events-today-text' => 'تحقق مرة أخرى غدًا للحصول على التحديثات.',
     'personal-inventory' => 'الممتلكات الشخصية',
     'badges-warnings' => 'الشارات والتنبيهات',
-    'employees-per-department' => 'الموظفون حسب كل قسم',
+    'employees-per-department' => 'الأقسام',
     'employees-per-salary-type' => 'الموظفون حسب طريقة القبض',
     'employees-statistics' => 'إحصائيات الموظفين',
     'monthly' => 'شهرياً',
@@ -616,6 +616,7 @@ return [
     'course-category' => 'تصنيفات الدورات|تصنيف الدورات',
     'collapse-all' => 'طيّ الكل',
     'expand-all' => 'توسيع الكل',
-    'calendar' => 'رزنامة'
+    'calendar' => 'رزنامة',
+    'reset-filters' => 'إعادة تعيين الفلاتر',
 
 ];
