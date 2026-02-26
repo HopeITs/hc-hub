@@ -82,7 +82,7 @@ return [
     'name_en' => 'EN Name',
     'name_ar' => 'AR Name',
     'type' => 'Type',
-    'place' => 'Place',
+    'place' => 'Location',
     'order' => 'Order',
     'open-at' => 'Open At',
     'close-at' => 'Close At',
