@@ -65,7 +65,7 @@ class DefaultDeliverablesTable extends LivewireTable
         return [
             Column::make('ID', 'id')->sortable(),
 
-            SelectColumn::make(trans_choice('general.employee',1), 'employee.name')
+            SelectColumn::make(trans_choice('general.employee',1), 'employee.id')
                 ->displayUsing(fn($v, Model $m) => $m->employee?->name ?? '—')
                 ->options($this->employeeOptions())
                 ->sortable()->searchable(),
