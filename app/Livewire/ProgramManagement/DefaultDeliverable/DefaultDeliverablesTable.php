@@ -67,7 +67,6 @@ class DefaultDeliverablesTable extends LivewireTable
 
         return City::query()
             ->whereHas('centers')
-            ->orderBy($name)
             ->pluck($name, $name)
             ->toArray();
     }
@@ -109,6 +108,30 @@ class DefaultDeliverablesTable extends LivewireTable
                 ->searchable(),
 
             Column::make(__('general.actions'), function (Model $m): string {
+                $user = auth()->user()->load('profile');
+                $role = $user->myRole();
+            
+                $roleArr = explode('-', $role);
+            
+                $canEdit = true;
+            
+                if ($roleArr[0] === 'HR') {
+            
+                    if ($roleArr[1] === 'SYR') {
+                        $canEdit = true;
+                    } else {
+                        $citySlug = $roleArr[1];
+            
+                        if ($m->city->slug !== $citySlug) {
+                            $canEdit = false;
+                        }
+                    }
+                }
+            
+                if (!$canEdit) {
+                    return ''; // hide buttons
+                }
+                
                 $id = $m->getKey();
 
                 $editBtn = Blade::render(

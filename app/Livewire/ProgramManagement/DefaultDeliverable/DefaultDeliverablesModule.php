@@ -44,31 +44,83 @@ class DefaultDeliverablesModule extends Component
         ];
     }
 
-    public function render()
-    {
-        $locale = app()->getLocale();
 
-        // Dropdowns for the modal
-        $employees = Employee::whereHas('contracts',function ($query){
-            $query->whereHas('position',function ($subQuery){
-                $subQuery->whereHas('department',function($q){
-                    $q->whereIn('code' , ['IT', 'CT', 'HR']);
-                } );
+   public function render()
+{
+    $locale = app()->getLocale();
+
+    $user = auth()->user()->load('profile');
+    $role = $user->myRole();
+    $roleArr = explode('-', $role);
+
+    $empCol  = "name_{$locale}";
+    $cityCol = "name_{$locale}";
+
+    $employeesQuery = Employee::whereHas('contracts', function ($query) {
+        $query->whereHas('position', function ($subQuery) {
+            $subQuery->whereHas('department', function ($q) {
+                $q->whereIn('code', ['IT', 'CT', 'HR']);
             });
-        })
-        ->orderBy(transColumn('name'))
-            ->get(['id',transColumn('name')])
-            ->mapWithKeys(fn ($e) => [$e->id => $e->name]);
+        });
+    });
 
-        $cities = City::whereHas('centers')
-            ->get(['id',transColumn('name')]);
+    $citiesQuery = City::whereHas('centers');
 
-        $checklistItems = ChecklistItem::orderBy('order')->get(['id','name']);
+    if ($roleArr[0] === 'HR') {
 
-        return view('livewire.program-management.default-deliverables-module', compact(
-            'employees', 'cities', 'checklistItems'
-        ));
+        if ($roleArr[1] !== 'SYR') {
+            // HR-City 
+
+            $citySlug = $roleArr[1];
+
+            $employees = $employeesQuery
+                ->whereHas('city', function ($q) use ($citySlug) {
+                    $q->where('slug', $citySlug);
+                })
+                ->orderBy($empCol)
+                ->get(['id', $empCol])
+                ->mapWithKeys(fn($e) => [$e->id => $e->{$empCol}]);
+
+            $cities = $citiesQuery
+                ->where('slug', $citySlug)
+                ->get(['id', $cityCol])
+                ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
+
+        } else {
+
+            // HR-SYR 
+            $employees = $employeesQuery
+                ->orderBy($empCol)
+                ->get(['id', $empCol])
+                ->mapWithKeys(fn($e) => [$e->id => $e->{$empCol}]);
+
+            $cities = $citiesQuery
+                ->get(['id', $cityCol])
+                ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
+        }
+
+    } else {
+
+        // SuperAdmin or GeneralAdmin 
+        $employees = $employeesQuery
+            ->orderBy($empCol)
+            ->get(['id', $empCol])
+            ->mapWithKeys(fn($e) => [$e->id => $e->{$empCol}]);
+
+        $cities = $citiesQuery
+            ->get(['id', $cityCol])
+            ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
     }
+
+    $checklistItems = ChecklistItem::orderBy('order')->get(['id','name']);
+
+    return view('livewire.program-management.default-deliverables-module', compact(
+        'employees',
+        'cities',
+        'checklistItems'
+    ));
+}
+ 
 
     public function create(): void
     {
@@ -94,27 +146,45 @@ class DefaultDeliverablesModule extends Component
         $this->showModal  = true;
     }
 
-    public function save(): void
-    {
-        $this->validate();
 
-        $model = !empty($this->item['id'])
-            ? DefaultDeliverableModel::findOrFail($this->item['id'])
-            : new DefaultDeliverableModel();
+public function save(): void
+{
+    $user = auth()->user();
+    $roleArr = explode('-', $user->myRole());
 
-        $model->employee_id = $this->item['employee_id'];
-        $model->city_id     = $this->item['city_id'];
-        $model->item_id     = $this->item['item_id'];
-        $model->save();
+    if ($roleArr[0] === 'HR') {
 
-        $this->showModal = false;
-        $this->resetErrorBag();
-        $this->resetValidation();
-        $this->dispatch('closeModal');
+        if ($roleArr[1] !== 'SYR') {
 
-        $this->dispatch('refreshDefaultDeliverablesTable');
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
+            $citySlug = $roleArr[1];
+            $allowedCity = City::where('slug', $citySlug)->first();
+            if (!$allowedCity || $this->item['city_id'] != $allowedCity->id) {
+                abort(403);
+            }
+        }
     }
-}
+
+    $this->validate();
+
+    $model = !empty($this->item['id'])
+        ? DefaultDeliverableModel::findOrFail($this->item['id'])
+        : new DefaultDeliverableModel();
+
+    $model->employee_id = $this->item['employee_id'];
+    $model->city_id     = $this->item['city_id'];
+    $model->item_id     = $this->item['item_id'];
+    $model->save();
+
+    $this->showModal = false;
+    $this->resetErrorBag();
+    $this->resetValidation();
+
+    $this->dispatch('closeModal');
+    $this->dispatch('refreshDefaultDeliverablesTable');
+
+    LivewireAlert::title(__('general.success-message'))
+        ->success()
+        ->toast()
+        ->position('top-start')
+        ->show();
+}}
