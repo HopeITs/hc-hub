@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b7b23b48ac3353cf4e6b723bc4036c79",
+    "content-hash": "fb08b65463a1978caa2d267f8f9749c5",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -4311,16 +4311,16 @@
         },
         {
             "name": "ramonrietdijk/livewire-tables",
-            "version": "v6.0.2",
+            "version": "5.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ramonrietdijk/livewire-tables.git",
-                "reference": "5cfd09b0b6888df17c9410099f5a60633fb41037"
+                "reference": "c2f233ec75efa4a93002095ceeb191223c133713"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ramonrietdijk/livewire-tables/zipball/5cfd09b0b6888df17c9410099f5a60633fb41037",
-                "reference": "5cfd09b0b6888df17c9410099f5a60633fb41037",
+                "url": "https://api.github.com/repos/ramonrietdijk/livewire-tables/zipball/c2f233ec75efa4a93002095ceeb191223c133713",
+                "reference": "c2f233ec75efa4a93002095ceeb191223c133713",
                 "shasum": ""
             },
             "require": {
@@ -4329,11 +4329,11 @@
                 "php": "^8.3"
             },
             "require-dev": {
-                "larastan/larastan": "^3.8",
-                "laravel/pint": "^1.26",
-                "orchestra/testbench": "^10.8",
+                "larastan/larastan": "^3.6",
+                "laravel/pint": "^1.24",
+                "orchestra/testbench": "^10.4",
                 "phpstan/phpstan-strict-rules": "^2.0",
-                "phpunit/phpunit": "^12.5"
+                "phpunit/phpunit": "^12.3"
             },
             "type": "package",
             "extra": {
@@ -4366,7 +4366,7 @@
             ],
             "support": {
                 "issues": "https://github.com/ramonrietdijk/livewire-tables/issues",
-                "source": "https://github.com/ramonrietdijk/livewire-tables/tree/v6.0.2"
+                "source": "https://github.com/ramonrietdijk/livewire-tables/tree/5.3.2"
             },
             "funding": [
                 {
@@ -4374,7 +4374,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-14T11:17:25+00:00"
+            "time": "2025-09-20T13:09:38+00:00"
         },
         {
             "name": "ramsey/collection",

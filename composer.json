@@ -17,7 +17,7 @@
         "livewire/livewire": "^3.6",
         "livewire/volt": "^1.7.0",
         "mcamara/laravel-localization": "^2.3",
-        "ramonrietdijk/livewire-tables": "^6.0",
+        "ramonrietdijk/livewire-tables": "^5.3",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-medialibrary": "^11.0",
         "spatie/laravel-permission": "^6.21"
