@@ -2,7 +2,7 @@
 
 
 use App\Livewire\Basics\{ChecklistItemModule,
-    CityModule,
+    CitiesModule,
     ContractTypeModule,
     DepartmentModule,
     JobLevelModule,
@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::get('cities', CityModule::class)->name('cities.index');
+Route::get('cities', CitiesModule::class)->name('cities.index');
 Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index')->middleware('role:HR|super-admin');
 Route::get('checklist-items', ChecklistItemModule::class)->name('basic-checklist-items.index');
 Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');

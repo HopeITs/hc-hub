@@ -3,21 +3,15 @@
 namespace App\Livewire\Basics;
 
 use App\Models\ChecklistItem;
-use App\Traits\SortableTable;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class ChecklistItemModule extends Component
 {
-
-    use WithPagination, SortableTable;
-
     public $showModal = false;
-    public $modalTitle = 'Modal title';
-    public $search = '';
-
+    public $modalTitle = '';
     public $item = [
+        'id' => null,
         'name' => null,
         'order' => null,
     ];
@@ -27,12 +21,14 @@ class ChecklistItemModule extends Component
         'item.order' => 'required|integer',
     ];
 
+    protected $listeners = ['editChecklistItem' => 'edit'];
+
     public function create()
     {
-        $this->showModal = true;
         $this->modalTitle = __('general.add-new');
+        $this->item = ['id' => null, 'name' => null, 'order' => null];
+        $this->showModal = true;
     }
-
 
     public function edit($id)
     {
@@ -42,79 +38,36 @@ class ChecklistItemModule extends Component
             'id' => $model->id,
             'name' => $model->name,
             'order' => $model->order,
-
         ];
-
-
         $this->showModal = true;
-    }
-
-    public function confirmDelete($id)
-    {
-
-
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->confirmButtonColor(config('samples.styles.colors.primary'))
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
     }
 
     public function save()
     {
         $this->validate();
 
-        if (array_key_exists('id', $this->item)) {
+        if ($this->item['id']) {
             ChecklistItem::findOrFail($this->item['id'])->update([
                 'name' => $this->item['name'],
                 'order' => $this->item['order'],
-
             ]);
         } else {
             ChecklistItem::create([
                 'name' => $this->item['name'],
                 'order' => $this->item['order'],
             ]);
-
         }
 
         $this->showModal = false;
-        $this->reset('item', 'showModal');
         LivewireAlert::title(__('general.success-message'))
             ->success()
             ->toast()
             ->position('top-start')
             ->show();
     }
-
-    public function delete($id)
-    {
-
-        ChecklistItem::find($id['id'])->delete();
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
-
-    }
-
-
 
     public function render()
     {
-
-        $items = ChecklistItem::search('name', $this->search)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(15);
-
-        return view('livewire.basics.checklist-item-module', [
-            'items' => $items,
-        ]);
-
+        return view('livewire.basics.checklist-item-module');
     }
 }

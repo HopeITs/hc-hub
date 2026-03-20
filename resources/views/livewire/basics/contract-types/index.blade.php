@@ -4,7 +4,7 @@
 @endphp
 
 <div>
-    <div class="flex justify-between">
+    <div class="flex justify-between mb-6">
         <livewire:layout.breadcrumbs
             :title="trans_choice('general.contract-type',2)"
             :crumbs="[
@@ -14,82 +14,16 @@
             :showButton="true"
         />
 
-        @activerole('HR', 'super-admin')
-        <div>
-            <x-primary-button wire:click="create">
-                @lang('general.add-new')
-            </x-primary-button>
-        </div>
+        @activerole('HR','super-admin')
+        <x-primary-button wire:click="create">
+            @lang('general.add-new')
+        </x-primary-button>
         @endactiverole
     </div>
 
-    <x-table>
-        <x-slot name="headings">
-            <x-table.heading sortable wire:click="sortBy('id')"
-                             :direction="$sortField === 'id' ? $sortDirection : null">
-                ID
-            </x-table.heading>
+    <livewire:basics.contract-type-table />
 
-            <x-table.heading sortable wire:click="sortBy('name_ar')"
-                             :direction="$sortField === 'name_ar' ? $sortDirection : null">
-                @lang('general.name')(AR)
-            </x-table.heading>
-
-            <x-table.heading sortable wire:click="sortBy('name_en')"
-                             :direction="$sortField === 'name_en' ? $sortDirection : null">
-                @lang('general.name')(EN)
-            </x-table.heading>
-
-            <x-table.heading sortable wire:click="sortBy('place')"
-                             :direction="$sortField === 'place' ? $sortDirection : null">
-                @lang('general.place')
-            </x-table.heading>
-
-            <x-table.heading sortable wire:click="sortBy('type')"
-                             :direction="$sortField === 'type' ? $sortDirection : null">
-                @lang('general.type')
-            </x-table.heading>
-
-            <x-table.heading/>
-        </x-slot>
-
-        <x-slot name="body">
-            @forelse($items as $item)
-                @php
-                    $place = ContractPlace::getLocalizedName($item->place);
-                    $type = ContractType::getLocalizedName($item->type);
-                @endphp
-                <x-table.row>
-                    <x-table.cell>{{ $item->id }}</x-table.cell>
-                    <x-table.cell>{{ $item->name_ar }}</x-table.cell>
-                    <x-table.cell>{{ $item->name_en }}</x-table.cell>
-
-                    <x-table.cell>
-                        <x-badge :color="$place['color']">{{ $place['value'] }}</x-badge>
-                    </x-table.cell>
-
-                    <x-table.cell>
-                        <x-badge :color="$type['color']">{{ $type['value'] }}</x-badge>
-                    </x-table.cell>
-                    @activerole('HR', 'super-admin')
-                    <x-table.cell>
-
-                        <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
-{{--                        <x-table.delete-btn :modelId="$item->id"/>--}}
-
-                    </x-table.cell>
-                    @endactiverole
-                </x-table.row>
-            @empty
-                <x-table.no-data/>
-            @endforelse
-        </x-slot>
-
-        <x-slot name="pagination">
-            {{ $items->links() }}
-        </x-slot>
-    </x-table>
-
+    {{-- MODAL (copied EXACTLY from old blade) --}}
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-2 space-x-2 space-y-4">
