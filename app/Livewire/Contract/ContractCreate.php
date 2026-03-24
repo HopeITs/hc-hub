@@ -180,6 +180,7 @@ class ContractCreate extends Component
         $cityCol = "name_{$locale}";
         $posCol = "title_{$locale}";
         $typeCol = "name_{$locale}";
+        $empCol = "name_{$locale}";
 
         $cities = City::select('id', $cityCol)->where('is_active', 1)->get()->map(fn($c) => tap($c, fn() => ($c->name = $c->{$cityCol})));
 
@@ -191,7 +192,7 @@ class ContractCreate extends Component
         if ($roleArr[0] === 'HR') {
 
             if ($roleArr[1] === 'SYR') {
-                $employees = Employee::where('is_active', 1)->get();
+                $employees = Employee::where('is_active', 1)->orderBy($empCol)->get();
             } else {
                 $citySlug = $roleArr[1];
 
@@ -199,6 +200,7 @@ class ContractCreate extends Component
                     ->whereHas('city', function ($query) use ($citySlug) {
                         $query->where('slug', $citySlug);
                     })
+                    ->orderBy($empCol)
                     ->get();
             }
 
@@ -212,6 +214,7 @@ class ContractCreate extends Component
 
             $employees = Employee::where('is_active', 1)
                 ->where('city_id', $cityId)
+                ->orderBy($empCol)
                 ->get();
         }
 
@@ -231,7 +234,7 @@ class ContractCreate extends Component
                 ->get()
             : collect();
 
-        $centers = $this->city_id !== 1 ? Center::where('city_id', $this->city_id)->select('id', 'name')->get() : Center::select('id', 'name')->get();
+        $centers = $this->city_id !== 1 ? Center::where('city_id', $this->city_id)->select('id', 'name')->orderby('name')->get() : Center::select('id', 'name')->orderby('name')->get();
 
         $positions =
             $this->city_id && $this->program_id

@@ -178,10 +178,10 @@ class ContractEdit extends Component
         $cityCol = "name_{$locale}";
         $posCol  = "title_{$locale}";
         $typeCol = "name_{$locale}";
+        $empCol = "name_{$locale}";
 
         $cities = City::select('id', $cityCol)
             ->where('is_active', 1)
-            ->orderBy($cityCol)
             ->get()
             ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
 
@@ -194,12 +194,13 @@ class ContractEdit extends Component
         if ($roleArr[0] === 'HR') {
 
             if ($roleArr[1] === 'SYR') {
-                $employees = Employee::where('is_active', 1)->get();
+                $employees = Employee::where('is_active', 1)->orderBy($empCol)->get();
             } else {
                 $citySlug = $roleArr[1];
 
                 $employees = Employee::where('is_active', 1)
                     ->whereHas('city', fn ($q) => $q->where('slug', $citySlug))
+                    ->orderBy($empCol)
                     ->get();
             }
 
@@ -210,6 +211,7 @@ class ContractEdit extends Component
 
             $employees = Employee::where('is_active', 1)
                 ->where('city_id', $cityId)
+                ->orderBy($empCol)
                 ->get();
         }
         //current emp active

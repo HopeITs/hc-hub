@@ -88,7 +88,7 @@ class AllLeaveRequestTable extends LivewireTable
                 ->sortable()
                 ->searchable(),
             SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee.' . transColumn('name'))
-                ->options(Employee::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
+                ->options(Employee::query()->orderby(transColumn('name'))->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()
                 ->searchable()->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
             SelectColumn::make(trans_choice('general.type', 1), 'type')

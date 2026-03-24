@@ -38,7 +38,7 @@ class CentersModule extends Component
 
     public function render()
     {
-        $cities = City::orderBy(transColumn('name'))->get(['id', transColumn('name')]);
+        $cities = City::get(['id', transColumn('name')]);
 
         return view('livewire.program-management.centers-module', compact('cities'));
     }

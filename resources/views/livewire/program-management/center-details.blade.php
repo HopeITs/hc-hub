@@ -27,7 +27,7 @@
 
                     <p class="text-neutral-600 h-18 dark:text-neutral-300 max-w-prose line-clamp-2">
                         <span>@lang('general.located-in')<span
-                                class="font-semibold text-neutral-900 dark:text-white">{{ optional($center->city)->name ?? '—' }}</span></span>
+                                class="ms-1 font-semibold text-neutral-900 dark:text-white">{{ optional($center->city)->name ?? '—' }}</span></span>
                         ,@lang('general.centers-text')
                     </p>
 

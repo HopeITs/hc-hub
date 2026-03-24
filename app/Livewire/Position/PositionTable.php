@@ -54,22 +54,22 @@ class PositionTable extends LivewireTable
                 ->options(City::query()->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()     ->searchable(),
             SelectColumn::make(trans_choice('general.program', 1), 'program.name')
-                ->options(Program::query()->get()->pluck('name', 'name')->toArray())
+                ->options(Program::query()->orderby('name')->get()->pluck('name', 'name')->toArray())
                 ->sortable()     ->searchable(),
             SelectColumn::make(trans_choice('general.center', 1), 'center.name')
-                ->options(Center::query()->get()->pluck('name', 'name')->toArray())
+                ->options(Center::query()->orderby('name')->get()->pluck('name', 'name')->toArray())
                 ->sortable()     ->searchable(),
             SelectColumn::make(trans_choice('general.department', 1), 'department.name')
-                ->options(Department::query()->get()->pluck('name', 'name')->toArray())
+                ->options(Department::query()->orderby('name')->get()->pluck('name', 'name')->toArray())
                 ->sortable()     ->searchable(),
             SelectColumn::make(trans_choice('general.job-level', 1), 'jobLevel.'.transColumn('name'))
-                ->options(JobLevel::query()->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
+                ->options(JobLevel::query()->orderBy('grade')->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()     ->searchable(),
             SelectColumn::make(__('general.direct-manager'), 'directManager.'.transColumn('title'))
-                ->options(Position::query()->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
+                ->options(Position::query()->orderby(transColumn('title'))->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
                 ->sortable()     ->searchable(),
             SelectColumn::make(__('general.tech-manager'), 'techManager.'.transColumn('title'))
-                ->options(Position::query()->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
+                ->options(Position::query()->orderby(transColumn('title'))->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
                 ->sortable()     ->searchable(),
 
             BooleanColumn::make(__('general.is-active'), 'is_active'),

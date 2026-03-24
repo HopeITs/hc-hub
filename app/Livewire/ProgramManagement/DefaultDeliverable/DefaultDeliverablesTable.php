@@ -31,56 +31,107 @@ class DefaultDeliverablesTable extends LivewireTable
 
     protected function globalSearchColumns(): array
     {
-        return ['id'];
+        $loc = app()->getLocale();
+        $name = $loc === 'ar' ? 'name_ar' : 'name_en';
+
+        return [
+            'id',
+            "employee.$name",
+            "city.$name",
+            'item.name',
+        ];
     }
 
     protected function employeeOptions(): array
     {
-        return Employee::query()->whereHas('contracts',function ($query){
-            $query->whereHas('position',function ($subQuery){
-                $subQuery->whereHas('department',function($q){
-                    $q->whereIn('name' , ['IT', 'Communication', 'HR']);
-                } );
-            });
-        })->orderBy(transColumn('name'))->get(['id', transColumn('name')])
-            ->mapWithKeys(fn($e) => [$e->id => $e->name])->all();
+        $loc = app()->getLocale();
+        $name = $loc === 'ar' ? 'name_ar' : 'name_en';
+
+        return Employee::query()
+            ->whereHas('contracts', function ($query) {
+                $query->whereHas('position', function ($subQuery) {
+                    $subQuery->whereHas('department', function ($q) {
+                        $q->whereIn('code', ['IT', 'CT', 'HR']);
+                    });
+                });
+            })
+            ->orderBy($name)
+            ->pluck($name, $name)
+            ->toArray();
     }
 
     protected function cityOptions(): array
     {
         $loc = app()->getLocale();
-        return City::query()->whereHas('centers')->orderBy(transColumn('name'))->get(['id', transColumn('name')])
-            ->mapWithKeys(fn($c) => [$c->id => $c->name])->all();
+        $name = $loc === 'ar' ? 'name_ar' : 'name_en';
+
+        return City::query()
+            ->whereHas('centers')
+            ->pluck($name, $name)
+            ->toArray();
     }
 
     protected function itemOptions(): array
     {
-        return ChecklistItem::query()->orderBy('order')->pluck('name', 'id')->toArray();
+        return ChecklistItem::query()->orderBy('order')->pluck('name', 'name')->toArray();
     }
 
     protected function columns(): array
     {
         $loc = app()->getLocale();
+        $name = $loc === 'ar' ? 'name_ar' : 'name_en';
 
         return [
-            Column::make('ID', 'id')->sortable(),
 
-            SelectColumn::make(trans_choice('general.employee',1), 'employee.name')
-                ->displayUsing(fn($v, Model $m) => $m->employee?->name ?? '—')
+            Column::make('ID', 'id')->sortable()->searchable(),
+
+            SelectColumn::make(trans_choice('general.employee', 1), 'employee.' . $name)
                 ->options($this->employeeOptions())
-                ->sortable()->searchable(),
-
-            SelectColumn::make(trans_choice('general.city', 1), 'city_id')
-                ->displayUsing(fn($v, Model $m) => $m->city?->name ?? '—')
+                ->sortable()
+                ->searchable(),
+            SelectColumn::make(trans_choice('general.city', 1), 'city.' . $name)
                 ->options($this->cityOptions())
-                ->sortable()->searchable(),
+                ->sortable()
+                ->searchable(),
 
-            SelectColumn::make(__('general.item'), 'item_id')
-                ->displayUsing(fn($v, Model $m) => $m->item?->name ?? '—')
-                ->options($this->itemOptions())
-                ->sortable()->searchable(),
+
+
+
+
+            SelectColumn::make(__('general.item'), 'item.name')
+                ->options(
+                    ChecklistItem::orderBy('order')
+                        ->pluck('name', 'name')
+                        ->toArray()
+                )
+                ->sortable()
+                ->searchable(),
 
             Column::make(__('general.actions'), function (Model $m): string {
+                $user = auth()->user()->load('profile');
+                $role = $user->myRole();
+            
+                $roleArr = explode('-', $role);
+            
+                $canEdit = true;
+            
+                if ($roleArr[0] === 'HR') {
+            
+                    if ($roleArr[1] === 'SYR') {
+                        $canEdit = true;
+                    } else {
+                        $citySlug = $roleArr[1];
+            
+                        if ($m->city->slug !== $citySlug) {
+                            $canEdit = false;
+                        }
+                    }
+                }
+            
+                if (!$canEdit) {
+                    return ''; // hide buttons
+                }
+                
                 $id = $m->getKey();
 
                 $editBtn = Blade::render(
@@ -91,7 +142,8 @@ class DefaultDeliverablesTable extends LivewireTable
                     '<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />'
                 );
 
-                return '<div class="flex items-center justify-center gap-2">' . $editBtn . $deleteBtn . '</div>';
+                return '<div class="flex items-center justify-center gap-2">'
+                    . $editBtn . $deleteBtn . '</div>';
             })->asHtml(),
         ];
     }
