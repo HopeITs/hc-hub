@@ -1,5 +1,5 @@
 @php($locale = app()->getLocale())
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 
     {{-- Start date --}}
     <div>
@@ -40,9 +40,9 @@
                 type="number" min="0"
                 wire:model.defer="form.weekly_hours"
                 placeholder="40"
-                class="pr-14"
+                class="pe-14"
             />
-            <span class="absolute inset-y-0 end-3 flex items-center text-xs text-gray-500 pointer-events-none">
+            <span class="absolute inset-y-0 flex items-center text-xs text-gray-500 pointer-events-none end-3">
                 {{ $locale === 'ar' ? 'س/أسبوع' : 'h/week' }}
             </span>
         </div>
@@ -60,7 +60,7 @@
         </div>
     @endforeach
 
-    <hr class="col-span-full my-3">
+    <hr class="my-3 col-span-full">
 
     {{-- Terminated at --}}
     <div class="md:col-span-2">
