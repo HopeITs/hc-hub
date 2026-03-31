@@ -617,4 +617,6 @@ return [
     'expand-all' => 'Expand All',
     'calendar' => 'Calendar',
     'reset-filters' => 'Reset Filters',
+
+    'time' => 'Time'
 ];
