@@ -37,7 +37,7 @@ class ContractForm extends Form
     // ── Schedule
     public  $work_days_ar ;
     public  $work_days_en ;
-    public  $work_hours_from = '09:30' ;
+    public  $work_hours_from = '09:00' ;
     public  $work_hours_to = '17:00';
     public function updatedContractTypeId($value): void
     {
@@ -66,7 +66,7 @@ class ContractForm extends Form
     private function defaultSalaryPer(): int
     {
         if (enum_exists(SalaryPer::class)) {
-            return (int)SalaryPer::Month->value;
+            return (int) SalaryPer::Month->value;
         }
 
         return defined(SalaryPer::class . '::Month') ? (int)constant(SalaryPer::class . '::Month') : 1; // safe fallback
