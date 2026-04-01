@@ -13,7 +13,7 @@
         <div class="flex flex-col items-center  pt-6 justify-center">
             <div
                 id="salaryTypePieChart"
-                class="w-[130px] mr-8 pt-2 h-[130px]"
+                class="w-[130px] me-8 pt-2 h-[130px]"
                 data-series='@json($series)'
                 data-percentage="{{ $highlightPercentage }}"
             ></div>
@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <div class="w-full -ml-3">
+        <div class="w-full -ms-3">
             <canvas
                 id="salaryTypeMiniChart"
                 class="w-full h-[140px]"

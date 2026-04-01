@@ -43,7 +43,7 @@
                                 {{ $item->item->name }}
                             </td>
                             <td class="pl-6 pr-2 py-4 text-sm">
-                                <span class="px-2 py-1 inline-flex text-xs ltr:-ml-2 rtl:text-right font-medium rounded-full
+                                <span class="px-2 py-1 inline-flex text-xs ltr:-ms-2 rtl:text-right font-medium rounded-full
                                     @if(strtolower($item->display_status) === 'delivered')
                                         bg-green-100 text-green-700
                                     @elseif(strtolower($item->display_status) === 'on hold')

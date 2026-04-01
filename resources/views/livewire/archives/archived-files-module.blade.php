@@ -72,17 +72,17 @@
                             </div>
                             <div class="border-t border-gray-100"></div>
                             <button wire:click.prevent="editPermissions({{ $folder->id }})" class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
-                                <x-icons.cog class="mr-3 text-red-800 size-5" />
+                                <x-icons.cog class="me-3 text-red-800 size-5" />
                                 {{ __('general.permissions') }}
                             </button>
                             <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
-                                <svg class="mr-3 text-gray-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <svg class="me-3 text-gray-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
                                 </svg>
                                 {{ __('general.edit') }}
                             </button>
                             <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="flex items-center w-full px-4 py-2 text-sm text-left text-red-700 hover:bg-gray-100">
-                                <svg class="mr-3 text-red-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <svg class="me-3 text-red-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
                                 </svg>
                                 {{ __('general.delete') }}
@@ -123,13 +123,13 @@
 
                         <div class="py-1">
                             <button wire:click.prevent="startEditingFile({{ $file->id }})" class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
-                                <svg class="mr-3 text-gray-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <svg class="me-3 text-gray-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
                                 </svg>
                                 {{ __('general.edit_name') }}
                             </button>
                             <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="flex items-center w-full px-4 py-2 text-sm text-left text-red-700 hover:bg-gray-100">
-                                <svg class="mr-3 text-red-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <svg class="me-3 text-red-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
                                 </svg>
                                 {{ __('general.delete_file') }}
@@ -174,7 +174,7 @@
                     <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-red-100 rounded-full">
                         <x-icons.exclamation-triangle class="w-6 h-6 text-red-600" />
                     </div>
-                    <div class="ml-4 text-left">
+                    <div class="ms-4 text-left">
                         <h3 class="text-lg font-medium text-gray-900">{{ __('general.delete_item') }}</h3>
                         <div class="mt-2">
                             <p class="text-sm text-gray-500">{{ __('general.delete_confirmation', ['item' => $itemNameToDelete ?? 'this item']) }}</strong>? This action cannot be undone.</p>
@@ -281,7 +281,7 @@
                         @foreach ($activeFilters as $index => $filter)
                         <span class="inline-flex items-center gap-x-1.5 rounded-md bg-gray-100 px-2 py-1 text-sm font-medium text-gray-800">
                             {{ $filter['type_label'] }}: {{ $filter['value_label'] }}
-                            <button type="button" wire:click="removeFilter({{ $index }})" class="group relative -mr-1 h-3.5 w-3.5 rounded-sm hover:bg-gray-500/20">
+                            <button type="button" wire:click="removeFilter({{ $index }})" class="group relative -me-1 h-3.5 w-3.5 rounded-sm hover:bg-gray-500/20">
                                 <span class="sr-only">Remove</span>
                                 <svg viewBox="0 0 14 14" class="h-3.5 w-3.5 stroke-gray-600/50 group-hover:stroke-gray-600/75">
                                     <path d="M4 4l6 6m0-6l-6 6" />
@@ -309,7 +309,7 @@
                 @forelse ($allUsers as $user)
                 <label for="user-{{ $user->id }}" class="flex items-center p-2 rounded-md hover:bg-gray-50 cursor-pointer @if($user->id === $folderForPermissions?->user_id) opacity-60 cursor-not-allowed @endif">
                     <input id="user-{{ $user->id }}" type="checkbox" value="{{ $user->id }}" wire:model.live="selectedUsers" class="w-4 h-4 border-gray-300 rounded text-primary focus:ring-primary" @if($user->id === $folderForPermissions?->user_id) disabled @endif>
-                    <span class="ml-3 text-sm text-gray-700">
+                    <span class="ms-3 text-sm text-gray-700">
                         {{ optional($user->profile)->name ?? $user->email }}
                         @if($user->id === $folderForPermissions?->user_id) {{ __('general.me_creator') }} @endif
                     </span>

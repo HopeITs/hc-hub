@@ -17,7 +17,7 @@
 
                 <button
                     @click="openNewNoteModal()"
-                    class="flex items-center mr-4 gap-2 bg-primary hover:bg-red-700 text-white text-xs font-medium px-3 py-2 rounded-md transition">
+                    class="flex items-center me-4 gap-2 bg-primary hover:bg-red-700 text-white text-xs font-medium px-3 py-2 rounded-md transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
@@ -53,7 +53,7 @@
 
                                 <td class="w-full py-2 px-4">
 
-                                    <div class="flex  ltr:-mr-11 rtl:-ml-9 items-left rtl:justify-start ltr:text-left rtl:text-right ltr:justify-end gap-4 rtl:flex-row-reverse">
+                                    <div class="flex  ltr:-me-11 rtl:-ml-9 items-left rtl:justify-start ltr:text-left rtl:text-right ltr:justify-end gap-4 rtl:flex-row-reverse">
 
                                         {{-- Edit --}}
                                         <button
@@ -66,7 +66,7 @@
                                         {{-- Delete --}}
                                         <button
                                             @click="confirmDelete({{ $note->id }})"
-                                            class="inline-flex mr-1 items-center justify-center text-gray-400 hover:text-red-600 transition"
+                                            class="inline-flex me-1 items-center justify-center text-gray-400 hover:text-red-600 transition"
                                             title="Delete Note">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
                                                  viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

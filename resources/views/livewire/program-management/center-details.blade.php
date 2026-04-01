@@ -32,7 +32,7 @@
                     </p>
 
 
-                    <div class="relative mt-2 -ml-1">
+                    <div class="relative mt-2 -ms-1">
                         <div
                             class="inline-flex rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-1 shadow-lg">
                             <button

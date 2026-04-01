@@ -79,7 +79,7 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+                <div class="flex items-center gap-2 ms-4 flex-shrink-0">
 
                     <a href="{{ route('employees.show', ['employee' => $member->username]) }}"
                        title="View Profile">
@@ -99,7 +99,7 @@
                     <a href="mailto:{{ $member->account->email ?? '#' }}"
                        class="text-secondary-light hover:text-primary transition"
                        title="Send Email">
-                        <x-icons.envelope class="text-secondary-light ml-1 hover:text-primary transition"/>
+                        <x-icons.envelope class="text-secondary-light ms-1 hover:text-primary transition"/>
                     </a>
 
                 </div>

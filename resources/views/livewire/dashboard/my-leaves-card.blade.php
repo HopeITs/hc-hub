@@ -46,11 +46,11 @@
 
 
         <div class="flex flex-col items-center md:items-end justify-center md:justify-end">
-            <div class="relative w-56 h-40 ml-10 md:mb-2">
+            <div class="relative w-56 h-40 ms-10 md:mb-2">
                 <canvas id="leavesGaugeChart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-end">
-                    <p class="text-primary mb-3 -ml-6 rtl:-ml-10 text-4xl font-bold">
-                        {{$percentage}} <span class="text-sm rtl:-mr-1.5 ltr:-ml-2">%</span>
+                    <p class="text-primary mb-3 -ml-6 rtl:-ms-10 text-4xl font-bold">
+                        {{$percentage}} <span class="text-sm rtl:-me-1.5 ltr:-ms-2">%</span>
                     </p>
                 </div>
             </div>

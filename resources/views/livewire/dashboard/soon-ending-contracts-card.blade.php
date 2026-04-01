@@ -15,7 +15,7 @@
             {{ $contracts->count() }}
         </span>
 
-        <x-icons.contracts class="mb-0.5 ml-1 text-primary"/>
+        <x-icons.contracts class="mb-0.5 ms-1 text-primary"/>
     </div>
 
     <!-- Scrollable Content (IDENTICAL to No Leaves) -->
