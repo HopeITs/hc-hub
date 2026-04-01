@@ -19,7 +19,7 @@
                 type="text"
                 placeholder="{{ __('general.search') }}"
                 class="w-full h-6 text-xs rounded-full border border-gray-300 bg-white
-                       pl-8 pt-2.5 pr-3 py-3 placeholder-secondary-light text-gray-700
+                       ps-8 pt-2.5 pe-3 py-3 placeholder-secondary-light text-gray-700
                        focus:border-gray-400 focus:ring-0 outline-none transition">
             <div class="absolute left-2 top-[13px] -translate-y-1/2 text-gray-400 pointer-events-none">
                 <x-icons.search class="w-2 h-2"/>

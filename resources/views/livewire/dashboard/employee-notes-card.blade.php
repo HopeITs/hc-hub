@@ -26,7 +26,7 @@
             </div>
 
             <div class="px-6 py-4 flex-1 overflow-hidden">
-                <div class=" pr-1 pt-1 ">
+                <div class=" pe-1 pt-1 ">
 
                     <table class="w-full text-sm text-gray-700 ">
                         <thead class="sticky top-0 z-10 bg-white">

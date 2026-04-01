@@ -42,7 +42,7 @@
                 sortable
                 wire:click="sortBy('grade')"
                 :direction="$sortField === 'grade' ? $sortDirection : null"
-            ><div class="ltr:pl-12 rtl:pr-12">@lang('general.grade')</div></x-table.heading>
+            ><div class="ltr:ps-12 rtl:pe-12">@lang('general.grade')</div></x-table.heading>
 
             <x-table.heading
                 sortable
