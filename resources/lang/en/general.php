@@ -618,5 +618,6 @@ return [
     'calendar' => 'Calendar',
     'reset-filters' => 'Reset Filters',
 
-    'time' => 'Time'
+    'time' => 'Time',
+    'leave-decision' => 'Leave Decision',
 ];

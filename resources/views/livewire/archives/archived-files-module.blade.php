@@ -1,14 +1,14 @@
 <div>
-    <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+    <div class="flex flex-col gap-4 md:flex-row md:justify-between md:items-start">
         <livewire:layout.breadcrumbs
             :title="$isShared ? __('general.shared-folders') : __('general.my-folders')"
             :crumbs="$finalCrumbs"
         />
 
-        <div class="flex items-center  space-x-2 flex-shrink-0">
+        <div class="flex items-center flex-shrink-0 space-x-2">
             @if (!$currentFolder && !$isShared)
                 <x-primary-button type="button" wire:click="$set('showCreateFolderModal', true)">
-                    <x-icons.plus class="w-5 h-5 mr-2 -ml-1" />
+                    <x-icons.plus class="w-5 h-5 me-1" />
                         {{ __('general.new_folder') }}
                 </x-primary-button>
             @endif
@@ -22,8 +22,8 @@
                     x-on:livewire-upload-progress="progress = $event.detail.progress"
                     class="w-full"
                 >
-                    <label for="file-upload" class="py-2 px-4 text-sm font-semibold text-white bg-primary hover:opacity-90 cursor-pointer rounded-md shadow-sm transition duration-150 ease-in-out flex justify-center items-center">
-                        <x-icons.upload class="w-5 h-5 mr-2 -ml-1" />
+                    <label for="file-upload" class="flex items-center justify-center px-4 py-2 text-sm font-semibold text-white transition duration-150 ease-in-out rounded-md shadow-sm cursor-pointer bg-primary hover:opacity-90">
+                        <x-icons.upload class="w-5 h-5 me-1" />
                         {{ __('general.upload_files') }}
                         <input id="file-upload" wire:model.live="filesToUpload" type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.gif,.xls,.xlsx,.doc,.docx,.pdf">
                     </label>
@@ -36,10 +36,10 @@
     </div>
 
     <div class="p-6 mt-6 bg-white shadow-sm sm:rounded-lg">
-        <div class="grid grid-cols-2  gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             @forelse($folders as $folder)
             <div class="relative group ">
-                <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md">
+                <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" class="flex flex-col items-center justify-center h-40 p-4 text-center border rounded-lg hover:bg-gray-100 hover:shadow-md">
                     <x-icons.folder class="w-16 h-16 text-primary" />
                     <span class="w-full mt-2 text-sm font-medium text-gray-800 truncate">{{ $folder->name }}</span>
                     @if ($folder->user_id === auth()->id())
@@ -62,7 +62,7 @@
 
                     <div x-show="open"
                          x-transition
-                         class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 origin-top-right"
+                         class="absolute right-0 z-20 w-48 mt-2 origin-top-right bg-white rounded-md shadow-lg"
                          style="display: none;"
                          @click="open = false">
 
@@ -71,18 +71,18 @@
                                 {{ __('general.files') }}: <span class="font-semibold text-gray-700">{{ $folder->files_count }}</span>
                             </div>
                             <div class="border-t border-gray-100"></div>
-                            <button wire:click.prevent="editPermissions({{ $folder->id }})" class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <x-icons.cog class="size-5 mr-3 text-red-800" />
+                            <button wire:click.prevent="editPermissions({{ $folder->id }})" class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
+                                <x-icons.cog class="mr-3 text-red-800 size-5" />
                                 {{ __('general.permissions') }}
                             </button>
-                            <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <svg class="size-5 mr-3 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <button wire:click.prevent="startEditingFolder({{ $folder->id }})" class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
+                                <svg class="mr-3 text-gray-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
                                 </svg>
                                 {{ __('general.edit') }}
                             </button>
-                            <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="w-full text-left flex items-center px-4 py-2 text-sm text-red-700 hover:bg-gray-100">
-                                <svg class="size-5 mr-3 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <button wire:click.prevent="confirmFolderDeletion({{ $folder->id }})" class="flex items-center w-full px-4 py-2 text-sm text-left text-red-700 hover:bg-gray-100">
+                                <svg class="mr-3 text-red-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
                                 </svg>
                                 {{ __('general.delete') }}
@@ -94,13 +94,13 @@
             </div>
             @empty
                 @if ($files->isEmpty())
-                    <p class="col-span-full text-center text-gray-500">{{ __('general.folder_empty') }}</p>
+                    <p class="text-center text-gray-500 col-span-full">{{ __('general.folder_empty') }}</p>
                 @endif
             @endforelse
 
             @foreach ($files as $file)
             <div class="relative group">
-                <div wire:click="downloadFile({{ $file->id }})" class="flex flex-col items-center justify-center p-4 text-center border rounded-lg h-40 hover:bg-gray-100 hover:shadow-md cursor-pointer">
+                <div wire:click="downloadFile({{ $file->id }})" class="flex flex-col items-center justify-center h-40 p-4 text-center border rounded-lg cursor-pointer hover:bg-gray-100 hover:shadow-md">
                     @if (isset($filePreviews[$file->id]))
                     <img src="{{ $filePreviews[$file->id] }}" alt="{{ $file->name }}" class="object-cover w-16 h-16 rounded-md" />
                     @else
@@ -117,19 +117,19 @@
 
                     <div x-show="open"
                          x-transition
-                         class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 origin-top-right"
+                         class="absolute right-0 z-20 w-48 mt-2 origin-top-right bg-white rounded-md shadow-lg"
                          style="display: none;"
                          @click="open = false">
 
                         <div class="py-1">
-                            <button wire:click.prevent="startEditingFile({{ $file->id }})" class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <svg class="size-5 mr-3 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <button wire:click.prevent="startEditingFile({{ $file->id }})" class="flex items-center w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100">
+                                <svg class="mr-3 text-gray-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
                                 </svg>
                                 {{ __('general.edit_name') }}
                             </button>
-                            <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="w-full text-left flex items-center px-4 py-2 text-sm text-red-700 hover:bg-gray-100">
-                                <svg class="size-5 mr-3 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <button wire:click.prevent="confirmFileDeletion({{ $file->id }})" class="flex items-center w-full px-4 py-2 text-sm text-left text-red-700 hover:bg-gray-100">
+                                <svg class="mr-3 text-red-800 size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
                                 </svg>
                                 {{ __('general.delete_file') }}
@@ -145,19 +145,19 @@
 
     @if ($showCreateFolderModal)
     <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('showCreateFolderModal', false)"></div>
-    <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
-        <div class="mx-4 rounded-lg bg-white shadow-xl">
+    <div class="fixed z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+        <div class="mx-4 bg-white rounded-lg shadow-xl">
             <div class="px-6 pt-6">
                 <h3 class="text-lg font-medium leading-6 text-gray-900">{{ __('general.create_new_folder') }}</h3>
                 <div class="mt-4">
                     <label for="folderName" class="block text-sm font-medium text-gray-700">{{ __('general.folder_name') }}</label>
                     <input type="text" id="folderName" wire:model.defer="newFolderName" wire:keydown.enter="createFolder" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm">
                     @error('newFolderName')
-                    <span class="mt-2 block text-sm text-red-600">{{ $message }}</span>
+                    <span class="block mt-2 text-sm text-red-600">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
-            <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
+            <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-4 rounded-b-lg bg-gray-50">
                 <x-primary-button type="button" wire:click="createFolder" :full="true">{{ __('general.create') }}</x-primary-button>
                 <button type="button" wire:click="$set('showCreateFolderModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">{{ __('general.cancel') }}</button>
             </div>
@@ -167,12 +167,12 @@
 
     @if ($showDeleteConfirmationModal)
     <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('showDeleteConfirmationModal', false)"></div>
-    <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2">
-        <div class="mx-4 rounded-lg bg-white shadow-xl">
+    <div class="fixed z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+        <div class="mx-4 bg-white rounded-lg shadow-xl">
             <div class="px-6 pt-6">
                 <div class="flex items-start">
-                    <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                        <x-icons.exclamation-triangle class="h-6 w-6 text-red-600" />
+                    <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-red-100 rounded-full">
+                        <x-icons.exclamation-triangle class="w-6 h-6 text-red-600" />
                     </div>
                     <div class="ml-4 text-left">
                         <h3 class="text-lg font-medium text-gray-900">{{ __('general.delete_item') }}</h3>
@@ -182,7 +182,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
+            <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-4 rounded-b-lg bg-gray-50">
                 <button type="button" wire:click="deleteItem" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none">{{ __('general.delete') }}</button>
                 <button type="button" wire:click="$set('showDeleteConfirmationModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">{{ __('general.cancel') }}</button>
             </div>
@@ -192,19 +192,19 @@
 
     @if ($editingFolderId)
     <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('editingFolderId', null)"></div>
-    <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
-        <div class="mx-4 rounded-lg bg-white shadow-xl">
+    <div class="fixed z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+        <div class="mx-4 bg-white rounded-lg shadow-xl">
             <div class="px-6 pt-6">
                 <h3 class="text-lg font-medium text-gray-900">{{ __('general.edit_folder') }}</h3>
                 <div class="mt-4">
                     <label for="editingFolderName" class="...">{{ __('general.folder_name') }}</label>
                     <input type="text" id="editingFolderName" wire:model.defer="editingFolderName" wire:keydown.enter="saveEditedFolder" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm">
                     @error('editingFolderName')
-                    <span class="mt-2 block text-sm text-red-600">{{ $message }}</span>
+                    <span class="block mt-2 text-sm text-red-600">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
-            <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
+            <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-4 rounded-b-lg bg-gray-50">
                 <x-primary-button type="button" wire:click="saveEditedFolder" :full="true">{{ __('general.save') }}</x-primary-button>
                 <button wire:click="$set('editingFolderId', null)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">{{ __('general.cancel') }}</button>
             </div>
@@ -214,19 +214,19 @@
 
     @if ($editingFileId)
     <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="$set('editingFileId', null)"></div>
-    <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
-        <div class="mx-4 rounded-lg bg-white shadow-xl">
+    <div class="fixed z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+        <div class="mx-4 bg-white rounded-lg shadow-xl">
             <div class="px-6 pt-6">
                 <h3 class="...">{{ __('general.edit_file_name') }}</h3>
                 <div class="mt-4">
                     <label for="editingFileName" class="...">{{ __('general.file_name') }}</label>
                     <input type="text" id="editingFileName" wire:model.defer="editingFileName" wire:keydown.enter="saveEditedFile" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm">
                     @error('editingFileName')
-                    <span class="mt-2 block text-sm text-red-600">{{ $message }}</span>
+                    <span class="block mt-2 text-sm text-red-600">{{ $message }}</span>
                     @enderror
                 </div>
             </div>
-            <div class="bg-gray-50 px-6 py-4 mt-4 grid grid-cols-2 gap-3 rounded-b-lg">
+            <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-4 rounded-b-lg bg-gray-50">
                 <x-primary-button type="button" wire:click="saveEditedFile" :full="true">{{ __('general.save') }}</x-primary-button>
                 <button wire:click="$set('editingFileId', null)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">{{ __('general.cancel') }}</button>
             </div>
@@ -236,29 +236,29 @@
 
     @if ($showPermissionsModal)
     <div class="fixed inset-0 z-40 bg-gray-900/60" wire:click="closePermissionsModal"></div>
-    <div class="fixed z-50 top-1/2 left-1/2 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2">
-        <div class="mx-4 rounded-lg bg-white shadow-xl flex flex-col">
+    <div class="fixed z-50 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+        <div class="flex flex-col mx-4 bg-white rounded-lg shadow-xl">
             <div class="px-6 pt-6">
                 <h3 class="text-lg font-medium text-gray-900">{{ __('general.assign_permissions', ['folder' => $folderForPermissions?->name]) }}</h3>
                 <p class="mt-1 text-sm text-gray-500">{{ __('general.select_employees') }}</p>
                 <div class="mt-4">
                     <input type="text" wire:model.live.debounce.300ms="userSearch" placeholder="{{ __('general.search_employees') }}" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm">
                 </div>
-                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 gap-4 mt-4 md:grid-cols-3">
                     <div class="md:col-span-1">
                         <label for="pFilterType" class="block text-sm font-medium text-gray-700">{{ __('general.filter_by_category') }}</label>
-                        <select id="pFilterType" wire:model.live="permissionFilterType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+                        <select id="pFilterType" wire:model.live="permissionFilterType" class="block w-full py-2 pl-3 pr-10 mt-1 text-base border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                             <option value="">{{ __('general.all_categories') }}</option>
                             @foreach($this->permissionFilterCategories as $key => $label)
                                 <option value="{{ $key }}">{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="md:col-span-2 flex items-end gap-x-2">
+                    <div class="flex items-end md:col-span-2 gap-x-2">
                         @if(!empty($permissionFilterOptions))
                             <div class="flex-grow">
                                 <label for="pFilterValue" class="block text-sm font-medium text-gray-700">{{ __('general.select_value') }}</label>
-                                <select id="pFilterValue" wire:model.live="permissionFilterValue" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+                                <select id="pFilterValue" wire:model.live="permissionFilterValue" class="block w-full py-2 pl-3 pr-10 mt-1 text-base border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                                     <option value="">{{ __('general.all') }}</option>
                                     @foreach($permissionFilterOptions as $id => $name)
                                         <option value="{{ $id }}">{{ $name }}</option>
@@ -277,7 +277,7 @@
                 </div>
 
                 @if (!empty($activeFilters))
-                    <div class="mt-4 flex flex-wrap gap-2">
+                    <div class="flex flex-wrap gap-2 mt-4">
                         @foreach ($activeFilters as $index => $filter)
                         <span class="inline-flex items-center gap-x-1.5 rounded-md bg-gray-100 px-2 py-1 text-sm font-medium text-gray-800">
                             {{ $filter['type_label'] }}: {{ $filter['value_label'] }}
@@ -292,13 +292,13 @@
                     </div>
                 @endif
             </div>
-            <div class="p-6 h-64 overflow-y-auto space-y-2 relative" wire:loading.class="opacity-50" wire:target="permissionFilterType, permissionFilterValue, userSearch, addFilter, removeFilter">
-                <div wire:loading wire:target="permissionFilterType, permissionFilterValue, userSearch, addFilter, removeFilter" class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-                    <x-icons.spinner class="h-8 w-8 text-primary" />
+            <div class="relative h-64 p-6 space-y-2 overflow-y-auto" wire:loading.class="opacity-50" wire:target="permissionFilterType, permissionFilterValue, userSearch, addFilter, removeFilter">
+                <div wire:loading wire:target="permissionFilterType, permissionFilterValue, userSearch, addFilter, removeFilter" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
+                    <x-icons.spinner class="w-8 h-8 text-primary" />
                 </div>
 
                 @if($allUsers?->isNotEmpty())
-                    <div class="flex items-center justify-end mb-2 px-2">
+                    <div class="flex items-center justify-end px-2 mb-2">
                         <button wire:click="toggleSelectAllVisible" type="button" class="text-sm font-medium text-primary hover:underline">
                             {{ $allVisibleUsersSelected ? __('general.deselect_all_visible') : __('general.select_all_visible') }}
                         </button>
@@ -308,18 +308,18 @@
                 @if($allUsers)
                 @forelse ($allUsers as $user)
                 <label for="user-{{ $user->id }}" class="flex items-center p-2 rounded-md hover:bg-gray-50 cursor-pointer @if($user->id === $folderForPermissions?->user_id) opacity-60 cursor-not-allowed @endif">
-                    <input id="user-{{ $user->id }}" type="checkbox" value="{{ $user->id }}" wire:model.live="selectedUsers" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" @if($user->id === $folderForPermissions?->user_id) disabled @endif>
+                    <input id="user-{{ $user->id }}" type="checkbox" value="{{ $user->id }}" wire:model.live="selectedUsers" class="w-4 h-4 border-gray-300 rounded text-primary focus:ring-primary" @if($user->id === $folderForPermissions?->user_id) disabled @endif>
                     <span class="ml-3 text-sm text-gray-700">
                         {{ optional($user->profile)->name ?? $user->email }}
                         @if($user->id === $folderForPermissions?->user_id) {{ __('general.me_creator') }} @endif
                     </span>
                 </label>
                 @empty
-                <p class="text-sm text-gray-500 text-center py-4">{{ __('general.no_employees_found') }}</p>
+                <p class="py-4 text-sm text-center text-gray-500">{{ __('general.no_employees_found') }}</p>
                 @endforelse
                 @endif
             </div>
-            <div class="bg-gray-50 px-6 py-4 grid grid-cols-2 gap-3 rounded-b-lg">
+            <div class="grid grid-cols-2 gap-3 px-6 py-4 rounded-b-lg bg-gray-50">
                 <x-primary-button type="button" wire:click="savePermissions" :full="true">{{ __('general.save_permissions') }}</x-primary-button>
                 <button type="button" wire:click="closePermissionsModal" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">{{ __('general.cancel') }}</button>
             </div>

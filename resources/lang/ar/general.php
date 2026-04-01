@@ -620,5 +620,6 @@ return [
     'reset-filters' => 'إعادة تعيين الفلاتر',
 
 
-     'time' => 'الوقت'
+    'time' => 'الوقت',
+    'leave-decision' => 'قرار الإجازة',
 ];
