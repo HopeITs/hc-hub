@@ -3,23 +3,19 @@
 namespace App\Livewire\Basics;
 
 use App\Models\LeaveType;
-use App\Enums\Gender;
-use App\Enums\MaritalStatus;
 use Livewire\Component;
-use Livewire\WithPagination;
-use App\Traits\SortableTable;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+
 
 class LeaveTypeModule extends Component
 {
-    use WithPagination, SortableTable;
-    public $search = '';
-    // Modal
-    public $showModal = false;
-    public $modalTitle = 'Modal title';
+    protected $listeners = ['openLeaveTypeEdit' => 'edit'];
 
-    // Form fields
-    public $item = [
+    public bool $showModal = false;
+    public string $modalTitle = '';
+
+    public array $item = [
+        'id' => null,
         'name_ar' => '',
         'name_en' => '',
         'base_days' => null,
@@ -27,35 +23,34 @@ class LeaveTypeModule extends Component
         'marital_status' => null,
     ];
 
-    protected $rules = [
-        'item.name_ar' => 'required|string',
-        'item.name_en' => 'required|string',
-        'item.base_days' => 'required|integer',
-        'item.allowed_gender' => 'integer',
-        'item.marital_status' => 'integer',
-    ];
+    protected function rules(): array
+    {
+        return [
+            'item.name_ar' => 'required|string',
+            'item.name_en' => 'required|string',
+            'item.base_days' => 'required|integer',
+            'item.allowed_gender' => 'required|integer',
+            'item.marital_status' => 'required|integer',
+        ];
+    }
 
     public function render()
     {
-        $items = LeaveType::search(['name_ar' , 'name_en'], $this->search)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(15);
-
-        return view('livewire.basics.leave-type-module', compact('items'));
+        return view('livewire.basics.leave-type-module');
     }
 
-    public function create()
+    public function create(): void
     {
         $this->reset('item');
-        $this->showModal = true;
+        $this->resetValidation();
         $this->modalTitle = __('general.add-new');
+        $this->showModal = true;
     }
 
-    public function edit($id)
+    public function edit(int $id): void
     {
         $model = LeaveType::findOrFail($id);
 
-        $this->modalTitle = __('general.edit');
         $this->item = [
             'id' => $model->id,
             'name_ar' => $model->name_ar,
@@ -65,47 +60,26 @@ class LeaveTypeModule extends Component
             'marital_status' => $model->marital_status,
         ];
 
+        $this->modalTitle = __('general.edit');
+        $this->resetValidation();
         $this->showModal = true;
     }
 
-    public function save()
+    public function save(): void
     {
         $this->validate();
 
-        if (array_key_exists('id', $this->item)) {
-            LeaveType::findOrFail($this->item['id'])->update($this->item);
-        } else {
-            LeaveType::create($this->item);
-        }
+        $model = $this->item['id']
+            ? LeaveType::findOrFail($this->item['id'])
+            : new LeaveType();
 
-        $this->reset('item', 'showModal');
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
-    }
+        $model->fill($this->item)->save();
 
-    public function confirmDelete($id)
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->confirmButtonColor(config('samples.styles.colors.primary'))
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
+        $this->showModal = false;
 
-    public function delete($id)
-    {
-        LeaveType::findOrFail($id['id'])->delete();
+        $this->dispatch('refreshLeaveTypeTable');
 
         LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
+            ->success()->toast()->position('top-start')->show();
     }
 }

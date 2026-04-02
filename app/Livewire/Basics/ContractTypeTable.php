@@ -92,8 +92,9 @@ class ContractTypeTable extends LivewireTable
                     '<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />'
                 );
 
-                return '<div class="flex items-center justify-center gap-2">'
-                    . $editBtn . $deleteBtn . '</div>';
+                // return '<div class="flex items-center justify-center gap-2">'
+                //     . $editBtn . $deleteBtn . '</div>';
+                    return $editBtn;
             })->asHtml(),
         ];
     }
