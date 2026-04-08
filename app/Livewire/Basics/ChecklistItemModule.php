@@ -3,118 +3,86 @@
 namespace App\Livewire\Basics;
 
 use App\Models\ChecklistItem;
-use App\Traits\SortableTable;
-use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
-use Livewire\WithPagination;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 
 class ChecklistItemModule extends Component
 {
+    protected $listeners = [
+        'openChecklistItemEdit' => 'edit',
+    ];
 
-    use WithPagination, SortableTable;
+    public bool $showModal = false;
+    public string $modalTitle = '';
 
-    public $showModal = false;
-    public $modalTitle = 'Modal title';
-    public $search = '';
-
-    public $item = [
-        'name' => null,
+    public array $item = [
+        'id' => null,
+        'name' => '',
         'order' => null,
     ];
 
-    protected $rules = [
-        'item.name' => 'required|string',
-        'item.order' => 'required|integer',
-    ];
-
-    public function create()
+    protected function rules(): array
     {
-        $this->showModal = true;
-        $this->modalTitle = __('general.add-new');
+        return [
+            'item.name' => 'required|string',
+            'item.order' => 'required|integer',
+        ];
+    }
+
+    public function render()
+    {
+        return view('livewire.basics.checklist-item-module');
     }
 
 
-    public function edit($id)
+
+    public function create(): void
+    {
+        $this->item = [
+            'id' => null,
+            'name' => '',
+            'order' => null,
+        ];
+        $this->resetValidation();
+
+        $this->modalTitle = __('general.add-new');
+        $this->showModal = true;
+    }
+
+    public function edit(int $id): void
     {
         $model = ChecklistItem::findOrFail($id);
-        $this->modalTitle = __('general.edit');
+
         $this->item = [
             'id' => $model->id,
             'name' => $model->name,
             'order' => $model->order,
-
         ];
 
-
+        $this->modalTitle = __('general.edit');
+        $this->resetValidation();
         $this->showModal = true;
     }
 
-    public function confirmDelete($id)
-    {
-
-
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->confirmButtonColor(config('samples.styles.colors.primary'))
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function save()
+    public function save(): void
     {
         $this->validate();
 
-        if (array_key_exists('id', $this->item)) {
-            ChecklistItem::findOrFail($this->item['id'])->update([
-                'name' => $this->item['name'],
-                'order' => $this->item['order'],
+        $model = !empty($this->item['id'])
+        // $model = $this->item['id']
+            ? ChecklistItem::findOrFail($this->item['id'])
+            : new ChecklistItem();
 
-            ]);
-        } else {
-            ChecklistItem::create([
-                'name' => $this->item['name'],
-                'order' => $this->item['order'],
-            ]);
-
-        }
+        $model->fill($this->item)->save();
 
         $this->showModal = false;
-        $this->reset('item', 'showModal');
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
-    }
 
-    public function delete($id)
-    {
-
-        ChecklistItem::find($id['id'])->delete();
+        $this->dispatch('refreshChecklistItemTable');
 
         LivewireAlert::title(__('general.success-message'))
             ->success()
             ->toast()
             ->position('top-start')
             ->show();
-
-    }
-
-
-
-    public function render()
-    {
-
-        $items = ChecklistItem::search('name', $this->search)
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate(15);
-
-        return view('livewire.basics.checklist-item-module', [
-            'items' => $items,
-        ]);
-
     }
 }
