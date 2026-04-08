@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Livewire\Basics;
+
 use App\Models\City;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -36,7 +38,7 @@ class CityTable extends LivewireTable
 
         return [
 
-            Column::make('ID', 'id')->sortable(),
+            Column::make('ID', 'id')->sortable()->searchable(),
 
             Column::make(__('general.name') . ' (AR)', 'name_ar')
                 ->sortable()->searchable(),
@@ -54,21 +56,33 @@ class CityTable extends LivewireTable
             BooleanColumn::make(__('general.active'), 'is_active')
                 ->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m) use ($isHR): string {
+            // Column::make(__('general.actions'), function (Model $m) use ($isHR): string {
 
-                if (!$isHR) {
-                    return '';
-                }
+            //     if (!$isHR) {
+            //         return '';
+            //     }
 
-                $toggleBtn = Blade::render(
+            //     $toggleBtn = Blade::render(
+            //         '<x-forms.toggle-input 
+            //             class="!me-2 text-xl p-2 mb-3"
+            //             active="' . ($m->is_active ? 1 : 0) . '" 
+            //             :model-id="' . $m->id . '" 
+            //             wire-event="confirmToggleItemStatus" />'
+            //     );
+            //     return $toggleBtn ;
+            // })->asHtml(),
+            Column::make(__('general.actions'), function (Model $m): string {
+
+                return Blade::render(
                     '<x-forms.toggle-input 
-                        class="!me-2 text-xl p-2 mb-3"
-                        active="' . ($m->is_active ? 1 : 0) . '" 
-                        :model-id="' . $m->id . '" 
-                        wire-event="confirmToggleItemStatus" />'
+            class="!me-2 text-xl p-2 mb-3"
+            active="' . ($m->is_active ? 1 : 0) . '" 
+            :model-id="' . $m->id . '" 
+            wire-event="confirmToggleItemStatus" />'
                 );
-                return $toggleBtn ;
-            })->asHtml(),
+            })
+                ->asHtml()
+                ->visible($isHR),
         ];
     }
 

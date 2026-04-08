@@ -35,9 +35,11 @@ class ContractTypeTable extends LivewireTable
 
     protected function columns(): array
     {
+        $user = auth()->user();
+        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
         return [
 
-            Column::make('ID', 'id')->sortable(),
+            Column::make('ID', 'id')->sortable()->searchable(),
 
             Column::make(__('general.name') . ' (AR)', 'name_ar')
                 ->sortable()
@@ -94,8 +96,8 @@ class ContractTypeTable extends LivewireTable
 
                 // return '<div class="flex items-center justify-center gap-2">'
                 //     . $editBtn . $deleteBtn . '</div>';
-                    return $editBtn;
-            })->asHtml(),
+                return $editBtn;
+            })->asHtml()->visible($isHR),
         ];
     }
 

@@ -36,8 +36,11 @@ class LeaveTypeTable extends LivewireTable
 
     protected function columns(): array
     {
+        $user = auth()->user();
+
+        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
         return [
-            Column::make('ID', 'id')->sortable(),
+            Column::make('ID', 'id')->sortable()->searchable(),
 
             Column::make(__('general.name') . ' (AR)', 'name_ar')->sortable()->searchable(),
             Column::make(__('general.name') . ' (EN)', 'name_en')->sortable()->searchable(),
@@ -83,7 +86,7 @@ class LeaveTypeTable extends LivewireTable
 
                 // return '<div class="flex items-center justify-center gap-2">' . $editBtn . '</div>';
                 return $editBtn;
-            })->asHtml(),
+            })->asHtml()->visible($isHR),
         ];
     }
 
