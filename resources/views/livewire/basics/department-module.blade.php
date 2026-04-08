@@ -5,97 +5,22 @@
             :title="trans_choice('general.department', 2)"
             :crumbs="[
                 ['label' => __('general.project-basics')],
-                ['label' => trans_choice('general.department', 2)],
+                ['label' => trans_choice('general.department', 2), 'route' => 'departments.index'],
             ]"
             :showButton="true"
         />
 
-        @activerole('HR','super-admin')
+        @activerole('HR', 'super-admin')
         <div>
-            <x-primary-button wire:click="create">
+            <x-primary-button wire:click="create" :showSpinner="false">
                 @lang('general.add-new')
             </x-primary-button>
         </div>
-        @endactiverole
+    @endactiverole
     </div>
 
-    {{-- Table --}}
-    <x-table>
-        <x-slot name="headings">
-            <x-table.heading
-                sortable
-                wire:click="sortBy('id')"
-                :direction="$sortField === 'id' ? $sortDirection : null">
-                ID
-            </x-table.heading>
 
-            <x-table.heading
-                sortable
-                wire:click="sortBy('name')"
-                :direction="$sortField === 'name' ? $sortDirection : null">
-                @lang('general.department-name')
-            </x-table.heading>
-
-            <x-table.heading>@lang('general.code')</x-table.heading>
-            <x-table.heading>@lang('general.department-description')</x-table.heading>
-
-            <x-table.heading
-                sortable
-                wire:click="sortBy('email')"
-                :direction="$sortField === 'email' ? $sortDirection : null">
-                @lang('general.department-email')
-            </x-table.heading>
-            @activerole('HR','super-admin')
-            <x-table.heading/>
-            @endactiverole
-        </x-slot>
-
-
-        <x-slot name="body">
-            @forelse($departments as $item)
-                <tr>
-                    {{-- ID --}}
-                    <x-table.cell class="w-1/12">{{ $item->id }}</x-table.cell>
-
-                    {{-- Name --}}
-                    <x-table.cell class="w-4/12">
-                        {{ $item->name }}
-                    </x-table.cell>
-                    <x-table.cell class="w-1/12">
-                        {{ $item->code }}
-                    </x-table.cell>
-
-                    {{-- Description --}}
-                    <x-table.cell class="w-3/12" title="{{ $item->{'description_' . app()->getLocale()} }}">
-                        <span class="line-clamp-1">
-                            {{ $item->{'description_' . app()->getLocale()} ?: '-' }}
-                        </span>
-                    </x-table.cell>
-
-                    {{-- Email --}}
-                    <x-table.cell class="w-2/12">
-                        {{ $item->email ?? '-' }}
-                    </x-table.cell>
-
-                    {{-- Actions --}}
-                    @activerole('HR','super-admin')
-                    <x-table.cell class=" whitespace-nowrap text-center">
-
-                        <div class="inline-flex items-center justify-center space-x-1 rtl:space-x-reverse">
-                            <x-table.edit-btn wire:click="edit({{ $item->id }})"/>
-                            {{--                                <x-table.delete-btn :modelId="$item->id"/>--}}
-                        </div>
-
-                    </x-table.cell>
-                    @endactiverole
-                </tr>
-            @empty
-                <x-table.no-data/>
-            @endforelse
-        </x-slot>
-
-        <x-slot name="pagination">{{ $departments->links() }}</x-slot>
-    </x-table>
+    <livewire:basics.department-table />
 
     {{-- Modal --}}
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
