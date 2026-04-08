@@ -41,7 +41,14 @@ class LeaveTypeModule extends Component
 
     public function create(): void
     {
-        $this->reset('item');
+        $this->item = [
+            'id' => null,
+            'name_ar' => '',
+            'name_en' => '',
+            'base_days' => null,
+            'allowed_gender' => null,
+            'marital_status' => null,
+        ];
         $this->resetValidation();
         $this->modalTitle = __('general.add-new');
         $this->showModal = true;
@@ -69,7 +76,7 @@ class LeaveTypeModule extends Component
     {
         $this->validate();
 
-        $model = $this->item['id']
+        $model = !empty($this->item['id'])
             ? LeaveType::findOrFail($this->item['id'])
             : new LeaveType();
 
