@@ -4,76 +4,23 @@
             :title="trans_choice('general.job-level', 2)"
             :crumbs="[
                  ['label' => __('general.project-basics')],
-                ['label' => trans_choice('general.job-level', 2)],
+                ['label' => trans_choice('general.job-level', 2), 'route' => 'job-levels.index'],
             ]"
             :showButton="true"
         />
 
+        @activerole('HR', 'super-admin')
         <div>
-            @activerole('HR','super-admin')
-            <x-primary-button wire:click="create">
+            <x-primary-button wire:click="create" :showSpinner="false">
                 @lang('general.add-new')
             </x-primary-button>
-            @endactiverole
         </div>
+    @endactiverole
     </div>
 
-    <x-table>
-        <x-slot name="headings">
-            <x-table.heading
-                sortable
-                wire:click="sortBy('id')"
-                :direction="$sortField === 'id' ? $sortDirection : null"
-            >ID</x-table.heading>
 
-            <x-table.heading
-                sortable
-                wire:click="sortBy('name_ar')"
-                :direction="$sortField === 'name_ar' ? $sortDirection : null"
-            >@lang('general.name')(AR)</x-table.heading>
+    <livewire:basics.job-level-table />
 
-            <x-table.heading
-                sortable
-                wire:click="sortBy('name_en')"
-                :direction="$sortField === 'name_en' ? $sortDirection : null"
-            >@lang('general.name')(EN)</x-table.heading>
-
-            <x-table.heading
-                sortable
-                wire:click="sortBy('grade')"
-                :direction="$sortField === 'grade' ? $sortDirection : null"
-            ><div class="ltr:pl-12 rtl:pr-12">@lang('general.grade')</div></x-table.heading>
-
-            <x-table.heading
-                sortable
-                wire:click="sortBy('email')"
-                :direction="$sortField === 'email' ? $sortDirection : null"
-            >@lang('general.email')</x-table.heading>
-
-            <x-table.heading/>
-        </x-slot>
-
-        <x-slot name="body">
-            @forelse($items as $item)
-                <tr>
-                    <x-table.cell>{{ $item->id }}</x-table.cell>
-                    <x-table.cell>{{ $item->name_ar }}</x-table.cell>
-                    <x-table.cell>{{ $item->name_en }}</x-table.cell>
-                    <x-table.cell><div class="text-center">{{ $item->grade }}</div></x-table.cell>
-                    <x-table.cell>{{ $item->email ?? '-' }}</x-table.cell>
-                    <x-table.cell>
-                        <x-table.edit-btn wire:click="edit({{ $item->id }})"></x-table.edit-btn>
-{{--                        <x-table.delete-btn :modelId="$item->id"/>--}}
-                    </x-table.cell>
-                </tr>
-            @empty
-                <x-table.no-data/>
-            @endforelse
-        </x-slot>
-        <x-slot name="pagination">
-            {{ $items->links() }}
-        </x-slot>
-    </x-table>
 
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         <form class="space-y-4" wire:submit.prevent="save">

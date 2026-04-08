@@ -15,7 +15,7 @@
 
         @activerole('HR','super-admin')
             <div>
-                <x-primary-button wire:click="create">
+                <x-primary-button wire:click="create" :showSpinner="false">
                     @lang('general.add-new')
                 </x-primary-button>
             </div>
