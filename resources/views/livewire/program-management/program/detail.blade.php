@@ -37,7 +37,7 @@
                         {{ $program->{'description_' . app()->getLocale()} }}
                     </p>
 
-                    <div class="relative mt-3 -ml-1">
+                    <div class="relative mt-3 -ms-1">
                         <div
                             class="inline-flex rounded-2xl border border-neutral-200 bg-white backdrop-blur-xl p-1 shadow-lg">
                             <button

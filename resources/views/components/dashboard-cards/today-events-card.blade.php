@@ -5,7 +5,7 @@
             <div class="flex items-center gap-2">
                 <span class="text-[13px] font-medium text-[#58595B]">@lang('general.today-events')</span>
                 <span class="text-[13px] font-light text-secondary-light">{{ now()->format('n/j/Y') }}</span>
-                <x-icons.event class="ml-1 mb-0.5 text-secondary-medium"/>
+                <x-icons.event class="ms-1 mb-0.5 text-secondary-medium"/>
             </div>
         </div>
         @if(count($events) > 0)
@@ -17,7 +17,7 @@
                             <div class="relative h-[240px] flex flex-col items-center justify-center">
                                 @if($event['type'] === 'birthday')
                                     <img src="/assets/GIF/01-Confetti.gif"
-                                         class="absolute inset-0 w-full h-full pr-2 pb-10 object-cover pointer-events-none opacity-100 z-0">
+                                         class="absolute inset-0 w-full h-full pe-2 pb-10 object-cover pointer-events-none opacity-100 z-0">
                                 @endif
 
                                 <div class="flex flex-col h-full justify-center z-30 bg-white items-center ">

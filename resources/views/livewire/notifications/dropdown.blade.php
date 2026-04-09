@@ -41,7 +41,7 @@
 
 {{--                    @if ($isUnread)--}}
 {{--                        <button wire:click="markAsRead('{{ $note->id }}')"--}}
-{{--                                class="text-xs text-primary-600 hover:underline ml-2">--}}
+{{--                                class="text-xs text-primary-600 hover:underline ms-2">--}}
 {{--                            @lang('general.mark-as-read')--}}
 {{--                        </button>--}}
 {{--                    @endif--}}

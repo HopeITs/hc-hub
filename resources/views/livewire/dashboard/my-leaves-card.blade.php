@@ -1,30 +1,30 @@
 <div class=" w-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border p-2 border-gray-200 py-6 px-8 flex flex-col justify-between space-y-4 min-h-[330px] sm:min-h-[360px] md:min-h-0">
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
         <h3 class="text-base font-semibold text-gray-600">
             {{ __('general.my-leaves') }}
         </h3>
-        <a href="{{route('leaves.index')}}" class="bg-primary  text-white text-xs flex  flex-row gap-2 font-medium px-3 py-2 rounded-md transition">
+        <a href="{{route('leaves.index')}}" class="flex flex-row gap-2 px-3 py-2 text-xs font-medium text-white transition rounded-md bg-primary">
 
             {{ __('general.show-more') }}
         </a>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-10 md:gap-6">
+    <div class="grid items-center grid-cols-1 gap-10 md:grid-cols-2 md:gap-6">
 
         <div class="flex items-end space-x-6">
             <div class="flex items-end -mb-3.5">
                 <span class="text-[125px] font-extrabold text-secondary-medium leading-none">{{$remainingDays}}</span>
-                <span class="text-3xl text-secondary-medium font-semibold mb-4">/{{$totalDays}}</span>
+                <span class="mb-4 text-3xl font-semibold text-secondary-medium">/{{$totalDays}}</span>
             </div>
 
             <div class="border-l border-secondary-medium h-26"></div>
 
             <div class="flex flex-col justify-between min-w-full">
-                <h4 class="text-secondary-medium font-bold text-md">
+                <h4 class="font-bold text-secondary-medium text-md">
                     {{ $title ?? __('general.annual-leave') }}
                 </h4>
-                <div class="border-b border-3 border-primary w-6"></div>
+                <div class="w-6 border-b border-3 border-primary"></div>
                 <ul class="mt-3 space-y-0.2 text-secondary-light text-xs leading-relaxed">
                     <li class="text-secondary-light text-start">
                         <span>@lang('general.used-leave', ['attr' => $used ]) </span>
@@ -45,11 +45,11 @@
         </div>
 
 
-        <div class="flex flex-col items-center md:items-end justify-center md:justify-end">
-            <div class="relative w-56 h-40 ml-10 md:mb-2">
+        <div class="flex flex-col items-center justify-center md:items-end md:justify-end">
+            <div class="relative w-56 h-40 ms-10 md:mb-2">
                 <canvas id="leavesGaugeChart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-end">
-                    <p class="text-primary mb-3 -ml-6 rtl:-ml-10 text-4xl font-bold">
+                    <p class="mb-3 -ml-6 text-4xl font-bold text-primary rtl:-ml-10">
                         {{$percentage}} <span class="text-sm rtl:-mr-1.5 ltr:-ml-2">%</span>
                     </p>
                 </div>

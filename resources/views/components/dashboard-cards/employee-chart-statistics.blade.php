@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-[18px] font-semibold text-secondary-medium flex items-center gap-2">
             @lang('general.employees-statistics')
-            <x-icons.chart class="w-5 mb-1 h-5 text-primary"/>
+            <x-icons.chart class="w-5 h-5 mb-1 text-primary"/>
         </h2>
 
         <select
@@ -18,7 +18,7 @@
         <canvas id="employeeChart"></canvas>
     </div>
 
-    <div id="chartLegend" class="flex items-center gap-6 ml-3 mt-6 text-sm text-neutral-600 font-medium"></div>
+    <div id="chartLegend" class="flex items-center gap-6 mt-6 text-sm font-medium ms-3 text-neutral-600"></div>
 
 </div>
 

@@ -19,7 +19,7 @@
                 type="text"
                 placeholder="{{ __('general.search') }}"
                 class="w-full h-6 text-xs rounded-full border border-gray-300 bg-white
-                       pl-8 pt-2.5 pr-3 py-3 placeholder-secondary-light text-gray-700
+                       ps-8 pt-2.5 pe-3 py-3 placeholder-secondary-light text-gray-700
                        focus:border-gray-400 focus:ring-0 outline-none transition">
             <div class="absolute left-2 top-[13px] -translate-y-1/2 text-gray-400 pointer-events-none">
                 <x-icons.search class="w-2 h-2"/>
@@ -79,7 +79,7 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center gap-2 ml-4 flex-shrink-0">
+                <div class="flex items-center gap-2 ms-4 flex-shrink-0">
 
                     <a href="{{ route('employees.show', ['employee' => $member->username]) }}"
                        title="View Profile">
@@ -99,7 +99,7 @@
                     <a href="mailto:{{ $member->account->email ?? '#' }}"
                        class="text-secondary-light hover:text-primary transition"
                        title="Send Email">
-                        <x-icons.envelope class="text-secondary-light ml-1 hover:text-primary transition"/>
+                        <x-icons.envelope class="text-secondary-light ms-1 hover:text-primary transition"/>
                     </a>
 
                 </div>

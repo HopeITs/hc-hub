@@ -123,7 +123,7 @@ class AllLeaveRequestModule extends Component
         $this->form->setDecisionLeave($id);
         $this->decisionLeave = $id->load(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee']);
 
-        $this->modalTitle = 'Leave Decision';
+        $this->modalTitle = __('general.leave-decision');
         $this->decisionModal = true;
     }
 

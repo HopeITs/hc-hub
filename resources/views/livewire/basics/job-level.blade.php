@@ -55,7 +55,7 @@
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-2 pt-4">
+            <div class="flex justify-end pt-4 space-x-2">
                 <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
                 <x-modal.cancel-btn/>
             </div>

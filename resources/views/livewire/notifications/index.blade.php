@@ -23,7 +23,7 @@
                     <a href="{{$notification->data['url']}}"
                        @if (is_null($notification->read_at)) wire:click="markAsRead('{{ $notification->id }}')"
                        @endif
-                       class="text-xs text-primary  hover:underline ml-2">
+                       class="text-xs text-primary  hover:underline ms-2">
                         @lang('general.show-more')
                     </a>
                 @endif

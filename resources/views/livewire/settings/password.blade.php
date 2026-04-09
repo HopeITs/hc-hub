@@ -63,7 +63,7 @@
 
                 <x-action-message
                     on="password-updated"
-                    class="text-sm text-green-600 ml-4 self-center">
+                    class="text-sm text-green-600 ms-4 self-center">
                     {{ __('general.profile.got-saved') }}
                 </x-action-message>
             </div>
