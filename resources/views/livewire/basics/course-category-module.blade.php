@@ -3,12 +3,17 @@
 @endphp
 <div>
     <div class="flex justify-between">
-        <livewire:layout.breadcrumbs :title="$title" :crumbs="[['label' => __('general.project-basics')], ['label' => $title, 'route' => 'course-categories.index']]" :showButton="true" />
-        <div>
-            <x-primary-button wire:click="create" :showSpinner="false">
-                @lang('general.add-new')
-            </x-primary-button>
-        </div>
+        <livewire:layout.breadcrumbs :title="$title" :crumbs="[
+            ['label' => __('general.project-basics')],
+            ['label' => $title, 'route' => 'course-categories.index'],
+        ]" :showButton="true" />
+        @activerole('HR', 'super-admin')
+            <div>
+                <x-primary-button wire:click="create" :showSpinner="false">
+                    @lang('general.add-new')
+                </x-primary-button>
+            </div>
+        @endactiverole
     </div>
 
     <livewire:basics.course-category-table />

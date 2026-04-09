@@ -35,6 +35,9 @@ class CourseCategoryTable extends LivewireTable
 
     protected function columns(): array
     {
+        $user = auth()->user();
+
+        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
         return [
             Column::make('ID', 'id')
                 ->sortable()
@@ -65,7 +68,7 @@ class CourseCategoryTable extends LivewireTable
                 return '<div class="flex items-center justify-center gap-2">'
                     . $editBtn . $deleteBtn .
                     '</div>';
-            })->asHtml(),
+            })->asHtml()->visible($isHR),
         ];
     }
 
