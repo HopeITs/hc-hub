@@ -1,3 +1,9 @@
+import jQuery from 'jquery';
+window.$ = window.jQuery = jQuery;
+
+import select2 from 'select2';
+select2(); // Mounts the plugin to jQuery
+// 
 
 import '../css/app.css';
 import {initFlowbite} from 'flowbite';
@@ -48,11 +54,4 @@ Livewire.hook('commit', ({component, commit, respond, succeed, fail}) => {
 document.addEventListener('livewire:navigated', () => {
     initFlowbite();
 })
-
-
-
-
-
-
-
 

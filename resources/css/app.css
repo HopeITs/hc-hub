@@ -12,7 +12,9 @@
 @source '../../vendor/livewire/flux/stubs/**/*.blade.php';
 @source "../node_modules/flowbite-datepicker";
 
-
+/*  */
+@import "select2/dist/css/select2.min.css";
+/*  */
 @font-face {
     font-family: 'SomarSans';
     src: url('/fonts/SomarSans/SomarSans-Thin.otf') format('opentype');
