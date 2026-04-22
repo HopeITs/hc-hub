@@ -55,14 +55,6 @@ class ContractForm extends Form
     }
 
 
-    private function toInt($value): int
-    {
-        if ($value instanceof \BackedEnum) {
-            return (string)$value->value;
-        }
-        return (string)$value;
-    }
-
     private function defaultSalaryPer(): int
     {
         if (enum_exists(SalaryPer::class)) {
@@ -128,7 +120,7 @@ class ContractForm extends Form
 
         $this->currency = (int)$c->currency;
         $this->salary = $c->salary;
-        $this->salary_per = $this->toInt($c->salary_per);
+        $this->salary_per = (int) $c->salary_per;
         $this->work_days_ar =  $c->work_days_ar;
         $this->work_days_en =  $c->work_days_en;
         $this->work_hours_from =  $c->work_hours_from;
