@@ -75,11 +75,13 @@ class ContractsTable extends LivewireTable
             Column::make(__('general.duration'), fn(Model $m) => $m->duration . ' ' . __('general.months'))
                 ->sortable(),
 
-            Column::make(__('general.period'), fn(Model $m) =>
-            Blade::render('<x-period :start="$start" :end="$end" />', [
-                'start' => $m->start_date,
-                'end' => $m->end_date,
-            ])
+            Column::make(
+                __('general.period'),
+                fn(Model $m) =>
+                Blade::render('<x-period :start="$start" :end="$end" />', [
+                    'start' => $m->start_date,
+                    'end' => $m->end_date,
+                ])
             )->asHtml(),
 
             Column::make(__('general.yearly-leave-days'), 'leaveBalances')
@@ -107,7 +109,7 @@ class ContractsTable extends LivewireTable
 
 
             Column::make(__('general.weekly-hours'), 'weekly_hours')
-                ->displayUsing(fn($v) => $v ? "{$v} " . trans_choice('general.hour',2) : '—')
+                ->displayUsing(fn($v) => $v ? "{$v} " . trans_choice('general.hour', 2) : '—')
                 ->sortable(),
 
             BooleanColumn::make(__('general.status'), 'is_active')->searchable(),
