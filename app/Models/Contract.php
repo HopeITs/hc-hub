@@ -65,7 +65,9 @@ class Contract extends Model
 
     public function getWorkHourPerDayAttribute(): int
     {
-        return $this->weekly_hours / 5;
+        $weekends = explode(',',$this->position->center->weekends);
+        $workDays = 7 - count($weekends);
+        return $this->weekly_hours / $workDays;
     }
 
     public function getActivitylogOptions(): LogOptions

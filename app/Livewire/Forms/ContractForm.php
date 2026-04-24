@@ -120,7 +120,7 @@ class ContractForm extends Form
 
         $this->currency = (int)$c->currency;
         $this->salary = $c->salary;
-        $this->salary_per = (int) $c->salary_per;
+        $this->salary_per = (int) $c->salary_per->value ?? $c->salary_per;
         $this->work_days_ar =  $c->work_days_ar;
         $this->work_days_en =  $c->work_days_en;
         $this->work_hours_from =  $c->work_hours_from;
@@ -137,6 +137,7 @@ class ContractForm extends Form
                 'exists:positions,id',
                 function ($attribute, $value, $fail) {
                     if (isset($this->contract)) {
+                        
                         if ($this->contract->position_id !== $value) {
                             $pos = Position::find($value);
                             if ($pos && !$pos->canAssign()) {
