@@ -37,12 +37,6 @@
 
     <div class="md:col-span-6">
         <x-forms.input-label for="employee_id">{{ trans_choice('general.employee', 2) }}</x-forms.input-label>
-        {{-- <x-forms.select-input id="employee_id" wire:model="form.employee_id" >
-            <option value="">{{ __('general.select') }}</option>
-            @foreach($employees as $e)
-                <option value="{{ $e->id }}">{{ $e->name }}</option>
-            @endforeach
-        </x-forms.select-input> --}}
         <x-forms.select2-input wire:model="form.employee_id" id="employee_id">
             <option value="">{{ __('general.select') }}</option>
         
