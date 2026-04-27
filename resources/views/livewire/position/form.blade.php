@@ -32,48 +32,48 @@
             </div>
             <div class="md:col-span-1">
                 <x-forms.input-label for="city">{{trans_choice('general.city',1)}}</x-forms.input-label>
-                <x-forms.select-input wire:model="form.city_id" id="city">
+                <x-forms.select2-input wire:model="form.city_id" id="city">
                     <option class="text-gray-400" @disabled($form->position !== null) @selected($form->position === null)>Select Any..</option>
                     @foreach($cities as $city)
                         <option value="{{$city->id}}">{{$city->name}}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.city_id') }}</x-error-span>
             </div>
             <div class="md:col-span-1">
                 <x-forms.input-label for="program">{{trans_choice('general.program',1)}}</x-forms.input-label>
-                <x-forms.select-input wire:model="form.program_id" id="program">
+                <x-forms.select2-input wire:model="form.program_id" id="program">
                     <option class="text-gray-400" @disabled($form->position !== null) @selected($form->position === null)>Select Any..</option>
                     @foreach($programs as $program)
                         <option value="{{$program->id}}">{{$program->name}}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.program_id') }}</x-error-span>
             </div>
             <div class="md:col-span-1">
                 <x-forms.input-label for="department">{{trans_choice('general.department',1)}}</x-forms.input-label>
-                <x-forms.select-input wire:model="form.department_id" id="department">
+                <x-forms.select2-input wire:model="form.department_id" id="department">
                     <option class="text-gray-400" @disabled($form->position !== null) @selected($form->position === null)>Select Any..</option>
                     @foreach($departments as $department)
                         <option value="{{$department->id}}">{{$department->name}}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.department_id') }}</x-error-span>
             </div>
             <div class="md:col-span-1">
                 <x-forms.input-label for="job-level">{{trans_choice('general.job-level',1)}}</x-forms.input-label>
-                <x-forms.select-input wire:model="form.job_level_id" id="job-level">
+                <x-forms.select2-input wire:model="form.job_level_id" id="job-level">
                     <option class="text-gray-400" @disabled($form->position !== null) @selected($form->position === null)>Select Any..</option>
                     @foreach($jobLevels as $level)
                         <option value="{{$level->id}}">{{$level->name}}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.job_level_id') }}</x-error-span>
             </div>
 
             <div class="md:col-span-1">
                 <x-forms.input-label for="tech-manager">{{__('general.tech-manager')}}</x-forms.input-label>
-                <x-forms.select-input wire:model="form.tech_manager_id" id="tech-manager">
+                <x-forms.select2-input wire:model="form.tech_manager_id" id="tech-manager">
                     <option>Select Any..</option>
                     @foreach($positions as $position)
                         @php
@@ -82,12 +82,12 @@
                         @endphp
                         <option value="{{$position->id}}">{{$position->title . " ( ".$programName .' - '.$centerName." ) "}}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.tech_manager_id') }}</x-error-span>
             </div>
             <div class="md:col-span-1">
                 <x-forms.input-label for="direct-manager">{{__('general.direct-manager')}}</x-forms.input-label>
-                <x-forms.select-input wire:model="form.direct_manager_id" id="direct-manager">
+                <x-forms.select2-input wire:model="form.direct_manager_id" id="direct-manager">
                     <option>Select Any..</option>
                     @foreach($positions as $position)
                         @php
@@ -96,17 +96,17 @@
                         @endphp
                         <option value="{{$position->id}}">{{$position->title . " ( ".$programName.' - '.$centerName ." ) "}}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.direct_manager_id') }}</x-error-span>
             </div>
             <div class="md:col-span-1">
                 <x-forms.input-label for="center">{{trans_choice('general.center',1)}}</x-forms.input-label>
-                <x-forms.select-input wire:model="form.center_id" id="center">
+                <x-forms.select2-input wire:model="form.center_id" id="center">
                     <option>Select Any..</option>
                     @foreach($centers as $center)
                         <option value="{{$center->id}}">{{$center->name .' - ' . $center->city->name}}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.center_id') }}</x-error-span>
             </div>
             <div>

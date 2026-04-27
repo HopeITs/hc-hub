@@ -14,6 +14,7 @@
 
 /*  */
 @import "select2/dist/css/select2.min.css";
+
 /*  */
 @font-face {
     font-family: 'SomarSans';
@@ -108,6 +109,7 @@
 
 
 @custom-variant dark (&:where(.dark, .dark *));
+
 body {
     font-family: 'SomarSans', sans-serif;
 }
@@ -131,7 +133,8 @@ body {
     --color-primary-200: #f9c5c6;
     --color-primary-300: #f49797;
     --color-primary-400: #ec6a6c;
-    --color-primary-500: #be1f24; /* your base */
+    --color-primary-500: #be1f24;
+    /* your base */
     --color-primary-600: #98191d;
     --color-primary-700: #731316;
     --color-primary-800: #4d0d0f;
@@ -140,13 +143,17 @@ body {
 
     --color-neutral-50: #f5f5f6;
     --color-neutral-100: #eeeff0;
-    --color-neutral-200: #dcddde; /* soft */
+    --color-neutral-200: #dcddde;
+    /* soft */
     --color-neutral-300: #bcbec0;
-    --color-neutral-400: #939598; /* light */
+    --color-neutral-400: #939598;
+    /* light */
     --color-neutral-500: #808184;
-    --color-neutral-600: #6d6e71; /* medium */
+    --color-neutral-600: #6d6e71;
+    /* medium */
     --color-neutral-700: #575759;
-    --color-neutral-800: #414042; /* dark */
+    --color-neutral-800: #414042;
+    /* dark */
     --color-neutral-900: #2b2a2c;
     --color-neutral-950: #171718;
 
@@ -163,7 +170,8 @@ body {
         --color-accent-content: var(--color-white);
         --color-accent-foreground: var(--color-neutral-800);
     }
-    .tagify{
+
+    .tagify {
         --tags-focus-border-color: var(--color-primary) !important;
     }
 }
@@ -178,7 +186,7 @@ body {
         border-color: var(--color-gray-200, currentColor);
     }
 }
-:root{
+:root {
 
     --livewire-progress-bar-color: var(--color-primary);
 
@@ -196,6 +204,7 @@ textarea:focus[data-flux-control],
 select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
+
 
 [type="text"],
 [type="email"],
@@ -218,6 +227,7 @@ select {
         --tw-ring-color: transparent;
     }
 }
+
 /* Target Firefox “Today” button */
 input[type="date"]::-moz-focus-inner {
     color: var(--color-primary);
@@ -235,17 +245,17 @@ input[type="date"]::-moz-focus-inner {
     color: var(--color-primary);
 }
 
-div:where(.swal2-icon).swal2-question  {
+div:where(.swal2-icon).swal2-question {
     border-color: var(--color-primary) !important;
     color: var(--color-primary) !important;
 }
-div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm){
+
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
     background-color: var(--color-primary) !important;
 }
 
-clock-timepicker { --clock-timepicker-accent-color: #be1f24 }
-option:hover {
-    background-color: var(--color-primary) !important;
+clock-timepicker {
+    --clock-timepicker-accent-color: #be1f24
 }
 
 
@@ -258,14 +268,14 @@ option:hover {
         background-color: #ffffff !important;
         border: 1px solid #d1d5db !important;
         border-radius: 0.375rem !important;
-        
- 
+
+
         box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
-        
+
         display: flex !important;
         align-items: center !important;
         transition: all 0.15s ease-in-out !important;
-        cursor: default !important; 
+        cursor: default !important;
     }
 
     .select2-container--default .select2-selection--single .select2-selection__rendered {
@@ -278,8 +288,10 @@ option:hover {
 
     .select2-container--default.select2-container--focus .select2-selection--single,
     .select2-container--default.select2-container--open .select2-selection--single {
-        border-color: var(--color-primary) !important; 
-        box-shadow: none !important; 
+        /* border-color: var(--color-primary-500) !important; */
+        /* box-shadow: 0 0 0 2px var(--color-primary-200) !important; */
+        border-color: var(--color-primary-500) !important;
+        box-shadow: none !important;
         outline: none !important;
     }
 
@@ -304,7 +316,7 @@ option:hover {
         background-repeat: no-repeat !important;
         background-size: 0.75em 0.75em !important;
         height: 100% !important;
-        width: 2.5rem !important; 
+        width: 2.5rem !important;
         top: 0 !important;
     }
 
@@ -320,3 +332,4 @@ option:hover {
         background-position: right 0.75rem center !important;
     }
 }
+
