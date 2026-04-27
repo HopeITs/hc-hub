@@ -70,6 +70,10 @@ class Contract extends Model
         return $this->weekly_hours / $workDays;
     }
 
+    public function getIsFullTimeAttribute(): bool{
+        return true ;
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
