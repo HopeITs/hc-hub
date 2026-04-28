@@ -111,16 +111,16 @@ class ContractEdit extends Component
         }
 
         $this->form->update($this->contract);
-
-        if ($this->contract->salary_per->value === SalaryPer::Month) {
+// TODO: this lines commented because all contracts types will have annual leaves
+        // if ($this->contract->salary_per->value === SalaryPer::Month) {
             if ($this->contract->leaveBalances()->exists()) {
                 $this->balanceForm->update($this->contract->id);
             } else {
                 $this->balanceForm->store($this->contract->id);
             }
-        } else {
-            $this->contract->leaveBalances()->delete();
-        }
+        // } else {
+        //     $this->contract->leaveBalances()->delete();
+        // }
 
         LivewireAlert::success(__('general.success-message'));
 

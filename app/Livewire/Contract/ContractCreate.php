@@ -100,10 +100,10 @@ class ContractCreate extends Component
         }
 
         $contract = $this->form->save();
-
-        if ($contract->salary_per->value === SalaryPer::Month) {
+        //TODO: this line commented because all contracts type will have annual leaves
+        // if ($contract->salary_per->value === SalaryPer::Month) {
             $this->balanceForm->store($contract->id);
-        }
+        // }
 
         $employee = $contract->employee;
 

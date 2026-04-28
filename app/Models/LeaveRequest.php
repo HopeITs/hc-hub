@@ -103,9 +103,10 @@ class LeaveRequest extends Model
 
         // Include the end date
         $days = $start->diffInWeekDays($end) + 1;
+        $contract = $this->leaveBalance->contract;
 
         // Get weekly hours from contract
-        $weeklyHours = (float) $this->leaveBalance->contract->weekly_hours;
+        $weeklyHours = (float) $contract->weekly_hours;
 
         // Hours per workday
         $hoursPerDay = $weeklyHours / 5;
