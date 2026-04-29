@@ -61,18 +61,18 @@ use App\Enums\LeaveRequestStatus;
             <div class="grid md:grid-cols-2 gap-4">
                 <div class="md:col-span-1">
                     <x-forms.input-label for="city">{{trans_choice('general.employee',1)}}</x-forms.input-label>
-                    <x-forms.select-input wire:model.live="form.employee_id" id="employee_id">
+                    <x-forms.select2-input wire:model.live="form.employee_id" id="employee_id">
                         <option value="">Select Employee…</option>
                         @foreach($employees as $emp)
                             <option value="{{ $emp->id }}">{{ $emp->name }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first('form.employee_id') }}</x-error-span>
                 </div>
 
                 <div class="md:col-span-1">
                     <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
-                    <x-forms.select-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
+                    <x-forms.select2-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                         <option
                             class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                             @lang('general.select')..
@@ -80,12 +80,12 @@ use App\Enums\LeaveRequestStatus;
                         @foreach($allAvailableLeaves ?? [] as $availableLeave)
                             <option value="{{$availableLeave->id}}" @selected($form->leave_balance_id === $availableLeave->id)>{{$availableLeave->leaveType->name}}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first('form.leave_balance_id') }}</x-error-span>
                 </div>
                 <div class="md:col-span-1">
                     <x-forms.input-label for="city">{{__('general.alternative-employee')}}</x-forms.input-label>
-                    <x-forms.select-input wire:model.live="form.alternative_employee" id="alternative_employee">
+                    <x-forms.select2-input wire:model.live="form.alternative_employee" id="alternative_employee">
                         <option
                             class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                             @lang('general.select')..
@@ -93,7 +93,7 @@ use App\Enums\LeaveRequestStatus;
                         @foreach($alternativeEmployees as $emp)
                             <option value="{{ $emp->id }}" @selected($form->alternative_employee === $emp->id)>{{ $emp->name }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
                 </div>
 

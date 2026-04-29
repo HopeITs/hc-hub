@@ -96,7 +96,7 @@ use App\Enums\LeaveRequestStatus;
 
                     <div class="md:col-span-1">
                         <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
-                        <x-forms.select-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
+                        <x-forms.select2-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
                             @if($allAvailableLeaves?->count() > 0)
                                 <option
                                     class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
@@ -112,12 +112,12 @@ use App\Enums\LeaveRequestStatus;
                                     @lang('general.no-available-data')
                                 </option>
                             @endif
-                        </x-forms.select-input>
+                        </x-forms.select2-input>
                         <x-error-span>{{ $errors->first('form.leave_balance_id') }}</x-error-span>
                     </div>
                     <div class="md:col-span-1">
                         <x-forms.input-label for="city">{{__('general.alternative-employee')}}</x-forms.input-label>
-                        <x-forms.select-input wire:model="form.alternative_employee" id="alternative_employee">
+                        <x-forms.select2-input wire:model="form.alternative_employee" id="alternative_employee">
                             <option
                                 class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
 
@@ -126,7 +126,7 @@ use App\Enums\LeaveRequestStatus;
                             @foreach($alternativeEmployees as $alternativeEmployee)
                                 <option value="{{$alternativeEmployee->id}}">{{$alternativeEmployee->name}}</option>
                             @endforeach
-                        </x-forms.select-input>
+                        </x-forms.select2-input>
                         <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
                     </div>
 

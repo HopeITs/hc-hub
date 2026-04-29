@@ -47,26 +47,26 @@
 
                 <div>
                     <x-forms.input-label for="education_degree_{{ $index }}">@lang('general.degree')</x-forms.input-label>
-                    <x-forms.select-input
+                    <x-forms.select2-input
                         id="education_degree_{{ $index }}"
                         wire:model.defer="educationForm.educations.{{ $index }}.degree">
                         <option value="">-- @lang('general.select') --</option>
                         @foreach(EducationType::getValues() as $value)
                             <option value="{{ $value }}">{{ EducationType::getLocalizedName($value) }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first("educationForm.educations.$index.degree") }}</x-error-span>
                 </div>
 
                 <div>
                     <x-forms.input-label for="education_status_{{ $index }}">@lang('general.status')</x-forms.input-label>
-                    <x-forms.select-input
+                    <x-forms.select2-input
                         id="education_status_{{ $index }}"
                         wire:model.defer="educationForm.educations.{{ $index }}.status">
                         @foreach(EducationStatus::getValues() as $value)
                             <option value="{{ $value }}">{{ EducationStatus::getLocalizedName($value) }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first("educationForm.educations.$index.status") }}</x-error-span>
                 </div>
                 <div class="md:col-span-2">

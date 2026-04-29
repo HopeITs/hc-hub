@@ -33,12 +33,12 @@
             </div>
             <div wire:key="emp-actual-dob">
                 <x-forms.input-label for="city_id">{{ trans_choice('general.city', 1) }}</x-forms.input-label>
-                <x-forms.select-input wire:model="infoForm.city_id" id="city_id">
+                <x-forms.select2-input wire:model="infoForm.city_id" id="city_id">
                     <option value="">{{ __('general.unknown') }}</option>
                     @foreach ($cities as $cityId => $city)
                         <option value="{{ $cityId }}">{{ $city }}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('infoForm.city_id') }}</x-error-span>
             </div>
         </div>
@@ -56,12 +56,12 @@
 
         <div wire:key="emp-marital_status">
             <x-forms.input-label for="marital_status">@lang('general.marital_status')</x-forms.input-label>
-            <x-forms.select-input wire:model="infoForm.marital_status" id="marital_status">
+            <x-forms.select2-input wire:model="infoForm.marital_status" id="marital_status">
                 @foreach (MaritalStatus::getValues() as $statusValue)
                     @php $status = MaritalStatus::getLocalizedName($statusValue); @endphp
                     <option value="{{ $statusValue }}">{{ $status['value'] }}</option>
                 @endforeach
-            </x-forms.select-input>
+            </x-forms.select2-input>
             <x-error-span>{{ $errors->first('infoForm.marital_status') }}</x-error-span>
         </div>
 
@@ -115,12 +115,12 @@
 
         <div wire:key="emp-nationality">
             <x-forms.input-label for="nationality">@lang('general.nationality')</x-forms.input-label>
-            <x-forms.select-input wire:model="infoForm.nationality" id="nationality">
+            <x-forms.select2-input wire:model="infoForm.nationality" id="nationality">
                 @foreach (Nationality::getValues() as $statusValue)
                     @php $status = Nationality::getLocalizedName($statusValue); @endphp
                     <option value="{{ $statusValue }}">{{ $status }}</option>
                 @endforeach
-            </x-forms.select-input>
+            </x-forms.select2-input>
             <x-error-span>{{ $errors->first('infoForm.nationality') }}</x-error-span>
         </div>
 

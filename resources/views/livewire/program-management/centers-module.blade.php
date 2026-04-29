@@ -29,12 +29,12 @@
 
             <div class="md:col-span-full">
                 <x-forms.input-label for="city_id">{{ trans_choice('general.city', 1) }}</x-forms.input-label>
-                <x-forms.select-input id="city_id" wire:model="item.city_id">
+                <x-forms.select2-input id="city_id" wire:model="item.city_id">
                     <option value="">{{ __('general.select') }}</option>
                     @foreach ($cities as $city)
                         <option value="{{ $city->id }}">{{ $city->name }}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('item.city_id') }}</x-error-span>
             </div>
 

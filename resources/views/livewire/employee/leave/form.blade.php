@@ -7,9 +7,9 @@
         <x-forms.errors-validation-list/>
         <div class="grid md:grid-cols-2 gap-4">
 
-            <div class="md:col-span-1">
+            <div class="md:col-span-1" wire:key="leave-balance-{{ $form->leaveRequest ? 'edit' : 'new' }}">
                 <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
-                <x-forms.select-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
+                <x-forms.select2-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                     <option
                         class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                         @lang('general.select')..
@@ -17,12 +17,12 @@
                     @foreach($allAvailableLeaves ?? [] as $availableLeave)
                         <option value="{{$availableLeave->id}}">{{$availableLeave->leaveType->name}}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.leave_balance_id') }}</x-error-span>
             </div>
-            <div class="md:col-span-1">
+            <div class="md:col-span-1" wire:key="alt-employee-{{ $form->leaveRequest ? 'edit' : 'new' }}">
                 <x-forms.input-label for="city">{{__('general.alternative-employee')}}</x-forms.input-label>
-                <x-forms.select-input wire:model="form.alternative_employee" id="alternative_employee">
+                <x-forms.select2-input wire:model="form.alternative_employee" id="alternative_employee">
                     <option
                         class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                         @lang('general.select')..
@@ -30,7 +30,7 @@
                     @foreach($alternativeEmployees as $alternativeEmployee)
                         <option value="{{$alternativeEmployee->id}}">{{$alternativeEmployee->name}}</option>
                     @endforeach
-                </x-forms.select-input>
+                </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
             </div>
 
