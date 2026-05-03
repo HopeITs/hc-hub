@@ -70,7 +70,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-error-span>{{ $errors->first('form.employee_id') }}</x-error-span>
                 </div>
             
-                <div class="md:col-span-1" wire:key="container-leave-type-{{ $form->employee_id }}-{{ $form->leaveRequest ? 'edit' : 'create' }}" >
+                <div class="md:col-span-1" wire:key="container-leave-type-{{ $form->employee_id ?? 'none' }}-{{ $form->leaveRequest ? 'edit' : 'create' }}" >
                     <x-forms.input-label for="leave_balance_id">{{__('general.type')}}</x-forms.input-label>
                     <x-forms.select2-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                         <option

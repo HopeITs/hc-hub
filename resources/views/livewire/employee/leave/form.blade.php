@@ -6,9 +6,8 @@
     <form wire:submit.prevent="save" class="space-y-4">
         <x-forms.errors-validation-list/>
         <div class="grid md:grid-cols-2 gap-4">
-
             <div class="md:col-span-1" wire:key="leave-balance-{{ $form->leaveRequest ? 'edit' : 'new' }}">
-                <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
+                <x-forms.input-label for="leave_balance_id">{{__('general.type')}}</x-forms.input-label>
                 <x-forms.select2-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                     <option
                         class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
@@ -21,7 +20,7 @@
                 <x-error-span>{{ $errors->first('form.leave_balance_id') }}</x-error-span>
             </div>
             <div class="md:col-span-1" wire:key="alt-employee-{{ $form->leaveRequest ? 'edit' : 'new' }}">
-                <x-forms.input-label for="city">{{__('general.alternative-employee')}}</x-forms.input-label>
+                <x-forms.input-label for="alternative_employee">{{__('general.alternative-employee')}}</x-forms.input-label>
                 <x-forms.select2-input wire:model="form.alternative_employee" id="alternative_employee">
                     <option
                         class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
@@ -50,7 +49,7 @@
                 <div>
                     <x-forms.input-label for="start_at">{{__('general.start-date')}}</x-forms.input-label>
                     <x-forms.date-input id="start_at" wire:model.live="form.start_at" label="Start Date"/>
-                    <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
+                    <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
                 </div>
                 <div>
                     <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>
@@ -76,7 +75,7 @@
                 @elseif($form->type === 'hour')
 
                     <div>
-                        <x-forms.input-label for="city">{{__('general.leave-date')}}</x-forms.input-label>
+                        <x-forms.input-label for="leave_date">{{__('general.leave-date')}}</x-forms.input-label>
                         <x-forms.date-input wire:model.live="form.leave_date" label="Leave Date"/>
                         <x-error-span>{{ $errors->first('form.leave_date') }}</x-error-span>
                     </div>

@@ -95,7 +95,7 @@ use App\Enums\LeaveRequestStatus;
                 <div class="grid md:grid-cols-2 gap-4">
 
                     <div class="md:col-span-1" wire:key="container-leave-type-{{ $form->leave_balance_id ?? 'new' }}">
-                        <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
+                        <x-forms.input-label for="leave_balance_id">{{__('general.type')}}</x-forms.input-label>
                         <x-forms.select2-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
                             @if($allAvailableLeaves?->count() > 0)
                                 <option
@@ -116,7 +116,7 @@ use App\Enums\LeaveRequestStatus;
                         <x-error-span>{{ $errors->first('form.leave_balance_id') }}</x-error-span>
                     </div>
                     <div class="md:col-span-1" wire:key="container-alt-employee-{{ $form->alternative_employee ?? 'none' }}">
-                        <x-forms.input-label for="city">{{__('general.alternative-employee')}}</x-forms.input-label>
+                        <x-forms.input-label for="alternative_employee">{{__('general.alternative-employee')}}</x-forms.input-label>
                         <x-forms.select2-input wire:model="form.alternative_employee" id="alternative_employee">
                             <option
                                 class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
@@ -175,8 +175,8 @@ use App\Enums\LeaveRequestStatus;
                         @elseif($form->type === 'hour')
 
                             <div>
-                                <x-forms.input-label for="city">{{__('general.leave-date')}}</x-forms.input-label>
-                                <x-forms.date-input wire:model.live="form.leave_date" label="Leave Date"/>
+                                <x-forms.input-label for="leave_date">{{__('general.leave-date')}}</x-forms.input-label>
+                                <x-forms.date-input id="leave_date" wire:model.live="form.leave_date" label="Leave Date"/>
                                 <x-error-span>{{ $errors->first('form.leave_date') }}</x-error-span>
                             </div>
 
