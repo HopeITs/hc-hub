@@ -48,7 +48,6 @@
 
 
 
-
 @props(['disabled' => false])
 
 <div class="w-full" 
@@ -97,4 +96,4 @@
             {{ $slot }}
         </select>
     </div>
-</div>
+</div> 
