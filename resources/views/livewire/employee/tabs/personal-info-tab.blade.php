@@ -27,7 +27,7 @@
 
         <div class="grid md:grid-cols-2 gap-x-6">
             <div wire:key="emp-actual-dob">
-                <x-forms.input-label for="dob">@lang('general.actual-dob')</x-forms.input-label>
+                <x-forms.input-label for="actual_dob">@lang('general.actual-dob')</x-forms.input-label>
                 <x-forms.date-input wire:model="infoForm.actual_dob" id="actual_dob" />
                 <x-error-span>{{ $errors->first('infoForm.actual_dob') }}</x-error-span>
             </div>
