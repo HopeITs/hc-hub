@@ -36,12 +36,12 @@
 
                 <div>
                     <x-forms.input-label for="course_category_{{ $index }}">@lang('general.category')</x-forms.input-label>
-                    <x-forms.select-input id="course_category_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.category_id">
+                    <x-forms.select2-input id="course_category_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.category_id">
                         <option value="">-- @lang('general.select') --</option>
                         @foreach ($courseCategories as $id => $label)
                             <option value="{{ $id }}">{{ $label }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.category_id") }}</x-error-span>
                 </div>
 
@@ -53,23 +53,23 @@
 
                 <div>
                     <x-forms.input-label for="course_org_{{ $index }}">@lang('general.organization')</x-forms.input-label>
-                    <x-forms.select-input id="course_org_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.organization">
+                    <x-forms.select2-input id="course_org_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.organization">
                         <option value="">-- @lang('general.select') --</option>
                         @foreach ($organizationOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.organization") }}</x-error-span>
                 </div>
 
                 <div>
                     <x-forms.input-label for="course_place_{{ $index }}">@lang('general.place')</x-forms.input-label>
-                    <x-forms.select-input id="course_place_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.place">
+                    <x-forms.select2-input id="course_place_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.place">
                         <option value="">-- @lang('general.select') --</option>
                         @foreach ($placeOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.place") }}</x-error-span>
                 </div>
 
@@ -95,12 +95,12 @@
 
                 <div>
                     <x-forms.input-label for="course_status_{{ $index }}">@lang('general.status')</x-forms.input-label>
-                    <x-forms.select-input id="course_status_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.status">
+                    <x-forms.select2-input id="course_status_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.status">
                         <option value="">-- @lang('general.select') --</option>
                         @foreach ($statusOptions as $value => $label)
                             <option value="{{ $value }}">{{ $label }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.status") }}</x-error-span>
                 </div>
 

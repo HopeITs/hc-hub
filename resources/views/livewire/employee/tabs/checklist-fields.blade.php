@@ -23,7 +23,7 @@
                 </div>
 
                 <div>
-                    <x-forms.select-input
+                    <x-forms.select2-input
                         id="delivered_id_{{ $index }}"
                         wire:model.defer="checklistForm.items.{{ $index }}.delivered_id"
                         :disabled="!$checklistForm->items[$index]['is_selected'] || !$canEdit">
@@ -31,12 +31,12 @@
                         @foreach ($delivereds as $delivered)
                             <option value="{{ $delivered->id }}">{{ $delivered->name }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                 </div>
 
                 @if ($isDelivered && !$isReturned)
                     <div>
-                        <x-forms.select-input
+                        <x-forms.select2-input
                             id="receiver_id_{{ $index }}"
                             wire:model.defer="checklistForm.items.{{ $index }}.receiver_id"
                             :disabled="!$checklistForm->items[$index]['is_selected']">
@@ -44,7 +44,7 @@
                             @foreach ($delivereds as $receiver)
                                 <option value="{{ $receiver->id }}">{{ $receiver->name }}</option>
                             @endforeach
-                        </x-forms.select-input>
+                        </x-forms.select2-input>
                     </div>
                 @endif
 

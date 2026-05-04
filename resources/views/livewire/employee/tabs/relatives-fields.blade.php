@@ -22,12 +22,12 @@
 
                 <div>
                     <x-forms.input-label for="relation_{{ $index }}">@lang('general.relation')</x-forms.input-label>
-                    <x-forms.select-input id="relation_{{ $index }}"
+                    <x-forms.select2-input id="relation_{{ $index }}"
                                           wire:model.defer="relativeForm.relatives.{{ $index }}.relation" >
                         @foreach(\App\Enums\KinshipType::getValues() as $key => $value)
                             <option value="{{$value}}">{{\App\Enums\KinshipType::getLocalizedName($value)}}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
 
                     <x-error-span>{{ $errors->first("relativeForm.relatives.$index.relation") }}</x-error-span>
                 </div>

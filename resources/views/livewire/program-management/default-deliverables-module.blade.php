@@ -17,42 +17,42 @@
 
     <livewire:program-management.default-deliverable.default-deliverables-table />
 
-    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model="showModal">
+    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model="showModal" wire:ignore.self>
         <form wire:submit.prevent="save" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2 md:col-span-1">
                     <x-forms.input-label
                         for="employee_id">{{ trans_choice('general.employee', 1) }}</x-forms.input-label>
-                    <x-forms.select-input id="employee_id" wire:model="item.employee_id">
+                    <x-forms.select2-input id="employee_id" wire:model="item.employee_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach ($employees as $id => $name)
                             <option value="{{ $id }}">{{ $name }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first('item.employee_id') }}</x-error-span>
                 </div>
 
                 <div class="col-span-2 md:col-span-1">
                     <x-forms.input-label for="city_id">{{ trans_choice('general.city', 1) }}</x-forms.input-label>
-                    <x-forms.select-input id="city_id" wire:model="item.city_id">
+                    <x-forms.select2-input id="city_id" wire:model="item.city_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach ($cities as $city)
                             <option value="{{ $city->id }}">
                                 {{ is_array($city->name) ? $city->name[$locale] ?? ($city->name['en'] ?? $city->id) : $city->name }}
                             </option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first('item.city_id') }}</x-error-span>
                 </div>
 
                 <div class="col-span-2">
                     <x-forms.input-label for="item_id">@lang('general.item')</x-forms.input-label>
-                    <x-forms.select-input id="item_id" wire:model="item.item_id">
+                    <x-forms.select2-input id="item_id" wire:model="item.item_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach ($checklistItems as $ci)
                             <option value="{{ $ci->id }}">{{ $ci->name }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first('item.item_id') }}</x-error-span>
                 </div>
             </div>

@@ -38,7 +38,7 @@
 
                 <div>
                     <x-forms.input-label for="order">@lang('general.order')</x-forms.input-label>
-                    <x-forms.select-input id="order" wire:model="item.order">
+                    <x-forms.select2-input id="order" wire:model="item.order">
                         <option value="">{{ __('general.select') }}</option>
                         <option value="{{ ChecklistItemOrder::ProbationContract }}">
                             {{ ChecklistItemOrder::getLocalizedName(ChecklistItemOrder::ProbationContract)['value'] }}
@@ -49,7 +49,7 @@
                         <option value="{{ ChecklistItemOrder::Resignation }}">
                             {{ ChecklistItemOrder::getLocalizedName(ChecklistItemOrder::Resignation)['value'] }}
                         </option>
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                 </div>
             </div>
 

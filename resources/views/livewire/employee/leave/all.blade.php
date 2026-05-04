@@ -12,7 +12,7 @@ use App\Enums\LeaveRequestStatus;
             ]"
             :showButton="true"
         />
-        @activerole('HR')
+        @activerole('HR','super-admin')
         <div>
             <x-primary-button wire:click="create">
                 @lang('general.add-new')
@@ -60,19 +60,19 @@ use App\Enums\LeaveRequestStatus;
             <x-forms.errors-validation-list/>
             <div class="grid md:grid-cols-2 gap-4">
                 <div class="md:col-span-1">
-                    <x-forms.input-label for="city">{{trans_choice('general.employee',1)}}</x-forms.input-label>
-                    <x-forms.select-input wire:model.live="form.employee_id" id="employee_id">
+                    <x-forms.input-label for="employee_id">{{trans_choice('general.employee',1)}}</x-forms.input-label>
+                    <x-forms.select2-input wire:model.live="form.employee_id" id="employee_id">
                         <option value="">Select Employee…</option>
                         @foreach($employees as $emp)
                             <option value="{{ $emp->id }}">{{ $emp->name }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first('form.employee_id') }}</x-error-span>
                 </div>
-
-                <div class="md:col-span-1">
-                    <x-forms.input-label for="city">{{__('general.type')}}</x-forms.input-label>
-                    <x-forms.select-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
+            
+                <div class="md:col-span-1" wire:key="container-leave-type-{{ $form->employee_id ?? 'none' }}-{{ $form->leaveRequest ? 'edit' : 'create' }}" >
+                    <x-forms.input-label for="leave_balance_id">{{__('general.type')}}</x-forms.input-label>
+                    <x-forms.select2-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                         <option
                             class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                             @lang('general.select')..
@@ -80,12 +80,12 @@ use App\Enums\LeaveRequestStatus;
                         @foreach($allAvailableLeaves ?? [] as $availableLeave)
                             <option value="{{$availableLeave->id}}" @selected($form->leave_balance_id === $availableLeave->id)>{{$availableLeave->leaveType->name}}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first('form.leave_balance_id') }}</x-error-span>
                 </div>
-                <div class="md:col-span-1">
-                    <x-forms.input-label for="city">{{__('general.alternative-employee')}}</x-forms.input-label>
-                    <x-forms.select-input wire:model.live="form.alternative_employee" id="alternative_employee">
+                <div class="md:col-span-1" wire:key="container-alt-emp-{{ $form->employee_id }}-{{ $form->leaveRequest ? 'edit' : 'create' }}">
+                    <x-forms.input-label for="alternative_employee">{{__('general.alternative-employee')}}</x-forms.input-label>
+                    <x-forms.select2-input wire:model.live="form.alternative_employee" id="alternative_employee">
                         <option
                             class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                             @lang('general.select')..
@@ -93,7 +93,7 @@ use App\Enums\LeaveRequestStatus;
                         @foreach($alternativeEmployees as $emp)
                             <option value="{{ $emp->id }}" @selected($form->alternative_employee === $emp->id)>{{ $emp->name }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
                     <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
                 </div>
 
@@ -113,7 +113,7 @@ use App\Enums\LeaveRequestStatus;
                         <div>
                             <x-forms.input-label for="start_at">{{__('general.start-date')}}</x-forms.input-label>
                             <x-forms.date-input id="start_at" wire:model.live="form.start_at" label="Start Date"/>
-                            <x-error-span>{{ $errors->first('form.alternative_employee') }}</x-error-span>
+                            <x-error-span>{{ $errors->first('form.start-date') }}</x-error-span>
                         </div>
                         <div>
                             <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>
@@ -139,8 +139,8 @@ use App\Enums\LeaveRequestStatus;
                     @elseif($form->type === 'hour')
 
                         <div>
-                            <x-forms.input-label for="city">{{__('general.leave-date')}}</x-forms.input-label>
-                            <x-forms.date-input wire:model.live="form.leave_date" label="Leave Date"/>
+                            <x-forms.input-label for="leave_date">{{__('general.leave-date')}}</x-forms.input-label>
+                            <x-forms.date-input id="leave_date" wire:model.live="form.leave_date" label="Leave Date"/>
                             <x-error-span>{{ $errors->first('form.leave_date') }}</x-error-span>
                         </div>
                         <div class=" md:grid md:grid-cols-2 md:gap-4">

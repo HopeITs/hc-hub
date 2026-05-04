@@ -14,12 +14,12 @@
                 </div>
                 <div>
                     <x-forms.input-label for="badge_type_{{ $index }}">@lang('general.type')</x-forms.input-label>
-                    <x-forms.select-input id="badge_type_{{ $index }}"
+                    <x-forms.select2-input id="badge_type_{{ $index }}"
                                           wire:model.live="badgeForm.badges.{{ $index }}.type">
                         @foreach(\App\Enums\BadgeType::getValues() as $key => $value)
                             <option value="{{ $value }}">{{ \App\Enums\BadgeType::getLocalizedName($value) }}</option>
                         @endforeach
-                    </x-forms.select-input>
+                    </x-forms.select2-input>
 
                     <x-error-span>{{ $errors->first("badgeForm.badges.$index.type") }}</x-error-span>
                 </div>
@@ -34,10 +34,10 @@
                     <div>
                         <x-forms.input-label
                             for="badge_evaluation_{{ $index }}">@lang('general.related_evaluation')</x-forms.input-label>
-                        <x-forms.select-input id="badge_evaluation_{{ $index }}"
+                        <x-forms.select2-input id="badge_evaluation_{{ $index }}"
                                               wire:model.defer="badgeForm.badges.{{ $index }}.evaluation_id">
                             <option value="">-- @lang('general.select') --</option>
-                        </x-forms.select-input>
+                        </x-forms.select2-input>
                         <x-error-span>{{ $errors->first("badgeForm.badges.$index.evaluation_id") }}</x-error-span>
                     </div>
 
@@ -63,13 +63,13 @@
                     <div>
                         <x-forms.input-label
                             for="badge_currency_{{ $index }}">@lang('general.currency')</x-forms.input-label>
-                        <x-forms.select-input id="badge_currency_{{ $index }}"
+                        <x-forms.select2-input id="badge_currency_{{ $index }}"
                                               wire:model.defer="badgeForm.badges.{{ $index }}.currency">
                             <option value="0">@lang('general.unknown')</option>
                             <option value="1">SYP</option>
                             <option value="2">USD</option>
                             <option value="3">EUR</option>
-                        </x-forms.select-input>
+                        </x-forms.select2-input>
                         <x-error-span>{{ $errors->first("badgeForm.badges.$index.currency") }}</x-error-span>
                     </div>
                 @endif

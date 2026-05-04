@@ -29,32 +29,32 @@ use App\Enums\LeaveRequestStatus;
             <x-forms.errors-validation-list/>
             <div class="grid md:grid-cols-3 gap-4">
                 <div class="md:col-span-1">
-                    <x-forms.input-label for="employee">{{__('general.name')}}</x-forms.input-label>
+                    <x-forms.input-label >{{__('general.name')}}</x-forms.input-label>
                     <p>{{$form->balance?->contract->employee->name}}</p>
                 </div>
                 <div class="md:col-span-2">
-                    <x-forms.input-label for="employee">{{__('general.years-of-service')}}</x-forms.input-label>
+                    <x-forms.input-label >{{__('general.years-of-service')}}</x-forms.input-label>
                     <p>{{$form->balance?->contract->employee->years_of_service}}</p>
                 </div>
                 <div class="md:col-span-1">
-                    <x-forms.input-label for="employee">{{__('general.deserved')}}</x-forms.input-label>
+                    <x-forms.input-label >{{__('general.deserved')}}</x-forms.input-label>
                     <p>{!! $form->balance?->deserved_formatted!!}</p>
                 </div>
                 <div class="md:col-span-1">
-                    <x-forms.input-label for="employee">{{__('general.used')}}</x-forms.input-label>
+                    <x-forms.input-label >{{__('general.used')}}</x-forms.input-label>
                     <p>{!! $form->balance?->used_formatted!!}</p>
                 </div>
                 <div class="md:col-span-1">
-                    <x-forms.input-label for="employee">{{__('general.remaining')}}</x-forms.input-label>
+                    <x-forms.input-label >{{__('general.remaining')}}</x-forms.input-label>
                     <p>{!!  $form->balance?->remaining!!}</p>
                 </div>
 
                 <div>
                     <x-forms.input-label>@lang('general.operation')</x-forms.input-label>
                     <div class="flex gap-x-4">
-                        <x-forms.radio-input id="sum" name="operation" value="sum"
+                        <x-forms.radio-input id="op_sum" name="operation" value="sum"
                                              wire:model="form.operation">{{__('general.sum')}}</x-forms.radio-input>
-                        <x-forms.radio-input id="sub" name="operation" value="sub"
+                        <x-forms.radio-input id="op_sub" name="operation" value="sub"
                                              wire:model="form.operation">{{__('general.sub')}}</x-forms.radio-input>
 
                     </div>
@@ -64,9 +64,9 @@ use App\Enums\LeaveRequestStatus;
                 <div>
                     <x-forms.input-label>@lang('general.unit')</x-forms.input-label>
                     <div class="flex gap-x-4">
-                        <x-forms.radio-input id="sum" name="unit" value="hour"
+                        <x-forms.radio-input id="unit_hour" name="unit" value="hour"
                                              wire:model="form.unit">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
-                        <x-forms.radio-input id="sub" name="unit" value="day"
+                        <x-forms.radio-input id="unit_day" name="unit" value="day"
                                              wire:model="form.unit">{{trans_choice('general.day',1)}}</x-forms.radio-input>
 
                     </div>
@@ -74,9 +74,9 @@ use App\Enums\LeaveRequestStatus;
                     <x-error-span>{{ $errors->first('form.unit') }}</x-error-span>
                 </div>
                 <div>
-                    <x-forms.input-label>@lang('general.amount')</x-forms.input-label>
-                    <x-forms.input wire:model="form.amount" type="numeric"/>
-                    <x-error-span>{{ $errors->first('form.unit') }}</x-error-span>
+                    <x-forms.input-label for="amount">@lang('general.amount')</x-forms.input-label>
+                    <x-forms.input id="amount" wire:model="form.amount" type="numeric"/>
+                    <x-error-span>{{ $errors->first('form.amount') }}</x-error-span>
                 </div>
                 <div>
                     <x-forms.checkbox-input type="checkbox"
@@ -85,8 +85,8 @@ use App\Enums\LeaveRequestStatus;
                 </div>
                 @if($form->add_badge)
                     <div class="col-span-2">
-                        <x-forms.input-label>@lang('general.note')</x-forms.input-label>
-                        <x-forms.input wire:model="form.notes" :required="$form->add_badge"/>
+                        <x-forms.input-label for="note">@lang('general.note')</x-forms.input-label>
+                        <x-forms.input id="note" wire:model="form.notes" :required="$form->add_badge"/>
                         <x-error-span>{{ $errors->first('form.notes') }}</x-error-span>
                     </div>
                 @endif

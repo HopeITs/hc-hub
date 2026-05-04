@@ -43,17 +43,19 @@ class AllLeaveRequestModule extends Component
 
         $this->refreshCounts();
         $user = auth()->user();
+        $locale = app()->getLocale();
+    $empCol = "name_{$locale}";
         if (str_contains($user->myRole(), 'HR-')) {
             $cityCode = explode('-', $user->myRole())[1];
 
             if ($cityCode === 'SYR') {
-                $this->employees = Employee::with('contracts.leaveBalances.leaveType')->get();
+                $this->employees = Employee::with('contracts.leaveBalances.leaveType')->orderBy($empCol)->get();
             } else {
                 $this->employees = Employee::whereHas('city', function ($query) use ($cityCode) {
                     $query->where('code', $cityCode);
 
 
-                })->with('contracts.leaveBalances.leaveType')->get();
+                })->with('contracts.leaveBalances.leaveType')->orderBy($empCol)->get();
             }
         }
 
@@ -68,6 +70,8 @@ class AllLeaveRequestModule extends Component
     }
     public function edit(LeaveRequest $id)
     {
+        $locale = app()->getLocale();
+    $empCol = "name_{$locale}";
         $this->form->setLeaveRequest($id);
 
         $employee = $id->leaveBalance->contract->employee;
@@ -78,6 +82,7 @@ class AllLeaveRequestModule extends Component
             ->where('city_id', $employee->city_id)
             ->where('id', '!=', $employee->id)
             ->whereHas('contracts.position.department', fn($q) => $q->where('id', $employee->department?->id))
+            ->orderBy($empCol)
             ->get();
         // hydrate form values
 
@@ -91,6 +96,8 @@ class AllLeaveRequestModule extends Component
 
     public function updatedFormEmployeeId($employeeId)
     {
+        $locale = app()->getLocale();
+    $empCol = "name_{$locale}";
         if (!$employeeId) {
             $this->allAvailableLeaves = [];
             $this->alternativeEmployees = [];
@@ -110,6 +117,7 @@ class AllLeaveRequestModule extends Component
             ->whereHas('contracts.position.department', function ($q) use ($employee) {
                 $q->where('id', $employee->department?->id);
             })
+            ->orderBy($empCol)
             ->get();
 
         // Reset dependent dropdowns
@@ -206,9 +214,13 @@ class AllLeaveRequestModule extends Component
 
     public function render()
     {
+        // $locale = app()->getLocale();
+        // $empCol = "name_{$locale}";
+        // $employees = collect($this->employees)->sortBy($empCol)->values();
         $employees = $this->employees;
         $allAvailableLeaves = $this->allAvailableLeaves;
         $alternativeEmployees = $this->alternativeEmployees;
+        // $alternativeEmployees = collect($this->alternativeEmployees)->sortBy($empCol)->values();
 
 
         return view('livewire.employee.leave.all', compact('employees', 'allAvailableLeaves', 'alternativeEmployees'));
