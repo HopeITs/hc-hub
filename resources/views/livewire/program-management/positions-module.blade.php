@@ -101,12 +101,12 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
                     <x-forms.input-label for="required_position_id">{{trans_choice('general.required-positions' , 2)}}</x-forms.input-label>
-                    <x-forms.select2-input id="required_position_id" wire:model="item.required_position_id">
+                    <x-forms.select-input id="required_position_id" wire:model="item.required_position_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach($availableRequired as $rp)
                             <option value="{{ $rp->id }}">{{ $rp->title }}</option>
                         @endforeach
-                    </x-forms.select2-input>
+                    </x-forms.select-input>
                     <x-error-span>{{ $errors->first('item.required_position_id') }}</x-error-span>
                 </div>
 

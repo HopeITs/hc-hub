@@ -4,38 +4,38 @@
     <div class="flex justify-between">
         <div class="grid grid-cols-5 gap-4 mb-6">
 
-            <x-forms.select2-input wire:model.live="city_id" label="City">
+            <x-forms.select-input wire:model.live="city_id" label="City">
                 @foreach($cities as $city)
                     <option value="{{ $city->id }}">{{ $city->name }}</option>
                 @endforeach
-            </x-forms.select2-input>
+            </x-forms.select-input>
 
-            <x-forms.select2-input wire:model.live="program_id" label="Program">
+            <x-forms.select-input wire:model.live="program_id" label="Program">
                 <option value="">@lang('general.all-programs')</option>
                 @foreach($programs as $program)
                     <option value="{{ $program->id }}">{{ $program->name }}</option>
                 @endforeach
-            </x-forms.select2-input>
+            </x-forms.select-input>
 
-            <x-forms.select2-input wire:model.live="center_id" label="Center">
+            <x-forms.select-input wire:model.live="center_id" label="Center">
                 <option value="">@lang('general.all-centers')</option>
                 @foreach($centers as $center)
                     <option value="{{ $center->id }}">{{ $center->name }}</option>
 
                 @endforeach
-            </x-forms.select2-input>
+            </x-forms.select-input>
 
-            <x-forms.select2-input wire:model.live="department_id" label="Department">
+            <x-forms.select-input wire:model.live="department_id" label="Department">
                 <option value="">@lang('general.all-departments')</option>
                 @foreach($departments as $dept)
                     <option value="{{ $dept->id }}">{{ $dept->name }}</option>
                 @endforeach
-            </x-forms.select2-input>
+            </x-forms.select-input>
 
-            <x-forms.select2-input wire:model.live="manager_type" label="Manager Type">
+            <x-forms.select-input wire:model.live="manager_type" label="Manager Type">
                 <option value="direct">@lang('general.direct-manager')</option>
                 <option value="tech">@lang('general.tech-manager')</option>
-            </x-forms.select2-input>
+            </x-forms.select-input>
 
         </div>
     </div>

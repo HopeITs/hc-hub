@@ -30,7 +30,7 @@
         </div>
 
         @if (!empty($item['newsable_type']))
-            <div class="col-span-2 sm:col-span-1">
+            <div class="col-span-2 sm:col-span-1" wire:key="entity-select-{{ $item['newsable_type'] }}">
                 <x-forms.input-label>@lang('general.target_entity')</x-forms.input-label>
                 <x-forms.select2-input wire:model.live="item.newsable_id">
                     <option value="">@lang('general.select_entity')</option>
