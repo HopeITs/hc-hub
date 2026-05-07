@@ -23,9 +23,9 @@ class AnnualLeaveRuleModule extends Component
     protected function rules(): array
     {
         return [
-            'item.days' => 'nullable|integer',
-            'item.day_per_month' => 'nullable|numeric',
-            'item.years_of_volunteering' => 'nullable|integer',
+            'item.days' => 'required|integer',
+            'item.day_per_month' => 'required|numeric',
+            'item.years_of_volunteering' => 'required|integer',
         ];
     }
 
