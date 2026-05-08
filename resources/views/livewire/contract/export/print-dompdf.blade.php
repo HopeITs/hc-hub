@@ -1,6 +1,6 @@
 @php
     $dir        = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
-    $headerSrc  = public_path('assets/img/HC_SYR_Header2.png');
+    $headerSrc  = public_path('assets/img/Header.png');
     $HEADER_HEIGHT_MM = 24;
     $TOP_MARGIN_MM    = 32;
 @endphp

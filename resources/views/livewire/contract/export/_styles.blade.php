@@ -4,7 +4,7 @@
         height: 300mm;
         max-width: 100%;
         margin: 0 auto;
-        background: #fff url('{{ asset('assets/img/header.svg') }}') no-repeat top center;
+        background: #fff url('{{ asset('assets/img/Header.svg') }}') no-repeat top center;
         background-size:95%;
         padding: 28mm 18mm 18mm;
         box-shadow: 0 8px 24px rgba(0,0,0,.06);
