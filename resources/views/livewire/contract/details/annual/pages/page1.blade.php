@@ -205,12 +205,25 @@
     $L = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 @endphp
 
-<div class="avoid-break">
+{{-- <div class="avoid-break">
     <x-contract.dual tight
                      :en="'Voluntary Contract'"
                      :ar="$Glyphs('عقد تطوع')"
                      enClass="text-lg fw-bold text-center" arClass="text-lg fw-bold text-center"
     />
+</div> --}}
+<div class="avoid-break contract-title-center">
+    <div class="dual-row dual-tight">
+        <div class="dual-en fw-title">
+            Voluntary Contract
+        </div>
+
+        <div class="contract-title-separator">|</div>
+
+        <div class="dual-ar fw-title">
+            {{ $Glyphs('عقد تطوّع') }}
+        </div>
+    </div>
 </div>
 
 <div class="avoid-break mt-6">
@@ -221,23 +234,47 @@
             :ar="$Glyphs('<strong>مؤسسة مركز الرجاء المسيحي - سوريا</strong><br>ينوب عنها بالتوقيع نائب رئيس مجلس الأمناء<br><strong>السيد فريدي يوسف</strong>')"/>
 </div>
 
-<div class="avoid-break mt-6">
-    <x-contract.dual rowClass="mt-3 fw-bold" :en="'And'" :ar="$Glyphs('و')"/>
-    <x-contract.dual rowClass="mt-1" :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))"/>
-    <x-contract.dual :en="'<strong>Ms./Mrs.</strong> '.$esc($nameEn)"
+<div class="avoid-break mt-1">
+     <x-contract.dual rowClass="mt-1 fw-bold" :en="'And'" :ar="$Glyphs('و')"/>
+   <x-contract.dual rowClass="mt-1" :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))"/>
+   {{--  <x-contract.dual :en="'<strong>Ms./Mrs.</strong> '.$esc($nameEn)"
                      :ar="'<strong>'.$Glyphs('الاسم الثلاثي:').'</strong> '.$escAr($nameAr)"/>
     <x-contract.dual :en="'<strong>Date and Place of Birth:</strong> '.$esc($pobEn).' — '.$esc($dobStr)"
                      :ar="'<strong>'.$Glyphs('مكان وتاريخ الولادة:').'</strong> '.$escAr($pobAr).' — '.$esc($dobStrAr)"/>
     <x-contract.dual :en="'<strong>National ID number:</strong> '.$esc($nationalId)"
-                     :ar="'<strong>'.$Glyphs('الرقم الوطني:').'</strong> '.$esc($Digits($nationalId ?? ''))"/>
-    <x-contract.dual :en="'<strong>Nationality:</strong> '.$esc($natEn)"
+                     :ar="'<strong>'.$Glyphs('الرقم الوطني:').'</strong> '.$esc($Digits($nationalId ?? ''))"/> --}}
+    {{-- <x-contract.dual :en="'<strong>Nationality:</strong> '.$esc($natEn)"
                      :ar="'<strong>'.$Glyphs('الجنسية:').'</strong> '.$escAr($natAr)"/>
     <x-contract.dual :en="'<strong>Address:</strong> '.$esc($addressEn)"
-                     :ar="'<strong>'.$Glyphs('العنوان:').'</strong> '.$escAr($addressAr)"/>
+                     :ar="'<strong>'.$Glyphs('العنوان:').'</strong> '.$escAr($addressAr)"/> --}}
+<x-contract.dual
+    :en="'Ms./Mrs.: <strong>'.$esc($nameEn).'</strong>'"
+    :ar="$Glyphs('الاسم الثلاثي:').' <strong>'.$escAr($nameAr).'</strong>'"
+/>
+
+<x-contract.dual
+    :en="'Date and Place of Birth: <strong>'.$esc($pobEn).' — '.$esc($dobStr).'</strong>'"
+    :ar="$Glyphs('مكان وتاريخ الولادة:').' <strong>'.$escAr($pobAr).' — '.$esc($dobStrAr).'</strong>'"
+/>
+
+<x-contract.dual rowClass="mt-3"
+    :en="'National ID number: <strong>'.$esc($nationalId).'</strong>'"
+    :ar="$Glyphs('الرقم الوطني:').' <strong>'.$esc($Digits($nationalId ?? '')).'</strong>'"
+/>
+
+<x-contract.dual 
+    :en="'Nationality: <strong>'.$esc($natEn).'</strong>'"
+    :ar="$Glyphs('الجنسية:').' <strong>'.$escAr($natAr).'</strong>'"
+/>
+
+<x-contract.dual
+    :en="'Address: <strong>'.$esc($addressEn).'</strong>'"
+    :ar="$Glyphs('العنوان:').' <strong>'.$escAr($addressAr).'</strong>'"
+/>
 </div>
 
 <div class="avoid-break mt-6">
-    <x-contract.dual :en="$L('Preamble:')" :ar="$L($Glyphs('مقدمة العقد:'))"/>
+    <x-contract.dual rowClass="fw-bold" :en="'Preamble:'" :ar="$Glyphs('مقدمة العقد:')"/>
     <x-contract.dual style="margin-top:-3px"
                      :en="'Since the first party oversees the implementation of programs in Syria and the nature of the program requires a volunteer in the capacity of <strong>'.$esc($positionEN).'</strong> to carry out the tasks mentioned in the attached job description,<br><br>And since the second team has shown willingness to undertake this voluntary work starting from the date of signing this contract,<br><br>The contract has been made between the two parties with mutual agreement of the following:'"
                      :ar="$Glyphs('لما كان الفريق الأول يشرف على تنفيذ البرامج في سوريا، وطبيعة البرنامج تحتاج إلى متطوع بصفة <strong>').$escAr($positionAR).$Glyphs('</strong> لتنفيذ المهام المذكورة في التوصيف الوظيفي المرفق،<br><br>ولما كان الفريق الثاني قد أبدى استعداده للقيام بهذا العمل التطوعي ابتداء من تاريخ توقيع هذا العقد.<br><br>تم العقد بين الطرفين والقبول المشترك لما يلي:')"/>
