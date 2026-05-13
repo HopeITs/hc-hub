@@ -89,204 +89,6 @@
 </style> --}}
 
 
-
-
-{{-- <style>
-    /* =========================
-       FONTS
-    ========================== */
-    @font-face{
-        font-family:'somar';
-        src:url('{{ asset('fonts/SomarSans/SomarSans-Regular.ttf') }}') format('truetype');
-        font-weight:400;
-    }
-
-        @font-face {
-            font-family: 'somar';
-            src: url('{{ public_path('fonts/SomarSans/SomarSans-Bold.ttf') }}') format('truetype');
-            font-weight: 700;
-            font-style: normal;
-        }
-        @font-face {
-            font-family: 'somar';
-            src: url('{{ public_path('fonts/SomarSans/SomarSans-Black.ttf') }}') format('truetype');
-            font-weight: 900;
-        }
-        @font-face {
-            font-family: 'NotoNaskhArabic';
-            src: url('{{ public_path('fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf') }}') format('truetype');
-            font-weight: 400;
-            font-style: normal;
-        }
-
-        @font-face {
-            font-family: 'NotoNaskhArabic';
-            src: url('{{ public_path('fonts/NotoNaskh/NotoNaskhArabic-Bold.ttf') }}') format('truetype');
-            font-weight: 700;
-            font-style: normal;
-        }
-
-    :root{
-        --green:#414042;
-        --red:#d11f2f;
-    }
-
-    /* =========================
-       PAGE
-    ========================== */
-    .contract-a4{
-        width: 210mm;
-        height: 300mm;
-        max-width: 100%;
-        margin: 0 auto;
-        background: #fff url('{{ asset('assets/img/Header.svg') }}') no-repeat top center;
-        background-size:93%;
-        padding: 35mm 10mm 10mm 10mm ;
-        box-shadow: 0 8px 24px rgba(0,0,0,.06);
-        background-position: center 8mm;
-        border-radius: 16px;
-        position: relative;
-        direction: ltr;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .contract-body{
-        margin-top:2mm;
-    }
-
-    .contract-footer{
-        position:absolute;
-        bottom:10mm;
-        right:18mm;
-        font-family:'Somar Sans Black';
-        font-size:7pt;
-        color:var(--green);
-    }
-
-    /* =========================
-       TITLE
-    ========================== */
-    .contract-title-center{
-        text-align:center;
-        margin-bottom:20px;
-    }
-
-    .contract-title-center .dual-row{
-        display:flex !important;
-        justify-content:center;
-        align-items:center;
-        gap:10px;
-    }
-
-    .contract-title-center .dual-en,
-    .contract-title-center .dual-ar{
-        font-family:'Somar Sans';
-        font-weight:700;
-        font-size:16pt;
-        color:var(--green);
-        line-height:1.2;
-    }
-
-    .contract-title-separator{
-        font-family:'Somar Sans';
-        font-weight:700;
-        font-size:16pt;
-        color:var(--green);
-    }
-
-    /* =========================
-       BODY GRID
-    ========================== */
-    .dual-row{
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:2rem;
-        margin-top:.35rem;
-        align-items:start;
-    }
-
-    .dual-col{
-        line-height:1.6;
-    }
-
-    .dual-en{
-        direction:ltr;
-        text-align:left;
-        font-family:'Somar Sans';
-        font-weight:400;
-        font-size:10.5pt;
-        color:var(--green);
-        line-height:20pt;
-    }
-
-    .dual-ar{
-        direction:rtl;
-        text-align:right;
-        unicode-bidi:plaintext;
-        font-family:'Somar Sans';
-        font-weight:400;
-        font-size:11pt;
-        color:var(--green);
-        line-height:16pt;
-    }
-    .fw-title{
-    font-size:16pt !important;
-    font-weight:700 !important;
-}
-
-    /* =========================
-       LABELS
-    ========================== */
-    .h-label{
-        color:var(--red);
-        font-family:'Somar Sans';
-        font-weight:700;
-    }
-
-    strong{
-        font-family:'Somar Sans Black';
-        color:#2c2c2c;
-        font-weight:900;
-    }
-
-    /* spacing */
-    .mt-1{margin-top:4px;}
-    .mt-2{margin-top:8px;}
-    .mt-3{margin-top:12px;}
-    .mt-4{margin-top:16px;}
-    .mt-6{margin-top:24px;}
-
-    .avoid-break{
-        page-break-inside:avoid;
-    }
-
-    /* =========================
-       PRINT
-    ========================== */
-    @media print{
-        @page{
-            size:A4 portrait;
-            margin:0;
-        }
-
-        .contract-a4{
-            box-shadow:none;
-            border-radius:0;
-        }
-
-        .no-print{
-            display:none !important;
-        }
-    }
-</style>  --}}
-
-
-
-
-
-
-
 {{-- WAS GOOD --}}
  <style>
     /* ==========================================
@@ -330,9 +132,6 @@
         --red:#c2151c;
     }
 
-    /* ==========================================
-       PAGE
-    ========================================== */
     .contract-a4{
         width:210mm;
         height:300mm;
@@ -341,7 +140,7 @@
         background:#fff url('{{ asset("assets/img/Header.svg") }}') no-repeat top center;
         background-size:93%;
         background-position:center 8mm;
-        padding:35mm 10mm 10mm 10mm;
+        padding: 35mm 10mm 10mm 10mm; 
         box-shadow:0 8px 24px rgba(0,0,0,.06);
         border-radius:16px;
         position:relative;
@@ -354,7 +153,7 @@
         margin-top:2mm;
         flex:1;
         overflow:hidden;
-    }
+    } 
 
     .contract-footer{
         position:absolute;
@@ -365,6 +164,24 @@
         font-size:7pt;
         color:var(--main);
     }
+
+
+
+
+
+/* Updated Page Index (1/4) */
+.contract-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    bottom: 12mm;
+    font-family: 'somar-bold';
+    font-weight: 700;
+    font-size: 7pt;
+    color: var(--main);
+    z-index: 2;
+}
 
     /* ==========================================
        TITLE
@@ -422,7 +239,8 @@
         font-family:'somar-regular';
         font-weight:400;
         font-size:10.5pt;
-        line-height:20pt;
+        /* line-height:20pt; */
+        line-height: 1.5;
         color:var(--main);
     }
 
@@ -433,7 +251,8 @@
         font-family:'somar-regular';
         font-weight:400;
         font-size:11pt;
-        line-height:16pt;
+        /* line-height:16pt; */
+        line-height: 1.5;
         color:var(--main);
     }
 
@@ -474,6 +293,22 @@
     .dual-ar .h-label{
         font-size:11pt;
     }
+
+    .h-label-bold{
+    color: var(--red);
+    font-family:'somar-bold';
+    font-weight:700;
+}
+
+.h-label-bold .dual-en,
+.dual-en .h-label-bold{
+    font-size:10.5pt;
+}
+
+.h-label-bold .dual-ar,
+.dual-ar .h-label-bold{
+    font-size:11pt;
+}
 
     /* ==========================================
        BLACK TEXT
