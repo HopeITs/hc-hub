@@ -8,7 +8,7 @@
                 @case(2) @include('livewire.contract.details.annual.pages.page2') @break
                 @case(3) @include('livewire.contract.details.annual.pages.page3') @break
                 @case(4) @include('livewire.contract.details.annual.pages.page4') @break
-                @case(5) @include('livewire.contract.details.annual.pages.page5') @break
+                {{-- @case(5) @include('livewire.contract.details.annual.pages.page5') @break --}}
             @endswitch
         </div>
     </div>

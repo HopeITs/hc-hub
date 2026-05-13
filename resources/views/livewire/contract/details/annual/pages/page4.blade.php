@@ -1,4 +1,4 @@
-@php
+{{-- @php
     use App\Support\ArabicText as AR;
 
     $forPdf = $forPdf ?? false;
@@ -79,4 +79,77 @@
     <x-contract.dual rowClass="mt-4"
                      :en="$p($EN_RETURN)"
                      :ar="$p($AR_RETURN)"/>
+</div> --}}
+{{-- 
+@php
+    use App\\Support\\ArabicText as AR;
+    $forPdf = $forPdf ?? false;
+    $Glyphs = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+    $L      = fn (string $t) => '<span class="h-label">'.$t.'</span>';
+    $p      = fn (string $t) => '<div>'.$t.'</div>';
+    
+    $emp = $contract->employee;
+    $nameEn = $emp?->name_en ?? '—';
+    $nameAr = $emp?->name_ar ?? '—';
+    $esc = fn ($v) => e((string)($v ?: '—'));
+    $escAr = fn ($v) => e((string)($v ? $Glyphs($v) : '—'));
+
+    $asList = function(array $lines) use ($Glyphs) {
+        return '<ul style="margin:0; padding-left:14px;">' . implode('', array_map(fn($l) => '<li>'.$l.'</li>', $lines)) . '</ul>';
+    };
+@endphp
+
+<div class="avoid-break mt-2">
+    <x-contract.dual
+        :en="$L('12. Termination of the Contract:').$p('The first party has the right to terminate this contract at any time by informing the second party in writing one month in advance.')"
+        :ar="$L('12. '.$Glyphs('إنهاء العقد:')).$p($Glyphs('يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل انتهاء مدته وذلك بإعلام الفريق الثاني خطياً قبل شهر.'))"/>
 </div>
+
+<div class="avoid-break mt-4">
+    <x-contract.dual
+        :en="$L('13. Duties and obligations on extension, expiration, or termination:')"
+        :ar="$L('13. '.$Glyphs('الواجبات والالتزامات عند التمديد أو الانتهاء أو إنهاء العقد:'))"/>
+    @php
+        $EN_OBL = ['First party notifies extension or non-extension one month in advance.', 'Second party notifies resignation one month in advance.', 'Second party returns all equipment and documents upon termination based on the personal handover list.'];
+        $AR_OBL = [$Glyphs('يلتزم الفريق الأول عند رغبته بالتمديد أو عدمه بأن يبلغ الفريق الثاني خطياً قبل شهر.'), $Glyphs('يلتزم الفريق الثاني عند رغبته بمغادرة العمل التطوعي بأن يبلغ الفريق الأول خطياً قبل شهر.'), $Glyphs('يلتزم الفريق الثاني عند انتهاء أو إنهاء تطوعه بتسليم جميع التجهيزات والوثائق استناداً لقائمة الاستلام الشخصي.')];
+    @endphp
+    <x-contract.dual rowClass="mt-2" :en="$asList($EN_OBL)" :ar="$asList($AR_OBL)"/>
+</div>
+
+<div class="avoid-break mt-4">
+    <x-contract.dual
+        :en="$L('14. Special Conditions:').$p('The second party pledges to maintain the confidentiality of all information and documents. The first party has the right to legal action in case of breach.')"
+        :ar="$L('14. '.$Glyphs('شروط خاصة:')).$p($Glyphs('يتعهد الفريق الثاني بالحفاظ على سرية جميع المعلومات والوثائق، ويحق للفريق الأول مقاضاة الفريق الثاني في حال إخلاله بهذا البند.'))"/>
+</div>
+
+<div class="avoid-break mt-4">
+    <x-contract.dual
+        :en="$L('15. Legal Status:').$p('This is a voluntary contract and is not subject to Labor Law No. 17 of 2010 or Social Insurance Law No. 92 of 1959. No end-of-service compensation is applicable.')"
+        :ar="$L('15. '.$Glyphs('إن هذا العقد هو عقد تطوعي لا يخضع لقانون العمل رقم 17 لعام 2010 أو قانون التأمينات الاجتماعية رقم 92 لعام 1959، ولا يحق للمتطوع المطالبة بتعويض نهاية خدمة.'))"/>
+</div>
+
+<div class="avoid-break mt-4">
+    <x-contract.dual
+        :en="'16. The contract is issued in Arabic and translated into English.'"
+        :ar="'16. '.$Glyphs('صدر هذا العقد باللغة العربية وترجم إلى اللغة الإنجليزية.')"/>
+    <x-contract.dual class="mt-2"
+        :en="'17. This contract was issued on 4 pages and 17 clauses, printed in a single copy kept at the Head Office in Aleppo.'"
+        :ar="'17. '.$Glyphs('صدر هذا العقد على 4 صفحات وعلى سبعة عشر بنداً، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.')"/>
+</div>
+
+<div class="avoid-break mt-6">
+    <x-contract.dual
+        :en="'I hereby certify having read and understood the conditions stipulated above and all attached documents and confirm my acceptance.'"
+        :ar="$Glyphs('أفيد بأنني قرأت وفهمت شروط العمل المنصوص عليها أعلاه وكافة المستندات المرفقة وأقر بموافقتي على كل ما ورد، وعليه أوقع.')"/>
+</div>
+
+<div style="margin-top: 40px; position: relative; height: 100px;">
+    <div style="position: absolute; left: 0; text-align: center; width: 45%;">
+        <div style="font-weight:bold; color:#b00;">Second Party / {{ $Glyphs('الفريق الثاني') }}</div>
+        <div style="margin-top: 5px;">{{ $esc($nameEn) }} / {{ $escAr($nameAr) }}</div>
+    </div>
+    <div style="position: absolute; right: 0; text-align: center; width: 45%;">
+        <div style="font-weight:bold; color:#b00;">First Party / {{ $Glyphs('الفريق الأول') }}</div>
+        <div style="margin-top: 5px;">{{ $Glyphs('فريدي يوسف') }}</div>
+    </div>
+</div> --}}

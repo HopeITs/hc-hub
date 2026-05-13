@@ -1,4 +1,4 @@
-@php
+{{-- @php
     use App\Support\ArabicText as AR;
 
     $forPdf = $forPdf ?? false;
@@ -61,4 +61,60 @@
     <x-contract.dual rowClass="mt-2"
                      :en="$asList($EN_END)"
                      :ar="$asList($AR_END)"/>
+</div> --}}
+
+
+
+{{-- @php
+    use App\\Support\\ArabicText as AR;
+    $forPdf = $forPdf ?? false;
+    $Glyphs = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+    $L      = fn (string $t) => '<span class="h-label">'.$t.'</span>';
+    $p      = fn (string $t) => '<div>'.$t.'</div>';
+
+    $asList = function(array $lines, string $lang = 'en') use ($Glyphs) {
+        return '<ul style="margin:0; padding-left:14px;">'
+            . implode('', array_map(fn($l) => '<li>'.$l.'</li>', $lines))
+            . '</ul>';
+    };
+@endphp
+
+<div class="avoid-break mt-4">
+    <x-contract.dual 
+        :en="$L('9. Annual Leave:')" 
+        :ar="$L('9. '.$Glyphs('إجازات العمل التطوعي:'))"/>
+    
+    <x-contract.dual class="mt-1"
+        :en="'The second party is entitled to annual leave days during the contract period, proportional to the contract duration.'"
+        :ar="$Glyphs('يحق للفريق الثاني يوم إجازة سنوية خلال فترة سريان العقد، وتكون متناسبة مع مدة العقد.')"/>
+
+    <x-contract.dual class="mt-2"
+        :en="'The second party is entitled to 24 days of sick leave only when necessary (surgeries and infectious diseases): 12 days fully paid and 12 days paid at half the monthly stipend, provided a medical report is submitted.'"
+        :ar="$Glyphs('يحق للفريق الثاني 24 يوم إجازة مرضية عند الضرورة فقط، أي في حالات العمليات والأمراض المعدية، 12 يوم مدفوع و 12 يوم مدفوع بنصف قيمة المكافأة المالية الشهرية وذلك بشرط تقديم تقرير طبي لتبرير الإجازة.')"/>
+
+    <x-contract.dual class="mt-2"
+        :en="'If the second party exceeds the specified leave days (annual or sick), an additional leave not exceeding 12 days may be granted, with its value deducted from the monthly stipend.'"
+        :ar="$Glyphs('في حال تجاوز الفريق الثاني أيام الاجازات المحددة له والتي تتناسب مع العقد سواءً إجازات عادية أو مرضية، يتم منحه إجازة لا تتجاوز مدتها 12 يوم يتم خصم قيمتها من المكافأة المالية الشهرية المخصصة له.')"/>
 </div>
+
+<div class="avoid-break mt-6">
+    <x-contract.dual
+        :en="$L('10. Internal Rules and Regulations:').$p('The volunteer acknowledges and pledges to commit to the following attached documents:')"
+        :ar="$L('10. '.$Glyphs('القوانين والأنظمة الداخلية:')).$p($Glyphs('الفريق الثاني يقر ويتعهد بالاطلاع والالتزام بالمستندات المرفقة التالية:'))"/>
+    @php
+        $EN_LIST = ['Job description.', 'Code of Conduct.', 'Christian Hope Center Policies.'];
+        $AR_LIST = [$Glyphs('توصيف العمل التطوعي.'), $Glyphs('القواعد الأخلاقية للتطوع.'), $Glyphs('سياسات مؤسسة مركز الرجاء المسيحي.')];
+    @endphp
+    <x-contract.dual rowClass="mt-2" :en="$asList($EN_LIST)" :ar="$asList($AR_LIST)"/>
+</div>
+
+<div class="avoid-break mt-6">
+    <x-contract.dual
+        :en="$L('11. Expiration of the agreement:').$p('This agreement shall be terminated in the following cases:')"
+        :ar="$L('11. '.$Glyphs('انتهاء العقد:')).$p($Glyphs('يعتبر هذا العقد منتهياً في الحالات التالية:'))"/>
+    @php
+        $EN_END = ['Closing of Christian Hope Center in Syria.', 'Project expiration.', 'Expiration of the contract duration.', 'Breach of contract terms or job description after warning.', 'Breach of Code of Conduct after warning.', 'Breach of CHC policies after warning.', 'Unsatisfactory performance evaluation results.'];
+        $AR_END = [$Glyphs('إغلاق مؤسسة مركز الرجاء المسيحي في سوريا.'), $Glyphs('انتهاء المشروع.'), $Glyphs('انتهاء مدة العقد.'), $Glyphs('في حال عدم التقيد ببنود هذا العقد وتوصيف العمل المرفق بعد التنبيه والإنذار.'), $Glyphs('في حال المخالفة لمدونة القواعد الأخلاقية بعد التنبيه والإنذار.'), $Glyphs('في حال مخالفة سياسات المؤسسة بعد التنبيه والإنذار.'), $Glyphs('نتائج تقييم الأداء غير المرضية.')];
+    @endphp
+    <x-contract.dual rowClass="mt-2" :en="$asList($EN_END)" :ar="$asList($AR_END)"/>
+</div> --}}
