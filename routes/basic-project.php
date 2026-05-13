@@ -6,7 +6,8 @@ use App\Livewire\Basics\{ChecklistItemModule,
     ContractTypeModule,
     DepartmentModule,
     JobLevelModule,
-    LeaveTypeModule
+    LeaveTypeModule,
+    AnnualLeaveRuleModule
 };
 use App\Livewire\Position\OrgChart;
 use Illuminate\Support\Facades\Route;
@@ -19,7 +20,7 @@ Route::get('checklist-items', ChecklistItemModule::class)->name('basic-checklist
 Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
 Route::get('job-levels', JobLevelModule::class)->name('job-levels.index')->middleware('role:HR|super-admin');
 Route::get('departments', DepartmentModule::class)->name('departments.index');
-
+Route::get('annual-leave-rules', AnnualLeaveRuleModule::class)->name('annual-leave-rules.index')->middleware('role:HR|super-admin');;
 
 
 Route::get('/org-chart', OrgChart::class)->name('org.chart');
