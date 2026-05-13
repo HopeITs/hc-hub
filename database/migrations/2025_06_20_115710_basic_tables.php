@@ -4,10 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
-        //basics
+        // basics
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
             $table->string('name_en');
@@ -64,7 +65,7 @@ return new class extends Migration {
             $table->date('start_date');
             $table->date('end_date');
             $table->morphs('holidayable'); // center, city, program, إلخ
-            $table->boolean('is_recurring')->default(false); //for the holidays used always
+            $table->boolean('is_recurring')->default(false); // for the holidays used always
             $table->timestamps();
         });
         Schema::create('checklist_items', function (Blueprint $table) {
@@ -117,25 +118,28 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        //employee
+        // employee
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('set null');
-            $table->string('name_en');
-            $table->string('name_ar');
-            $table->string('username')->unique();
-            $table->char('national_number')->unique()->nullable();
-            $table->dateTime('actual_dob')->nullable();
-            $table->dateTime('dob')->nullable();
-            $table->string('place_and_birth_date')->nullable();
-            $table->string('civil_registry_office')->nullable();
-            $table->string('civil_registry_number')->nullable();
-            $table->string('place_of_registration')->nullable();
-            $table->unsignedTinyInteger('gender')->nullable();
+            $table->string('first_name_en');
+            $table->string('first_name_ar');
+            $table->string('last_name_en');
+            $table->string('last_name_ar');
             $table->string('father_name_en')->nullable();
             $table->string('father_name_ar')->nullable();
             $table->string('mother_name_en')->nullable();
             $table->string('mother_name_ar')->nullable();
+            $table->string('username')->unique();
+            $table->char('national_number')->unique()->nullable();
+            $table->dateTime('actual_dob')->comment('real birthday')->nullable();
+            $table->dateTime('dob')->comment('date of birth in ID')->nullable();
+            $table->string('pob_en')->comment('place of birth')->nullable();
+            $table->string('pob_ar')->comment('place of birth')->nullable();
+            $table->string('civil_registry_office')->nullable();
+            $table->string('civil_registry_number')->nullable();
+            $table->unsignedTinyInteger('gender')->nullable();
+
             $table->tinyInteger('nationality')->nullable();
             $table->unsignedTinyInteger('marital_status')->nullable();
             $table->integer('children')->default(0)->nullable();
@@ -253,7 +257,7 @@ return new class extends Migration {
             $table->dateTime('end_date');
             $table->dateTime('terminated_at')->nullable();
             $table->text('reason_of_termination')->nullable();
-            $table->decimal('salary', 10, 2);
+            $table->integer('salary')->nullable();
             $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR');
             $table->unsignedTinyInteger('salary_per')->comment('0=Unknown, 1=Month, 2=Hour, 3=Session')->default(0);
             $table->time('work_hours_from')->nullable()->default('09:30');
@@ -309,15 +313,7 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // Schema::create('attachments', function (Blueprint $table) {
-        //     $table->id();
-        //     $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-        //     $table->string('name');
-        //     $table->string('category')->nullable();
-        //     $table->string('file_path')->nullable();
-        //     $table->timestamps();
-        // });
-
+  
         Schema::create('employee_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');

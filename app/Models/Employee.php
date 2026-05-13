@@ -2,23 +2,37 @@
 
 namespace App\Models;
 
-use App\Enums\LeaveRequestStatus;
 use App\Traits\HasTranslation;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+use App\Models\City;
+use App\Models\Contract;
+use App\Models\DefaultDeliverable;
+use App\Models\Position;
+use App\Models\Education;
+use App\Models\Course;
+use App\Models\Experience;
+use App\Models\Badge;
+use App\Models\Evaluation;
+use App\Models\Relative;
+use App\Models\Checklist;
+use App\Models\EmployeeItem;
+use App\Models\JobLevel;
+use App\Models\ContractType;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 class Employee extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, HasTranslation, LogsActivity;
+    use HasFactory, HasTranslation, InteractsWithMedia, LogsActivity;
 
     protected $guarded = ['id'];
 
@@ -32,27 +46,49 @@ class Employee extends Model implements HasMedia
         'children' => 'integer',
     ];
 
-    protected function name(): Attribute
+    protected function long_fullname(): Attribute
+    {
+        return Attribute::get(
+            fn () => "{$this->first_name} {$this->father_name} {$this->last_name}"
+        );
+    }
+
+    protected function fullname(): Attribute
+    {
+        return Attribute::get(
+            fn () => "{$this->first_name} {$this->last_name}"
+        );
+    }
+
+    protected function first_name(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->getTranslatableAttribute('name'),
-            set: fn($value) => $this->setTranslatableAttribute('name', $value)
+            get: fn () => $this->getTranslatableAttribute('first_name'),
+            set: fn ($value) => $this->setTranslatableAttribute('first_name', $value)
+        );
+    }
+
+    protected function last_name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('last_name'),
+            set: fn ($value) => $this->setTranslatableAttribute('last_name', $value)
         );
     }
 
     protected function father_name(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->getTranslatableAttribute('father_name'),
-            set: fn($value) => $this->setTranslatableAttribute('father_name', $value)
+            get: fn () => $this->getTranslatableAttribute('father_name'),
+            set: fn ($value) => $this->setTranslatableAttribute('father_name', $value)
         );
     }
 
     protected function mother_name(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->getTranslatableAttribute('mother_name'),
-            set: fn($value) => $this->setTranslatableAttribute('mother_name', $value)
+            get: fn () => $this->getTranslatableAttribute('mother_name'),
+            set: fn ($value) => $this->setTranslatableAttribute('mother_name', $value)
         );
     }
 
@@ -64,8 +100,8 @@ class Employee extends Model implements HasMedia
     protected function address(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->getTranslatableAttribute('address'),
-            set: fn($value) => $this->setTranslatableAttribute('address', $value)
+            get: fn () => $this->getTranslatableAttribute('address'),
+            set: fn ($value) => $this->setTranslatableAttribute('address', $value)
         );
     }
 
@@ -88,8 +124,7 @@ class Employee extends Model implements HasMedia
 
     }
 
-
-    public function latestActiveContract(): Contract|null
+    public function latestActiveContract(): ?Contract
     {
         return $this->contracts()->with(['position.department', 'leaveBalances'])->latest()->first();
     }
@@ -104,7 +139,7 @@ class Employee extends Model implements HasMedia
         return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')
             ->withPivot([
                 'id', 'contract_type_id', 'start_date', 'end_date', 'terminated_at',
-                'salary', 'currency', 'weekly_hours', transColumn('work_days'), 'work_hours_from','work_hours_to', 'is_active'
+                'salary', 'currency', 'weekly_hours', transColumn('work_days'), 'work_hours_from', 'work_hours_to', 'is_active',
             ])
             ->wherePivot('is_active', true)
             ->where(function ($query) {
@@ -181,8 +216,6 @@ class Employee extends Model implements HasMedia
         return $this->belongsToMany(ContractType::class, 'contracts', 'employee_id', 'contract_type_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'work_days', 'work_hours']);
     }
 
-
-
     public function account()
     {
         return $this->hasOne(User::class, 'employee_id');
@@ -194,13 +227,13 @@ class Employee extends Model implements HasMedia
         $leaves = $this->latestActiveContract()?->leaveBalances()
 //            ->whereHas('leaveType', fn ($q) => $q->where('base_days', '>', 10))
             ->with(['leaveRequests' => fn ($q) => $q->pending()
-                ->select('id','leave_balance_id','type','start_at','end_at')
+                ->select('id', 'leave_balance_id', 'type', 'start_at', 'end_at'),
             ])
             ->get();
 
         // Now compute pending durations using the real accessor logic
 
-        if($leaves?->count() > 0){
+        if ($leaves?->count() > 0) {
             foreach ($leaves as $leave) {
 
                 $pendingDays = 0;
@@ -226,10 +259,8 @@ class Employee extends Model implements HasMedia
             }
         }
 
-
         return $leaves;
     }
-
 
     public function allAvailableLeaves()
     {
@@ -239,7 +270,7 @@ class Employee extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('avatar')
-            ->useFallbackUrl('https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=be1f24&background=FFF')
+            ->useFallbackUrl('https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=be1f24&background=FFF')
             ->singleFile();
 
         $this->addMediaCollection('attachments');
@@ -258,7 +289,7 @@ class Employee extends Model implements HasMedia
             ->get();
 
         if ($contracts->isEmpty()) {
-            return 0 . ' ' . trans_choice('general.year', 0);
+            return 0 .' '.trans_choice('general.year', 0);
         }
 
         // Build the time periods for each contract
@@ -312,14 +343,15 @@ class Employee extends Model implements HasMedia
         }
         $result = '';
         if ($totalYears > 0) {
-            $result = $totalYears . ' ' . trans_choice('general.year', $totalYears) . ' ';
+            $result = $totalYears.' '.trans_choice('general.year', $totalYears).' ';
         }
         if ($totalMonths > 0) {
-            $result .= $totalMonths . ' ' . trans_choice('general.month', $totalMonths);
+            $result .= $totalMonths.' '.trans_choice('general.month', $totalMonths);
         }
         if ($result === '') {
-            $result = $totalYears . ' ' . trans_choice('general.year', $totalYears);
+            $result = $totalYears.' '.trans_choice('general.year', $totalYears);
         }
+
         // Return total years of service rounded to one decimal
         return $result;
     }
@@ -332,7 +364,7 @@ class Employee extends Model implements HasMedia
             ->get();
 
         if ($contracts->isEmpty()) {
-            return 0 ;
+            return 0;
         }
 
         // Build the time periods for each contract
@@ -400,7 +432,6 @@ class Employee extends Model implements HasMedia
 
     }
 
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -424,5 +455,4 @@ class Employee extends Model implements HasMedia
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }
-
 }
