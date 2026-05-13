@@ -53,14 +53,14 @@ return [
             'type' => ContractType::PartTime,
         ],
         [
-            'name_en' => 'Online Agreement Contract',
-            'name_ar' => 'عقد اتفاق اونلاين',
+            'name_en' => 'Online Agreement',
+            'name_ar' => 'اتفاق اونلاين',
             'place' => ContractPlace::Online,
             'type' => ContractType::Freelance,
         ],
         [
-            'name_en' => 'Onsite Agreement Contract',
-            'name_ar' => 'عقد اتفاق في الموقع',
+            'name_en' => 'Service Agreement',
+            'name_ar' => 'اتفاق خدمة محددة',
             'place' => ContractPlace::Onsite,
             'type' => ContractType::Freelance,
         ],
