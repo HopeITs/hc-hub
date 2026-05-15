@@ -53,14 +53,14 @@ class Employee extends Model implements HasMedia
         );
     }
 
-    protected function fullname(): Attribute
+    protected function name(): Attribute
     {
         return Attribute::get(
             fn () => "{$this->first_name} {$this->last_name}"
         );
     }
 
-    protected function first_name(): Attribute
+    protected function firstName(): Attribute
     {
         return Attribute::make(
             get: fn () => $this->getTranslatableAttribute('first_name'),
@@ -68,7 +68,7 @@ class Employee extends Model implements HasMedia
         );
     }
 
-    protected function last_name(): Attribute
+    protected function lastName(): Attribute
     {
         return Attribute::make(
             get: fn () => $this->getTranslatableAttribute('last_name'),

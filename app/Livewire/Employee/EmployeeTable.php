@@ -53,11 +53,11 @@ class EmployeeTable extends LivewireTable
             Column::make(trans('general.photo'), function (Model $m): string {
                 $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
                 return $src
-                    ? '<img src="' . e($src) . '" alt="' . e($m->full_name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
+                    ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
                     : '<div class="w-12 h-12 bg-gray-200 rounded-full"></div>';
             })->asHtml(),
             Column::make(trans('general.name'), transColumn('name'))
-                ->displayUsing(fn($v, Model $m) => $m->full_name) // uses accessor
+                ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
                 ->sortable()->searchable(),
             Column::make(trans_choice('general.role', 1), 'account')
                 ->displayUsing(fn($v, Model $m) => $m->account?->myRole()),

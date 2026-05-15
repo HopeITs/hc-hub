@@ -248,7 +248,7 @@ class Index extends Component
         $members = collect();
 
         $ceo = Employee::query()
-            ->where('name_en', 'Fredy Youssef')
+            ->where('id', 1)
             ->with(['media', 'contracts.position.jobLevel'])
             ->first();
 
