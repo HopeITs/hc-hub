@@ -19,7 +19,7 @@ class ContractDetails extends Component
     ];
 
     private const TEMPLATE_PAGES = [
-        'annual'  => 5,
+        'annual'  => 4,
         'trial'   => 4,
         'service' => 4,
     ];
