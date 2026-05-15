@@ -178,7 +178,7 @@ class ContractEdit extends Component
         $cityCol = "name_{$locale}";
         $posCol  = "title_{$locale}";
         $typeCol = "name_{$locale}";
-        $empCol = "name_{$locale}";
+        $empCol = transColumn('first_name');
 
         $cities = City::select('id', $cityCol)
             ->where('is_active', 1)

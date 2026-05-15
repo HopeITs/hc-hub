@@ -11,8 +11,8 @@
     $position = $contract->position;
     $program  = $position?->program;
 
-        $nameEn = $emp?->name_en ?? '—';
-      $nameAr = $emp?->name_ar ?? '—';
+        $nameEn = $emp?->first_name_en .' ' . $emp?->last_name_en ?? '—';
+      $nameAr = $emp?->first_name_ar .' ' . $emp?->last_name_ar ?? '—';
 
       $cityEn = $emp?->city?->name_en
           ?? $emp?->city?->name
@@ -60,7 +60,7 @@
     $L = fn (string $t) => '<span class="h-label">'.$t.'</span>';
 @endphp
 
-<div class="avoid-break mt-6 " style="line-height: 0.8">
+<div class="mt-6 avoid-break " style="line-height: 0.8">
     <x-contract.dual tight
                      :en="$L('PRIVATE AND CONFIDENTIAL')"
                      :ar="$L($Glyphs('سري وخاص'))"
@@ -75,7 +75,7 @@
 
 
 
-<div class="avoid-break mt-6" style="line-height: 0.8">
+<div class="mt-6 avoid-break" style="line-height: 0.8">
     <x-contract.dual rowClass=" fw-bold" :en="'Between'" :ar="$Glyphs('بين')"/>
     <x-contract.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))"/>
     <div style="margin-top: -4px">
@@ -100,7 +100,7 @@
 
 
 
-<div class="avoid-break mt-6" style="line-height: 0.7">
+<div class="mt-6 avoid-break" style="line-height: 0.7">
     <x-contract.dual rowClass="mt-3 fw-bold" :en="'And'" :ar="$Glyphs('و')"/>
     <x-contract.dual rowClass="mt-1" :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))"/>
 
@@ -127,7 +127,7 @@
     </div>
 </div>
 
-<div class="avoid-break mt-6">
+<div class="mt-6 avoid-break">
     <x-contract.dual :en="$L('Preamble:')" :ar="$L($Glyphs('المقدمة:'))"/>
     <x-contract.dual style="margin-top: -3px"
         :en="'Whereas the Volunteer has stated that he/she possesses the required qualifications for <strong>'.$esc($positionEN).'</strong> (the qualifications are attached to the job description),<br>  and on the basis thereof has offered to volunteer for “'.$esc($program).'” as a <strong>'.$esc($positionEN).'</strong>, starting  from the  signing <br> date of this contract.'"

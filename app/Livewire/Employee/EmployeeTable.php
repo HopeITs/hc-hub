@@ -36,11 +36,11 @@ class EmployeeTable extends LivewireTable
     protected function managerOptions(): array
     {
         return Employee::query()
-            ->select(['id', 'name_en', 'name_ar'])
-            ->orderBy(transColumn('name'), 'asc')
+            ->select(['id', 'first_name_en', 'first_name_ar'])
+            ->orderBy(transColumn('first_name'), 'asc')
             ->get()
             ->mapWithKeys(fn($e) => [
-                $e->id => $e->name
+                $e->id => $e->first_name
             ])
             ->all();
     }
@@ -53,8 +53,8 @@ class EmployeeTable extends LivewireTable
             Column::make(trans('general.photo'), function (Model $m): string {
                 $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
                 return $src
-                    ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="size-12 border border-1 border-primary rounded-full object-cover" />'
-                    : '<div class="h-12 w-12 rounded-full bg-gray-200"></div>';
+                    ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
+                    : '<div class="w-12 h-12 bg-gray-200 rounded-full"></div>';
             })->asHtml(),
             Column::make(trans('general.name'), transColumn('name'))
                 ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
@@ -116,14 +116,14 @@ class EmployeeTable extends LivewireTable
                 $isActive = $model->is_active ? 1 : 0;
 
                 $toggleBtn = Blade::render(
-                    '<x-forms.toggle-input class="text-xl p-2 m-2" active="' . $isActive .
+                    '<x-forms.toggle-input class="p-2 m-2 text-xl" active="' . $isActive .
                     '" :model-id="' . $model->getKey() .
                     '" wire-event="confirmToggleItemStatus" />'
                 );
 
                 $viewBtn = Blade::render(
                     '<a  href="' . route('employees.show', ['employee' => $model->username]) . '" class="p-2 " title="View Profile">
-                                <x-icons.eye class="text-secondary-light hover:text-primary transition" />
+                                <x-icons.eye class="transition text-secondary-light hover:text-primary" />
                             </a>'
                 );
 
