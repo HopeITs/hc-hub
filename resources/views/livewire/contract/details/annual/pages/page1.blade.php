@@ -13,8 +13,12 @@
     $position = $contract->position;
     $program = $position?->program;
 
-    $nameEn = $emp?->name_en ?? '—';
-    $nameAr = $emp?->name_ar ?? '—';
+    $nameEn = trim(($emp?->first_name_en ?? '') . ' ' . ($emp?->father_name_en ?? '') . ' ' . ($emp?->last_name_en ?? ''));
+    $nameEn = $nameEn !== '' ? $nameEn : '—';
+
+
+    $nameAr = trim(($emp?->first_name_ar ?? '') . ' ' . ($emp?->father_name_ar ?? '') . ' ' . ($emp?->last_name_ar ?? ''));
+    $nameAr = $nameAr !== '' ? $nameAr : '—';
 
     $cityEn = $emp?->city?->name_en ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
     $cityAr = $emp?->city?->name_ar ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
