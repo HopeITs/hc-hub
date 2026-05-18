@@ -139,7 +139,7 @@
 
     <x-contract.dual :en="$LB('2. Contract type:') . ' <strong>Voluntary Probation agreement.</strong>'"
         :ar="$LB($Glyphs('2. نوع العقد:')).
-        ' <strong>'.$Glyphs('عقد تطوعي تجريبي').
+        ' <strong>'.$Glyphs('عقد تطوعي تجريبي.').
         '</strong>'" />
 
     <x-contract.dual :en="$LB('3. Place of Work:') . ' <strong>' . $esc($workPlaceEn) . '</strong>'"

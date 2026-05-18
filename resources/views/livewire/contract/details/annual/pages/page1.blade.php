@@ -138,9 +138,9 @@
 
     <x-contract.dual :en="$LB('1. Contract Preamble:') . ' an integral part of it.'" :ar="$LB($Glyphs('1. مقدمة العقد:')) . ' ' . $Glyphs('جزء لا يتجزأ منه.')" />
 
-    <x-contract.dual :en="$LB('2. Contract type:') . ' <strong>Volunteer agreement for a limited period</strong>'"
+    <x-contract.dual :en="$LB('2. Contract type:') . ' <strong>Volunteer agreement for a limited period.</strong>'"
         :ar="$LB($Glyphs('2. نوع العقد:')).
-        ' <strong>'.$Glyphs('عقد تطوعي لمدة محدودة').
+        ' <strong>'.$Glyphs('عقد تطوعي لمدة محدودة.').
         '</strong>'" />
 
     <x-contract.dual :en="$LB('3. Place of Work:') . ' <strong>' . $esc($workPlaceEn) . '</strong>'"

@@ -1,74 +1,83 @@
 @php
     use App\Support\ArabicText as AR;
 
-    $forPdf  = $forPdf ?? false;
-    $Glyphs  = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
-    $Digits  = fn ($s) => $forPdf ? ar_digits((string)$s) : (string)$s;
-    $L       = fn (string $t) => '<span class="h-label">'.$t.'</span>';
+    $forPdf = $forPdf ?? false;
 
-    // Employee name
-    $empNameEn =  $contract->employee?->name_en ?? '—';
-    $empNameAr =  $Glyphs($contract->employee?->name_ar ?? '—');
+    $Glyphs = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+    $LB     = fn ($t) => '<span class="h-label-bold">' . $t . '</span>';
+
+    $emp    = $contract->employee;
+
+    $nameEn = trim(($emp?->first_name_en ?? '') . ' ' . ($emp?->father_name_en ?? '') . ' ' . ($emp?->last_name_en ?? ''));
+    $nameEn = $nameEn !== '' ? $nameEn : '—';
+
+
+    $nameAr = trim(($emp?->first_name_ar ?? '') . ' ' . ($emp?->father_name_ar ?? '') . ' ' . ($emp?->last_name_ar ?? ''));
+    $nameAr = $nameAr !== '' ? $nameAr : '—';
 
     $esc   = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
     $escAr = fn ($v) => e((string)($v === '' || $v === null ? '—' : $Glyphs($v)));
 @endphp
 
-{{-- Fourth term (3) --}}
-<x-contract.dual rowClass="mt-6 mb-6"
-                 :en="'3. The first party has the right to terminate this contract at any time before its expiry date in case the second party violates the terms of this contract and the volunteering code of conduct; in this case, all due amounts must be paid to the second party up to the termination date.'"
-                 :ar="'3. يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل انتهاء مدته  في حال قيام الفريق الثاني بمخالفة بنود هذا العقد والقواعد الأخلاقية للتطوع؛ وعليه في هذه الحالة أن يدفع  للفريق الثاني كافة المبالغ المستحقة له حتى تاريخ الإنهاء.'"
-/>
 
-{{-- Fifth term --}}
+
 <div class="avoid-break mt-4">
-    <x-contract.dual :en="$L('Fifth term:')" :ar="$L($Glyphs('البند الخامس:'))"/>
+    <x-contract.dual 
+        :en="$LB('12. This contract') . ' is a voluntary contract and is <strong>not subject to Labor Law No. /17/ of 2010</strong> or any amendments to the law or any new law, and it is also <strong>not subject to social security Law No. 92 of 1959 and its amendments</strong>. The second team has no right to claim any end-of-service compensation upon the expiration or termination of the second party contract.'"
+        :ar="$LB($Glyphs('12. إن هذا العقد')) . $Glyphs(' هو عقد تطوّعي ') . '<strong>' . $Glyphs('لا يخضع لقانون العمل رقم /17/ لعام 2010') . '</strong>' . $Glyphs(' أو أي تعديل للقانون أو أي قانون جديد، وكذلك ') . '<strong>' . $Glyphs('لا يخضع لقانون التأمينات الاجتماعية رقم 92 لعام 1959 وتعديلاته') . '</strong>' . $Glyphs('، ولا يحق للفريق الثاني المطالبة بأي تعويض نهاية خدمة عند انتهاء عقد التطوّع أو إنهائه.')" />
+</div>
+<div class="avoid-break mt-4">
+    <x-contract.dual 
+        :en="$LB('13. The contract is issued') . ' in Arabic and translated into English.'"
+        :ar="$LB($Glyphs('13. صدر هذا العقد')) . $Glyphs(' باللغة العربية وتُرجم إلى اللغة الإنكليزية.')" />
 </div>
 
-<x-contract.dual rowClass="mt-6 mb-6"
-                 :en="'I hereby confirm that I have read and understood the work conditions and all the attached documents and I agree to all of the stated.'"
-                 :ar="$Glyphs('أفيد بأنني قرأت وفهمت شروط العمل المنصوص عليها وكافة المستندات المرفقة وأوافق على كل ما ورد.')"
-/>
-
-<x-contract.dual rowClass="mt-2 mb-2"
-                 :en="'This contract was issued on three pages, printed as a single copy, and has only one version secured in the head office in Aleppo.'"
-                 :ar="$Glyphs('صدر هذا العقد على ثلاث صفحات، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.')"
-/>
-
-<x-contract.dual rowClass="mt-2 mb-10"
-                 :en="'This contract was issued in Arabic and translated into English.'"
-                 :ar="$Glyphs('صدر هذا العقد بالنسخة العربية وترجم إلى اللغة الإنكليزية.')"
-/>
-
-<!-- Second Party -->
-<div style="position: absolute; left: 0; text-align: center; width: 50%; margin-top: 35px;">
-    <div style="font-weight:bold; color:#b00; margin-bottom:12px;">
-        Second Party/{{ $Glyphs('الفريق الثاني') }}
-    </div>
-    <div style="margin-bottom:6px;">
-        Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
-    </div>
-    <div>
-        {{ $esc($empNameEn) }}/{{ $escAr($empNameAr) }}
-    </div>
+<div class="avoid-break mt-4">
+    <x-contract.dual 
+        :en="$LB('14. This contract was issued') . ' on 4 pages and contains 14 clauses, printed in a single copy preserved at the Head Office in Aleppo.'"
+        :ar="$LB($Glyphs('14. صدر هذا العقد')) . $Glyphs(' على 4 صفحات وعلى أربعة عشر بنداً، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.')" />
 </div>
 
-<!-- First Party -->
-<div style="position: absolute; right: 0; text-align: center; width: 50%; margin-top: 35px;">
-    <div style="font-weight:bold; color:#b00; margin-bottom:12px;">
-        First Party/{{ $Glyphs('الفريق الأول') }}
-    </div>
-    <div style="margin-bottom:6px;">
-        Name and Signature/{{ $Glyphs('الاسم والتوقيع') }}
-    </div>
-    <div>
-        Fredy Youssef/{{ $Glyphs('فريدي يوسف') }}
-    </div>
+<div class="avoid-break mt-6">
+    <x-contract.dual
+        :en="'I hereby certify having read and understood the conditions stipulated above and all the attached documents and confirm that I accept them all.'"
+        :ar="$Glyphs('أفيد بأنني قرأت وفهمت شروط العمل المنصوص عليها أعلاه وكافة المستندات المرفقة وأقر بموافقتي على كل ما ورد، وعليه أوقّع.')" />
 </div>
 
-<!-- Date -->
-<div class="avoid-break" style="text-align:right; position: absolute; bottom:19%; right:160px;">
-    <div style="margin-bottom:6px;">
-        Date/{{ $Glyphs('التاريخ') }}
+<div class="avoid-break" style="position: relative; margin-top: 45px; min-height: 220px;">
+    
+    <div style="position: absolute; left: 0; text-align: center; width: 48%;">
+        <div style="margin-bottom: 12px;">
+            {!! $LB('Second Party') !!} / {!! $LB($Glyphs('الفريق الثاني')) !!}
+        </div>
+        <div style="margin-bottom: 15px;">
+            Name and Signature / {{ $Glyphs('الاسم والتوقيع') }}
+        </div>
+        <div style="line-height: 1.6; margin-bottom: 25px;">
+            <strong>{{ $esc($nameEn) }}</strong>
+            <br>
+            <strong>{{ $escAr($nameAr) }}</strong>
+        </div>
+        <div style="font-size: 14px;">
+            Date / {{ $Glyphs('التاريخ') }}
+        </div>
     </div>
+
+    <div style="position: absolute; right: 0; text-align: center; width: 48%;">
+        <div style="margin-bottom: 12px;">
+            {!! $LB('First Party') !!} / {!! $LB($Glyphs('الفريق الأول')) !!}
+        </div>
+        <div style="margin-bottom: 15px;">
+            Name and Signature / {{ $Glyphs('الاسم والتوقيع') }}
+        </div>
+        <div style="line-height: 1.6; margin-bottom: 25px;">
+            <strong>Fredy Georges Youssef</strong>
+            <br>
+            <strong>{{ $Glyphs('فريدي جرجس يوسف') }}</strong>
+        </div>
+        <div style="font-size: 14px;">
+            Date / {{ $Glyphs('التاريخ') }}
+        </div>
+    </div>
+
 </div>

@@ -32,7 +32,7 @@
 
 <div class="avoid-break mt-1">
     <x-contract.dual 
-        :en="$LB('11. Termination of the Contract:')" 
+        :en="$LB('11. Expiration of the Contract:')" 
         :ar="$LB($Glyphs('11. انتهاء العقد:'))" />
     
     <x-contract.dual class="mt-1"
@@ -66,7 +66,7 @@
 
 <div class="avoid-break mt-1">
     <x-contract.dual 
-        :en="$LB('12. Special conditions:')" 
+        :en="$LB('12. Termination of the Contract:')" 
         :ar="$LB($Glyphs('12. إنهاء العقد:'))" />
     
     <x-contract.dual class="mt-1"
