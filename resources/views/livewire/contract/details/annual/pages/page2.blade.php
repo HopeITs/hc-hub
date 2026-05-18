@@ -48,16 +48,10 @@ $durationMonths = (int) round($contract->duration);
         $durationLabelEn = $durationMonths . ' Months';
         $durationLabelAr = $Digits($durationMonths) . ' ' . $Glyphs('أشهر');
     }
-   // جلب معرف المشروع
     $programId = $contract->position?->program_id;
 
-    // تعريف المجموعات (استبدل الأرقام بالـ IDs الحقيقية لديك في قاعدة البيانات)
-    $isHopeCenter = ($programId == 1); 
-    $isStudyZone  = ($programId == 8); 
-    $isFlexible   = in_array($programId, [10, 13]); // Children University (10), LEAP (13)
-    
-    // إذا لم يكن من المجموعات أعلاه، نعتبره "مرن" حسب طلبك
-    $isStandard = ($isHopeCenter || $isStudyZone); 
+      $isStudyZone  = ($programId == 8); 
+    $isGeneralProject = !$isStudyZone;
 @endphp
 
 
@@ -93,8 +87,8 @@ $durationMonths = (int) round($contract->duration);
 <div class="avoid-break mt-4">
     <x-contract.dual :en="$LB('6. Volunteer Work Hours:')" :ar="$LB($Glyphs('6. ساعات العمل التطوعّي:'))" />
 
-    @if($isStandard)
-        {{-- Case1:Hope Center ,Study Zone --}}
+    
+        
              <x-contract.dual class="mt-1"
             :en="'<strong>' . $weeklyHours . ' working hours</strong> per week, <strong>' . $dailyHours . ' hours</strong> per day.'" 
             :ar="'<strong>' . $Digits($weeklyHours) . ' ' . $Glyphs('ساعة') . '</strong> ' . $Glyphs('عمل أسبوعياً،') . ' <strong>' . $Digits($dailyHours) . ' ' . $Glyphs('ساعات') . '</strong> ' . $Glyphs('يومياً.')" />
@@ -102,7 +96,7 @@ $durationMonths = (int) round($contract->duration);
             :en="'Standard office hours are ' . $workDaysEn . ' from ' . $dailyStart . ' to ' . $dailyEnd . '.'"
             :ar="$Glyphs('من نهار ') . $Glyphs($workDaysAr) . ' ' . $Glyphs('من الساعة ') . $dailyStart . ' ' . $Glyphs('حتى الساعة ') . $dailyEnd . '.'" />
 
-        @if($isHopeCenter)
+        @if($isGeneralProject)
             <x-contract.dual class="mt-1"
                 :en="'Saturdays are considered working days when necessary and not treated as extra hours.'"
                 :ar="$Glyphs('يعتبر يوم السبت يوم عمل في حال رأت الإدارة الحاجة لذلك، ولا يعتبر دوام إضافي.')"/>
@@ -113,13 +107,6 @@ $durationMonths = (int) round($contract->duration);
                 :en="'Volunteers are entitled to a second day off in the week, to be determined in coordination with management and based on work requirements. It is permitted to adjust working hours and holidays in months that require opening the center 7 days, in coordination with the direct manager and the HR officer.'"
                 :ar="$Glyphs('يحق للمتطوع يوم عطلة ثان ضمن الأسبوع، يتم تحديده بالتنسيق مع الإدارة وما يتطلبه العمل. يسمح بتعديل أوقات الدوام والعطل في الأشهر التي تتطلب فتح المركز 7 أيام، وذلك بالتنسيق مع المدير المباشر ومسؤول الموارد البشرية.')"/>
         @endif
-
-    @else
-        {{-- Case2: For others --}}
-        <x-contract.dual class="mt-1"
-            :en=" $weeklyHours . ' working hours per week, it changes according to the requirements of the job.'" 
-            :ar=" $Digits($weeklyHours) . ' ' . $Glyphs('ساعة عمل أسبوعياً، تتغير بحسب متطلّبات العمل.')" />
-    @endif
 </div>
 
 <div class="avoid-break mt-4">

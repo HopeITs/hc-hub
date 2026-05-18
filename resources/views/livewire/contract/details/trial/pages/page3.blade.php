@@ -1,73 +1,70 @@
 @php
     use App\Support\ArabicText as AR;
-
-    $forPdf  = $forPdf ?? false;
-    $Glyphs  = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
-    $Digits  = fn ($s) => $forPdf ? ar_digits((string)$s) : (string)$s;
-    $L       = fn (string $t) => '<span class="h-label">'.$t.'</span>';
-
-    // Salary
-    $salary  = (float) ($contract->salary ?? 0);
-    $salaryFormattedEn = $salary ? number_format($salary, 0, '.', ',') : '—';
-    $salaryFormattedAr = $salary ? $Digits(number_format($salary, 0, '.', ',')) : '—';
-
-    // Currency mapping (IDs or codes)
-    $CURRENCY = [
-        1     => ['code' => 'SYP', 'en' => 'Syrian Pounds', 'ar' => 'ليرة سورية'],
-        2     => ['code' => 'USD', 'en' => 'US Dollars',    'ar' => 'دولار أمريكي'],
-        3     => ['code' => 'EUR', 'en' => 'European Euro', 'ar' => 'يورو أوروبي'],
-        'SYP' => ['code' => 'SYP', 'en' => 'Syrian Pounds', 'ar' => 'ليرة سورية'],
-        'USD' => ['code' => 'USD', 'en' => 'US Dollars',    'ar' => 'دولار أمريكي'],
-        'EUR' => ['code' => 'EUR', 'en' => 'European Euro', 'ar' => 'يورو أوروبي'],
-    ];
-
-    $currencyKey = $contract->currency ?? 1; // could be ID or code
-    $cur = $CURRENCY[$currencyKey] ?? ['code' => 'SYP', 'en' => 'Syrian Pounds', 'ar' => 'ليرة سورية'];
+    $forPdf = $forPdf ?? false;
+    $Glyphs = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+    $LB     = fn ($t) => '<span class="h-label-bold">' . $t . '</span>';
+        $asList = function(array $lines) {
+        return '<div style="margin:0; padding:0;">'
+            . implode('', array_map(fn($l) => '<div style="margin-top:2px;">'.$l.'</div>', $lines))
+            . '</div>';
+    };
 @endphp
 
-
-{{-- Third term continuation (6–7) --}}
 <div class="avoid-break mt-4">
-    <x-contract.dual :en="$L('Third term:')" :ar="$L($Glyphs('البند الثالث:'))"/>
+    <x-contract.dual :en="$LB('9. Annual Leave:')" :ar="$LB($Glyphs('9. إجازات العمل التطوعّي:'))" />
+    
+    <x-contract.dual class="mt-1"
+        :en="'- The second party is not entitled to any leave days during the period of the trial contract.'" 
+        :ar="$Glyphs('- لا يحق للفريق الثاني إجازات  خلال فترة سريان العقد التجريبي.')" />
+
+
+    <x-contract.dual class="mt-1"
+        :en="'- If the second party has a strong reason to be absent, they must inform the first party, as the leave shall not exceed 3 days in a row during the contract period, except in cases of death or severe sickness.'" 
+        :ar="$Glyphs('- في حال اضطرّار الفريق الثاني للغياب فعليه أخذ موافقة الفريق الأول بذلك على ألا يتجاوز الأمر أكثر من 3 أيام متتالية خلال فترة العقد، وذلك ما عدا حالات الوفاة والمرض.')" />
+
+    <x-contract.dual class="mt-1"
+        :en="'- The second party stipend amount will be deducted for one working day in case of repeated delays beyond the specified working hours more than 3 times a month.'" 
+        :ar="$Glyphs('- يُخصم يوم عمل تطوّّعي للفريق الثاني من مكافأة التطوّّع المخصصة له في حال تكرار التأخير عن موعد الدوام المحدد لأكثر من 3 مرات في الشهر.')" />
 </div>
 
-{{-- 6 --}}
-<x-contract.dual rowClass="mt-6 mb-10"
-                 :en="'6. The first party is committed to paying the second party in exchange for his/her services, a monthly stipend of '.$salaryFormattedEn.' '.$cur['code'].' / '.$cur['en'].' only.'"
-                 :ar="'6. يلتزم الفريق الأول بدفع مكافأة شهرية للفريق الثاني لقاء خدماته مقدارها '.$salaryFormattedAr.' '.$cur['code'].' / '.$cur['ar'].' فقط لا غير.'"
-/>
+<div class="avoid-break mt-1">
+    <x-contract.dual 
+        :en="$LB('10. Internal Rules and Regulations:')" 
+        :ar="$LB($Glyphs('10. القوانين والأنظمة الداخلية:'))" />
+    
+    <x-contract.dual class="mt-1"
+        :en="'The second party acknowledges and pledges to commit to the following attached documents:'"
+        :ar="$Glyphs('الفريق الثاني يُقر ويتعهد بالاطلاع والالتزام بالمستندات المرفقة التالية:')" />
 
-{{-- 7 --}}
-<x-contract.dual rowClass="mt-6 mb-10"
-                 :en="'7. The second party has to commit, abide and sign the code of conduct.'"
-                 :ar="'7. على الفريق الثاني الامتثال للقواعد الأخلاقية للتطوع والتقيد بها وتوقيعها.'"
-/>
-
-{{-- Fourth term --}}
-<div class="avoid-break mt-6">
-    <x-contract.dual :en="$L('Fourth term:')" :ar="$L($Glyphs('البند الرابع:'))"/>
+    @php
+        $EN_RULES = ['- Job description.', '- Code of Conduct.', '- Christian Hope Center Policies.'];
+        $AR_RULES = [$Glyphs('- توصيف العمل التطوّعي.'), $Glyphs('- القواعد الأخلاقية للتطوّع.'), $Glyphs('- سياسات مؤسسة مركز الرجاء المسيحي.')];
+    @endphp
+    <x-contract.dual class="mt-1" 
+        :en="$asList($EN_RULES)" 
+        :ar="$asList($AR_RULES)" />
 </div>
 
-{{-- 1 --}}
-<x-contract.dual rowClass="mt-6 mb-10"
-                 :en="'1. The second party stipend amount will be deducted an amount of one working day in case of repeated delays beyond the specified working hours for more than 3 times a month.'"
-                 :ar="'1. يخصم يوم عمل تطوعي للفريق الثاني من المكافأة المالية المخصصة له في حال تكرار التأخير عن موعد الدوام المحدد لأكثر من 3 مرات في الشهر.'"
-/>
+<div class="avoid-break mt-4">
+    <x-contract.dual :en="$LB('11. Termination of the Contract:')" :ar="$LB($Glyphs('11. إنهاء العقد:'))" />
+    @php
+        $EN_TERM = [
+            '- The first party has the right to terminate this contract at any time before its expiry date in case the second party violates the terms of this contract and the volunteering code of conduct.',
+            '- If the second party wishes to terminate the contract, the second party is obliged to inform the first party at least a Two week before the end of the contract period.',
+            '- The second party is committed to hand over to "Christian Hope Center" all the equipment, material, and documents that they received upon the termination or expiration of this contract, based on the personal receipt list of the volunteer.'
+        ];
+        $AR_TERM = [
+            $Glyphs('- يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل إنتهاء مدته في حال قيام الفريق الثاني بمخالفة بنود هذا العقد والمستندات المرفقة به.'),
+            $Glyphs('- في حال رغبة الفريق الثاني بفسخ العقد، يلتزم بأن يُعلم الفريق الأول قبل أسبوعين على الأقل من تاريخ انتهاء العقد.'),
+            $Glyphs('- يلتزم الفريق الثاني عند انتهاء أو إنهاء العقد بتسليم جميع التجهيزات والمواد والوثائق المؤتمن بها للفريق الأول وذلك استناداً لقائمة الاستلام الشخصي.')
+        ];
+    @endphp
+    <x-contract.dual class="mt-1" :en="$asList($EN_TERM)" :ar="$asList($AR_TERM)" />
+</div>
 
-{{-- 2 --}}
-<x-contract.dual rowClass="mt-6 mb-10"
-                 :en="'2. The volunteer is not entitled to any leave days during the period of the trial contract.'"
-                 :ar="'2. لا يحق للمتطوع إجازات خلال فترة سريان العقد التجريبي.'"
-/>
-
-{{-- 3 --}}
-<x-contract.dual rowClass="mt-6 mb-10"
-                 :en="'3. If the second party has a strong reason to be absent, he/she must inform the first party, without exceeding 3 days in a row during the contract period with the exception of cases regarding death or severe sickness.'"
-                 :ar="'3. في حال اضطرار الفريق الثاني للغياب فعليه أخذ موافقة الفريق الأول بذلك على أن لا يتجاوز الأمر أكثر من 3 أيام متتالية خلال فترة العقد، وذلك ما عدا حالات الوفاة أو المرض.'"
-/>
-
-{{-- 4 --}}
-<x-contract.dual rowClass="mt-6 mb-10"
-                 :en="'4. The first party has the right to terminate this contract at any time before its expiry date in case the second party violates the terms of this contract and the volunteering code of conduct, in which case all due amounts must be paid to the second party up to the termination date.'"
-                 :ar="'4. يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل انتهاء مدته في حال قيام الطرف الثاني بمخالفة بنود هذا العقد والقواعد الأخلاقية للتطوع، وعليه في هذه الحالة يجب أن يدفع للفريق الثاني كافة المبالغ المستحقة له حتى تاريخ الإنهاء'"
-/>
+<div class="avoid-break mt-4">
+    <x-contract.dual :en="$LB('12. Special conditions:')" :ar="$LB($Glyphs('12. شروط خاصة:'))" />
+    <x-contract.dual class="mt-1"
+        :en="'The second team commits to maintaining the confidentiality of all information and documents they have access to, and not using them outside the scope of the volunteer work. The first team has the right to take legal action against the second team in case of a breach of this clause.'"
+        :ar="$Glyphs('يتعهد الفريق الثاني بالحفاظ على سريّة جميع المعلومات والوثائق التي يطّلّع عليها، وعدم استخدامها خارج نطاق العمل التطوّعي. ويحق للفريق الأول مقاضاة الفريق الثاني في حال إخلاله بهذا البند.')" />
+</div>

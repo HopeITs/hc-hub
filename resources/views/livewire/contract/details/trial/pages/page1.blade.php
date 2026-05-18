@@ -4,119 +4,147 @@
 
     $forPdf = $forPdf ?? false;
 
-    $Glyphs = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
-    $Digits = fn ($s) => $forPdf ? ar_digits((string)$s) : (string)$s;
+    $Glyphs = fn($s) => $forPdf ? AR::glyphs((string) $s) : (string) $s;
+    $Digits = fn($s) => $forPdf ? ar_digits((string) $s) : (string) $s;
 
     $loc = $locale ?? app()->getLocale();
     $emp = $contract->employee;
-
     $position = $contract->position;
-    $positionEN = $position?->title_en ?? '—';
-    $positionAR = $position?->title_ar ?? '—';
-    // Fields
-    $nameEn = $emp?->name_en ?? '—';
-    $nameAr = $emp?->name_ar ?? '—';
+    $program = $position?->program;
 
-    $cityEn = $emp?->city?->name_en
-          ?? $emp?->city?->name
-          ?? $emp?->place_of_birth ?? '';
+    $nameEn = trim(($emp?->first_name_en ?? '') . ' ' . ($emp?->father_name_en ?? '') . ' ' . ($emp?->last_name_en ?? ''));
+    $nameEn = $nameEn !== '' ? $nameEn : '—';
 
-    $cityAr = $emp?->city?->name_ar
-          ?? $emp?->city?->name
-          ?? $emp?->place_of_birth ?? '';
 
+    $nameAr = trim(($emp?->first_name_ar ?? '') . ' ' . ($emp?->father_name_ar ?? '') . ' ' . ($emp?->last_name_ar ?? ''));
+    $nameAr = $nameAr !== '' ? $nameAr : '—';
+
+    $cityEn = $emp?->city?->name_en ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
+    $cityAr = $emp?->city?->name_ar ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
+
+    $addressEn = $emp?->address_en ?? '—';
+    $addressAr = $emp?->address_ar ?? '—';
+
+    // DOB
+    $dob = $emp?->dob;
+    $dobStr = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
+    $dobStrAr = $Digits($dobStr);
+    // Other info
     $pobEn = trim((string) $cityEn);
     $pobAr = trim((string) $cityAr);
-
-    $dob = $emp?->dob;
-    $dobStr   = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
-    $dobStrAr = $Digits($dobStr);
-
     $nationalId = $emp?->national_number;
 
     $nationalityRaw = (string) ($emp?->nationality ?? '');
     $natKey = strtoupper(trim($nationalityRaw));
     $NATIONALITY_MAP = [
-        '1'   => ['en' => 'Syrian', 'ar' => 'سوري'],
-        'SY'  => ['en' => 'Syrian', 'ar' => 'سوري'],
+        '1' => ['en' => 'Syrian', 'ar' => 'سوري'],
+        'SY' => ['en' => 'Syrian', 'ar' => 'سوري'],
         'SYR' => ['en' => 'Syrian', 'ar' => 'سوري'],
     ];
     $natEn = $NATIONALITY_MAP[$natKey]['en'] ?? ($nationalityRaw ?: '—');
     $natAr = $Glyphs($NATIONALITY_MAP[$natKey]['ar'] ?? ($nationalityRaw ?: '—'));
+    // Position and program
+    $req = $position?->requiredPosition;
+    $positionEN = $req?->title_en ?? ($position?->title_en ?? '—');
+    $positionAR = $req?->title_ar ?? ($position?->title_ar ?? '—');
+    $program = $program?->name ?? '—';
+    //Center and City Name
+    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name ?? '—';
+    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name ?? '—';
 
-    $addressEn = $emp?->address_en
-          ?? (is_array($emp?->address ?? null) ? ($emp->address['en'] ?? reset($emp->address) ?? '') : ($emp->address ?? ''));
+    $cityNameEn = $position?->city?->name_en ?? '—';
+    $cityNameAr = $position?->city?->name_ar ?? '—';
 
-    $addressAr = $emp?->address_ar
-          ?? (is_array($emp?->address ?? null) ? ($emp->address['ar'] ?? reset($emp->address) ?? '') : ($emp->address ?? ''));
+    $workPlaceEn = $cityNameEn . ' - ' . $centerNameEn;
+    $workPlaceAr = $cityNameAr . ' - ' . $centerNameAr;
+    // Escaping
+    $esc = fn($v) => e((string) ($v === '' || $v === null ? '—' : $v));
+    $escAr = fn($v) => e((string) ($v === '' || $v === null ? '—' : $Glyphs($v)));
 
-    $esc   = fn ($v) => e((string)($v === '' || $v === null ? '—' : $v));
-    $escAr = fn ($v) => e((string)($v === '' || $v === null ? '—' : $Glyphs($v)));
-
-    $L = fn (string $t) => '<span class="h-label">'.$t.'</span>';
+    $L = fn(string $t) => '<span class="h-label">' . $t . '</span>';
+    $LB = fn(string $t) => '<span class="h-label-bold">' . $t . '</span>';
 @endphp
 
-<div class="text-center text-primary mb-6 ">
-    <h2 class="text-[18px] font-bold">عقد اتفاق تجريبي</h2>
+<div class="avoid-break contract-title-center">
+    <div class="dual-row dual-tight">
+        <div class="dual-en fw-title">
+            Voluntary Probation  Contract
+        </div>
+
+        <div class="contract-title-separator">|</div>
+
+        <div class="dual-ar fw-title">
+            {{ $Glyphs('عقد تطوّع تجريبـي ') }}
+        </div>
+    </div>
 </div>
 
-<div class="avoid-break " >
-    <x-contract.dual tight
-                     :en="$L('PRIVATE AND CONFIDENTIAL')"
-                     :ar="$L($Glyphs('سري وخاص'))"
-                     enClass="text-base" arClass="text-base"
-    />
-    <x-contract.dual tight
-                     :en="' Volunteer agreement for a limited period'"
-                     :ar="$Glyphs('عقد تطوعي لمدة محدودة')"
-                     enClass="text-base" arClass="text-base"
-    />
+<div class="avoid-break mt-4">
+    <x-contract.dual rowClass="fw-bold" :en="'Between'" :ar="$Glyphs('بين')" />
+    <x-contract.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))" />
+    <x-contract.dual :en="'<strong>Christian Hope Center - Syria</strong><br>Represented by the Vice chairman of the board of trustees<br><strong>Mr. Fredy Youssef</strong>'"
+        :ar="$Glyphs(
+            '<strong>مؤسسة مركز الرجاء المسيحي - سوريا</strong><br>ينوب عنها بالتوقيع نائب رئيس مجلس الأمناء<br><strong>السيد فريدي يوسف</strong>')" />
 </div>
 
-<div class="avoid-break mt-3" style="line-height: 1.3" >
-    <x-contract.dual rowClass="fw-bold" :en="'Between'" :ar="$Glyphs('بين')"/>
-    <x-contract.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))"/>
-    <x-contract.dual
-        :en="'<strong>Christian Hope Center - Aleppo / Head office</strong> represented in this Contract by <strong>Mr. Fredy Youssef</strong>'"
-        :ar="$Glyphs('<strong>مركز الرجاء المسيحي - حلب / الإدارة العامة</strong> الممثل في هذا العقد ب<strong>السيد فريدي يوسف</strong>')"/>
-    <x-contract.dual
-        :en="'<strong>Mr. Fredy Youssef</strong> is delegated by the Latin church in Syria to manage The Christian Hope Center and all affiliated programs.'"
-        :ar="$Glyphs('إن السيد فريدي يوسف تم تفويضه من قبل النيابة الرسولية اللاتينية في سوريا لإدارة مركز الرجاء المسيحي وكل البرامج التابعة له.')"/>
-    <x-contract.dual
-        :en="'Hereinafter referred to as “<strong>Christian Hope Center - Aleppo - Head Office</strong>”'"
-        :ar="$Glyphs('المشار إليه في هذا العقد بـ “<strong>مركز الرجاء المسيحي – حلب - الإدارة العامة</strong>”')"/>
+<div class="avoid-break mt-1">
+    <x-contract.dual rowClass="mt-1 fw-bold" :en="'And'" :ar="$Glyphs('و')" />
+    <x-contract.dual rowClass="mt-1" :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))" />
+    <x-contract.dual :en="'Ms./Mrs.: <strong>' . $esc($nameEn) . '</strong>'" :ar="$Glyphs('الاسم الثلاثي:').
+    ' <strong>'.$escAr($nameAr).
+    '</strong>'" />
+
+    <x-contract.dual :en="'Date and Place of Birth: <strong>' . $esc($pobEn) . ' — ' . $esc($dobStr) . '</strong>'"
+        :ar="$Glyphs('مكان وتاريخ الولادة:').
+        ' <strong>'.$escAr($pobAr).
+        ' — '.$esc($dobStrAr).
+        '</strong>'" />
+
+    <x-contract.dual rowClass="mt-3" :en="'National ID number: <strong>' . $esc($nationalId) . '</strong>'"
+        :ar="$Glyphs('الرقم الوطني:').
+        ' <strong>'.$esc($Digits($nationalId ?? '')).
+        '</strong>'" />
+
+    <x-contract.dual :en="'Nationality: <strong>' . $esc($natEn) . '</strong>'" :ar="$Glyphs('الجنسية:').
+    ' <strong>'.$escAr($natAr).
+    '</strong>'" />
+
+    <x-contract.dual :en="'Address: <strong>' . $esc($addressEn) . '</strong>'" :ar="$Glyphs('العنوان:').
+    ' <strong>'.$escAr($addressAr).
+    '</strong>'" />
 </div>
 
-<div class="avoid-break mt-3" style="line-height: 1.2" >
-    <x-contract.dual rowClass="mt-3 fw-bold" :en="'And'" :ar="$Glyphs('و')"/>
-    <x-contract.dual rowClass="mt-1" :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))"/>
-    <x-contract.dual :en="'<strong>Ms./Mrs.</strong> '.$esc($nameEn)"
-                     :ar="'<strong>'.$Glyphs('السيد/ة:').'</strong> '.$esc($nameAr)"/>
-    <x-contract.dual :en="'<strong>Date and Place of Birth:</strong> '.$esc($pobEn).' — '.$esc($dobStr)"
-                     :ar="'<strong>'.$Glyphs('مكان وتاريخ الولادة:').'</strong> '.$esc($pobAr).' — '.$esc($dobStrAr)"/>
-    <x-contract.dual :en="'<strong>National ID number:</strong> '.$esc($nationalId)"
-                     :ar="'<strong>'.$Glyphs('الرقم الوطني:').'</strong> '.$esc($Digits($nationalId ?? ''))"/>
-    <x-contract.dual :en="'<strong>Nationality:</strong> '.$esc($natEn)"
-                     :ar="'<strong>'.$Glyphs('الجنسية:').'</strong> '.$esc($natAr)"/>
-    <x-contract.dual :en="'<strong>Address:</strong> '.$esc($addressEn)"
-                     :ar="'<strong>'.$Glyphs('العنوان:').'</strong> '.$esc($addressAr)"/>
+<div class="avoid-break mt-4">
+    <x-contract.dual rowClass="fw-bold" :en="'Preamble:'" :ar="$Glyphs('مقدمة العقد:')" />
+    <x-contract.dual style="margin-top:-3px" :en="'Since the first party oversees the implementation of programs in Syria and the nature of the program requires a volunteer in the capacity of <strong>' .
+        $esc($positionEN) .
+        '</strong>'"
+        :ar="$Glyphs('لما كان الفريق الأول يشرف على تنفيذ البرامج في سوريا، وطبيعة البرنامج تحتاج إلى متطوع بصفة ').
+        '<strong>'.$escAr($positionAR).
+        '</strong>'" />
+
+    <x-contract.dual :en="'to carry out the tasks mentioned in the attached job description,'" :ar="$Glyphs('لتنفيذ المهام المذكورة في التوصيف الوظيفي المرفق،')" />
+
+    <x-contract.dual :en="'And since the second team has shown willingness to undertake this voluntary work starting from the date of signing this contract,'" :ar="$Glyphs(
+        'ولما كان الفريق الثاني قد أبدى استعداده للقيام بهذا العمل التطوعي ابتداءً من تاريخ توقيع هذا العقد،',
+    )" />
+
+    <x-contract.dual :en="'The contract has been made between the two parties with mutual agreement of the following:'" :ar="$Glyphs('تم العقد بين الطرفين والقبول المشترك لما يلي:')" />
 </div>
 
-<div class="avoid-break mt-4" style="line-height: 1.3">
-    <x-contract.dual :en="$L('Contract Introduction:')" :ar="$L($Glyphs('مقدمة العقد:'))"/>
-    <x-contract.dual style="margin-top:-3px"
-                     :en="'The First Party wants to utilize the expertise of the second party as a <strong>'.$esc($positionEN).'</strong> and offered the second party the position whereas the second  party has agreed to this offer.'"
-                     :ar="$Glyphs('حيث أن الفريق الأول يرغب في الاستعانة بخبرة الفريق الثاني لكونه <strong>'.$esc($positionAR).'</strong> وعرض وعلى الفريق الثاني القيام بذلك وحيث أن هذا العرض قد لاقى قبول الفريق الثاني.')"/>
-</div>
 
-<div class="avoid-break mt-4" style="line-height: 1.1">
-    <x-contract.dual :en="$L('First term:')" :ar="$L($Glyphs('البند الأول:'))"/>
-    <x-contract.dual :en="'The introduction of this contract is considered an indissoluble part of it.'"
-                     :ar="$Glyphs('تُعتبر مقدمة هذا العقد جزءاً لا يتجزأ من هذا العقد.')"/>
-</div>
+<div class="avoid-break mt-3">
 
-<div class="avoid-break mt-4" style="line-height: 1.3">
-    <x-contract.dual :en="$L('Second term:')" :ar="$L($Glyphs('البند الثاني:'))"/>
-    <x-contract.dual :en="'The second party is committed to implementing all volunteering activities agreed on with the first party (attached with the job description).'"
-                     :ar="$Glyphs('على الفريق الثاني القيام بكافة الأعمال التطوعية المتفق عليها مع الفريق الأول (مرفقة بتوصيف العمل التطوعي).')"/>
+    <x-contract.dual :en="$LB('1. Contract Preamble:') . ' an integral part of it.'" :ar="$LB($Glyphs('1. مقدمة العقد:')) . ' ' . $Glyphs('جزء لا يتجزأ منه.')" />
+
+    <x-contract.dual :en="$LB('2. Contract type:') . ' <strong>Voluntary Probation agreement.</strong>'"
+        :ar="$LB($Glyphs('2. نوع العقد:')).
+        ' <strong>'.$Glyphs('عقد تطوعي تجريبي').
+        '</strong>'" />
+
+    <x-contract.dual :en="$LB('3. Place of Work:') . ' <strong>' . $esc($workPlaceEn) . '</strong>'"
+        :ar="$LB($Glyphs('3. مكان العمل:')).
+        ' <strong>'.$escAr($workPlaceAr).
+        '</strong>'" />
+
 </div>
