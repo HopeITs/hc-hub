@@ -1514,7 +1514,7 @@ strong, .dual-en strong, .dual-ar strong {
         text-align: left !important;
         font-family: 'somar-regular','NotoNaskhArabic','DejaVu Sans',sans-serif;
         font-size: 10pt;
-        line-height: 1.35;
+        line-height: 1.15;
         color: #414042;
     }
 
@@ -1525,7 +1525,7 @@ strong, .dual-en strong, .dual-ar strong {
         text-align: right !important;
         font-family: 'somar-regular','NotoNaskhArabic','DejaVu Sans',sans-serif;
         font-size: 10.5pt;
-        line-height: 1.35;
+        line-height: 1.15;
         color: #414042;
     }
 

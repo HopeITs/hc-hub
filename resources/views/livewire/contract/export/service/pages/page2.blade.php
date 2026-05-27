@@ -177,7 +177,7 @@
     />
     
 
-        <x-contract.dual class="mt-1" :en="'Christian Hope Center is to give a monthly stipend of <strong>/ ' . $salaryFormattedEn . ' USD /</strong>'"
+        <x-contract.dual class="mt-1" :en="'Christian Hope Center is to give a monthly stipend of<br><strong>/ ' . $salaryFormattedEn . ' USD /</strong>'"
         :ar="$SmartGlyphs('خصص الفريق الأول للفريق الثاني شهرياً مكافأة وقدرها') . '<br><strong>/ ' . $Glyphs('دولار أمريكي') . ' ' . $salaryFormattedAr . ' /</strong>'" />
 
     <x-contract.dual :en="'or its equivalent in Syrian pounds, to be paid in cash to the volunteer at the end of each month.'" 
