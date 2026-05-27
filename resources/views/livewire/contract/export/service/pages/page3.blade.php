@@ -1,4 +1,4 @@
-@php
+{{-- @php
     use Illuminate\Support\Number;
     use App\Support\ArabicText as AR;
 
@@ -79,7 +79,6 @@
     ];
 @endphp
 
-{{-- Third Term --}}
 <div class="avoid-break mt-8">
     <x-contract.dual :en="$L('Third term:')" :ar="$L($Glyphs('البند الثالث:'))"/>
 </div>
@@ -90,7 +89,6 @@
     :ar="$asList($AR_LIST_3, 'ar', 2)"
 />
 
-{{-- Fourth Term --}}
 <div class="avoid-break mt-4">
     <x-contract.dual :en="$L('Fourth term:')" :ar="$L($Glyphs('البند الرابع:'))"/>
 </div>
@@ -99,4 +97,108 @@
     rowClass="mt-6"
     :en="$asList($EN_LIST_4, 'en', 1)"
     :ar="$asList($AR_LIST_4, 'ar', 1)"
-/>
+/> --}}
+
+@php
+    use App\Support\ArabicText as AR;
+    
+    $forPdf = $forPdf ?? false;
+    $Glyphs = fn($s) => $forPdf ? AR::glyphs((string) $s) : (string) $s;
+    $SmartGlyphs = fn($s, $limit = 2000) => $forPdf ? AR::smartGlyphs((string)$s, $limit) : (string)$s;
+    $LB = fn($t) => '<span class="h-label-bold">' . $t . '</span>';
+    
+    $asList = function (array $lines) {
+        return '<div style="margin:0; padding:0;">' .
+            implode('', array_map(fn($l) => '<div style="margin-top:2px;">' . $l . '</div>', $lines)) .
+            '</div>';
+    };
+
+    $arBullet = function(array $lines) use ($SmartGlyphs) {
+        $html = '';
+        $count = count($lines);
+        foreach ($lines as $i => $line) {
+            $processed = $SmartGlyphs($line);
+            
+            if ($i === 0) {
+                $html .= $processed . ' -';
+            } else {
+                $html .= $processed;
+            }
+            
+            if ($i < $count - 1) {
+                $html .= '<br>';
+            }
+        }
+        return $html;
+    };
+@endphp
+
+<div class="avoid-break mt-4">
+    <x-contract.dual 
+        :en="$LB('10. Termination of the Contract:')" 
+        :ar="$LB($Glyphs('إنهاء العقد:') . ' .10')" />
+    
+    @php
+        $EN_TERM = [
+            '- The first party has the right to terminate this contract at any time before its expiry date in case the second party violates the terms of this contract and the volunteering code of conduct, or in the case of Unsatisfactory results of job performance.',
+            '- This contract will not be renewed without a written agreement of both parties, whereas each party shall inform the other of the contract termination one month prior to the end of the contract.',
+            '- The second party is committed to hand over to “Christian Hope Center” all the equipment, material, and documents that they received upon the termination or expiration of this contract, based on the personal receipt list of the volunteer.',
+        ];
+        
+        $AR_TERM = [
+$arBullet([
+                'يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل',
+                'انتهاء مدته في حال قيام الفريق الثاني بمخالفة بنود',
+                'هذا العقد والمستندات المرفقة به أو في حال نتائج',
+                'تقييم الأداء غير الجيدة.'
+            ]),
+            $arBullet([
+                'لا يتجدد هذا العقد لمدة أخرى إلا بموافقة الفريقين',
+                'خطياً، على أن يُعلم كل فريق الآخر بعدم التجديد قبل',
+                'شهر من انتهاء العقد، أو قبل شهر من تاريخ الرغبة',
+                'بفسخ العقد.'
+            ]),
+            $arBullet([
+                'يلتزم الفريق الثاني عند انتهاء أو إنهاء العقد بتسليم',
+                'جميع التجهيزات والمواد والوثائق المؤتمن بها للفريق',
+                'الأول وذلك استناداً لقائمة الاستلام الشخصي.'
+            ])
+        ];
+    @endphp
+    <x-contract.dual class="mt-1" :en="$asList($EN_TERM)" :ar="$asList($AR_TERM)" />
+</div>
+
+<div class="avoid-break mt-4">
+    <x-contract.dual 
+        :en="$LB('11. Special conditions:')" 
+        :ar="$LB($Glyphs('شروط خاصة:') . ' .11')" />
+
+    @php
+        $EN_SPECIAL = [
+            '- If the second party has a strong purpose to be absent, they must inform the first party.',
+            '- The second party stipend amount will be deducted for one working day in case of repeated delays beyond the specified working hours more than 3 times a month.',
+            '- The second team commits to maintaining the confidentiality of all information and documents they have access to, and not using them outside the scope of the volunteer work. The first team has the right to take legal action against the second team in case of a breach of this clause.',
+        ];
+
+        $AR_SPECIAL = [
+$arBullet([
+                'في حال اضطرار الفريق الثاني للغياب فعليه أخذ',
+                'موافقة الفريق الأول بذلك.'
+            ]),
+            $arBullet([
+                'يُخصم يوم عمل تطوعي للفريق الثاني من مكافأة',
+                'التطوّع المخصصة له في حال تكرار التأخير عن مواعيد',
+                'الدوام المحددة لأكثر من 3 مرات في الشهر مبلغاً يعادل',
+                'قيمة يوم دوام / جلسة.'
+            ]),
+            $arBullet([
+                'يتعهد الفريق الثاني بالحفاظ على سرّية جميع',
+                'المعلومات والوثائق التي يطّلع عليها، وعدم استخدامها',
+                'خارج نطاق العمل التطوّعي. ويحق للفريق الأول',
+                'مقاضاة الفريق الثاني في حال إخلاله بهذا البند.'
+            ])
+        ];
+    @endphp
+
+    <x-contract.dual class="mt-1" :en="$asList($EN_SPECIAL)" :ar="$asList($AR_SPECIAL)" />
+</div>
