@@ -631,7 +631,7 @@ $preambleSentenceAr = $SmartGlyphs(
     </div>
 </div>
 
-<div class="avoid-break mt-4">
+<div class="avoid-break mt-1">
     <x-contract.dual rowClass="fw-bold" :en="'Between'" :ar="$Glyphs('بين')" />
     <x-contract.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))" />
     <x-contract.dual 
@@ -642,7 +642,7 @@ $preambleSentenceAr = $SmartGlyphs(
 />
 </div>
 
-<div class="avoid-break mt-2">
+<div class="avoid-break mt-1">
     <x-contract.dual rowClass="fw-bold" :en="'And'"           :ar="$Glyphs('و')" />
     <x-contract.dual rowClass="mt-1"    :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))" />
 

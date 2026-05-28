@@ -210,7 +210,7 @@
     $preambleConclusionAr = $SmartGlyphs('تم العقد بين الطرفين والقبول المشترك لما يلي:');
 @endphp
 
-<div style="line-height: 1.15;">
+<div>
     
     {{-- ── TITLE SECTION ── --}}
     <div class="avoid-break contract-title-center">
@@ -222,7 +222,7 @@
     </div>
 
     {{-- ── FIRST PARTY ── --}}
-    <div class="avoid-break mt-2">
+    <div class="avoid-break mt-1">
         <x-contract.dual rowClass="fw-bold" :en="'Between'" :ar="$Glyphs('بين')" />
         <x-contract.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))" />
         <x-contract.dual 
@@ -232,7 +232,7 @@
     </div>
 
     {{-- ── SECOND PARTY ── --}}
-    <div class="avoid-break mt-2">
+    <div class="avoid-break mt-1">
         <x-contract.dual rowClass="fw-bold" :en="'And'" :ar="$Glyphs('و')" />
         <x-contract.dual rowClass="mt-1" :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))" />
         
@@ -258,7 +258,7 @@
     </div>
 
     {{-- ── PREAMBLE SECTION ── --}}
-    <div class="avoid-break" style="margin-top: 10px;">
+    <div class="avoid-break mt-1">
         <x-contract.dual
             :en="'<strong>Preamble:</strong>'"
             :ar="'<strong>' . $Glyphs('مقدمة العقد:') . '</strong>'" />
@@ -281,7 +281,7 @@
     </div>
 
     {{-- ── ARTICLES 1-3 ── --}}
-    <div class="avoid-break mt-2">
+    <div class="avoid-break mt-1">
         <x-contract.dual
             :en="$LB('1. Contract Preamble:') . ' an integral part of it.'"
             :ar="$Glyphs('جزء لا يتجزأ منه. ') . $LB($Glyphs('مقدمة العقد:') . ' .1')" />

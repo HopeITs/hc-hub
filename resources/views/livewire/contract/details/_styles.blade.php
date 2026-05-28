@@ -240,7 +240,7 @@
         font-weight:400;
         font-size:10.5pt;
         /* line-height:20pt; */
-        line-height: 1.5;
+        line-height: 1.35;
         color:var(--main);
     }
 
@@ -252,7 +252,7 @@
         font-weight:400;
         font-size:11pt;
         /* line-height:16pt; */
-        line-height: 1.5;
+        line-height: 1.35;
         color:var(--main);
     }
 

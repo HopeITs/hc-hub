@@ -102,13 +102,13 @@
     };
 @endphp
 
-<div style="line-height: 1.15;">
-    <div class="avoid-break" style="margin-top: 10px;">
-        <x-contract.dual 
+<div >
+    <div class="avoid-break" style="line-height: 0.7">
+        <x-contract.dual
             :en="$LB('10. Internal Rules and Regulations:')" 
             :ar="$LB($Glyphs('القوانين والأنظمة الداخلية:') . ' .10')" />
         
-        <x-contract.dual class="mt-1"
+        <x-contract.dual rowClass="mt-1 lh-tight"
             :en="'The second party acknowledges and pledges to commit to the following attached documents:'"
             :ar="$SmartGlyphs('يُقر الفريق الثاني ويتعهد بالاطلاع والالتزام<br>بالمستندات المرفقة التالية:')" />
 
@@ -120,15 +120,15 @@
                 $SmartGlyphs('سياسات مؤسسة مركز الرجاء المسيحي.') . ' -'
             ];
         @endphp
-        <x-contract.dual class="mt-1" :en="$asList($EN_RULES)" :ar="$asList($AR_RULES)" />
+        <x-contract.dual rowClass="mt-1 lh-tight" :en="$asList($EN_RULES)" :ar="$asList($AR_RULES)" />
     </div>
 
-    <div class="avoid-break" style="margin-top: 15px;">
+    <div class="avoid-break" style="line-height: 0.7">
         <x-contract.dual 
             :en="$LB('11. Expiration of the Contract:')" 
             :ar="$LB($Glyphs('انتهاء العقد:') . ' .11')" />
         
-        <x-contract.dual class="mt-1"
+        <x-contract.dual rowClass="mt-1 lh-tight"
             :en="'This contract is considered to be terminated in case of:'"
             :ar="$SmartGlyphs('يعتبر هذا العقد منتهياً في الحالات التالية:')" />
 
@@ -162,27 +162,28 @@
                 $arBullet(['نتائج تقييم الأداء غير المُرضيّة.'])
             ];
         @endphp
-        <x-contract.dual class="mt-1" :en="$asList($EN_TERMINATION)" :ar="$asList($AR_TERMINATION)" />
+        <x-contract.dual rowClass="mt-1 lh-tight" :en="$asList($EN_TERMINATION)" :ar="$asList($AR_TERMINATION)" />
     </div>
 
-    <div class="avoid-break" style="margin-top: 15px;">
+<div class="avoid-break mt-1" style="line-height: 0.7">
         <x-contract.dual 
             :en="$LB('12. Termination of the Contract:')" 
             :ar="$LB($Glyphs('إنهاء العقد:') . ' .12')" />
         
-        <x-contract.dual class="mt-1"
+        <x-contract.dual rowClass="mt-1 lh-tight"
             :en="'Hope Center Aleppo / Head office has the right to terminate this contract during the effective period, by informing the volunteer through a written termination notice one month in advance.'"
             :ar="
-                $SmartGlyphs('يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل انتهاء مدته') . '<br>' .
-                $SmartGlyphs('وذلك بإعلام الفريق الثاني خطيّاً قبل شهر.')
+                $SmartGlyphs('يحق للفريق الأول إنهاء هذا العقد في أي وقت') . '<br>' .
+                $SmartGlyphs('قبل انتهاء مدته وذلك بإعلام الفريق الثاني خطيّاً') . '<br>' .
+                $SmartGlyphs('قبل شهر.')
             " />
     </div>
-
-    <div class="avoid-break" style="margin-top: 15px;">
-        <x-contract.dual 
+    <div class="avoid-break" style="line-height: 0.7">
+        <x-contract.dual rowClass="lh-tight"
             :en="$LB('13. Duties and obligations on the extension, expiration, or termination of the agreement:')" 
-            :ar="$LB($Glyphs('الواجبات والالتزامات على تمديد أو انتهاء أو إنهاء العقد:') . ' .13')" />
-        
+            :ar="$LB($Glyphs('الواجبات والالتزامات على تمديد أو انتهاء') . ' .13') . '<br>' . $LB($Glyphs('أو إنهاء العقد:'))" />
+                   
+
         @php
             $EN_OBLIGATIONS = [
                 '- The first party is required to notify the second party through a written notice of the termination or extension date one month in advance.',
@@ -206,7 +207,7 @@
                     'للفريق الأول وذلك استناداً لقائمة الاستلام الشخصي.'
                 ])
             ];
-        @endphp
-        <x-contract.dual class="mt-1" :en="$asList($EN_OBLIGATIONS)" :ar="$asList($AR_OBLIGATIONS)" />
+        @endphp 
+        <x-contract.dual  rowClass="mt-1 lh-tight" :en="$asList($EN_OBLIGATIONS)" :ar="$asList($AR_OBLIGATIONS)" />
     </div>
 </div>

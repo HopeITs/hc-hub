@@ -119,10 +119,10 @@
 
 <div style="line-height: 1.15;">
     <div class="avoid-break" style="margin-top: 10px;">
-        <x-contract.dual 
+        <x-contract.dual rowClass="lh-tight"
             :en="$LB('14. Special conditions:')" 
             :ar="$LB($Glyphs('شروط خاصة:') . ' .14')" />
-        <x-contract.dual class="mt-1"
+        <x-contract.dual class="mt-1 lh-tight"
             :en="'The second team commits to maintaining the confidentiality of all information and documents they have access to, and not using them outside the scope of the volunteer work. The first team has the right to take legal action against the second team in case of a breach of this clause.'"
             :ar="
                 $SmartGlyphs('يتعهد الفريق الثاني بالحفاظ على سريّة جميع المعلومات') . '<br>' .
@@ -133,29 +133,31 @@
     </div>
 
     <div class="avoid-break" style="margin-top: 15px;">
-        <x-contract.dual 
+        <x-contract.dual rowClass="lh-tight"
             :en="$LB('15. This contract') . ' is a voluntary contract and is <strong>not subject to Labor Law No. /17/ of 2010</strong> or any amendments to the law or any new law, and it is also <strong>not subject to social security Law No. 92 of 1959 and its amendments</strong>. The second team has no right to claim any end-of-service compensation upon the expiration or termination of the second party contract.'"
             :ar="$ar_term_15" 
         />
     </div>
 
     <div class="avoid-break" style="margin-top: 15px;">
-        <x-contract.dual 
+        <x-contract.dual rowClass="lh-tight"
             :en="$LB('16. The contract is issued') . ' in Arabic and translated into English.'"
             :ar="$SmartGlyphs('باللغة العربية وتُرجم إلى اللغة الإنكليزية.') . ' ' . $LB($Glyphs('صدر هذا العقد') . ' .16')" />
     </div>
 
     <div class="avoid-break" style="margin-top: 15px;">
-        <x-contract.dual 
+        <x-contract.dual rowClass="lh-tight"
             :en="$LB('17. This contract was issued') . ' on 4 pages and contains 17 clauses, printed in a single copy preserved at the Head Office in Aleppo.'"
             :ar="
-                $SmartGlyphs('على 4 صفحات وعلى سبعة عشر بنداً، مطبوعاً') . ' ' . $LB($Glyphs('صدر هذا العقد') . ' .17') . '<br>' .
-                $SmartGlyphs('على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.')
+                $SmartGlyphs('على 4 صفحات وعلى سبعة عشر بنداً،') . ' ' . $LB($Glyphs('صدر هذا العقد') . ' .17') . '<br>' .
+                $SmartGlyphs('مطبوعاً على نسخة واحدة محفوظة لدى الإدارة') . '<br>' .
+                $SmartGlyphs('العامة في حلب.')
             " />
+            
     </div>
 
     <div class="avoid-break" style="margin-top: 25px;">
-        <x-contract.dual
+        <x-contract.dual rowClass="lh-tight"
             :en="'I hereby certify having read and understood the conditions stipulated above and all the attached documents and confirm that I accept them all.'"
             :ar="
                 $SmartGlyphs('أفيد بأنني قرأت وفهمت شروط العمل المنصوص عليها أعلاه') . '<br>' .
@@ -164,7 +166,7 @@
             " />
     </div>
 
-    <div class="avoid-break" style="position: relative; margin-top: 45px; min-height: 220px;">
+    <div class="avoid-break " style="position: relative; margin-top: 45px; min-height: 220px;">
         
         <div style="position: absolute; left: 0; text-align: center; width: 48%;">
             <div style="margin-bottom: 12px; font-size: 12pt;">

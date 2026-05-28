@@ -1454,7 +1454,7 @@ strong, .dual-en strong, .dual-ar strong {
     /* ── HEADER (in loop, normal flow) ── */
     .page-header {
         height: {{ $HEADER_HEIGHT_MM }}mm;   /* 24mm */
-        padding: 6px 25px 0 25px;
+        padding: 8px 25px 0 25px;
         box-sizing: border-box;
     }
     .page-header img { width: 100%; display: block; }
@@ -1527,6 +1527,11 @@ strong, .dual-en strong, .dual-ar strong {
         font-size: 10.5pt;
         line-height: 1.15;
         color: #414042;
+    }
+
+    .lh-tight .dual-en, .lh-tight .dual-en *,
+    .lh-tight .dual-ar, .lh-tight .dual-ar * {
+        line-height: 0.9 !important;
     }
 
     /* ── TITLE ROW ── */
