@@ -1,4 +1,4 @@
-@php
+{{-- @php
     use App\Support\ArabicText as AR;
 
     $forPdf = $forPdf ?? false;
@@ -61,4 +61,184 @@
 
 <x-contract.dual class=""
     :en="$asList($EN_LIST_7,'en',1)"
-    :ar="$asList($AR_LIST_7,'ar',1)"/>
+    :ar="$asList($AR_LIST_7,'ar',1)"/> --}}
+
+
+  @php
+    use App\Support\ArabicText as AR;
+    $forPdf = $forPdf ?? false;
+    $Glyphs = fn ($s) => $forPdf ? AR::glyphs((string)$s) : (string)$s;
+    $SmartGlyphs = fn($s, $limit = 2000) => $forPdf ? AR::smartGlyphs((string)$s, $limit) : (string)$s;
+    $LB     = fn ($t) => '<span class="h-label-bold">' . $t . '</span>';
+    
+    $asList = function(array $lines) {
+        return '<div style="margin:0; padding:0;">'
+            . implode('', array_map(fn($l) => '<div style="margin-top:2px;">'.$l.'</div>', $lines))
+            . '</div>';
+    };
+
+    $arBullet = function(array $lines) use ($SmartGlyphs) {
+        $html = '';
+        $count = count($lines);
+        foreach ($lines as $i => $line) {
+            $processed = $SmartGlyphs($line);
+            if ($i === 0) {
+                $html .= $processed . ' -';
+            } else {
+                $html .= $processed;
+            }
+            if ($i < $count - 1) {
+                $html .= '<br>';
+            }
+        }
+        return $html;
+    };
+
+
+    // --- اقتراحك الممتاز: تعريف المتغيرات هنا لترتيب الأرقام والأسطر ---
+    
+    $leaveRule1Ar = $SmartGlyphs('لا يحق للفريق الثاني إجازات خلال فترة سريان العقد') . ' -<br>' . 
+                    $SmartGlyphs('التجريبي.');
+
+    // تركيب السطر: (اليسار: أيام متتالية...) + 3 + (اليمين: أكثر من)
+    $leaveRule2Ar = $SmartGlyphs('في حال اضطرّار الفريق الثاني للغياب فعليه أخذ') . ' -<br>' .
+                    $SmartGlyphs('موافقة الفريق الأول بذلك على ألا يتجاوز الأمر') . '<br>' .
+                    $SmartGlyphs('أيام متتالية خلال فترة العقد، وذلك') . ' 3 ' . $SmartGlyphs('أكثر من') . '<br>' .
+                    $SmartGlyphs('ما عدا حالات الوفاة والمرض.');
+
+    // تركيب السطر: (اليسار: مرات في الشهر.) + 3 + (اليمين: موعد الدوام المحدد لأكثر من)
+    $leaveRule3Ar = $SmartGlyphs('يُخصم يوم عمل تطوّّعي للفريق الثاني من مكافأة') . ' -<br>' .
+                    $SmartGlyphs('التطوّّع المخصصة له في حال تكرار التأخير عن') . '<br>' .
+                    $SmartGlyphs('مرات في الشهر.') . ' 3 ' . $SmartGlyphs('موعد الدوام المحدد لأكثر من');
+@endphp
+
+<div style="line-height: 1.15;">
+    
+    {{-- <div class="avoid-break" style="margin-top: 10px;">
+        <x-contract.dual rowClass="lh-tight" :en="$LB('9. Annual Leave:')" :ar="$LB($Glyphs('إجازات العمل التطوعّي:') . ' .9')" />
+        
+        <x-contract.dual rowClass="mt-1 lh-tight"
+            :en="'- The second party is not entitled to any leave days during the period of the trial contract.'" 
+            :ar="$SmartGlyphs('لا يحق للفريق الثاني إجازات خلال فترة سريان العقد التجريبي.') . ' -'" />
+
+        <x-contract.dual rowClass="mt-1 lh-tight"
+            :en="'- If the second party has a strong reason to be absent, they must inform the first party, as the leave shall not exceed 3 days in a row during the contract period, except in cases of death or severe sickness.'" 
+            :ar="
+                $SmartGlyphs('في حال اضطرّار الفريق الثاني للغياب فعليه أخذ موافقة الفريق') . ' -<br>' .
+                $SmartGlyphs('الأول بذلك على ألا يتجاوز الأمر أكثر من 3 أيام متتالية') . '<br>' .
+                $SmartGlyphs('خلال فترة العقد، وذلك ما عدا حالات الوفاة والمرض.')
+            " />
+
+        <x-contract.dual rowClass="mt-1 lh-tight"
+            :en="'- The second party stipend amount will be deducted for one working day in case of repeated delays beyond the specified working hours more than 3 times a month.'" 
+            :ar="
+                $SmartGlyphs('يُخصم يوم عمل تطوّّعي للفريق الثاني من مكافأة التطوّّع المخصصة') . ' -<br>' .
+                $SmartGlyphs('له في حال تكرار التأخير عن موعد الدوام المحدد لأكثر من 3 مرات في الشهر.')
+            " />
+    </div> --}}
+
+<div class="avoid-break" style="margin-top: 10px;">
+        <x-contract.dual rowClass="lh-tight" :en="$LB('9. Annual Leave:')" :ar="$LB($Glyphs('إجازات العمل التطوعّي:') . ' .9')" />
+        
+        <x-contract.dual rowClass="mt-1 lh-tight"
+            :en="'- The second party is not entitled to any leave days during the period of the trial contract.'" 
+            :ar="$leaveRule1Ar" />
+
+        <x-contract.dual rowClass="mt-1 lh-tight"
+            :en="'- If the second party has a strong reason to be absent, they must inform the first party, as the leave shall not exceed 3 days in a row during the contract period, except in cases of death or severe sickness.'" 
+            :ar="$leaveRule2Ar" />
+
+        <x-contract.dual rowClass="mt-1 lh-tight"
+            :en="'- The second party stipend amount will be deducted for one working day in case of repeated delays beyond the specified working hours more than 3 times a month.'" 
+            :ar="$leaveRule3Ar" />
+    </div>
+
+    <div class="avoid-break" style="margin-top: 15px;">
+        <x-contract.dual rowClass="lh-tight"
+            :en="$LB('10. Internal Rules and Regulations:')" 
+            :ar="$LB($Glyphs('القوانين والأنظمة الداخلية:') . ' .10')" />
+        
+        <x-contract.dual rowClass="mt-1 lh-tight"
+            :en="'The second party acknowledges and pledges to commit to the following attached documents:'"
+            :ar="$SmartGlyphs(' الفريق الثاني يُقر ويتعهد بالاطلاع والالتزام<br>بالمستندات المرفقة التالية:')" />
+
+        @php
+            $EN_RULES = ['- Job description.', '- Code of Conduct.', '- Christian Hope Center Policies.'];
+            $AR_RULES = [
+                $SmartGlyphs('توصيف العمل التطوّعي.') . ' -', 
+                $SmartGlyphs('القواعد الأخلاقية للتطوّع.') . ' -', 
+                $SmartGlyphs('سياسات مؤسسة مركز الرجاء المسيحي.') . ' -'
+            ];
+        @endphp
+        <x-contract.dual rowClass="mt-1 lh-tight" :en="$asList($EN_RULES)" :ar="$asList($AR_RULES)" />
+    </div>
+
+    {{-- <div class="avoid-break" style="margin-top: 15px;">
+        <x-contract.dual rowClass="lh-tight" :en="$LB('11. Termination of the Contract:')" :ar="$LB($Glyphs('إنهاء العقد:') . ' .11')" />
+        @php
+            $EN_TERM = [
+                '- The first party has the right to terminate this contract at any time before its expiry date in case the second party violates the terms of this contract and the volunteering code of conduct.',
+                '- If the second party wishes to terminate the contract, the second party is obliged to inform the first party at least a Two week before the end of the contract period.',
+                '- The second party is committed to hand over to "Christian Hope Center" all the equipment, material, and documents that they received upon the termination or expiration of this contract, based on the personal receipt list of the volunteer.'
+            ];
+            $AR_TERM = [
+                $arBullet([
+                    'يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل إنتهاء مدته',
+                    'في حال قيام الفريق الثاني بمخالفة بنود هذا العقد والمستندات المرفقة به.'
+                ]),
+                $arBullet([
+                    'في حال رغبة الفريق الثاني بفسخ العقد، يلتزم بأن يُعلم الفريق الأول',
+                    'قبل أسبوعين على الأقل من تاريخ انتهاء العقد.'
+                ]),
+                $arBullet([
+                    'يلتزم الفريق الثاني عند انتهاء أو إنهاء العقد بتسليم جميع التجهيزات',
+                    'والمواد والوثائق المؤتمن بها للفريق الأول وذلك استناداً لقائمة الاستلام الشخصي.'
+                ])
+            ];
+        @endphp
+        <x-contract.dual rowClass="mt-1 lh-tight" :en="$asList($EN_TERM)" :ar="$asList($AR_TERM)" />
+    </div> --}}
+
+    <div class="avoid-break" style="margin-top: 15px;">
+        <x-contract.dual rowClass="lh-tight" :en="$LB('11. Termination of the Contract:')" :ar="$LB($Glyphs('إنهاء العقد:') . ' .11')" />
+        @php
+            $EN_TERM = [
+                '- The first party has the right to terminate this contract at any time before its expiry date in case the second party violates the terms of this contract and the volunteering code of conduct.',
+                '- If the second party wishes to terminate the contract, the second party is obliged to inform the first party at least a Two week before the end of the contract period.',
+                '- The second party is committed to hand over to "Christian Hope Center" all the equipment, material, and documents that they received upon the termination or expiration of this contract, based on the personal receipt list of the volunteer.'
+            ];
+            $AR_TERM = [
+                $arBullet([
+                    'يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل',
+                    'إنتهاء مدته في حال قيام الفريق الثاني بمخالفة بنود',
+                    'هذا العقد والمستندات المرفقة به.'
+                ]),
+                $arBullet([
+                    'في حال رغبة الفريق الثاني بفسخ العقد، يلتزم بأن',
+                    'يُعلم الفريق الأول قبل أسبوعين على الأقل من تاريخ',
+                    'انتهاء العقد.'
+                ]),
+                $arBullet([
+                    'يلتزم الفريق الثاني عند انتهاء أو إنهاء العقد',
+                    'بتسليم جميع التجهيزات والمواد والوثائق المؤتمن بها',
+                    'للفريق الأول وذلك استناداً لقائمة الاستلام الشخصي.'
+                ])
+            ];
+        @endphp
+        <x-contract.dual rowClass="mt-1 lh-tight" :en="$asList($EN_TERM)" :ar="$asList($AR_TERM)" />
+    </div>
+
+    <div class="avoid-break" style="margin-top: 15px;">
+        <x-contract.dual rowClass="lh-tight" :en="$LB('12. Special conditions:')" :ar="$LB($Glyphs('شروط خاصة:') . ' .12')" />
+        <x-contract.dual rowClass="mt-1 lh-tight"
+            :en="'The second team commits to maintaining the confidentiality of all information and documents they have access to, and not using them outside the scope of the volunteer work. The first team has the right to take legal action against the second team in case of a breach of this clause.'"
+            :ar="
+                $SmartGlyphs('يتعهد الفريق الثاني بالحفاظ على سريّة جميع المعلومات') . '<br>' .
+                $SmartGlyphs('والوثائق التي يطّلّع عليها، وعدم استخدامها خارج نطاق العمل') . '<br>' .
+                $SmartGlyphs('التطوّعي. ويحق للفريق الأول مقاضاة الفريق الثاني في حال') . '<br>' .
+                $SmartGlyphs('إخلاله بهذا البند.')
+            " />
+    </div>
+</div>  
+
+                
