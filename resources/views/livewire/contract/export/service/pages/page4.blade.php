@@ -147,9 +147,9 @@
     <x-contract.dual
         :en="'I hereby certify having read and understood the conditions stipulated above and all the attached documents and confirm that I accept them all.'"
  :ar="
-            $SmartGlyphs('أفيد بأنني قرأت وفهمت شروط العمل المنصوص') . '<br>' .
-            $SmartGlyphs('عليها أعلاه وكافة المستندات المرفقة وأقر') . '<br>' .
-            $SmartGlyphs('بموافقتي على كل ما ورد، وعليه أوقّع.')
+                $SmartGlyphs('أفيد بأنني قرأت وفهمت شروط العمل المنصوص عليها أعلاه') . '<br>' .
+                $SmartGlyphs('وكافة المستندات المرفقة وأقر بموافقتي على كل ما ورد،') . '<br>' .
+                $SmartGlyphs('وعليه أوقّع.')
         " />
 </div>
 

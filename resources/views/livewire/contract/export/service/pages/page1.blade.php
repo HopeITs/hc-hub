@@ -631,18 +631,18 @@ $preambleSentenceAr = $SmartGlyphs(
     </div>
 </div>
 
-<div class="avoid-break mt-1">
+<div class="avoid-break mt-2">
     <x-contract.dual rowClass="fw-bold" :en="'Between'" :ar="$Glyphs('بين')" />
     <x-contract.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))" />
     <x-contract.dual 
-    :en="'<strong>Christian Hope Center - Syria</strong><br>Represented by the Vice chairman of the board of trustees<br><strong>Mr. Fredy Youssef</strong>'"
+    :en="'<strong>Christian Hope Center - Syria</strong><br>Represented by the Vice chairman of the board of trustees <strong>Mr. Fredy Youssef</strong>'"
     :ar="'<strong>' . $Glyphs('مؤسسة مركز الرجاء المسيحي - سوريا') . '</strong><br>' . 
          $Glyphs('ينوب عنها بالتوقيع نائب رئيس مجلس الأمناء') . '<br>' . 
          '<strong>' . $Glyphs('السيد فريدي يوسف') . '</strong>'" 
 />
 </div>
 
-<div class="avoid-break mt-1">
+<div class="avoid-break mt-2">
     <x-contract.dual rowClass="fw-bold" :en="'And'"           :ar="$Glyphs('و')" />
     <x-contract.dual rowClass="mt-1"    :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))" />
 
@@ -668,7 +668,7 @@ $preambleSentenceAr = $SmartGlyphs(
         :ar="'<strong>' . $escAr($addressAr) . '</strong> ' . $Glyphs('العنوان:')" />
 </div>
 
-<div class="avoid-break" style="margin-top: 3px;">
+<div class="avoid-break mt-2">
     <x-contract.dual
         :en="'<strong>Preamble:</strong>'"
         :ar="'<strong>' . $Glyphs('مقدمة العقد:') . '</strong>'" />
@@ -689,7 +689,7 @@ $preambleSentenceAr = $SmartGlyphs(
         :en="'The contract has been made between the two parties with mutual agreement of the following:'"
         :ar="$preambleConclusionAr" />
 </div>
-<div class="avoid-break mt-3">
+<div class="avoid-break mt-2">
     <x-contract.dual
         :en="$LB('1. Contract Preamble:') . ' an integral part of it.'"
         :ar="$Glyphs('جزء لا يتجزأ منه. ') . $LB($Glyphs('مقدمة العقد:') . ' .1')" />

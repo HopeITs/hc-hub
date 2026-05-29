@@ -195,16 +195,16 @@
     $isGeneralProject = !$isStudyZone;
 @endphp
 
-<div style="line-height: 0.9" >
 
-    <div class="avoid-break mt-1" style="line-height: 0.7">
+
+    <div class="avoid-break mt-4" >
         <x-contract.dual :en="$LB('4. Job description:')" :ar="$LB($Glyphs('وصف العمل:') . ' .4')" />
-        <x-contract.dual rowClass="mt-1 lh-tight" :en="'<strong>' . $esc($positionTitleEn) . '</strong>'" :ar="$SmartGlyphs('<strong>'.$esc($positionTitleAr).'</strong>')" />
+        <x-contract.dual rowClass="mt-1" :en="'<strong>' . $esc($positionTitleEn) . '</strong>'" :ar="$SmartGlyphs('<strong>'.$esc($positionTitleAr).'</strong>')" />
     </div>
 
-    <div class="avoid-break mt-1" style="line-height: 0.7">
+    <div class="avoid-break mt-4" >
         <x-contract.dual :en="$LB('5. Duration of the contract:')" :ar="$LB($Glyphs('مدة العقد:') . ' .5')" />
-        <x-contract.dual rowClass="mt-1 lh-tight" :en="'<strong>' . $durationLabelEn . '</strong>'" :ar="'<strong>' . $durationLabelAr . '</strong>'" />
+        <x-contract.dual rowClass="mt-1" :en="'<strong>' . $durationLabelEn . '</strong>'" :ar="'<strong>' . $durationLabelAr . '</strong>'" />
 
         <x-contract.dual rowClass="mt-1" :en="'Start date: <strong>' . $esc($startStr) . '</strong>'"
             :ar="$Glyphs('تبدأ من تاريخ: <strong>'.$esc($startStrAr).'</strong>')" />
@@ -213,45 +213,16 @@
             :ar="$Glyphs('وتنتهي إلى تاريخ: <strong>'.$esc($endStrAr).'</strong>')" />
     </div>
 
-    {{-- <div class="avoid-break">
-        <x-contract.dual :en="$LB('6. Volunteer Work Hours:')" :ar="$LB($Glyphs('ساعات العمل التطوعّي:') . ' .6')" />
-        
-        <x-contract.dual class="mt-1"
-            :en="'<strong>' . $weeklyHours . ' working hours</strong> per week, <strong>' . $dailyHours . ' hours</strong> per day.'" 
-            :ar="$SmartGlyphs('<strong>' . $weeklyHours . ' ساعة</strong> عمل أسبوعياً، <strong>' . $dailyHours . ' ساعات</strong> يومياً.')" />
-        
-        <x-contract.dual class="mt-1" 
-            :en="'Standard office hours are ' . $workDaysEn . ' from ' . $dailyStart . ' to ' . $dailyEnd . '.'"
-            :ar="$SmartGlyphs('من نهار ' . $workDaysAr . ' من الساعة ' . $dailyStart . ' حتى الساعة ' . $dailyEnd . '.')" />
-
-        @if($isGeneralProject)
-            <x-contract.dual class="mt-1"
-                :en="'Saturdays are considered working days when necessary and not treated as extra hours.'"
-                :ar="$SmartGlyphs('يعتبر يوم السبت يوم عمل في حال رأت الإدارة الحاجة<br>لذلك، ولا يعتبر دوام إضافي.')"/>
-        @endif
-
-        @if($isStudyZone)
-            <x-contract.dual class="mt-1"
-                :en="'Volunteers are entitled to a second day off in the week, to be determined in coordination with management and based on work requirements. It is permitted to adjust working hours and holidays in months that require opening the center 7 days, in coordination with the direct manager and the HR officer.'"
-                :ar="
-                    $SmartGlyphs('يحق للمتطوع يوم عطلة ثان ضمن الأسبوع، يتم تحديده') . '<br>' .
-                    $SmartGlyphs('بالتنسيق مع الإدارة وما يتطلبه العمل. يسمح بتعديل أوقات') . '<br>' .
-                    $SmartGlyphs('الدوام والعطل في الأشهر التي تتطلب فتح المركز 7 أيام،') . '<br>' .
-                    $SmartGlyphs('وذلك بالتنسيق مع المدير المباشر ومسؤول الموارد البشرية.')
-                "/>
-        @endif
-    </div> --}}
-
-    <div class="avoid-break mt-1" style="line-height: 0.7">
+    <div class="avoid-break mt-4" >
         <x-contract.dual 
             :en="$LB('6. Volunteer Work Hours:')" 
             :ar="$LB($Glyphs('ساعات العمل التطوعّي:') . ' .6')" />
         
-        <x-contract.dual rowClass="mt-1 lh-tight"
+        <x-contract.dual rowClass="mt-1"
             :en="'<strong>' . $weeklyHours . ' working hours</strong> per week, <strong>' . $dailyHours . ' hours</strong> per day.'" 
             :ar="$SmartGlyphs('ساعات يومياً.') . ' <strong>' . $dailyHours . '</strong> ' . $SmartGlyphs('ساعة عمل أسبوعياً،') . ' <strong>' . $weeklyHours . '</strong>'" />
         
-<x-contract.dual rowClass="mt-1 lh-tight" 
+<x-contract.dual rowClass="mt-1" 
             :en="'Standard office hours are ' . $workDaysEn . ' from ' . $dailyStart . ' to ' . $dailyEnd . '.'"
             
             :ar="
@@ -259,13 +230,13 @@
                 '. ' . $wrapLtr($dailyEnd) . ' ' . $SmartGlyphs('حتى الساعة') . ' ' . $wrapLtr($dailyStart) . ' ' . $SmartGlyphs('من الساعة')
             " />
         @if($isGeneralProject)
-            <x-contract.dual rowClass="mt-1 lh-tight"
+            <x-contract.dual rowClass="mt-1"
                 :en="'Saturdays are considered working days when necessary and not treated as extra hours.'"
                 :ar="$SmartGlyphs('يعتبر يوم السبت يوم عمل في حال رأت الإدارة الحاجة<br>لذلك، ولا يعتبر دوام إضافي.')"/>
         @endif
 
         @if($isStudyZone)
-            <x-contract.dual rowClass="mt-1 lh-tight"
+            <x-contract.dual rowClass="mt-1"
                 :en="'Volunteers are entitled to a second day off in the week, to be determined in coordination with management and based on work requirements. It is permitted to adjust working hours and holidays in months that require opening the center 7 days, in coordination with the direct manager and the HR officer.'"
                 :ar="
                     $SmartGlyphs('يحق للمتطوع يوم عطلة ثان ضمن الأسبوع، يتم تحديده') . '<br>' .
@@ -276,10 +247,10 @@
         @endif
     </div>
 
-    <div class="avoid-break mt-1" style="line-height: 0.7">
+    <div class="avoid-break mt-4" >
         <x-contract.dual :en="$LB('7. Stipend and Benefits:')" :ar="$LB($Glyphs('المكافأة المالية والمزايا:') . ' .7')" />
         
-        <x-contract.dual rowClass="mt-1 lh-tight"
+        <x-contract.dual rowClass="mt-1"
             :en="'Christian Hope Center is to give a monthly stipend of<br><strong>/ ' . $salaryFormattedEn . ' USD /</strong>'" 
             :ar="$SmartGlyphs('خصص الفريق الأول للفريق الثاني شهرياً مكافأة وقدرها') . '<br><strong>/ ' . $Glyphs('دولار أمريكي') . ' ' . $salaryFormattedAr . ' /</strong>'" />
 
@@ -287,41 +258,14 @@
             :ar="$SmartGlyphs('أو ما يعادلها بالليرة السورية، تُمنح نقداً في نهاية كل شهر.')" />
     </div> 
 
-    <div class="avoid-break" class="mt-1" style="line-height: 0.7">
+    <div class="avoid-break" class="mt-4" >
         <x-contract.dual :en="$LB('8. Duties:')" :ar="$LB($Glyphs('المسؤوليات:') . ' .8')" />
-        <x-contract.dual rowClass="mt-1 lh-tight"
+        <x-contract.dual rowClass="mt-1"
             :en="'The second party commits to the description of the volunteer work approved by the first team. Therefore, their signature on this contract is an acknowledgment of their full commitment to it.'" 
             :ar="$SmartGlyphs('يلتزم الفريق الثاني بتوصيف العمل التطوّعي الذي أقرّه<br>الفريق الأول، وعليه فإن توقيعه على هذا العقد<br>هو إقرار منه بالتزامه الكامل بها.')" />
     </div>
 
-    <div class="avoid-break" style="line-height: 0.7">
-        <x-contract.dual :en="$LB('9. Annual Leave:')" :ar="$LB($Glyphs('إجازات العمل التطوعّي:') . ' .9')" />
-        
-        <x-contract.dual  rowClass="mt-1 lh-tight"
-            :en="'The second team is entitled to <strong>' . $annualLeaveDays . '</strong> days of working days leave during the validity period of the contract, with it being proportional to the duration of the contract.'" 
-            :ar="
-                $SmartGlyphs('يوم إجازة سنوية خلال فترة سريان') . ' <strong>' . $annualLeaveDays . '</strong> ' . $SmartGlyphs('يحق للفريق الثاني') . '<br>' .
-                $SmartGlyphs('العقد، وتكون متناسبة مع مدة العقد.')
-            " />
 
-        <x-contract.dual  rowClass="mt-1 lh-tight"
-            :en="'The second team is entitled to 24 days of sick leave in cases of operations and infectious diseases, 12 days paid and 12 days paid at half the value of the monthly stipend, provided that a medical report is submitted to justify the leave.'" 
-            :ar="
-                $SmartGlyphs('يوم إجازة مرضية عند الضرورة فقط،') . ' 24 ' . $SmartGlyphs('يحق للفريق الثاني') . '<br>' .
-                $SmartGlyphs('يوم مدفوع') . ' 12 ' . $SmartGlyphs('أي في حالات العمليات والأمراض المُعديَة،') . '<br>' .
-                $SmartGlyphs('يوم مدفوع بنصف قيمة المكافأة المالية الشهرية وذلك') . ' 12' . $Glyphs('و') . '<br>' .
-                $SmartGlyphs('بشرط تقديم تقرير طبي لتبرير الإجازة.')
-            " />
-
-        <x-contract.dual  rowClass="mt-1 lh-tight"
-            :en="'- In case the second team consumes all annual and sickness leave days, they will be given 12 days of leave with the deduction of the number of leave days from the monthly stipend allowance.'" 
-            :ar="
-                $SmartGlyphs('في حال تجاوز الفريق الثاني أيام الاجازات المحددة له') . ' -<br>' .
-                $SmartGlyphs('والتي تتناسب مع العقد سواءً إجازات عادية أو مرضية، يتم') . '<br>' .
-                $SmartGlyphs('يوم يتم خصم قيمتها من') . ' 12 ' . $SmartGlyphs('منحه إجازة لا تتجاوز مدتها') . '<br>' .
-                $SmartGlyphs('المكافأة المالية الشهرية المخصصة له.')
-            " />
-    </div>
  {{-- <div class="avoid-break mt-1" style="line-height: 0.6">
         <x-contract.dual :en="$LB('9. Annual Leave:')" :ar="$LB($Glyphs('إجازات العمل التطوعّي:') . ' .9')" />
         
@@ -347,4 +291,3 @@
     </div> --}}
 
 
-</div>

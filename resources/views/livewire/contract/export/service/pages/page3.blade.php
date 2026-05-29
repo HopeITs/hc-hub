@@ -165,7 +165,11 @@ $arBullet([
             ])
         ];
     @endphp
-    <x-contract.dual class="mt-1" :en="$asList($EN_TERM)" :ar="$asList($AR_TERM)" />
+    {{-- <x-contract.dual class="mt-1" :en="$asList($EN_TERM)" :ar="$asList($AR_TERM)" /> --}}
+
+            @foreach ($EN_TERM as $index => $enItem)
+        <x-contract.dual class="mt-1" :en="$enItem" :ar="$AR_TERM[$index]" />
+    @endforeach
 </div>
 
 <div class="avoid-break mt-4">
@@ -200,5 +204,8 @@ $arBullet([
         ];
     @endphp
 
-    <x-contract.dual class="mt-1" :en="$asList($EN_SPECIAL)" :ar="$asList($AR_SPECIAL)" />
+    {{-- <x-contract.dual class="mt-1" :en="$asList($EN_SPECIAL)" :ar="$asList($AR_SPECIAL)" /> --}}
+        @foreach ($EN_SPECIAL as $index => $enItem)
+        <x-contract.dual class="mt-1" :en="$enItem" :ar="$AR_SPECIAL[$index]" />
+    @endforeach
 </div>

@@ -4,13 +4,31 @@
     $forPdf = $forPdf ?? false;
     $Glyphs = fn($s) => $forPdf ? AR::glyphs((string) $s) : (string) $s;
     $LB     = fn($t) => '<span class="h-label-bold">' . $t . '</span>';
-
+    $annualLeaveDays = $contract->leaveBalances->first()?->int_total ?? '—';
+  $Digits = fn($s) => $forPdf ? ar_digits((string) $s) : (string) $s;
     $asList = function(array $lines) {
         return '<div style="margin:0; padding:0;">'
             . implode('', array_map(fn($l) => '<div style="margin-top:2px;">'.$l.'</div>', $lines))
             . '</div>';
     };
 @endphp
+
+<div class="avoid-break mt-1">
+    <x-contract.dual :en="$LB('9. Annual Leave:')" :ar="$LB($Glyphs('9. إجازات العمل التطوعّي:'))" />
+    
+    <x-contract.dual class="mt-1" 
+        :en="'The second team is entitled to <strong>' . $annualLeaveDays . '</strong> days of working days leave during the validity period of the contract, with it being proportional to the duration of the contract.'" 
+        :ar="$Glyphs('يحق للفريق الثاني ') . '<strong>' . $Digits($annualLeaveDays) . '</strong>' . $Glyphs(' يوم إجازة سنوية خلال فترة سريان العقد، وتكون متناسبة مع مدة العقد.')" />
+
+    <x-contract.dual class="mt-1" 
+        :en="'The second team is entitled to 24 days of sick leave in cases of operations and infectious diseases, 12 days paid and 12 days paid at half the value of the monthly stipend, provided that a medical report is submitted to justify the leave.'" 
+        :ar="$Glyphs('يحق للفريق الثاني 24 يوم إجازة مرضية عند الضرورة فقط، أي في حالات العمليات والأمراض المُعديَة، 12 يوم مدفوع و12 يوم مدفوع بنصف قيمة المكافأة المالية الشهرية وذلك بشرط تقديم تقرير طبي لتبرير الإجازة.')" />
+
+    <x-contract.dual class="mt-1" 
+        :en="'- In case the second team consumes all annual and sickness leave days, they will be given 12 days of leave with the deduction of the number of leave days from the monthly stipend allowance.'" 
+        :ar="$Glyphs('- في حال تجاوز الفريق الثاني أيام الاجازات المحددة له والتي تتناسب مع العقد سواءً إجازات عادية أو مرضية، يتم منحه إجازة لا تتجاوز مدتها 12 يوم يتم خصم قيمتها من المكافأة المالية الشهرية المخصصة له.')" />
+</div>
+
 
 <div class="avoid-break mt-1">
     <x-contract.dual 
@@ -64,34 +82,3 @@
         :ar="$asList($AR_TERMINATION)" />
 </div>
 
-<div class="avoid-break mt-1">
-    <x-contract.dual 
-        :en="$LB('12. Termination of the Contract:')" 
-        :ar="$LB($Glyphs('12. إنهاء العقد:'))" />
-    
-    <x-contract.dual class="mt-1"
-        :en="'Hope Center Aleppo / Head office has the right to terminate this contract during the effective period, by informing the volunteer through a written termination notice one month in advance.'"
-        :ar="$Glyphs('يحق للفريق الأول إنهاء هذا العقد في أي وقت قبل انتهاء مدته وذلك بإعلام الفريق الثاني خطيّاً قبل شهر.')" />
-</div>
-
-<div class="avoid-break mt-1">
-    <x-contract.dual 
-        :en="$LB('13. Duties and obligations on the extension, expiration, or termination of the agreement:')" 
-        :ar="$LB($Glyphs('13. الواجبات والالتزامات على تمديد أو انتهاء أو إنهاء العقد:'))" />
-    
-    @php
-        $EN_OBLIGATIONS = [
-            '- The first party is required to notify the second party through a written notice of the termination or extension date one month in advance.',
-            '- The second party is required to notify the first party of their wish to end the volunteering one month in advance.',
-            '- The second party is committed to hand over to Christian Hope Center all the equipment, material, and documents that they received upon the termination or expiration of this contract, based on the personal receipt list of the volunteer.'
-        ];
-        $AR_OBLIGATIONS = [
-            $Glyphs('- يلتزم الفريق الأول عند رغبته بالتمديد أو عدمه بأن يُبلّغ الفريق الثاني بذلك بشكل خطيّ قبل مدة شهر.'),
-            $Glyphs('- يلتزم الفريق الثاني عند رغبته بمغادرة العمل التطوّعي خلال مدة سريان العقد بأن يبلغ الفريق الأول بذلك بشكل خطيّ قبل مدة شهر.'),
-            $Glyphs('- يلتزم الفريق الثاني عند انتهاء أو إنهاء فترة تطوّعه بتسليم جميع التجهيزات والمواد والوثائق المؤتمن بها للفريق الأول وذلك استناداً لقائمة الاستلام الشخصي.')
-        ];
-    @endphp
-    <x-contract.dual class="mt-1" 
-        :en="$asList($EN_OBLIGATIONS)" 
-        :ar="$asList($AR_OBLIGATIONS)" />
-</div>

@@ -70,21 +70,21 @@
 </div>
  --}}
 
- @php
+@php
     use App\Support\ArabicText as AR;
 
     $forPdf = $forPdf ?? false;
     $Glyphs = fn($s) => $forPdf ? AR::glyphs((string) $s) : (string) $s;
-    $SmartGlyphs = fn($s, $limit = 2000) => $forPdf ? AR::smartGlyphs((string)$s, $limit) : (string)$s;
-    $LB     = fn($t) => '<span class="h-label-bold">' . $t . '</span>';
-
-    $asList = function(array $lines) {
-        return '<div style="margin:0; padding:0;">'
-            . implode('', array_map(fn($l) => '<div style="margin-top:2px;">'.$l.'</div>', $lines))
-            . '</div>';
+    $SmartGlyphs = fn($s, $limit = 2000) => $forPdf ? AR::smartGlyphs((string) $s, $limit) : (string) $s;
+    $LB = fn($t) => '<span class="h-label-bold">' . $t . '</span>';
+    $annualLeaveDays = $contract->leaveBalances->first()?->int_total ?? '—';
+    $asList = function (array $lines) {
+        return '<div style="margin:0; padding:0;">' .
+            implode('', array_map(fn($l) => '<div style="margin-top:2px;">' . $l . '</div>', $lines)) .
+            '</div>';
     };
 
-    $arBullet = function(array $lines) use ($SmartGlyphs) {
+    $arBullet = function (array $lines) use ($SmartGlyphs) {
         $html = '';
         $count = count($lines);
         foreach ($lines as $i => $line) {
@@ -102,112 +102,92 @@
     };
 @endphp
 
-<div >
-    <div class="avoid-break" style="line-height: 0.7">
-        <x-contract.dual
-            :en="$LB('10. Internal Rules and Regulations:')" 
-            :ar="$LB($Glyphs('القوانين والأنظمة الداخلية:') . ' .10')" />
-        
-        <x-contract.dual rowClass="mt-1 lh-tight"
-            :en="'The second party acknowledges and pledges to commit to the following attached documents:'"
-            :ar="$SmartGlyphs('يُقر الفريق الثاني ويتعهد بالاطلاع والالتزام<br>بالمستندات المرفقة التالية:')" />
 
-        @php
-            $EN_RULES = ['- Job description.', '- Code of Conduct.', '- Christian Hope Center Policies.'];
-            $AR_RULES = [
-                $SmartGlyphs('توصيف العمل التطوّعي.') . ' -', 
-                $SmartGlyphs('القواعد الأخلاقية للتطوّع.') . ' -', 
-                $SmartGlyphs('سياسات مؤسسة مركز الرجاء المسيحي.') . ' -'
-            ];
-        @endphp
-        <x-contract.dual rowClass="mt-1 lh-tight" :en="$asList($EN_RULES)" :ar="$asList($AR_RULES)" />
-    </div>
+<div class="avoid-break">
+    <x-contract.dual :en="$LB('9. Annual Leave:')" :ar="$LB($Glyphs('إجازات العمل التطوعّي:') . ' .9')" />
 
-    <div class="avoid-break" style="line-height: 0.7">
-        <x-contract.dual 
-            :en="$LB('11. Expiration of the Contract:')" 
-            :ar="$LB($Glyphs('انتهاء العقد:') . ' .11')" />
-        
-        <x-contract.dual rowClass="mt-1 lh-tight"
-            :en="'This contract is considered to be terminated in case of:'"
-            :ar="$SmartGlyphs('يعتبر هذا العقد منتهياً في الحالات التالية:')" />
+    <x-contract.dual rowClass="mt-1" :en="'The second team is entitled to <strong>' .
+        $annualLeaveDays .
+        '</strong> days of working days leave during the validity period of the contract, with it being proportional to the duration of the contract.'"
+        :ar="$SmartGlyphs('يوم إجازة سنوية خلال فترة سريان').
+        ' <strong>'.$annualLeaveDays.
+        '</strong> '.$SmartGlyphs('يحق للفريق الثاني').
+        '<br>'.
+        $SmartGlyphs('العقد، وتكون متناسبة مع مدة العقد.')" />
 
-        @php
-            $EN_TERMINATION = [
-                '- The closure of the Christian Hope Center in Syria.',
-                '- Project expiration.',
-                '- Expiration of the agreement.',
-                '- Breaching of this agreement and the attached job description by the second team after notice and warning.',
-                '- Breaching the Code of Conduct after notice and warning.',
-                '- Breaching the Christian Hope Center policies and bylaws after notice and warning.',
-                '- Unsatisfactory results of job performance evaluation.'
-            ];
-            
-            $AR_TERMINATION = [
-                $arBullet(['إغلاق مؤسسة مركز الرجاء المسيحي في سوريا.']),
-                $arBullet(['انتهاء المشروع.']),
-                $arBullet(['انتهاء مدة العقد.']),
-                $arBullet([
-                    'في حال عدم التقيّد ببنود هذا العقد وتوصيف العمل',
-                    'التطوّعي المرفق من قبل الفريق الثاني بعد التنبيه والانذار.'
-                ]),
-                $arBullet([
-                    'في حال المخالفة لمدونة القواعد الأخلاقية للتطوّع',
-                    'بعد التنبيه والانذار.'
-                ]),
-                $arBullet([
-                    'في حال مخالفة سياسات مؤسسة مركز الرجاء المسيحي',
-                    'بعد التنبيه والانذار.'
-                ]),
-                $arBullet(['نتائج تقييم الأداء غير المُرضيّة.'])
-            ];
-        @endphp
-        <x-contract.dual rowClass="mt-1 lh-tight" :en="$asList($EN_TERMINATION)" :ar="$asList($AR_TERMINATION)" />
-    </div>
+    <x-contract.dual rowClass="mt-1" :en="'The second team is entitled to 24 days of sick leave in cases of operations and infectious diseases, 12 days paid and 12 days paid at half the value of the monthly stipend, provided that a medical report is submitted to justify the leave.'" :ar="$SmartGlyphs('يوم إجازة مرضية عند الضرورة فقط،') .
+        ' 24 ' .
+        $SmartGlyphs('يحق للفريق الثاني') .
+        '<br>' .
+        $SmartGlyphs('يوم مدفوع') .
+        ' 12 ' .
+        $SmartGlyphs('أي في حالات العمليات والأمراض المُعديَة،') .
+        '<br>' .
+        $SmartGlyphs('يوم مدفوع بنصف قيمة المكافأة المالية الشهرية وذلك') .
+        ' 12' .
+        $Glyphs('و') .
+        '<br>' .
+        $SmartGlyphs('بشرط تقديم تقرير طبي لتبرير الإجازة.')" />
 
-<div class="avoid-break mt-1" style="line-height: 0.7">
-        <x-contract.dual 
-            :en="$LB('12. Termination of the Contract:')" 
-            :ar="$LB($Glyphs('إنهاء العقد:') . ' .12')" />
-        
-        <x-contract.dual rowClass="mt-1 lh-tight"
-            :en="'Hope Center Aleppo / Head office has the right to terminate this contract during the effective period, by informing the volunteer through a written termination notice one month in advance.'"
-            :ar="
-                $SmartGlyphs('يحق للفريق الأول إنهاء هذا العقد في أي وقت') . '<br>' .
-                $SmartGlyphs('قبل انتهاء مدته وذلك بإعلام الفريق الثاني خطيّاً') . '<br>' .
-                $SmartGlyphs('قبل شهر.')
-            " />
-    </div>
-    <div class="avoid-break" style="line-height: 0.7">
-        <x-contract.dual rowClass="lh-tight"
-            :en="$LB('13. Duties and obligations on the extension, expiration, or termination of the agreement:')" 
-            :ar="$LB($Glyphs('الواجبات والالتزامات على تمديد أو انتهاء') . ' .13') . '<br>' . $LB($Glyphs('أو إنهاء العقد:'))" />
-                   
+    <x-contract.dual rowClass="mt-1" :en="'- In case the second team consumes all annual and sickness leave days, they will be given 12 days of leave with the deduction of the number of leave days from the monthly stipend allowance.'" :ar="$SmartGlyphs('في حال تجاوز الفريق الثاني أيام الاجازات المحددة له') .
+        ' -<br>' .
+        $SmartGlyphs('والتي تتناسب مع العقد سواءً إجازات عادية أو مرضية، يتم') .
+        '<br>' .
+        $SmartGlyphs('يوم يتم خصم قيمتها من') .
+        ' 12 ' .
+        $SmartGlyphs('منحه إجازة لا تتجاوز مدتها') .
+        '<br>' .
+        $SmartGlyphs('المكافأة المالية الشهرية المخصصة له.')" />
+</div>
 
-        @php
-            $EN_OBLIGATIONS = [
-                '- The first party is required to notify the second party through a written notice of the termination or extension date one month in advance.',
-                '- The second party is required to notify the first party of their wish to end the volunteering one month in advance.',
-                '- The second party is committed to hand over to Christian Hope Center all the equipment, material, and documents that they received upon the termination or expiration of this contract, based on the personal receipt list of the volunteer.'
-            ];
-            
-            $AR_OBLIGATIONS = [
-                $arBullet([
-                    'يلتزم الفريق الأول عند رغبته بالتمديد أو عدمه بأن',
-                    'يُبلّغ الفريق الثاني بذلك بشكل خطيّ قبل مدة شهر.'
-                ]),
-                $arBullet([
-                    'يلتزم الفريق الثاني عند رغبته بمغادرة العمل التطوّعي',
-                    'خلال مدة سريان العقد بأن يبلغ الفريق الأول بذلك',
-                    'بشكل خطيّ قبل مدة شهر.'
-                ]),
-                $arBullet([
-                    'يلتزم الفريق الثاني عند انتهاء أو إنهاء فترة تطوّعه',
-                    'بتسليم جميع التجهيزات والمواد والوثائق المؤتمن بها',
-                    'للفريق الأول وذلك استناداً لقائمة الاستلام الشخصي.'
-                ])
-            ];
-        @endphp 
-        <x-contract.dual  rowClass="mt-1 lh-tight" :en="$asList($EN_OBLIGATIONS)" :ar="$asList($AR_OBLIGATIONS)" />
-    </div>
+<div class="avoid-break">
+    <x-contract.dual :en="$LB('10. Internal Rules and Regulations:')" :ar="$LB($Glyphs('القوانين والأنظمة الداخلية:') . ' .10')" />
+
+    <x-contract.dual rowClass="mt-1" :en="'The second party acknowledges and pledges to commit to the following attached documents:'" :ar="$SmartGlyphs('يُقر الفريق الثاني ويتعهد بالاطلاع والالتزام<br>بالمستندات المرفقة التالية:')" />
+
+    @php
+        $EN_RULES = ['- Job description.', '- Code of Conduct.', '- Christian Hope Center Policies.'];
+        $AR_RULES = [
+            $SmartGlyphs('توصيف العمل التطوّعي.') . ' -',
+            $SmartGlyphs('القواعد الأخلاقية للتطوّع.') . ' -',
+            $SmartGlyphs('سياسات مؤسسة مركز الرجاء المسيحي.') . ' -',
+        ];
+    @endphp
+    <x-contract.dual rowClass="mt-1" :en="$asList($EN_RULES)" :ar="$asList($AR_RULES)" />
+</div>
+
+<div class="avoid-break">
+    <x-contract.dual :en="$LB('11. Expiration of the Contract:')" :ar="$LB($Glyphs('انتهاء العقد:') . ' .11')" />
+
+    <x-contract.dual rowClass="mt-1" :en="'This contract is considered to be terminated in case of:'" :ar="$SmartGlyphs('يعتبر هذا العقد منتهياً في الحالات التالية:')" />
+
+    @php
+        $EN_TERMINATION = [
+            '- The closure of the Christian Hope Center in Syria.',
+            '- Project expiration.',
+            '- Expiration of the agreement.',
+            '- Breaching of this agreement and the attached job description by the second team after notice and warning.',
+            '- Breaching the Code of Conduct after notice and warning.',
+            '- Breaching the Christian Hope Center policies and bylaws after notice and warning.',
+            '- Unsatisfactory results of job performance evaluation.',
+        ];
+
+        $AR_TERMINATION = [
+            $arBullet(['إغلاق مؤسسة مركز الرجاء المسيحي في سوريا.']),
+            $arBullet(['انتهاء المشروع.']),
+            $arBullet(['انتهاء مدة العقد.']),
+            $arBullet([
+                'في حال عدم التقيّد ببنود هذا العقد وتوصيف العمل',
+                'التطوّعي المرفق من قبل الفريق الثاني بعد التنبيه والانذار.',
+            ]),
+            $arBullet(['في حال المخالفة لمدونة القواعد الأخلاقية للتطوّع', 'بعد التنبيه والانذار.']),
+            $arBullet(['في حال مخالفة سياسات مؤسسة مركز الرجاء المسيحي', 'بعد التنبيه والانذار.']),
+            $arBullet(['نتائج تقييم الأداء غير المُرضيّة.']),
+        ];
+    @endphp
+    @foreach ($EN_TERMINATION as $index => $enItem)
+            <x-contract.dual class="mt-1 lh-tight" :en="$enItem" :ar="$AR_TERMINATION[$index]" />
+        @endforeach
+
+    {{-- <x-contract.dual rowClass="mt-1 lh-tight " :en="$asList($EN_TERMINATION)" :ar="$asList($AR_TERMINATION)" /> --}}
 </div>

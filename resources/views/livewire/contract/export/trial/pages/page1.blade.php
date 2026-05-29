@@ -223,7 +223,7 @@
     $preambleConclusionAr = $SmartGlyphs('تم العقد بين الطرفين والقبول المشترك لما يلي:');
 @endphp
 
-<div style="line-height: 1.15;">
+
     
     {{-- ── TITLE SECTION ── --}}
     <div class="avoid-break contract-title-center">
@@ -235,17 +235,17 @@
     </div>
 
     {{-- ── FIRST PARTY ── --}}
-    <div class="avoid-break mt-1">
+    <div class="avoid-break mt-2">
         <x-contract.dual rowClass="fw-bold" :en="'Between'" :ar="$Glyphs('بين')" />
         <x-contract.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))" />
         <x-contract.dual 
-            :en="'<strong>Christian Hope Center - Syria</strong><br>Represented by the Vice chairman of the board of trustees<br><strong>Mr. Fredy Youssef</strong>'"
+            :en="'<strong>Christian Hope Center - Syria</strong><br>Represented by the Vice chairman of the board of trustees <strong>Mr. Fredy Youssef</strong>'"
             :ar="'<strong>' . $Glyphs('مؤسسة مركز الرجاء المسيحي - سوريا') . '</strong><br>' . $Glyphs('ينوب عنها بالتوقيع نائب رئيس مجلس الأمناء') . '<br><strong>' . $Glyphs('السيد فريدي يوسف') . '</strong>'" 
         />
     </div>
 
     {{-- ── SECOND PARTY ── --}}
-    <div class="avoid-break mt-1">
+    <div class="avoid-break mt-2">
         <x-contract.dual rowClass="fw-bold" :en="'And'" :ar="$Glyphs('و')" />
         <x-contract.dual rowClass="mt-1" :en="$L('Second Party:')" :ar="$L($Glyphs('الفريق الثاني:'))" />
         
@@ -271,7 +271,7 @@
     </div>
 
     {{-- ── PREAMBLE SECTION ── --}}
-    <div class="avoid-break" style="margin-top: 10px;">
+    <div class="avoid-break mt-2">
         <x-contract.dual
             :en="'<strong>Preamble:</strong>'"
             :ar="'<strong>' . $Glyphs('مقدمة العقد:') . '</strong>'" />
@@ -294,7 +294,7 @@
     </div>
 
     {{-- ── ARTICLES 1-3 ── --}}
-    <div class="avoid-break mt-1">
+    <div class="avoid-break mt-2">
         <x-contract.dual
             :en="$LB('1. Contract Preamble:') . ' an integral part of it.'"
             :ar="$Glyphs('جزء لا يتجزأ منه. ') . $LB($Glyphs('مقدمة العقد:') . ' .1')" />
@@ -307,4 +307,3 @@
             :en="$LB('3. Place of Work:') . ' <strong>' . $esc($workPlaceEn) . '</strong>'"
             :ar="'<strong>' . $escAr($workPlaceAr) . '</strong> ' . $LB($Glyphs('مكان العمل:') . ' .3')" />
     </div>
-</div>

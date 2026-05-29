@@ -18,7 +18,7 @@ class ContractExportController extends Controller
         ]);
 
         $category   = $contract->contractType?->category ?? 'annual';
-        $pagesMap   = ['annual' => 4, 'trial' => 4, 'service' => 4];
+        $pagesMap   = ['annual' => 5, 'trial' => 4, 'service' => 4];
         $totalPages = $pagesMap[$category] ?? 1;
         $locale     = app()->getLocale();
         $dir        = $locale === 'ar' ? 'rtl' : 'ltr';

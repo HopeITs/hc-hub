@@ -8,6 +8,7 @@
                 @case(2) @include('livewire.contract.export.annual.pages.page2') @break
                 @case(3) @include('livewire.contract.export.annual.pages.page3') @break
                 @case(4) @include('livewire.contract.export.annual.pages.page4') @break
+                @case(5) @include('livewire.contract.export.annual.pages.page5') @break
             @endswitch
         </div>
     </div>

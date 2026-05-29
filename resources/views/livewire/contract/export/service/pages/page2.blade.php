@@ -138,13 +138,13 @@
 
 
 
-<div class="avoid-break mt-1">
+<div class="avoid-break mt-2">
     <x-contract.dual :en="$LB('4. Job description:')" :ar="$LB($Glyphs('وصف العمل:') . ' .4')" />
 
     <x-contract.dual class="mt-1" :en="'<strong>' . $esc($positionTitleEn) . '</strong>'" :ar="$SmartGlyphs('<strong>'.$esc($positionTitleAr).'</strong>')" />
 </div>
 
-<div class="avoid-break mt-1">
+<div class="avoid-break mt-2">
     <x-contract.dual :en="$LB('5. Duration of the contract:')" :ar="$LB($Glyphs('مدة العقد:') . ' .5')" />
 
         <x-contract.dual class="mt-1" 
@@ -161,7 +161,7 @@
         :ar="$SmartGlyphs('ويعتبر أول ثلاثة أشهر فترة تجريبية للفريق الثاني، يحق<br>فيها للفريق الأول إنهاء العقد وعدم الاستمرار مع الفريق الثاني.')" />
 </div>
 
-<div class="avoid-break mt-1">
+<div class="avoid-break mt-2">
     <x-contract.dual 
         :en="$LB('6. Volunteer Work Hours:')" 
         :ar="$LB($Glyphs('ساعات العمل التطوعّي:') . ' .6')"
@@ -171,7 +171,7 @@
         :en="$weeklyHours . ' working hours per week, it changes according to the requirements of the job.'" 
         :ar="$Glyphs('ساعة عمل أسبوعياً، تتغير بحسب متطلّبات العمل.') . ' ' . $weeklyHours" />
 </div>
-<div class="avoid-break mt-1">
+<div class="avoid-break mt-2">
     <x-contract.dual :en="$LB('7. Stipend and Benefits:')" 
     :ar="$LB($Glyphs('المكافأة المالية والمزايا:') . ' .7')"
     />
@@ -184,7 +184,7 @@
         :ar="$SmartGlyphs('أو ما يعادلها بالليرة السورية، تُمنح نقداً في نهاية كل شهر.')" />
 </div>
 
-<div class="avoid-break mt-1">
+<div class="avoid-break mt-2">
     <x-contract.dual :en="$LB('8. Duties:')" 
      :ar="$LB($Glyphs('المسؤوليات:') . ' .8')"
  />
@@ -193,7 +193,7 @@
         :ar="$SmartGlyphs('يلتزم الفريق الثاني بتوصيف العمل التطوّعي الذي أقرّه<br>الفريق الأول، وعليه فإن توقيعه على هذا العقد<br>هو إقرار منه بالتزامه الكامل بها.')" />
 </div>
 
-<div class="avoid-break mt-1">
+<div class="avoid-break mt-2">
     <x-contract.dual 
         :en="$LB('9. Internal Rules and Regulations:')" 
        :ar="$LB($Glyphs('القوانين والأنظمة الداخلية:') . ' .9')" />

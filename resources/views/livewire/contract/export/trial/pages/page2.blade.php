@@ -122,19 +122,19 @@
     $isGeneralProject = !$isStudyZone;
 @endphp
 
-<div style="line-height: 1.15;">
 
-    <div class="avoid-break" style="margin-top: 10px;">
+
+    <div class="avoid-break mt-2">
         <x-contract.dual :en="$LB('4. Job description:')" :ar="$LB($Glyphs('وصف العمل:') . ' .4')" />
         <x-contract.dual rowClass="mt-1 lh-tight" :en="'<strong>' . $esc($positionTitleEn) . '</strong>'" :ar="$SmartGlyphs('<strong>'.$esc($positionTitleAr).'</strong>')" />
     </div>
 
-    <div class="avoid-break" style="margin-top: 15px;">
+    <div class="avoid-break mt-2" >
         <x-contract.dual :en="$LB('5. Duration of the contract:')" :ar="$LB($Glyphs('مدة العقد (الفترة التجريبية):') . ' .5')" />
 
-        <x-contract.dual rowClass="mt-1 lh-tight " :en="'<strong>' . $durationLabelEn . '</strong>'" :ar="'<strong>' . $durationLabelAr . '</strong>'" />
+        <x-contract.dual rowClass="mt-1 lh-tight" :en="'<strong>' . $durationLabelEn . '</strong>'" :ar="'<strong>' . $durationLabelAr . '</strong>'" />
 
-        <x-contract.dual rowClass="mt-1" :en="'Start date: <strong>' . $esc($startStr) . '</strong>'"
+        <x-contract.dual rowClass="mt-1 lh-tight" :en="'Start date: <strong>' . $esc($startStr) . '</strong>'"
             :ar="$Glyphs('تبدأ من تاريخ: <strong>'.$esc($startStrAr).'</strong>')" />
 
         <x-contract.dual :en="'End date: <strong>' . $esc($endStr) . '</strong>'"
@@ -150,7 +150,7 @@
             " />
     </div> 
 
-    <div class="avoid-break" style="margin-top: 15px;">
+    <div class="avoid-break mt-2">
         <x-contract.dual :en="$LB('6. Volunteer Work Hours:')" :ar="$LB($Glyphs('ساعات العمل التطوعّي:') . ' .6')" />
         
         <x-contract.dual rowClass="mt-1 lh-tight"
@@ -182,7 +182,7 @@
         @endif
     </div>
 
-    <div class="avoid-break" style="margin-top: 15px;">
+    <div class="avoid-break mt-2" >
         <x-contract.dual :en="$LB('7. Stipend and Benefits:')" :ar="$LB($Glyphs('المكافأة المالية والمزايا:') . ' .7')" />
         
         <x-contract.dual rowClass="mt-1 lh-tight"
@@ -193,11 +193,10 @@
             :ar="$SmartGlyphs('أو ما يعادلها بالليرة السورية، تُمنح نقداً في نهاية كل شهر.')" />
     </div> 
 
-    <div class="avoid-break" style="margin-top: 15px;">
+    <div class="avoid-break mt-2" >
         <x-contract.dual :en="$LB('8. Duties:')" :ar="$LB($Glyphs('المسؤوليات:') . ' .8')" />
         <x-contract.dual rowClass="mt-1 lh-tight"
             :en="'The second party commits to the description of the volunteer work approved by the first team. Therefore, their signature on this contract is an acknowledgment of their full commitment to it.'" 
             :ar="$SmartGlyphs('يلتزم الفريق الثاني بتوصيف العمل التطوّعي الذي أقرّه<br>الفريق الأول، وعليه فإن توقيعه على هذا العقد<br>هو إقرار منه بالتزامه الكامل بها.')" />
     </div>
 
-</div>
