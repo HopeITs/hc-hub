@@ -71,7 +71,7 @@
 
 
 
-@for($i = 1; $i <= $totalPages; $i++)
+@for ($i = 1; $i <= $totalPages; $i++)
     <div class="page-header">
         <img src="{{ $headerSrc }}" alt="Header">
     </div>
@@ -88,7 +88,7 @@
 @endfor
 
 </body>
-</html> 
+</html>
  --}}
 
 
@@ -97,18 +97,18 @@
 
 
 
-{{-- 
+{{--
 @php
     $dir        = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
-    
+
     // إجبار DomPDF على قراءة الصور عبر تحويلها إلى Base64
-    $headerPath = public_path('assets/img/Header.png');
-    $headerSrc  = (file_exists($headerPath) && is_file($headerPath)) 
-        ? 'data:image/png;base64,' . base64_encode(file_get_contents($headerPath)) 
+    $headerPath = public_path('assets/img/header.png');
+    $headerSrc  = (file_exists($headerPath) && is_file($headerPath))
+        ? 'data:image/png;base64,' . base64_encode(file_get_contents($headerPath))
         : '';
 
     $HEADER_HEIGHT_MM = 24;
-    $TOP_MARGIN_MM    = 38; 
+    $TOP_MARGIN_MM    = 38;
 @endphp
 <!doctype html>
 <html lang="ar">
@@ -124,9 +124,9 @@
         @font-face { font-family: 'NotoNaskhArabic'; src: url('{{ public_path("fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf") }}') format('truetype'); font-weight: 400; font-style: normal; }
         @font-face { font-family: 'NotoNaskhArabic'; src: url('{{ public_path("fonts/NotoNaskh/NotoNaskhArabic-Bold.ttf") }}') format('truetype'); font-weight: 700; font-style: normal; }
 
-        @page { 
-            size: A4 portrait; 
-            margin: {{ $TOP_MARGIN_MM }}mm 16mm 22mm 16mm; 
+        @page {
+            size: A4 portrait;
+            margin: {{ $TOP_MARGIN_MM }}mm 16mm 22mm 16mm;
         }
 
         html, body {
@@ -138,7 +138,7 @@
         /* Fixed Header & Footer */
         .page-header { position: fixed; top: -38mm; left: -2px; right: 0; height: {{ $HEADER_HEIGHT_MM }}mm; }
         .page-header img { width: 100%; display: block; }
-        
+
         .contract-footer {
             position: absolute;
             left: 0; right: 0; bottom: 12mm;
@@ -156,8 +156,8 @@
         ========================================== */
         .contract-title-center { width: 100%; text-align: center; margin-top: 4px; margin-bottom: 20px; }
         .contract-title-center .dual-row { display: table; width: 100%; margin: 0 auto; table-layout: fixed; }
-        .contract-title-center .dual-en, 
-        .contract-title-center .dual-ar, 
+        .contract-title-center .dual-en,
+        .contract-title-center .dual-ar,
         .contract-title-separator {
             display: table-cell; vertical-align: middle;
             font-family: 'somar-bold', 'NotoNaskhArabic', sans-serif;
@@ -186,7 +186,7 @@
         .dual-ar, .dual-ar * {
             text-align: right !important; direction: rtl !important;
             font-family: 'somar-regular', 'NotoNaskhArabic', sans-serif; font-weight: 400; font-size: 11pt;
-            line-height: 1.5; color: #414042; 
+            line-height: 1.5; color: #414042;
             /* unicode-bidi: plaintext !important; هذا ما يصلح انعكاس الكلمات */
             unicode-bidi: bidi-override !important;
         }
@@ -218,7 +218,7 @@
         ========================================== */
         .tight p { margin: 0 0 .45rem 0; }
         .avoid-break { page-break-inside: avoid; }
-        .mt-1 { margin-top: 4px; } .mt-2 { margin-top: 8px; } .mt-3 { margin-top: 12px; } 
+        .mt-1 { margin-top: 4px; } .mt-2 { margin-top: 8px; } .mt-3 { margin-top: 12px; }
         .mt-4 { margin-top: 16px; } .mt-6 { margin-top: 24px; }
     </style>
     <title></title>
@@ -226,10 +226,10 @@
 <body>
 
     <div class="page-header">
-        @if($headerSrc) <img src="{{ $headerSrc }}" alt="Header"> @endif
+        @if ($headerSrc) <img src="{{ $headerSrc }}" alt="Header"> @endif
     </div>
 
-    @for($i = 1; $i <= $totalPages; $i++)
+    @for ($i = 1; $i <= $totalPages; $i++)
         <section class="pdf-page">
             @includeIf("livewire.contract.export.{$category}.pages.page{$i}", [
                 'contract'    => $contract,
@@ -243,7 +243,7 @@
     @endfor
 
 </body>
-</html> 
+</html>
 
 
 
@@ -277,7 +277,7 @@
 
 {{-- @php
     $dir        = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
-    $headerSrc  = public_path('assets/img/Header.png');
+    $headerSrc  = public_path('assets/img/header.png');
     $HEADER_HEIGHT_MM = 24;
     $TOP_MARGIN_MM    = 32;
 @endphp
@@ -339,7 +339,7 @@
         .fw-bold { font-weight: 700; }
         strong { font-weight: 700; color: #414042; }
         .avoid-break { page-break-inside: avoid; }
-        
+
         .mt-1 { margin-top: 4px; }
         .mt-2 { margin-top: 8px; }
         .mt-3 { margin-top: 12px; }
@@ -354,11 +354,11 @@
 </head>
 <body>
 
-@for($i = 1; $i <= $totalPages; $i++)
+@for ($i = 1; $i <= $totalPages; $i++)
     <div class="page-header">
         <img src="{{ $headerSrc }}" alt="Header">
     </div>
-    
+
     <section class="pdf-page">
         @includeIf("livewire.contract.export.{$category}.pages.page{$i}", [
             'contract'    => $contract,
@@ -381,12 +381,12 @@
 
 
 
-{{-- 
+{{--
 
 
 @php
     $dir        = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
-    $headerSrc  = public_path('assets/img/Header.png');
+    $headerSrc  = public_path('assets/img/header.png');
     $HEADER_HEIGHT_MM = 24;
     $TOP_MARGIN_MM    = 32;
 @endphp
@@ -496,14 +496,14 @@
 
     /* ── STRONG ── */
     /* strong { font-family:'somar-bold'; font-weight:700; color:#414042; } */
-strong, .dual-en strong, .dual-ar strong { 
-    font-family: 'somar-bold' !important; 
-    font-weight: 700 !important; 
-    color: #414042; 
+strong, .dual-en strong, .dual-ar strong {
+    font-family: 'somar-bold' !important;
+    font-weight: 700 !important;
+    color: #414042;
 }
     /* ── FOOTER ── */
 
-      
+
 
     .contract-footer {
     position: absolute;
@@ -530,7 +530,7 @@ strong, .dual-en strong, .dual-ar strong {
 </head>
 <body>
 
-@for($i = 1; $i <= $totalPages; $i++)
+@for ($i = 1; $i <= $totalPages; $i++)
     <div class="page-header">
         <img src="{{ $headerSrc }}" alt="Header">
     </div>
@@ -554,10 +554,10 @@ strong, .dual-en strong, .dual-ar strong {
 
  --}}
 
-{{-- 
+{{--
  @php
     $dir        = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
-    $headerSrc  = public_path('assets/img/Header.png');
+    $headerSrc  = public_path('assets/img/header.png');
     $footerSrc  = public_path('assets/img/Footer.png'); /* Add this line */
     $HEADER_HEIGHT_MM = 24;
     $TOP_MARGIN_MM    = 32;
@@ -577,11 +577,11 @@ strong, .dual-en strong, .dual-ar strong {
     /* ── PAGE ── */
     /* Reduced bottom margin to 18mm to give the content more vertical room */
     @page { size: A4; margin: {{ $TOP_MARGIN_MM }}mm 16mm 18mm 16mm; }
-    
+
     html, body {
         margin:0; padding:0;
         font-family:'somar-regular','NotoNaskhArabic','DejaVu Sans',sans-serif;
-        font-size:12px; 
+        font-size:12px;
         line-height:1.45;
         color:#414042; background:#fff;
         direction:ltr;
@@ -667,10 +667,10 @@ strong, .dual-en strong, .dual-ar strong {
     .h-label-bold     { color:#c2151c !important; font-family:'somar-bold'  !important; font-weight:700; }
 
     /* ── STRONG (Fix for NotoNaskh Override) ── */
-    strong, .dual-en strong, .dual-ar strong { 
-        font-family: 'somar-bold' !important; 
-        font-weight: 700 !important; 
-        color: #414042; 
+    strong, .dual-en strong, .dual-ar strong {
+        font-family: 'somar-bold' !important;
+        font-weight: 700 !important;
+        color: #414042;
     }
 
     /* ── FOOTER ── */
@@ -681,10 +681,10 @@ strong, .dual-en strong, .dual-ar strong {
         text-align: center;
         bottom: -12mm;            /* Sits perfectly within the new 18mm bottom margin */
         font-family: 'somar-bold';
-        font-size: 8pt;           
+        font-size: 8pt;
         font-weight: 700;
         color: #9ca3af;           /* Muted grey color for standard footer appearance */
-        padding: 0 6mm;           
+        padding: 0 6mm;
     }
 
     /* ── FOOTER IMAGE ── */
@@ -710,11 +710,11 @@ strong, .dual-en strong, .dual-ar strong {
 </head>
 <body>
 
-@for($i = 1; $i <= $totalPages; $i++)
+@for ($i = 1; $i <= $totalPages; $i++)
     <div class="page-header">
         <img src="{{ $headerSrc }}" alt="Header">
     </div>
-    
+
     <section class="pdf-page">
         @includeIf("livewire.contract.export.{$category}.pages.page{$i}", [
             'contract'   => $contract,
@@ -723,7 +723,7 @@ strong, .dual-en strong, .dual-ar strong {
             'totalPages' => $totalPages,
             'forPdf'     => true,
         ])
-        
+
         <div class="page-footer-img">
             <img src="{{ $footerSrc }}" alt="Footer">
         </div>
@@ -737,11 +737,11 @@ strong, .dual-en strong, .dual-ar strong {
 
 {{-- @php
     $dir        = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
-    $headerSrc  = public_path('assets/img/Header.png');
-    
+    $headerSrc  = public_path('assets/img/header.png');
+
     /* ADDED FOOTER IMAGE PATH HERE */
-    $footerSrc  = public_path('assets/img/Footer.png'); 
-    
+    $footerSrc  = public_path('assets/img/Footer.png');
+
     $HEADER_HEIGHT_MM = 24;
     $TOP_MARGIN_MM    = 32;
 @endphp
@@ -759,11 +759,11 @@ strong, .dual-en strong, .dual-ar strong {
 
     /* ── PAGE ── */
     @page { size: A4; margin: {{ $TOP_MARGIN_MM }}mm 16mm 18mm 16mm; }
-    
+
     html, body {
         margin:0; padding:0;
         font-family:'somar-regular','NotoNaskhArabic','DejaVu Sans',sans-serif;
-        font-size:12px; 
+        font-size:12px;
         line-height:1.45;
         color:#414042; background:#fff;
         direction:ltr;
@@ -843,17 +843,17 @@ strong, .dual-en strong, .dual-ar strong {
     .h-label          { color:#c2151c !important; font-family:'somar-black' !important; font-weight:900; }
     .h-label-bold     { color:#c2151c !important; font-family:'somar-bold'  !important; font-weight:700; }
 
-    strong, .dual-en strong, .dual-ar strong { 
-        font-family: 'somar-bold' !important; 
-        font-weight: 700 !important; 
-        color: #414042; 
+    strong, .dual-en strong, .dual-ar strong {
+        font-family: 'somar-bold' !important;
+        font-weight: 700 !important;
+        color: #414042;
     }
 
     /* ── FOOTER IMAGE & TEXT (FIXED POSITIONS) ── */
     /* Because .pdf-page is no longer relative, 'absolute' anchors to the bottom of the A4 paper */
     .page-footer-img {
         position: absolute;
-        bottom: -18mm; 
+        bottom: -18mm;
         left: 0;
         right: 0;
     }
@@ -869,10 +869,10 @@ strong, .dual-en strong, .dual-ar strong {
         right: 0;
         text-align: center;
         font-family: 'somar-bold';
-        font-size: 8pt;           
+        font-size: 8pt;
         font-weight: 700;
         color: #9ca3af;
-        padding: 0 6mm;           
+        padding: 0 6mm;
     }
 
     /* ── SPACING ── */
@@ -887,11 +887,11 @@ strong, .dual-en strong, .dual-ar strong {
 </head>
 <body>
 
-@for($i = 1; $i <= $totalPages; $i++)
+@for ($i = 1; $i <= $totalPages; $i++)
     <div class="page-header">
         <img src="{{ $headerSrc }}" alt="Header">
     </div>
-    
+
     <section class="pdf-page">
         @includeIf("livewire.contract.export.{$category}.pages.page{$i}", [
             'contract'   => $contract,
@@ -900,7 +900,7 @@ strong, .dual-en strong, .dual-ar strong {
             'totalPages' => $totalPages,
             'forPdf'     => true,
         ])
-        
+
         <div class="page-footer-img">
             <img src="{{ $footerSrc }}" alt="Footer">
         </div>
@@ -911,10 +911,10 @@ strong, .dual-en strong, .dual-ar strong {
 
 </body>
 </html> --}}
-{{-- 
+{{--
 @php
     $dir              = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
-    $headerSrc        = public_path('assets/img/Header.png');
+    $headerSrc        = public_path('assets/img/header.png');
     $footerSrc        = public_path('assets/img/Footer.png');
     $HEADER_HEIGHT_MM = 24;
     $FOOTER_HEIGHT_MM = 12;
@@ -1048,10 +1048,10 @@ strong, .dual-en strong, .dual-ar strong {
     .h-label-bold { color:#c2151c !important; font-family:'somar-bold'  !important; font-weight:700; }
 
     /* ── STRONG ── */
-    strong, .dual-en strong, .dual-ar strong { 
-        font-family: 'somar-bold' !important; 
-        font-weight: 700 !important; 
-        color: #414042; 
+    strong, .dual-en strong, .dual-ar strong {
+        font-family: 'somar-bold' !important;
+        font-weight: 700 !important;
+        color: #414042;
     }
 
     /* ── SPACING ── */
@@ -1066,7 +1066,7 @@ strong, .dual-en strong, .dual-ar strong {
 </head>
 <body>
 
-@for($i = 1; $i <= $totalPages; $i++)
+@for ($i = 1; $i <= $totalPages; $i++)
 
     <div class="page-header">
         <img src="{{ $headerSrc }}" alt="Header">
@@ -1098,7 +1098,7 @@ strong, .dual-en strong, .dual-ar strong {
 
 </html>  --}}
 {{-- @php
-    $headerSrc        = public_path('assets/img/Header.png');
+    $headerSrc        = public_path('assets/img/header.png');
     $footerSrc        = public_path('assets/img/Footer.png');
     $HEADER_HEIGHT_MM = 24;
     $FOOTER_HEIGHT_MM = 12;
@@ -1158,7 +1158,7 @@ strong, .dual-en strong, .dual-ar strong {
     /* ── DUAL COLUMN ── */
     .dual-row { display: table; table-layout: fixed; width: 100%; margin-top: 6px; }
     .dual-row > div { display: table-cell; width: 50%; vertical-align: top; }
-    
+
     .dual-en, .dual-en * { direction: ltr !important; text-align: left !important; font-size: 10pt; }
     .dual-ar, .dual-ar * { direction: rtl !important; text-align: right !important; font-size: 10.5pt; }
 
@@ -1166,7 +1166,7 @@ strong, .dual-en strong, .dual-ar strong {
     .contract-title-center { width: 100%; text-align: center; margin: 4px 0 10px 0; }
     .contract-title-center .dual-row { width: auto; margin: 0 auto; }
     .contract-title-center .dual-en, .contract-title-center .dual-ar { width: auto !important; padding: 0 6px; font-family: 'somar-bold' !important; font-size: 15pt !important; }
-    
+
     .fw-bold, .fw-bold * { font-family: 'somar-bold' !important; font-weight: 700; }
     .h-label { color: #c2151c !important; font-family: 'somar-black' !important; }
     strong { font-family: 'somar-bold' !important; font-weight: 700; }
@@ -1179,7 +1179,7 @@ strong, .dual-en strong, .dual-ar strong {
 </head>
 <body>
 
-@for($i = 1; $i <= $totalPages; $i++)
+@for ($i = 1; $i <= $totalPages; $i++)
     <div class="header">
         <img src="{{ $headerSrc }}" alt="Header">
     </div>
@@ -1209,7 +1209,7 @@ strong, .dual-en strong, .dual-ar strong {
 {{-- PREMODIFIED_WORK(FOOTER IS have some padding , Header is GOOD,text is good  ) --}}
 {{-- @php
     $dir              = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
-    $headerSrc        = public_path('assets/img/Header.png');
+    $headerSrc        = public_path('assets/img/header.png');
     $footerSrc        = public_path('assets/img/Footer.png');
     $HEADER_HEIGHT_MM = 24;
     $FOOTER_HEIGHT_MM = 12;
@@ -1376,7 +1376,7 @@ strong, .dual-en strong, .dual-ar strong {
 </head>
 <body>
 
-@for($i = 1; $i <= $totalPages; $i++)
+@for ($i = 1; $i <= $totalPages; $i++)
 
     <div class="page-header">
         <img src="{{ $headerSrc }}" alt="Header">
@@ -1410,25 +1410,55 @@ strong, .dual-en strong, .dual-ar strong {
 {{-- MODIFIED_WORK(FOOTER IS IN Bottom of page , Header IS GOOD ) --}}
 
 @php
-    $dir              = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
-    $headerSrc        = public_path('assets/img/Header.png');
-    $footerSrc        = public_path('assets/img/Footer.png');
+    $dir = ($locale ?? app()->getLocale()) === 'ar' ? 'rtl' : 'ltr';
+    $headerSrc = public_path('assets/img/header.png');
+    $footerSrc = public_path('assets/img/Footer.png');
     $HEADER_HEIGHT_MM = 16;
     $FOOTER_HEIGHT_MM = 12;
 @endphp
 <!doctype html>
 <html lang="ar">
-<head>
-<meta charset="utf-8">
-<style>
-    /* ── FONTS ── */
-    @font-face { font-family:'somar-regular'; src:url('{{ public_path("fonts/SomarSans/SomarSans-Regular.ttf") }}') format('truetype'); font-weight:400; font-style:normal; }
-    @font-face { font-family:'somar-bold';    src:url('{{ public_path("fonts/SomarSans/SOMARSANS-BOLD.ttf") }}')    format('truetype'); font-weight:700; font-style:normal; }
-    @font-face { font-family:'somar-black';   src:url('{{ public_path("fonts/SomarSans/SOMARSANS-BLACK.ttf") }}')   format('truetype'); font-weight:900; font-style:normal; }
-    @font-face { font-family:'NotoNaskhArabic'; src:url('{{ public_path("fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf") }}') format('truetype'); font-weight:400; font-style:normal; }
-    @font-face { font-family:'NotoNaskhArabic'; src:url('{{ public_path("fonts/NotoNaskh/NotoNaskhArabic-Bold.ttf") }}')    format('truetype'); font-weight:700; font-style:normal; }
 
-    /*
+<head>
+    <meta charset="utf-8">
+    <style>
+        /* ── FONTS ── */
+        @font-face {
+            font-family: 'somar-regular';
+            src: url('{{ public_path('fonts/SomarSans/SomarSans-Regular.ttf') }}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'somar-bold';
+            src: url('{{ public_path('fonts/SomarSans/SOMARSANS-BOLD.ttf') }}') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'somar-black';
+            src: url('{{ public_path('fonts/SomarSans/SOMARSANS-BLACK.ttf') }}') format('truetype');
+            font-weight: 900;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'NotoNaskhArabic';
+            src: url('{{ public_path('fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf') }}') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'NotoNaskhArabic';
+            src: url('{{ public_path('fonts/NotoNaskh/NotoNaskhArabic-Bold.ttf') }}') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        /*
      * ── PAGE MATH ──
      * A4 = 297mm tall
      * @page margin top : 8mm  (small gap above header)
@@ -1437,176 +1467,281 @@ strong, .dual-en strong, .dual-ar strong {
      * Header height    : 24mm
      * Section height   : 287 - 24 = 263mm  ← exact fit, no overflow
      */
-    @page {
-        size: A4;
-        margin: 8mm 16mm 2mm 16mm;
-    }
+        @page {
+            size: A4;
+            margin: 8mm 16mm 2mm 16mm;
+        }
 
-    html, body {
-        margin: 0; padding: 0;
-        font-family: 'somar-regular','NotoNaskhArabic','DejaVu Sans',sans-serif;
-        font-size: 12px;
-        line-height: 1.35;
-        color: #414042; background: #fff;
-        direction: ltr;
-    }
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'somar-regular', 'NotoNaskhArabic', 'DejaVu Sans', sans-serif;
+            font-size: 12px;
+            line-height: 1.35;
+            color: #414042;
+            background: #fff;
+            direction: ltr;
+        }
 
-    /* ── HEADER (in loop, normal flow) ── */
-    .page-header {
-        height: {{ $HEADER_HEIGHT_MM }}mm;   /* 24mm */
-        padding: 8px 25px 0 25px;
-        box-sizing: border-box;
-    }
-    .page-header img { width: 100%; display: block; }
+        /* ── HEADER (in loop, normal flow) ── */
+        .page-header {
+            height: {{ $HEADER_HEIGHT_MM }}mm;
+            /* 24mm */
+            padding: 8px 25px 0 25px;
+            box-sizing: border-box;
+        }
 
-    /* ── PAGE WRAPPER ──
+        .page-header img {
+            width: 100%;
+            display: block;
+        }
+
+        /* ── PAGE WRAPPER ──
        263mm = 287mm content area − 24mm header.
        Locked height means footer can never drift to the next page.
     ── */
-    .pdf-page {
-        page-break-after: always;
-        padding: 4mm 50px 0 50px;   /* 4mm top gap between header and text */
-        position: relative;
-        height: 271mm;
-        box-sizing: border-box;
-    }
-    .pdf-page:last-child { page-break-after: auto; }
+        .pdf-page {
+            page-break-after: always;
+            padding: 4mm 50px 0 50px;
+            /* 4mm top gap between header and text */
+            position: relative;
+            height: 271mm;
+            box-sizing: border-box;
+        }
 
-    /* ── PAGE COUNTER ──
+        .pdf-page:last-child {
+            page-break-after: auto;
+        }
+
+        /* ── PAGE COUNTER ──
        Sits just above the footer image.
        bottom = 2mm (footer bleed) + 12mm (footer height) + 1mm gap = 15mm
     ── */
-    .contract-footer {
-        position: absolute;
-        bottom: 4mm;
-        left: 0; right: 0;
-        text-align: center;
-        font-family: 'somar-bold';
-        font-size: 7pt;
-        font-weight: 700;
-        color: #414042;
-    }
+        .contract-footer {
+            position: absolute;
+            bottom: 4mm;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-family: 'somar-bold';
+            font-size: 7pt;
+            font-weight: 700;
+            color: #414042;
+        }
 
-    /* ── FOOTER IMAGE ──
+        /* ── FOOTER IMAGE ──
        bottom: -2mm bleeds it into the 2mm @page bottom margin
        so the image sits flush near the physical page bottom.
     ── */
-    .page-footer {
-        position: absolute;
-        bottom: -12mm;
-        left: 0; right: 0;
-        height: {{ $FOOTER_HEIGHT_MM }}mm;   /* 12mm */
-        padding: 0 25px;
-        box-sizing: border-box;
-    }
-    .page-footer img { width: 100%; display: block; }
+        .page-footer {
+            position: absolute;
+            bottom: -12mm;
+            left: 0;
+            right: 0;
+            height: {{ $FOOTER_HEIGHT_MM }}mm;
+            /* 12mm */
+            padding: 0 25px;
+            box-sizing: border-box;
+        }
 
-    /* ── DUAL COLUMN ── */
-    .dual-row   { display: table; table-layout: fixed; width: 100%; margin-top: 6px; }
-    .dual-tight { margin-top: 0; }
-    .dual-row > .dual-en,
-    .dual-row > .dual-ar { display: table-cell; width: 50%; vertical-align: top; }
+        .page-footer img {
+            width: 100%;
+            display: block;
+        }
 
-    /* ── ENGLISH COLUMN ── */
-    .dual-en, .dual-en * {
-        direction: ltr !important;
-        unicode-bidi: embed !important;
-        text-align: left !important;
-        font-family: 'somar-regular','NotoNaskhArabic','DejaVu Sans',sans-serif;
-        font-size: 10pt;
-        line-height: 1.15;
-        color: #414042;
-    }
+        /* ── DUAL COLUMN ── */
+        .dual-row {
+            display: table;
+            table-layout: fixed;
+            width: 100%;
+            margin-top: 6px;
+        }
 
-    /* ── ARABIC COLUMN ── */
-    .dual-ar, .dual-ar * {
-        direction: rtl !important;
-        unicode-bidi: embed !important;
-        text-align: right !important;
-        font-family: 'somar-regular','NotoNaskhArabic','DejaVu Sans',sans-serif;
-        font-size: 10.5pt;
-        line-height: 1.15;
-        color: #414042;
-    }
+        .dual-tight {
+            margin-top: 0;
+        }
 
-    .lh-tight .dual-en, .lh-tight .dual-en *,
-    .lh-tight .dual-ar, .lh-tight .dual-ar * {
-        line-height: 0.9 !important;
-    }
+        .dual-row>.dual-en,
+        .dual-row>.dual-ar {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+        }
 
-    /* ── TITLE ROW ── */
-    .contract-title-center { width: 100%; text-align: center; margin-top: 4px; margin-bottom: 10px; }
-    .contract-title-center .dual-row { display: table; width: auto; margin: 0 auto; }
-    .contract-title-center .dual-en,
-    .contract-title-center .dual-ar,
-    .contract-title-center .dual-ar *,
-    .contract-title-center .dual-en *,
-    .contract-title-separator {
-        display: table-cell;
-        width: auto !important;
-        white-space: nowrap;
-        font-family: 'somar-bold' !important;
-        font-size: 15pt !important;
-        font-weight: 700 !important;
-        line-height: 1.2 !important;
-        color: #414042 !important;
-        text-align: center !important;
-        vertical-align: middle;
-        padding: 0 6px;
-    }
+        /* ── ENGLISH COLUMN ── */
+        .dual-en,
+        .dual-en * {
+            direction: ltr !important;
+            unicode-bidi: embed !important;
+            text-align: left !important;
+            font-family: 'somar-regular', 'NotoNaskhArabic', 'DejaVu Sans', sans-serif;
+            font-size: 10pt;
+            line-height: 1.15;
+            color: #414042;
+        }
 
-    /* ── BOLD OVERRIDE ── */
-    .fw-bold .dual-en, .fw-bold .dual-en * { font-family:'somar-bold' !important; font-size:10pt;   font-weight:700; color:#414042; }
-    .fw-bold .dual-ar, .fw-bold .dual-ar * { font-family:'somar-bold' !important; font-size:10.5pt; font-weight:700; color:#414042; }
+        /* ── ARABIC COLUMN ── */
+        .dual-ar,
+        .dual-ar * {
+            direction: rtl !important;
+            unicode-bidi: embed !important;
+            text-align: right !important;
+            font-family: 'somar-regular', 'NotoNaskhArabic', 'DejaVu Sans', sans-serif;
+            font-size: 10.5pt;
+            line-height: 1.15;
+            color: #414042;
+        }
 
-    /* ── LABELS ── */
-    .h-label      { color:#c2151c !important; font-family:'somar-black' !important; font-weight:900; }
-    .h-label-bold { color:#c2151c !important; font-family:'somar-bold'  !important; font-weight:700; }
+        .lh-tight .dual-en,
+        .lh-tight .dual-en *,
+        .lh-tight .dual-ar,
+        .lh-tight .dual-ar * {
+            line-height: 0.9 !important;
+        }
 
-    /* ── STRONG ── */
-    strong, .dual-en strong, .dual-ar strong {
-        font-family: 'somar-bold' !important;
-        font-weight: 700 !important;
-        color: #414042;
-    }
+        /* ── TITLE ROW ── */
+        .contract-title-center {
+            width: 100%;
+            text-align: center;
+            margin-top: 4px;
+            margin-bottom: 10px;
+        }
 
-    /* ── SPACING ── */
-    .mt-1{margin-top:3px;}   .mt-2{margin-top:6px;}
-    .mt-3{margin-top:10px;}  .mt-4{margin-top:14px;}
-    .mt-6{margin-top:20px;}  .mt-8{margin-top:28px;}
-    .mt-10{margin-top:36px;}
-    .avoid-break { page-break-inside: avoid; }
-    ul { margin:0; padding:0 0 0 14px; } li { margin:2px 0; }
-</style>
-<title></title>
+        .contract-title-center .dual-row {
+            display: table;
+            width: auto;
+            margin: 0 auto;
+        }
+
+        .contract-title-center .dual-en,
+        .contract-title-center .dual-ar,
+        .contract-title-center .dual-ar *,
+        .contract-title-center .dual-en *,
+        .contract-title-separator {
+            display: table-cell;
+            width: auto !important;
+            white-space: nowrap;
+            font-family: 'somar-bold' !important;
+            font-size: 15pt !important;
+            font-weight: 700 !important;
+            line-height: 1.2 !important;
+            color: #414042 !important;
+            text-align: center !important;
+            vertical-align: middle;
+            padding: 0 6px;
+        }
+
+        /* ── BOLD OVERRIDE ── */
+        .fw-bold .dual-en,
+        .fw-bold .dual-en * {
+            font-family: 'somar-bold' !important;
+            font-size: 10pt;
+            font-weight: 700;
+            color: #414042;
+        }
+
+        .fw-bold .dual-ar,
+        .fw-bold .dual-ar * {
+            font-family: 'somar-bold' !important;
+            font-size: 10.5pt;
+            font-weight: 700;
+            color: #414042;
+        }
+
+        /* ── LABELS ── */
+        .h-label {
+            color: #c2151c !important;
+            font-family: 'somar-black' !important;
+            font-weight: 900;
+        }
+
+        .h-label-bold {
+            color: #c2151c !important;
+            font-family: 'somar-bold' !important;
+            font-weight: 700;
+        }
+
+        /* ── STRONG ── */
+        strong,
+        .dual-en strong,
+        .dual-ar strong {
+            font-family: 'somar-bold' !important;
+            font-weight: 700 !important;
+            color: #414042;
+        }
+
+        /* ── SPACING ── */
+        .mt-1 {
+            margin-top: 3px;
+        }
+
+        .mt-2 {
+            margin-top: 6px;
+        }
+
+        .mt-3 {
+            margin-top: 10px;
+        }
+
+        .mt-4 {
+            margin-top: 14px;
+        }
+
+        .mt-6 {
+            margin-top: 20px;
+        }
+
+        .mt-8 {
+            margin-top: 28px;
+        }
+
+        .mt-10 {
+            margin-top: 36px;
+        }
+
+        .avoid-break {
+            page-break-inside: avoid;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0 0 0 14px;
+        }
+
+        li {
+            margin: 2px 0;
+        }
+    </style>
+    <title></title>
 </head>
+
 <body>
 
-@for($i = 1; $i <= $totalPages; $i++)
-
-    <div class="page-header">
-        <img src="{{ $headerSrc }}" alt="Header">
-    </div>
-
-    <section class="pdf-page">
-
-        @includeIf("livewire.contract.export.{$category}.pages.page{$i}", [
-            'contract'   => $contract,
-            'locale'     => $locale,
-            'pageNo'     => $i,
-            'totalPages' => $totalPages,
-            'forPdf'     => true,
-        ])
-
-        <div class="contract-footer">{{ $i }} / {{ $totalPages }}</div>
-
-        <div class="page-footer">
-            <img src="{{ $footerSrc }}" alt="Footer">
+    @for ($i = 1; $i <= $totalPages; $i++)
+        <div class="page-header">
+            <img src="{{ $headerSrc }}" alt="Header">
         </div>
 
-    </section>
+        <section class="pdf-page">
 
-@endfor
+            @includeIf("livewire.contract.export.{$category}.pages.page{$i}", [
+                'contract' => $contract,
+                'locale' => $locale,
+                'pageNo' => $i,
+                'totalPages' => $totalPages,
+                'forPdf' => true,
+            ])
+
+            <div class="contract-footer">{{ $i }} / {{ $totalPages }}</div>
+
+            <div class="page-footer">
+                <img src="{{ $footerSrc }}" alt="Footer">
+            </div>
+
+        </section>
+    @endfor
 
 </body>
+
 </html>
