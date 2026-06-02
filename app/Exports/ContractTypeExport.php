@@ -15,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Symfony\Component\Console\Helper\TableStyle;
 
 class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
 {
@@ -138,6 +139,8 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Worksheet\Table;
+use PhpOffice\PhpSpreadsheet\Worksheet\Table\TableStyle;
 use Illuminate\Support\Collection;
 use App\Enums\ContractPlace;
 use App\Enums\ContractType as ContractTypeEnum;
@@ -196,14 +199,69 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
         return $mappedRow;
     }
 
-public function styles(Worksheet $sheet): array
+// public function styles(Worksheet $sheet): array
+//     {
+//         $highestRow = $sheet->getHighestRow();
+//         $highestColumn = $sheet->getHighestColumn();
+//         $globalRange = 'A1:' . $highestColumn . $highestRow;
+
+//         return [
+//             // 1. Global styles for ALL CELLS (Headers + Data Rows)
+//             $globalRange => [
+//                 'font' => [
+//                     'name' => 'Somar Sans',
+//                     'size' => 11,
+//                 ],
+//                 'alignment' => [
+//                     'horizontal' => Alignment::HORIZONTAL_CENTER,
+//                     'vertical'   => Alignment::VERTICAL_CENTER,
+//                 ],
+//                 'borders' => [
+//                     'allBorders' => [
+//                         'borderStyle' => Border::BORDER_THIN,
+//                     ],
+//                 ],
+//             ],
+//             // 2. Specific styles overriding the FIRST ROW (Headers)
+//             1 => [
+//                 'font' => [
+//                     'name'  => 'Somar Sans',
+//                     'bold'  => true,
+//                     'size'  => 12,
+//                     'color' => ['argb' => 'FFFFFFFF'], // White text so it's readable
+//                 ],
+//                 'fill' => [
+//                     'fillType'   => Fill::FILL_SOLID,
+//                     'startColor' => ['argb' => 'FFC2151C'], // Red background!
+//                 ],
+//             ],
+//         ];
+//     }
+// }
+public function styles(Worksheet $sheet)
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
         $globalRange = 'A1:' . $highestColumn . $highestRow;
 
+        // --- NEW: FORMAT AS NATIVE EXCEL TABLE ---
+        // Create a table over the entire data range
+        $table = new Table($globalRange, 'ContractTypes');
+        
+        // Create a table style
+        $tableStyle = new TableStyle();
+        // Use a LIGHT theme so it adds banded rows/filters but keeps your red header!
+        $tableStyle->setTheme(TableStyle::TABLE_STYLE_LIGHT1); 
+        $tableStyle->setShowRowStripes(true); // Enables alternating banded rows
+        $table->setStyle($tableStyle);
+        
+        // Add the table to the worksheet
+        $sheet->addTable($table);
+        // -----------------------------------------
+
+        // Return your existing styles to keep the font, alignment, and red background
         return [
-            // 1. Global styles for ALL CELLS (Headers + Data Rows)
+            // 1. Global styles for ALL CELLS
             $globalRange => [
                 'font' => [
                     'name' => 'Somar Sans',
@@ -225,11 +283,11 @@ public function styles(Worksheet $sheet): array
                     'name'  => 'Somar Sans',
                     'bold'  => true,
                     'size'  => 12,
-                    'color' => ['argb' => 'FFFFFFFF'], // White text so it's readable
+                    'color' => ['argb' => 'FFFFFFFF'], // White text
                 ],
                 'fill' => [
                     'fillType'   => Fill::FILL_SOLID,
-                    'startColor' => ['argb' => 'FFC2151C'], // Red background!
+                    'startColor' => ['argb' => 'FFC2151C'], // Your red background
                 ],
             ],
         ];
