@@ -1,5 +1,5 @@
 <div>
-    <div class="flex justify-between">
+    {{-- <div class="flex justify-between">
         <livewire:layout.breadcrumbs :title="__('general.annual_leave_rules')" :crumbs="[
             ['label' => __('general.project-basics')],
             ['label' => __('general.annual_leave_rules'), 'route' => 'annual-leave-rules.index'],
@@ -7,6 +7,25 @@
 
         @activerole('HR', 'super-admin')
             <div>
+                <x-primary-button wire:click="create" :showSpinner="false">
+                    @lang('general.add-new')
+                </x-primary-button>
+            </div>
+        @endactiverole
+    </div> --}}
+        <div class="flex justify-between items-start mb-4">
+
+        <livewire:layout.breadcrumbs :title="__('general.annual_leave_rules')" :crumbs="[
+            ['label' => __('general.project-basics')],
+            ['label' => __('general.annual_leave_rules'), 'route' => 'annual-leave-rules.index'],
+        ]" :showButton="true" />
+
+        @activerole('HR', 'super-admin')
+            <div class="flex items-center gap-2">
+                <x-primary-button wire:click="$dispatchTo('basics.annual-leave-rule-table', 'exportExcel')" :showSpinner="true">
+                    @lang('general.export-excel')
+                </x-primary-button>
+
                 <x-primary-button wire:click="create" :showSpinner="false">
                     @lang('general.add-new')
                 </x-primary-button>
