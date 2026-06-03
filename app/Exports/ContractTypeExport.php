@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithProperties;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -135,6 +136,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithProperties;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -145,7 +147,7 @@ use Illuminate\Support\Collection;
 use App\Enums\ContractPlace;
 use App\Enums\ContractType as ContractTypeEnum;
 
-class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles
+class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithProperties
 {
     public function __construct(
         protected Collection $collection,
@@ -154,6 +156,16 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
         // FORCE ENGLISH LOCALE for the duration of the export
         // This ensures the __('general.x') and Enums resolve to English
         app()->setLocale('en');
+    }
+
+    public function properties(): array
+    {
+        return [
+            'creator'        => 'Hope HR',
+            'lastModifiedBy' => ' ',
+            'title'          => ' ', 
+            'company'        => 'Hope Center', 
+        ];
     }
 
     public function collection(): Collection
@@ -243,8 +255,6 @@ public function styles(Worksheet $sheet)
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
         $globalRange = 'A1:' . $highestColumn . $highestRow;
-
-        // --- NEW: FORMAT AS NATIVE EXCEL TABLE ---
         // Create a table over the entire data range
         $table = new Table($globalRange, 'ContractTypes');
         
@@ -257,9 +267,9 @@ public function styles(Worksheet $sheet)
         
         // Add the table to the worksheet
         $sheet->addTable($table);
-        // -----------------------------------------
+       
 
-        // Return your existing styles to keep the font, alignment, and red background
+        
         return [
             // 1. Global styles for ALL CELLS
             $globalRange => [
@@ -283,11 +293,11 @@ public function styles(Worksheet $sheet)
                     'name'  => 'Somar Sans',
                     'bold'  => true,
                     'size'  => 12,
-                    'color' => ['argb' => 'FFFFFFFF'], // White text
+                    'color' => ['argb' => 'FFFFFFFF'], 
                 ],
                 'fill' => [
                     'fillType'   => Fill::FILL_SOLID,
-                    'startColor' => ['argb' => 'FFC2151C'], // Your red background
+                    'startColor' => ['argb' => 'FFC2151C'], 
                 ],
             ],
         ];
