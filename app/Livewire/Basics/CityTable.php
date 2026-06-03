@@ -13,12 +13,17 @@ use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CityExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 class CityTable extends LivewireTable
 {
     protected string $model = City::class;
     protected $listeners = [
         'refreshCityTable' => '$refresh',
-        'toggleItemStatusConfirmed'
+        'toggleItemStatusConfirmed',
+        'exportExcel' => 'exportExcel',
     ];
 
     protected function query(): Builder
@@ -110,5 +115,30 @@ class CityTable extends LivewireTable
             ->show();
 
         $this->dispatch('refreshCityTable');
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery(); 
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns; 
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) return true;
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code()) 
+            ->toArray();
+
+        $filename = 'cities_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(
+            new CityExport($data, $visibleColumnCodes), 
+            $filename
+        );
     }
 }

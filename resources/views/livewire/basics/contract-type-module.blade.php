@@ -17,7 +17,7 @@
             </div>
         @endactiverole
     </div> --}}
-{{-- @activerole('HR', 'super-admin')
+    {{-- @activerole('HR', 'super-admin')
             <div class="flex items-center space-x-2 gap-2"> <x-primary-button 
                     wire:click="$dispatchTo('basics.contract-type-table', 'exportExcel')" 
                     
@@ -31,8 +31,8 @@
                 </x-primary-button>
             </div>
         @endactiverole --}}
-        <div class="flex justify-between items-start mb-4">
-        
+    <div class="flex justify-between items-start mb-4">
+
         <livewire:layout.breadcrumbs :title="trans_choice('general.contract-type', 2)" :crumbs="[
             ['label' => __('general.project-basics')],
             ['label' => trans_choice('general.contract-type', 2), 'route' => 'contract-types.index'],
@@ -40,12 +40,9 @@
 
         @activerole('HR', 'super-admin')
             <div class="flex items-center gap-2">
-                {{-- <x-primary-button 
-                    wire:click="$dispatchTo('basics.contract-type-table', 'exportExcel')" 
-                    :showSpinner="true"
-                >
+                <x-primary-button wire:click="$dispatchTo('basics.contract-type-table', 'exportExcel')" :showSpinner="true">
                     @lang('general.export-excel')
-                </x-primary-button> --}}
+                </x-primary-button>
 
                 <x-primary-button wire:click="create" :showSpinner="false">
                     @lang('general.add-new')
