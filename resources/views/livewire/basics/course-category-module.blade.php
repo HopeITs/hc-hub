@@ -2,13 +2,31 @@
     $title = __('Course Categories');
 @endphp
 <div>
-    <div class="flex justify-between">
+    {{-- <div class="flex justify-between">
         <livewire:layout.breadcrumbs :title="$title" :crumbs="[
             ['label' => __('general.project-basics')],
             ['label' => $title, 'route' => 'course-categories.index'],
         ]" :showButton="true" />
         @activerole('HR', 'super-admin')
             <div>
+                <x-primary-button wire:click="create" :showSpinner="false">
+                    @lang('general.add-new')
+                </x-primary-button>
+            </div>
+        @endactiverole
+    </div> --}}
+                <div class="flex justify-between items-start mb-4">
+
+        <livewire:layout.breadcrumbs :title="$title" :crumbs="[
+            ['label' => __('general.project-basics')],
+            ['label' => $title, 'route' => 'course-categories.index'],
+        ]" :showButton="true" />
+        @activerole('HR', 'super-admin')
+            <div class="flex items-center gap-2">
+                <x-primary-button wire:click="$dispatchTo('basics.course-category-table', 'exportExcel')" :showSpinner="true">
+                    @lang('general.export-excel')
+                </x-primary-button>
+
                 <x-primary-button wire:click="create" :showSpinner="false">
                     @lang('general.add-new')
                 </x-primary-button>

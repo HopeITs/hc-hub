@@ -10,6 +10,10 @@ use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CourseCategoryExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 class CourseCategoryTable extends LivewireTable
 {
     protected string $model = CourseCategory::class;
@@ -17,6 +21,7 @@ class CourseCategoryTable extends LivewireTable
     protected $listeners = [
         'refreshCourseCategoryTable' => '$refresh',
         'delete',
+        'exportExcel' => 'exportExcel',
     ];
 
     protected function query(): Builder
@@ -108,5 +113,30 @@ class CourseCategoryTable extends LivewireTable
             ->show();
 
         $this->dispatch('refreshCourseCategoryTable');
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery(); 
+        $data = $query->get();
+        $data->loadCount('courses');
+        $userSelectedColumns = $this->columns; 
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) return true;
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code()) 
+            ->toArray();
+
+        $filename = 'course_categories_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(
+            new CourseCategoryExport($data, $visibleColumnCodes), 
+            $filename
+        );
     }
 }
