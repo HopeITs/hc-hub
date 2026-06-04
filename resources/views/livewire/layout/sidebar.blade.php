@@ -6,18 +6,16 @@
         rtl: {{ app()->getLocale() === 'ar' ? 'true' : 'false' }},
         open: @entangle('open').live
     }" x-cloak @click.outside="open = false"
-        class="fixed top-0 z-40 w-64 h-full pt-4 bg-white
-           transition-transform duration-300
-           md:translate-x-0"
+        class="fixed top-0 z-40 w-64 h-full pt-4 transition-transform duration-300 bg-white md:translate-x-0"
         :class="{
             // MOBILE ONLY behavior (< md)
             'translate-x-0': open,
             '-translate-x-full': !open && !rtl,
             'translate-x-full': !open && rtl,
         }">
-        <div class="flex flex-col h-full justify-between">
-            <div class="h-full px-3 pb-4 bg-white overflow-y-auto">
-                <a href="{{ route('dashboard') }}" class="flex justify-center items-center mt-4 mb-8">
+        <div class="flex flex-col justify-between h-full">
+            <div class="h-full px-3 pb-4 overflow-y-auto bg-white">
+                <a href="{{ route('dashboard') }}" class="flex items-center justify-center mt-4 mb-8">
                     <x-app-logo class="md:w-[11rem] md:h-auto object-fit" />
                 </a>
 
@@ -67,7 +65,8 @@
                         request()->routeIs('basic-checklist-items.*') ||
                         request()->routeIs('departments.*') ||
                         request()->routeIs('course-categories.*') ||
-                        request()->routeIs('job-levels.*')">
+                        request()->routeIs('job-levels.*')  ||   request()->routeIs('termination-reasons.*')  "
+                        >
                         <x-slot name="icon">
                             <x-icons.home />
                         </x-slot>
@@ -90,6 +89,9 @@
                             @activerole('HR', 'super-admin')
                                 <x-layouts.app.sidebar.nav-item :href="route('annual-leave-rules.index')" :active="request()->routeIs('annual-leave-rules.*')" wire:navigate>
                                     {{ __('general.annual_leave_rules') }}
+                                </x-layouts.app.sidebar.nav-item>
+                                   <x-layouts.app.sidebar.nav-item :href="route('termination-reasons.index')" :active="request()->routeIs('termination-reasons.*')" wire:navigate>
+                                    {{ __('general.termination_reasons') }}
                                 </x-layouts.app.sidebar.nav-item>
                             @endactiverole
 
@@ -303,5 +305,5 @@
         </div>
     </aside>
     <div x-show="open" x-transition.opacity @click="open = false"
-        class="fixed z-30 inset-0 bg-secondary-light/50 md:hidden" x-cloak></div>
+        class="fixed inset-0 z-30 bg-secondary-light/50 md:hidden" x-cloak></div>
 </div>

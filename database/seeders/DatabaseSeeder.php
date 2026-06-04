@@ -35,7 +35,8 @@ class DatabaseSeeder extends Seeder
             UserRoleSeeder::class,
             EmployeeContractSeeder::class,
             EducationFieldSeeder::class,
-            CourseCategorySeeder::class
+            CourseCategorySeeder::class,
+            TerminationReasonSeeder::class
         ]);
 
         //    $user = User::factory()->create([

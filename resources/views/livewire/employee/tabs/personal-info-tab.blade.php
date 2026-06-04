@@ -94,7 +94,7 @@
 
     <div class="grid pb-8 mb-8 border-b md:grid-cols-2 gap-x-6 gap-y-3">
         <x-heading-label class="col-span-full">@lang('general.address_info')</x-heading-label>
-
+<div class="md:grid md:grid-cols-2 gap-x-6 gap-y-3">
         @foreach (config('app.supported_locales') as $locale)
             <div wire:key="emp-father-{{ $locale }}">
                 <x-forms.input-label for="father_name_{{ $locale }}">@lang('general.father_name')
@@ -105,7 +105,8 @@
                 <x-error-span>{{ $errors->first('infoForm.father_name_' . $locale) }}</x-error-span>
             </div>
         @endforeach
-
+</div>
+<div class="md:grid md:grid-cols-2 gap-x-6 gap-y-3">
         @foreach (config('app.supported_locales') as $locale)
             <div wire:key="emp-mother-{{ $locale }}">
                 <x-forms.input-label for="mother_name_{{ $locale }}">@lang('general.mother_name')
@@ -116,7 +117,7 @@
                 <x-error-span>{{ $errors->first('infoForm.mother_name_' . $locale) }}</x-error-span>
             </div>
         @endforeach
-
+</div>
         <div wire:key="emp-dob">
             <x-forms.input-label for="dob">@lang('general.dob')</x-forms.input-label>
             <x-forms.date-input wire:model="infoForm.dob" id="dob" />
@@ -140,8 +141,8 @@
             <x-error-span>{{ $errors->first('infoForm.national_number') }}</x-error-span>
         </div>
 
-     
 
+<div class="md:grid md:grid-cols-2 gap-x-6 gap-y-3">
          @foreach (config('app.supported_locales') as $locale)
             <div wire:key="pob-{{ $locale }}">
                 <x-forms.input-label for="pob_{{ $locale }}">@lang('general.place_and_birth_date')
@@ -152,7 +153,7 @@
                 <x-error-span>{{ $errors->first('infoForm.pob_' . $locale) }}</x-error-span>
             </div>
         @endforeach
-
+</div>
         <div>
             <x-forms.input-label for="civil_registry_office">@lang('general.civil_registry_office')</x-forms.input-label>
             <x-forms.input type="text" wire:model="infoForm.civil_registry_office" id="civil_registry_office" />

@@ -162,6 +162,7 @@ return [
     'program-manager' => 'Program Manager',
     'years-of-service' => 'Years of Service',
     'annual_leave_rules' => 'Annual Leave Rules',
+    'termination_reasons' => 'Termination Reasons',
     'years_of_volunteering'=> 'Years of Volunteering',
     'day_per_month'=> 'Leave Days Per Month',
     'days_per_year'=> 'Leave Days Per Year',
