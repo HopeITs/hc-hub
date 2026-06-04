@@ -20,6 +20,9 @@
             <x-primary-button :href="route('positions.create')">
                 @lang('general.add-new')
             </x-primary-button>
+                            <x-primary-button wire:click="$dispatchTo('position.position-table', 'exportExcel')" :showSpinner="true">
+                    @lang('general.export-excel')
+                </x-primary-button>
         </div>
     </div>
 

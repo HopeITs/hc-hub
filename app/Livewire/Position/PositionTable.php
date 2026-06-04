@@ -17,6 +17,10 @@ use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PositionExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 class PositionTable extends LivewireTable
 {
     protected string $model = Position::class;
@@ -24,6 +28,10 @@ class PositionTable extends LivewireTable
     public ?int $centerId = null;
     public ?int $cityId = null;
     public $itemID;
+
+   protected $listeners = [
+        'exportExcel' => 'exportExcel', 
+    ];
 
     public function mount(?int $centerId = null, ?int $cityId = null): void
     {
@@ -48,8 +56,8 @@ class PositionTable extends LivewireTable
     protected function columns(): array
     {
         return [
-            Column::make(__('Title'), 'title_en')->sortable()->searchable(),
-            Column::make(__('Title') . ' (AR)', 'title_ar')->sortable()->searchable(),
+            Column::make(__('general.title') . ' (EN)', 'title_en')->sortable()->searchable(),
+            Column::make(__('general.title') . ' (AR)', 'title_ar')->sortable()->searchable(),
             SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
                 ->options(City::query()->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()     ->searchable(),
@@ -142,5 +150,30 @@ class PositionTable extends LivewireTable
 
         LivewireAlert::title(__('general.item-updated'))
             ->success()->toast()->position('top-start')->show();
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery(); 
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns; 
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) return true;
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code()) 
+            ->toArray();
+
+        $filename = 'positions_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(
+            new PositionExport($data, $visibleColumnCodes), 
+            $filename
+        );
     }
 }
