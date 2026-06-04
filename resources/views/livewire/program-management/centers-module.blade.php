@@ -12,6 +12,9 @@
                 <x-primary-button href="{{ route('centers.create') }}">
                     @lang('general.add-new')
                 </x-primary-button>
+                                            <x-primary-button wire:click="$dispatchTo('program-management.center.centers-table', 'exportExcel')" :showSpinner="true">
+                    @lang('general.export-excel')
+                </x-primary-button>
             </div>
         @endactiverole
     </div>
