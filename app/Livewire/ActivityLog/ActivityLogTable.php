@@ -33,9 +33,7 @@ class ActivityLogTable extends LivewireTable
                         return '-';
                     }
 
-                    return app()->getLocale() === 'ar'
-                        ? $profile->name_ar
-                        : $profile->name_en;
+                    return $profile->name;
                 }),
 
             Column::make(__('Action'), 'description')
@@ -85,9 +83,7 @@ class ActivityLogTable extends LivewireTable
                             $profile = $user->profile;
 
                             $name = $profile
-                                ? (app()->getLocale() === 'ar'
-                                    ? $profile->name_ar
-                                    : $profile->name_en)
+                                ? $profile->name
                                 : 'Unknown';
 
                             return [$user->id => $name];

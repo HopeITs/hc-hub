@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'first_name' => 'الاسم',
+    'last_name' => 'الكنية',
     'new_folder' => 'مجلد جديد',
     'upload_files' => 'رفع الملفات',
     'by_me' => 'بواسطتي',

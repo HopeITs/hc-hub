@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'first_name' => 'First name',
+    'last_name' => 'Last Name',
     'new_folder' => 'New Folder',
     'upload_files' => 'Upload Files',
     'by_me' => 'By: Me',

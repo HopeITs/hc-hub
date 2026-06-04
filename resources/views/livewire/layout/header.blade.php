@@ -9,15 +9,14 @@
 @endphp
 
 <nav dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
-     class="fixed inset-x-0 top-0 z-10 w-screen md:w-full  bg-white dark:bg-gray-800 backdrop-blur">
+     class="fixed inset-x-0 top-0 z-10 w-screen bg-white md:w-full dark:bg-gray-800 backdrop-blur">
 
     <div class="px-3 py-1 lg:px-5 lg:ps-3">
         <div class="flex items-center justify-end gap-3 md:pe-0 pe-4">
             <button
                 wire:click="$dispatch('sidebar.toggle')"
                 type="button"
-                class="md:hidden me-auto text-heading text-secondary-light bg-transparent border border-transparent
-           hover:text-secondary-dark transition cursor-pointer rounded-base p-2"
+                class="p-2 transition bg-transparent border border-transparent cursor-pointer md:hidden me-auto text-heading text-secondary-light hover:text-secondary-dark rounded-base"
             >
                 <span class="sr-only">Open sidebar</span>
                 <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -25,20 +24,20 @@
                 </svg>
             </button>
             <a href="{{ $localized }}"
-               class="flex items-center text-xs font-medium mt-1 text-secondary-light hover:text-secondary-dark transition">
+               class="flex items-center mt-1 text-xs font-medium transition text-secondary-light hover:text-secondary-dark">
                 {{ $switchTo === 'ar' ? 'AR' : 'EN' }}
             </a>
 
             <a href="https://docs.google.com/document/d/1AcrvWNBzoD-bTem3Gy_35EtDgwD-SXST/edit?usp=sharing&ouid=105248334092459549739&rtpof=true&sd=true"
                target="_blank" rel="noopener"
                class="pe-1 ps-3 border-x border-e-secondary-soft">
-                <x-icons.guide class="text-secondary-light hover:text-secondary-dark me-2 transition"/>
+                <x-icons.guide class="transition text-secondary-light hover:text-secondary-dark me-2"/>
             </a>
 
             <a href="https://hcsyria.org/home"
                target="_blank" rel="noopener"
                class="pe-3 border-e border-e-secondary-soft">
-                <x-icons.homepage class="text-secondary-light hover:text-secondary-dark transition"/>
+                <x-icons.homepage class="transition text-secondary-light hover:text-secondary-dark"/>
             </a>
 
             <x-layouts.app.notification/>
@@ -52,7 +51,7 @@
 
                         <span class="relative inline-grid place-items-center rounded-full p-[2px] shrink-0">
                             <img class="size-7.5 border border-primary rounded-full object-cover"
-                                 src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt="user"/>
+                                 src="{{ $user->profile?->getFirstMediaUrl('avatar') }}" alt="user"/>
 
                             <span class="absolute bottom-0.5 {{ $isRtl ? 'start-1' : 'end-0.5' }}
                                          size-2 rounded-full bg-emerald-500 ring-2 ring-white"></span>
@@ -73,8 +72,8 @@
 
                             <div class="relative flex items-center gap-3">
                                 <span class="p-[3px] rounded-full">
-                                    <img class="size-12 border border-primary rounded-full object-cover"
-                                         src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt="user">
+                                    <img class="object-cover border rounded-full size-12 border-primary"
+                                         src="{{ $user->profile?->getFirstMediaUrl('avatar') }}" alt="user">
                                 </span>
 
                                 <div class="min-w-0">
@@ -91,9 +90,8 @@
 
                         <div class="px-2 py-2">
                             <a href="{{ route('settings.password') }}"
-                               class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium
-                                      text-gray-800 hover:bg-gray-100/90 hover:shadow-sm transition">
-                                <svg class="size-4 text-gray-700" viewBox="0 0 24 24" fill="none"
+                               class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-800 transition rounded-xl hover:bg-gray-100/90 hover:shadow-sm">
+                                <svg class="text-gray-700 size-4" viewBox="0 0 24 24" fill="none"
                                      stroke="currentColor" stroke-width="1.8">
                                     <circle cx="12" cy="8" r="4"/>
                                     <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
@@ -141,8 +139,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit"
-                                        class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold
-                                               text-red-600 hover:bg-red-50/80 hover:shadow-sm transition">
+                                        class="flex items-center w-full gap-3 px-3 py-2 text-sm font-semibold text-red-600 transition rounded-xl hover:bg-red-50/80 hover:shadow-sm">
                                     <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                          stroke-width="1.8">
                                         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>

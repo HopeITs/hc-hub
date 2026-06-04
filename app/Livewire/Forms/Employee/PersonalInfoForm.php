@@ -19,9 +19,14 @@ class PersonalInfoForm extends Form
 
     public $photo = null;
     #[Validate('required|string')]
-    public $name_ar;
+    public $first_name_ar;
     #[Validate('required|string')]
-    public $name_en;
+    public $first_name_en;
+     #[Validate('required|string')]
+    public $last_name_ar;
+    #[Validate('required|string')]
+    public $last_name_en;
+
 
     public $id;
     #[Validate('required|string')]
@@ -68,9 +73,10 @@ class PersonalInfoForm extends Form
     #[Validate('nullable|string')]
     public $civil_registry_number;
     #[Validate('nullable|string')]
-    public $place_and_birth_date;
+    public $pob_en;
     #[Validate('nullable|string')]
-    public $place_of_registration;
+    public $pob_ar;
+ 
 
     #[Validate('nullable|string')]
     public $work_phone;
@@ -166,9 +172,11 @@ class PersonalInfoForm extends Form
         $this->children = $employee->children;
         $this->nationality = $employee->nationality;
         $this->civil_registry_office = $employee->civil_registry_office;
-        $this->place_and_birth_date = $employee->place_and_birth_date;
-        $this->civil_registry_number = $employee->civil_registry_number;
-        $this->place_of_registration = $employee->place_of_registration;
+             $this->civil_registry_number = $employee->civil_registry_number;
+
+        $this->pob_en = $employee->pob_en;
+          $this->pob_ar = $employee->pob_ar;
+
         $this->work_phone = $employee->work_phone;
         $this->personal_phone = $employee->personal_phone;
         $this->personal_email = $employee->personal_email;
@@ -178,8 +186,10 @@ class PersonalInfoForm extends Form
         $this->is_board_member = $employee->is_board_member;
         $this->board_member_started_at = $employee->board_member_started_at?->format('Y-m-d');
         $this->board_member_end_at = $employee->board_member_end_at?->format('Y-m-d');
-        $this->name_ar = $employee->name_ar;
-        $this->name_en = $employee->name_en;
+        $this->first_name_en = $employee->first_name_en;
+        $this->first_name_ar = $employee->first_name_ar;
+        $this->last_name_en = $employee->last_name_en;
+        $this->last_name_ar = $employee->last_name_ar;
         $this->father_name_en = $employee->father_name_en;
         $this->father_name_ar = $employee->father_name_ar;
         $this->mother_name_en = $employee->mother_name_en;

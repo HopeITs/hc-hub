@@ -266,7 +266,7 @@ class ArchivedFilesModule extends Component
             $this->folderForPermissions->users()->sync($newIds);
 
             if ($addedUserIds->isNotEmpty()) {
-                $creatorName = $this->user->profile?->name ?? $this->user->name;
+                $creatorName = $this->user->profile?->name ?? '-';
                 foreach (User::whereIn('id', $addedUserIds)->get() as $user) {
                     $user->notify(new \App\Notifications\FolderShared($this->folderForPermissions, $creatorName));
                 }

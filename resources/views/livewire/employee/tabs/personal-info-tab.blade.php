@@ -12,18 +12,28 @@
             accept="image/*" :old-file="$infoForm->photo" />
     </div>
 
-    <div class="grid md:grid-cols-2 gap-x-6 gap-y-3 border-b pb-8 mb-8">
+    <div class="grid pb-8 mb-8 border-b md:grid-cols-2 gap-x-6 gap-y-3">
         <x-heading-label class="col-span-full">@lang('general.general_info')</x-heading-label>
+        <div class="grid md:grid-cols-4 col-span-full gap-x-6 gap-y-3">
+            @foreach (config('app.supported_locales') as $locale)
+                <div wire:key="emp-name-{{ $locale }}">
+                    <x-forms.input-label for="first_name{{ $locale }}">@lang('general.first_name') ({{ strtoupper($locale) }})
+                    </x-forms.input-label>
+                    <x-forms.input type="text" wire:model="infoForm.first_name_{{ $locale }}"
+                        id="name_{{ $locale }}" />
+                    <x-error-span>{{ $errors->first('infoForm.first_name_' . $locale) }}</x-error-span>
+                </div>
 
-        @foreach (config('app.supported_locales') as $locale)
-            <div wire:key="emp-name-{{ $locale }}">
-                <x-forms.input-label for="name_{{ $locale }}">@lang('general.name') ({{ strtoupper($locale) }})
-                </x-forms.input-label>
-                <x-forms.input type="text" wire:model="infoForm.name_{{ $locale }}"
-                    id="name_{{ $locale }}" />
-                <x-error-span>{{ $errors->first('infoForm.name_' . $locale) }}</x-error-span>
-            </div>
-        @endforeach
+                <div wire:key="emp-name-{{ $locale }}">
+                    <x-forms.input-label for="last_name_{{ $locale }}">@lang('general.last_name') ({{ strtoupper($locale) }})
+                    </x-forms.input-label>
+                    <x-forms.input type="text" wire:model="infoForm.last_name_{{ $locale }}"
+                        id="name_{{ $locale }}" />
+                    <x-error-span>{{ $errors->first('infoForm.last_name_' . $locale) }}</x-error-span>
+                </div>
+            @endforeach
+        </div>
+
 
         <div class="grid md:grid-cols-2 gap-x-6">
             <div wire:key="emp-actual-dob">
@@ -45,7 +55,7 @@
 
         <div wire:key="emp-gender">
             <x-forms.input-label for="gender">@lang('general.gender')</x-forms.input-label>
-            <div class="flex space-x-4 mt-2">
+            <div class="flex mt-2 space-x-4">
                 <x-forms.radio-input name="gender" value="1"
                     wire:model="infoForm.gender">@lang('general.male')</x-forms.radio-input>
                 <x-forms.radio-input name="gender" value="2"
@@ -82,7 +92,7 @@
         @endforeach
     </div>
 
-    <div class="grid md:grid-cols-2 gap-x-6 gap-y-3 border-b pb-8 mb-8">
+    <div class="grid pb-8 mb-8 border-b md:grid-cols-2 gap-x-6 gap-y-3">
         <x-heading-label class="col-span-full">@lang('general.address_info')</x-heading-label>
 
         @foreach (config('app.supported_locales') as $locale)
@@ -130,11 +140,18 @@
             <x-error-span>{{ $errors->first('infoForm.national_number') }}</x-error-span>
         </div>
 
-        <div>
-            <x-forms.input-label for="place_and_birth_date">@lang('general.place_and_birth_date')</x-forms.input-label>
-            <x-forms.input type="text" wire:model="infoForm.place_and_birth_date" id="place_and_birth_date" />
-            <x-error-span>{{ $errors->first('infoForm.place_and_birth_date') }}</x-error-span>
-        </div>
+     
+
+         @foreach (config('app.supported_locales') as $locale)
+            <div wire:key="pob-{{ $locale }}">
+                <x-forms.input-label for="pob_{{ $locale }}">@lang('general.place_and_birth_date')
+                    ({{ strtoupper($locale) }})
+                </x-forms.input-label>
+                <x-forms.input type="text" wire:model="infoForm.pob_{{ $locale }}"
+                    id="pob_{{ $locale }}" />
+                <x-error-span>{{ $errors->first('infoForm.pob_' . $locale) }}</x-error-span>
+            </div>
+        @endforeach
 
         <div>
             <x-forms.input-label for="civil_registry_office">@lang('general.civil_registry_office')</x-forms.input-label>
@@ -148,62 +165,57 @@
             <x-error-span>{{ $errors->first('infoForm.civil_registry_number') }}</x-error-span>
         </div>
 
-        <div>
-            <x-forms.input-label for="place_of_registration">@lang('general.place_of_registration')</x-forms.input-label>
-            <x-forms.input type="text" wire:model="infoForm.place_of_registration" id="place_of_registration" />
-            <x-error-span>{{ $errors->first('infoForm.place_of_registration') }}</x-error-span>
-        </div>
+
     </div>
-    <div class="grid md:grid-cols-1 gap-x-6 gap-y-3 border-b pb-8 mb-8">
+    <div class="grid pb-8 mb-8 border-b md:grid-cols-1 gap-x-6 gap-y-3">
         <x-heading-label class="col-span-1 ">@lang('general.membership')</x-heading-label>
 
         <div class="col-span-full">
             <x-forms.input-label for="roles">{{ trans_choice('general.role', 2) }}</x-forms.input-label>
-            <x-forms.tags-input    placeholder='Add tag'
-                                   :suggestions="implode(',', $roles)"
-                                   :forceSuggestion=true wire:model="infoForm.roles" />
+            <x-forms.tags-input placeholder='Add tag' :suggestions="implode(',', $roles)" :forceSuggestion=true
+                wire:model="infoForm.roles" />
             <x-error-span>{{ $errors->first('infoForm.roles') }}</x-error-span>
         </div>
-        <div class=" col-span-1 flex items-center space-x-2">
+        <div class="flex items-center col-span-1 space-x-2 ">
             <x-forms.input type="checkbox" wire:model.live="infoForm.is_board_member"
-                           wire:change="toggleBoardMember($event.target.checked)" value="1" id="is_board_member" />
+                wire:change="toggleBoardMember($event.target.checked)" value="1" id="is_board_member" />
             <x-forms.input-label for="is_board_member">@lang('general.is_board_member')</x-forms.input-label>
             <x-error-span>{{ $errors->first('infoForm.is_board_member') }}</x-error-span>
         </div>
 
-        <div class="col-span-1 grid  md:grid-cols-2 gap-x-6 gap-y-3"
-             wire:key="board-member-{{ (int) data_get($infoForm, 'is_board_member') }}">
+        <div class="grid col-span-1 md:grid-cols-2 gap-x-6 gap-y-3"
+            wire:key="board-member-{{ (int) data_get($infoForm, 'is_board_member') }}">
             <div>
                 <x-forms.input-label for="board_member_started_at">@lang('general.board_member_started_at')</x-forms.input-label>
                 <x-forms.date-input wire:model.live="infoForm.board_member_started_at" id="board_member_started_at"
-                                    :required="data_get($infoForm, 'is_board_member')" value="{{ data_get($infoForm, 'is_board_member') ?? null }}" />
+                    :required="data_get($infoForm, 'is_board_member')" value="{{ data_get($infoForm, 'is_board_member') ?? null }}" />
                 <x-error-span>{{ $errors->first('infoForm.board_member_started_at') }}</x-error-span>
             </div>
 
             <div>
                 <x-forms.input-label for="board_member_end_at">@lang('general.board_member_end_at')</x-forms.input-label>
                 <x-forms.date-input wire:model.live="infoForm.board_member_end_at" id="board_member_end_at"
-                                    value="{{ data_get($infoForm, 'is_board_member') ?? null }}" />
+                    value="{{ data_get($infoForm, 'is_board_member') ?? null }}" />
                 <x-error-span>{{ $errors->first('infoForm.board_member_end_at') }}</x-error-span>
             </div>
         </div>
     </div>
-    <div class="border-b pb-8 mb-8">
+    <div class="pb-8 mb-8 border-b">
         <x-heading-label>@lang('general.skills_and_interests')</x-heading-label>
 
         <div class="md:col-span-2" wire:ignore>
             <x-forms.input-label for="skills">@lang('general.skills')</x-forms.input-label>
-            <x-forms.tags-input    placeholder='Add tag'
-                                   suggestions="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking,Problem Solving,Adaptability,Willingness to learn,Active listening,Emotion Intelligence,Creativity,Data analysis"
-                                   :forceSuggestion=true wire:model="infoForm.skills" />
+            <x-forms.tags-input placeholder='Add tag'
+                suggestions="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking,Problem Solving,Adaptability,Willingness to learn,Active listening,Emotion Intelligence,Creativity,Data analysis"
+                :forceSuggestion=true wire:model="infoForm.skills" />
             <x-error-span>{{ $errors->first('infoForm.skills') }}</x-error-span>
         </div>
 
         <div class="md:col-span-2" wire:ignore>
             <x-forms.input-label for="interests">@lang('general.interests')</x-forms.input-label>
-            <x-forms.tags-input    placeholder='Add tag'
-            suggestions="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling"
-            :forceSuggestion=true wire:model="infoForm.interests" />
+            <x-forms.tags-input placeholder='Add tag'
+                suggestions="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling"
+                :forceSuggestion=true wire:model="infoForm.interests" />
             <x-error-span>{{ $errors->first('infoForm.interests') }}</x-error-span>
         </div>
     </div>
