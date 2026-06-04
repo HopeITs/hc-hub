@@ -7,7 +7,7 @@
             ['label' => trans_choice('general.city', 2), 'route' => 'cities.index'],
         ]" />
     </div> --}}
-    <div class="flex justify-between items-start mb-4">
+    <div class="flex justify-between items-center mb-6">
 
         <livewire:layout.breadcrumbs :title="trans_choice('general.city', 2)" :crumbs="[
             ['label' => __('general.project-basics')],
@@ -31,7 +31,7 @@
             </div>
         @endactiverole --}}
         @activerole('HR','super-admin')
-            <div>
+            <div class="flex items-center gap-2">
               <x-primary-button wire:click="$dispatchTo('basics.city-table', 'exportExcel')" :showSpinner="true">
                     @lang('general.export-excel')
                 </x-primary-button>

@@ -13,7 +13,7 @@
             </div>
         @endactiverole
     </div> --}}
-        <div class="flex justify-between items-start mb-4">
+        <div class="flex justify-between items-center mb-6">
 
         <livewire:layout.breadcrumbs :title="__('general.annual_leave_rules')" :crumbs="[
             ['label' => __('general.project-basics')],
