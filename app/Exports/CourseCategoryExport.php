@@ -66,9 +66,7 @@ class CourseCategoryExport implements FromCollection, WithHeadings, WithMapping,
                 'id'            => $row->id,
                 'name_ar'       => $row->name_ar,
                 'name_en'       => $row->name_en,
-                // 'courses_count' => $row->courses_count,
-                'courses_count' => (int) $row->courses_count,
-                default         => '',
+                'courses_count' => empty($row->courses_count) ? '0' :  $row->courses_count,                default         => '',
             };
         }
 

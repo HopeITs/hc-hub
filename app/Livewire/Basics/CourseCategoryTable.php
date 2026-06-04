@@ -119,7 +119,6 @@ class CourseCategoryTable extends LivewireTable
     {
         $query = $this->appliedQuery(); 
         $data = $query->get();
-        $data->loadCount('courses');
         $userSelectedColumns = $this->columns; 
 
         $visibleColumnCodes = collect($this->resolveColumns())
