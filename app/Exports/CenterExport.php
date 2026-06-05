@@ -21,8 +21,7 @@ class CenterExport implements FromCollection, WithHeadings, WithMapping, ShouldA
         protected Collection $collection,
         protected array $visibleColumnCodes
     ) {
-        // FORCE ENGLISH LOCALE
-        app()->setLocale('en');
+
     }
 
     public function properties(): array
@@ -47,12 +46,12 @@ class CenterExport implements FromCollection, WithHeadings, WithMapping, ShouldA
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'                           => 'ID',
-                'name'                         => __('general.center-name'),
-                'open_at'                      => __('general.working-hours'),
-                'city_name_en', 'city_name_ar' => trans_choice('general.city', 1),
-                'address_en'                      => __('general.address'),
-                'positions_count'              => __('general.positions'),
-                'is_active'                    => __('general.is-active'),
+                'name'                         => __('general.center-name', [], 'en'),
+                'open_at'                      => __('general.working-hours', [], 'en'),
+                'city_name_en', 'city_name_ar' => trans_choice('general.city', 1, [], 'en'),
+                'address'                      => __('general.address', [], 'en'),
+                'positions_count'              => __('general.positions', [], 'en'),
+                'is_active'                    => __('general.is-active', [], 'en'),
                 default                        => $code,
             };
         }
@@ -68,14 +67,11 @@ class CenterExport implements FromCollection, WithHeadings, WithMapping, ShouldA
             $mappedRow[] = match ($code) {
                 'id'                           => $row->id,
                 'name'                         => $row->name,
-                
-                // Combine open and close times for Excel
                 'open_at'                      => $row->open_at_formatted . ' - ' . $row->close_at_formatted,
                 
                 'city_name_en', 'city_name_ar' => $row->city?->name_en ?? '',
-                'address_en'                      => $row->address_en ?? '—',
+                'address'                      => $row->address_en ?? '—',
                 
-                // Force the count to be a strict string/integer so Excel never renders a blank cell
                 'positions_count'              => empty($row->positions_count) ? '0' :  $row->positions_count,
                 'is_active'                    => $row->is_active ? 'Yes' : 'No',
 

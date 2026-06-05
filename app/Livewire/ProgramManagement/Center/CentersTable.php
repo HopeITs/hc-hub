@@ -22,7 +22,7 @@ class CentersTable extends LivewireTable
 {
     protected string $model = Center::class;
 
-    protected $listeners = ['delete', 'toggleItemStatusConfirmed','exportExcel' => 'exportExcel',];
+    protected $listeners = ['delete', 'toggleItemStatusConfirmed', 'exportExcel' => 'exportExcel',];
 
     protected function query(): Builder
     {
@@ -52,7 +52,7 @@ class CentersTable extends LivewireTable
     {
         $locale = app()->getLocale();
         $user = auth()->user();
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin') ;
+        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
 
         return [
             Column::make('ID', 'id')->sortable(),
@@ -66,17 +66,18 @@ class CentersTable extends LivewireTable
                 ]))->sortable(),
 
             SelectColumn::make(trans_choice('general.city', 1), 'city.' . transColumn('name'))
-                ->options(City::query()
-                    ->whereNot('code', '000')
-                    ->where('is_active', true)
-                    ->get()
-                    ->pluck(transColumn('name'), transColumn('name'))
-                    ->toArray()
+                ->options(
+                    City::query()
+                        ->whereNot('code', '000')
+                        ->where('is_active', true)
+                        ->get()
+                        ->pluck(transColumn('name'), transColumn('name'))
+                        ->toArray()
                 )
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('general.address'))
+            Column::make(__('general.address'), 'address')
                 ->displayUsing(fn($v, Model $m) => $m->address ?: '—')
                 ->sortable()
                 ->searchable(),
@@ -84,22 +85,40 @@ class CentersTable extends LivewireTable
             BooleanColumn::make(__('general.is-active'), 'is_active')->searchable(),
 
             // ✅ Positions button with count
-            Column::make(__('general.positions'), function (Model $m): string {
-                $url = route('positions.index', ['center' => $m->id]);
+            // Column::make(__('general.positions'), function (Model $m): string {
+            //     $url = route('positions.index', ['center' => $m->id]);
 
-                $classes = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium ' . 'border shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary/40 ' . ($m->is_active ? 'bg-secondary-soft text-secondary-dark shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300');
+            //     $classes = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium ' . 'border shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary/40 ' . ($m->is_active ? 'bg-secondary-soft text-secondary-dark shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300');
 
-                $count = $m->positions_count ?? 0;
-                $badge = '<span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[11px] md:text-xs bg-current/10">' . $count . '</span>';
+            //     $count = $m->positions_count ?? 0;
+            //     $badge = '<span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[11px] md:text-xs bg-current/10">' . $count . '</span>';
 
-                return Blade::render(
-                    '<a href="' . $url . '" class="' . $classes . '" title="' . e(__('general.positions')) . '">
-                        <i class="ti ti-briefcase text-base"></i>
-                        <span>' . e(trans_choice('general.positions', 2)) . '</span>' .
-                    $badge .
-                    '</a>'
-                );
-            })->asHtml()->visible($user->activeRoleIs('HR') || $user->activeRoleIs('super-admin')),
+            //     return Blade::render(
+            //         '<a href="' . $url . '" class="' . $classes . '" title="' . e(__('general.positions')) . '">
+            //             <i class="ti ti-briefcase text-base"></i>
+            //             <span>' . e(trans_choice('general.positions', 2)) . '</span>' .
+            //         $badge .
+            //         '</a>'
+            //     );
+            // })->asHtml()->visible($user->activeRoleIs('HR') || $user->activeRoleIs('super-admin')),
+            Column::make(__('general.positions'), 'positions_count')
+                ->displayUsing(function ($v, Model $m): string {
+
+                    $url = route('positions.index', ['center' => $m->id]);
+
+                    $classes = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium ' . 'border shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary/40 ' . ($m->is_active ? 'bg-secondary-soft text-secondary-dark shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300');
+
+                    $count = $m->positions_count ?? 0;
+                    $badge = '<span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[11px] md:text-xs bg-current/10">' . $count . '</span>';
+
+                    return Blade::render(
+                        '<a href="' . $url . '" class="' . $classes . '" title="' . e(__('general.positions')) . '">
+                <i class="ti ti-briefcase text-base"></i>
+                <span>' . e(trans_choice('general.positions', 2)) . '</span>' .
+                            $badge .
+                            '</a>'
+                    );
+                })->asHtml()->visible($isHR),
 
             Column::make(__('general.actions'), function (Model $m) use ($isHR): string {
                 $viewUrl = route('centers.show', $m->getKey());
@@ -134,7 +153,7 @@ class CentersTable extends LivewireTable
                     '<x-table.delete-btn :modelId="' . $m->getKey() . '" />'
                 );
 
-                return $toggleBtn . $viewBtn . $editBtn ;
+                return $toggleBtn . $viewBtn . $editBtn;
             })->asHtml(),
         ];
     }
@@ -185,27 +204,29 @@ class CentersTable extends LivewireTable
 
         LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
     }
+    
     public function exportExcel(): BinaryFileResponse
     {
-        $query = $this->appliedQuery(); 
+        $query = $this->appliedQuery();
         $data = $query->get();
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
                 if (empty($userSelectedColumns)) return true;
                 return in_array($column->code(), $userSelectedColumns);
             })
-            ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code()) 
+            ->filter(fn($column) => $column->label() !== __('general.actions'))
+            ->map(fn($column) => $column->code())
             ->toArray();
 
         $filename = 'centers_' . now()->format('Y-m-d') . '.xlsx';
 
         return Excel::download(
-            new CenterExport($data, $visibleColumnCodes), 
+            new CenterExport($data, $visibleColumnCodes),
             $filename
         );
     }
+
 }
