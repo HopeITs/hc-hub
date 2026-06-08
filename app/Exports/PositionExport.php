@@ -21,8 +21,7 @@ class PositionExport implements FromCollection, WithHeadings, WithMapping, Shoul
         protected Collection $collection,
         protected array $visibleColumnCodes
     ) {
-        // FORCE ENGLISH LOCALE
-        app()->setLocale('en');
+
     }
 
     public function properties(): array
@@ -46,17 +45,17 @@ class PositionExport implements FromCollection, WithHeadings, WithMapping, Shoul
         
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
-                'title_en'                               => __('general.title') . ' (EN)',
-                'title_ar'                               => __('general.title') . ' (AR)',
+                'title_en'                               => __('general.title', [], 'en') . ' (EN)',
+                'title_ar'                               => __('general.title', [], 'en') . ' (AR)',
                 // Match both EN and AR generated codes from the table
-                'city_name_en', 'city_name_ar'           => trans_choice('general.city', 1),
-                'program_name'                           => trans_choice('general.program', 1),
-                'center_name'                            => trans_choice('general.center', 1),
-                'department_name'                        => trans_choice('general.department', 1),
-                'jobLevel_name_en', 'jobLevel_name_ar'   => trans_choice('general.job-level', 1),
-                'directManager_title_en', 'directManager_title_ar' => __('general.direct-manager'),
-                'techManager_title_en', 'techManager_title_ar'     => __('general.tech-manager'),
-                'is_active'                              => __('general.is-active'),
+                'city_name_en', 'city_name_ar'           => trans_choice('general.city', 1, [], 'en'),
+                'program_name'                           => trans_choice('general.program', 1, [], 'en'),
+                'center_name'                            => trans_choice('general.center', 1, [], 'en'),
+                'department_name'                        => trans_choice('general.department', 1, [], 'en'),
+                'jobLevel_name_en', 'jobLevel_name_ar'   => trans_choice('general.job-level', 1, [], 'en'),
+                'directManager_title_en', 'directManager_title_ar' => __('general.direct-manager', [], 'en'),
+                'techManager_title_en', 'techManager_title_ar'     => __('general.tech-manager', [], 'en'),
+                'is_active'                              => __('general.is-active', [], 'en'),
                 default                                  => $code,
             };
         }
