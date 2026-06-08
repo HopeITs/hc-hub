@@ -57,7 +57,7 @@ class CourseCategoryTable extends LivewireTable
                 ->searchable(),
                 
             Column::make(trans_choice('general.course', 2), 'courses_count')
-                ->sortable()->searchable(),
+                ->sortable(),
 
             Column::make(__('general.actions'), function (Model $m): string {
                 $id = $m->id;
