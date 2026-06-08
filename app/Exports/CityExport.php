@@ -21,7 +21,7 @@ class CityExport implements FromCollection, WithHeadings, WithMapping, ShouldAut
         protected array $visibleColumnCodes
     ) {
     
-        app()->setLocale('en');
+        
     }
 
     public function properties(): array
@@ -46,11 +46,11 @@ class CityExport implements FromCollection, WithHeadings, WithMapping, ShouldAut
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'        => 'ID',
-                'name_ar'   => __('general.name') . ' (AR)',
-                'name_en'   => __('general.name') . ' (EN)',
-                'code'      => __('general.code'),
-                'slug'      => __('general.slug'),
-                'is_active' => __('general.active'),
+                'name_ar'   => __('general.name', [], 'en') . ' (AR)',
+                'name_en'   => __('general.name', [], 'en') . ' (EN)',
+                'code'      => __('general.code', [], 'en'),
+                'slug'      => __('general.slug', [], 'en'),
+                'is_active' => __('general.active', [], 'en'),
                 default     => $code,
             };
         }

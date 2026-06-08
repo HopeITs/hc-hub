@@ -21,8 +21,7 @@ class ChecklistItemExport implements FromCollection, WithHeadings, WithMapping, 
         protected Collection $collection,
         protected array $visibleColumnCodes
     ) {
-        // FORCE ENGLISH LOCALE
-        app()->setLocale('en');
+   
     }
 
     public function properties(): array
@@ -47,8 +46,8 @@ class ChecklistItemExport implements FromCollection, WithHeadings, WithMapping, 
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'    => 'ID',
-                'name'  => __('general.name'),
-                'order' => __('general.order'),
+                'name'  => __('general.name', [], 'en'),
+                'order' => __('general.order', [], 'en'),
                 default => $code,
             };
         }
@@ -58,6 +57,8 @@ class ChecklistItemExport implements FromCollection, WithHeadings, WithMapping, 
 
     public function map($row): array
     {
+        $orig = app()->getLocale();
+        app()->setLocale('en');
         $mappedRow = [];
         
         foreach ($this->visibleColumnCodes as $code) {
@@ -68,7 +69,7 @@ class ChecklistItemExport implements FromCollection, WithHeadings, WithMapping, 
                 default => '',
             };
         }
-
+        app()->setLocale($orig);
         return $mappedRow;
     }
 

@@ -22,7 +22,7 @@ class LeaveTypeExport implements FromCollection, WithHeadings, WithMapping, Shou
         protected Collection $collection,
         protected array $visibleColumnCodes
     ) {
-        app()->setLocale('en');
+
     }
 
     public function properties(): array
@@ -47,11 +47,11 @@ class LeaveTypeExport implements FromCollection, WithHeadings, WithMapping, Shou
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'             => 'ID',
-                'name_ar'        => __('general.name') . ' (AR)',
-                'name_en'        => __('general.name') . ' (EN)',
-                'base_days'      => __('general.base-days'),
-                'allowed_gender' => __('general.allowed-gender'),
-                'marital_status' => __('general.marital_status'),
+                'name_ar'        => __('general.name', [], 'en') . ' (AR)',
+                'name_en'        => __('general.name', [], 'en') . ' (EN)',
+                'base_days'      => __('general.base-days', [], 'en'),
+                'allowed_gender' => __('general.allowed-gender', [], 'en'),
+                'marital_status' => __('general.marital_status', [], 'en'),
                 default          => $code,
             };
         }
@@ -61,6 +61,9 @@ class LeaveTypeExport implements FromCollection, WithHeadings, WithMapping, Shou
 
     public function map($row): array
     {
+        $orig = app()->getLocale();
+        app()->setLocale('en');
+
         $mappedRow = [];
         
         foreach ($this->visibleColumnCodes as $code) {
@@ -75,6 +78,8 @@ class LeaveTypeExport implements FromCollection, WithHeadings, WithMapping, Shou
             };
         }
 
+        app()->setLocale($orig);
+        
         return $mappedRow;
     }
 

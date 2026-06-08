@@ -151,11 +151,9 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
 {
     public function __construct(
         protected Collection $collection,
-        protected array $visibleColumnCodes // Now accepts codes instead of labels
+        protected array $visibleColumnCodes 
     ) {
-        // FORCE ENGLISH LOCALE for the duration of the export
-        // This ensures the __('general.x') and Enums resolve to English
-        app()->setLocale('en');
+
     }
 
     public function properties(): array
@@ -177,14 +175,14 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
     {
         $headers = [];
         
-        // Map the codes back to forced English headers
+        
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'      => 'ID',
-                'name_ar' => __('general.name') . ' (AR)',
-                'name_en' => __('general.name') . ' (EN)',
-                'place'   => __('general.place'),
-                'type'    => __('general.type'),
+                'name_ar' => __('general.name', [], 'en') . ' (AR)',
+                'name_en' => __('general.name', [], 'en') . ' (EN)',
+                'place'   => __('general.place', [], 'en'),
+                'type'    => __('general.type', [], 'en'),
                 default   => $code,
             };
         }
@@ -194,84 +192,44 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
 
     public function map($row): array
     {
+        $orig = app()->getLocale();
+        app()->setLocale('en');
+
         $mappedRow = [];
         
-        // Safely map data using the column code, ignoring UI locale
         foreach ($this->visibleColumnCodes as $code) {
             $mappedRow[] = match ($code) {
                 'id'      => $row->id,
                 'name_ar' => $row->name_ar,
                 'name_en' => $row->name_en,
-                'place'   => ContractPlace::getLocalizedName($row->place)['value'] ?? '', // Will be EN
-                'type'    => ContractTypeEnum::getLocalizedName($row->type)['value'] ?? '', // Will be EN
+                'place'   => ContractPlace::getLocalizedName($row->place)['value'] ?? '', 
+                'type'    => ContractTypeEnum::getLocalizedName($row->type)['value'] ?? '', 
                 default   => '',
             };
         }
-
+        app()->setLocale($orig);
+        
         return $mappedRow;
     }
 
-// public function styles(Worksheet $sheet): array
-//     {
-//         $highestRow = $sheet->getHighestRow();
-//         $highestColumn = $sheet->getHighestColumn();
-//         $globalRange = 'A1:' . $highestColumn . $highestRow;
 
-//         return [
-//             // 1. Global styles for ALL CELLS (Headers + Data Rows)
-//             $globalRange => [
-//                 'font' => [
-//                     'name' => 'Somar Sans',
-//                     'size' => 11,
-//                 ],
-//                 'alignment' => [
-//                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-//                     'vertical'   => Alignment::VERTICAL_CENTER,
-//                 ],
-//                 'borders' => [
-//                     'allBorders' => [
-//                         'borderStyle' => Border::BORDER_THIN,
-//                     ],
-//                 ],
-//             ],
-//             // 2. Specific styles overriding the FIRST ROW (Headers)
-//             1 => [
-//                 'font' => [
-//                     'name'  => 'Somar Sans',
-//                     'bold'  => true,
-//                     'size'  => 12,
-//                     'color' => ['argb' => 'FFFFFFFF'], // White text so it's readable
-//                 ],
-//                 'fill' => [
-//                     'fillType'   => Fill::FILL_SOLID,
-//                     'startColor' => ['argb' => 'FFC2151C'], // Red background!
-//                 ],
-//             ],
-//         ];
-//     }
-// }
 public function styles(Worksheet $sheet)
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
         $globalRange = 'A1:' . $highestColumn . $highestRow;
-        // Create a table over the entire data range
         $table = new Table($globalRange, 'ContractTypes');
         
-        // Create a table style
         $tableStyle = new TableStyle();
-        // Use a LIGHT theme so it adds banded rows/filters but keeps your red header!
         $tableStyle->setTheme(TableStyle::TABLE_STYLE_LIGHT1); 
-        $tableStyle->setShowRowStripes(true); // Enables alternating banded rows
+        $tableStyle->setShowRowStripes(true); 
         $table->setStyle($tableStyle);
         
-        // Add the table to the worksheet
         $sheet->addTable($table);
        
 
         
         return [
-            // 1. Global styles for ALL CELLS
             $globalRange => [
                 'font' => [
                     'name' => 'Somar Sans',
@@ -287,7 +245,6 @@ public function styles(Worksheet $sheet)
                     ],
                 ],
             ],
-            // 2. Specific styles overriding the FIRST ROW (Headers)
             1 => [
                 'font' => [
                     'name'  => 'Somar Sans',

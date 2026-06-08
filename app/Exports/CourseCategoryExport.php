@@ -22,7 +22,7 @@ class CourseCategoryExport implements FromCollection, WithHeadings, WithMapping,
         protected array $visibleColumnCodes
     ) {
         
-        app()->setLocale('en');
+  
     }
 
     public function properties(): array
@@ -47,9 +47,9 @@ class CourseCategoryExport implements FromCollection, WithHeadings, WithMapping,
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'            => 'ID',
-                'name_ar'       => __('general.name') . ' (AR)',
-                'name_en'       => __('general.name') . ' (EN)',
-                'courses_count' => trans_choice('general.course', 2),
+                'name_ar'       => __('general.name', [], 'en') . ' (AR)',
+                'name_en'       => __('general.name', [], 'en') . ' (EN)',
+                'courses_count' => trans_choice('general.course', 2, [], 'en'),
                 default         => $code,
             };
         }

@@ -21,7 +21,7 @@ class AnnualLeaveRuleExport implements FromCollection, WithHeadings, WithMapping
         protected Collection $collection,
         protected array $visibleColumnCodes
     ) {
-        app()->setLocale('en');
+        
     }
 
     public function properties(): array
@@ -46,9 +46,9 @@ class AnnualLeaveRuleExport implements FromCollection, WithHeadings, WithMapping
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'                    => 'ID',
-                'days'                  => __('general.days_per_year'),
-                'day_per_month'         => __('general.day_per_month'),
-                'years_of_volunteering' => __('general.years_of_volunteering'),
+                'days'                  => __('general.days_per_year', [], 'en'),
+                'day_per_month'         => __('general.day_per_month', [], 'en'),
+                'years_of_volunteering' => __('general.years_of_volunteering', [], 'en'),
                 default                 => $code,
             };
         }

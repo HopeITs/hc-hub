@@ -21,7 +21,7 @@ class JobLevelExport implements FromCollection, WithHeadings, WithMapping, Shoul
         protected Collection $collection,
         protected array $visibleColumnCodes
     ) {
-        app()->setLocale('en');
+        
     }
 
     public function properties(): array
@@ -46,10 +46,10 @@ class JobLevelExport implements FromCollection, WithHeadings, WithMapping, Shoul
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'      => 'ID',
-                'name_ar' => __('general.name') . ' (AR)',
-                'name_en' => __('general.name') . ' (EN)',
-                'grade'   => __('general.grade'),
-                'email'   => __('general.email'),
+                'name_ar' => __('general.name', [], 'en') . ' (AR)',
+                'name_en' => __('general.name', [], 'en') . ' (EN)',
+                'grade'   => __('general.grade', [], 'en'),
+                'email'   => __('general.email', [], 'en'),
                 default   => $code,
             };
         }

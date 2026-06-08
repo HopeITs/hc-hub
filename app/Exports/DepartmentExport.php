@@ -21,7 +21,7 @@ class DepartmentExport implements FromCollection, WithHeadings, WithMapping, Sho
         protected Collection $collection,
         protected array $visibleColumnCodes
     ) {
-        app()->setLocale('en');
+        
     }
 
     public function properties(): array
@@ -46,9 +46,9 @@ class DepartmentExport implements FromCollection, WithHeadings, WithMapping, Sho
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'             => 'ID',
-                'name'           => __('general.department-name'),
-                'code'           => __('general.code'),
-                'email'          => __('general.department-email'),
+                'name'           => __('general.department-name', [], 'en'),
+                'code'           => __('general.code', [], 'en'),
+                'email'          => __('general.department-email', [], 'en'),
                 default          => $code,
             };
         }
