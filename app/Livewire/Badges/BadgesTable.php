@@ -132,8 +132,8 @@ class BadgesTable extends LivewireTable
     protected function employeeOptions(): array
     {
         return Employee::query()
-            ->select(['id', 'name_en', 'name_ar'])
-            ->orderBy(transColumn('name'))
+            ->select(['id', 'first_name_en', 'first_name_ar' , 'last_name_en', 'last_name_ar'])
+            ->orderBy(transColumn('first_name'))
             ->get()
             ->mapWithKeys(fn($e) => [$e->id => $e->name])
             ->all();
