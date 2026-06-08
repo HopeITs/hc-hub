@@ -54,19 +54,12 @@ class EmployeeTable extends LivewireTable
         $user = auth()->user();
         return [
             Column::make('ID', 'id')->sortable(),
-            // Column::make(trans('general.photo'), function (Model $m): string {
-            //     $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
-            //     return $src
-            //         ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
-            //         : '<div class="w-12 h-12 bg-gray-200 rounded-full"></div>';
-            // })->asHtml(),
-            Column::make(trans('general.photo'), 'photo')
-                ->displayUsing(function ($v, Model $m): string {
-                    $src = $m->getFirstMediaUrl('avatar'); 
-                    return $src
-                        ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
-                        : '<div class="w-12 h-12 bg-gray-200 rounded-full"></div>';
-                })->asHtml(),
+            Column::make(trans('general.photo'), function (Model $m): string {
+                $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
+                return $src
+                    ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
+                    : '<div class="w-12 h-12 bg-gray-200 rounded-full"></div>';
+            })->asHtml(),
             Column::make(trans('general.name'), transColumn('name'))
                 ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
                 ->sortable()->searchable(),
@@ -79,24 +72,6 @@ class EmployeeTable extends LivewireTable
             SelectColumn::make(trans_choice('general.city', 1), 'city.' . transColumn('name'))
                 ->options(City::query()->whereNot('code', '000')->where('is_active', true)->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()->searchable(),
-
-            // SelectColumn::make(trans('general.direct_manager'), function (mixed $value, Model $model) {
-            //     return $model->latestActiveContract()?->position->directManager?->employee()?->name ?? '—';
-            // })
-            //     ->options($this->managerOptions())
-            //     ->sortable()
-            //     ->searchable(function (Builder $builder, mixed $search, SearchScope $scope): void {
-            //         $builder->whereHas('positions', function (Builder $builder) use ($search) {
-            //             $builder->whereHas('directManager', function (Builder $builder) use ($search) {
-            //                 $builder->whereHas('contracts', function (Builder $builder) use ($search) {
-            //                     $builder->whereHas('employee', function (Builder $builder) use ($search) {
-            //                         $builder->where('id', $search);
-            //                     });
-            //                 });
-            //             });
-            //         });
-
-            //     }),
 
             SelectColumn::make(trans('general.direct_manager'), 'direct_manager')
                 ->displayUsing(function ($v, Model $model) {
@@ -116,23 +91,6 @@ class EmployeeTable extends LivewireTable
                     });
                 }),
 
-            // SelectColumn::make(trans('general.tech_manager'), function (mixed $value, Model $model) {
-            //     return $model->latestActiveContract()?->position->techManager?->employee()?->name ?? '—';
-            // })
-            //     ->options($this->managerOptions())
-            //     ->sortable()
-            //     ->searchable(function (Builder $builder, mixed $search, SearchScope $scope): void {
-            //         $builder->whereHas('positions', function (Builder $builder) use ($search) {
-            //             $builder->whereHas('techManager', function (Builder $builder) use ($search) {
-            //                 $builder->whereHas('contracts', function (Builder $builder) use ($search) {
-            //                     $builder->whereHas('employee', function (Builder $builder) use ($search) {
-            //                         $builder->where('id', $search);
-            //                     });
-            //                 });
-            //             });
-            //         });
-
-            //     }),
             SelectColumn::make(trans('general.tech_manager'), 'tech_manager')
                 ->displayUsing(function ($v, Model $model) {
                     return $model->latestActiveContract()?->position->techManager?->employee()?->name ?? '—';

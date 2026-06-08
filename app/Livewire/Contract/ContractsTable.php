@@ -19,6 +19,11 @@ use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
+
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ContractExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 class ContractsTable extends LivewireTable
 {
     protected string $model = Contract::class;
@@ -26,6 +31,7 @@ class ContractsTable extends LivewireTable
     protected $listeners = [
         'delete',
         'refreshContractsTable' => '$refresh',
+        'exportExcel' => 'exportExcel',
     ];
 
     protected function query(): Builder
@@ -95,16 +101,24 @@ class ContractsTable extends LivewireTable
                 ->options(JobLevel::orderBy('grade')->pluck($name, $name)->toArray())
                 ->sortable()->searchable(),
 
-            Column::make(__('general.duration'), fn (Model $m) => $m->duration.' '.__('general.months'))
+            // Column::make(__('general.duration'), fn (Model $m) => $m->duration.' '.__('general.months'))
+            //     ->sortable(),
+Column::make(__('general.duration'), 'duration')
+                ->displayUsing(fn ($v, Model $m) => $m->duration.' '.__('general.months'))
                 ->sortable(),
-
-            Column::make(
-                __('general.period'),
-                fn (Model $m) => Blade::render('<x-period :start="$start" :end="$end" />', [
+                
+            // Column::make(
+            //     __('general.period'),
+            //     fn (Model $m) => Blade::render('<x-period :start="$start" :end="$end" />', [
+            //         'start' => $m->start_date,
+            //         'end' => $m->end_date,
+            //     ])
+            // )->asHtml(),
+            Column::make(__('general.period'), 'period')
+                ->displayUsing(fn ($v, Model $m) => Blade::render('<x-period :start="$start" :end="$end" />', [
                     'start' => $m->start_date,
-                    'end' => $m->end_date,
-                ])
-            )->asHtml(),
+                    'end'   => $m->end_date,
+                ]))->asHtml(),
 
             Column::make(__('general.yearly-leave-days'), 'leaveBalances')
                 ->displayUsing(fn ($m) => $m[0]->deserved_formatted ?? 0)
@@ -166,4 +180,30 @@ class ContractsTable extends LivewireTable
 
         $this->dispatch('refreshContractsTable');
     }
+
+            public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery(); 
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns; 
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) return true;
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code()) 
+            ->toArray();
+
+        $filename = 'contracts_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(
+            new ContractExport($data, $visibleColumnCodes), 
+            $filename
+        );
+    }
+
 }

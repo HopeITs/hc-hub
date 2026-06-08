@@ -4,6 +4,7 @@
             ['label' => trans_choice('general.employee-management', 2)],
             ['label' => trans_choice('general.employee', 2)],
         ]" :showButton="true" />
+        @activerole('HR', 'super-admin')
         <div class="flex items-center gap-2">
             <x-primary-button wire:click="$dispatchTo('employee.employee-table', 'exportExcel')" :showSpinner="true">
                 @lang('general.export-excel')
@@ -13,6 +14,7 @@
             </x-primary-button>
 
         </div>
+        @endactiverole
     </div>
 
     <livewire:employee.employee-table />
