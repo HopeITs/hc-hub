@@ -151,7 +151,7 @@ class Employee extends Model implements HasMedia
 
     public function getDirectManagerAttribute()
     {
-        $this->latestActiveContract()->position->directManager->employee();
+        $this->latestActiveContract()?->position?->directManager?->employee();
     }
 
     public function scopeInvolvedInProgram($query, $programId)
