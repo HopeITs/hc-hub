@@ -54,20 +54,15 @@ class EmployeeTable extends LivewireTable
         $user = auth()->user();
         return [
             Column::make('ID', 'id')->sortable(),
-            // Column::make(trans('general.photo'), function (Model $m): string {
-            //     $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
-            //     return $src
-            //         ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
-            //         : '<div class="w-12 h-12 bg-gray-200 rounded-full"></div>';
-            // })->asHtml(),
+
             Column::make(trans('general.photo'), 'photo')
                 ->displayUsing(function ($v, Model $m): string {
                     $src = $m->getFirstMediaUrl('avatar');
                     return $src
-                        ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
-                        : '<div class="w-12 h-12 bg-gray-200 rounded-full"></div>';
+                        ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="border rounded-full object-fit size-12 border-1 border-primary" />'
+                        : '<div class="bg-gray-200 rounded-full size-12"></div>';
                 })->asHtml(),
-                
+
             Column::make(trans('general.name'), transColumn('name'))
                 ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
                 ->sortable()->searchable(),
