@@ -12,8 +12,11 @@ use App\Enums\LeaveRequestStatus;
             ]"
             :showButton="true"
         />
-
-
+        @activerole('HR', 'super-admin')
+            <div class="flex items-center gap-2">
+                <x-excel-export-button wire:click="$dispatchTo('employee.leave.emp-leave-balance-table', 'exportExcel')" />
+            </div>
+        @endactiverole
     </div>
 
 
