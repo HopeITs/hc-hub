@@ -24,7 +24,7 @@ class EmployeeTable extends LivewireTable
 {
     protected string $model = Employee::class;
 
-    protected $listeners = ['delete', 'toggleItemStatusConfirmed','exportExcel' => 'exportExcel'];
+    protected $listeners = ['delete', 'toggleItemStatusConfirmed', 'exportExcel' => 'exportExcel'];
 
     protected function query(): Builder
     {
@@ -54,12 +54,20 @@ class EmployeeTable extends LivewireTable
         $user = auth()->user();
         return [
             Column::make('ID', 'id')->sortable(),
-            Column::make(trans('general.photo'), function (Model $m): string {
-                $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
-                return $src
-                    ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
-                    : '<div class="w-12 h-12 bg-gray-200 rounded-full"></div>';
-            })->asHtml(),
+            // Column::make(trans('general.photo'), function (Model $m): string {
+            //     $src = $m->getFirstMediaUrl('avatar'); // use 'thumb' conversion if you have it
+            //     return $src
+            //         ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
+            //         : '<div class="w-12 h-12 bg-gray-200 rounded-full"></div>';
+            // })->asHtml(),
+            Column::make(trans('general.photo'), 'photo')
+                ->displayUsing(function ($v, Model $m): string {
+                    $src = $m->getFirstMediaUrl('avatar');
+                    return $src
+                        ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="object-cover border rounded-full size-12 border-1 border-primary" />'
+                        : '<div class="w-12 h-12 bg-gray-200 rounded-full"></div>';
+                })->asHtml(),
+                
             Column::make(trans('general.name'), transColumn('name'))
                 ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
                 ->sortable()->searchable(),
@@ -109,11 +117,11 @@ class EmployeeTable extends LivewireTable
                     });
                 }),
             SelectColumn::make(trans('general.position'), 'contracts.position.' . transColumn('title'))
-                ->options(Position::query()->orderby(transColumn('title'),'asc')->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
+                ->options(Position::query()->orderby(transColumn('title'), 'asc')->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
                 ->sortable()->searchable(),
 
 
-            Column::make(trans('general.work_email'),'work_email')
+            Column::make(trans('general.work_email'), 'work_email')
                 ->displayUsing(fn($v, Model $m) => $m->account?->email ?? '—'),
 
             BooleanColumn::make(trans('general.is-active'), 'is_active')->searchable(),
@@ -123,8 +131,8 @@ class EmployeeTable extends LivewireTable
 
                 $toggleBtn = Blade::render(
                     '<x-forms.toggle-input class="p-2 m-2 text-xl" active="' . $isActive .
-                    '" :model-id="' . $model->getKey() .
-                    '" wire-event="confirmToggleItemStatus" />'
+                        '" :model-id="' . $model->getKey() .
+                        '" wire-event="confirmToggleItemStatus" />'
                 );
 
                 $viewBtn = Blade::render(
@@ -145,7 +153,6 @@ class EmployeeTable extends LivewireTable
                 return '<div class="flex items-center gap-1">' .
                     $toggleBtn . $viewBtn . $editBtn .
                     '</div>';
-
             })->visible($user->activeRoleIs('HR') || $user->activeRoleIs('super-admin'))->asHtml(),
 
         ];
@@ -192,27 +199,27 @@ class EmployeeTable extends LivewireTable
             ->success()->toast()->position('top-start')->show();
     }
 
-        public function exportExcel(): BinaryFileResponse
+    public function exportExcel(): BinaryFileResponse
     {
-        $query = $this->appliedQuery(); 
+        $query = $this->appliedQuery();
         $data = $query->get();
 
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
                 if (empty($userSelectedColumns)) return true;
                 return in_array($column->code(), $userSelectedColumns);
             })
-            ->filter(fn ($column) => $column->label() !== __('general.actions') && $column->code() !== 'photo')
-            ->map(fn ($column) => $column->code()) 
+            ->filter(fn($column) => $column->label() !== __('general.actions') && $column->code() !== 'photo')
+            ->map(fn($column) => $column->code())
             ->toArray();
 
         $filename = 'employees_' . now()->format('Y-m-d') . '.xlsx';
 
         return Excel::download(
-            new EmployeeExport($data, $visibleColumnCodes), 
+            new EmployeeExport($data, $visibleColumnCodes),
             $filename
         );
     }

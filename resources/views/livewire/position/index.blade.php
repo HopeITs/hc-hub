@@ -17,12 +17,11 @@
             :showButton="true"
         />
         <div class="flex items-center gap-2">
+            <x-excel-export-button wire:click="$dispatchTo('position.position-table', 'exportExcel')" />
+
             <x-primary-button :href="route('positions.create')">
                 @lang('general.add-new')
             </x-primary-button>
-                            <x-primary-button wire:click="$dispatchTo('position.position-table', 'exportExcel')" :showSpinner="true">
-                    @lang('general.export-excel')
-                </x-primary-button>
         </div>
     </div>
 
