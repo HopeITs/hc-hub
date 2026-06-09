@@ -12,6 +12,10 @@ use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\AnnualLeaveRuleExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 class AnnualLeaveRuleTable extends LivewireTable
 {
     protected string $model = AnnualLeaveRule::class;
@@ -19,6 +23,7 @@ class AnnualLeaveRuleTable extends LivewireTable
     protected $listeners = [
         'refreshAnnualLeaveRuleTable' => '$refresh',
         'delete',
+        'exportExcel' => 'exportExcel',
     ];
 
     protected function query(): Builder
@@ -92,5 +97,30 @@ class AnnualLeaveRuleTable extends LivewireTable
             ->success()->toast()->position('top-start')->show();
 
         $this->dispatch('refreshAnnualLeaveRuleTable');
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery(); 
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns; 
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) return true;
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code()) 
+            ->toArray();
+
+        $filename = 'annual_leave_rules_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(
+            new AnnualLeaveRuleExport($data, $visibleColumnCodes), 
+            $filename
+        );
     }
 }

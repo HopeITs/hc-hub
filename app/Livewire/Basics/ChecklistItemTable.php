@@ -12,6 +12,10 @@ use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ChecklistItemExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 class ChecklistItemTable extends LivewireTable
 {
     protected string $model = ChecklistItem::class;
@@ -19,6 +23,7 @@ class ChecklistItemTable extends LivewireTable
     protected $listeners = [
         'refreshChecklistItemTable' => '$refresh',
         'delete',
+        'exportExcel' => 'exportExcel',
     ];
 
     protected function query(): Builder
@@ -105,5 +110,30 @@ class ChecklistItemTable extends LivewireTable
             ->show();
 
         $this->dispatch('refreshChecklistItemTable');
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery(); 
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns; 
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) return true;
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code()) 
+            ->toArray();
+
+        $filename = 'checklist_items_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(
+            new ChecklistItemExport($data, $visibleColumnCodes), 
+            $filename
+        );
     }
 }

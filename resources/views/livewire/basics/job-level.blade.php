@@ -1,5 +1,5 @@
 <div>
-    <div class="flex justify-between">
+    {{-- <div class="flex justify-between">
         <livewire:layout.breadcrumbs
             :title="trans_choice('general.job-level', 2)"
             :crumbs="[
@@ -16,8 +16,28 @@
             </x-primary-button>
         </div>
     @endactiverole
-    </div>
+    </div> --}}
+        <div class="flex justify-between items-center mb-6">
 
+        <livewire:layout.breadcrumbs
+            :title="trans_choice('general.job-level', 2)"
+            :crumbs="[
+                 ['label' => __('general.project-basics')],
+                ['label' => trans_choice('general.job-level', 2), 'route' => 'job-levels.index'],
+            ]"
+            :showButton="true"
+        />
+
+        @activerole('HR', 'super-admin')
+            <div class="flex items-center gap-2">
+                <x-excel-export-button wire:click="$dispatchTo('basics.job-level-table', 'exportExcel')" />
+
+                <x-primary-button wire:click="create" :showSpinner="false">
+                    @lang('general.add-new')
+                </x-primary-button>
+            </div>
+        @endactiverole
+    </div>
 
     <livewire:basics.job-level-table />
 

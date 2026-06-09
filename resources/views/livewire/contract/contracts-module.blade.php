@@ -11,11 +11,14 @@
             ]"
             :showButton="true"
         />
-        <div>
+        @activerole('HR', 'super-admin')
+        <div class="flex items-center gap-2">
+             <x-excel-export-button wire:click="$dispatchTo('contract.contracts-table', 'exportExcel')" />
             <x-primary-button :href="route('contracts.create')">
                 @lang('general.add-new')
             </x-primary-button>
         </div>
+        @endactiverole
     </div>
 
     <livewire:contract.contracts-table />

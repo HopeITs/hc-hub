@@ -53,7 +53,6 @@ class DefaultDeliverablesModule extends Component
     $role = $user->myRole();
     $roleArr = explode('-', $role);
 
-    $empCol  = "name_{$locale}";
     $cityCol = "name_{$locale}";
 
     $employeesQuery = Employee::whereHas('contracts', function ($query) {
@@ -77,9 +76,9 @@ class DefaultDeliverablesModule extends Component
                 ->whereHas('city', function ($q) use ($citySlug) {
                     $q->where('slug', $citySlug);
                 })
-                ->orderBy($empCol)
-                ->get(['id', $empCol])
-                ->mapWithKeys(fn($e) => [$e->id => $e->{$empCol}]);
+                ->orderBy(transColumn('first_name'))
+                 ->get()
+                ->mapWithKeys(fn($e) => [$e->id => $e->name]);
 
             $cities = $citiesQuery
                 ->where('slug', $citySlug)
@@ -90,9 +89,9 @@ class DefaultDeliverablesModule extends Component
 
             // HR-SYR 
             $employees = $employeesQuery
-                ->orderBy($empCol)
-                ->get(['id', $empCol])
-                ->mapWithKeys(fn($e) => [$e->id => $e->{$empCol}]);
+                ->orderBy(transColumn('first_name'))
+                ->get()
+                ->mapWithKeys(fn($e) => [$e->id => $e->name]); 
 
             $cities = $citiesQuery
                 ->get(['id', $cityCol])
@@ -103,9 +102,9 @@ class DefaultDeliverablesModule extends Component
 
         // SuperAdmin or GeneralAdmin 
         $employees = $employeesQuery
-            ->orderBy($empCol)
-            ->get(['id', $empCol])
-            ->mapWithKeys(fn($e) => [$e->id => $e->{$empCol}]);
+            ->orderBy(transColumn('first_name'))
+            ->get()  
+            ->mapWithKeys(fn($e) => [$e->id => $e->name]);
 
         $cities = $citiesQuery
             ->get(['id', $cityCol])

@@ -44,9 +44,6 @@ class DefaultDeliverablesTable extends LivewireTable
 
     protected function employeeOptions(): array
     {
-        $loc = app()->getLocale();
-        $name = $loc === 'ar' ? 'name_ar' : 'name_en';
-
         return Employee::query()
             ->whereHas('contracts', function ($query) {
                 $query->whereHas('position', function ($subQuery) {
@@ -55,8 +52,9 @@ class DefaultDeliverablesTable extends LivewireTable
                     });
                 });
             })
-            ->orderBy($name)
-            ->pluck($name, $name)
+            ->orderBy(transColumn('first_name'))
+            ->get()
+            ->mapWithKeys(fn($e) => [$e->id => $e->name])
             ->toArray();
     }
 
@@ -85,10 +83,19 @@ class DefaultDeliverablesTable extends LivewireTable
 
             Column::make('ID', 'id')->sortable()->searchable(),
 
-            SelectColumn::make(trans_choice('general.employee', 1), 'employee.' . $name)
-                ->options($this->employeeOptions())
-                ->sortable()
-                ->searchable(),
+            // SelectColumn::make(trans_choice('general.employee', 1), 'employee.' . $name)
+            //     ->options($this->employeeOptions())
+            //     ->sortable()
+            //     ->searchable(),
+            SelectColumn::make(trans_choice('general.employee', 1), 'employee_id')
+            ->options($this->employeeOptions())
+            ->displayUsing(fn($v, Model $m) => $m->employee?->name ?? '—')
+            ->sortable()
+            ->searchable(function (Builder $query, $value) {
+                $query->whereHas('employee', function ($q) use ($value) {
+                    $q->where('id', $value);
+                });
+            }),
             SelectColumn::make(trans_choice('general.city', 1), 'city.' . $name)
                 ->options($this->cityOptions())
                 ->sortable()
@@ -110,28 +117,28 @@ class DefaultDeliverablesTable extends LivewireTable
             Column::make(__('general.actions'), function (Model $m): string {
                 $user = auth()->user()->load('profile');
                 $role = $user->myRole();
-            
+
                 $roleArr = explode('-', $role);
-            
+
                 $canEdit = true;
-            
+
                 if ($roleArr[0] === 'HR') {
-            
+
                     if ($roleArr[1] === 'SYR') {
                         $canEdit = true;
                     } else {
                         $citySlug = $roleArr[1];
-            
+
                         if ($m->city->slug !== $citySlug) {
                             $canEdit = false;
                         }
                     }
                 }
-            
+
                 if (!$canEdit) {
                     return ''; // hide buttons
                 }
-                
+
                 $id = $m->getKey();
 
                 $editBtn = Blade::render(

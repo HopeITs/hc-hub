@@ -320,6 +320,7 @@ return [
     'period' => 'Period',
     'next' => 'Next',
     'loading' => 'Loading',
+    'export-excel' =>'Export To Excel',
     'previous' => 'Previous',
     'month' => 'Month',
     'session' => 'Session',

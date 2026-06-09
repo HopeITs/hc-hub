@@ -10,6 +10,10 @@ use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\DepartmentExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 class DepartmentTable extends LivewireTable
 {
     protected string $model = Department::class;
@@ -17,6 +21,7 @@ class DepartmentTable extends LivewireTable
     protected $listeners = [
         'refreshDepartmentTable' => '$refresh',
         'delete',
+        'exportExcel' => 'exportExcel',
     ];
 
     protected function query(): Builder
@@ -107,5 +112,30 @@ class DepartmentTable extends LivewireTable
             ->show();
 
         $this->dispatch('refreshDepartmentTable');
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery(); 
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns; 
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) return true;
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code()) 
+            ->toArray();
+
+        $filename = 'departments_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(
+            new DepartmentExport($data, $visibleColumnCodes), 
+            $filename
+        );
     }
 }
