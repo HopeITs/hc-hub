@@ -247,6 +247,12 @@ return new class extends Migration
             $table->foreignId('item_id')->constrained('checklist_items')->onDelete('restrict');
             $table->timestamps();
         });
+        Schema::create('termination_reasons', function (Blueprint $table) {
+            $table->id();
+            $table->text('title_ar');
+            $table->text('title_en')->nullable();
+            $table->timestamps();
+        });
 
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
@@ -255,6 +261,7 @@ return new class extends Migration
             $table->foreignId('contract_type_id')->constrained()->onDelete('restrict');
             $table->dateTime('start_date');
             $table->dateTime('end_date');
+            $table->foreignId('termination_reason_id')->nullable()->constrained()->onDelete('restrict');
             $table->dateTime('terminated_at')->nullable();
             $table->text('reason_of_termination')->nullable();
             $table->integer('salary')->nullable();
@@ -264,8 +271,8 @@ return new class extends Migration
             $table->time('work_hours_to')->nullable()->default('17:00');
             $table->string('work_days_en')->nullable();
             $table->string('work_days_ar')->nullable();
-            $table->string('notes_ar')->nullable();
-            $table->string('notes_en')->nullable();
+            $table->string('attending_notes_ar')->nullable();
+            $table->string('attending_notes_en')->nullable();
             $table->integer('weekly_hours');
             $table->boolean('is_active')->default(true);
             $table->timestamps();

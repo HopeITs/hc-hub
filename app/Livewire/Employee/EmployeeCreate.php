@@ -52,7 +52,7 @@ class EmployeeCreate extends Component
         return view('livewire.employee.form', [
             'roles' => $roles,
             'cities' => $cities,
-            'allEmployees' => Employee::select('id', 'name_en', 'name_ar')->get(),
+            'allEmployees' => Employee::select('id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar')->get(),
             'isCreateMode' => true,
             'employeeChecklistItems' => collect(),
         ]);

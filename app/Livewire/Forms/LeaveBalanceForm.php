@@ -365,7 +365,7 @@ class LeaveBalanceForm extends Form
             recipientType: 'manager'
         )) : '';
 
-        $employee->notify(new ActionLeaveBalance(
+        $employee?->notify(new ActionLeaveBalance(
             balance: $this->balance,
             operation: $this->operation,
             unit: $this->unit,
