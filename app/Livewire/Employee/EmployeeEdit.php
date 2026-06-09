@@ -283,9 +283,7 @@ class EmployeeEdit extends Component
         return view('livewire.employee.form', [
             'roles' => $roles,
             'cities' => $cities,
-            'allEmployees' => Employee::select('id', 'name_en', 'name_ar')
-                ->where('id', '!=', $this->employee->id)
-                ->get(),
+     
             'delivereds' => $delivereds,
             'employeeChecklistItems' => $employeeChecklistItems,
             'isCreateMode' => false,
