@@ -283,7 +283,6 @@ class EmployeeEdit extends Component
         return view('livewire.employee.form', [
             'roles' => $roles,
             'cities' => $cities,
-     
             'delivereds' => $delivereds,
             'employeeChecklistItems' => $employeeChecklistItems,
             'isCreateMode' => false,
