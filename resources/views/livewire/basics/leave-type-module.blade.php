@@ -15,7 +15,7 @@
             </div>
         @endactiverole
     </div> --}}
-        <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6">
 
         <livewire:layout.breadcrumbs :title="trans_choice('general.leave-type', 2)" :crumbs="[
             ['label' => __('general.project-basics')],
@@ -24,10 +24,7 @@
 
         @activerole('HR', 'super-admin')
             <div class="flex items-center gap-2">
-                <x-primary-button wire:click="$dispatchTo('basics.leave-type-table', 'exportExcel')" :showSpinner="true">
-                    @lang('general.export-excel')
-                </x-primary-button>
-
+                <x-excel-export-button wire:click="$dispatchTo('basics.leave-type-table', 'exportExcel')" />
                 <x-primary-button wire:click="create" :showSpinner="false">
                     @lang('general.add-new')
                 </x-primary-button>

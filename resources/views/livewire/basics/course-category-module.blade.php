@@ -15,7 +15,7 @@
             </div>
         @endactiverole
     </div> --}}
-                <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6">
 
         <livewire:layout.breadcrumbs :title="$title" :crumbs="[
             ['label' => __('general.project-basics')],
@@ -23,12 +23,11 @@
         ]" :showButton="true" />
         @activerole('HR', 'super-admin')
             <div class="flex items-center gap-2">
-                {{-- <x-primary-button wire:click="$dispatchTo('basics.course-category-table', 'exportExcel')" :showSpinner="true">
-                    @lang('general.export-excel')
-                </x-primary-button> --}}
-<x-excel-export-button
-    wireClick="$dispatchTo('basics.course-category-table', 'exportExcel')"
-/>
+
+                <x-excel-export-button wire:click="$dispatchTo('basics.course-category-table', 'exportExcel')" />
+
+
+
                 <x-primary-button wire:click="create" :showSpinner="false">
                     @lang('general.add-new')
                 </x-primary-button>
