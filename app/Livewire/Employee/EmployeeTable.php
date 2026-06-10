@@ -40,11 +40,11 @@ class EmployeeTable extends LivewireTable
     protected function managerOptions(): array
     {
         return Employee::query()
-            ->select(['id', 'first_name_en', 'first_name_ar'])
+            ->select(['id', 'first_name_en', 'first_name_ar','last_name_en', 'last_name_ar',])
             ->orderBy(transColumn('first_name'), 'asc')
             ->get()
             ->mapWithKeys(fn($e) => [
-                $e->id => $e->first_name
+                $e->id => $e->name
             ])
             ->all();
     }
@@ -63,9 +63,26 @@ class EmployeeTable extends LivewireTable
                         : '<div class="bg-gray-200 rounded-full size-12"></div>';
                 })->asHtml(),
 
-            Column::make(trans('general.name'), transColumn('name'))
-                ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
-                ->sortable()->searchable(),
+            // Column::make(trans('general.name'), transColumn('name'))
+            //     ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
+            //     ->sortable()->searchable(),
+            Column::make(trans('general.name'), 'employee')
+                ->displayUsing(fn($v, Model $m) => $m->name)
+                ->sortable()
+                ->searchable(function (Builder $query, $value) {
+                    $parts = array_filter(explode(' ', trim($value)));
+
+                    $query->where(function (Builder $q) use ($parts) {
+                        foreach ($parts as $part) {
+                            $q->where(function (Builder $inner) use ($part) {
+                                $inner->where('first_name_en', 'LIKE', "%{$part}%")
+                                    ->orWhere('first_name_ar', 'LIKE', "%{$part}%")
+                                    ->orWhere('last_name_en',  'LIKE', "%{$part}%")
+                                    ->orWhere('last_name_ar',  'LIKE', "%{$part}%");
+                            });
+                        }
+                    });
+                }),
             Column::make(trans_choice('general.role', 1), 'account')
                 ->displayUsing(fn($v, Model $m) => $m->account?->myRole()),
 
