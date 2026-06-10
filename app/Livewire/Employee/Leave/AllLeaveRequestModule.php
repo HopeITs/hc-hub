@@ -49,13 +49,13 @@ class AllLeaveRequestModule extends Component
             $cityCode = explode('-', $user->myRole())[1];
 
             if ($cityCode === 'SYR') {
-                $this->employees = Employee::with('contracts.leaveBalances.leaveType')->orderBy($empCol)->get();
+                $this->employees = Employee::with('contracts.leaveBalances.leaveType')->orderBy(transColumn('first_name'))->get();
             } else {
                 $this->employees = Employee::whereHas('city', function ($query) use ($cityCode) {
                     $query->where('code', $cityCode);
 
 
-                })->with('contracts.leaveBalances.leaveType')->orderBy($empCol)->get();
+                })->with('contracts.leaveBalances.leaveType')->orderBy(transColumn('first_name'))->get();
             }
         }
 
@@ -82,7 +82,7 @@ class AllLeaveRequestModule extends Component
             ->where('city_id', $employee->city_id)
             ->where('id', '!=', $employee->id)
             ->whereHas('contracts.position.department', fn($q) => $q->where('id', $employee->department?->id))
-            ->orderBy($empCol)
+            ->orderBy(transColumn('first_name'))
             ->get();
         // hydrate form values
 
@@ -117,7 +117,7 @@ class AllLeaveRequestModule extends Component
             ->whereHas('contracts.position.department', function ($q) use ($employee) {
                 $q->where('id', $employee->department?->id);
             })
-            ->orderBy($empCol)
+            ->orderBy(transColumn('first_name'))
             ->get();
 
         // Reset dependent dropdowns

@@ -26,7 +26,7 @@ class AllLeaveRequestTable extends LivewireTable
     public $showModal = false;
     public $modalTitle = 'Modal title';
 
-    protected $listeners = ['filterStatus' => 'setStatusFilter' , 'toggleItemStatusConfirmed'];
+    protected $listeners = ['filterStatus' => 'setStatusFilter', 'toggleItemStatusConfirmed'];
 
 
     public function setStatusFilter(string $status): void
@@ -56,7 +56,6 @@ class AllLeaveRequestTable extends LivewireTable
                     });
                 });
             });
-
         } else {
             //is manager
             $query->whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
@@ -87,10 +86,46 @@ class AllLeaveRequestTable extends LivewireTable
                 ->options(LeaveType::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()
                 ->searchable(),
-            SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee.' . transColumn('first_name'))
-                ->options(Employee::query()->orderby(transColumn('first_name'))->pluck(transColumn('first_name'), transColumn('first_name'))->toArray())
+            // SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee.' . transColumn('first_name'))
+            //     ->options(Employee::query()->orderby(transColumn('first_name'))->pluck(transColumn('first_name'), transColumn('first_name'))->toArray())
+            //     ->sortable()
+            //     ->searchable()->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
+            // SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee_id')
+            //     ->options(
+            //         Employee::query()
+            //             ->orderBy(transColumn('first_name'))
+            //             ->get()
+            //             ->mapWithKeys(fn($e) => [$e->id => $e->name])
+            //             ->toArray()
+            //     )
+            //     ->displayUsing(fn($v, Model $m) => $m->leaveBalance?->contract?->employee?->name ?? '—')
+            //     ->sortable()
+            //     ->searchable(function (Builder $query, $value) {
+            //         $parts = array_filter(explode(' ', trim($value)));
+            //         $query->whereHas('leaveBalance.contract.employee', function (Builder $q) use ($parts) {
+            //             foreach ($parts as $part) {
+            //                 $q->where(function (Builder $inner) use ($part) {
+            //                     $inner->where('first_name_en', 'LIKE', "%{$part}%")
+            //                         ->orWhere('first_name_ar', 'LIKE', "%{$part}%")
+            //                         ->orWhere('last_name_en',  'LIKE', "%{$part}%")
+            //                         ->orWhere('last_name_ar',  'LIKE', "%{$part}%");
+            //                 });
+            //             }
+            //         });
+            //     })
+            //     ->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
+            SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee_id')
+                ->options(
+                    Employee::query()
+                        ->orderBy(transColumn('first_name'))
+                        ->get()
+                        ->mapWithKeys(fn($e) => [$e->id => $e->name])
+                        ->toArray()
+                )
+                ->displayUsing(fn($v, Model $m) => $m->leaveBalance?->contract?->employee?->name ?? '—')
                 ->sortable()
-                ->searchable()->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
+                ->searchable()
+                ->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
             SelectColumn::make(trans_choice('general.type', 1), 'type')
                 ->options(['hour' => trans_choice('general.hour', 1), 'day' => trans_choice('general.day', 1)])
                 ->displayUsing(fn($v, Model $m) => trans_choice('general.' . $m->type, 1))
@@ -127,18 +162,18 @@ class AllLeaveRequestTable extends LivewireTable
                 })
                 ->sortable(),
             Column::make(__('general.seen-by-hr'), function (Model $model): string {
-                if($model->status !== LeaveRequestStatus::Pending){
+                if ($model->status !== LeaveRequestStatus::Pending) {
                     $isActive = $model->hr_approved ? 1 : 0;
 
                     $toggleBtn = Blade::render(
                         '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . $isActive .
-                        '" :model-id="' . $model->getKey() .
-                        '" wire-event="confirmToggleItemStatus" />'
+                            '" :model-id="' . $model->getKey() .
+                            '" wire-event="confirmToggleItemStatus" />'
                     );
                     return $toggleBtn;
                 }
                 return '';
-            })->visible(str_contains($user->myRole(),'HR-'))->asHtml(),
+            })->visible(str_contains($user->myRole(), 'HR-'))->asHtml(),
             Column::make(__('general.actions'), function (Model $model): string {
 
                 $decisionBtn = '';
@@ -223,9 +258,9 @@ class AllLeaveRequestTable extends LivewireTable
         $techManager = $leaveRequest->leaveBalance->contract->position->techManager?->employee()->account;
         $employee = $leaveRequest->leaveBalance->contract->employee->account;
 
-        isset($directManage) ? $directManage->notify(new HRSawLeaveRequest($leaveRequest , 'manager')) : '';
-        isset($techManager) ? $techManager->notify(new HRSawLeaveRequest($leaveRequest , 'manager')) : '';
-        isset($employee) ? $employee->notify(new HRSawLeaveRequest($leaveRequest , 'employee')) : '';
+        isset($directManage) ? $directManage->notify(new HRSawLeaveRequest($leaveRequest, 'manager')) : '';
+        isset($techManager) ? $techManager->notify(new HRSawLeaveRequest($leaveRequest, 'manager')) : '';
+        isset($employee) ? $employee->notify(new HRSawLeaveRequest($leaveRequest, 'employee')) : '';
         $this->dispatch('notification-created');
 
 
@@ -233,5 +268,4 @@ class AllLeaveRequestTable extends LivewireTable
         LivewireAlert::title(__('general.item-updated'))
             ->success()->toast()->position('top-start')->show();
     }
-
 }
