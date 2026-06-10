@@ -46,7 +46,7 @@ class EmployeeLeaveBalanceExport implements FromCollection, WithHeadings, WithMa
         
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
-                'name_en', 'name_ar'         => __('general.name', [], 'en'),
+                'employee'        => __('general.name', [], 'en'),
                 'years_of_service_formatted' => __('general.years-of-service', [], 'en'),
                 'deserved'                   => __('general.deserved', [], 'en'),
                 'used'                       => __('general.used', [], 'en'),
@@ -68,7 +68,7 @@ class EmployeeLeaveBalanceExport implements FromCollection, WithHeadings, WithMa
         
         foreach ($this->visibleColumnCodes as $code) {
             $mappedRow[] = match ($code) {
-                'name_en', 'name_ar'         => $row->name,
+                'employee'        => $row->name,
                 'years_of_service_formatted' => $row->years_of_service_formatted,
                 
                 // FIX: Strip HTML tags to make the Excel sheet clean!

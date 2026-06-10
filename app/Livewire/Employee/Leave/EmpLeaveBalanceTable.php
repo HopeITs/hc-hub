@@ -70,35 +70,43 @@ class EmpLeaveBalanceTable extends LivewireTable
             // Column::make(trans('general.name'), transColumn('name'))
             //     ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
             //     ->sortable()->searchable(),
-            Column::make(trans('general.name'), transColumn('name')) 
+            // Column::make(trans('general.name'), transColumn('name')) 
                 
-                ->displayUsing(fn($v, Model $m) => $m->name) 
+            //     ->displayUsing(fn($v, Model $m) => $m->name) 
                 
                 
-                ->searchable(function (Builder $query, string $search) {
-                    $query->where(transColumn('first_name'), 'like', "%{$search}%")
-                          ->orWhere(transColumn('last_name'), 'like', "%{$search}%");
-                })
+            //     ->searchable(function (Builder $query, string $search) {
+            //         $query->where(transColumn('first_name'), 'like', "%{$search}%")
+            //               ->orWhere(transColumn('last_name'), 'like', "%{$search}%");
+            //     })
                 
-                ->sortable(function (Builder $query, string $direction) {
-                    $query->orderBy(transColumn('first_name'), $direction)
-                          ->orderBy(transColumn('last_name'), $direction);
-                }),
-
+            //     ->sortable(function (Builder $query, string $direction) {
+            //         $query->orderBy(transColumn('first_name'), $direction)
+            //               ->orderBy(transColumn('last_name'), $direction);
+            //     }),
+Column::make(trans('general.name'), 'employee')
+    ->displayUsing(fn($v, Model $m) => $m->name)
+    ->searchable(function (Builder $query, $value) {
+        $parts = array_filter(explode(' ', trim($value)));
+        foreach ($parts as $part) {
+            $query->where(function (Builder $inner) use ($part) {
+                $inner->where('first_name_en', 'LIKE', "%{$part}%")
+                      ->orWhere('first_name_ar', 'LIKE', "%{$part}%")
+                      ->orWhere('last_name_en',  'LIKE', "%{$part}%")
+                      ->orWhere('last_name_ar',  'LIKE', "%{$part}%");
+            });
+        }
+    })
+    ->sortable(function (Builder $query, string $direction) {
+        $query->orderBy(transColumn('first_name'), $direction)
+              ->orderBy(transColumn('last_name'), $direction);
+    }),
 
 
 
 
             Column::make(trans('general.years-of-service'), 'years_of_service_formatted')->computed()->sortable(),
-            // Column::make(__('general.deserved'), function (mixed $value, Model $model) {
-            //     return $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->deserved_formatted;
-            // })->asHtml(),
-            // Column::make(__('general.used'), function (mixed $value, Model $model) {
-            //     return $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->used_formatted;
-            // })->asHtml(),
-            // Column::make(__('general.remaining'), function (mixed $value, Model $model) {
-            //     return $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->remaining;
-            // })->asHtml(),
+
             Column::make(__('general.deserved'), 'deserved')
                 ->displayUsing(function ($v, Model $model) {
                     return $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->deserved_formatted;
