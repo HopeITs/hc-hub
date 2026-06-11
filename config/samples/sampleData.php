@@ -6,7 +6,6 @@ use App\Enums\Gender;
 use App\Enums\LeaveType;
 use App\Enums\MaritalStatus;
 
-
 return [
     'cities' => [
         ['slug' => 'SYR', 'name_en' => 'Syria', 'name_ar' => 'سوريا', 'is_active' => true, 'code' => '000'],
@@ -217,6 +216,9 @@ return [
         ['name' => 'Study Zone Tartous', 'city_id' => 6, 'address_en' => 'Tartous', 'address_ar' => 'طرطوس', 'is_active' => true, 'weekends' => '5'],
         ['name' => 'LEAP Aleppo', 'city_id' => 2, 'address_en' => 'Aleppo', 'address_ar' => 'حلب', 'is_active' => true, 'weekends' => '0'],
         ['name' => 'LEAP Homs', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0'],
+        ['name' => 'Study Zone Al Inshaat', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0']
+        ['name' => 'Al Wadi Training Center', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0'],
+
     ],
 
     'checkListsItems' => [['name' => 'ID Cartoon', 'order' => 1], ['name' => 'Email', 'order' => 1], ['name' => 'Email Signature', 'order' => 1], ['name' => 'Laptop', 'order' => 1], ['name' => 'Mobile', 'order' => 1], ['name' => 'SIM', 'order' => 1], ['name' => 'Mug', 'order' => 2], ['name' => 'ID Plastic', 'order' => 2], ['name' => 'Web photo', 'order' => 2], ['name' => 'Recieve Electronics', 'order' => 3], ['name' => 'Cancel work mail & work accounts', 'order' => 3], ['name' => 'Delete the volunteer from the web page', 'order' => 3]],
@@ -382,239 +384,238 @@ return [
         ['name_en' => 'Keepers', 'name_ar' => 'المستخدمون', 'description' => null, 'grade' => 8, 'email' => null],
     ],
 
-
-    "employees"=> [
+    'employees' => [
         [
-            "first_name_ar" =>  "فريدي",
-            "last_name_ar" =>  "يوسف",
-            "first_name_en" =>  "Fredy",
-            "last_name_en" =>  "Youssef",
-            "father_name_ar" =>  "جرجس",
-            "father_name_en" =>  "Georges",
-            "username" =>  "fredy.youssef",
-            "dob" =>  "1979-01-03",
-            "actual_dob" =>  "1979-01-03",
-            "national_number" =>  "02040420674",
+            'first_name_ar' => 'فريدي',
+            'last_name_ar' => 'يوسف',
+            'first_name_en' => 'Fredy',
+            'last_name_en' => 'Youssef',
+            'father_name_ar' => 'جرجس',
+            'father_name_en' => 'Georges',
+            'username' => 'fredy.youssef',
+            'dob' => '1979-01-03',
+            'actual_dob' => '1979-01-03',
+            'national_number' => '02040420674',
 
-            "gender" =>  Gender::Male(),
-            "marital_status" =>  MaritalStatus::Married(),
-            "mother_name_ar" =>  "كناريك",
-            "personal_phone" =>  "0944978059",
-            "address_ar" =>  "Almouhafaza",
-            "city_id" =>  2,
-            "is_active" =>  true,
-            "is_board_member" =>  true
+            'gender' => Gender::Male(),
+            'marital_status' => MaritalStatus::Married(),
+            'mother_name_ar' => 'كناريك',
+            'personal_phone' => '0944978059',
+            'address_ar' => 'Almouhafaza',
+            'city_id' => 2,
+            'is_active' => true,
+            'is_board_member' => true,
         ],
         [
-            "first_name_ar" =>  "سفير",
-            "last_name_ar" =>  "سليم",
-            "first_name_en" =>  "Safir",
-            "last_name_en" =>  "Salim",
-            "father_name_ar" =>  "سمير",
-            "father_name_en" =>  "Samir",
-            "username" =>  "safir.salim",
-            "dob" =>  "1985-06-14",
-            "actual_dob" =>  "1985-06-14",
-            "national_number" =>  "04130025314",
-            "civil_registry_office" =>  "مشايخ كيمه",
-            "civil_registry_number" =>  "3",
-            "gender" =>  Gender::Male(),
-            "marital_status" =>  MaritalStatus::Married(),
-            "mother_name_ar" =>  "بهية",
-            "personal_phone" =>  "0969666815",
-            "address_ar" =>  "Villat Sharqieh - Next to Khazna Company",
-            "city_id" =>  2,
-            "is_active" =>  true,
-            "is_board_member" =>  true
+            'first_name_ar' => 'سفير',
+            'last_name_ar' => 'سليم',
+            'first_name_en' => 'Safir',
+            'last_name_en' => 'Salim',
+            'father_name_ar' => 'سمير',
+            'father_name_en' => 'Samir',
+            'username' => 'safir.salim',
+            'dob' => '1985-06-14',
+            'actual_dob' => '1985-06-14',
+            'national_number' => '04130025314',
+            'civil_registry_office' => 'مشايخ كيمه',
+            'civil_registry_number' => '3',
+            'gender' => Gender::Male(),
+            'marital_status' => MaritalStatus::Married(),
+            'mother_name_ar' => 'بهية',
+            'personal_phone' => '0969666815',
+            'address_ar' => 'Villat Sharqieh - Next to Khazna Company',
+            'city_id' => 2,
+            'is_active' => true,
+            'is_board_member' => true,
         ],
         [
-            "first_name_ar" =>  "جودي",
-            "last_name_ar" =>  "داداأوغليان",
-            "first_name_en" =>  "Judy",
-            "last_name_en" =>  "Dadaoghlian",
-            "father_name_ar" =>  "هاروتيون",
-            "father_name_en" =>  "Haroutiun",
-            "username" =>  "judy.dadaoghlian",
-            "dob" =>  "1994-04-21",
-            "actual_dob" =>  "1994-04-21",
-            "national_number" =>  "02030461058",
-            "civil_registry_office" =>  "حميدية",
-            "civil_registry_number" =>  "4/1/76/80",
+            'first_name_ar' => 'جودي',
+            'last_name_ar' => 'داداأوغليان',
+            'first_name_en' => 'Judy',
+            'last_name_en' => 'Dadaoghlian',
+            'father_name_ar' => 'هاروتيون',
+            'father_name_en' => 'Haroutiun',
+            'username' => 'judy.dadaoghlian',
+            'dob' => '1994-04-21',
+            'actual_dob' => '1994-04-21',
+            'national_number' => '02030461058',
+            'civil_registry_office' => 'حميدية',
+            'civil_registry_number' => '4/1/76/80',
 
-            "gender" =>  Gender::Female(),
-            "marital_status" =>  MaritalStatus::Single(),
-            "mother_name_ar" =>  "كاتيا",
-            "personal_phone" =>  "0937696416",
-            "address_ar" =>  "Talifon Huawei - Mikhaiel Kashour School street",
-            "city_id" =>  2,
-            "is_active" =>  true,
-            "is_board_member" =>  true
+            'gender' => Gender::Female(),
+            'marital_status' => MaritalStatus::Single(),
+            'mother_name_ar' => 'كاتيا',
+            'personal_phone' => '0937696416',
+            'address_ar' => 'Talifon Huawei - Mikhaiel Kashour School street',
+            'city_id' => 2,
+            'is_active' => true,
+            'is_board_member' => true,
         ],
         [
-            "first_name_ar" =>  "جورج",
-            "last_name_ar" =>  "عبد النور",
-            "first_name_en" =>  "George",
-            "last_name_en" =>  "Abdelnour",
-            "father_name_ar" =>  "جان",
-            "father_name_en" =>  "Jean",
-            "username" =>  "george.abdelnour",
-            "dob" =>  "1988-02-07",
-            "actual_dob" =>  "1988-02-07",
-            "national_number" =>  "02010010158",
-            "civil_registry_office" =>  "حي العروبة",
-            "civil_registry_number" =>  "29",
-            "gender" =>  Gender::Male(),
-            "marital_status" =>  MaritalStatus::Married(),
-            "mother_name_ar" =>  "ايفون",
-            "personal_phone" =>  "0932504803",
-            "address_ar" =>  "Alazizieh - Cinema Alzahraa Street",
-            "city_id" =>  2,
-            "is_active" =>  true,
-            "is_board_member" =>  true
+            'first_name_ar' => 'جورج',
+            'last_name_ar' => 'عبد النور',
+            'first_name_en' => 'George',
+            'last_name_en' => 'Abdelnour',
+            'father_name_ar' => 'جان',
+            'father_name_en' => 'Jean',
+            'username' => 'george.abdelnour',
+            'dob' => '1988-02-07',
+            'actual_dob' => '1988-02-07',
+            'national_number' => '02010010158',
+            'civil_registry_office' => 'حي العروبة',
+            'civil_registry_number' => '29',
+            'gender' => Gender::Male(),
+            'marital_status' => MaritalStatus::Married(),
+            'mother_name_ar' => 'ايفون',
+            'personal_phone' => '0932504803',
+            'address_ar' => 'Alazizieh - Cinema Alzahraa Street',
+            'city_id' => 2,
+            'is_active' => true,
+            'is_board_member' => true,
         ],
         [
-            "first_name_ar" =>  "لانا",
-            "last_name_ar" =>  "عبدو",
-            "first_name_en" =>  "Lana",
-            "last_name_en" =>  "Abdo",
-            "father_name_ar" =>  "الياس",
-            "father_name_en" =>  "Elias",
-            "username" =>  "lana.abdo",
-            "dob" =>  "1990-08-01",
-            "actual_dob" =>  "1990-08-01",
-            "national_number" =>  "02010314796",
-            "civil_registry_office" =>  "عطوي كبير",
-            "civil_registry_number" =>  "2/70/59",
+            'first_name_ar' => 'لانا',
+            'last_name_ar' => 'عبدو',
+            'first_name_en' => 'Lana',
+            'last_name_en' => 'Abdo',
+            'father_name_ar' => 'الياس',
+            'father_name_en' => 'Elias',
+            'username' => 'lana.abdo',
+            'dob' => '1990-08-01',
+            'actual_dob' => '1990-08-01',
+            'national_number' => '02010314796',
+            'civil_registry_office' => 'عطوي كبير',
+            'civil_registry_number' => '2/70/59',
 
-            "gender" =>  Gender::Female(),
-            "marital_status" =>  MaritalStatus::Single(),
-            "mother_name_ar" =>  "محاسن",
-            "personal_phone" =>  "0965557274",
-            "address_ar" =>  "Alsoulaimanieh - Next To MTN",
-            "city_id" =>  2,
-            "is_active" =>  true,
-            "is_board_member" =>  true
+            'gender' => Gender::Female(),
+            'marital_status' => MaritalStatus::Single(),
+            'mother_name_ar' => 'محاسن',
+            'personal_phone' => '0965557274',
+            'address_ar' => 'Alsoulaimanieh - Next To MTN',
+            'city_id' => 2,
+            'is_active' => true,
+            'is_board_member' => true,
         ],
         [
-            "first_name_ar" =>  "مجد",
-            "last_name_ar" =>  "زريق",
-            "first_name_en" =>  "Majd",
-            "last_name_en" =>  "Zrek",
-            "father_name_ar" =>  "الياس",
-            "father_name_en" =>  "Elias",
-            "username" =>  "majd.zrek",
-            "dob" =>  "1980-07-26",
-            "actual_dob" =>  "1980-07-26",
-            "national_number" =>  "02010256912",
-            "civil_registry_office" =>  "السليمانية",
-            "civil_registry_number" =>  "86/172",
+            'first_name_ar' => 'مجد',
+            'last_name_ar' => 'زريق',
+            'first_name_en' => 'Majd',
+            'last_name_en' => 'Zrek',
+            'father_name_ar' => 'الياس',
+            'father_name_en' => 'Elias',
+            'username' => 'majd.zrek',
+            'dob' => '1980-07-26',
+            'actual_dob' => '1980-07-26',
+            'national_number' => '02010256912',
+            'civil_registry_office' => 'السليمانية',
+            'civil_registry_number' => '86/172',
 
-            "gender" =>  Gender::Male(),
-            "marital_status" =>  MaritalStatus::Married(),
-            "mother_name_ar" =>  "غزاله",
-            "personal_phone" =>  "0944933668",
-            "address_ar" =>  "Almidan - Next to Alsourieh high school",
-            "city_id" =>  2,
-            "is_active" =>  true
+            'gender' => Gender::Male(),
+            'marital_status' => MaritalStatus::Married(),
+            'mother_name_ar' => 'غزاله',
+            'personal_phone' => '0944933668',
+            'address_ar' => 'Almidan - Next to Alsourieh high school',
+            'city_id' => 2,
+            'is_active' => true,
         ],
         [
-            "first_name_ar" =>  "رامه",
-            "last_name_ar" =>  "دعبول",
-            "first_name_en" =>  "Rama",
-            "last_name_en" =>  "Daaboul",
-            "father_name_ar" =>  "فؤاد",
-            "father_name_en" =>  "Fouad",
-            "username" =>  "rama.daaboul",
-            "dob" =>  "1992-01-04",
-            "actual_dob" =>  "1992-01-04",
-            "national_number" =>  "08090058432",
-            "civil_registry_office" =>  "بشيرية",
-            "civil_registry_number" =>  "717",
+            'first_name_ar' => 'رامه',
+            'last_name_ar' => 'دعبول',
+            'first_name_en' => 'Rama',
+            'last_name_en' => 'Daaboul',
+            'father_name_ar' => 'فؤاد',
+            'father_name_en' => 'Fouad',
+            'username' => 'rama.daaboul',
+            'dob' => '1992-01-04',
+            'actual_dob' => '1992-01-04',
+            'national_number' => '08090058432',
+            'civil_registry_office' => 'بشيرية',
+            'civil_registry_number' => '717',
 
-            "gender" =>  Gender::Female(),
-            "marital_status" =>  MaritalStatus::Married(),
-            "mother_name_ar" =>  "هالة",
-            "personal_phone" =>  "0999282633",
-            "address_ar" =>  "Faisal Street - Al taalof Hospital Alley",
-            "city_id" =>  2,
-            "is_active" =>  true,
-            "is_board_member" =>  true
+            'gender' => Gender::Female(),
+            'marital_status' => MaritalStatus::Married(),
+            'mother_name_ar' => 'هالة',
+            'personal_phone' => '0999282633',
+            'address_ar' => 'Faisal Street - Al taalof Hospital Alley',
+            'city_id' => 2,
+            'is_active' => true,
+            'is_board_member' => true,
         ],
         [
-            "first_name_ar" =>  "ماكي",
-            "last_name_ar" =>  "نجار",
-            "first_name_en" =>  "Magie",
-            "last_name_en" =>  "Najjar",
-            "father_name_ar" =>  "يوسف",
-            "father_name_en" =>  "Youssef",
-            "username" =>  "magie.najjar",
-            "dob" =>  "1970-10-26",
-            "actual_dob" =>  "1970-10-26",
-            "national_number" =>  "02030290012",
-            "civil_registry_office" =>  "حميدية",
-            "civil_registry_number" =>  "1/74/576",
+            'first_name_ar' => 'ماكي',
+            'last_name_ar' => 'نجار',
+            'first_name_en' => 'Magie',
+            'last_name_en' => 'Najjar',
+            'father_name_ar' => 'يوسف',
+            'father_name_en' => 'Youssef',
+            'username' => 'magie.najjar',
+            'dob' => '1970-10-26',
+            'actual_dob' => '1970-10-26',
+            'national_number' => '02030290012',
+            'civil_registry_office' => 'حميدية',
+            'civil_registry_number' => '1/74/576',
 
-            "gender" =>  Gender::Female(),
-            "marital_status" =>  MaritalStatus::Widowed(),
-            "mother_name_ar" =>  "لوسين",
-            "personal_phone" =>  "0943947603",
-            "address_ar" =>  "Alsoulimanieh - Istanbeli glass alley",
-            "city_id" =>  2,
-            "is_active" =>  true
+            'gender' => Gender::Female(),
+            'marital_status' => MaritalStatus::Widowed(),
+            'mother_name_ar' => 'لوسين',
+            'personal_phone' => '0943947603',
+            'address_ar' => 'Alsoulimanieh - Istanbeli glass alley',
+            'city_id' => 2,
+            'is_active' => true,
         ],
         [
-            "first_name_ar" =>  "شادي",
-            "last_name_ar" =>  "مقدسي",
-            "first_name_en" =>  "Shadi",
-            "last_name_en" =>  "Makdessi",
-            "father_name_ar" =>  "فارس",
-            "father_name_en" =>  "Fares",
-            "username" =>  "shadi.makdessi",
-            "dob" =>  "1993-08-21",
-            "actual_dob" =>  "1993-08-21",
-            "national_number" =>  "02010023256",
-            "civil_registry_office" =>  "محافظة",
-            "civil_registry_number" =>  "110",
+            'first_name_ar' => 'شادي',
+            'last_name_ar' => 'مقدسي',
+            'first_name_en' => 'Shadi',
+            'last_name_en' => 'Makdessi',
+            'father_name_ar' => 'فارس',
+            'father_name_en' => 'Fares',
+            'username' => 'shadi.makdessi',
+            'dob' => '1993-08-21',
+            'actual_dob' => '1993-08-21',
+            'national_number' => '02010023256',
+            'civil_registry_office' => 'محافظة',
+            'civil_registry_number' => '110',
 
-            "gender" =>  Gender::Male(),
-            "marital_status" =>  MaritalStatus::Single(),
-            "mother_name_ar" =>  "تيريز",
-            "personal_phone" =>  "0966097563",
-            "address_ar" =>  "Alsoulimanieh - Ghariebeh glass alley",
-            "city_id" =>  2,
-            "is_active" =>  true,
-            "is_board_member" =>  true
+            'gender' => Gender::Male(),
+            'marital_status' => MaritalStatus::Single(),
+            'mother_name_ar' => 'تيريز',
+            'personal_phone' => '0966097563',
+            'address_ar' => 'Alsoulimanieh - Ghariebeh glass alley',
+            'city_id' => 2,
+            'is_active' => true,
+            'is_board_member' => true,
         ],
         [
-            "first_name_ar" =>  "أنطوان",
-            "last_name_ar" =>  "عربه جي",
-            "first_name_en" =>  "Antoine",
-            "last_name_en" =>  "Arbaji",
-            "father_name_ar" =>  "انسطاس",
-            "father_name_en" =>  "Anestas",
-            "username" =>  "antoine.arbaji",
-            "dob" =>  "1980-04-04",
-            "actual_dob" =>  "1980-04-04",
-            "national_number" =>  "02030442867",
-            "civil_registry_office" =>  "حميدية",
-            "civil_registry_number" =>  "1/57/22",
+            'first_name_ar' => 'أنطوان',
+            'last_name_ar' => 'عربه جي',
+            'first_name_en' => 'Antoine',
+            'last_name_en' => 'Arbaji',
+            'father_name_ar' => 'انسطاس',
+            'father_name_en' => 'Anestas',
+            'username' => 'antoine.arbaji',
+            'dob' => '1980-04-04',
+            'actual_dob' => '1980-04-04',
+            'national_number' => '02030442867',
+            'civil_registry_office' => 'حميدية',
+            'civil_registry_number' => '1/57/22',
 
-            "gender" =>  Gender::Male(),
-            "marital_status" =>  MaritalStatus::Married(),
-            "mother_name_ar" =>  "جورجيت",
-            "personal_phone" =>  "0933678287",
-            "address_ar" =>  "محطة بغداد - شارع جابر بن حيان",
-            "city_id" =>  2,
-            "is_active" =>  true,
-            "is_board_member" =>  true
-        ]
+            'gender' => Gender::Male(),
+            'marital_status' => MaritalStatus::Married(),
+            'mother_name_ar' => 'جورجيت',
+            'personal_phone' => '0933678287',
+            'address_ar' => 'محطة بغداد - شارع جابر بن حيان',
+            'city_id' => 2,
+            'is_active' => true,
+            'is_board_member' => true,
+        ],
     ],
 
     'positions' => [
         // -------------------------------
         // Aleppo (city_id = 2)
         // -------------------------------
-        //1
+        // 1
         [
             'title_en' => 'Chief Executive Officer',
             'title_ar' => 'الرئيس التنفيذي',
@@ -628,7 +629,7 @@ return [
             'max_emp' => 1,
             'exist_emp' => 0,
         ], // Fredy Youssef
-        //2
+        // 2
         [
             'title_en' => 'Deputy Chief Executive Officer',
             'title_ar' => 'نائب الرئيس التنفيذي',
@@ -642,7 +643,7 @@ return [
             'max_emp' => 1,
             'exist_emp' => 0,
         ], // Safir Salim
-        //3
+        // 3
         [
             'title_en' => 'Second Deputy Chief Executive Officer',
             'title_ar' => 'نائب ثاني للرئيس التنفيذي',
@@ -656,7 +657,7 @@ return [
             'max_emp' => 1,
             'exist_emp' => 0,
         ], // Rama Daaboul
-        //4
+        // 4
         [
             'title_en' => 'Senior Financial Manager',
             'title_ar' => 'المدير المالي الأول',
@@ -670,7 +671,7 @@ return [
             'max_emp' => 1,
             'exist_emp' => 0,
         ], // Shadi Makdessi
-        //5
+        // 5
         [
             'title_en' => 'IT Manager',
             'title_ar' => 'مدير تكنولوجيا المعلومات',
@@ -684,7 +685,7 @@ return [
             'max_emp' => 1,
             'exist_emp' => 0,
         ], // Judy Dadaoghlian
-        //6
+        // 6
         [
             'title_en' => 'Projects and Fundraising Manager',
             'title_ar' => 'مدير المشاريع وجمع التبرعات',
@@ -698,7 +699,7 @@ return [
             'max_emp' => 1,
             'exist_emp' => 0,
         ],
-        //7
+        // 7
         [
             'title_en' => 'Communication Manager',
             'title_ar' => 'مدير التواصل',
@@ -712,7 +713,7 @@ return [
             'max_emp' => 1,
             'exist_emp' => 0,
         ],
-        //8
+        // 8
         [
             'title_en' => 'Associate Communication Manager',
             'title_ar' => 'مدير التواصل المساعد',
@@ -726,7 +727,7 @@ return [
             'max_emp' => 1,
             'exist_emp' => 0,
         ], // George Abdelnour
-        //9
+        // 9
         [
             'title_en' => 'HR Generalist',
             'title_ar' => 'مسؤول الموارد البشرية',
@@ -740,12 +741,12 @@ return [
             'max_emp' => 1,
             'exist_emp' => 0,
         ], // Lana Abdo
-        //10
+        // 10
         ['title_en' => 'Program Manager / Micro Projects', 'title_ar' => 'مدير البرامج / المشاريع الصغيرة', 'program_id' => 2, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0], // Antoine Arbaji
 
-        //11
+        // 11
         ['title_en' => 'Project Manager / Micro Projects', 'title_ar' => 'مدير / المشاريع الصغيرة', 'program_id' => 2, 'department_id' => 2, 'job_level_id' => 3, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 10, 'tech_manager_id' => 10, 'max_emp' => 1, 'exist_emp' => 0], // Antoine Arbaji
-        //12
+        // 12
         [
             'title_en' => 'Legal Affairs Consultant',
             'title_ar' => 'مستشار الشؤون القانونية',
@@ -760,51 +761,51 @@ return [
             'exist_emp' => 0,
         ], // Majd Zrek
 
-        //13
+        // 13
         ['title_en' => 'Training Manager', 'title_ar' => 'مدير برنامج التدريب', 'program_id' => 1, 'department_id' => 1, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => 1, 'max_emp' => 1, 'exist_emp' => 0],
-        //14
+        // 14
         ['title_en' => 'LEAP Program Manager', 'title_ar' => 'مدير برنامج LEAP', 'program_id' => 13, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 24, 'direct_manager_id' => 13, 'tech_manager_id' => 13, 'max_emp' => 1, 'exist_emp' => 0],
-        //15
+        // 15
         ['title_en' => 'Study Zone General Manager', 'title_ar' => 'مدير منطقة الدراسة', 'program_id' => 8, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 1, 'direct_manager_id' => 1, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
-        //16
+        // 16
         ['title_en' => 'Children University Program Manager', 'title_ar' => 'مدير برنامج جامعة الأطفال', 'program_id' => 10, 'department_id' => 2, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 6, 'direct_manager_id' => 13, 'tech_manager_id' => 13, 'max_emp' => 1, 'exist_emp' => 0],
-        //17
+        // 17
         ['title_en' => 'Children University Manager', 'title_ar' => 'مدير جامعة الأطفال', 'program_id' => 10, 'department_id' => 2, 'job_level_id' => 3, 'city_id' => 2, 'center_id' => 6, 'direct_manager_id' => 15, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
-        //18
+        // 18
         ['title_en' => 'DISC Program Manager', 'title_ar' => 'مدير برنامج الديسك', 'program_id' => 7, 'department_id' => 12, 'job_level_id' => 1, 'city_id' => 1, 'center_id' => 8, 'direct_manager_id' => 13, 'tech_manager_id' => 13, 'max_emp' => 1, 'exist_emp' => 0],
 
-        //19
+        // 19
         ['title_en' => 'DISC Project Manager', 'title_ar' => 'مدير  الديسك', 'program_id' => 7, 'department_id' => 12, 'job_level_id' => 3, 'city_id' => 2, 'center_id' => 8, 'direct_manager_id' => 18, 'tech_manager_id' => 18, 'max_emp' => 1, 'exist_emp' => 0],
-        //20
+        // 20
         ['title_en' => 'Accountant', 'title_ar' => 'محاسب', 'program_id' => 1, 'department_id' => 8, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 4, 'tech_manager_id' => 4, 'max_emp' => 1, 'exist_emp' => 0],
-        //21
+        // 21
         ['title_en' => 'IT Specialist', 'title_ar' => 'متخصص تكنولوجيا المعلومات', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 5, 'tech_manager_id' => 5, 'max_emp' => 3, 'exist_emp' => 0],
-        //22
+        // 22
         ['title_en' => 'Communication Officer / Videographer', 'title_ar' => 'مسؤول تواصل / مصور فيديو', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 1, 'exist_emp' => 0],
-        //23
+        // 23
         ['title_en' => 'Communication Officer / Photographer', 'title_ar' => 'مسؤول تواصل / مصور فوتوغرافي', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 1, 'exist_emp' => 0],
-        //24
+        // 24
         ['title_en' => 'Communication Officer / Designer', 'title_ar' => 'مسؤول تواصل / مصمم', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 7, 'tech_manager_id' => 7, 'max_emp' => 1, 'exist_emp' => 0],
-        //25
+        // 25
         ['title_en' => 'Public Relations Officer', 'title_ar' => 'مسؤول علاقات عامة', 'program_id' => 1, 'department_id' => 6, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 6, 'tech_manager_id' => 6, 'max_emp' => 2, 'exist_emp' => 0],
 
-        //26
+        // 26
         ['title_en' => 'LEAP  Manager', 'title_ar' => 'مدير  LEAP', 'program_id' => 11, 'department_id' => 2, 'job_level_id' => 3, 'city_id' => 2, 'center_id' => 24, 'direct_manager_id' => 14, 'tech_manager_id' => 14, 'max_emp' => 1, 'exist_emp' => 0],
 
-        //27
+        // 27
         ['title_en' => 'Study Zone Manager', 'title_ar' => 'مدير منطقة الدراسة', 'program_id' => 8, 'department_id' => 2, 'job_level_id' => 3, 'city_id' => 2, 'center_id' => 13, 'direct_manager_id' => 15, 'tech_manager_id' => 15, 'max_emp' => 1, 'exist_emp' => 0],
-        //28
+        // 28
 
         ['title_en' => 'Case Manager', 'title_ar' => 'مدير الحالة', 'program_id' => 10, 'department_id' => 2, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 6, 'direct_manager_id' => 27, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 
-        //29
+        // 29
 
         ['title_en' => 'Logistic Officer', 'title_ar' => 'مسؤول المشتريات', 'program_id' => 2, 'department_id' => 11, 'job_level_id' => 6, 'city_id' => 2, 'center_id' => 1, 'direct_manager_id' => 11, 'tech_manager_id' => null, 'max_emp' => 1, 'exist_emp' => 0],
 
         // -------------------------------
         // Damascus (city_id = 4)
         // -------------------------------
-        //30
+        // 30
         ['title_en' => 'Project Manager/DISC', 'title_ar' => 'مدير مشروع', 'program_id' => 7, 'department_id' => 1, 'job_level_id' => 3, 'city_id' => 4, 'center_id' => 8, 'direct_manager_id' => 18, 'tech_manager_id' => 18],
 
         ['title_en' => 'Project Assistant Manager', 'title_ar' => 'مساعد مدير المشروع', 'program_id' => 7, 'department_id' => 1, 'job_level_id' => 4, 'city_id' => 4, 'center_id' => 8, 'direct_manager_id' => 30, 'tech_manager_id' => 18],
@@ -813,17 +814,17 @@ return [
         ['title_en' => 'English Teacher', 'title_ar' => 'استاذ لغة انجليزية', 'program_id' => 7, 'department_id' => 3, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 8, 'direct_manager_id' => 30, 'tech_manager_id' => 18],
         ['title_en' => 'ICDL Trainer', 'title_ar' => 'مدرب ICDL', 'program_id' => 7, 'department_id' => 4, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 8, 'direct_manager_id' => 30, 'tech_manager_id' => 18],
         ['title_en' => 'Companion', 'title_ar' => 'مرافق', 'program_id' => 7, 'department_id' => 1, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 8, 'direct_manager_id' => 30, 'tech_manager_id' => 18],
-        //37
+        // 37
         ['title_en' => 'Project Manager/Study zone', 'title_ar' => 'مدير مشروع', 'program_id' => 8, 'department_id' => 1, 'job_level_id' => 3, 'city_id' => 4, 'center_id' => 18, 'direct_manager_id' => 15, 'tech_manager_id' => 15],
         ['title_en' => 'Project Team Member', 'title_ar' => 'عضو في فريق البرنامج', 'program_id' => 8, 'department_id' => 1, 'job_level_id' => 5, 'city_id' => 4, 'center_id' => 18, 'direct_manager_id' => 37, 'tech_manager_id' => 15],
         ['title_en' => 'Center Keeper', 'title_ar' => 'مدبرة مركز', 'program_id' => 8, 'department_id' => 13, 'job_level_id' => 8, 'city_id' => 4, 'center_id' => 18, 'direct_manager_id' => 37, 'tech_manager_id' => null],
 
-        //40
+        // 40
         ['title_en' => 'Project Manager/Micro', 'title_ar' => 'مدير مشروع', 'program_id' => 2, 'department_id' => 1, 'job_level_id' => 3, 'city_id' => 4, 'center_id' => 4, 'direct_manager_id' => 10, 'tech_manager_id' => 10],
         ['title_en' => 'Field Officer', 'title_ar' => 'مسؤول ميداني', 'program_id' => 2, 'department_id' => 11, 'job_level_id' => 5, 'city_id' => 4, 'center_id' => 4, 'direct_manager_id' => 40, 'tech_manager_id' => 22],
         ['title_en' => 'Field Officer Assistant', 'title_ar' => 'مساعد مسؤول ميداني', 'program_id' => 2, 'department_id' => 11, 'job_level_id' => 5, 'city_id' => 4, 'center_id' => 4, 'direct_manager_id' => 40, 'tech_manager_id' => 22],
         ['title_en' => 'Center Keeper', 'title_ar' => 'مدبرة مركز', 'program_id' => 2, 'department_id' => 13, 'job_level_id' => 8, 'city_id' => 4, 'center_id' => 4, 'direct_manager_id' => 40, 'tech_manager_id' => null],
-        //44
+        // 44
         ['title_en' => 'Design Manager', 'title_ar' => 'مدير التصميم', 'program_id' => 1, 'department_id' => 5, 'job_level_id' => 5, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 40, 'tech_manager_id' => 7],
         ['title_en' => 'Legal Affairs Consultant', 'title_ar' => 'مستشار الشؤون القانوينة', 'program_id' => 2, 'department_id' => 12, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 40, 'tech_manager_id' => 40],
         ['title_en' => 'HR Manager', 'title_ar' => 'مسؤول الموارد البشرية', 'program_id' => 1, 'department_id' => 7, 'job_level_id' => 6, 'city_id' => 4, 'center_id' => 3, 'direct_manager_id' => 40, 'tech_manager_id' => 9],
