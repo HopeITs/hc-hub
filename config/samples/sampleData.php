@@ -216,8 +216,8 @@ return [
         ['name' => 'Study Zone Tartous', 'city_id' => 6, 'address_en' => 'Tartous', 'address_ar' => 'طرطوس', 'is_active' => true, 'weekends' => '5'],
         ['name' => 'LEAP Aleppo', 'city_id' => 2, 'address_en' => 'Aleppo', 'address_ar' => 'حلب', 'is_active' => true, 'weekends' => '0'],
         ['name' => 'LEAP Homs', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0'],
-        ['name' => 'Study Zone Al Inshaat', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0']
-        ['name' => 'Al Wadi Training Center', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0'],
+        ['name' => 'Study Zone Al Inshaat', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0'],
+        ['name' => 'Al Wadi Training Center', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0']
 
     ],
 
