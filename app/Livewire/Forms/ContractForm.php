@@ -136,7 +136,7 @@ class ContractForm extends Form
             'terminated_at'          => ['nullable', 'date', 'after_or_equal:start_date'],
             'termination_reason_id'  => ['nullable', 'exists:termination_reasons,id'],
             'reason_of_termination'  => ['nullable', 'string'],
-            'weekly_hours'           => ['required', 'integer', 'min:0'],
+            'weekly_hours'           => ['required', 'integer', 'min:1'],
         ]);
     }
 
