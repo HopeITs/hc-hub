@@ -4,8 +4,9 @@ namespace App\Livewire\ProgramManagement\Center;
 
 use App\Models\Center;
 use App\Models\City;
+use App\Models\User;
 use App\Notifications\NewCenterCreated;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Notification;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
@@ -39,9 +40,7 @@ class CenterCreate extends Component
         $this->item['weekends'] = implode(',', $this->item['weekends']);
         $center = Center::create($this->item);
 
-        foreach (\App\Models\User::all() as $user) {
-            $user->notify(new NewCenterCreated($center));
-        }
+        Notification::send(User::all(), new NewCenterCreated($center));
 
         LivewireAlert::title(__('general.success-message'))
             ->success()

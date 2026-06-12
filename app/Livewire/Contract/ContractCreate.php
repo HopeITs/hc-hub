@@ -14,6 +14,7 @@ use App\Models\Program;
 use App\Models\TerminationReason;
 use App\Models\User;
 use App\Notifications\NewEmployeeWelcome;
+use Illuminate\Support\Facades\Notification;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
@@ -32,13 +33,6 @@ class ContractCreate extends Component
     public ?int $program_id = null;
 
     public ?int $center_id = null;
-
-    /**
-     * City whose positions/centers/employees are unrestricted.
-     * Positions in this city are visible regardless of which center
-     * or program is selected, and all employees belong to it.
-     */
-    private const GLOBAL_CITY_ID = 1;
 
     protected array $validatorsByStep = [
         1 => 'validateIdentity',
@@ -197,11 +191,12 @@ class ContractCreate extends Component
     }
 
     /**
-     * Employees visible to the current user, then narrowed by selected city.
+     * Employees selectable for the contract, scoped by the current user's role.
      *
-     * - Global city (id = 1) → all employees the user can see.
-     * - Any other city       → employees whose city_id matches.
-     * - No city selected     → empty (nothing to show yet).
+     * - No city selected → empty (nothing to show yet).
+     * - Non-HR roles     → pinned to the user's own city.
+     * - HR-SYR           → every active employee (nationwide HR).
+     * - Other HR-{scope}  → employees in the city matching the role scope slug.
      */
     private function getEmployees(string $orderCol): \Illuminate\Support\Collection
     {
@@ -230,7 +225,7 @@ class ContractCreate extends Component
             $query->whereHas('city', fn ($q) => $q->where('slug', $roleScope));
         }
 
-    
+
         return $query->get();
     }
 
@@ -249,12 +244,7 @@ class ContractCreate extends Component
         }
 
         $programIds = Position::query()
-            ->where(function ($q) {
-                // Position assigned directly to the city
-                $q->where('city_id', $this->city_id)
-                  // OR position assigned to a center that belongs to the city
-                    ->orWhereHas('center', fn ($c) => $c->where('city_id', $this->city_id));
-            })
+            ->inCity($this->city_id)
             ->pluck('program_id')
             ->unique();
 
@@ -267,11 +257,8 @@ class ContractCreate extends Component
     /**
      * Centers relevant to the selected city + program combination.
      *
-     * - No city or no program selected → empty.
-     * - Global city  → centers that have at least one position in city 1
-     *                  belonging to the selected program.
-     * - Other city   → centers that belong to the city AND have at least one
-     *                  position in the selected program.
+     * Requires both city and program; returns centers that have at least one
+     * position in the selected program whose effective city matches.
      */
     private function getCenters(): \Illuminate\Support\Collection
     {
@@ -282,10 +269,7 @@ class ContractCreate extends Component
         return Center::select('centers.id', 'centers.name')
             ->whereHas('positions', function ($q) {
                 $q->where('program_id', $this->program_id)
-                    ->where(function ($inner) {
-                        $inner->where('city_id', $this->city_id)
-                            ->orWhereHas('center', fn ($c) => $c->where('city_id', $this->city_id));
-                    });
+                    ->inCity($this->city_id);
             })
             ->orderBy('centers.name')
             ->get();
@@ -305,10 +289,7 @@ class ContractCreate extends Component
         }
 
         $positions = Position::where('program_id', $this->program_id)
-            ->where(function ($q) {
-                $q->where('city_id', $this->city_id)
-                    ->orWhereHas('center', fn ($c) => $c->where('city_id', $this->city_id));
-            })
+            ->inCity($this->city_id)
             ->when($this->center_id, fn ($q) => $q->where('center_id', $this->center_id))
             ->select('id', $col, 'center_id', 'city_id')
             ->orderBy($col)
@@ -349,11 +330,13 @@ class ContractCreate extends Component
             return false;
         }
 
-        $positionCityId = $position->center_id
-            ? Center::whereKey($position->center_id)->value('city_id')
-            : $position->city_id;
+        // Use the same rule as the dropdown (Position::scopeInCity): a position
+        // belongs to the city if its own city_id matches OR its center is in it.
+        $belongsToCity = Position::whereKey($position->id)
+            ->inCity($this->city_id)
+            ->exists();
 
-        if ($positionCityId != $this->city_id) {
+        if (! $belongsToCity) {
             $this->addError('form.position_id', __('validation.custom.position_id.invalid'));
 
             return false;
@@ -382,11 +365,7 @@ class ContractCreate extends Component
             return;
         }
 
-        User::all()->each(fn (User $user) => $user->notify(new NewEmployeeWelcome($employee)));
-    }
-
-    private function isGlobalCity(): bool
-    {
-        return $this->city_id === self::GLOBAL_CITY_ID;
+        // Queued, batched broadcast to every user (database channel).
+        Notification::send(User::all(), new NewEmployeeWelcome($employee));
     }
 }

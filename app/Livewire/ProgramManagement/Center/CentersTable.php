@@ -178,9 +178,10 @@ class CentersTable extends LivewireTable
         $item->save();
 
         if (!$item->is_active) {
-            foreach (\App\Models\User::all() as $user) {
-                $user->notify(new \App\Notifications\CenterClosed($item));
-            }
+            \Illuminate\Support\Facades\Notification::send(
+                \App\Models\User::all(),
+                new \App\Notifications\CenterClosed($item)
+            );
             $this->dispatch('center-closed');
         }
 

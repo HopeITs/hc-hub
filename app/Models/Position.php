@@ -104,6 +104,23 @@ class Position extends Model
     }
 
     // --------------------------------------------
+    // Query scopes
+    // --------------------------------------------
+
+    /**
+     * Positions reachable from the given city: either assigned directly to the
+     * city, or assigned to a center that belongs to it. Single source of truth
+     * for city scoping; keep contract create/edit filters aligned with it.
+     */
+    public function scopeInCity($query, int $cityId)
+    {
+        return $query->where(function ($q) use ($cityId) {
+            $q->where('city_id', $cityId)
+              ->orWhereHas('center', fn ($c) => $c->where('city_id', $cityId));
+        });
+    }
+
+    // --------------------------------------------
     // Helpers
     // --------------------------------------------
 

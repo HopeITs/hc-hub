@@ -34,31 +34,33 @@ class AllLeaveRequestModule extends Component
     public $decisionModal = false;
     public $decisionLeave;
     public array $counts = [];
-    public $employees = [];
     public $allAvailableLeaves = [];
     public $alternativeEmployees = [];
 
     public function mount()
     {
-
         $this->refreshCounts();
-        $user = auth()->user();
-        $locale = app()->getLocale();
-    $empCol = "name_{$locale}";
-        if (str_contains($user->myRole(), 'HR-')) {
-            $cityCode = explode('-', $user->myRole())[1];
+    }
 
-            if ($cityCode === 'SYR') {
-                $this->employees = Employee::with('contracts.leaveBalances.leaveType')->orderBy(transColumn('first_name'))->get();
-            } else {
-                $this->employees = Employee::whereHas('city', function ($query) use ($cityCode) {
-                    $query->where('code', $cityCode);
+    /**
+     * Employees selectable in the dropdown, scoped to the HR user's city.
+     * Computed per render (not stored as state) so the heavy list is never
+     * serialized into the Livewire payload on every request.
+     */
+    protected function scopedEmployees(): \Illuminate\Support\Collection
+    {
+        $role = auth()->user()->myRole();
 
-
-                })->with('contracts.leaveBalances.leaveType')->orderBy(transColumn('first_name'))->get();
-            }
+        if (! str_contains($role, 'HR-')) {
+            return collect();
         }
 
+        $cityCode = explode('-', $role)[1];
+
+        return Employee::query()
+            ->when($cityCode !== 'SYR', fn ($q) => $q->whereHas('city', fn ($c) => $c->where('slug', $cityCode)))
+            ->orderBy(transColumn('first_name'))
+            ->get();
     }
 
     public function show($id)
@@ -70,22 +72,15 @@ class AllLeaveRequestModule extends Component
     }
     public function edit(LeaveRequest $id)
     {
-        $locale = app()->getLocale();
-    $empCol = "name_{$locale}";
         $this->form->setLeaveRequest($id);
 
         $employee = $id->leaveBalance->contract->employee;
 
         // hydrate dependent lists
-        $this->allAvailableLeaves = $employee->latestActiveContract()?->leaveBalances()->with('leaveType')->get();
-        $this->alternativeEmployees = Employee::query()
-            ->where('city_id', $employee->city_id)
-            ->where('id', '!=', $employee->id)
-            ->whereHas('contracts.position.department', fn($q) => $q->where('id', $employee->department?->id))
-            ->orderBy(transColumn('first_name'))
-            ->get();
-        // hydrate form values
+        $this->allAvailableLeaves   = $this->leavesFor($employee);
+        $this->alternativeEmployees = $this->alternativeEmployeesFor($employee);
 
+        // hydrate form values
         $this->form->employee_id = $employee->id;
         $this->form->leave_balance_id = (int) $id->leave_balance_id;
 
@@ -96,8 +91,6 @@ class AllLeaveRequestModule extends Component
 
     public function updatedFormEmployeeId($employeeId)
     {
-        $locale = app()->getLocale();
-    $empCol = "name_{$locale}";
         if (!$employeeId) {
             $this->allAvailableLeaves = [];
             $this->alternativeEmployees = [];
@@ -105,20 +98,10 @@ class AllLeaveRequestModule extends Component
             return;
         }
 
-        $employee = Employee::with(['contracts.leaveBalances.leaveType', 'city'])
-            ->find($employeeId);
+        $employee = Employee::with('city')->find($employeeId);
 
-        // Available leaves
-        $this->allAvailableLeaves = $employee->availableLeaves();
-
-        // Alternative employees
-        $this->alternativeEmployees = Employee::where('city_id', $employee->city_id)
-            ->where('id', '!=', $employee->id)
-            ->whereHas('contracts.position.department', function ($q) use ($employee) {
-                $q->where('id', $employee->department?->id);
-            })
-            ->orderBy(transColumn('first_name'))
-            ->get();
+        $this->allAvailableLeaves   = $this->leavesFor($employee);
+        $this->alternativeEmployees = $this->alternativeEmployeesFor($employee);
 
         // Reset dependent dropdowns
         $this->form->leave_balance_id = null;
@@ -214,26 +197,11 @@ class AllLeaveRequestModule extends Component
 
     public function render()
     {
-        // $locale = app()->getLocale();
-        // $empCol = "name_{$locale}";
-        // $employees = collect($this->employees)->sortBy($empCol)->values();
-        $employees = $this->employees;
+        $employees = $this->scopedEmployees();
         $allAvailableLeaves = $this->allAvailableLeaves;
         $alternativeEmployees = $this->alternativeEmployees;
-        // $alternativeEmployees = collect($this->alternativeEmployees)->sortBy($empCol)->values();
-
 
         return view('livewire.employee.leave.all', compact('employees', 'allAvailableLeaves', 'alternativeEmployees'));
-    }
-
-    public function getCountsProperty()
-    {
-        return [
-            'all' => LeaveRequest::count(),
-            'pending' => LeaveRequest::where('status', LeaveRequestStatus::Pending)->count(),
-            'accepted' => LeaveRequest::where('status', LeaveRequestStatus::Accepted)->count(),
-            'rejected' => LeaveRequest::where('status', LeaveRequestStatus::Rejected)->count(),
-        ];
     }
 
     public function confirmSave()
@@ -325,6 +293,36 @@ class AllLeaveRequestModule extends Component
             ->position('top-start')
             ->show();
 
+    }
+
+    /**
+     * Leave balances selectable for an employee's latest active contract.
+     * Single source of truth for the leave-type dropdown (with leaveType
+     * eager-loaded for the option labels).
+     */
+    protected function leavesFor(?Employee $employee): \Illuminate\Support\Collection
+    {
+        return $employee?->latestActiveContract()
+            ?->leaveBalances()
+            ->with('leaveType')
+            ->get() ?? collect();
+    }
+
+    /**
+     * Colleagues in the same city and department who can cover for the employee.
+     */
+    protected function alternativeEmployeesFor(?Employee $employee): \Illuminate\Support\Collection
+    {
+        if (! $employee) {
+            return collect();
+        }
+
+        return Employee::query()
+            ->where('city_id', $employee->city_id)
+            ->where('id', '!=', $employee->id)
+            ->whereHas('contracts.position.department', fn ($q) => $q->where('id', $employee->department?->id))
+            ->orderBy(transColumn('first_name'))
+            ->get();
     }
 
     protected function resolveStart()

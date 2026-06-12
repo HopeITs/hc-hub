@@ -264,10 +264,7 @@ class ContractEdit extends Component
         }
 
         $programIds = Position::query()
-            ->where(function ($q) {
-                $q->whereHas('center', fn ($c) => $c->where('city_id', $this->city_id))
-                  ->orWhere(fn ($c) => $c->whereNull('center_id')->where('city_id', $this->city_id));
-            })
+            ->inCity($this->city_id)
             ->pluck('program_id')
             ->unique();
 
@@ -279,13 +276,16 @@ class ContractEdit extends Component
 
     private function getCenters(): \Illuminate\Support\Collection
     {
-        if (! $this->city_id) {
+        if (! $this->city_id || ! $this->program_id) {
             return collect();
         }
 
-        return Center::select('id', 'name')
-            ->where('city_id', $this->city_id)
-            ->orderBy('name')
+        return Center::select('centers.id', 'centers.name')
+            ->whereHas('positions', function ($q) {
+                $q->where('program_id', $this->program_id)
+                    ->inCity($this->city_id);
+            })
+            ->orderBy('centers.name')
             ->get();
     }
 
@@ -296,10 +296,8 @@ class ContractEdit extends Component
         }
 
         $positions = Position::where('program_id', $this->program_id)
-            ->where(function ($q) {
-                $q->where('city_id', $this->city_id)
-                  ->orWhereHas('center', fn ($c) => $c->where('city_id', $this->city_id));
-            })
+            ->inCity($this->city_id)
+            ->when($this->center_id, fn ($q) => $q->where('center_id', $this->center_id))
             ->select('id', $col)
             ->orderBy($col)
             ->get()
@@ -344,11 +342,13 @@ class ContractEdit extends Component
             return false;
         }
 
-        $positionCityId = $position->center_id
-            ? Center::whereKey($position->center_id)->value('city_id')
-            : $position->city_id;
+        // Use the same rule as the dropdown (Position::scopeInCity): a position
+        // belongs to the city if its own city_id matches OR its center is in it.
+        $belongsToCity = Position::whereKey($position->id)
+            ->inCity($this->city_id)
+            ->exists();
 
-        if ($positionCityId != $this->city_id) {
+        if (! $belongsToCity) {
             $this->addError('form.position_id', __('validation.custom.position_id.invalid'));
             return false;
         }

@@ -4,9 +4,10 @@ namespace App\Notifications;
 
 use App\Models\Center;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class NewCenterCreated extends Notification
+class NewCenterCreated extends Notification implements ShouldQueue
 {
     use Queueable;
 

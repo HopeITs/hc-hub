@@ -96,9 +96,10 @@ class CentersModule extends Component
         $model->save();
 
         if ($isNew) {
-            foreach (\App\Models\User::all() as $user) {
-                $user->notify(new \App\Notifications\NewCenterCreated($model));
-            }
+            \Illuminate\Support\Facades\Notification::send(
+                \App\Models\User::all(),
+                new \App\Notifications\NewCenterCreated($model)
+            );
             $this->dispatch('center-created');
         }
 
