@@ -11,7 +11,7 @@ use App\Http\Controllers\ContractExportController;
 
 Route::prefix('employees')
     ->name('employees.')
-    ->middleware('role:HR|super-admin|general-admin')
+    ->middleware('role:HR|super-admin|general-manager')
     ->group(function () {
         Route::get('/', EmployeeModule::class)->name('index');
         Route::get('/create', EmployeeCreate::class)->name('create');
@@ -19,11 +19,11 @@ Route::prefix('employees')
         Route::get('/{employee:username}/show', EmployeeProfile::class)->name('show');
     });
 
-Route::get('/default-deliverables', DefaultDeliverablesModule::class)    ->middleware('role:HR|super-admin|general-admin')->name('default-deliverables.index');
+Route::get('/default-deliverables', DefaultDeliverablesModule::class)    ->middleware('role:HR|super-admin|general-manager')->name('default-deliverables.index');
 
 Route::prefix('contracts')
     ->name('contracts.')
-    ->middleware('role:HR|super-admin|general-admin')
+    ->middleware('role:HR|super-admin|general-manager')
     ->group(function () {
         Route::get('/', ContractsModule::class)->name('index');
         Route::get('/create', ContractCreate::class)->name('create');
