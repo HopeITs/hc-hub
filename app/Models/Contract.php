@@ -24,7 +24,7 @@ class Contract extends Model
         'weekly_hours' => 'integer',
         'currency' => 'integer',
         'salary' => 'decimal:2',
-        'salary_per' => SalaryPer::class,
+
     ];
 
     //    protected function work_days(): Attribute
@@ -48,6 +48,11 @@ class Contract extends Model
     public function contractType()
     {
         return $this->belongsTo(ContractType::class, 'contract_type_id');
+    }
+
+      public function terminationReason()
+    {
+        return $this->belongsTo(TerminationReason::class, 'termination_reason_id');
     }
 
     public function leaveBalances()

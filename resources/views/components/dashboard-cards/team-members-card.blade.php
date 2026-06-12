@@ -9,7 +9,7 @@
 
     <!-- Header -->
     <div class="flex items-center justify-between gap-6 px-6 py-6">
-        <h2 class="text-sm font-semibold text-secondary-medium flex items-center gap-2 whitespace-nowrap">
+        <h2 class="flex items-center gap-2 text-sm font-semibold text-secondary-medium whitespace-nowrap">
             @lang('general.contact-the-team')
         </h2>
 
@@ -56,14 +56,14 @@
                 class="flex items-center justify-between py-2 border-b border-[var(--color-neutral-200)] last:border-0">
 
                 <!-- Avatar + Name + Title -->
-                <div class="flex items-center gap-3 min-w-0 flex-1">
+                <div class="flex items-center flex-1 min-w-0 gap-3">
 
                     <!-- Avatar -->
                     <div class="flex items-center justify-center h-10 w-10 flex-shrink-0 rounded-full overflow-hidden
                                 bg-[var(--color-primary-500)] text-white font-semibold uppercase shadow-sm">
                         <img src="{{ $member->getFirstMediaUrl('avatar') }}"
                              alt="{{ $member->displayName ?? $member->name }}"
-                             class="h-full w-full object-cover">
+                             class="object-cover w-full h-full">
                     </div>
 
                     <!-- Name + Position -->
@@ -72,18 +72,18 @@
                             {{ $member->displayName ?? $member->name }}
                         </p>
 
-                        <p class="text-xs font-light text-secondary-light truncate">
+                        <p class="text-xs font-light truncate text-secondary-light">
                             {{ Str::limit($memberTitle, 40) }}
                         </p>
                     </div>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center gap-2 ms-4 flex-shrink-0">
+                <div class="flex items-center flex-shrink-0 gap-2 ms-4">
 
-                    <a href="{{ route('employees.show', ['employee' => $member->username]) }}"
+                    <a href="{{ route('employees.show', ['employee' => $member?->username]) }}"
                        title="View Profile">
-                        <x-icons.user class="text-secondary-light hover:text-primary transition"/>
+                        <x-icons.user class="transition text-secondary-light hover:text-primary"/>
                     </a>
 
                     <a href="tel:{{ $phone }}" title="Call">
@@ -91,22 +91,22 @@
                     </a>
 
                     <a href="tg://resolve?phone={{ $phone }}"
-                       class="text-secondary-light hover:text-primary transition"
+                       class="transition text-secondary-light hover:text-primary"
                        title="Chat on Telegram">
-                        <x-icons.telegram class="text-secondary-light hover:text-primary transition"/>
+                        <x-icons.telegram class="transition text-secondary-light hover:text-primary"/>
                     </a>
 
                     <a href="mailto:{{ $member->account->email ?? '#' }}"
-                       class="text-secondary-light hover:text-primary transition"
+                       class="transition text-secondary-light hover:text-primary"
                        title="Send Email">
-                        <x-icons.envelope class="text-secondary-light ms-1 hover:text-primary transition"/>
+                        <x-icons.envelope class="transition text-secondary-light ms-1 hover:text-primary"/>
                     </a>
 
                 </div>
             </div>
 
         @empty
-            <div class="flex flex-col items-center justify-center  text-sm font-light text-secondary-light h-full">
+            <div class="flex flex-col items-center justify-center h-full text-sm font-light text-secondary-light">
                 <span>@lang('general.no-available-data')</span>
             </div>
         @endforelse

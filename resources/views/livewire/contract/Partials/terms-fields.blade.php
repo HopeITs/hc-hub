@@ -63,10 +63,21 @@
     <hr class="my-3 col-span-full">
 
     {{-- Terminated at --}}
-    <div class="md:col-span-2">
+    <div class="md:col-span-1">
         <x-forms.input-label for="terminated_at">@lang('general.terminated-at')</x-forms.input-label>
         <x-forms.date-input id="terminated_at" wire:model.defer="form.terminated_at"/>
         <x-error-span>{{ $errors->first('form.terminated_at') }}</x-error-span>
+    </div>
+
+     <div class="md:col-span-1">
+        <x-forms.input-label for="termination_reason_id">@lang('general.reason-of-termination')</x-forms.input-label>
+                <x-forms.select-input wire:model.defer="form.termination_reason_id" label="Reason">
+                            <option value=""></option>
+                @foreach($terminationReasons as $reason)
+                    <option value="{{ $reason->id }}">{{ $reason->title }}</option>
+                @endforeach
+            </x-forms.select-input>
+        <x-error-span>{{ $errors->first('form.termination_reason_id') }}</x-error-span>
     </div>
 
     {{-- Reason of termination --}}

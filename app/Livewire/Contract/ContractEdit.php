@@ -2,10 +2,16 @@
 
 namespace App\Livewire\Contract;
 
-use App\Enums\SalaryPer;
 use App\Livewire\Forms\ContractForm;
 use App\Livewire\Forms\LeaveBalanceForm;
-use App\Models\{City, Center, Employee, Position, Program, ContractType};
+use App\Models\Center;
+use App\Models\City;
+use App\Models\Contract;
+use App\Models\ContractType;
+use App\Models\Employee;
+use App\Models\Position;
+use App\Models\Program;
+use App\Models\TerminationReason;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
@@ -13,7 +19,7 @@ class ContractEdit extends Component
 {
     public ContractForm $form;
     public LeaveBalanceForm $balanceForm;
-    public \App\Models\Contract $contract;
+    public Contract $contract;
 
     public int $step = 1;
     public int $maxStep = 1;
@@ -28,23 +34,23 @@ class ContractEdit extends Component
         3 => 'validatePay',
     ];
 
-    public function mount(\App\Models\Contract $contract): void
+    // ────────────────────────────────────────────────
+    // Lifecycle
+    // ────────────────────────────────────────────────
+
+    public function mount(Contract $contract): void
     {
         $this->contract = $contract->loadMissing('position.center');
 
         $this->form->setDefaults();
         $this->form->setContract($contract);
 
-        $pos = $this->contract->position;
-
-        $effectiveCityId = $pos?->center_id
-            ? Center::whereKey($pos->center_id)->value('city_id')
-            : ($pos?->city_id ?? null);
-
-        $this->city_id    = $effectiveCityId ?? $contract->employee?->city_id;
-        $this->program_id = $pos?->program_id;
-        $this->center_id  = $pos?->center_id;
+        $this->initLocationContext();
     }
+
+    // ────────────────────────────────────────────────
+    // Wired property hooks
+    // ────────────────────────────────────────────────
 
     public function updatedCityId(): void
     {
@@ -61,22 +67,32 @@ class ContractEdit extends Component
         $this->reset(['form.position_id']);
     }
 
-    public function updatedFormPositionId($value): void
+    public function updatedFormPositionId(mixed $value): void
     {
         $this->resetErrorBag('form.position_id');
 
-        if ($this->contract->position_id !== (int)$value) {
-            $pos = Position::find($value);
-            if ($pos && !$pos->canAssign()) {
-                $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
-            }
+        // Skip capacity check when the position is unchanged
+        if ($this->contract->position_id === (int) $value) {
+            return;
+        }
+
+        $position = Position::find($value);
+
+        if ($position && ! $position->canAssign()) {
+            $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
         }
     }
 
+    // ────────────────────────────────────────────────
+    // Step navigation
+    // ────────────────────────────────────────────────
+
     public function next(): void
     {
-        if (method_exists($this->form, $this->validatorsByStep[$this->step] ?? '')) {
-            $this->form->{$this->validatorsByStep[$this->step]}();
+        $validator = $this->validatorsByStep[$this->step] ?? null;
+
+        if ($validator && method_exists($this->form, $validator)) {
+            $this->form->{$validator}();
         }
 
         if ($this->step < 3) {
@@ -95,190 +111,258 @@ class ContractEdit extends Component
     public function jumpTo(int $target): void
     {
         $target = max(1, min(3, $target));
+
         if ($target <= $this->maxStep) {
             $this->step = $target;
         }
     }
 
-    public function submit()
+    // ────────────────────────────────────────────────
+    // Submission
+    // ────────────────────────────────────────────────
+
+    public function submit(): mixed
     {
         $this->form->validateIdentity();
         $this->form->validateTerms();
         $this->form->validatePay();
 
-        if (!$this->validateCityConsistency()) {
-            return;
+        if (! $this->validateCityConsistency()) {
+            return null;
         }
 
         $this->form->update($this->contract);
-// TODO: this lines commented because all contracts types will have annual leaves
-        // if ($this->contract->salary_per->value === SalaryPer::Month) {
-            if ($this->contract->leaveBalances()->exists()) {
-                $this->balanceForm->update($this->contract->id);
-            } else {
-                $this->balanceForm->store($this->contract->id);
-            }
-        // } else {
-        //     $this->contract->leaveBalances()->delete();
-        // }
+
+        // All contract types receive annual leave balances.
+        if ($this->contract->leaveBalances()->exists()) {
+            $this->balanceForm->update($this->contract->id);
+        } else {
+            $this->balanceForm->store($this->contract->id);
+        }
 
         LivewireAlert::success(__('general.success-message'));
 
-        return redirect()->route('contracts.show', ['contract' => $this->contract->id]);
+        return redirect()->route('contracts.show', $this->contract->id);
     }
 
-    private function validateCityConsistency(): bool
-    {
-        if (!$this->city_id) {
-            return true;
-        }
-
-        if ($this->form->position_id) {
-            $pos = Position::select('id', 'program_id', 'center_id', 'city_id')->find($this->form->position_id);
-            if (!$pos) {
-                $this->addError('form.position_id', __('validation.exists', ['attribute' => 'position']));
-                return false;
-            }
-
-            $centerCityId = $pos->center_id
-                ? Center::whereKey($pos->center_id)->value('city_id')
-                : $pos->city_id;
-
-            if ($centerCityId != $this->city_id) {
-                $this->addError('form.position_id', __('validation.custom.position_id.invalid'));
-                return false;
-            }
-
-            if ($this->program_id && (int)$pos->program_id !== (int)$this->program_id) {
-                $this->addError('form.position_id', __('validation.custom.position_id.program_mismatch'));
-                return false;
-            }
-
-            if ($this->center_id && $pos->center_id && (int)$pos->center_id !== (int)$this->center_id) {
-                $this->addError('form.position_id', __('validation.custom.position_id.center_mismatch'));
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public function saveIdentity(): void {}
-    public function saveTerms(): void {}
-    public function savePay(): void {}
-
-    public function save()
+    /** Alias kept for view compatibility. */
+    public function save(): mixed
     {
         return $this->submit();
     }
 
-    public function render()
+    // ────────────────────────────────────────────────
+    // Rendering
+    // ────────────────────────────────────────────────
+
+    public function render(): \Illuminate\View\View
     {
-        $locale = app()->getLocale();
-        $cityCol = "name_{$locale}";
+        $locale  = app()->getLocale();
         $posCol  = "title_{$locale}";
         $typeCol = "name_{$locale}";
-        $empCol = transColumn('first_name');
+        $cityCol = "name_{$locale}";
+        $empCol  = transColumn('first_name');
 
-        $cities = City::select('id', $cityCol)
-            ->where('is_active', 1)
+        $cities              = $this->getCities($cityCol);
+        $employees           = $this->getEmployees($empCol);
+        $programs            = $this->getPrograms();
+        $centers             = $this->getCenters();
+        $positions           = $this->getPositions($posCol);
+        $types               = $this->getContractTypes($typeCol);
+        $terminationReasons  = TerminationReason::all();
+
+        return view('livewire.contract.contract-edit', compact(
+            'cities',
+            'employees',
+            'programs',
+            'centers',
+            'positions',
+            'types',
+            'terminationReasons',
+        ));
+    }
+
+    // ────────────────────────────────────────────────
+    // Private — initialisation
+    // ────────────────────────────────────────────────
+
+    private function initLocationContext(): void
+    {
+        $position = $this->contract->position;
+
+        $effectiveCityId = $position?->center_id
+            ? Center::whereKey($position->center_id)->value('city_id')
+            : $position?->city_id;
+
+        $this->city_id    = $effectiveCityId ?? $this->contract->employee?->city_id;
+        $this->program_id = $position?->program_id;
+        $this->center_id  = $position?->center_id;
+    }
+
+    // ────────────────────────────────────────────────
+    // Private — query helpers
+    // ────────────────────────────────────────────────
+
+    private function getCities(string $col): \Illuminate\Support\Collection
+    {
+        return City::select('id', $col)
+            ->where('is_active', true)
             ->get()
-            ->map(fn($c) => tap($c, fn() => $c->name = $c->{$cityCol}));
+            ->each(fn (City $city) => $city->name = $city->{$col});
+    }
 
-        $user = auth()->user()->load('profile');
-        $role = $user->myRole();
+    private function getEmployees(string $orderCol): \Illuminate\Support\Collection
+    {
+        $user    = auth()->user()->load('profile');
+        $role    = $user->myRole();
+        [$roleType, $roleScope] = array_pad(explode('-', $role, 2), 2, null);
 
-        $roleArr = explode('-', $role);
-        $currentEmployeeId = $this->contract->employee_id;
-
-        if ($roleArr[0] === 'HR') {
-
-            if ($roleArr[1] === 'SYR') {
-                $employees = Employee::where('is_active', 1)->orderBy($empCol)->get();
-            } else {
-                $citySlug = $roleArr[1];
-
-                $employees = Employee::where('is_active', 1)
-                    ->whereHas('city', fn ($q) => $q->where('slug', $citySlug))
-                    ->orderBy($empCol)
-                    ->get();
-            }
-
-        } else {
-
+        if ($roleType !== 'HR') {
             $cityId = optional($user->profile)->city_id;
-            abort_unless($cityId, 403, 'User has no linked employee or city.');
+            abort_unless($cityId, 403, 'User has no linked city.');
 
-            $employees = Employee::where('is_active', 1)
-                ->where('city_id', $cityId)
-                ->orderBy($empCol)
-                ->get();
-        }
-        //current emp active
-        if ($currentEmployeeId && $employees->where('id', $currentEmployeeId)->isEmpty()) {
-            $currentEmployee = Employee::find($currentEmployeeId);
-            if ($currentEmployee) {
-                $employees = $employees->push($currentEmployee)->unique('id')->values();
-            }
+            return $this->withCurrentEmployee(
+                Employee::where('is_active', true)
+                    ->where('city_id', $cityId)
+                    ->orderBy($orderCol)
+                    ->get()
+            );
         }
 
+        $query = Employee::where('is_active', true)->orderBy($orderCol);
 
-        $programs = $this->city_id
-            ? Program::whereIn(
-                'id',
-                Position::query()
-                    ->where(function ($q) {
-                        $q->whereHas('center', fn($c) => $c->where('city_id', $this->city_id))
-                          ->orWhereNull('center_id')
-                          ->where('city_id', $this->city_id);
-                    })
-                    ->pluck('program_id')
-                    ->unique()
-            )
-                ->select('id', 'name')
-                ->orderBy('name')
-                ->get()
-            : collect();
+        if ($roleScope !== 'SYR') {
+            $query->whereHas('city', fn ($q) => $q->where('slug', $roleScope));
+        }
 
-        $centers = $this->city_id
-            ? Center::where('city_id', $this->city_id)
-                ->select('id', 'name')
-                ->orderBy('name')
-                ->get()
-            : collect();
+        return $this->withCurrentEmployee($query->get());
+    }
 
-        $positions = ($this->city_id && $this->program_id)
-            ? Position::where('program_id', $this->program_id)
-                ->where(function ($q) {
-                    $q->where('city_id', $this->city_id)
-                      ->orWhereHas('center', fn($c) => $c->where('city_id', $this->city_id));
-                })
-                ->select('id', $posCol)
-                ->orderBy($posCol)
-                ->get()
-                ->map(fn($p) => tap($p, fn() => $p->title = $p->{$posCol}))
-            : collect();
+    /**
+     * Guarantee the contract's current employee appears in the list even if
+     * they no longer match the active filter (e.g. they were deactivated).
+     */
+    private function withCurrentEmployee(\Illuminate\Support\Collection $employees): \Illuminate\Support\Collection
+    {
+        $currentId = $this->contract->employee_id;
 
-        if ($this->form->position_id && $positions->where('id', $this->form->position_id)->isEmpty()) {
-            $current = Position::select('id', $posCol)->find($this->form->position_id);
+        if ($currentId && $employees->doesntContain('id', $currentId)) {
+            $current = Employee::find($currentId);
+
             if ($current) {
-                $current->title = $current->{$posCol};
-                $positions = $positions->push($current)->unique('id')->values();
+                $employees = $employees->push($current)->unique('id')->values();
             }
         }
 
-        $types = ContractType::select('id', $typeCol)
-            ->orderBy($typeCol)
-            ->get()
-            ->map(fn($t) => tap($t, fn() => $t->name = $t->{$typeCol}));
+        return $employees;
+    }
 
-        return view('livewire.contract.contract-edit', [
-            'cities'     => $cities,
-            'employees'  => $employees,
-            'programs'   => $programs,
-            'centers'    => $centers,
-            'positions'  => $positions,
-            'types'      => $types,
-        ]);
+    private function getPrograms(): \Illuminate\Support\Collection
+    {
+        if (! $this->city_id) {
+            return collect();
+        }
+
+        $programIds = Position::query()
+            ->where(function ($q) {
+                $q->whereHas('center', fn ($c) => $c->where('city_id', $this->city_id))
+                  ->orWhere(fn ($c) => $c->whereNull('center_id')->where('city_id', $this->city_id));
+            })
+            ->pluck('program_id')
+            ->unique();
+
+        return Program::whereIn('id', $programIds)
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function getCenters(): \Illuminate\Support\Collection
+    {
+        if (! $this->city_id) {
+            return collect();
+        }
+
+        return Center::select('id', 'name')
+            ->where('city_id', $this->city_id)
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function getPositions(string $col): \Illuminate\Support\Collection
+    {
+        if (! $this->city_id || ! $this->program_id) {
+            return collect();
+        }
+
+        $positions = Position::where('program_id', $this->program_id)
+            ->where(function ($q) {
+                $q->where('city_id', $this->city_id)
+                  ->orWhereHas('center', fn ($c) => $c->where('city_id', $this->city_id));
+            })
+            ->select('id', $col)
+            ->orderBy($col)
+            ->get()
+            ->each(fn (Position $p) => $p->title = $p->{$col});
+
+        // Ensure the currently-assigned position is always present in the list
+        if ($this->form->position_id && $positions->doesntContain('id', $this->form->position_id)) {
+            $current = Position::select('id', $col)->find($this->form->position_id);
+
+            if ($current) {
+                $current->title = $current->{$col};
+                $positions->push($current);
+            }
+        }
+
+        return $positions;
+    }
+
+    private function getContractTypes(string $col): \Illuminate\Support\Collection
+    {
+        return ContractType::select('id', $col)
+            ->orderBy($col)
+            ->get()
+            ->each(fn (ContractType $t) => $t->name = $t->{$col});
+    }
+
+    // ────────────────────────────────────────────────
+    // Private — business logic
+    // ────────────────────────────────────────────────
+
+    private function validateCityConsistency(): bool
+    {
+        if (! $this->city_id || ! $this->form->position_id) {
+            return true;
+        }
+
+        $position = Position::select('id', 'program_id', 'center_id', 'city_id')
+            ->find($this->form->position_id);
+
+        if (! $position) {
+            $this->addError('form.position_id', __('validation.exists', ['attribute' => 'position']));
+            return false;
+        }
+
+        $positionCityId = $position->center_id
+            ? Center::whereKey($position->center_id)->value('city_id')
+            : $position->city_id;
+
+        if ($positionCityId != $this->city_id) {
+            $this->addError('form.position_id', __('validation.custom.position_id.invalid'));
+            return false;
+        }
+
+        if ($this->program_id && (int) $position->program_id !== (int) $this->program_id) {
+            $this->addError('form.position_id', __('validation.custom.position_id.program_mismatch'));
+            return false;
+        }
+
+        if ($this->center_id && $position->center_id && (int) $position->center_id !== (int) $this->center_id) {
+            $this->addError('form.position_id', __('validation.custom.position_id.center_mismatch'));
+            return false;
+        }
+
+        return true;
     }
 }

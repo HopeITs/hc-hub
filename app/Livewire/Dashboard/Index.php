@@ -314,6 +314,7 @@ class Index extends Component
         $sameCityEmployees = Employee::query()
             ->where('city_id', $this->employee?->city_id)
             ->whereNotIn('id', $excludeIds)
+            ->whereNotNull('username')
             ->with(['contracts.position.jobLevel'])
             ->get()
             ->map(function ($emp) use ($nameCol, $titleCol) {
@@ -364,6 +365,7 @@ class Index extends Component
 
     public function render()
     {
+       
         return view('livewire.dashboard.index', [
             'employee' => $this->employee,
             'hasLeaves' => $this->employee?->availableLeaves()?->count() > 0,
