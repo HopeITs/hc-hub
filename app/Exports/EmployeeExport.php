@@ -44,7 +44,7 @@ class EmployeeExport implements FromCollection, WithHeadings, WithMapping, Shoul
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'                                                           => 'ID',
-                'name_en', 'name_ar'                                   => __('general.name', [], 'en'),
+                'employee'                                                       => __('general.name', [], 'en'),
                 'account'                                                      => trans_choice('general.role', 1, [], 'en'),
                 'years_of_service_formatted'                                   => __('general.years-of-service', [], 'en'),
                 'join_at'                                                      => __('general.join-at', [], 'en'),
@@ -72,7 +72,7 @@ class EmployeeExport implements FromCollection, WithHeadings, WithMapping, Shoul
         foreach ($this->visibleColumnCodes as $code) {
             $mappedRow[] = match ($code) {
                 'id'                                                           => $row->id,
-                'name_en', 'name_ar'                                           => $row->name,
+                'employee'                                           => $row->name,
                 'account'                                                      => $row->account?->myRole() ?? '—',
                 'years_of_service_formatted'                                   => $row->years_of_service_formatted,
                 'join_at'                                                      => $row->join_at,

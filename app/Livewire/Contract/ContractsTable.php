@@ -52,9 +52,9 @@ class ContractsTable extends LivewireTable
 
         return [
             'id',
-            'employee.'.($loc === 'ar' ? 'first_name_ar' : 'first_name_en'),
-            'position.'.($loc === 'ar' ? 'title_ar' : 'title_en'),
-            'contractType.'.($loc === 'ar' ? 'name_ar' : 'name_en'),
+            'employee.' . ($loc === 'ar' ? 'first_name_ar' : 'first_name_en'),
+            'position.' . ($loc === 'ar' ? 'title_ar' : 'title_en'),
+            'contractType.' . ($loc === 'ar' ? 'name_ar' : 'name_en'),
             'position.department.name',
         ];
     }
@@ -66,7 +66,7 @@ class ContractsTable extends LivewireTable
         $title = $loc === 'ar' ? 'title_ar' : 'title_en';
         $employees = Employee::orderBy(transColumn('first_name'))
             ->get()
-            ->mapWithKeys(fn ($employee) => [
+            ->mapWithKeys(fn($employee) => [
                 "{$employee->first_name} {$employee->last_name}" => "{$employee->first_name} {$employee->last_name}",
             ])
             ->toArray();
@@ -74,22 +74,38 @@ class ContractsTable extends LivewireTable
         return [
             // Column::make('ID', 'id')->sortable()->searchable(),
 
+            // Column::make(trans_choice('general.employee', 1), 'employee')
+            //     ->displayUsing(fn ($m) => $m->name ?? ' - ')
+            //     ->searchable(function (Builder $query, string $search) {
+            //         // Search by first name or last name at the database level
+            //         $query->where(transColumn('first_name'), 'like', "%{$search}%")
+            //             ->orWhere(transColumn('last_name'), 'like', "%{$search}%");
+            //     })
+            //     ->sortable(function (Builder $query, string $direction) {
+            //         // Sort by first name at the database level
+            //         $query->orderBy(transColumn('first_name'), $direction);
+            //     }),
             Column::make(trans_choice('general.employee', 1), 'employee')
-                ->displayUsing(fn ($m) => $m->name ?? ' - ')
-                ->searchable(function (Builder $query, string $search) {
-                    // Search by first name or last name at the database level
-                    $query->where(transColumn('first_name'), 'like', "%{$search}%")
-                        ->orWhere(transColumn('last_name'), 'like', "%{$search}%");
-                })
-                ->sortable(function (Builder $query, string $direction) {
-                    // Sort by first name at the database level
-                    $query->orderBy(transColumn('first_name'), $direction);
+                ->displayUsing(fn($v, Model $m) => $m->employee?->name ?? '—')
+                ->searchable(function (Builder $query, $value) {
+                    $parts = array_filter(explode(' ', trim($value)));
+
+                    $query->whereHas('employee', function (Builder $q) use ($parts) {
+                        foreach ($parts as $part) {
+                            $q->where(function (Builder $inner) use ($part) {
+                                $inner->where('first_name_en', 'LIKE', "%{$part}%")
+                                    ->orWhere('first_name_ar', 'LIKE', "%{$part}%")
+                                    ->orWhere('last_name_en',  'LIKE', "%{$part}%")
+                                    ->orWhere('last_name_ar',  'LIKE', "%{$part}%");
+                            });
+                        }
+                    });
                 }),
-            SelectColumn::make(trans_choice('general.positions', 1), 'position.'.$title)
+            SelectColumn::make(trans_choice('general.positions', 1), 'position.' . $title)
                 ->options(Position::orderBy($title)->pluck($title, $title)->toArray())
                 ->sortable()->searchable(),
 
-            SelectColumn::make(trans_choice('general.contract-type', 1), 'contractType.'.$name)
+            SelectColumn::make(trans_choice('general.contract-type', 1), 'contractType.' . $name)
                 ->options(ContractType::orderBy($name)->pluck($name, $name)->toArray())
                 ->sortable()->searchable(),
 
@@ -97,36 +113,27 @@ class ContractsTable extends LivewireTable
                 ->options(Department::orderBy('name')->pluck('name', 'name')->toArray())
                 ->sortable()->searchable(),
 
-            SelectColumn::make(trans_choice('general.job-level', 1), 'position.jobLevel.'.$name)
+            SelectColumn::make(trans_choice('general.job-level', 1), 'position.jobLevel.' . $name)
                 ->options(JobLevel::orderBy('grade')->pluck($name, $name)->toArray())
                 ->sortable()->searchable(),
 
-            // Column::make(__('general.duration'), fn (Model $m) => $m->duration.' '.__('general.months'))
-            //     ->sortable(),
-Column::make(__('general.duration'), 'duration')
-                ->displayUsing(fn ($v, Model $m) => $m->duration.' '.__('general.months'))
+            Column::make(__('general.duration'), 'duration')
+                ->displayUsing(fn($v, Model $m) => $m->duration . ' ' . __('general.months'))
                 ->sortable(),
-                
-            // Column::make(
-            //     __('general.period'),
-            //     fn (Model $m) => Blade::render('<x-period :start="$start" :end="$end" />', [
-            //         'start' => $m->start_date,
-            //         'end' => $m->end_date,
-            //     ])
-            // )->asHtml(),
+
             Column::make(__('general.period'), 'period')
-                ->displayUsing(fn ($v, Model $m) => Blade::render('<x-period :start="$start" :end="$end" />', [
+                ->displayUsing(fn($v, Model $m) => Blade::render('<x-period :start="$start" :end="$end" />', [
                     'start' => $m->start_date,
                     'end'   => $m->end_date,
                 ]))->asHtml(),
 
             Column::make(__('general.yearly-leave-days'), 'leaveBalances')
-                ->displayUsing(fn ($m) => $m[0]->deserved_formatted ?? 0)
+                ->displayUsing(fn($m) => $m[0]->deserved_formatted ?? 0)
                 ->sortable()->asHtml(),
 
             SelectColumn::make(__('general.salary-per'), 'salary_per')
                 ->options(
-                    collect(SalaryPer::getValues())->mapWithKeys(fn ($value) => [
+                    collect(SalaryPer::getValues())->mapWithKeys(fn($value) => [
                         $value => SalaryPer::getLocalizedName((int) $value)['value'],
                     ])->toArray()
                 )
@@ -145,7 +152,7 @@ Column::make(__('general.duration'), 'duration')
                 ->asHtml(),
 
             Column::make(__('general.weekly-hours'), 'weekly_hours')
-                ->displayUsing(fn ($v) => $v ? "{$v} ".trans_choice('general.hour', 2) : '—')
+                ->displayUsing(fn($v) => $v ? "{$v} " . trans_choice('general.hour', 2) : '—')
                 ->sortable(),
 
             BooleanColumn::make(__('general.status'), 'is_active')->searchable(),
@@ -155,7 +162,7 @@ Column::make(__('general.duration'), 'duration')
                 $edit = Blade::render('<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />', ['id' => $m->getKey()]);
                 $delete = Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $m->getKey()]);
 
-                return '<div class="flex items-center justify-center gap-2">'.$view.$edit.'</div>';
+                return '<div class="flex items-center justify-center gap-2">' . $view . $edit . '</div>';
             })->asHtml(),
         ];
     }
@@ -173,7 +180,7 @@ Column::make(__('general.duration'), 'duration')
 
     public function delete(array $payload): void
     {
-        DB::transaction(fn () => Contract::findOrFail($payload['id'])->delete());
+        DB::transaction(fn() => Contract::findOrFail($payload['id'])->delete());
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
@@ -181,29 +188,28 @@ Column::make(__('general.duration'), 'duration')
         $this->dispatch('refreshContractsTable');
     }
 
-            public function exportExcel(): BinaryFileResponse
+    public function exportExcel(): BinaryFileResponse
     {
-        $query = $this->appliedQuery(); 
+        $query = $this->appliedQuery();
         $data = $query->get();
 
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
                 if (empty($userSelectedColumns)) return true;
                 return in_array($column->code(), $userSelectedColumns);
             })
-            ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code()) 
+            ->filter(fn($column) => $column->label() !== __('general.actions'))
+            ->map(fn($column) => $column->code())
             ->toArray();
 
         $filename = 'contracts_' . now()->format('Y-m-d') . '.xlsx';
 
         return Excel::download(
-            new ContractExport($data, $visibleColumnCodes), 
+            new ContractExport($data, $visibleColumnCodes),
             $filename
         );
     }
-
 }

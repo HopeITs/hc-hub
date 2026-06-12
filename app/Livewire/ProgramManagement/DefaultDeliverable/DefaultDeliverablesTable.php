@@ -15,6 +15,10 @@ use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\DefaultDeliverableExport;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 class DefaultDeliverablesTable extends LivewireTable
 {
     protected string $model = DefaultDeliverableModel::class;
@@ -22,6 +26,7 @@ class DefaultDeliverablesTable extends LivewireTable
     protected $listeners = [
         'delete',
         'refreshDefaultDeliverablesTable' => '$refresh',
+        'exportExcel' => 'exportExcel',
     ];
 
     protected function query(): Builder
@@ -174,5 +179,30 @@ class DefaultDeliverablesTable extends LivewireTable
             ->success()->toast()->position('top-start')->show();
 
         $this->dispatch('refreshDefaultDeliverablesTable');
+    }
+
+        public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery();
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns;
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn($column) => $column->isVisible())
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) return true;
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn($column) => $column->label() !== __('general.actions'))
+            ->map(fn($column) => $column->code())
+            ->toArray();
+
+        $filename = 'default_deliverables_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(
+            new DefaultDeliverableExport($data, $visibleColumnCodes),
+            $filename
+        );
     }
 }
