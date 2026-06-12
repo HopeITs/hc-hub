@@ -12,38 +12,38 @@
     ];
 @endphp
 
-<div class="min-h-screen  pb-4 px-6 bg-neutral-50 font-sans text-secondary-dark">
-    <div class="max-w-7xl  mx-auto">
+<div class="min-h-screen px-6 pb-4 font-sans bg-neutral-50 text-secondary-dark">
+    <div class="mx-auto max-w-7xl">
 
-        <div class="grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto gap-4">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto">
 
             <div class="lg:row-span-2 bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8 flex flex-col justify-center items-center text-center">
                 @if($employee->getFirstMediaUrl('avatar'))
                     <img src="{{$employee->getFirstMediaUrl('avatar')}}"
-                         class="w-28 h-28 rounded-full object-cover border-4 border-primary shadow-sm">
+                         class="object-cover border-2 rounded-full shadow-sm w-28 h-28 border-primary">
                 @else
-                    <div class="w-28 h-28 flex items-center justify-center text-primary text-3xl font-bold border-4 border-primary rounded-full">
+                    <div class="flex items-center justify-center text-3xl font-bold border-2 rounded-full w-28 h-28 text-primary border-primary">
                         {{ strtoupper(substr($employee->$nameField,0,2)) }}
                     </div>
                 @endif
 
-                <h1 class="mt-4 text-xl font-semibold text-secondary-dark tracking-tight">
+                <h1 class="mt-4 text-xl font-semibold tracking-tight text-secondary-dark">
                     {{$employee->$nameField}}
                 </h1>
-                <p class="mt-2 text-primary text-sm font-medium">
+                <p class="mt-2 text-sm font-medium text-primary">
                     {{$employee->positions()->latest()->first()->title ?? '—'}}
                 </p>
-                <p class="text-secondary-light text-xs mt-2">
+                <p class="mt-2 text-xs text-secondary-light">
                     @lang('general.employee-id'): {{$employee->id}}
                 </p>
             </div>
 
             <div class="lg:col-span-2 lg:col-start-2 lg:row-start-1 bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
-                <h2 class="text-lg font-bold text-secondary-dark mb-3 flex items-center gap-2">
+                <h2 class="flex items-center gap-2 mb-3 text-lg font-bold text-secondary-dark">
                     <span class="inline-block w-1.5 h-5 bg-primary rounded"></span>
                     @lang('general.employment-overview')
                 </h2>
-                <ul class="text-sm space-y-1">
+                <ul class="space-y-1 text-sm">
                     <li><strong>@lang('general.name'):</strong> {{ $employee->$nameField }}</li>
                     <li><strong>@lang('general.years-of-service'):</strong> {{ $employee->years_of_service ?? 'N/A' }}</li>
                     <li><strong>@lang('general.position'):</strong> {{ $employee->positions()->latest()->first()->title ?? '—' }}</li>
@@ -53,7 +53,7 @@
             </div>
 
             <div class="lg:col-start-2 lg:row-start-2 bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
-                <h2 class="text-lg font-bold text-secondary-dark mb-3 flex items-center gap-2">
+                <h2 class="flex items-center gap-2 mb-3 text-lg font-bold text-secondary-dark">
                     <span class="inline-block w-1.5 h-5 bg-primary rounded"></span>
                     @lang('general.bio-birthday')
                 </h2>
@@ -65,7 +65,7 @@
             </div>
 
             <div class="lg:col-start-3 lg:row-start-2 bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
-                <h2 class="text-lg font-bold text-secondary-dark mb-3 flex items-center gap-2">
+                <h2 class="flex items-center gap-2 mb-3 text-lg font-bold text-secondary-dark">
                     <span class="inline-block w-1.5 h-5 bg-primary rounded"></span>
                     @lang('general.contact')
                 </h2>
@@ -77,20 +77,20 @@
             </div>
 
             <div class="lg:col-start-2 lg:row-start-3 bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
-                <h2 class="text-lg font-bold text-secondary-dark mb-3 flex items-center gap-2">
+                <h2 class="flex items-center gap-2 mb-3 text-lg font-bold text-secondary-dark">
                     <span class="inline-block w-1.5 h-5 bg-primary rounded"></span>
                     @lang('general.skills-and-interests')
                 </h2>
 
                 <div class="flex flex-wrap gap-2">
                     @foreach(json_decode($employee->skills ?? '[]') as $skill)
-                        <span class="px-3 py-1 text-xs font-medium bg-primary/10 text-primary border border-primary/20 rounded-full">
+                        <span class="px-3 py-1 text-xs font-medium border rounded-full bg-primary/10 text-primary border-primary/20">
                             {{ $skill }}
                         </span>
                     @endforeach
 
                     @foreach(json_decode($employee->interests ?? '[]') as $interest)
-                        <span class="px-3 py-1 text-xs font-medium bg-neutral-100 text-secondary-dark border border-neutral-200 rounded-full">
+                        <span class="px-3 py-1 text-xs font-medium border rounded-full bg-neutral-100 text-secondary-dark border-neutral-200">
                             {{ $interest }}
                         </span>
                     @endforeach
@@ -98,7 +98,7 @@
             </div>
 
             <div class="lg:col-start-3 lg:row-start-3 bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
-                <h2 class="text-lg font-bold text-secondary-dark mb-3 flex items-center gap-2">
+                <h2 class="flex items-center gap-2 mb-3 text-lg font-bold text-secondary-dark">
                     <span class="inline-block w-1.5 h-5 bg-primary rounded"></span>
                     @lang('general.marital-status')
                 </h2>
@@ -118,12 +118,12 @@
             </div>
 
             <div class="lg:row-span-2 lg:col-start-1 lg:row-start-3 bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
-                <h2 class="text-lg font-bold text-secondary-dark mb-3 flex items-center gap-2">
+                <h2 class="flex items-center gap-2 mb-3 text-lg font-bold text-secondary-dark">
                     <span class="inline-block w-1.5 h-5 bg-primary rounded"></span>
                     @lang('general.national-info')
                 </h2>
 
-                <ul class="text-sm space-y-1">
+                <ul class="space-y-1 text-sm">
                     <li><strong>@lang('general.national-id'):</strong> {{ $employee->national_number }}</li>
                     <li><strong>@lang('general.civil-registry-office'):</strong> {{ $employee->civil_registry_office }}</li>
                     <li><strong>@lang('general.civil-registry-number'):</strong> {{ $employee->civil_registry_number }}</li>
@@ -133,14 +133,14 @@
             </div>
 
             <div class="lg:col-start-2 bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
-                <h2 class="text-lg font-bold text-secondary-dark mb-3 flex items-center gap-2">
+                <h2 class="flex items-center gap-2 mb-3 text-lg font-bold text-secondary-dark">
                     <span class="inline-block w-1.5 h-5 bg-primary rounded"></span>
                     @lang('general.badges')
                 </h2>
             </div>
 
             <div class="lg:col-start-3 lg:row-start-4 bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-2xl p-8">
-                <h2 class="text-lg font-bold text-secondary-dark mb-3 flex items-center gap-2">
+                <h2 class="flex items-center gap-2 mb-3 text-lg font-bold text-secondary-dark">
                     <span class="inline-block w-1.5 h-5 bg-primary rounded"></span>
                     @lang('general.attachments')
                 </h2>
@@ -149,7 +149,7 @@
         </div>
 
         <div class=" bg-white border mt-4 border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] rounded-3xl p-8">
-            <h2 class="text-lg font-bold text-secondary-dark mb-3 flex items-center gap-2">
+            <h2 class="flex items-center gap-2 mb-3 text-lg font-bold text-secondary-dark">
                 <span class="inline-block w-1.5 h-5 bg-primary rounded"></span>
                 @lang('general.contract-details')
             </h2>
