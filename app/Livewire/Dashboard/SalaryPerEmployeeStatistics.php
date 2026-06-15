@@ -25,7 +25,7 @@ class SalaryPerEmployeeStatistics extends Component
             $contract = $employee->contracts->first();
             if (!$contract) continue;
 
-            $type = $contract->salary_per?->value;
+            $type = $contract->salary_per;
 
             $map = [
                 1 => 'per_month',
