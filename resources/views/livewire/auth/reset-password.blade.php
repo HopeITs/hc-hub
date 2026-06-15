@@ -23,7 +23,7 @@
 
                 {{-- New Password --}}
                 <div>
-                    <x-forms.input-label for="password" :value="__('auth.password')" />
+                    <x-forms.input-label for="password" required :value="__('auth.password')" />
 
                     <x-forms.password-input
                         id="password"
@@ -51,7 +51,7 @@
 
                 {{-- Confirm Password --}}
                 <div>
-                    <x-forms.input-label for="password_confirmation" :value="__('auth.confirm-password')" />
+                    <x-forms.input-label for="password_confirmation" required :value="__('auth.confirm-password')" />
                     <x-forms.password-input
                         id="password_confirmation"
                         model="password_confirmation"

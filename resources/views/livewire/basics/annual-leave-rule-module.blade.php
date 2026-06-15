@@ -37,19 +37,19 @@
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-1 gap-4">
                 <div>
-                    <x-forms.input-label for="days">@lang('general.days_per_year')</x-forms.input-label>
+                    <x-forms.input-label for="days" required>@lang('general.days_per_year')</x-forms.input-label>
                     <x-forms.input type="number" wire:model="item.days" id="days" />
                     <x-error-span>{{ $errors->first('item.days') }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="day_per_month">@lang('general.day_per_month')</x-forms.input-label>
+                    <x-forms.input-label for="day_per_month" required>@lang('general.day_per_month')</x-forms.input-label>
                     <x-forms.input type="number" step="0.1" wire:model="item.day_per_month" id="day_per_month" />
                     <x-error-span>{{ $errors->first('item.day_per_month') }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="years_of_volunteering">@lang('general.years_of_volunteering')</x-forms.input-label>
+                    <x-forms.input-label for="years_of_volunteering" required>@lang('general.years_of_volunteering')</x-forms.input-label>
                     <x-forms.input type="number" wire:model="item.years_of_volunteering" id="years_of_volunteering" />
                     <x-error-span>{{ $errors->first('item.years_of_volunteering') }}</x-error-span>
                 </div>

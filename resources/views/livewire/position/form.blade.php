@@ -31,7 +31,7 @@
                 <x-error-span>{{ $errors->first('form.title_ar') }}</x-error-span>
             </div>
             <div class="md:col-span-1">
-                <x-forms.input-label for="city">{{trans_choice('general.city',1)}}</x-forms.input-label>
+                <x-forms.input-label for="city" required>{{trans_choice('general.city',1)}}</x-forms.input-label>
                 <x-forms.select2-input wire:model="form.city_id" id="city">
                     <option class="text-gray-400" @disabled($form->position !== null) @selected($form->position === null)>Select Any..</option>
                     @foreach($cities as $city)
@@ -41,7 +41,7 @@
                 <x-error-span>{{ $errors->first('form.city_id') }}</x-error-span>
             </div>
             <div class="md:col-span-1">
-                <x-forms.input-label for="program">{{trans_choice('general.program',1)}}</x-forms.input-label>
+                <x-forms.input-label for="program" required>{{trans_choice('general.program',1)}}</x-forms.input-label>
                 <x-forms.select2-input wire:model="form.program_id" id="program">
                     <option class="text-gray-400" @disabled($form->position !== null) @selected($form->position === null)>Select Any..</option>
                     @foreach($programs as $program)
@@ -51,7 +51,7 @@
                 <x-error-span>{{ $errors->first('form.program_id') }}</x-error-span>
             </div>
             <div class="md:col-span-1">
-                <x-forms.input-label for="department">{{trans_choice('general.department',1)}}</x-forms.input-label>
+                <x-forms.input-label for="department" required>{{trans_choice('general.department',1)}}</x-forms.input-label>
                 <x-forms.select2-input wire:model="form.department_id" id="department">
                     <option class="text-gray-400" @disabled($form->position !== null) @selected($form->position === null)>Select Any..</option>
                     @foreach($departments as $department)
@@ -61,7 +61,7 @@
                 <x-error-span>{{ $errors->first('form.department_id') }}</x-error-span>
             </div>
             <div class="md:col-span-1">
-                <x-forms.input-label for="job-level">{{trans_choice('general.job-level',1)}}</x-forms.input-label>
+                <x-forms.input-label for="job-level" required>{{trans_choice('general.job-level',1)}}</x-forms.input-label>
                 <x-forms.select2-input wire:model="form.job_level_id" id="job-level">
                     <option class="text-gray-400" @disabled($form->position !== null) @selected($form->position === null)>Select Any..</option>
                     @foreach($jobLevels as $level)
@@ -110,18 +110,18 @@
                 <x-error-span>{{ $errors->first('form.center_id') }}</x-error-span>
             </div>
             <div>
-                <x-forms.input-label for="max_emp">@lang('general.max')</x-forms.input-label>
+                <x-forms.input-label for="max_emp" required>@lang('general.max')</x-forms.input-label>
                 <x-forms.input id="max_emp" type="number" min="0" wire:model.defer="form.max_emp"/>
                 <x-error-span>{{ $errors->first('form.max_emp') }}</x-error-span>
             </div>
 
             <div class="col-span-2">
-                <x-forms.input-label for="responsibilities">@lang('general.responsibilities')</x-forms.input-label>
+                <x-forms.input-label for="responsibilities" required>@lang('general.responsibilities')</x-forms.input-label>
                 <x-forms.textarea id="responsibilities" rows="3" wire:model.defer="form.responsibilities"/>
                 <x-error-span>{{ $errors->first('form.responsibilities') }}</x-error-span>
             </div>
             <div class="col-span-2">
-                <x-forms.input-label for="qualifications">@lang('general.qualifications')</x-forms.input-label>
+                <x-forms.input-label for="qualifications" required>@lang('general.qualifications')</x-forms.input-label>
                 <x-forms.textarea id="qualifications" rows="3" wire:model.defer="form.qualifications"/>
                 <x-error-span>{{ $errors->first('form.qualifications') }}</x-error-span>
             </div>

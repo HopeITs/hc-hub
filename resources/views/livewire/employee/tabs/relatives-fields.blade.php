@@ -14,14 +14,14 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label for="relative_name_{{ $index }}">@lang('general.name')</x-forms.input-label>
+                    <x-forms.input-label for="relative_name_{{ $index }}" required>@lang('general.name')</x-forms.input-label>
                     <x-forms.input id="relative_name_{{ $index }}" type="text"
                         wire:model.defer="relativeForm.relatives.{{ $index }}.name" />
                     <x-error-span>{{ $errors->first("relativeForm.relatives.$index.name") }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="relation_{{ $index }}">@lang('general.relation')</x-forms.input-label>
+                    <x-forms.input-label for="relation_{{ $index }}" required>@lang('general.relation')</x-forms.input-label>
                     <x-forms.select2-input id="relation_{{ $index }}"
                                           wire:model.defer="relativeForm.relatives.{{ $index }}.relation" >
                         @foreach(\App\Enums\KinshipType::getValues() as $key => $value)

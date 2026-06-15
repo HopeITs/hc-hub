@@ -39,7 +39,7 @@
             <div class="grid grid-cols-2 gap-4">
                 @foreach (config('app.supported_locales') as $locale)
                     <div>
-                        <x-forms.input-label for="name_{{ $locale }}">
+                        <x-forms.input-label for="name_{{ $locale }}" required>
                             @lang('general.name') ({{ strtoupper($locale) }})
                         </x-forms.input-label>
                         <x-forms.input type="text" wire:model="item.name_{{ $locale }}"
@@ -49,13 +49,13 @@
                 @endforeach
 
                 <div>
-                    <x-forms.input-label for="base_days">@lang('general.base-days')</x-forms.input-label>
+                    <x-forms.input-label for="base_days" required>@lang('general.base-days')</x-forms.input-label>
                     <x-forms.input type="number" wire:model="item.base_days" id="base_days" />
                     <x-error-span>{{ $errors->first('item.base_days') }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label>@lang('general.allowed-gender')</x-forms.input-label>
+                    <x-forms.input-label required>@lang('general.allowed-gender')</x-forms.input-label>
                     <div class="flex justify-between">
                         <x-forms.radio-input id="any_gender" name="allowed_gender" value="{{ LeaveType::GENDER_ANY }}"
                             wire:model="item.allowed_gender">{{ LeaveType::getGender(LeaveType::GENDER_ANY)['value'] }}</x-forms.radio-input>
@@ -69,7 +69,7 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label>@lang('general.marital_status')</x-forms.input-label>
+                    <x-forms.input-label required>@lang('general.marital_status')</x-forms.input-label>
                     <div class="flex justify-between">
                         <x-forms.radio-input id="any_status" name="marital_status"
                             value="{{ LeaveType::MARITAL_STATUS_ANY }}"

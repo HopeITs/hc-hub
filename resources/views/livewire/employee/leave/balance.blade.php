@@ -53,7 +53,7 @@ use App\Enums\LeaveRequestStatus;
                 </div>
 
                 <div>
-                    <x-forms.input-label>@lang('general.operation')</x-forms.input-label>
+                    <x-forms.input-label required>@lang('general.operation')</x-forms.input-label>
                     <div class="flex gap-x-4">
                         <x-forms.radio-input id="op_sum" name="operation" value="sum"
                                              wire:model="form.operation">{{__('general.sum')}}</x-forms.radio-input>
@@ -65,7 +65,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-error-span>{{ $errors->first('form.operation') }}</x-error-span>
                 </div>
                 <div>
-                    <x-forms.input-label>@lang('general.unit')</x-forms.input-label>
+                    <x-forms.input-label required>@lang('general.unit')</x-forms.input-label>
                     <div class="flex gap-x-4">
                         <x-forms.radio-input id="unit_hour" name="unit" value="hour"
                                              wire:model="form.unit">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
@@ -77,7 +77,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-error-span>{{ $errors->first('form.unit') }}</x-error-span>
                 </div>
                 <div>
-                    <x-forms.input-label for="amount">@lang('general.amount')</x-forms.input-label>
+                    <x-forms.input-label for="amount" required>@lang('general.amount')</x-forms.input-label>
                     <x-forms.input id="amount" wire:model="form.amount" type="numeric"/>
                     <x-error-span>{{ $errors->first('form.amount') }}</x-error-span>
                 </div>

@@ -16,11 +16,11 @@
         <div class="space-y-6">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                    <x-forms.input-label class="text-red-600 dark:text-red-400">@lang('general.employee')</x-forms.input-label>
+                    <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.employee')</x-forms.input-label>
                     <div class="font-medium text-gray-900 dark:text-gray-100">{{ $badge['employee'] ?? '—' }}</div>
                 </div>
                 <div>
-                    <x-forms.input-label class="text-red-600 dark:text-red-400">@lang('general.type')</x-forms.input-label>
+                    <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.type')</x-forms.input-label>
                     <div class="inline-flex items-center gap-2">
                         <span class="rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ring-gray-300 dark:ring-gray-600">
                             {{ $badge['type'] ?? '—' }}
@@ -28,21 +28,21 @@
                     </div>
                 </div>
                 <div>
-                    <x-forms.input-label class="text-red-600 dark:text-red-400">@lang('general.date')</x-forms.input-label>
+                    <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.date')</x-forms.input-label>
                     <div>{{ $badge['date'] ?? '—' }}</div>
                 </div>
                 <div>
-                    <x-forms.input-label class="text-red-600 dark:text-red-400">{{ trans_choice('general.program', 1) }}</x-forms.input-label>
+                    <x-forms.input-label required class="text-red-600 dark:text-red-400">{{ trans_choice('general.program', 1) }}</x-forms.input-label>
                     <div>{{ $badge['program'] ?? '—' }}</div>
                 </div>
                 <div>
-                    <x-forms.input-label class="text-red-600 dark:text-red-400">{{ trans_choice('general.department', 1) }}</x-forms.input-label>
+                    <x-forms.input-label required class="text-red-600 dark:text-red-400">{{ trans_choice('general.department', 1) }}</x-forms.input-label>
                     <div>{{ $badge['department'] ?? '—' }}</div>
                 </div>
             </div>
 
             <div>
-                <x-forms.input-label class="text-red-600 dark:text-red-400">@lang('general.reason')</x-forms.input-label>
+                <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.reason')</x-forms.input-label>
                 <div class="whitespace-pre-line rounded-md border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900/30">
                     {{ $badge['reason'] ?? '—' }}
                 </div>
@@ -51,11 +51,11 @@
             @if(!empty($badge['is_salary']))
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div>
-                        <x-forms.input-label class="text-red-600 dark:text-red-400">@lang('general.currency')</x-forms.input-label>
+                        <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.currency')</x-forms.input-label>
                         <div>{{ $badge['currency'] ?? '—' }}</div>
                     </div>
                     <div>
-                        <x-forms.input-label class="text-red-600 dark:text-red-400">@lang('general.current_salary')</x-forms.input-label>
+                        <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.current_salary')</x-forms.input-label>
                         <div>
                             @if(!empty($badge['current_salary']))
                                 {{ number_format((float)$badge['current_salary'], 2) }} {{ $badge['currency'] ?? '' }}
@@ -65,7 +65,7 @@
                         </div>
                     </div>
                     <div>
-                        <x-forms.input-label class="text-red-600 dark:text-red-400">@lang('general.new-salary')</x-forms.input-label>
+                        <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.new-salary')</x-forms.input-label>
                         <div>
                             @if(!empty($badge['new_salary']))
                                 {{ number_format((float)$badge['new_salary'], 2) }} {{ $badge['currency'] ?? '' }}
@@ -78,7 +78,7 @@
             @endif
 
             <div>
-                <x-forms.input-label class="text-red-600 dark:text-red-400">@lang('general.notes')</x-forms.input-label>
+                <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.notes')</x-forms.input-label>
                 <div class="whitespace-pre-line rounded-md border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900/30">
                     {{ $badge['notes'] ?? '—' }}
                 </div>

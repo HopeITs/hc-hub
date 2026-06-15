@@ -3,14 +3,14 @@
 
     {{-- Start date --}}
     <div>
-        <x-forms.input-label for="start_date">@lang('general.start-date')</x-forms.input-label>
+        <x-forms.input-label for="start_date" required>@lang('general.start-date')</x-forms.input-label>
         <x-forms.date-input id="start_date" wire:model.defer="form.start_date"/>
         <x-error-span>{{ $errors->first('form.start_date') }}</x-error-span>
     </div>
 
     {{-- End date --}}
     <div>
-        <x-forms.input-label for="end_date">@lang('general.end-date')</x-forms.input-label>
+        <x-forms.input-label for="end_date" required>@lang('general.end-date')</x-forms.input-label>
         <x-forms.date-input id="end_date" wire:model.defer="form.end_date"/>
         <x-error-span>{{ $errors->first('form.end_date') }}</x-error-span>
     </div>
@@ -33,7 +33,7 @@
 
     {{-- Weekly hours --}}
     <div>
-        <x-forms.input-label for="weekly_hours">@lang('general.weekly-hours')</x-forms.input-label>
+        <x-forms.input-label for="weekly_hours" required>@lang('general.weekly-hours')</x-forms.input-label>
         <div class="relative mt-1">
             <x-forms.input
                 id="weekly_hours"

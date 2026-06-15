@@ -46,12 +46,12 @@
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-1">
-                    <x-forms.input-label for="name_ar">@lang('general.name') (AR)</x-forms.input-label>
+                    <x-forms.input-label for="name_ar" required>@lang('general.name') (AR)</x-forms.input-label>
                     <x-forms.input type="text" id="name_ar" wire:model.defer="item.name_ar"/>
                     <x-error-span>{{ $errors->first('item.name_ar') }}</x-error-span>
                 </div>
                 <div class="col-span-1">
-                    <x-forms.input-label for="name_en">@lang('general.name') (EN)</x-forms.input-label>
+                    <x-forms.input-label for="name_en" required>@lang('general.name') (EN)</x-forms.input-label>
                     <x-forms.input type="text" id="name_en" wire:model.defer="item.name_en"/>
                     <x-error-span>{{ $errors->first('item.name_en') }}</x-error-span>
                 </div>

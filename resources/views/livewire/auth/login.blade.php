@@ -17,7 +17,7 @@
             <form wire:submit.prevent="login" class="space-y-5">
 
                 <div>
-                    <x-forms.input-label for="email" :value="__('auth.email-address')" />
+                    <x-forms.input-label for="email" required :value="__('auth.email-address')" />
                     <x-forms.input
                         id="email"
                         type="email"
@@ -30,7 +30,7 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label for="password" :value="__('auth.password')" />
+                    <x-forms.input-label for="password" required :value="__('auth.password')" />
                     <x-forms.password-input
                         id="password"
                         model="password"

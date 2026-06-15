@@ -23,7 +23,7 @@
             <form wire:submit.prevent="sendPasswordResetLink" class="space-y-5">
                 {{-- Email --}}
                 <div>
-                    <x-forms.input-label for="email" :value="__('auth.email-address')" />
+                    <x-forms.input-label for="email" required :value="__('auth.email-address')" />
                     <x-forms.input
                         id="email"
                         type="email"

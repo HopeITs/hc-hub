@@ -57,7 +57,7 @@
             <div class="grid grid-cols-2 space-x-2 space-y-4">
                 @foreach (config('app.supported_locales') as $locale)
                     <div class="col-span-1">
-                        <x-forms.input-label for="name_{{ $locale }}">
+                        <x-forms.input-label for="name_{{ $locale }}" required>
                             @lang('general.name')({{ strtoupper($locale) }})
                         </x-forms.input-label>
                         <x-forms.input type="text" id="name_{{ $locale }}"
@@ -67,7 +67,7 @@
                 @endforeach
 
                 <div>
-                    <x-forms.input-label for="type">@lang('general.type')</x-forms.input-label>
+                    <x-forms.input-label for="type" required>@lang('general.type')</x-forms.input-label>
                     <div class="flex space-x-2">
                         <x-forms.radio-input id="full" name="type" value="{{ ContractType::FullTime }}"
                             wire:model="item.type">
@@ -88,7 +88,7 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label for="place">@lang('general.place')</x-forms.input-label>
+                    <x-forms.input-label for="place" required>@lang('general.place')</x-forms.input-label>
                     <div class="flex space-x-2">
                         <x-forms.radio-input id="onsite" name="place" value="{{ ContractPlace::Onsite }}"
                             wire:model="item.place">

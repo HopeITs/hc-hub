@@ -95,7 +95,7 @@ use App\Enums\LeaveRequestStatus;
                 <div class="grid md:grid-cols-2 gap-4">
 
                     <div class="md:col-span-1" wire:key="container-leave-type-{{ $form->leave_balance_id ?? 'new' }}">
-                        <x-forms.input-label for="leave_balance_id">{{__('general.type')}}</x-forms.input-label>
+                        <x-forms.input-label for="leave_balance_id" required>{{__('general.type')}}</x-forms.input-label>
                         <x-forms.select2-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
                             @if($allAvailableLeaves?->count() > 0)
                                 <option
@@ -146,12 +146,12 @@ use App\Enums\LeaveRequestStatus;
                     @if($form->leave_balance_id === null || optional($availableLeaves->find($form->leave_balance_id))->leaveType->id !== LeaveTypeCases::Annual)
 
                         <div>
-                            <x-forms.input-label for="start_at">{{__('general.start-date')}}</x-forms.input-label>
+                            <x-forms.input-label for="start_at" required>{{__('general.start-date')}}</x-forms.input-label>
                             <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
                             <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
                         </div>
                         <div>
-                            <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>
+                            <x-forms.input-label for="end_at" required>{{__('general.end-date')}}</x-forms.input-label>
                             <x-forms.date-input id="end_at" wire:model="form.end_at" label="End Date"/>
                             <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
                         </div>
@@ -162,12 +162,12 @@ use App\Enums\LeaveRequestStatus;
                             <div class="col-span-full grid md:grid-cols-2 gap-4">
                                 <div>
                                     <x-forms.input-label
-                                        for="start_at">{{__('general.start-date')}}</x-forms.input-label>
+                                        for="start_at" required>{{__('general.start-date')}}</x-forms.input-label>
                                     <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
                                     <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
                                 </div>
                                 <div>
-                                    <x-forms.input-label for="end_at">{{__('general.end-date')}}</x-forms.input-label>
+                                    <x-forms.input-label for="end_at" required>{{__('general.end-date')}}</x-forms.input-label>
                                     <x-forms.date-input id="end_at" wire:model="form.end_at" label="End Date"/>
                                     <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
                                 </div>
@@ -175,13 +175,13 @@ use App\Enums\LeaveRequestStatus;
                         @elseif($form->type === 'hour')
 
                             <div>
-                                <x-forms.input-label for="leave_date">{{__('general.leave-date')}}</x-forms.input-label>
+                                <x-forms.input-label for="leave_date" required>{{__('general.leave-date')}}</x-forms.input-label>
                                 <x-forms.date-input id="leave_date" wire:model.live="form.leave_date" label="Leave Date"/>
                                 <x-error-span>{{ $errors->first('form.leave_date') }}</x-error-span>
                             </div>
 
                             <div>
-                                <x-forms.input-label for="start_time">{{__('general.start-time')}}(24)
+                                <x-forms.input-label for="start_time" required>{{__('general.start-time')}}(24)
                                 </x-forms.input-label>
                                 <x-forms.date-input id="start_time" type="time" min="09:00" max="21:00"
                                                     wire:model.live="form.start_hour"
@@ -189,7 +189,7 @@ use App\Enums\LeaveRequestStatus;
                                 <x-error-span>{{ $errors->first('form.start_hour') }}</x-error-span>
                             </div>
                             <div>
-                                <x-forms.input-label for="end_time">{{__('general.end-time')}}(24)</x-forms.input-label>
+                                <x-forms.input-label for="end_time" required>{{__('general.end-time')}}(24)</x-forms.input-label>
                                 <x-forms.date-input type="time" id="end_time" min="09:00" max="21:00"
                                                     wire:model.live="form.end_hour"
                                                     label="End Time"/>
@@ -200,7 +200,7 @@ use App\Enums\LeaveRequestStatus;
 
                     @endif
                     <div class="col-span-full">
-                        <x-forms.input-label for="reason">{{__('general.reason')}}</x-forms.input-label>
+                        <x-forms.input-label for="reason" required>{{__('general.reason')}}</x-forms.input-label>
                         <x-forms.input id="reason" wire:model="form.reason" required/>
                         <x-error-span>{{ $errors->first('form.reason') }}</x-error-span>
                     </div>

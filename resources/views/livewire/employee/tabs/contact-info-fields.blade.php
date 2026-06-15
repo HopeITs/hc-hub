@@ -6,7 +6,7 @@
         <x-heading-label>@lang('general.employment_info')</x-heading-label>
 
         <div>
-            <x-forms.input-label for="username">@lang('general.username')</x-forms.input-label>
+            <x-forms.input-label for="username" required>@lang('general.username')</x-forms.input-label>
             <div class="flex rtl:flex-row-reverse">
                 <x-forms.input type="text" wire:model="infoForm.username" id="username"
                     @class(['rounded-r-none' => data_get($infoForm, 'create_account')])

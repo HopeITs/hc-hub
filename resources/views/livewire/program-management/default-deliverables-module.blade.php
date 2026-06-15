@@ -24,7 +24,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2 md:col-span-1">
                     <x-forms.input-label
-                        for="employee_id">{{ trans_choice('general.employee', 1) }}</x-forms.input-label>
+                        for="employee_id" required>{{ trans_choice('general.employee', 1) }}</x-forms.input-label>
                     <x-forms.select2-input id="employee_id" wire:model="item.employee_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach ($employees as $id => $name)
@@ -35,7 +35,7 @@
                 </div>
 
                 <div class="col-span-2 md:col-span-1">
-                    <x-forms.input-label for="city_id">{{ trans_choice('general.city', 1) }}</x-forms.input-label>
+                    <x-forms.input-label for="city_id" required>{{ trans_choice('general.city', 1) }}</x-forms.input-label>
                     <x-forms.select2-input id="city_id" wire:model="item.city_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach ($cities as $city)
@@ -48,7 +48,7 @@
                 </div>
 
                 <div class="col-span-2">
-                    <x-forms.input-label for="item_id">@lang('general.item')</x-forms.input-label>
+                    <x-forms.input-label for="item_id" required>@lang('general.item')</x-forms.input-label>
                     <x-forms.select2-input id="item_id" wire:model="item.item_id">
                         <option value="">{{ __('general.select') }}</option>
                         @foreach ($checklistItems as $ci)

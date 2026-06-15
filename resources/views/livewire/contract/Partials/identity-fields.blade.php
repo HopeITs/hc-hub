@@ -34,7 +34,7 @@
         <x-error-span>{{ $errors->first('program_id') }}</x-error-span>
     </div>
     <div class="md:col-span-6" wire:key="employee-for-city-{{ $city_id }}">
-        <x-forms.input-label for="employee_id">{{ trans_choice('general.employee', 2) }}</x-forms.input-label>
+        <x-forms.input-label for="employee_id" required>{{ trans_choice('general.employee', 2) }}</x-forms.input-label>
         <x-forms.select2-input wire:model.live="form.employee_id" id="employee_id">
             <option value="">{{ __('general.select') }}</option>
 
@@ -59,7 +59,7 @@
     </div>
 
     <div class="md:col-span-6" wire:key="pos-for-city-{{ $city_id }}-prog-{{ $program_id }}">
-        <x-forms.input-label for="position_id">
+        <x-forms.input-label for="position_id" required>
             {{ trans_choice('general.positions', 1) }}
         </x-forms.input-label>
 
@@ -79,7 +79,7 @@
 
     <div class="md:col-span-6">
         <x-forms.input-label
-            for="contract_type_id">{{ trans_choice('general.contract-type', 1) }}</x-forms.input-label>
+            for="contract_type_id" required>{{ trans_choice('general.contract-type', 1) }}</x-forms.input-label>
         <x-forms.select2-input id="contract_type_id" wire:model.live="form.contract_type_id">
             <option value="">{{ __('general.select') }}</option>
             @foreach ($types as $t)

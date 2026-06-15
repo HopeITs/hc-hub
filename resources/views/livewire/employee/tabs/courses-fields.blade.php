@@ -35,7 +35,7 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label for="course_category_{{ $index }}">@lang('general.category')</x-forms.input-label>
+                    <x-forms.input-label for="course_category_{{ $index }}" required>@lang('general.category')</x-forms.input-label>
                     <x-forms.select2-input id="course_category_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.category_id">
                         <option value="">-- @lang('general.select') --</option>
                         @foreach ($courseCategories as $id => $label)
@@ -46,13 +46,13 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label for="course_title_{{ $index }}">@lang('general.title')</x-forms.input-label>
+                    <x-forms.input-label for="course_title_{{ $index }}" required>@lang('general.title')</x-forms.input-label>
                     <x-forms.input id="course_title_{{ $index }}" type="text" wire:model.defer="courseForm.courses.{{ $index }}.title" />
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.title") }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="course_org_{{ $index }}">@lang('general.organization')</x-forms.input-label>
+                    <x-forms.input-label for="course_org_{{ $index }}" required>@lang('general.organization')</x-forms.input-label>
                     <x-forms.select2-input id="course_org_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.organization">
                         <option value="">-- @lang('general.select') --</option>
                         @foreach ($organizationOptions as $value => $label)
@@ -80,7 +80,7 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label for="course_end_date_{{ $index }}">@lang('general.end_date')</x-forms.input-label>
+                    <x-forms.input-label for="course_end_date_{{ $index }}" required>@lang('general.end_date')</x-forms.input-label>
                     <x-forms.input id="course_end_date_{{ $index }}" type="date" wire:model.defer="courseForm.courses.{{ $index }}.end_date" />
                     <x-error-span>{{ $errors->first("courseForm.courses.$index.end_date") }}</x-error-span>
                 </div>
@@ -94,7 +94,7 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label for="course_status_{{ $index }}">@lang('general.status')</x-forms.input-label>
+                    <x-forms.input-label for="course_status_{{ $index }}" required>@lang('general.status')</x-forms.input-label>
                     <x-forms.select2-input id="course_status_{{ $index }}" wire:model.defer="courseForm.courses.{{ $index }}.status">
                         <option value="">-- @lang('general.select') --</option>
                         @foreach ($statusOptions as $value => $label)

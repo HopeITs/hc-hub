@@ -20,13 +20,13 @@
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-1 gap-4">
                 <div>
-                    <x-forms.input-label for="title_en">@lang('general.title')(EN)</x-forms.input-label>
+                    <x-forms.input-label for="title_en" required>@lang('general.title')(EN)</x-forms.input-label>
                     <x-forms.input type="text" wire:model="item.title_en" id="title_en" />
                     <x-error-span>{{ $errors->first('item.title_en') }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="title_ar">@lang('general.title')(AR)</x-forms.input-label>
+                    <x-forms.input-label for="title_ar" required>@lang('general.title')(AR)</x-forms.input-label>
                     <x-forms.input type="text" wire:model="item.title_ar" id="title_ar" />
                     <x-error-span>{{ $errors->first('item.title_ar') }}</x-error-span>
                 </div>

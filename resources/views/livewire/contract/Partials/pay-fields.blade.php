@@ -6,7 +6,7 @@
     <div class="col-span-7 grid grid-cols-9">
 
         <div class="col-span-7 flex flex-col">
-            <x-forms.input-label for="salary">@lang('general.salary')</x-forms.input-label>
+            <x-forms.input-label for="salary" required>@lang('general.salary')</x-forms.input-label>
             <x-forms.input id="salary"
                            type="number"
                            step="0.01"
@@ -38,7 +38,7 @@
 
     {{-- Salary per --}}
     <div class="col-span-5">
-        <x-forms.input-label for="salary_per">@lang('general.salary-per')</x-forms.input-label>
+        <x-forms.input-label for="salary_per" required>@lang('general.salary-per')</x-forms.input-label>
 
         <div class="mt-1 grid grid-cols-3 gap-2" role="radiogroup" aria-labelledby="salary_per">
             {{-- Month --}}

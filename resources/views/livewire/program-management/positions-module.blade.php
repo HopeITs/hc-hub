@@ -111,13 +111,13 @@
                 </div>
 
                 <div class="col-span-2">
-                    <x-forms.input-label for="responsibilities">@lang('general.responsibilities')</x-forms.input-label>
+                    <x-forms.input-label for="responsibilities" required>@lang('general.responsibilities')</x-forms.input-label>
                     <x-forms.textarea id="responsibilities" rows="3" wire:model.defer="item.responsibilities" />
                     <x-error-span>{{ $errors->first('item.responsibilities') }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="max_emp">@lang('general.max')</x-forms.input-label>
+                    <x-forms.input-label for="max_emp" required>@lang('general.max')</x-forms.input-label>
                     <x-forms.input id="max_emp" type="number" min="0" wire:model.defer="item.max_emp" />
                     <x-error-span>{{ $errors->first('item.max_emp') }}</x-error-span>
                 </div>

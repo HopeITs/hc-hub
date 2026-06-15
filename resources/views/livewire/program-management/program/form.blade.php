@@ -22,19 +22,19 @@
             </div>
 
             <div>
-                <x-forms.input-label for="code">@lang('general.code')</x-forms.input-label>
+                <x-forms.input-label for="code" required>@lang('general.code')</x-forms.input-label>
                 <x-forms.input type="text" id="code" wire:model.defer="form.code" />
                 <x-error-span>{{ $errors->first('form.code') }}</x-error-span>
             </div>
 
             <div>
-                <x-forms.input-label for="slug">@lang('general.slug')</x-forms.input-label>
+                <x-forms.input-label for="slug" required>@lang('general.slug')</x-forms.input-label>
                 <x-forms.input type="text" id="slug" wire:model.defer="form.slug" />
                 <x-error-span>{{ $errors->first('form.slug') }}</x-error-span>
             </div>
 
             <div class="col-span-2">
-                <x-forms.input-label for="name">@lang('general.name')</x-forms.input-label>
+                <x-forms.input-label for="name" required>@lang('general.name')</x-forms.input-label>
                 <x-forms.input type="text" id="name" wire:model.defer="form.name" />
                 <x-error-span>{{ $errors->first('form.name') }}</x-error-span>
             </div>
@@ -56,7 +56,7 @@
             @endforeach
 
             <div>
-                <x-forms.input-label for="start_date">@lang('general.start-date')</x-forms.input-label>
+                <x-forms.input-label for="start_date" required>@lang('general.start-date')</x-forms.input-label>
                 <x-forms.date-input id="start_date" wire:model.defer="form.start_date" />
                 <x-error-span>{{ $errors->first('form.start_date') }}</x-error-span>
             </div>

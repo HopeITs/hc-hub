@@ -46,13 +46,13 @@
         <form class="space-y-4" wire:submit.prevent="save">
             <div class="grid grid-cols-1 space-x-2 space-y-4">
                 <div class="col-span-1">
-                    <x-forms.input-label for="name">@lang('general.name')</x-forms.input-label>
+                    <x-forms.input-label for="name" required>@lang('general.name')</x-forms.input-label>
                     <x-forms.input type="text" id="name" wire:model="item.name" />
                     <x-error-span>{{ $errors->first('item.name') }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="order">@lang('general.order')</x-forms.input-label>
+                    <x-forms.input-label for="order" required>@lang('general.order')</x-forms.input-label>
                     <x-forms.select2-input id="order" wire:model="item.order">
                         <option value="">{{ __('general.select') }}</option>
                         <option value="{{ ChecklistItemOrder::ProbationContract }}">

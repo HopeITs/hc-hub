@@ -45,14 +45,14 @@
             <div class="grid grid-cols-2 space-x-2 space-y-4">
                 {{-- Name Input  --}}
                 <div class="col-span-1">
-                    <x-forms.input-label for="name">
+                    <x-forms.input-label for="name" required>
                         @lang('general.department-name')
                     </x-forms.input-label>
                     <x-forms.input type="text" id="name" wire:model="item.name" />
                     <x-error-span>{{ $errors->first('item.name') }}</x-error-span>
                 </div>
                 <div class="col-span-1">
-                    <x-forms.input-label for="code">
+                    <x-forms.input-label for="code" required>
                         @lang('general.code')
                     </x-forms.input-label>
                     <x-forms.input type="text" id="code" wire:model="item.code" />

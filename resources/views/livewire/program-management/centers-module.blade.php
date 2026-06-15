@@ -23,13 +23,13 @@
         <form wire:submit.prevent="save" class="grid grid-cols-2 gap-4">
 
             <div class="md:col-span-full">
-                <x-forms.input-label for="name">@lang('general.center-name')</x-forms.input-label>
+                <x-forms.input-label for="name" required>@lang('general.center-name')</x-forms.input-label>
                 <x-forms.input id="name" type="text" wire:model.defer="item.name" />
                 <x-error-span>{{ $errors->first('item.name') }}</x-error-span>
             </div>
 
             <div class="md:col-span-full">
-                <x-forms.input-label for="city_id">{{ trans_choice('general.city', 1) }}</x-forms.input-label>
+                <x-forms.input-label for="city_id" required>{{ trans_choice('general.city', 1) }}</x-forms.input-label>
                 <x-forms.select2-input id="city_id" wire:model="item.city_id">
                     <option value="">{{ __('general.select') }}</option>
                     @foreach ($cities as $city)
@@ -51,19 +51,19 @@
             @endforeach
 
             <div class="md:col-span-1">
-                <x-forms.input-label for="open_at">@lang('general.open-at')</x-forms.input-label>
+                <x-forms.input-label for="open_at" required>@lang('general.open-at')</x-forms.input-label>
                 <x-forms.time-picker id="open_at" wire-model="item.open_at" format="HH:mm" />
                 <x-error-span>{{ $errors->first('item.open_at') }}</x-error-span>
             </div>
 
             <div class="md:col-span-1">
-                <x-forms.input-label for="close_at">@lang('general.close-at')</x-forms.input-label>
+                <x-forms.input-label for="close_at" required>@lang('general.close-at')</x-forms.input-label>
                 <x-forms.time-picker id="close_at" wire-model="item.close_at" format="HH:mm" />
                 <x-error-span>{{ $errors->first('item.close_at') }}</x-error-span>
             </div>
 
             <div class="md:col-span-full">
-                <x-forms.input-label for="weekends">
+                <x-forms.input-label for="weekends" required>
                     @lang('general.weekend-days')
                 </x-forms.input-label>
                 <div class="flex gap-x-4">

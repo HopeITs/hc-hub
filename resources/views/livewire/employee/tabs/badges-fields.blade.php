@@ -13,7 +13,7 @@
                     </x-primary-button>
                 </div>
                 <div>
-                    <x-forms.input-label for="badge_type_{{ $index }}">@lang('general.type')</x-forms.input-label>
+                    <x-forms.input-label for="badge_type_{{ $index }}" required>@lang('general.type')</x-forms.input-label>
                     <x-forms.select2-input id="badge_type_{{ $index }}"
                                           wire:model.live="badgeForm.badges.{{ $index }}.type">
                         @foreach(\App\Enums\BadgeType::getValues() as $key => $value)
@@ -25,7 +25,7 @@
                 </div>
 
                     <div>
-                        <x-forms.input-label for="badge_date_{{ $index }}">@lang('general.date')</x-forms.input-label>
+                        <x-forms.input-label for="badge_date_{{ $index }}" required>@lang('general.date')</x-forms.input-label>
                         <x-forms.date-input id="badge_date_{{ $index }}"
                                             wire:model.defer="badgeForm.badges.{{ $index }}.date"/>
                         <x-error-span>{{ $errors->first("badgeForm.badges.$index.date") }}</x-error-span>

@@ -17,7 +17,7 @@
         <div class="grid md:grid-cols-4 col-span-full gap-x-6 gap-y-3">
             @foreach (config('app.supported_locales') as $locale)
                 <div wire:key="emp-name-{{ $locale }}">
-                    <x-forms.input-label for="first_name{{ $locale }}">@lang('general.first_name') ({{ strtoupper($locale) }})
+                    <x-forms.input-label for="first_name{{ $locale }}" required>@lang('general.first_name') ({{ strtoupper($locale) }})
                     </x-forms.input-label>
                     <x-forms.input type="text" wire:model="infoForm.first_name_{{ $locale }}"
                         id="name_{{ $locale }}" />
@@ -25,7 +25,7 @@
                 </div>
 
                 <div wire:key="emp-name-{{ $locale }}">
-                    <x-forms.input-label for="last_name_{{ $locale }}">@lang('general.last_name') ({{ strtoupper($locale) }})
+                    <x-forms.input-label for="last_name_{{ $locale }}" required>@lang('general.last_name') ({{ strtoupper($locale) }})
                     </x-forms.input-label>
                     <x-forms.input type="text" wire:model="infoForm.last_name_{{ $locale }}"
                         id="name_{{ $locale }}" />
@@ -42,7 +42,7 @@
                 <x-error-span>{{ $errors->first('infoForm.actual_dob') }}</x-error-span>
             </div>
             <div wire:key="emp-actual-dob">
-                <x-forms.input-label for="city_id">{{ trans_choice('general.city', 1) }}</x-forms.input-label>
+                <x-forms.input-label for="city_id" required>{{ trans_choice('general.city', 1) }}</x-forms.input-label>
                 <x-forms.select2-input wire:model="infoForm.city_id" id="city_id">
                     <option value="">{{ __('general.unknown') }}</option>
                     @foreach ($cities as $cityId => $city)
@@ -54,7 +54,7 @@
         </div>
 
         <div wire:key="emp-gender">
-            <x-forms.input-label for="gender">@lang('general.gender')</x-forms.input-label>
+            <x-forms.input-label for="gender" required>@lang('general.gender')</x-forms.input-label>
             <div class="flex mt-2 space-x-4">
                 <x-forms.radio-input name="gender" value="1"
                     wire:model="infoForm.gender">@lang('general.male')</x-forms.radio-input>
@@ -65,7 +65,7 @@
         </div>
 
         <div wire:key="emp-marital_status">
-            <x-forms.input-label for="marital_status">@lang('general.marital_status')</x-forms.input-label>
+            <x-forms.input-label for="marital_status" required>@lang('general.marital_status')</x-forms.input-label>
             <x-forms.select2-input wire:model="infoForm.marital_status" id="marital_status">
                 @foreach (MaritalStatus::getValues() as $statusValue)
                     @php $status = MaritalStatus::getLocalizedName($statusValue); @endphp
@@ -97,7 +97,7 @@
 <div class="md:grid md:grid-cols-2 gap-x-6 gap-y-3">
         @foreach (config('app.supported_locales') as $locale)
             <div wire:key="emp-father-{{ $locale }}">
-                <x-forms.input-label for="father_name_{{ $locale }}">@lang('general.father_name')
+                <x-forms.input-label for="father_name_{{ $locale }}" required>@lang('general.father_name')
                     ({{ strtoupper($locale) }})
                 </x-forms.input-label>
                 <x-forms.input type="text" wire:model="infoForm.father_name_{{ $locale }}"
@@ -109,7 +109,7 @@
 <div class="md:grid md:grid-cols-2 gap-x-6 gap-y-3">
         @foreach (config('app.supported_locales') as $locale)
             <div wire:key="emp-mother-{{ $locale }}">
-                <x-forms.input-label for="mother_name_{{ $locale }}">@lang('general.mother_name')
+                <x-forms.input-label for="mother_name_{{ $locale }}" required>@lang('general.mother_name')
                     ({{ strtoupper($locale) }})
                 </x-forms.input-label>
                 <x-forms.input type="text" wire:model="infoForm.mother_name_{{ $locale }}"
@@ -136,7 +136,7 @@
         </div>
 
         <div wire:key="emp-national-number">
-            <x-forms.input-label for="national_number">@lang('general.national_number')</x-forms.input-label>
+            <x-forms.input-label for="national_number" required>@lang('general.national_number')</x-forms.input-label>
             <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number" />
             <x-error-span>{{ $errors->first('infoForm.national_number') }}</x-error-span>
         </div>

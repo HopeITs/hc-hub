@@ -40,12 +40,12 @@
         <form wire:submit.prevent="save" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <x-forms.input-label for="name_en">{{ __('Name (EN)') }}</x-forms.input-label>
+                    <x-forms.input-label for="name_en" required>{{ __('Name (EN)') }}</x-forms.input-label>
                     <x-forms.input type="text" wire:model="item.name_en" id="name_en" />
                     <x-error-span>{{ $errors->first('item.name_en') }}</x-error-span>
                 </div>
                 <div>
-                    <x-forms.input-label for="name_ar">{{ __('Name (AR)') }}</x-forms.input-label>
+                    <x-forms.input-label for="name_ar" required>{{ __('Name (AR)') }}</x-forms.input-label>
                     <x-forms.input type="text" wire:model="item.name_ar" id="name_ar" />
                     <x-error-span>{{ $errors->first('item.name_ar') }}</x-error-span>
                 </div>

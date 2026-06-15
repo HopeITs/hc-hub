@@ -13,21 +13,21 @@
                 </div>
 
                 <div>
-                    <x-forms.input-label for="job_title_{{ $index }}">@lang('general.job_title')</x-forms.input-label>
+                    <x-forms.input-label for="job_title_{{ $index }}" required>@lang('general.job_title')</x-forms.input-label>
                     <x-forms.input id="job_title_{{ $index }}" type="text"
                         wire:model.defer="experienceForm.experiences.{{ $index }}.job_title" />
                     <x-error-span>{{ $errors->first("experienceForm.experiences.$index.job_title") }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="company_{{ $index }}">@lang('general.company')</x-forms.input-label>
+                    <x-forms.input-label for="company_{{ $index }}" required>@lang('general.company')</x-forms.input-label>
                     <x-forms.input id="company_{{ $index }}" type="text"
                         wire:model.defer="experienceForm.experiences.{{ $index }}.company" />
                     <x-error-span>{{ $errors->first("experienceForm.experiences.$index.company") }}</x-error-span>
                 </div>
 
                 <div>
-                    <x-forms.input-label for="start_date_{{ $index }}">@lang('general.start_date')</x-forms.input-label>
+                    <x-forms.input-label for="start_date_{{ $index }}" required>@lang('general.start_date')</x-forms.input-label>
                     <x-forms.date-input id="start_date_{{ $index }}"
                         wire:model.defer="experienceForm.experiences.{{ $index }}.start_date" />
                     <x-error-span>{{ $errors->first("experienceForm.experiences.$index.start_date") }}</x-error-span>

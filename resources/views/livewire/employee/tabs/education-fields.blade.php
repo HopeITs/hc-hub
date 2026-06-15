@@ -20,7 +20,7 @@
 
                 <div>
                     <x-forms.input-label
-                        for="education_field_{{ $index }}">@lang('general.field-of-study')</x-forms.input-label>
+                        for="education_field_{{ $index }}" required>@lang('general.field-of-study')</x-forms.input-label>
                     <x-forms.select2-input id="education_field_{{ $index }}"
                         wire:model.defer="educationForm.educations.{{ $index }}.name">
                         <option value="">-- @lang('general.select') --</option>
@@ -41,7 +41,7 @@
 
                 <div>
                     <x-forms.input-label
-                        for="education_degree_{{ $index }}">@lang('general.degree')</x-forms.input-label>
+                        for="education_degree_{{ $index }}" required>@lang('general.degree')</x-forms.input-label>
                     <x-forms.select2-input id="education_degree_{{ $index }}"
                         wire:model.defer="educationForm.educations.{{ $index }}.degree">
                         <option value="">-- @lang('general.select') --</option>
@@ -54,7 +54,7 @@
 
                 <div>
                     <x-forms.input-label
-                        for="education_status_{{ $index }}">@lang('general.status')</x-forms.input-label>
+                        for="education_status_{{ $index }}" required>@lang('general.status')</x-forms.input-label>
                     <x-forms.select2-input id="education_status_{{ $index }}"
                         wire:model.defer="educationForm.educations.{{ $index }}.status">
                         @foreach (EducationStatus::getValues() as $value)

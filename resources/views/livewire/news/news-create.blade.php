@@ -6,13 +6,13 @@
     <form wire:submit.prevent="save" class="grid grid-cols-2 gap-4">
 
         <div class="col-span-2">
-            <x-forms.input-label for="title">@lang('general.title')</x-forms.input-label>
+            <x-forms.input-label for="title" required>@lang('general.title')</x-forms.input-label>
             <x-forms.input id="title" type="text" wire:model.live="item.title" />
             <x-error-span>{{ $errors->first('item.title') }}</x-error-span>
         </div>
 
         <div class="col-span-2">
-            <x-forms.input-label for="description">@lang('general.description')</x-forms.input-label>
+            <x-forms.input-label for="description" required>@lang('general.description')</x-forms.input-label>
             <x-forms.textarea id="description" wire:model.live="item.description" />
             <x-error-span>{{ $errors->first('item.description') }}</x-error-span>
         </div>
