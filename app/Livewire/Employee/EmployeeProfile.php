@@ -33,8 +33,6 @@ class EmployeeProfile extends Component
         $isHr = $user->activeRoleIs('HR', 'super-admin');
         $isManagement = $user->activeRoleIs('general-manager');
 
-        abort_unless($this->isSelf || $isHr || $isManagement, 403);
-
         $this->canViewPrivate = $this->isSelf || $isHr;
         $this->canViewFinancial = $isHr;
         $this->canEdit = $isHr || $isManagement;
