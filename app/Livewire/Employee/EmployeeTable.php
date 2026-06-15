@@ -147,11 +147,15 @@ class EmployeeTable extends LivewireTable
                         '" wire-event="confirmToggleItemStatus" />'
                 );
 
-                $viewBtn = Blade::render(
-                    '<a  href="' . route('employees.show', ['employee' => $model->username]) . '" class="p-2 " title="View Profile">
+                // Profile route is keyed by username; imported employees may
+                // not have one yet, so only link when it exists.
+                $viewBtn = $model->username
+                    ? Blade::render(
+                        '<a  href="' . route('employees.show', ['employee' => $model->username]) . '" class="p-2 " title="View Profile">
                                 <x-icons.eye class="transition text-secondary-light hover:text-primary" />
                             </a>'
-                );
+                    )
+                    : '';
 
                 $editBtn = Blade::render(
                     '<x-table.edit-btn href="' . route('employees.edit', $model->getKey()) . '" />'
