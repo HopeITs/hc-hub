@@ -1,13 +1,15 @@
 <?php
 
-
-use App\Livewire\ProgramManagement\DefaultDeliverable\DefaultDeliverablesModule;
-use App\Livewire\Contract\{ContractCreate, ContractDetails, ContractEdit, ContractsModule};
-use App\Livewire\Employee\{EmployeeCreate,
-    EmployeeEdit,
-    EmployeeModule,
-    EmployeeProfile};
 use App\Http\Controllers\ContractExportController;
+use App\Livewire\Contract\ContractCreate;
+use App\Livewire\Contract\ContractDetails;
+use App\Livewire\Contract\ContractEdit;
+use App\Livewire\Contract\ContractsModule;
+use App\Livewire\Employee\EmployeeCreate;
+use App\Livewire\Employee\EmployeeEdit;
+use App\Livewire\Employee\EmployeeModule;
+use App\Livewire\Employee\EmployeeProfile;
+use App\Livewire\ProgramManagement\DefaultDeliverable\DefaultDeliverablesModule;
 
 Route::prefix('employees')
     ->name('employees.')
@@ -16,10 +18,10 @@ Route::prefix('employees')
         Route::get('/', EmployeeModule::class)->name('index');
         Route::get('/create', EmployeeCreate::class)->name('create');
         Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
-        Route::get('/{employee:username}/show', EmployeeProfile::class)->name('show');
-    });
 
-Route::get('/default-deliverables', DefaultDeliverablesModule::class)    ->middleware('role:HR|super-admin|general-manager')->name('default-deliverables.index');
+    });
+Route::get('employees/{employee:username}/show', EmployeeProfile::class)->name('employees.show');
+Route::get('/default-deliverables', DefaultDeliverablesModule::class)->middleware('role:HR|super-admin|general-manager')->name('default-deliverables.index');
 
 Route::prefix('contracts')
     ->name('contracts.')
@@ -31,16 +33,3 @@ Route::prefix('contracts')
         Route::get('/{contract}/export', [ContractExportController::class, 'pdf'])->name('export');
         Route::get('/{contract}', ContractDetails::class)->name('show');
     });
-
-
-
-
-
-
-
-
-
-
-
-
-

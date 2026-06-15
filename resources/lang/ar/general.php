@@ -656,6 +656,14 @@ return [
     'view-profile-of' => 'عرض ملف :name',
     'collapse-sidebar' => 'طي القائمة الجانبية',
     'expand-sidebar' => 'توسيع القائمة الجانبية',
+    'contract-status' => 'حالة العقد',
+    'professional-information' => 'الدور والفريق وخطوط الإشراف ومعلومات مكان العمل',
+    'career-history' => 'المسيرة المهنية',
+    'personal-information' => 'المعلومات الشخصية',
+    'private-information' => 'تظهر فقط للموظف وأدوار الموارد البشرية المصرح لها',
+    'work-contact' => 'بيانات التواصل للعمل',
+    'personal-contact' => 'بيانات التواصل الشخصية',
+    'family-information' => 'معلومات العائلة',
 
 
     'time' => 'الوقت',
