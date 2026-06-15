@@ -13,7 +13,12 @@
     <title>@yield('title', 'Hope HR')</title>
 </head>
 
-<body class="antialiased min-h-screen bg-white">
+<body class="antialiased min-h-screen bg-white"
+      x-data="{ sidebarCollapsed: localStorage.getItem('sidebar-collapsed') === 'true' }"
+      x-on:sidebar-collapse-toggle.window="
+          sidebarCollapsed = !sidebarCollapsed;
+          localStorage.setItem('sidebar-collapsed', sidebarCollapsed);
+      ">
 
 <div id="page-gif-overlay" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-[9999]">
     <video autoplay loop muted playsinline class="w-74 h-74">
@@ -23,7 +28,8 @@
 <livewire:layout.sidebar/>
 
 
-<div class="flex flex-col min-h-screen md:ms-60">
+<div class="flex flex-col min-h-screen transition-[margin] duration-300 md:ms-60"
+     :class="sidebarCollapsed ? 'md:!ms-20' : 'md:!ms-60'">
 
 
 
@@ -48,28 +54,7 @@
     </footer>
 </div>
 
-<div id="sidebar-overlay" class="fixed inset-0 bg-gray-200 opacity-50 z-30 sm:hidden hidden"></div>
-
-
 @include('partials.scripts')
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const sidebar = document.getElementById('cta-button-sidebar');
-        const toggleButton = document.getElementById('sidebar-toggle');
-        const overlay = document.getElementById('sidebar-overlay');
-
-        const toggleSidebar = () => {
-            sidebar?.classList.toggle('translate-x-full');
-            overlay?.classList.toggle('hidden');
-        };
-
-        if (toggleButton && sidebar && overlay) {
-            toggleButton.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', toggleSidebar);
-        }
-    });
-</script>
 @stack('scripts')
 <script>
     function hidePreloader() {

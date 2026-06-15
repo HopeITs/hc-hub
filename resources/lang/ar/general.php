@@ -654,6 +654,8 @@ return [
     'vacant-position' => 'منصب شاغر',
     'not-specified' => 'غير محدد',
     'view-profile-of' => 'عرض ملف :name',
+    'collapse-sidebar' => 'طي القائمة الجانبية',
+    'expand-sidebar' => 'توسيع القائمة الجانبية',
 
 
     'time' => 'الوقت',

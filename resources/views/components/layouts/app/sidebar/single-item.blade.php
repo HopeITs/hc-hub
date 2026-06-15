@@ -1,7 +1,8 @@
 @props(['active' => false, 'icon' => null])
 
-<li>
+<li class="w-full">
     <a
+        title="{{ trim(strip_tags($slot)) }}"
         {{ $attributes->merge([
             'class' => "
                 group flex items-center w-full p-2 rounded-lg transition duration-150
@@ -9,6 +10,7 @@
                 hover:text-secondary-dark hover:font-bold hover:bg-secondary-soft
                 " . ($active ? ' !text-primary !font-bold' : '')
         ]) }}
+        :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0' : ''"
     >
 
         {{-- Icon --}}
@@ -22,6 +24,7 @@
                 text-sm flex-1 ms-3 rtl:me-3 text-left rtl:text-right whitespace-nowrap
                 text-inherit group-hover:text-inherit
             "
+            x-show="!sidebarCollapsed || open"
         >
             {{ $slot }}
         </span>

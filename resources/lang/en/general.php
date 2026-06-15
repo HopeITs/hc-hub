@@ -653,6 +653,8 @@ return [
     'vacant-position' => 'Vacant position',
     'not-specified' => 'Not specified',
     'view-profile-of' => 'View profile of :name',
+    'collapse-sidebar' => 'Collapse sidebar',
+    'expand-sidebar' => 'Expand sidebar',
 
     'time' => 'Time',
     'leave-decision' => 'Leave Decision',
