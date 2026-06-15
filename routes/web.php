@@ -11,7 +11,7 @@ use App\Livewire\ChecklistItems\{AllItems, DoneRequests, PendingItems, PendingRe
 use App\Livewire\Statistics\ContractStatistics;
 use App\Livewire\Statistics\GeneralStatistics;
 use App\Livewire\Employee\{
-    Leave\AllLeaveRequestModule,  Leave\EmpLeaveBalanceModule, Leave\MyLeaveRequestModule, Leave\MyLeaveRequestTable};
+    EmployeeProfile, Leave\AllLeaveRequestModule, Leave\EmpLeaveBalanceModule, Leave\MyLeaveRequestModule, Leave\MyLeaveRequestTable};
 use App\Livewire\Employee\EmployeeStatistics;
 
 use App\Livewire\Settings\{Appearance, Password, Profile};
@@ -44,6 +44,7 @@ Route::group(
 
             Route::redirect('settings', 'settings/password');
             Route::get('settings/password', Password::class)->name('settings.password');
+            Route::get('my-profile', EmployeeProfile::class)->name('my-profile');
 
 
             //Basic project routes

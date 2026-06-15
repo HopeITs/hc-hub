@@ -89,12 +89,23 @@
                         <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
 
                         <div class="px-2 py-2">
+                            <a href="{{ route('my-profile') }}"
+                               wire:navigate
+                               class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-800 transition rounded-xl hover:bg-primary-50/70 hover:text-primary hover:shadow-sm">
+                                <svg class="size-4" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="1.8">
+                                    <circle cx="12" cy="8" r="4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+                                </svg>
+                                <span>@lang('general.my-profile')</span>
+                            </a>
+
                             <a href="{{ route('settings.password') }}"
                                class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-800 transition rounded-xl hover:bg-gray-100/90 hover:shadow-sm">
                                 <svg class="text-gray-700 size-4" viewBox="0 0 24 24" fill="none"
                                      stroke="currentColor" stroke-width="1.8">
-                                    <circle cx="12" cy="8" r="4"/>
-                                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+                                    <rect x="5" y="10" width="14" height="10" rx="2"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 10V7a4 4 0 0 1 8 0v3"/>
                                 </svg>
                                 <span>@lang('general.my-account')</span>
                             </a>
