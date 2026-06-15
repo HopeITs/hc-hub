@@ -131,6 +131,9 @@ class PersonalInfoForm extends Form
     public function rules()
     {
         return [
+            'photo' => $this->photo instanceof TemporaryUploadedFile
+                ? ['image', 'max:5120']
+                : ['nullable'],
             'national_number' => [
                 'required',
                 Rule::unique('employees', 'national_number')->ignore($this->employee?->id),
