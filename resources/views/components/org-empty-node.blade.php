@@ -1,25 +1,30 @@
-@props(['position','color'=>'gray','size'=>'md'])
+@props(['position', 'size' => 'md'])
 
 @php
     $sizes = [
-        'xs' => 'text-xs px-2 py-1 w-28 text-[8px]',
-        'sm' => 'text-xs px-2 py-2 w-36 text-[10px]',
-        'md' => 'text-sm px-3 py-2 w-44',
-        'lg' => 'text-base px-4 py-3 w-52',
+        'xs' => 'w-32 px-2.5 pb-2.5 pt-3 text-[9px]',
+        'sm' => 'w-36 px-3 pb-3 pt-3.5 text-[10px]',
+        'md' => 'w-40 px-3 pb-3 pt-4 text-[10px]',
+        'lg' => 'w-44 px-3.5 pb-3.5 pt-4 text-[11px]',
     ];
+    $location = $position->city?->name ?? $position->center?->name;
 @endphp
 
-<div class="h-fit rounded-2xl  bg-{{ $color }}-100 shadow-sm text-center {{ $sizes[$size] }}" data-tooltip-target="tooltip-default-{{$position->id}}">
-    <div class="font-semibold truncate">
-        {{  '—' }}
-    </div>
-    <div class="text-secondary-medium truncate">
-        {{ $position->title . ' - ' . $position->city->slug }}
+<div {{ $attributes->merge([
+    'class' => 'h-fit rounded-2xl border border-dashed border-gray-300 bg-gray-50/80 text-center text-secondary-medium transition hover:border-primary-200 hover:bg-primary-50/40 '.($sizes[$size] ?? $sizes['md']),
+]) }}>
+    <div class="flex flex-col items-center">
+        <span class="flex size-16 shrink-0 items-center justify-center rounded-full border border-dashed border-gray-300 bg-white text-secondary-light shadow-sm">
+            <x-icons.user class="size-7" />
+        </span>
+        <div class="mt-2.5 min-w-0 w-full">
+            <div class="truncate font-extrabold text-secondary-medium">@lang('general.vacant-position')</div>
+            <div class="mt-1 line-clamp-2 min-h-7 font-semibold leading-tight">{{ $position->title }}</div>
+        </div>
     </div>
 
-    <div id="tooltip-default-{{$position->id}}" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-400 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
-        {{ $position->title . ' - ' . $position->city->slug }}
-        <div class="tooltip-arrow" data-popper-arrow></div>
+    <div class="mt-2 flex items-center justify-center gap-1 truncate border-t border-dashed border-gray-200 pt-2 text-secondary-light">
+        <x-icons.map-pin class="size-3.5 shrink-0" />
+        <span class="truncate">{{ $location ?? __('general.not-specified') }}</span>
     </div>
 </div>
-

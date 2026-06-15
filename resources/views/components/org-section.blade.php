@@ -1,34 +1,26 @@
-@props(['team' , 'managerType'])
+@props(['team', 'managerType'])
 
-@foreach($team ?? [] as $t)
-    <div class="flex flex-col items-center gap-2">
-        @foreach($t->activeContracts as $contract)
-            <x-org-node :position="$t" :employee="$contract->employee" :is-manager="$contract->position->{$managerType.'Team'}->count() > 0"
-                        size="sm"/>
-            @if($contract->position->{$managerType.'Team'}->count() > 0)
-                <div
-                    class="flex {{$t->job_level_id === 3 ? ' flex-col items-start justify-start' : ' flex-row items-start justify-start'}}  gap-2 mt-2">
-                    <x-org-section :team="$contract->position->{$managerType.'Team'}"
-                                   :managerType="$managerType"/>
-                </div>
-            @endif
+@foreach($team ?? [] as $position)
+    <div class="relative flex flex-col items-center gap-3 pt-5">
+        <span class="absolute start-1/2 top-0 h-5 w-px bg-gray-300"></span>
+
+        @foreach($position->activeContracts as $contract)
+            <x-org-node
+                :position="$position"
+                :employee="$contract->employee"
+                :is-manager="$position->{$managerType.'Team'}->isNotEmpty()"
+                size="sm"
+            />
         @endforeach
-        @if($t->activeContracts->count() < $t->max_emp)
-            @for($i=1;$i<= $t->max_emp - $t->activeContracts->count() ;$i++)
-                <x-org-empty-node :position="$t" size="sm"/>
 
-                @if($t->{$managerType.'Team'}->count() > 0)
-                    <div
-                        class="flex {{$t->job_level_id === 3 ? ' flex-col items-start justify-start' : ' flex-row items-start justify-start'}}  gap-2 mt-2">
-                        <x-org-section :team="$t->{$managerType.'Team'}" :managerType="$managerType"/>
-                    </div>
-                @endif
-            @endfor
+        @for($i = 0; $i < max(0, $position->max_emp - $position->activeContracts->count()); $i++)
+            <x-org-empty-node :position="$position" size="sm"/>
+        @endfor
+
+        @if($position->{$managerType.'Team'}->isNotEmpty())
+            <div class="relative mt-2 flex items-start gap-4 border-t border-gray-300">
+                <x-org-section :team="$position->{$managerType.'Team'}" :managerType="$managerType"/>
+            </div>
         @endif
     </div>
-
 @endforeach
-
-
-
-
