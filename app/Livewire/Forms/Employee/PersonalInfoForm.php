@@ -106,6 +106,13 @@ class PersonalInfoForm extends Form
 
     public $username;
 
+    /**
+     * When true, a platform login account (work email) is created/kept for the
+     * employee. When false, the employee exists without platform access — the
+     * username is still required (used for the profile page and QR scan ID).
+     */
+    public bool $create_account = true;
+
     #[Validate('nullable|exists:employees,id')]
     public $direct_manager_id = null;
     #[Validate('nullable|exists:employees,id')]
@@ -130,7 +137,7 @@ class PersonalInfoForm extends Form
 
     public function rules()
     {
-        return [
+        $rules = [
             'photo' => $this->photo instanceof TemporaryUploadedFile
                 ? ['image', 'max:5120']
                 : ['nullable'],
@@ -138,15 +145,22 @@ class PersonalInfoForm extends Form
                 'required',
                 Rule::unique('employees', 'national_number')->ignore($this->employee?->id),
             ],
-            'email' => [
-                'required',
-                Rule::unique('users', 'email')->ignore($this->employee?->account?->id),
-            ],
+            // Username is always required: it drives the profile page and QR scan ID.
             'username' => [
                 'required',
                 Rule::unique('employees', 'username')->ignore($this->employee?->id),
             ],
         ];
+
+        // The work email/login account is only validated when HR opts to create it.
+        if ($this->create_account) {
+            $rules['email'] = [
+                'required',
+                Rule::unique('users', 'email')->ignore($this->employee?->account?->id),
+            ];
+        }
+
+        return $rules;
     }
 
     protected function buildWorkEmail(?string $username): ?string
@@ -202,6 +216,8 @@ class PersonalInfoForm extends Form
         $this->username = $employee->username;
         $this->email = $employee->account?->email;
         $this->photo = $employee->getFirstMediaUrl('avatar');
+        // Pre-tick the checkbox only if a login account already exists.
+        $this->create_account = (bool) $employee->account;
         $this->roles = implode(',', $employee->account?->roles()->pluck('name')->toArray() ?? []);
         $this->whatsapp_work = $employee->whatsapp_work ?? null;
         $this->telegram_work = $employee->telegram_work ?? null;
@@ -212,33 +228,24 @@ class PersonalInfoForm extends Form
 
     public function saveInformation(): Employee
     {
-        $this->email = $this->buildWorkEmail($this->username);
+        // Work email is derived from the username, only when an account is wanted.
+        $this->email = $this->create_account ? $this->buildWorkEmail($this->username) : null;
 
         $this->validate();
 
+        // create_account is a UI-only flag, not an employees column.
+        $payload = $this->except(['email', 'photo', 'create_account']);
+
         if ($this->employee) {
-            $this->employee->update($this->except(['email', 'photo']));
-
-            if ($this->employee->account) {
-                $this->employee->account->update(['email' => $this->email]);
-
-                if ($this->roles !==  null || $this->roles !== '') {
-                    $roles = explode(',', $this->roles);
-
-                    $this->employee->account->syncRoles($roles);
-                    $this->employee->account->roles()->withPivot('is_active')->first()?->pivot->update(['is_active' => true]);
-                }
-            }
+            $this->employee->update($payload);
         } else {
-            $this->employee = Employee::create($this->except(['email', 'photo']));
+            $this->employee = Employee::create($payload);
+        }
 
-            $user = User::create([
-                'email' => $this->email,
-                'password' => Hash::make('HopeCenterHR'),
-                'employee_id' => $this->employee->id,
-            ]);
-
-            $user->assignRole(json_decode($this->roles));
+        // Create/update the login account only when HR opted in. Unchecking on
+        // an existing employee leaves any current account untouched.
+        if ($this->create_account) {
+            $this->persistAccount();
         }
 
         if ($this->photo instanceof TemporaryUploadedFile) {
@@ -248,5 +255,57 @@ class PersonalInfoForm extends Form
         }
 
         return $this->employee;
+    }
+
+    /**
+     * Create the login account when missing, or update the email of an existing
+     * one, then sync the selected roles (keeping one active).
+     */
+    protected function persistAccount(): void
+    {
+        $roles = $this->parseRoles();
+
+        if ($this->employee->account) {
+            $this->employee->account->update(['email' => $this->email]);
+
+            if ($roles) {
+                $this->employee->account->syncRoles($roles);
+                $this->employee->account->roles()->withPivot('is_active')->first()?->pivot->update(['is_active' => true]);
+            }
+
+            return;
+        }
+
+        $user = User::create([
+            'email' => $this->email,
+            'password' => Hash::make('HopeCenterHR'),
+            'employee_id' => $this->employee->id,
+        ]);
+
+        if ($roles) {
+            $user->assignRole($roles);
+        }
+    }
+
+    /**
+     * Normalise the roles tags-input value (JSON array or comma string) to a
+     * plain array of role names.
+     */
+    protected function parseRoles(): array
+    {
+        if (blank($this->roles)) {
+            return [];
+        }
+
+        if (is_array($this->roles)) {
+            return $this->roles;
+        }
+
+        $decoded = json_decode($this->roles, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        return array_values(array_filter(array_map('trim', explode(',', $this->roles))));
     }
 }

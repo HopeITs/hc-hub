@@ -6,19 +6,32 @@
         <x-heading-label>@lang('general.employment_info')</x-heading-label>
 
         <div>
-            <div class="flex justify-between">
-                <x-forms.input-label for="username">@lang('general.work_email')</x-forms.input-label>
-                <span class="text-secondary-light text-xs">password is: HopeCenterHR</span>
-            </div>
+            <x-forms.input-label for="username">@lang('general.username')</x-forms.input-label>
             <div class="flex rtl:flex-row-reverse">
-                <x-forms.input type="text" wire:model="infoForm.username" id="username" class="rounded-r-none"
+                <x-forms.input type="text" wire:model="infoForm.username" id="username"
+                    @class(['rounded-r-none' => data_get($infoForm, 'create_account')])
                     placeholder="username" />
-                <span
-                    class="inline-flex items-center px-3 ltr:rounded-e-md rtl:rounded-s-md shadow-md border ltr:border-s-0 rtl:border-e-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                    @hcsyria.org
-                </span>
+                @if (data_get($infoForm, 'create_account'))
+                    <span
+                        class="inline-flex items-center px-3 ltr:rounded-e-md rtl:rounded-s-md shadow-md border ltr:border-s-0 rtl:border-e-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        @hcsyria.org
+                    </span>
+                @endif
             </div>
             <x-error-span>{{ $errors->first('infoForm.username') }}</x-error-span>
+
+            {{-- Optional: create a platform login account (work email) --}}
+            <label class="flex items-start gap-2 mt-3 cursor-pointer">
+                <x-forms.input type="checkbox" wire:model.live="infoForm.create_account" value="1"
+                    id="create_account" class="mt-1" />
+                <span>
+                    <span class="text-sm text-secondary-dark">@lang('general.create_login_account')</span>
+                    @if (data_get($infoForm, 'create_account'))
+                        <span class="block text-xs text-secondary-light">@lang('general.create_login_account_hint')</span>
+                    @endif
+                </span>
+            </label>
+            <x-error-span>{{ $errors->first('infoForm.email') }}</x-error-span>
         </div>
 
         <div>
