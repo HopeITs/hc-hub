@@ -39,7 +39,7 @@ class SalaryPerEmployeeStatistics extends Component
         }
 
         $meta = [
-            'per_month'   => ['label' => 'Per Month',   'color' => '#be1f24'],
+            'per_month'   => ['label' => 'Per Month',   'color' => '#c2151c'],
             'per_session' => ['label' => 'Per Session', 'color' => '#4b4b4b'],
             'per_hour'    => ['label' => 'Per Hour',    'color' => '#cdcdcd'],
         ];

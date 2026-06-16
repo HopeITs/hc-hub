@@ -2,7 +2,7 @@
 
 return [
     'colors' => [
-        'primary' => '#be1f24',
+        'primary' => '#c2151c',
         'secondary-dark' => '#414042',
         'secondary-medium' => '#6d6e71',
         'secondary-light' => '#939598',

@@ -53,7 +53,7 @@ class Program extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('logo')
-            ->useFallbackUrl('https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=be1f24&background=FEE2E2')
+            ->useFallbackUrl('https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=c2151c&background=FEE2E2')
             ->singleFile();
     }
 

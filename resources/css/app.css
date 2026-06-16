@@ -21,6 +21,7 @@
     src: url('/fonts/SomarSans/SomarSans-Thin.otf') format('opentype');
     font-weight: 100;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
@@ -28,6 +29,7 @@
     src: url('/fonts/SomarSans/SOMARSANS-LIGHT.OTF') format('opentype');
     font-weight: 300;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
@@ -35,6 +37,7 @@
     src: url('/fonts/SomarSans/SomarSans-Regular.otf') format('opentype');
     font-weight: 400;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
@@ -42,6 +45,7 @@
     src: url('/fonts/SomarSans/SOMARSANS-MEDIUM.OTF') format('opentype');
     font-weight: 500;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
@@ -49,6 +53,7 @@
     src: url('/fonts/SomarSans/SomarSans-SemiBold.otf') format('opentype');
     font-weight: 600;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
@@ -56,6 +61,7 @@
     src: url('/fonts/SomarSans/SOMARSANS-BOLD.OTF') format('opentype');
     font-weight: 700;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
@@ -63,6 +69,7 @@
     src: url('/fonts/SomarSans/SOMARSANS-EXTRABOLD.OTF') format('opentype');
     font-weight: 800;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
@@ -70,6 +77,7 @@
     src: url('/fonts/SomarSans/SOMARSANS-BLACK.OTF') format('opentype');
     font-weight: 900;
     font-style: normal;
+    font-display: swap;
 }
 
 
@@ -122,7 +130,7 @@ body {
     --color-accent-content: #414042;
     --color-accent-foreground: var(--color-white);
 
-    --color-primary: #be1f24;
+    --color-primary: #c2151c; /* HOPE brand primary red */
     --color-secondary-dark: #58595b;
     --color-secondary-medium: #6d6e71;
     --color-secondary-light: #939598;
@@ -133,13 +141,13 @@ body {
     --color-primary-200: #f9c5c6;
     --color-primary-300: #f49797;
     --color-primary-400: #ec6a6c;
-    --color-primary-500: #be1f24;
-    /* your base */
-    --color-primary-600: #98191d;
-    --color-primary-700: #731316;
-    --color-primary-800: #4d0d0f;
-    --color-primary-900: #2a0808;
-    --color-primary-950: #150404;
+    --color-primary-500: #c2151c;
+    /* HOPE brand base */
+    --color-primary-600: #a51218;
+    --color-primary-700: #880f14;
+    --color-primary-800: #6b0c0f;
+    --color-primary-900: #4a080b;
+    --color-primary-950: #2b0506;
 
     --color-neutral-50: #f5f5f6;
     --color-neutral-100: #eeeff0;
@@ -159,7 +167,7 @@ body {
 
 
     --color-black: #414042;
-    --tag-remove-btn-bg--hover: #be1f24;
+    --tag-remove-btn-bg--hover: #c2151c;
 
 
 }
@@ -255,7 +263,7 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
 }
 
 clock-timepicker {
-    --clock-timepicker-accent-color: #be1f24
+    --clock-timepicker-accent-color: #c2151c
 }
 
 

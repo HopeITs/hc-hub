@@ -162,7 +162,7 @@ if (document.getElementById("chartdiv")) {
                     radius: 4,
                     stroke: am5.color("#ffffff"),
                     strokeWidth: 2,
-                    fill: dataItem.dataContext._dotColor || am5.color("#be1f24")
+                    fill: dataItem.dataContext._dotColor || am5.color("#c2151c")
                 })
             });
         });

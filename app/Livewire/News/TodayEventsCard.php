@@ -30,7 +30,7 @@ class TodayEventsCard extends Component
                 'department' => $employee->latestActiveContract()?->position?->department?->name ?? '',
                 'message'    => 'Happy Birthday! 🎉',
                 'photo'      => $employee->getFirstMediaUrl('avatar')
-                    ?: 'https://ui-avatars.com/api/?name=' . urlencode($employee->name) . '&color=be1f24&background=FFF',
+                    ?: 'https://ui-avatars.com/api/?name=' . urlencode($employee->name) . '&color=c2151c&background=FFF',
             ]);
 
         $newsEvents = News::whereDate('event_date', $today)

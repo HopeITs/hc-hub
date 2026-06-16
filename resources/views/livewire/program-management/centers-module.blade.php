@@ -85,6 +85,6 @@
     </x-modal.dialog>
 
     <style>
-        clock-timepicker{--clock-timepicker-accent-color:#be1f24}
+        clock-timepicker{--clock-timepicker-accent-color:#c2151c}
     </style>
 </div>

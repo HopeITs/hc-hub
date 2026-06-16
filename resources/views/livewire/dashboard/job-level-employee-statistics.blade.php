@@ -25,7 +25,7 @@
             const jobLevels = @json($jobLevelLabels);
             const employees = @json($employeeCounts);
 
-            const primaryColor = "#be1f24";
+            const primaryColor = "#c2151c";
             const gridColor    = "#dcddde";
 
             new Chart(ctx, {
