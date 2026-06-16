@@ -270,7 +270,8 @@ class Employee extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('avatar')
-            ->useFallbackUrl('https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=be1f24&background=FFF')
+            ->useFallbackUrl(asset('images/default-avatar.png'))
+            ->useFallbackPath(public_path('images/default-avatar.png'))
             ->singleFile();
 
         $this->addMediaCollection('attachments');
