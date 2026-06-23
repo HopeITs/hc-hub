@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
-Route::get('/id/{username}', ShowDigitalId::class)->name('digital-id.show');
+Route::get('/ID/{username}', ShowDigitalId::class)->name('digital-id.show');
 
 Route::group(
     [

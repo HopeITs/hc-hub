@@ -11,40 +11,47 @@
             --id-primary: var(--color-primary, #c2151c);
             --id-black: var(--color-black, #414042);
             --id-icon: #414042;
+            --id-card-width: min(88vw, 21rem, 43dvh);
             min-height: 100vh;
-            padding: clamp(1.25rem, 5vw, 4rem) 1rem;
+            min-height: 100dvh;
+            padding: clamp(0.5rem, 1.5dvh, 1rem) 1rem;
             color: var(--id-black);
             background: #ffffff;
             font-family: 'SomarSans', 'Lato', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
         .digital-id-wrap {
-            width: min(94vw, 32rem);
+            width: var(--id-card-width);
             margin: 0 auto;
             text-align: center;
         }
 
         .digital-id-logo {
-            width: clamp(8.5rem, 38vw, 15rem);
-            margin: 0 auto clamp(2rem, 8vw, 4.25rem);
+            width: min(52%, 9rem);
+            margin: 0 auto clamp(0.7rem, 1.8dvh, 1.1rem);
         }
 
         .digital-id-card {
             position: relative;
             display: flex;
             flex-direction: column;
+            aspect-ratio: 0.645;
             height: auto;
             min-height: 0;
             overflow: hidden;
-            border-radius: clamp(2rem, 8vw, 3.2rem);
+            border-radius: calc(var(--id-card-width) * 0.095);
             background: #ffffff;
-            box-shadow: 0 1rem 2rem rgb(65 64 66 / 22%);
+            box-shadow: 0 calc(var(--id-card-width) * 0.04) calc(var(--id-card-width) * 0.08) rgb(65 64 66 / 22%);
+            container-type: inline-size;
         }
 
         .digital-id-photo-panel {
             position: relative;
-            flex: none;
-            height: clamp(18rem, 72vw, 30rem);
+            flex: 0 0 47%;
             overflow: hidden;
             background: #ffffff;
         }
@@ -53,7 +60,7 @@
             position: absolute;
             inset-inline: 0;
             bottom: 0;
-            height: clamp(3.15rem, 11vw, 4.6rem);
+            height: 13.5%;
             background: var(--id-primary);
         }
 
@@ -63,7 +70,7 @@
             left: 50%;
             z-index: 1;
             display: block;
-            width: min(92%, 27rem);
+            width: 92%;
             max-height: 94%;
             transform: translateX(-50%);
             object-fit: contain;
@@ -75,14 +82,15 @@
             flex: none;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
             min-height: 0;
-            padding: clamp(1.15rem, 4.2vw, 2rem) clamp(1.25rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.4rem);
+            padding: 4.8cqw 6cqw 10cqw;
         }
 
         .digital-id-name {
             max-width: 100%;
             color: var(--id-primary);
-            font-size: clamp(2.65rem, 10.5vw, 4.75rem);
+            font-size: clamp(1.7rem, 15.5cqw, 3.05rem);
             font-weight: 900;
             line-height: 0.88;
             letter-spacing: 0;
@@ -92,9 +100,9 @@
 
         .digital-id-position {
             max-width: 100%;
-            margin-top: clamp(0.7rem, 2.6vw, 1rem);
+            margin-top: 3.2cqw;
             color: var(--id-black);
-            font-size: clamp(1.28rem, 4.6vw, 2.1rem);
+            font-size: clamp(0.86rem, 7.8cqw, 1.55rem);
             font-weight: 700;
             line-height: 1.02;
             overflow-wrap: anywhere;
@@ -102,9 +110,9 @@
 
         .digital-id-center {
             max-width: 100%;
-            margin-top: 0.22rem;
+            margin-top: 1cqw;
             color: var(--id-black);
-            font-size: clamp(0.98rem, 3.5vw, 1.48rem);
+            font-size: clamp(0.64rem, 5.5cqw, 1.08rem);
             font-weight: 700;
             line-height: 1.05;
             text-transform: uppercase;
@@ -113,9 +121,9 @@
 
         .digital-id-city {
             max-width: 100%;
-            margin-top: clamp(0.9rem, 3.4vw, 1.5rem);
+            margin-top: 4.4cqw;
             color: var(--id-primary);
-            font-size: clamp(1rem, 3.5vw, 1.48rem);
+            font-size: clamp(0.64rem, 5.5cqw, 1.08rem);
             font-weight: 700;
             line-height: 1.05;
             text-transform: uppercase;
@@ -124,8 +132,8 @@
 
         .digital-id-divider {
             width: 70%;
-            height: 0.12rem;
-            margin-top: clamp(1rem, 3.8vw, 1.65rem);
+            height: max(1px, 0.45cqw);
+            margin-top: 4.4cqw;
             background: #bcbec0;
         }
 
@@ -133,17 +141,17 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: clamp(0.55rem, 2vw, 0.9rem);
-            margin-top: clamp(1rem, 3.8vw, 1.7rem);
+            gap: 2.4cqw;
+            margin-top: 4.8cqw;
         }
 
         .digital-id-icon-link {
             display: inline-flex;
-            width: clamp(2.1rem, 7.8vw, 3rem);
-            height: clamp(2.1rem, 7.8vw, 3rem);
+            width: clamp(1.15rem, 8.5cqw, 1.72rem);
+            height: clamp(1.15rem, 8.5cqw, 1.72rem);
             align-items: center;
             justify-content: center;
-            border-radius: 0.5rem;
+            border-radius: 1.4cqw;
             color: #ffffff;
             background: var(--id-icon);
             transition: transform 160ms ease, background-color 160ms ease;
@@ -162,9 +170,9 @@
         }
 
         .digital-id-emergency {
-            margin-top: clamp(1.75rem, 6vw, 3.1rem);
+            margin-top: clamp(0.75rem, 2.1dvh, 1.25rem);
             color: var(--id-black);
-            font-size: clamp(1rem, 3.6vw, 1.55rem);
+            font-size: clamp(0.72rem, 3.8vw, 1rem);
             font-weight: 500;
             line-height: 1.2;
         }
@@ -172,9 +180,15 @@
         .digital-id-emergency a,
         .digital-id-emergency strong {
             color: var(--id-black);
-            font-size: clamp(1.12rem, 4vw, 1.75rem);
+            font-size: clamp(0.8rem, 4.2vw, 1.08rem);
             font-weight: 700;
             text-decoration: none;
+        }
+
+        @supports not (height: 100dvh) {
+            .digital-id-page {
+                --id-card-width: min(88vw, 21rem, 43vh);
+            }
         }
     </style>
 
