@@ -1,24 +1,27 @@
 <?php
 
-
-use App\Http\Controllers\ContractExportController;
 use App\Livewire\ActivityLog\ActivityLogModule;
 use App\Livewire\Archives\ArchivedFilesModule;
+use App\Livewire\Basics\CourseCategoryModule;
+use App\Livewire\ChecklistItems\AllItems;
+use App\Livewire\ChecklistItems\DoneRequests;
+use App\Livewire\ChecklistItems\PendingItems;
+use App\Livewire\ChecklistItems\PendingReturns;
 use App\Livewire\Dashboard\Index as DashboardIndex;
-
-use App\Livewire\ChecklistItems\{AllItems, DoneRequests, PendingItems, PendingReturns};
-
+use App\Livewire\Employee\EmployeeProfile;
+use App\Livewire\Employee\EmployeeStatistics;
+use App\Livewire\Employee\Leave\AllLeaveRequestModule;
+use App\Livewire\Employee\Leave\EmpLeaveBalanceModule;
+use App\Livewire\Employee\Leave\MyLeaveRequestModule;
+use App\Livewire\EmployeeCards\ShowDigitalId;
+use App\Livewire\Settings\Password;
 use App\Livewire\Statistics\ContractStatistics;
 use App\Livewire\Statistics\GeneralStatistics;
-use App\Livewire\Employee\{
-    EmployeeProfile, Leave\AllLeaveRequestModule, Leave\EmpLeaveBalanceModule, Leave\MyLeaveRequestModule, Leave\MyLeaveRequestTable};
-use App\Livewire\Employee\EmployeeStatistics;
-
-use App\Livewire\Settings\{Appearance, Password, Profile};
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
-use App\Livewire\Basics\CourseCategoryModule;
+
+Route::get('/ID/{username}', ShowDigitalId::class)->name('digital-id.show');
 
 Route::group(
     [
@@ -26,8 +29,7 @@ Route::group(
         'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath'],
     ],
     function () {
-        Livewire::setUpdateRoute(fn($handle) => Route::post('/livewire/update', $handle));
-
+        Livewire::setUpdateRoute(fn ($handle) => Route::post('/livewire/update', $handle));
 
         Route::middleware(['auth'])->group(function () {
             Route::get('/', DashboardIndex::class)
@@ -40,19 +42,16 @@ Route::group(
                     Route::get('/contract', ContractStatistics::class)->name('contract');
                 });
 
-
-
             Route::redirect('settings', 'settings/password');
             Route::get('settings/password', Password::class)->name('settings.password');
             Route::get('my-profile', EmployeeProfile::class)->name('my-profile');
 
+            // Basic project routes
+            require __DIR__.'/basic-project.php';
 
-            //Basic project routes
-            require __DIR__ . '/basic-project.php';
+            require __DIR__.'/projects-management.php';
 
-            require __DIR__ . '/projects-management.php';
-
-            require __DIR__ . '/employees-management.php';
+            require __DIR__.'/employees-management.php';
 
             Route::prefix('leaves')
                 ->name('leaves.')
@@ -62,13 +61,9 @@ Route::group(
                     Route::get('/balance', EmpLeaveBalanceModule::class)->name('balance')->middleware('role:HR|super-admin|general-manager');
                 });
 
-
-
             Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
             Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', false)->name('my-folders.index');
             Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', true)->name('shared-folders.index');
-
-
 
             Route::prefix('checklist-items')
                 ->name('checklist-items.')
@@ -78,9 +73,6 @@ Route::group(
                     Route::get('/done-requests', DoneRequests::class)->name('done-requests');
                     Route::get('/all', AllItems::class)->name('index');
                 });
-
-
-
 
             Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
 
@@ -97,9 +89,8 @@ Route::group(
             Route::get('/activity-log', ActivityLogModule::class)
                 ->name('activity-log.index');
 
-
         });
 
-        require __DIR__ . '/auth.php';
+        require __DIR__.'/auth.php';
     },
 );
