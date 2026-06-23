@@ -32,8 +32,8 @@ class ContractForm extends Form
     // ── Schedule
     public mixed $work_days_ar = null;
     public mixed $work_days_en = null;
-    public string $work_hours_from = '09:00';
-    public string $work_hours_to = '17:00';
+    public ?string $work_hours_from = '09:00';
+    public ?string $work_hours_to = '17:00';
 
     // ── Pay
     public int $currency = 1;
@@ -101,8 +101,8 @@ class ContractForm extends Form
         $this->salary_per      = $contract->salary_per;
         $this->work_days_ar    = $contract->work_days_ar;
         $this->work_days_en    = $contract->work_days_en;
-        $this->work_hours_from = $contract->work_hours_from;
-        $this->work_hours_to   = $contract->work_hours_to;
+        $this->work_hours_from = $contract->work_hours_from ?? $this->work_hours_from;
+        $this->work_hours_to   = $contract->work_hours_to ?? $this->work_hours_to;
     }
 
     // ────────────────────────────────────────────────

@@ -358,7 +358,7 @@ class ContractEdit extends Component
             return false;
         }
 
-        if ($this->center_id && $position->center_id && (int) $position->center_id !== (int) $this->center_id) {
+        if ($this->center_id && (int) $position->center_id !== (int) $this->center_id) {
             $this->addError('form.position_id', __('validation.custom.position_id.center_mismatch'));
             return false;
         }
