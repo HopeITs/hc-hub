@@ -666,4 +666,27 @@ return [
 
     'time' => 'Time',
     'leave-decision' => 'Leave Decision',
+
+    // Org chart
+    'filters' => 'Filters',
+    'apply' => 'Apply',
+    'all-job-levels' => 'All Job Levels',
+    'all-managers' => 'All Managers',
+    'compact-view' => 'Compact',
+    'comfortable-view' => 'Comfortable',
+    'reporting-line-help' => 'Switch the structural tree between the direct and technical reporting lines. The other line is shown as a dotted-line badge on each card.',
+    'search-name-or-position' => 'Search name or position…',
+    'clear-search' => 'Clear search',
+    'search-results-count' => '{0}No matches|{1}:count match|[2,*]:count matches',
+    'no-search-results' => 'No matches found',
+    'no-search-results-help' => 'Try a different name or position title, or clear the active filters.',
+    'chart-view' => 'Chart',
+    'directory-view' => 'Directory',
+    'view-full-profile' => 'View full profile',
+    'staff-total' => 'staff total',
+    'all-statuses' => 'All Statuses',
+    'export' => 'Export',
+    'export-png' => 'Export PNG',
+    'export-csv' => 'Export CSV',
+    'no-department' => 'Unassigned',
 ];

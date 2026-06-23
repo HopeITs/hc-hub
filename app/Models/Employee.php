@@ -118,9 +118,7 @@ class Employee extends Model implements HasMedia
     public function contracts()
     {
         return $this->hasMany(Contract::class, 'employee_id')
-            ->where('is_active', true)
-            ->whereDate('start_date', '<=', Carbon::now())
-            ->whereDate('end_date', '>=', Carbon::now());
+            ->activeNow();
 
     }
 

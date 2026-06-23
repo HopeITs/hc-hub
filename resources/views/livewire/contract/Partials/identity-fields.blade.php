@@ -58,7 +58,7 @@
         <x-error-span>{{ $errors->first('center_id') }}</x-error-span>
     </div>
 
-    <div class="md:col-span-6" wire:key="pos-for-city-{{ $city_id }}-prog-{{ $program_id }}">
+    <div class="md:col-span-6" wire:key="pos-for-city-{{ $city_id }}-prog-{{ $program_id }}-center-{{ $center_id }}">
         <x-forms.input-label for="position_id" required>
             {{ trans_choice('general.positions', 1) }}
         </x-forms.input-label>
