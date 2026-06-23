@@ -65,46 +65,17 @@ class ShowDigitalId extends Component
             return null;
         }
 
-        $hrEmployee = Employee::query()
+        return Employee::query()
             ->where('is_active', true)
-            ->where(function (Builder $query) {
-                $query
-                    ->where(function (Builder $query) {
-                        $query
-                            ->whereNotNull('work_phone')
-                            ->where('work_phone', '<>', '');
-                    })
-                    ->orWhere(function (Builder $query) {
-                        $query
-                            ->whereNotNull('personal_phone')
-                            ->where('personal_phone', '<>', '');
-                    });
-            })
-            ->whereHas('contracts', function (Builder $contract) use ($cityId) {
-                $contract->whereHas('position', fn (Builder $position) => $this->scopeHrPositionInCity($position, $cityId));
+            ->whereNotNull('work_phone')
+            ->where('work_phone', '<>', '')
+            ->whereHas('contracts.position', function (Builder $position) use ($cityId) {
+                $position
+                    ->where('city_id', $cityId)
+                    ->whereHas('department', fn (Builder $department) => $department->where('code', 'HR'));
             })
             ->orderBy('id')
-            ->first(['id', 'work_phone', 'personal_phone']);
-
-        return $hrEmployee?->work_phone ?: $hrEmployee?->personal_phone;
-    }
-
-    private function scopeHrPositionInCity(Builder $query, int $cityId): void
-    {
-        $query
-            ->where('city_id', $cityId)
-            ->where(function (Builder $query) {
-                $query
-                    ->where('title_en', 'like', '%HR%')
-                    ->orWhere('title_en', 'like', '%Human Resource%')
-                    ->orWhere('title_ar', 'like', '%الموارد البشرية%')
-                    ->orWhereHas('department', function (Builder $department) {
-                        $department
-                            ->where('code', 'HR')
-                            ->orWhere('name', 'like', '%Human Resource%')
-                            ->orWhere('name', 'like', '%HR%');
-                    });
-            });
+            ->value('work_phone');
     }
 
     private function phoneHref(?string $phone): ?string

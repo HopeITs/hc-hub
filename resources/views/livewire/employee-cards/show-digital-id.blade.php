@@ -51,7 +51,7 @@
 
         .digital-id-photo-panel {
             position: relative;
-            flex: 0 0 47%;
+            flex: 0 0 44%;
             overflow: hidden;
             background: #ffffff;
         }
@@ -84,13 +84,13 @@
             align-items: center;
             justify-content: flex-start;
             min-height: 0;
-            padding: 4.8cqw 6cqw 10cqw;
+            padding: 4.2cqw 6cqw 12cqw;
         }
 
         .digital-id-name {
             max-width: 100%;
             color: var(--id-primary);
-            font-size: clamp(1.7rem, 15.5cqw, 3.05rem);
+            font-size: clamp(1.55rem, 14.2cqw, 2.8rem);
             font-weight: 900;
             line-height: 0.88;
             letter-spacing: 0;
@@ -100,9 +100,9 @@
 
         .digital-id-position {
             max-width: 100%;
-            margin-top: 3.2cqw;
+            margin-top: 2.8cqw;
             color: var(--id-black);
-            font-size: clamp(0.86rem, 7.8cqw, 1.55rem);
+            font-size: clamp(0.78rem, 6.8cqw, 1.36rem);
             font-weight: 700;
             line-height: 1.02;
             overflow-wrap: anywhere;
@@ -112,7 +112,7 @@
             max-width: 100%;
             margin-top: 1cqw;
             color: var(--id-black);
-            font-size: clamp(0.64rem, 5.5cqw, 1.08rem);
+            font-size: clamp(0.58rem, 4.9cqw, 0.98rem);
             font-weight: 700;
             line-height: 1.05;
             text-transform: uppercase;
@@ -123,7 +123,7 @@
             max-width: 100%;
             margin-top: 4.4cqw;
             color: var(--id-primary);
-            font-size: clamp(0.64rem, 5.5cqw, 1.08rem);
+            font-size: clamp(0.58rem, 4.9cqw, 0.98rem);
             font-weight: 700;
             line-height: 1.05;
             text-transform: uppercase;
@@ -142,7 +142,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 2.4cqw;
-            margin-top: 4.8cqw;
+            margin-top: 5.2cqw;
         }
 
         .digital-id-icon-link {
@@ -188,6 +188,52 @@
         @supports not (height: 100dvh) {
             .digital-id-page {
                 --id-card-width: min(88vw, 21rem, 43vh);
+            }
+        }
+
+        @media (max-width: 399px) {
+            .digital-id-page {
+                --id-card-width: min(84vw, 20rem, 41dvh);
+            }
+
+            .digital-id-logo {
+                margin-bottom: clamp(0.55rem, 1.4dvh, 0.9rem);
+            }
+
+            .digital-id-photo-panel {
+                flex-basis: 41%;
+            }
+
+            .digital-id-info {
+                padding: 3.6cqw 6cqw 14cqw;
+            }
+
+            .digital-id-name {
+                font-size: clamp(1.35rem, 13.2cqw, 2.45rem);
+            }
+
+            .digital-id-position {
+                margin-top: 2.4cqw;
+                font-size: clamp(0.72rem, 6.2cqw, 1.16rem);
+            }
+
+            .digital-id-center,
+            .digital-id-city {
+                font-size: clamp(0.52rem, 4.5cqw, 0.86rem);
+            }
+
+            .digital-id-city,
+            .digital-id-divider {
+                margin-top: 3.5cqw;
+            }
+
+            .digital-id-icons {
+                margin-top: 5.4cqw;
+            }
+
+            .digital-id-icon-link {
+                width: clamp(1rem, 7.7cqw, 1.45rem);
+                height: clamp(1rem, 7.7cqw, 1.45rem);
             }
         }
     </style>
@@ -243,13 +289,11 @@
             </div>
         </section>
 
-        <p class="digital-id-emergency">
-            EMERGENCY CONTACT:
-            @if (filled($emergencyPhone) && filled($emergencyPhoneHref))
+        @if (filled($emergencyPhone) && filled($emergencyPhoneHref))
+            <p class="digital-id-emergency">
+                EMERGENCY CONTACT:
                 <a href="{{ $emergencyPhoneHref }}">{{ $emergencyPhone }}</a>
-            @else
-                <strong>Not available</strong>
-            @endif
-        </p>
+            </p>
+        @endif
     </main>
 </div>
