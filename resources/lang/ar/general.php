@@ -668,4 +668,27 @@ return [
 
     'time' => 'الوقت',
     'leave-decision' => 'قرار الإجازة',
+
+    // المخطط التنظيمي
+    'filters' => 'عوامل التصفية',
+    'apply' => 'تطبيق',
+    'all-job-levels' => 'جميع المستويات الوظيفية',
+    'all-managers' => 'جميع المدراء',
+    'compact-view' => 'مضغوط',
+    'comfortable-view' => 'مريح',
+    'reporting-line-help' => 'بدّل الشجرة الهيكلية بين خط الإشراف المباشر والخط الفني. يظهر الخط الآخر كشارة منقّطة على كل بطاقة.',
+    'search-name-or-position' => 'ابحث بالاسم أو المنصب…',
+    'clear-search' => 'مسح البحث',
+    'search-results-count' => '{0}لا نتائج|{1}نتيجة واحدة|{2}نتيجتان|[3,10]:count نتائج|[11,*]:count نتيجة',
+    'no-search-results' => 'لا توجد نتائج',
+    'no-search-results-help' => 'جرّب اسماً أو مسمى وظيفياً مختلفاً، أو امسح عوامل التصفية الحالية.',
+    'chart-view' => 'المخطط',
+    'directory-view' => 'الدليل',
+    'view-full-profile' => 'عرض الملف الكامل',
+    'staff-total' => 'إجمالي الموظفين',
+    'all-statuses' => 'جميع الحالات',
+    'export' => 'تصدير',
+    'export-png' => 'تصدير PNG',
+    'export-csv' => 'تصدير CSV',
+    'no-department' => 'غير محدد',
 ];
