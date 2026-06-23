@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\SalaryPer;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -43,6 +44,14 @@ class Contract extends Model
     public function position()
     {
         return $this->belongsTo(Position::class, 'position_id');
+    }
+
+    public function scopeActiveNow(Builder $query): Builder
+    {
+        return $query
+            ->where('is_active', true)
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now());
     }
 
     public function contractType()

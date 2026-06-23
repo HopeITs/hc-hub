@@ -47,13 +47,17 @@ class Position extends Model
     public function activeContracts(): HasMany
     {
         return $this->contracts()
-            ->where(function ($q) {
-                $q->where('is_active', true)
-                    ->orWhere(function ($q2) {
-                        $q2->whereNull('terminated_at')
-                            ->whereDate('start_date', '<=', now())
-                            ->whereDate('end_date', '>=', now());
-                    });
+            ->activeNow()
+            ->where('contracts.id', function ($query) {
+                $query->select('latest_contracts.id')
+                    ->from('contracts as latest_contracts')
+                    ->whereColumn('latest_contracts.employee_id', 'contracts.employee_id')
+                    ->where('latest_contracts.is_active', true)
+                    ->whereDate('latest_contracts.start_date', '<=', now())
+                    ->whereDate('latest_contracts.end_date', '>=', now())
+                    ->latest('latest_contracts.created_at')
+                    ->latest('latest_contracts.id')
+                    ->limit(1);
             })
             ->with('employee');
     }
