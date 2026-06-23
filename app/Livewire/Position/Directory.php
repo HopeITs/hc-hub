@@ -128,7 +128,7 @@ class Directory extends Component
             ]);
 
             $this->baseQuery()
-                ->with(['city', 'contracts.position.department', 'contracts.position.center', 'contracts.position.program'])
+                ->with(['city', 'contracts' => fn ($q) => $this->withVisiblePosition($q)])
                 ->chunk(200, function ($employees) use ($handle) {
                     foreach ($employees as $employee) {
                         $position = $employee->contracts->first()?->position;
@@ -155,14 +155,23 @@ class Directory extends Component
             ->with([
                 'media',
                 'city',
-                'contracts.position.department',
-                'contracts.position.center',
-                'contracts.position.program',
-                'contracts.position.jobLevel',
-                'contracts.position.city',
+                'contracts' => fn ($q) => $this->withVisiblePosition($q),
             ])
             ->paginate($this->perPage);
 
         return view('livewire.position.directory', compact('employees'));
+    }
+
+    private function withVisiblePosition($query)
+    {
+        return $query
+            ->whereHas('position', fn (Builder $position) => $position->visible())
+            ->with([
+                'position.department',
+                'position.center',
+                'position.program',
+                'position.jobLevel',
+                'position.city',
+            ]);
     }
 }

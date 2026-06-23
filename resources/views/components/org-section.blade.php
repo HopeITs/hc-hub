@@ -10,7 +10,7 @@
 
     // Split the team: leaves (no further reports) get pooled into a compact
     // wrapped grid so wide teams stop sprawling; branches keep the tree layout.
-    $members = collect($team);
+    $members = collect($team)->filter(fn ($p) => $p->is_active);
     $leaves = $members->filter(fn ($p) => $p->{$teamRel}->isEmpty());
     $branches = $members->filter(fn ($p) => $p->{$teamRel}->isNotEmpty());
     $leafRows = $leaves
