@@ -8,12 +8,12 @@ use App\Livewire\ChecklistItems\DoneRequests;
 use App\Livewire\ChecklistItems\PendingItems;
 use App\Livewire\ChecklistItems\PendingReturns;
 use App\Livewire\Dashboard\Index as DashboardIndex;
-use App\Livewire\DigitalId;
 use App\Livewire\Employee\EmployeeProfile;
 use App\Livewire\Employee\EmployeeStatistics;
 use App\Livewire\Employee\Leave\AllLeaveRequestModule;
 use App\Livewire\Employee\Leave\EmpLeaveBalanceModule;
 use App\Livewire\Employee\Leave\MyLeaveRequestModule;
+use App\Livewire\EmployeeCards\ShowDigitalId;
 use App\Livewire\Settings\Password;
 use App\Livewire\Statistics\ContractStatistics;
 use App\Livewire\Statistics\GeneralStatistics;
@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
-Route::get('/ID/{username}', DigitalId::class)->name('digital-id.show');
+Route::get('/id/{username}', ShowDigitalId::class)->name('digital-id.show');
 
 Route::group(
     [

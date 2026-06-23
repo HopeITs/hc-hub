@@ -12,21 +12,21 @@
             --id-black: var(--color-black, #414042);
             --id-icon: #414042;
             min-height: 100vh;
-            padding: clamp(1.5rem, 6vw, 4rem) 1rem;
+            padding: clamp(1.25rem, 5vw, 4rem) 1rem;
             color: var(--id-black);
             background: #ffffff;
             font-family: 'SomarSans', 'Lato', sans-serif;
         }
 
         .digital-id-wrap {
-            width: min(92vw, 25.5rem);
+            width: min(94vw, 32rem);
             margin: 0 auto;
             text-align: center;
         }
 
         .digital-id-logo {
-            width: clamp(8.5rem, 43vw, 15rem);
-            margin: 0 auto clamp(2.6rem, 10vw, 5rem);
+            width: clamp(8.5rem, 38vw, 15rem);
+            margin: 0 auto clamp(2rem, 8vw, 4.25rem);
         }
 
         .digital-id-card {
@@ -36,7 +36,7 @@
             height: auto;
             min-height: 0;
             overflow: hidden;
-            border-radius: clamp(2rem, 9vw, 3.2rem);
+            border-radius: clamp(2rem, 8vw, 3.2rem);
             background: #ffffff;
             box-shadow: 0 1rem 2rem rgb(65 64 66 / 22%);
         }
@@ -44,7 +44,7 @@
         .digital-id-photo-panel {
             position: relative;
             flex: none;
-            height: clamp(18rem, 78vw, 27rem);
+            height: clamp(18rem, 72vw, 30rem);
             overflow: hidden;
             background: #ffffff;
         }
@@ -53,7 +53,7 @@
             position: absolute;
             inset-inline: 0;
             bottom: 0;
-            height: clamp(3.15rem, 13vw, 4.4rem);
+            height: clamp(3.15rem, 11vw, 4.6rem);
             background: var(--id-primary);
         }
 
@@ -62,12 +62,12 @@
             bottom: 0;
             left: 50%;
             z-index: 1;
-            width: min(92%, 23rem);
+            display: block;
+            width: min(92%, 27rem);
             max-height: 94%;
             transform: translateX(-50%);
             object-fit: contain;
             object-position: bottom center;
-            display: block;
         }
 
         .digital-id-info {
@@ -76,13 +76,13 @@
             flex-direction: column;
             align-items: center;
             min-height: 0;
-            padding: clamp(1.15rem, 5vw, 2rem) clamp(1rem, 5vw, 2rem) clamp(1.5rem, 6vw, 2.4rem);
+            padding: clamp(1.15rem, 4.2vw, 2rem) clamp(1.25rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.4rem);
         }
 
         .digital-id-name {
             max-width: 100%;
             color: var(--id-primary);
-            font-size: clamp(2.65rem, 12vw, 4.45rem);
+            font-size: clamp(2.65rem, 10.5vw, 4.75rem);
             font-weight: 900;
             line-height: 0.88;
             letter-spacing: 0;
@@ -92,9 +92,9 @@
 
         .digital-id-position {
             max-width: 100%;
-            margin-top: clamp(0.7rem, 3vw, 1rem);
+            margin-top: clamp(0.7rem, 2.6vw, 1rem);
             color: var(--id-black);
-            font-size: clamp(1.28rem, 5.5vw, 2.1rem);
+            font-size: clamp(1.28rem, 4.6vw, 2.1rem);
             font-weight: 700;
             line-height: 1.02;
             overflow-wrap: anywhere;
@@ -104,7 +104,7 @@
             max-width: 100%;
             margin-top: 0.22rem;
             color: var(--id-black);
-            font-size: clamp(0.98rem, 4.1vw, 1.48rem);
+            font-size: clamp(0.98rem, 3.5vw, 1.48rem);
             font-weight: 700;
             line-height: 1.05;
             text-transform: uppercase;
@@ -113,9 +113,9 @@
 
         .digital-id-city {
             max-width: 100%;
-            margin-top: clamp(0.9rem, 4vw, 1.5rem);
+            margin-top: clamp(0.9rem, 3.4vw, 1.5rem);
             color: var(--id-primary);
-            font-size: clamp(1rem, 4.1vw, 1.48rem);
+            font-size: clamp(1rem, 3.5vw, 1.48rem);
             font-weight: 700;
             line-height: 1.05;
             text-transform: uppercase;
@@ -125,7 +125,7 @@
         .digital-id-divider {
             width: 70%;
             height: 0.12rem;
-            margin-top: clamp(1rem, 4.5vw, 1.65rem);
+            margin-top: clamp(1rem, 3.8vw, 1.65rem);
             background: #bcbec0;
         }
 
@@ -133,14 +133,14 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: clamp(0.55rem, 2.4vw, 0.9rem);
-            margin-top: clamp(1rem, 4.6vw, 1.7rem);
+            gap: clamp(0.55rem, 2vw, 0.9rem);
+            margin-top: clamp(1rem, 3.8vw, 1.7rem);
         }
 
         .digital-id-icon-link {
             display: inline-flex;
-            width: clamp(2.1rem, 9vw, 3rem);
-            height: clamp(2.1rem, 9vw, 3rem);
+            width: clamp(2.1rem, 7.8vw, 3rem);
+            height: clamp(2.1rem, 7.8vw, 3rem);
             align-items: center;
             justify-content: center;
             border-radius: 0.5rem;
@@ -162,9 +162,9 @@
         }
 
         .digital-id-emergency {
-            margin-top: clamp(1.75rem, 7vw, 3.1rem);
+            margin-top: clamp(1.75rem, 6vw, 3.1rem);
             color: var(--id-black);
-            font-size: clamp(1rem, 4vw, 1.55rem);
+            font-size: clamp(1rem, 3.6vw, 1.55rem);
             font-weight: 500;
             line-height: 1.2;
         }
@@ -172,7 +172,7 @@
         .digital-id-emergency a,
         .digital-id-emergency strong {
             color: var(--id-black);
-            font-size: clamp(1.12rem, 4.5vw, 1.75rem);
+            font-size: clamp(1.12rem, 4vw, 1.75rem);
             font-weight: 700;
             text-decoration: none;
         }
