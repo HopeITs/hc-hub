@@ -102,7 +102,7 @@
             <div class="md:col-span-1">
                 <x-forms.input-label for="center">{{trans_choice('general.center',1)}}</x-forms.input-label>
                 <x-forms.select2-input wire:model="form.center_id" id="center">
-                    <option>Select Any..</option>
+                    <option value="">@lang('general.online')</option>
                     @foreach($centers as $center)
                         <option value="{{$center->id}}">{{$center->name .' - ' . $center->city->name}}</option>
                     @endforeach

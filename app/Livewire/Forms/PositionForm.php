@@ -96,7 +96,10 @@ class PositionForm extends Form
 
     private function normalizeNullableManagers(): void
     {
+        // An empty <select> submits '' — coerce to null so "online" positions
+        // (no center) and unset managers store/validate as null, not ''.
         $this->tech_manager_id = blank($this->tech_manager_id) ? null : $this->tech_manager_id;
         $this->direct_manager_id = blank($this->direct_manager_id) ? null : $this->direct_manager_id;
+        $this->center_id = blank($this->center_id) ? null : $this->center_id;
     }
 }

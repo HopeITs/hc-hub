@@ -33,7 +33,18 @@ class OrgChart extends Component
     /** Flat manager list for the "focus on a manager" filter. */
     public Collection $managers;
 
-    public array $tree = [];
+    /**
+     * The built chart tree. Protected (not a Livewire public property) so the
+     * Eloquent models — with their *filtered* eager-loaded team relations — are
+     * never serialized/rehydrated between requests. Rehydration re-fetches models
+     * fresh and drops the constrained eager loads, which would make collapsing /
+     * zooming lazy-load every report unfiltered. Instead it is rebuilt once per
+     * request in render().
+     */
+    protected array $tree = [];
+
+    /** Whether the tree has already been built during the current request. */
+    protected bool $treeBuilt = false;
 
     public array $collapsed = [];
 
@@ -81,6 +92,9 @@ class OrgChart extends Component
         'job_level_id', 'focus_manager_id', 'manager_type',
     ];
 
+    /** The main "parent" city (Syria) that scopes the whole org. */
+    private const MAIN_CITY_ID = 1;
+
     public function mount(): void
     {
         $this->managers = collect();
@@ -109,7 +123,7 @@ class OrgChart extends Component
             ->visible()
             ->managersOnly($this->manager_type)
             ->whereHas('activeContracts')
-            ->when($this->city_id, fn (Builder $q) => $q->where('city_id', $this->city_id))
+            ->when($this->cityFilterIds(), fn (Builder $q, array $ids) => $q->whereIn('city_id', $ids))
             ->when($this->program_id, fn (Builder $q) => $q->where('program_id', $this->program_id))
             ->with(['activeContracts.employee', 'jobLevel'])
             ->orderByGrade()
@@ -275,7 +289,7 @@ class OrgChart extends Component
                             ->orWhere('last_name_ar', 'like', $term);
                     });
             })
-            ->when($this->city_id, fn (Builder $query) => $query->where('city_id', $this->city_id))
+            ->when($this->cityFilterIds(), fn (Builder $query, array $ids) => $query->whereIn('city_id', $ids))
             ->when($this->program_id, fn (Builder $query) => $query->where('program_id', $this->program_id))
             ->when($this->center_id, fn (Builder $query) => $query->where('center_id', $this->center_id))
             ->when($this->department_id, fn (Builder $query) => $query->where('department_id', $this->department_id))
@@ -302,6 +316,7 @@ class OrgChart extends Component
     private function refreshTree(): void
     {
         $this->tree = $this->buildTree();
+        $this->treeBuilt = true;
         $this->collapsed = collect($this->tree['managers'])
             ->mapWithKeys(fn (Position $position) => [$position->id => $this->collapsed[$position->id] ?? true])
             ->all();
@@ -397,12 +412,28 @@ class OrgChart extends Component
             ->get();
     }
 
+    /**
+     * City ids the chart should keep when a city filter is active. Filtering on
+     * a branch city (e.g. Latakia) still keeps the main city (Syria) so the
+     * HQ/parent positions stay visible and the tree remains connected.
+     *
+     * @return list<int>|null  Null when no city filter is active.
+     */
+    private function cityFilterIds(): ?array
+    {
+        if (! $this->city_id) {
+            return null;
+        }
+
+        return array_values(array_unique([self::MAIN_CITY_ID, $this->city_id]));
+    }
+
     private function applyFilters(Builder|Relation $query): Builder|Relation
     {
         return $query
             ->visible()
             ->whereNotNull($this->manager_type.'_manager_id')
-            ->when($this->city_id, fn (Builder $query) => $query->where('city_id', $this->city_id))
+            ->when($this->cityFilterIds(), fn (Builder $query, array $ids) => $query->whereIn('city_id', $ids))
             ->when($this->program_id, fn (Builder $query) => $query->where('program_id', $this->program_id))
             ->when($this->center_id, fn (Builder $query) => $query->where('center_id', $this->center_id))
             ->when($this->department_id, fn (Builder $query) => $query->where('department_id', $this->department_id))
@@ -443,6 +474,13 @@ class OrgChart extends Component
 
     public function render()
     {
-        return view('livewire.position.org-chart');
+        // Actions that don't change a tree filter (collapse, zoom, density…) skip
+        // refreshTree(); rebuild here so the view always renders a freshly filtered
+        // tree rather than a rehydrated, unfiltered one.
+        if (! $this->treeBuilt) {
+            $this->refreshTree();
+        }
+
+        return view('livewire.position.org-chart', ['tree' => $this->tree]);
     }
 }
