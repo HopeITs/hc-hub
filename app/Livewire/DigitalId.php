@@ -4,7 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Employee;
 use App\Models\Position;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -37,6 +37,7 @@ class DigitalId extends Component
 
         $position = $currentContract?->position;
         $city = $position?->city ?? $position?->center?->city;
+        $emergencyPhone = $this->findEmergencyPhone($position);
 
         return view('livewire.digital-id', [
             'employee' => $this->employee,
@@ -44,7 +45,8 @@ class DigitalId extends Component
             'position' => $position,
             'center' => $position?->center,
             'city' => $city,
-            'emergencyPhone' => $this->findEmergencyPhone($position),
+            'emergencyPhone' => $emergencyPhone,
+            'emergencyPhoneHref' => $this->phoneHref($emergencyPhone),
             'phoneHref' => $this->phoneHref($this->employee->work_phone),
             'telegramHref' => $this->telegramHref($this->employee->telegram_work),
             'linkedinHref' => $this->linkedinHref($this->employee->linkedin),
@@ -53,45 +55,59 @@ class DigitalId extends Component
 
     private function findEmergencyPhone(?Position $position): ?string
     {
-        $cityId = $position?->city_id ?? $position?->center?->city_id;
+        $cityId = $position?->city_id;
 
         if (! $cityId) {
             return null;
         }
 
-        return Employee::query()
-            ->where('is_active', true)
-            ->whereNotNull('work_phone')
-            ->where('work_phone', '<>', '')
-            ->whereHas('contracts', function (Builder $contract) use ($cityId) {
-                $contract
-                    ->where('is_active', true)
-                    ->whereNull('terminated_at')
-                    ->whereDate('start_date', '<=', now())
-                    ->whereDate('end_date', '>=', now())
-                    ->whereHas('position', function (Builder $position) use ($cityId) {
-                        $position
-                            ->where(function (Builder $cityScope) use ($cityId) {
-                                $cityScope
-                                    ->where('city_id', $cityId)
-                                    ->orWhereHas('center', fn (Builder $center) => $center->where('city_id', $cityId));
-                            })
-                            ->where(function (Builder $hrScope) {
-                                $hrScope
-                                    ->where('title_en', 'like', '%HR%')
-                                    ->orWhere('title_en', 'like', '%Human Resource%')
-                                    ->orWhere('title_ar', 'like', '%الموارد البشرية%')
-                                    ->orWhereHas('department', function (Builder $department) {
-                                        $department
-                                            ->where('code', 'HR')
-                                            ->orWhere('name', 'like', '%Human Resource%')
-                                            ->orWhere('name', 'like', '%HR%');
-                                    });
-                            });
+        return $this->hrPhoneForCity($cityId)
+            ?? $this->hrPhoneForCity($this->headOfficeCityId(), exceptCityId: $cityId)
+            ?? $this->hrPhoneForCity();
+    }
+
+    private function hrPhoneForCity(?int $cityId = null, ?int $exceptCityId = null): ?string
+    {
+        $hr = DB::table('employees as e')
+            ->join('contracts as c', 'c.employee_id', '=', 'e.id')
+            ->join('positions as p', 'p.id', '=', 'c.position_id')
+            ->leftJoin('departments as d', 'd.id', '=', 'p.department_id')
+            ->where('e.is_active', true)
+            ->where('c.is_active', true)
+            ->whereDate('c.start_date', '<=', now())
+            ->whereDate('c.end_date', '>=', now())
+            ->where(function ($query) {
+                $query
+                    ->whereNotNull('e.work_phone')
+                    ->where('e.work_phone', '<>', '')
+                    ->orWhere(function ($query) {
+                        $query
+                            ->whereNotNull('e.personal_phone')
+                            ->where('e.personal_phone', '<>', '');
                     });
             })
-            ->oldest('id')
-            ->value('work_phone');
+            ->when($cityId, fn ($query) => $query->where('p.city_id', $cityId))
+            ->when($exceptCityId, fn ($query) => $query->where('p.city_id', '<>', $exceptCityId))
+            ->where(function ($query) {
+                $query
+                    ->where('p.title_en', 'like', '%HR%')
+                    ->orWhere('p.title_en', 'like', '%Human Resource%')
+                    ->orWhere('p.title_ar', 'like', '%الموارد البشرية%')
+                    ->orWhere('d.code', 'HR')
+                    ->orWhere('d.name', 'like', '%Human Resource%')
+                    ->orWhere('d.name', 'like', '%HR%');
+            })
+            ->orderBy('e.id')
+            ->first(['e.work_phone', 'e.personal_phone']);
+
+        return $hr?->work_phone ?: $hr?->personal_phone;
+    }
+
+    private function headOfficeCityId(): ?int
+    {
+        return DB::table('cities')
+            ->where('slug', 'SYR')
+            ->value('id');
     }
 
     private function phoneHref(?string $phone): ?string
