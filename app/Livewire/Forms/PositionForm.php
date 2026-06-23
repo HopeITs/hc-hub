@@ -67,6 +67,7 @@ class PositionForm extends Form
 
     public function store()
     {
+        $this->normalizeNullableManagers();
         $this->validate();
         $this->position = Position::create($this->pull());
         $this->reset();
@@ -75,6 +76,7 @@ class PositionForm extends Form
 
     public function update()
     {
+        $this->normalizeNullableManagers();
         $this->validate();
 
         $this->position->update(
@@ -90,5 +92,11 @@ class PositionForm extends Form
                 'is_active' => !$this->position->is_active,
             ]
         );
+    }
+
+    private function normalizeNullableManagers(): void
+    {
+        $this->tech_manager_id = blank($this->tech_manager_id) ? null : $this->tech_manager_id;
+        $this->direct_manager_id = blank($this->direct_manager_id) ? null : $this->direct_manager_id;
     }
 }

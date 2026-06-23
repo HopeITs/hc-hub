@@ -317,13 +317,15 @@ class OrgChart extends Component
         $teamRelation = $this->manager_type.'Team';
         $relations = Position::cardRelations($this->manager_type);
 
-        $rootPosition = $this->resolveRoot($managerColumn, $relations);
+        $rootPositions = $this->resolveRoots($managerColumn, $relations);
 
-        if (! $rootPosition) {
+        if ($rootPositions->isEmpty()) {
             $this->managersCount = 0;
 
             return ['root' => collect(), 'rootAssistant' => collect(), 'managers' => collect()];
         }
+
+        $rootIds = $rootPositions->pluck('id');
 
         // When focusing on a specific manager there is no "assistant" tier — the
         // manager IS the root and their team becomes the first level.
@@ -331,7 +333,7 @@ class OrgChart extends Component
             ? collect()
             : Position::query()
                 ->visible()
-                ->where($managerColumn, $rootPosition->id)
+                ->whereIn($managerColumn, $rootIds)
                 ->whereHas('jobLevel', fn (Builder $query) => $query->where('grade', 2))
                 ->with($relations)
                 ->get();
@@ -346,7 +348,7 @@ class OrgChart extends Component
         // applyFilters() as the recursion so every tier obeys one rule; the root
         // always stays visible and the filters only prune the branches below it.
         $managers = Position::query()
-            ->where($managerColumn, $rootPosition->id)
+            ->whereIn($managerColumn, $rootIds)
             ->whereNotIn('id', $rootAssistant->pluck('id'))
             ->tap(fn (Builder $query) => $this->applyFilters($query))
             ->orderByGrade()
@@ -356,13 +358,13 @@ class OrgChart extends Component
         $this->managersCount = $managers->count();
 
         return [
-            'root' => collect([$rootPosition]),
+            'root' => $rootPositions,
             'rootAssistant' => $rootAssistant,
             'managers' => $managers,
         ];
     }
 
-    private function resolveRoot(string $managerColumn, array $relations): ?Position
+    private function resolveRoots(string $managerColumn, array $relations): Collection
     {
         // A focused manager becomes the single source of truth for the root.
         if ($this->focus_manager_id) {
@@ -370,23 +372,29 @@ class OrgChart extends Component
                 ->visible()
                 ->whereKey($this->focus_manager_id)
                 ->with($relations)
-                ->first();
+                ->get();
         }
 
-        // Otherwise the grade-1 Program Manager is the one true root, falling back
-        // to a manager-less position only when no grade-1 exists.
-        return Position::query()
+        $roots = Position::query()
             ->visible()
+            ->whereNull($managerColumn)
             ->whereHas('jobLevel', fn (Builder $query) => $query->where('grade', 1))
             ->with($relations)
+            ->orderByGrade()
             ->orderBy('id')
-            ->first()
-            ?? Position::query()
-                ->visible()
-                ->whereNull($managerColumn)
-                ->with($relations)
-                ->orderByGrade()
-                ->first();
+            ->get();
+
+        if ($roots->isNotEmpty()) {
+            return $roots;
+        }
+
+        return Position::query()
+            ->visible()
+            ->whereNull($managerColumn)
+            ->with($relations)
+            ->orderByGrade()
+            ->limit(1)
+            ->get();
     }
 
     private function applyFilters(Builder|Relation $query): Builder|Relation
@@ -416,6 +424,7 @@ class OrgChart extends Component
             }
         };
 
+        $walk($this->tree['rootAssistant']);
         $walk($this->tree['managers']);
 
         $positions = $positions->unique('id')->values();

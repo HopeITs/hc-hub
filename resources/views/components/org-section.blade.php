@@ -13,6 +13,9 @@
     $members = collect($team);
     $leaves = $members->filter(fn ($p) => $p->{$teamRel}->isEmpty());
     $branches = $members->filter(fn ($p) => $p->{$teamRel}->isNotEmpty());
+    $leafRows = $leaves
+        ->sortBy(fn ($p) => sprintf('%04d-%010d', $p->jobLevel?->grade ?? 999, $p->id))
+        ->groupBy(fn ($p) => $p->jobLevel?->grade ?? 999);
 
     // Keep the pool roughly square: cap columns by the leaf count.
     $poolMax = $compact ? 'max-w-[34rem]' : 'max-w-[44rem]';
@@ -50,21 +53,25 @@
     <div class="relative flex flex-col items-center {{ $compact ? 'pt-4' : 'pt-5' }}">
         <span class="absolute start-1/2 top-0 {{ $compact ? 'h-4' : 'h-5' }} {{ $vLine }}"></span>
 
-        <div class="flex flex-wrap content-start justify-center {{ $gap }} {{ $poolMax }} rounded-2xl border border-gray-100 bg-gray-50/40 {{ $compact ? 'p-2' : 'p-3' }}">
-            @foreach($leaves as $position)
-                @foreach($position->activeContracts as $contract)
-                    <x-org-node
-                        :position="$position"
-                        :employee="$contract->employee"
-                        :manager-type="$managerType"
-                        :compact="$compact"
-                        size="sm"
-                    />
-                @endforeach
+        <div class="flex flex-col items-center {{ $gap }} {{ $poolMax }} rounded-2xl border border-gray-100 bg-gray-50/40 {{ $compact ? 'p-2' : 'p-3' }}">
+            @foreach($leafRows as $grade => $positions)
+                <div class="flex flex-wrap content-start justify-center {{ $gap }} w-full">
+                    @foreach($positions as $position)
+                        @foreach($position->activeContracts as $contract)
+                            <x-org-node
+                                :position="$position"
+                                :employee="$contract->employee"
+                                :manager-type="$managerType"
+                                :compact="$compact"
+                                size="sm"
+                            />
+                        @endforeach
 
-                @for($i = 0; $i < max(0, $position->max_emp - $position->activeContracts->count()); $i++)
-                    <x-org-empty-node :position="$position" :compact="$compact" size="sm"/>
-                @endfor
+                        @for($i = 0; $i < max(0, $position->max_emp - $position->activeContracts->count()); $i++)
+                            <x-org-empty-node :position="$position" :compact="$compact" size="sm"/>
+                        @endfor
+                    @endforeach
+                </div>
             @endforeach
         </div>
     </div>

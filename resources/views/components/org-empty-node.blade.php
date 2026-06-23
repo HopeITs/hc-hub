@@ -20,7 +20,7 @@
     @if($position->program)
         <div class="mb-1.5 flex justify-center">
             <span class="max-w-full truncate rounded-full bg-gray-200/70 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-secondary-light">
-                {{ $position->program->name }}
+                {{ $position->program->slug }}
             </span>
         </div>
     @endif
@@ -29,8 +29,8 @@
         <span class="flex {{ $style['icon'] }} shrink-0 items-center justify-center rounded-full border border-dashed border-gray-300 bg-white text-secondary-light shadow-sm">
             <x-icons.user class="size-5" />
         </span>
-        <div class="mt-2 min-w-0 w-full">
-            <div class="truncate font-extrabold text-secondary-medium">@lang('general.vacant-position')</div>
+        <div class="w-full min-w-0 mt-2">
+            <div class="font-extrabold truncate text-secondary-medium">@lang('general.vacant-position')</div>
             <div class="mt-0.5 line-clamp-2 min-h-6 font-semibold leading-tight">{{ $position->title }}</div>
         </div>
     </div>

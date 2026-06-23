@@ -46,7 +46,7 @@
     @if($position->program)
         <div class="mb-1.5 flex justify-center">
             <span class="max-w-full truncate rounded-full bg-secondary-soft/15 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-secondary-dark">
-                {{ $position->program->name }}
+                {{ $position->program->slug }}
             </span>
         </div>
     @endif
