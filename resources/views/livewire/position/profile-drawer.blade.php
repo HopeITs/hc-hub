@@ -9,6 +9,8 @@
 <div x-data="{ show: @entangle('open') }"
      x-cloak
      x-show="show"
+     x-effect="document.body.classList.toggle('overflow-hidden', show)"
+     x-on:livewire:navigating.window="document.body.classList.remove('overflow-hidden')"
      x-on:keydown.escape.window="show = false"
      class="fixed inset-0 z-50">
 
@@ -18,9 +20,11 @@
          wire:click="close"></div>
 
     {{-- Panel: right drawer on desktop, bottom sheet on mobile --}}
-    <div class="absolute inset-x-0 bottom-0 max-h-[90vh] sm:inset-y-0 sm:end-0 sm:start-auto sm:max-h-none sm:w-[26rem]
-                flex flex-col rounded-t-3xl bg-white shadow-2xl sm:rounded-none"
+    <div class="absolute inset-x-0 bottom-0 flex max-h-[92dvh] min-h-0 flex-col rounded-t-3xl bg-white shadow-2xl
+                sm:inset-y-0 sm:end-0 sm:start-auto sm:h-dvh sm:max-h-none sm:w-[28rem] sm:rounded-none"
          x-show="show"
+         x-on:wheel.stop
+         x-on:touchmove.stop
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="translate-y-full sm:translate-y-0 sm:translate-x-full sm:rtl:-translate-x-full"
          x-transition:enter-end="translate-y-0 sm:translate-x-0"
@@ -30,7 +34,7 @@
 
         @if($employee)
             {{-- Header --}}
-            <div class="relative shrink-0 overflow-hidden bg-gradient-to-br from-secondary-dark to-secondary-medium px-6 pb-6 pt-7 text-white">
+            <div class="relative shrink-0 overflow-hidden bg-gradient-to-br from-secondary-dark to-secondary-medium px-6 pb-5 pt-6 text-white">
                 <div class="absolute -end-10 -top-12 size-40 rounded-full bg-primary/20 blur-2xl"></div>
                 <button type="button" wire:click="close"
                         class="absolute end-4 top-4 flex size-8 items-center justify-center rounded-lg text-white/80 transition hover:bg-white/10 hover:text-white">
@@ -41,7 +45,7 @@
 
                 <div class="relative flex flex-col items-center text-center">
                     <img src="{{ $employee->getFirstMediaUrl('avatar') }}" alt="{{ $employee->name }}"
-                         class="size-24 rounded-full object-cover ring-4 ring-white/30 shadow-lg">
+                         class="size-20 rounded-full object-cover ring-4 ring-white/30 shadow-lg sm:size-24">
                     <h2 class="mt-3 text-lg font-extrabold tracking-tight">{{ $employee->name }}</h2>
                     @if($position)
                         <p class="mt-0.5 text-sm font-semibold text-white/80">{{ $position->title }}</p>
@@ -55,10 +59,11 @@
             </div>
 
             {{-- Body --}}
-            <div class="flex-1 space-y-5 overflow-y-auto px-6 py-5">
+            <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-smooth px-5 py-5 [scrollbar-gutter:stable] sm:px-6">
+                <div class="space-y-5 pb-4">
                 {{-- Org placement --}}
                 @if($position)
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         @foreach([
                             ['label' => trans_choice('general.program', 1), 'value' => $position->program?->name],
                             ['label' => trans_choice('general.department', 1), 'value' => $position->department?->name],
@@ -148,15 +153,19 @@
                     </div>
                 @endif
 
-                {{-- Full profile link --}}
-                @if(filled($employee->username))
+                </div>
+            </div>
+
+            {{-- Footer action stays visible while the details scroll. --}}
+            @if(filled($employee->username))
+                <div class="shrink-0 border-t border-gray-100 bg-white/95 px-5 py-4 shadow-[0_-12px_24px_-18px_rgba(15,23,42,0.45)] backdrop-blur sm:px-6">
                     <a href="{{ route('employees.show', ['employee' => $employee->username]) }}" wire:navigate
-                       class="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-600">
+                       class="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:ring-offset-2">
                         @lang('general.view-full-profile')
                         <svg class="size-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
                     </a>
-                @endif
-            </div>
+                </div>
+            @endif
         @endif
     </div>
 </div>
