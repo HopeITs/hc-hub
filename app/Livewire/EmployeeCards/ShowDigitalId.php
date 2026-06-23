@@ -4,7 +4,6 @@ namespace App\Livewire\EmployeeCards;
 
 use App\Models\Contract;
 use App\Models\Employee;
-use App\Models\Position;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -19,11 +18,11 @@ class ShowDigitalId extends Component
         $this->employee = Employee::query()
             ->where('username', $username)
             ->with([
+                'city',
                 'media',
                 'contracts' => fn ($query) => $query
                     ->with([
                         'position.center.city',
-                        'position.city',
                         'position.department',
                     ])
                     ->latest('start_date'),
@@ -35,8 +34,8 @@ class ShowDigitalId extends Component
     {
         $contract = $this->currentContract();
         $position = $contract?->position;
-        $city = $position?->city ?? $position?->center?->city;
-        $emergencyPhone = $this->findEmergencyPhone($position);
+        $city = $this->employee->city;
+        $emergencyPhone = $this->findEmergencyPhone($this->employee->city_id);
 
         return view('livewire.employee-cards.show-digital-id', [
             'employee' => $this->employee,
@@ -57,23 +56,18 @@ class ShowDigitalId extends Component
         return $this->employee->contracts->first();
     }
 
-    private function findEmergencyPhone(?Position $position): ?string
+    private function findEmergencyPhone(?int $cityId): ?string
     {
-        $cityId = $position?->city_id;
-
         if (! $cityId) {
             return null;
         }
 
         return Employee::query()
             ->where('is_active', true)
+            ->where('city_id', $cityId)
             ->whereNotNull('work_phone')
             ->where('work_phone', '<>', '')
-            ->whereHas('contracts.position', function (Builder $position) use ($cityId) {
-                $position
-                    ->where('city_id', $cityId)
-                    ->whereHas('department', fn (Builder $department) => $department->where('code', 'HR'));
-            })
+            ->whereHas('contracts.position.department', fn (Builder $department) => $department->where('code', 'HR'))
             ->orderBy('id')
             ->value('work_phone');
     }
