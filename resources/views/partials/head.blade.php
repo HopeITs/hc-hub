@@ -3,9 +3,12 @@
 
 <title>{{ $title ?? config('app.name') }}</title>
 
-<link rel="icon" href="{{ asset('assets/img/hope-center-icon.svg') }}?v=20260615" type="image/svg+xml">
-<link rel="shortcut icon" href="{{ asset('assets/img/hope-center-icon.svg') }}?v=20260615" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="{{asset('favicons/apple-touch-icon.png')}}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{asset('favicons/favicon-32x32.png')}}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{asset('favicons/favicon-16x16.png')}}">
+<link rel="manifest" href="{{asset('favicons/site.webmanifest')}}">
+
+
 
 {{-- Preload the critical brand font weights so text paints without a flash --}}
 <link rel="preload" href="{{ asset('fonts/SomarSans/SomarSans-Regular.otf') }}" as="font" type="font/otf" crossorigin>

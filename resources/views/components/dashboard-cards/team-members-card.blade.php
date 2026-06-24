@@ -5,7 +5,7 @@
 @endphp
 
 <div x-data="{ search: '' }"
-     class="relative w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
+    class="relative w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
 
     <!-- Header -->
     <div class="flex items-center justify-between gap-6 px-6 py-6">
@@ -14,40 +14,34 @@
         </h2>
 
         <div class="relative flex-1">
-            <input
-                x-model="search"
-                type="text"
-                placeholder="{{ __('general.search') }}"
+            <input x-model="search" type="text" placeholder="{{ __('general.search') }}"
                 class="w-full h-6 text-xs rounded-full border border-gray-300 bg-white
                        ps-8 pt-2.5 pe-3 py-3 placeholder-secondary-light text-gray-700
                        focus:border-gray-400 focus:ring-0 outline-none transition">
             <div class="absolute left-2 top-[13px] -translate-y-1/2 text-gray-400 pointer-events-none">
-                <x-icons.search class="w-2 h-2"/>
+                <x-icons.search class="w-2 h-2" />
             </div>
         </div>
     </div>
 
     <!-- Team List -->
-    <div class="relative px-6 pt-2 space-y-3 overflow-y-auto flex-grow
+    <div
+        class="relative px-6 pt-2 space-y-3 overflow-y-auto flex-grow
                 scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent
                 hover:scrollbar-thumb-[var(--color-primary-300)] max-h-[440px]">
 
         @forelse($this->teamMembers as $member)
-
             @php
                 // Phone normalization
                 $phone = preg_replace('/\D+/', '', $member->personal_phone ?? '');
 
                 // Localized job title for each member
                 $memberContract = $member->latestActiveContract();
-                $memberTitle = $memberContract?->position?->$titleCol
-                    ?? $memberContract?->position?->title_en
-                    ?? '—';
+                $memberTitle = $memberContract?->position?->$titleCol ?? ($memberContract?->position?->title_en ?? '—');
             @endphp
 
-                <!-- Member Row -->
-            <div
-                x-show="
+            <!-- Member Row -->
+            <div x-show="
                     !search ||
                     '{{ strtolower($member->displayName ?? $member->name) }}'.includes(search.toLowerCase()) ||
                     '{{ strtolower($memberTitle) }}'.includes(search.toLowerCase())
@@ -59,11 +53,11 @@
                 <div class="flex items-center flex-1 min-w-0 gap-3">
 
                     <!-- Avatar -->
-                    <div class="flex items-center justify-center h-10 w-10 flex-shrink-0 rounded-full overflow-hidden
+                    <div
+                        class="flex items-center justify-center h-10 w-10 flex-shrink-0 rounded-full overflow-hidden
                                 bg-[var(--color-primary-500)] text-white font-semibold uppercase shadow-sm">
                         <img src="{{ $member->getFirstMediaUrl('avatar') }}"
-                             alt="{{ $member->displayName ?? $member->name }}"
-                             class="object-cover w-full h-full">
+                            alt="{{ $member->displayName ?? $member->name }}" class="object-fit w-full h-full">
                     </div>
 
                     <!-- Name + Position -->
@@ -81,25 +75,22 @@
                 <!-- Actions -->
                 <div class="flex items-center flex-shrink-0 gap-2 ms-4">
 
-                    <a href="{{ route('employees.show', ['employee' => $member?->username]) }}"
-                       title="View Profile">
-                        <x-icons.user class="transition text-secondary-light hover:text-primary"/>
+                    <a href="{{ route('employees.show', ['employee' => $member?->username]) }}" title="View Profile">
+                        <x-icons.user class="transition text-secondary-light hover:text-primary" />
                     </a>
 
                     <a href="tel:{{ $phone }}" title="Call">
-                        <x-icons.phone class="text-secondary-light ml-0.5 hover:text-primary transition"/>
+                        <x-icons.phone class="text-secondary-light ml-0.5 hover:text-primary transition" />
                     </a>
 
                     <a href="tg://resolve?phone={{ $phone }}"
-                       class="transition text-secondary-light hover:text-primary"
-                       title="Chat on Telegram">
-                        <x-icons.telegram class="transition text-secondary-light hover:text-primary"/>
+                        class="transition text-secondary-light hover:text-primary" title="Chat on Telegram">
+                        <x-icons.telegram class="transition text-secondary-light hover:text-primary" />
                     </a>
 
                     <a href="mailto:{{ $member->account->email ?? '#' }}"
-                       class="transition text-secondary-light hover:text-primary"
-                       title="Send Email">
-                        <x-icons.envelope class="transition text-secondary-light ms-1 hover:text-primary"/>
+                        class="transition text-secondary-light hover:text-primary" title="Send Email">
+                        <x-icons.envelope class="transition text-secondary-light ms-1 hover:text-primary" />
                     </a>
 
                 </div>
@@ -116,7 +107,7 @@
     <!-- Footer -->
     <div class="border-t border-[var(--color-neutral-200)] bg-white px-6 py-3 text-center mt-auto">
         <a href="{{ route('org.chart') }}"
-           class="text-[12px] font-semibold text-[var(--color-primary-500)] hover:underline">
+            class="text-[12px] font-semibold text-[var(--color-primary-500)] hover:underline">
             @lang('general.view-all') →
         </a>
     </div>
