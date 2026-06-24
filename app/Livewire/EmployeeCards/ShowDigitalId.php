@@ -5,6 +5,7 @@ namespace App\Livewire\EmployeeCards;
 use App\Models\Contract;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\App;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -12,6 +13,11 @@ use Livewire\Component;
 class ShowDigitalId extends Component
 {
     public Employee $employee;
+
+    public function boot(): void
+    {
+        App::setLocale('en');
+    }
 
     public function mount(string $username): void
     {
@@ -36,13 +42,20 @@ class ShowDigitalId extends Component
         $position = $contract?->position;
         $city = $this->employee->city;
         $emergencyPhone = $this->findEmergencyPhone($this->employee->city_id);
+        $firstName = $this->employee->first_name_en;
+        $lastName = $this->employee->last_name_en;
 
         return view('livewire.employee-cards.show-digital-id', [
             'employee' => $this->employee,
             'avatarSrc' => $this->employee->getFirstMediaUrl('avatar'),
+            'employeeName' => trim($firstName.' '.$lastName),
+            'firstName' => $firstName,
+            'lastName' => $lastName,
             'position' => $position,
+            'positionTitle' => $position?->title_en,
             'center' => $position?->center,
             'city' => $city,
+            'cityName' => $city?->name_en,
             'emergencyPhone' => $emergencyPhone,
             'emergencyPhoneHref' => $this->phoneHref($emergencyPhone),
             'phoneHref' => $this->phoneHref($this->employee->work_phone),
