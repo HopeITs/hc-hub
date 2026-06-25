@@ -5,16 +5,6 @@
     $trunk = $isTech ? 'border-s border-dashed border-amber-300' : 'bg-gray-300';
     $branchBorder = $isTech ? 'border-dashed border-amber-300' : 'border-gray-300';
     $colGap = $compact ? 'gap-3' : 'gap-7';
-
-    // Recursively count filled positions (staff) within a manager's whole branch.
-    $staffCount = function ($team, $rel) use (&$staffCount) {
-        $total = 0;
-        foreach ($team as $position) {
-            $total += $position->activeContracts->count();
-            $total += $staffCount($position->{$rel}, $rel);
-        }
-        return $total;
-    };
 @endphp
 
 <div class="space-y-4 pb-8"
@@ -418,23 +408,24 @@
                                         >
                                             <span class="absolute start-1/2 top-0 h-6 w-px {{ $trunk }}"></span>
                                             <div class="rounded-3xl border border-gray-200 bg-white/80 {{ $compact ? 'p-2' : 'p-3' }} shadow-sm backdrop-blur-sm">
-                                                <div class="mb-2 flex items-center justify-between gap-2 px-1">
-                                                    <span class="rounded-full bg-gray-100 px-2 py-1 text-[10px] font-bold text-secondary-medium">
-                                                        {{ $team->count() }} @lang('general.direct-reports')
-                                                    </span>
-                                                    @if($team->isNotEmpty())
-                                                        <button type="button"
-                                                                wire:click="toggleCollapse({{ $manager->id }})"
-                                                                x-on:click="open = !open"
-                                                                class="flex size-7 items-center justify-center rounded-lg text-secondary-light transition hover:bg-secondary-soft hover:text-primary"
-                                                                :title="open ? @js(__('general.collapse')) : @js(__('general.expand'))">
-                                                            <svg class="size-4 transition-transform" :class="open ? 'rotate-180' : ''"
-                                                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
-                                                            </svg>
-                                                        </button>
-                                                    @endif
-                                                </div>
+                                                @if($team->isNotEmpty())
+                                                    <button type="button"
+                                                            wire:click="toggleCollapse({{ $manager->id }})"
+                                                            x-on:click="open = !open"
+                                                            class="mb-2 flex w-full items-center justify-between gap-2 rounded-full bg-gray-100 px-2.5 py-1.5 text-[10px] font-bold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                                                            :aria-expanded="open"
+                                                            :title="open ? @js(__('general.collapse')) : @js(__('general.expand'))">
+                                                        <span>{{ $team->count() }} @lang('general.direct-reports')</span>
+                                                        <svg class="size-4 shrink-0 transition-transform" :class="open ? 'rotate-180' : ''"
+                                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+                                                        </svg>
+                                                    </button>
+                                                @else
+                                                    <div class="mb-2 rounded-full bg-gray-100 px-2.5 py-1.5 text-center text-[10px] font-bold text-secondary-medium">
+                                                        0 @lang('general.direct-reports')
+                                                    </div>
+                                                @endif
 
                                                 {{-- Center the manager card over its (potentially wider) team. --}}
                                                 <div class="flex flex-wrap justify-center gap-2">
@@ -446,25 +437,9 @@
                                                 </div>
 
                                                 @if($team->isNotEmpty())
-                                                    @php($branchStaff = $staffCount($team, $manager_type.'Team'))
-                                                    {{-- Collapsed: compact expand chip (not an employee card). --}}
-                                                    <button type="button" x-show="!open" x-cloak
-                                                            wire:click="toggleCollapse({{ $manager->id }})"
-                                                            x-on:click="open = true"
-                                                            class="mx-auto mt-2 flex min-w-[7.5rem] items-center justify-between gap-2 rounded-lg border border-dashed border-secondary-light bg-secondary-soft px-2.5 py-1.5 text-start transition hover:border-primary hover:bg-secondary-soft"
-                                                            title="{{ __('general.expand') }}">
-                                                        <span class="min-w-0 leading-tight">
-                                                            <span class="block text-[10px] font-bold text-primary">{{ $team->count() }} @lang('general.direct-reports')</span>
-                                                            <span class="block text-[9px] text-secondary-light">{{ $branchStaff }} @lang('general.staff-total')</span>
-                                                        </span>
-                                                        <svg class="size-3.5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
-                                                        </svg>
-                                                    </button>
-
                                                     <div x-cloak x-show="open" x-collapse>
                                                         <div class="relative mt-4 flex items-start justify-center gap-4 border-t {{ $branchBorder }}">
-                                                            <x-org-section :team="$team" :managerType="$manager_type" :compact="$compact"/>
+                                                            <x-org-section :team="$team" :managerType="$manager_type" :compact="$compact" :collapsed="$collapsed"/>
                                                         </div>
                                                     </div>
                                                 @endif

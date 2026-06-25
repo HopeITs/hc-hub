@@ -333,10 +333,9 @@ clock-timepicker {
         flex-direction: column;
 
         flex-shrink: 0;
-        aspect-ratio: 3 / 4;
         overflow: hidden;
         border: 1px solid #e5e7eb;
-        border-radius: 1.5cqw;
+        border-radius: 0.5cqw;
         background: #ffffff;
         box-shadow: 0 4cqw 8cqw rgb(65 64 66 / 20%);
         text-align: center;
@@ -381,7 +380,9 @@ clock-timepicker {
 
     .org-id-card__photo {
         position: relative;
-        flex: 0 0 44%;
+        flex: 0 0 auto;
+        width: 100%;
+        aspect-ratio: 1 / 1;
         overflow: hidden;
         background: #ffffff;
     }
@@ -416,64 +417,101 @@ clock-timepicker {
         object-position: bottom center;
     }
 
-    .org-id-card__avatar-placeholder {
-        position: absolute;
-        bottom: 8%;
-        left: 50%;
-        z-index: 1;
+    .org-id-card__header {
         display: flex;
-        width: 52%;
-        aspect-ratio: 1;
-        transform: translateX(-50%);
+        flex: 0 0 auto;
         align-items: center;
-        justify-content: center;
-        border-radius: 9999px;
-        border: 1px dashed #d1d5db;
-        background: #ffffff;
-        color: #9ca3af;
+        justify-content: space-between;
+        gap: 1.5cqw;
+        width: 100%;
+        min-height: calc(7cqw + 2.5cqw);
+        padding: 3cqw 5cqw 0;
     }
 
-    .org-id-card__info {
-        display: flex;
-        min-height: 0;
-        flex: 1;
-        flex-direction: column;
-        align-items: center;
-          justify-content: center;
-        padding: 3.5cqw 5.5cqw 5cqw;
-    }
-
-    .org-id-card__name {
-        max-width: 100%;
-        color: var(--color-primary);
-        font-size: 6.8cqw;
-        font-weight: 900;
-        line-height: 0.92;
-        letter-spacing: 0.01em;
-        text-transform: uppercase;
-    }
-
-    .org-id-card__name span {
-        display: block;
+    .org-id-card__badge {
+        min-width: 0;
+            margin-top: 1.2cqw;
+        max-width: 48%;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        border-radius: 20%;
+        background-color: var(--color-secondary-light);
+        padding: 1px 4px;
+        color: #ffffff;
+        font-size: 6.5cqw;
+        font-weight: 400;
+        line-height: 1.2;
+        text-transform: uppercase;
+    }
+
+        .org-id-card__city {
+        min-height: calc(4.4cqw * 1.1);
+        margin-top: 1.2cqw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: white;
+        padding-inline: 5px;
+        padding-block: 1px;
+        border-radius: 10%;
+        font-size: 7cqw;
+        font-weight: 200;
+        text-transform: uppercase;
+        background-color: var(--color-secondary-light);
+    }
+
+    .org-id-card__info {
+        display: grid;
+        flex: 0 0 auto;
+        grid-template-rows: calc(9cqw * 1.05 * 2) calc(7cqw * 1.1 * 2);
+        gap: 1.5cqw;
+        width: 100%;
+        padding: 2.5cqw 4cqw 3cqw;
+    }
+
+    .org-id-card__slot--empty {
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    .org-id-card__name {
+        display: -webkit-box;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        width: 100%;
+        max-height: calc(9cqw * 1.05 * 2);
+        color: var(--color-primary);
+        font-size: 9cqw;
+        font-weight: 900;
+        line-height: 1.05;
+        letter-spacing: 0.01em;
+        text-transform: uppercase;
+        word-break: break-word;
+        text-align: center;
+        margin-block: auto;
+
     }
 
     .org-id-card__position {
         display: -webkit-box;
+        overflow: hidden;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
-        max-width: 100%;
-        margin-top: 2.4cqw;
-        overflow: hidden;
+        width: 100%;
+        max-height: calc(7cqw * 1.1 * 2);
         color: var(--color-black, #414042);
-        font-size: 5.2cqw;
+        font-size: 7cqw;
         font-weight: 700;
-
+        line-height: 1.1;
+        word-break: break-word;
+          text-align: center;
+        margin-block: auto;
     }
 
     .org-id-card__center {
+        min-height: calc(4.4cqw * 1.1);
         max-width: 100%;
         margin-top: 1.2cqw;
         overflow: hidden;
@@ -486,21 +524,11 @@ clock-timepicker {
         text-transform: uppercase;
     }
 
-    .org-id-card__city {
-        max-width: 100%;
-        margin-top: 2.8cqw;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: var(--color-primary);
-        font-size: 4.4cqw;
-        font-weight: 700;
-        line-height: 1.05;
-        text-transform: uppercase;
-    }
+
 
     .org-id-card__matrix {
         display: flex;
+        min-height: calc(3.6cqw + 1.6cqw);
         max-width: 100%;
         margin-top: 1.8cqw;
         align-items: center;
@@ -515,6 +543,11 @@ clock-timepicker {
         font-size: 3.6cqw;
         font-weight: 400;
 
+    }
+
+    .org-id-card__matrix.org-id-card__slot--empty {
+        border-color: transparent;
+        background: transparent;
     }
 
     .org-id-card__matrix span {

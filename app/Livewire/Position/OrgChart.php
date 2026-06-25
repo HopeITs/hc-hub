@@ -317,10 +317,33 @@ class OrgChart extends Component
     {
         $this->tree = $this->buildTree();
         $this->treeBuilt = true;
-        $this->collapsed = collect($this->tree['managers'])
-            ->mapWithKeys(fn (Position $position) => [$position->id => $this->collapsed[$position->id] ?? true])
-            ->all();
+        $this->collapsed = $this->syncCollapsedState();
         $this->updateStats();
+    }
+
+    /** Keep collapse state for every branch that has direct reports. */
+    private function syncCollapsedState(): array
+    {
+        $teamRelation = $this->manager_type.'Team';
+        $ids = collect();
+
+        $walk = function ($items) use (&$walk, &$ids, $teamRelation): void {
+            foreach ($items as $position) {
+                $team = $position->getRelation($teamRelation);
+
+                if ($team->isNotEmpty()) {
+                    $ids->push($position->id);
+                }
+
+                $walk($team);
+            }
+        };
+
+        $walk($this->tree['managers']);
+
+        return $ids->unique()
+            ->mapWithKeys(fn (int $id) => [$id => $this->collapsed[$id] ?? true])
+            ->all();
     }
 
     private function buildTree(): array
@@ -417,7 +440,7 @@ class OrgChart extends Component
      * a branch city (e.g. Latakia) still keeps the main city (Syria) so the
      * HQ/parent positions stay visible and the tree remains connected.
      *
-     * @return list<int>|null  Null when no city filter is active.
+     * @return list<int>|null Null when no city filter is active.
      */
     private function cityFilterIds(): ?array
     {

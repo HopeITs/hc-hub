@@ -130,6 +130,7 @@ class Position extends Model
         return [
             'activeContracts.employee.media',
             'city',
+            'center.city',
             'center',
             'program',
             'department',
