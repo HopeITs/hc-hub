@@ -8,18 +8,18 @@
                 </span>
                 <input type="search" wire:model.live.debounce.350ms="search"
                        placeholder="{{ __('general.search-name-or-position') }}"
-                       class="w-full rounded-xl border border-gray-200 bg-white py-2.5 ps-9 pe-3 text-sm font-medium text-secondary-dark placeholder:text-secondary-light focus:border-primary-200 focus:ring-2 focus:ring-primary-100" />
+                       class="w-full rounded-xl border border-gray-200 bg-white py-2.5 ps-9 pe-3 text-sm font-medium text-secondary-dark placeholder:text-secondary-light focus:border-secondary-light focus:ring-2 focus:ring-secondary-soft" />
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
                 <button type="button" wire:click="exportCsv"
-                        class="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary">
+                        class="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
                     <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
                     @lang('general.export-csv')
                 </button>
                 @if($this->activeFilterCount > 0 || filled($search))
                     <button type="button" wire:click="resetFilters"
-                            class="rounded-xl px-3 py-2 text-xs font-semibold text-primary transition hover:bg-primary-50">
+                            class="rounded-xl px-3 py-2 text-xs font-semibold text-primary transition hover:bg-secondary-soft">
                         @lang('general.reset-filters')
                     </button>
                 @endif
@@ -71,7 +71,7 @@
         @if($employees->isEmpty())
             <div class="flex min-h-[360px] items-center justify-center">
                 <div class="max-w-md rounded-3xl border border-dashed border-gray-300 bg-white px-8 py-10 text-center">
-                    <span class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary-50 text-primary">
+                    <span class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary-soft text-primary">
                         <x-icons.user class="size-7" />
                     </span>
                     <h2 class="mt-4 text-lg font-bold text-secondary-dark">@lang('general.no-search-results')</h2>
@@ -85,10 +85,10 @@
                     <button type="button"
                             wire:click="$dispatch('open-profile', { employeeId: {{ $employee->id }} })"
                             wire:key="dir-{{ $employee->id }}"
-                            class="group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-start shadow-sm transition hover:-translate-y-0.5 hover:border-primary-200 hover:shadow-md">
+                            class="group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-start shadow-sm transition hover:-translate-y-0.5 hover:border-secondary-light hover:shadow-md">
                         <div class="relative shrink-0">
                             <img src="{{ $employee->getFirstMediaUrl('avatar') }}" alt="{{ $employee->name }}" loading="lazy"
-                                 class="size-14 rounded-full object-cover ring-2 ring-white outline outline-1 outline-gray-200 group-hover:outline-primary-300">
+                                 class="size-14 rounded-full object-cover ring-2 ring-white outline outline-1 outline-gray-200 group-hover:outline-secondary-medium">
                             @if($employee->is_board_member)
                                 <span class="absolute -bottom-0.5 -end-0.5 flex size-5 items-center justify-center rounded-full border-2 border-white bg-primary text-[9px] font-bold text-white">★</span>
                             @endif

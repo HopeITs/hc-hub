@@ -14,7 +14,7 @@
                     <input type="checkbox"
                         id="item_selected_{{ $index }}"
                         wire:model.live="checklistForm.items.{{ $index }}.is_selected"
-                        class="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        class="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
                         @if (!$canEdit) disabled @endif>
                     <label for="item_selected_{{ $index }}" class="font-medium text-gray-800">
                         {{ $item['item_name'] }}

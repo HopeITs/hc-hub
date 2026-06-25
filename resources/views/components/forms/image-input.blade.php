@@ -1,7 +1,7 @@
 @props(['item' => null])
 <div x-data="{ preview: null }" x-init="@this.on('resetPreview', () => preview = null);">
     <label for="logo-upload"
-        class="cursor-pointer relative block aspect-video w-4/12 rounded-sm overflow-hidden border-2 border-dashed border-gray-300 group hover:border-primary-400 transition">
+        class="cursor-pointer relative block aspect-video w-4/12 rounded-sm overflow-hidden border-2 border-dashed border-gray-300 group hover:border-secondary-medium transition">
         <input id="logo-upload" type="file" class="hidden" wire:model="item.logo" x-ref="logo"
             x-on:change="
                     const file = $refs.logo.files[0];
@@ -12,7 +12,7 @@
                     }
                 ">
 
-        <div class="flex items-center justify-center h-full bg-gray-100 group-hover:bg-primary-50 transition">
+        <div class="flex items-center justify-center h-full bg-gray-100 group-hover:bg-secondary-soft transition">
             <template x-if="preview">
                 <img :src="preview" class="object-fit w-full h-full rounded-sm" />
             </template>

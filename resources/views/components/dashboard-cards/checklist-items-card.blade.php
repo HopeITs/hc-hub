@@ -28,9 +28,9 @@
     <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto
                 px-4 md:px-6 pb-4 space-y-2
-                scrollbar-thin scrollbar-thumb-[var(--color-primary-300)]
+                scrollbar-thin scrollbar-thumb-[var(--color-secondary-medium)]
                 scrollbar-track-[var(--color-neutral-100)]
-                hover:scrollbar-thumb-[var(--color-primary-400)]">
+                hover:scrollbar-thumb-[var(--color-secondary-medium)]">
 
         @forelse ($deliveredItems as $item)
             <div class="pb-2 border-b border-b-secondary-light">

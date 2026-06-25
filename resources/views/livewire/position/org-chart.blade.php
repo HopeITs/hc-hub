@@ -50,9 +50,8 @@
 
     <section class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
         {{-- ---------- Header + stats ---------- --}}
-        <div class="relative bg-gradient-to-r from-secondary-dark to-secondary-medium px-6 py-6 text-white">
+        <div class="relative bg-secondary-dark px-6 py-6 text-white">
             <div class="absolute -end-16 -top-20 size-56 rounded-full bg-white/5"></div>
-            <div class="absolute end-32 top-8 size-24 rounded-full bg-primary/30 blur-2xl"></div>
 
             <div class="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
                 <div>
@@ -69,7 +68,7 @@
                         ['value' => $stats['positions'], 'label' => __('general.total-positions'), 'color' => 'bg-white/10'],
                         ['value' => $stats['employees'], 'label' => __('general.filled-positions'), 'color' => 'bg-emerald-400/15'],
                         ['value' => $stats['vacancies'], 'label' => __('general.vacant-positions'), 'color' => 'bg-amber-300/15'],
-                        ['value' => $stats['managers'], 'label' => __('general.top-level-managers'), 'color' => 'bg-primary/30'],
+                        ['value' => $stats['managers'], 'label' => __('general.top-level-managers'), 'color' => 'bg-secondary-dark'],
                     ] as $stat)
                         <div class="min-w-28 rounded-2xl border border-white/10 {{ $stat['color'] }} px-4 py-3 backdrop-blur-sm">
                             <div class="text-2xl font-extrabold">{{ number_format($stat['value']) }}</div>
@@ -108,7 +107,7 @@
                     </span>
                     <input type="search" wire:model.live.debounce.350ms="search"
                            placeholder="{{ __('general.search-name-or-position') }}"
-                           class="w-52 rounded-xl border border-gray-200 bg-gray-50 py-2 ps-8 pe-3 text-xs font-medium text-secondary-dark placeholder:text-secondary-light focus:border-primary-200 focus:bg-white focus:ring-2 focus:ring-primary-100" />
+                           class="w-52 rounded-xl border border-gray-200 bg-gray-50 py-2 ps-8 pe-3 text-xs font-medium text-secondary-dark placeholder:text-secondary-light focus:border-secondary-light focus:bg-white focus:ring-2 focus:ring-secondary-soft" />
                     @if($this->isSearching)
                         <button type="button" wire:click="$set('search', '')"
                                 class="absolute inset-y-0 end-2 flex items-center text-secondary-light transition hover:text-primary">
@@ -143,7 +142,7 @@
                 </div>
 
                 <button type="button" wire:click="toggleDensity"
-                        class="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary">
+                        class="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
                     <x-icons.code-fork class="size-3.5" />
                     {{ $compact ? __('general.comfortable-view') : __('general.compact-view') }}
                 </button>
@@ -164,7 +163,7 @@
                     </button>
                 </div>
                 <button type="button" wire:click="fitToScreen"
-                        class="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary">
+                        class="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
                     @lang('general.fit-to-screen')
                 </button>
                 <button type="button" wire:click="expandAll"
@@ -172,14 +171,14 @@
                     @lang('general.expand-all')
                 </button>
                 <button type="button" wire:click="collapseAll"
-                        class="rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white transition hover:bg-primary-600">
+                        class="rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white transition hover:bg-primary">
                     @lang('general.collapse-all')
                 </button>
 
                 {{-- Export menu --}}
                 <div class="relative" x-data="{ menu: false }" x-on:click.outside="menu = false">
                     <button type="button" x-on:click="menu = !menu" :disabled="exporting"
-                            class="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary disabled:opacity-60">
+                            class="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary disabled:opacity-60">
                         <svg x-show="!exporting" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
                         <x-icons.spinner x-show="exporting" x-cloak class="size-4 animate-spin" />
                         @lang('general.export')
@@ -187,11 +186,11 @@
                     <div x-show="menu" x-cloak x-transition
                          class="absolute end-0 z-30 mt-1 w-36 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
                         <button type="button" x-on:click="menu = false; exportChart('png')"
-                                class="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-secondary-dark transition hover:bg-primary-50 hover:text-primary">
+                                class="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-secondary-dark transition hover:bg-secondary-soft hover:text-primary">
                             @lang('general.export-png')
                         </button>
                         <button type="button" x-on:click="menu = false; exportChart('pdf')"
-                                class="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-secondary-dark transition hover:bg-primary-50 hover:text-primary">
+                                class="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-secondary-dark transition hover:bg-secondary-soft hover:text-primary">
                             @lang('general.export-pdf')
                         </button>
                     </div>
@@ -220,7 +219,7 @@
                             <span class="text-secondary-light">— "{{ $search }}"</span>
                         </span>
                         <button type="button" wire:click="$set('search', '')"
-                                class="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary-50">
+                                class="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-secondary-soft">
                             @lang('general.clear-search')
                         </button>
                     </div>
@@ -228,7 +227,7 @@
                     @if($results->isEmpty())
                         <div class="flex min-h-[560px] items-center justify-center p-6">
                             <div class="max-w-md rounded-3xl border border-dashed border-gray-300 bg-white/90 px-8 py-10 text-center shadow-sm">
-                                <span class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary-50 text-primary">
+                                <span class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary-soft text-primary">
                                     <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                         <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m20 20-3-3"/>
                                     </svg>
@@ -242,10 +241,10 @@
                             @foreach($results as $result)
                                 @if($result->activeContracts->isNotEmpty())
                                     @foreach($result->activeContracts as $contract)
-                                        <x-org-node :position="$result" :employee="$contract->employee" :manager-type="$manager_type" :compact="$compact" size="md"/>
+                                        <x-org-node :position="$result" :employee="$contract->employee" :manager-type="$manager_type" :compact="$compact"/>
                                     @endforeach
                                 @else
-                                    <x-org-empty-node :position="$result" :compact="$compact" size="md"/>
+                                    <x-org-empty-node :position="$result" :compact="$compact"/>
                                 @endif
                             @endforeach
                         </div>
@@ -253,36 +252,129 @@
                 </div>
             @else
             <div
+                x-ref="viewport"
                 x-data="{
-                    isDragging: false,
-                    startX: 0,
-                    startY: 0,
+                    scale: @entangle('scale').live,
                     translateX: 0,
                     translateY: 0,
-                    mouseDown(event) {
-                        if (event.target.closest('a, button')) return
-                        this.isDragging = true
-                        this.startX = event.clientX - this.translateX
-                        this.startY = event.clientY - this.translateY
+                    dragging: false,
+                    pointerId: null,
+                    lastX: 0,
+                    lastY: 0,
+                    lastTime: 0,
+                    velocityX: 0,
+                    velocityY: 0,
+                    inertiaId: null,
+
+                    transformStyle() {
+                        return `transform: translate3d(${this.translateX}px, ${this.translateY}px, 0) scale(${this.scale})`;
                     },
-                    mouseMove(event) {
-                        if (!this.isDragging) return
-                        this.translateX = event.clientX - this.startX
-                        this.translateY = event.clientY - this.startY
+
+                    stopInertia() {
+                        if (this.inertiaId) cancelAnimationFrame(this.inertiaId);
+                        this.inertiaId = null;
                     },
-                    mouseUp() { this.isDragging = false }
+
+                    startInertia() {
+                        const step = () => {
+                            this.velocityX *= 0.9;
+                            this.velocityY *= 0.9;
+                            if (Math.abs(this.velocityX) < 0.25 && Math.abs(this.velocityY) < 0.25) {
+                                this.inertiaId = null;
+                                return;
+                            }
+                            this.translateX += this.velocityX;
+                            this.translateY += this.velocityY;
+                            this.inertiaId = requestAnimationFrame(step);
+                        };
+                        if (Math.abs(this.velocityX) > 0.4 || Math.abs(this.velocityY) > 0.4) {
+                            this.inertiaId = requestAnimationFrame(step);
+                        }
+                    },
+
+                    zoomAt(clientX, clientY, delta) {
+                        const rect = this.$refs.viewport.getBoundingClientRect();
+                        const x = clientX - rect.left;
+                        const y = clientY - rect.top;
+                        const prev = this.scale;
+                        const next = Math.min(2, Math.max(0.3, +(prev + delta).toFixed(2)));
+                        if (next === prev) return;
+                        const ratio = next / prev;
+                        this.translateX = x - (x - this.translateX) * ratio;
+                        this.translateY = y - (y - this.translateY) * ratio;
+                        this.scale = next;
+                    },
+
+                    onWheel(event) {
+                        event.preventDefault();
+                        this.stopInertia();
+                        if (event.ctrlKey || event.metaKey) {
+                            const delta = event.deltaY < 0 ? 0.06 : -0.06;
+                            this.zoomAt(event.clientX, event.clientY, delta);
+                            return;
+                        }
+                        const factor = event.deltaMode === 1 ? 16 : 1;
+                        this.translateX -= event.deltaX * factor;
+                        this.translateY -= event.deltaY * factor;
+                    },
+
+                    onPointerDown(event) {
+                        if (event.button !== 0 || event.target.closest('button, a, input, select, textarea, [data-no-pan]')) return;
+                        this.stopInertia();
+                        this.dragging = true;
+                        this.pointerId = event.pointerId;
+                        this.lastX = event.clientX;
+                        this.lastY = event.clientY;
+                        this.lastTime = performance.now();
+                        this.velocityX = 0;
+                        this.velocityY = 0;
+                        this.$refs.viewport.setPointerCapture(event.pointerId);
+                    },
+
+                    onPointerMove(event) {
+                        if (!this.dragging || event.pointerId !== this.pointerId) return;
+                        const now = performance.now();
+                        const dt = Math.max(now - this.lastTime, 1);
+                        const dx = event.clientX - this.lastX;
+                        const dy = event.clientY - this.lastY;
+                        this.translateX += dx;
+                        this.translateY += dy;
+                        this.velocityX = (dx / dt) * 16;
+                        this.velocityY = (dy / dt) * 16;
+                        this.lastX = event.clientX;
+                        this.lastY = event.clientY;
+                        this.lastTime = now;
+                    },
+
+                    onPointerUp(event) {
+                        if (!this.dragging || event.pointerId !== this.pointerId) return;
+                        this.dragging = false;
+                        this.$refs.viewport.releasePointerCapture(event.pointerId);
+                        this.startInertia();
+                    },
+
+                    resetPan() {
+                        this.stopInertia();
+                        this.translateX = 0;
+                        this.translateY = 0;
+                    },
                 }"
-                @mousedown="mouseDown($event)"
-                @mousemove.window="mouseMove($event)"
-                @mouseup.window="mouseUp"
-                x-on:reset-pan.window="translateX = 0; translateY = 0"
-                class="relative min-h-[680px] w-full select-none overflow-hidden bg-[radial-gradient(circle_at_center,_#e5e7eb_1px,_transparent_1px)] [background-size:22px_22px]"
-                :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
+                @wheel.prevent="onWheel($event)"
+                @pointerdown="onPointerDown($event)"
+                @pointermove="onPointerMove($event)"
+                @pointerup="onPointerUp($event)"
+                @pointercancel="onPointerUp($event)"
+                x-on:reset-pan.window="resetPan()"
+                class="relative min-h-[min(72vh,820px)] w-full touch-none overflow-hidden overscroll-none select-none bg-[radial-gradient(circle_at_center,_#e5e7eb_1px,_transparent_1px)] [background-size:22px_22px]"
+                :class="dragging ? 'cursor-grabbing' : 'cursor-grab'"
             >
+                <p class="pointer-events-none absolute bottom-3 start-3 z-10 rounded-lg border border-gray-200/80 bg-white/90 px-2.5 py-1 text-[10px] font-medium text-secondary-light shadow-sm backdrop-blur-sm">
+                    @lang('general.org-chart-nav-hint')
+                </p>
                 @if(collect($tree['root'])->isEmpty())
                     <div class="absolute inset-0 flex items-center justify-center p-6">
                         <div class="max-w-md rounded-3xl border border-dashed border-gray-300 bg-white/90 px-8 py-10 text-center shadow-sm">
-                            <span class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary-50 text-primary">
+                            <span class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary-soft text-primary">
                                 <x-icons.code-fork class="size-7" />
                             </span>
                             <h2 class="mt-4 text-lg font-bold text-secondary-dark">@lang('general.no-org-chart-data')</h2>
@@ -290,26 +382,25 @@
                         </div>
                     </div>
                 @else
-                    <div class="origin-top transition-transform duration-200"
-                         :style="`transform: translate(${translateX}px, ${translateY}px) scale({{ $scale }});`"
-                         @wheel.prevent="$event.deltaY < 0 ? $wire.zoomIn() : $wire.zoomOut()">
+                    <div class="origin-top-left will-change-transform"
+                         :style="transformStyle()">
                         <div id="org-chart-export" class="flex min-w-max flex-col items-center {{ $compact ? 'px-8 py-8' : 'px-14 py-12' }}">
                             {{-- Root (CEO) and their deputies/assistants share the first row. --}}
                             <div class="relative flex items-end justify-center gap-4 pb-10">
                                 @foreach($tree['root'] as $root)
-                                    @if($root->activeContracts->isNotEmpty())
-                                        <x-org-node :position="$root" :is-manager="true" :manager-type="$manager_type" :compact="$compact" size="lg"/>
-                                    @else
-                                        <x-org-empty-node :position="$root" :compact="$compact" size="lg"/>
-                                    @endif
+                                    @forelse($root->activeContracts as $contract)
+                                        <x-org-node :position="$root" :employee="$contract->employee" :is-manager="true" :manager-type="$manager_type" :compact="$compact"/>
+                                    @empty
+                                        <x-org-empty-node :position="$root" :compact="$compact"/>
+                                    @endforelse
                                 @endforeach
 
                                 @foreach($tree['rootAssistant'] as $assistant)
-                                    @if($assistant->activeContracts->isNotEmpty())
-                                        <x-org-node :position="$assistant" :manager-type="$manager_type" :compact="$compact" size="lg"/>
-                                    @else
-                                        <x-org-empty-node :position="$assistant" :compact="$compact" size="lg"/>
-                                    @endif
+                                    @forelse($assistant->activeContracts as $contract)
+                                        <x-org-node :position="$assistant" :employee="$contract->employee" :manager-type="$manager_type" :compact="$compact"/>
+                                    @empty
+                                        <x-org-empty-node :position="$assistant" :compact="$compact"/>
+                                    @endforelse
                                 @endforeach
 
                                 <span class="absolute bottom-0 start-1/2 h-10 w-px {{ $trunk }}"></span>
@@ -335,7 +426,7 @@
                                                         <button type="button"
                                                                 wire:click="toggleCollapse({{ $manager->id }})"
                                                                 x-on:click="open = !open"
-                                                                class="flex size-7 items-center justify-center rounded-lg text-secondary-light transition hover:bg-primary-50 hover:text-primary"
+                                                                class="flex size-7 items-center justify-center rounded-lg text-secondary-light transition hover:bg-secondary-soft hover:text-primary"
                                                                 :title="open ? @js(__('general.collapse')) : @js(__('general.expand'))">
                                                             <svg class="size-4 transition-transform" :class="open ? 'rotate-180' : ''"
                                                                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -346,26 +437,29 @@
                                                 </div>
 
                                                 {{-- Center the manager card over its (potentially wider) team. --}}
-                                                <div class="flex justify-center">
-                                                    @if($manager->activeContracts->isNotEmpty())
-                                                        <x-org-node :position="$manager" :is-manager="$team->isNotEmpty()" :manager-type="$manager_type" :compact="$compact" size="lg"/>
-                                                    @else
-                                                        <x-org-empty-node :position="$manager" :compact="$compact" size="lg"/>
-                                                    @endif
+                                                <div class="flex flex-wrap justify-center gap-2">
+                                                    @forelse($manager->activeContracts as $contract)
+                                                        <x-org-node :position="$manager" :employee="$contract->employee" :is-manager="$team->isNotEmpty()" :manager-type="$manager_type" :compact="$compact"/>
+                                                    @empty
+                                                        <x-org-empty-node :position="$manager" :compact="$compact"/>
+                                                    @endforelse
                                                 </div>
 
                                                 @if($team->isNotEmpty())
                                                     @php($branchStaff = $staffCount($team, $manager_type.'Team'))
-                                                    {{-- Collapsed: a compact department-summary node instead of the team. --}}
+                                                    {{-- Collapsed: compact expand chip (not an employee card). --}}
                                                     <button type="button" x-show="!open" x-cloak
                                                             wire:click="toggleCollapse({{ $manager->id }})"
                                                             x-on:click="open = true"
-                                                            class="mx-auto mt-3 flex w-44 items-center justify-between gap-2 rounded-2xl border border-dashed border-primary-200 bg-primary-50/60 px-3 py-2 text-start transition hover:border-primary hover:bg-primary-50">
-                                                        <span class="min-w-0">
-                                                            <span class="block text-[11px] font-bold text-primary">{{ $team->count() }} @lang('general.direct-reports')</span>
-                                                            <span class="block text-[10px] font-semibold text-secondary-light">{{ $branchStaff }} @lang('general.staff-total')</span>
+                                                            class="mx-auto mt-2 flex min-w-[7.5rem] items-center justify-between gap-2 rounded-lg border border-dashed border-secondary-light bg-secondary-soft px-2.5 py-1.5 text-start transition hover:border-primary hover:bg-secondary-soft"
+                                                            title="{{ __('general.expand') }}">
+                                                        <span class="min-w-0 leading-tight">
+                                                            <span class="block text-[10px] font-bold text-primary">{{ $team->count() }} @lang('general.direct-reports')</span>
+                                                            <span class="block text-[9px] text-secondary-light">{{ $branchStaff }} @lang('general.staff-total')</span>
                                                         </span>
-                                                        <svg class="size-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+                                                        <svg class="size-3.5 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+                                                        </svg>
                                                     </button>
 
                                                     <div x-cloak x-show="open" x-collapse>
@@ -502,7 +596,7 @@
                     @lang('general.reset-filters')
                 </button>
                 <button type="button" x-on:click="filtersOpen = false"
-                        class="flex-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-primary-600">
+                        class="flex-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-primary">
                     @lang('general.apply')
                 </button>
             </div>

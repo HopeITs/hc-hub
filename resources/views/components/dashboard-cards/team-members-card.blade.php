@@ -28,7 +28,7 @@
     <div
         class="relative px-6 pt-2 space-y-3 overflow-y-auto flex-grow
                 scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent
-                hover:scrollbar-thumb-[var(--color-primary-300)] max-h-[440px]">
+                hover:scrollbar-thumb-[var(--color-secondary-medium)] max-h-[440px]">
 
         @forelse($this->teamMembers as $member)
             @php
@@ -55,7 +55,7 @@
                     <!-- Avatar -->
                     <div
                         class="flex items-center justify-center h-10 w-10 flex-shrink-0 rounded-full overflow-hidden
-                                bg-[var(--color-primary-500)] text-white font-semibold uppercase shadow-sm">
+                                bg-[var(--color-primary)] text-white font-semibold uppercase shadow-sm">
                         <img src="{{ $member->getFirstMediaUrl('avatar') }}"
                             alt="{{ $member->displayName ?? $member->name }}" class="object-fit w-full h-full">
                     </div>
@@ -107,7 +107,7 @@
     <!-- Footer -->
     <div class="border-t border-[var(--color-neutral-200)] bg-white px-6 py-3 text-center mt-auto">
         <a href="{{ route('org.chart') }}"
-            class="text-[12px] font-semibold text-[var(--color-primary-500)] hover:underline">
+            class="text-[12px] font-semibold text-[var(--color-primary)] hover:underline">
             @lang('general.view-all') →
         </a>
     </div>

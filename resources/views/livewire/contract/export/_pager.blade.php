@@ -19,7 +19,7 @@
                 @endfor
             </div>
 
-            <button type="button" class="px-3 py-2 rounded-lg bg-primary text-white hover:opacity-90 disabled:opacity-40"
+            <button type="button" class="px-3 py-2 rounded-lg bg-primary text-white disabled:opacity-40"
                     wire:click="nextPage" @disabled($pageNo === $totalPages)>
                 @lang('general.next')
             </button>

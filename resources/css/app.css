@@ -136,19 +136,6 @@ body {
     --color-secondary-light: #939598;
     --color-secondary-soft: #dcddde;
 
-    --color-primary-50: #fef2f2;
-    --color-primary-100: #fdeaea;
-    --color-primary-200: #f9c5c6;
-    --color-primary-300: #f49797;
-    --color-primary-400: #ec6a6c;
-    --color-primary-500: #c2151c;
-    /* HOPE brand base */
-    --color-primary-600: #a51218;
-    --color-primary-700: #880f14;
-    --color-primary-800: #6b0c0f;
-    --color-primary-900: #4a080b;
-    --color-primary-950: #2b0506;
-
     --color-neutral-50: #f5f5f6;
     --color-neutral-100: #eeeff0;
     --color-neutral-200: #dcddde;
@@ -296,9 +283,7 @@ clock-timepicker {
 
     .select2-container--default.select2-container--focus .select2-selection--single,
     .select2-container--default.select2-container--open .select2-selection--single {
-        /* border-color: var(--color-primary-500) !important; */
-        /* box-shadow: 0 0 0 2px var(--color-primary-200) !important; */
-        border-color: var(--color-primary-500) !important;
+        border-color: var(--color-primary) !important;
         box-shadow: none !important;
         outline: none !important;
     }
@@ -338,6 +323,211 @@ clock-timepicker {
         right: 0 !important;
         left: auto !important;
         background-position: right 0.75rem center !important;
+    }
+
+    /* Org chart cards — inspired by digital employee ID */
+    .org-id-card {
+        container-type: inline-size;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+
+        flex-shrink: 0;
+        aspect-ratio: 3 / 4;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        border-radius: 1.5cqw;
+        background: #ffffff;
+        box-shadow: 0 4cqw 8cqw rgb(65 64 66 / 20%);
+        text-align: center;
+        transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .org-id-card--comfortable {
+        width: 8rem;
+    }
+
+    .org-id-card--compact {
+        width: 6rem;
+    }
+
+    button.org-id-card {
+        cursor: pointer;
+        padding: 0;
+    }
+
+    button.org-id-card:hover {
+        border-color: var(--color-secondary-light);
+        box-shadow: 0 5cqw 10cqw rgb(65 64 66 / 26%);
+        transform: translateY(-2px);
+    }
+
+    button.org-id-card:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+    }
+
+    .org-id-card--manager {
+        border-color: var(--color-secondary-light);
+        box-shadow: 0 4cqw 8cqw rgb(65 64 66 / 20%);
+    }
+
+    .org-id-card--vacant {
+        border-style: dashed;
+        border-color: #d1d5db;
+        background: #f9fafb;
+        box-shadow: none;
+    }
+
+    .org-id-card__photo {
+        position: relative;
+        flex: 0 0 44%;
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .org-id-card__bar {
+        position: absolute;
+        inset-inline: 0;
+        bottom: 0;
+        z-index: 0;
+        height: 13.5%;
+        background: var(--color-primary);
+    }
+
+    .org-id-card--manager .org-id-card__bar {
+        height: 16%;
+    }
+
+    .org-id-card__bar--vacant {
+        background: var(--color-secondary-light);
+    }
+
+    .org-id-card__avatar {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        z-index: 1;
+        display: block;
+        width: 92%;
+        max-height: 94%;
+        transform: translateX(-50%);
+        object-fit: contain;
+        object-position: bottom center;
+    }
+
+    .org-id-card__avatar-placeholder {
+        position: absolute;
+        bottom: 8%;
+        left: 50%;
+        z-index: 1;
+        display: flex;
+        width: 52%;
+        aspect-ratio: 1;
+        transform: translateX(-50%);
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        border: 1px dashed #d1d5db;
+        background: #ffffff;
+        color: #9ca3af;
+    }
+
+    .org-id-card__info {
+        display: flex;
+        min-height: 0;
+        flex: 1;
+        flex-direction: column;
+        align-items: center;
+          justify-content: center;
+        padding: 3.5cqw 5.5cqw 5cqw;
+    }
+
+    .org-id-card__name {
+        max-width: 100%;
+        color: var(--color-primary);
+        font-size: 6.8cqw;
+        font-weight: 900;
+        line-height: 0.92;
+        letter-spacing: 0.01em;
+        text-transform: uppercase;
+    }
+
+    .org-id-card__name span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .org-id-card__position {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        max-width: 100%;
+        margin-top: 2.4cqw;
+        overflow: hidden;
+        color: var(--color-black, #414042);
+        font-size: 5.2cqw;
+        font-weight: 700;
+
+    }
+
+    .org-id-card__center {
+        max-width: 100%;
+        margin-top: 1.2cqw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--color-black, #414042);
+        font-size: 4.4cqw;
+        font-weight: 700;
+        line-height: 1.05;
+        text-transform: uppercase;
+    }
+
+    .org-id-card__city {
+        max-width: 100%;
+        margin-top: 2.8cqw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--color-primary);
+        font-size: 4.4cqw;
+        font-weight: 700;
+        line-height: 1.05;
+        text-transform: uppercase;
+    }
+
+    .org-id-card__matrix {
+        display: flex;
+        max-width: 100%;
+        margin-top: 1.8cqw;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8cqw;
+        overflow: hidden;
+        border-radius: 2.2cqw;
+        border: 1px dashed var(--color-secondary-dark);
+        background: var(--color-secondary-light);
+        padding: 0.8cqw 1.4cqw;
+        color:white;
+        font-size: 3.6cqw;
+        font-weight: 400;
+
+    }
+
+    .org-id-card__matrix span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .org-id-card__divider {
+        width: 70%;
+        height: max(1px, 0.4cqw);
+        margin-top: auto;
+        background: #bcbec0;
     }
 }
 

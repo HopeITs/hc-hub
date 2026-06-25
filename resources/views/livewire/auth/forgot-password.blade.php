@@ -44,7 +44,7 @@
         {{-- Back to Login --}}
         <div class="text-center text-gray-500 text-sm mt-6">
             {{ __('auth.back-to') }}
-            <a href="{{ route('login') }}" class="text-primary-600 hover:underline">
+            <a href="{{ route('login') }}" class="text-primary hover:underline">
                 {{ __('auth.sign-in') }}
             </a>
         </div>

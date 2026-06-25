@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto px-6 py-4 space-y-5 scrollbar-thin scrollbar-thumb-[var(--color-primary-300)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-primary-400)]">
+    <div class="flex-1 overflow-y-auto px-6 py-4 space-y-5 scrollbar-thin scrollbar-thumb-[var(--color-secondary-medium)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-secondary-medium)]">
         @forelse($newsItems as $news)
             <div class="border-b border-b-secondary-light pb-3 last:border-b-0 last:pb-0">
                 <p class="text-[10px] font-light text-gray-400">

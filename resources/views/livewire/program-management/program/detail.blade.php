@@ -46,7 +46,7 @@
                                 duration-300
                                 "
                                 :class="activeTab === 'details'
-                                    ? 'bg-primary-500 text-white'
+                                    ? 'bg-primary text-white'
                                     : 'text-neutral-700'">
                                 @lang('general.project-info')
                             </button>
@@ -57,7 +57,7 @@
                                 duration-300
                                 "
                                 :class="activeTab === 'centers'
-                                    ? 'bg-primary-500 text-white'
+                                    ? 'bg-primary text-white'
                                     : 'text-neutral-700'">
                                 {{trans_choice('general.center' , 1)}}
                             </button>
@@ -68,7 +68,7 @@
                                 duration-300
                                 "
                                 :class="activeTab === 'employees'
-                                    ? 'bg-primary-500 text-white'
+                                    ? 'bg-primary text-white'
                                     : 'text-neutral-700'">
                                 {{trans_choice('general.employee' , 2)}}
                             </button>

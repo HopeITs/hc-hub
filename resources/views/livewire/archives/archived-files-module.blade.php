@@ -22,7 +22,7 @@
                     x-on:livewire-upload-progress="progress = $event.detail.progress"
                     class="w-full"
                 >
-                    <label for="file-upload" class="flex items-center justify-center px-4 py-2 text-sm font-semibold text-white transition duration-150 ease-in-out rounded-md shadow-sm cursor-pointer bg-primary hover:opacity-90">
+                    <label for="file-upload" class="flex items-center justify-center px-4 py-2 text-sm font-semibold text-white transition duration-150 ease-in-out rounded-md shadow-sm cursor-pointer bg-primary">
                         <x-icons.upload class="w-5 h-5 me-1" />
                         {{ __('general.upload_files') }}
                         <input id="file-upload" wire:model.live="filesToUpload" type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.gif,.xls,.xlsx,.doc,.docx,.pdf">

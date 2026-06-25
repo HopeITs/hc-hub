@@ -7,7 +7,7 @@
 ])
 
 @php
-    $base = 'py-2 px-4 text-sm font-semibold text-white bg-primary hover:opacity-90 cursor-pointer
+    $base = 'py-2 px-4 text-sm font-semibold text-white bg-primary cursor-pointer
              rounded-md shadow-sm transition duration-150 ease-in-out flex justify-center items-center
              disabled:opacity-60 disabled:cursor-not-allowed';
     $classes = ($full ? 'w-full ' : '') . $base;

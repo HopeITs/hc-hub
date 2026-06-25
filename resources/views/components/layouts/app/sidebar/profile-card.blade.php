@@ -86,7 +86,7 @@
                 <div class="mt-3">
                     <span
                         class="inline-flex items-center gap-2 px-2 py-1 rounded-full text-[11px] font-semibold
-                                 bg-primary-50 text-primary-700 border border-primary-200">
+                                 bg-secondary-soft text-secondary-dark border border-secondary-light">
                         {{ __('Current:') }} <span x-text="activeRole">{{ $activeRole }}</span>
                     </span>
                 </div>
@@ -127,7 +127,7 @@
                             {{ __('Switch role') }}</div>
                         <button @click="rolesOpen = !rolesOpen" @mouseenter="rolesOpen = true"
                                 class="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-1.5 text-xs font-medium
-                                   hover:border-primary-400 hover:bg-primary-50/70 transition"
+                                   hover:border-secondary-medium hover:bg-secondary-soft transition"
                                 :aria-expanded="rolesOpen">
                             <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                  stroke-width="1.8">
@@ -145,7 +145,7 @@
                         <div
                             class="[&>div>button]:w-full [&>div>button]:text-left [&>div>button]:p-3 [&>div>button]:rounded-xl
                                     [&>div>button]:border-2 [&>div>button]:border-gray-200 [&>div>button]:shadow-sm
-                                    [&>div>button:hover]:border-primary-400 [&>div>button:hover]:bg-primary-50/70
+                                    [&>div>button:hover]:border-secondary-medium [&>div>button:hover]:bg-secondary-soft
                                     [&>div>button]:flex [&>div>button]:items-center [&>div>button]:gap-3">
                             <livewire:auth.role-switcher :onlySwitchables="true" :wire:key="'role-switcher-pill'"/>
                         </div>
@@ -180,7 +180,7 @@
 @guest
     <div class="p-4 space-y-2 w-full">
         <a href="{{ route('login') }}"
-           class="block w-full text-center py-2 px-4 text-sm font-semibold text-white bg-primary hover:opacity-90 rounded-md">
+           class="block w-full text-center py-2 px-4 text-sm font-semibold text-white bg-primary rounded-md">
             @lang('auth.login')
         </a>
         <a href="{{ route('register') }}"

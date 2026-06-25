@@ -8,13 +8,13 @@
         <div
             class="p-3 border-b hover:bg-neutral-100 dark:hover:bg-neutral-800 transition
                    @if($isUnread)
-                       bg-primary-50 border-s-4 border-primary-500
+                       bg-secondary-soft border-s-4 border-primary
                    @endif">
 
             <div class="flex items-start gap-2">
 
                 @if($isUnread)
-                    <span class="mt-1 inline-block w-2 h-2 bg-primary-500 rounded-full"></span>
+                    <span class="mt-1 inline-block w-2 h-2 bg-primary rounded-full"></span>
                 @endif
 
                 <a class="flex-1" @if(array_key_exists('url' ,$note->data)) href="{{$note->data['url']}}"@endif  @if ($isUnread) wire:click="markAsRead('{{ $note->id }}')"
@@ -41,7 +41,7 @@
 
 {{--                    @if ($isUnread)--}}
 {{--                        <button wire:click="markAsRead('{{ $note->id }}')"--}}
-{{--                                class="text-xs text-primary-600 hover:underline ms-2">--}}
+{{--                                class="text-xs text-primary hover:underline ms-2">--}}
 {{--                            @lang('general.mark-as-read')--}}
 {{--                        </button>--}}
 {{--                    @endif--}}

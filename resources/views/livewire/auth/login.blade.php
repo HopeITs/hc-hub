@@ -47,7 +47,7 @@
 {{--                        <x-forms.input-label for="role_id" :value="__('Login as role')" />--}}
 {{--                        <select id="role_id"--}}
 {{--                                wire:model="selectedRoleId"--}}
-{{--                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500">--}}
+{{--                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-primary focus:ring-primary">--}}
 {{--                            <option value="">{{ __('Choose a role') }}</option>--}}
 {{--                            @foreach($roleOptions as $opt)--}}
 {{--                                <option value="{{ $opt['id'] }}">{{ $opt['name'] }}</option>--}}
@@ -65,7 +65,7 @@
                     </x-forms.checkbox-input>
 
                     @if (request()->has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-primary-600 hover:underline">
+                        <a href="{{ route('password.request') }}" class="text-primary hover:underline">
                             {{ __('auth.forgot-password') }}
                         </a>
                     @endif

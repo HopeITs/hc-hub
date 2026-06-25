@@ -633,6 +633,7 @@ return [
     'reset-filters' => 'إعادة تعيين الفلاتر',
     'organization-overview' => 'نظرة عامة على المؤسسة',
     'org-chart-subtitle' => 'استعرض خطوط الإشراف والفرق والموظفين والشواغر ضمن المؤسسة.',
+    'org-chart-nav-hint' => 'اسحب للتحريك · مرّر للتنقل · Ctrl + التمرير للتكبير',
     'total-positions' => 'إجمالي المناصب',
     'filled-positions' => 'المناصب المشغولة',
     'vacant-positions' => 'المناصب الشاغرة',

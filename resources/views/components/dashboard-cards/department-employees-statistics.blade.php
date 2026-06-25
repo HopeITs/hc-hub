@@ -5,7 +5,7 @@
         class="flex justify-between items-center px-6 py-4 border-b border-[var(--color-neutral-200)] bg-[var(--color-neutral-50)]">
         <h2 class="text-lg font-semibold text-[var(--color-neutral-800)] tracking-tight flex items-center gap-2">
       <span
-          class="inline-block w-2.5 h-2.5 rounded-full bg-[var(--color-primary-500)] shadow-[0_0_8px_var(--color-primary-400)]"></span>
+          class="inline-block w-2.5 h-2.5 rounded-full bg-[var(--color-primary)] shadow-[0_0_8px_var(--color-secondary-medium)]"></span>
             Employees per Department
         </h2>
         <span class="text-sm text-[var(--color-neutral-500)] font-medium">2025 Overview</span>
@@ -29,7 +29,7 @@
         const employees = [8, 4, 15, 6, 5, 9, 7, 3, 2, 4];
 
         const barColor = getComputedStyle(document.documentElement)
-            .getPropertyValue("--color-primary-500").trim();
+            .getPropertyValue("--color-primary").trim();
         const neutralGrid = "rgba(0,0,0,0.06)";
 
         new Chart(ctx, {

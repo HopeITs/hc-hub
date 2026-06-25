@@ -18,7 +18,7 @@
         ->groupBy(fn ($p) => $p->jobLevel?->grade ?? 999);
 
     // Keep the pool roughly square: cap columns by the leaf count.
-    $poolMax = $compact ? 'max-w-[34rem]' : 'max-w-[44rem]';
+    $poolMax = $compact ? 'max-w-[36rem]' : 'max-w-[44rem]';
 @endphp
 
 {{-- Leaf reports: a flexible, wrapping pool that keeps the chart narrow. --}}
@@ -34,12 +34,11 @@
                 :is-manager="true"
                 :manager-type="$managerType"
                 :compact="$compact"
-                size="sm"
             />
         @endforeach
 
         @for($i = 0; $i < max(0, $position->max_emp - $position->activeContracts->count()); $i++)
-            <x-org-empty-node :position="$position" :compact="$compact" size="sm"/>
+            <x-org-empty-node :position="$position" :compact="$compact"/>
         @endfor
 
         <div class="relative mt-2 flex items-start justify-center {{ $gap }} {{ $hBorder }}">
@@ -63,12 +62,11 @@
                                 :employee="$contract->employee"
                                 :manager-type="$managerType"
                                 :compact="$compact"
-                                size="sm"
                             />
                         @endforeach
 
                         @for($i = 0; $i < max(0, $position->max_emp - $position->activeContracts->count()); $i++)
-                            <x-org-empty-node :position="$position" :compact="$compact" size="sm"/>
+                            <x-org-empty-node :position="$position" :compact="$compact"/>
                         @endfor
                     @endforeach
                 </div>

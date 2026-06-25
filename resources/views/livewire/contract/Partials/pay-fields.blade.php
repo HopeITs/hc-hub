@@ -47,7 +47,7 @@
                 <div class="flex justify-center items-center rounded-lg border border-gray-300 bg-white p-2 text-center text-gray-700
                             shadow-sm transition
                             peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
-                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/30">
+                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary-light">
                     <div class="text-md leading-none me-1">🗓️</div>
                     <div class="text-sm font-semibold">@lang('general.month')</div>
                 </div>
@@ -59,7 +59,7 @@
                 <div class="flex justify-center items-center rounded-lg border border-gray-300 bg-white p-2 text-center text-gray-700
                             shadow-sm transition
                             peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
-                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/30">
+                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary-light">
                     <div class="text-lg leading-none me-1">⏱️</div>
                     <div class="text-sm font-semibold">{{trans_choice('general.hour',1)}}</div>
                 </div>
@@ -71,7 +71,7 @@
                 <div class="flex justify-center items-center rounded-lg border border-gray-300 bg-white py-2 text-center text-gray-700
                             shadow-sm transition
                             peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
-                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/30">
+                            peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-secondary-light">
                     <div class="text-lg leading-none me-1">🎓</div>
                     <div class="text-sm font-semibold">@lang('general.session')</div>
                 </div>

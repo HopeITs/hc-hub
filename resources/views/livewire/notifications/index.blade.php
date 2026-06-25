@@ -8,7 +8,7 @@
 
     @forelse ($notifications as $notification)
         <div class="flex justify-between items-center bg-white px-4 py-3 rounded shadow-sm
-         {{is_null($notification->read_at) ? ' bg-primary-50 border-s-4 border-primary-500 ' : '' }}">
+         {{is_null($notification->read_at) ? ' bg-secondary-soft border-s-4 border-primary ' : '' }}">
             <div class="text-gray-700">
                 <div class="font-medium">{{ $notification->data['title'][app()->getLocale()] ?? 'Notification' }}</div>
                 <div class="text-sm">{{ $notification->data['body'][app()->getLocale()] ?? '' }}</div>

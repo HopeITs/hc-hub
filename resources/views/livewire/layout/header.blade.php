@@ -85,7 +85,7 @@
 
                         <div class="px-2 py-2">
                             <a href="{{ route('my-profile') }}" wire:navigate
-                                class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-800 transition rounded-xl hover:bg-primary-50/70 hover:text-primary hover:shadow-sm">
+                                class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-800 transition rounded-xl hover:bg-secondary-soft hover:text-primary hover:shadow-sm">
                                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="1.8">
                                     <circle cx="12" cy="8" r="4" />
@@ -116,8 +116,8 @@
 
                         {{--                                    <button @click="rolesOpen = !rolesOpen" --}}
                         {{--                                            class="inline-flex items-center gap-2 rounded-xl border border-gray-200 --}}
-                        {{--                                                   px-3 py-1.5 text-xs font-medium hover:border-primary-400 --}}
-                        {{--                                                   hover:bg-primary-50/70 transition"> --}}
+                        {{--                                                   px-3 py-1.5 text-xs font-medium hover:border-secondary-medium --}}
+                        {{--                                                   hover:bg-secondary-soft transition"> --}}
                         {{--                                        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" --}}
                         {{--                                             stroke-width="1.8"> --}}
                         {{--                                            <path d="M16 3h5v5"/> --}}

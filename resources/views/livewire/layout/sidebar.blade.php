@@ -13,7 +13,7 @@
     >
         <button type="button"
                 x-on:click="$dispatch('sidebar-collapse-toggle')"
-                class="absolute z-50 items-center justify-center hidden transition bg-white border border-gray-200 rounded-full shadow-md top-7 size-8 text-secondary-medium hover:border-primary-200 hover:bg-primary-50 hover:text-primary md:flex"
+                class="absolute z-50 items-center justify-center hidden transition bg-white border border-gray-200 rounded-full shadow-md top-7 size-8 text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary md:flex"
                 :class="rtl ? '-left-4' : '-right-4'"
                 :title="sidebarCollapsed ? @js(__('general.expand-sidebar')) : @js(__('general.collapse-sidebar'))">
             <svg class="transition-transform duration-300 size-4"

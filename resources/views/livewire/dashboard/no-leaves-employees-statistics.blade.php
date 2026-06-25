@@ -17,7 +17,7 @@
 
     <div class="relative px-6 pb-6 pt-2 space-y-3 overflow-y-auto flex-grow
                 scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent
-                hover:scrollbar-thumb-[var(--color-primary-300)] max-h-[440px] ">
+                hover:scrollbar-thumb-[var(--color-secondary-medium)] max-h-[440px] ">
 
         @forelse ($noLeavesEmployees as $emp)
             <div class="flex items-center justify-between py-4 border-b border-[var(--color-neutral-200)] last:border-0">
@@ -25,7 +25,7 @@
                 <div class="flex items-center gap-3">
 
                     <div class="flex items-center justify-center h-11 w-11 flex-shrink-0 rounded-full overflow-hidden
-                                bg-[var(--color-primary-500)] text-white font-semibold uppercase shadow-sm">
+                                bg-[var(--color-primary)] text-white font-semibold uppercase shadow-sm">
 
 
                             <img src="{{ $emp->getFirstMediaUrl('avatar') }}"

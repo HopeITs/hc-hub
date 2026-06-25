@@ -5,31 +5,34 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 const dynamicLabels = window.jobLevelLabels || [];
 const dynamicCounts = window.employeeCounts || [];
 
+const chartPalette = () => {
+    const rootStyle = getComputedStyle(document.documentElement);
+
+    return [
+        rootStyle.getPropertyValue("--color-primary").trim(),
+        rootStyle.getPropertyValue("--color-secondary-dark").trim(),
+        rootStyle.getPropertyValue("--color-secondary-medium").trim(),
+        rootStyle.getPropertyValue("--color-secondary-light").trim(),
+        rootStyle.getPropertyValue("--color-secondary-soft").trim(),
+        rootStyle.getPropertyValue("--color-neutral-600").trim(),
+        rootStyle.getPropertyValue("--color-neutral-400").trim(),
+        rootStyle.getPropertyValue("--color-neutral-800").trim(),
+    ].map((color) => color || "#c2151c");
+};
+
 const chartData = dynamicLabels.map((label, index) => {
-    const colorIndex = (index % 8) + 1;
-    const colorVar = `--color-primary-${colorIndex * 100}`;
-    const color = getComputedStyle(document.documentElement).getPropertyValue(colorVar.trim()) || "#dc2626";
+    const palette = chartPalette();
 
     return {
         category: label,
         value: dynamicCounts[index],
-        color: am5.color(color),
+        color: am5.color(palette[index % palette.length]),
     };
 });
 
 
 if (document.getElementById("jobLevelsChart") && chartData.length > 0) {
     am5.ready(function () {
-        const rootStyle = getComputedStyle(document.documentElement);
-        const primaryColor1 = am5.color(rootStyle.getPropertyValue("--color-primary100").trim() || "#dc2626");
-        const primaryColor2 = am5.color(rootStyle.getPropertyValue("--color-primary-200").trim() || "#dc2626");
-        const primaryColor3 = am5.color(rootStyle.getPropertyValue("--color-primary-300").trim() || "#dc2626");
-        const primaryColor4 = am5.color(rootStyle.getPropertyValue("--color-primary-400").trim() || "#dc2626");
-        const primaryColor5 = am5.color(rootStyle.getPropertyValue("--color-primary-500").trim() || "#dc2626");
-        const primaryColor6 = am5.color(rootStyle.getPropertyValue("--color-primary-600").trim() || "#dc2626");
-        const primaryColor7 = am5.color(rootStyle.getPropertyValue("--color-primary-700").trim() || "#dc2626");
-        const primaryColor8 = am5.color(rootStyle.getPropertyValue("--color-primary-800").trim() || "#dc2626");
-
         const root = am5.Root.new("jobLevelsChart");
 
         root.setThemes([am5themes_Animated.new(root)]);

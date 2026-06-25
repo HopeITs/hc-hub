@@ -44,21 +44,15 @@ class Position extends Model
         return $this->hasMany(Contract::class, 'position_id');
     }
 
+    /**
+     * Active contracts on this position. Employees may hold multiple positions
+     * simultaneously; each position lists every active contract here. For the
+     * employee's single "primary" contract elsewhere, use Employee::latestActiveContract().
+     */
     public function activeContracts(): HasMany
     {
         return $this->contracts()
             ->activeNow()
-            ->where('contracts.id', function ($query) {
-                $query->select('latest_contracts.id')
-                    ->from('contracts as latest_contracts')
-                    ->whereColumn('latest_contracts.employee_id', 'contracts.employee_id')
-                    ->where('latest_contracts.is_active', true)
-                    ->whereDate('latest_contracts.start_date', '<=', now())
-                    ->whereDate('latest_contracts.end_date', '>=', now())
-                    ->latest('latest_contracts.created_at')
-                    ->latest('latest_contracts.id')
-                    ->limit(1);
-            })
             ->with('employee');
     }
 

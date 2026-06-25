@@ -57,7 +57,7 @@
 
             <div class="flex justify-end">
                 <x-primary-button
-                    class="text-sm font-semibold rounded-lg bg-primary hover:bg-primary/90 transition shadow-sm">
+                    class="text-sm font-semibold rounded-lg bg-primary hover:bg-primary transition shadow-sm">
                     {{ __('general.profile.save') }}
                 </x-primary-button>
 

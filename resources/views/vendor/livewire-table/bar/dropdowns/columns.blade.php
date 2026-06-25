@@ -11,10 +11,10 @@
         <span
             class="flex gap-2 px-3 py-2 font-bold text-xs uppercase border-b border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
             <span class="me-auto">@lang('Columns')</span>
-            <a href="#" class="text-primary-500" wire:click.prevent="selectAllColumns(true)">
+            <a href="#" class="text-primary" wire:click.prevent="selectAllColumns(true)">
                 @lang('All')
             </a>
-            <a href="#" class="text-primary-500" wire:click.prevent="selectAllColumns(false)">
+            <a href="#" class="text-primary" wire:click.prevent="selectAllColumns(false)">
                 @lang('None')
             </a>
         </span>
@@ -34,7 +34,7 @@
                     )
                 }"
             >
-                <input type="checkbox" class="size-4 !text-primary-400 rounded border-primary-400 " value="{{ $column->code() }}" wire:model.live="columns">
+                <input type="checkbox" class="size-4 !text-secondary-medium rounded border-secondary-medium " value="{{ $column->code() }}" wire:model.live="columns">
                 <span class="truncate" title="{{ $column->label() }}">{{ $column->label() }}</span>
             </label>
         @endforeach

@@ -35,7 +35,7 @@
         const ctx = canvas.getContext("2d");
 
         const styles = getComputedStyle(document.documentElement);
-        const primary   = styles.getPropertyValue("--color-primary-500").trim();
+        const primary   = styles.getPropertyValue("--color-primary").trim();
         const secondary = styles.getPropertyValue("--color-secondary-medium").trim();
         const neutral   = styles.getPropertyValue("--color-neutral-300").trim();
 

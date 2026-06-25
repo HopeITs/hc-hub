@@ -7,8 +7,7 @@
             />
             @activerole('HR' , 'super-admin' ,'general-manager')
             <a href="{{ route('programs.create') }}"
-               class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium shadow
-                  hover:opacity-93 transition">
+               class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium shadow transition">
                 @lang('general.add-new')
             </a>
             @endactiverole

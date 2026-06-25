@@ -79,3 +79,13 @@ if (! function_exists('formatDuration')) {
 
 
 }
+
+if (! function_exists('orgCardTokens')) {
+    /** Org-chart card size modifier (layout in app.css `.org-id-card`). */
+    function orgCardTokens(bool $compact = false): array
+    {
+        return [
+            'modifier' => $compact ? 'org-id-card--compact' : 'org-id-card--comfortable',
+        ];
+    }
+}

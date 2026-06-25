@@ -82,7 +82,7 @@ class ContractStatistics extends Component
                 $this->cards[] = [
                         'name' => $program->slug,
                         'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
-                        'color' => 'bg-primary-500',
+                        'color' => 'bg-primary',
                         'program_slug' => $program->slug,
                     ] + $this->getCardBreakdown($contractsQuery);
             }
@@ -127,7 +127,7 @@ class ContractStatistics extends Component
                 $this->cards[] = [
                         'name' => $program->name,
                         'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
-                        'color' => 'bg-primary-500',
+                        'color' => 'bg-primary',
                         'program_slug' => $program->slug,
                     ] + $this->getCardBreakdown($contractsQuery);
             }

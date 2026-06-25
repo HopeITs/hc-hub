@@ -18,7 +18,7 @@
                             </a>
                             @activerole('HR','super-admin')
                             <a href="{{ route('positions.index', ['center' => $center->id]) }}"
-                               class="group relative flex items-center gap-2 rounded-xl px-3 py-2 bg-primary-500 text-white hover:bg-primary-600 shadow-lg transition-all duration-300 hover:shadow-xl ">
+                               class="group relative flex items-center gap-2 rounded-xl px-3 py-2 bg-primary text-white hover:bg-primary shadow-lg transition-all duration-300 hover:shadow-xl ">
                                 <span class="z-10 text-[12px] font-semibold">@lang('general.view-positions')</span>
                             </a>
                             @endactiverole
@@ -37,12 +37,12 @@
                             class="inline-flex rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-1 shadow-lg">
                             <button
                                 wire:click="switchTab('contracts')"
-                                class="ui-tab group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300  {{ $activeTab === 'contracts' ? 'bg-primary-500 text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
+                                class="ui-tab group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300  {{ $activeTab === 'contracts' ? 'bg-primary text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
                                 <span class="z-10">@lang('general.employees-by-contract-type')</span>
                             </button>
                             <button
                                 wire:click="switchTab('programs')"
-                                class="ui-tab group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 {{ $activeTab === 'programs' ? 'bg-primary-500 text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
+                                class="ui-tab group relative inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-light {{ $activeTab === 'programs' ? 'bg-primary text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
                                 <span class="z-10">@lang('general.employees-by-program')</span>
                             </button>
                         </div>
@@ -81,7 +81,7 @@
                             <div class="relative flex items-center justify-between gap-4">
                                 <h3 class="text-lg font-bold capitalize text-neutral-900 dark:text-white">{{ $categories['label'] }}</h3>
                                 <span
-                                    class="inline-flex  items-center gap-1  px-3 py-2 text-[13px] font-semibold text-secondary-dark dark:text-primary-300">
+                                    class="inline-flex  items-center gap-1  px-3 py-2 text-[13px] font-semibold text-secondary-dark dark:text-secondary-medium">
                                     <i class="ti ti-users"></i>
                                     @lang('general.total') {{ $__total }}
                                 </span>
@@ -104,7 +104,7 @@
 
                                         <div
                                             class="h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
-                                            <div class="h-full rounded-full bg-primary-500"
+                                            <div class="h-full rounded-full bg-primary"
                                                  style="width: {{ $__pct }}%"></div>
                                         </div>
                                     </div>
@@ -126,7 +126,7 @@
                             </h3>
 
                             <p class="mt-1 text-sm text-secondary-light dark:text-neutral-300">@lang('general.total-employees')</p>
-                            <p class="text-3xl font-black mt-3 tracking-normal text-primary dark:text-primary-400">
+                            <p class="text-3xl font-black mt-3 tracking-normal text-primary dark:text-secondary-medium">
                                 {{ $program['count'] }}
                             </p>
 

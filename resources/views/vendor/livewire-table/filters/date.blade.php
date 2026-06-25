@@ -6,13 +6,13 @@
         <div>
             <span class="block text-sm font-bold">@lang('From')</span>
             <input type="date"
-                   class="w-full border border-neutral-200 rounded-md shadow-xs outline-hidden bg-white text-black focus:border-primary-300 me-auto px-3 py-2 font-normal transition ease-in-out dark:bg-neutral-900 dark:border-neutral-700 dark:focus:border-primary-600 dark:text-white"
+                   class="w-full border border-neutral-200 rounded-md shadow-xs outline-hidden bg-white text-black focus:border-secondary-medium me-auto px-3 py-2 font-normal transition ease-in-out dark:bg-neutral-900 dark:border-neutral-700 dark:focus:border-primary dark:text-white"
                    wire:model.live="filters.{{ $filter->code() }}.from">
         </div>
         <div>
             <span class="block text-sm font-bold">@lang('To')</span>
             <input type="date"
-                   class="w-full border border-neutral-200 rounded-md shadow-xs outline-hidden bg-white text-black focus:border-primary-300 me-auto px-3 py-2 font-normal transition ease-in-out dark:bg-neutral-900 dark:border-neutral-700 dark:focus:border-primary-600 dark:text-white"
+                   class="w-full border border-neutral-200 rounded-md shadow-xs outline-hidden bg-white text-black focus:border-secondary-medium me-auto px-3 py-2 font-normal transition ease-in-out dark:bg-neutral-900 dark:border-neutral-700 dark:focus:border-primary dark:text-white"
                    wire:model.live="filters.{{ $filter->code() }}.to">
         </div>
     </div>

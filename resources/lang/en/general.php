@@ -632,6 +632,7 @@ return [
     'reset-filters' => 'Reset Filters',
     'organization-overview' => 'Organization Overview',
     'org-chart-subtitle' => 'Explore reporting lines, teams, employees, and open positions across the organization.',
+    'org-chart-nav-hint' => 'Drag to pan · Scroll to move · Ctrl + scroll to zoom',
     'total-positions' => 'Total positions',
     'filled-positions' => 'Filled positions',
     'vacant-positions' => 'Vacant positions',
