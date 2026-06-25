@@ -439,7 +439,7 @@
                                                 @if($team->isNotEmpty())
                                                     <div x-cloak x-show="open" x-collapse>
                                                         <div class="relative mt-4 flex items-start justify-center gap-4 border-t {{ $branchBorder }}">
-                                                            <x-org-section :team="$team" :managerType="$manager_type" :compact="$compact"/>
+                                                            <x-org-section :team="$team" :managerType="$manager_type" :compact="$compact" :collapsed="$collapsed"/>
                                                         </div>
                                                     </div>
                                                 @endif
