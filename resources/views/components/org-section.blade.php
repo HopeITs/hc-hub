@@ -1,4 +1,4 @@
-@props(['team', 'managerType' => 'direct', 'compact' => false])
+@props(['team', 'managerType' => 'direct', 'compact' => false, 'collapsed' => []])
 
 @php
     // Solid connectors for the direct line, dashed for the technical line.
@@ -21,30 +21,58 @@
     $poolMax = $compact ? 'max-w-[36rem]' : 'max-w-[44rem]';
 @endphp
 
-{{-- Leaf reports: a flexible, wrapping pool that keeps the chart narrow. --}}
 {{-- Branch reports first (higher grade), then the leaf pool, so each row reads grade-ascending. --}}
 @foreach($branches as $position)
-    <div class="relative flex flex-col items-center {{ $compact ? 'gap-2 pt-4' : 'gap-3 pt-5' }}">
+    @php($subTeam = $position->{$teamRel})
+    <section
+        x-data="{ open: @js(!($collapsed[$position->id] ?? true)) }"
+        x-on:expand-all.window="open = true"
+        x-on:collapse-all.window="open = false"
+        class="relative flex flex-col items-center {{ $compact ? 'gap-2 pt-4' : 'gap-3 pt-5' }}"
+    >
         <span class="absolute start-1/2 top-0 {{ $compact ? 'h-4' : 'h-5' }} {{ $vLine }}"></span>
 
-        @foreach($position->activeContracts as $contract)
-            <x-org-node
-                :position="$position"
-                :employee="$contract->employee"
-                :is-manager="true"
-                :manager-type="$managerType"
-                :compact="$compact"
-            />
-        @endforeach
+        <div class="rounded-3xl border border-gray-200 bg-white/80 {{ $compact ? 'p-2' : 'p-3' }} shadow-sm backdrop-blur-sm">
+            @if($subTeam->isNotEmpty())
+                <button type="button"
+                        wire:click="toggleCollapse({{ $position->id }})"
+                        x-on:click="open = !open"
+                        class="mb-2 flex w-full items-center justify-between gap-2 rounded-full bg-gray-100 px-2.5 py-1.5 text-[10px] font-bold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                        :aria-expanded="open"
+                        :title="open ? @js(__('general.collapse')) : @js(__('general.expand'))">
+                    <span>{{ $subTeam->count() }} @lang('general.direct-reports')</span>
+                    <svg class="size-4 shrink-0 transition-transform" :class="open ? 'rotate-180' : ''"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+                    </svg>
+                </button>
+            @endif
 
-        @for($i = 0; $i < max(0, $position->max_emp - $position->activeContracts->count()); $i++)
-            <x-org-empty-node :position="$position" :compact="$compact"/>
-        @endfor
+            <div class="flex flex-wrap justify-center gap-2">
+                @foreach($position->activeContracts as $contract)
+                    <x-org-node
+                        :position="$position"
+                        :employee="$contract->employee"
+                        :is-manager="true"
+                        :manager-type="$managerType"
+                        :compact="$compact"
+                    />
+                @endforeach
 
-        <div class="relative mt-2 flex items-start justify-center {{ $gap }} {{ $hBorder }}">
-            <x-org-section :team="$position->{$teamRel}" :managerType="$managerType" :compact="$compact"/>
+                @for($i = 0; $i < max(0, $position->max_emp - $position->activeContracts->count()); $i++)
+                    <x-org-empty-node :position="$position" :compact="$compact"/>
+                @endfor
+            </div>
+
+            @if($subTeam->isNotEmpty())
+                <div x-cloak x-show="open" x-collapse>
+                    <div class="relative mt-4 flex items-start justify-center {{ $gap }} {{ $hBorder }}">
+                        <x-org-section :team="$subTeam" :managerType="$managerType" :compact="$compact" :collapsed="$collapsed"/>
+                    </div>
+                </div>
+            @endif
         </div>
-    </div>
+    </section>
 @endforeach
 
 {{-- Leaf reports: a flexible, wrapping pool that keeps the chart narrow. --}}
