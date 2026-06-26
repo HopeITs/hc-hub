@@ -4,7 +4,7 @@
         <div class="flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
             <div class="flex items-center gap-2">
                 <h3 class="text-sm font-semibold text-[#58595B]">@lang('general.today-events')</h3>
-                <span class="text-sm font-medium text-secondary-light">{{ now()->format('n/j/Y') }}</span>
+                <span class="text-sm font-medium text-secondary-light">{{ now()->format('j/n/Y') }}</span>
                 <x-icons.event class="ms-1 mb-0.5 text-secondary-medium"/>
             </div>
         </div>
