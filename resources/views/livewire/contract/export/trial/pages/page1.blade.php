@@ -18,16 +18,8 @@
     $nameEn = $emp?->name_en ?? '—';
     $nameAr = $emp?->name_ar ?? '—';
 
-    $cityEn = $emp?->city?->name_en
-          ?? $emp?->city?->name
-          ?? $emp?->place_of_birth ?? '';
-
-      $cityAr = $emp?->city?->name_ar
-          ?? $emp?->city?->name
-          ?? $emp?->place_of_birth ?? '';
-
-    $pobEn = trim((string) $cityEn);
-    $pobAr = trim((string) $cityAr);
+    $pobEn = trim((string) ($emp?->pob_en ?? '—'));
+    $pobAr = trim((string) ($emp?->pob_ar ?? '—'));
 
     $dob = $emp?->dob;
     $dobStr   = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
@@ -172,10 +164,8 @@
     $nameAr = $nameAr !== '' ? $nameAr : '—';
 
     // ── Place & Date of Birth ──
-    $cityEn = $emp?->city?->name_en ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-    $cityAr = $emp?->city?->name_ar ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-    $pobEn  = trim((string) $cityEn);
-    $pobAr  = trim((string) $cityAr);
+    $pobEn = trim((string) ($emp?->pob_en ?? '—'));
+    $pobAr = trim((string) ($emp?->pob_ar ?? '—'));
 
     $dob      = $emp?->dob;
     $dobStr   = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
