@@ -33,20 +33,7 @@
         <span class="absolute start-1/2 top-0 {{ $compact ? 'h-4' : 'h-5' }} {{ $vLine }}"></span>
 
         <div class="rounded-3xl border border-gray-200 bg-white/80 {{ $compact ? 'p-2' : 'p-3' }} shadow-sm backdrop-blur-sm">
-            @if($subTeam->isNotEmpty())
-                <button type="button"
-                        wire:click="toggleCollapse({{ $position->id }})"
-                        x-on:click="open = !open"
-                        class="mb-2 flex w-full items-center justify-between gap-2 rounded-full bg-gray-100 px-2.5 py-1.5 text-[10px] font-bold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
-                        :aria-expanded="open"
-                        :title="open ? @js(__('general.collapse')) : @js(__('general.expand'))">
-                    <span>{{ $subTeam->count() }} @lang('general.direct-reports')</span>
-                    <svg class="size-4 shrink-0 transition-transform" :class="open ? 'rotate-180' : ''"
-                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
-                    </svg>
-                </button>
-            @endif
+
 
             <div class="flex flex-wrap justify-center gap-2">
                 @foreach($position->activeContracts as $contract)
@@ -70,6 +57,21 @@
                         <x-org-section :team="$subTeam" :managerType="$managerType" :compact="$compact" :collapsed="$collapsed"/>
                     </div>
                 </div>
+            @endif
+
+             @if($subTeam->isNotEmpty())
+                <button type="button"
+                        wire:click="toggleCollapse({{ $position->id }})"
+                        x-on:click="open = !open"
+                        class="mt-2 flex w-full items-center justify-between gap-2 rounded-[0.5cqw] bg-gray-100 px-2.5 py-1.5 text-[10px] font-bold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                        :aria-expanded="open"
+                        :title="open ? @js(__('general.collapse')) : @js(__('general.expand'))">
+                    <span>{{ $subTeam->count() }} @lang('general.direct-reports')</span>
+                    <svg class="transition-transform size-4 shrink-0" :class="open ? 'rotate-180' : ''"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+                    </svg>
+                </button>
             @endif
         </div>
     </section>

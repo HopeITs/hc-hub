@@ -15,7 +15,7 @@
     $modifiers = collect([
         'org-id-card',
         $org['modifier'],
-        $isManager ? 'org-id-card--manager' : null,
+        // $isManager ? 'org-id-card--manager' : null,
         $employee->is_board_member ? 'org-id-card--board' : null,
     ])
         ->filter()
@@ -25,10 +25,7 @@
 <button type="button" wire:click="$dispatch('open-profile', { employeeId: {{ $employee->id }} })"
     aria-label="{{ __('general.view-profile-of', ['name' => $employee->name]) }}"
     {{ $attributes->merge(['class' => $modifiers]) }}>
-    <div class="org-id-card__header">
-        <div class="org-id-card__badge" @if ($cityName) title="{{ $cityName }}" @endif>{{ $city }}</div>
-        <div class="org-id-card__badge">{{ $position->program?->slug }}</div>
-    </div>
+
 
     <div class="org-id-card__photo">
         <div class="org-id-card__bar" aria-hidden="true"></div>
@@ -36,7 +33,18 @@
     </div>
 
     <div class="org-id-card__info">
-        <div class="org-id-card__name">{{ $employee->first_name.' '.$employee->last_name }}</div>
-        <div class="org-id-card__position">{{ $position->title }}</div>
+        <div>
+            <div class="org-id-card__name">{{ $employee->first_name }}</div>
+            <div class="org-id-card__name">{{ $employee->last_name }}</div>
+        </div>
+        <div class="mt-2 org-id-card__position">{{ $position->title }}</div>
+        <div class="flex flex-col items-start justify-start mt-3 ">
+
+
+            <span class="text-[7px] uppercase">{{ $position->program?->name }}</span>
+            <span class="text-primary text-[7px] uppercase"
+                @if ($cityName) title="{{ $cityName }}" @endif>{{ $cityName }}</span>
+
+        </div>
     </div>
 </button>

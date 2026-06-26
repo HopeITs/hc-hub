@@ -7,7 +7,7 @@
     $colGap = $compact ? 'gap-3' : 'gap-7';
 @endphp
 
-<div class="space-y-4 pb-8"
+<div class="pb-8 space-y-4"
      x-data="{
         filtersOpen: false,
         exporting: false,
@@ -38,19 +38,19 @@
      }"
      x-on:keydown.escape.window="filtersOpen = false">
 
-    <section class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+    <section class="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-3xl">
         {{-- ---------- Header + stats ---------- --}}
-        <div class="relative bg-secondary-dark px-6 py-6 text-white">
-            <div class="absolute -end-16 -top-20 size-56 rounded-full bg-white/5"></div>
+        <div class="relative px-6 py-6 text-white bg-secondary-dark">
+            <div class="absolute rounded-full -end-16 -top-20 size-56 bg-white/5"></div>
 
             <div class="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
                 <div>
-                    <div class="mb-2 flex items-center gap-2 text-sm font-semibold text-white/70">
+                    <div class="flex items-center gap-2 mb-2 text-sm font-semibold text-white/70">
                         <x-icons.code-fork class="size-4" />
                         @lang('general.organization-overview')
                     </div>
                     <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">@lang('general.orgn-chart')</h1>
-                    <p class="mt-2 max-w-2xl text-sm leading-6 text-white/70">@lang('general.org-chart-subtitle')</p>
+                    <p class="max-w-2xl mt-2 text-sm leading-6 text-white/70">@lang('general.org-chart-subtitle')</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -70,7 +70,7 @@
         </div>
 
         {{-- ---------- View switcher ---------- --}}
-        <div class="flex items-center gap-1 border-b border-gray-200 bg-white px-4 pt-3">
+        <div class="flex items-center gap-1 px-4 pt-3 bg-white border-b border-gray-200">
             <button type="button" wire:click="$set('view', 'chart')"
                     class="flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-2.5 text-sm font-bold transition {{ $view === 'chart' ? 'border-primary text-primary' : 'border-transparent text-secondary-light hover:text-secondary-dark' }}">
                 <x-icons.code-fork class="size-4" />
@@ -97,10 +97,10 @@
                     </span>
                     <input type="search" wire:model.live.debounce.350ms="search"
                            placeholder="{{ __('general.search-name-or-position') }}"
-                           class="w-52 rounded-xl border border-gray-200 bg-gray-50 py-2 ps-8 pe-3 text-xs font-medium text-secondary-dark placeholder:text-secondary-light focus:border-secondary-light focus:bg-white focus:ring-2 focus:ring-secondary-soft" />
+                           class="py-2 text-xs font-medium border border-gray-200 w-52 rounded-xl bg-gray-50 ps-8 pe-3 text-secondary-dark placeholder:text-secondary-light focus:border-secondary-light focus:bg-white focus:ring-2 focus:ring-secondary-soft" />
                     @if($this->isSearching)
                         <button type="button" wire:click="$set('search', '')"
-                                class="absolute inset-y-0 end-2 flex items-center text-secondary-light transition hover:text-primary">
+                                class="absolute inset-y-0 flex items-center transition end-2 text-secondary-light hover:text-primary">
                             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>
                             </svg>
@@ -109,7 +109,7 @@
                 </div>
 
                 <button type="button" x-on:click="filtersOpen = true"
-                        class="relative flex items-center gap-2 rounded-xl bg-secondary-dark px-3 py-2 text-xs font-semibold text-white transition hover:bg-secondary-medium">
+                        class="relative flex items-center gap-2 px-3 py-2 text-xs font-semibold text-white transition rounded-xl bg-secondary-dark hover:bg-secondary-medium">
                     <x-icons.cog class="size-4" />
                     @lang('general.filters')
                     @if($this->activeFilterCount > 0)
@@ -120,7 +120,7 @@
                 </button>
 
                 {{-- Reporting line quick switch --}}
-                <div class="flex items-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50 text-xs font-semibold">
+                <div class="flex items-center overflow-hidden text-xs font-semibold border border-gray-200 rounded-xl bg-gray-50">
                     <button type="button" wire:click="$set('manager_type', 'direct')"
                             class="px-3 py-2 transition {{ ! $isTech ? 'bg-primary text-white' : 'text-secondary-medium hover:bg-white' }}">
                         @lang('general.direct-manager')
@@ -139,29 +139,29 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-                <div class="flex items-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+                <div class="flex items-center overflow-hidden border border-gray-200 rounded-xl bg-gray-50">
                     <button type="button" wire:click="zoomOut" title="{{ __('general.zoom-out') }}"
-                            class="flex size-8 items-center justify-center text-secondary-medium transition hover:bg-white hover:text-primary">
+                            class="flex items-center justify-center transition size-8 text-secondary-medium hover:bg-white hover:text-primary">
                         <span class="text-lg font-bold">-</span>
                     </button>
                     <span class="min-w-12 border-x border-gray-200 bg-white px-1 py-1.5 text-center text-xs font-bold text-secondary-dark">
                         {{ round($scale * 100) }}%
                     </span>
                     <button type="button" wire:click="zoomIn" title="{{ __('general.zoom-in') }}"
-                            class="flex size-8 items-center justify-center text-secondary-medium transition hover:bg-white hover:text-primary">
+                            class="flex items-center justify-center transition size-8 text-secondary-medium hover:bg-white hover:text-primary">
                         <span class="text-lg font-bold">+</span>
                     </button>
                 </div>
                 <button type="button" wire:click="fitToScreen"
-                        class="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
+                        class="px-3 py-2 text-xs font-semibold transition bg-white border border-gray-200 rounded-xl text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
                     @lang('general.fit-to-screen')
                 </button>
                 <button type="button" wire:click="expandAll"
-                        class="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:bg-gray-50">
+                        class="px-3 py-2 text-xs font-semibold transition bg-white border border-gray-200 rounded-xl text-secondary-medium hover:bg-gray-50">
                     @lang('general.expand-all')
                 </button>
                 <button type="button" wire:click="collapseAll"
-                        class="rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-white transition hover:bg-primary">
+                        class="px-3 py-2 text-xs font-semibold text-white transition rounded-xl bg-primary hover:bg-primary">
                     @lang('general.collapse-all')
                 </button>
 
@@ -174,13 +174,13 @@
                         @lang('general.export')
                     </button>
                     <div x-show="menu" x-cloak x-transition
-                         class="absolute end-0 z-30 mt-1 w-36 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
+                         class="absolute z-30 py-1 mt-1 overflow-hidden bg-white border border-gray-200 shadow-lg end-0 w-36 rounded-xl">
                         <button type="button" x-on:click="menu = false; exportChart('png')"
-                                class="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-secondary-dark transition hover:bg-secondary-soft hover:text-primary">
+                                class="flex items-center w-full gap-2 px-3 py-2 text-xs font-semibold transition text-secondary-dark hover:bg-secondary-soft hover:text-primary">
                             @lang('general.export-png')
                         </button>
                         <button type="button" x-on:click="menu = false; exportChart('pdf')"
-                                class="flex w-full items-center gap-2 px-3 py-2 text-xs font-semibold text-secondary-dark transition hover:bg-secondary-soft hover:text-primary">
+                                class="flex items-center w-full gap-2 px-3 py-2 text-xs font-semibold transition text-secondary-dark hover:bg-secondary-soft hover:text-primary">
                             @lang('general.export-pdf')
                         </button>
                     </div>
@@ -193,7 +193,7 @@
             <div wire:loading.flex
                  wire:target="city_id,program_id,center_id,department_id,job_level_id,focus_manager_id,manager_type,search,resetFilters,toggleDensity"
                  class="absolute inset-0 z-30 items-center justify-center bg-white/75 backdrop-blur-[1px]">
-                <div class="flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-secondary-medium shadow-lg">
+                <div class="flex items-center gap-2 px-5 py-3 text-sm font-semibold bg-white border border-gray-200 shadow-lg rounded-2xl text-secondary-medium">
                     <x-icons.spinner class="size-5 animate-spin text-primary" />
                     @lang('general.updating-chart')
                 </div>
@@ -203,7 +203,7 @@
                 {{-- Flat search results grid (hierarchy is not meaningful while searching). --}}
                 @php($results = $this->searchResults)
                 <div class="min-h-[680px] w-full bg-[radial-gradient(circle_at_center,_#e5e7eb_1px,_transparent_1px)] [background-size:22px_22px]">
-                    <div class="flex items-center justify-between gap-3 border-b border-gray-200 bg-white/80 px-5 py-3">
+                    <div class="flex items-center justify-between gap-3 px-5 py-3 border-b border-gray-200 bg-white/80">
                         <span class="text-sm font-semibold text-secondary-medium">
                             {{ trans_choice('general.search-results-count', $results->count(), ['count' => $results->count()]) }}
                             <span class="text-secondary-light">— "{{ $search }}"</span>
@@ -216,8 +216,8 @@
 
                     @if($results->isEmpty())
                         <div class="flex min-h-[560px] items-center justify-center p-6">
-                            <div class="max-w-md rounded-3xl border border-dashed border-gray-300 bg-white/90 px-8 py-10 text-center shadow-sm">
-                                <span class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary-soft text-primary">
+                            <div class="max-w-md px-8 py-10 text-center border border-gray-300 border-dashed shadow-sm rounded-3xl bg-white/90">
+                                <span class="flex items-center justify-center mx-auto size-14 rounded-2xl bg-secondary-soft text-primary">
                                     <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                         <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m20 20-3-3"/>
                                     </svg>
@@ -363,8 +363,8 @@
                 </p>
                 @if(collect($tree['root'])->isEmpty())
                     <div class="absolute inset-0 flex items-center justify-center p-6">
-                        <div class="max-w-md rounded-3xl border border-dashed border-gray-300 bg-white/90 px-8 py-10 text-center shadow-sm">
-                            <span class="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary-soft text-primary">
+                        <div class="max-w-md px-8 py-10 text-center border border-gray-300 border-dashed shadow-sm rounded-3xl bg-white/90">
+                            <span class="flex items-center justify-center mx-auto size-14 rounded-2xl bg-secondary-soft text-primary">
                                 <x-icons.code-fork class="size-7" />
                             </span>
                             <h2 class="mt-4 text-lg font-bold text-secondary-dark">@lang('general.no-org-chart-data')</h2>
@@ -408,24 +408,7 @@
                                         >
                                             <span class="absolute start-1/2 top-0 h-6 w-px {{ $trunk }}"></span>
                                             <div class="rounded-3xl border border-gray-200 bg-white/80 {{ $compact ? 'p-2' : 'p-3' }} shadow-sm backdrop-blur-sm">
-                                                @if($team->isNotEmpty())
-                                                    <button type="button"
-                                                            wire:click="toggleCollapse({{ $manager->id }})"
-                                                            x-on:click="open = !open"
-                                                            class="mb-2 flex w-full items-center justify-between gap-2 rounded-full bg-gray-100 px-2.5 py-1.5 text-[10px] font-bold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
-                                                            :aria-expanded="open"
-                                                            :title="open ? @js(__('general.collapse')) : @js(__('general.expand'))">
-                                                        <span>{{ $team->count() }} @lang('general.direct-reports')</span>
-                                                        <svg class="size-4 shrink-0 transition-transform" :class="open ? 'rotate-180' : ''"
-                                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
-                                                        </svg>
-                                                    </button>
-                                                @else
-                                                    <div class="mb-2 rounded-full bg-gray-100 px-2.5 py-1.5 text-center text-[10px] font-bold text-secondary-medium">
-                                                        0 @lang('general.direct-reports')
-                                                    </div>
-                                                @endif
+
 
                                                 {{-- Center the manager card over its (potentially wider) team. --}}
                                                 <div class="flex flex-wrap justify-center gap-2">
@@ -435,6 +418,24 @@
                                                         <x-org-empty-node :position="$manager" :compact="$compact"/>
                                                     @endforelse
                                                 </div>
+                                                    @if($team->isNotEmpty())
+                                                    <button type="button"
+                                                            wire:click="toggleCollapse({{ $manager->id }})"
+                                                            x-on:click="open = !open"
+                                                            class="mt-2 flex w-full items-center justify-between gap-2 rounded-[0.5cqw] bg-gray-100 px-2.5 py-1.5 text-[10px] font-bold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                                                            :aria-expanded="open"
+                                                            :title="open ? @js(__('general.collapse')) : @js(__('general.expand'))">
+                                                        <span>{{ $team->count() }} @lang('general.direct-reports')</span>
+                                                        <svg class="transition-transform size-4 shrink-0" :class="open ? 'rotate-180' : ''"
+                                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
+                                                        </svg>
+                                                    </button>
+                                                @else
+                                                    <div class="mt-2 rounded-[0.5cqw] bg-gray-100 px-2.5 py-1.5 text-center text-[10px] font-bold text-secondary-medium">
+                                                        0 @lang('general.direct-reports')
+                                                    </div>
+                                                @endif
 
                                                 @if($team->isNotEmpty())
                                                     <div x-cloak x-show="open" x-collapse>
@@ -448,7 +449,7 @@
                                     @endforeach
                                 </div>
                             @else
-                                <div class="mt-8 rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-4 text-sm text-secondary-light">
+                                <div class="px-6 py-4 mt-8 text-sm bg-white border border-gray-300 border-dashed rounded-2xl text-secondary-light">
                                     @lang('general.no-data-filters')
                                 </div>
                             @endif
@@ -468,7 +469,7 @@
     <div x-cloak x-show="filtersOpen" class="fixed inset-0 z-40" x-transition.opacity>
         <div class="absolute inset-0 bg-secondary-dark/40 backdrop-blur-[1px]" x-on:click="filtersOpen = false"></div>
 
-        <div class="absolute inset-y-0 end-0 flex w-full max-w-sm flex-col bg-white shadow-2xl"
+        <div class="absolute inset-y-0 flex flex-col w-full max-w-sm bg-white shadow-2xl end-0"
              x-show="filtersOpen"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="translate-x-full rtl:-translate-x-full"
@@ -477,20 +478,20 @@
              x-transition:leave-start="translate-x-0"
              x-transition:leave-end="translate-x-full rtl:-translate-x-full">
 
-            <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
                 <div class="flex items-center gap-2 text-sm font-bold text-secondary-dark">
                     <x-icons.cog class="size-4 text-primary" />
                     @lang('general.chart-filters')
                 </div>
                 <button type="button" x-on:click="filtersOpen = false"
-                        class="flex size-8 items-center justify-center rounded-lg text-secondary-light transition hover:bg-gray-100 hover:text-primary">
+                        class="flex items-center justify-center transition rounded-lg size-8 text-secondary-light hover:bg-gray-100 hover:text-primary">
                     <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/>
                     </svg>
                 </button>
             </div>
 
-            <div class="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+            <div class="flex-1 px-5 py-5 space-y-4 overflow-y-auto">
                 <label class="block space-y-1">
                     <span class="text-xs font-semibold text-secondary-medium">{{ trans_choice('general.city', 1) }}</span>
                     <x-forms.select-input wire:model.live="city_id">
@@ -565,7 +566,7 @@
                 </label>
             </div>
 
-            <div class="flex items-center gap-2 border-t border-gray-200 px-5 py-4">
+            <div class="flex items-center gap-2 px-5 py-4 border-t border-gray-200">
                 <button type="button" wire:click="resetFilters" x-on:click="filtersOpen = false"
                         class="flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-xs font-semibold text-secondary-medium transition hover:bg-gray-50">
                     @lang('general.reset-filters')

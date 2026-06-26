@@ -337,7 +337,7 @@ clock-timepicker {
         border: 1px solid #e5e7eb;
         border-radius: 0.5cqw;
         background: #ffffff;
-        box-shadow: 0 4cqw 8cqw rgb(65 64 66 / 20%);
+        box-shadow: 0 0.1cqw 0.3cqw rgb(65 64 66 / 20%);
         text-align: center;
         transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
     }
@@ -382,7 +382,7 @@ clock-timepicker {
         position: relative;
         flex: 0 0 auto;
         width: 100%;
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 4 / 3;
         overflow: hidden;
         background: #ffffff;
     }
@@ -410,7 +410,7 @@ clock-timepicker {
         left: 50%;
         z-index: 1;
         display: block;
-        width: 92%;
+        width:75%;
         max-height: 94%;
         transform: translateX(-50%);
         object-fit: contain;
@@ -465,9 +465,9 @@ clock-timepicker {
         display: grid;
         flex: 0 0 auto;
         grid-template-rows: calc(9cqw * 1.05 * 2) calc(7cqw * 1.1 * 2);
-        gap: 1.5cqw;
+
         width: 100%;
-        padding: 2.5cqw 4cqw 3cqw;
+        padding: 12.5cqw 6cqw 7cqw;
     }
 
     .org-id-card__slot--empty {
@@ -483,14 +483,14 @@ clock-timepicker {
         width: 100%;
         max-height: calc(9cqw * 1.05 * 2);
         color: var(--color-primary);
-        font-size: 9cqw;
+        font-size: 11cqw;
         font-weight: 900;
         line-height: 1.05;
         letter-spacing: 0.01em;
         text-transform: uppercase;
         word-break: break-word;
         text-align: center;
-        margin-block: auto;
+        margin-top: auto;
 
     }
 
@@ -498,7 +498,7 @@ clock-timepicker {
         display: -webkit-box;
         overflow: hidden;
         -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
+
         width: 100%;
         max-height: calc(7cqw * 1.1 * 2);
         color: var(--color-black, #414042);
