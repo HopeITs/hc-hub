@@ -19,9 +19,6 @@
     $nameAr = trim(($emp?->first_name_ar ?? '') . ' ' . ($emp?->father_name_ar ?? '') . ' ' . ($emp?->last_name_ar ?? ''));
     $nameAr = $nameAr !== '' ? $nameAr : '—';
 
-    $cityEn = $emp?->city?->name_en ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-    $cityAr = $emp?->city?->name_ar ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-
     $addressEn = $emp?->address_en ?? '—';
     $addressAr = $emp?->address_ar ?? '—';
 
@@ -30,8 +27,8 @@
     $dobStr = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
     $dobStrAr = $Digits($dobStr);
     // Other info
-    $pobEn = trim((string) $cityEn);
-    $pobAr = trim((string) $cityAr);
+    $pobEn = trim((string) ($emp?->pob_en ?? '—'));
+    $pobAr = trim((string) ($emp?->pob_ar ?? '—'));
     $nationalId = $emp?->national_number;
 
     $nationalityRaw = (string) ($emp?->nationality ?? '');

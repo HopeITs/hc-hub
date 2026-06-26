@@ -16,11 +16,8 @@
     // Fields
     $nameEn =  $emp?->name_en ?? '—';
     $nameAr =  $Glyphs($emp?->name_ar ??  '—');
-   $cityEn = $emp?->city?->name_en ?? $emp?->place_of_birth ?? '';
-    $cityAr = $Glyphs( $emp?->city?->name_ar ?? $emp?->place_of_birth ?? '');
-
-    $pobEn = trim((string) $cityEn);
-    $pobAr = trim((string) $cityAr);
+    $pobEn = trim((string) ($emp?->pob_en ?? '—'));
+    $pobAr = trim((string) ($Glyphs($emp?->pob_ar ?? '—')));
 
     $dob = $emp?->dob;
     $dobStr   = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
@@ -155,9 +152,6 @@
     $nameAr = $nameAr !== '' ? $nameAr : '—';
 
     // Location Data
-    $cityEn = $emp?->city?->name_en ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-    $cityAr = $emp?->city?->name_ar ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-
     $addressEn = $emp?->address_en ?? '—';
     $addressAr = $emp?->address_ar ?? '—';
 
@@ -165,9 +159,9 @@
     $dob = $emp?->dob;
     $dobStr = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
     $dobStrAr = $Digits($dobStr);
-    
-    $pobEn = trim((string) $cityEn);
-    $pobAr = trim((string) $cityAr);
+
+    $pobEn = trim((string) ($emp?->pob_en ?? '—'));
+    $pobAr = trim((string) ($emp?->pob_ar ?? '—'));
     $nationalId = $emp?->national_number;
 
     // Nationality Mapping
@@ -315,9 +309,6 @@
     $nameAr = $nameAr !== '' ? $nameAr : '—';
 
     // Location Data
-    $cityEn = $emp?->city?->name_en ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-    $cityAr = $emp?->city?->name_ar ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-
     $addressEn = $emp?->address_en ?? '—';
     $addressAr = $emp?->address_ar ?? '—';
 
@@ -325,9 +316,9 @@
     $dob = $emp?->dob;
     $dobStr = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
     $dobStrAr = $Digits($dobStr);
-    
-    $pobEn = trim((string) $cityEn);
-    $pobAr = trim((string) $cityAr);
+
+    $pobEn = trim((string) ($emp?->pob_en ?? '—'));
+    $pobAr = trim((string) ($emp?->pob_ar ?? '—'));
     $nationalId = $emp?->national_number;
 
     // Nationality Mapping
@@ -570,10 +561,8 @@
     $nameAr = trim(($emp?->first_name_ar ?? '') . ' ' . ($emp?->father_name_ar ?? '') . ' ' . ($emp?->last_name_ar ?? ''));
     $nameAr = $nameAr !== '' ? $nameAr : '—';
 
-    $cityEn = $emp?->city?->name_en ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-    $cityAr = $emp?->city?->name_ar ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-    $pobEn  = trim((string) $cityEn);
-    $pobAr  = trim((string) $cityAr);
+    $pobEn = trim((string) ($emp?->pob_en ?? '—'));
+    $pobAr = trim((string) ($emp?->pob_ar ?? '—'));
 
     $dob      = $emp?->dob;
     $dobStr   = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
