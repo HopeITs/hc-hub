@@ -648,7 +648,7 @@ return [
     'updating-chart' => 'Updating organization chart...',
     'no-org-chart-data' => 'Organization chart is not configured',
     'no-org-chart-data-help' => 'Add a root position and reporting relationships to begin building the chart.',
-    'direct-reports' => 'direct reports',
+    'direct-reports' => 'Direct Reports',
     'collapse' => 'Collapse',
     'expand' => 'Expand',
     'vacant-position' => 'Vacant position',
