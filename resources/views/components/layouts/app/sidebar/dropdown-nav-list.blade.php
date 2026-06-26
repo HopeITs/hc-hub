@@ -28,7 +28,7 @@
         :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0' : ''"
     >
         {{-- Icon --}}
-        <span class="size-4 shrink-0 text-inherit group-hover:text-inherit">
+        <span class="size-5 shrink-0 text-inherit group-hover:text-inherit">
             {{ $icon }}
         </span>
 
