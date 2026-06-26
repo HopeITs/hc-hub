@@ -46,14 +46,16 @@
     $positionAR = $req?->title_ar ?? ($position?->title_ar ?? '—');
     $program = $program?->name ?? '—';
     //Center and City Name
-    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name ?? '—';
-    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name ?? '—';
+    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_en ?? '—'));
+    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_ar ?? '—'));
 
     $cityNameEn = $position?->city?->name_en ?? '—';
     $cityNameAr = $position?->city?->name_ar ?? '—';
 
-    $workPlaceEn = $cityNameEn . ' - ' . $centerNameEn;
-    $workPlaceAr = $cityNameAr . ' - ' . $centerNameAr;
+    $workPlaceEn = $position?->center_id ? ($cityNameEn . ' - ' . $centerNameEn) : $centerNameEn;
+    $workPlaceAr = $position?->center_id ? ($cityNameAr . ' - ' . $centerNameAr) : $centerNameAr;
     // Escaping
     $esc = fn($v) => e((string) ($v === '' || $v === null ? '—' : $v));
     $escAr = fn($v) => e((string) ($v === '' || $v === null ? '—' : $Glyphs($v)));

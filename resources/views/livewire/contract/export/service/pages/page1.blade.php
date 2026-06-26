@@ -180,13 +180,15 @@
     $positionEN = $req?->title_en ?? ($position?->title_en ?? '—');
     $positionAR = $req?->title_ar ?? ($position?->title_ar ?? '—');
     
-    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name ?? '—';
-    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name ?? '—';
+    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_en ?? '—'));
+    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_ar ?? '—'));
     $cityNameEn = $position?->city?->name_en ?? '—';
     $cityNameAr = $position?->city?->name_ar ?? '—';
 
-    $workPlaceEn = $cityNameEn . ' - ' . $centerNameEn;
-    $workPlaceAr = $cityNameAr . ' - ' . $centerNameAr;
+    $workPlaceEn = $position?->center_id ? ($cityNameEn . ' - ' . $centerNameEn) : $centerNameEn;
+    $workPlaceAr = $position?->center_id ? ($cityNameAr . ' - ' . $centerNameAr) : $centerNameAr;
 
     // Escaping helpers
     $esc = fn($v) => e((string) ($v === '' || $v === null ? '—' : $v));
@@ -337,13 +339,15 @@
     $positionEN = $req?->title_en ?? ($position?->title_en ?? '—');
     $positionAR = $req?->title_ar ?? ($position?->title_ar ?? '—');
     
-    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name ?? '—';
-    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name ?? '—';
+    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_en ?? '—'));
+    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_ar ?? '—'));
     $cityNameEn = $position?->city?->name_en ?? '—';
     $cityNameAr = $position?->city?->name_ar ?? '—';
 
-    $workPlaceEn = $cityNameEn . ' - ' . $centerNameEn;
-    $workPlaceAr = $cityNameAr . ' - ' . $centerNameAr;
+    $workPlaceEn = $position?->center_id ? ($cityNameEn . ' - ' . $centerNameEn) : $centerNameEn;
+    $workPlaceAr = $position?->center_id ? ($cityNameAr . ' - ' . $centerNameAr) : $centerNameAr;
 
     // Escaping helpers
     $esc = fn($v) => e((string) ($v === '' || $v === null ? '—' : $v));
@@ -483,12 +487,14 @@
     $nationalId = $emp?->national_number ?? '—';
 
     // Location
-    $centerNameEn = $position?->center?->name_en ?? '—';
-    $centerNameAr = $position?->center?->name_ar ?? '—';
+    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_en ?? '—'));
+    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_ar ?? '—'));
     $cityNameEn = $position?->city?->name_en ?? '—';
     $cityNameAr = $position?->city?->name_ar ?? '—';
-    $workPlaceEn = $cityNameEn . ' - ' . $centerNameEn;
-    $workPlaceAr = $cityNameAr . ' - ' . $centerNameAr;
+    $workPlaceEn = $position?->center_id ? ($cityNameEn . ' - ' . $centerNameEn) : $centerNameEn;
+    $workPlaceAr = $position?->center_id ? ($cityNameAr . ' - ' . $centerNameAr) : $centerNameAr;
 
     $esc = fn($v) => e((string) ($v ?: '—'));
     $escAr = fn($v) => e((string) ($v ? $Glyphs($v) : '—'));
@@ -586,13 +592,15 @@
     $positionEN = $req?->title_en ?? ($position?->title_en ?? '—');
     $positionAR = $req?->title_ar ?? ($position?->title_ar ?? '—');
 
-    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name ?? '—';
-    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name ?? '—';
+    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_en ?? '—'));
+    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_ar ?? '—'));
     $cityNameEn   = $position?->city?->name_en ?? '—';
     $cityNameAr   = $position?->city?->name_ar ?? '—';
 
-    $workPlaceEn  = $cityNameEn . ' - ' . $centerNameEn;
-    $workPlaceAr  = $cityNameAr . ' - ' . $centerNameAr;
+    $workPlaceEn  = $position?->center_id ? ($cityNameEn . ' - ' . $centerNameEn) : $centerNameEn;
+    $workPlaceAr  = $position?->center_id ? ($cityNameAr . ' - ' . $centerNameAr) : $centerNameAr;
 
     $esc   = fn($v) => e((string) ($v === '' || $v === null ? '—' : $v));
     $escAr = fn($v) => e((string) ($v === '' || $v === null ? '—' : $Glyphs($v)));
