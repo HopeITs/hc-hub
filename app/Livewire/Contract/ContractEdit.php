@@ -297,7 +297,11 @@ class ContractEdit extends Component
 
         $positions = Position::where('program_id', $this->program_id)
             ->inCity($this->city_id)
-            ->when($this->center_id, fn ($q) => $q->where('center_id', $this->center_id))
+            ->when(
+                $this->center_id,
+                fn ($q) => $q->where('center_id', $this->center_id),
+                fn ($q) => $q->whereNull('center_id'),
+            )
             ->select('id', $col)
             ->orderBy($col)
             ->get()
