@@ -20,6 +20,11 @@
     ])
         ->filter()
         ->implode(' ');
+
+    // Long single words (e.g. surnames) can't wrap inside the fixed card width,
+    // so shrink the name font a little when either line is long.
+    $longestNameLine = max(mb_strlen((string) $employee->first_name), mb_strlen((string) $employee->last_name));
+    $nameClass = $longestNameLine > 9 ? 'org-id-card__name org-id-card__name--sm' : 'org-id-card__name';
 @endphp
 
 <button type="button" wire:click="$dispatch('open-profile', { employeeId: {{ $employee->id }} })"
@@ -34,8 +39,8 @@
 
     <div class="org-id-card__info">
         <div>
-            <div class="org-id-card__name">{{ $employee->first_name }}</div>
-            <div class="org-id-card__name">{{ $employee->last_name }}</div>
+            <div class="{{ $nameClass }}">{{ $employee->first_name }}</div>
+            <div class="{{ $nameClass }}">{{ $employee->last_name }}</div>
         </div>
         <div class="mt-2 org-id-card__position">{{ $position->title }}</div>
         <div class="flex flex-col items-start justify-start mt-3 ">
