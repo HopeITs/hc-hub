@@ -19,9 +19,6 @@
     $nameAr = trim(($emp?->first_name_ar ?? '') . ' ' . ($emp?->father_name_ar ?? '') . ' ' . ($emp?->last_name_ar ?? ''));
     $nameAr = $nameAr !== '' ? $nameAr : '—';
 
-    $cityEn = $emp?->city?->name_en ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-    $cityAr = $emp?->city?->name_ar ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-
     $addressEn = $emp?->address_en ?? '—';
     $addressAr = $emp?->address_ar ?? '—';
 
@@ -30,8 +27,8 @@
     $dobStr = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
     $dobStrAr = $Digits($dobStr);
     // Other info
-    $pobEn = trim((string) $cityEn);
-    $pobAr = trim((string) $cityAr);
+    $pobEn = trim((string) ($emp?->pob_en ?? '—'));
+    $pobAr = trim((string) ($emp?->pob_ar ?? '—'));
     $nationalId = $emp?->national_number;
 
     $nationalityRaw = (string) ($emp?->nationality ?? '');
@@ -49,14 +46,16 @@
     $positionAR = $req?->title_ar ?? ($position?->title_ar ?? '—');
     $program = $program?->name ?? '—';
     //Center and City Name
-    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name ?? '—';
-    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name ?? '—';
+    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_en ?? '—'));
+    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_ar ?? '—'));
 
     $cityNameEn = $position?->city?->name_en ?? '—';
     $cityNameAr = $position?->city?->name_ar ?? '—';
 
-    $workPlaceEn = $cityNameEn . ' - ' . $centerNameEn;
-    $workPlaceAr = $cityNameAr . ' - ' . $centerNameAr;
+    $workPlaceEn = $position?->center_id ? ($cityNameEn . ' - ' . $centerNameEn) : $centerNameEn;
+    $workPlaceAr = $position?->center_id ? ($cityNameAr . ' - ' . $centerNameAr) : $centerNameAr;
     // Escaping
     $esc = fn($v) => e((string) ($v === '' || $v === null ? '—' : $v));
     $escAr = fn($v) => e((string) ($v === '' || $v === null ? '—' : $Glyphs($v)));

@@ -22,7 +22,7 @@
                 </svg>
             </button>
             <a href="{{ $localized }}"
-                class="flex items-center mt-1 text-xs font-medium transition text-secondary-light hover:text-secondary-dark">
+                class="flex items-center text-base font-semibold leading-none transition text-secondary-light hover:text-secondary-dark">
                 {{ $switchTo === 'ar' ? 'AR' : 'EN' }}
             </a>
 

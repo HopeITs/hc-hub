@@ -17,7 +17,7 @@
                     @foreach($items as $i => $crumb)
                         <li><span class="text-default">/</span></li>
 
-                        <li class="text-xs {{ $loop->last ? 'text-gray-900' : 'text-default' }}">
+                        <li class="text-sm {{ $loop->last ? 'text-gray-900' : 'text-default' }}">
                             @if(!empty($crumb['href']))
                                 <a href="{{ $crumb['href'] }}" class="hover:underline">
                                     {{ $crumb['label'] }}
