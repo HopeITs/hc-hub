@@ -2,11 +2,11 @@
 <button id="dropdownNotificationButton"
         data-dropdown-toggle="dropdownNotification"
         type="button"
-        class="relative cursor-pointer me-3 inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
+        class="relative inline-flex items-center justify-center text-sm font-medium transition rounded-full cursor-pointer size-9 text-secondary-light hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:text-white">
 
-    <x-icons.notification class=" text-secondary-light hover:text-secondary-dark transition"/>
+    <x-icons.notification class="size-5" />
     <!-- Unread Counter -->
-    <div class="absolute -top-2 start-3">
+    <div class="absolute -top-0.5 start-5">
         <livewire:notifications.counter wire:poll.10s />
     </div>
 </button>
