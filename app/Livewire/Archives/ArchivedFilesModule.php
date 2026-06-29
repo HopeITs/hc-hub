@@ -411,10 +411,18 @@ class ArchivedFilesModule extends Component
         $query = User::query()->whereHas('profile');
 
         if (trim($this->userSearch)) {
-            $query->whereHas('profile', function ($q) {
-                $q->where(function ($s) {
-                    $s->where('name_en', 'like', '%' . $this->userSearch . '%')
-                      ->orWhere('name_ar', 'like', '%' . $this->userSearch . '%');
+            $parts = array_filter(explode(' ', trim($this->userSearch)));
+
+            $query->whereHas('profile', function ($q) use ($parts) {
+                $q->where(function ($outer) use ($parts) {
+                    foreach ($parts as $part) {
+                        $outer->where(function ($inner) use ($part) {
+                            $inner->where('first_name_en', 'LIKE', "%{$part}%")
+                                ->orWhere('first_name_ar', 'LIKE', "%{$part}%")
+                                ->orWhere('last_name_en', 'LIKE', "%{$part}%")
+                                ->orWhere('last_name_ar', 'LIKE', "%{$part}%");
+                        });
+                    }
                 });
             });
         }
