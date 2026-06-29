@@ -396,57 +396,48 @@
                                 <span class="absolute bottom-0 start-1/2 h-10 w-px {{ $trunk }}"></span>
                             </div>
 
-                            @if(collect($tree['managers'])->isNotEmpty())
-                                <div class="flex items-start justify-center {{ $colGap }} border-t {{ $branchBorder }} px-4">
-                                    @foreach($tree['managers'] as $manager)
-                                        @php($team = $manager->{$manager_type.'Team'})
-                                        <section
-                                            x-data="{ open: @js(!($collapsed[$manager->id] ?? true)) }"
-                                            x-on:expand-all.window="open = true"
-                                            x-on:collapse-all.window="open = false"
-                                            class="relative flex flex-col items-center pt-6"
-                                        >
-                                            <span class="absolute start-1/2 top-0 h-6 w-px {{ $trunk }}"></span>
-                                            <div class="rounded-3xl border border-gray-200 bg-white/80 {{ $compact ? 'p-2' : 'p-3' }} shadow-sm backdrop-blur-sm">
+                            @php($teamRel = $manager_type.'Team')
+                            @php($topManagers = collect($tree['managers']))
+                            @php($topBranches = $topManagers->filter(fn ($p) => $p->{$teamRel}->isNotEmpty()))
+                            {{-- Only genuinely lower-grade leaves (ranked below every real manager) drop
+                                 into the section below; high-grade leaves (e.g. a deputy with no reports)
+                                 stay in the manager row. --}}
+                            @php($maxBranchGrade = (int) $topBranches->max(fn ($p) => $p->jobLevel?->grade ?? 0))
+                            @php($topLeaves = $topManagers->filter(fn ($p) => $p->{$teamRel}->isEmpty() && ($p->jobLevel?->grade ?? 999) > $maxBranchGrade))
+                            @php($rowManagers = $topManagers->reject(fn ($p) => $topLeaves->contains('id', $p->id)))
+                            @php($vLine = $isTech ? 'w-0 border-s border-dashed border-amber-300' : 'w-px bg-gray-300')
+                            @php($rowGap = $compact ? 'gap-2' : 'gap-4')
 
+                            @if($topManagers->isNotEmpty())
+                                <div class="flex w-full flex-col items-center {{ $rowGap }} border-t {{ $branchBorder }} px-4">
+                                    {{-- Managers (and high-grade leaves) stay on the main row. --}}
+                                    @if($rowManagers->isNotEmpty())
+                                        <div class="flex items-start justify-center {{ $colGap }}">
+                                            @foreach($rowManagers as $manager)
+                                                <x-org-manager-column
+                                                    :manager="$manager"
+                                                    :managerType="$manager_type"
+                                                    :compact="$compact"
+                                                    :collapsed="$collapsed"
+                                                    :trunk="$trunk"
+                                                    :branchBorder="$branchBorder"
+                                                    top-level
+                                                />
+                                            @endforeach
+                                        </div>
+                                    @endif
 
-                                                {{-- Center the manager card over its (potentially wider) team. --}}
-                                                <div class="flex flex-wrap justify-center gap-2">
-                                                    @forelse($manager->activeContracts as $contract)
-                                                        <x-org-node :position="$manager" :employee="$contract->employee" :is-manager="$team->isNotEmpty()" :manager-type="$manager_type" :compact="$compact"/>
-                                                    @empty
-                                                        <x-org-empty-node :position="$manager" :compact="$compact"/>
-                                                    @endforelse
-                                                </div>
-                                                    @if($team->isNotEmpty())
-                                                    <button type="button"
-                                                            wire:click="toggleCollapse({{ $manager->id }})"
-                                                            x-on:click="open = !open"
-                                                            class="mt-2 flex w-full items-center justify-between gap-2 rounded-[0.5cqw] bg-gray-100 px-2.5 py-1.5 text-[10px] font-bold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
-                                                            :aria-expanded="open"
-                                                            :title="open ? @js(__('general.collapse')) : @js(__('general.expand'))">
-                                                        <span>{{ $team->count() }} @lang('general.direct-reports')</span>
-                                                        <svg class="transition-transform size-4 shrink-0" :class="open ? 'rotate-180' : ''"
-                                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/>
-                                                        </svg>
-                                                    </button>
-                                                @else
-                                                    <div class="mt-2 rounded-[0.5cqw] bg-gray-100 px-2.5 py-1.5 text-center text-[10px] font-bold text-secondary-medium">
-                                                        0 @lang('general.direct-reports')
-                                                    </div>
-                                                @endif
-
-                                                @if($team->isNotEmpty())
-                                                    <div x-cloak x-show="open" x-collapse>
-                                                        <div class="relative mt-4 flex items-start justify-center gap-4 border-t {{ $branchBorder }}">
-                                                            <x-org-section :team="$team" :managerType="$manager_type" :compact="$compact" :collapsed="$collapsed"/>
-                                                        </div>
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        </section>
-                                    @endforeach
+                                    {{-- Lower-grade individual contributors pool below the manager row. --}}
+                                    @if($topLeaves->isNotEmpty())
+                                        <x-org-leaf-pool
+                                            :positions="$topLeaves"
+                                            :managerType="$manager_type"
+                                            :compact="$compact"
+                                            :vLine="$vLine"
+                                            :gap="$rowGap"
+                                            wide
+                                        />
+                                    @endif
                                 </div>
                             @else
                                 <div class="px-6 py-4 mt-8 text-sm bg-white border border-gray-300 border-dashed rounded-2xl text-secondary-light">
