@@ -92,8 +92,8 @@
                             </div>
 
                             <div class="relative flex items-center gap-3">
-                                <span class="p-[3px] rounded-full">
-                                    <img class="object-fit border rounded-full size-12 border-primary"
+                                <span class="inline-flex items-center justify-center overflow-hidden rounded-full size-14 shrink-0">
+                                    <img class="object-cover border rounded-full size-12 border-primary"
                                         src="{{ $user->profile?->getFirstMediaUrl('avatar') }}" alt="user">
                                 </span>
 

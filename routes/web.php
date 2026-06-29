@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArchiveFileController;
 use App\Livewire\ActivityLog\ActivityLogModule;
 use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Basics\CourseCategoryModule;
@@ -64,6 +65,9 @@ Route::group(
             Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
             Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', false)->name('my-folders.index');
             Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', true)->name('shared-folders.index');
+            Route::get('folder-files/{media}/preview', [ArchiveFileController::class, 'preview'])->name('folder-files.preview');
+            Route::get('folder-files/{media}/download', [ArchiveFileController::class, 'download'])->name('folder-files.download');
+            Route::get('folder-files/{media}/office-preview', [ArchiveFileController::class, 'officePreview'])->name('folder-files.office-preview');
 
             Route::prefix('checklist-items')
                 ->name('checklist-items.')

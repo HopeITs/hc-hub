@@ -5,37 +5,66 @@
             :crumbs="$finalCrumbs"
         />
 
-        <div class="flex items-center flex-shrink-0 space-x-2">
-            @if (!$currentFolder && !$isShared)
+        <div class="flex items-center flex-shrink-0 gap-2">
+            @if ($canManageCurrentFolder)
                 <button type="button" wire:click="$set('showCreateFolderModal', true)" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white transition rounded-md shadow-sm bg-[#be1f24] hover:bg-[#a51b20] focus:outline-none focus:ring-2 focus:ring-[#be1f24]/30">
                     <x-icons.plus class="w-5 h-5 me-1" />
                     {{ __('general.new_folder') }}
                 </button>
             @endif
 
-            @if ($currentFolder && (!$isShared || ($isShared && auth()->user()->hasRole('super-admin'))))
+            @if ($currentFolder && $canManageCurrentFolder)
                 <div
                     x-data="{ uploading: false, progress: 0 }"
                     x-on:livewire-upload-start="uploading = true"
                     x-on:livewire-upload-finish="uploading = false; progress = 0"
                     x-on:livewire-upload-error="uploading = false; progress = 0"
                     x-on:livewire-upload-progress="progress = $event.detail.progress"
-                    class="w-full"
+                    class="w-full sm:w-auto"
                 >
-                    <label for="file-upload" class="flex items-center justify-center px-4 py-2 text-sm font-semibold text-white transition duration-150 ease-in-out rounded-md shadow-sm cursor-pointer bg-[#be1f24] hover:bg-[#a51b20]">
+                    <label for="file-upload" class="flex items-center justify-center px-4 py-2 text-sm font-semibold text-gray-800 transition duration-150 ease-in-out bg-white border border-gray-300 rounded-md shadow-sm cursor-pointer hover:bg-gray-50">
                         <x-icons.upload class="w-5 h-5 me-1" />
                         {{ __('general.upload_files') }}
-                        <input id="file-upload" wire:model.live="filesToUpload" type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.gif,.xls,.xlsx,.doc,.docx,.pdf">
+                        <input x-ref="fileInput" id="file-upload" wire:model.live="filesToUpload" type="file" class="sr-only" multiple accept=".jpg,.jpeg,.png,.svg,.pdf,.docx,.xlsx,.pptx">
                     </label>
                     <div x-show="uploading" class="mt-2 w-full bg-gray-200 rounded-full h-2.5">
                         <div class="bg-[#be1f24] h-2.5 rounded-full" :style="`width: ${progress}%`"></div>
                     </div>
+                    @error('filesToUpload')
+                        <p class="mt-2 text-xs font-semibold text-[#be1f24]">{{ $message }}</p>
+                    @enderror
                 </div>
             @endif
         </div>
     </div>
 
-    <div class="p-5 mt-6 border border-gray-200 shadow-sm bg-gray-50/80 sm:rounded-lg">
+    <div
+        @if ($currentFolder && $canManageCurrentFolder)
+        x-data="{ dragging: false }"
+        x-on:dragover.prevent="dragging = true"
+        x-on:dragleave.prevent="dragging = false"
+        x-on:drop.prevent="
+            dragging = false;
+            const input = document.getElementById('file-upload');
+            if (input) {
+                input.files = $event.dataTransfer.files;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        "
+        @endif
+        class="relative p-5 mt-6 transition border border-gray-200 shadow-sm bg-gray-50/80 sm:rounded-lg"
+        @if ($currentFolder && $canManageCurrentFolder) :class="dragging ? 'border-[#be1f24] bg-gray-100 ring-2 ring-[#be1f24]/20' : ''" @endif
+    >
+        @if ($currentFolder && $canManageCurrentFolder)
+            <div x-show="dragging" x-transition class="absolute inset-3 z-10 flex items-center justify-center border-2 border-dashed rounded-lg pointer-events-none border-[#be1f24] bg-white/80" style="display: none;">
+                <div class="text-center">
+                    <x-icons.upload class="mx-auto size-10 text-[#be1f24]" />
+                    <p class="mt-2 text-sm font-semibold text-gray-900">Drop files here to upload</p>
+                    <p class="text-xs text-gray-500">JPG, PNG, SVG, PDF, DOCX, XLSX and PPTX files are supported</p>
+                </div>
+            </div>
+        @endif
+
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             @forelse($folders as $folder)
             <div class="relative group ">
@@ -102,18 +131,18 @@
 
             @foreach ($files as $file)
             <div class="relative group">
-                <div wire:click="downloadFile({{ $file->id }})" class="flex flex-col items-center justify-center h-40 p-4 text-center transition bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:-translate-y-0.5 hover:border-[#be1f24]/50 hover:shadow-lg">
-                    @if (str($file->mime_type)->startsWith('image'))
-                    <img src="{{ $file->getUrl() }}" alt="{{ $file->name }}" class="object-cover w-16 h-16 rounded-lg ring-1 ring-gray-200" />
+                <button type="button" wire:click="previewFile({{ $file->id }})" class="flex flex-col items-center justify-center w-full h-40 p-4 text-center transition bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:-translate-y-0.5 hover:border-[#be1f24]/50 hover:shadow-lg">
+                    @if (in_array(strtolower($file->extension ?? ''), ['jpg', 'jpeg', 'png'], true))
+                    <img src="{{ route('folder-files.preview', ['media' => $file->id]) }}" alt="{{ $file->name }}" class="object-cover w-16 h-16 rounded-lg ring-1 ring-gray-200" />
                     @else
                     <span class="flex items-center justify-center rounded-lg size-16 bg-gray-100 ring-1 ring-gray-200 group-hover:bg-[#be1f24] group-hover:ring-[#be1f24]">
                         <x-icons.document-text class="w-10 h-10 text-[#be1f24] group-hover:text-white" />
                     </span>
                     @endif
                     <span class="w-full mt-3 text-sm font-semibold text-gray-900 truncate">{{ $file->name }}</span>
-                </div>
+                    <span class="mt-1 text-xs text-gray-500">{{ strtoupper($file->extension) }} · {{ $file->size >= 1048576 ? number_format($file->size / 1048576, 1).' MB' : number_format($file->size / 1024, 1).' KB' }}</span>
+                </button>
 
-                @if (!$isShared && ($currentFolder->user_id === auth()->id() || auth()->user()->hasRole('super-admin')))
                 <div x-data="{ open: false }" @click.away="open = false" class="absolute top-2 right-2">
                     <button @click="open = !open" class="inline-flex items-center justify-center transition rounded-md size-8 text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         <svg class="w-5 h-5 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 8a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
@@ -126,6 +155,20 @@
                          @click="open = false">
 
                         <div class="py-2">
+                            <button wire:click.prevent="previewFile({{ $file->id }})" class="flex items-center w-full gap-3 px-4 py-2.5 text-sm font-medium text-left text-gray-700 transition hover:bg-gray-100 hover:text-gray-950">
+                                <x-icons.eye class="flex-shrink-0 text-current size-5" />
+                                <span>Preview</span>
+                            </button>
+                            <button wire:click.prevent="downloadFile({{ $file->id }})" class="flex items-center w-full gap-3 px-4 py-2.5 text-sm font-medium text-left text-gray-700 transition hover:bg-gray-100 hover:text-gray-950">
+                                <svg class="flex-shrink-0 text-current size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v11" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m7.5 9.5 4.5 4.5 4.5-4.5" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 19h14" />
+                                </svg>
+                                <span>Download</span>
+                            </button>
+                            @if ($canManageCurrentFolder)
+                            <div class="my-1 border-t border-gray-100"></div>
                             <button wire:click.prevent="startEditingFile({{ $file->id }})" class="flex items-center w-full gap-3 px-4 py-2.5 text-sm font-medium text-left text-gray-700 transition hover:bg-gray-100 hover:text-gray-950">
                                 <svg class="flex-shrink-0 text-current size-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
@@ -138,10 +181,10 @@
                                 </svg>
                                 <span>{{ __('general.delete_file') }}</span>
                             </button>
+                            @endif
                         </div>
                     </div>
                 </div>
-                @endif
             </div>
             @endforeach
         </div>
@@ -233,6 +276,115 @@
             <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-4 rounded-b-lg bg-gray-50">
                 <button type="button" wire:click="saveEditedFile" class="inline-flex justify-center w-full px-4 py-2 text-base font-semibold text-white transition rounded-md bg-[#be1f24] hover:bg-[#a51b20] focus:outline-none focus:ring-2 focus:ring-[#be1f24]/30">{{ __('general.save') }}</button>
                 <button wire:click="$set('editingFileId', null)" class="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-gray-700 bg-white border rounded-md hover:bg-gray-50">{{ __('general.cancel') }}</button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if ($showPreviewModal && $previewFile)
+    @php
+        $previewExtension = strtolower($previewFile->extension ?? '');
+        $canPreviewInOffice = in_array($previewExtension, ['docx', 'xlsx', 'pptx'], true);
+        $canExtractOfficeText = in_array($previewExtension, ['docx', 'xlsx'], true);
+    @endphp
+    <div class="fixed inset-0 z-40 bg-gray-950/70" wire:click="closePreviewModal"></div>
+    <div class="fixed z-50 w-full max-w-5xl -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+        <div class="flex flex-col max-h-[88vh] mx-4 overflow-hidden bg-white border border-gray-200 rounded-lg shadow-2xl">
+            <div class="flex items-center justify-between gap-4 px-5 py-4 border-b border-gray-200 bg-gray-50">
+                <div class="min-w-0">
+                    <h3 class="text-base font-bold text-gray-950 truncate">{{ $previewFile->name }}</h3>
+                    <p class="mt-0.5 text-xs text-gray-500">{{ strtoupper($previewFile->extension) }} · {{ $previewFile->size >= 1048576 ? number_format($previewFile->size / 1048576, 1).' MB' : number_format($previewFile->size / 1024, 1).' KB' }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-3 py-2 text-sm font-semibold text-white transition rounded-md bg-[#be1f24] hover:bg-[#a51b20]">
+                        Download
+                    </button>
+                    <button type="button" wire:click="closePreviewModal" class="inline-flex items-center justify-center text-gray-500 transition rounded-md size-9 hover:bg-gray-100 hover:text-gray-900">
+                        <span class="sr-only">Close</span>
+                        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" d="M6 6l12 12M18 6 6 18" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 min-h-0 p-4 overflow-auto bg-gray-100">
+                @if (in_array($previewExtension, ['jpg', 'jpeg', 'png'], true))
+                    <div class="flex items-center justify-center min-h-[55vh]">
+                        <img src="{{ route('folder-files.preview', ['media' => $previewFile->id]) }}" alt="{{ $previewFile->name }}" class="max-w-full max-h-[70vh] rounded-lg shadow-lg bg-white">
+                    </div>
+                @elseif ($previewExtension === 'pdf')
+                    <iframe src="{{ route('folder-files.preview', ['media' => $previewFile->id]) }}" title="{{ $previewFile->name }}" class="w-full h-[70vh] bg-white border border-gray-200 rounded-lg"></iframe>
+                @elseif ($convertedOfficePdfUrl)
+                    <iframe src="{{ $convertedOfficePdfUrl }}" title="{{ $previewFile->name }}" class="w-full h-[70vh] bg-white border border-gray-200 rounded-lg"></iframe>
+                @elseif ($canExtractOfficeText)
+                    @if (($officePreviewData['available'] ?? false) && ($officePreviewData['type'] ?? null) === 'docx')
+                        <div class="max-w-4xl p-8 mx-auto bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <div class="prose prose-sm max-w-none">
+                                @foreach ($officePreviewData['paragraphs'] as $paragraph)
+                                    <p class="mb-3 leading-7 text-gray-800">{{ $paragraph }}</p>
+                                @endforeach
+                            </div>
+                        </div>
+                    @elseif (($officePreviewData['available'] ?? false) && ($officePreviewData['type'] ?? null) === 'xlsx')
+                        <div class="overflow-auto bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <table class="min-w-full text-sm border-collapse">
+                                <tbody class="divide-y divide-gray-100">
+                                    @foreach ($officePreviewData['rows'] as $row)
+                                        <tr class="divide-x divide-gray-100">
+                                            @foreach ($row as $cell)
+                                                <td class="min-w-32 px-3 py-2 text-gray-800 whitespace-nowrap">{{ $cell }}</td>
+                                            @endforeach
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="flex items-center justify-center min-h-[55vh]">
+                            <div class="max-w-lg p-8 text-center bg-white border border-gray-200 rounded-lg shadow-sm">
+                                <span class="inline-flex items-center justify-center mx-auto rounded-lg size-16 bg-gray-100 ring-1 ring-gray-200">
+                                    <x-icons.document-text class="size-9 text-[#be1f24]" />
+                                </span>
+                                <h4 class="mt-4 text-base font-bold text-gray-950">{{ $previewFile->name }}</h4>
+                                <p class="mt-2 text-sm leading-6 text-gray-500">
+                                    {{ $officePreviewData['message'] ?? 'A local preview could not be generated for this Office file.' }}
+                                </p>
+                                <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-4 py-2 mt-5 text-sm font-semibold text-white transition rounded-md bg-[#be1f24] hover:bg-[#a51b20]">
+                                    Download file
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+                @elseif ($canPreviewInOffice)
+                    <div class="flex items-center justify-center min-h-[55vh]">
+                        <div class="max-w-lg p-8 text-center bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <span class="inline-flex items-center justify-center mx-auto rounded-lg size-16 bg-gray-100 ring-1 ring-gray-200">
+                                <x-icons.document-text class="size-9 text-[#be1f24]" />
+                            </span>
+                            <h4 class="mt-4 text-base font-bold text-gray-950">{{ $previewFile->name }}</h4>
+                            <p class="mt-2 text-sm leading-6 text-gray-500">
+                                A full local Office preview needs LibreOffice or Microsoft Office available on the server. Until then, this file can be downloaded and opened in its native app.
+                            </p>
+                            <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-4 py-2 mt-5 text-sm font-semibold text-white transition rounded-md bg-[#be1f24] hover:bg-[#a51b20]">
+                                Download file
+                            </button>
+                        </div>
+                    </div>
+                @else
+                    <div class="flex items-center justify-center min-h-[55vh]">
+                        <div class="max-w-md p-8 text-center bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <span class="inline-flex items-center justify-center mx-auto rounded-lg size-16 bg-gray-100 ring-1 ring-gray-200">
+                                <x-icons.document-text class="size-9 text-[#be1f24]" />
+                            </span>
+                            <h4 class="mt-4 text-base font-bold text-gray-950">{{ $previewFile->name }}</h4>
+                            <p class="mt-2 text-sm text-gray-500">Preview is available for images, PDF, Word, Excel and PowerPoint files. Download this file to open it in its native app.</p>
+                            <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-4 py-2 mt-5 text-sm font-semibold text-white transition rounded-md bg-[#be1f24] hover:bg-[#a51b20]">
+                                Download file
+                            </button>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
