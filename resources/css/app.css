@@ -497,7 +497,7 @@ clock-timepicker {
     /* Long names (e.g. unbreakable surnames) get a slightly smaller font so
        they don't overflow the fixed card width. */
     .org-id-card__name--sm {
-        font-size: 9cqw;
+        font-size: 10cqw;
     }
 
     .org-id-card__position {
