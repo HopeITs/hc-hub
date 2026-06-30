@@ -41,6 +41,8 @@ return [
     'deselect_all_visible' => 'إلغاء تحديد الكل المرئي',
     'select_all_visible' => 'تحديد الكل المرئي',
     'me_creator' => '(أنا - المنشئ)',
+    'has_access' => 'لديه صلاحية',
+    'no_access' => 'بدون صلاحية',
     'no_employees_found' => 'لم يتم العثور على موظفين يطابقون معايير البحث.',
     'save_permissions' => 'حفظ الصلاحيات',
     'choose' => 'اختر',

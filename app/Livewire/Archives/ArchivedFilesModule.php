@@ -13,10 +13,11 @@ use App\Notifications\FolderShared;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\Process\Process;
@@ -101,10 +102,12 @@ class ArchivedFilesModule extends Component
 
     public bool $permissionUsersNeedRefresh = false;
 
-    public function mount(bool $isShared, $folderId = null)
+    public function mount($folderId = null)
     {
         $this->user = auth()->user();
-        $this->isShared = $isShared;
+        // Derive from the route name so it can never be wrong, regardless of how
+        // the component is mounted (full-page route, embedded tag, or AJAX re-render).
+        $this->isShared = request()->routeIs('shared-folders.*');
 
         if ($folderId) {
             $folder = Folder::with('users')->find($folderId);
@@ -410,6 +413,15 @@ class ArchivedFilesModule extends Component
     public function updatedFilesToUpload()
     {
         $this->authorizeCurrentFolderManagement();
+
+        $rateKey = 'archive-upload:'.$this->user->id;
+        if (RateLimiter::tooManyAttempts($rateKey, 30)) {
+            throw ValidationException::withMessages([
+                'filesToUpload' => 'Too many uploads. Please wait a moment before trying again.',
+            ]);
+        }
+        RateLimiter::hit($rateKey, 60);
+
         $this->validate([
             'filesToUpload' => ['array', 'max:20'],
             'filesToUpload.*' => ['file', 'max:10240'],
@@ -506,12 +518,19 @@ class ArchivedFilesModule extends Component
             $this->rejectUpload($originalName, 'The file could not be inspected safely.');
         }
 
-        $sample = fread($handle, 1024 * 1024) ?: '';
-        fclose($handle);
-
-        if (stripos($sample, '<?php') !== false || stripos($sample, '<?=') !== false) {
-            $this->rejectUpload($originalName, 'The file contains executable PHP code.');
+        // Scan the full file in 1 MB chunks; keep an 8-byte tail so a tag
+        // split across two chunks is still caught.
+        $tail = '';
+        while (! feof($handle)) {
+            $chunk = fread($handle, 1024 * 1024) ?: '';
+            $window = $tail.$chunk;
+            if (stripos($window, '<?php') !== false || stripos($window, '<?=') !== false) {
+                fclose($handle);
+                $this->rejectUpload($originalName, 'The file contains executable PHP code.');
+            }
+            $tail = substr($chunk, -8);
         }
+        fclose($handle);
     }
 
     private function validateJpeg(string $path, string $originalName): void
@@ -1124,7 +1143,7 @@ POWERSHELL;
         $folder = $this->folderForMedia((int) $file->id);
         $this->authorizeFolderManagement($folder);
 
-        $newFileName = $this->editingFileName.'.'.$file->extension;
+        $newFileName = $this->safeDisplayFileName($this->editingFileName.'.'.$file->extension, $file->extension);
         $file->name = $newFileName;
         $file->save();
 
@@ -1213,38 +1232,33 @@ POWERSHELL;
 
     public function render()
     {
+        $hasAccessUsers = collect();
+        $noAccessUsers = collect();
+
         if ($this->showPermissionsModal) {
             if ($this->allUsers === null || $this->permissionUsersNeedRefresh) {
                 $this->allUsers = $this->getVisibleUsersQuery()->get();
                 $this->permissionUsersNeedRefresh = false;
             }
 
-            $creatorId = $this->folderForPermissions?->user_id;
-            [$creator, $otherUsers] = $this->allUsers->partition(fn ($user) => $user->id === $creatorId);
-
+            $creatorId = (int) $this->folderForPermissions?->user_id;
             $selectedIds = array_map('intval', $this->selectedUsers);
-            $sortedUsers = $otherUsers->sort(function ($firstUser, $secondUser) use ($selectedIds) {
-                $firstHasAccess = in_array((int) $firstUser->id, $selectedIds, true);
-                $secondHasAccess = in_array((int) $secondUser->id, $selectedIds, true);
 
-                if ($firstHasAccess !== $secondHasAccess) {
-                    return $firstHasAccess ? -1 : 1;
-                }
+            [$creatorCollection, $otherUsers] = $this->allUsers->partition(fn ($u) => (int) $u->id === $creatorId);
+            [$withAccess, $withoutAccess] = $otherUsers->partition(fn ($u) => in_array((int) $u->id, $selectedIds, true));
 
-                return strnatcasecmp(
-                    optional($firstUser->profile)->name ?? $firstUser->email,
-                    optional($secondUser->profile)->name ?? $secondUser->email
-                );
-            });
+            $hasAccessUsers = $creatorCollection->merge(
+                $withAccess->sortBy(fn ($u) => optional($u->profile)->name ?? $u->email)
+            );
+            $noAccessUsers = $withoutAccess
+                ->sortBy(fn ($u) => optional($u->profile)->name ?? $u->email)
+                ->values();
 
-            $this->allUsers = $creator->merge($sortedUsers);
+            $this->allUsers = $hasAccessUsers->merge($noAccessUsers);
 
-            // Keep the "select all visible" label in sync with the real selection,
-            // so it flips to "deselect" once every toggleable visible user is selected.
             $toggleable = $otherUsers->pluck('id')->map(fn ($id) => (int) $id);
-            $selected = array_map('intval', $this->selectedUsers);
             $this->allVisibleUsersSelected = $toggleable->isNotEmpty()
-                && $toggleable->every(fn ($id) => in_array($id, $selected, true));
+                && $toggleable->every(fn ($id) => in_array($id, $selectedIds, true));
         }
 
         $previewFile = null;
@@ -1255,6 +1269,8 @@ POWERSHELL;
         }
 
         return view('livewire.archives.archived-files-module', [
+            'hasAccessUsers' => $hasAccessUsers,
+            'noAccessUsers' => $noAccessUsers,
             'canManageCurrentFolder' => $this->userCanManageFolder($this->currentFolder),
             'previewFile' => $previewFile,
             'convertedOfficePdfUrl' => $this->convertedOfficePdfUrl($previewFile),

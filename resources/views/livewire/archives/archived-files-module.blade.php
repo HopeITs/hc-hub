@@ -481,36 +481,69 @@
                     </div>
                 @endif
             </div>
-            <div class="relative mx-6 mt-4 overflow-y-auto border border-gray-200 rounded-lg shadow-inner h-72 bg-gray-50" wire:loading.class="opacity-40" wire:target="permissionFilterType, permissionFilterValue, userSearch, clearFilters, removeFilter, toggleSelectAllVisible">
-                <div wire:loading wire:target="permissionFilterType, permissionFilterValue, userSearch, clearFilters, removeFilter, toggleSelectAllVisible" class="absolute inset-0 z-10 flex items-center justify-center bg-white/75">
+            <div class="relative mx-6 mt-4 overflow-y-auto border border-gray-200 rounded-xl h-72" wire:loading.class="opacity-40" wire:target="permissionFilterType, permissionFilterValue, userSearch, clearFilters, removeFilter, toggleSelectAllVisible">
+                <div wire:loading wire:target="permissionFilterType, permissionFilterValue, userSearch, clearFilters, removeFilter, toggleSelectAllVisible" class="absolute inset-0 z-10 flex items-center justify-center bg-white/80 rounded-xl">
                     <x-icons.spinner class="w-8 h-8 text-[#be1f24]" />
                 </div>
 
-                @if($allUsers)
-                    <div class="p-2 space-y-2">
-                        @forelse ($allUsers as $user)
-                            @php
-                                $isCreator = $user->id === $folderForPermissions?->user_id;
-                                $isChecked = $isCreator || in_array((int) $user->id, array_map('intval', $selectedUsers), true);
-                            @endphp
-                            <button type="button"
-                                    wire:key="perm-user-{{ $user->id }}"
-                                    @if(!$isCreator) wire:click="toggleUser({{ $user->id }})" @endif
-                                    class="flex items-center w-full gap-3 px-4 py-3 text-start transition rounded-lg border @if($isChecked) bg-white border-[#be1f24]/40 shadow-sm @elseif($isCreator) cursor-default bg-white border-gray-200 @else bg-white border-gray-200 hover:border-gray-400 hover:shadow-sm @endif">
-                                <span class="flex items-center justify-center flex-shrink-0 transition-colors border rounded size-5 @if($isChecked) bg-[#be1f24] border-[#be1f24] text-white @else bg-white border-gray-300 @endif">
-                                    @if($isChecked)
-                                        <svg class="size-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.58l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-                                    @endif
-                                </span>
-                                <span class="min-w-0 text-sm @if($isCreator) text-gray-500 @else text-gray-800 @endif">
-                                    <span class="block font-semibold truncate">{{ optional($user->profile)->name ?? $user->email }}</span>
-                                    @if($isCreator) <span class="text-xs text-gray-400">{{ __('general.me_creator') }}</span> @endif
-                                </span>
-                            </button>
-                        @empty
-                            <p class="py-10 text-sm text-center text-gray-500">{{ __('general.no_employees_found') }}</p>
-                        @endforelse
+                @if($allUsers && $allUsers->isNotEmpty())
+
+                    {{-- ── HAS ACCESS ─────────────────────────────────────── --}}
+                    @if($hasAccessUsers->isNotEmpty())
+                    <div class="sticky top-0 z-10 flex items-center gap-2 px-4 py-2 bg-white border-b border-gray-200">
+                        <svg class="size-3.5 text-[#be1f24] flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-[10px] font-bold tracking-widest uppercase text-gray-500">{{ __('general.has_access') }}</span>
+                        <span class="inline-flex items-center justify-center min-w-[1.25rem] h-4 px-1.5 text-[10px] font-bold text-white rounded-full bg-[#be1f24]">{{ $hasAccessUsers->count() }}</span>
                     </div>
+                    @foreach ($hasAccessUsers as $user)
+                        @php
+                            $isCreator = $user->id === $folderForPermissions?->user_id;
+                            $uName     = optional($user->profile)->name ?? $user->email;
+                        @endphp
+                        <button type="button"
+                                wire:key="perm-user-{{ $user->id }}"
+                                @if(!$isCreator) wire:click="toggleUser({{ $user->id }})" @endif
+                                class="flex items-center w-full gap-3 px-4 py-2.5 text-start border-s-[3px] border-[#be1f24] transition-colors @if($isCreator) cursor-default bg-gray-50/60 @else hover:bg-gray-50 bg-white @endif">
+                            <span class="flex-1 min-w-0">
+                                <span class="block text-sm font-semibold text-gray-800 truncate">{{ $uName }}</span>
+                                @if($isCreator)<span class="text-[11px] text-gray-400">{{ __('general.me_creator') }}</span>@endif
+                            </span>
+                            <span class="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded border bg-[#be1f24] border-[#be1f24] text-white">
+                                <svg class="size-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.58l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
+                            </span>
+                        </button>
+                    @endforeach
+                    @endif
+
+                    {{-- ── NO ACCESS ──────────────────────────────────────── --}}
+                    @if($noAccessUsers->isNotEmpty())
+                    <div class="sticky top-0 z-10 flex items-center gap-2 px-4 py-2 bg-white border-b border-gray-200 @if($hasAccessUsers->isNotEmpty()) border-t border-gray-200 @endif">
+                        <svg class="size-3.5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="text-[10px] font-bold tracking-widest uppercase text-gray-400">{{ __('general.no_access') }}</span>
+                        <span class="inline-flex items-center justify-center min-w-[1.25rem] h-4 px-1.5 text-[10px] font-bold text-gray-500 rounded-full bg-gray-200">{{ $noAccessUsers->count() }}</span>
+                    </div>
+                    @foreach ($noAccessUsers as $user)
+                        @php
+                            $uName = optional($user->profile)->name ?? $user->email;
+                        @endphp
+                        <button type="button"
+                                wire:key="perm-user-{{ $user->id }}"
+                                wire:click="toggleUser({{ $user->id }})"
+                                class="flex items-center w-full gap-3 px-4 py-2.5 text-start transition-colors hover:bg-gray-50 bg-white border-s-[3px] border-transparent">
+                            <span class="flex-1 min-w-0">
+                                <span class="block text-sm font-medium text-gray-600 truncate">{{ $uName }}</span>
+                            </span>
+                            <span class="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded border bg-white border-gray-300"></span>
+                        </button>
+                    @endforeach
+                    @endif
+
+                @elseif($allUsers !== null)
+                    <p class="py-12 text-sm text-center text-gray-400">{{ __('general.no_employees_found') }}</p>
                 @endif
             </div>
             <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-5 border-t border-gray-200 bg-gray-50">

@@ -39,6 +39,8 @@ return [
     'deselect_all_visible' => 'Deselect All Visible',
     'select_all_visible' => 'Select All Visible',
     'me_creator' => '(Me - Creator)',
+    'has_access' => 'Has Access',
+    'no_access' => 'No Access',
     'no_employees_found' => 'No employees found matching your criteria.',
     'save_permissions' => 'Save Permissions',
     'choose' => 'Choose',
