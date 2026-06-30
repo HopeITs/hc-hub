@@ -16,8 +16,8 @@
         x-bind:aria-expanded="open"
     >
         @if($icon)
-            <div class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white sm:h-12 sm:w-12 sm:rounded-2xl">
-                <x-dynamic-component :component="$icon" class="block h-4 w-4 !me-0 sm:h-6 sm:w-6"/>
+            <div class="rounded-xl bg-primary p-2 text-white sm:rounded-2xl sm:p-3">
+                <x-dynamic-component :component="$icon" class="h-4 w-4 !me-0 sm:h-6 sm:w-6"/>
             </div>
         @endif
 

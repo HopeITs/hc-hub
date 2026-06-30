@@ -15,13 +15,13 @@
             <div class="absolute inset-x-0 top-0 h-1 bg-primary sm:h-1.5"></div>
 
             <div
-                class="relative flex flex-wrap items-start gap-3 p-4 pt-5 sm:items-center sm:gap-6 sm:p-8 2xl:flex-nowrap 2xl:flex-row">
+                class="relative flex flex-wrap items-start gap-3 p-4 pt-5 sm:items-center sm:gap-6 sm:p-8 min-[1390px]:flex-nowrap">
                 <div class="shrink-0">
                     <img src="{{ $employee->getFirstMediaUrl('avatar') }}" alt="{{ $employee->name }}"
                         class="h-20 w-20 rounded-2xl border-2 border-white object-fit shadow-md ring-1 ring-neutral-200 sm:h-40 sm:w-40 sm:rounded-3xl sm:border-4 sm:shadow-lg">
                 </div>
 
-                <div class="min-w-0 flex-1 basis-[calc(100%-6rem)] sm:basis-[calc(100%-11.5rem)] 2xl:basis-auto">
+                <div class="min-w-0 flex-1 basis-[calc(100%-6rem)] sm:basis-[calc(100%-11.5rem)] min-[1390px]:basis-auto">
                     <div class="mb-1.5 flex flex-wrap items-center gap-1.5 sm:mb-3 sm:gap-2">
                         <span
                             class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold sm:px-3 sm:py-1 sm:text-xs {{ $employee->is_active ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-neutral-100 text-secondary-medium ring-1 ring-neutral-200' }}">
@@ -58,26 +58,24 @@
                     </div>
                 </div>
 
-                <div class="flex w-full min-w-0 flex-wrap gap-2 sm:w-full lg:w-auto lg:max-w-full 2xl:max-w-52 2xl:flex-col">
+                <div class="flex w-full min-w-0 flex-wrap gap-2 min-[1390px]:w-auto">
                     @if ($canEdit)
                         <a href="{{ route('employees.edit', $employee) }}" title="{{ __('general.edit') }}"
-                            class="inline-flex h-9 w-9 max-w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-bold text-white shadow-sm transition hover:brightness-90 sm:h-auto sm:w-auto sm:rounded-xl sm:px-4 sm:py-2.5">
-                            <x-icons.edit class="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span
-                                class="hidden sm:inline">@lang('general.edit')</span>
+                            class="inline-flex max-w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:brightness-90">
+                            <x-icons.edit class="h-4 w-4" /> <span>@lang('general.edit')</span>
                         </a>
                     @endif
                     @if ($workEmail)
                         <a href="mailto:{{ $workEmail }}" title="{{ __('general.email') }}"
-                            class="inline-flex h-9 w-9 max-w-full items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white text-sm font-semibold text-secondary-dark transition hover:border-primary hover:text-primary sm:h-auto sm:w-auto sm:rounded-xl sm:px-4 sm:py-2.5 lg:px-3 2xl:px-4">
-                            <x-icons.envelope class="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4" /> <span
-                                class="hidden sm:inline">@lang('general.email')</span>
+                            class="inline-flex max-w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-secondary-dark transition hover:border-primary hover:text-primary">
+                            <x-icons.envelope class="h-4 w-4 shrink-0 text-primary" /> <span
+                                class="min-w-0 truncate">@lang('general.email')</span>
                         </a>
                     @endif
                     @if ($employee->work_phone)
                         <a href="tel:{{ $employee->work_phone }}" title="{{ __('general.work-phone') }}"
-                            class="inline-flex h-9 w-9 max-w-full items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white text-sm font-semibold text-secondary-dark transition hover:border-primary hover:text-primary sm:h-auto sm:w-auto sm:rounded-xl sm:px-4 sm:py-2.5 lg:px-3 2xl:px-4">
-                            <x-icons.phone class="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4" /> <span
-                                class="hidden sm:inline">@lang('general.work-phone')</span>
+                            class="inline-flex max-w-full items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-semibold text-secondary-dark transition hover:border-primary hover:text-primary">
+                            <x-icons.phone class="h-4 w-4 shrink-0 text-primary" /> <span>@lang('general.work-phone')</span>
                         </a>
                     @endif
                 </div>
@@ -88,7 +86,7 @@
             @foreach ([[__('general.years-of-service'), $employee->years_of_service_formatted, 'icons.clock'], [trans_choice('general.department', 1), $currentPosition?->department?->name ?? $notSpecified, 'icons.homepage'], [trans_choice('general.center', 1), $currentPosition?->center?->name ?? $notSpecified, 'icons.map-pin'], [__('general.contract-status'), $currentContract ? __('general.active') : __('general.inactive'), 'icons.contracts']] as [$label, $value, $icon])
                 <div class="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm sm:rounded-2xl sm:p-4">
                     <div
-                        class="mb-2 grid h-7 w-7 place-items-center rounded-lg bg-primary text-white sm:mb-3 sm:h-9 sm:w-9 sm:rounded-xl">
+                        class="mb-2 flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-white sm:mb-3 sm:h-9 sm:w-9 sm:rounded-xl">
                         <x-dynamic-component :component="$icon" class="h-3.5 w-3.5 sm:h-5 sm:w-5" />
                     </div>
                     <p
@@ -214,15 +212,15 @@
                     <div class="space-y-3 text-sm">
                         @foreach ([[__('general.email'), $workEmail, 'icons.envelope', $workEmail ? 'mailto:' . $workEmail : null], [__('general.work-phone'), $employee->work_phone, 'icons.phone', $employee->work_phone ? 'tel:' . $employee->work_phone : null], ['WhatsApp', $employee->whatsapp_work, 'icons.whatsapp', null], ['Telegram', $employee->telegram_work, 'icons.telegram', null]] as [$label, $value, $icon, $href])
                             @if ($value)
-                                <div class="flex items-center gap-3 rounded-2xl bg-neutral-50 p-3">
+                                <div class="flex min-w-0 items-center gap-3 rounded-2xl bg-neutral-50 p-3">
                                     <x-dynamic-component :component="$icon"
                                         class="h-4 w-4 shrink-0 text-primary sm:h-5 sm:w-5" />
                                     <div class="min-w-0">
                                         <p class="text-xs text-secondary-light">{{ $label }}</p>
                                         @if ($href)
                                             <a href="{{ $href }}"
-                                                class="truncate font-semibold text-secondary-dark hover:text-primary">{{ $value }}</a>
-                                        @else<p class="truncate font-semibold text-secondary-dark">
+                                                class="block min-w-0 break-all font-semibold text-secondary-dark hover:text-primary">{{ $value }}</a>
+                                        @else<p class="block min-w-0 break-all font-semibold text-secondary-dark">
                                                 {{ $value }}</p>
                                         @endif
                                     </div>
