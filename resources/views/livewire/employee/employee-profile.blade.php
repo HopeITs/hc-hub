@@ -15,13 +15,13 @@
             <div class="absolute inset-x-0 top-0 h-1 bg-primary sm:h-1.5"></div>
 
             <div
-                class="relative flex flex-wrap items-start gap-3 p-4 pt-5 sm:items-center sm:gap-6 sm:p-8">
-                <div class="shrink-0">
+                class="relative flex flex-col items-start gap-3 p-4 pt-5 sm:gap-6 sm:p-8 min-[900px]:flex-row min-[900px]:items-center">
+                <div class="shrink-0 self-start">
                     <img src="{{ $employee->getFirstMediaUrl('avatar') }}" alt="{{ $employee->name }}"
                         class="h-20 w-20 rounded-2xl border-2 border-white object-fit shadow-md ring-1 ring-neutral-200 sm:h-40 sm:w-40 sm:rounded-3xl sm:border-4 sm:shadow-lg">
                 </div>
 
-                <div class="min-w-0 flex-1 basis-[calc(100%-6rem)] sm:basis-[calc(100%-11.5rem)]">
+                <div class="min-w-0 w-full flex-1 min-[900px]:basis-[calc(100%-11.5rem)]">
                     <div class="mb-1.5 flex flex-wrap items-center gap-1.5 sm:mb-3 sm:gap-2">
                         <span
                             class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold sm:px-3 sm:py-1 sm:text-xs {{ $employee->is_active ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-neutral-100 text-secondary-medium ring-1 ring-neutral-200' }}">
@@ -37,7 +37,7 @@
                         @endif
                     </div>
 
-                    <h1 class="whitespace-normal break-words py-1 text-xl font-bold leading-normal tracking-tight text-secondary-dark sm:text-4xl sm:leading-normal">
+                    <h1 class="whitespace-normal break-normal py-1 text-xl font-bold leading-normal tracking-tight text-secondary-dark sm:text-4xl sm:leading-normal">
                         {{ $employee->name }}</h1>
                     <p class="mt-1 whitespace-normal break-words py-0.5 text-sm font-semibold leading-normal text-primary sm:mt-2 sm:text-lg sm:leading-normal">{{ $positionName }}
                     </p>
@@ -60,20 +60,20 @@
                     <div class="mt-4 flex min-w-0 flex-row flex-wrap gap-2 sm:gap-3">
                         @if ($canEdit)
                             <a href="{{ route('employees.edit', $employee) }}" title="{{ __('general.edit') }}"
-                                class="inline-flex h-9 w-9 max-w-full items-center justify-center gap-2 rounded-lg bg-primary p-0 text-sm font-bold text-white shadow-sm transition hover:brightness-90 min-[701px]:h-auto min-[701px]:w-auto min-[701px]:rounded-xl min-[701px]:px-4 min-[701px]:py-2.5">
+                                class="inline-flex h-9 w-9 max-w-full items-center justify-center gap-2 rounded-lg bg-primary p-0 text-sm font-bold text-white shadow-sm transition hover:brightness-90 min-[701px]:h-auto min-[701px]:w-auto min-[701px]:rounded-xl min-[701px]:px-3 min-[701px]:py-2 min-[900px]:px-4 min-[900px]:py-2.5">
                                 <x-icons.edit class="h-3.5 w-3.5 min-[701px]:h-4 min-[701px]:w-4" /> <span class="hidden min-[701px]:inline">@lang('general.edit')</span>
                             </a>
                         @endif
                         @if ($workEmail)
                             <a href="mailto:{{ $workEmail }}" title="{{ __('general.email') }}"
-                                class="inline-flex h-9 w-9 max-w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white p-0 text-sm font-semibold text-secondary-dark transition hover:border-primary hover:text-primary min-[701px]:h-auto min-[701px]:w-auto min-[701px]:rounded-xl min-[701px]:px-4 min-[701px]:py-2.5">
+                                class="inline-flex h-9 w-9 max-w-full min-w-0 items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white p-0 text-sm font-semibold text-secondary-dark transition hover:border-primary hover:text-primary min-[701px]:h-auto min-[701px]:w-auto min-[701px]:rounded-xl min-[701px]:px-3 min-[701px]:py-2 min-[900px]:px-4 min-[900px]:py-2.5">
                                 <x-icons.envelope class="h-3.5 w-3.5 shrink-0 text-primary min-[701px]:h-4 min-[701px]:w-4" /> <span
                                     class="hidden min-w-0 truncate min-[701px]:inline">@lang('general.email')</span>
                             </a>
                         @endif
                         @if ($employee->work_phone)
                             <a href="tel:{{ $employee->work_phone }}" title="{{ __('general.work-phone') }}"
-                                class="inline-flex h-9 w-9 max-w-full items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white p-0 text-sm font-semibold text-secondary-dark transition hover:border-primary hover:text-primary min-[701px]:h-auto min-[701px]:w-auto min-[701px]:rounded-xl min-[701px]:px-4 min-[701px]:py-2.5">
+                                class="inline-flex h-9 w-9 max-w-full items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white p-0 text-sm font-semibold text-secondary-dark transition hover:border-primary hover:text-primary min-[701px]:h-auto min-[701px]:w-auto min-[701px]:rounded-xl min-[701px]:px-3 min-[701px]:py-2 min-[900px]:px-4 min-[900px]:py-2.5">
                                 <x-icons.phone class="h-3.5 w-3.5 shrink-0 text-primary min-[701px]:h-4 min-[701px]:w-4" /> <span class="hidden min-[701px]:inline">@lang('general.work-phone')</span>
                             </a>
                         @endif
