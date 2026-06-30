@@ -37,7 +37,7 @@
             <div class="relative px-6 pt-6 pb-5 overflow-hidden text-white shrink-0 bg-gradient-to-b from-secondary-dark to-secondary-light">
 
                 <button type="button" wire:click="close"
-                        class="absolute flex items-center justify-center transition rounded-lg end-4 top-4 size-8 text-white/80 hover:bg-white/10 hover:text-white">
+                        class="absolute z-20 flex items-center justify-center transition rounded-lg end-4 top-4 size-8 text-white/80 hover:bg-white/10 hover:text-white">
                     <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>
                     </svg>
@@ -71,7 +71,7 @@
                             ['label' => trans_choice('general.city', 1), 'value' => $position->city?->name ?? $employee->city?->name],
                         ] as $item)
                             <div class="px-3 py-2 border border-gray-100 rounded-xl bg-secondary-soft/5">
-                                <div class="text-[10px] font-bold uppercase tracking-wide text-secondary-light">{{ $item['label'] }}</div>
+                                <div class="text-xs font-bold uppercase tracking-wide text-secondary-light">{{ $item['label'] }}</div>
                                 <div class="mt-0.5 truncate text-sm font-semibold text-secondary-dark">{{ $item['value'] ?? __('general.not-specified') }}</div>
                             </div>
                         @endforeach
@@ -81,7 +81,7 @@
                 {{-- Contact --}}
                 @php($contacts = collect([
                     ['icon' => 'phone', 'value' => $employee->work_phone, 'href' => 'tel:'],
-                    ['icon' => 'phone', 'value' => $employee->personal_phone, 'href' => 'tel:'],
+                    ['icon' => 'mobile', 'value' => $employee->personal_phone, 'href' => 'tel:'],
                     ['icon' => 'mail', 'value' => $employee->personal_email, 'href' => 'mailto:'],
                 ])->filter(fn ($c) => filled($c['value'])))
                 @if($contacts->isNotEmpty())
@@ -94,6 +94,8 @@
                                     <span class="flex items-center justify-center rounded-lg size-7 shrink-0 bg-secondary-soft/10 text-primary">
                                         @if($contact['icon'] === 'mail')
                                             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                                        @elseif($contact['icon'] === 'mobile')
+                                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path stroke-linecap="round" d="M11 18h2"/></svg>
                                         @else
                                             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2 5a2 2 0 0 1 2-2h2l2 5-2 1a12 12 0 0 0 5 5l1-2 5 2v2a2 2 0 0 1-2 2A16 16 0 0 1 2 5Z"/></svg>
                                         @endif
