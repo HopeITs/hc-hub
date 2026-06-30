@@ -86,8 +86,8 @@
             @foreach ([[__('general.years-of-service'), $employee->years_of_service_formatted, 'icons.clock'], [trans_choice('general.department', 1), $currentPosition?->department?->name ?? $notSpecified, 'icons.homepage'], [trans_choice('general.center', 1), $currentPosition?->center?->name ?? $notSpecified, 'icons.map-pin'], [__('general.contract-status'), $currentContract ? __('general.active') : __('general.inactive'), 'icons.contracts']] as [$label, $value, $icon])
                 <div class="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm sm:rounded-2xl sm:p-4">
                     <div
-                        class="mb-2 flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-white sm:mb-3 sm:h-9 sm:w-9 sm:rounded-xl">
-                        <x-dynamic-component :component="$icon" class="h-3.5 w-3.5 sm:h-5 sm:w-5" />
+                        class="mb-2 inline-flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-white sm:mb-3 sm:h-9 sm:w-9 sm:rounded-xl">
+                        <x-dynamic-component :component="$icon" class="block h-3.5 w-3.5 sm:h-5 sm:w-5" />
                     </div>
                     <p
                         class="truncate text-[10px] font-semibold uppercase tracking-wide text-secondary-light sm:text-xs">

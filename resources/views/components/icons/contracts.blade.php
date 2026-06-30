@@ -1,5 +1,5 @@
 <svg
-    {{ $attributes->merge(['class' => 'size-4']) }}
+    {{ $attributes->merge(['class' => 'size-4 translate-x-px']) }}
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     fill="currentColor"
