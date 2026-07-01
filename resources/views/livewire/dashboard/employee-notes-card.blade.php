@@ -25,7 +25,7 @@
                 </button>
             </div>
 
-            <div class="px-6 py-4 flex-1 overflow-hidden">
+            <div class="px-6 py-4 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
                 <div class=" pe-1 pt-1 ">
 
                     <table class="w-full text-sm text-gray-700 ">
