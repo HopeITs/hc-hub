@@ -57,13 +57,9 @@ class LeaveTypeTable extends LivewireTable
                     LeaveTypeEnum::GENDER_MALE => LeaveTypeEnum::getGender(LeaveTypeEnum::GENDER_MALE)['value'],
                     LeaveTypeEnum::GENDER_FEMALE => LeaveTypeEnum::getGender(LeaveTypeEnum::GENDER_FEMALE)['value'],
                 ])
-                ->displayUsing(fn($value) => Blade::render(
-                    '<x-badge color="' . LeaveTypeEnum::getGender($value)['color'] . '">'
-                        . e(LeaveTypeEnum::getGender($value)['value']) . '</x-badge>'
-                ))
+                ->displayUsing(fn($value) => LeaveTypeEnum::getGender($value)['value'])
                 ->sortable()
-                ->searchable()
-                ->asHtml(),
+                ->searchable(),
 
             SelectColumn::make(__('general.marital_status'), 'marital_status')
                 ->options([
@@ -71,13 +67,9 @@ class LeaveTypeTable extends LivewireTable
                     LeaveTypeEnum::MARITAL_STATUS_SINGLE => LeaveTypeEnum::getMaritalStatus(LeaveTypeEnum::MARITAL_STATUS_SINGLE)['value'],
                     LeaveTypeEnum::MARITAL_STATUS_MARRIED => LeaveTypeEnum::getMaritalStatus(LeaveTypeEnum::MARITAL_STATUS_MARRIED)['value'],
                 ])
-                ->displayUsing(fn($value) => Blade::render(
-                    '<x-badge color="' . LeaveTypeEnum::getMaritalStatus($value)['color'] . '">'
-                        . e(LeaveTypeEnum::getMaritalStatus($value)['value']) . '</x-badge>'
-                ))
+                ->displayUsing(fn($value) => LeaveTypeEnum::getMaritalStatus($value)['value'])
                 ->sortable()
-                ->searchable()
-                ->asHtml(),
+                ->searchable(),
 
             Column::make(__('general.actions'), function (Model $m): string {
                 $id = $m->id;

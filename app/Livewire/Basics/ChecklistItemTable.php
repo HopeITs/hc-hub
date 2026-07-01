@@ -60,16 +60,9 @@ class ChecklistItemTable extends LivewireTable
                     ChecklistItemOrder::Resignation =>
                     ChecklistItemOrder::getLocalizedName(ChecklistItemOrder::Resignation)['value'],
                 ])
-                ->displayUsing(fn($value) => Blade::render(
-                    '<x-badge color="' .
-                        ChecklistItemOrder::getLocalizedName($value)['color'] .
-                        '">' .
-                        e(ChecklistItemOrder::getLocalizedName($value)['value']) .
-                        '</x-badge>'
-                ))
+                ->displayUsing(fn($value) => ChecklistItemOrder::getLocalizedName($value)['value'])
                 ->sortable()
-                ->searchable()
-                ->asHtml(),
+                ->searchable(),
 
             Column::make(__('general.actions'), function (Model $m): string {
                 $id = $m->id;

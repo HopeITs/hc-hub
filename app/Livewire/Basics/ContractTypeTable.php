@@ -62,13 +62,10 @@ class ContractTypeTable extends LivewireTable
                 ->displayUsing(function ($value) {
                     $place = ContractPlace::getLocalizedName($value);
 
-                    return Blade::render(
-                        '<x-badge color="' . $place['color'] . '">' . e($place['value']) . '</x-badge>'
-                    );
+                    return $place['value'];
                 })
                 ->sortable()
-                ->searchable()
-                ->asHtml(),
+                ->searchable(),
 
             SelectColumn::make(__('general.type'), 'type')
                 ->options([
@@ -79,13 +76,10 @@ class ContractTypeTable extends LivewireTable
                 ->displayUsing(function ($value) {
                     $type = ContractTypeEnum::getLocalizedName($value);
 
-                    return Blade::render(
-                        '<x-badge color="' . $type['color'] . '">' . e($type['value']) . '</x-badge>'
-                    );
+                    return $type['value'];
                 })
                 ->sortable()
-                ->searchable()
-                ->asHtml(),
+                ->searchable(),
 
             Column::make(__('general.actions'), function (Model $m): string {
 
