@@ -17,7 +17,7 @@ use App\Enums\ContractType as ContractTypeEnum;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ContractTypeExport;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use RamonRietdijk\LivewireTables\Actions\Action;
+
 class ContractTypeTable extends LivewireTable
 {
     protected string $model = ContractType::class;
@@ -95,12 +95,6 @@ class ContractTypeTable extends LivewireTable
                     '<x-table.edit-btn wire:click="$dispatch(\'openContractTypeEdit\', { id: ' . $id . ' })" />'
                 );
 
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />'
-                );
-
-                // return '<div class="flex items-center justify-center gap-2">'
-                //     . $editBtn . $deleteBtn . '</div>';
                 return $editBtn;
             })->asHtml()->visible($isHR),
         ];
@@ -129,90 +123,7 @@ class ContractTypeTable extends LivewireTable
         $this->dispatch('refreshContractTypeTable');
     }
 
-
-
-//   protected function actions(): array
-//     {
-//         $user = auth()->user();
-//         $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
-
-//         $actions = [];
-
-//         if ($isHR) {
-//             // FIX: Added 'export_excel' as the second argument!
-//             $actions[] = Action::make(__('general.export-excel'), 'export_excel', function (): mixed {
-                
-//                 $query = $this->appliedQuery(); 
-//                 $data = $query->get();
-
-//                 $userSelectedColumns = $this->columns; 
-
-//                 $visibleColumnCodes = collect($this->resolveColumns())
-//                     ->filter(fn ($column) => $column->isVisible()) 
-//                     ->filter(function ($column) use ($userSelectedColumns) {
-//                         if (empty($userSelectedColumns)) return true;
-//                         return in_array($column->code(), $userSelectedColumns);
-//                     })
-//                     ->filter(fn ($column) => $column->label() !== __('general.actions'))
-//                     ->map(fn ($column) => $column->code()) 
-//                     ->toArray();
-
-//                 $filename = 'contract_types_' . now()->format('Y-m-d') . '.xlsx';
-
-//                 return \Maatwebsite\Excel\Facades\Excel::download(
-//                     new \App\Exports\ContractTypeExport($data, $visibleColumnCodes), 
-//                     $filename
-//                 );
-//             })->standalone(); 
-//         }
-
-//         return $actions;
-//     }  
-
-    /**
-     * NEW METHOD: Handle the Excel Export
-     */
-    // public function exportExcel(): BinaryFileResponse
-    // {
-    //     // $this->appliedQuery() automatically captures the current filtered, 
-    //     // globally searched, and sorted state of the data table.
-    //     $query = $this->appliedQuery();
-        
-    //     $data = $query->get();
-
-    //     $filename = 'contract_types_' . now()->format('Y-m-d') . '.xlsx';
-
-    //     // Return the file download directly from the Livewire component
-    //     return Excel::download(new ContractTypeExport($data), $filename);
-    // }
-// public function exportExcel(): BinaryFileResponse
-//     {
-//         $query = $this->appliedQuery();
-//         $data = $query->get();
-
-//         $userSelectedColumns = $this->columns; 
-
-//         $visibleColumns = collect($this->resolveColumns())
-//             // 1. Keep columns that pass backend visibility rules
-//             ->filter(fn ($column) => $column->isVisible()) 
-//             // 2. Keep columns toggled ON in the UI
-//             ->filter(function ($column) use ($userSelectedColumns) {
-//                 if (empty($userSelectedColumns)) return true;
-//                 return in_array($column->code(), $userSelectedColumns);
-//             })
-//             // 3. NEW: Explicitly exclude the Actions column by its label
-//             ->filter(fn ($column) => $column->label() !== __('general.actions'))
-//             // 4. Extract the labels to pass to the Excel header
-//             ->map(fn ($column) => $column->label()) 
-//             ->toArray();
-
-//         $filename = 'contract_types_' . now()->format('Y-m-d') . '.xlsx';
-
-//         return Excel::download(new ContractTypeExport($data, $visibleColumns), $filename);
-//     }
-// }
-
-public function exportExcel():BinaryFileResponse
+    public function exportExcel():BinaryFileResponse
     {
 
         $query = $this->appliedQuery(); 

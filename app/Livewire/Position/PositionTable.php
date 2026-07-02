@@ -41,7 +41,7 @@ class PositionTable extends LivewireTable
 
     protected function query(): \Illuminate\Database\Eloquent\Builder
     {
-        $query = $this->model()::query()->with(['city', 'program', 'center' , 'jobLevel' , 'department']);
+        $query = $this->model()::query()->with(['city', 'program', 'center', 'jobLevel', 'department', 'directManager', 'techManager']);
 
         if ($this->centerId) {
             $query->where('positions.center_id', $this->centerId);

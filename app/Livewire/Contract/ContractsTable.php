@@ -72,19 +72,6 @@ class ContractsTable extends LivewireTable
             ->toArray();
 
         return [
-            // Column::make('ID', 'id')->sortable()->searchable(),
-
-            // Column::make(trans_choice('general.employee', 1), 'employee')
-            //     ->displayUsing(fn ($m) => $m->name ?? ' - ')
-            //     ->searchable(function (Builder $query, string $search) {
-            //         // Search by first name or last name at the database level
-            //         $query->where(transColumn('first_name'), 'like', "%{$search}%")
-            //             ->orWhere(transColumn('last_name'), 'like', "%{$search}%");
-            //     })
-            //     ->sortable(function (Builder $query, string $direction) {
-            //         // Sort by first name at the database level
-            //         $query->orderBy(transColumn('first_name'), $direction);
-            //     }),
             Column::make(trans_choice('general.employee', 1), 'employee')
                 ->displayUsing(fn($v, Model $m) => $m->employee?->name ?? '—')
                 ->searchable(function (Builder $query, $value) {
