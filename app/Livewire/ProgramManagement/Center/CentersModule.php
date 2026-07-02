@@ -4,6 +4,7 @@ namespace App\Livewire\ProgramManagement\Center;
 
 use App\Models\Center;
 use App\Models\City;
+use App\Models\User;
 use App\Notifications\NewCenterCreated;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\On;
@@ -12,6 +13,7 @@ use Livewire\Component;
 class CentersModule extends Component
 {
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -73,8 +75,8 @@ class CentersModule extends Component
             'city_id' => $model->city_id,
             'address_ar' => $model->address_ar,
             'address_en' => $model->address_en,
-            'is_active' => (bool)$model->is_active,
-            'weekends' => explode(',',$model->weekends),
+            'is_active' => (bool) $model->is_active,
+            'weekends' => explode(',', $model->weekends),
             'open_at' => $model->open_at,
             'close_at' => $model->close_at,
         ];
@@ -88,18 +90,16 @@ class CentersModule extends Component
     {
         $this->validate();
 
-        $this->item['weekends'] = implode(',',$this->item['weekends']);
+        $this->item['weekends'] = implode(',', $this->item['weekends']);
         $model = Center::findOrNew($this->item['id']);
-        $isNew = !$model->exists;
+        $isNew = ! $model->exists;
 
         $model->fill($this->item);
         $model->save();
 
         if ($isNew) {
-            \Illuminate\Support\Facades\Notification::send(
-                \App\Models\User::all(),
-                new \App\Notifications\NewCenterCreated($model)
-            );
+            $model->load('city');
+            User::sendBroadcast(new NewCenterCreated($model), $model->city_id);
             $this->dispatch('center-created');
         }
 

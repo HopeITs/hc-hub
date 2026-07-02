@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Employee;
 
+use App\Exports\EmployeeExport;
 use App\Models\City;
 use App\Models\Employee;
 use App\Models\Position;
@@ -9,15 +10,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Enums\SearchScope;
-use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\EmployeeExport;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class EmployeeTable extends LivewireTable
@@ -50,26 +48,31 @@ class EmployeeTable extends LivewireTable
     protected function managerOptions(): array
     {
         return Employee::query()
-            ->select(['id', 'first_name_en', 'first_name_ar','last_name_en', 'last_name_ar',])
+            ->select(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
+            ->when(
+                auth()->user()->activeCityId(),
+                fn (Builder $q, int $cityId) => $q->where('city_id', $cityId),
+            )
+            ->where('is_active', true)
             ->orderBy(transColumn('first_name'), 'asc')
             ->get()
-            ->mapWithKeys(fn($e) => [
-                $e->id => $e->name
-            ])
+            ->mapWithKeys(fn ($e) => [$e->id => $e->name])
             ->all();
     }
 
     protected function columns(): array
     {
         $user = auth()->user();
+
         return [
             Column::make('ID', 'id')->sortable(),
 
             Column::make(trans('general.photo'), 'photo')
                 ->displayUsing(function ($v, Model $m): string {
                     $src = $m->getFirstMediaUrl('avatar');
+
                     return $src
-                        ? '<img src="' . e($src) . '" alt="' . e($m->name) . '" class="border rounded-full object-fit size-12 border-1 border-primary" />'
+                        ? '<img src="'.e($src).'" alt="'.e($m->name).'" class="border rounded-full object-fit size-12 border-1 border-primary" />'
                         : '<div class="bg-gray-200 rounded-full size-12"></div>';
                 })->asHtml(),
 
@@ -77,7 +80,7 @@ class EmployeeTable extends LivewireTable
             //     ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
             //     ->sortable()->searchable(),
             Column::make(trans('general.name'), 'employee')
-                ->displayUsing(fn($v, Model $m) => $m->name)
+                ->displayUsing(fn ($v, Model $m) => $m->name)
                 ->sortable()
                 ->searchable(function (Builder $query, $value) {
                     $parts = array_filter(explode(' ', trim($value)));
@@ -87,19 +90,19 @@ class EmployeeTable extends LivewireTable
                             $q->where(function (Builder $inner) use ($part) {
                                 $inner->where('first_name_en', 'LIKE', "%{$part}%")
                                     ->orWhere('first_name_ar', 'LIKE', "%{$part}%")
-                                    ->orWhere('last_name_en',  'LIKE', "%{$part}%")
-                                    ->orWhere('last_name_ar',  'LIKE', "%{$part}%");
+                                    ->orWhere('last_name_en', 'LIKE', "%{$part}%")
+                                    ->orWhere('last_name_ar', 'LIKE', "%{$part}%");
                             });
                         }
                     });
                 }),
             Column::make(trans_choice('general.role', 1), 'account')
-                ->displayUsing(fn($v, Model $m) => $m->account?->myRole()),
+                ->displayUsing(fn ($v, Model $m) => $m->account?->myRole()),
 
             Column::make(trans('general.years-of-service'), 'years_of_service_formatted')->computed()->sortable(),
 
             Column::make(trans('general.join-at'), 'join_at')->computed()->sortable(),
-            SelectColumn::make(trans_choice('general.city', 1), 'city.' . transColumn('name'))
+            SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
                 ->options(City::query()->whereNot('code', '000')->where('is_active', true)->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()->searchable(),
 
@@ -138,13 +141,12 @@ class EmployeeTable extends LivewireTable
                         });
                     });
                 }),
-            SelectColumn::make(trans('general.position'), 'contracts.position.' . transColumn('title'))
+            SelectColumn::make(trans('general.position'), 'contracts.position.'.transColumn('title'))
                 ->options(Position::query()->orderby(transColumn('title'), 'asc')->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
                 ->sortable()->searchable(),
 
-
             Column::make(trans('general.work_email'), 'work_email')
-                ->displayUsing(fn($v, Model $m) => $m->account?->email ?? '—'),
+                ->displayUsing(fn ($v, Model $m) => $m->account?->email ?? '—'),
 
             BooleanColumn::make(trans('general.is-active'), 'is_active')->searchable(),
 
@@ -152,8 +154,8 @@ class EmployeeTable extends LivewireTable
                 $isActive = $model->is_active ? 1 : 0;
 
                 $toggleBtn = Blade::render(
-                    '<x-forms.toggle-input class="p-2 m-2 text-xl" active="' . $isActive .
-                        '" :model-id="' . $model->getKey() .
+                    '<x-forms.toggle-input class="p-2 m-2 text-xl" active="'.$isActive.
+                        '" :model-id="'.$model->getKey().
                         '" wire-event="confirmToggleItemStatus" />'
                 );
 
@@ -161,29 +163,28 @@ class EmployeeTable extends LivewireTable
                 // not have one yet, so only link when it exists.
                 $viewBtn = $model->username
                     ? Blade::render(
-                        '<a  href="' . route('employees.show', ['employee' => $model->username]) . '" class="p-2 " title="View Profile">
+                        '<a  href="'.route('employees.show', ['employee' => $model->username]).'" class="p-2 " title="View Profile">
                                 <x-icons.eye class="transition text-secondary-light hover:text-primary" />
                             </a>'
                     )
                     : '';
 
                 $editBtn = Blade::render(
-                    '<x-table.edit-btn href="' . route('employees.edit', $model->getKey()) . '" />'
+                    '<x-table.edit-btn href="'.route('employees.edit', $model->getKey()).'" />'
                 );
 
                 $deleteBtn = Blade::render(
-                    '<x-table.delete-btn :modelId="' . $model->getKey() . '" />'
+                    '<x-table.delete-btn :modelId="'.$model->getKey().'" />'
                 );
 
                 // Wrap everything in a flex row
-                return '<div class="flex items-center gap-1">' .
-                    $toggleBtn . $viewBtn . $editBtn .
+                return '<div class="flex items-center gap-1">'.
+                    $toggleBtn.$viewBtn.$editBtn.
                     '</div>';
             })->visible($user->activeRoleIs('HR') || $user->activeRoleIs('super-admin'))->asHtml(),
 
         ];
     }
-
 
     public function confirmDelete($id): void
     {
@@ -218,7 +219,7 @@ class EmployeeTable extends LivewireTable
     public function toggleItemStatusConfirmed($payload): void
     {
         $item = Employee::findOrFail($payload['id']);
-        $item->is_active = !$item->is_active;
+        $item->is_active = ! $item->is_active;
         $item->save();
 
         LivewireAlert::title(__('general.item-updated'))
@@ -233,16 +234,19 @@ class EmployeeTable extends LivewireTable
         $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn($column) => $column->isVisible())
+            ->filter(fn ($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) return true;
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
                 return in_array($column->code(), $userSelectedColumns);
             })
-            ->filter(fn($column) => $column->label() !== __('general.actions') && $column->code() !== 'photo')
-            ->map(fn($column) => $column->code())
+            ->filter(fn ($column) => $column->label() !== __('general.actions') && $column->code() !== 'photo')
+            ->map(fn ($column) => $column->code())
             ->toArray();
 
-        $filename = 'employees_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'employees_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(
             new EmployeeExport($data, $visibleColumnCodes),

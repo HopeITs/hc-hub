@@ -3,11 +3,13 @@
 namespace App\Livewire\ChecklistItems;
 
 use App\Models\Checklist;
+use App\Models\ChecklistItem;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use RamonRietdijk\LivewireTables\Columns\SelectColumn;
+use Illuminate\Support\Collection;
 use RamonRietdijk\LivewireTables\Columns\Column;
+use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Enums\Direction;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
@@ -19,45 +21,29 @@ class DoneRequestsTable extends LivewireTable
 
     protected function query(): Builder
     {
-        $employee = auth()->user()->profile ?? null;
-        if (!$employee) {
-            return Checklist::query()->whereRaw('1 = 0');
-        }
-
-        $department = $employee->contracts()->with('position.department')->first()?->position?->department?->name;
-
-        if (!in_array($department, ['IT', 'Communication', 'HR'])) {
-            return Checklist::query()->whereRaw('1 = 0');
-        }
-
-        $deptEmployeeIds = Employee::whereHas('contracts.position.department', function ($q) use ($department) {
-            $q->where('name', $department);
-        })->pluck('id');
-
-        return Checklist::query()
-            ->with(['employee', 'item', 'delivered', 'receiver'])
-            ->where(function (Builder $q) use ($deptEmployeeIds) {
-                $q->whereIn('delivered_id', $deptEmployeeIds)->where('delivered_status', 'delivered')
-                    ->orWhereIn('receiver_id', $deptEmployeeIds)->where('returned_status', 'received');
-            });
+        return $this->scopedChecklistQuery()
+            ->with(['employee', 'item', 'delivered', 'receiver']);
     }
 
     protected function columns(): array
     {
-        $employeeOptions = Employee::query()
-            ->get()
-            ->pluck('name', 'name')
-            ->unique()
-            ->sort()
-            ->toArray();
+        $context = $this->departmentContext();
 
-        $itemOptions = Checklist::query()
-            ->whereHas('item')
-            ->with('item')
-            ->get()
-            ->pluck('item.name', 'item.name')
-            ->unique()
-            ->sort()
+        $employeeOptions = $context
+            ? Employee::query()
+                ->select(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
+                ->whereIn('id', $context['deptEmployeeIds'])
+                ->orderBy(transColumn('first_name'))
+                ->get()
+                ->pluck('name', 'name')
+                ->unique()
+                ->sort()
+                ->toArray()
+            : [];
+
+        $itemOptions = ChecklistItem::query()
+            ->orderBy('name')
+            ->pluck('name', 'name')
             ->toArray();
 
         $actionOptions = [
@@ -65,26 +51,29 @@ class DoneRequestsTable extends LivewireTable
             'received' => __('general.received'),
         ];
 
-        $counterpartyOptions = Checklist::query()
-            ->with(['employee', 'receiver', 'delivered'])
-            ->get()
-            ->map(function ($row) {
-                if ($row->returned_status === 'received') {
-                    return $row->employee?->name ?? $row->delivered?->name;
-                }
-                if ($row->delivered_status === 'delivered') {
-                    return $row->receiver?->name ?? $row->employee?->name;
-                }
-                return null;
-            })
-            ->filter()
-            ->unique()
-            ->sort()
-            ->mapWithKeys(fn($name) => [$name => $name])
-            ->toArray();
+        $counterpartyOptions = $context
+            ? $this->scopedChecklistQuery()
+                ->with(['employee', 'receiver', 'delivered'])
+                ->get()
+                ->map(function ($row) {
+                    if ($row->returned_status === 'received') {
+                        return $row->employee?->name ?? $row->delivered?->name;
+                    }
+                    if ($row->delivered_status === 'delivered') {
+                        return $row->receiver?->name ?? $row->employee?->name;
+                    }
+
+                    return null;
+                })
+                ->filter()
+                ->unique()
+                ->sort()
+                ->mapWithKeys(fn ($name) => [$name => $name])
+                ->toArray()
+            : [];
 
         return [
-            SelectColumn::make(trans_choice('general.employee',1))
+            SelectColumn::make(trans_choice('general.employee', 1))
                 ->options($employeeOptions)
                 ->displayUsing(function (mixed $value, Model $row): string {
                     if ($row->returned_status === 'received') {
@@ -93,6 +82,7 @@ class DoneRequestsTable extends LivewireTable
                     if ($row->delivered_status === 'delivered') {
                         return $row->delivered?->name ?? '—';
                     }
+
                     return '—';
                 })
                 ->sortable()
@@ -145,6 +135,7 @@ class DoneRequestsTable extends LivewireTable
                     if ($row->delivered_status === 'delivered') {
                         return $row->receiver?->name ?? ($row->employee?->name ?? '—');
                     }
+
                     return '—';
                 })
                 ->sortable()
@@ -156,9 +147,9 @@ class DoneRequestsTable extends LivewireTable
                                     $nested->whereHas('employee', function (Builder $q) use ($value) {
                                         $q->where('name_en', $value)->orWhere('name_ar', $value);
                                     })
-                                    ->orWhereHas('delivered', function (Builder $q) use ($value) {
-                                        $q->where('name_en', $value)->orWhere('name_ar', $value);
-                                    });
+                                        ->orWhereHas('delivered', function (Builder $q) use ($value) {
+                                            $q->where('name_en', $value)->orWhere('name_ar', $value);
+                                        });
                                 });
                         })->orWhere(function (Builder $subQuery) use ($value) {
                             $subQuery->where('delivered_status', 'delivered')
@@ -166,9 +157,9 @@ class DoneRequestsTable extends LivewireTable
                                     $nested->whereHas('receiver', function (Builder $q) use ($value) {
                                         $q->where('name_en', $value)->orWhere('name_ar', $value);
                                     })
-                                    ->orWhereHas('employee', function (Builder $q) use ($value) {
-                                        $q->where('name_en', $value)->orWhere('name_ar', $value);
-                                    });
+                                        ->orWhereHas('employee', function (Builder $q) use ($value) {
+                                            $q->where('name_en', $value)->orWhere('name_ar', $value);
+                                        });
                                 });
                         });
                     });
@@ -180,12 +171,14 @@ class DoneRequestsTable extends LivewireTable
 
                     if ($row->returned_status === 'received') {
                         $actionDate = $row->returned_at?->format('Y-m-d') ?? '-';
-                        return "{$requestDate} → " . __('general.received_at') . ": {$actionDate}";
+
+                        return "{$requestDate} → ".__('general.received_at').": {$actionDate}";
                     }
 
                     if ($row->delivered_status === 'delivered') {
                         $actionDate = $row->delivered_at?->format('Y-m-d') ?? '-';
-                        return "{$requestDate} → " . __('general.delivered_at') . ": {$actionDate}";
+
+                        return "{$requestDate} → ".__('general.delivered_at').": {$actionDate}";
                     }
 
                     return "{$requestDate} → -";
@@ -199,5 +192,49 @@ class DoneRequestsTable extends LivewireTable
                 ->sortable()
                 ->searchable(),
         ];
+    }
+
+    /**
+     * @return array{department: string, deptEmployeeIds: Collection<int, int>}|null
+     */
+    private function departmentContext(): ?array
+    {
+        $employee = auth()->user()?->profile;
+
+        if (! $employee) {
+            return null;
+        }
+
+        $department = $employee->latestActiveContract()?->position?->department?->name;
+
+        if (! in_array($department, ['IT', 'Communication', 'HR'], true)) {
+            return null;
+        }
+
+        $deptEmployeeIds = Employee::whereHas('contracts.position.department', function ($q) use ($department) {
+            $q->where('name', $department);
+        })->pluck('id');
+
+        return [
+            'department' => $department,
+            'deptEmployeeIds' => $deptEmployeeIds,
+        ];
+    }
+
+    private function scopedChecklistQuery(): Builder
+    {
+        $context = $this->departmentContext();
+
+        if (! $context) {
+            return Checklist::query()->whereRaw('1 = 0');
+        }
+
+        $deptEmployeeIds = $context['deptEmployeeIds'];
+
+        return Checklist::query()
+            ->where(function (Builder $q) use ($deptEmployeeIds) {
+                $q->whereIn('delivered_id', $deptEmployeeIds)->where('delivered_status', 'delivered')
+                    ->orWhereIn('receiver_id', $deptEmployeeIds)->where('returned_status', 'received');
+            });
     }
 }

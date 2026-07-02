@@ -4,17 +4,17 @@ namespace App\Livewire\Badges;
 
 use App\Enums\BadgeType;
 use App\Models\Badge;
-use App\Models\Employee;
 use App\Models\Department;
+use App\Models\Employee;
 use App\Models\Program;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\DB;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
-use Illuminate\Support\Facades\DB;
 
 class BadgesTable extends LivewireTable
 {
@@ -38,19 +38,19 @@ class BadgesTable extends LivewireTable
         return [
             SelectColumn::make(trans_choice('general.employee', 1), 'employee_id')
                 ->options($this->employeeOptions())
-                ->displayUsing(fn($v, Model $m) => $m->employee?->name ?? '—')
+                ->displayUsing(fn ($v, Model $m) => $m->employee?->name ?? '—')
                 ->sortable()
                 ->searchable(),
 
             SelectColumn::make(trans('general.type'), 'type')
                 ->options($this->badgeTypeOptions())
-                ->displayUsing(fn($v, Model $m) => BadgeType::getLocalizedName((int)($m->type ?? 0)))
+                ->displayUsing(fn ($v, Model $m) => BadgeType::getLocalizedName((int) ($m->type ?? 0)))
                 ->sortable()
                 ->searchable(),
 
             SelectColumn::make(trans_choice('general.program', 1), 'program_id')
                 ->options($this->programOptions())
-                ->displayUsing(fn($v, Model $m) => $m->employee?->latestActiveContract()?->position?->program?->name ?? '—')
+                ->displayUsing(fn ($v, Model $m) => $m->employee?->latestActiveContract()?->position?->program?->name ?? '—')
                 // ->sortable()
                 ->searchable(function (Builder $query, $value) {
                     $query->whereHas('employee.contracts.position.program', function ($q) use ($value) {
@@ -60,7 +60,7 @@ class BadgesTable extends LivewireTable
 
             SelectColumn::make(trans_choice('general.department', 1), 'department_id')
                 ->options($this->departmentOptions())
-                ->displayUsing(fn($v, Model $m) => $m->employee?->latestActiveContract()?->position?->department?->name ?? '—')
+                ->displayUsing(fn ($v, Model $m) => $m->employee?->latestActiveContract()?->position?->department?->name ?? '—')
                 // ->sortable()
                 ->searchable(function (Builder $query, $value) {
                     $query->whereHas('employee.contracts.position.department', function ($q) use ($value) {
@@ -69,7 +69,7 @@ class BadgesTable extends LivewireTable
                 }),
 
             Column::make(trans('general.date'), 'date')
-                ->displayUsing(fn($v, Model $m) => optional($m->date)->format('Y-m-d') ?? '—')
+                ->displayUsing(fn ($v, Model $m) => optional($m->date)->format('Y-m-d') ?? '—')
                 ->sortable(),
 
             Column::make(__('general.actions'), function (Model $m): string {
@@ -96,7 +96,7 @@ class BadgesTable extends LivewireTable
 
                 $deleteBtn = Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $id]);
 
-                return '<div class="flex items-center justify-center gap-2">' . $viewBtn . $deleteBtn . '</div>';
+                return '<div class="flex items-center justify-center gap-2">'.$viewBtn.$deleteBtn.'</div>';
             })->asHtml(),
         ];
     }
@@ -114,7 +114,7 @@ class BadgesTable extends LivewireTable
 
     public function delete(array $payload): void
     {
-        DB::transaction(fn() => Badge::findOrFail($payload['id'])->delete());
+        DB::transaction(fn () => Badge::findOrFail($payload['id'])->delete());
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
@@ -127,18 +127,24 @@ class BadgesTable extends LivewireTable
         $values = BadgeType::getValues();
         $out = [];
         foreach ($values as $v) {
-            $out[$v] = BadgeType::getLocalizedName((int)$v);
+            $out[$v] = BadgeType::getLocalizedName((int) $v);
         }
+
         return $out;
     }
 
     protected function employeeOptions(): array
     {
         return Employee::query()
-            ->select(['id', 'first_name_en', 'first_name_ar' , 'last_name_en', 'last_name_ar'])
+            ->select(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
+            ->when(
+                auth()->user()?->activeCityId(),
+                fn (Builder $q, int $cityId) => $q->where('city_id', $cityId),
+            )
+            ->where('is_active', true)
             ->orderBy(transColumn('first_name'))
             ->get()
-            ->mapWithKeys(fn($e) => [$e->id => $e->name])
+            ->mapWithKeys(fn ($e) => [$e->id => $e->name])
             ->all();
     }
 

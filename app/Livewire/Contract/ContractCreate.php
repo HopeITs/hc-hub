@@ -12,7 +12,6 @@ use App\Models\TerminationReason;
 use App\Models\User;
 use App\Notifications\NewEmployeeWelcome;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -192,7 +191,7 @@ class ContractCreate extends Component
             return;
         }
 
-        // Queued, batched broadcast to every user (database channel).
-        Notification::send(User::all(), new NewEmployeeWelcome($employee));
+        // Queued notifications to active colleagues in the employee's city.
+        User::sendBroadcast(new NewEmployeeWelcome($employee), $employee->city_id);
     }
 }

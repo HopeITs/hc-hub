@@ -2,21 +2,23 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Spatie\Permission\Traits\HasRoles;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles, LogsActivity;
+    use HasFactory, HasRoles, LogsActivity, Notifiable;
 
     protected $fillable = ['email', 'password', 'employee_id'];
 
@@ -26,10 +28,9 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
+            'password' => 'hashed',
         ];
     }
-
 
     public function profile(): BelongsTo
     {
@@ -46,11 +47,37 @@ class User extends Authenticatable
         return $this->belongsToMany(Folder::class);
     }
 
+    /**
+     * Users who should receive org-wide database notifications.
+     * Scoped to active employees; optionally limited to a single city.
+     */
+    public static function broadcastRecipientsQuery(?int $cityId = null): Builder
+    {
+        return static::query()
+            ->whereNotNull('employee_id')
+            ->whereHas('profile', function ($query) use ($cityId) {
+                $query->where('is_active', true);
+
+                if ($cityId !== null) {
+                    $query->where('city_id', $cityId);
+                }
+            });
+    }
+
+    /**
+     * Queue database notifications in chunks instead of loading every user at once.
+     */
+    public static function sendBroadcast(Notification $notification, ?int $cityId = null): void
+    {
+        static::broadcastRecipientsQuery($cityId)->chunkById(100, function ($users) use ($notification) {
+            \Illuminate\Support\Facades\Notification::send($users, $notification);
+        });
+    }
 
     public function activeRole(): ?Role
     {
         if ($this->relationLoaded('roles')) {
-            return $this->roles->firstWhere(fn($r) => (bool) ($r->pivot->is_active ?? false));
+            return $this->roles->firstWhere(fn ($r) => (bool) ($r->pivot->is_active ?? false));
         }
 
         return $this->roles()->wherePivot('is_active', true)->first();
@@ -63,17 +90,17 @@ class User extends Authenticatable
             ?? null;
     }
 
-
     public function activeRoleSlug(): ?string
     {
         $name = $this->myRole();
+
         return $name ? Str::slug($name) : null;
     }
 
     public function activeRoleIs(string ...$roles): bool
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -90,6 +117,7 @@ class User extends Authenticatable
                 return true;
             }
         }
+
         return false;
     }
 
@@ -113,7 +141,7 @@ class User extends Authenticatable
     public function inactiveRoles()
     {
         if ($this->relationLoaded('roles')) {
-            return $this->roles->filter(fn($r) => empty($r->pivot->is_active));
+            return $this->roles->filter(fn ($r) => empty($r->pivot->is_active));
         }
 
         return $this->roles()->wherePivot('is_active', false)->get();
@@ -131,13 +159,13 @@ class User extends Authenticatable
     public function setActiveRole(int $roleId): void
     {
         DB::transaction(function () use ($roleId) {
-            if (!$this->roles()->where('roles.id', $roleId)->exists()) {
+            if (! $this->roles()->where('roles.id', $roleId)->exists()) {
                 abort(403, 'Role does not belong to this user.');
             }
 
             $ids = $this->roles()->pluck('roles.id')->all();
 
-            if (!empty($ids)) {
+            if (! empty($ids)) {
                 $this->roles()->updateExistingPivot($ids, ['is_active' => false]);
             }
 
@@ -152,18 +180,17 @@ class User extends Authenticatable
 
     }
 
-
     public function initials(): string
     {
         $display = $this->profile?->name ?: '';
+
         return Str::of($display)
             ->trim()
             ->explode(' ')
             ->take(2)
-            ->map(fn($w) => Str::substr($w, 0, 1))
+            ->map(fn ($w) => Str::substr($w, 0, 1))
             ->implode('');
     }
-
 
     public function getActivitylogOptions(): LogOptions
     {
