@@ -35,22 +35,24 @@ import './contract-type-employees-chart.js';
 import './job-levels-employees.js';
 import './donut-chart.js'
 import './scatter-chart.js'
-
-
-
+import { initClockTimepickers } from './clock-timepicker.js';
 
 window.Swal = Swal
 window.Chart = Chart;
+
+document.addEventListener('DOMContentLoaded', () => initClockTimepickers());
 
 Livewire.hook('commit', ({component, commit, respond, succeed, fail}) => {
     succeed(({snapshot, effect}) => {
         queueMicrotask(() => {
             initFlowbite();
+            initClockTimepickers();
         })
     })
 })
 
 document.addEventListener('livewire:navigated', () => {
     initFlowbite();
+    initClockTimepickers();
 })
 
