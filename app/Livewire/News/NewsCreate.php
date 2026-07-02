@@ -66,11 +66,13 @@ class NewsCreate extends Component
 
     public function getEntitiesProperty()
     {
+        // Only id + the columns the `name` accessor needs — the dropdown
+        // renders `$entity->id` / `$entity->name` and nothing else.
         return match ($this->item['newsable_type'] ?? '') {
-            City::class => City::all(),
+            City::class => City::select('id', 'name_en', 'name_ar')->get(),
             Center::class => Center::select('id', 'name')->get(),
             Program::class => Program::select('id', 'name')->get(),
-            Employee::class => Employee::all(),
+            Employee::class => Employee::select('id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar')->get(),
             default => collect(),
         };
     }
@@ -114,11 +116,8 @@ class NewsCreate extends Component
 
     public function render()
     {
-        return view('livewire.news.news-create', [
-            'cities' => City::select('id')->get(),
-            'centers' => Center::select('id', 'name')->get(),
-            'programs' => Program::select('id', 'name')->get(),
-            'employees' => Employee::select('id')->get(),
-        ]);
+        // Entity options are provided by the computed `entities` property;
+        // the view uses nothing else, so no extra queries here.
+        return view('livewire.news.news-create');
     }
 }

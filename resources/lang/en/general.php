@@ -134,6 +134,7 @@ return [
     'marital-status' => 'Marital Status',
     'any' => 'Any',
     'attachment' => 'Attachment',
+    'upload-failed-for' => 'Upload failed for:',
     'male' => 'Male',
     'female' => 'Female',
     'single' => 'Single',

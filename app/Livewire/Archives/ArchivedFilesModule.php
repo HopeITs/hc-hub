@@ -433,29 +433,41 @@ class ArchivedFilesModule extends Component
             return;
         }
 
+        $failed = [];
+
         foreach ($this->filesToUpload as $file) {
             $safeFile = $this->validateArchiveUpload($file);
 
-            if ($safeFile['extension'] === 'svg') {
+            try {
+                if ($safeFile['extension'] === 'svg') {
+                    $this->currentFolder
+                        ->addMediaFromString($safeFile['contents'])
+                        ->usingName($safeFile['displayName'])
+                        ->usingFileName($safeFile['storedName'])
+                        ->withCustomProperties(['validated_upload' => true])
+                        ->toMediaCollection('archived_files', 'local');
+
+                    continue;
+                }
+
                 $this->currentFolder
-                    ->addMediaFromString($safeFile['contents'])
+                    ->addMedia($file->getRealPath())
                     ->usingName($safeFile['displayName'])
                     ->usingFileName($safeFile['storedName'])
                     ->withCustomProperties(['validated_upload' => true])
                     ->toMediaCollection('archived_files', 'local');
-
-                continue;
+            } catch (\Throwable $e) {
+                report($e);
+                $failed[] = $safeFile['displayName'];
             }
-
-            $this->currentFolder
-                ->addMedia($file->getRealPath())
-                ->usingName($safeFile['displayName'])
-                ->usingFileName($safeFile['storedName'])
-                ->withCustomProperties(['validated_upload' => true])
-                ->toMediaCollection('archived_files', 'local');
         }
+
         $this->filesToUpload = [];
         $this->loadContent();
+
+        if ($failed !== []) {
+            $this->addError('filesToUpload', __('general.upload-failed-for').' '.implode(', ', $failed));
+        }
     }
 
     private function validateArchiveUpload(TemporaryUploadedFile $file): array
