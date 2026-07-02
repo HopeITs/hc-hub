@@ -22,8 +22,16 @@
 
                                 <div class="flex flex-col h-full justify-center z-30 bg-white items-center ">
                                     {{-- Avatar --}}
-                                    <img src="{{ $event['photo'] }}" alt="{{ $event['name'] }}"
-                                         class="relative z-20 bg-white border border-primary w-18 h-18 rounded-full object-cover">
+                                    @php $isDefaultIcon = str_ends_with($event['photo'], '.svg'); @endphp
+                                    @if($isDefaultIcon)
+                                        <div class="relative z-20 flex items-center justify-center bg-white border border-primary w-18 h-18 rounded-full">
+                                            <img src="{{ $event['photo'] }}" alt="{{ $event['name'] }}"
+                                                 class="w-10 h-10 opacity-70">
+                                        </div>
+                                    @else
+                                        <img src="{{ $event['photo'] }}" alt="{{ $event['name'] }}"
+                                             class="relative z-20 bg-white border border-primary w-18 h-18 rounded-full object-cover">
+                                    @endif
 
                                     {{-- Info --}}
                                     <div class="mt-2 bg-white z-20 text-center">
