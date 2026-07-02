@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use RamonRietdijk\LivewireTables\Columns\Column;
-use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 use RamonRietdijk\LivewireTables\Enums\Direction;
+use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 class NewsTable extends LivewireTable
 {
@@ -19,14 +19,12 @@ class NewsTable extends LivewireTable
 
     protected function query(): Builder
     {
-        $employee = auth()->user()?->employee;
-        $query = News::query();
+        $employee = auth()->user()?->profile;
 
-        if ($employee && method_exists($query->getModel(), 'scopeVisibleTo')) {
-            $query = $query->visibleTo($employee);
-        }
-
-        return $query->latest();
+        return News::query()
+            ->with('newsable')
+            ->when($employee && method_exists(News::class, 'scopeVisibleTo'), fn (Builder $q) => $q->visibleTo($employee))
+            ->latest();
     }
 
     protected function globalSearchColumns(): array
@@ -53,10 +51,10 @@ class NewsTable extends LivewireTable
             Column::make(__('general.actions'), function (Model $m): string {
                 $id = $m->getKey();
                 $editUrl = route('news.edit', ['news' => $id]);
-                $editBtn = Blade::render('<x-table.edit-btn href="' . $editUrl . '" />');
-                $deleteBtn = Blade::render('<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />');
+                $editBtn = Blade::render('<x-table.edit-btn href="'.$editUrl.'" />');
+                $deleteBtn = Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />');
 
-                return '<div class="flex items-center justify-center gap-2">' . $editBtn . $deleteBtn . '</div>';
+                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
             })->asHtml(),
         ];
     }

@@ -2,32 +2,31 @@
 
 namespace App\Livewire\ProgramManagement\Center;
 
+use App\Exports\CenterExport;
 use App\Models\Center;
 use App\Models\City;
+use App\Models\User;
+use App\Notifications\CenterClosed;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
-use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\CenterExport;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CentersTable extends LivewireTable
 {
     protected string $model = Center::class;
 
-    protected $listeners = ['delete', 'toggleItemStatusConfirmed', 'exportExcel' => 'exportExcel',];
+    protected $listeners = ['delete', 'toggleItemStatusConfirmed', 'exportExcel' => 'exportExcel'];
 
     protected function query(): Builder
     {
-        return $this->model()
-            ::query()
+        return $this->model()::query()
             ->with(['city'])
             ->withCount('positions');
     }
@@ -44,7 +43,7 @@ class CentersTable extends LivewireTable
         return City::query()->whereHas('centers')
             ->orderBy(transColumn('name'))
             ->get(['id', transColumn('name')])
-            ->mapWithKeys(fn($c) => [$c->id => $c->name])
+            ->mapWithKeys(fn ($c) => [$c->id => $c->name])
             ->all();
     }
 
@@ -60,12 +59,12 @@ class CentersTable extends LivewireTable
             Column::make(__('general.center-name'), 'name')
                 ->sortable()->searchable(),
             Column::make(__('general.working-hours'), 'open_at')
-                ->displayUsing(fn($v, Model $m) => __('general.from-hour-to-hour', [
+                ->displayUsing(fn ($v, Model $m) => __('general.from-hour-to-hour', [
                     'from' => $m->open_at_formatted,
                     'to' => $m->close_at_formatted,
                 ]))->sortable(),
 
-            SelectColumn::make(trans_choice('general.city', 1), 'city.' . transColumn('name'))
+            SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
                 ->options(
                     City::query()
                         ->whereNot('code', '000')
@@ -78,7 +77,7 @@ class CentersTable extends LivewireTable
                 ->searchable(),
 
             Column::make(__('general.address'), 'address')
-                ->displayUsing(fn($v, Model $m) => $m->address ?: '—')
+                ->displayUsing(fn ($v, Model $m) => $m->address ?: '—')
                 ->sortable()
                 ->searchable(),
 
@@ -106,16 +105,16 @@ class CentersTable extends LivewireTable
 
                     $url = route('positions.index', ['center' => $m->id]);
 
-                    $classes = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium ' . 'border shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-secondary-light ' . ($m->is_active ? 'bg-secondary-soft text-secondary-dark shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300');
+                    $classes = 'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs md:text-sm font-medium '.'border shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-secondary-light '.($m->is_active ? 'bg-secondary-soft text-secondary-dark shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300');
 
                     $count = $m->positions_count ?? 0;
-                    $badge = '<span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[11px] md:text-xs bg-current/10">' . $count . '</span>';
+                    $badge = '<span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[11px] md:text-xs bg-current/10">'.$count.'</span>';
 
                     return Blade::render(
-                        '<a href="' . $url . '" class="' . $classes . '" title="' . e(__('general.positions')) . '">
+                        '<a href="'.$url.'" class="'.$classes.'" title="'.e(__('general.positions')).'">
                 <i class="ti ti-briefcase text-base"></i>
-                <span>' . e(trans_choice('general.positions', 2)) . '</span>' .
-                            $badge .
+                <span>'.e(trans_choice('general.positions', 2)).'</span>'.
+                            $badge.
                             '</a>'
                     );
                 })->asHtml()->visible($isHR),
@@ -123,9 +122,9 @@ class CentersTable extends LivewireTable
             Column::make(__('general.actions'), function (Model $m) use ($isHR): string {
                 $viewUrl = route('centers.show', $m->getKey());
                 $viewBtn = Blade::render(
-                    '<a href="' . $viewUrl . '"
+                    '<a href="'.$viewUrl.'"
                                 class="inline-flex items-center justify-center p-2 text-xl rounded-lg  text-black"
-                                title="' . e(__('general.view')) . '">
+                                title="'.e(__('general.view')).'">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                      fill="none" viewBox="0 0 24 24"
                                      stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -137,28 +136,26 @@ class CentersTable extends LivewireTable
                             </a>'
                 );
 
-                if (!$isHR) {
+                if (! $isHR) {
                     return $viewBtn;
                 }
 
                 $toggleBtn = Blade::render(
-                    '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="' . ($m->is_active ? 1 : 0) . '" :model-id="' . $m->getKey() . '" wire-event="confirmToggleItemStatus" />'
+                    '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="'.($m->is_active ? 1 : 0).'" :model-id="'.$m->getKey().'" wire-event="confirmToggleItemStatus" />'
                 );
 
                 $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openCenterEdit\', { id: ' . $m->getKey() . ' })" />'
+                    '<x-table.edit-btn wire:click="$dispatch(\'openCenterEdit\', { id: '.$m->getKey().' })" />'
                 );
 
                 $deleteBtn = Blade::render(
-                    '<x-table.delete-btn :modelId="' . $m->getKey() . '" />'
+                    '<x-table.delete-btn :modelId="'.$m->getKey().'" />'
                 );
 
-                return $toggleBtn . $viewBtn . $editBtn;
+                return $toggleBtn.$viewBtn.$editBtn;
             })->asHtml(),
         ];
     }
-
-
 
     public function confirmToggleItemStatus($id): void
     {
@@ -174,14 +171,12 @@ class CentersTable extends LivewireTable
     public function toggleItemStatusConfirmed($payload): void
     {
         $item = Center::findOrFail($payload['id']);
-        $item->is_active = !$item->is_active;
+        $item->is_active = ! $item->is_active;
         $item->save();
 
-        if (!$item->is_active) {
-            \Illuminate\Support\Facades\Notification::send(
-                \App\Models\User::all(),
-                new \App\Notifications\CenterClosed($item)
-            );
+        if (! $item->is_active) {
+            $item->load('city');
+            User::sendBroadcast(new CenterClosed($item), $item->city_id);
             $this->dispatch('center-closed');
         }
 
@@ -205,7 +200,7 @@ class CentersTable extends LivewireTable
 
         LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
     }
-    
+
     public function exportExcel(): BinaryFileResponse
     {
         $query = $this->appliedQuery();
@@ -213,21 +208,23 @@ class CentersTable extends LivewireTable
         $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn($column) => $column->isVisible())
+            ->filter(fn ($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) return true;
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
                 return in_array($column->code(), $userSelectedColumns);
             })
-            ->filter(fn($column) => $column->label() !== __('general.actions'))
-            ->map(fn($column) => $column->code())
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code())
             ->toArray();
 
-        $filename = 'centers_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'centers_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(
             new CenterExport($data, $visibleColumnCodes),
             $filename
         );
     }
-
 }

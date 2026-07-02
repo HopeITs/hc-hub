@@ -131,6 +131,7 @@ return [
     'and' => ':attr1 و :attr2',
     'and2' => 'و',
     'attachment' => 'المرفق',
+    'upload-failed-for' => 'فشل رفع الملفات التالية:',
     'male' => 'ذكر',
     'female' => 'أنثى',
     'single' => 'أعزب',

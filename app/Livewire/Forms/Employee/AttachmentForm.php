@@ -93,15 +93,24 @@ class AttachmentForm extends Form
 
         foreach ($this->attachments as $index => $item) {
             if ($item['file'] instanceof TemporaryUploadedFile) {
-                $media = $this->employee
-                    ->addMedia($item['file']->getRealPath())
-                    ->usingFileName($item['file']->getClientOriginalName())
-                    ->preservingOriginal()
-                    ->withCustomProperties([
-                        'name' => $item['name'],
-                        'category' => $item['category']
-                    ])
-                    ->toMediaCollection('attachments');
+                try {
+                    $media = $this->employee
+                        ->addMedia($item['file']->getRealPath())
+                        ->usingFileName($item['file']->getClientOriginalName())
+                        ->preservingOriginal()
+                        ->withCustomProperties([
+                            'name' => $item['name'],
+                            'category' => $item['category']
+                        ])
+                        ->toMediaCollection('attachments');
+                } catch (\Throwable $e) {
+                    // Surface a field error instead of a 500; keep the old
+                    // media untouched so a failed replacement loses nothing.
+                    report($e);
+                    $this->addError("attachments.{$index}.file", __('validation.uploaded', ['attribute' => $item['name'] ?: __('general.attachment')]));
+
+                    continue;
+                }
 
                 if ($item['media_id']) {
                     $oldMedia = $this->employee->media()->find($item['media_id']);
