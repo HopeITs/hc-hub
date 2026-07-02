@@ -54,8 +54,8 @@
 
         <!-- Footer -->
         <a href="{{ route('notifications.index') }}"
-           class="flex items-center justify-center gap-2 border-t border-gray-100 py-2.5 text-sm font-semibold
-                  text-[#be1f24] transition hover:bg-gray-50">
+           class="flex items-center justify-center gap-2 border-t border-gray-100 bg-gray-50 py-2.5 text-sm font-semibold
+                  text-gray-900 transition hover:bg-gray-100">
             <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14">
                 <path d="M10 0C4.612 0 0 5.336 0 7c0 1.742 3.546 7 10 7 6.454 0 10-5.258 10-7 0-1.664-4.612-7-10-7Zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>
             </svg>

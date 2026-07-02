@@ -38,7 +38,7 @@
                 class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
                 title="{{ $guideLabel }}"
                 aria-label="{{ $guideLabel }}">
-                <x-icons.guide-book class="size-5.5" />
+                <x-icons.user-guide class="size-5.5" />
             </a>
 
             <span class="w-px h-6 bg-secondary-soft" aria-hidden="true"></span>
@@ -65,7 +65,7 @@
             <x-layouts.app.notification />
 
             @auth
-                <div x-data="roleDropdown()" x-init="$store.dir = { rtl: @js($isRtl) }" class="relative" @keydown.escape.window="open=false">
+                <div x-data="roleDropdown()" x-init="$store.dir = { rtl: @js($isRtl) }" class="relative ms-3" @keydown.escape.window="open=false">
 
                     <button @click="toggle()" :aria-expanded="open" aria-haspopup="menu" class="inline-flex items-center justify-center transition rounded-full size-9 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
 

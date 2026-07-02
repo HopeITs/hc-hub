@@ -1,6 +1,6 @@
 <div>
     {{-- Header --}}
-    <div class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white/90 px-4 py-3 backdrop-blur">
+    <div class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-gray-50/90 px-4 py-3 backdrop-blur">
         <span class="text-sm font-semibold text-gray-800">
             @lang('general.notifications')
         </span>
@@ -9,7 +9,7 @@
             <button
                 type="button"
                 wire:click="markAllAsRead"
-                class="text-xs font-medium text-[#be1f24] transition hover:underline">
+                class="text-xs font-medium text-gray-600 transition hover:text-gray-900 hover:underline">
                 @lang('general.mark-all-read')
             </button>
         @endif
@@ -27,7 +27,7 @@
             x-bind:style="clicked ? 'background-color: transparent' : ''"
             class="notif-row group relative flex items-start gap-3 border-b border-gray-100 px-4 py-3 transition-colors duration-300 last:border-b-0
                    {{ $isUnread
-                        ? 'bg-[#be1f24]/[0.06] hover:bg-[#be1f24]/10 cursor-pointer'
+                        ? 'bg-gray-100 hover:bg-gray-200 cursor-pointer'
                         : 'bg-white hover:bg-gray-50' }}">
 
             {{-- Unread accent bar --}}
@@ -36,14 +36,14 @@
 
             {{-- Icon bubble --}}
             <span class="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full transition-colors duration-300
-                         {{ $isUnread ? 'bg-[#be1f24]/10 text-[#be1f24]' : 'bg-gray-100 text-gray-400' }}">
+                         {{ $isUnread ? 'bg-gray-200 text-gray-500' : 'bg-gray-100 text-gray-400' }}">
                 <x-icons.notification class="size-4" />
             </span>
 
             {{-- Text --}}
             <div class="min-w-0 flex-1">
                 <p class="truncate text-sm font-semibold transition-colors duration-300
-                          {{ $isUnread ? 'text-gray-900' : 'text-gray-600' }}">
+                          {{ $isUnread ? 'text-gray-900' : 'text-gray-800' }}">
                     {{ $note->data['title'][app()->getLocale()] ?? 'Notification' }}
                 </p>
 

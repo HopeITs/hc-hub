@@ -22,10 +22,10 @@ class Dropdown extends Component
 
         $unread = $user->unreadNotifications()
             ->latest()
-            ->take(4)
+            ->take(3)
             ->get();
 
-        $read = $unread->count() < 4
+        $read = $unread->count() < 3
             ? $user->readNotifications()->latest()->take(4 - $unread->count())->get()
             : collect();
 
