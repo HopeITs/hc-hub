@@ -17,6 +17,11 @@ class ContractExportController extends Controller
             'contractType',
         ]);
 
+        $cityId = auth()->user()->activeCityId();
+        if ($cityId && $contract->employee?->city_id !== $cityId) {
+            abort(403);
+        }
+
         $category   = $contract->contractType?->category ?? 'annual';
         $pagesMap   = ['annual' => 5, 'trial' => 4, 'service' => 4];
         $totalPages = $pagesMap[$category] ?? 1;

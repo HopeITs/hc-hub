@@ -40,6 +40,7 @@ class EmpLeaveBalanceTable extends LivewireTable
         $role = $user->myRole();
 
         $query = Employee::query()
+            ->with('contracts.leaveBalances.contract')
             ->whereHas('contracts.leaveBalances', function ($query) {
                 return $query->where('type_id', LeaveTypeCases::Annual);
             });
@@ -109,22 +110,23 @@ Column::make(trans('general.name'), 'employee')
 
             Column::make(__('general.deserved'), 'deserved')
                 ->displayUsing(function ($v, Model $model) {
-                    return $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->deserved_formatted;
+                    return $this->annualBalance($model)?->deserved_formatted;
                 })->asHtml(),
-                
+
             Column::make(__('general.used'), 'used')
                 ->displayUsing(function ($v, Model $model) {
-                    return $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->used_formatted;
+                    return $this->annualBalance($model)?->used_formatted;
                 })->asHtml(),
-                
+
             Column::make(__('general.remaining'), 'remaining')
                 ->displayUsing(function ($v, Model $model) {
-                    return $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->remaining;
+                    return $this->annualBalance($model)?->remaining;
                 })->asHtml(),
             Column::make(__('general.actions'), function (Model $model): string {
                 $editBtn = '';
-                if (isset($model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()->id)) {
-                    $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openEdit\', { id: ' . $model->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()->id . ' })" />');
+                $balanceId = $this->annualBalance($model)?->id;
+                if ($balanceId) {
+                    $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openEdit\', { id: ' . $balanceId . ' })" />');
                 }
 
 
@@ -134,6 +136,16 @@ Column::make(trans('general.name'), 'employee')
         ];
     }
 
+
+    private function annualBalance(Model $employee): ?LeaveBalance
+    {
+        // latestActiveContract() memoizes and reuses the eager-loaded contracts
+        // relation; reading the loaded leaveBalances collection avoids one
+        // query per cell (this used to run 5 fresh queries per row).
+        return $employee->latestActiveContract()
+            ?->leaveBalances
+            ->firstWhere('type_id', LeaveTypeCases::Annual);
+    }
 
     public function edit($id)
     {

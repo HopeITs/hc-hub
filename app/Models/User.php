@@ -93,6 +93,23 @@ class User extends Authenticatable
         return false;
     }
 
+    /**
+     * The city this user's active role is scoped to, or null when the role
+     * sees every city: super-admin, general-manager, and HR-SYR (headquarters).
+     */
+    public function activeCityId(): ?int
+    {
+        $roleName = strtoupper(trim($this->myRole() ?? ''));
+
+        if (! Str::startsWith($roleName, 'HR-') || $roleName === 'HR-SYR') {
+            return null;
+        }
+
+        $slug = Str::after($roleName, 'HR-');
+
+        return City::where('slug', $slug)->value('id');
+    }
+
     public function inactiveRoles()
     {
         if ($this->relationLoaded('roles')) {

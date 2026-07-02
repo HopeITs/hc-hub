@@ -86,12 +86,13 @@ Route::group(
 
             Route::get('/badges', \App\Livewire\Badges\BadgesModule::class)->name('badges.index');
 
-            Route::get('/news/create', \App\Livewire\News\NewsCreate::class)->name('news.create');
-            Route::get('/news/{news}/edit', \App\Livewire\News\NewsCreate::class)->name('news.edit');
+            Route::get('/news/create', \App\Livewire\News\NewsCreate::class)->name('news.create')->middleware('role:HR|super-admin');
+            Route::get('/news/{news}/edit', \App\Livewire\News\NewsCreate::class)->name('news.edit')->middleware('role:HR|super-admin');
 
             Route::get('/course-categories', CourseCategoryModule::class)->name('course-categories.index');
             Route::get('/activity-log', ActivityLogModule::class)
-                ->name('activity-log.index');
+                ->name('activity-log.index')
+                ->middleware('role:HR|super-admin');
 
         });
 

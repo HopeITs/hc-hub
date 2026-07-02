@@ -201,6 +201,12 @@ class Position extends Model
 
     public function employee(): ?Employee
     {
+        // Reuse the eager-loaded relation when present to avoid one query per
+        // position when this is called inside table/export loops.
+        if ($this->relationLoaded('activeContracts')) {
+            return $this->activeContracts->first()?->employee;
+        }
+
         return $this->activeContracts()->first()?->employee;
     }
 
