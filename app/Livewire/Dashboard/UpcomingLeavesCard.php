@@ -3,10 +3,9 @@
 namespace App\Livewire\Dashboard;
 
 use App\Enums\LeaveRequestStatus;
-use App\Models\Contract;
 use App\Models\LeaveRequest;
-use Livewire\Component;
 use Carbon\Carbon;
+use Livewire\Component;
 
 class UpcomingLeavesCard extends Component
 {
@@ -17,8 +16,7 @@ class UpcomingLeavesCard extends Component
         $user = auth()->user()->load('profile');
 
         $role = $user->myRole();
-        $query = LeaveRequest::
-        whereDate('start_at', '>=', Carbon::now());
+        $query = LeaveRequest::whereDate('start_at', '>=', Carbon::now());
         if ($role === 'HR-SYR') {
             $query->whereIn('status', [LeaveRequestStatus::Accepted, LeaveRequestStatus::Pending]);
         } elseif (str_starts_with($role, 'HR-')) {
@@ -30,16 +28,23 @@ class UpcomingLeavesCard extends Component
 
                 });
         } else {
+            $position = $user->profile?->latestActiveContract()?->position;
+
+            if (! $position) {
+                $this->upcomingLeaves = collect();
+
+                return;
+            }
+
             $query->where('status', LeaveRequestStatus::Accepted)
-                ->with(['leaveBalance.contract.position' => function ($query) use ($user) {
-                    return $query->where('department_id', $user->profile->latestActiveContract()->position->department_id)
-                        ->orWhere('center_id', $user->profile->latestActiveContract()->position->center_id);
-                }, 'leaveBalance.contract.employee'
-                ]);
+                ->whereHas('leaveBalance.contract.position', function ($query) use ($position) {
+                    $query->where('department_id', $position->department_id)
+                        ->orWhere('center_id', $position->center_id);
+                })
+                ->with(['leaveBalance.contract.position', 'leaveBalance.contract.employee']);
         }
 
         $this->upcomingLeaves = $query->orderBy('start_at')->get();
-
 
     }
 
