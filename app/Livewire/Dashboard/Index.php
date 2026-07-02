@@ -2,18 +2,30 @@
 
 namespace App\Livewire\Dashboard;
 
-use App\Models\{Badge, Center, Checklist, City, Contract, Employee, News, Program};
+use App\Models\Badge;
+use App\Models\Center;
+use App\Models\Checklist;
+use App\Models\City;
+use App\Models\Contract;
+use App\Models\Employee;
+use App\Models\News;
+use App\Models\Position;
+use App\Models\Program;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
 class Index extends Component
 {
     public $employee;
+
     public $contract;
+
     public $positionTitle;
+
     public $departmentName;
+
     public $joinedOn;
+
     public $workEmail;
 
     public function getTodayEventsProperty()
@@ -44,7 +56,7 @@ class Index extends Component
                 $emp->departmentName = $contract?->position?->department?->$deptCol ?? null;
                 $emp->event_type = 'birthday';
                 $emp->event_title = 'Happy Birthday!';
-                $emp->event_description = trim(($emp->positionTitle ? $emp->positionTitle . ' · ' : '') . ($emp->departmentName ?? ''));
+                $emp->event_description = trim(($emp->positionTitle ? $emp->positionTitle.' · ' : '').($emp->departmentName ?? ''));
                 $emp->event_timestamp = $today;
 
                 return $emp;
@@ -76,7 +88,7 @@ class Index extends Component
             ->get()
             ->map(function ($news) {
                 $timestamp = $news->event_date ?? $news->published_at;
-                if (!$timestamp instanceof Carbon) {
+                if (! $timestamp instanceof Carbon) {
                     $timestamp = Carbon::parse($timestamp);
                 }
 
@@ -84,7 +96,7 @@ class Index extends Component
                 $news->event_title = $news->title;
                 $news->event_description = $news->description;
                 $news->event_timestamp = $timestamp;
-                $news->image_url = $news->photo ? Storage::url($news->photo) : '/images/news-default.png';
+                $news->image_url = $news->getFirstMediaUrl('news-image') ?: '/images/news-default.png';
 
                 return $news;
             });
@@ -107,16 +119,16 @@ class Index extends Component
             ->where(function ($q) use ($cityId, $centerId, $programId, $employeeId) {
                 $q->whereNull('newsable_type')
                     ->orWhere(function ($q2) use ($employeeId) {
-                        $q2->where('newsable_type', \App\Models\Employee::class)->where('newsable_id', $employeeId);
+                        $q2->where('newsable_type', Employee::class)->where('newsable_id', $employeeId);
                     })
                     ->orWhere(function ($q2) use ($cityId) {
-                        $q2->where('newsable_type', \App\Models\City::class)->where('newsable_id', $cityId);
+                        $q2->where('newsable_type', City::class)->where('newsable_id', $cityId);
                     })
                     ->orWhere(function ($q2) use ($centerId) {
-                        $q2->where('newsable_type', \App\Models\Center::class)->where('newsable_id', $centerId);
+                        $q2->where('newsable_type', Center::class)->where('newsable_id', $centerId);
                     })
                     ->orWhere(function ($q2) use ($programId) {
-                        $q2->where('newsable_type', \App\Models\Program::class)->where('newsable_id', $programId);
+                        $q2->where('newsable_type', Program::class)->where('newsable_id', $programId);
                     });
             })
             ->where(function ($q) {
@@ -130,7 +142,7 @@ class Index extends Component
                 $news->event_title = $news->title;
                 $news->event_description = $news->description;
                 $news->event_timestamp = $timestamp;
-                $news->image_url = $news->photo ? \Storage::url($news->photo) : '/images/news-default.png';
+                $news->image_url = $news->getFirstMediaUrl('news-image') ?: '/images/news-default.png';
                 $news->daysLeftText = match ($daysLeft) {
                     1 => 'Tomorrow',
                     default => "In {$daysLeft} days",
@@ -159,6 +171,7 @@ class Index extends Component
                 if ($dob->lt($start)) {
                     $dob->addYear();
                 }
+
                 return $dob->isBetween($start, $end, true);
             })
             ->map(function ($emp) use ($titleCol, $deptCol) {
@@ -180,15 +193,16 @@ class Index extends Component
                     1 => 'Tomorrow',
                     default => "In {$daysLeft} days",
                 };
+
                 return $emp;
             })
-            ->sortBy(fn($emp) => Carbon::parse($emp->dob)->setYear(now()->year)->dayOfYear)
+            ->sortBy(fn ($emp) => Carbon::parse($emp->dob)->setYear(now()->year)->dayOfYear)
             ->values();
     }
 
     public function getDeliveredItemsProperty()
     {
-        if (!$this->employee) {
+        if (! $this->employee) {
             return collect();
         }
 
@@ -202,7 +216,7 @@ class Index extends Component
 
     public function getMyBadgesProperty()
     {
-        if (!$this->employee) {
+        if (! $this->employee) {
             return collect();
         }
 
@@ -211,7 +225,7 @@ class Index extends Component
 
     public function getPendingRequestsProperty()
     {
-        if (!$this->employee) {
+        if (! $this->employee) {
             return collect();
         }
 
@@ -221,7 +235,7 @@ class Index extends Component
             ->latest()
             ->get()
             ->map(
-                fn($checklist) => [
+                fn ($checklist) => [
                     'id' => $checklist->id,
                     'item' => $checklist->item?->name ?? '—',
                     'employee_name' => $checklist->employee?->name ?? '—',
@@ -233,7 +247,7 @@ class Index extends Component
 
     public function getTeamMembersProperty()
     {
-        if (!$this->contract?->position) {
+        if (! $this->contract?->position) {
             return collect();
         }
 
@@ -260,7 +274,7 @@ class Index extends Component
 
         $directManager = null;
         if ($position?->direct_manager_id) {
-            $managerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])->find($position->direct_manager_id);
+            $managerPosition = Position::with(['jobLevel', 'activeContracts.employee.media'])->find($position->direct_manager_id);
 
             if ($managerPosition) {
                 $activeContract = $managerPosition
@@ -277,13 +291,13 @@ class Index extends Component
             }
         }
 
-        if ($directManager && !$members->contains('id', $directManager->id)) {
+        if ($directManager && ! $members->contains('id', $directManager->id)) {
             $members->push($directManager);
         }
 
         $techManager = null;
         if ($position?->tech_manager_id) {
-            $techManagerPosition = \App\Models\Position::with(['jobLevel', 'activeContracts.employee.media'])->find($position->tech_manager_id);
+            $techManagerPosition = Position::with(['jobLevel', 'activeContracts.employee.media'])->find($position->tech_manager_id);
 
             if ($techManagerPosition) {
                 $activeContract = $techManagerPosition
@@ -300,7 +314,7 @@ class Index extends Component
             }
         }
 
-        if ($techManager && !$members->contains('id', $techManager->id)) {
+        if ($techManager && ! $members->contains('id', $techManager->id)) {
             $members->push($techManager);
         }
 
@@ -318,7 +332,7 @@ class Index extends Component
             ->with(['contracts.position.jobLevel'])
             ->get()
             ->map(function ($emp) use ($nameCol, $titleCol) {
-                $contract = $emp->contracts->filter(fn($c) => $c->is_active || (!$c->terminated_at && $c->start_date <= now() && $c->end_date >= now()))->sortByDesc('start_date')->first() ?? $emp->latestActiveContract();
+                $contract = $emp->contracts->filter(fn ($c) => $c->is_active || (! $c->terminated_at && $c->start_date <= now() && $c->end_date >= now()))->sortByDesc('start_date')->first() ?? $emp->latestActiveContract();
 
                 $emp->displayName = $emp->$nameCol ?? $emp->name_en;
                 $emp->positionTitle = $contract?->position?->$titleCol ?? ($contract?->position?->title_en ?? '—');
@@ -339,7 +353,7 @@ class Index extends Component
         $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
 
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             abort(403, 'Unauthorized');
         }
 
@@ -365,7 +379,7 @@ class Index extends Component
 
     public function render()
     {
-       
+
         return view('livewire.dashboard.index', [
             'employee' => $this->employee,
             'hasLeaves' => $this->employee?->availableLeaves()?->count() > 0,
