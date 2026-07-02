@@ -14,14 +14,22 @@
 
             <x-auth-session-status class="text-center text-green-600 text-sm mb-2" :status="session('status')" />
 
-            <form wire:submit.prevent="login" class="space-y-5">
+            <form
+                x-data
+                x-on:submit.prevent="
+                    $wire.set('email', document.getElementById('email').value, false);
+                    $wire.set('password', document.getElementById('password').value, false);
+                    $wire.login()
+                "
+                class="space-y-5"
+            >
 
                 <div>
                     <x-forms.input-label for="email" required :value="__('auth.email-address')" />
                     <x-forms.input
                         id="email"
                         type="email"
-                        wire:model.debounce.500ms="email"
+                        wire:model.live.debounce.500ms="email"
                         placeholder="email@example.com"
                         autocomplete="email"
                     />
