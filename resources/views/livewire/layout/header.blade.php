@@ -6,13 +6,16 @@
     $activeRole = $user->active_role_name ?? __('None');
     $switchTo = $isRtl ? 'en' : 'ar';
     $localized = LaravelLocalization::getLocalizedURL($switchTo, null, [], true);
+    $guideLabel = $isRtl ? 'دليل الاستخدام' : 'User guide';
+    $homepageLabel = $isRtl ? 'الموقع الرئيسي' : 'Main website';
+    $feedbackLabel = $isRtl ? 'إرسال مشكلة أو ملاحظة' : 'Send problem or feedback';
 @endphp
 
 <nav dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
     class="fixed inset-x-0 top-0 z-10 w-screen bg-white md:w-full dark:bg-gray-800 backdrop-blur">
 
     <div class="px-3 py-1 lg:px-5 lg:ps-3">
-        <div class="flex items-center justify-end gap-3 md:pe-0 pe-4">
+        <div class="flex items-center justify-end gap-2 md:pe-0 pe-4">
             <button wire:click="$dispatch('sidebar.toggle')" type="button"
                 class="p-2 transition bg-transparent border border-transparent cursor-pointer md:hidden me-auto text-heading text-secondary-light hover:text-secondary-dark rounded-base">
                 <span class="sr-only">Open sidebar</span>
@@ -22,33 +25,56 @@
                 </svg>
             </button>
             <a href="{{ $localized }}"
-                class="flex items-center text-base font-semibold leading-none transition text-secondary-light hover:text-secondary-dark">
+                class="inline-flex items-center justify-center px-2 pt-px text-base font-semibold leading-none tracking-wide transition rounded-full h-9 min-w-9 text-secondary-medium hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
+                title="{{ $switchTo === 'ar' ? 'العربية' : 'English' }}"
+                aria-label="{{ $switchTo === 'ar' ? 'Switch to Arabic' : 'Switch to English' }}">
                 {{ $switchTo === 'ar' ? 'AR' : 'EN' }}
             </a>
 
+            <span class="w-px h-6 bg-secondary-soft" aria-hidden="true"></span>
+
             <a href="https://docs.google.com/document/d/1AcrvWNBzoD-bTem3Gy_35EtDgwD-SXST/edit?usp=sharing&ouid=105248334092459549739&rtpof=true&sd=true"
-                target="_blank" rel="noopener" class="pe-1 ps-3 border-x border-e-secondary-soft">
-                <x-icons.guide class="transition text-secondary-light hover:text-secondary-dark me-2" />
+                target="_blank" rel="noopener"
+                class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
+                title="{{ $guideLabel }}"
+                aria-label="{{ $guideLabel }}">
+                <x-icons.user-guide class="size-5.5" />
             </a>
 
+            <span class="w-px h-6 bg-secondary-soft" aria-hidden="true"></span>
+
             <a href="https://hcsyria.org/home" target="_blank" rel="noopener"
-                class="pe-3 border-e border-e-secondary-soft">
-                <x-icons.homepage class="transition text-secondary-light hover:text-secondary-dark" />
+                class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
+                title="{{ $homepageLabel }}"
+                aria-label="{{ $homepageLabel }}">
+                <x-icons.homepage class="size-5" />
             </a>
+
+            <span class="w-px h-6 bg-secondary-soft" aria-hidden="true"></span>
+
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdxNuk6xkFZY1t4vb3kYEKkwMMPM6VnvfGPO-iH1VfTCiEHMQ/viewform"
+                target="_blank" rel="noopener"
+                class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
+                title="{{ $feedbackLabel }}"
+                aria-label="{{ $feedbackLabel }}">
+                <x-icons.guide class="size-5" />
+            </a>
+
+            <span class="w-px h-6 bg-secondary-soft" aria-hidden="true"></span>
 
             <x-layouts.app.notification />
 
             @auth
-                <div x-data="roleDropdown()" x-init="$store.dir = { rtl: @js($isRtl) }" class="relative" @keydown.escape.window="open=false">
+                <div x-data="roleDropdown()" x-init="$store.dir = { rtl: @js($isRtl) }" class="relative ms-3" @keydown.escape.window="open=false">
 
-                    <button @click="toggle()" :aria-expanded="open" aria-haspopup="menu" class="flex items-center">
+                    <button @click="toggle()" :aria-expanded="open" aria-haspopup="menu" class="inline-flex items-center justify-center transition rounded-full size-9 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
 
-                        <span class="relative inline-grid place-items-center rounded-full p-[2px] shrink-0">
-                            <img class="size-7.5 border border-primary rounded-full object-cover"
+                        <span class="relative inline-flex items-center justify-center rounded-full size-9 shrink-0">
+                            <img class="object-cover border rounded-full size-8 border-primary"
                                 src="{{ $user->profile?->getFirstMediaUrl('avatar') }}" alt="user" />
 
                             <span
-                                class="absolute bottom-0.5 {{ $isRtl ? 'start-1' : 'end-0.5' }}
+                                class="absolute bottom-0.5 {{ $isRtl ? 'start-0.5' : 'end-0.5' }}
                                          size-2 rounded-full bg-emerald-500 ring-2 ring-white"></span>
                         </span>
                     </button>
@@ -66,8 +92,8 @@
                             </div>
 
                             <div class="relative flex items-center gap-3">
-                                <span class="p-[3px] rounded-full">
-                                    <img class="object-fit border rounded-full size-12 border-primary"
+                                <span class="inline-flex items-center justify-center overflow-hidden rounded-full size-14 shrink-0">
+                                    <img class="object-cover border rounded-full size-12 border-primary"
                                         src="{{ $user->profile?->getFirstMediaUrl('avatar') }}" alt="user">
                                 </span>
 

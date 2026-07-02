@@ -137,6 +137,7 @@ class MyLeaveRequestModule extends Component
             ->show();
 
         $this->refreshCounts();
+        $this->dispatch('leaveRequestSaved')->to(MyLeaveRequestTable::class);
     }
 
     protected function confirmationMessage(): string

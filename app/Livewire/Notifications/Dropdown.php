@@ -9,6 +9,7 @@ class Dropdown extends Component
 {
     #[On('notification-read')]
     #[On('notification-created')]
+    #[On('notif-arrived')]
     #[On('center-created')]
     #[On('center-closed')]
     public function refreshList()
@@ -25,11 +26,12 @@ class Dropdown extends Component
             ->get();
 
         $read = $unread->count() < 3
-            ? $user->readNotifications()->latest()->take(3 - $unread->count())->get()
+            ? $user->readNotifications()->latest()->take(4 - $unread->count())->get()
             : collect();
 
         return view('livewire.notifications.dropdown', [
             'notifications' => $unread->merge($read),
+            'hasUnread'     => $user->unreadNotifications()->exists(),
         ]);
     }
 
@@ -41,6 +43,12 @@ class Dropdown extends Component
             ->update(['read_at' => now()]);
 
         $this->dispatch('notification-read');
-        $this->dispatch('$refresh');
+    }
+
+    public function markAllAsRead(): void
+    {
+        auth()->user()->unreadNotifications()->update(['read_at' => now()]);
+
+        $this->dispatch('notification-read');
     }
 }
