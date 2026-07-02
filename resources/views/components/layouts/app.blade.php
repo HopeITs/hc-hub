@@ -20,8 +20,9 @@
           localStorage.setItem('sidebar-collapsed', sidebarCollapsed);
       ">
 
-<div id="page-gif-overlay" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-[9999]">
-    <video autoplay loop muted playsinline class="w-74 h-74">
+<div id="page-gif-overlay"
+     style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#ffffff; z-index:9999;">
+    <video autoplay loop muted playsinline style="width:18.5rem; height:18.5rem; object-fit:contain;">
         <source src="{{ asset('assets/GIF/hr-website-2.mp4') }}" type="video/mp4">
     </video>
 </div>
