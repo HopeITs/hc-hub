@@ -9,7 +9,6 @@
         "@amcharts/amcharts5": "^5.14.3",
         "@tailwindcss/postcss": "^4.1.11",
         "alpinejs": "^3.14.9",
-        "axios": "^1.7.4",
         "chart.js": "^4.5.1",
         "concurrently": "^9.0.1",
         "flowbite": "^3.1.2",
