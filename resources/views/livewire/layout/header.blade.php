@@ -25,7 +25,7 @@
                 </svg>
             </button>
             <a href="{{ $localized }}"
-                class="inline-flex items-center justify-center h-9 min-w-9 px-2 pt-px text-base font-semibold leading-none tracking-wide transition rounded-full text-secondary-medium hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
+                class="inline-flex items-center justify-center h-9 min-w-9 px-2 pt-px text-base font-medium leading-none tracking-wide transition rounded-full text-secondary-medium hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
                 title="{{ $switchTo === 'ar' ? 'العربية' : 'English' }}"
                 aria-label="{{ $switchTo === 'ar' ? 'Switch to Arabic' : 'Switch to English' }}">
                 {{ $switchTo === 'ar' ? 'AR' : 'EN' }}
@@ -38,7 +38,7 @@
                 class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
                 title="{{ $guideLabel }}"
                 aria-label="{{ $guideLabel }}">
-                <x-icons.user-guide class="size-5.5" />
+                <x-icons.user-guide class="size-[24px]" />
             </a>
 
             <span class="w-px h-6 bg-secondary-soft" aria-hidden="true"></span>
