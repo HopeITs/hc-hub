@@ -61,21 +61,6 @@ class CityTable extends LivewireTable
             BooleanColumn::make(__('general.active'), 'is_active')
                 ->searchable(),
 
-            // Column::make(__('general.actions'), function (Model $m) use ($isHR): string {
-
-            //     if (!$isHR) {
-            //         return '';
-            //     }
-
-            //     $toggleBtn = Blade::render(
-            //         '<x-forms.toggle-input 
-            //             class="!me-2 text-xl p-2 mb-3"
-            //             active="' . ($m->is_active ? 1 : 0) . '" 
-            //             :model-id="' . $m->id . '" 
-            //             wire-event="confirmToggleItemStatus" />'
-            //     );
-            //     return $toggleBtn ;
-            // })->asHtml(),
             Column::make(__('general.actions'), function (Model $m): string {
 
                 return Blade::render(

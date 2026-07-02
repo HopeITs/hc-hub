@@ -72,9 +72,9 @@ class EmployeeLeaveBalanceExport implements FromCollection, WithHeadings, WithMa
                 'years_of_service_formatted' => $row->years_of_service_formatted,
                 
                 // FIX: Strip HTML tags to make the Excel sheet clean!
-                'deserved'                   => strip_tags($row->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->deserved_formatted ?? '0'),
-                'used'                       => strip_tags($row->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->used_formatted ?? '0'),
-                'remaining'                  => strip_tags($row->latestActiveContract()?->leaveBalances()->where('type_id', LeaveTypeCases::Annual)->first()?->remaining ?? '0'),
+                'deserved'                   => strip_tags($this->annualBalance($row)?->deserved_formatted ?? '0'),
+                'used'                       => strip_tags($this->annualBalance($row)?->used_formatted ?? '0'),
+                'remaining'                  => strip_tags($this->annualBalance($row)?->remaining ?? '0'),
                 
                 default                      => '',
             };
@@ -84,6 +84,13 @@ class EmployeeLeaveBalanceExport implements FromCollection, WithHeadings, WithMa
         app()->setLocale($orig);
 
         return $mappedRow;
+    }
+
+    private function annualBalance($employee): ?\App\Models\LeaveBalance
+    {
+        return $employee->latestActiveContract()
+            ?->leaveBalances
+            ->firstWhere('type_id', LeaveTypeCases::Annual);
     }
 
     public function styles(Worksheet $sheet)

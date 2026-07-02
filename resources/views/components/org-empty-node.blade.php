@@ -7,10 +7,6 @@
 @endphp
 
 <div {{ $attributes->merge(['class' => 'org-id-card org-id-card--vacant '.$org['modifier']]) }}>
-    <div class="org-id-card__header">
-        <div class="org-id-card__badge" @if ($cityName) title="{{ $cityName }}" @endif>{{ $city }}</div>
-        <div class="org-id-card__badge">{{ $position->program?->slug }}</div>
-    </div>
 
     <div class="org-id-card__photo">
         <div class="org-id-card__bar org-id-card__bar--vacant" aria-hidden="true"></div>
@@ -22,7 +18,14 @@
     </div>
 
     <div class="org-id-card__info">
-        <div class="org-id-card__name">@lang('general.vacant-position')</div>
-        <div class="org-id-card__position">{{ $position->title }}</div>
+        <div>
+            <div class="org-id-card__name org-id-card__name--sm">@lang('general.vacant-position')</div>
+        </div>
+        <div class="mt-2 org-id-card__position">{{ $position->title }}</div>
+        <div class="flex flex-col items-start justify-start mt-3">
+            <span class="text-[7px] uppercase">{{ $position->program?->name }}</span>
+            <span class="text-primary text-[7px] uppercase"
+                @if ($cityName) title="{{ $cityName }}" @endif>{{ $cityName }}</span>
+        </div>
     </div>
 </div>

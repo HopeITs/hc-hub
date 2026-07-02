@@ -14,14 +14,6 @@
         $nameEn = $emp?->first_name_en .' ' . $emp?->last_name_en ?? '—';
       $nameAr = $emp?->first_name_ar .' ' . $emp?->last_name_ar ?? '—';
 
-      $cityEn = $emp?->city?->name_en
-          ?? $emp?->city?->name
-          ?? $emp?->place_of_birth ?? '—';
-
-      $cityAr = $emp?->city?->name_ar
-          ?? $emp?->city?->name
-          ?? $emp?->place_of_birth ?? '—';
-
       $addressEn = $emp?->address_en ?? '—';
       $addressAr = $emp?->address_ar ?? '—';
 
@@ -31,8 +23,8 @@
     $dobStrAr = ar_digits($dobStr);
 
     // Other info
-    $pobEn  = trim((string) $cityEn);
-    $pobAr  = trim((string) $cityAr);
+    $pobEn  = trim((string) ($emp?->pob_en ?? '—'));
+    $pobAr  = trim((string) ($emp?->pob_ar ?? '—'));
     $nationalId = $emp?->national_number;
 
     $nationalityRaw = (string) ($emp?->nationality ?? '');
@@ -162,10 +154,8 @@
     $nameAr = $nameAr !== '' ? $nameAr : '—';
 
     // ── Place & Date of Birth ──
-    $cityEn = $emp?->city?->name_en ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-    $cityAr = $emp?->city?->name_ar ?? ($emp?->city?->name ?? ($emp?->place_of_birth ?? '—'));
-    $pobEn = trim((string) $cityEn);
-    $pobAr = trim((string) $cityAr);
+    $pobEn = trim((string) ($emp?->pob_en ?? '—'));
+    $pobAr = trim((string) ($emp?->pob_ar ?? '—'));
 
     $dob = $emp?->dob;
     $dobStr = $dob ? Carbon::parse($dob)->format('d/m/Y') : '—';
@@ -192,13 +182,15 @@
     $positionAR = $req?->title_ar ?? ($position?->title_ar ?? '—');
     $program = $program?->name ?? '—';
 
-    $centerNameEn = $position?->center?->name_en ?? ($position?->center?->name ?? '—');
-    $centerNameAr = $position?->center?->name_ar ?? ($position?->center?->name ?? '—');
+    $centerNameEn = $position?->center?->name_en ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_en ?? '—'));
+    $centerNameAr = $position?->center?->name_ar ?? $position?->center?->name
+        ?? (($position?->program?->name ?? '') . ' - ' . ($position?->city?->name_ar ?? '—'));
     $cityNameEn = $position?->city?->name_en ?? '—';
     $cityNameAr = $position?->city?->name_ar ?? '—';
 
-    $workPlaceEn = $cityNameEn . ' - ' . $centerNameEn;
-    $workPlaceAr = $cityNameAr . ' - ' . $centerNameAr;
+    $workPlaceEn = $position?->center_id ? ($cityNameEn . ' - ' . $centerNameEn) : $centerNameEn;
+    $workPlaceAr = $position?->center_id ? ($cityNameAr . ' - ' . $centerNameAr) : $centerNameAr;
 
     // ── Text Helpers ──
     $esc = fn($v) => e((string) ($v === '' || $v === null ? '—' : $v));

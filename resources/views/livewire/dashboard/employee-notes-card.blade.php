@@ -3,7 +3,7 @@
         x-data="notesBoard()"
         x-init="init(@js($this->notes->pluck('id')))"
         class="relative w-full ">
-        <div class="bg-white rounded-3xl border border-gray-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] flex flex-col h-68 w-full">
+        <div class="bg-white rounded-3xl border border-gray-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] flex flex-col h-68 w-full overflow-hidden">
             <div class="flex items-center justify-between px-6 pt-6 shrink-0">
                 <div class="flex pt-2 items-center gap-2">
                     <h2 class="text-md font-semibold text-secondary-medium">@lang('general.note')</h2>
@@ -25,20 +25,20 @@
                 </button>
             </div>
 
-            <div class="px-6 py-4 flex-1 overflow-hidden">
-                <div class=" pe-1 pt-1 ">
+            <div class="mx-6 my-4 pe-2 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+                <div class="pt-1">
 
                     <table class="w-full text-sm text-gray-700 ">
-                        <thead class="sticky top-0 z-10 bg-white">
+                        <thead>
                         <tr class="border-b border-b-secondary-light text-gray-500">
-                            <th class=" py-1 w-10 text-center font-medium"></th>
-                            <th class="py-1 font-medium text-left"></th>
-                            <th class="py-1 px-3 ltr:text-right rtl:text-left font-medium">@lang('general.actions')</th>
-                            <th class="py-1 text-center font-medium w-16">@lang('general.done')!</th>
+                            <th class="sticky top-0 z-20 bg-white py-1 w-10 text-center font-medium"></th>
+                            <th class="sticky top-0 z-20 bg-white py-1 font-medium text-left"></th>
+                            <th class="sticky top-0 z-20 bg-white py-1 px-3 ltr:text-right rtl:text-left font-medium">@lang('general.actions')</th>
+                            <th class="sticky top-0 z-20 bg-white py-1 text-center font-medium w-16">@lang('general.done')!</th>
                         </tr>
                         </thead>
 
-                        <tbody>
+                        <tbody class="relative z-0">
                         @forelse($notes as $index => $note)
                             <tr
                                 data-id="{{ $note->id }}"
@@ -243,14 +243,19 @@
 
     <style>
         .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
+        }
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.22) transparent;
+            scrollbar-gutter: stable;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
             background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0.22);
+            border-radius: 999px;
         }
     </style>
 </div>
