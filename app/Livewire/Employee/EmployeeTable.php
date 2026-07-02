@@ -181,7 +181,7 @@ class EmployeeTable extends LivewireTable
                 return '<div class="flex items-center gap-1">'.
                     $toggleBtn.$viewBtn.$editBtn.
                     '</div>';
-            })->visible($user->activeRoleIs('HR') || $user->activeRoleIs('super-admin'))->asHtml(),
+            })->visible($user->activeRoleIs('HR', 'super-admin'))->asHtml(),
 
         ];
     }

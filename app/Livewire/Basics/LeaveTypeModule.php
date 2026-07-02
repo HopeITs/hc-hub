@@ -2,16 +2,19 @@
 
 namespace App\Livewire\Basics;
 
+use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\LeaveType;
-use Livewire\Component;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
-
+use Livewire\Component;
 
 class LeaveTypeModule extends Component
 {
+    use AuthorizesHrAction;
+
     protected $listeners = ['openLeaveTypeEdit' => 'edit'];
 
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -74,11 +77,13 @@ class LeaveTypeModule extends Component
 
     public function save(): void
     {
+        $this->authorizeHrAction();
+
         $this->validate();
 
-        $model = !empty($this->item['id'])
+        $model = ! empty($this->item['id'])
             ? LeaveType::findOrFail($this->item['id'])
-            : new LeaveType();
+            : new LeaveType;
 
         $model->fill($this->item)->save();
 

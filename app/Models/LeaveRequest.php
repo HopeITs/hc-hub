@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use App\Enums\LeaveRequestStatus;
-
-use Carbon\CarbonInterface;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -22,11 +22,12 @@ class LeaveRequest extends Model
         'end_at' => 'datetime',
     ];
 
-    public function leaveBalance(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function leaveBalance(): BelongsTo
     {
         return $this->belongsTo(LeaveBalance::class);
     }
-    public function leaveType(): \Illuminate\Database\Eloquent\Relations\HasOneThrough|LeaveRequest
+
+    public function leaveType(): HasOneThrough|LeaveRequest
     {
         return $this->hasOneThrough(
             LeaveType::class,      // final model you want
@@ -38,11 +39,10 @@ class LeaveRequest extends Model
         );
     }
 
-    public function alternativeEmployee(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function alternativeEmployee(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'alternative_employee_id');
     }
-
 
     public function getDurationAttribute(): string
     {
@@ -53,12 +53,12 @@ class LeaveRequest extends Model
         if ($this->type === 'hour') {
             $floatHours = $this->start_at->floatDiffInRealHours($this->end_at);
 
-            $hours   = (int) $floatHours;
+            $hours = (int) $floatHours;
             $minutes = (int) round(($floatHours - $hours) * 60);
 
             // 60 minutes rolls into an extra hour
             if ($minutes >= 60) {
-                $hours   += intdiv($minutes, 60);
+                $hours += intdiv($minutes, 60);
                 $minutes = $minutes % 60;
             }
 
@@ -78,7 +78,7 @@ class LeaveRequest extends Model
 
         // Day-based leave (unchanged)
         $start = $this->start_at;
-        $end   = $this->end_at;
+        $end = $this->end_at;
 
         // Include the end date
         $days = $start->diffInWeekDays($end) + 1;
@@ -99,7 +99,7 @@ class LeaveRequest extends Model
 
         // For day-type leave: calculate days
         $start = $this->start_at;
-        $end   = $this->end_at;
+        $end = $this->end_at;
 
         // Include the end date
         $days = $start->diffInWeekDays($end) + 1;
@@ -115,10 +115,42 @@ class LeaveRequest extends Model
         return $days * $hoursPerDay;
     }
 
-
     public function scopePending($q)
     {
         return $q->where('status', LeaveRequestStatus::Pending);
+    }
+
+    /**
+     * Leave requests the given user may see and act on: HR-SYR sees all,
+     * other HR roles see their city, everyone else (managers) sees the
+     * employees whose position they directly or technically manage.
+     * Single source of truth — use this both for listing AND when resolving
+     * an id passed to a Livewire action.
+     */
+    public function scopeVisibleTo($query, User $user)
+    {
+        $role = $user->myRole() ?? '';
+
+        if ($role === 'HR-SYR') {
+            return $query;
+        }
+
+        if (str_starts_with($role, 'HR-')) {
+            $cityCode = substr($role, 3);
+
+            return $query->whereHas(
+                'leaveBalance.contract.employee.city',
+                fn ($q) => $q->where('slug', $cityCode)
+            );
+        }
+
+        $positionIds = $user->profile?->positions->modelKeys() ?? [];
+
+        return $query->whereHas(
+            'leaveBalance.contract.employee.positions',
+            fn ($q) => $q->whereIn('direct_manager_id', $positionIds)
+                ->orWhereIn('tech_manager_id', $positionIds)
+        );
     }
 
     public function getActivitylogOptions(): LogOptions
@@ -136,5 +168,4 @@ class LeaveRequest extends Model
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }
-
 }

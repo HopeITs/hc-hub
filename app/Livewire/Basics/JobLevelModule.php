@@ -1,9 +1,8 @@
 <?php
 
-
-
 namespace App\Livewire\Basics;
 
+use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\JobLevel;
 use Illuminate\Validation\Rule;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -11,11 +10,14 @@ use Livewire\Component;
 
 class JobLevelModule extends Component
 {
+    use AuthorizesHrAction;
+
     protected $listeners = [
         'openJobLevelEdit' => 'edit',
     ];
 
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -84,11 +86,13 @@ class JobLevelModule extends Component
 
     public function save(): void
     {
+        $this->authorizeHrAction();
+
         $this->validate();
 
-        $model = !empty($this->item['id'])
+        $model = ! empty($this->item['id'])
             ? JobLevel::findOrFail($this->item['id'])
-            : new JobLevel();
+            : new JobLevel;
 
         $model->fill($this->item)->save();
 

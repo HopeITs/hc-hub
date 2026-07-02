@@ -42,8 +42,8 @@ class Index extends Component
 
         $birthdays = Employee::query()
             ->whereNotNull('dob')
-            ->whereRaw('DAY(dob) = ?', [$today->day])
-            ->whereRaw('MONTH(dob) = ?', [$today->month])
+            ->whereDay('dob', $today->day)
+            ->whereMonth('dob', $today->month)
             ->with(['media', 'contracts.position.department'])
             ->get()
             ->map(function ($emp) use ($titleCol, $deptCol, $today) {

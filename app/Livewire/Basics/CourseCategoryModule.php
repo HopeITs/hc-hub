@@ -2,17 +2,21 @@
 
 namespace App\Livewire\Basics;
 
+use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\CourseCategory;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 class CourseCategoryModule extends Component
 {
+    use AuthorizesHrAction;
+
     protected $listeners = [
         'openCourseCategoryEdit' => 'edit',
     ];
 
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -63,11 +67,13 @@ class CourseCategoryModule extends Component
 
     public function save(): void
     {
+        $this->authorizeHrAction();
+
         $this->validate();
 
-        $model = !empty($this->item['id'])
+        $model = ! empty($this->item['id'])
             ? CourseCategory::findOrFail($this->item['id'])
-            : new CourseCategory();
+            : new CourseCategory;
 
         $model->fill($this->item)->save();
 

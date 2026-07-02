@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArchiveFileController;
 use App\Livewire\ActivityLog\ActivityLogModule;
 use App\Livewire\Archives\ArchivedFilesModule;
+use App\Livewire\Badges\BadgesModule;
 use App\Livewire\Basics\CourseCategoryModule;
 use App\Livewire\ChecklistItems\AllItems;
 use App\Livewire\ChecklistItems\DoneRequests;
@@ -15,6 +16,9 @@ use App\Livewire\Employee\Leave\AllLeaveRequestModule;
 use App\Livewire\Employee\Leave\EmpLeaveBalanceModule;
 use App\Livewire\Employee\Leave\MyLeaveRequestModule;
 use App\Livewire\EmployeeCards\ShowDigitalId;
+use App\Livewire\News\NewsCreate;
+use App\Livewire\News\NewsModule;
+use App\Livewire\Notifications\Index;
 use App\Livewire\Settings\Password;
 use App\Livewire\Statistics\ContractStatistics;
 use App\Livewire\Statistics\GeneralStatistics;
@@ -78,16 +82,16 @@ Route::group(
                     Route::get('/all', AllItems::class)->name('index');
                 });
 
-            Route::get('/notifications', \App\Livewire\Notifications\Index::class)->name('notifications.index');
+            Route::get('/notifications', Index::class)->name('notifications.index');
 
-            Route::get('/news', \App\Livewire\News\NewsModule::class)->name('news.index')->middleware('auth');
+            Route::get('/news', NewsModule::class)->name('news.index');
 
             Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
 
-            Route::get('/badges', \App\Livewire\Badges\BadgesModule::class)->name('badges.index');
+            Route::get('/badges', BadgesModule::class)->name('badges.index');
 
-            Route::get('/news/create', \App\Livewire\News\NewsCreate::class)->name('news.create')->middleware('role:HR|super-admin');
-            Route::get('/news/{news}/edit', \App\Livewire\News\NewsCreate::class)->name('news.edit')->middleware('role:HR|super-admin');
+            Route::get('/news/create', NewsCreate::class)->name('news.create')->middleware('role:HR|super-admin');
+            Route::get('/news/{news}/edit', NewsCreate::class)->name('news.edit')->middleware('role:HR|super-admin');
 
             Route::get('/course-categories', CourseCategoryModule::class)->name('course-categories.index');
             Route::get('/activity-log', ActivityLogModule::class)

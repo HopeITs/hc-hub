@@ -4,10 +4,8 @@ namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Forms\LeaveRequestForm;
-use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
@@ -21,13 +19,16 @@ use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 class MyLeaveRequestTable extends LivewireTable
 {
     protected string $model = LeaveRequest::class;
+
     public LeaveRequestForm $form;
+
     public string $statusFilter = 'all';
+
     public $showModal = false;
+
     public $modalTitle = 'Modal title';
 
     protected $listeners = ['filterStatus' => 'setStatusFilter', 'leaveRequestSaved' => '$refresh'];
-
 
     public function setStatusFilter(string $status): void
     {
@@ -42,11 +43,9 @@ class MyLeaveRequestTable extends LivewireTable
             ->with(['leaveBalance.contract.employee', 'leaveBalance.contract.position'])
             ->orderBy('created_at', 'desc');
 
-
         $query->whereHas('leaveBalance.contract', function ($q) use ($user) {
             $q->where('employee_id', $user->profile->id);
         });
-
 
         if ($this->statusFilter !== 'all') {
             $query->where('status', $this->statusFilter);
@@ -55,43 +54,48 @@ class MyLeaveRequestTable extends LivewireTable
         return $query;
     }
 
-
     protected function columns(): array
     {
         $user = auth()->user();
+
         return [
 
-
-            SelectColumn::make(trans_choice('general.leave-type', 1), 'leaveBalance.leaveType.' . transColumn('name'))
+            SelectColumn::make(trans_choice('general.leave-type', 1), 'leaveBalance.leaveType.'.transColumn('name'))
                 ->options(LeaveType::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()
                 ->searchable(),
             SelectColumn::make(trans_choice('general.type', 1), 'type')
                 ->options(['hour' => trans_choice('general.hour', 1), 'day' => trans_choice('general.day', 1)])
-                ->displayUsing(fn($v, Model $m) => trans_choice('general.' . $m->type, 1))
+                ->displayUsing(fn ($v, Model $m) => trans_choice('general.'.$m->type, 1))
                 ->sortable()
                 ->searchable(),
 
             Column::make(__('general.duration'), 'duration')->computed(),
             Column::make(__('general.status'), function (mixed $value, Model $model): string {
                 $status = LeaveRequestStatus::getLocalizedName($value->status);
+
                 return "<span class='px-2 py-1 text-xs font-semibold rounded-md bg-{$status['color']}-100 text-{$status['color']}-800'>
                     {$status['value']}
                 </span>";
             })->asHtml(),
 
-
             DateColumn::make(__('general.start-date'), 'start_at')
                 ->format('d-m-Y H:i') // keep it; used for default/export/sort context
                 ->displayUsing(function (mixed $value, Model $model): string {
-                    if (!$value) return '-';
+                    if (! $value) {
+                        return '-';
+                    }
+
                     return $model->type === 'hour' ? $model->start_at->format('H:i d-m-Y') : $model->start_at->format('d-m-Y');
                 })
                 ->sortable(),
             DateColumn::make(__('general.end-date'), 'end_at')
                 ->format('d-m-Y H:i') // keep it; used for default/export/sort context
                 ->displayUsing(function (mixed $value, Model $model): string {
-                    if (!$value) return '-';
+                    if (! $value) {
+                        return '-';
+                    }
+
                     return $model->type === 'hour' ? $model->end_at->format('H:i d-m-Y') : $model->end_at->format('d-m-Y');
                 })
                 ->sortable(),
@@ -99,13 +103,13 @@ class MyLeaveRequestTable extends LivewireTable
             Column::make(__('general.actions'), function (Model $model): string {
 
                 if ($model->status === LeaveRequestStatus::Pending) {
-                    $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: ' . $model->getKey() . ' })" />');
+                    $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: '.$model->getKey().' })" />');
                     $deleteBtn = Blade::render(
-                        '<x-table.delete-btn :modelId="' . $model->getKey() . '" />'
+                        '<x-table.delete-btn :modelId="'.$model->getKey().'" />'
                     );
-                    return $editBtn . $deleteBtn;
-                }
 
+                    return $editBtn.$deleteBtn;
+                }
 
                 return '';
 
@@ -125,33 +129,23 @@ class MyLeaveRequestTable extends LivewireTable
             ->show();
     }
 
-    public function edit($id)
-    {
-        $model = LeaveRequest::findOrFail($id);
-
-
-        $this->form->setLeaveRequest($model);
-        $employee = auth()->user()->profile;
-        $modalTitle = __('general.edit');
-        $form = $this->form;
-        $availableLeaves = auth()->user()->profile->availableLeaves();
-        $allAvailableLeaves = $employee->allAvailableLeaves();
-        $alternativeEmployees = Employee::where('city_id', $employee->city_id)->where('id', '!=', $employee->id)
-            ->whereHas('contracts', function ($query) use ($employee) {
-                $query->whereHas('position.department', function ($query) use ($employee) {
-                    $query->where('id', $employee->department->id ?? null);
-                });
-            })->get();
-        $this->showModal = true;
-    }
-
-
     public function delete($payload): void
     {
-        LeaveRequest::find($payload['id'])?->delete();
+        // Only the owner may delete, and only while still pending — deleting
+        // an accepted request would leave the balance deducted.
+        $leaveRequest = LeaveRequest::query()
+            ->whereKey($payload['id'])
+            ->pending()
+            ->whereHas('leaveBalance.contract', function (Builder $q) {
+                $q->where('employee_id', auth()->user()->profile?->id);
+            })
+            ->first();
+
+        abort_unless($leaveRequest !== null, 403);
+
+        $leaveRequest->delete();
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
     }
-
 }

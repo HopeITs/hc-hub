@@ -7,6 +7,7 @@ use App\Enums\LeaveTypeCases;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
@@ -60,7 +61,17 @@ class LeaveRequestForm extends Form
     public function rules()
     {
         $employee = auth()->user()->profile;
-        $maxHours = ($employee->latestActiveContract()->weekly_hours / 5) / 2;
+        $contract = $employee?->latestActiveContract();
+
+        // Without an active contract there is nothing to request leave
+        // against — fail with a validation message instead of a 500.
+        if (! $contract) {
+            throw ValidationException::withMessages([
+                'leave_balance_id' => __('validation.exists', ['attribute' => trans_choice('general.contract', 1)]),
+            ]);
+        }
+
+        $maxHours = ($contract->weekly_hours / 5) / 2;
 
         $rules = [
             'type' => ['required', Rule::in(['day', 'hour'])],
@@ -69,9 +80,9 @@ class LeaveRequestForm extends Form
         ];
 
         // Fetch center open and close times
-        $center = $employee->latestActiveContract()->position->center;
-        $centerOpenTime = Carbon::parse($center->open_at ?? '09:00');
-        $centerCloseTime = Carbon::parse($center->close_at ?? '16:30');
+        $center = $contract->position?->center;
+        $centerOpenTime = Carbon::parse($center?->open_at ?? '09:00');
+        $centerCloseTime = Carbon::parse($center?->close_at ?? '16:30');
 
         if ($this->type === 'hour') {
             $rules['start_hour'] = ['required', 'date_format:H:i', function ($attribute, $value, $fail) use ($centerOpenTime) {
@@ -138,12 +149,12 @@ class LeaveRequestForm extends Form
             'start_at',
             'end_at',
             'reason',
-            'alternative_employee',
             'approved_by',
             'approved_at',
             'status',
             'type',
         ]));
+        $this->alternative_employee = $leaveRequest->alternative_employee_id;
         // Handle hour-based requests
         if ($leaveRequest->type === 'hour') {
             $this->leave_date = Carbon::parse($leaveRequest->start_at)->toDateString();
@@ -175,18 +186,24 @@ class LeaveRequestForm extends Form
             return;
         }
 
+        // Only pending requests can be decided — deciding an accepted request
+        // again would deduct the balance twice.
+        if ((int) $this->decisionLeave->status !== LeaveRequestStatus::Pending) {
+            return;
+        }
+
         if ((int) $this->status === LeaveRequestStatus::Accepted) {
-
-            $this->decisionLeave->update([
-                'status' => LeaveRequestStatus::Accepted,
-                'reject_reason' => null,
-                'approved_at' => now(),
-                'approved_by' => auth()->user()->profile->id,
-            ]);
-            $this->decisionLeave->leaveBalance->update([
-                'used' => $this->decisionLeave->leaveBalance->used + $this->decisionLeave->duration_in_hours,
-            ]);
-
+            DB::transaction(function () {
+                $this->decisionLeave->update([
+                    'status' => LeaveRequestStatus::Accepted,
+                    'reject_reason' => null,
+                    'approved_at' => now(),
+                    'approved_by' => auth()->user()->profile->id,
+                ]);
+                $this->decisionLeave->leaveBalance->update([
+                    'used' => $this->decisionLeave->leaveBalance->used + $this->decisionLeave->duration_in_hours,
+                ]);
+            });
         }
 
         if ((int) $this->status === LeaveRequestStatus::Rejected) {
@@ -235,16 +252,19 @@ class LeaveRequestForm extends Form
             }
         }
 
+        // status / approved_* are never taken from the form: Livewire public
+        // properties are client-writable, and decisions only happen through
+        // submitDecision(). A new request is always pending.
         $this->leaveRequest = LeaveRequest::create([
             'leave_balance_id' => $this->leave_balance_id,
             'type' => $this->type,
             'start_at' => $this->start_at ?? $this->combineDateTime($this->leave_date, $this->start_hour),
             'end_at' => $this->end_at ?? $this->combineDateTime($this->leave_date, $this->end_hour),
             'reason' => $this->reason,
-            'alternative_employee' => $this->alternative_employee,
-            'approved_by' => $this->approved_by,
-            'approved_at' => $this->approved_at,
-            'status' => $this->status,
+            'alternative_employee_id' => $this->alternative_employee,
+            'approved_by' => null,
+            'approved_at' => null,
+            'status' => LeaveRequestStatus::Pending,
         ]);
 
         $this->resetForm();
@@ -287,19 +307,38 @@ class LeaveRequestForm extends Form
                 $this->leaveRequest->leaveBalance->update([
                     'used' => $this->leaveRequest->leaveBalance->used - $this->leaveRequest->duration_in_hours,
                 ]);
-                $this->leaveRequest->update($this->all());
+                $this->leaveRequest->update($this->contentAttributes());
                 $this->leaveRequest->leaveBalance->update([
                     'used' => $this->leaveRequest->leaveBalance->used + $this->leaveRequest->duration_in_hours,
                 ]);
             } else {
-                $this->leaveRequest->update($this->all());
+                $this->leaveRequest->update($this->contentAttributes());
             }
 
         } else {
-            $this->leaveRequest->update($this->all());
+            $this->leaveRequest->update($this->contentAttributes());
         }
 
         $this->resetForm();
+    }
+
+    /**
+     * The columns an edit is allowed to change. status / approved_* / hr_approved
+     * must never come from the form — they are set by submitDecision() and the
+     * HR-seen toggle only.
+     *
+     * @return array<string, mixed>
+     */
+    protected function contentAttributes(): array
+    {
+        return [
+            'leave_balance_id' => $this->leave_balance_id,
+            'type' => $this->type,
+            'start_at' => $this->start_at,
+            'end_at' => $this->end_at,
+            'reason' => $this->reason,
+            'alternative_employee_id' => $this->alternative_employee,
+        ];
     }
 
     /**

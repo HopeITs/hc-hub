@@ -17,17 +17,22 @@ use Livewire\Component;
 class MyLeaveRequestModule extends Component
 {
     public LeaveBalance $leaveBalance;
+
     public LeaveRequest $leaveRequest;
+
     public LeaveRequestForm $form;
+
     public $showModal = false;
+
     public $modalTitle = 'Modal title';
 
     protected $listeners = [
         'openRequestLeaveEdit' => 'edit',
-        'processSave' => 'processSave'
+        'processSave' => 'processSave',
     ];
 
     public string $statusFilter = 'all';
+
     public array $counts = [];
 
     public function mount()
@@ -67,12 +72,43 @@ class MyLeaveRequestModule extends Component
 
     public function edit(LeaveRequest $id)
     {
+        $this->authorizeOwnLeaveRequest($id);
 
         $this->form->setLeaveRequest($id);
 
-
         $this->modalTitle = __('general.edit');
         $this->showModal = true;
+    }
+
+    /**
+     * This page is reachable by every authenticated employee, so every action
+     * must verify the leave request (or balance) actually belongs to them.
+     */
+    protected function authorizeOwnLeaveRequest(?LeaveRequest $leaveRequest): void
+    {
+        $employeeId = auth()->user()->profile?->id;
+
+        abort_unless(
+            $employeeId !== null
+            && $leaveRequest?->leaveBalance?->contract?->employee_id === $employeeId,
+            403
+        );
+    }
+
+    protected function authorizeOwnLeaveBalance($leaveBalanceId): void
+    {
+        // Null falls through to the form's "required" validation message.
+        if (! $leaveBalanceId) {
+            return;
+        }
+
+        $employeeId = auth()->user()->profile?->id;
+        $balance = LeaveBalance::find($leaveBalanceId);
+
+        abort_unless(
+            $employeeId !== null && $balance?->contract?->employee_id === $employeeId,
+            403
+        );
     }
 
     public function render()
@@ -83,7 +119,7 @@ class MyLeaveRequestModule extends Component
 
         $alternativeEmployees = Employee::where('city_id', $employee->city_id)
             ->where('id', '!=', $employee->id)
-            ->whereHas('contracts.position.department', fn($q) => $q->where('id', $employee->department->id ?? null)
+            ->whereHas('contracts.position.department', fn ($q) => $q->where('id', $employee->department->id ?? null)
             )
             ->get();
 
@@ -108,18 +144,21 @@ class MyLeaveRequestModule extends Component
 
     public function processSave()
     {
+        $this->authorizeOwnLeaveBalance($this->form->leave_balance_id);
+
         if ($this->form->id) {
+            $this->authorizeOwnLeaveRequest($this->form->leaveRequest);
             $this->form->update();
         } else {
             $this->form->store();
 
-            //Notify
+            // Notify
             $leaveRequest = $this->form->leaveRequest->load('leaveBalance.contract.position');
             $directManage = $leaveRequest->leaveBalance->contract->position->directManager?->employee()->account;
             $techManager = $leaveRequest->leaveBalance->contract->position->techManager?->employee()->account;
             $city = $leaveRequest->leaveBalance->contract->employee->city;
             $hr = User::whereHas('roles', function ($query) use ($city) {
-                $query->where('name', 'HR-' . $city->slug);
+                $query->where('name', 'HR-'.$city->slug);
             })->first();
             isset($directManage) ? $directManage->notify(new NewLeaveRequest($leaveRequest)) : '';
             isset($techManager) ? $techManager->notify(new NewLeaveRequest($leaveRequest)) : '';
@@ -144,13 +183,13 @@ class MyLeaveRequestModule extends Component
     {
         $balance = LeaveBalance::find($this->form->leave_balance_id);
         $leaveTypeName = $balance->leaveType->name ?? 'N/A';
-        $weekends = $leaveBalance->contract->position->center->weekends ?? '0,6';
+        $weekends = $balance->contract->position->center->weekends ?? '0,6';
         $type = $this->form->type;
 
         $start = $this->resolveStart();
         $end = $this->resolveEnd();
         $durationVal = $this->resolveDuration($weekends);
-        $duration = $type === 'day' ? $durationVal . ' ' . trans_choice('general.day', $durationVal) : $durationVal . ' ' . trans_choice('general.hour', $durationVal);
+        $duration = $type === 'day' ? $durationVal.' '.trans_choice('general.day', $durationVal) : $durationVal.' '.trans_choice('general.hour', $durationVal);
         $date = $this->form->leave_date;
         $reason = $this->form->reason;
 
@@ -188,9 +227,9 @@ class MyLeaveRequestModule extends Component
             $weekends = array_map('intval', explode(',', $weekends));
 
             return Carbon::parse($this->form->start_at)
-                    ->diffInDaysFiltered(function (Carbon $date) use ($weekends) {
-                        return !in_array($date->dayOfWeek, $weekends);
-                    }, $this->form->end_at) + 1;
+                ->diffInDaysFiltered(function (Carbon $date) use ($weekends) {
+                    return ! in_array($date->dayOfWeek, $weekends);
+                }, $this->form->end_at) + 1;
         }
 
         return Carbon::parse($this->form->start_hour)
