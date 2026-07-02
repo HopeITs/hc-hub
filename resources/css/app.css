@@ -564,3 +564,41 @@ clock-timepicker {
     }
 }
 
+/* ------------------------------------------------------------------ */
+/* Notification micro-interactions                                     */
+/* ------------------------------------------------------------------ */
+
+/* Bell "ring" shake when a new notification arrives */
+@keyframes notif-shake {
+    0%   { transform: rotate(0); }
+    15%  { transform: rotate(14deg); }
+    30%  { transform: rotate(-12deg); }
+    45%  { transform: rotate(9deg); }
+    60%  { transform: rotate(-6deg); }
+    75%  { transform: rotate(3deg); }
+    100% { transform: rotate(0); }
+}
+
+.animate-notif-shake {
+    animation: notif-shake 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    transform-origin: top center;
+}
+
+/* Badge pop when the count changes / a notification arrives */
+@keyframes notif-pop {
+    0%   { transform: scale(0.4); opacity: 0; }
+    55%  { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+.animate-notif-pop {
+    animation: notif-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-notif-shake,
+    .animate-notif-pop {
+        animation: none;
+    }
+}
+

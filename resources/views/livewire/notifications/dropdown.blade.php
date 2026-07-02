@@ -1,61 +1,72 @@
 <div>
+    {{-- Header --}}
+    <div class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white/90 px-4 py-3 backdrop-blur">
+        <span class="text-sm font-semibold text-gray-800">
+            @lang('general.notifications')
+        </span>
+
+        @if($hasUnread)
+            <button
+                type="button"
+                wire:click="markAllAsRead"
+                class="text-xs font-medium text-[#be1f24] transition hover:underline">
+                @lang('general.mark-all-read')
+            </button>
+        @endif
+    </div>
+
+    {{-- List --}}
     @forelse($notifications as $note)
+        @php $isUnread = is_null($note->read_at); @endphp
 
-        @php
-            $isUnread = is_null($note->read_at);
-        @endphp
+        <a
+            wire:key="note-{{ $note->id }}"
+            x-data="{ clicked: false }"
+            @if(array_key_exists('url', $note->data)) href="{{ $note->data['url'] }}" @endif
+            @if($isUnread) wire:click="markAsRead('{{ $note->id }}')" @click="clicked = true" @endif
+            x-bind:style="clicked ? 'background-color: transparent' : ''"
+            class="notif-row group relative flex items-start gap-3 border-b border-gray-100 px-4 py-3 transition-colors duration-300 last:border-b-0
+                   {{ $isUnread
+                        ? 'bg-[#be1f24]/[0.06] hover:bg-[#be1f24]/10 cursor-pointer'
+                        : 'bg-white hover:bg-gray-50' }}">
 
-        <div
-            class="p-3 border-b hover:bg-neutral-100 dark:hover:bg-neutral-800 transition
-                   @if($isUnread)
-                       bg-secondary-soft border-s-4 border-primary
-                   @endif">
+            {{-- Unread accent bar --}}
+            <span class="absolute inset-y-0 start-0 w-[3px] transition-all duration-300 {{ $isUnread ? 'bg-[#be1f24]' : 'bg-transparent' }}"
+                  x-bind:style="clicked ? 'background-color: transparent' : ''"></span>
 
-            <div class="flex items-start gap-2">
+            {{-- Icon bubble --}}
+            <span class="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full transition-colors duration-300
+                         {{ $isUnread ? 'bg-[#be1f24]/10 text-[#be1f24]' : 'bg-gray-100 text-gray-400' }}">
+                <x-icons.notification class="size-4" />
+            </span>
 
-                @if($isUnread)
-                    <span class="mt-1 inline-block w-2 h-2 bg-primary rounded-full"></span>
-                @endif
+            {{-- Text --}}
+            <div class="min-w-0 flex-1">
+                <p class="truncate text-sm font-semibold transition-colors duration-300
+                          {{ $isUnread ? 'text-gray-900' : 'text-gray-600' }}">
+                    {{ $note->data['title'][app()->getLocale()] ?? 'Notification' }}
+                </p>
 
-                <a class="flex-1" @if(array_key_exists('url' ,$note->data)) href="{{$note->data['url']}}"@endif  @if ($isUnread) wire:click="markAsRead('{{ $note->id }}')"
-                    @endif>
+                <p class="mt-0.5 line-clamp-2 text-xs transition-colors duration-300
+                          {{ $isUnread ? 'text-gray-600' : 'text-gray-500' }}">
+                    {{ $note->data['body'][app()->getLocale()] ?? '' }}
+                </p>
 
-                    <p class="text-sm font-semibold
-                              @if($isUnread)
-                                  text-neutral-900 dark:text-white
-                              @else
-                                  text-neutral-800 dark:text-neutral-200
-                              @endif">
-                        {{ $note->data['title'][app()->getLocale()] ?? 'Notification' }}
-                    </p>
-
-                    <p class="text-xs mt-1
-                              @if($isUnread)
-                                  text-neutral-700 dark:text-neutral-300
-                              @else
-                                  text-neutral-600 dark:text-neutral-400
-                              @endif">
-                        {{ $note->data['body'][app()->getLocale()] ?? '' }}
-                    </p>
-
-
-{{--                    @if ($isUnread)--}}
-{{--                        <button wire:click="markAsRead('{{ $note->id }}')"--}}
-{{--                                class="text-xs text-primary hover:underline ms-2">--}}
-{{--                            @lang('general.mark-as-read')--}}
-{{--                        </button>--}}
-{{--                    @endif--}}
-
-
-                </a>
-
+                <p class="mt-1 text-[11px] text-gray-400">
+                    {{ $note->created_at?->diffForHumans() }}
+                </p>
             </div>
 
-        </div>
-
+            {{-- Unread dot (fades + shrinks out on read) --}}
+            <span class="mt-1.5 size-2 shrink-0 rounded-full bg-[#be1f24] transition-all duration-300 {{ $isUnread ? 'opacity-100 scale-100' : 'opacity-0 scale-0' }}"
+                  x-bind:style="clicked ? 'opacity: 0; transform: scale(0)' : ''"></span>
+        </a>
     @empty
-        <div class="p-4 text-center text-neutral-500 dark:text-neutral-400">
-            @lang('general.no-notifications')
+        <div class="flex flex-col items-center justify-center gap-2 px-4 py-10 text-center">
+            <span class="inline-flex size-11 items-center justify-center rounded-full bg-gray-100 text-gray-300">
+                <x-icons.notification class="size-5" />
+            </span>
+            <span class="text-sm text-gray-400">@lang('general.no-notifications')</span>
         </div>
     @endforelse
 </div>

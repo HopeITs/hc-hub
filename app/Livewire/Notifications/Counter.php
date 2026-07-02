@@ -15,7 +15,14 @@ class Counter extends Component
     #[On('center-closed')]
     public function updateCount(): void
     {
-        $this->count = auth()->user()->unreadNotifications()->count();
+        $new = auth()->user()->unreadNotifications()->count();
+
+        // A new notification landed since we last checked → tell the UI to react.
+        if ($new > $this->count) {
+            $this->dispatch('notif-arrived');
+        }
+
+        $this->count = $new;
     }
 
     public function mount(): void
