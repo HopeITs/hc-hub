@@ -124,8 +124,25 @@ class Employee extends Model implements HasMedia
 
     public function latestActiveContract(): ?Contract
     {
-        return $this->contracts()->with(['position.department', 'leaveBalances'])->latest()->first();
+        if ($this->latestActiveContractResolved) {
+            return $this->latestActiveContractMemo;
+        }
+
+        // Reuse the eager-loaded `contracts` relation when present so callers
+        // that iterate many employees don't trigger one query per row.
+        $contract = $this->relationLoaded('contracts')
+            ? $this->contracts->sortByDesc('created_at')->first()
+            : $this->contracts()->with(['position.department', 'leaveBalances'])->latest()->first();
+
+        $this->latestActiveContractResolved = true;
+
+        return $this->latestActiveContractMemo = $contract;
     }
+
+    /** Memoized result of latestActiveContract() — not a database column. */
+    protected ?Contract $latestActiveContractMemo = null;
+
+    protected bool $latestActiveContractResolved = false;
 
     public function defaultDeliverItems(): Employee|\Illuminate\Database\Eloquent\Relations\HasMany
     {

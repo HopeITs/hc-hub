@@ -29,7 +29,17 @@ class EmployeeTable extends LivewireTable
     protected function query(): Builder
     {
         return $this->model()::query()
-            ->with(['contracts.position.directManager', 'contracts.position.techManager', 'account', 'media'])->orderByDesc('is_active');
+            ->with([
+                'contracts.position.directManager.activeContracts',
+                'contracts.position.techManager.activeContracts',
+                'account',
+                'media',
+            ])
+            ->when(
+                auth()->user()->activeCityId(),
+                fn (Builder $q, int $cityId) => $q->where('city_id', $cityId),
+            )
+            ->orderByDesc('is_active');
     }
 
     protected function globalSearchColumns(): array

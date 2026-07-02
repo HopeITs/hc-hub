@@ -27,7 +27,10 @@ class BadgesTable extends LivewireTable
 
     protected function query(): Builder
     {
-        return $this->model()::query()->with(['employee']);
+        return $this->model()::query()->with([
+            'employee.contracts.position.program',
+            'employee.contracts.position.department',
+        ]);
     }
 
     protected function columns(): array

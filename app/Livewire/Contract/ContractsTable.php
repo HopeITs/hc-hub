@@ -43,7 +43,11 @@ class ContractsTable extends LivewireTable
                 'position.jobLevel',
                 'contractType',
                 'leaveBalances',
-            ]);
+            ])
+            ->when(
+                auth()->user()->activeCityId(),
+                fn (Builder $q, int $cityId) => $q->whereHas('employee', fn (Builder $e) => $e->where('city_id', $cityId)),
+            );
     }
 
     protected function globalSearchColumns(): array
