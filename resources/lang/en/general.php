@@ -530,6 +530,7 @@ return [
     'reject' => 'Reject',
     'reject-reason' => 'Reject Reason',
     'during-period' => 'During Period',
+    'no-data-filters' => 'No data matches the selected filters.',
     'annual' => 'Annual',
     'service' => 'Service',
     'trial' => 'Trial',
