@@ -90,8 +90,8 @@ Route::group(
 
             Route::get('/badges', BadgesModule::class)->name('badges.index');
 
-            Route::get('/news/create', NewsCreate::class)->name('news.create')->middleware('role:HR|super-admin');
-            Route::get('/news/{news}/edit', NewsCreate::class)->name('news.edit')->middleware('role:HR|super-admin');
+            Route::get('/news/create', NewsCreate::class)->name('news.create')->middleware('role:HR|super-admin|general-manager|manager');
+            Route::get('/news/{news}/edit', NewsCreate::class)->name('news.edit')->middleware('role:HR|super-admin|general-manager|manager');
 
             Route::get('/course-categories', CourseCategoryModule::class)->name('course-categories.index');
             Route::get('/activity-log', ActivityLogModule::class)
