@@ -552,7 +552,7 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
     .org-id-card__info {
         display: grid;
         flex: 0 0 auto;
-        grid-template-rows: calc(9cqw * 1.05 * 2) calc(7cqw * 1.1 * 2);
+        grid-template-rows: calc(11cqw * 1.2 * 2 + 1cqw) calc(7cqw * 1.25 * 2 + 0.5cqw);
 
         width: 100%;
         padding: 12.5cqw 6cqw 7cqw;
@@ -569,11 +569,12 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
         width: 100%;
-        max-height: calc(9cqw * 1.05 * 2);
+        max-height: calc(11cqw * 1.2 * 2 + 0.5cqw);
+        padding-bottom: 0.08em;
         color: var(--color-primary);
         font-size: 11cqw;
         font-weight: 900;
-        line-height: 1.05;
+        line-height: 1.2;
         letter-spacing: 0.01em;
         text-transform: uppercase;
         word-break: break-word;
@@ -594,13 +595,14 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
         -webkit-box-orient: vertical;
 
         width: 100%;
-        max-height: calc(7cqw * 1.1 * 2);
+        max-height: calc(7cqw * 1.25 * 2 + 0.5cqw);
+        padding-bottom: 0.08em;
         color: var(--color-black, #414042);
         font-size: 7cqw;
         font-weight: 700;
-        line-height: 1.1;
+        line-height: 1.25;
         word-break: break-word;
-          text-align: center;
+        text-align: center;
         margin-block: auto;
     }
 
@@ -695,4 +697,3 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
         animation: none;
     }
 }
-
