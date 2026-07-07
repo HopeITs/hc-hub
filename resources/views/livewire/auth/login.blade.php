@@ -68,7 +68,7 @@
 {{--                @endif--}}
 
                 <div class="flex items-center justify-between text-sm text-gray-600">
-                    <x-forms.checkbox-input type="checkbox" id="remember" model="remember">
+                    <x-forms.checkbox-input type="checkbox" id="remember" wire:model="remember">
                     {{ __('auth.remember-me') }}
                     </x-forms.checkbox-input>
 
