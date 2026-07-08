@@ -33,6 +33,9 @@
 
     <div class="flex-1 overflow-y-auto px-6 py-4 space-y-5 scrollbar-thin scrollbar-thumb-[var(--color-secondary-medium)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-secondary-medium)]">
         @forelse($newsItems as $news)
+            @php
+                $targetType = $news->newsable_type ? strtolower(class_basename($news->newsable_type)) : 'all';
+            @endphp
             <div class="border-b border-b-secondary-light pb-3 last:border-b-0 last:pb-0">
                 <p class="text-[10px] font-light text-gray-400">
                     {{ $news->published_at?->diffForHumans() ?? 'Just Now' }}
@@ -48,6 +51,9 @@
                         title: @js($news->title),
                         description: @js($news->description),
                         image: @js($news->getFirstMediaUrl('news-image') ?: null),
+                        eventDate: @js($news->event_date?->translatedFormat('d M Y')),
+                        target: @js($news->newsable_name),
+                        targetType: @js($targetType),
                     }; open = true"
                     class="ms-auto mt-2 flex text-xs font-semibold text-primary underline">
                     @lang('general.read-more') →
@@ -95,6 +101,36 @@
                     <div class="space-y-4 p-6 sm:p-8">
                         <p class="text-xs font-semibold uppercase tracking-wide text-primary">@lang('general.news')</p>
                         <h3 class="text-2xl font-extrabold leading-normal text-secondary-dark sm:text-3xl" x-text="selected?.title"></h3>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <template x-if="selected?.eventDate">
+                                <span class="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-secondary-medium">
+                                    <svg class="size-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
+                                    </svg>
+                                    <span x-text="selected.eventDate"></span>
+                                </span>
+                            </template>
+
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
+                                <svg x-show="selected?.targetType === 'all'" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20a5 5 0 0 0-10 0M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 8a4.5 4.5 0 0 0-6-4.24M2 20a4.5 4.5 0 0 1 6-4.24" />
+                                </svg>
+                                <svg x-show="selected?.targetType === 'employee'" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0" />
+                                </svg>
+                                <svg x-show="selected?.targetType === 'center'" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-7h6v7M9 10h.01M15 10h.01" />
+                                </svg>
+                                <svg x-show="selected?.targetType === 'program'" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 8 4-8 4-8-4 8-4Zm-8 8 8 4 8-4M4 15l8 4 8-4" />
+                                </svg>
+                                <svg x-show="selected?.targetType === 'city'" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.25 7-11a7 7 0 1 0-14 0c0 5.75 7 11 7 11Z" />
+                                    <circle cx="12" cy="10" r="2.5" />
+                                </svg>
+                                <span x-text="selected?.target || @js(__('general.all_org'))"></span>
+                            </span>
+                        </div>
                         <div class="h-px bg-neutral-200"></div>
                         <p class="whitespace-pre-line text-sm font-normal leading-7 text-secondary-medium sm:text-base sm:leading-8"
                             x-text="selected?.description || ''"></p>
