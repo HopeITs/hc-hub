@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -38,6 +39,28 @@ class News extends Model implements HasMedia
         return $this->morphTo();
     }
 
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->creator();
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->updater();
+    }
+
+
+
     public function getIsExpiredAttribute(): bool
     {
         return $this->display_until && $this->display_until->isPast();
@@ -45,7 +68,7 @@ class News extends Model implements HasMedia
 
     public function getNewsableNameAttribute(): string
     {
-        if (!$this->newsable) {
+        if (! $this->newsable) {
             return __('general.all_org');
         }
 
@@ -61,7 +84,7 @@ class News extends Model implements HasMedia
         };
 
         if (in_array($type, ['City', 'Center', 'Program', 'Employee'])) {
-            return $name . ': ' . $relation->name;
+            return $name.': '.$relation->name;
         }
 
         return $name;
@@ -78,6 +101,8 @@ class News extends Model implements HasMedia
             ->useLogName('news')
             ->logOnly([
                 'title',
+                'created_by',
+                'updated_by',
                 'description',
                 'photo',
                 'display_until',

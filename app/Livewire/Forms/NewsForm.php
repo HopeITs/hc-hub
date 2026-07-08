@@ -103,7 +103,10 @@ class NewsForm extends Form
         $news ??= new News;
 
         if ($isNew) {
+            $news->created_by = auth()->id();
             $news->published_at = now();
+        } else {
+            $news->updated_by = auth()->id();
         }
 
         $news->fill([
