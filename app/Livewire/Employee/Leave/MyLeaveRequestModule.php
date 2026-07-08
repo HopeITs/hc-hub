@@ -154,8 +154,8 @@ class MyLeaveRequestModule extends Component
 
             // Notify
             $leaveRequest = $this->form->leaveRequest->load('leaveBalance.contract.position');
-            $directManage = $leaveRequest->leaveBalance->contract->position->directManager?->employee()->account;
-            $techManager = $leaveRequest->leaveBalance->contract->position->techManager?->employee()->account;
+            $directManage = $leaveRequest->leaveBalance->contract->position->directManager?->employee()?->account;
+            $techManager = $leaveRequest->leaveBalance->contract->position->techManager?->employee()?->account;
             $city = $leaveRequest->leaveBalance->contract->employee->city;
             $hr = User::whereHas('roles', function ($query) use ($city) {
                 $query->where('name', 'HR-'.$city->slug);
