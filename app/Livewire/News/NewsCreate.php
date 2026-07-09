@@ -4,6 +4,7 @@ namespace App\Livewire\News;
 
 use App\Livewire\Forms\NewsForm;
 use App\Models\News;
+use App\Services\TranslationService;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -49,6 +50,16 @@ class NewsCreate extends Component
         return to_route('news.index');
     }
 
+    public function translateTitleToEnglish(): void
+    {
+        $this->translateArabicFieldToEnglish('title_ar', 'title_en');
+    }
+
+    public function translateDescriptionToEnglish(): void
+    {
+        $this->translateArabicFieldToEnglish('description_ar', 'description_en');
+    }
+
     public function render()
     {
         return view('livewire.news.news-create');
@@ -57,6 +68,27 @@ class NewsCreate extends Component
     private function canCreateNews(): bool
     {
         return $this->canManageAllNews() || $this->isManager();
+    }
+
+    private function translateArabicFieldToEnglish(string $sourceField, string $targetField): void
+    {
+        $source = (string) $this->form->{$sourceField};
+
+        if (trim($source) === '') {
+            LivewireAlert::title(__('general.translation-source-required'))->warning()->toast()->position('top-start')->show();
+
+            return;
+        }
+
+        $translated = app(TranslationService::class)->arabicToEnglish($source);
+
+        if (! $translated) {
+            LivewireAlert::title(__('general.translation-failed'))->error()->toast()->position('top-start')->show();
+
+            return;
+        }
+
+        $this->form->{$targetField} = $translated;
     }
 
     private function canManageNews(News $news): bool

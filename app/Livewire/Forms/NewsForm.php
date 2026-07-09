@@ -15,9 +15,13 @@ use Livewire\Form;
 
 class NewsForm extends Form
 {
-    public string $title = '';
+    public string $title_ar = '';
 
-    public string $description = '';
+    public ?string $title_en = null;
+
+    public string $description_ar = '';
+
+    public ?string $description_en = null;
 
     public mixed $photo = null;
 
@@ -43,8 +47,10 @@ class NewsForm extends Form
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
+            'title_ar' => ['required', 'string', 'max:255'],
+            'title_en' => ['nullable', 'string', 'max:255'],
+            'description_ar' => ['required', 'string'],
+            'description_en' => ['nullable', 'string'],
             'newsable_type' => ['nullable', 'string', Rule::in(self::allowedNewsableTypes())],
             'newsable_id' => [
                 Rule::requiredIf(filled($this->newsable_type)),
@@ -52,7 +58,7 @@ class NewsForm extends Form
                 'integer',
             ],
             'display_until' => ['nullable', 'date'],
-            'event_date' => ['nullable', 'date'],
+            'event_date' => ['required', 'date'],
             'photo' => [
                 'nullable',
                 Rule::when(
@@ -66,8 +72,10 @@ class NewsForm extends Form
     public function fillFromNews(News $news): void
     {
         $this->fill([
-            'title' => $news->title,
-            'description' => $news->description ?? '',
+            'title_ar' => $news->title_ar ?? '',
+            'title_en' => $news->title_en,
+            'description_ar' => $news->description_ar ?? '',
+            'description_en' => $news->description_en,
             'newsable_type' => $news->newsable_type ?? '',
             'newsable_id' => $news->newsable_id ?? '',
             'display_until' => $news->display_until?->format('Y-m-d'),
@@ -110,8 +118,10 @@ class NewsForm extends Form
         }
 
         $news->fill([
-            'title' => $this->title,
-            'description' => $this->description,
+            'title_ar' => $this->title_ar,
+            'title_en' => $this->title_en ?: null,
+            'description_ar' => $this->description_ar,
+            'description_en' => $this->description_en ?: null,
             'newsable_type' => $this->newsable_type ?: null,
             'newsable_id' => $this->newsable_id ?: null,
             'display_until' => $this->display_until ? Carbon::parse($this->display_until) : null,

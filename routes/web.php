@@ -84,7 +84,7 @@ Route::group(
 
             Route::get('/notifications', Index::class)->name('notifications.index');
 
-            Route::get('/news', NewsModule::class)->name('news.index');
+            Route::get('/news', NewsModule::class)->name('news.index')->middleware('role:HR|super-admin|general-manager|manager');
 
             Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
 

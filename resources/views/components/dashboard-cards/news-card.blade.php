@@ -36,21 +36,23 @@
             @php
                 $targetType = $news->newsable_type ? strtolower(class_basename($news->newsable_type)) : 'all';
                 $authorName = $news->creator?->profile?->name ?? $news->creator?->email ?? __('general.unknown');
+                $title = $news->localizedTitle();
+                $description = $news->localizedDescription();
             @endphp
             <div class="border-b border-b-secondary-light pb-3 last:border-b-0 last:pb-0">
                 <p class="text-[10px] font-light text-gray-400">
                     {{ $news->published_at?->diffForHumans() ?? 'Just Now' }}
                 </p>
                 <p class="text-sm font-bold text-[#58595B]">
-                    {{ $news->title }}
+                    {{ $title }}
                 </p>
                 <p class="text-xs font-light text-secondary-medium mt-1 line-clamp-2">
-                    {{ $news->description ?? 'Since 2013 (officially established in 2018), Christian Hope Center has been dedicated to supporting Christian...' }}
+                    {{ $description ?? 'Since 2013 (officially established in 2018), Christian Hope Center has been dedicated to supporting Christian...' }}
                 </p>
                 <button type="button"
                     x-on:click="selected = {
-                        title: @js($news->title),
-                        description: @js($news->description),
+                        title: @js($title),
+                        description: @js($description),
                         image: @js($news->getFirstMediaUrl('news-image') ?: null),
                         publishedAt: @js($news->published_at?->translatedFormat('d M Y') ?? __('general.unknown')),
                         author: @js($authorName),

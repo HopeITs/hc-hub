@@ -35,16 +35,20 @@ class NewsTable extends LivewireTable
 
     protected function globalSearchColumns(): array
     {
-        return ['title', 'description'];
+        return ['title_ar', 'title_en', 'description_ar', 'description_en'];
     }
 
     protected function columns(): array
     {
         $showActions = $this->canManageAllNews() || $this->isManager();
+        $titleColumn = app()->getLocale() === 'ar' ? 'title_ar' : 'title_en';
 
         return [
             Column::make('ID', 'id')->sortable(),
-            Column::make(__('general.title'), 'title')->sortable()->searchable(),
+            Column::make(__('general.title'), function (Model $m): string {
+                /** @var News $m */
+                return $m->localizedTitle();
+            })->sortable(fn (Builder $query, Direction $direction) => $query->orderBy($titleColumn, $direction->value)),
             Column::make(__('general.target_group'), 'newsable_name')
                 ->sortable(fn (Builder $query, Direction $direction) => $query->orderBy('newsable_type', $direction->value)),
             Column::make(__('general.display_until'), 'display_until')

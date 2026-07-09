@@ -1,14 +1,44 @@
 <div class="grid grid-cols-2 gap-4">
-    <div class="col-span-2">
-        <x-forms.input-label for="title" required>@lang('general.title')</x-forms.input-label>
-        <x-forms.input id="title" type="text" wire:model.live="form.title" />
-        <x-error-span>{{ $errors->first('form.title') }}</x-error-span>
+    <div class="col-span-2 sm:col-span-1">
+        <x-forms.input-label for="title_ar" required>@lang('general.title') (AR)</x-forms.input-label>
+        <x-forms.input id="title_ar" type="text" wire:model.live="form.title_ar" dir="rtl" />
+        <x-error-span>{{ $errors->first('form.title_ar') }}</x-error-span>
     </div>
 
-    <div class="col-span-2">
-        <x-forms.input-label for="description" required>@lang('general.description')</x-forms.input-label>
-        <x-forms.textarea id="description" wire:model.live="form.description" />
-        <x-error-span>{{ $errors->first('form.description') }}</x-error-span>
+    <div class="col-span-2 sm:col-span-1">
+        <div class="flex items-center justify-between gap-2">
+            <x-forms.input-label for="title_en">@lang('general.title') (EN)</x-forms.input-label>
+            <button type="button"
+                wire:click="translateTitleToEnglish"
+                wire:loading.attr="disabled"
+                wire:target="translateTitleToEnglish"
+                class="text-xs font-semibold text-primary underline-offset-2 transition hover:underline disabled:cursor-wait disabled:opacity-60">
+                @lang('general.auto-translate')
+            </button>
+        </div>
+        <x-forms.input id="title_en" type="text" wire:model.live="form.title_en" dir="ltr" />
+        <x-error-span>{{ $errors->first('form.title_en') }}</x-error-span>
+    </div>
+
+    <div class="col-span-2 sm:col-span-1">
+        <x-forms.input-label for="description_ar" required>@lang('general.description') (AR)</x-forms.input-label>
+        <x-forms.textarea id="description_ar" wire:model.live="form.description_ar" dir="rtl" />
+        <x-error-span>{{ $errors->first('form.description_ar') }}</x-error-span>
+    </div>
+
+    <div class="col-span-2 sm:col-span-1">
+        <div class="flex items-center justify-between gap-2">
+            <x-forms.input-label for="description_en">@lang('general.description') (EN)</x-forms.input-label>
+            <button type="button"
+                wire:click="translateDescriptionToEnglish"
+                wire:loading.attr="disabled"
+                wire:target="translateDescriptionToEnglish"
+                class="text-xs font-semibold text-primary underline-offset-2 transition hover:underline disabled:cursor-wait disabled:opacity-60">
+                @lang('general.auto-translate')
+            </button>
+        </div>
+        <x-forms.textarea id="description_en" wire:model.live="form.description_en" dir="ltr" />
+        <x-error-span>{{ $errors->first('form.description_en') }}</x-error-span>
     </div>
 
     <div class="col-span-2 sm:col-span-1">
@@ -54,7 +84,7 @@
     </div>
 
     <div class="col-span-2 sm:col-span-1">
-        <x-forms.input-label>@lang('general.event_date')</x-forms.input-label>
+        <x-forms.input-label required>@lang('general.event_date')</x-forms.input-label>
         <x-forms.input type="date" wire:model.live="form.event_date" />
         <x-error-span>{{ $errors->first('form.event_date') }}</x-error-span>
     </div>
