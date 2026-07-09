@@ -634,6 +634,11 @@ return [
     '500-title2' => '“We hit an unexpected error.”',
     '500-message' => 'It’s not you. It’s us. Try refreshing the page, or come back a little later.',
     '500-button' => 'Go to homepage',
+    '503-title1' => 'Maintenance Mode',
+    '503-title2' => 'The system is getting a careful tune-up.',
+    '503-message' => 'Hope HR is temporarily unavailable while we make things better. Please check back in a little while.',
+    '503-button' => 'Check again',
+
     'course-category' => 'Course Category|Course Categories',
     'collapse-all' => 'Collapse All',
     'expand-all' => 'Expand All',
