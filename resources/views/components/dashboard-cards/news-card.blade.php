@@ -15,7 +15,7 @@
 
 <div x-data="{ open: false, selected: null }"
     x-on:keydown.escape.window="open = false"
-    class="relative w-full h-full  py-6 bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] flex flex-col overflow-hidden">
+    class="relative flex h-70 min-h-0 w-full flex-col overflow-hidden rounded-3xl bg-white py-6 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] lg:h-[36.5rem]">
     <div class="flex items-center justify-between px-6 pt-5 pb-1 flex-shrink-0">
         <div class="flex items-center gap-3">
             <h2 class="text-md font-base text-[#58595B]">
@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto px-6 py-4 space-y-5 scrollbar-thin scrollbar-thumb-[var(--color-secondary-medium)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-secondary-medium)]">
+    <div class="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-6 py-4 space-y-5">
         @forelse($newsItems as $news)
             @php
                 $targetType = $news->newsable_type ? strtolower(class_basename($news->newsable_type)) : 'all';
@@ -59,7 +59,7 @@
                         targetType: @js($targetType),
                     }; open = true"
                     class="ms-auto mt-2 flex text-xs font-semibold text-primary underline">
-                    @lang('general.read-more') →
+                    @lang('general.read-more') &rarr;
                 </button>
             </div>
         @empty
@@ -92,7 +92,7 @@
                     <x-icons.x-mark class="size-4 shrink-0" />
                 </button>
 
-                <div class="max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-secondary-medium)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-secondary-medium)]">
+                <div class="custom-scrollbar max-h-[90vh] overflow-y-auto">
                     <template x-if="selected?.image">
                         <div class="aspect-[16/7] w-full overflow-hidden bg-neutral-100">
                             <img :src="selected.image" :alt="selected.title || ''" class="h-full w-full object-cover">
@@ -102,31 +102,43 @@
                     <div class="space-y-4 p-6 sm:p-8">
                         <p class="text-xs font-semibold uppercase tracking-wide text-primary">@lang('general.news')</p>
                         <h3 class="text-2xl font-extrabold leading-normal text-secondary-dark sm:text-3xl" x-text="selected?.title"></h3>
-                        <div class="mt-2 mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-secondary-medium">
-                            <span class="inline-flex items-center gap-1.5">
-                                <x-icons.clock class="size-3.5 shrink-0 text-secondary-light" />
-                                <span x-text="selected?.publishedAt"></span>
+                        <div class="mt-2 mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs leading-4 text-secondary-medium">
+                            <span class="group flex items-center gap-1.5 transition-colors hover:text-primary">
+                                <x-icons.clock class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
+                                <span class="flex items-center gap-1">
+                                    <span class="font-semibold text-secondary-dark transition-colors group-hover:text-primary">@lang('general.published_at'):</span>
+                                    <span x-text="selected?.publishedAt"></span>
+                                </span>
                             </span>
 
-                            <span class="inline-flex items-center gap-1.5">
-                                <x-icons.employee class="size-3.5 shrink-0 text-secondary-light" />
-                                <span x-text="selected?.author"></span>
+                            <span class="group flex items-center gap-1.5 transition-colors hover:text-primary">
+                                <x-icons.employee class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
+                                <span class="flex items-center gap-1">
+                                    <span class="font-semibold text-secondary-dark transition-colors group-hover:text-primary">@lang('general.created_by'):</span>
+                                    <span x-text="selected?.author"></span>
+                                </span>
                             </span>
 
                             <template x-if="selected?.eventDate">
-                                <span class="inline-flex items-center gap-1.5">
-                                    <x-icons.calendar class="size-3.5 shrink-0 text-secondary-light" />
-                                    <span x-text="selected.eventDate"></span>
+                                <span class="group flex items-center gap-1.5 transition-colors hover:text-primary">
+                                    <x-icons.calendar class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
+                                    <span class="flex items-center gap-1">
+                                        <span class="font-semibold text-secondary-dark transition-colors group-hover:text-primary">@lang('general.event_date'):</span>
+                                        <span x-text="selected.eventDate"></span>
+                                    </span>
                                 </span>
                             </template>
 
-                            <span class="inline-flex items-center gap-1.5">
-                                <x-icons.team x-show="selected?.targetType === 'all'" class="size-3.5 shrink-0 text-secondary-light" />
-                                <x-icons.employee x-show="selected?.targetType === 'employee'" class="size-3.5 shrink-0 text-secondary-light" />
-                                <x-icons.center x-show="selected?.targetType === 'center'" class="size-3.5 shrink-0 text-secondary-light" />
-                                <x-icons.program-support x-show="selected?.targetType === 'program'" class="size-3.5 shrink-0 text-secondary-light" />
-                                <x-icons.city x-show="selected?.targetType === 'city'" class="size-3.5 shrink-0 text-secondary-light" />
-                                <span x-text="selected?.target || @js(__('general.all_org'))"></span>
+                            <span class="group flex items-center gap-1.5 transition-colors hover:text-primary">
+                                <x-icons.team x-show="selected?.targetType === 'all'" class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
+                                <x-icons.employee x-show="selected?.targetType === 'employee'" class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
+                                <x-icons.center x-show="selected?.targetType === 'center'" class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
+                                <x-icons.program x-show="selected?.targetType === 'program'" class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
+                                <x-icons.city x-show="selected?.targetType === 'city'" class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
+                                <span class="flex items-center gap-1">
+                                    <span class="font-semibold text-secondary-dark transition-colors group-hover:text-primary">@lang('general.target_group'):</span>
+                                    <span x-text="selected?.target || @js(__('general.all_org'))"></span>
+                                </span>
                             </span>
                         </div>
                         <div class="h-px bg-neutral-200"></div>
@@ -138,3 +150,21 @@
         </div>
     </template>
 </div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.22) transparent;
+        scrollbar-gutter: stable;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.22);
+        border-radius: 999px;
+    }
+</style>
