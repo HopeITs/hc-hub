@@ -5,7 +5,7 @@
 @section('page-background')
     <style>
         body {
-            background: url('{{ asset('assets/errors/500.png') }}') no-repeat center center;
+            background: url('{{ asset('assets/errors/503.jpg') }}') no-repeat center center;
             background-size: cover;
             position: relative;
             top:0;

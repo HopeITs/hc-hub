@@ -636,7 +636,7 @@ return [
     '500-button' => 'Go to homepage',
     '503-title1' => 'Maintenance Mode',
     '503-title2' => 'The system is getting a careful tune-up.',
-    '503-message' => 'Hope HR is temporarily unavailable while we make things better. Please check back in a little while.',
+    '503-message' => 'The website is temporarily unavailable while we make things better. Please check back in later.',
     '503-button' => 'Check again',
 
     'course-category' => 'Course Category|Course Categories',
