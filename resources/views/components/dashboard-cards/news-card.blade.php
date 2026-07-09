@@ -4,7 +4,7 @@
 
     $today = Carbon::today();
 
-    $newsItems = News::with('newsable')
+    $newsItems = News::with(['newsable', 'creator.profile'])
         ->whereDate('event_date', '<', $today)
         ->whereDate('event_date', '>=', $today->copy()->subDays(7))
         ->orderByDesc('event_date')
@@ -35,6 +35,7 @@
         @forelse($newsItems as $news)
             @php
                 $targetType = $news->newsable_type ? strtolower(class_basename($news->newsable_type)) : 'all';
+                $authorName = $news->creator?->profile?->name ?? $news->creator?->email ?? __('general.unknown');
             @endphp
             <div class="border-b border-b-secondary-light pb-3 last:border-b-0 last:pb-0">
                 <p class="text-[10px] font-light text-gray-400">
@@ -51,6 +52,8 @@
                         title: @js($news->title),
                         description: @js($news->description),
                         image: @js($news->getFirstMediaUrl('news-image') ?: null),
+                        publishedAt: @js($news->published_at?->translatedFormat('d M Y') ?? __('general.unknown')),
+                        author: @js($authorName),
                         eventDate: @js($news->event_date?->translatedFormat('d M Y')),
                         target: @js($news->newsable_name),
                         targetType: @js($targetType),
@@ -86,12 +89,10 @@
                     x-on:click="open = false"
                     class="absolute end-4 top-4 z-10 flex size-9 items-center justify-center rounded-full border border-neutral-200 bg-white/95 text-secondary-medium shadow-sm transition hover:border-secondary-light hover:text-primary"
                     aria-label="{{ __('general.cancel') }}">
-                    <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
-                    </svg>
+                    <x-icons.x-mark class="size-4 shrink-0" />
                 </button>
 
-                <div class="max-h-[90vh] overflow-y-auto">
+                <div class="max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--color-secondary-medium)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-secondary-medium)]">
                     <template x-if="selected?.image">
                         <div class="aspect-[16/7] w-full overflow-hidden bg-neutral-100">
                             <img :src="selected.image" :alt="selected.title || ''" class="h-full w-full object-cover">
@@ -101,33 +102,30 @@
                     <div class="space-y-4 p-6 sm:p-8">
                         <p class="text-xs font-semibold uppercase tracking-wide text-primary">@lang('general.news')</p>
                         <h3 class="text-2xl font-extrabold leading-normal text-secondary-dark sm:text-3xl" x-text="selected?.title"></h3>
-                        <div class="flex flex-wrap items-center gap-2">
+                        <div class="mt-2 mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-secondary-medium">
+                            <span class="inline-flex items-center gap-1.5">
+                                <x-icons.clock class="size-3.5 shrink-0 text-secondary-light" />
+                                <span x-text="selected?.publishedAt"></span>
+                            </span>
+
+                            <span class="inline-flex items-center gap-1.5">
+                                <x-icons.employee class="size-3.5 shrink-0 text-secondary-light" />
+                                <span x-text="selected?.author"></span>
+                            </span>
+
                             <template x-if="selected?.eventDate">
-                                <span class="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-semibold text-secondary-medium">
-                                    <svg class="size-3.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" />
-                                    </svg>
+                                <span class="inline-flex items-center gap-1.5">
+                                    <x-icons.calendar class="size-3.5 shrink-0 text-secondary-light" />
                                     <span x-text="selected.eventDate"></span>
                                 </span>
                             </template>
 
-                            <span class="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
-                                <svg x-show="selected?.targetType === 'all'" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20a5 5 0 0 0-10 0M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm10 8a4.5 4.5 0 0 0-6-4.24M2 20a4.5 4.5 0 0 1 6-4.24" />
-                                </svg>
-                                <svg x-show="selected?.targetType === 'employee'" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0" />
-                                </svg>
-                                <svg x-show="selected?.targetType === 'center'" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-7h6v7M9 10h.01M15 10h.01" />
-                                </svg>
-                                <svg x-show="selected?.targetType === 'program'" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 8 4-8 4-8-4 8-4Zm-8 8 8 4 8-4M4 15l8 4 8-4" />
-                                </svg>
-                                <svg x-show="selected?.targetType === 'city'" class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.25 7-11a7 7 0 1 0-14 0c0 5.75 7 11 7 11Z" />
-                                    <circle cx="12" cy="10" r="2.5" />
-                                </svg>
+                            <span class="inline-flex items-center gap-1.5">
+                                <x-icons.team x-show="selected?.targetType === 'all'" class="size-3.5 shrink-0 text-secondary-light" />
+                                <x-icons.employee x-show="selected?.targetType === 'employee'" class="size-3.5 shrink-0 text-secondary-light" />
+                                <x-icons.center x-show="selected?.targetType === 'center'" class="size-3.5 shrink-0 text-secondary-light" />
+                                <x-icons.program-support x-show="selected?.targetType === 'program'" class="size-3.5 shrink-0 text-secondary-light" />
+                                <x-icons.city x-show="selected?.targetType === 'city'" class="size-3.5 shrink-0 text-secondary-light" />
                                 <span x-text="selected?.target || @js(__('general.all_org'))"></span>
                             </span>
                         </div>
