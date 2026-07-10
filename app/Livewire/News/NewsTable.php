@@ -29,26 +29,28 @@ class NewsTable extends LivewireTable
                     && ! ($this->canManageAllNews() || $this->isManager())
                     && method_exists(News::class, 'scopeVisibleTo'),
                 fn (Builder $q) => $q->visibleTo($employee)
-            )
-            ->latest();
+            );
     }
 
     protected function globalSearchColumns(): array
     {
-        return ['title_ar', 'title_en', 'description_ar', 'description_en'];
+        return ['title_ar', 'description_ar'];
     }
 
     protected function columns(): array
     {
         $showActions = $this->canManageAllNews() || $this->isManager();
-        $titleColumn = app()->getLocale() === 'ar' ? 'title_ar' : 'title_en';
+        $titleColumn = 'title_ar';
 
         return [
             Column::make('ID', 'id')->sortable(),
-            Column::make(__('general.title'), function (Model $m): string {
-                /** @var News $m */
-                return $m->localizedTitle();
-            })->sortable(fn (Builder $query, Direction $direction) => $query->orderBy($titleColumn, $direction->value)),
+            Column::make(__('general.title'), $titleColumn)
+                ->displayUsing(function ($value, Model $m): string {
+                    /** @var News $m */
+                    return $m->localizedTitle();
+                })
+                ->sortable()
+                ->searchable(),
             Column::make(__('general.target_group'), 'newsable_name')
                 ->sortable(fn (Builder $query, Direction $direction) => $query->orderBy('newsable_type', $direction->value)),
             Column::make(__('general.display_until'), 'display_until')
