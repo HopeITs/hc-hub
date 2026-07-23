@@ -7,24 +7,24 @@
 
 <section
     x-data="{ open: false }"
-    class="rounded-2xl border {{ $private ? 'border-primary' : 'border-neutral-200' }} bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6"
+    class="rounded-surface border {{ $private ? 'border-primary' : 'border-neutral-200' }} bg-white p-4 shadow-e1 sm:rounded-surface sm:p-6"
 >
     <button
         type="button"
-        class="flex w-full items-center gap-3 text-start sm:mb-5 sm:cursor-default"
+        class="flex w-full items-center gap-3 text-start sm:mb-4 sm:cursor-default"
         x-on:click="if (window.innerWidth < 640) open = !open"
         x-bind:aria-expanded="open"
     >
         @if($icon)
-            <div class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white sm:h-12 sm:w-12 sm:rounded-2xl">
+            <div class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-surface bg-primary text-white sm:h-12 sm:w-12 sm:rounded-surface">
                 <x-dynamic-component :component="$icon" class="block h-4 w-4 !me-0 sm:h-6 sm:w-6"/>
             </div>
         @endif
 
         <div class="min-w-0 flex-1">
-            <h2 class="text-lg font-bold text-primary sm:text-xl">{{ $title }}</h2>
+            <h2 class="text-h4 font-bold text-primary sm:text-h4">{{ $title }}</h2>
             @if($subtitle)
-                <p class="mt-0.5 text-xs text-secondary-light sm:mt-1 sm:text-sm">{{ $subtitle }}</p>
+                <p class="mt-1 text-small text-secondary-light sm:mt-1 sm:text-body">{{ $subtitle }}</p>
             @endif
         </div>
 
@@ -58,24 +58,24 @@
 
 <section
     x-data="{ open: false }"
-    class="rounded-2xl border {{ $private ? 'border-primary' : 'border-neutral-200' }} bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6"
+    class="rounded-surface border {{ $private ? 'border-primary' : 'border-neutral-200' }} bg-white p-4 shadow-e1 sm:rounded-surface sm:p-6"
 >
     <button
         type="button"
-        class="flex w-full items-center gap-3 text-start sm:mb-5 sm:cursor-default"
+        class="flex w-full items-center gap-3 text-start sm:mb-4 sm:cursor-default"
         x-on:click="if (window.innerWidth < 640) open = !open"
         x-bind:aria-expanded="open"
     >
         @if($icon)
-            <div class="rounded-xl bg-primary p-2 text-white sm:rounded-2xl sm:p-3">
+            <div class="rounded-surface bg-primary p-2 text-white sm:rounded-surface sm:p-3">
                 <x-dynamic-component :component="$icon" class="h-4 w-4 !me-0 sm:h-6 sm:w-6"/>
             </div>
         @endif
 
         <div class="min-w-0 flex-1">
-            <h2 class="text-lg font-bold text-primary sm:text-xl">{{ $title }}</h2>
+            <h2 class="text-h4 font-bold text-primary sm:text-h4">{{ $title }}</h2>
             @if($subtitle)
-                <p class="mt-0.5 text-xs text-secondary-light sm:mt-1 sm:text-sm">{{ $subtitle }}</p>
+                <p class="mt-1 text-small text-secondary-light sm:mt-1 sm:text-body">{{ $subtitle }}</p>
             @endif
         </div>
 

@@ -42,8 +42,8 @@
                 {{-- step 1 --}}
                 <x-tab.container active-tab="identity">
                     @if($step === 1)
-                        <div class="mb-4 pb-3 border-b border-gray-200">
-                            <h2 class="text-base font-semibold text-gray-900">@lang('general.identity-org')</h2>
+                        <div class="mb-4 pb-3 border-b border-neutral-200">
+                            <h2 class="text-body font-semibold text-neutral-900">@lang('general.identity-org')</h2>
                         </div>
 
                         @include('livewire.contract.Partials.identity-fields')
@@ -60,14 +60,14 @@
                 {{-- step 2 --}}
                 <x-tab.container active-tab="terms">
                     @if($step === 2)
-                        <div class="mb-4 pb-3 border-b border-gray-200">
-                            <h2 class="text-base font-semibold text-gray-900">@lang('general.terms-status')</h2>
+                        <div class="mb-4 pb-3 border-b border-neutral-200">
+                            <h2 class="text-body font-semibold text-neutral-900">@lang('general.terms-status')</h2>
                         </div>
 
                         @include('livewire.contract.Partials.terms-fields')
 
                         <div class="mt-6 flex items-center justify-between">
-                            <x-secondary-button type="button" wire:click="prev" class="hover:bg-gray-100"
+                            <x-secondary-button type="button" wire:click="prev" class="hover:bg-neutral-100"
                                                 wire:loading.attr="disabled">
                                 @lang('general.previous')
                             </x-secondary-button>
@@ -82,14 +82,14 @@
                 {{-- step 3 --}}
                 <x-tab.container active-tab="comp">
                     @if($step === 3)
-                        <div class="mb-4 pb-3 border-b border-gray-200">
-                            <h2 class="text-base font-semibold text-gray-900">@lang('general.Pay-schedule')</h2>
+                        <div class="mb-4 pb-3 border-b border-neutral-200">
+                            <h2 class="text-body font-semibold text-neutral-900">@lang('general.Pay-schedule')</h2>
                         </div>
 
                         @include('livewire.contract.Partials.pay-fields')
 
                         <div class="mt-6 flex items-center justify-between">
-                            <x-secondary-button type="button" wire:click="prev" class="hover:bg-gray-100"
+                            <x-secondary-button type="button" wire:click="prev" class="hover:bg-neutral-100"
                                                 wire:loading.attr="disabled">
                                 @lang('general.previous')
                             </x-secondary-button>

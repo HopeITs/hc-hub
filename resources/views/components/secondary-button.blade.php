@@ -1,8 +1,8 @@
 @props(['href' => null])
 
 @php
-    $baseClasses = 'py-2 px-4 text-sm font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300
-                    cursor-pointer rounded-md shadow-sm transition duration-150 ease-in-out
+    $baseClasses = 'py-2 px-4 text-body font-semibold text-neutral-800 bg-neutral-200 hover:bg-neutral-300
+                    cursor-pointer rounded-control shadow-e1 transition duration-150 ease-in-out
                     flex justify-center items-center disabled:opacity-60 disabled:cursor-not-allowed';
 @endphp
 

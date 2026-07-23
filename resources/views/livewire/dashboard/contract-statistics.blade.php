@@ -1,20 +1,20 @@
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8  py-12">
 
     <div class="mb-12 ">
-        <h1 class="text-4xl font-black text-neutral-900 tracking-tight mb-6">
+        <h1 class="text-h1 font-black text-neutral-900 tracking-tight mb-6">
             @lang('general.contract-statistics')
         </h1>
 
 
         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-end">
 
-        <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-secondary-dark uppercase tracking-wide">
+        <div class="flex flex-col gap-2">
+            <label class="text-small font-semibold text-secondary-dark uppercase tracking-wide">
                 {{ trans_choice('general.city', 1) }}
             </label>
 
             <select wire:model.lazy="selectedCity"
-                    class="w-full border border-secondary-soft rounded-lg px-4 py-2.5
+                    class="w-full border border-secondary-soft rounded-surface px-4 py-2
                            text-neutral-900 bg-white focus:ring-primary focus:ring-2 transition">
                 <option value="">{{ __('general.all') }} {{ trans_choice('general.city', 2) }}</option>
                 @foreach($cities as $city)
@@ -23,13 +23,13 @@
             </select>
         </div>
 
-            <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-secondary-dark uppercase tracking-wide">
+            <div class="flex flex-col gap-2">
+                <label class="text-small font-semibold text-secondary-dark uppercase tracking-wide">
                     {{ trans_choice('general.program', 1) }}
                 </label>
 
                 <select wire:model.lazy="selectedProgram"
-                        class="w-full border border-secondary-soft rounded-lg px-4 py-2.5
+                        class="w-full border border-secondary-soft rounded-surface px-4 py-2
                            text-neutral-900 bg-white focus:ring-primary focus:ring-2 transition">
                     <option value="">{{ __('general.all') }} {{ trans_choice('general.program', 2) }}</option>
                     @foreach($programs as $program)
@@ -40,13 +40,13 @@
 
             <div class="flex sm:col-span-2 lg:col-span-1 justify-start lg:justify-start">
                 {{-- <button wire:click="resetFilters"
-                        class="px-4 py-3 text-sm text-secondary-dark font-semibold border border-secondary-soft
-           rounded-lg bg-white hover:shadow-sm cursor-pointer transition w-full sm:w-auto
+                        class="px-4 py-3 text-body text-secondary-dark font-semibold border border-secondary-soft
+           rounded-surface bg-white hover:shadow-e1 cursor-pointer transition w-full sm:w-auto
            flex items-center justify-center"> --}}
 
               <button wire:click="resetFilters"
-                        class="px-4 py-3 text-sm text-secondary-dark font-semibold border border-secondary-soft
-           rounded-lg bg-white hover:shadow-sm cursor-pointer transition w-full sm:w-auto
+                        class="px-4 py-3 text-body text-secondary-dark font-semibold border border-secondary-soft
+           rounded-surface bg-white hover:shadow-e1 cursor-pointer transition w-full sm:w-auto
            flex items-center justify-center gap-2">
 
                     <svg xmlns="http://www.w3.org/2000/svg"
@@ -68,8 +68,8 @@
     </div>
 
 
-    <div wire:loading.flex wire:target="applyFilters, resetFilters" class="justify-center py-10">
-        <div class="text-sm text-secondary-dark flex items-center gap-2">
+    <div wire:loading.flex wire:target="applyFilters, resetFilters" class="justify-center py-12">
+        <div class="text-body text-secondary-dark flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
             @lang('general.updating-statistics')
         </div>
@@ -81,25 +81,25 @@
 
         @forelse ($cards as $card)
 
-            <article class="border border-secondary-soft rounded-3xl bg-white
-                            shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] hover:shadow-md transition-all duration-200
+            <article class="border border-secondary-soft rounded-surface bg-white
+                            shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] hover:shadow-e2 transition-all duration-200
                             hover:-translate-y-1 flex flex-col">
 
 
                 <div class="p-6 flex justify-between items-start border-b  border-secondary-soft">
                     <div class="flex flex-col">
-                        <span class="text-lg font-black text-neutral-900">
+                        <span class="text-h4 font-black text-neutral-900">
                             {{ $card['name'] }}
                         </span>
 
-                        <span class="text-[13px] text-secondary-dark mt-1.5">
+                        <span class="text-body text-secondary-dark mt-2">
                             {{ trans_choice('general.employee', 2) }}:
                             <span class="font-bold text-primary">{{ $card['employees'] }}</span>
                         </span>
                     </div>
 
                     <div class="text-right">
-                        <span class="inline-block px-2 py-1 text-[10px] font-semibold text-white rounded-md
+                        <span class="inline-block px-2 py-1 text-caption font-semibold text-white rounded-control
                                      {{ $card['color'] }}">
                             {{ $cardType === 'program'
                                 ? trans_choice('general.program', 2)
@@ -107,7 +107,7 @@
                         </span>
 
                         @if ($card['centers'] !== null)
-                            <p class="text-[13px] text-center text-secondary-dark mt-[10.2px]">
+                            <p class="text-body text-center text-secondary-dark mt-[10.2px]">
                                 {{ trans_choice('general.center', 2) }}:
                                 <span class="font-semibold text-neutral-800">{{ $card['centers'] }}</span>
                             </p>
@@ -133,15 +133,15 @@
                                 : $data['full'] + $data['part'];
                         @endphp
 
-                        <div class="rounded-2xl bg-neutral-50 border border-neutral-200
+                        <div class="rounded-surface bg-neutral-50 border border-neutral-200
                     p-3 shadow-inner hover:bg-neutral-100 transition">
 
-                            <p class="text-xs font-semibold text-neutral-800
+                            <p class="text-small font-semibold text-neutral-800
                       border-b border-neutral-200 pb-1 mb-1">
                                 {{ $label }}
                             </p>
 
-                            <div class="space-y-0.5 text-xs">
+                            <div class="space-y-1 text-small">
 
                                 @if ($isService)
                                     <div class="flex justify-between">
@@ -184,7 +184,7 @@
                                 : ($cardType === 'center'
                                     ? route('centers.show', $card['center_id'])
                                     : '#') }}"
-                       class="text-xs flex justify-end  text-primary hover:underline">
+                       class="text-small flex justify-end  text-primary hover:underline">
                         @lang('general.show-more') →
                     </a>
                 </div>
@@ -194,7 +194,7 @@
 
         @empty
 
-            <div class="col-span-full text-center py-10 text-secondary-dark">
+            <div class="col-span-full text-center py-12 text-secondary-dark">
                 @lang('general.no-data-filters')
             </div>
 

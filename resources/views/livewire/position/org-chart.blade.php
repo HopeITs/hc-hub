@@ -4,9 +4,9 @@
     // Structural connectors mirror the active line. The technical line uses a
     // dashed neutral, the direct line a solid neutral — the dash *pattern*
     // (not colour) carries the meaning, keeping it colour-blind safe and on-brand.
-    $trunk = $isTech ? 'border-s border-dashed border-gray-400' : 'bg-gray-300';
-    $branchBorder = $isTech ? 'border-dashed border-gray-400' : 'border-gray-300';
-    $colGap = $compact ? 'gap-3' : 'gap-7';
+    $trunk = $isTech ? 'border-s border-dashed border-neutral-400' : 'bg-neutral-300';
+    $branchBorder = $isTech ? 'border-dashed border-neutral-400' : 'border-neutral-300';
+    $colGap = $compact ? 'gap-3' : 'gap-6';
 @endphp
 
 <div class="pb-8 space-y-4"
@@ -40,17 +40,17 @@
      }"
      x-on:keydown.escape.window="filtersOpen = false">
 
-    <section class="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-3xl">
+    <section class="overflow-hidden bg-white border border-neutral-200 shadow-e1 rounded-surface">
         {{-- ---------- Header + stats ---------- --}}
         <div class="relative px-6 py-6 text-white bg-secondary-dark">
-            <div class="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
+            <div class="relative flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                 <div>
-                    <div class="flex items-center gap-2 mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-white/70">
+                    <div class="flex items-center gap-2 mb-2 text-caption font-semibold uppercase tracking-wider text-white/70">
                         <x-icons.code-fork class="size-4" />
                         @lang('general.organization-overview')
                     </div>
-                    <h1 class="text-2xl font-bold leading-tight tracking-tight sm:text-3xl">@lang('general.orgn-chart')</h1>
-                    <p class="max-w-2xl mt-2.5 text-sm leading-relaxed text-white/75">@lang('general.org-chart-subtitle')</p>
+                    <h1 class="text-h3 font-bold leading-tight tracking-tight sm:text-h2">@lang('general.orgn-chart')</h1>
+                    <p class="max-w-2xl mt-2 text-body leading-relaxed text-white/75">@lang('general.org-chart-subtitle')</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -62,12 +62,12 @@
                     ] as $stat)
                         {{-- Uniform neutral cards; the vacancies card carries a flat red
                              accent bar because vacancies are the actionable metric. --}}
-                        <div class="relative min-w-28 overflow-hidden rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                        <div class="relative min-w-28 overflow-hidden rounded-surface border border-white/10 bg-white/10 px-4 py-3">
                             @if($stat['accent'])
                                 <span class="absolute inset-y-0 start-0 w-1 bg-primary" aria-hidden="true"></span>
                             @endif
-                            <div class="text-2xl font-bold tabular-nums">{{ number_format($stat['value']) }}</div>
-                            <div class="mt-1 text-[11px] font-medium leading-snug text-white/80">{{ $stat['label'] }}</div>
+                            <div class="text-h3 font-bold tabular-nums">{{ number_format($stat['value']) }}</div>
+                            <div class="mt-1 text-caption font-medium leading-snug text-white/80">{{ $stat['label'] }}</div>
                         </div>
                     @endforeach
                 </div>
@@ -75,14 +75,14 @@
         </div>
 
         {{-- ---------- View switcher ---------- --}}
-        <div class="flex items-center gap-1 px-4 pt-3 bg-white border-b border-gray-200">
+        <div class="flex items-center gap-1 px-4 pt-3 bg-white border-b border-neutral-200">
             <button type="button" wire:click="$set('view', 'chart')"
-                    class="flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-2.5 text-sm font-semibold transition {{ $view === 'chart' ? 'border-primary text-primary' : 'border-transparent text-secondary-light hover:text-secondary-dark' }}">
+                    class="flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-2 text-body font-semibold transition {{ $view === 'chart' ? 'border-primary text-primary' : 'border-transparent text-secondary-light hover:text-secondary-dark' }}">
                 <x-icons.code-fork class="size-4" />
                 @lang('general.chart-view')
             </button>
             <button type="button" wire:click="$set('view', 'directory')"
-                    class="flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-2.5 text-sm font-semibold transition {{ $view === 'directory' ? 'border-primary text-primary' : 'border-transparent text-secondary-light hover:text-secondary-dark' }}">
+                    class="flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-2 text-body font-semibold transition {{ $view === 'directory' ? 'border-primary text-primary' : 'border-transparent text-secondary-light hover:text-secondary-dark' }}">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5h18M3 12h18M3 19h18"/></svg>
                 @lang('general.directory-view')
             </button>
@@ -92,7 +92,7 @@
             <livewire:position.directory />
         @else
         {{-- ---------- Slim sticky toolbar ---------- --}}
-        <div class="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 bg-white/95 px-4 py-2.5 backdrop-blur">
+        <div class="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 bg-white/95 px-4 py-2 backdrop-blur">
             <div class="flex flex-wrap items-center gap-2">
                 <div class="relative">
                     <span class="pointer-events-none absolute inset-y-0 start-2.5 flex items-center text-secondary-light">
@@ -102,7 +102,7 @@
                     </span>
                     <input type="search" wire:model.live.debounce.350ms="search"
                            placeholder="{{ __('general.search-name-or-position') }}"
-                           class="py-2 text-xs font-medium border border-gray-200 w-52 rounded-xl bg-gray-50 ps-8 pe-3 text-secondary-dark placeholder:text-secondary-light focus:border-secondary-light focus:bg-white focus:ring-2 focus:ring-secondary-soft" />
+                           class="py-2 text-small font-medium border border-neutral-200 w-52 rounded-surface bg-neutral-50 ps-8 pe-3 text-secondary-dark placeholder:text-secondary-light focus:border-secondary-light focus:bg-white focus:ring-2 focus:ring-secondary-soft" />
                     @if($this->isSearching)
                         <button type="button" wire:click="$set('search', '')"
                                 class="absolute inset-y-0 flex items-center transition end-2 text-secondary-light hover:text-primary">
@@ -114,18 +114,18 @@
                 </div>
 
                 <button type="button" x-on:click="filtersOpen = true"
-                        class="relative flex items-center gap-2 px-3 py-2 text-xs font-semibold text-white transition rounded-xl bg-secondary-dark hover:bg-secondary-medium">
+                        class="relative flex items-center gap-2 px-3 py-2 text-small font-semibold text-white transition rounded-surface bg-secondary-dark hover:bg-secondary-medium">
                     <x-icons.cog class="size-4" />
                     @lang('general.filters')
                     @if($this->activeFilterCount > 0)
-                        <span class="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold">
+                        <span class="flex size-5 items-center justify-center rounded-full bg-primary text-caption font-bold">
                             {{ $this->activeFilterCount }}
                         </span>
                     @endif
                 </button>
 
                 {{-- Reporting line quick switch --}}
-                <div class="flex items-center overflow-hidden text-xs font-semibold border border-gray-200 rounded-xl bg-gray-50">
+                <div class="flex items-center overflow-hidden text-small font-semibold border border-neutral-200 rounded-surface bg-neutral-50">
                     <button type="button" wire:click="$set('manager_type', 'direct')"
                             class="px-3 py-2 transition {{ ! $isTech ? 'bg-primary text-white' : 'text-secondary-medium hover:bg-white' }}">
                         @lang('general.direct-manager')
@@ -137,55 +137,55 @@
                 </div>
 
                 <button type="button" wire:click="toggleDensity"
-                        class="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
+                        class="flex items-center gap-2 rounded-surface border border-neutral-200 bg-white px-3 py-2 text-small font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
                     <x-icons.code-fork class="size-3.5" />
                     {{ $compact ? __('general.comfortable-view') : __('general.compact-view') }}
                 </button>
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-                <div class="flex items-center overflow-hidden border border-gray-200 rounded-xl bg-gray-50">
+                <div class="flex items-center overflow-hidden border border-neutral-200 rounded-surface bg-neutral-50">
                     <button type="button" wire:click="zoomOut" title="{{ __('general.zoom-out') }}"
                             class="flex items-center justify-center transition size-8 text-secondary-medium hover:bg-white hover:text-primary">
-                        <span class="text-lg font-bold">-</span>
+                        <span class="text-h4 font-bold">-</span>
                     </button>
-                    <span class="min-w-12 border-x border-gray-200 bg-white px-1 py-1.5 text-center text-xs font-semibold tabular-nums text-secondary-dark">
+                    <span class="min-w-12 border-x border-neutral-200 bg-white px-1 py-2 text-center text-small font-semibold tabular-nums text-secondary-dark">
                         {{ round($scale * 100) }}%
                     </span>
                     <button type="button" wire:click="zoomIn" title="{{ __('general.zoom-in') }}"
                             class="flex items-center justify-center transition size-8 text-secondary-medium hover:bg-white hover:text-primary">
-                        <span class="text-lg font-bold">+</span>
+                        <span class="text-h4 font-bold">+</span>
                     </button>
                 </div>
                 <button type="button" wire:click="fitToScreen"
-                        class="px-3 py-2 text-xs font-semibold transition bg-white border border-gray-200 rounded-xl text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
+                        class="px-3 py-2 text-small font-semibold transition bg-white border border-neutral-200 rounded-surface text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
                     @lang('general.fit-to-screen')
                 </button>
                 <button type="button" wire:click="expandAll"
-                        class="px-3 py-2 text-xs font-semibold transition bg-white border border-gray-200 rounded-xl text-secondary-medium hover:bg-gray-50">
+                        class="px-3 py-2 text-small font-semibold transition bg-white border border-neutral-200 rounded-surface text-secondary-medium hover:bg-neutral-50">
                     @lang('general.expand-all')
                 </button>
                 <button type="button" wire:click="collapseAll"
-                        class="px-3 py-2 text-xs font-semibold text-white transition rounded-xl bg-primary hover:opacity-90">
+                        class="px-3 py-2 text-small font-semibold text-white transition rounded-surface bg-primary hover:opacity-90">
                     @lang('general.collapse-all')
                 </button>
 
                 {{-- Export menu --}}
                 <div class="relative" x-data="{ menu: false }" x-on:click.outside="menu = false">
                     <button type="button" x-on:click="menu = !menu" :disabled="exporting"
-                            class="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary disabled:opacity-60">
+                            class="flex items-center gap-2 rounded-surface border border-neutral-200 bg-white px-3 py-2 text-small font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary disabled:opacity-60">
                         <svg x-show="!exporting" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
                         <x-icons.spinner x-show="exporting" x-cloak class="size-4 animate-spin" />
                         @lang('general.export')
                     </button>
                     <div x-show="menu" x-cloak x-transition
-                         class="absolute z-30 py-1 mt-1 overflow-hidden bg-white border border-gray-200 shadow-lg end-0 w-36 rounded-xl">
+                         class="absolute z-30 py-1 mt-1 overflow-hidden bg-white border border-neutral-200 shadow-e3 end-0 w-36 rounded-surface">
                         <button type="button" x-on:click="menu = false; exportChart('png')"
-                                class="flex items-center w-full gap-2 px-3 py-2 text-xs font-semibold transition text-secondary-dark hover:bg-secondary-soft hover:text-primary">
+                                class="flex items-center w-full gap-2 px-3 py-2 text-small font-semibold transition text-secondary-dark hover:bg-secondary-soft hover:text-primary">
                             @lang('general.export-png')
                         </button>
                         <button type="button" x-on:click="menu = false; exportChart('pdf')"
-                                class="flex items-center w-full gap-2 px-3 py-2 text-xs font-semibold transition text-secondary-dark hover:bg-secondary-soft hover:text-primary">
+                                class="flex items-center w-full gap-2 px-3 py-2 text-small font-semibold transition text-secondary-dark hover:bg-secondary-soft hover:text-primary">
                             @lang('general.export-pdf')
                         </button>
                     </div>
@@ -198,7 +198,7 @@
             <div wire:loading.flex
                  wire:target="city_id,program_id,center_id,department_id,job_level_id,focus_manager_id,manager_type,search,resetFilters,toggleDensity"
                  class="absolute inset-0 z-30 items-center justify-center bg-white/75 backdrop-blur-[1px]">
-                <div class="flex items-center gap-2 px-5 py-3 text-sm font-semibold bg-white border border-gray-200 shadow-lg rounded-2xl text-secondary-medium">
+                <div class="flex items-center gap-2 px-4 py-3 text-body font-semibold bg-white border border-neutral-200 shadow-e3 rounded-surface text-secondary-medium">
                     <x-icons.spinner class="size-5 animate-spin text-primary" />
                     @lang('general.updating-chart')
                 </div>
@@ -208,27 +208,27 @@
                 {{-- Flat search results grid (hierarchy is not meaningful while searching). --}}
                 @php($results = $this->searchResults)
                 <div class="min-h-[680px] w-full bg-[radial-gradient(circle_at_center,_#e5e7eb_1px,_transparent_1px)] [background-size:22px_22px]">
-                    <div class="flex items-center justify-between gap-3 px-5 py-3 border-b border-gray-200 bg-white/80">
-                        <span class="text-sm font-semibold text-secondary-medium">
+                    <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-neutral-200 bg-white/80">
+                        <span class="text-body font-semibold text-secondary-medium">
                             {{ trans_choice('general.search-results-count', $results->count(), ['count' => $results->count()]) }}
                             <span class="text-secondary-light">— "{{ $search }}"</span>
                         </span>
                         <button type="button" wire:click="$set('search', '')"
-                                class="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-secondary-soft">
+                                class="rounded-surface px-3 py-2 text-small font-semibold text-primary transition hover:bg-secondary-soft">
                             @lang('general.clear-search')
                         </button>
                     </div>
 
                     @if($results->isEmpty())
                         <div class="flex min-h-[560px] items-center justify-center p-6">
-                            <div class="max-w-md px-8 py-10 text-center border border-gray-300 border-dashed shadow-sm rounded-3xl bg-white/90">
-                                <span class="flex items-center justify-center mx-auto size-14 rounded-2xl bg-secondary-soft text-primary">
+                            <div class="max-w-md px-8 py-12 text-center border border-neutral-300 border-dashed shadow-e1 rounded-surface bg-white/90">
+                                <span class="flex items-center justify-center mx-auto size-14 rounded-surface bg-secondary-soft text-primary">
                                     <svg class="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                         <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m20 20-3-3"/>
                                     </svg>
                                 </span>
-                                <h2 class="mt-4 text-lg font-semibold text-secondary-dark">@lang('general.no-search-results')</h2>
-                                <p class="max-w-xs mx-auto mt-2.5 text-sm leading-relaxed text-secondary-light">@lang('general.no-search-results-help')</p>
+                                <h2 class="mt-4 text-h4 font-semibold text-secondary-dark">@lang('general.no-search-results')</h2>
+                                <p class="max-w-xs mx-auto mt-2 text-body leading-relaxed text-secondary-light">@lang('general.no-search-results-help')</p>
                             </div>
                         </div>
                     @else
@@ -363,25 +363,25 @@
                 class="relative min-h-[min(72vh,820px)] w-full touch-none overflow-hidden overscroll-none select-none bg-[radial-gradient(circle_at_center,_#e5e7eb_1px,_transparent_1px)] [background-size:22px_22px]"
                 :class="dragging ? 'cursor-grabbing' : 'cursor-grab'"
             >
-                <p class="pointer-events-none absolute bottom-3 start-3 z-10 rounded-lg border border-gray-200/80 bg-white/90 px-2.5 py-1 text-[10px] font-medium text-secondary-light shadow-sm backdrop-blur-sm">
+                <p class="pointer-events-none absolute bottom-3 start-3 z-10 rounded-surface border border-neutral-200/80 bg-white/90 px-2 py-1 text-caption font-medium text-secondary-light shadow-e1 backdrop-blur-sm">
                     @lang('general.org-chart-nav-hint')
                 </p>
                 @if(collect($tree['root'])->isEmpty())
                     <div class="absolute inset-0 flex items-center justify-center p-6">
-                        <div class="max-w-md px-8 py-10 text-center border border-gray-300 border-dashed shadow-sm rounded-3xl bg-white/90">
-                            <span class="flex items-center justify-center mx-auto size-14 rounded-2xl bg-secondary-soft text-primary">
+                        <div class="max-w-md px-8 py-12 text-center border border-neutral-300 border-dashed shadow-e1 rounded-surface bg-white/90">
+                            <span class="flex items-center justify-center mx-auto size-14 rounded-surface bg-secondary-soft text-primary">
                                 <x-icons.code-fork class="size-7" />
                             </span>
-                            <h2 class="mt-4 text-lg font-semibold text-secondary-dark">@lang('general.no-org-chart-data')</h2>
-                            <p class="max-w-xs mx-auto mt-2.5 text-sm leading-relaxed text-secondary-light">@lang('general.no-org-chart-data-help')</p>
+                            <h2 class="mt-4 text-h4 font-semibold text-secondary-dark">@lang('general.no-org-chart-data')</h2>
+                            <p class="max-w-xs mx-auto mt-2 text-body leading-relaxed text-secondary-light">@lang('general.no-org-chart-data-help')</p>
                         </div>
                     </div>
                 @else
                     <div class="origin-top-left will-change-transform"
                          :style="transformStyle()">
-                        <div id="org-chart-export" class="flex min-w-max flex-col items-center {{ $compact ? 'px-8 py-8' : 'px-14 py-12' }}">
+                        <div id="org-chart-export" class="flex min-w-max flex-col items-center {{ $compact ? 'px-8 py-8' : 'px-16 py-12' }}">
                             {{-- Root (CEO) and their deputies/assistants share the first row. --}}
-                            <div class="relative flex items-end justify-center gap-4 pb-10">
+                            <div class="relative flex items-end justify-center gap-4 pb-12">
                                 @foreach($tree['root'] as $root)
                                     @forelse($root->activeContracts as $contract)
                                         <x-org-node :position="$root" :employee="$contract->employee" :is-manager="true" :manager-type="$manager_type" :compact="$compact"/>
@@ -410,7 +410,7 @@
                             @php($maxBranchGrade = (int) $topBranches->max(fn ($p) => $p->jobLevel?->grade ?? 0))
                             @php($topLeaves = $topManagers->filter(fn ($p) => $p->{$teamRel}->isEmpty() && ($p->jobLevel?->grade ?? 999) > $maxBranchGrade))
                             @php($rowManagers = $topManagers->reject(fn ($p) => $topLeaves->contains('id', $p->id)))
-                            @php($vLine = $isTech ? 'w-0 border-s border-dashed border-gray-400' : 'w-px bg-gray-300')
+                            @php($vLine = $isTech ? 'w-0 border-s border-dashed border-neutral-400' : 'w-px bg-neutral-300')
                             @php($rowGap = $compact ? 'gap-2' : 'gap-4')
 
                             @if($topManagers->isNotEmpty())
@@ -445,7 +445,7 @@
                                     @endif
                                 </div>
                             @else
-                                <div class="px-6 py-4 mt-8 text-sm leading-relaxed bg-white border border-gray-300 border-dashed rounded-2xl text-secondary-light">
+                                <div class="px-6 py-4 mt-8 text-body leading-relaxed bg-white border border-neutral-300 border-dashed rounded-surface text-secondary-light">
                                     @lang('general.no-data-filters')
                                 </div>
                             @endif
@@ -465,7 +465,7 @@
     <div x-cloak x-show="filtersOpen" class="fixed inset-0 z-40" x-transition.opacity>
         <div class="absolute inset-0 bg-secondary-dark/40 backdrop-blur-[1px]" x-on:click="filtersOpen = false"></div>
 
-        <div class="absolute inset-y-0 flex flex-col w-full max-w-sm bg-white shadow-2xl end-0"
+        <div class="absolute inset-y-0 flex flex-col w-full max-w-sm bg-white shadow-e3 end-0"
              x-show="filtersOpen"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="translate-x-full rtl:-translate-x-full"
@@ -474,22 +474,22 @@
              x-transition:leave-start="translate-x-0"
              x-transition:leave-end="translate-x-full rtl:-translate-x-full">
 
-            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-                <div class="flex items-center gap-2 text-sm font-semibold text-secondary-dark">
+            <div class="flex items-center justify-between px-4 py-4 border-b border-neutral-200">
+                <div class="flex items-center gap-2 text-body font-semibold text-secondary-dark">
                     <x-icons.cog class="size-4 text-primary" />
                     @lang('general.chart-filters')
                 </div>
                 <button type="button" x-on:click="filtersOpen = false"
-                        class="flex items-center justify-center transition rounded-lg size-8 text-secondary-light hover:bg-gray-100 hover:text-primary">
+                        class="flex items-center justify-center transition rounded-surface size-8 text-secondary-light hover:bg-neutral-100 hover:text-primary">
                     <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/>
                     </svg>
                 </button>
             </div>
 
-            <div class="flex-1 px-5 py-5 space-y-4 overflow-y-auto">
+            <div class="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
                 <label class="block space-y-1">
-                    <span class="text-xs font-semibold text-secondary-medium">{{ trans_choice('general.city', 1) }}</span>
+                    <span class="text-small font-semibold text-secondary-medium">{{ trans_choice('general.city', 1) }}</span>
                     <x-forms.select-input wire:model.live="city_id">
                         <option value="">@lang('general.all-cities')</option>
                         @foreach($cities as $city)
@@ -499,7 +499,7 @@
                 </label>
 
                 <label class="block space-y-1">
-                    <span class="text-xs font-semibold text-secondary-medium">{{ trans_choice('general.program', 1) }}</span>
+                    <span class="text-small font-semibold text-secondary-medium">{{ trans_choice('general.program', 1) }}</span>
                     <x-forms.select-input wire:model.live="program_id">
                         <option value="">@lang('general.all-programs')</option>
                         @foreach($programs as $program)
@@ -509,7 +509,7 @@
                 </label>
 
                 <label class="block space-y-1">
-                    <span class="text-xs font-semibold text-secondary-medium">{{ trans_choice('general.job-level', 1) }}</span>
+                    <span class="text-small font-semibold text-secondary-medium">{{ trans_choice('general.job-level', 1) }}</span>
                     <x-forms.select-input wire:model.live="job_level_id">
                         <option value="">@lang('general.all-job-levels')</option>
                         @foreach($jobLevels as $level)
@@ -519,7 +519,7 @@
                 </label>
 
                 <label class="block space-y-1">
-                    <span class="text-xs font-semibold text-secondary-medium">
+                    <span class="text-small font-semibold text-secondary-medium">
                         {{ $isTech ? __('general.tech-manager') : __('general.direct-manager') }}
                     </span>
                     <x-forms.select-input wire:model.live="focus_manager_id">
@@ -533,7 +533,7 @@
                 </label>
 
                 <label class="block space-y-1">
-                    <span class="text-xs font-semibold text-secondary-medium">{{ trans_choice('general.center', 1) }}</span>
+                    <span class="text-small font-semibold text-secondary-medium">{{ trans_choice('general.center', 1) }}</span>
                     <x-forms.select-input wire:model.live="center_id">
                         <option value="">@lang('general.all-centers')</option>
                         @foreach($centers as $center)
@@ -543,7 +543,7 @@
                 </label>
 
                 <label class="block space-y-1">
-                    <span class="text-xs font-semibold text-secondary-medium">{{ trans_choice('general.department', 1) }}</span>
+                    <span class="text-small font-semibold text-secondary-medium">{{ trans_choice('general.department', 1) }}</span>
                     <x-forms.select-input wire:model.live="department_id">
                         <option value="">@lang('general.all-departments')</option>
                         @foreach($departments as $department)
@@ -553,22 +553,22 @@
                 </label>
 
                 <label class="block space-y-1">
-                    <span class="text-xs font-semibold text-secondary-medium">@lang('general.reporting-line')</span>
+                    <span class="text-small font-semibold text-secondary-medium">@lang('general.reporting-line')</span>
                     <x-forms.select-input wire:model.live="manager_type">
                         <option value="direct">@lang('general.direct-manager')</option>
                         <option value="tech">@lang('general.tech-manager')</option>
                     </x-forms.select-input>
-                    <span class="block pt-1 text-[11px] leading-relaxed text-secondary-light">@lang('general.reporting-line-help')</span>
+                    <span class="block pt-1 text-caption leading-relaxed text-secondary-light">@lang('general.reporting-line-help')</span>
                 </label>
             </div>
 
-            <div class="flex items-center gap-2 px-5 py-4 border-t border-gray-200">
+            <div class="flex items-center gap-2 px-4 py-4 border-t border-neutral-200">
                 <button type="button" wire:click="resetFilters" x-on:click="filtersOpen = false"
-                        class="flex-1 rounded-xl border border-gray-200 px-3 py-2.5 text-xs font-semibold text-secondary-medium transition hover:bg-gray-50">
+                        class="flex-1 rounded-surface border border-neutral-200 px-3 py-2 text-small font-semibold text-secondary-medium transition hover:bg-neutral-50">
                     @lang('general.reset-filters')
                 </button>
                 <button type="button" x-on:click="filtersOpen = false"
-                        class="flex-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-semibold text-white transition hover:opacity-90">
+                        class="flex-1 rounded-surface bg-primary px-3 py-2 text-small font-semibold text-white transition hover:opacity-90">
                     @lang('general.apply')
                 </button>
             </div>

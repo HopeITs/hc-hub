@@ -44,7 +44,7 @@ use App\Enums\LeaveRequestStatus;
             @endforeach
         </div>
     @else
-        <div class="rounded-2xl shadow-md mb-6 text-center font-semibold text-secondary-medium p-4">
+        <div class="rounded-surface shadow-e2 mb-6 text-center font-semibold text-secondary-medium p-4">
             @lang('general.no-available-data')
         </div>
 
@@ -89,7 +89,7 @@ use App\Enums\LeaveRequestStatus;
         wire:model.defer="showModal"
         wire:ignore.self
         class="flex items-center justify-center px-2">
-        <div class="w-full max-h-[60vh] overflow-y-auto bg-white rounded-2xl px-6 py-4 md:px-10 md:py-6">
+        <div class="w-full max-h-[60vh] overflow-y-auto bg-white rounded-surface px-6 py-4 md:px-12 md:py-6">
             <form wire:submit.prevent="save" class="space-y-4">
                 <x-forms.errors-validation-list/>
                 <div class="grid md:grid-cols-2 gap-4">
@@ -99,7 +99,7 @@ use App\Enums\LeaveRequestStatus;
                         <x-forms.select2-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
                             @if($allAvailableLeaves?->count() > 0)
                                 <option
-                                    class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                                    class="text-secondary-light" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                                     @lang('general.select')
                                 </option>
                                 @foreach($allAvailableLeaves  as $availableLeave)
@@ -108,7 +108,7 @@ use App\Enums\LeaveRequestStatus;
                                 @endforeach
                             @else
                                 <option
-                                    class="text-gray-400" disabled>
+                                    class="text-secondary-light" disabled>
                                     @lang('general.no-available-data')
                                 </option>
                             @endif
@@ -119,7 +119,7 @@ use App\Enums\LeaveRequestStatus;
                         <x-forms.input-label for="alternative_employee">{{__('general.alternative-employee')}}</x-forms.input-label>
                         <x-forms.select2-input wire:model="form.alternative_employee" id="alternative_employee">
                             <option
-                                class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                                class="text-secondary-light" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
 
                                 @lang('general.select')
                             </option>

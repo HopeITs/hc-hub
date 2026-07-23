@@ -1,6 +1,6 @@
 @php($actions = $this->resolveActions()->filter(fn ($action): bool => ! $action->isStandalone()))
 
-<div class="px-2 py-0.5 text-black dark:text-white">
+<div class="px-2 py-1 text-black dark:text-white">
     <x-livewire-table::dropdown size="sm" label="{{ __('general.actions') }}">
         <x-slot name="icon">
             <!-- Icon "play" (outline) from https://heroicons.com -->
@@ -11,7 +11,7 @@
         <div class="flex flex-col">
             <div class="flex flex-col border-b border-neutral-200 dark:border-neutral-700 last:border-b-0">
                 <span
-                    class="px-3 py-2 font-bold text-xs uppercase border-b border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+                    class="px-3 py-2 font-bold text-small uppercase border-b border-neutral-200 bg-neutral-50 text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
                     @lang('Actions')
                 </span>
                 @foreach($actions as $action)

@@ -40,12 +40,12 @@
     <!-- suggestions -->
     <template x-if="showSuggestions && filtered.length">
         <ul
-            class="absolute top-full left-0 z-10 w-full bg-white border border-gray-300 mt-1 rounded-md shadow-md max-h-40 overflow-y-auto"
+            class="absolute top-full left-0 z-10 w-full bg-white border border-neutral-300 mt-1 rounded-control shadow-e2 max-h-40 overflow-y-auto"
         >
             <template x-for="(s, i) in filtered" :key="i">
                 <li
                     @mousedown.prevent="selectSuggestion(s)"
-                    class="px-3 py-1 cursor-pointer hover:bg-gray-100"
+                    class="px-3 py-1 cursor-pointer hover:bg-neutral-100"
                     x-text="s.label"
                 ></li>
             </template>
@@ -55,7 +55,7 @@
     <!-- current tags -->
     <template x-for="(tag, i) in tags" :key="i">
         <span
-            class="inline-flex mt-2 items-center shadow-md gap-1 text-secondary-dark rounded-full bg-gray-100 px-2 py-1 text-sm"
+            class="inline-flex mt-2 items-center shadow-e2 gap-1 text-secondary-dark rounded-full bg-neutral-100 px-2 py-1 text-body"
         >
             <span x-text="displayLabel(tag)"></span>
             <button type="button" @click="remove(i)" class=" hover:text-primary">×</button>

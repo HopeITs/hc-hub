@@ -1,6 +1,6 @@
 <svg {{
     $attributes->merge([
-        'class' => 'size-4 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'
+        'class' => 'size-4 text-secondary-medium transition duration-75 dark:text-secondary-light group-hover:text-neutral-900 dark:group-hover:text-white'
     ])
 }}
      aria-hidden="true"

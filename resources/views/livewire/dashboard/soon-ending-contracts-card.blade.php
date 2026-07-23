@@ -3,19 +3,19 @@
     $titleField = 'title_' . $locale;
 @endphp
 
-<div class="relative w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
+<div class="relative w-full h-full bg-white rounded-surface shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
 
     <!-- Header (IDENTICAL to No Leaves) -->
     <div class="flex items-center gap-2 px-6 pt-6 pb-4">
-        <h2 class="text-[18px] font-semibold text-secondary-medium">
+        <h2 class="text-h4 font-semibold text-secondary-medium">
             @lang('general.soon-ending-contracts')
         </h2>
 
-        <span class="text-secondary-light sm:text-[20px] md:text-sm font-medium">
+        <span class="text-secondary-light sm:text-h4 md:text-body font-medium">
             {{ $contracts->count() }}
         </span>
 
-        <x-icons.contracts class="mb-0.5 ms-1 text-primary"/>
+        <x-icons.contracts class="mb-1 ms-1 text-primary"/>
     </div>
 
     <!-- Scrollable Content (IDENTICAL to No Leaves) -->
@@ -32,7 +32,7 @@
                 <div class="flex items-center gap-3">
 
                     <div class="flex items-center justify-center h-11 w-11 flex-shrink-0 rounded-full overflow-hidden
-                                bg-[var(--color-primary)] text-white font-semibold uppercase shadow-sm">
+                                bg-[var(--color-primary)] text-white font-semibold uppercase shadow-e1">
 
                         <img
                             src="{{ $contract->employee->getFirstMediaUrl('avatar') }}"
@@ -43,11 +43,11 @@
 
 
                     <div class="min-w-0">
-                        <p class="text-sm font-semibold text-[var(--color-neutral-800)] truncate">
+                        <p class="text-body font-semibold text-[var(--color-neutral-800)] truncate">
                             {{ $contract->employee_name }}
                         </p>
 
-                        <p class="text-xs text-[var(--color-neutral-500)] truncate">
+                        <p class="text-small text-[var(--color-neutral-500)] truncate">
                             {{ $contract->position->$titleField }}
                         </p>
                     </div>
@@ -55,14 +55,14 @@
 
                 <!-- RIGHT: End Date (only difference) -->
                 <div class="flex flex-col items-end">
-                    <p class="text-sm font-semibold text-primary whitespace-nowrap">
+                    <p class="text-body font-semibold text-primary whitespace-nowrap">
                         {{ \Carbon\Carbon::parse($contract->end_date)->format('d/m/Y') }}
                     </p>
                 </div>
 
             </div>
         @empty
-            <div class="text-center p-4 text-sm text-[var(--color-neutral-500)]">
+            <div class="text-center p-4 text-body text-[var(--color-neutral-500)]">
                 @lang('general.no_active_contracts_ending_soon')
             </div>
         @endforelse

@@ -5,8 +5,8 @@
     <input {{$attributes->merge([
     'id' => $id,
     'type' => 'radio',
-    'class' => 'size-4 rounded-sm text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500  focus:ring-2 '
+    'class' => 'size-4 rounded-inset text-red-600 bg-neutral-100 border-neutral-300 focus:ring-red-500  focus:ring-2 '
 ])}}
     >
-    <label for="{{$id}}" class="ms-2 text-sm font-medium text-secondary-medium ">{{$slot}}</label>
+    <label for="{{$id}}" class="ms-2 text-body font-medium text-secondary-medium ">{{$slot}}</label>
 </div>

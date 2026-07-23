@@ -14,7 +14,7 @@
             {{ __('Resend verification email') }}
         </flux:button>
 
-        <flux:link class="text-sm cursor-pointer" wire:click="logout">
+        <flux:link class="text-body cursor-pointer" wire:click="logout">
             {{ __('Log out') }}
         </flux:link>
     </div>

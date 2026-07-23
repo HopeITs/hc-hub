@@ -29,8 +29,8 @@
 <livewire:layout.sidebar/>
 
 
-<div class="flex flex-col min-h-screen transition-[margin] duration-300 md:ms-60"
-     :class="sidebarCollapsed ? 'md:!ms-20' : 'md:!ms-60'">
+<div class="flex flex-col min-h-screen transition-[margin] duration-[400ms] ease-fluid md:ms-60"
+     :class="sidebarCollapsed ? 'md:!ms-24' : 'md:!ms-60'">
 
 
 

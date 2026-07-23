@@ -1,5 +1,5 @@
 <div>
-    <div class="space-y-10">
+    <div class="space-y-12">
         <div class="flex items-center justify-between mb-6">
             <livewire:layout.breadcrumbs
                 :title="__('general.programs-management')"
@@ -7,7 +7,7 @@
             />
             @activerole('HR' , 'super-admin' ,'general-manager')
             <a href="{{ route('programs.create') }}"
-               class="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium shadow transition">
+               class="px-4 py-2 rounded-surface bg-primary text-white text-body font-medium shadow transition">
                 @lang('general.add-new')
             </a>
             @endactiverole
@@ -15,15 +15,15 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach ($items as $program)
-                <div class="rounded-3xl bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border border-gray-200 hover:shadow-md transition flex flex-col h-full">
+                <div class="rounded-surface bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border border-neutral-200 hover:shadow-e2 transition flex flex-col h-full">
 
                     <!-- Smaller Header Section -->
-                    <div class="p-4 border-b border-gray-100 flex-shrink-0">
+                    <div class="p-4 border-b border-neutral-100 flex-shrink-0">
                         <div class="flex items-center justify-between gap-3">
                             <!-- Program name with vertical centering -->
                             <div class="flex-1 min-w-0 flex items-center">
                                 <div class="overflow-hidden">
-                                    <h2 class="font-bold text-secondary-dark text-[18px] leading-snug line-clamp-2">
+                                    <h2 class="font-bold text-secondary-dark text-h4 leading-snug line-clamp-2">
                                         @php
                                             // Display slug instead of full name for specific long program names
                                             $displayName = $program->name;
@@ -43,10 +43,10 @@
 
                             <!-- Actions with vertical centering - Checkbox moved to last -->
                             @activerole('HR','super-admin','general-manager')
-                            <div class="flex items-center gap-0.5">
+                            <div class="flex items-center gap-1">
                                 <a href="{{ route('programs.show', $program->slug) }}"
-                                   class="p-1 text-secondary-medium hover:text-primary hover:bg-gray-50
-                                          rounded-lg transition"
+                                   class="p-1 text-secondary-medium hover:text-primary hover:bg-neutral-50
+                                          rounded-surface transition"
                                    title="@lang('general.view')">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                          stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -59,8 +59,8 @@
                                 </a>
 
                                 <a href="{{ route('programs.edit', $program->slug) }}"
-                                   class="p-1 text-secondary-medium hover:text-primary hover:bg-gray-50
-                                          rounded-lg transition"
+                                   class="p-1 text-secondary-medium hover:text-primary hover:bg-neutral-50
+                                          rounded-surface transition"
                                    title="@lang('general.edit')">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                          stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -83,35 +83,35 @@
                     </div>
 
                     <!-- Content Section -->
-                    <div class="px-5 pt-3 pb-5 grid grid-cols-1 gap-2.5 flex-grow">
+                    <div class="px-4 pt-3 pb-4 grid grid-cols-1 gap-2 flex-grow">
                         <!-- Program Manager -->
-                        <div class="flex items-center p-2.5 rounded-lg border border-gray-100 bg-gray-100 min-h-[3.5rem]">
-                            <x-icons.user class="size-3.5 text-gray-400 flex-shrink-0 me-2.5"/>
-                            <div class="flex flex-col gap-0.5 min-w-0">
-                                <span class="text-gray-500 text-xs">{{ __('general.program-manager') }}</span>
-                                <span class="font-semibold text-secondary-dark text-sm truncate">
+                        <div class="flex items-center p-2 rounded-surface border border-neutral-100 bg-neutral-100 min-h-[3.5rem]">
+                            <x-icons.user class="size-3.5 text-secondary-light flex-shrink-0 me-2"/>
+                            <div class="flex flex-col gap-1 min-w-0">
+                                <span class="text-secondary-medium text-small">{{ __('general.program-manager') }}</span>
+                                <span class="font-semibold text-secondary-dark text-body truncate">
                                     {{ $program->program_manager_name ?? '-' }}
                                 </span>
                             </div>
                         </div>
 
                         <!-- Cities & Employees -->
-                        <div class="grid grid-cols-2 gap-2.5">
-                            <div class="flex items-center p-2.5 rounded-lg border border-gray-100 bg-gray-100 min-h-[3.5rem]">
-                                <x-icons.map-pin class="size-3.5 text-gray-400 flex-shrink-0 me-2.5"/>
-                                <div class="flex flex-col gap-0.5">
-                                    <span class="text-gray-500 text-xs">{{ trans_choice('general.city', 2) }}</span>
-                                    <span class="font-semibold text-gray-800 text-base">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex items-center p-2 rounded-surface border border-neutral-100 bg-neutral-100 min-h-[3.5rem]">
+                                <x-icons.map-pin class="size-3.5 text-secondary-light flex-shrink-0 me-2"/>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-secondary-medium text-small">{{ trans_choice('general.city', 2) }}</span>
+                                    <span class="font-semibold text-neutral-800 text-body">
                                         {{ $program->cities_count }}
                                     </span>
                                 </div>
                             </div>
 
-                            <div class="flex items-center p-2.5 rounded-lg border border-gray-100 bg-gray-100 min-h-[3.5rem]">
-                                <x-icons.users class="size-3.5 text-gray-400 flex-shrink-0 me-2.5"/>
-                                <div class="flex flex-col gap-0.5">
-                                    <span class="text-gray-500 text-xs">{{ trans_choice('general.employee', 2) }}</span>
-                                    <span class="font-semibold text-gray-800 text-base">
+                            <div class="flex items-center p-2 rounded-surface border border-neutral-100 bg-neutral-100 min-h-[3.5rem]">
+                                <x-icons.users class="size-3.5 text-secondary-light flex-shrink-0 me-2"/>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-secondary-medium text-small">{{ trans_choice('general.employee', 2) }}</span>
+                                    <span class="font-semibold text-neutral-800 text-body">
                                         {{ $program->contracts_count }}
                                     </span>
                                 </div>
@@ -119,22 +119,22 @@
                         </div>
 
                         <!-- Dates -->
-                        <div class="grid grid-cols-2 gap-2.5">
-                            <div class="flex items-center p-2.5 rounded-lg border border-gray-100 bg-gray-100 min-h-[3.5rem]">
-                                <x-icons.calendar class="size-3.5 text-gray-400 flex-shrink-0 me-2.5"/>
-                                <div class="flex flex-col gap-0.5 min-w-0">
-                                    <span class="text-gray-500 text-xs">{{ __('general.start-date') }}</span>
-                                    <span class="font-semibold text-gray-800 text-sm truncate">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex items-center p-2 rounded-surface border border-neutral-100 bg-neutral-100 min-h-[3.5rem]">
+                                <x-icons.calendar class="size-3.5 text-secondary-light flex-shrink-0 me-2"/>
+                                <div class="flex flex-col gap-1 min-w-0">
+                                    <span class="text-secondary-medium text-small">{{ __('general.start-date') }}</span>
+                                    <span class="font-semibold text-neutral-800 text-body truncate">
                                         {{ $program->start_date?->format('M, Y') ?? '-' }}
                                     </span>
                                 </div>
                             </div>
 
-                            <div class="flex items-center p-2.5 rounded-lg border border-gray-100 bg-gray-100 min-h-[3.5rem]">
-                                <x-icons.calendar class="size-3.5 text-gray-400 flex-shrink-0 me-2.5"/>
-                                <div class="flex flex-col gap-0.5 min-w-0">
-                                    <span class="text-gray-500 text-xs">{{ __('general.end-date') }}</span>
-                                    <span class="font-semibold text-gray-800 text-sm truncate">
+                            <div class="flex items-center p-2 rounded-surface border border-neutral-100 bg-neutral-100 min-h-[3.5rem]">
+                                <x-icons.calendar class="size-3.5 text-secondary-light flex-shrink-0 me-2"/>
+                                <div class="flex flex-col gap-1 min-w-0">
+                                    <span class="text-secondary-medium text-small">{{ __('general.end-date') }}</span>
+                                    <span class="font-semibold text-neutral-800 text-body truncate">
                                         {{ $program->end_date ? $program->end_date?->format('M, Y') : __('general.active') }}
                                     </span>
                                 </div>
@@ -149,8 +149,8 @@
         @if ($items->count() >= $perPage)
             <div class="text-center pt-4">
                 <button wire:click="loadMore"
-                        class="px-4 py-1.5 rounded-lg bg-white border border-secondary-light
-                           text-secondary-dark text-sm hover:text-primary hover:border-primary cursor-pointer transition ease-in duration-75">
+                        class="px-4 py-2 rounded-surface bg-white border border-secondary-light
+                           text-secondary-dark text-body hover:text-primary hover:border-primary cursor-pointer transition ease-in duration-75">
                     @lang('general.show-more')
                 </button>
             </div>

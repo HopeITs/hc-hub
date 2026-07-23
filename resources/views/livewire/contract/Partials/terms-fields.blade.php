@@ -40,9 +40,9 @@
                 type="number" min="0"
                 wire:model.defer="form.weekly_hours"
                 placeholder="40"
-                class="pe-14"
+                class="pe-16"
             />
-            <span class="absolute inset-y-0 flex items-center text-xs text-gray-500 pointer-events-none end-3">
+            <span class="absolute inset-y-0 flex items-center text-small text-secondary-medium pointer-events-none end-3">
                 {{ $locale === 'ar' ? 'س/أسبوع' : 'h/week' }}
             </span>
         </div>

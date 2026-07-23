@@ -3,7 +3,7 @@
         <livewire:layout.breadcrumbs :title="__('general.all-badges')" :crumbs="[['label' => __('general.all-badges')]]" :showButton="false" />
     </div>
 
-    <div class="rounded-xl border border-gray-200 bg-white/60 backdrop-blur p-3 dark:border-gray-700 dark:bg-gray-800/60">
+    <div class="rounded-surface border border-neutral-200 bg-white/60 backdrop-blur p-3 dark:border-neutral-700 dark:bg-neutral-800/60">
         <livewire:badges.badges-table />
     </div>
 
@@ -17,12 +17,12 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.employee')</x-forms.input-label>
-                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ $badge['employee'] ?? '—' }}</div>
+                    <div class="font-medium text-neutral-900 dark:text-neutral-100">{{ $badge['employee'] ?? '—' }}</div>
                 </div>
                 <div>
                     <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.type')</x-forms.input-label>
                     <div class="inline-flex items-center gap-2">
-                        <span class="rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ring-gray-300 dark:ring-gray-600">
+                        <span class="rounded-full px-2 py-1 text-small font-semibold ring-1 ring-inset ring-neutral-300 dark:ring-neutral-600">
                             {{ $badge['type'] ?? '—' }}
                         </span>
                     </div>
@@ -43,7 +43,7 @@
 
             <div>
                 <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.reason')</x-forms.input-label>
-                <div class="whitespace-pre-line rounded-md border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900/30">
+                <div class="whitespace-pre-line rounded-control border border-neutral-200 bg-neutral-50 p-3 text-body dark:border-neutral-700 dark:bg-neutral-900/30">
                     {{ $badge['reason'] ?? '—' }}
                 </div>
             </div>
@@ -79,7 +79,7 @@
 
             <div>
                 <x-forms.input-label required class="text-red-600 dark:text-red-400">@lang('general.notes')</x-forms.input-label>
-                <div class="whitespace-pre-line rounded-md border border-gray-200 bg-gray-50 p-3 text-sm dark:border-gray-700 dark:bg-gray-900/30">
+                <div class="whitespace-pre-line rounded-control border border-neutral-200 bg-neutral-50 p-3 text-body dark:border-neutral-700 dark:bg-neutral-900/30">
                     {{ $badge['notes'] ?? '—' }}
                 </div>
             </div>

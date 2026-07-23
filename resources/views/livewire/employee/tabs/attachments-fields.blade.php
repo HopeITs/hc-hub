@@ -19,7 +19,7 @@
                     <x-forms.input type="text"
                         wire:model.defer="attachmentForm.attachments.{{ $index }}.name" />
                     @error("attachmentForm.attachments.{$index}.name")
-                        <span class="text-sm text-red-500">{{ $message }}</span>
+                        <x-error-span>{{ $message }}</x-error-span>
                     @enderror
                 </div>
 
@@ -33,7 +33,7 @@
                         @endforeach
                     </x-forms.select2-input>
                     @error("attachmentForm.attachments.{$index}.category")
-                        <span class="text-sm text-red-500">{{ $message }}</span>
+                        <x-error-span>{{ $message }}</x-error-span>
                     @enderror
                 </div>
 
@@ -42,7 +42,7 @@
                     <x-forms.file-input wire:model="attachmentForm.attachments.{{ $index }}.file"
                         preview-type="pdf" :old-file="$attachment['old_file_url'] ?? null" :file-name="$attachment['file_name'] ?? null" accept=".pdf, .jpg, .jpeg, .png" />
                     @error("attachmentForm.attachments.{$index}.file")
-                        <span class="text-sm text-red-500">{{ $message }}</span>
+                        <x-error-span>{{ $message }}</x-error-span>
                     @enderror
                 </div>
 

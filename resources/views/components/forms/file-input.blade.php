@@ -39,20 +39,20 @@
     @if ($previewType === 'image')
         <div class="shrink-0">
             @if ($tempUrl)
-                <img class="w-28 rounded-md object-cover" src="{{ $tempUrl }}" alt="New photo"/>
+                <img class="w-28 rounded-control object-cover" src="{{ $tempUrl }}" alt="New photo"/>
             @elseif ($oldFile && ! $tempUrl)
                 @if (is_string($oldFile))
-                    <img class="w-28 rounded-md object-cover" src="{{ $oldFile }}" alt="Current photo"/>
+                    <img class="w-28 rounded-control object-cover" src="{{ $oldFile }}" alt="Current photo"/>
                 @else
-                    <div class="w-24 rounded-md bg-gray-200 flex flex-col items-center justify-center">
+                    <div class="w-24 rounded-control bg-neutral-200 flex flex-col items-center justify-center">
                         <x-icons.image class="size-12"/>
-                        <span class="text-xs text-secondary-medium">NO IMAGE</span>
+                        <span class="text-small text-secondary-medium">NO IMAGE</span>
                     </div>
                 @endif
             @else
-                <div class="w-24 rounded-md bg-gray-200 flex flex-col items-center justify-center">
+                <div class="w-24 rounded-control bg-neutral-200 flex flex-col items-center justify-center">
                     <x-icons.image class="size-12"/>
-                    <span class="text-xs text-secondary-medium">NO IMAGE</span>
+                    <span class="text-small text-secondary-medium">NO IMAGE</span>
                 </div>
             @endif
         </div>
@@ -61,25 +61,25 @@
     @if ($previewType === 'pdf')
         <div class="shrink-0">
             @if ($tempUrl)
-                <a href="{{ $tempUrl }}" target="_blank" class="w-24 rounded-md bg-gray-200 flex flex-col items-center justify-center">
+                <a href="{{ $tempUrl }}" target="_blank" class="w-24 rounded-control bg-neutral-200 flex flex-col items-center justify-center">
                     <x-icons.pdf-file />
                 </a>
-                <span class="text-xs text-secondary-medium text-center mt-2 w-24">
+                <span class="text-small text-secondary-medium text-center mt-2 w-24">
                     {{ $oldFile instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile ? ($oldFile->getClientOriginalName() ?? 'FILE') : ($fileName ?? 'FILE') }}
                 </span>
             @elseif ($oldFile && is_string($oldFile))
                 <a href="{{ $oldFile }}" target="_blank" class="flex flex-col justify-center">
-                    <div class="w-24 rounded-md bg-gray-200 flex flex-col items-center justify-center">
+                    <div class="w-24 rounded-control bg-neutral-200 flex flex-col items-center justify-center">
                         <x-icons.pdf-file />
                     </div>
-                    <span class="text-xs text-secondary-medium text-center mt-2 w-24">
+                    <span class="text-small text-secondary-medium text-center mt-2 w-24">
                         {{ $fileName ?? 'NO FILE' }}
                     </span>
                 </a>
             @else
-                <div class="w-24 rounded-md bg-gray-200 flex flex-col items-center justify-center">
+                <div class="w-24 rounded-control bg-neutral-200 flex flex-col items-center justify-center">
                     <x-icons.pdf-file />
-                    <span class="text-xs text-secondary-medium">NO FILE</span>
+                    <span class="text-small text-secondary-medium">NO FILE</span>
                 </div>
             @endif
         </div>
@@ -87,7 +87,7 @@
 
     <div>
         <input {{ $attributes->merge([
-            'class' => 'block w-full text-sm text-slate-500 px-4 file:me-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-secondary-light file:text-white hover:file:bg-secondary-medium',
+            'class' => 'block w-full text-body text-slate-500 px-4 file:me-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-body file:font-semibold file:bg-secondary-light file:text-white hover:file:bg-secondary-medium',
             'type' => 'file',
             'value' => $fileName
         ]) }}/>

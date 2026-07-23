@@ -1,4 +1,4 @@
-@props(['positions', 'managerType' => 'direct', 'compact' => false, 'vLine' => 'w-px bg-gray-300', 'gap' => 'gap-4', 'wide' => false])
+@props(['positions', 'managerType' => 'direct', 'compact' => false, 'vLine' => 'w-px bg-neutral-300', 'gap' => 'gap-4', 'wide' => false])
 
 @php
     $leafRows = collect($positions)
@@ -8,10 +8,10 @@
     $poolMax = $wide ? 'max-w-full' : ($compact ? 'max-w-[36rem]' : 'max-w-[44rem]');
 @endphp
 
-<div class="relative flex w-full flex-col items-center {{ $compact ? 'pt-4' : 'pt-5' }}">
+<div class="relative flex w-full flex-col items-center {{ $compact ? 'pt-4' : 'pt-4' }}">
     <span class="absolute start-1/2 top-0 {{ $compact ? 'h-4' : 'h-5' }} {{ $vLine }}"></span>
 
-    <div class="flex w-full flex-col items-center {{ $gap }} {{ $poolMax }} rounded-2xl border border-gray-100 bg-gray-50/40 {{ $compact ? 'p-2' : 'p-3' }}">
+    <div class="flex w-full flex-col items-center {{ $gap }} {{ $poolMax }} rounded-surface border border-neutral-100 bg-neutral-50/40 {{ $compact ? 'p-2' : 'p-3' }}">
         @foreach($leafRows as $grade => $gradePositions)
             <div class="flex w-full flex-wrap content-start justify-center {{ $gap }}">
                 @foreach($gradePositions as $position)

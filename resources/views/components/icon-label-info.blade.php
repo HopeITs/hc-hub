@@ -3,6 +3,6 @@
     'class' => 'flex items-center'
 ])}}>
     {{$slot}}
-    <span class="font-bold me-1 text-sm 2xl:text-base">{{ $label. ': ' }}</span>
-    <span class=" text-sm  2xl:text-base">  {{$info}} </span>
+    <span class="font-bold me-1 text-body 2xl:text-body">{{ $label. ': ' }}</span>
+    <span class=" text-body  2xl:text-body">  {{$info}} </span>
 </div>

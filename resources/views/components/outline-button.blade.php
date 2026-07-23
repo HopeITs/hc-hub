@@ -1,6 +1,6 @@
 <button wire:loading.attr="disabled"
     {{$attributes->merge([
-    'class' => 'text-primary hover:text-white border border-primary hover:bg-primary focus:ring-4 focus:outline-none focus:ring-primary font-medium rounded-md text-sm px-5 py-2.5 text-center me-2 mb-2 shadow-sm transition duration-150 ease-in-out'
+    'class' => 'text-primary hover:text-white border border-primary hover:bg-primary focus:ring-4 focus:outline-none focus:ring-primary font-medium rounded-control text-body px-4 py-2 text-center me-2 mb-2 shadow-e1 transition duration-150 ease-in-out'
 ])}}>
     <div role="status" class="me-2" wire:loading>
         <svg aria-hidden="true" class="inline size-4 text-white-200 animate-spin  fill-white" viewBox="0 0 100 101"

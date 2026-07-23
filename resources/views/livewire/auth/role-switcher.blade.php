@@ -52,9 +52,9 @@
                 <button
                     type="button"
                     wire:click="switchTo('{{ $role }}')"
-                    class="group w-full rounded-xl border-2 border-gray-200 p-3 text-sm font-medium
+                    class="group w-full rounded-surface border-2 border-neutral-200 p-3 text-body font-medium
                            hover:border-secondary-medium hover:bg-secondary-soft transition flex items-center gap-3">
-                    <span class="inline-grid place-items-center size-6 rounded-md border border-gray-300 bg-white">
+                    <span class="inline-grid place-items-center size-6 rounded-control border border-neutral-300 bg-white">
                         {!! $iconFor($role) !!}
                     </span>
 
@@ -68,7 +68,7 @@
             </div>
         @endforeach
     @else
-        <div class="text-xs text-gray-500">{{ __('No other roles available.') }}</div>
+        <div class="text-small text-secondary-medium">{{ __('No other roles available.') }}</div>
     @endif
 </div>
 

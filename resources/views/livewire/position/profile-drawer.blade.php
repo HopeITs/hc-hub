@@ -20,7 +20,7 @@
          wire:click="close"></div>
 
     {{-- Panel: right drawer on desktop, bottom sheet on mobile --}}
-    <div class="absolute inset-x-0 bottom-0 flex max-h-[92dvh] min-h-0 flex-col rounded-t-3xl bg-white shadow-2xl
+    <div class="absolute inset-x-0 bottom-0 flex max-h-[92dvh] min-h-0 flex-col rounded-t-3xl bg-white shadow-e3
                 sm:inset-y-0 sm:end-0 sm:start-auto sm:h-dvh sm:max-h-none sm:w-[28rem] sm:rounded-none"
          x-show="show"
          x-on:wheel.stop
@@ -34,10 +34,10 @@
 
         @if($employee)
             {{-- Header --}}
-            <div class="relative px-6 pt-6 pb-5 overflow-hidden text-white shrink-0 bg-gradient-to-b from-secondary-dark to-secondary-light">
+            <div class="relative px-6 pt-6 pb-4 overflow-hidden text-white shrink-0 bg-gradient-to-b from-secondary-dark to-secondary-light">
 
                 <button type="button" wire:click="close"
-                        class="absolute z-20 flex items-center justify-center transition rounded-lg end-4 top-4 size-8 text-white/80 hover:bg-white/10 hover:text-white">
+                        class="absolute z-20 flex items-center justify-center transition rounded-surface end-4 top-4 size-8 text-white/80 hover:bg-white/10 hover:text-white">
                     <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>
                     </svg>
@@ -45,13 +45,13 @@
 
                 <div class="relative flex flex-col items-center text-center">
                     <img src="{{ $employee->getFirstMediaUrl('avatar') }}" alt="{{ $employee->name }}"
-                         class="object-cover rounded-full shadow-lg size-20 ring-4 ring-white/30 sm:size-24">
-                    <h2 class="mt-3 text-lg font-extrabold tracking-tight">{{ $employee->name }}</h2>
+                         class="object-cover rounded-full shadow-e3 size-20 ring-4 ring-white/30 sm:size-24">
+                    <h2 class="mt-3 text-h4 font-extrabold tracking-tight">{{ $employee->name }}</h2>
                     @if($position)
-                        <p class="mt-0.5 text-sm font-semibold text-white/80">{{ $position->title }}</p>
+                        <p class="mt-1 text-body font-semibold text-white/80">{{ $position->title }}</p>
                     @endif
                     @if($employee->is_board_member)
-                        <span class="mt-2 rounded-full bg-primary px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide">
+                        <span class="mt-2 rounded-full bg-primary px-3 py-1 text-caption font-bold uppercase tracking-wide">
                             @lang('general.board-member')
                         </span>
                     @endif
@@ -59,8 +59,8 @@
             </div>
 
             {{-- Body --}}
-            <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-smooth px-5 py-5 [scrollbar-gutter:stable] sm:px-6">
-                <div class="pb-4 space-y-5">
+            <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-smooth px-4 py-4 [scrollbar-gutter:stable] sm:px-6">
+                <div class="pb-4 space-y-4">
                 {{-- Org placement --}}
                 @if($position)
                     <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -70,9 +70,9 @@
                             ['label' => trans_choice('general.center', 1), 'value' => $position->center?->name],
                             ['label' => trans_choice('general.city', 1), 'value' => $position->city?->name ?? $employee->city?->name],
                         ] as $item)
-                            <div class="px-3 py-2 border border-gray-100 rounded-xl bg-secondary-soft/5">
-                                <div class="text-xs font-bold uppercase tracking-wide text-secondary-light">{{ $item['label'] }}</div>
-                                <div class="mt-0.5 truncate text-sm font-semibold text-secondary-dark">{{ $item['value'] ?? __('general.not-specified') }}</div>
+                            <div class="px-3 py-2 border border-neutral-100 rounded-surface bg-secondary-soft/5">
+                                <div class="text-small font-bold uppercase tracking-wide text-secondary-light">{{ $item['label'] }}</div>
+                                <div class="mt-1 truncate text-body font-semibold text-secondary-dark">{{ $item['value'] ?? __('general.not-specified') }}</div>
                             </div>
                         @endforeach
                     </div>
@@ -86,12 +86,12 @@
                 ])->filter(fn ($c) => filled($c['value'])))
                 @if($contacts->isNotEmpty())
                     <div>
-                        <h3 class="mb-2 text-xs font-bold tracking-wide uppercase text-secondary-light">@lang('general.contact')</h3>
-                        <div class="space-y-1.5">
+                        <h3 class="mb-2 text-small font-bold tracking-wide uppercase text-secondary-light">@lang('general.contact')</h3>
+                        <div class="space-y-2">
                             @foreach($contacts as $contact)
                                 <a href="{{ $contact['href'].$contact['value'] }}"
-                                   class="flex items-center gap-2.5 rounded-xl border border-gray-100 px-3 py-2 text-sm font-medium text-secondary-dark transition hover:border-secondary-light hover:bg-secondary-soft">
-                                    <span class="flex items-center justify-center rounded-lg size-7 shrink-0 bg-secondary-soft/10 text-primary">
+                                   class="flex items-center gap-2 rounded-surface border border-neutral-100 px-3 py-2 text-body font-medium text-secondary-dark transition hover:border-secondary-light hover:bg-secondary-soft">
+                                    <span class="flex items-center justify-center rounded-surface size-7 shrink-0 bg-secondary-soft/10 text-primary">
                                         @if($contact['icon'] === 'mail')
                                             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
                                         @elseif($contact['icon'] === 'mobile')
@@ -110,13 +110,13 @@
                 {{-- Manager --}}
                 @if($managerEmployee)
                     <div>
-                        <h3 class="mb-2 text-xs font-bold tracking-wide uppercase text-secondary-light">@lang('general.direct-manager')</h3>
+                        <h3 class="mb-2 text-small font-bold tracking-wide uppercase text-secondary-light">@lang('general.direct-manager')</h3>
                         <button type="button" wire:click="$dispatch('open-profile', { employeeId: {{ $managerEmployee->id }} })"
-                                class="flex items-center w-full gap-3 px-3 py-2 transition border border-gray-100 rounded-xl text-start hover:border-secondary-light hover:bg-secondary-soft">
+                                class="flex items-center w-full gap-3 px-3 py-2 transition border border-neutral-100 rounded-surface text-start hover:border-secondary-light hover:bg-secondary-soft">
                             <img src="{{ $managerEmployee->getFirstMediaUrl('avatar') }}" alt="" class="object-cover rounded-full size-9">
                             <div class="min-w-0">
-                                <div class="text-sm font-bold truncate text-secondary-dark">{{ $managerEmployee->name }}</div>
-                                <div class="text-xs truncate text-secondary-light">{{ $manager->title }}</div>
+                                <div class="text-body font-bold truncate text-secondary-dark">{{ $managerEmployee->name }}</div>
+                                <div class="text-small truncate text-secondary-light">{{ $manager->title }}</div>
                             </div>
                         </button>
                     </div>
@@ -125,28 +125,28 @@
                 {{-- Direct reports --}}
                 @if($reports->isNotEmpty())
                     <div>
-                        <h3 class="flex items-center gap-2 mb-2 text-xs font-bold tracking-wide uppercase text-secondary-light">
+                        <h3 class="flex items-center gap-2 mb-2 text-small font-bold tracking-wide uppercase text-secondary-light">
                             @lang('general.direct-reports')
-                            <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-bold text-secondary-medium">{{ $reports->count() }}</span>
+                            <span class="rounded-full bg-neutral-100 px-2 py-1 text-caption font-bold text-secondary-medium">{{ $reports->count() }}</span>
                         </h3>
-                        <div class="space-y-1.5">
+                        <div class="space-y-2">
                             @foreach($reports as $report)
                                 @php($rEmployee = $report->activeContracts->first()?->employee)
                                 @if($rEmployee)
                                     <button type="button" wire:click="$dispatch('open-profile', { employeeId: {{ $rEmployee->id }} })"
-                                            class="flex items-center w-full gap-3 px-3 py-2 transition border border-gray-100 rounded-xl text-start hover:border-secondary-light hover:bg-secondary-soft">
+                                            class="flex items-center w-full gap-3 px-3 py-2 transition border border-neutral-100 rounded-surface text-start hover:border-secondary-light hover:bg-secondary-soft">
                                         <img src="{{ $rEmployee->getFirstMediaUrl('avatar') }}" alt="" class="object-cover rounded-full size-9">
                                         <div class="min-w-0">
-                                            <div class="text-sm font-bold truncate text-secondary-dark">{{ $rEmployee->name }}</div>
-                                            <div class="text-xs truncate text-secondary-light">{{ $report->title }}</div>
+                                            <div class="text-body font-bold truncate text-secondary-dark">{{ $rEmployee->name }}</div>
+                                            <div class="text-small truncate text-secondary-light">{{ $report->title }}</div>
                                         </div>
                                     </button>
                                 @else
-                                    <div class="flex items-center gap-3 px-3 py-2 border border-gray-200 border-dashed rounded-xl text-secondary-light">
-                                        <span class="flex items-center justify-center border border-gray-300 border-dashed rounded-full size-9"><x-icons.user class="size-4"/></span>
+                                    <div class="flex items-center gap-3 px-3 py-2 border border-neutral-200 border-dashed rounded-surface text-secondary-light">
+                                        <span class="flex items-center justify-center border border-neutral-300 border-dashed rounded-full size-9"><x-icons.user class="size-4"/></span>
                                         <div class="min-w-0">
-                                            <div class="text-sm font-semibold truncate">@lang('general.vacant-position')</div>
-                                            <div class="text-xs truncate">{{ $report->title }}</div>
+                                            <div class="text-body font-semibold truncate">@lang('general.vacant-position')</div>
+                                            <div class="text-small truncate">{{ $report->title }}</div>
                                         </div>
                                     </div>
                                 @endif
@@ -160,9 +160,9 @@
 
             {{-- Footer action stays visible while the details scroll. --}}
             @if(filled($employee->username))
-                <div class="shrink-0 border-t border-gray-100 bg-white/95 px-5 py-4 shadow-[0_-12px_24px_-18px_rgba(15,23,42,0.45)] backdrop-blur sm:px-6">
+                <div class="shrink-0 border-t border-neutral-100 bg-white/95 px-4 py-4 shadow-[0_-12px_24px_-18px_rgba(15,23,42,0.45)] backdrop-blur sm:px-6">
                     <a href="{{ route('employees.show', ['employee' => $employee->username]) }}" wire:navigate
-                       class="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary focus:outline-none focus:ring-2 focus:ring-secondary-light focus:ring-offset-2">
+                       class="flex items-center justify-center gap-2 rounded-surface bg-primary px-4 py-2 text-body font-semibold text-white transition hover:bg-primary focus:outline-none focus:ring-2 focus:ring-secondary-light focus:ring-offset-2">
                         @lang('general.view-full-profile')
                         <svg class="size-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
                     </a>

@@ -14,12 +14,12 @@
 @endphp
 
 @section('greeting')
-    <div class="py-4 pt-26">
-        <h1 class="text-secondary-dark font-semibold text-[23px]">
+    <div class="py-4 pt-24">
+        <h1 class="text-secondary-dark font-semibold text-h3">
             @lang('general.greeting') {{ $firstName }},
         </h1>
 
-        <p class="text-secondary-light text-[15px]">
+        <p class="text-secondary-light text-body">
             {{ $positionTitle }}
         </p>
     </div>
@@ -30,21 +30,21 @@
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="flex flex-col h-full gap-6 lg:col-span-2">
             @if($hasLeaves)
-                <div class="flex items-center justify-start font-semibold text-white rounded-xl">
+                <div class="flex items-center justify-start font-semibold text-white rounded-surface">
                     <livewire:dashboard.my-leaves-card/>
                 </div>
             @endif
-            <div class="flex items-center justify-start font-semibold text-white rounded-xl h-68">
+            <div class="flex items-center justify-start font-semibold text-white rounded-surface h-68">
                 <livewire:dashboard.employee-notes-card :employee="auth()->id()"/>
             </div>
         </div>
 
-        <div class="w-full rounded-xl text-white font-semibold  {{$hasLeaves ? 'h-full' : 'h-68'}}">
+        <div class="w-full rounded-surface text-white font-semibold  {{$hasLeaves ? 'h-full' : 'h-68'}}">
             <x-dashboard-cards.team-members-card/>
         </div>
 
 
-        <div class="flex items-center justify-center h-full row-span-2 font-semibold text-white rounded-xl">
+        <div class="flex items-center justify-center h-full row-span-2 font-semibold text-white rounded-surface">
             <x-dashboard-cards.news-card/>
         </div>
 

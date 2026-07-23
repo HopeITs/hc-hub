@@ -1,7 +1,7 @@
-<div class="bg-white rounded-[32px] py-4 px-7 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] w-full max-w-3xl h-full mx-auto">
+<div class="bg-white rounded-[32px] py-4 px-6 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] w-full max-w-3xl h-full mx-auto">
 
-    <div class="flex items-center gap-2 m-2.5 leading-none">
-        <h2 class="text-[16px] font-semibold text-secondary-dark">@lang('general.calendar')</h2>
+    <div class="flex items-center gap-2 m-2 leading-none">
+        <h2 class="text-body font-semibold text-secondary-dark">@lang('general.calendar')</h2>
 
         <span class="text-primary">
             <svg class="size-5 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -12,11 +12,11 @@
     </div>
 
     <div class="flex justify-between items-center px-3 my-1">
-        <p class="text-[13px] font-normal text-secondary-dark">
+        <p class="text-body font-normal text-secondary-dark">
             {{ $current->format('F Y') }}
         </p>
 
-        <div class="flex gap-1 text-[16px] font-light text-secondary-dark">
+        <div class="flex gap-1 text-body font-light text-secondary-dark">
             <button wire:click="prev" >&lt;</button>
             <button wire:click="next" >&gt;</button>
         </div>
@@ -24,7 +24,7 @@
 
     <div class="border-t w-full  border-secondary-medium mb-2"></div>
 
-    <div class="grid grid-cols-7 text-center font-medium mb-1 text-[12px] text-secondary-dark tracking-wide">
+    <div class="grid grid-cols-7 text-center font-medium mb-1 text-small text-secondary-dark tracking-wide">
         <span>{{substr(__('general.days-of-week.1'), 0,2)}} </span>
         <span>Tu</span>
         <span>We</span>
@@ -34,7 +34,7 @@
         <span>Su</span>
     </div>
 
-    <div class="grid grid-cols-7 text-center font-light gap-y-1.5 text-[11px]">
+    <div class="grid grid-cols-7 text-center font-light gap-y-2 text-caption">
 
         @foreach ($calendar as $day)
             @php
@@ -68,7 +68,7 @@
                 </div>
 
                 @if(count($day['tooltip']) > 0)
-                    <div class="absolute bottom-7 left-1/2 -translate-x-1/2 bg-white text-secondary-dark text-[10px] px-2 py-1 rounded shadow hidden group-hover:block whitespace-nowrap z-20">
+                    <div class="absolute bottom-7 left-1/2 -translate-x-1/2 bg-white text-secondary-dark text-caption px-2 py-1 rounded shadow hidden group-hover:block whitespace-nowrap z-20">
                         @foreach($day['tooltip'] as $t)
                             <div>{{ $t }}</div>
                         @endforeach

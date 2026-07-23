@@ -3,18 +3,18 @@
     $nameCol = "name_{$locale}";
 @endphp
 
-<div class="w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col
+<div class="w-full h-full bg-white rounded-surface shadow-e1 overflow-hidden flex flex-col
             max-w-full md:max-w-md  md:h-full lg:max-w-full">
     <!-- Header -->
     <div class="flex items-center justify-between
-                px-4 md:px-6 pt-4 md:pt-5 pb-6 md:pb-10 flex-shrink-0">
+                px-4 md:px-6 pt-4 md:pt-4 pb-6 md:pb-12 flex-shrink-0">
 
         <div class="flex items-center gap-2 md:gap-3">
-            <h3 class="sm:text[20px] md:text-sm font-semibold text-[#58595B]">
+            <h3 class="sm:text[20px] md:text-body font-semibold text-[#58595B]">
                 {{ __('general.personal-inventory') }}
             </h3>
 
-            <span class="text-secondary-light sm:text[20px] md:text-sm font-medium">
+            <span class="text-secondary-light sm:text[20px] md:text-body font-medium">
                 {{ $deliveredItems->count() }}
             </span>
 
@@ -36,17 +36,17 @@
             <div class="pb-2 border-b border-b-secondary-light">
 
                 <div class="flex justify-between items-center">
-                    <p class="sm:text[14px] md:text-[11px] font-bold text-[#58595B]">
+                    <p class="sm:text[14px] md:text-caption font-bold text-[#58595B]">
                         {{ $item->item?->name ?? 'Item #'.$item->item_id }}
                     </p>
 
-                    <span class=" text-[10px] sm:text-[10px] md:text-[11px] text-[#58595B]">
+                    <span class=" text-caption sm:text-caption md:text-caption text-[#58595B]">
                         {{ optional($item->delivered_at)->format('d/m/Y') }}
                     </span>
                 </div>
             </div>
         @empty
-            <div class="flex flex-col items-center justify-center  text-sm font-light text-secondary-light h-full">
+            <div class="flex flex-col items-center justify-center  text-body font-light text-secondary-light h-full">
                 <span>@lang('general.no-available-data')</span>
             </div>
         @endforelse

@@ -1,8 +1,8 @@
 <div
-    class="w-full h-full rounded-3xl bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] hover:shadow-md transition-all duration-300 p-6 flex flex-col">
+    class="w-full h-full rounded-surface bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] hover:shadow-e2 transition-all duration-300 p-6 flex flex-col">
 
     <div class="flex items-center justify-between mb-4">
-        <h2 class="text-[18px] font-semibold text-secondary-medium flex items-center gap-2">
+        <h2 class="text-h4 font-semibold text-secondary-medium flex items-center gap-2">
             @lang('general.employees-per-department')
             <x-icons.chart class="w-5 mb-1 h-5 text-primary"/>
         </h2>

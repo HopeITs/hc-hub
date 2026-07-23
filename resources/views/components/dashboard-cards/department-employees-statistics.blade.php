@@ -1,14 +1,14 @@
 <div
-    class="w-full h-[28rem] rounded-2xl bg-white border border-[var(--color-neutral-200)] shadow-md hover:shadow-lg transition-all duration-500 overflow-hidden">
+    class="w-full h-[28rem] rounded-surface bg-white border border-[var(--color-neutral-200)] shadow-e2 hover:shadow-e3 transition-all duration-500 overflow-hidden">
 
     <div
         class="flex justify-between items-center px-6 py-4 border-b border-[var(--color-neutral-200)] bg-[var(--color-neutral-50)]">
-        <h2 class="text-lg font-semibold text-[var(--color-neutral-800)] tracking-tight flex items-center gap-2">
+        <h2 class="text-h4 font-semibold text-[var(--color-neutral-800)] tracking-tight flex items-center gap-2">
       <span
           class="inline-block w-2.5 h-2.5 rounded-full bg-[var(--color-primary)] shadow-[0_0_8px_var(--color-secondary-medium)]"></span>
             Employees per Department
         </h2>
-        <span class="text-sm text-[var(--color-neutral-500)] font-medium">2025 Overview</span>
+        <span class="text-body text-[var(--color-neutral-500)] font-medium">2025 Overview</span>
     </div>
 
     <div class="relative p-3 h-[calc(100%-4.5rem)]">

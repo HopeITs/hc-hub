@@ -1,21 +1,21 @@
-<div class=" w-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border p-2 border-gray-200 py-6 px-8 flex flex-col justify-between space-y-4 min-h-[330px] sm:min-h-[360px] md:min-h-0">
+<div class=" w-full bg-white rounded-surface shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border p-2 border-neutral-200 py-6 px-8 flex flex-col justify-between space-y-4 min-h-[330px] sm:min-h-[360px] md:min-h-0">
 
     <div class="flex items-center justify-between">
-        <h3 class="text-base font-semibold text-gray-600">
+        <h3 class="text-body font-semibold text-secondary-medium">
             {{ __('general.my-leaves') }}
         </h3>
-        <a href="{{route('leaves.index')}}" class="flex flex-row gap-2 px-3 py-2 text-xs font-medium text-white transition rounded-md bg-primary">
+        <a href="{{route('leaves.index')}}" class="flex flex-row gap-2 px-3 py-2 text-small font-medium text-white transition rounded-control bg-primary">
 
             {{ __('general.show-more') }}
         </a>
     </div>
 
-    <div class="grid items-center grid-cols-1 gap-10 md:grid-cols-2 md:gap-6">
+    <div class="grid items-center grid-cols-1 gap-12 md:grid-cols-2 md:gap-6">
 
         <div class="flex items-end space-x-6">
-            <div class="flex items-end -mb-3.5">
+            <div class="flex items-end -mb-3">
                 <span class="text-[125px] font-extrabold text-secondary-medium leading-none">{{$remainingDays}}</span>
-                <span class="mb-4 text-3xl font-semibold text-secondary-medium">/{{$totalDays}}</span>
+                <span class="mb-4 text-h2 font-semibold text-secondary-medium">/{{$totalDays}}</span>
             </div>
 
             <div class="border-l border-secondary-medium h-26"></div>
@@ -25,7 +25,7 @@
                     {{ $title ?? __('general.annual-leave') }}
                 </h4>
                 <div class="w-6 border-b border-3 border-primary"></div>
-                <ul class="mt-3 space-y-0.2 text-secondary-light text-xs leading-relaxed">
+                <ul class="mt-3 space-y-1 text-secondary-light text-small leading-relaxed">
                     <li class="text-secondary-light text-start">
                         <span>@lang('general.used-leave', ['attr' => $used ]) </span>
 
@@ -46,11 +46,11 @@
 
 
         <div class="flex flex-col items-center justify-center md:items-end md:justify-end">
-            <div class="relative w-56 h-40 ms-10 md:mb-2">
+            <div class="relative w-56 h-40 ms-12 md:mb-2">
                 <canvas id="leavesGaugeChart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-end">
-                    <p class="mb-3 -ml-6 text-4xl font-bold text-primary rtl:-ml-10">
-                        {{$percentage}} <span class="text-sm rtl:-mr-1.5 ltr:-ml-2">%</span>
+                    <p class="mb-3 -ml-6 text-h1 font-bold text-primary rtl:-ml-12">
+                        {{$percentage}} <span class="text-body rtl:-mr-2 ltr:-ml-2">%</span>
                     </p>
                 </div>
             </div>

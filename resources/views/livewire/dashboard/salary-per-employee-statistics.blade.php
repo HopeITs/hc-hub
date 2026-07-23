@@ -1,7 +1,7 @@
-<div class="w-full h-full bg-white rounded-[32px] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border border-gray-200 px-6 py-3 flex flex-col">
+<div class="w-full h-full bg-white rounded-[32px] shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border border-neutral-200 px-6 py-3 flex flex-col">
 
     <div class="flex items-center gap-4 mt-3">
-        <h3 class="text-[18px] font-semibold text-secondary-medium">
+        <h3 class="text-h4 font-semibold text-secondary-medium">
             @lang('general.employees-per-salary-type')
         </h3>
 
@@ -18,12 +18,12 @@
                 data-percentage="{{ $highlightPercentage }}"
             ></div>
 
-            <div class="flex flex-row justify-center items-center  ms-40 gap-8 mt-10">
+            <div class="flex flex-row justify-center items-center  ms-24 gap-8 mt-12">
                 @foreach($series as $item)
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full"
                               style="background: {{ $item['color'] }}"></span>
-                        <span class="text-neutral-700 font-normal whitespace-nowrap text-[11px]">
+                        <span class="text-neutral-700 font-normal whitespace-nowrap text-caption">
                             {{ $item['label'] }}
                         </span>
                     </div>

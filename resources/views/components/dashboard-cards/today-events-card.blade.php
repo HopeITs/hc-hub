@@ -1,11 +1,11 @@
 <div
-    class="w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ring-1 ring-gray-200 overflow-hidden relative flex flex-col">
+    class="w-full h-full bg-white rounded-surface shadow-e1 ring-1 ring-neutral-200 overflow-hidden relative flex flex-col">
     <div class="js-today-events flex h-full min-h-0 flex-col">
-        <div class="flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
+        <div class="flex items-center justify-between px-6 pt-4 pb-4 flex-shrink-0">
             <div class="flex items-center gap-2">
-                <h3 class="text-sm font-semibold text-[#58595B]">@lang('general.today-events')</h3>
-                <span class="text-sm font-medium text-secondary-light">{{ now()->format('j/n/Y') }}</span>
-                <x-icons.event class="ms-1 mb-0.5 text-secondary-medium"/>
+                <h3 class="text-body font-semibold text-[#58595B]">@lang('general.today-events')</h3>
+                <span class="text-body font-medium text-secondary-light">{{ now()->format('j/n/Y') }}</span>
+                <x-icons.event class="ms-1 mb-1 text-secondary-medium"/>
             </div>
         </div>
         @if(count($events) > 0)
@@ -17,7 +17,7 @@
                             <div class="relative h-[240px] flex flex-col items-center justify-center">
                                 @if($event['type'] === 'birthday')
                                     <img src="/assets/GIF/01-Confetti.gif"
-                                         class="absolute inset-0 w-full h-full pe-2 pb-10 object-cover pointer-events-none opacity-100 z-0">
+                                         class="absolute inset-0 w-full h-full pe-2 pb-12 object-cover pointer-events-none opacity-100 z-0">
                                 @endif
 
                                 <div class="flex flex-col h-full justify-center z-30 bg-white items-center ">
@@ -35,7 +35,7 @@
 
                                     {{-- Info --}}
                                     <div class="mt-2 bg-white z-20 text-center">
-                                        <p class="font-semibold text-[15px] mt-2 text-[#58595B]">{{ $event['name'] }}</p>
+                                        <p class="font-semibold text-body mt-2 text-[#58595B]">{{ $event['name'] }}</p>
 
                                         @php
                                             $details = trim(
@@ -44,10 +44,10 @@
                                         @endphp
 
                                         @if ($details)
-                                            <p class="text-[12px] tracking-wider font-light text-[#58595B]">{{ $details }}</p>
+                                            <p class="text-small tracking-wider font-light text-[#58595B]">{{ $details }}</p>
                                         @endif
 
-                                        <p class="text-[12px] text-gray-400 mt-1">{{ $event['message'] }}</p>
+                                        <p class="text-small text-secondary-light mt-1">{{ $event['message'] }}</p>
                                     </div>
                                 </div>
 
@@ -66,7 +66,7 @@
 
         @else
 
-            <div class="flex flex-col items-center justify-center  text-sm font-light text-secondary-light h-full">
+            <div class="flex flex-col items-center justify-center  text-body font-light text-secondary-light h-full">
                 <span>@lang('general.no-available-data')</span>
             </div>
         @endif

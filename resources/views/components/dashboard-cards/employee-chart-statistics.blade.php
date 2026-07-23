@@ -1,13 +1,13 @@
-<div class="w-full h-full rounded-3xl bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] hover:shadow-md transition-all duration-300 p-6 flex flex-col">
+<div class="w-full h-full rounded-surface bg-white border border-neutral-200 shadow-e1 hover:shadow-e2 transition-all duration-300 p-6 flex flex-col">
 
     <div class="flex items-center justify-between mb-4">
-        <h2 class="text-[18px] font-semibold text-secondary-medium flex items-center gap-2">
+        <h2 class="text-h4 font-semibold text-secondary-medium flex items-center gap-2">
             @lang('general.employees-statistics')
             <x-icons.chart class="w-5 h-5 mb-1 text-primary"/>
         </h2>
 
         <select
-            class="text-xs border border-neutral-300 rounded-xl px-4 py-1.5 bg-white shadow-sm text-neutral-700">
+            class="text-small border border-neutral-300 rounded-surface px-4 py-2 bg-white shadow-e1 text-neutral-700">
             <option value="monthly">@lang('general.monthly')</option>
             <option value="quarterly">@lang('general.quarterly')</option>
             <option value="yearly">@lang('general.yearly')</option>
@@ -18,7 +18,7 @@
         <canvas id="employeeChart"></canvas>
     </div>
 
-    <div id="chartLegend" class="flex items-center gap-6 mt-6 text-sm font-medium ms-3 text-neutral-600"></div>
+    <div id="chartLegend" class="flex items-center gap-6 mt-6 text-body font-medium ms-3 text-neutral-600"></div>
 
 </div>
 
@@ -160,7 +160,7 @@
 
                 const label = document.createElement("span");
                 label.textContent = ds.label;
-                label.className = "text-xs";
+                label.className = "text-small";
                 label.style.opacity = isHidden ? 0.4 : 1;
 
                 item.appendChild(dot);

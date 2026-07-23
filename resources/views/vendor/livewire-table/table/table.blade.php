@@ -33,7 +33,7 @@
     @if($this->deferLoading && ! $this->initialized)
         <tr class="group">
             <td class="p-0" colspan="{{ $columns->count() + 1 }}">
-                <span class="block text-lg text-center py-20 bg-white text-black dark:bg-neutral-900 dark:text-white">
+                <span class="block text-h4 text-center py-24 bg-white text-black dark:bg-neutral-900 dark:text-white">
                     @lang('Fetching records...')
                 </span>
             </td>
@@ -98,7 +98,7 @@
         @empty
             <tr class="group">
                 <td class="p-0" colspan="{{ $columns->count() + 1 }}">
-                    <span class="block text-lg text-center py-20 bg-white text-black dark:bg-neutral-900 dark:text-white">
+                    <span class="block text-h4 text-center py-24 bg-white text-black dark:bg-neutral-900 dark:text-white">
                         @lang('No results')
                     </span>
                 </td>

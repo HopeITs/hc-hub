@@ -3,7 +3,7 @@
     wire:loading.attr="disabled"
     {{ $attributes->merge([
         'class' =>
-            'w-full py-2 px-4 text-sm font-semibold text-white bg-primary cursor-pointer rounded-md shadow-sm transition duration-150 ease-in-out flex justify-center items-center',
+            'w-full py-2 px-4 text-body font-semibold text-white bg-primary cursor-pointer rounded-control shadow-e1 transition duration-150 ease-in-out flex justify-center items-center',
     ]) }}
 >
     {{ $slot }}
