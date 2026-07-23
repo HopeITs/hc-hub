@@ -2,9 +2,10 @@
 
 @php
     // Solid connectors for the direct line, dashed for the technical line.
+    // The dash pattern (not colour) distinguishes the two — colour-blind safe, on-brand.
     $isTech = $managerType === 'tech';
-    $vLine = $isTech ? 'w-0 border-s border-dashed border-amber-300' : 'w-px bg-gray-300';
-    $hBorder = $isTech ? 'border-t border-dashed border-amber-300' : 'border-t border-gray-300';
+    $vLine = $isTech ? 'w-0 border-s border-dashed border-gray-400' : 'w-px bg-gray-300';
+    $hBorder = $isTech ? 'border-t border-dashed border-gray-400' : 'border-t border-gray-300';
     $gap = $compact ? 'gap-2' : 'gap-4';
     $teamRel = $managerType.'Team';
 
@@ -29,7 +30,7 @@
                 >
                     <span class="absolute start-1/2 top-0 {{ $compact ? 'h-4' : 'h-5' }} {{ $vLine }}"></span>
 
-                    <div class="rounded-3xl border border-gray-200 bg-white/80 {{ $compact ? 'p-2' : 'p-3' }} shadow-sm backdrop-blur-sm">
+                    <div class="rounded-3xl border border-gray-200 bg-white {{ $compact ? 'p-2' : 'p-3' }} shadow-sm">
                         <div class="flex flex-wrap justify-center gap-2">
                             @foreach($position->activeContracts as $contract)
                                 <x-org-node

@@ -18,23 +18,24 @@
         title="{{ $title }}"
 
         class=" cursor-pointer
-            group flex items-center w-full p-2 rounded-lg transition duration-150
+            group flex items-center w-full px-3 py-2.5 rounded-xl transition duration-150
+            border-s-2 border-transparent
 
-            font-medium text-secondary-light bg-white
-            hover:text-secondary-dark hover:font-bold hover:bg-secondary-soft
+            font-medium text-secondary-light bg-transparent
+            hover:text-secondary-dark hover:bg-secondary-soft
 
-            {{ $active ? 'text-secondary-dark font-bold bg-secondary-soft' : '' }}
+            {{ $active ? 'text-secondary-dark font-semibold bg-secondary-soft' : '' }}
         "
-        :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0' : ''"
+        :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0 md:mx-auto' : ''"
     >
         {{-- Icon --}}
-        <span class="size-5 shrink-0 text-inherit group-hover:text-inherit">
+        <span class="flex items-center justify-center size-5 shrink-0 text-inherit group-hover:text-inherit">
             {{ $icon }}
         </span>
 
         {{-- Label --}}
         <span
-            class="flex-1 text-sm text-left  ms-3 rtl:me-3 rtl:text-right whitespace-nowrap text-inherit group-hover:text-inherit"
+            class="flex-1 text-[13px] text-left  ms-1.5 rtl:me-1.5 rtl:text-right whitespace-nowrap text-inherit group-hover:text-inherit"
             x-show="!sidebarCollapsed || open"
         >
             {{ $title }}

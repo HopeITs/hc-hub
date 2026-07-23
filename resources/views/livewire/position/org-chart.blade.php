@@ -1,9 +1,11 @@
 @php
     $compact = $density === 'compact';
     $isTech = $manager_type === 'tech';
-    // Structural connectors mirror the active line: dashed amber for tech.
-    $trunk = $isTech ? 'border-s border-dashed border-amber-300' : 'bg-gray-300';
-    $branchBorder = $isTech ? 'border-dashed border-amber-300' : 'border-gray-300';
+    // Structural connectors mirror the active line. The technical line uses a
+    // dashed neutral, the direct line a solid neutral — the dash *pattern*
+    // (not colour) carries the meaning, keeping it colour-blind safe and on-brand.
+    $trunk = $isTech ? 'border-s border-dashed border-gray-400' : 'bg-gray-300';
+    $branchBorder = $isTech ? 'border-dashed border-gray-400' : 'border-gray-300';
     $colGap = $compact ? 'gap-3' : 'gap-7';
 @endphp
 
@@ -41,28 +43,31 @@
     <section class="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-3xl">
         {{-- ---------- Header + stats ---------- --}}
         <div class="relative px-6 py-6 text-white bg-secondary-dark">
-            <div class="absolute rounded-full -end-16 -top-20 size-56 bg-white/5"></div>
-
             <div class="relative flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
                 <div>
-                    <div class="flex items-center gap-2 mb-2 text-sm font-semibold text-white/70">
+                    <div class="flex items-center gap-2 mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-white/70">
                         <x-icons.code-fork class="size-4" />
                         @lang('general.organization-overview')
                     </div>
-                    <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">@lang('general.orgn-chart')</h1>
-                    <p class="max-w-2xl mt-2 text-sm leading-6 text-white/70">@lang('general.org-chart-subtitle')</p>
+                    <h1 class="text-2xl font-bold leading-tight tracking-tight sm:text-3xl">@lang('general.orgn-chart')</h1>
+                    <p class="max-w-2xl mt-2.5 text-sm leading-relaxed text-white/75">@lang('general.org-chart-subtitle')</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     @foreach([
-                        ['value' => $stats['positions'], 'label' => __('general.total-positions'), 'color' => 'bg-white/10'],
-                        ['value' => $stats['employees'], 'label' => __('general.filled-positions'), 'color' => 'bg-emerald-400/15'],
-                        ['value' => $stats['vacancies'], 'label' => __('general.vacant-positions'), 'color' => 'bg-amber-300/15'],
-                        ['value' => $stats['managers'], 'label' => __('general.top-level-managers'), 'color' => 'bg-secondary-dark'],
+                        ['value' => $stats['positions'], 'label' => __('general.total-positions'), 'accent' => false],
+                        ['value' => $stats['employees'], 'label' => __('general.filled-positions'), 'accent' => false],
+                        ['value' => $stats['vacancies'], 'label' => __('general.vacant-positions'), 'accent' => true],
+                        ['value' => $stats['managers'], 'label' => __('general.top-level-managers'), 'accent' => false],
                     ] as $stat)
-                        <div class="min-w-28 rounded-2xl border border-white/10 {{ $stat['color'] }} px-4 py-3 backdrop-blur-sm">
-                            <div class="text-2xl font-extrabold">{{ number_format($stat['value']) }}</div>
-                            <div class="mt-0.5 text-[11px] font-medium text-white/70">{{ $stat['label'] }}</div>
+                        {{-- Uniform neutral cards; the vacancies card carries a flat red
+                             accent bar because vacancies are the actionable metric. --}}
+                        <div class="relative min-w-28 overflow-hidden rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                            @if($stat['accent'])
+                                <span class="absolute inset-y-0 start-0 w-1 bg-primary" aria-hidden="true"></span>
+                            @endif
+                            <div class="text-2xl font-bold tabular-nums">{{ number_format($stat['value']) }}</div>
+                            <div class="mt-1 text-[11px] font-medium leading-snug text-white/80">{{ $stat['label'] }}</div>
                         </div>
                     @endforeach
                 </div>
@@ -72,12 +77,12 @@
         {{-- ---------- View switcher ---------- --}}
         <div class="flex items-center gap-1 px-4 pt-3 bg-white border-b border-gray-200">
             <button type="button" wire:click="$set('view', 'chart')"
-                    class="flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-2.5 text-sm font-bold transition {{ $view === 'chart' ? 'border-primary text-primary' : 'border-transparent text-secondary-light hover:text-secondary-dark' }}">
+                    class="flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-2.5 text-sm font-semibold transition {{ $view === 'chart' ? 'border-primary text-primary' : 'border-transparent text-secondary-light hover:text-secondary-dark' }}">
                 <x-icons.code-fork class="size-4" />
                 @lang('general.chart-view')
             </button>
             <button type="button" wire:click="$set('view', 'directory')"
-                    class="flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-2.5 text-sm font-bold transition {{ $view === 'directory' ? 'border-primary text-primary' : 'border-transparent text-secondary-light hover:text-secondary-dark' }}">
+                    class="flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-2.5 text-sm font-semibold transition {{ $view === 'directory' ? 'border-primary text-primary' : 'border-transparent text-secondary-light hover:text-secondary-dark' }}">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5h18M3 12h18M3 19h18"/></svg>
                 @lang('general.directory-view')
             </button>
@@ -126,7 +131,7 @@
                         @lang('general.direct-manager')
                     </button>
                     <button type="button" wire:click="$set('manager_type', 'tech')"
-                            class="px-3 py-2 transition {{ $isTech ? 'bg-amber-500 text-white' : 'text-secondary-medium hover:bg-white' }}">
+                            class="px-3 py-2 transition {{ $isTech ? 'bg-primary text-white' : 'text-secondary-medium hover:bg-white' }}">
                         @lang('general.tech-manager')
                     </button>
                 </div>
@@ -144,7 +149,7 @@
                             class="flex items-center justify-center transition size-8 text-secondary-medium hover:bg-white hover:text-primary">
                         <span class="text-lg font-bold">-</span>
                     </button>
-                    <span class="min-w-12 border-x border-gray-200 bg-white px-1 py-1.5 text-center text-xs font-bold text-secondary-dark">
+                    <span class="min-w-12 border-x border-gray-200 bg-white px-1 py-1.5 text-center text-xs font-semibold tabular-nums text-secondary-dark">
                         {{ round($scale * 100) }}%
                     </span>
                     <button type="button" wire:click="zoomIn" title="{{ __('general.zoom-in') }}"
@@ -161,7 +166,7 @@
                     @lang('general.expand-all')
                 </button>
                 <button type="button" wire:click="collapseAll"
-                        class="px-3 py-2 text-xs font-semibold text-white transition rounded-xl bg-primary hover:bg-primary">
+                        class="px-3 py-2 text-xs font-semibold text-white transition rounded-xl bg-primary hover:opacity-90">
                     @lang('general.collapse-all')
                 </button>
 
@@ -222,8 +227,8 @@
                                         <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m20 20-3-3"/>
                                     </svg>
                                 </span>
-                                <h2 class="mt-4 text-lg font-bold text-secondary-dark">@lang('general.no-search-results')</h2>
-                                <p class="mt-2 text-sm text-secondary-light">@lang('general.no-search-results-help')</p>
+                                <h2 class="mt-4 text-lg font-semibold text-secondary-dark">@lang('general.no-search-results')</h2>
+                                <p class="max-w-xs mx-auto mt-2.5 text-sm leading-relaxed text-secondary-light">@lang('general.no-search-results-help')</p>
                             </div>
                         </div>
                     @else
@@ -367,8 +372,8 @@
                             <span class="flex items-center justify-center mx-auto size-14 rounded-2xl bg-secondary-soft text-primary">
                                 <x-icons.code-fork class="size-7" />
                             </span>
-                            <h2 class="mt-4 text-lg font-bold text-secondary-dark">@lang('general.no-org-chart-data')</h2>
-                            <p class="mt-2 text-sm text-secondary-light">@lang('general.no-org-chart-data-help')</p>
+                            <h2 class="mt-4 text-lg font-semibold text-secondary-dark">@lang('general.no-org-chart-data')</h2>
+                            <p class="max-w-xs mx-auto mt-2.5 text-sm leading-relaxed text-secondary-light">@lang('general.no-org-chart-data-help')</p>
                         </div>
                     </div>
                 @else
@@ -405,7 +410,7 @@
                             @php($maxBranchGrade = (int) $topBranches->max(fn ($p) => $p->jobLevel?->grade ?? 0))
                             @php($topLeaves = $topManagers->filter(fn ($p) => $p->{$teamRel}->isEmpty() && ($p->jobLevel?->grade ?? 999) > $maxBranchGrade))
                             @php($rowManagers = $topManagers->reject(fn ($p) => $topLeaves->contains('id', $p->id)))
-                            @php($vLine = $isTech ? 'w-0 border-s border-dashed border-amber-300' : 'w-px bg-gray-300')
+                            @php($vLine = $isTech ? 'w-0 border-s border-dashed border-gray-400' : 'w-px bg-gray-300')
                             @php($rowGap = $compact ? 'gap-2' : 'gap-4')
 
                             @if($topManagers->isNotEmpty())
@@ -440,7 +445,7 @@
                                     @endif
                                 </div>
                             @else
-                                <div class="px-6 py-4 mt-8 text-sm bg-white border border-gray-300 border-dashed rounded-2xl text-secondary-light">
+                                <div class="px-6 py-4 mt-8 text-sm leading-relaxed bg-white border border-gray-300 border-dashed rounded-2xl text-secondary-light">
                                     @lang('general.no-data-filters')
                                 </div>
                             @endif
@@ -470,7 +475,7 @@
              x-transition:leave-end="translate-x-full rtl:-translate-x-full">
 
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-                <div class="flex items-center gap-2 text-sm font-bold text-secondary-dark">
+                <div class="flex items-center gap-2 text-sm font-semibold text-secondary-dark">
                     <x-icons.cog class="size-4 text-primary" />
                     @lang('general.chart-filters')
                 </div>
@@ -553,7 +558,7 @@
                         <option value="direct">@lang('general.direct-manager')</option>
                         <option value="tech">@lang('general.tech-manager')</option>
                     </x-forms.select-input>
-                    <span class="block pt-1 text-[11px] leading-snug text-secondary-light">@lang('general.reporting-line-help')</span>
+                    <span class="block pt-1 text-[11px] leading-relaxed text-secondary-light">@lang('general.reporting-line-help')</span>
                 </label>
             </div>
 
@@ -563,7 +568,7 @@
                     @lang('general.reset-filters')
                 </button>
                 <button type="button" x-on:click="filtersOpen = false"
-                        class="flex-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-primary">
+                        class="flex-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-semibold text-white transition hover:opacity-90">
                     @lang('general.apply')
                 </button>
             </div>

@@ -36,7 +36,7 @@
 
     <livewire:layout.header/>
 
-    <main class="{{ View::hasSection('greeting') ? '' : 'pt-[120px] ' }} bg-gray-100 flex-grow flex flex-col items-center">
+    <main class="{{ View::hasSection('greeting') ? '' : 'pt-[120px] ' }} bg-app-surface flex-grow flex flex-col items-center">
 
 
         @if (session('status'))
@@ -50,7 +50,7 @@
         </div>
     </main>
 
-    <footer class="bg-gray-100">
+    <footer class="bg-app-surface">
         <x-layouts.app.footer/>
     </footer>
 </div>

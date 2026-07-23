@@ -12,7 +12,7 @@
 @endphp
 
 <nav dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
-    class="fixed inset-x-0 top-0 z-10 w-screen bg-white md:w-full dark:bg-gray-800 backdrop-blur">
+    class="fixed inset-x-0 top-0 z-10 w-screen bg-white md:w-full dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
 
     <div class="px-3 py-1 lg:px-5 lg:ps-3">
         <div class="flex items-center justify-end gap-2 md:pe-0 pe-4">

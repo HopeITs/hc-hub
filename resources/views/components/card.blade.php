@@ -1,6 +1,6 @@
 @props(['title' => null])
 <div {{$attributes->merge([
-    'class' => ' p-6 bg-white flex flex-col justify-between border border-gray-200 rounded-lg shadow-sm'
+    'class' => ' p-6 bg-white flex flex-col justify-between border border-gray-100 rounded-xl shadow-sm'
 ])}}
 >
 

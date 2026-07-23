@@ -15,7 +15,7 @@
 >
     <span class="absolute start-1/2 top-0 {{ $stemH }} w-px {{ $trunk }}"></span>
 
-    <div class="rounded-3xl border border-gray-200 bg-white/80 {{ $compact ? 'p-2' : 'p-3' }} shadow-sm backdrop-blur-sm">
+    <div class="rounded-3xl border border-gray-200 bg-white {{ $compact ? 'p-2' : 'p-3' }} shadow-sm">
         <div class="flex flex-wrap justify-center gap-2">
             @forelse($manager->activeContracts as $contract)
                 <x-org-node

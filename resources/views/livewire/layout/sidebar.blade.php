@@ -3,7 +3,7 @@
     open: @entangle('open').live
 }" x-cloak>
     <aside x-cloak @click.outside="open = false"
-        class="fixed top-0 z-40 h-full pt-4 bg-white shadow-[4px_0_20px_-18px_rgba(0,0,0,0.35)] transition-[width,transform] duration-300 md:translate-x-0"
+        class="fixed top-0 z-40 h-full pt-4 bg-sidebar-surface border-e border-gray-100 shadow-sm transition-[width,transform] duration-300 md:translate-x-0"
         :class="[
             sidebarCollapsed ? 'md:w-20' : 'md:w-64',
             open ? 'w-64 translate-x-0' : 'w-64',
@@ -24,7 +24,7 @@
         </button>
 
         <div class="flex flex-col justify-between h-full">
-            <div class="h-full px-3 pb-4 overflow-x-hidden overflow-y-auto bg-white">
+            <div class="h-full px-3 pb-4 overflow-x-hidden overflow-y-auto bg-sidebar-surface">
                 <a href="{{ route('dashboard') }}" class="flex items-center justify-center h-16 mb-4">
                     <x-app-logo class="w-[11rem] h-auto object-fit" x-show="!sidebarCollapsed || open" />
                     <img src="{{ asset('assets/img/hope-center-icon.svg') }}"
@@ -33,7 +33,12 @@
                          class="hidden object-contain size-8 md:block" />
                 </a>
 
-                <ul class="space-y-2 font-medium" :class="sidebarCollapsed && !open ? 'md:flex md:flex-col md:items-center' : ''">
+                <ul class="space-y-0.5 font-medium" :class="sidebarCollapsed && !open ? 'md:flex md:flex-col md:items-center' : ''">
+
+                    {{-- Group: Main --}}
+                    <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-secondary-light">{{ app()->getLocale() === 'ar' ? 'الرئيسية' : 'Main' }}</span>
+                    </li>
 
                     {{-- 1. Employee Dashboard (Seen by all) --}}
                     <x-layouts.app.sidebar.single-item :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('employee.dashboard')">
@@ -70,6 +75,11 @@
                         </x-slot>
                         {{ __('general.orgn-chart') }}
                     </x-layouts.app.sidebar.single-item>
+
+                    {{-- Group: Management --}}
+                    <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-secondary-light">{{ app()->getLocale() === 'ar' ? 'الإدارة' : 'Management' }}</span>
+                    </li>
 
                     {{-- 2. Project Basics --}}
                     <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('cities.*') ||
@@ -195,6 +205,11 @@
                         </x-layouts.app.sidebar.dropdown-nav-list>
                     @endactiverole
 
+                    {{-- Group: Time & Leave --}}
+                    <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-secondary-light">{{ app()->getLocale() === 'ar' ? 'الإجازات' : 'Time & Leave' }}</span>
+                    </li>
+
                     {{-- 5. Leave Management (Holidays and leaves) --}}
                     {{-- Visible to: HR, super-admin, AND Managers --}}
                     @activerole('HR', 'super-admin', 'manager', 'general-manager')
@@ -227,6 +242,11 @@
                         </x-slot>
                         {{ __('general.my-leaves') }}
                     </x-layouts.app.sidebar.single-item>
+
+                    {{-- Group: Files & Tasks --}}
+                    <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-secondary-light">{{ app()->getLocale() === 'ar' ? 'الملفات والمهام' : 'Files & Tasks' }}</span>
+                    </li>
 
                     {{-- 6. Archived Files (All) --}}
                     <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')" :active="request()->routeIs('my-folders.*') || request()->routeIs('shared-folders.*')">
@@ -284,6 +304,13 @@
                         </x-slot>
                         @lang('general.my-items')
                     </x-layouts.app.sidebar.single-item>
+
+                    {{-- Group: More (only for roles that can see any item below) --}}
+                    @activerole('HR', 'super-admin', 'general-manager', 'manager')
+                        <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-secondary-light">{{ app()->getLocale() === 'ar' ? 'أخرى' : 'More' }}</span>
+                        </li>
+                    @endactiverole
 
                     {{-- 8. News Management (super-admin, Managers, HRs) --}}
                     @activerole('HR', 'super-admin', 'general-manager', 'manager')

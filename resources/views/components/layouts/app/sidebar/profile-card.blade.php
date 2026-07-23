@@ -15,11 +15,10 @@
          @keydown.escape.window="open=false">
         <button @click="toggle()" :aria-expanded="open" aria-haspopup="menu"
                 class="group flex w-full items-center gap-3 px-3 py-2 rounded-2xl
-                   bg-white/60 backdrop-blur supports-[backdrop-filter]:bg-white/40
-                   border border-gray-200/70 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition">
+                   bg-white
+                   border border-gray-200/70 shadow-sm hover:bg-gray-50 transition">
             <span
-                class="relative inline-grid place-items-center rounded-full p-[2px] shrink-0
-                         bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
+                class="relative inline-grid place-items-center rounded-full shrink-0 ring-2 ring-primary/30">
                 <img class="size-14 border border-1 border-primary rounded-full object-cover"
                      src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt="user"/>
                 <span
@@ -72,7 +71,7 @@
 
                 <div class="relative flex items-center gap-3">
                     <span
-                        class="p-[3px] rounded-full shrink-0 bg-[conic-gradient({{ $haloAnchor }},theme(colors.primary.600),theme(colors.rose.500),theme(colors.primary.600))]">
+                        class="rounded-full shrink-0 ring-2 ring-primary/30">
                         <img class="size-12 border border-1 border-primary rounded-full object-cover"
                              src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt="user">
                     </span>

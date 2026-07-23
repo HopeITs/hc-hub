@@ -5,23 +5,24 @@
         title="{{ trim(strip_tags($slot)) }}"
         {{ $attributes->merge([
             'class' => "
-                group flex items-center w-full p-2 rounded-lg transition duration-150
-                font-medium text-secondary-light bg-white
-                hover:text-secondary-dark hover:font-bold hover:bg-secondary-soft
-                " . ($active ? ' !text-primary !font-bold' : '')
+                group flex items-center w-full px-3 py-2.5 rounded-xl transition duration-150
+                border-s-2 border-transparent
+                font-medium text-secondary-light bg-transparent
+                hover:text-secondary-dark hover:bg-secondary-soft
+                " . ($active ? ' !text-primary !font-semibold bg-primary/5' : '')
         ]) }}
-        :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0' : ''"
+        :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0 md:mx-auto' : ''"
     >
 
         {{-- Icon --}}
-        <span class="size-5 shrink-0 text-inherit group-hover:text-inherit">
+        <span class="flex items-center justify-center size-5 shrink-0 text-inherit group-hover:text-inherit">
             {!! $icon !!}
         </span>
 
         {{-- Label --}}
         <span
             class="
-                text-sm flex-1 ms-3 rtl:me-3 text-left rtl:text-right whitespace-nowrap
+                text-[13px] flex-1 ms-1.5 rtl:me-1.5 text-left rtl:text-right whitespace-nowrap
                 text-inherit group-hover:text-inherit
             "
             x-show="!sidebarCollapsed || open"

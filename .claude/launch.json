@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hc-hr",
+      "runtimeExecutable": "composer",
+      "runtimeArgs": ["dev"],
+      "port": 8000,
+      "autoPort": false
+    }
+  ]
+}
