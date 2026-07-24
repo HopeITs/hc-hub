@@ -7,7 +7,7 @@
         </h2>
 
         <select
-            class="text-small border border-neutral-300 rounded-surface px-4 py-2 bg-white shadow-e1 text-neutral-700">
+            class="text-small border border-neutral-300 rounded-surface px-3 py-1.5 bg-white shadow-e1 text-neutral-700">
             <option value="monthly">@lang('general.monthly')</option>
             <option value="quarterly">@lang('general.quarterly')</option>
             <option value="yearly">@lang('general.yearly')</option>
@@ -154,13 +154,13 @@
                 const isHidden = chartInstance.isDatasetVisible(index) === false;
 
                 const dot = document.createElement("span");
-                dot.className = "w-2.5 h-2.5 rounded-full inline-block";
+                dot.className = "w-[7.7px] h-[7.7px] rounded-full inline-block";
                 dot.style.backgroundColor = isHidden ? "transparent" : ds.borderColor;
-                dot.style.border = `2px solid ${ds.borderColor}`;
+                dot.style.border = `1.54px solid ${ds.borderColor}`;
 
                 const label = document.createElement("span");
                 label.textContent = ds.label;
-                label.className = "text-small";
+                label.className = "text-[9.24px]";
                 label.style.opacity = isHidden ? 0.4 : 1;
 
                 item.appendChild(dot);

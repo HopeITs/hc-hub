@@ -20,10 +20,10 @@
 
             <div class="flex flex-row justify-center items-center  ms-24 gap-8 mt-12">
                 @foreach($series as $item)
-                    <div class="flex items-center gap-2">
-                        <span class="w-3 h-3 rounded-full"
+                    <div class="flex items-center gap-1">
+                        <span class="w-[7.7px] h-[7.7px] rounded-full"
                               style="background: {{ $item['color'] }}"></span>
-                        <span class="text-neutral-700 font-normal whitespace-nowrap text-caption">
+                        <span class="text-neutral-700 font-normal whitespace-nowrap text-[9.24px]">
                             {{ $item['label'] }}
                         </span>
                     </div>
