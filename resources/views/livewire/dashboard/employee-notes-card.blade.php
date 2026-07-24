@@ -115,7 +115,7 @@
             @click.self="showModal=false"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
             x-transition>
-            <div class="w-full max-w-md rounded-surface bg-white p-6 shadow-e3 border border-neutral-100">
+            <div class="w-full max-w-md rounded-surface bg-white p-9 shadow-e3 border border-neutral-100">
                 <div class="flex items-start justify-between mb-4">
                     <h3 class="text-h4 font-semibold text-neutral-900 tracking-tight"
                         x-text="modalMode === 'create' ? '{{__('general.add-new-note')}}' : '{{__('general.edit-note')}}'"></h3>
@@ -159,7 +159,7 @@
             x-cloak
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
             x-transition>
-            <div class="w-full max-w-sm bg-white rounded-surface shadow-e3 border border-neutral-200 p-6">
+            <div class="w-full max-w-sm bg-white rounded-surface shadow-e3 border border-neutral-200 p-9">
                 <h2 class="text-h4 font-semibold text-neutral-800 mb-3">@lang('general.delete-note')</h2>
                 <p class="text-body text-secondary-medium mb-6">
                     @lang('general.delete-note-text')

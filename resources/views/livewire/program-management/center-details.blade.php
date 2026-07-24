@@ -3,7 +3,7 @@
     <div class="space-y-12 ">
         <div class="grid h-full gap-6 md:grid-cols-[1fr_auto] items-start">
             <div
-                class="relative overflow-hidden rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-e1">
+                class="relative overflow-hidden rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-9 shadow-e1">
                 <div class="absolute inset-0 opacity-50 bg-neutral-100 dark:bg-neutral-800"></div>
 
                 <div class="relative flex flex-col gap-3">
@@ -77,7 +77,7 @@
                     @foreach ($contractData as $type => $categories)
                         @php $__total = array_sum(array_column($categories['items'], 'count')); @endphp
                         <div
-                            class="group relative overflow-hidden rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-e3 transition-all duration-300 hover:-translate-y-1 hover:shadow-e3">
+                            class="group relative overflow-hidden rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-9 shadow-e3 transition-all duration-300 hover:-translate-y-1 hover:shadow-e3">
                             <div class="relative flex items-center justify-between gap-4">
                                 <h3 class="text-h4 font-bold capitalize text-neutral-900 dark:text-white">{{ $categories['label'] }}</h3>
                                 <span
@@ -120,7 +120,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     @forelse ($programData as $program)
                         <div
-                            class="group relative overflow-hidden rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow-e3 transition-all duration-300 hover:-translate-y-1 hover:shadow-e3">
+                            class="group relative overflow-hidden rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-9 shadow-e3 transition-all duration-300 hover:-translate-y-1 hover:shadow-e3">
                             <h3 class="relative text-h4 font-extrabold text-secondary-dark dark:text-white">
                                 {{ $program['program'] ?? 'Unassigned Program' }}
                             </h3>
@@ -154,7 +154,7 @@
             <div class="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 @for ($i = 0; $i < 6; $i++)
                     <div
-                        class="animate-pulse rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-6 shadow">
+                        class="animate-pulse rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-9 shadow">
                         <div class="h-6 w-1/3 rounded bg-neutral-200 dark:bg-neutral-700"></div>
                         <div class="mt-4 space-y-3">
                             <div class="h-3 w-full rounded bg-neutral-200 dark:bg-neutral-700"></div>

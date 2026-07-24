@@ -7,7 +7,7 @@
 
 <section
     x-data="{ open: false }"
-    class="rounded-surface border {{ $private ? 'border-primary' : 'border-neutral-200' }} bg-white p-4 shadow-e1 sm:rounded-surface sm:p-6"
+    class="rounded-surface border {{ $private ? 'border-primary' : 'border-neutral-200' }} bg-white p-4 shadow-e1 sm:rounded-surface sm:p-9"
 >
     <button
         type="button"
@@ -58,7 +58,7 @@
 
 <section
     x-data="{ open: false }"
-    class="rounded-surface border {{ $private ? 'border-primary' : 'border-neutral-200' }} bg-white p-4 shadow-e1 sm:rounded-surface sm:p-6"
+    class="rounded-surface border {{ $private ? 'border-primary' : 'border-neutral-200' }} bg-white p-4 shadow-e1 sm:rounded-surface sm:p-9"
 >
     <button
         type="button"

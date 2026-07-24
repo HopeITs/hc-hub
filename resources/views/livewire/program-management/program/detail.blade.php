@@ -4,7 +4,7 @@
         <div class="grid gap-6 md:grid-cols-[1fr_auto] items-start">
 
             <div
-                class="relative overflow-hidden rounded-surface border border-neutral-200 bg-white backdrop-blur-xl p-6 shadow-e1">
+                class="relative overflow-hidden rounded-surface border border-neutral-200 bg-white backdrop-blur-xl p-9 shadow-e1">
                 <div class="absolute inset-0 opacity-50 bg-neutral-100"></div>
 
                 <div class="relative flex flex-col gap-3">
@@ -106,7 +106,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <div
-                        class="group relative overflow-hidden rounded-surface border border-neutral-200 bg-white backdrop-blur-xl p-6 shadow-e2">
+                        class="group relative overflow-hidden rounded-surface border border-neutral-200 bg-white backdrop-blur-xl p-9 shadow-e2">
                         <div class="flex items-start gap-3">
 
                             <div>
@@ -119,7 +119,7 @@
                     </div>
 
                     <div
-                        class="group relative overflow-hidden rounded-surface border bg-white backdrop-blur-xl p-6 shadow-e2">
+                        class="group relative overflow-hidden rounded-surface border bg-white backdrop-blur-xl p-9 shadow-e2">
                         <div class="flex items-start gap-3">
                             <div>
                                 <p class="font-semibold text-neutral-900">@lang('general.start-date')</p>
@@ -131,7 +131,7 @@
                     </div>
 
                     <div
-                        class="group relative overflow-hidden rounded-surface border bg-white backdrop-blur-xl p-6 shadow-e2">
+                        class="group relative overflow-hidden rounded-surface border bg-white backdrop-blur-xl p-9 shadow-e2">
                         <div class="flex items-start gap-3">
                             <div>
                                 <p class="font-semibold text-neutral-900">@lang('general.end-date')</p>
@@ -151,7 +151,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         @foreach ($program->centers as $center)
                             <a href="{{ route('centers.show', $center->id) }}"
-                               class="group relative rounded-surface border bg-white backdrop-blur-xl p-6 shadow hover:-translate-y-1 hover:shadow-e3 transition">
+                               class="group relative rounded-surface border bg-white backdrop-blur-xl p-9 shadow hover:-translate-y-1 hover:shadow-e3 transition">
 
                                 <h3 class="text-h4 font-bold text-neutral-900">
                                     {{ $center->name }}
