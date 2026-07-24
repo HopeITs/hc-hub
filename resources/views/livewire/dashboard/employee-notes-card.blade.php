@@ -4,10 +4,10 @@
         x-init="init(@js($this->notes->pluck('id')))"
         class="relative w-full ">
         <div class="bg-white rounded-surface border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] flex flex-col h-68 w-full overflow-hidden">
-            <div class="flex items-center justify-between px-6 pt-6 shrink-0">
-                <div class="flex pt-2 items-center gap-2">
+            <div class="flex items-start justify-between px-6 pt-4 pb-4 shrink-0">
+                <div class="flex items-center gap-2">
                     <h2 class="text-md font-semibold text-secondary-medium">@lang('general.note')</h2>
-                    <span class="text-body font-medium text-secondary-light px-2 py-1 rounded-full">
+                    <span class="text-body font-medium text-secondary-light">
                         {{ $this->notes->count() }}
                     </span>
                     <div class="text-red-500 w-3.5 h-3.5 text-body">

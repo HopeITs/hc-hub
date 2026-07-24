@@ -13,8 +13,8 @@
 
 
 
-<div class="relative w-full h-full  py-6 bg-white rounded-surface shadow-e1 flex flex-col overflow-hidden">
-    <div class="flex items-center justify-between px-6 pt-4 pb-1 flex-shrink-0">
+<div class="relative w-full h-full bg-white rounded-surface shadow-e1 flex flex-col overflow-hidden">
+    <div class="flex items-center justify-between px-6 pt-4 pb-4 flex-shrink-0">
         <div class="flex items-center gap-3">
             <h2 class="text-md font-base text-[#58595B]">
                 {{ __('general.news') }}

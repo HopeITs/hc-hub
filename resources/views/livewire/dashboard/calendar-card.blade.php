@@ -1,6 +1,6 @@
 <div class="bg-white rounded-surface py-4 px-6 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] w-full max-w-3xl h-full mx-auto">
 
-    <div class="flex items-center gap-2 m-2 leading-none">
+    <div class="flex items-center gap-2 leading-none">
         <h2 class="text-body font-semibold text-secondary-dark">@lang('general.calendar')</h2>
 
         <span class="text-primary">

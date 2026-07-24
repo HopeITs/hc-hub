@@ -8,7 +8,7 @@
     class="relative w-full h-full bg-white rounded-surface shadow-e1 overflow-hidden flex flex-col">
 
     <!-- Header -->
-    <div class="flex items-center justify-between gap-6 px-6 py-6">
+    <div class="flex items-center justify-between gap-6 px-6 pt-4 pb-4">
         <h2 class="flex items-center gap-2 text-body font-semibold text-secondary-medium whitespace-nowrap">
             @lang('general.contact-the-team')
         </h2>

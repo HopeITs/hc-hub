@@ -1,8 +1,7 @@
 <div class="w-full h-full bg-white rounded-surface shadow-e1 overflow-hidden flex flex-col
             max-w-full md:max-w-md lg:max-w-full md:h-full">
     <!-- Header -->
-    <div class="flex items-center justify-between
-                px-4 md:px-6 pt-4 md:pt-4 pb-6 md:pb-12 flex-shrink-0">
+    <div class="flex items-center justify-between px-6 pt-4 pb-4 flex-shrink-0">
 
         <div class="flex items-center gap-2 md:gap-3">
             <h3 class="sm:text-h4 md:text-body font-semibold text-[#58595B]">
