@@ -44,7 +44,7 @@
                 {{ session('status') }}
             </div>
         @endif
-        <div class="px-4 pb-6 max-lg:w-full md:w-11/12  min-h-full">
+        <div class="px-4 pb-18 max-lg:w-full md:w-11/12  min-h-full">
             @yield('greeting')
             {{ $slot }}
         </div>

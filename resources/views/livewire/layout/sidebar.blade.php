@@ -25,8 +25,8 @@
 
         <div class="flex flex-col justify-between h-full">
             <div class="h-full px-3 pb-4 overflow-x-hidden overflow-y-auto">
-                <a href="{{ route('dashboard') }}" class="flex items-center justify-center h-16 mb-4">
-                    <x-app-logo class="w-[11rem] h-auto object-fit" x-show="!sidebarCollapsed || open" />
+                <a href="{{ route('dashboard') }}" class="flex items-center justify-start ps-3 h-16 mb-4">
+                    <x-app-logo class="w-[8.25rem] h-auto object-fit" x-show="!sidebarCollapsed || open" />
                     <img src="{{ asset('assets/img/hope-center-icon.svg') }}"
                          alt="{{ config('app.name') }}"
                          x-show="sidebarCollapsed && !open"
