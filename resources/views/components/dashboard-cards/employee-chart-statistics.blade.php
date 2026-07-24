@@ -115,10 +115,10 @@
                             drawOnChartArea: true
                         },
                         ticks: {
-                            color: styles.getPropertyValue("--color-secondary-dark"),
+                            color: "#6b7280",
                             font: {
                                 size: 12,
-                                weight: "bold",
+                                family: "SomarSans",
                             }
                         }
                     },
@@ -131,10 +131,10 @@
                         },
                         ticks: {
                             stepSize: 1,
-                            color: styles.getPropertyValue("--color-secondary-dark"),
+                            color: "#6b7280",
                             font: {
                                 size: 12,
-                                weight: "bold",
+                                family: "SomarSans",
                             },
                             callback: value => Number.isInteger(value) ? value : ""
                         }

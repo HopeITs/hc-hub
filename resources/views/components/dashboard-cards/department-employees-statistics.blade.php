@@ -93,8 +93,8 @@
                     x: {
                         grid: { display: false },
                         ticks: {
-                            color: "var(--color-neutral-600)",
-                            font: { size: 11, family: "SomarSans", weight: "500" },
+                            color: "#6b7280",
+                            font: { size: 12, family: "SomarSans" },
                             padding: 8,
                             maxRotation: 80,
                             minRotation: 50,
@@ -105,7 +105,7 @@
                         beginAtZero: true,
                         grid: { color: neutralGrid, drawBorder: false },
                         ticks: {
-                            color: "var(--color-neutral-600)",
+                            color: "#6b7280",
                             font: { size: 12, family: "SomarSans" },
                             padding: 6
                         }

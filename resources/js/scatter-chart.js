@@ -51,10 +51,10 @@ function initSalaryTypeScatter() {
                         callback: function(value, index) {
                             return labels[index];
                         },
-                        color: "#414042",
+                        color: "#6b7280",
                         font: {
-                            size: 10,
-                            weight: "600"
+                            size: 12,
+                            family: "SomarSans"
                         }
                     }
                 },
@@ -64,10 +64,10 @@ function initSalaryTypeScatter() {
                     suggestedMax,
                     grid: { color: "#e5e7eb" },
                     ticks: {
-                        color: "#414042",
+                        color: "#6b7280",
                         font: {
-                            size: 10,
-                            weight: "600"
+                            size: 12,
+                            family: "SomarSans"
                         }
                     }
                 }
