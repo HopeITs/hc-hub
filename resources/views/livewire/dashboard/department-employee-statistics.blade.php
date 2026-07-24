@@ -49,8 +49,8 @@
                             borderWidth: 0,
                             pointBackgroundColor: primaryColor,
                             pointBorderColor: primaryColor,
-                            pointRadius: 3.6,
-                            pointHoverRadius: 6,
+                            pointRadius: 2.52,
+                            pointHoverRadius: 4.2,
                             tension: 0
                         }
                     ]

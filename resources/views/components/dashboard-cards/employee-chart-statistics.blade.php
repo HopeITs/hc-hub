@@ -58,10 +58,10 @@
                         borderColor: primary,
                         fill: false,
                         tension: 0.3,
-                        borderWidth: 2,
+                        borderWidth: 0.7,
                         pointBackgroundColor: primary,
-                        pointRadius: 3,
-                        pointHoverRadius: 6
+                        pointRadius: 2.1,
+                        pointHoverRadius: 4.2
                     },
                     {
                         label: "Ended",
@@ -69,10 +69,10 @@
                         borderColor: secondary,
                         fill: false,
                         tension: 0.3,
-                        borderWidth: 2,
+                        borderWidth: 0.7,
                         pointBackgroundColor: secondary,
-                        pointRadius: 3,
-                        pointHoverRadius: 6
+                        pointRadius: 2.1,
+                        pointHoverRadius: 4.2
                     },
                     {
                         label: "Terminated",
@@ -80,10 +80,10 @@
                         borderColor: neutral,
                         fill: false,
                         tension: 0.3,
-                        borderWidth: 2,
+                        borderWidth: 0.7,
                         pointBackgroundColor: neutral,
-                        pointRadius: 3,
-                        pointHoverRadius: 6
+                        pointRadius: 2.1,
+                        pointHoverRadius: 4.2
                     },
                 ]
             },

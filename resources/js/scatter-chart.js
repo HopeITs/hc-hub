@@ -31,7 +31,7 @@ function initSalaryTypeScatter() {
                     })),
                     pointBackgroundColor: colors,
                     pointBorderColor: colors,
-                    pointRadius: 4,
+                    pointRadius: 2.8,
                     borderWidth: 0,
                     showLine: false
                 }
