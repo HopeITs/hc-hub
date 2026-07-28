@@ -22,7 +22,7 @@
             font-medium
 
             {{ $active
-                ? 'text-primary font-semibold bg-selection'
+                ? 'text-secondary-dark bg-selection'
                 : 'text-secondary-light hover:text-secondary-dark hover:bg-black/[0.03]' }}
         "
         :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0 md:mx-auto' : ''"
@@ -53,7 +53,7 @@
         </svg>
     </button>
 
-    <ul id="{{ $id }}" class="{{ $isActive }} ps-4" x-show="!sidebarCollapsed || open">
+    <ul id="{{ $id }}" class="{{ $isActive }} ps-[21px]" x-show="!sidebarCollapsed || open">
         {{ $list }}
     </ul>
 </li>

@@ -47,16 +47,7 @@ function initSalaryTypeScatter() {
                     min: 0.7,
                     max: numericX.length + 0.3,
                     grid: { display: false },
-                    ticks: {
-                        callback: function(value, index) {
-                            return labels[index];
-                        },
-                        color: "#6b7280",
-                        font: {
-                            size: 12,
-                            family: "SomarSans"
-                        }
-                    }
+                    ticks: { display: false }
                 },
 
                 y: {

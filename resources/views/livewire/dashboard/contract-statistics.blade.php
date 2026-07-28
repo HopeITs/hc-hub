@@ -86,7 +86,7 @@
                             hover:-translate-y-1 flex flex-col">
 
 
-                <div class="p-6 flex justify-between items-start border-b  border-secondary-soft">
+                <div class="p-6 pb-1.5 flex justify-between items-start">
                     <div class="flex flex-col">
                         <span class="text-h4 font-black text-neutral-900">
                             {{ $card['name'] }}
@@ -94,7 +94,7 @@
 
                         <span class="text-body text-secondary-dark mt-2">
                             {{ trans_choice('general.employee', 2) }}:
-                            <span class="font-bold text-primary">{{ $card['employees'] }}</span>
+                            <span class="font-bold text-[#414141]">{{ $card['employees'] }}</span>
                         </span>
                     </div>
 
@@ -167,7 +167,7 @@
 
                                 <div class="border-t border-neutral-200 pt-1 mt-1 flex justify-between">
                                     <span class="text-neutral-600">@lang('general.total')</span>
-                                    <span class="font-bold text-primary">{{ $total }}</span>
+                                    <span class="font-bold text-[#414141]">{{ $total }}</span>
                                 </div>
 
                             </div>
@@ -178,7 +178,7 @@
 
 
 
-                <div class="p-4 border-t border-secondary-soft">
+                <div class="mt-auto p-4">
                     <a href="{{ $cardType === 'program'
                                 ? route('programs.show', ['program' => $card['program_slug']])
                                 : ($cardType === 'center'
