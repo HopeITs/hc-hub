@@ -17,21 +17,20 @@
     ];
 @endphp
 
-<div class="w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col
-     max-w-full md:max-w-md  md:h-full lg:max-w-full">
+<div class="flex h-full w-full flex-col overflow-hidden rounded-3xl bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
     <!-- Header -->
-    <div class="flex items-center justify-between px-4 md:px-6 pt-4 pb-6 md:pt-5 md:pb-10 flex-shrink-0">
-        <div class="flex items-center gap-2 md:gap-3">
-            <h3 class="sm:text-[20px]  md:text-sm font-semibold text-[#58595B]">
+    <div class="flex shrink-0 items-center justify-start px-4 pb-4 pt-5 sm:px-6">
+        <div class="flex flex-wrap items-center gap-2">
+            <h3 class="text-sm font-semibold leading-none text-[#58595B]">
                 {{ __('general.badges-warnings') }}
             </h3>
 
-            <span class="text-secondary-light sm:text-[20px] md:text-sm font-medium">
+            <span class="relative -top-px text-sm font-medium leading-none text-secondary-light">
                 {{ $myBadges->count() }}
             </span>
 
-            <div class="text-primary w-4 h-4 ">
-                <img src="{{ asset('assets/icons/badges.svg') }}" alt="Badges icon">
+            <div class="relative -top-px flex size-4 shrink-0 items-center justify-center text-primary">
+                <img class="block size-full object-contain" src="{{ asset('assets/icons/badges.svg') }}" alt="Badges icon">
             </div>
         </div>
     </div>
@@ -51,11 +50,11 @@
             <div class="flex justify-between items-center pb-2 border-b border-b-secondary-light"
                  wire:key="badge-{{ $badge->id }}">
 
-                <p class=" sm:text-[14px] md:text-[11px] font-bold uppercase {{ $colorClass }}">
+                <p class="text-[13px] font-bold uppercase {{ $colorClass }}">
                     {{ $badge->reason ?? __('No reason provided') }}
                 </p>
 
-                <span class=" text-[10px] sm:text-[10px] md:text-[11px] text-[#888]">
+                <span class="text-[11px] text-[#888]">
                     {{ optional($badge->date)->format('d/m/Y') }}
                 </span>
             </div>

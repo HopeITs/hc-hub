@@ -14,16 +14,16 @@
 
 
 <div class="relative w-full h-full  py-6 bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] flex flex-col overflow-hidden">
-    <div class="flex items-center justify-between px-6 pt-5 pb-1 flex-shrink-0">
-        <div class="flex items-center gap-3">
-            <h2 class="text-md font-base text-[#58595B]">
+    <div class="flex shrink-0 items-center justify-start px-4 pb-1 pt-5 sm:px-6">
+        <div class="flex flex-wrap items-center gap-2">
+            <h2 class="text-sm font-semibold leading-none text-[#58595B]">
                 {{ __('general.news') }}
-                <span class="text-secondary-light text-md ms-1">
-                    {{ $newsItems->count() }}
-                </span>
             </h2>
-            <div class="text-red-500 w-4 h-4 text-sm">
-                <img src="{{ asset('assets/icons/news.svg') }}" alt="Notes icon">
+            <span class="relative -top-px text-sm font-medium leading-none text-secondary-light">
+                {{ $newsItems->count() }}
+            </span>
+            <div class="relative -top-px flex size-4 shrink-0 items-center justify-center text-red-500">
+                <img class="block size-full object-contain" src="{{ asset('assets/icons/news.svg') }}" alt="News icon">
             </div>
 
         </div>
