@@ -1,23 +1,23 @@
-<div class="w-full">
+<div class="h-full w-full">
     <div
         x-data="notesBoard()"
         x-init="init(@js($this->notes->pluck('id')))"
-        class="relative w-full ">
-        <div class="bg-white rounded-3xl border border-gray-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] flex flex-col h-68 w-full overflow-hidden">
-            <div class="flex items-center justify-between px-6 pt-6 shrink-0">
-                <div class="flex pt-2 items-center gap-2">
-                    <h2 class="text-md font-semibold text-secondary-medium">@lang('general.note')</h2>
-                    <span class="text-sm font-medium text-secondary-light px-2 py-0.5 rounded-full">
+        class="relative h-full w-full">
+        <div class="flex h-full w-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
+            <div class="flex shrink-0 items-center justify-between px-6 pb-4 pt-5">
+                <div class="flex items-center gap-2">
+                    <h2 class="text-base font-semibold leading-none text-[#58595B]">@lang('general.notes')</h2>
+                    <span class="relative -top-px text-sm font-medium leading-none text-secondary-light">
                         {{ $this->notes->count() }}
                     </span>
-                    <div class="text-red-500 w-3.5 h-3.5 text-sm">
-                        <img src="{{ asset('assets/icons/notes.svg') }}" alt="Notes icon">
+                    <div class="relative -top-px flex size-4 shrink-0 items-center justify-center text-primary">
+                        <img class="block size-full object-contain" src="{{ asset('assets/icons/notes.svg') }}" alt="Notes icon">
                     </div>
                 </div>
 
                 <button
                     @click="openNewNoteModal()"
-                    class="flex items-center me-4 gap-2 bg-primary hover:bg-red-700 text-white text-xs font-medium px-3 py-2 rounded-md transition">
+                    class="flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>

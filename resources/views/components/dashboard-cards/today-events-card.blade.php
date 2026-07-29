@@ -1,11 +1,11 @@
 <div
     class="w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ring-1 ring-gray-200 overflow-hidden relative flex flex-col">
     <div class="js-today-events flex h-full min-h-0 flex-col">
-        <div class="flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
-            <div class="flex items-center gap-2">
-                <h3 class="text-sm font-semibold text-[#58595B]">@lang('general.today-events')</h3>
-                <span class="text-sm font-medium text-secondary-light">{{ now()->format('j/n/Y') }}</span>
-                <x-icons.event class="ms-1 mb-0.5 text-secondary-medium"/>
+        <div class="flex shrink-0 items-center justify-start px-4 pb-4 pt-5 sm:px-6">
+            <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-sm font-semibold leading-none text-[#58595B]">@lang('general.today-events')</h3>
+                <span class="relative -top-px text-sm font-medium leading-none text-secondary-light">{{ now()->format('j/n/Y') }}</span>
+                <x-icons.event class="relative -top-px size-4 shrink-0 text-secondary-medium"/>
             </div>
         </div>
         @if(count($events) > 0)

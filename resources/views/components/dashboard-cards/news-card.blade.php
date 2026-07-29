@@ -13,25 +13,23 @@
 
 
 
-<div x-data="{ open: false, selected: null }"
-    x-on:keydown.escape.window="open = false"
-    class="relative flex h-70 min-h-0 w-full flex-col overflow-hidden rounded-3xl bg-white py-6 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] lg:h-[36.5rem]">
-    <div class="flex items-center justify-between px-6 pt-5 pb-1 flex-shrink-0">
-        <div class="flex items-center gap-3">
-            <h2 class="text-md font-base text-[#58595B]">
+<div class="relative w-full h-full  py-6 bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] flex flex-col overflow-hidden">
+    <div class="flex items-center justify-start px-4 pt-5 pb-1 shrink-0 sm:px-6">
+        <div class="flex flex-wrap items-center gap-2">
+            <h2 class="text-sm font-semibold leading-none text-[#58595B]">
                 {{ __('general.news') }}
-                <span class="text-secondary-light text-md ms-1">
-                    {{ $newsItems->count() }}
-                </span>
             </h2>
-            <div class="text-red-500 w-4 h-4 text-sm">
-                <img src="{{ asset('assets/icons/news.svg') }}" alt="Notes icon">
+            <span class="relative text-sm font-medium leading-none -top-px text-secondary-light">
+                {{ $newsItems->count() }}
+            </span>
+            <div class="relative flex items-center justify-center text-red-500 -top-px size-4 shrink-0">
+                <img class="block object-contain size-full" src="{{ asset('assets/icons/news.svg') }}" alt="News icon">
             </div>
 
         </div>
     </div>
 
-    <div class="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-6 py-4 space-y-5">
+    <div class="flex-1 min-h-0 px-6 py-4 space-y-5 overflow-y-auto custom-scrollbar">
         @forelse($newsItems as $news)
             @php
                 $targetType = $news->newsable_type ? strtolower(class_basename($news->newsable_type)) : 'all';
@@ -39,14 +37,14 @@
                 $title = $news->localizedTitle();
                 $description = $news->localizedDescription();
             @endphp
-            <div class="border-b border-b-secondary-light pb-3 last:border-b-0 last:pb-0">
+            <div class="pb-3 border-b border-b-secondary-light last:border-b-0 last:pb-0">
                 <p class="text-[10px] font-light text-gray-400">
                     {{ $news->published_at?->diffForHumans() ?? 'Just Now' }}
                 </p>
                 <p class="text-sm font-bold text-[#58595B]">
                     {{ $title }}
                 </p>
-                <p class="text-xs font-light text-secondary-medium mt-1 line-clamp-2">
+                <p class="mt-1 text-xs font-light text-secondary-medium line-clamp-2">
                     {{ $description ?? 'Since 2013 (officially established in 2018), Christian Hope Center has been dedicated to supporting Christian...' }}
                 </p>
                 <button type="button"
@@ -60,12 +58,12 @@
                         target: @js($news->newsable_name),
                         targetType: @js($targetType),
                     }; open = true"
-                    class="ms-auto mt-2 flex text-xs font-semibold text-primary underline">
+                    class="flex mt-2 text-xs font-semibold underline ms-auto text-primary">
                     @lang('general.read-more') &rarr;
                 </button>
             </div>
         @empty
-            <div class="flex flex-col items-center justify-center  text-sm font-light text-secondary-light h-full">
+            <div class="flex flex-col items-center justify-center h-full text-sm font-light text-secondary-light">
                 <span>@lang('general.no-available-data')</span>
             </div>
         @endforelse
@@ -75,7 +73,7 @@
         <div x-cloak
             x-show="open"
             x-transition.opacity.duration.200ms
-            class="fixed inset-0 z-50 flex items-center justify-center bg-accent/55 p-4 font-sans backdrop-blur-sm sm:p-6"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 font-sans bg-accent/55 backdrop-blur-sm sm:p-6"
             role="dialog"
             aria-modal="true"
             x-on:click.self="open = false">
@@ -89,7 +87,7 @@
                 class="relative max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-2xl">
                 <button type="button"
                     x-on:click="open = false"
-                    class="absolute end-4 top-4 z-10 flex size-9 items-center justify-center rounded-full border border-neutral-200 bg-white/95 text-secondary-medium shadow-sm transition hover:border-secondary-light hover:text-primary"
+                    class="absolute z-10 flex items-center justify-center transition border rounded-full shadow-sm end-4 top-4 size-9 border-neutral-200 bg-white/95 text-secondary-medium hover:border-secondary-light hover:text-primary"
                     aria-label="{{ __('general.cancel') }}">
                     <x-icons.x-mark class="size-4 shrink-0" />
                 </button>
@@ -97,18 +95,18 @@
                 <div class="custom-scrollbar max-h-[90vh] overflow-y-auto">
                     <template x-if="selected?.image">
                         <div class="aspect-[16/7] w-full overflow-hidden bg-neutral-100">
-                            <img :src="selected.image" :alt="selected.title || ''" class="h-full w-full object-cover">
+                            <img :src="selected.image" :alt="selected.title || ''" class="object-cover w-full h-full">
                         </div>
                     </template>
 
-                    <div class="space-y-4 p-6 sm:p-8">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-primary">@lang('general.news')</p>
+                    <div class="p-6 space-y-4 sm:p-8">
+                        <p class="text-xs font-semibold tracking-wide uppercase text-primary">@lang('general.news')</p>
                         <h3 class="text-2xl font-extrabold leading-normal text-secondary-dark sm:text-3xl" x-text="selected?.title"></h3>
-                        <div class="mt-2 mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs leading-4 text-secondary-medium">
+                        <div class="flex flex-wrap items-center mt-2 mb-4 text-xs leading-4 gap-x-4 gap-y-2 text-secondary-medium">
                             <span class="group flex items-center gap-1.5 transition-colors hover:text-primary">
                                 <x-icons.clock class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
                                 <span class="flex items-center gap-1">
-                                    <span class="font-semibold text-secondary-dark transition-colors group-hover:text-primary">@lang('general.published_at'):</span>
+                                    <span class="font-semibold transition-colors text-secondary-dark group-hover:text-primary">@lang('general.published_at'):</span>
                                     <span x-text="selected?.publishedAt"></span>
                                 </span>
                             </span>
@@ -116,7 +114,7 @@
                             <span class="group flex items-center gap-1.5 transition-colors hover:text-primary">
                                 <x-icons.employee class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
                                 <span class="flex items-center gap-1">
-                                    <span class="font-semibold text-secondary-dark transition-colors group-hover:text-primary">@lang('general.created_by'):</span>
+                                    <span class="font-semibold transition-colors text-secondary-dark group-hover:text-primary">@lang('general.created_by'):</span>
                                     <span x-text="selected?.author"></span>
                                 </span>
                             </span>
@@ -125,7 +123,7 @@
                                 <span class="group flex items-center gap-1.5 transition-colors hover:text-primary">
                                     <x-icons.calendar class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
                                     <span class="flex items-center gap-1">
-                                        <span class="font-semibold text-secondary-dark transition-colors group-hover:text-primary">@lang('general.event_date'):</span>
+                                        <span class="font-semibold transition-colors text-secondary-dark group-hover:text-primary">@lang('general.event_date'):</span>
                                         <span x-text="selected.eventDate"></span>
                                     </span>
                                 </span>
@@ -138,13 +136,13 @@
                                 <x-icons.program x-show="selected?.targetType === 'program'" class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
                                 <x-icons.city x-show="selected?.targetType === 'city'" class="size-3.5 shrink-0 text-secondary-light transition-colors group-hover:text-primary" />
                                 <span class="flex items-center gap-1">
-                                    <span class="font-semibold text-secondary-dark transition-colors group-hover:text-primary">@lang('general.target_group'):</span>
+                                    <span class="font-semibold transition-colors text-secondary-dark group-hover:text-primary">@lang('general.target_group'):</span>
                                     <span x-text="selected?.target || @js(__('general.all_org'))"></span>
                                 </span>
                             </span>
                         </div>
                         <div class="h-px bg-neutral-200"></div>
-                        <p class="whitespace-pre-line text-sm font-normal leading-7 text-secondary-medium sm:text-base sm:leading-8"
+                        <p class="text-sm font-normal leading-7 whitespace-pre-line text-secondary-medium sm:text-base sm:leading-8"
                             x-text="selected?.description || ''"></p>
                     </div>
                 </div>

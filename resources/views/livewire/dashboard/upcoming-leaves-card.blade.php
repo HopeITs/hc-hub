@@ -4,16 +4,16 @@
 <div
         class="w-full h-full  bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
     <!-- Header -->
-    <div class="flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
-        <div class="flex items-center gap-2">
-            <h3 class="text-sm font-semibold text-[#58595B]">
+    <div class="flex shrink-0 items-center justify-start px-4 pb-4 pt-5 sm:px-6">
+        <div class="flex flex-wrap items-center gap-2">
+            <h3 class="text-sm font-semibold leading-none text-[#58595B]">
                 @lang('general.upcoming-leaves')
             </h3>
-            <span class="text-secondary-light text-sm font-medium">
+            <span class="relative -top-px text-sm font-medium leading-none text-secondary-light">
                 {{$upcomingLeaves->count()}}
             </span>
-            <div class="text-red-500 w-4 h-4 text-sm">
-                <img src="{{ asset('assets/icons/upcoming-leaves.svg') }}" alt="Notes icon">
+            <div class="relative -top-px flex size-4 shrink-0 items-center justify-center text-red-500">
+                <img class="block size-full object-contain" src="{{ asset('assets/icons/upcoming-leaves.svg') }}" alt="Upcoming leaves icon">
             </div>
         </div>
     </div>
