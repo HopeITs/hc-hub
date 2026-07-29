@@ -1,17 +1,14 @@
-<div class="bg-white rounded-[32px] py-4 px-7 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] w-full max-w-3xl h-full mx-auto">
-
-    <div class="m-2.5 flex items-center justify-start gap-2 leading-none">
-        <h2 class="text-[16px] font-semibold text-secondary-dark">@lang('general.calendar')</h2>
-
-        <span class="relative -top-px flex size-5 shrink-0 items-center justify-center text-primary">
+<div class="mx-auto h-full w-full max-w-3xl rounded-[32px] bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
+    <x-dashboard-cards.card-header :title="__('general.calendar')">
+        <x-slot:icon>
             <svg class="block size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round"
                       d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/>
             </svg>
-        </span>
-    </div>
+        </x-slot:icon>
+    </x-dashboard-cards.card-header>
 
-    <div class="flex justify-between items-center px-3 my-1">
+    <div class="mx-7 my-1 flex items-center justify-between px-3">
         <p class="text-[13px] font-normal text-secondary-dark">
             {{ $current->format('F Y') }}
         </p>
@@ -22,9 +19,9 @@
         </div>
     </div>
 
-    <div class="border-t w-full  border-secondary-medium mb-2"></div>
+    <div class="mx-7 mb-2 border-t border-secondary-medium"></div>
 
-    <div class="grid grid-cols-7 text-center font-medium mb-1 text-[12px] text-secondary-dark tracking-wide">
+    <div class="mx-7 mb-1 grid grid-cols-7 text-center text-[12px] font-medium tracking-wide text-secondary-dark">
         <span>{{substr(__('general.days-of-week.1'), 0,2)}} </span>
         <span>Tu</span>
         <span>We</span>
@@ -34,7 +31,7 @@
         <span>Su</span>
     </div>
 
-    <div class="grid grid-cols-7 text-center font-light gap-y-1.5 text-[11px]">
+    <div class="mx-7 grid grid-cols-7 gap-y-1.5 text-center text-[11px] font-light">
 
         @foreach ($calendar as $day)
             @php

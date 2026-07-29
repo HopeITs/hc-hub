@@ -4,26 +4,21 @@
         x-init="init(@js($this->notes->pluck('id')))"
         class="relative h-full w-full">
         <div class="flex h-full w-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
-            <div class="flex shrink-0 items-center justify-between px-6 pb-4 pt-5">
-                <div class="flex items-center gap-2">
-                    <h2 class="text-base font-semibold leading-none text-[#58595B]">@lang('general.notes')</h2>
-                    <span class="relative -top-px text-sm font-medium leading-none text-secondary-light">
-                        {{ $this->notes->count() }}
-                    </span>
-                    <div class="relative -top-px flex size-4 shrink-0 items-center justify-center text-primary">
-                        <img class="block size-full object-contain" src="{{ asset('assets/icons/notes.svg') }}" alt="Notes icon">
-                    </div>
-                </div>
-
-                <button
-                    @click="openNewNoteModal()"
-                    class="flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    @lang('general.add-note')
-                </button>
-            </div>
+            <x-dashboard-cards.card-header :title="__('general.notes')" :count="$this->notes->count()">
+                <x-slot:icon>
+                    <img class="block size-full object-contain" src="{{ asset('assets/icons/notes.svg') }}" alt="">
+                </x-slot:icon>
+                <x-slot:actions>
+                    <button
+                        @click="openNewNoteModal()"
+                        class="flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        @lang('general.add-note')
+                    </button>
+                </x-slot:actions>
+            </x-dashboard-cards.card-header>
 
             <div class="mx-6 my-4 pe-2 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
                 <div class="pt-1">

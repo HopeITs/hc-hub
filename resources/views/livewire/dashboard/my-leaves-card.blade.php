@@ -1,16 +1,13 @@
-<div class=" w-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border p-2 border-gray-200 py-6 px-8 flex flex-col justify-between space-y-4 min-h-[330px] sm:min-h-[360px] md:min-h-0">
+<div class="flex min-h-[330px] w-full flex-col justify-between space-y-4 rounded-3xl border border-gray-200 bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] sm:min-h-[360px] md:min-h-0">
+    <x-dashboard-cards.card-header :title="__('general.my-leaves')">
+        <x-slot:actions>
+            <a href="{{route('leaves.index')}}" class="flex flex-row gap-2 rounded-md bg-primary px-3 py-2 text-xs font-medium text-white transition">
+                {{ __('general.show-more') }}
+            </a>
+        </x-slot:actions>
+    </x-dashboard-cards.card-header>
 
-    <div class="flex items-center justify-between">
-        <h3 class="text-base font-semibold text-gray-600">
-            {{ __('general.my-leaves') }}
-        </h3>
-        <a href="{{route('leaves.index')}}" class="flex flex-row gap-2 px-3 py-2 text-xs font-medium text-white transition rounded-md bg-primary">
-
-            {{ __('general.show-more') }}
-        </a>
-    </div>
-
-    <div class="grid items-center grid-cols-1 gap-10 md:grid-cols-2 md:gap-6">
+    <div class="grid grid-cols-1 items-center gap-10 px-8 pb-6 md:grid-cols-2 md:gap-6">
 
         <div class="flex items-end space-x-6">
             <div class="flex items-end -mb-3.5">
