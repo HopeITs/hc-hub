@@ -22,7 +22,7 @@ class PositionEdit extends Component
         $this->form->setPosition($this->position);
         $cities = City::where('is_active', true)->get();
         $programs = Program::where('is_active', true)->orderBy('name')->get();
-        $centers = Center::where('is_active', true)->with('city')->orderBy('name')->get();
+        $centers = Center::where('is_active', true)->with('city')->orderBy(transColumn('name'))->get();
         $jobLevels = JobLevel::orderBy('grade')->get();
         $positions = Position::with(['center', 'program'])->whereNot('id',$this->position->id)->orderBy(transColumn('title'))->get();
         $departments = Department::orderby('name')->get();

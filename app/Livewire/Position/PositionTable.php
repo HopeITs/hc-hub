@@ -64,8 +64,8 @@ class PositionTable extends LivewireTable
             SelectColumn::make(trans_choice('general.program', 1), 'program.name')
                 ->options(Program::query()->orderby('name')->get()->pluck('name', 'name')->toArray())
                 ->sortable()     ->searchable(),
-            SelectColumn::make(trans_choice('general.center', 1), 'center.name')
-                ->options(Center::query()->orderby('name')->get()->pluck('name', 'name')->toArray())
+            SelectColumn::make(trans_choice('general.center', 1), 'center.'.transColumn('name'))
+                ->options(Center::query()->orderBy(transColumn('name'))->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()     ->searchable(),
             SelectColumn::make(trans_choice('general.department', 1), 'department.name')
                 ->options(Department::query()->orderby('name')->get()->pluck('name', 'name')->toArray())

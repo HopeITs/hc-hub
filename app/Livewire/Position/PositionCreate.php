@@ -23,7 +23,7 @@ class PositionCreate extends Component
     {
         $cities = City::where('is_active', true)->get();
         $programs = Program::where('is_active', true)->orderBy('name')->get();
-        $centers = Center::where('is_active', true)->with('city')->orderBy('name')->get();
+        $centers = Center::where('is_active', true)->with('city')->orderBy(transColumn('name'))->get();
         $jobLevels = JobLevel::orderBy('grade')->get();
         $positions = Position::where('is_active', true)->with(['center', 'program'])->orderBy(transColumn('title'))->get();
 

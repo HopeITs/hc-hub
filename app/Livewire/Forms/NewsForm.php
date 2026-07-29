@@ -80,7 +80,7 @@ class NewsForm extends Form
     {
         return match ($this->newsable_type) {
             City::class => City::select('id', 'name_en', 'name_ar')->where('is_active', true)->orderBy('name_en')->get(),
-            Center::class => Center::select('id', 'name')->where('is_active', true)->orderBy('name')->get(),
+            Center::class => Center::select('id', transColumn('name'))->where('is_active', true)->orderBy(transColumn('name'))->get(),
             Program::class => Program::select('id', 'name')->orderBy('name')->get(),
             Employee::class => Employee::select('id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar')
                 ->where('is_active', true)

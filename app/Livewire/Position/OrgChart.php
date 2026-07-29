@@ -110,7 +110,7 @@ class OrgChart extends Component
     {
         $this->cities = City::where('is_active', true)->orderBy(transColumn('name'))->get();
         $this->programs = Program::where('is_active', true)->orderBy('name')->get();
-        $this->centers = Center::where('is_active', true)->orderBy('name')->get();
+        $this->centers = Center::where('is_active', true)->orderBy(transColumn('name'))->get();
         $this->departments = Department::orderBy('name')->get();
         $this->jobLevels = JobLevel::orderBy('grade')->get();
         $this->refreshManagerOptions();
@@ -225,12 +225,12 @@ class OrgChart extends Component
     private function updateCityOptions(): void
     {
         if ($this->city_id === 1 || $this->city_id === null) {
-            $this->centers = Center::where('is_active', true)->orderBy('name')->get();
+            $this->centers = Center::where('is_active', true)->orderBy(transColumn('name'))->get();
             $this->programs = Program::where('is_active', true)->orderBy('name')->get();
         } else {
             $this->centers = Center::where('is_active', true)
                 ->where('city_id', $this->city_id)
-                ->orderBy('name')
+                ->orderBy(transColumn('name'))
                 ->get();
             $this->programs = Program::where('is_active', true)
                 ->whereHas('positions', fn (Builder $query) => $query->where('city_id', $this->city_id))
@@ -245,11 +245,11 @@ class OrgChart extends Component
     private function updateProgramOptions(): void
     {
         if ($this->program_id === 1 || $this->program_id === null) {
-            $this->centers = Center::where('is_active', true)->orderBy('name')->get();
+            $this->centers = Center::where('is_active', true)->orderBy(transColumn('name'))->get();
         } else {
             $this->centers = Center::where('is_active', true)
                 ->whereHas('positions', fn (Builder $query) => $query->where('program_id', $this->program_id))
-                ->orderBy('name')
+                ->orderBy(transColumn('name'))
                 ->get();
         }
 

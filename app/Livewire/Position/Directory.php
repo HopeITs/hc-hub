@@ -50,7 +50,7 @@ class Directory extends Component
     public function mount(): void
     {
         $this->departments = Department::orderBy('name')->get();
-        $this->centers = Center::where('is_active', true)->orderBy('name')->get();
+        $this->centers = Center::where('is_active', true)->orderBy(transColumn('name'))->get();
         $this->cities = City::where('is_active', true)->orderBy(transColumn('name'))->get();
         $this->programs = Program::where('is_active', true)->orderBy('name')->get();
         $this->jobLevels = JobLevel::orderBy('grade')->get();

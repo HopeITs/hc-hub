@@ -53,12 +53,14 @@ trait ResolvesContractLocationOptions
             return collect();
         }
 
-        return Center::select('centers.id', 'centers.name')
+        $nameColumn = transColumn('name');
+
+        return Center::select('centers.id', "centers.{$nameColumn}")
             ->whereHas('positions', function ($q) {
                 $q->where('program_id', $this->program_id)
                     ->inCity($this->city_id);
             })
-            ->orderBy('centers.name')
+            ->orderBy("centers.{$nameColumn}")
             ->get();
     }
 

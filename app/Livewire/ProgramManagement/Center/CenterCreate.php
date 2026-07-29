@@ -12,7 +12,8 @@ use Livewire\Component;
 class CenterCreate extends Component
 {
     public array $item = [
-        'name' => '',
+        'name_en' => '',
+        'name_ar' => '',
         'city_id' => '',
         'address_ar' => '',
         'address_en' => '',
@@ -23,7 +24,8 @@ class CenterCreate extends Component
     ];
 
     protected $rules = [
-        'item.name' => 'required|string|max:255',
+        'item.name_en' => 'required|string|max:255',
+        'item.name_ar' => 'required|string|max:255',
         'item.city_id' => 'required|exists:cities,id',
         'item.address_en' => 'nullable|string|max:255',
         'item.address_ar' => 'nullable|string|max:255',

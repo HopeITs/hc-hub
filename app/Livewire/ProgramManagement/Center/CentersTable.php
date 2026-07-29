@@ -33,7 +33,7 @@ class CentersTable extends LivewireTable
 
     protected function globalSearchColumns(): array
     {
-        return ['name'];
+        return [transColumn('name')];
     }
 
     protected function cityOptions(): array
@@ -56,7 +56,7 @@ class CentersTable extends LivewireTable
         return [
             Column::make('ID', 'id')->sortable(),
 
-            Column::make(__('general.center-name'), 'name')
+            Column::make(__('general.center-name'), transColumn('name'))
                 ->sortable()->searchable(),
             Column::make(__('general.working-hours'), 'open_at')
                 ->displayUsing(fn ($v, Model $m) => __('general.from-hour-to-hour', [

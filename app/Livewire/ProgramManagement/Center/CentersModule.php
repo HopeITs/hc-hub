@@ -18,7 +18,8 @@ class CentersModule extends Component
 
     public array $item = [
         'id' => null,
-        'name' => '',
+        'name_en' => '',
+        'name_ar' => '',
         'city_id' => '',
         'address_ar' => '',
         'address_en' => '',
@@ -29,7 +30,8 @@ class CentersModule extends Component
     ];
 
     protected $rules = [
-        'item.name' => 'required|string|max:255',
+        'item.name_en' => 'required|string|max:255',
+        'item.name_ar' => 'required|string|max:255',
         'item.city_id' => 'required|exists:cities,id',
         'item.address_en' => 'nullable|string|max:255',
         'item.address_ar' => 'nullable|string|max:255',
@@ -49,7 +51,8 @@ class CentersModule extends Component
     {
         $this->item = [
             'id' => null,
-            'name' => '',
+            'name_en' => '',
+            'name_ar' => '',
             'city_id' => '',
             'address_ar' => '',
             'address_en' => '',
@@ -71,7 +74,8 @@ class CentersModule extends Component
 
         $this->item = [
             'id' => $model->id,
-            'name' => $model->name,
+            'name_en' => $model->name_en,
+            'name_ar' => $model->name_ar,
             'city_id' => $model->city_id,
             'address_ar' => $model->address_ar,
             'address_en' => $model->address_en,

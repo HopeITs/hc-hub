@@ -22,11 +22,15 @@
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" max-width="3xl" wire:ignore.self>
         <form wire:submit.prevent="save" class="grid grid-cols-2 gap-4">
 
-            <div class="md:col-span-full">
-                <x-forms.input-label for="name" required>@lang('general.center-name')</x-forms.input-label>
-                <x-forms.input id="name" type="text" wire:model.defer="item.name" />
-                <x-error-span>{{ $errors->first('item.name') }}</x-error-span>
-            </div>
+            @foreach(config('app.supported_locales') as $loc)
+                <div>
+                    <x-forms.input-label for="name_{{ $loc }}" required>
+                        @lang('general.center-name') ({{ strtoupper($loc) }})
+                    </x-forms.input-label>
+                    <x-forms.input id="name_{{ $loc }}" type="text" wire:model.defer="item.name_{{ $loc }}" />
+                    <x-error-span>{{ $errors->first('item.name_' . $loc) }}</x-error-span>
+                </div>
+            @endforeach
 
             <div class="md:col-span-full">
                 <x-forms.input-label for="city_id" required>{{ trans_choice('general.city', 1) }}</x-forms.input-label>

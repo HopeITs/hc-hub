@@ -27,8 +27,8 @@ class NewCenterCreated extends Notification implements ShouldQueue
             ],
 
             'body' => [
-                'en' => "Center \"{$this->center->name}\" has been created.",
-                'ar' => "تم إنشاء المركز \"{$this->center->name}\".",
+                'en' => "Center \"{$this->center->name_en}\" has been created.",
+                'ar' => "تم إنشاء المركز \"{$this->center->name_ar}\".",
             ],
 
         ];
