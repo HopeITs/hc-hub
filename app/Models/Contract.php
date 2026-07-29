@@ -102,6 +102,8 @@ class Contract extends Model
                 'salary_per',
                 'work_days_en',
                 'work_days_ar',
+                'attending_notes_en',
+                'attending_notes_ar',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

@@ -32,6 +32,8 @@ class ContractForm extends Form
     // ── Schedule
     public mixed $work_days_ar = null;
     public mixed $work_days_en = null;
+    public ?string $attending_notes_ar = null;
+    public ?string $attending_notes_en = null;
     public ?string $work_hours_from = '09:00';
     public ?string $work_hours_to = '17:00';
 
@@ -74,6 +76,8 @@ class ContractForm extends Form
         $this->terminated_at         = null;
         $this->termination_reason_id = null;
         $this->reason_of_termination = null;
+        $this->attending_notes_ar    = null;
+        $this->attending_notes_en    = null;
     }
 
     public function setContract(Contract $contract): void
@@ -101,6 +105,8 @@ class ContractForm extends Form
         $this->salary_per      = $contract->salary_per;
         $this->work_days_ar    = $contract->work_days_ar;
         $this->work_days_en    = $contract->work_days_en;
+        $this->attending_notes_ar = $contract->attending_notes_ar;
+        $this->attending_notes_en = $contract->attending_notes_en;
         $this->work_hours_from = $contract->work_hours_from ?? $this->work_hours_from;
         $this->work_hours_to   = $contract->work_hours_to ?? $this->work_hours_to;
     }
@@ -137,6 +143,8 @@ class ContractForm extends Form
             'termination_reason_id'  => ['nullable', 'exists:termination_reasons,id'],
             'reason_of_termination'  => ['nullable', 'string'],
             'weekly_hours'           => ['required', 'integer', 'min:1'],
+            'attending_notes_ar'     => ['nullable', 'string', 'max:255'],
+            'attending_notes_en'     => ['nullable', 'string', 'max:255'],
         ]);
     }
 
@@ -213,6 +221,8 @@ class ContractForm extends Form
             'weekly_hours'          => (int) $this->weekly_hours,
             'work_days_ar'          => $this->work_days_ar,
             'work_days_en'          => $this->work_days_en,
+            'attending_notes_ar' => filled($this->attending_notes_ar) ? trim($this->attending_notes_ar) : null,
+            'attending_notes_en' => filled($this->attending_notes_en) ? trim($this->attending_notes_en) : null,
             'work_hours_from'       => $this->work_hours_from,
             'work_hours_to'         => $this->work_hours_to,
             // Automatically deactivate when a termination is recorded
@@ -250,6 +260,8 @@ class ContractForm extends Form
             'weekly_hours'          => (int) $this->weekly_hours,
             'work_days_ar'          => $this->work_days_ar,
             'work_days_en'          => $this->work_days_en,
+            'attending_notes_ar' => filled($this->attending_notes_ar) ? trim($this->attending_notes_ar) : null,
+            'attending_notes_en' => filled($this->attending_notes_en) ? trim($this->attending_notes_en) : null,
             'work_hours_from'       => $this->work_hours_from,
             'work_hours_to'         => $this->work_hours_to,
             'currency'              => (int) $this->currency,
@@ -281,6 +293,7 @@ class ContractForm extends Form
 
 
  
+
 
 
 

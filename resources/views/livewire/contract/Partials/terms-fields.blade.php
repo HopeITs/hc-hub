@@ -60,6 +60,25 @@
         </div>
     @endforeach
 
+    @foreach(config('app.supported_locales') as $notesLocale)
+        <div class="col-span-1">
+            <x-forms.input-label for="attending_notes_{{ $notesLocale }}">
+                @lang('general.attending-notes') ({{ strtoupper($notesLocale) }})
+            </x-forms.input-label>
+
+            <x-forms.textarea
+                id="attending_notes_{{ $notesLocale }}"
+                wire:model.defer="form.attending_notes_{{ $notesLocale }}"
+                maxlength="255"
+                rows="3"
+                dir="{{ $notesLocale === 'ar' ? 'rtl' : 'ltr' }}"
+                placeholder="{{ __('general.attending-notes-placeholder-'.$notesLocale) }}"
+            />
+
+            <x-error-span>{{ $errors->first('form.attending_notes_'.$notesLocale) }}</x-error-span>
+        </div>
+    @endforeach
+
     <hr class="my-3 col-span-full">
 
     {{-- Terminated at --}}
