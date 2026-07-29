@@ -1,4 +1,5 @@
 @php
+    use App\Enums\Currency;
     use App\Support\ArabicText as AR;
     use Carbon\Carbon;
 
@@ -18,6 +19,9 @@
     $salary = (float) ($contract->salary ?? 0);
     $salaryFormattedEn = $salary ? number_format($salary, 0, '.', ',') : '—';
     $salaryFormattedAr = $salary ? $Digits(number_format($salary, 0, '.', ',')) : '—';
+    $currencyLabels = Currency::getLocalizedName((int) $contract->currency);
+    $currencyEn = $currencyLabels['en'];
+    $currencyAr = $currencyLabels['ar'];
     $annualLeaveDays = $contract->leaveBalances->first()?->int_total ?? '—';
     $weeklyHours = (int) ($contract->weekly_hours ?? 40);
     $dailyHours = $weeklyHours / 5;
@@ -101,10 +105,10 @@
     <x-contract.dual :en="$LB('7. Stipend and Benefits:')" :ar="$LB($Glyphs('7. المكافأة المالية والمزايا:'))" />
     <x-contract.dual class="mt-1" :en="'Christian Hope Center is to give a monthly stipend of <strong>/ ' .
         $salaryFormattedEn .
-        ' USD /</strong>'"
+        ' ' . $currencyEn . ' /</strong>'"
         :ar="$Glyphs('خصص الفريق الأول للفريق الثاني شهرياً مكافأة وقدرها ').
         '<strong>'.$Glyphs('/').$salaryFormattedAr.
-        ' '.$Glyphs('دولار أمريكي /').
+        ' '.$Glyphs($currencyAr.' /').
         '</strong>'" />
 
     <x-contract.dual :en="'or its equivalent in Syrian pounds, to be paid in cash to the volunteer at the end of each month.'" :ar="$Glyphs('أو ما يعادلها بالليرة السورية، تُمنح نقداً في نهاية كل شهر.')" />
