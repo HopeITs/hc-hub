@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\LeaveRequest;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -51,11 +50,9 @@ class HRSawLeaveRequest extends Notification
         $leaveRequest = $this->leaveRequest;
         $leaveType = $leaveRequest->leaveBalance->leaveType;
 
-
         $employee = $leaveRequest->leaveBalance->contract->employee;
-        $employeeNameEn = $employee->name_en ?? '';
-        $employeeNameAr = $employee->name_ar ?? '';
-
+        $employeeNameEn = $employee->nameForLocale('en');
+        $employeeNameAr = $employee->nameForLocale('ar');
 
         if ($this->recipientType === 'employee') {
             return [
@@ -66,7 +63,8 @@ class HRSawLeaveRequest extends Notification
                 'body' => [
                     'en' => "HR reviewed your leave request: {$leaveType->name_en}",
                     'ar' => "قام قسم الموارد البشرية بمراجعة طلب إجازتك من نوع: {$leaveType->name_ar}",
-                ]
+                ],
+                'url' => route('leaves.index', ['leave' => $leaveRequest->id]),
             ];
         }
 
@@ -79,11 +77,14 @@ class HRSawLeaveRequest extends Notification
                 'body' => [
                     'en' => "HR reviewed {$leaveType->name_en} leave request for employee: {$employeeNameEn}",
                     'ar' => "قام قسم الموارد البشرية بمراجعة طلب إجازة ({$leaveType->name_ar}) للموظف: {$employeeNameAr}",
-                ]
+                ],
+                'url' => route('leaves.all', [
+                    'leave' => $leaveRequest->id,
+                    'mode' => 'details',
+                ]),
             ];
         }
 
         return [];
     }
-
 }

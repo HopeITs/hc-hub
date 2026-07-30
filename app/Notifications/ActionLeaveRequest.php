@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Enums\LeaveRequestStatus;
 use App\Models\LeaveRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -26,9 +27,19 @@ class ActionLeaveRequest extends Notification
         $leaveType = $leaveRequest->leaveBalance->leaveType;
         $status = $leaveRequest->status;
 
-        $isAccepted = $status === \App\Enums\LeaveRequestStatus::Accepted;
+        $isAccepted = match ($status) {
+            LeaveRequestStatus::Accepted => true,
+            LeaveRequestStatus::Rejected => false,
+            default => throw new \LogicException(
+                "Cannot create a leave decision notification for status [{$status}]."
+            ),
+        };
 
+        $rejectReason = trim((string) $leaveRequest->reject_reason);
 
+        if (! $isAccepted && $rejectReason === '') {
+            throw new \LogicException('A rejected leave notification requires a rejection reason.');
+        }
 
         if ($this->recipientType === 'employee') {
             return [
@@ -39,18 +50,20 @@ class ActionLeaveRequest extends Notification
                 'body' => [
                     'en' => $isAccepted
                         ? "Your leave request has been approved: {$leaveType->name_en}"
-                        : "Your leave request has been rejected: {$leaveType->name_en}",
+                        : "Your leave request has been rejected: {$leaveType->name_en} — Reason: {$rejectReason}",
                     'ar' => $isAccepted
                         ? "تم قبول إجازتك من نوع: {$leaveType->name_ar}"
-                        : "تم رفض طلب الإجازة من نوع: {$leaveType->name_ar}",
+                        : "تم رفض طلب الإجازة من نوع: {$leaveType->name_ar} — سبب الرفض: {$rejectReason}",
                 ],
-                'url' => route('leaves.index'),
+                'url' => route('leaves.index', ['leave' => $leaveRequest->id]),
             ];
         }
 
-
         if ($this->recipientType === 'hr') {
             $employee = $leaveRequest->leaveBalance->contract->employee;
+            $employeeNameEn = $employee->nameForLocale('en');
+            $employeeNameAr = $employee->nameForLocale('ar');
+
             return [
                 'title' => [
                     'en' => $isAccepted
@@ -64,15 +77,18 @@ class ActionLeaveRequest extends Notification
 
                 'body' => [
                     'en' => $isAccepted
-                        ? "{$leaveType->name_en} leave has been approved for employee: {$employee->name_en}"
-                        : "{$leaveType->name_en} leave has been rejected for employee: {$employee->name_en}",
+                        ? "{$leaveType->name_en} leave has been approved for employee: {$employeeNameEn}"
+                        : "{$leaveType->name_en} leave has been rejected for employee: {$employeeNameEn} — Reason: {$rejectReason}",
 
                     'ar' => $isAccepted
-                        ? "تم قبول إجازة ({$leaveType->name_ar}) للموظف: {$employee->name_ar}"
-                        : "تم رفض إجازة ({$leaveType->name_ar}) للموظف: {$employee->name_ar}",
+                        ? "تم قبول إجازة ({$leaveType->name_ar}) للموظف: {$employeeNameAr}"
+                        : "تم رفض إجازة ({$leaveType->name_ar}) للموظف: {$employeeNameAr} — سبب الرفض: {$rejectReason}",
                 ],
 
-                'url' => route('leaves.all'),
+                'url' => route('leaves.all', [
+                    'leave' => $leaveRequest->id,
+                    'mode' => 'details',
+                ]),
             ];
         }
 

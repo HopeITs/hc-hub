@@ -595,6 +595,10 @@ return [
     'start-time' => 'وقت البدء',
     'end-time' => 'وقت الانتهاء',
     'seen-by-hr' => 'مراجَع من الـ HR',
+    'reviewed' => 'تمت المراجعة',
+    'mark-reviewed' => 'تحديد كمراجَع',
+    'review-leave-request' => 'مراجعة طلب الإجازة',
+    'confirm-review-leave-request' => 'هل تريد تحديد طلب الإجازة هذا كمراجَع من الموارد البشرية؟ لا يمكن التراجع عن هذا الإجراء.',
     'actions' => 'الإجراءات',
     'search-all-columns' => 'البحث في جميع الأعمدة',
     'no-available-data' => 'لا توجد بيانات متاحة',
@@ -678,6 +682,8 @@ return [
 
     'time' => 'الوقت',
     'leave-decision' => 'قرار الإجازة',
+    'leave-details' => 'تفاصيل الإجازة',
+    'decision-date' => 'تاريخ القرار',
 
     // المخطط التنظيمي
     'filters' => 'عوامل التصفية',

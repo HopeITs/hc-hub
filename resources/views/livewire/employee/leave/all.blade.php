@@ -98,7 +98,7 @@ use App\Enums\LeaveRequestStatus;
                 </div>
 
                 @if($form->leave_balance_id !== null)
-                    @if(optional($allAvailableLeaves->find($form->leave_balance_id))->leaveType->id === LeaveTypeCases::Annual)
+                    @if($allAvailableLeaves->find($form->leave_balance_id)?->leaveType?->id === LeaveTypeCases::Annual)
                         <div class="mt-4">
                             <x-forms.input-label>Leave Type</x-forms.input-label>
                             <div class="flex gap-4">
@@ -108,7 +108,7 @@ use App\Enums\LeaveRequestStatus;
                         </div>
                     @endif
                 @endif
-                @if($form->leave_balance_id === null || optional($allAvailableLeaves->find($form->leave_balance_id))->leaveType->id !== LeaveTypeCases::Annual)
+                @if($form->leave_balance_id === null || $allAvailableLeaves->find($form->leave_balance_id)?->leaveType?->id !== LeaveTypeCases::Annual)
                     <div class="col-span-full md:grid md:grid-cols-2 md:gap-4">
                         <div>
                             <x-forms.input-label for="start_at" required>{{__('general.start-date')}}</x-forms.input-label>
@@ -180,17 +180,13 @@ use App\Enums\LeaveRequestStatus;
     <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
         @if($selectedLeave)
             <div class="space-y-6">
+                <x-leave.decision-summary :leave-request="$selectedLeave" />
 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
                         <x-forms.input-label>{{ __('general.name') }}</x-forms.input-label>
                         <p class="text-gray-700">{{ $selectedLeave->leaveBalance->contract->employee->name }}</p>
                     </div>
-                    <div>
-                        <x-forms.input-label>{{ __('general.request_date') }}</x-forms.input-label>
-                        <p class="text-gray-700">{{ $selectedLeave->created_at->format('d-M-Y') }}</p>
-                    </div>
-
                     <div>
                         <x-forms.input-label>{{ __('general.type') }}</x-forms.input-label>
                         <p class="text-gray-700">{{ $selectedLeave->leaveType->name }}</p>
@@ -252,7 +248,7 @@ use App\Enums\LeaveRequestStatus;
                                       class=" !w-auto">
                         {{ __('general.delete') }}
                     </x-primary-button>
-                    <x-primary-button wire:click="$set('showModal', false)"
+                    <x-primary-button wire:click="closeDetails"
                                       class="!bg-secondary-light !w-auto">
                         {{ __('general.cancel') }}
                     </x-primary-button>
@@ -349,10 +345,11 @@ use App\Enums\LeaveRequestStatus;
 
                             </label>
                         </div>
+                        <x-error-span>{{ $errors->first('form.status') }}</x-error-span>
 
                         @if((int)$form->status === LeaveRequestStatus::Rejected)
                             <div>
-                                <x-forms.input-label>{{ __('general.reject-reason') }}</x-forms.input-label>
+                                <x-forms.input-label required>{{ __('general.reject-reason') }}</x-forms.input-label>
                                 <x-forms.input wire:model="form.reject_reason"/>
                                 <x-error-span>{{ $errors->first('form.reject_reason') }}</x-error-span>
                             </div>
@@ -364,11 +361,15 @@ use App\Enums\LeaveRequestStatus;
 
                 <div class="flex space-x-2 justify-end mt-4">
 
-                    <x-primary-button wire:click="submitDecision" class="!w-auto">
+                    <x-primary-button
+                        wire:click="submitDecision"
+                        wire:loading.attr="disabled"
+                        wire:target="submitDecision"
+                        class="!w-auto">
                         {{ __('general.save') }}
                     </x-primary-button>
 
-                    <x-primary-button wire:click="$set('decisionModal', false)"
+                    <x-primary-button wire:click="closeDecision"
                                       class="!bg-secondary-light !w-auto">
                         {{ __('general.cancel') }}
                     </x-primary-button>

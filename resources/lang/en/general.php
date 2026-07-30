@@ -594,6 +594,10 @@ return [
     'start-time' => 'Start Time',
     'end-time' => 'End Time',
     'seen-by-hr' => 'Seen By HR',
+    'reviewed' => 'Reviewed',
+    'mark-reviewed' => 'Mark reviewed',
+    'review-leave-request' => 'Review leave request',
+    'confirm-review-leave-request' => 'Mark this leave request as reviewed by HR? This action cannot be undone.',
     'actions' => 'Actions',
     'search-all-columns' => 'Search All Columns',
     'no-available-data' => 'No available data',
@@ -676,6 +680,8 @@ return [
 
     'time' => 'Time',
     'leave-decision' => 'Leave Decision',
+    'leave-details' => 'Leave Details',
+    'decision-date' => 'Decision Date',
 
     // Org chart
     'filters' => 'Filters',

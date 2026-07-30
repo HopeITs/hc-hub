@@ -34,7 +34,7 @@
             </div>
 
             @if($form->leave_balance_id !== null)
-                @if(optional($availableLeaves->find($form->leave_balance_id))->leaveType->id === LeaveTypeCases::Annual)
+                @if($availableLeaves->find($form->leave_balance_id)?->leaveType?->id === LeaveTypeCases::Annual)
                     <div class="mt-4">
                         <x-forms.input-label>Leave Type</x-forms.input-label>
                         <div class="flex gap-4">
@@ -44,7 +44,7 @@
                     </div>
                 @endif
             @endif
-            @if($form->leave_balance_id === null || optional($availableLeaves->find($form->leave_balance_id))->leaveType->id !== LeaveTypeCases::Annual)
+            @if($form->leave_balance_id === null || $availableLeaves->find($form->leave_balance_id)?->leaveType?->id !== LeaveTypeCases::Annual)
 
                 <div>
                     <x-forms.input-label for="start_at" required>{{__('general.start-date')}}</x-forms.input-label>

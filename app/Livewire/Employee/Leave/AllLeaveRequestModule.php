@@ -7,39 +7,72 @@ use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
-use App\Models\User;
-use App\Notifications\ActionLeaveRequest;
-use Carbon\Carbon;
+use App\Services\LeaveNotificationService;
 use Blade;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class AllLeaveRequestModule extends Component
 {
-
     public LeaveBalance $leaveBalance;
+
     public LeaveRequest $leaveRequest;
+
     public LeaveRequestForm $form;
+
     public $formModal = false;
+
     public $modalTitle = 'Modal title';
+
     protected $listeners = [
         'openRequestLeaveEdit' => 'edit',
         'openShowRequestLeave' => 'show',
         'openDecisionRequestLeave' => 'openDecision',
-        'processSave' => 'processSave'
+        'processSave' => 'processSave',
     ];
+
     public string $statusFilter = 'all';
+
     public $selectedLeave;
+
     public $showModal = false;
+
     public $decisionModal = false;
+
     public $decisionLeave;
+
+    #[Url(as: 'leave')]
+    public ?int $linkedLeaveId = null;
+
+    #[Url(as: 'mode')]
+    public ?string $linkedLeaveMode = null;
+
     public array $counts = [];
+
     public $allAvailableLeaves = [];
+
     public $alternativeEmployees = [];
 
     public function mount()
     {
         $this->refreshCounts();
+
+        if ($this->linkedLeaveId !== null) {
+            $leaveRequest = LeaveRequest::findOrFail($this->linkedLeaveId);
+
+            if (
+                $this->linkedLeaveMode === 'decision'
+                && $leaveRequest->status === LeaveRequestStatus::Pending
+            ) {
+                $this->openDecision($leaveRequest);
+            } else {
+                $this->show($leaveRequest->id);
+            }
+        }
     }
 
     /**
@@ -47,7 +80,7 @@ class AllLeaveRequestModule extends Component
      * Computed per render (not stored as state) so the heavy list is never
      * serialized into the Livewire payload on every request.
      */
-    protected function scopedEmployees(): \Illuminate\Support\Collection
+    protected function scopedEmployees(): Collection
     {
         $role = auth()->user()->myRole();
 
@@ -65,19 +98,27 @@ class AllLeaveRequestModule extends Component
 
     public function show($id)
     {
-        $this->selectedLeave = LeaveRequest::with(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee'])->findOrFail($id);
+        $leaveRequest = LeaveRequest::with(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee'])->findOrFail($id);
+        Gate::authorize('view', $leaveRequest);
+
+        $this->selectedLeave = $leaveRequest;
+        $this->linkedLeaveId = $leaveRequest->id;
+        $this->linkedLeaveMode = 'details';
 
         $this->modalTitle = 'Leave Details';
         $this->showModal = true;
     }
+
     public function edit(LeaveRequest $id)
     {
+        Gate::authorize('update', $id);
+
         $this->form->setLeaveRequest($id);
 
         $employee = $id->leaveBalance->contract->employee;
 
         // hydrate dependent lists
-        $this->allAvailableLeaves   = $this->leavesFor($employee);
+        $this->allAvailableLeaves = $this->leavesFor($employee);
         $this->alternativeEmployees = $this->alternativeEmployeesFor($employee);
 
         // hydrate form values
@@ -88,19 +129,19 @@ class AllLeaveRequestModule extends Component
         $this->formModal = true;
     }
 
-
     public function updatedFormEmployeeId($employeeId)
     {
-        if (!$employeeId) {
+        if (! $employeeId) {
             $this->allAvailableLeaves = [];
             $this->alternativeEmployees = [];
             $this->form->leave_balance_id = null;
+
             return;
         }
 
         $employee = Employee::with('city')->find($employeeId);
 
-        $this->allAvailableLeaves   = $this->leavesFor($employee);
+        $this->allAvailableLeaves = $this->leavesFor($employee);
         $this->alternativeEmployees = $this->alternativeEmployeesFor($employee);
 
         // Reset dependent dropdowns
@@ -108,11 +149,14 @@ class AllLeaveRequestModule extends Component
         $this->form->alternative_employee = null;
     }
 
-
     public function openDecision(LeaveRequest $id)
     {
+        Gate::authorize('decide', $id);
+
         $this->form->setDecisionLeave($id);
         $this->decisionLeave = $id->load(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee']);
+        $this->linkedLeaveId = $id->id;
+        $this->linkedLeaveMode = 'decision';
 
         $this->modalTitle = __('general.leave-decision');
         $this->decisionModal = true;
@@ -120,21 +164,17 @@ class AllLeaveRequestModule extends Component
 
     public function submitDecision()
     {
-        $this->form->submitDecision();
+        $leaveRequest = $this->form->submitDecision();
 
-        //Notify
-        $leaveRequest = $this->form->decisionLeave->load('leaveBalance.contract.employee.city');
-        $city = $leaveRequest->leaveBalance->contract->employee->city;
-        $hr = User::whereHas('roles', function ($query) use ($city) {
-            $query->where('name', 'HR-' . $city->slug);
-        })->first();
-        $employee = $leaveRequest->leaveBalance->contract->employee->account;
-        isset($hr) ? $hr->notify(new ActionLeaveRequest($leaveRequest ,'hr')) : '';
-        isset($employee) ? $employee->notify(new ActionLeaveRequest($leaveRequest)) : '';
+        app(LeaveNotificationService::class)->sendDecision(
+            $leaveRequest,
+            auth()->user()
+        );
         $this->dispatch('notification-created');
 
         $this->refreshCounts();
         $this->decisionModal = false;
+        $this->clearLinkedLeave();
 
         LivewireAlert::title(__('general.success-message'))
             ->success()
@@ -143,8 +183,8 @@ class AllLeaveRequestModule extends Component
             ->show();
 
         $this->dispatch('$refresh');
+        $this->dispatch('leaveRequestDecisionSaved')->to(AllLeaveRequestTable::class);
     }
-
 
     public function setActiveTab(string $status)
     {
@@ -152,40 +192,29 @@ class AllLeaveRequestModule extends Component
         $this->dispatch('$refresh');
     }
 
+    public function closeDetails(): void
+    {
+        $this->showModal = false;
+        $this->selectedLeave = null;
+        $this->clearLinkedLeave();
+    }
+
+    public function closeDecision(): void
+    {
+        $this->decisionModal = false;
+        $this->decisionLeave = null;
+        $this->clearLinkedLeave();
+    }
+
     public function refreshCounts(): void
     {
         $user = auth()->user();
-        $employee = $user->profile;
-        $role = $user->myRole();
-        // Collect all leave requests through the relationship chain:
-        $leaveRequests = LeaveRequest::whereHas('leaveBalance.contract', function ($query) use ($role, $employee) {
-            if ($role === 'HR-SYR') {
-                return true;
-            } elseif (str_starts_with($role, 'HR-')) {
-                // Extract city code from role, e.g. HR-ALP → ALP
-                $cityCode = substr($role, 3);
-                $query->whereHas('employee', function ($q) use ($cityCode) {
-                    $q->whereHas('city', function ($qq) use ($cityCode) {
-                        $qq->where('slug', $cityCode);
-                    });
-                });
-
-            } else {
-                //is manager
-                $query->whereHas('employee', function ($q) use ($employee) {
-                    $q->whereHas('positions', function ($qq) use ($employee) {
-                        $currentPositions = $employee->positions->modelKeys();
-                        $qq->whereIn('direct_manager_id', $currentPositions)->orWhereIn('tech_manager_id', $currentPositions);
-                    });
-                });
-            }
-
-        });
+        $leaveRequests = LeaveRequest::query()->manageableBy($user);
 
         $this->counts = ['all' => (clone $leaveRequests)->count(),
             'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)->count(),
             'accepted' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Accepted)->count(),
-            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(),];
+            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(), ];
     }
 
     public function create()
@@ -214,13 +243,14 @@ class AllLeaveRequestModule extends Component
             ->html($html)
             ->withConfirmButton(__('general.save'))
             ->onConfirm('processSave')
-            ->withCancelButton(__('general.cancel')) ->show();
+            ->withCancelButton(__('general.cancel'))->show();
 
     }
 
     public function processSave()
     {
         if ($this->form->id) {
+            Gate::authorize('update', $this->form->leaveRequest);
             $this->form->update();
         } else {
             $this->form->store();
@@ -240,7 +270,7 @@ class AllLeaveRequestModule extends Component
 
     protected function confirmationMessage(): string
     {
-        $leaveTypeName = LeaveBalance::find($this->form->leave_balance_id)
+        $leaveTypeName = $this->form->selectedBalance()
             ->leaveType
             ->name ?? 'N/A';
 
@@ -266,10 +296,8 @@ class AllLeaveRequestModule extends Component
         );
     }
 
-
     public function confirmDelete($id)
     {
-
 
         LivewireAlert::title(__('general.delete-item'))
             ->text(__('general.confirm-delete-item'))
@@ -283,9 +311,12 @@ class AllLeaveRequestModule extends Component
 
     public function delete($id)
     {
+        $leaveRequest = LeaveRequest::findOrFail($id['id']);
+        Gate::authorize('delete', $leaveRequest);
 
-        LeaveRequest::find($id['id'])->delete();
+        $leaveRequest->delete();
         $this->showModal = false;
+        $this->clearLinkedLeave();
         $this->refreshCounts();
         LivewireAlert::title(__('general.success-message'))
             ->success()
@@ -300,7 +331,7 @@ class AllLeaveRequestModule extends Component
      * Single source of truth for the leave-type dropdown (with leaveType
      * eager-loaded for the option labels).
      */
-    protected function leavesFor(?Employee $employee): \Illuminate\Support\Collection
+    protected function leavesFor(?Employee $employee): Collection
     {
         return $employee?->latestActiveContract()
             ?->leaveBalances()
@@ -311,7 +342,7 @@ class AllLeaveRequestModule extends Component
     /**
      * Colleagues in the same city and department who can cover for the employee.
      */
-    protected function alternativeEmployeesFor(?Employee $employee): \Illuminate\Support\Collection
+    protected function alternativeEmployeesFor(?Employee $employee): Collection
     {
         if (! $employee) {
             return collect();
@@ -343,11 +374,16 @@ class AllLeaveRequestModule extends Component
     {
         if ($this->form->type === 'day') {
             return Carbon::parse($this->form->start_at)
-                    ->diffInDays(Carbon::parse($this->form->end_at)) + 1;
+                ->diffInDays(Carbon::parse($this->form->end_at)) + 1;
         }
 
         return Carbon::parse($this->form->start_hour)
             ->floatDiffInHours(Carbon::parse($this->form->end_hour));
     }
 
+    private function clearLinkedLeave(): void
+    {
+        $this->linkedLeaveId = null;
+        $this->linkedLeaveMode = null;
+    }
 }

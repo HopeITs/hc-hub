@@ -4,9 +4,12 @@ namespace App\Livewire\Forms;
 
 use App\Enums\LeaveRequestStatus;
 use App\Enums\LeaveTypeCases;
+use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
@@ -18,7 +21,6 @@ class LeaveRequestForm extends Form
 
     public ?LeaveRequest $decisionLeave = null;
 
-    #[Validate('required|exists:leave_balances,id')]
     public $leave_balance_id = null;
 
     public $id = null;
@@ -40,7 +42,6 @@ class LeaveRequestForm extends Form
     #[Validate('required|string|min:3')]
     public $reason = '';
 
-    #[Validate('nullable|exists:employees,id')]
     public $alternative_employee = null;
 
     #[Validate('nullable|exists:employees,id')]
@@ -59,17 +60,29 @@ class LeaveRequestForm extends Form
      */
     public function rules()
     {
-        $employee = auth()->user()->profile;
-        $maxHours = ($employee->latestActiveContract()->weekly_hours / 5) / 2;
+        $employee = $this->targetEmployee();
+        $activeContract = $employee?->latestActiveContract();
+        $maxHours = (($activeContract?->weekly_hours ?? 0) / 5) / 2;
 
         $rules = [
             'type' => ['required', Rule::in(['day', 'hour'])],
             'reason' => ['required', 'string', 'min:3'],
-            'leave_balance_id' => ['required', 'exists:leave_balances,id'],
+            'leave_balance_id' => [
+                'required',
+                Rule::exists('leave_balances', 'id')
+                    ->where('contract_id', $activeContract?->id ?? 0),
+            ],
+            'alternative_employee' => [
+                'nullable',
+                Rule::exists('employees', 'id')
+                    ->where(fn ($query) => $query
+                        ->where('city_id', $employee?->city_id ?? 0)
+                        ->where('id', '!=', $employee?->id ?? 0)),
+            ],
         ];
 
         // Fetch center open and close times
-        $center = $employee->latestActiveContract()->position->center;
+        $center = $activeContract?->position?->center;
         $centerOpenTime = Carbon::parse($center->open_at ?? '09:00');
         $centerCloseTime = Carbon::parse($center->close_at ?? '16:30');
 
@@ -138,12 +151,12 @@ class LeaveRequestForm extends Form
             'start_at',
             'end_at',
             'reason',
-            'alternative_employee',
             'approved_by',
             'approved_at',
             'status',
             'type',
         ]));
+        $this->alternative_employee = $leaveRequest->alternative_employee_id;
         // Handle hour-based requests
         if ($leaveRequest->type === 'hour') {
             $this->leave_date = Carbon::parse($leaveRequest->start_at)->toDateString();
@@ -157,51 +170,76 @@ class LeaveRequestForm extends Form
 
     public function setDecisionLeave(LeaveRequest $leaveRequest): void
     {
-
         $this->decisionLeave = $leaveRequest;
         $this->fill($leaveRequest->only([
             'id',
             'approved_by',
             'approved_at',
-            'status',
-            'reject_reason',
         ]));
 
+        // A decision must always be an explicit choice made in this modal.
+        $this->status = null;
+        $this->reject_reason = null;
+        $this->resetValidation();
     }
 
-    public function submitDecision()
+    public function submitDecision(): LeaveRequest
     {
         if (! $this->decisionLeave) {
-            return;
+            throw new \LogicException('A leave request must be selected before submitting a decision.');
         }
 
-        if ((int) $this->status === LeaveRequestStatus::Accepted) {
+        $this->validate([
+            'status' => [
+                'required',
+                Rule::in([
+                    LeaveRequestStatus::Accepted,
+                    LeaveRequestStatus::Rejected,
+                ]),
+            ],
+            'reject_reason' => [
+                Rule::requiredIf(fn () => (int) $this->status === LeaveRequestStatus::Rejected),
+                'nullable',
+                'string',
+                'max:255',
+            ],
+        ], attributes: [
+            'status' => __('general.action'),
+            'reject_reason' => __('general.reject-reason'),
+        ]);
 
-            $this->decisionLeave->update([
-                'status' => LeaveRequestStatus::Accepted,
-                'reject_reason' => null,
-                'approved_at' => now(),
-                'approved_by' => auth()->user()->profile->id,
-            ]);
-            $this->decisionLeave->leaveBalance->update([
-                'used' => $this->decisionLeave->leaveBalance->used + $this->decisionLeave->duration_in_hours,
-            ]);
+        return DB::transaction(function (): LeaveRequest {
+            $leaveRequest = LeaveRequest::query()
+                ->with('leaveBalance.contract.position.center')
+                ->lockForUpdate()
+                ->findOrFail($this->decisionLeave->id);
 
-        }
+            // Authorization is intentionally checked after the row lock. A
+            // concurrent decision must observe the latest persisted status.
+            Gate::authorize('decide', $leaveRequest);
 
-        if ((int) $this->status === LeaveRequestStatus::Rejected) {
-            $this->validate([
-                'reject_reason' => 'required|string|max:255',
-            ]);
+            if ((int) $this->status === LeaveRequestStatus::Accepted) {
+                $leaveRequest->update([
+                    'status' => LeaveRequestStatus::Accepted,
+                    'reject_reason' => null,
+                    'approved_at' => now(),
+                    'approved_by' => auth()->user()->profile->id,
+                ]);
+                $leaveRequest->leaveBalance()->increment(
+                    'used',
+                    $leaveRequest->duration_in_hours
+                );
+            } else {
+                $leaveRequest->update([
+                    'status' => LeaveRequestStatus::Rejected,
+                    'reject_reason' => $this->reject_reason,
+                    'approved_at' => now(),
+                    'approved_by' => auth()->user()->profile->id,
+                ]);
+            }
 
-            $this->decisionLeave->update([
-                'status' => LeaveRequestStatus::Rejected,
-                'reject_reason' => $this->reject_reason,
-                'approved_at' => now(),
-                'approved_by' => auth()->user()->profile->id,
-            ]);
-        }
-
+            return $this->decisionLeave = $leaveRequest->refresh();
+        });
     }
 
     /**
@@ -221,7 +259,7 @@ class LeaveRequestForm extends Form
         }
 
         $this->validateMaxDuration();
-        $leaveBalance = LeaveBalance::find($this->leave_balance_id);
+        $leaveBalance = $this->selectedBalance();
 
         // --- Handle Annual Leave Accrual ---
         if ($leaveBalance->isAnnual()) {
@@ -241,10 +279,11 @@ class LeaveRequestForm extends Form
             'start_at' => $this->start_at ?? $this->combineDateTime($this->leave_date, $this->start_hour),
             'end_at' => $this->end_at ?? $this->combineDateTime($this->leave_date, $this->end_hour),
             'reason' => $this->reason,
-            'alternative_employee' => $this->alternative_employee,
-            'approved_by' => $this->approved_by,
-            'approved_at' => $this->approved_at,
-            'status' => $this->status,
+            'alternative_employee_id' => $this->alternative_employee,
+            'approved_by' => null,
+            'approved_at' => null,
+            'reject_reason' => null,
+            'status' => LeaveRequestStatus::Pending,
         ]);
 
         $this->resetForm();
@@ -287,16 +326,16 @@ class LeaveRequestForm extends Form
                 $this->leaveRequest->leaveBalance->update([
                     'used' => $this->leaveRequest->leaveBalance->used - $this->leaveRequest->duration_in_hours,
                 ]);
-                $this->leaveRequest->update($this->all());
+                $this->leaveRequest->update($this->requestData());
                 $this->leaveRequest->leaveBalance->update([
                     'used' => $this->leaveRequest->leaveBalance->used + $this->leaveRequest->duration_in_hours,
                 ]);
             } else {
-                $this->leaveRequest->update($this->all());
+                $this->leaveRequest->update($this->requestData());
             }
 
         } else {
-            $this->leaveRequest->update($this->all());
+            $this->leaveRequest->update($this->requestData());
         }
 
         $this->resetForm();
@@ -358,7 +397,7 @@ class LeaveRequestForm extends Form
 
     protected function validateMaxDuration()
     {
-        $leaveBalance = LeaveBalance::find($this->leave_balance_id);
+        $leaveBalance = $this->selectedBalance();
         $leaveType = $leaveBalance->leaveType;
 
         if ($leaveBalance->isAnnual()) {
@@ -412,5 +451,55 @@ class LeaveRequestForm extends Form
                 ]),
             ]);
         }
+    }
+
+    public function selectedBalance(): LeaveBalance
+    {
+        $activeContract = $this->targetEmployee()?->latestActiveContract();
+        $leaveBalance = $activeContract?->leaveBalances()
+            ->with(['leaveType', 'contract.position.center'])
+            ->find($this->leave_balance_id);
+
+        if (! $leaveBalance) {
+            throw ValidationException::withMessages([
+                'leave_balance_id' => __('validation.exists', [
+                    'attribute' => trans_choice('general.leave-type', 1),
+                ]),
+            ]);
+        }
+
+        return $leaveBalance;
+    }
+
+    private function targetEmployee(): ?Employee
+    {
+        $user = auth()->user();
+        $role = $user?->myRole();
+        $canSelectEmployee = $role === 'super-admin'
+            || ($role && str_starts_with($role, 'HR-'));
+
+        if ($canSelectEmployee && $this->employee_id) {
+            return Employee::query()->find($this->employee_id);
+        }
+
+        return $user?->profile;
+    }
+
+    /**
+     * Only request-editable fields may be updated. Decision metadata is kept
+     * authoritative and cannot be changed through forged form state.
+     *
+     * @return array<string, mixed>
+     */
+    private function requestData(): array
+    {
+        return [
+            'leave_balance_id' => $this->leave_balance_id,
+            'type' => $this->type,
+            'start_at' => $this->start_at,
+            'end_at' => $this->end_at,
+            'reason' => $this->reason,
+            'alternative_employee_id' => $this->alternative_employee,
+        ];
     }
 }

@@ -9,27 +9,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-use App\Models\City;
-use App\Models\Contract;
-use App\Models\DefaultDeliverable;
-use App\Models\Position;
-use App\Models\Education;
-use App\Models\Course;
-use App\Models\Experience;
-use App\Models\Badge;
-use App\Models\Evaluation;
-use App\Models\Relative;
-use App\Models\Checklist;
-use App\Models\EmployeeItem;
-use App\Models\JobLevel;
-use App\Models\ContractType;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 class Employee extends Model implements HasMedia
 {
     use HasFactory, HasTranslation, InteractsWithMedia, LogsActivity;
@@ -58,6 +43,17 @@ class Employee extends Model implements HasMedia
         return Attribute::get(
             fn () => "{$this->first_name} {$this->last_name}"
         );
+    }
+
+    public function nameForLocale(string $locale): string
+    {
+        $locale = in_array($locale, ['en', 'ar'], true) ? $locale : app()->getLocale();
+        $name = trim(implode(' ', array_filter([
+            $this->getAttribute("first_name_{$locale}"),
+            $this->getAttribute("last_name_{$locale}"),
+        ])));
+
+        return $name !== '' ? $name : trim((string) $this->name);
     }
 
     protected function firstName(): Attribute
@@ -144,7 +140,7 @@ class Employee extends Model implements HasMedia
 
     protected bool $latestActiveContractResolved = false;
 
-    public function defaultDeliverItems(): Employee|\Illuminate\Database\Eloquent\Relations\HasMany
+    public function defaultDeliverItems(): Employee|HasMany
     {
         return $this->hasMany(DefaultDeliverable::class, 'employee_id');
     }
