@@ -9,7 +9,7 @@
             <span class="text-secondary-light text-body font-medium">
                 {{ $upcomingEvents->count() }}
             </span>
-            <x-icons.event class="ms-1 mb-1 text-secondary-medium"/>
+            <x-icons.event class="size-5 ms-1 mb-1 text-secondary-medium"/>
         </div>
     </div>
 

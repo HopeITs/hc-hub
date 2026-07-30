@@ -5,7 +5,7 @@
             <div class="flex items-center gap-2">
                 <h3 class="text-body font-semibold text-[#58595B]">@lang('general.today-events')</h3>
                 <span class="text-body font-medium text-secondary-light">{{ now()->format('j/n/Y') }}</span>
-                <x-icons.event class="ms-1 mb-1 text-secondary-medium"/>
+                <x-icons.event class="size-5 ms-1 mb-1 text-secondary-medium"/>
             </div>
         </div>
         @if(count($events) > 0)

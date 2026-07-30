@@ -12,7 +12,7 @@
         <span class="text-secondary-light sm:text-h4 md:text-body font-medium">
                 {{ $noLeavesEmployees->count() }}
             </span>
-        <x-icons.no-leaves class=" mb-1 text-primary"/>
+        <x-icons.no-leaves class="size-5 mb-1 text-primary"/>
     </div>
 
     <div class="relative px-6 pb-6 pt-2 space-y-3 overflow-y-auto flex-grow

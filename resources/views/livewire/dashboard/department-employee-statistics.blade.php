@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-h4 font-semibold text-secondary-medium flex items-center gap-2">
             @lang('general.employees-per-department')
-            <x-icons.chart class="w-5 mb-1 h-5 text-primary"/>
+            <x-icons.chart class="size-5 mb-1 text-primary"/>
         </h2>
     </div>
 
