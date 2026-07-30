@@ -283,24 +283,26 @@
                     </div>
                 </x-profile-section>
 
-                <x-profile-section :title="__('general.badges')" icon="icons.badges">
-                    <div class="space-y-3">
-                        @forelse($employee->badges->take(5) as $badge)
-                            <div class="rounded-2xl bg-neutral-50 p-3">
-                                <div class="flex items-start justify-between gap-3">
-                                    <p class="text-sm font-bold text-secondary-dark">
-                                        {{ \App\Enums\BadgeType::getLocalizedName((int) $badge->type) }}</p>
-                                    <span class="text-xs text-secondary-light">{{ $formatDate($badge->date) }}</span>
+                @if($canViewBadges)
+                    <x-profile-section :title="__('general.badges')" icon="icons.badges">
+                        <div class="space-y-3">
+                            @forelse($employee->badges->take(5) as $badge)
+                                <div class="rounded-2xl bg-neutral-50 p-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <p class="text-sm font-bold text-secondary-dark">
+                                            {{ \App\Enums\BadgeType::getLocalizedName((int) $badge->type) }}</p>
+                                        <span class="text-xs text-secondary-light">{{ $formatDate($badge->date) }}</span>
+                                    </div>
+                                    @if ($badge->reason)
+                                        <p class="mt-2 text-xs text-secondary-medium">{{ $badge->reason }}</p>
+                                    @endif
                                 </div>
-                                @if ($badge->reason)
-                                    <p class="mt-2 text-xs text-secondary-medium">{{ $badge->reason }}</p>
-                                @endif
-                            </div>
-                        @empty
-                            <p class="text-sm text-secondary-light">@lang('general.no-available-data')</p>
-                        @endforelse
-                    </div>
-                </x-profile-section>
+                            @empty
+                                <p class="text-sm text-secondary-light">@lang('general.no-available-data')</p>
+                            @endforelse
+                        </div>
+                    </x-profile-section>
+                @endif
 
                 @if ($canViewPrivate && $employee->relatives->isNotEmpty())
                     <x-profile-section :title="__('general.family-information')" icon="icons.relatives" private>

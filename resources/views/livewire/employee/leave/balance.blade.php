@@ -82,11 +82,13 @@ use App\Enums\LeaveRequestStatus;
                     <x-error-span>{{ $errors->first('form.amount') }}</x-error-span>
                 </div>
                 <div>
-                    <x-forms.checkbox-input type="checkbox"
-                                            wire:model.live="form.add_badge">@lang('general.add-as-badge')</x-forms.checkbox-input>
-                    <x-error-span>{{ $errors->first('form.add_badge') }}</x-error-span>
+                    @if($form->balance && \Illuminate\Support\Facades\Gate::allows('create', [\App\Models\Badge::class, $form->balance->contract->employee]))
+                        <x-forms.checkbox-input type="checkbox"
+                                                wire:model.live="form.add_badge">@lang('general.add-as-badge')</x-forms.checkbox-input>
+                        <x-error-span>{{ $errors->first('form.add_badge') }}</x-error-span>
+                    @endif
                 </div>
-                @if($form->add_badge)
+                @if($form->add_badge && $form->balance && \Illuminate\Support\Facades\Gate::allows('create', [\App\Models\Badge::class, $form->balance->contract->employee]))
                     <div class="col-span-2">
                         <x-forms.input-label for="note">@lang('general.note')</x-forms.input-label>
                         <x-forms.input id="note" wire:model="form.notes" :required="$form->add_badge"/>

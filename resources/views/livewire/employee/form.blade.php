@@ -25,9 +25,11 @@
             <x-tab.item :title="__('general.relatives')" activeTab="relatives" :disabled="!isset($infoForm->id)" :active="$activeTab === 'relatives'">
                 <x-icons.relatives />
             </x-tab.item>
-            <x-tab.item :title="__('general.badges')" activeTab="badges" :disabled="!isset($infoForm->id)" :active="$activeTab === 'badges'">
-                <x-icons.badges />
-            </x-tab.item>
+            @if($canManageBadges)
+                <x-tab.item :title="__('general.badges')" activeTab="badges" :disabled="!isset($infoForm->id)" :active="$activeTab === 'badges'">
+                    <x-icons.badges />
+                </x-tab.item>
+            @endif
             <x-tab.item :title="__('general.checklist')" activeTab="checklist" :disabled="!isset($infoForm->id)" :active="$activeTab === 'checklist'">
                 <x-icons.checklist  />
             </x-tab.item>
@@ -53,7 +55,7 @@
                     @include('livewire.employee.tabs.experience-fields')
                 @elseif($activeTab === 'relatives')
                     @include('livewire.employee.tabs.relatives-fields')
-                @elseif($activeTab === 'badges')
+                @elseif($activeTab === 'badges' && $canManageBadges)
                     @include('livewire.employee.tabs.badges-fields')
                 @elseif($activeTab === 'checklist')
                     @include('livewire.employee.tabs.checklist-fields')

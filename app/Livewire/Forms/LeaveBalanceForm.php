@@ -3,22 +3,32 @@
 namespace App\Livewire\Forms;
 
 use App\Enums\BadgeType;
+use App\Models\Badge;
 use App\Models\Contract;
 use App\Models\LeaveBalance;
 use App\Notifications\ActionLeaveBalance;
 use App\Services\LeaveBalanceService;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Form;
 
 class LeaveBalanceForm extends Form
 {
     public ?LeaveBalance $balance = null;
+
     public $contract_id;
+
     public $used = 0;
+
     public $deserved;
+
     public $operation = 'sum';
+
     public $unit = 'hour';
+
     public $amount = 0;
+
     public $add_badge = false;
+
     public $notes = null;
 
     protected function rules()
@@ -57,8 +67,16 @@ class LeaveBalanceForm extends Form
             'unit' => 'required|in:hour,day',
             'amount' => 'required|numeric|min:0',
             'add_badge' => 'required|boolean',
-            'notes' => $this->add_badge ? 'required|string' : 'nullable'
+            'notes' => $this->add_badge ? 'required|string|max:5000' : 'nullable',
         ]);
+
+        if ($this->add_badge) {
+            Gate::authorize('create', [
+                Badge::class,
+                $this->balance->contract->employee,
+            ]);
+        }
+
         if ($this->unit === 'day') {
             $amount = $this->amount * $this->balance->contract->work_hour_per_day;
         } else {
@@ -74,11 +92,11 @@ class LeaveBalanceForm extends Form
             $this->balance->contract->employee->badges()->create([
                 'type' => $this->operation === 'sum' ? BadgeType::Reward : BadgeType::Warning,
                 'date' => now(),
-                'notes' => $this->notes
+                'notes' => $this->notes,
             ]);
         }
 
-        //Notify
+        // Notify
         $balance = $this->balance->load('contract.position');
         $directManage = $balance->contract->position->directManager?->employee()->account;
         $techManager = $balance->contract->position->techManager?->employee()->account;

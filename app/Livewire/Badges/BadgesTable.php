@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
@@ -25,12 +26,19 @@ class BadgesTable extends LivewireTable
         'refreshBadgesTable' => '$refresh',
     ];
 
+    public function boot(): void
+    {
+        Gate::authorize('viewAny', Badge::class);
+    }
+
     protected function query(): Builder
     {
-        return $this->model()::query()->with([
-            'employee.contracts.position.program',
-            'employee.contracts.position.department',
-        ]);
+        return $this->model()::query()
+            ->visibleTo(auth()->user())
+            ->with([
+                'employee.contracts.position.program',
+                'employee.contracts.position.department',
+            ]);
     }
 
     protected function columns(): array
@@ -103,6 +111,9 @@ class BadgesTable extends LivewireTable
 
     public function confirmDelete(int $id): void
     {
+        $badge = $this->findVisibleBadge($id);
+        Gate::authorize('delete', $badge);
+
         LivewireAlert::title(__('general.delete-item'))
             ->text(__('general.confirm-delete-item'))
             ->question()
@@ -114,7 +125,14 @@ class BadgesTable extends LivewireTable
 
     public function delete(array $payload): void
     {
-        DB::transaction(fn () => Badge::findOrFail($payload['id'])->delete());
+        $validated = validator($payload, [
+            'id' => ['required', 'integer', 'min:1'],
+        ])->validate();
+
+        $badge = $this->findVisibleBadge((int) $validated['id']);
+        Gate::authorize('delete', $badge);
+
+        DB::transaction(fn () => $badge->delete());
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
@@ -137,10 +155,7 @@ class BadgesTable extends LivewireTable
     {
         return Employee::query()
             ->select(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
-            ->when(
-                auth()->user()?->activeCityId(),
-                fn (Builder $q, int $cityId) => $q->where('city_id', $cityId),
-            )
+            ->whereHas('badges', fn (Builder $query) => $query->visibleTo(auth()->user()))
             ->where('is_active', true)
             ->orderBy(transColumn('first_name'))
             ->get()
@@ -151,6 +166,13 @@ class BadgesTable extends LivewireTable
     protected function programOptions(): array
     {
         return Program::query()
+            ->when(
+                auth()->user()->activeCityId(),
+                fn (Builder $query, int $cityId) => $query->whereHas(
+                    'positions',
+                    fn (Builder $query) => $query->inCity($cityId),
+                ),
+            )
             ->orderBy('name')
             ->pluck('name', 'id')
             ->toArray();
@@ -159,8 +181,26 @@ class BadgesTable extends LivewireTable
     protected function departmentOptions(): array
     {
         return Department::query()
+            ->when(
+                auth()->user()->activeCityId(),
+                fn (Builder $query, int $cityId) => $query->whereHas(
+                    'positions',
+                    fn (Builder $query) => $query->inCity($cityId),
+                ),
+            )
             ->orderBy('name')
             ->pluck('name', 'id')
             ->toArray();
+    }
+
+    protected function findVisibleBadge(int $id): Badge
+    {
+        $badge = Badge::query()
+            ->visibleTo(auth()->user())
+            ->find($id);
+
+        abort_unless($badge, 404);
+
+        return $badge;
     }
 }

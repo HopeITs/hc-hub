@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Badge;
 use App\Models\Contract;
 use App\Models\LeaveRequest;
 use App\Observers\ContractObserver;
+use App\Policies\BadgePolicy;
 use App\Policies\LeaveRequestPolicy;
 use App\Services\ActivityLogger;
 use Illuminate\Database\Query\Builder;
@@ -13,7 +15,6 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Gate::policy(Badge::class, BadgePolicy::class);
         Gate::policy(LeaveRequest::class, LeaveRequestPolicy::class);
 
         Livewire::setUpdateRoute(function ($handle) {
@@ -86,25 +88,8 @@ class AppServiceProvider extends ServiceProvider
 
         Blade::if('activerole', function (...$roles) {
             $user = auth()->user();
-            if (! $user) {
-                return false;
-            }
 
-            $activeRole = strtoupper(trim($user->myRole() ?? ''));
-
-            foreach ($roles as $r) {
-                $normalized = strtoupper(trim($r));
-
-                if (Str::startsWith($activeRole, 'HR-') && Str::startsWith($normalized, 'HR')) {
-                    return true;
-                }
-
-                if ($activeRole === $normalized) {
-                    return true;
-                }
-            }
-
-            return false;
+            return $user?->activeRoleIs(...$roles) ?? false;
         });
 
         Blade::if('notactiverole', function (...$roles) {

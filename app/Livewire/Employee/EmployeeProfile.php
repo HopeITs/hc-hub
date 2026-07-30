@@ -5,19 +5,27 @@ namespace App\Livewire\Employee;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class EmployeeProfile extends Component
 {
     public Employee $employee;
 
+    #[Locked]
     public bool $isSelf = false;
 
+    #[Locked]
     public bool $canViewPrivate = false;
 
+    #[Locked]
     public bool $canViewFinancial = false;
 
+    #[Locked]
     public bool $canEdit = false;
+
+    #[Locked]
+    public bool $canViewBadges = false;
 
     public function mount(?Employee $employee = null): void
     {
@@ -32,10 +40,14 @@ class EmployeeProfile extends Component
         $this->isSelf = $user->employee_id === $this->employee->id;
         $isHr = $user->activeRoleIs('HR', 'super-admin');
         $isManagement = $user->activeRoleIs('general-manager');
+        $activeCityId = $user->activeCityId();
+        $isHrInScope = $isHr
+            && ($activeCityId === null || $this->employee->city_id === $activeCityId);
 
-        $this->canViewPrivate = $this->isSelf || $isHr;
-        $this->canViewFinancial = $isHr;
-        $this->canEdit = $isHr || $isManagement;
+        $this->canViewPrivate = $this->isSelf || $isHrInScope;
+        $this->canViewFinancial = $isHrInScope;
+        $this->canEdit = $isHrInScope || $isManagement;
+        $this->canViewBadges = $this->isSelf || $isHrInScope;
     }
 
     public function render()
@@ -50,16 +62,11 @@ class EmployeeProfile extends Component
             array_push($contractColumns, 'salary', 'currency');
         }
 
-        $employee = $this->employee->load([
+        $relations = [
             'account',
             'educations',
             'experiences',
             'courses.category',
-            'badges' => fn ($query) => $query
-                ->select($this->canViewFinancial
-                    ? ['id', 'employee_id', 'evaluation_id', 'currency', 'type', 'date', 'reason', 'current_salary', 'new_salary', 'notes']
-                    : ['id', 'employee_id', 'evaluation_id', 'type', 'date', 'reason', 'notes'])
-                ->latest('date'),
             'allContracts' => fn ($query) => $query
                 ->select($contractColumns)
                 ->with([
@@ -74,7 +81,17 @@ class EmployeeProfile extends Component
                     'position.techManager.activeContracts.employee',
                 ])
                 ->latest('start_date'),
-        ]);
+        ];
+
+        if ($this->canViewBadges) {
+            $relations['badges'] = fn ($query) => $query
+                ->select($this->canViewFinancial
+                    ? ['id', 'employee_id', 'evaluation_id', 'currency', 'type', 'date', 'reason', 'current_salary', 'new_salary', 'notes']
+                    : ['id', 'employee_id', 'evaluation_id', 'type', 'date', 'reason', 'notes'])
+                ->latest('date');
+        }
+
+        $employee = $this->employee->load($relations);
 
         if ($this->canViewPrivate) {
             $employee->load('relatives');
@@ -84,7 +101,7 @@ class EmployeeProfile extends Component
         $currentContract = $contracts->first(fn ($contract) => $contract->is_active
             && $contract->start_date?->lte(today())
             && $contract->end_date?->gte(today())
-            && !$contract->terminated_at);
+            && ! $contract->terminated_at);
         $currentPosition = $currentContract?->position;
 
         return view('livewire.employee.employee-profile', [
@@ -99,12 +116,13 @@ class EmployeeProfile extends Component
             'canViewPrivate' => $this->canViewPrivate,
             'canViewFinancial' => $this->canViewFinancial,
             'canEdit' => $this->canEdit,
+            'canViewBadges' => $this->canViewBadges,
         ]);
     }
 
     private function parseTags(?string $value): array
     {
-        if (!$value) {
+        if (! $value) {
             return [];
         }
 

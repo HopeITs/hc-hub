@@ -99,17 +99,12 @@ class User extends Authenticatable
 
     public function activeRoleIs(string ...$roles): bool
     {
-        $user = auth()->user();
-        if (! $user) {
-            return false;
-        }
-
-        $activeRole = strtoupper(trim($user->myRole() ?? ''));
+        $activeRole = strtoupper(trim($this->myRole() ?? ''));
 
         foreach ($roles as $r) {
             $normalized = strtoupper(trim($r));
 
-            if (Str::startsWith($activeRole, 'HR-') && Str::startsWith($normalized, 'HR')) {
+            if ($normalized === 'HR' && Str::startsWith($activeRole, 'HR-')) {
                 return true;
             }
 

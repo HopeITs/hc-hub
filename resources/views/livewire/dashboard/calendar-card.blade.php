@@ -31,7 +31,7 @@
         <span>Su</span>
     </div>
 
-    <div class="mx-7 grid grid-cols-7 gap-y-1.5 text-center text-[11px] font-light">
+    <div class="mx-7 grid grid-cols-7 gap-y-1 text-center text-[11px] font-light">
 
         @foreach ($calendar as $day)
             @php

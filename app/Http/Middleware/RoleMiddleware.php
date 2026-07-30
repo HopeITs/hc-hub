@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Role;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -17,31 +16,24 @@ class RoleMiddleware
         $user = $authGuard->user();
 
         // For machine-to-machine Passport clients
-        if (!$user && $request->bearerToken() && config('permission.use_passport_client_credentials')) {
+        if (! $user && $request->bearerToken() && config('permission.use_passport_client_credentials')) {
             $user = Guard::getPassportClient($guard);
         }
 
-        if (!$user) {
+        if (! $user) {
             throw UnauthorizedException::notLoggedIn();
         }
 
-        if (!method_exists($user, 'hasAnyRole')) {
+        if (! method_exists($user, 'hasAnyRole')) {
             throw UnauthorizedException::missingTraitHasRoles($user);
         }
 
-        $roles = explode('|', self::parseRolesToString($role));
+        $roles = array_values(array_filter(explode('|', self::parseRolesToString($role))));
+        $hasAllowedRole = method_exists($user, 'activeRoleIs')
+            ? $user->activeRoleIs(...$roles)
+            : $user->hasAnyRole($roles);
 
-        if (in_array('HR', $roles)) {
-            $hrs = Role::where('name', 'like', 'HR-%')->pluck('name')->toArray();
-            $roles = array_merge($roles, $hrs);
-            $key = array_search('HR', $roles);
-            if ($key !== false) {
-                unset($roles[$key]);
-            }
-
-        }
-
-        if (!$user->hasAnyRole($roles)) {
+        if (! $hasAllowedRole) {
             throw UnauthorizedException::forRoles($roles);
         }
 
@@ -51,8 +43,8 @@ class RoleMiddleware
     /**
      * Specify the role and guard for the middleware.
      *
-     * @param array|string|\BackedEnum $role
-     * @param string|null $guard
+     * @param  array|string|\BackedEnum  $role
+     * @param  string|null  $guard
      * @return string
      */
     public static function using($role, $guard = null)
@@ -61,7 +53,7 @@ class RoleMiddleware
 
         $args = is_null($guard) ? $roleString : "$roleString,$guard";
 
-        return static::class . ':' . $args;
+        return static::class.':'.$args;
     }
 
     /**
@@ -77,11 +69,11 @@ class RoleMiddleware
         }
 
         if (is_array($role)) {
-            $role = array_map(fn($r) => $r instanceof \BackedEnum ? $r->value : $r, $role);
+            $role = array_map(fn ($r) => $r instanceof \BackedEnum ? $r->value : $r, $role);
 
             return implode('|', $role);
         }
 
-        return (string)$role;
+        return (string) $role;
     }
 }
