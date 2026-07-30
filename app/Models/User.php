@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -35,6 +36,38 @@ class User extends Authenticatable
     public function profile(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    /**
+     * Include the application's active-role flag whenever roles are eager loaded.
+     *
+     * Spatie's default relationship only exposes its own pivot keys. Without
+     * this override, activeRole() cannot inspect is_active on a loaded roles
+     * collection and may incorrectly fall back to the first assigned role.
+     */
+    public function roles(): BelongsToMany
+    {
+        $registrar = app(PermissionRegistrar::class);
+        $relation = $this->morphToMany(
+            config('permission.models.role'),
+            'model',
+            config('permission.table_names.model_has_roles'),
+            config('permission.column_names.model_morph_key'),
+            $registrar->pivotRole,
+        )->withPivot('is_active');
+
+        if (! $registrar->teams) {
+            return $relation;
+        }
+
+        $teamsKey = $registrar->teamsKey;
+        $relation->withPivot($teamsKey);
+        $teamField = config('permission.table_names.roles').'.'.$teamsKey;
+
+        return $relation->wherePivot($teamsKey, getPermissionsTeamId())
+            ->where(fn (Builder $query): Builder => $query
+                ->whereNull($teamField)
+                ->orWhere($teamField, getPermissionsTeamId()));
     }
 
     public function folders(): HasMany
@@ -114,6 +147,25 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    /**
+     * Check direct grants plus the currently active role only.
+     *
+     * Spatie's default check combines every assigned role, which is unsafe for
+     * this application because users explicitly switch between active roles.
+     */
+    public function hasActivePermission(string $permission): bool
+    {
+        if ($this->activeRoleIs(...config('access-control.administrator_roles', []))) {
+            return true;
+        }
+
+        if ($this->permissions()->where('name', $permission)->exists()) {
+            return true;
+        }
+
+        return $this->activeRole()?->hasPermissionTo($permission) ?? false;
     }
 
     /**

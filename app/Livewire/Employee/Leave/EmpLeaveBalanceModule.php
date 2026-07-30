@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Forms\LeaveBalanceForm;
 use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
@@ -15,6 +16,7 @@ use Livewire\Component;
 
 class EmpLeaveBalanceModule extends Component
 {
+    use AuthorizesActivePermissions;
 
     public LeaveBalance $leaveBalance;
 
@@ -60,6 +62,8 @@ class EmpLeaveBalanceModule extends Component
 
     public function processSave()
     {
+        $this->authorizeActivePermission('leaves.manage-balances');
+
         $this->form->updateAnnualLeaves();
 
 

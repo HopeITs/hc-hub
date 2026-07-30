@@ -2,15 +2,19 @@
 
 namespace App\Livewire\Basics;
 
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Models\AnnualLeaveRule;
-use Livewire\Component;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Component;
 
 class AnnualLeaveRuleModule extends Component
 {
+    use AuthorizesActivePermissions;
+
     protected $listeners = ['openAnnualLeaveRuleEdit' => 'edit'];
 
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -36,11 +40,12 @@ class AnnualLeaveRuleModule extends Component
 
     public function create(): void
     {
+        $this->authorizeActivePermission('project-basics.create');
         $this->item = [
             'id' => null,
-        'days' => null,
-        'day_per_month' => null,
-        'years_of_volunteering' => null,
+            'days' => null,
+            'day_per_month' => null,
+            'years_of_volunteering' => null,
         ];
         $this->resetValidation();
         $this->modalTitle = __('general.add-new');
@@ -49,9 +54,10 @@ class AnnualLeaveRuleModule extends Component
 
     public function edit(int $id): void
     {
+        $this->authorizeActivePermission('project-basics.update');
         $model = AnnualLeaveRule::findOrFail($id);
 
-         $this->item = [
+        $this->item = [
             'id' => $model->id,
             'days' => $model->days,
             'day_per_month' => $model->day_per_month,
@@ -63,14 +69,16 @@ class AnnualLeaveRuleModule extends Component
         $this->showModal = true;
     }
 
-
     public function save(): void
     {
+        $this->authorizeActivePermission(
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+        );
         $this->validate();
 
-        $model = !empty($this->item['id'])
+        $model = ! empty($this->item['id'])
             ? AnnualLeaveRule::findOrFail($this->item['id'])
-            : new AnnualLeaveRule();
+            : new AnnualLeaveRule;
 
         $model->fill($this->item)->save();
 

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\ActiveLivewirePermissionMiddleware;
 use App\Models\Badge;
 use App\Models\Contract;
 use App\Models\LeaveRequest;
@@ -34,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
 
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle)
-                ->middleware('web')
+                ->middleware(['web', ActiveLivewirePermissionMiddleware::class])
                 ->prefix(LaravelLocalization::setLocale());
         });
 
@@ -94,6 +95,10 @@ class AppServiceProvider extends ServiceProvider
 
         Blade::if('notactiverole', function (...$roles) {
             return auth()->check() && ! auth()->user()->activeRoleIs(...$roles);
+        });
+
+        Blade::if('activepermission', function (string $permission) {
+            return auth()->user()?->hasActivePermission($permission) ?? false;
         });
 
         Contract::observe(ContractObserver::class);

@@ -44,7 +44,7 @@
                     </x-layouts.app.sidebar.single-item>
 
                     {{-- Statistics (HR + super-admin only - kept as per logic) --}}
-                    @activerole('HR', 'super-admin')
+                    @activepermission('statistics.view')
                         <x-layouts.app.sidebar.dropdown-nav-list id="statistics" title="{{ __('general.statistics') }}"
                             :active="request()->routeIs('statistics.general') ||
                                 request()->routeIs('statistics.contract')">
@@ -62,16 +62,19 @@
                                 </x-layouts.app.sidebar.nav-item>
                             </x-slot>
                         </x-layouts.app.sidebar.dropdown-nav-list>
-                    @endactiverole
+                    @endactivepermission
 
-                    <x-layouts.app.sidebar.single-item :href="route('org.chart')" :active="request()->routeIs('org.chart')">
-                        <x-slot name="icon">
-                            <x-icons.code-fork class="size-5" />
-                        </x-slot>
-                        {{ __('general.orgn-chart') }}
-                    </x-layouts.app.sidebar.single-item>
+                    @activepermission('positions.view')
+                        <x-layouts.app.sidebar.single-item :href="route('org.chart')" :active="request()->routeIs('org.chart')">
+                            <x-slot name="icon">
+                                <x-icons.code-fork class="size-5" />
+                            </x-slot>
+                            {{ __('general.orgn-chart') }}
+                        </x-layouts.app.sidebar.single-item>
+                    @endactivepermission
 
                     {{-- 2. Project Basics --}}
+                    @activepermission('project-basics.view')
                     <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('cities.*') ||
                         request()->routeIs('contract-types.*') ||
                         request()->routeIs('leave-types.*') ||
@@ -129,11 +132,12 @@
                             </x-layouts.app.sidebar.nav-item>
                         </x-slot>
                     </x-layouts.app.sidebar.dropdown-nav-list>
+                    @endactivepermission
 
 
                     {{-- 3. Program Management --}}
                     {{-- Dropdown visible to HR & super-admin --}}
-                    @activerole('super-admin', 'HR', 'manager', 'general-manager')
+                    @if ($user->hasActivePermission('programs.view') || $user->hasActivePermission('positions.view'))
                         <x-layouts.app.sidebar.dropdown-nav-list id="program-management" :title="__('general.programs-management')"
                             :active="request()->routeIs('programs.*') ||
                                 request()->routeIs('positions.*') ||
@@ -144,34 +148,38 @@
                             </x-slot>
 
                             <x-slot name="list">
+                                @activepermission('programs.view')
                                 <x-layouts.app.sidebar.nav-item :href="route('programs.index')" :active="request()->routeIs('programs.*')">
                                     {{ trans_choice('general.program', 2) }}
                                 </x-layouts.app.sidebar.nav-item>
-                                @activerole('super-admin', 'HR')
+                                @endactivepermission
+                                @activepermission('positions.view')
                                     <x-layouts.app.sidebar.nav-item :href="route('positions.index')" :active="request()->routeIs('positions.*')">
                                         {{ __('general.positions') }}
                                     </x-layouts.app.sidebar.nav-item>
-                                @endactiverole
+                                @endactivepermission
 
+                                @activepermission('centers.view')
                                 <x-layouts.app.sidebar.nav-item :href="route('centers.index')" :active="request()->routeIs('centers.*')" wire:navigate>
                                     {{ trans_choice('general.center', 2) }}
                                 </x-layouts.app.sidebar.nav-item>
+                                @endactivepermission
                             </x-slot>
                         </x-layouts.app.sidebar.dropdown-nav-list>
-                    @endactiverole
+                    @endif
 
                     {{-- Centers for everyone else (Single item) --}}
-                    @notactiverole('super-admin', 'HR')
+                    @if ($user->hasActivePermission('centers.view') && ! $user->hasActivePermission('programs.view') && ! $user->hasActivePermission('positions.view'))
                         <x-layouts.app.sidebar.single-item :href="route('centers.index')" :active="request()->routeIs('centers.*')">
                             <x-slot name="icon">
                                 <x-icons.layers class="size-5" />
                             </x-slot>
                             {{ trans_choice('general.center', 2) }}
                         </x-layouts.app.sidebar.single-item>
-                    @endnotactiverole
+                    @endif
 
                     {{-- 4. Employee Management (super-admin + HR) --}}
-                    @activerole('super-admin', 'HR', 'general-manager')
+                    @if ($user->hasActivePermission('employees.view') || $user->hasActivePermission('contracts.view') || $user->hasActivePermission('checklists.manage'))
                         <x-layouts.app.sidebar.dropdown-nav-list id="employees-management" :title="trans_choice('general.employee-management', 2)"
                             :active="request()->routeIs('employees.*') ||
                                 request()->routeIs('contracts.*') ||
@@ -180,24 +188,30 @@
                                 <x-icons.users />
                             </x-slot>
                             <x-slot name="list">
+                                @activepermission('employees.view')
                                 <x-layouts.app.sidebar.nav-item :href="route('employees.index')" :active="request()->routeIs('employees.*')">
                                     {{ trans_choice('general.employee', 2) }}
                                 </x-layouts.app.sidebar.nav-item>
+                                @endactivepermission
 
+                                @activepermission('checklists.manage')
                                 <x-layouts.app.sidebar.nav-item :href="route('default-deliverables.index')" :active="request()->routeIs('default-deliverables.index')">
                                     {{ trans_choice('general.default-deliverables', 2) }}
                                 </x-layouts.app.sidebar.nav-item>
+                                @endactivepermission
 
+                                @activepermission('contracts.view')
                                 <x-layouts.app.sidebar.nav-item :href="route('contracts.index')" :active="request()->routeIs('contracts.*')">
                                     {{ trans_choice('general.contracts', 2) }}
                                 </x-layouts.app.sidebar.nav-item>
+                                @endactivepermission
                             </x-slot>
                         </x-layouts.app.sidebar.dropdown-nav-list>
-                    @endactiverole
+                    @endif
 
                     {{-- 5. Leave Management (Holidays and leaves) --}}
                     {{-- Visible to: HR, super-admin, AND Managers --}}
-                    @activerole('HR', 'super-admin', 'manager', 'general-manager')
+                    @if ($user->hasActivePermission('leaves.view-all') || $user->hasActivePermission('leaves.manage-balances'))
                         <x-layouts.app.sidebar.dropdown-nav-list id="leaves-management"
                             title="{{ __('general.leaves-management') }}" :active="request()->routeIs('leaves.all') || request()->routeIs('leaves.balance')">
                             <x-slot name="icon">
@@ -205,21 +219,24 @@
                             </x-slot>
                             <x-slot name="list">
                                 {{-- All Leaves: Managers, HRs, super-admin --}}
+                                @activepermission('leaves.view-all')
                                 <x-layouts.app.sidebar.nav-item :href="route('leaves.all')" :active="request()->routeIs('leaves.all')">
                                     {{ __('general.all-leaves') }}
                                 </x-layouts.app.sidebar.nav-item>
+                                @endactivepermission
 
                                 {{-- Balance: ONLY HR + super-admin (Managers excluded) --}}
-                                @activerole('HR', 'super-admin')
+                                @activepermission('leaves.manage-balances')
                                     <x-layouts.app.sidebar.nav-item :href="route('leaves.balance')" :active="request()->routeIs('leaves.balance')">
                                         {{ __('general.balance') }}
                                     </x-layouts.app.sidebar.nav-item>
-                                @endactiverole
+                                @endactivepermission
                             </x-slot>
                         </x-layouts.app.sidebar.dropdown-nav-list>
-                    @endactiverole
+                    @endif
 
                     {{-- My Leaves: Single Item OUTSIDE for ALL --}}
+                    @activepermission('leaves.view-own')
                     <x-layouts.app.sidebar.single-item :href="route('leaves.index')" :active="request()->routeIs('leaves.index')">
                         <x-slot name="icon">
                             <x-icons.my-leaves />
@@ -227,8 +244,10 @@
                         </x-slot>
                         {{ __('general.my-leaves') }}
                     </x-layouts.app.sidebar.single-item>
+                    @endactivepermission
 
                     {{-- 6. Archived Files (All) --}}
+                    @activepermission('archives.view')
                     <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')" :active="request()->routeIs('my-folders.*') || request()->routeIs('shared-folders.*')">
                         <x-slot name="icon">
                             <x-icons.archived />
@@ -246,9 +265,10 @@
                             </x-layouts.app.sidebar.nav-item>
                         </x-slot>
                     </x-layouts.app.sidebar.dropdown-nav-list>
+                    @endactivepermission
 
 
-                    @if ($isDeliverResponsible)
+                    @if ($isDeliverResponsible && ($user->hasActivePermission('checklists.deliver') || $user->hasActivePermission('checklists.receive') || $user->hasActivePermission('checklists.manage')))
                         <x-layouts.app.sidebar.dropdown-nav-list id="checklist-items" :title="__('general.checklist_items')"
                             :active="request()->routeIs('checklist-items.*')">
                             <x-slot name="icon">
@@ -256,19 +276,25 @@
                             </x-slot>
                             <x-slot name="list">
 
+                                @activepermission('checklists.deliver')
                                 <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-delivers')" :active="request()->routeIs('checklist-items.pending-delivers')">
                                     {{ __('general.pending-delivers') }}
                                     @livewire('checklist-items.pending-delivers-counter')
                                 </x-layouts.app.sidebar.nav-item>
+                                @endactivepermission
 
+                                @activepermission('checklists.receive')
                                 <x-layouts.app.sidebar.nav-item :href="route('checklist-items.pending-returns')" :active="request()->routeIs('checklist-items.pending-returns')">
                                     {{ __('general.pending_returns') }}
                                     @livewire('checklist-items.pending-returns-counter')
                                 </x-layouts.app.sidebar.nav-item>
+                                @endactivepermission
 
+                                @activepermission('checklists.manage')
                                 <x-layouts.app.sidebar.nav-item :href="route('checklist-items.done-requests')" :active="request()->routeIs('checklist-items.done-requests')">
                                     {{ __('general.done_requests') }}
                                 </x-layouts.app.sidebar.nav-item>
+                                @endactivepermission
 
 
                             </x-slot>
@@ -278,39 +304,52 @@
 
 
                     {{-- 7. Checklist Items -> My items (All, Single) --}}
+                    @activepermission('checklists.view-own')
                     <x-layouts.app.sidebar.single-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
                         <x-slot name="icon">
                             <x-icons.clipboard-list class="size-4" />
                         </x-slot>
                         @lang('general.my-items')
                     </x-layouts.app.sidebar.single-item>
+                    @endactivepermission
 
                     {{-- 8. News Management (super-admin, Managers, HRs) --}}
-                    @activerole('HR', 'super-admin', 'general-manager', 'manager')
+                    @activepermission('news.view')
                         <x-layouts.app.sidebar.single-item :href="route('news.index')" :active="request()->routeIs('news.*')">
                             <x-slot name="icon">
                                 <x-icons.newspaper class="size-4" />
                             </x-slot>
                             {{ __('general.news-management') }}
                         </x-layouts.app.sidebar.single-item>
-                    @endactiverole
+                    @endactivepermission
 
 
-                    @activerole('super-admin', 'HR')
+                    @activepermission('badges.view')
                         <x-layouts.app.sidebar.single-item :href="route('badges.index')" :active="request()->routeIs('badges.*')">
                             <x-slot name="icon" class="text-secondary-light">
                                 <x-icons.badges class="size-4" />
                             </x-slot>
                             {{ __('general.all-badges') }}
                         </x-layouts.app.sidebar.single-item>
-                    @endactiverole
+                    @endactivepermission
 
-                    @activerole('super-admin')
+                    @activepermission('activity-log.view')
                         <x-layouts.app.sidebar.single-item :href="route('activity-log.index')" :active="request()->routeIs('activity-log.*')">
                             <x-slot name="icon">
                                 <x-icons.activity-log class="size-4" />
                             </x-slot>
                             {{ __('general.activity-log') }}
+                        </x-layouts.app.sidebar.single-item>
+                    @endactivepermission
+
+                    @activerole('HR-SYR', 'super-admin')
+                        <x-layouts.app.sidebar.single-item :href="route('access-management.index')" :active="request()->routeIs('access-management.*')">
+                            <x-slot name="icon">
+                                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.1a7.5 7.5 0 0 1 15 0M18 8.25h3m-1.5-1.5v3"/>
+                                </svg>
+                            </x-slot>
+                            {{ __('access.title') }}
                         </x-layouts.app.sidebar.single-item>
                     @endactiverole
 

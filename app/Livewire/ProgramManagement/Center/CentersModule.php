@@ -2,6 +2,7 @@
 
 namespace App\Livewire\ProgramManagement\Center;
 
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\User;
@@ -12,6 +13,8 @@ use Livewire\Component;
 
 class CentersModule extends Component
 {
+    use AuthorizesActivePermissions;
+
     public bool $showModal = false;
 
     public string $modalTitle = '';
@@ -49,6 +52,8 @@ class CentersModule extends Component
 
     public function create(): void
     {
+        $this->authorizeActivePermission('centers.create');
+
         $this->item = [
             'id' => null,
             'name_en' => '',
@@ -70,6 +75,8 @@ class CentersModule extends Component
     #[On('openCenterEdit')]
     public function edit(int $id): void
     {
+        $this->authorizeActivePermission('centers.update');
+
         $model = Center::findOrFail($id);
 
         $this->item = [
@@ -92,6 +99,10 @@ class CentersModule extends Component
 
     public function save(): void
     {
+        $this->authorizeActivePermission(
+            empty($this->item['id']) ? 'centers.create' : 'centers.update'
+        );
+
         $this->validate();
 
         $this->item['weekends'] = implode(',', $this->item['weekends']);

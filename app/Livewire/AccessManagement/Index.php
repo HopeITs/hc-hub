@@ -1,0 +1,521 @@
+<?php
+
+namespace App\Livewire\AccessManagement;
+
+use App\Models\Permission;
+use App\Models\Role;
+use App\Models\User;
+use App\Services\ActivityLogger;
+use App\Support\AccessPermissionCatalog;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
+use Spatie\Permission\PermissionRegistrar;
+
+class Index extends Component
+{
+    use WithPagination;
+
+    private const COMPACT_EMPLOYEES_PER_PAGE = 12;
+
+    private const EXPANDED_EMPLOYEES_PER_PAGE = 24;
+
+    #[Url(as: 'tab')]
+    public string $activeTab = 'employees';
+
+    #[Url(as: 'q')]
+    public string $search = '';
+
+    #[Url]
+    public string $roleFilter = 'all';
+
+    #[Url]
+    public string $statusFilter = 'all';
+
+    public ?int $selectedUserId = null;
+
+    /** @var array<int, int|string> */
+    public array $employeeRoleIds = [];
+
+    public ?int $employeeActiveRoleId = null;
+
+    /** @var array<int, int|string> */
+    public array $employeePermissionIds = [];
+
+    /** @var array<int, int> */
+    #[Locked]
+    public array $originalEmployeeRoleIds = [];
+
+    #[Locked]
+    public ?int $originalEmployeeActiveRoleId = null;
+
+    /** @var array<int, int> */
+    #[Locked]
+    public array $originalEmployeePermissionIds = [];
+
+    public ?int $selectedRoleId = null;
+
+    /** @var array<int, int|string> */
+    public array $rolePermissionIds = [];
+
+    public string $newRoleName = '';
+
+    public string $selectedRoleName = '';
+
+    public bool $showAssignedUsersModal = false;
+
+    public function mount(): void
+    {
+        $this->authorizePage();
+
+        $this->selectedRoleId = Role::query()->orderBy('name')->value('id');
+        $this->loadSelectedRole();
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function clearSearch(): void
+    {
+        $this->search = '';
+        $this->resetPage();
+    }
+
+    public function updatedRoleFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatusFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedEmployeeRoleIds(): void
+    {
+        $this->employeeRoleIds = array_values(array_unique(array_map(
+            'intval',
+            $this->employeeRoleIds,
+        )));
+
+        if (! in_array($this->employeeActiveRoleId, $this->employeeRoleIds, true)) {
+            // A select element visually falls back to its first option when the
+            // previous role disappears, but Livewire retains the old value.
+            // Keep the server-side active role synchronized with that UI state.
+            $this->employeeActiveRoleId = $this->employeeRoleIds[0] ?? null;
+        }
+
+        $this->resetValidation([
+            'employeeRoleIds',
+            'employeeRoleIds.*',
+            'employeeActiveRoleId',
+        ]);
+    }
+
+    public function showTab(string $tab): void
+    {
+        abort_unless(in_array($tab, ['employees', 'roles'], true), 404);
+        $this->activeTab = $tab;
+        $this->showAssignedUsersModal = false;
+    }
+
+    public function selectUser(int $userId): void
+    {
+        $this->authorizePage();
+
+        $user = $this->findManagedUser($userId);
+        $directoryPosition = (clone $this->employeeQuery())
+            ->where('users.email', '<', $user->email)
+            ->count();
+
+        $this->selectedUserId = $user->id;
+        $this->setPage(intdiv($directoryPosition, self::EXPANDED_EMPLOYEES_PER_PAGE) + 1);
+        $this->employeeRoleIds = $user->roles->pluck('id')->map(fn ($id): int => (int) $id)->all();
+        $this->employeeActiveRoleId = $user->activeRole()?->id
+            ?? ($this->employeeRoleIds[0] ?? null);
+        $this->employeePermissionIds = $user->permissions->pluck('id')->map(fn ($id): int => (int) $id)->all();
+        $this->originalEmployeeRoleIds = $this->normalizeIds($this->employeeRoleIds);
+        $this->originalEmployeeActiveRoleId = $this->employeeActiveRoleId;
+        $this->originalEmployeePermissionIds = $this->normalizeIds($this->employeePermissionIds);
+        unset($this->employeeAccessIsDirty);
+        $this->resetValidation();
+    }
+
+    #[Computed]
+    public function employeeAccessIsDirty(): bool
+    {
+        if (! $this->selectedUserId) {
+            return false;
+        }
+
+        return $this->normalizeIds($this->employeeRoleIds) !== $this->originalEmployeeRoleIds
+            || $this->employeeActiveRoleId !== $this->originalEmployeeActiveRoleId
+            || $this->normalizeIds($this->employeePermissionIds) !== $this->originalEmployeePermissionIds;
+    }
+
+    public function saveEmployeeAccess(ActivityLogger $activityLogger): void
+    {
+        $this->authorizePage();
+
+        if (! $this->employeeAccessIsDirty) {
+            return;
+        }
+
+        $validated = $this->validate([
+            'selectedUserId' => ['required', 'integer', Rule::exists('users', 'id')],
+            'employeeRoleIds' => ['required', 'array', 'min:1'],
+            'employeeRoleIds.*' => ['integer', 'distinct', Rule::exists('roles', 'id')->where('guard_name', 'web')],
+            'employeeActiveRoleId' => ['required', 'integer', Rule::in(array_map('intval', $this->employeeRoleIds))],
+            'employeePermissionIds' => ['array'],
+            'employeePermissionIds.*' => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('guard_name', 'web')],
+        ]);
+
+        $target = $this->findManagedUser((int) $validated['selectedUserId']);
+        $before = [
+            'roles' => $target->roles->pluck('name')->values()->all(),
+            'active_role' => $target->myRole(),
+            'direct_permissions' => $target->permissions->pluck('name')->values()->all(),
+        ];
+        $externalPermissionIds = $target->permissions()
+            ->whereNotIn('name', AccessPermissionCatalog::names())
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+
+        if ($target->is(auth()->user())) {
+            $currentActiveRoleId = auth()->user()->activeRole()?->id;
+            $keepsAdministratorAccess = in_array($currentActiveRoleId, array_map('intval', $validated['employeeRoleIds']), true)
+                && (int) $validated['employeeActiveRoleId'] === $currentActiveRoleId;
+
+            if (! $keepsAdministratorAccess) {
+                throw ValidationException::withMessages([
+                    'employeeActiveRoleId' => __('access.cannot-edit-self'),
+                ]);
+            }
+        }
+
+        DB::transaction(function () use ($target, $validated, $externalPermissionIds): void {
+            $roleIds = array_map('intval', $validated['employeeRoleIds']);
+
+            // Spatie's role sync owns membership; the application's
+            // authoritative helper then guarantees exactly one active pivot.
+            $target->roles()->sync($roleIds);
+            $target->setActiveRole((int) $validated['employeeActiveRoleId']);
+            $target->syncPermissions(array_values(array_unique([
+                ...$externalPermissionIds,
+                ...array_map('intval', $validated['employeePermissionIds'] ?? []),
+            ])));
+        });
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $target->unsetRelation('roles')->unsetRelation('permissions');
+
+        $activityLogger->log(
+            'Employee access updated',
+            $target,
+            properties: [
+                'before' => $before,
+                'after' => [
+                    'roles' => $target->roles()->pluck('name')->values()->all(),
+                    'active_role' => $target->myRole(),
+                    'direct_permissions' => $target->permissions()->pluck('name')->values()->all(),
+                ],
+            ],
+            logName: 'access-management',
+        );
+
+        session()->flash('access-success', __('access.access-saved'));
+        $this->selectUser($target->id);
+    }
+
+    public function selectRole(int $roleId): void
+    {
+        $this->authorizePage();
+        $this->selectedRoleId = Role::query()->whereKey($roleId)->value('id');
+        abort_unless($this->selectedRoleId, 404);
+        $this->showAssignedUsersModal = false;
+        $this->loadSelectedRole();
+    }
+
+    public function showAssignedUsers(): void
+    {
+        $this->authorizePage();
+        abort_unless(
+            $this->selectedRoleId && Role::query()->whereKey($this->selectedRoleId)->exists(),
+            404,
+        );
+
+        $this->showAssignedUsersModal = true;
+    }
+
+    public function saveRolePermissions(ActivityLogger $activityLogger): void
+    {
+        $this->authorizePage();
+        $role = Role::query()->with('permissions')->findOrFail($this->selectedRoleId);
+
+        $this->validate([
+            'rolePermissionIds' => ['array'],
+            'rolePermissionIds.*' => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('guard_name', 'web')],
+        ]);
+
+        $before = $role->permissions->pluck('name')->values()->all();
+        $externalPermissionIds = $role->permissions()
+            ->whereNotIn('name', AccessPermissionCatalog::names())
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+        $permissionIds = $this->isAdministratorRole($role)
+            ? Permission::query()->pluck('id')->all()
+            : array_values(array_unique([
+                ...$externalPermissionIds,
+                ...array_map('intval', $this->rolePermissionIds),
+            ]));
+
+        $role->syncPermissions($permissionIds);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $activityLogger->log(
+            'Role permissions updated',
+            $role,
+            properties: [
+                'before' => $before,
+                'after' => $role->permissions()->pluck('name')->values()->all(),
+            ],
+            logName: 'access-management',
+        );
+
+        session()->flash('access-success', __('access.role-permissions-saved'));
+        $this->loadSelectedRole();
+    }
+
+    public function selectAllRolePermissions(): void
+    {
+        $this->authorizePage();
+        $this->rolePermissionIds = Permission::query()
+            ->whereIn('name', AccessPermissionCatalog::names())
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+    }
+
+    public function clearRolePermissions(): void
+    {
+        $this->authorizePage();
+        $role = Role::query()->findOrFail($this->selectedRoleId);
+
+        if (! $this->isAdministratorRole($role)) {
+            $this->rolePermissionIds = [];
+        }
+    }
+
+    public function createRole(ActivityLogger $activityLogger): void
+    {
+        $this->authorizePage();
+        $this->newRoleName = Str::slug($this->newRoleName);
+
+        $validated = $this->validate([
+            'newRoleName' => [
+                'required', 'string', 'min:2', 'max:80', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                Rule::unique('roles', 'name')->where('guard_name', 'web'),
+            ],
+        ]);
+
+        $role = Role::query()->create(['name' => $validated['newRoleName'], 'guard_name' => 'web']);
+        $activityLogger->log('Role created', $role, logName: 'access-management');
+
+        $this->newRoleName = '';
+        $this->selectedRoleId = $role->id;
+        $this->loadSelectedRole();
+        session()->flash('access-success', __('access.role-created'));
+    }
+
+    public function renameRole(ActivityLogger $activityLogger): void
+    {
+        $this->authorizePage();
+        $role = Role::query()->findOrFail($this->selectedRoleId);
+        $this->ensureCustomRole($role);
+        $this->selectedRoleName = Str::slug($this->selectedRoleName);
+
+        $validated = $this->validate([
+            'selectedRoleName' => [
+                'required', 'string', 'min:2', 'max:80', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                Rule::unique('roles', 'name')->where('guard_name', 'web')->ignore($role->id),
+            ],
+        ]);
+
+        $before = $role->name;
+        $role->update(['name' => $validated['selectedRoleName']]);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $activityLogger->log(
+            'Role renamed',
+            $role,
+            properties: ['before' => $before, 'after' => $role->name],
+            logName: 'access-management',
+        );
+
+        session()->flash('access-success', __('access.role-renamed'));
+        $this->loadSelectedRole();
+    }
+
+    public function deleteRole(ActivityLogger $activityLogger): void
+    {
+        $this->authorizePage();
+        $role = Role::query()->withCount('users')->findOrFail($this->selectedRoleId);
+        $this->ensureCustomRole($role);
+
+        if ($role->users_count > 0) {
+            throw ValidationException::withMessages(['selectedRoleName' => __('access.role-in-use')]);
+        }
+
+        $activityLogger->log(
+            'Role deleted',
+            $role,
+            properties: ['name' => $role->name],
+            logName: 'access-management',
+        );
+        $role->delete();
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $this->selectedRoleId = Role::query()->orderBy('name')->value('id');
+        $this->loadSelectedRole();
+        session()->flash('access-success', __('access.role-deleted'));
+    }
+
+    public function render(): View
+    {
+        $this->authorizePage();
+
+        $roles = Role::query()->withCount('users')->orderBy('name')->get();
+        $permissions = Permission::query()
+            ->whereIn('name', AccessPermissionCatalog::names())
+            ->orderBy('name')
+            ->get();
+
+        $selectedUser = $this->selectedUserId
+            ? User::query()->with(['profile.city', 'roles', 'permissions'])->find($this->selectedUserId)
+            : null;
+        $selectedRole = $this->selectedRoleId
+            ? $roles->firstWhere('id', $this->selectedRoleId)
+            : null;
+        $selectedRoleUsers = $this->showAssignedUsersModal && $selectedRole
+            ? $selectedRole->users()
+                ->with(['profile.city'])
+                ->orderBy('email')
+                ->get()
+            : collect();
+
+        return view('livewire.access-management.index', [
+            'employees' => $this->employeeQuery()->paginate(
+                $this->selectedUserId
+                    ? self::EXPANDED_EMPLOYEES_PER_PAGE
+                    : self::COMPACT_EMPLOYEES_PER_PAGE,
+            ),
+            'roles' => $roles,
+            'permissionGroups' => AccessPermissionCatalog::forDisplay($permissions),
+            'selectedUser' => $selectedUser,
+            'selectedRole' => $selectedRole,
+            'selectedRoleUsers' => $selectedRoleUsers,
+            'selectedRoleIsSystem' => $selectedRole ? $this->isSystemRole($selectedRole) : false,
+            'selectedRoleIsAdministrator' => $selectedRole ? $this->isAdministratorRole($selectedRole) : false,
+        ]);
+    }
+
+    private function employeeQuery(): Builder
+    {
+        $locale = app()->getLocale() === 'ar' ? 'ar' : 'en';
+
+        return User::query()
+            ->with(['profile.city', 'roles'])
+            ->whereNotNull('employee_id')
+            ->whereHas('profile')
+            ->when($this->search !== '', function (Builder $query) use ($locale): void {
+                $search = '%'.trim($this->search).'%';
+                $query->where(function (Builder $query) use ($search, $locale): void {
+                    $query->where('email', 'like', $search)
+                        ->orWhereHas('profile', fn (Builder $profile): Builder => $profile
+                            ->where("first_name_{$locale}", 'like', $search)
+                            ->orWhere("last_name_{$locale}", 'like', $search)
+                            ->orWhere('username', 'like', $search));
+                });
+            })
+            ->when($this->roleFilter !== 'all', fn (Builder $query): Builder => $query
+                ->whereHas('roles', fn (Builder $roles): Builder => $roles->whereKey((int) $this->roleFilter)))
+            ->when($this->statusFilter !== 'all', fn (Builder $query): Builder => $query
+                ->whereHas('profile', fn (Builder $profile): Builder => $profile
+                    ->where('is_active', $this->statusFilter === 'active')))
+            ->orderBy('email');
+    }
+
+    private function findManagedUser(int $userId): User
+    {
+        return User::query()
+            ->with(['profile.city', 'roles', 'permissions'])
+            ->whereNotNull('employee_id')
+            ->whereHas('profile')
+            ->findOrFail($userId);
+    }
+
+    private function loadSelectedRole(): void
+    {
+        if (! $this->selectedRoleId) {
+            $this->selectedRoleName = '';
+            $this->rolePermissionIds = [];
+
+            return;
+        }
+
+        $role = Role::query()->with('permissions')->findOrFail($this->selectedRoleId);
+        $this->selectedRoleName = $role->name;
+        $this->rolePermissionIds = $role->permissions->pluck('id')->map(fn ($id): int => (int) $id)->all();
+        $this->resetValidation();
+    }
+
+    private function authorizePage(): void
+    {
+        abort_unless(
+            auth()->user()?->activeRoleIs(...config('access-control.administrator_roles', [])),
+            403,
+        );
+    }
+
+    private function isAdministratorRole(Role $role): bool
+    {
+        return in_array($role->name, config('access-control.administrator_roles', []), true);
+    }
+
+    private function isSystemRole(Role $role): bool
+    {
+        return in_array($role->name, config('access-control.system_roles', []), true);
+    }
+
+    private function ensureCustomRole(Role $role): void
+    {
+        if ($this->isSystemRole($role)) {
+            throw ValidationException::withMessages([
+                'selectedRoleName' => __('access.system-role-locked'),
+            ]);
+        }
+    }
+
+    /**
+     * @param  array<int, int|string>  $ids
+     * @return array<int, int>
+     */
+    private function normalizeIds(array $ids): array
+    {
+        $normalized = array_values(array_unique(array_map('intval', $ids)));
+        sort($normalized);
+
+        return $normalized;
+    }
+}

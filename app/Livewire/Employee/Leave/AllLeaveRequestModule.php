@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
@@ -18,6 +19,8 @@ use Livewire\Component;
 
 class AllLeaveRequestModule extends Component
 {
+    use AuthorizesActivePermissions;
+
     public LeaveBalance $leaveBalance;
 
     public LeaveRequest $leaveRequest;
@@ -249,6 +252,8 @@ class AllLeaveRequestModule extends Component
 
     public function processSave()
     {
+        $this->authorizeActivePermission($this->form->id ? 'leaves.update' : 'leaves.create');
+
         if ($this->form->id) {
             Gate::authorize('update', $this->form->leaveRequest);
             $this->form->update();

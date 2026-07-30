@@ -1,9 +1,8 @@
 <?php
 
-
-
 namespace App\Livewire\Basics;
 
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Models\JobLevel;
 use Illuminate\Validation\Rule;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -11,11 +10,14 @@ use Livewire\Component;
 
 class JobLevelModule extends Component
 {
+    use AuthorizesActivePermissions;
+
     protected $listeners = [
         'openJobLevelEdit' => 'edit',
     ];
 
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -49,6 +51,7 @@ class JobLevelModule extends Component
 
     public function create(): void
     {
+        $this->authorizeActivePermission('project-basics.create');
         $this->item = [
             'id' => null,
             'name_ar' => '',
@@ -66,6 +69,7 @@ class JobLevelModule extends Component
 
     public function edit(int $id): void
     {
+        $this->authorizeActivePermission('project-basics.update');
         $model = JobLevel::findOrFail($id);
 
         $this->item = [
@@ -84,11 +88,14 @@ class JobLevelModule extends Component
 
     public function save(): void
     {
+        $this->authorizeActivePermission(
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+        );
         $this->validate();
 
-        $model = !empty($this->item['id'])
+        $model = ! empty($this->item['id'])
             ? JobLevel::findOrFail($this->item['id'])
-            : new JobLevel();
+            : new JobLevel;
 
         $model->fill($this->item)->save();
 

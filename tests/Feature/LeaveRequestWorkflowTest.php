@@ -799,6 +799,7 @@ class LeaveRequestWorkflowTest extends TestCase
             'email' => $email,
             'password' => 'password',
         ]);
+        $user->givePermissionTo(['leaves.create', 'leaves.update']);
 
         return [$user, LeaveRequest::query()->findOrFail($leaveRequestId)];
     }

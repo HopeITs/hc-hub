@@ -2,17 +2,21 @@
 
 namespace App\Livewire\Basics;
 
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Models\ChecklistItem;
-use Livewire\Component;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Component;
 
 class ChecklistItemModule extends Component
 {
+    use AuthorizesActivePermissions;
+
     protected $listeners = [
         'openChecklistItemEdit' => 'edit',
     ];
 
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -34,10 +38,9 @@ class ChecklistItemModule extends Component
         return view('livewire.basics.checklist-item-module');
     }
 
-
-
     public function create(): void
     {
+        $this->authorizeActivePermission('project-basics.create');
         $this->item = [
             'id' => null,
             'name' => '',
@@ -51,6 +54,7 @@ class ChecklistItemModule extends Component
 
     public function edit(int $id): void
     {
+        $this->authorizeActivePermission('project-basics.update');
         $model = ChecklistItem::findOrFail($id);
 
         $this->item = [
@@ -66,12 +70,15 @@ class ChecklistItemModule extends Component
 
     public function save(): void
     {
+        $this->authorizeActivePermission(
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+        );
         $this->validate();
 
-        $model = !empty($this->item['id'])
+        $model = ! empty($this->item['id'])
         // $model = $this->item['id']
             ? ChecklistItem::findOrFail($this->item['id'])
-            : new ChecklistItem();
+            : new ChecklistItem;
 
         $model->fill($this->item)->save();
 

@@ -2,15 +2,19 @@
 
 namespace App\Livewire\Basics;
 
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Models\ContractType;
-use Livewire\Component;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Component;
 
 class ContractTypeModule extends Component
 {
+    use AuthorizesActivePermissions;
+
     protected $listeners = ['openContractTypeEdit' => 'edit'];
 
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -26,8 +30,8 @@ class ContractTypeModule extends Component
         return [
             'item.name_ar' => 'required|string',
             'item.name_en' => 'required|string',
-            'item.place'   => 'required|integer',
-            'item.type'    => 'required|integer',
+            'item.place' => 'required|integer',
+            'item.type' => 'required|integer',
         ];
     }
 
@@ -38,6 +42,7 @@ class ContractTypeModule extends Component
 
     public function create(): void
     {
+        $this->authorizeActivePermission('project-basics.create');
         $this->item = [
             'id' => null,
             'name_ar' => '',
@@ -51,13 +56,13 @@ class ContractTypeModule extends Component
         $this->showModal = true;
     }
 
-
     public function edit(int $id): void
     {
+        $this->authorizeActivePermission('project-basics.update');
         $model = ContractType::findOrFail($id);
-    
+
         $this->modalTitle = __('general.edit');
-    
+
         $this->item = [
             'id' => $model->id,
             'name_ar' => $model->name_ar,
@@ -65,18 +70,20 @@ class ContractTypeModule extends Component
             'place' => $model->place,
             'type' => $model->type,
         ];
-    
+
         $this->showModal = true;
     }
 
-
     public function save(): void
     {
+        $this->authorizeActivePermission(
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+        );
         $this->validate();
 
-        $model = !empty($this->item['id'])
+        $model = ! empty($this->item['id'])
             ? ContractType::findOrFail($this->item['id'])
-            : new ContractType();
+            : new ContractType;
 
         $model->fill($this->item);
         $model->save();
@@ -94,6 +101,7 @@ class ContractTypeModule extends Component
 
     public function delete(array $payload): void
     {
+        $this->authorizeActivePermission('project-basics.delete');
         ContractType::findOrFail($payload['id'])->delete();
 
         $this->dispatch('refreshContractTypeTable');
