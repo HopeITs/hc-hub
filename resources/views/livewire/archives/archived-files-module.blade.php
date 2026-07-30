@@ -69,7 +69,7 @@
             @forelse($folders as $folder)
             <div class="relative group ">
                 <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" class="flex flex-col items-center justify-center h-40 p-4 text-center transition bg-white border border-neutral-200 rounded-surface shadow-e1 hover:-translate-y-0.5 hover:border-[#c2151c]/50 hover:shadow-e3">
-                    <span class="flex items-center justify-center rounded-surface size-16 bg-transparent ring-1 ring-[#c2151c] group-hover:bg-[#c2151c] group-hover:ring-[#c2151c]">
+                    <span class="flex items-center justify-center rounded-surface size-16 bg-transparent ring-1 ring-transparent group-hover:bg-[#c2151c] group-hover:ring-[#c2151c]">
                         <x-icons.folder class="w-10 h-10 text-[#c2151c] group-hover:text-white" />
                     </span>
                     <span class="w-full mt-3 text-body font-semibold text-neutral-900 truncate">{{ $folder->name }}</span>
@@ -135,7 +135,7 @@
                     @if (in_array(strtolower($file->extension ?? ''), ['jpg', 'jpeg', 'png'], true))
                     <img src="{{ route('folder-files.preview', ['media' => $file->id]) }}" alt="{{ $file->name }}" class="object-cover w-16 h-16 rounded-surface ring-1 ring-neutral-200" />
                     @else
-                    <span class="flex items-center justify-center rounded-surface size-16 bg-transparent ring-1 ring-[#c2151c] group-hover:bg-[#c2151c] group-hover:ring-[#c2151c]">
+                    <span class="flex items-center justify-center rounded-surface size-16 bg-transparent ring-1 ring-transparent group-hover:bg-[#c2151c] group-hover:ring-[#c2151c]">
                         <x-icons.document-text class="w-10 h-10 text-[#c2151c] group-hover:text-white" />
                     </span>
                     @endif
