@@ -180,6 +180,12 @@ class Index extends Component
             'employeePermissionIds.*' => ['integer', 'distinct', Rule::exists('permissions', 'id')->where('guard_name', 'web')],
         ]);
 
+        // Both checks run before anything is written, and before the
+        // self-edit guard below — a request that tries to escalate is refused
+        // outright rather than partially applied.
+        $this->assertMayAssignRoles($validated['employeeRoleIds']);
+        $this->assertMayGrantPermissions($validated['employeePermissionIds'] ?? [], 'employeePermissionIds');
+
         $target = $this->findManagedUser((int) $validated['selectedUserId']);
         $before = [
             'roles' => $target->roles->pluck('name')->values()->all(),
@@ -278,7 +284,22 @@ class Index extends Component
             ? Permission::query()->pluck('id')->all()
             : array_values(array_unique([
                 ...$externalPermissionIds,
-                ...array_map('intval', $this->rolePermissionIds),
+                // Anything already on the role is preserved even if the actor
+                // does not hold it; only newly *added* permissions are gated,
+                // so a delegated administrator cannot silently strip authority
+                // they cannot see either.
+                ...$this->assertMayGrantPermissions(
+                    array_diff(
+                        array_map('intval', $this->rolePermissionIds),
+                        $role->permissions->pluck('id')->map(fn ($id): int => (int) $id)->all(),
+                    ),
+                    'rolePermissionIds',
+                ),
+                ...$role->permissions
+                    ->pluck('id')
+                    ->map(fn ($id): int => (int) $id)
+                    ->intersect(array_map('intval', $this->rolePermissionIds))
+                    ->all(),
             ]));
 
         $role->syncPermissions($permissionIds);
@@ -441,6 +462,7 @@ class Index extends Component
             ->with(['profile.city', 'roles'])
             ->whereNotNull('employee_id')
             ->whereHas('profile')
+            ->tap(fn (Builder $query) => $this->scopeToManagedCity($query))
             ->when($this->search !== '', function (Builder $query) use ($locale): void {
                 $search = '%'.trim($this->search).'%';
                 $query->where(function (Builder $query) use ($search, $locale): void {
@@ -465,7 +487,26 @@ class Index extends Component
             ->with(['profile.city', 'roles', 'permissions'])
             ->whereNotNull('employee_id')
             ->whereHas('profile')
+            ->tap(fn (Builder $query) => $this->scopeToManagedCity($query))
             ->findOrFail($userId);
+    }
+
+    /**
+     * Restrict account administration to the actor's own city.
+     *
+     * Latent rather than live today, because only administrator roles hold
+     * access-management.manage-employees and those roles are nationwide by
+     * design. It stops being latent the moment that permission is granted to a
+     * regional role through this very screen — at which point the role would
+     * otherwise administer accounts across the whole country.
+     */
+    private function scopeToManagedCity(Builder $query): Builder
+    {
+        $cityId = auth()->user()?->activeCityId();
+
+        return $cityId === null
+            ? $query
+            : $query->whereHas('profile', fn (Builder $profile): Builder => $profile->where('city_id', $cityId));
     }
 
     private function loadSelectedRole(): void
@@ -496,6 +537,74 @@ class Index extends Component
     private function isAdministratorRole(Role $role): bool
     {
         return in_array($role->name, config('access-control.administrator_roles', []), true);
+    }
+
+    /**
+     * Only an active super-admin may hand out administrator roles.
+     *
+     * Without this, holding access-management.manage-employees was enough to
+     * create a super-admin. That permission is granted automatically to every
+     * role in access-control.administrator_roles — which includes HR-SYR — so
+     * headquarters HR could promote any account in the system to full
+     * administrator. Self-editing was already blocked, but promoting a second
+     * account they control is the same outcome one step removed.
+     *
+     * @param  array<int, int|string>  $roleIds
+     */
+    private function assertMayAssignRoles(array $roleIds): void
+    {
+        if (auth()->user()?->isActiveAdministrator()) {
+            return;
+        }
+
+        $privileged = Role::query()
+            ->whereKey(array_map('intval', $roleIds))
+            ->get()
+            ->filter(fn (Role $role): bool => $this->isAdministratorRole($role));
+
+        if ($privileged->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'employeeRoleIds' => __('access.cannot-assign-administrator-role', [
+                    'roles' => $privileged->pluck('name')->implode(', '),
+                ]),
+            ]);
+        }
+    }
+
+    /**
+     * Nobody may grant a permission they do not themselves hold.
+     *
+     * Closes the second half of the same escalation. Blocking assignment of the
+     * super-admin *role* alone would still let a delegated administrator create
+     * an ordinary custom role, grant it every permission in the catalogue, and
+     * assign that instead — different name, same authority. The rule here is
+     * the standard one: delegation can narrow authority, never widen it.
+     *
+     * @param  array<int, int|string>  $permissionIds
+     * @return array<int, int> the permission ids, unchanged, when all are allowed
+     */
+    private function assertMayGrantPermissions(array $permissionIds, string $field): array
+    {
+        $permissionIds = array_map('intval', $permissionIds);
+        $user = auth()->user();
+
+        if ($user?->isActiveAdministrator()) {
+            return $permissionIds;
+        }
+
+        $granting = Permission::query()->whereKey($permissionIds)->pluck('name', 'id');
+
+        $beyond = $granting->reject(fn (string $name): bool => $user?->hasActivePermission($name) ?? false);
+
+        if ($beyond->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                $field => __('access.cannot-grant-unheld-permission', [
+                    'permissions' => $beyond->values()->implode(', '),
+                ]),
+            ]);
+        }
+
+        return $permissionIds;
     }
 
     private function isSystemRole(Role $role): bool

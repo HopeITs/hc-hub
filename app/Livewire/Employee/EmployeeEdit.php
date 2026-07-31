@@ -17,7 +17,7 @@ use App\Models\ChecklistItem;
 use App\Models\City;
 use App\Models\DefaultDeliverable;
 use App\Models\Employee;
-use App\Models\Role;
+use App\Services\ChecklistWorkflow;
 use App\Traits\WithAlerts;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -65,6 +65,8 @@ class EmployeeEdit extends Component
 
     public function mount(Employee $employee)
     {
+        Gate::authorize('update', $employee);
+
         $this->employee = $employee;
         $this->title = $employee->name;
         $this->canManageBadges = Gate::allows('create', [Badge::class, $employee]);
@@ -231,24 +233,36 @@ class EmployeeEdit extends Component
 
     public function openInitiateReturnModal(int $checklistId)
     {
-        $this->selectedChecklistForReturn = Checklist::find($checklistId);
+        Gate::authorize('update', $this->employee);
+
+        // Scoped to the employee being edited. Previously any checklist id at
+        // all could be loaded into the modal — including one belonging to
+        // another city's employee — and then written to by initiateReturn().
+        $this->selectedChecklistForReturn = Checklist::query()
+            ->whereKey($checklistId)
+            ->where('employee_id', $this->employee->id)
+            ->firstOrFail();
+
         $this->return_receiver_id = null;
         $this->showInitiateReturnModal = true;
     }
 
     public function initiateReturn()
     {
+        Gate::authorize('update', $this->employee);
+
         $this->validate(['return_receiver_id' => 'required|exists:employees,id']);
 
         if ($this->selectedChecklistForReturn) {
-            $this->selectedChecklistForReturn->update([
-                'receiver_id' => $this->return_receiver_id,
-                'returned_status' => 'pending',
-                'returned_at' => now(),
-            ]);
+            app(ChecklistWorkflow::class)->initiateReturn(
+                checklistId: (int) $this->selectedChecklistForReturn->id,
+                employee: $this->employee,
+                receiverId: (int) $this->return_receiver_id,
+            );
 
             $this->successToast('Return process initiated.');
             $this->showInitiateReturnModal = false;
+            $this->selectedChecklistForReturn = null;
         }
 
         $this->checklistForm->setEmployeeAndAllItems(
@@ -260,11 +274,9 @@ class EmployeeEdit extends Component
 
     public function finalizeReturnCycle(int $checklistId)
     {
-        $checklist = Checklist::findOrFail($checklistId);
+        Gate::authorize('update', $this->employee);
 
-        if ($checklist->returned_status === 'received') {
-            $checklist->delete();
-        }
+        app(ChecklistWorkflow::class)->finalizeReturn($checklistId, $this->employee);
 
         $this->successToast('Checklist fully reset.');
 
@@ -282,7 +294,6 @@ class EmployeeEdit extends Component
 
     public function render()
     {
-        $roles = Role::pluck('name', 'id')->toArray();
         $delivereds = Employee::whereIn('id', DefaultDeliverable::pluck('employee_id'))->get();
         if ($delivereds->isEmpty()) {
             $delivereds = Employee::whereHas(
@@ -306,7 +317,6 @@ class EmployeeEdit extends Component
             ->get();
 
         return view('livewire.employee.form', [
-            'roles' => $roles,
             'cities' => $cities,
             'delivereds' => $delivereds,
             'employeeChecklistItems' => $employeeChecklistItems,

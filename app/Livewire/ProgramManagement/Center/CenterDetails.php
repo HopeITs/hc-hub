@@ -5,6 +5,7 @@ namespace App\Livewire\ProgramManagement\Center;
 use App\Models\Center;
 use App\Models\ContractType;
 use App\Models\Program;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class CenterDetails extends Component
@@ -16,6 +17,10 @@ class CenterDetails extends Component
 
     public function mount(Center $center): void
     {
+        // Route-model binding resolves any id in the URL; without this a
+        // regional user could read another city's centre detail page directly.
+        Gate::authorize('view', $center);
+
         $this->center = $center->load('city');
         $this->loadContractData();
         $this->loadProgramData();

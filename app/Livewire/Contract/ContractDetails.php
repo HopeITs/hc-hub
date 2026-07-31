@@ -3,6 +3,7 @@
 namespace App\Livewire\Contract;
 
 use App\Models\Contract;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class ContractDetails extends Component
@@ -10,22 +11,27 @@ class ContractDetails extends Component
     public Contract $contract;
 
     public string $displayView = 'annual';
-    public array  $crumbs      = [];
-    public int    $pageNo      = 1;
-    public int    $totalPages  = 1;
+
+    public array $crumbs = [];
+
+    public int $pageNo = 1;
+
+    public int $totalPages = 1;
 
     protected $queryString = [
         'pageNo' => ['as' => 'p', 'except' => 1],
     ];
 
     private const TEMPLATE_PAGES = [
-        'annual'  => 5,
-        'trial'   => 4,
+        'annual' => 5,
+        'trial' => 4,
         'service' => 4,
     ];
 
     public function mount(Contract $contract): void
     {
+        Gate::authorize('view', $contract);
+
         $contract->loadMissing([
             'employee',
             'employee.city',
@@ -40,21 +46,21 @@ class ContractDetails extends Component
 
         // 🔒 Safe category resolution (no crashes if contractType is null or misconfigured)
         $category = $contract->contractType->category
-            ?? match ((int)($contract->contractType->type ?? $contract->contract_type_id ?? 0)) {
+            ?? match ((int) ($contract->contractType->type ?? $contract->contract_type_id ?? 0)) {
                 2 => 'trial',
                 3 => 'service',
                 default => 'annual',
             };
 
-        $this->displayView = in_array($category, ['annual','trial','service'], true) ? $category : 'annual';
-        $this->totalPages  = self::TEMPLATE_PAGES[$this->displayView] ?? 1;
+        $this->displayView = in_array($category, ['annual', 'trial', 'service'], true) ? $category : 'annual';
+        $this->totalPages = self::TEMPLATE_PAGES[$this->displayView] ?? 1;
 
         // Keep requested page within bounds
-        $requested   = (int) (request()->query('p', $this->pageNo) ?: 1);
+        $requested = (int) (request()->query('p', $this->pageNo) ?: 1);
         $this->pageNo = $this->clamp($requested);
 
         // 🔒 Guard employee name translation (no crash if employee null or no translation)
-        $locale       = app()->getLocale();
+        $locale = app()->getLocale();
         $employeeName = $contract->employee?->name ?? __('general.na');
 
         $this->crumbs = [
@@ -67,13 +73,13 @@ class ContractDetails extends Component
     public function render()
     {
         return view('livewire.contract.contract-details', [
-            'contract'    => $this->contract,
-            'locale'      => app()->getLocale(),
+            'contract' => $this->contract,
+            'locale' => app()->getLocale(),
             'displayView' => $this->displayView,
             'partialPath' => $this->partialPath(),
-            'crumbs'      => $this->crumbs,
-            'pageNo'      => $this->pageNo,
-            'totalPages'  => $this->totalPages,
+            'crumbs' => $this->crumbs,
+            'pageNo' => $this->pageNo,
+            'totalPages' => $this->totalPages,
         ])->title(trans_choice('general.contracts', 1));
     }
 
@@ -84,8 +90,16 @@ class ContractDetails extends Component
             $this->scrollTop();
         }
     }
-    public function nextPage(): void { $this->setPage($this->pageNo + 1); }
-    public function prevPage(): void { $this->setPage($this->pageNo - 1); }
+
+    public function nextPage(): void
+    {
+        $this->setPage($this->pageNo + 1);
+    }
+
+    public function prevPage(): void
+    {
+        $this->setPage($this->pageNo - 1);
+    }
 
     private function clamp(int $p): int
     {

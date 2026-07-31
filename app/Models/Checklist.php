@@ -67,7 +67,9 @@ class Checklist extends Model
                 'delivered_status',
                 'returned_at',
                 'returned_status',
-                'notes',
+                // 'notes' is free text written by staff about a specific
+                // person and is not needed to audit a state change. The
+                // transition itself is recorded by ChecklistWorkflow.
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

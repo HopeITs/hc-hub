@@ -4,24 +4,24 @@ namespace App\Models;
 
 use App\Traits\HasTranslation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Department extends Model
 {
     use HasFactory, HasTranslation, LogsActivity;
 
-    protected $guarded = [
-        'id'
+    protected $fillable = [
+        'name', 'code', 'description_en', 'description_ar', 'email',
     ];
 
     protected function description(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->getTranslatableAttribute('description'),
-            set: fn($value) => $this->setTranslatableAttribute('description', $value)
+            get: fn () => $this->getTranslatableAttribute('description'),
+            set: fn ($value) => $this->setTranslatableAttribute('description', $value)
         );
     }
 

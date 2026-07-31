@@ -371,7 +371,7 @@ return [
     'work_email' => 'Work Email',
     'username' => 'Username',
     'create_login_account' => 'Create a login account (work email) for this employee',
-    'create_login_account_hint' => 'Lets the employee sign in to the platform. Default password: HopeCenterHR',
+    'create_login_account_hint' => 'Lets the employee sign in to the platform. A secure password setup link is emailed to them.',
     'national-id' => 'National Id',
     'direct_manager' => 'Direct Manager',
     'tech_manager' => 'Tech Manager',

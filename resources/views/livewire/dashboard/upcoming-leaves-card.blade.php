@@ -37,7 +37,7 @@
                             $leave_date ='<span>' . $upcomingLeave->start_at->format('d M') .  '</span><span class="me-1"> - '.$upcomingLeave->end_at->format('d M') .'</span>';
                         }
                     @endphp
-                    <p class="text-[10px] font-light mt-1 text-gray-500 gap-1 flex">{!! $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') ' !!}</p>
+                    <p class="text-[10px] font-light mt-1 text-gray-500 gap-1 flex">{{ $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') ' }}</p>
 
                 @else
                     @php
@@ -50,7 +50,7 @@
                         }
 
                     @endphp
-                    <p class="text-[10px] font-light mt-1 text-gray-500 space-x-1">{!!   $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') '  !!}
+                    <p class="text-[10px] font-light mt-1 text-gray-500 space-x-1">{{ $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') ' }}
                     </p>
                 @endif
             </div>

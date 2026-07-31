@@ -71,8 +71,8 @@
     </div>
     {{-- Swiper Assets --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script>
+    <script nonce="{{ Vite::cspNonce() }}" src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script nonce="{{ Vite::cspNonce() }}">
         document.addEventListener("DOMContentLoaded", () => {
             new Swiper(".js-today-events .swiper", {
                 slidesPerView: 1,

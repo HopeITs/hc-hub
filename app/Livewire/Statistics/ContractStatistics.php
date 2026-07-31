@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Statistics;
 
+use App\Livewire\Concerns\ScopesToAuthorizedCity;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\Contract;
@@ -13,6 +14,8 @@ use Livewire\Component;
 
 class ContractStatistics extends Component
 {
+    use ScopesToAuthorizedCity;
+
     public ?int $selectedCity = null;
     public ?int $selectedProgram = null;
 
@@ -23,12 +26,36 @@ class ContractStatistics extends Component
 
     public function mount(): void
     {
+        $cityId = $this->authorizedCityId();
+
         $this->cities = City::where('is_active', true)
+            ->when($cityId !== null, fn ($q) => $q->whereKey($cityId))
             ->get();
 
         $this->programs = Program::where('is_active', true)
             ->orderby('name')
             ->get();
+
+        $this->enforceCityScope();
+    }
+
+    /**
+     * Pin the city filter for regionally scoped roles.
+     *
+     * selectedCity is a public property, so it is client-writable, and null
+     * meant "every city" — the branch a regional user landed on by default.
+     * That produced nationwide contract, employee, and salary totals for a
+     * user entitled to one city. Re-applied at the top of loadData() so a
+     * tampered value is overwritten before any aggregate is computed, not just
+     * at mount time.
+     */
+    private function enforceCityScope(): void
+    {
+        $cityId = $this->authorizedCityId();
+
+        if ($cityId !== null) {
+            $this->selectedCity = $cityId;
+        }
     }
 
     private function countByTypeTokens(Builder $query, array $tokens): int
@@ -66,6 +93,8 @@ class ContractStatistics extends Component
 
     public function loadData(): void
     {
+        $this->enforceCityScope();
+
         $this->cards = [];
 
         if (!$this->selectedCity && !$this->selectedProgram) {
@@ -162,6 +191,9 @@ class ContractStatistics extends Component
     {
         $this->selectedCity = null;
         $this->selectedProgram = null;
+
+        // "Clear filters" must not become a way back to nationwide figures.
+        $this->enforceCityScope();
     }
 
     public function render(): View

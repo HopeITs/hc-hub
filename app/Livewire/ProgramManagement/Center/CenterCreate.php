@@ -2,15 +2,19 @@
 
 namespace App\Livewire\ProgramManagement\Center;
 
+use App\Livewire\Concerns\ScopesToAuthorizedCity;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\User;
 use App\Notifications\NewCenterCreated;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 class CenterCreate extends Component
 {
+    use ScopesToAuthorizedCity;
+
     public array $item = [
         'name_en' => '',
         'name_ar' => '',
@@ -38,6 +42,11 @@ class CenterCreate extends Component
     {
         $this->validate();
 
+        // 'exists:cities,id' only proves the city exists, not that this user
+        // may create centers in it.
+        $this->assertCityIsAuthorized($this->item['city_id']);
+        Gate::authorize('create', [Center::class, (int) $this->item['city_id']]);
+
         $this->item['weekends'] = implode(',', $this->item['weekends']);
         $center = Center::create($this->item);
         $center->load('city');
@@ -55,7 +64,10 @@ class CenterCreate extends Component
 
     public function render()
     {
-        $cities = City::get(['id', transColumn('name')]);
+        $cityId = $this->authorizedCityId();
+
+        $cities = ($cityId === null ? City::query() : City::query()->whereKey($cityId))
+            ->get(['id', transColumn('name')]);
 
         return view('livewire.program-management.center.center-create', compact('cities'));
     }

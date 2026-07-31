@@ -3,6 +3,7 @@
 namespace App\Livewire\Auth;
 
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
@@ -55,6 +56,16 @@ class ResetPassword extends Component
                     'password' => Hash::make($this->password),
                     'remember_token' => Str::random(60),
                 ])->save();
+
+                // A reset is often a response to a suspected compromise, so it
+                // has to end whatever sessions the attacker may already hold.
+                // Rotating remember_token above only covers the "remember me"
+                // cookie; the server-side session rows have to go too.
+                if (config('session.driver') === 'database') {
+                    DB::table(config('session.table', 'sessions'))
+                        ->where('user_id', $user->getKey())
+                        ->delete();
+                }
 
                 event(new PasswordReset($user));
             }

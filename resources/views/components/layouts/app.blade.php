@@ -9,8 +9,6 @@
             display: none !important;
         }
     </style>
-
-    <title>@yield('title', 'Hope HR')</title>
 </head>
 
 <body class="antialiased min-h-screen bg-white"
@@ -50,14 +48,12 @@
         </div>
     </main>
 
-    <footer class="bg-gray-100">
-        <x-layouts.app.footer/>
-    </footer>
+    <x-layouts.app.footer class="bg-gray-100"/>
 </div>
 
 @include('partials.scripts')
 @stack('scripts')
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
     function hidePreloader() {
         const overlay = document.getElementById('page-gif-overlay');
         if (!overlay) return;

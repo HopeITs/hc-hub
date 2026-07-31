@@ -26,6 +26,10 @@ trait ResolvesContractLocationOptions
     {
         return City::select('id', $col)
             ->where('is_active', true)
+            ->when(
+                auth()->user()?->activeCityId(),
+                fn ($query, int $cityId) => $query->whereKey($cityId),
+            )
             ->get()
             ->each(fn (City $city) => $city->name = $city->{$col});
     }
@@ -120,6 +124,7 @@ trait ResolvesContractLocationOptions
 
             return Employee::where('is_active', true)
                 ->where('city_id', $cityId)
+                ->when($this->city_id, fn ($query) => $query->where('city_id', $this->city_id))
                 ->orderBy($orderCol)
                 ->get();
         }
@@ -128,6 +133,10 @@ trait ResolvesContractLocationOptions
 
         if ($roleScope !== 'SYR') {
             $query->whereHas('city', fn ($q) => $q->where('slug', $roleScope));
+        }
+
+        if ($this->city_id) {
+            $query->where('city_id', $this->city_id);
         }
 
         return $query->get();
@@ -148,8 +157,24 @@ trait ResolvesContractLocationOptions
 
     private function validateCityConsistency(): bool
     {
+        $activeCityId = auth()->user()?->activeCityId();
+        if ($activeCityId !== null && $activeCityId !== (int) $this->city_id) {
+            $this->addError('city_id', __('You may only manage contracts in your active city.'));
+
+            return false;
+        }
+
+        if (! Employee::query()
+            ->whereKey($this->form->employee_id)
+            ->where('city_id', $this->city_id)
+            ->exists()) {
+            $this->addError('form.employee_id', __('The selected employee must belong to the contract city.'));
+
+            return false;
+        }
+
         if (! $this->city_id || ! $this->form->position_id) {
-            return true;
+            return false;
         }
 
         $position = Position::select('id', 'program_id', 'center_id', 'city_id')

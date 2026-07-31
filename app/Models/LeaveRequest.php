@@ -16,7 +16,11 @@ class LeaveRequest extends Model
 {
     use HasFactory, LogsActivity;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'leave_balance_id', 'type', 'start_at', 'end_at', 'reason',
+        'approved_by', 'approved_at', 'hr_approved', 'reject_reason', 'status',
+        'alternative_employee_id',
+    ];
 
     protected $casts = [
         'start_at' => 'datetime',

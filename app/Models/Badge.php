@@ -5,12 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\RedactsSensitiveActivityLog;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Badge extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, RedactsSensitiveActivityLog;
+
+    /**
+     * Salary figures and the free-text reason/notes behind a promotion or
+     * warning are logged by name only. @see RedactsSensitiveActivityLog
+     */
+    protected array $sensitiveLogAttributes = [
+        'current_salary',
+        'new_salary',
+        'reason',
+        'notes',
+    ];
 
     protected $fillable = [
         'employee_id',
@@ -65,10 +77,6 @@ class Badge extends Model
                 'type',
                 'currency',
                 'date',
-                'reason',
-                'current_salary',
-                'new_salary',
-                'notes',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

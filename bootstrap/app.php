@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Middleware\ActivePermissionMiddleware;
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,6 +22,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->append(SecurityHeaders::class);
+
+        // Re-checks the account's active flag on every authenticated request,
+        // including the Livewire update endpoint. Deactivation must end
+        // existing sessions, not merely block the next login.
+        $middleware->web(append: [
+            EnsureAccountIsActive::class,
+        ]);
+
         $middleware->alias([
             /**** OTHER MIDDLEWARE ALIASES ****/
             'localize' => LaravelLocalizationRoutes::class,

@@ -34,7 +34,7 @@
 
     <div class="org-id-card__photo">
         <div class="org-id-card__bar" aria-hidden="true"></div>
-        <img class="org-id-card__avatar" src="{{ $employee->getFirstMediaUrl('avatar') }}" alt="" loading="lazy">
+        <img class="org-id-card__avatar" src="{{ $employee->avatar_url }}" alt="" loading="lazy">
     </div>
 
     <div class="org-id-card__info">

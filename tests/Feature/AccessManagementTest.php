@@ -176,6 +176,12 @@ class AccessManagementTest extends TestCase
         $permissionManager->givePermissionTo([
             'access-management.view',
             'access-management.manage-permissions',
+            // statistics.view is granted to the manager as well, because a
+            // delegated administrator may now only hand out permissions they
+            // hold themselves. Without that rule, manage-permissions was a
+            // route to assembling a role with every permission in the
+            // catalogue and then assigning it — see PrivilegeEscalationTest.
+            'statistics.view',
         ]);
 
         Livewire::actingAs($permissionManager)

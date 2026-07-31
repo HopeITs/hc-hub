@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ArchiveFileController;
+use App\Http\Controllers\EmployeeAvatarController;
+use App\Http\Controllers\EmployeeDocumentController;
 use App\Http\Middleware\ActiveLivewirePermissionMiddleware;
 use App\Livewire\AccessManagement\Index as AccessManagementIndex;
 use App\Livewire\ActivityLog\ActivityLogModule;
@@ -28,7 +30,18 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
-Route::get('/ID/{username}', ShowDigitalId::class)->name('digital-id.show');
+Route::get('/ID/{token}', ShowDigitalId::class)
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->middleware('throttle:30,1')
+    ->name('digital-id.show');
+
+// Photo for the public ID card. Outside the locale group and outside 'auth'
+// because the card itself is unauthenticated; the signed URL is minted by
+// ShowDigitalId only after the bearer token resolved to an active employee,
+// and it expires within minutes.
+Route::get('/ID/{employee}/photo', [EmployeeAvatarController::class, 'digitalId'])
+    ->middleware(['signed', 'throttle:60,1'])
+    ->name('digital-id.avatar');
 
 Route::group(
     [
@@ -75,6 +88,16 @@ Route::group(
             Route::get('folder-files/{media}/preview', [ArchiveFileController::class, 'preview'])->middleware('active_permission:archives.view')->name('folder-files.preview');
             Route::get('folder-files/{media}/download', [ArchiveFileController::class, 'download'])->middleware('active_permission:archives.download')->name('folder-files.download');
             Route::get('folder-files/{media}/office-preview', [ArchiveFileController::class, 'officePreview'])->middleware('active_permission:archives.view')->name('folder-files.office-preview');
+            Route::get('employee-files/{media}/download', [EmployeeDocumentController::class, 'download'])
+                ->middleware('throttle:60,1')
+                ->name('employee-files.download');
+
+            // Employee photographs live on the private disk; every in-app
+            // <img> resolves through here so EmployeePolicy (and with it the
+            // city scope) applies to the image itself, not just to the page
+            // that embeds it.
+            Route::get('employee-photo/{employee}', [EmployeeAvatarController::class, 'internal'])
+                ->name('employees.avatar');
 
             Route::prefix('checklist-items')
                 ->name('checklist-items.')

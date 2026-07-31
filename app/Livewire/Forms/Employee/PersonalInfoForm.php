@@ -3,9 +3,17 @@
 namespace App\Livewire\Forms\Employee;
 
 use App\Models\Employee;
+use App\Models\Role;
 use App\Models\User;
+use App\Rules\SafeImage;
+use App\Services\SecureImageUploadService;
+use App\Support\BlindIndex;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
@@ -18,28 +26,36 @@ class PersonalInfoForm extends Form
     public ?Employee $employee = null;
 
     public $photo = null;
+
     #[Validate('required|string')]
     public $first_name_ar;
+
     #[Validate('required|string')]
     public $first_name_en;
-     #[Validate('required|string')]
+
+    #[Validate('required|string')]
     public $last_name_ar;
+
     #[Validate('required|string')]
     public $last_name_en;
 
-
     public $id;
+
     #[Validate('required|string')]
     public $father_name_ar;
+
     #[Validate('required|string')]
     public $father_name_en;
 
     #[Validate('required|string')]
     public $mother_name_ar;
+
     #[Validate('required|string')]
     public $mother_name_en;
+
     #[Validate('nullable|string')]
     public $address_ar;
+
     #[Validate('nullable|string')]
     public $address_en;
 
@@ -67,16 +83,18 @@ class PersonalInfoForm extends Form
 
     #[Validate('required|exists:cities,id')]
     public $city_id;
+
     #[Validate('nullable|string')]
     public $civil_registry_office;
 
     #[Validate('nullable|string')]
     public $civil_registry_number;
+
     #[Validate('nullable|string')]
     public $pob_en;
+
     #[Validate('nullable|string')]
     public $pob_ar;
- 
 
     #[Validate('nullable|string')]
     public $work_phone;
@@ -101,6 +119,7 @@ class PersonalInfoForm extends Form
 
     #[Validate('nullable|date|after:board_member_started_at')]
     public $board_member_end_at;
+
     #[Validate('boolean')]
     public $is_active = true;
 
@@ -115,10 +134,9 @@ class PersonalInfoForm extends Form
 
     #[Validate('nullable|exists:employees,id')]
     public $direct_manager_id = null;
+
     #[Validate('nullable|exists:employees,id')]
     public $tech_manager_id = null;
-
-    public $roles;
 
     #[Validate('nullable|string')]
     public $whatsapp_work;
@@ -138,12 +156,24 @@ class PersonalInfoForm extends Form
     public function rules()
     {
         $rules = [
+            // 'image' alone accepts anything GD can parse under any name the
+            // client chooses. SafeImage narrows the set and the upload service
+            // re-encodes it before it is stored.
             'photo' => $this->photo instanceof TemporaryUploadedFile
-                ? ['image', 'max:5120']
+                ? ['mimes:jpeg,jpg,png,webp', 'max:4096', new SafeImage('avatar')]
                 : ['nullable'],
+            // Uniqueness is checked against the blind index, not the column
+            // itself: the encrypted value differs on every write, so a
+            // unique rule on national_number would never match and the same
+            // person could be entered twice.
             'national_number' => [
                 'required',
-                Rule::unique('employees', 'national_number')->ignore($this->employee?->id),
+                Rule::unique('employees', 'national_number_index')
+                    ->ignore($this->employee?->id)
+                    ->where(fn ($query) => $query->where(
+                        'national_number_index',
+                        BlindIndex::of($this->national_number),
+                    )),
             ],
             // Username is always required: it drives the profile page and QR scan ID.
             'username' => [
@@ -166,7 +196,8 @@ class PersonalInfoForm extends Form
     protected function buildWorkEmail(?string $username): ?string
     {
         $username = trim($username ?? '');
-        return $username ? strtolower($username) . '@hcsyria.org' : null;
+
+        return $username ? strtolower($username).'@hcsyria.org' : null;
     }
 
     protected function extractUsernameFromEmail(?string $email): ?string
@@ -189,10 +220,10 @@ class PersonalInfoForm extends Form
         $this->children = $employee->children;
         $this->nationality = $employee->nationality;
         $this->civil_registry_office = $employee->civil_registry_office;
-             $this->civil_registry_number = $employee->civil_registry_number;
+        $this->civil_registry_number = $employee->civil_registry_number;
 
         $this->pob_en = $employee->pob_en;
-          $this->pob_ar = $employee->pob_ar;
+        $this->pob_ar = $employee->pob_ar;
 
         $this->work_phone = $employee->work_phone;
         $this->personal_phone = $employee->personal_phone;
@@ -215,10 +246,9 @@ class PersonalInfoForm extends Form
         $this->address_ar = $employee->address_ar;
         $this->username = $employee->username;
         $this->email = $employee->account?->email;
-        $this->photo = $employee->getFirstMediaUrl('avatar');
+        $this->photo = $employee->avatar_url;
         // Pre-tick the checkbox only if a login account already exists.
         $this->create_account = (bool) $employee->account;
-        $this->roles = implode(',', $employee->account?->roles()->pluck('name')->toArray() ?? []);
         $this->whatsapp_work = $employee->whatsapp_work ?? null;
         $this->telegram_work = $employee->telegram_work ?? null;
         $this->facebook = $employee->facebook ?? null;
@@ -232,6 +262,7 @@ class PersonalInfoForm extends Form
         $this->email = $this->create_account ? $this->buildWorkEmail($this->username) : null;
 
         $this->validate();
+        $this->authorizeScope();
 
         // create_account is a UI-only flag, not an employees column.
         $payload = $this->except(['email', 'photo', 'create_account']);
@@ -249,63 +280,74 @@ class PersonalInfoForm extends Form
         }
 
         if ($this->photo instanceof TemporaryUploadedFile) {
-            $this->employee->addMedia($this->photo->getRealPath())
-                ->usingFileName('employee-avatar.' . $this->photo->getClientOriginalExtension())
-                ->toMediaCollection('avatar');
+            // Employee photographs are protection-sensitive: they are stored
+            // re-encoded, under a random server-chosen name, on the private
+            // disk, and served only through EmployeeAvatarController.
+            app(SecureImageUploadService::class)->attachTo(
+                model: $this->employee,
+                file: $this->photo,
+                collection: 'avatar',
+                profile: 'avatar',
+                disk: 'local',
+            );
         }
 
         return $this->employee;
     }
 
+    private function authorizeScope(): void
+    {
+        $user = auth()->user();
+        abort_unless($user, 403);
+
+        if ($this->employee) {
+            Gate::authorize('update', $this->employee);
+        } else {
+            Gate::authorize('create', [Employee::class, (int) $this->city_id]);
+        }
+
+        $activeCityId = $user->activeCityId();
+        if ($activeCityId !== null && $activeCityId !== (int) $this->city_id) {
+            throw ValidationException::withMessages([
+                'city_id' => __('You may only manage employees in your active city.'),
+            ]);
+        }
+
+        foreach (['direct_manager_id', 'tech_manager_id'] as $field) {
+            $managerId = $this->{$field};
+            if ($managerId && ! Employee::query()
+                ->whereKey($managerId)
+                ->where('city_id', $this->city_id)
+                ->exists()) {
+                throw ValidationException::withMessages([
+                    $field => __('The selected manager must belong to the employee city.'),
+                ]);
+            }
+        }
+    }
+
     /**
-     * Create the login account when missing, or update the email of an existing
-     * one, then sync the selected roles (keeping one active).
+     * Create/update the login account. Privileged role changes are deliberately
+     * restricted to the dedicated Access Management module.
      */
     protected function persistAccount(): void
     {
-        $roles = $this->parseRoles();
-
         if ($this->employee->account) {
             $this->employee->account->update(['email' => $this->email]);
-
-            if ($roles) {
-                $this->employee->account->syncRoles($roles);
-                $this->employee->account->roles()->withPivot('is_active')->first()?->pivot->update(['is_active' => true]);
-            }
 
             return;
         }
 
         $user = User::create([
             'email' => $this->email,
-            'password' => Hash::make('HopeCenterHR'),
+            'password' => Hash::make(Str::password(64)),
             'employee_id' => $this->employee->id,
         ]);
 
-        if ($roles) {
-            $user->assignRole($roles);
-        }
-    }
-
-    /**
-     * Normalise the roles tags-input value (JSON array or comma string) to a
-     * plain array of role names.
-     */
-    protected function parseRoles(): array
-    {
-        if (blank($this->roles)) {
-            return [];
+        if (Role::query()->where('name', 'employee')->exists()) {
+            $user->assignRole('employee');
         }
 
-        if (is_array($this->roles)) {
-            return $this->roles;
-        }
-
-        $decoded = json_decode($this->roles, true);
-        if (is_array($decoded)) {
-            return $decoded;
-        }
-
-        return array_values(array_filter(array_map('trim', explode(',', $this->roles))));
+        Password::sendResetLink(['email' => $user->email]);
     }
 }

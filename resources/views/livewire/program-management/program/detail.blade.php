@@ -190,8 +190,8 @@
 
                                 <div class="flex text-[35px] items-center justify-center size-26  flex-shrink-0 rounded-full overflow-hidden
                                     bg-white border-2 border-primary text-primary font-medium uppercase ">
-                                    @if($employee->getFirstMediaUrl('avatar'))
-                                        <img src="{{ $employee->getFirstMediaUrl('avatar') }}"
+                                    @if($employee->avatar_url)
+                                        <img src="{{ $employee->avatar_url }}"
                                              alt="{{ $employee->displayName ?? $employee->name }}"
                                              class="h-full w-full object-cover">
                                     @else

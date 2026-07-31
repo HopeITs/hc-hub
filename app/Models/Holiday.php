@@ -6,5 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Holiday extends Model
 {
-   protected $guarded = ['id'];
+    protected $fillable = [
+        'name', 'start_date', 'end_date', 'holidayable_id',
+        'holidayable_type', 'is_recurring',
+    ];
 }

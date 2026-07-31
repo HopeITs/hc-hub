@@ -3,17 +3,19 @@
 namespace App\Livewire\ProgramManagement\Center;
 
 use App\Livewire\Concerns\AuthorizesActivePermissions;
+use App\Livewire\Concerns\ScopesToAuthorizedCity;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\User;
 use App\Notifications\NewCenterCreated;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class CentersModule extends Component
 {
-    use AuthorizesActivePermissions;
+    use AuthorizesActivePermissions, ScopesToAuthorizedCity;
 
     public bool $showModal = false;
 
@@ -45,9 +47,18 @@ class CentersModule extends Component
 
     public function render()
     {
-        $cities = City::get(['id', transColumn('name')]);
+        // The dropdown and save() both resolve the permitted city from
+        // ScopesToAuthorizedCity, so they cannot disagree.
+        $cities = $this->authorizedCityQuery()->get(['id', transColumn('name')]);
 
         return view('livewire.program-management.centers-module', compact('cities'));
+    }
+
+    private function authorizedCityQuery()
+    {
+        $cityId = $this->authorizedCityId();
+
+        return $cityId === null ? City::query() : City::query()->whereKey($cityId);
     }
 
     public function create(): void
@@ -79,6 +90,10 @@ class CentersModule extends Component
 
         $model = Center::findOrFail($id);
 
+        // A Livewire listener is directly invokable; the id is untrusted even
+        // though the only button that dispatches it is city-filtered.
+        Gate::authorize('update', $model);
+
         $this->item = [
             'id' => $model->id,
             'name_en' => $model->name_en,
@@ -105,9 +120,18 @@ class CentersModule extends Component
 
         $this->validate();
 
+        // Validated against the active role's city, not against the dropdown
+        // that produced it — the submitted value is what actually gets stored.
+        $this->assertCityIsAuthorized($this->item['city_id']);
+
         $this->item['weekends'] = implode(',', $this->item['weekends']);
         $model = Center::findOrNew($this->item['id']);
         $isNew = ! $model->exists;
+
+        Gate::authorize(
+            $isNew ? 'create' : 'update',
+            $isNew ? [Center::class, (int) $this->item['city_id']] : $model,
+        );
 
         $model->fill($this->item);
         $model->save();

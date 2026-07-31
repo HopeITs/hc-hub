@@ -4,6 +4,7 @@ namespace App\Livewire\ActivityLog;
 
 use Spatie\Activitylog\Models\Activity as ActivityLog;
 use App\Models\User;
+use Illuminate\Support\Str;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
@@ -52,22 +53,56 @@ class ActivityLogTable extends LivewireTable
             Column::make(__('Record ID'), 'subject_id')
                 ->sortable(),
 
+            // Stored XSS sink: this column rendered the logged old/new values
+            // as raw HTML. Those values come from user-editable fields (an
+            // employee name, a note, an address), so a payload saved into any
+            // audited record would execute for every administrator who later
+            // opened the activity log — a privileged audience, which is what
+            // makes it worth more than a self-XSS.
+            //
+            // asHtml() is dropped: the changes are plain text and the table
+            // library escapes non-HTML columns. Every value is additionally
+            // run through e() so that reinstating asHtml() later cannot
+            // silently reopen the hole.
             Column::make(__('Changes'), 'properties')
-                ->displayUsing(function ($value) {
-                    if (!$value) return '-';
+                ->displayUsing(function ($value): string {
+                    if (! $value) {
+                        return '-';
+                    }
 
-                    $json = json_decode($value, true);
+                    $json = json_decode($value, true) ?: [];
 
-                    $before = $json['old'] ?? [];
-                    $after = $json['attributes'] ?? [];
-
-                    return 'Old: ' . json_encode($before) . ' | New: ' . json_encode($after);
-                })->asHtml(),
+                    return 'Old: '.$this->summarise($json['old'] ?? [])
+                        .' | New: '.$this->summarise($json['attributes'] ?? []);
+                }),
 
             Column::make(__('Date'), 'created_at')
                 ->sortable()
                 ->displayUsing(fn($value) => $value->format('Y-m-d H:i')),
         ];
+    }
+
+    /**
+     * Render a logged attribute set as escaped, readable text.
+     *
+     * Nested values are JSON-encoded rather than printed structurally, so a
+     * crafted array cannot smuggle markup through a child node.
+     */
+    private function summarise(mixed $attributes): string
+    {
+        if (! is_array($attributes) || $attributes === []) {
+            return '—';
+        }
+
+        return collect($attributes)
+            ->map(function ($value, $key): string {
+                $rendered = is_scalar($value) || $value === null
+                    ? (string) $value
+                    : json_encode($value);
+
+                return e($key).': '.e(Str::limit((string) $rendered, 120));
+            })
+            ->implode(', ');
     }
 
     protected function filters(): array

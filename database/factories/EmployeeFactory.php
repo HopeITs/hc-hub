@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Contract;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -13,22 +12,22 @@ class EmployeeFactory extends Factory
     public function definition()
     {
         return [
-            'name_en' => $this->faker->name,
-            'name_ar' => 'اسم ' . $this->faker->unique()->numberBetween(1, 1000),
-            'city_id' => $this->faker->numberBetween(2, 6),
+            'first_name_en' => $this->faker->firstName,
+            'first_name_ar' => 'اسم '.$this->faker->unique()->numberBetween(1, 1000),
+            'last_name_en' => $this->faker->lastName,
+            'last_name_ar' => 'عائلة '.$this->faker->unique()->numberBetween(1, 1000),
+            'city_id' => null,
             'username' => $this->faker->userName,
             'actual_dob' => $this->faker->date('Y-m-d', '-20 years'),
-            'years_of_service' => $this->faker->randomFloat(1, 0, 8),
             'national_number' => $this->faker->unique()->numerify('###########'),
             'dob' => $this->faker->date('Y-m-d', '-20 years'),
             'civil_registry_office' => $this->faker->city,
             'civil_registry_number' => strtoupper($this->faker->bothify('###??')),
-            'place_of_registration' => $this->faker->city,
             'gender' => $this->faker->randomElement([0, 1, 2]),
             'father_name_en' => $this->faker->firstNameMale,
-            'father_name_ar' => 'اسمأب' . $this->faker->unique()->numberBetween(1, 1000),
+            'father_name_ar' => 'اسمأب'.$this->faker->unique()->numberBetween(1, 1000),
             'mother_name_en' => $this->faker->firstNameFemale,
-            'mother_name_ar' => 'اسمأم' . $this->faker->unique()->numberBetween(1, 1000),
+            'mother_name_ar' => 'اسمأم'.$this->faker->unique()->numberBetween(1, 1000),
             'nationality' => 1,
             'marital_status' => $this->faker->randomElement([0, 1, 2]),
             'children' => $this->faker->numberBetween(0, 5),
@@ -36,10 +35,16 @@ class EmployeeFactory extends Factory
             'personal_phone' => $this->faker->numerify('09########'),
             'personal_email' => $this->faker->unique()->safeEmail,
             'address_en' => $this->faker->city,
-            'address_ar' => 'مدينة' . $this->faker->unique()->numberBetween(1, 1000),
+            'address_ar' => 'مدينة'.$this->faker->unique()->numberBetween(1, 1000),
             'skills' => implode(', ', $this->faker->words(3)),
             'interests' => implode(', ', $this->faker->words(3)),
-            'is_active' => $this->faker->boolean(90),
+            // Deterministically active. This was faker->boolean(90), which made
+            // roughly one in ten factory-built employees inactive at random —
+            // so any test that signs a user in was silently flaky, and now that
+            // EnsureAccountIsActive rejects inactive accounts it would fail
+            // outright about a tenth of the time. Use the inactive() state when
+            // a test actually wants a deactivated employee.
+            'is_active' => true,
             'is_board_member' => $this->faker->boolean(10),
             'board_member_started_at' => null,
             'board_member_end_at' => null,
@@ -48,13 +53,8 @@ class EmployeeFactory extends Factory
         ];
     }
 
-    public function configure()
+    public function inactive(): static
     {
-        return $this->afterCreating(function ($employee) {
-
-          Contract::factory()->create([
-                'employee_id' => $employee->id,
-            ]);
-        });
+        return $this->state(fn (): array => ['is_active' => false]);
     }
 }

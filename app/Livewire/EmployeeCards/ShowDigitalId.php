@@ -19,10 +19,14 @@ class ShowDigitalId extends Component
         App::setLocale('en');
     }
 
-    public function mount(string $username): void
+    public function mount(string $token): void
     {
         $this->employee = Employee::query()
-            ->where('username', $username)
+            ->where('digital_id_token', $token)
+            ->where('is_active', true)
+            // A deactivated employee's card, and a card that has been
+            // explicitly disabled after being lost, both stop resolving here.
+            ->where('digital_id_enabled', true)
             ->with([
                 'city',
                 'media',
@@ -47,7 +51,10 @@ class ShowDigitalId extends Component
 
         return view('livewire.employee-cards.show-digital-id', [
             'employee' => $this->employee,
-            'avatarSrc' => $this->employee->getFirstMediaUrl('avatar'),
+            // The card is unauthenticated, so the internal avatar route would
+            // 403 here. The bearer token has already been matched to an active
+            // employee in mount(), which is what authorizes this signed link.
+            'avatarSrc' => $this->employee->signedAvatarUrl(),
             'employeeName' => trim($firstName.' '.$lastName),
             'firstName' => $firstName,
             'lastName' => $lastName,

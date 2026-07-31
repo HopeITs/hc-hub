@@ -16,7 +16,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
     document.addEventListener("DOMContentLoaded", () => {
         const canvas = document.getElementById("departmentEmployeesChart");
         if (!canvas) return;

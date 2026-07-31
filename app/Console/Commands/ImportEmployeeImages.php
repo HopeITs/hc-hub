@@ -91,10 +91,13 @@ class ImportEmployeeImages extends Command
 
             try {
                 // singleFile collection: adding replaces any previous avatar.
+                // Explicit private disk, matching the runtime upload path in
+                // PersonalInfoForm — a bulk import must not reintroduce
+                // publicly fetchable photographs.
                 $employee->addMedia($filePath)
                     ->preservingOriginal()
                     ->usingFileName($filename)
-                    ->toMediaCollection('avatar');
+                    ->toMediaCollection('avatar', 'local');
 
                 $stored++;
                 $this->line("✔ {$filename} → #{$employee->id} {$employee->name}");

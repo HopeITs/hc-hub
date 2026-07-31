@@ -71,7 +71,7 @@
 
                         <span class="relative inline-flex items-center justify-center rounded-full size-9 shrink-0">
                             <img class="object-cover border rounded-full size-8 border-primary"
-                                src="{{ $user->profile?->getFirstMediaUrl('avatar') }}" alt="user" />
+                                src="{{ $user->profile?->avatar_url }}" alt="user" />
 
                             <span
                                 class="absolute bottom-0.5 {{ $isRtl ? 'start-0.5' : 'end-0.5' }}
@@ -94,7 +94,7 @@
                             <div class="relative flex items-center gap-3">
                                 <span class="inline-flex items-center justify-center overflow-hidden rounded-full size-14 shrink-0">
                                     <img class="object-cover border rounded-full size-12 border-primary"
-                                        src="{{ $user->profile?->getFirstMediaUrl('avatar') }}" alt="user">
+                                        src="{{ $user->profile?->avatar_url }}" alt="user">
                                 </span>
 
                                 <div class="min-w-0">
@@ -188,7 +188,7 @@
     </div>
 </nav>
 
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
     function roleDropdown() {
         return {
             open: false,

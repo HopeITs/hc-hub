@@ -63,7 +63,7 @@
     </template>
 </div>
 
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
     document.addEventListener('alpine:init', () => {
         Alpine.data('tagsInput', ({ model, suggestions = [], forceSuggestion = false }) => ({
             model,

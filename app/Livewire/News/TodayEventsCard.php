@@ -29,8 +29,10 @@ class TodayEventsCard extends Component
                 'position'   => $employee->latestActiveContract()?->position?->title ?? '',
                 'department' => $employee->latestActiveContract()?->position?->department?->name ?? '',
                 'message'    => 'Happy Birthday! 🎉',
-                'photo'      => $employee->getFirstMediaUrl('avatar')
-                    ?: 'https://ui-avatars.com/api/?name=' . urlencode($employee->name) . '&color=c2151c&background=FFF',
+                'photo'      => $employee->avatar_url
+                    // Local placeholder: the previous ui-avatars.com fallback
+                    // sent every employee's name to a third-party host.
+                    ?: asset('images/default-avatar.png'),
             ]);
 
         $newsEvents = News::whereDate('event_date', $today)

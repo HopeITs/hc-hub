@@ -44,7 +44,7 @@
                 </button>
 
                 <div class="relative flex flex-col items-center text-center">
-                    <img src="{{ $employee->getFirstMediaUrl('avatar') }}" alt="{{ $employee->name }}"
+                    <img src="{{ $employee->avatar_url }}" alt="{{ $employee->name }}"
                          class="object-cover rounded-full shadow-lg size-20 ring-4 ring-white/30 sm:size-24">
                     <h2 class="mt-3 text-lg font-extrabold tracking-tight">{{ $employee->name }}</h2>
                     @if($position)
@@ -113,7 +113,7 @@
                         <h3 class="mb-2 text-xs font-bold tracking-wide uppercase text-secondary-light">@lang('general.direct-manager')</h3>
                         <button type="button" wire:click="$dispatch('open-profile', { employeeId: {{ $managerEmployee->id }} })"
                                 class="flex items-center w-full gap-3 px-3 py-2 transition border border-gray-100 rounded-xl text-start hover:border-secondary-light hover:bg-secondary-soft">
-                            <img src="{{ $managerEmployee->getFirstMediaUrl('avatar') }}" alt="" class="object-cover rounded-full size-9">
+                            <img src="{{ $managerEmployee->avatar_url }}" alt="" class="object-cover rounded-full size-9">
                             <div class="min-w-0">
                                 <div class="text-sm font-bold truncate text-secondary-dark">{{ $managerEmployee->name }}</div>
                                 <div class="text-xs truncate text-secondary-light">{{ $manager->title }}</div>
@@ -135,7 +135,7 @@
                                 @if($rEmployee)
                                     <button type="button" wire:click="$dispatch('open-profile', { employeeId: {{ $rEmployee->id }} })"
                                             class="flex items-center w-full gap-3 px-3 py-2 transition border border-gray-100 rounded-xl text-start hover:border-secondary-light hover:bg-secondary-soft">
-                                        <img src="{{ $rEmployee->getFirstMediaUrl('avatar') }}" alt="" class="object-cover rounded-full size-9">
+                                        <img src="{{ $rEmployee->avatar_url }}" alt="" class="object-cover rounded-full size-9">
                                         <div class="min-w-0">
                                             <div class="text-sm font-bold truncate text-secondary-dark">{{ $rEmployee->name }}</div>
                                             <div class="text-xs truncate text-secondary-light">{{ $report->title }}</div>

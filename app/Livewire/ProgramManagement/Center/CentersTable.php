@@ -3,6 +3,7 @@
 namespace App\Livewire\ProgramManagement\Center;
 
 use App\Exports\CenterExport;
+use App\Livewire\Concerns\ScopesToAuthorizedCity;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\User;
@@ -10,6 +11,7 @@ use App\Notifications\CenterClosed;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
@@ -20,15 +22,21 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CentersTable extends LivewireTable
 {
+    use ScopesToAuthorizedCity;
+
     protected string $model = Center::class;
 
     protected $listeners = ['delete', 'toggleItemStatusConfirmed', 'exportExcel' => 'exportExcel'];
 
     protected function query(): Builder
     {
-        return $this->model()::query()
-            ->with(['city'])
-            ->withCount('positions');
+        // Applied at the query, so it covers the table, the global search, the
+        // filters, and exportExcel() (which builds on appliedQuery()) at once.
+        return $this->scopeToAuthorizedCity(
+            $this->model()::query()
+                ->with(['city'])
+                ->withCount('positions')
+        );
     }
 
     protected function globalSearchColumns(): array
@@ -40,11 +48,28 @@ class CentersTable extends LivewireTable
     {
         $locale = app()->getLocale();
 
-        return City::query()->whereHas('centers')
+        return $this->authorizedCities()
+            ->whereHas('centers')
             ->orderBy(transColumn('name'))
             ->get(['id', transColumn('name')])
             ->mapWithKeys(fn ($c) => [$c->id => $c->name])
             ->all();
+    }
+
+    /**
+     * Cities this user may filter by.
+     *
+     * The dropdown and the row query are both derived from authorizedCityId(),
+     * so a filter option can never select rows the query would exclude — and,
+     * more importantly, the option list itself stops disclosing which other
+     * cities exist and have centers.
+     */
+    protected function authorizedCities(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = City::query();
+        $cityId = $this->authorizedCityId();
+
+        return $cityId === null ? $query : $query->whereKey($cityId);
     }
 
     protected function columns(): array
@@ -68,7 +93,7 @@ class CentersTable extends LivewireTable
 
             SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
                 ->options(
-                    City::query()
+                    $this->authorizedCities()
                         ->whereNot('code', '000')
                         ->where('is_active', true)
                         ->get()
@@ -175,6 +200,10 @@ class CentersTable extends LivewireTable
     public function toggleItemStatusConfirmed($payload): void
     {
         $item = Center::findOrFail($payload['id']);
+
+        // The id comes from a browser-dispatched confirmation payload.
+        Gate::authorize('update', $item);
+
         $item->is_active = ! $item->is_active;
         $item->save();
 
@@ -200,13 +229,21 @@ class CentersTable extends LivewireTable
 
     public function delete($payload): void
     {
-        Center::findOrFail($payload['id'])->delete();
+        $center = Center::findOrFail($payload['id']);
+
+        Gate::authorize('delete', $center);
+
+        $center->delete();
 
         LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
     }
 
     public function exportExcel(): BinaryFileResponse
     {
+        Gate::authorize('export', Center::class);
+
+        // appliedQuery() derives from query(), which is already city-scoped, so
+        // the export cannot contain rows the table would not have shown.
         $query = $this->appliedQuery();
         $data = $query->get();
         $userSelectedColumns = $this->columns;

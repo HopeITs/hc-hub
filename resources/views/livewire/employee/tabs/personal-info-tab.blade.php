@@ -171,12 +171,6 @@
     <div class="grid pb-8 mb-8 border-b md:grid-cols-1 gap-x-6 gap-y-3">
         <x-heading-label class="col-span-1 ">@lang('general.membership')</x-heading-label>
 
-        <div class="col-span-full">
-            <x-forms.input-label for="roles">{{ trans_choice('general.role', 2) }}</x-forms.input-label>
-            <x-forms.tags-input placeholder='Add tag' :suggestions="implode(',', $roles)" :forceSuggestion=true
-                wire:model="infoForm.roles" />
-            <x-error-span>{{ $errors->first('infoForm.roles') }}</x-error-span>
-        </div>
         <div class="flex items-center col-span-1 space-x-2 ">
             <x-forms.input type="checkbox" wire:model.live="infoForm.is_board_member"
                 wire:change="toggleBoardMember($event.target.checked)" value="1" id="is_board_member" />

@@ -10,6 +10,8 @@ return [
     'forgot-password' => 'Forgot Password?',
     'copyright' => 'Christian Hope Center - HRM',
     'failed' => 'Please check your credentials',
+    'account_inactive' => 'This account has been deactivated. Please contact your HR administrator.',
+    'throttle_ip' => 'Too many sign-in attempts from this network. Please try again in :seconds seconds.',
 
     'reset-password' => 'Reset Password',
     'reset-password-text' => 'The new password must be different from previously used passwords.',

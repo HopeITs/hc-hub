@@ -15,7 +15,10 @@ class Center extends Model
 {
     use HasFactory, HasTranslation, LogsActivity;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name_en', 'name_ar', 'weekends', 'open_at', 'close_at', 'city_id',
+        'address_en', 'address_ar', 'is_active',
+    ];
 
     protected function name(): Attribute
     {
@@ -77,8 +80,6 @@ class Center extends Model
         // Using floatDiffInHours is cleaner than calculating minutes manually (Carbon 2+)
         return $open->floatDiffInHours($close);
     }
-
-
 
     public function getActivitylogOptions(): LogOptions
     {

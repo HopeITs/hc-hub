@@ -3,6 +3,7 @@
 namespace App\Livewire\ChecklistItems;
 
 use App\Models\Checklist;
+use App\Services\ChecklistWorkflow;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -26,12 +27,17 @@ class PendingReturns extends Component
 
     public function markReceived(int $id): void
     {
-        $checklist = Checklist::findOrFail($id);
-        $checklist->update([
-            'returned_status' => 'received',
-            'returned_at' => now(),
-            'notes' => $this->notes[$id] ?? null,
-        ]);
+        $employee = Auth::user()?->profile;
+
+        abort_unless($employee, 403);
+
+        // Re-scoped to the nominated receiver; the id in the payload is not
+        // evidence that this user is entitled to close the return.
+        app(ChecklistWorkflow::class)->markReceived(
+            checklistId: $id,
+            actorEmployeeId: $employee->id,
+            notes: $this->notes[$id] ?? null,
+        );
 
         unset($this->notes[$id]);
         $this->dispatch('pendingReturnsCount');

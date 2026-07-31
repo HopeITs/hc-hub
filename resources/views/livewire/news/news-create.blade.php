@@ -9,7 +9,7 @@
         <div class="col-span-2 flex justify-end gap-2">
             <x-primary-button type="submit">@lang('general.save')</x-primary-button>
             <x-primary-button type="button" class="!bg-gray-200 !text-black hover:!bg-gray-300"
-                onclick="window.location='{{ route('news.index') }}'">
+                x-on:click="window.location.href = @js(route('news.index'))">
                 @lang('general.cancel')
             </x-primary-button>
         </div>

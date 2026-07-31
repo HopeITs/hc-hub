@@ -10,7 +10,7 @@
     <clock-timepicker id="{{ $pickerId }}" format="{{ $format }}"></clock-timepicker>
 </div>
 
-<script type="module">
+<script nonce="{{ Vite::cspNonce() }}" type="module">
     if (!customElements.get('clock-timepicker')) {
         import('https://unpkg.com/clock-timepicker/dist/clock-timepicker.js');
     }
@@ -44,5 +44,4 @@
         });
     })(@json($id), @json($pickerId));
 </script>
-
 

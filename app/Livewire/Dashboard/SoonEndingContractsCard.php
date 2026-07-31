@@ -33,7 +33,11 @@ class SoonEndingContractsCard extends Component
             $contract->city_name = $employee?->city?->name ?? 'N/A';
             $contract->department_title = $contract->position?->department?->name ?? 'N/A';
             $contract->position_title = $contract->position?->title ?? '';
-            $contract->employee_photo = $employee?->photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($contract->employee_name) . '&color=7F9CF5&background=EBF4FF';
+            // photo_url is not an attribute on Employee; this silently resolved
+            // to null and always fell through to the third-party avatar
+            // service, leaking employee names to ui-avatars.com on every
+            // dashboard render.
+            $contract->employee_photo = $employee?->avatar_url ?? asset('images/default-avatar.png');
             $contract->view_route = route('contracts.show', ['contract' => $contract->id]);
         });
 

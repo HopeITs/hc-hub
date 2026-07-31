@@ -80,7 +80,7 @@
                     @endif
                 </a>
 
-                @if (!$isShared && ($folder->user_id === auth()->id() || auth()->user()->hasRole('super-admin')))
+                @if (!$isShared && ($folder->user_id === auth()->id() || auth()->user()->isActiveAdministrator()))
                 <div x-data="{ open: false }" @click.away="open = false" class="absolute top-2 right-2">
                     <button @click="open = !open" class="inline-flex items-center justify-center transition rounded-md size-8 text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         <svg class="w-5 h-5 text-secondary-medium"

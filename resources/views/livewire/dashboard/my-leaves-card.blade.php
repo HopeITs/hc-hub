@@ -56,7 +56,7 @@
     </div>
 </div>
 @push('js')
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
     function initChart() {
         const canvas = document.getElementById("leavesGaugeChart");
         const ctx = canvas.getContext("2d");

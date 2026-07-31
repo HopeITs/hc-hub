@@ -10,6 +10,7 @@ use App\Models\Contract;
 use App\Models\Position;
 use App\Models\TerminationReason;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -46,6 +47,8 @@ class ContractEdit extends Component
 
     public function mount(Contract $contract): void
     {
+        Gate::authorize('update', $contract);
+
         $this->contract = $contract->loadMissing('position.center');
 
         $this->form->setDefaults();
@@ -129,6 +132,8 @@ class ContractEdit extends Component
 
     public function submit(): mixed
     {
+        Gate::authorize('update', $this->contract);
+
         $this->form->validateIdentity();
         $this->form->validateTerms();
         $this->form->validatePay();

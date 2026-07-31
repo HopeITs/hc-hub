@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\SalaryPer;
+use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -13,9 +13,40 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Contract extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, RedactsSensitiveActivityLog;
 
-    protected $guarded = ['id'];
+    /**
+     * Salary and free-text attendance notes are logged by name only.
+     *
+     * @see RedactsSensitiveActivityLog
+     */
+    protected array $sensitiveLogAttributes = [
+        'salary',
+        'attending_notes_en',
+        'attending_notes_ar',
+    ];
+
+    protected $fillable = [
+        'employee_id',
+        'position_id',
+        'contract_type_id',
+        'start_date',
+        'end_date',
+        'termination_reason_id',
+        'terminated_at',
+        'reason_of_termination',
+        'salary',
+        'currency',
+        'salary_per',
+        'work_hours_from',
+        'work_hours_to',
+        'work_days_en',
+        'work_days_ar',
+        'attending_notes_ar',
+        'attending_notes_en',
+        'weekly_hours',
+        'is_active',
+    ];
 
     protected $casts = [
         'start_date' => 'date',
@@ -59,7 +90,7 @@ class Contract extends Model
         return $this->belongsTo(ContractType::class, 'contract_type_id');
     }
 
-      public function terminationReason()
+    public function terminationReason()
     {
         return $this->belongsTo(TerminationReason::class, 'termination_reason_id');
     }
@@ -82,8 +113,6 @@ class Contract extends Model
         return $this->weekly_hours / 5;
     }
 
-
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -98,12 +127,9 @@ class Contract extends Model
                 'is_active',
                 'weekly_hours',
                 'currency',
-                'salary',
                 'salary_per',
                 'work_days_en',
                 'work_days_ar',
-                'attending_notes_en',
-                'attending_notes_ar',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

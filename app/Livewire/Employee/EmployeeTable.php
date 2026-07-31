@@ -9,6 +9,7 @@ use App\Models\Position;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
@@ -71,7 +72,7 @@ class EmployeeTable extends LivewireTable
 
             Column::make(trans('general.photo'), 'photo')
                 ->displayUsing(function ($v, Model $m): string {
-                    $src = $m->getFirstMediaUrl('avatar');
+                    $src = $m->avatar_url;
 
                     return $src
                         ? '<img src="'.e($src).'" alt="'.e($m->name).'" class="border rounded-full object-fit size-12 border-1 border-primary" />'
@@ -202,7 +203,9 @@ class EmployeeTable extends LivewireTable
 
     public function delete($payload): void
     {
-        Employee::find($payload['id'])?->delete();
+        $employee = Employee::findOrFail($payload['id']);
+        Gate::authorize('delete', $employee);
+        $employee->delete();
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
@@ -222,6 +225,7 @@ class EmployeeTable extends LivewireTable
     public function toggleItemStatusConfirmed($payload): void
     {
         $item = Employee::findOrFail($payload['id']);
+        Gate::authorize('update', $item);
         $item->is_active = ! $item->is_active;
         $item->save();
 

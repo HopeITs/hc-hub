@@ -150,6 +150,21 @@ class User extends Authenticatable
     }
 
     /**
+     * True only when the role the user is *currently operating under* is a
+     * super-admin role.
+     *
+     * Spatie's hasRole('super-admin') answers "has this user ever been granted
+     * super-admin", which is the wrong question in an application where users
+     * hold several roles and explicitly switch between them. Someone who once
+     * held super-admin and is now signed in as HR-ALP would pass that check and
+     * receive nationwide archive access. Always use this instead.
+     */
+    public function isActiveAdministrator(): bool
+    {
+        return $this->activeRoleIs('super-admin');
+    }
+
+    /**
      * Check direct grants plus the currently active role only.
      *
      * Spatie's default check combines every assigned role, which is unsafe for

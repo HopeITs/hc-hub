@@ -35,7 +35,7 @@
                                 bg-[var(--color-primary)] text-white font-semibold uppercase shadow-sm">
 
                         <img
-                            src="{{ $contract->employee->getFirstMediaUrl('avatar') }}"
+                            src="{{ $contract->employee->avatar_url }}"
                             alt="{{ $contract->employee->name }}"
                             class="h-full w-full object-cover"
                         >

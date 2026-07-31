@@ -111,7 +111,7 @@ class ArchivedFilesModule extends Component
 
         if ($folderId) {
             $folder = Folder::with('users')->find($folderId);
-            if ($folder && ! $this->user->hasRole('super-admin') && ! $folder->users->contains($this->user->id)) {
+            if ($folder && ! $this->user->isActiveAdministrator() && ! $folder->users->contains($this->user->id)) {
                 abort(403, 'You do not have permission to access this folder.');
             }
             $this->currentFolder = $folder;
@@ -212,26 +212,26 @@ class ArchivedFilesModule extends Component
 
     private function userCanAccessFolder(Folder $folder): bool
     {
-        return $this->user->hasRole('super-admin')
+        return $this->user->isActiveAdministrator()
             || $folder->users()->whereKey($this->user->id)->exists();
     }
 
     private function userCanManageFolder(?Folder $folder = null): bool
     {
-        if ($this->isShared && ! $this->user->hasRole('super-admin')) {
+        if ($this->isShared && ! $this->user->isActiveAdministrator()) {
             return false;
         }
 
         if (! $folder) {
-            return ! $this->isShared || $this->user->hasRole('super-admin');
+            return ! $this->isShared || $this->user->isActiveAdministrator();
         }
 
-        return $this->user->hasRole('super-admin') || (int) $folder->user_id === (int) $this->user->id;
+        return $this->user->isActiveAdministrator() || (int) $folder->user_id === (int) $this->user->id;
     }
 
     private function authorizeSharedAction(): void
     {
-        if ($this->isShared && ! $this->user->hasRole('super-admin')) {
+        if ($this->isShared && ! $this->user->isActiveAdministrator()) {
             abort(403, 'You are not authorized to perform this action in Shared Folders.');
         }
     }
@@ -288,7 +288,7 @@ class ArchivedFilesModule extends Component
             $query->where('is_shared', false)->where('user_id', $this->user->id);
         }
 
-        if (! $this->user->hasRole('super-admin')) {
+        if (! $this->user->isActiveAdministrator()) {
             $query->whereHas('users', fn ($q) => $q->where('user_id', $this->user->id));
         }
 
@@ -350,7 +350,7 @@ class ArchivedFilesModule extends Component
     public function editPermissions(int $folderId)
     {
         $folder = Folder::findOrFail($folderId);
-        if ($folder->user_id !== $this->user->id && ! $this->user->hasRole('super-admin')) {
+        if ($folder->user_id !== $this->user->id && ! $this->user->isActiveAdministrator()) {
             abort(403, 'Only the creator can manage permissions.');
         }
         $this->folderForPermissions = $folder;
@@ -363,7 +363,7 @@ class ArchivedFilesModule extends Component
     public function savePermissions()
     {
         if ($this->folderForPermissions) {
-            if ($this->folderForPermissions->user_id !== $this->user->id && ! $this->user->hasRole('super-admin')) {
+            if ($this->folderForPermissions->user_id !== $this->user->id && ! $this->user->isActiveAdministrator()) {
                 abort(403, 'Only the creator can manage permissions.');
             }
 
@@ -641,6 +641,16 @@ class ArchivedFilesModule extends Component
             $this->rejectUpload($originalName, 'The Office file is not a valid zipped Office document.');
         }
 
+        $maxEntries = (int) config('uploads.office.max_entries', 1000);
+        $maxTotalBytes = (int) config('uploads.office.max_total_uncompressed_bytes', 100 * 1024 * 1024);
+        $maxEntryBytes = (int) config('uploads.office.max_entry_uncompressed_bytes', 20 * 1024 * 1024);
+        $maxRatio = (float) config('uploads.office.max_compression_ratio', 50);
+
+        if ($zip->numFiles < 1 || $zip->numFiles > $maxEntries) {
+            $zip->close();
+            $this->rejectUpload($originalName, 'The Office archive contains too many entries.');
+        }
+
         $requiredEntries = match ($extension) {
             'docx' => ['[Content_Types].xml', 'word/document.xml'],
             'xlsx' => ['[Content_Types].xml', 'xl/workbook.xml'],
@@ -654,7 +664,31 @@ class ArchivedFilesModule extends Component
             }
         }
 
+        $totalUncompressedBytes = 0;
+
         for ($index = 0; $index < $zip->numFiles; $index++) {
+            $stat = $zip->statIndex($index);
+
+            if (! is_array($stat)) {
+                $zip->close();
+                $this->rejectUpload($originalName, 'The Office archive could not be inspected safely.');
+            }
+
+            $uncompressedBytes = (int) ($stat['size'] ?? 0);
+            $compressedBytes = (int) ($stat['comp_size'] ?? 0);
+            $totalUncompressedBytes += $uncompressedBytes;
+
+            if ($uncompressedBytes < 0
+                || $compressedBytes < 0
+                || $uncompressedBytes > $maxEntryBytes
+                || $totalUncompressedBytes > $maxTotalBytes
+                || ($uncompressedBytes > 0 && $compressedBytes === 0)
+                || ($compressedBytes > 0 && ($uncompressedBytes / $compressedBytes) > $maxRatio)
+                || (int) ($stat['encryption_method'] ?? 0) !== 0) {
+                $zip->close();
+                $this->rejectUpload($originalName, 'The Office archive exceeds safe expansion limits or is encrypted.');
+            }
+
             $entryName = $zip->getNameIndex($index) ?: '';
             $lowerEntry = strtolower($entryName);
 
@@ -795,7 +829,7 @@ class ArchivedFilesModule extends Component
 
     private function convertedOfficePdfUrl(?Media $media): ?string
     {
-        if (! $media) {
+        if (! $media || ! config('uploads.office.conversion_enabled', false)) {
             return null;
         }
 
@@ -989,7 +1023,7 @@ POWERSHELL;
 
     private function docxPreviewData(\ZipArchive $zip): array
     {
-        $xml = $zip->getFromName('word/document.xml');
+        $xml = $this->readPreviewXml($zip, 'word/document.xml');
 
         if (! $xml) {
             return ['available' => false, 'message' => 'No document content was found in this file.'];
@@ -1019,7 +1053,7 @@ POWERSHELL;
     private function xlsxPreviewData(\ZipArchive $zip): array
     {
         $sharedStrings = [];
-        $sharedXml = $zip->getFromName('xl/sharedStrings.xml');
+        $sharedXml = $this->readPreviewXml($zip, 'xl/sharedStrings.xml');
 
         if ($sharedXml) {
             preg_match_all('/<si\b.*?<\/si>/s', $sharedXml, $stringMatches);
@@ -1038,7 +1072,7 @@ POWERSHELL;
             }
         }
 
-        $sheetXml = $sheetName ? $zip->getFromName($sheetName) : null;
+        $sheetXml = $sheetName ? $this->readPreviewXml($zip, $sheetName) : null;
 
         if (! $sheetXml) {
             return ['available' => false, 'message' => 'No worksheet content was found in this Excel file.'];
@@ -1081,6 +1115,22 @@ POWERSHELL;
             'rows' => $rows,
             'message' => empty($rows) ? 'No readable cells were found in this Excel file.' : null,
         ];
+    }
+
+    private function readPreviewXml(\ZipArchive $zip, string $entry): ?string
+    {
+        $stat = $zip->statName($entry);
+        $maxBytes = (int) config('uploads.office.max_preview_xml_bytes', 10 * 1024 * 1024);
+
+        if (! is_array($stat) || (int) ($stat['size'] ?? 0) > $maxBytes) {
+            return null;
+        }
+
+        $contents = $zip->getFromName($entry, $maxBytes + 1);
+
+        return is_string($contents) && strlen($contents) <= $maxBytes
+            ? $contents
+            : null;
     }
 
     public function confirmFileDeletion($mediaId)

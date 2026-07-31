@@ -187,5 +187,16 @@ return [
 
     ],
     'leave-max-date' => 'The total leave duration (:days days) exceeds the allowed (:max days).',
-    'annual-leave-max-date' => 'You have exceeded your accrued annual leave allowance.'
+    'annual-leave-max-date' => 'You have exceeded your accrued annual leave allowance.',
+
+    'city_not_authorized' => 'You may only manage records for your own city.',
+
+    'secure_image' => [
+        'unsupported' => 'Only JPEG, PNG and WebP images are accepted.',
+        'unreadable' => 'This file could not be read as an image. Please upload a different one.',
+        'too_large' => 'The image must not be larger than :max.',
+        'too_big' => 'The image must not exceed :width x :height pixels.',
+        'too_many_pixels' => 'The image resolution is too high. Please resize it before uploading.',
+        'aspect_ratio' => 'The image is too elongated. Its longest side may be at most :ratio times the shortest.',
+    ],
 ];

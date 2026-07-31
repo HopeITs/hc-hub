@@ -3,6 +3,7 @@
 namespace App\Livewire\ChecklistItems;
 
 use App\Models\Checklist;
+use App\Services\ChecklistWorkflow;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -26,12 +27,18 @@ class PendingItems extends Component
 
     public function markDelivered(int $id): void
     {
-        $checklist = Checklist::findOrFail($id);
-        $checklist->update([
-            'delivered_status' => 'delivered',
-            'delivered_at' => now(),
-            'notes' => $this->notes[$id] ?? null,
-        ]);
+        $employee = Auth::user()?->profile;
+
+        abort_unless($employee, 403);
+
+        // The list above is scoped to this employee, but the id arrives from
+        // the browser and must be re-scoped here — the read being safe never
+        // made the write safe.
+        app(ChecklistWorkflow::class)->markDelivered(
+            checklistId: $id,
+            actorEmployeeId: $employee->id,
+            notes: $this->notes[$id] ?? null,
+        );
 
         unset($this->notes[$id]);
         $this->dispatch('pendingDeliversCount');

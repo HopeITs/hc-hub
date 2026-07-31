@@ -47,11 +47,10 @@
 
 </div>
 
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
     document.addEventListener('livewire:init', () => {
         Livewire.on('scroll-to-top', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
 </script>
-

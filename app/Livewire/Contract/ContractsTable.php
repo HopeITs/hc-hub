@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
@@ -168,7 +169,10 @@ class ContractsTable extends LivewireTable
 
     public function delete(array $payload): void
     {
-        DB::transaction(fn () => Contract::findOrFail($payload['id'])->delete());
+        $contract = Contract::findOrFail($payload['id']);
+        Gate::authorize('delete', $contract);
+
+        DB::transaction(fn () => $contract->delete());
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();

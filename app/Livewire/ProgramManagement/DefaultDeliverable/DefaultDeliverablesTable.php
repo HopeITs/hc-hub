@@ -2,6 +2,7 @@
 
 namespace App\Livewire\ProgramManagement\DefaultDeliverable;
 
+use App\Livewire\Concerns\ScopesToAuthorizedCity;
 use App\Models\ChecklistItem;
 use App\Models\City;
 use App\Models\DefaultDeliverable as DefaultDeliverableModel;
@@ -9,6 +10,7 @@ use App\Models\Employee;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
@@ -21,6 +23,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DefaultDeliverablesTable extends LivewireTable
 {
+    use ScopesToAuthorizedCity;
+
     protected string $model = DefaultDeliverableModel::class;
 
     protected $listeners = [
@@ -31,7 +35,11 @@ class DefaultDeliverablesTable extends LivewireTable
 
     protected function query(): Builder
     {
-        return $this->model()::query()->with(['employee', 'city', 'item']);
+        // Scoping the base query covers rows, search, filters, and the export,
+        // which all derive from it.
+        return $this->scopeToAuthorizedCity(
+            $this->model()::query()->with(['employee', 'city', 'item'])
+        );
     }
 
     protected function globalSearchColumns(): array
@@ -49,7 +57,10 @@ class DefaultDeliverablesTable extends LivewireTable
 
     protected function employeeOptions(): array
     {
+        $cityId = $this->authorizedCityId();
+
         return Employee::query()
+            ->when($cityId !== null, fn ($q) => $q->where('city_id', $cityId))
             ->whereHas('contracts', function ($query) {
                 $query->whereHas('position', function ($subQuery) {
                     $subQuery->whereHas('department', function ($q) {
@@ -68,7 +79,10 @@ class DefaultDeliverablesTable extends LivewireTable
         $loc = app()->getLocale();
         $name = $loc === 'ar' ? 'name_ar' : 'name_en';
 
+        $cityId = $this->authorizedCityId();
+
         return City::query()
+            ->when($cityId !== null, fn ($q) => $q->whereKey($cityId))
             ->whereHas('centers')
             ->pluck($name, $name)
             ->toArray();
@@ -120,28 +134,11 @@ class DefaultDeliverablesTable extends LivewireTable
                 ->searchable(),
 
             Column::make(__('general.actions'), function (Model $m): string {
-                $user = auth()->user()->load('profile');
-                $role = $user->myRole();
-
-                $roleArr = explode('-', $role);
-
-                $canEdit = true;
-
-                if ($roleArr[0] === 'HR') {
-
-                    if ($roleArr[1] === 'SYR') {
-                        $canEdit = true;
-                    } else {
-                        $citySlug = $roleArr[1];
-
-                        if ($m->city->slug !== $citySlug) {
-                            $canEdit = false;
-                        }
-                    }
-                }
-
-                if (!$canEdit) {
-                    return ''; // hide buttons
+                // The policy decides, so the button and the action it triggers
+                // can no longer disagree. (Hiding the button was never the
+                // control — edit() and delete() enforce it too.)
+                if (auth()->user()?->cannot('update', $m)) {
+                    return '';
                 }
 
                 $id = $m->getKey();
@@ -173,7 +170,13 @@ class DefaultDeliverablesTable extends LivewireTable
 
     public function delete(array $payload): void
     {
-        DefaultDeliverableModel::findOrFail($payload['id'])->delete();
+        $model = DefaultDeliverableModel::findOrFail($payload['id']);
+
+        // The id arrives from a browser-dispatched confirmation callback and
+        // was previously deleted without any city check at all.
+        Gate::authorize('delete', $model);
+
+        $model->delete();
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
@@ -183,6 +186,8 @@ class DefaultDeliverablesTable extends LivewireTable
 
         public function exportExcel(): BinaryFileResponse
     {
+        Gate::authorize('viewAny', DefaultDeliverableModel::class);
+
         $query = $this->appliedQuery();
         $data = $query->get();
 

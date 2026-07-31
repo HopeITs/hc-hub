@@ -12,6 +12,7 @@ use App\Models\Program;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
@@ -43,6 +44,11 @@ class PositionTable extends LivewireTable
     protected function query(): Builder
     {
         $query = $this->model()::query()->with(['city', 'program', 'center', 'jobLevel', 'department', 'directManager', 'techManager']);
+
+        $query->when(
+            auth()->user()?->activeCityId(),
+            fn (Builder $query, int $cityId) => $query->inCity($cityId),
+        );
 
         if ($this->centerId) {
             $query->where('positions.center_id', $this->centerId);
@@ -127,7 +133,9 @@ class PositionTable extends LivewireTable
 
     public function delete($payload)
     {
-        Position::findOrFail($payload['id'])->delete();
+        $position = Position::findOrFail($payload['id']);
+        Gate::authorize('delete', $position);
+        $position->delete();
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
@@ -149,6 +157,7 @@ class PositionTable extends LivewireTable
     public function toggleItemStatusConfirmed($payload)
     {
         $item = Position::findOrFail($payload['id']);
+        Gate::authorize('update', $item);
         $item->is_active = ! $item->is_active;
         $item->save();
 

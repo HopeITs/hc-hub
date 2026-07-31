@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedPii;
+use App\Support\BlindIndex;
 use App\Traits\HasTranslation;
+use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
@@ -17,9 +22,95 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Employee extends Model implements HasMedia
 {
-    use HasFactory, HasTranslation, InteractsWithMedia, LogsActivity;
+    use HasFactory, HasTranslation, InteractsWithMedia, LogsActivity, RedactsSensitiveActivityLog;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'city_id',
+        'first_name_en',
+        'first_name_ar',
+        'last_name_en',
+        'last_name_ar',
+        'father_name_en',
+        'father_name_ar',
+        'mother_name_en',
+        'mother_name_ar',
+        'username',
+        'national_number',
+        'actual_dob',
+        'dob',
+        'pob_en',
+        'pob_ar',
+        'civil_registry_office',
+        'civil_registry_number',
+        'gender',
+        'nationality',
+        'marital_status',
+        'children',
+        'work_phone',
+        'personal_phone',
+        'personal_email',
+        'whatsapp_work',
+        'telegram_work',
+        'facebook',
+        'instagram',
+        'linkedin',
+        'address_en',
+        'address_ar',
+        'skills',
+        'interests',
+        'is_active',
+        'is_board_member',
+        'board_member_started_at',
+        'board_member_end_at',
+    ];
+
+    /**
+     * Logged by name only, never by value. @see RedactsSensitiveActivityLog
+     */
+    protected array $sensitiveLogAttributes = [
+        'national_number',
+        'civil_registry_number',
+        'civil_registry_office',
+        'address_en',
+        'address_ar',
+        'dob',
+        'actual_dob',
+        'personal_phone',
+        'work_phone',
+        'personal_email',
+        'whatsapp_work',
+        'telegram_work',
+        'father_name_en',
+        'father_name_ar',
+        'mother_name_en',
+        'mother_name_ar',
+        'children',
+        'marital_status',
+        'digital_id_token',
+    ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Employee $employee): void {
+            $employee->digital_id_token ??= Str::random(64);
+        });
+
+        // Keep the blind index in step with the encrypted national number.
+        // Registered on the model rather than left to callers so that imports,
+        // seeders, the Livewire forms, and any future write path all get it —
+        // a row saved without an index would silently escape the uniqueness
+        // constraint that the index now carries.
+        static::saving(function (Employee $employee): void {
+            if ($employee->isDirty('national_number')) {
+                $employee->national_number_index = BlindIndex::of($employee->national_number);
+            }
+        });
+    }
+
+    public function digitalIdUrl(): string
+    {
+        return route('digital-id.show', ['token' => $this->digital_id_token]);
+    }
 
     protected $casts = [
         'dob' => 'datetime',
@@ -29,7 +120,32 @@ class Employee extends Model implements HasMedia
         'is_active' => 'boolean',
         'is_board_member' => 'boolean',
         'children' => 'integer',
+        'digital_id_enabled' => 'boolean',
+        'digital_id_rotated_at' => 'datetime',
+        'digital_id_revoked_at' => 'datetime',
+
+        // Encrypted at rest. A stolen database backup, a misconfigured replica,
+        // or a SQL-injection read yields ciphertext for the fields that
+        // identify a person and let someone find them physically. Nothing in
+        // the application queries these columns except the national-number
+        // uniqueness check, which goes through the blind index below.
+        'national_number' => EncryptedPii::class,
+        'civil_registry_number' => EncryptedPii::class,
+        'civil_registry_office' => EncryptedPii::class,
+        'address_en' => EncryptedPii::class,
+        'address_ar' => EncryptedPii::class,
+        'personal_phone' => EncryptedPii::class,
+        'work_phone' => EncryptedPii::class,
+        'personal_email' => EncryptedPii::class,
+        'whatsapp_work' => EncryptedPii::class,
+        'telegram_work' => EncryptedPii::class,
     ];
+
+    /** Exact-match lookup on the encrypted national number. */
+    public function scopeWhereNationalNumber($query, ?string $nationalNumber)
+    {
+        return $query->where('national_number_index', BlindIndex::of($nationalNumber));
+    }
 
     protected function long_fullname(): Attribute
     {
@@ -280,12 +396,62 @@ class Employee extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
+        // Photographs of staff working for a Syrian NGO are protection-sensitive
+        // and must never be reachable by URL guessing, so this collection lives
+        // on the private disk and is read back through EmployeeAvatarController.
         $this->addMediaCollection('avatar')
+            ->useDisk('local')
             ->useFallbackUrl(asset('images/default-avatar.png'))
             ->useFallbackPath(public_path('images/default-avatar.png'))
             ->singleFile();
 
         $this->addMediaCollection('attachments');
+    }
+
+    /**
+     * The authorized URL for this employee's photo.
+     *
+     * Every view uses this instead of getFirstMediaUrl('avatar'), which would
+     * return a directly fetchable public path. Requests land on
+     * EmployeeAvatarController::internal, which runs EmployeePolicy::view.
+     *
+     * The cache-busting query segment is derived from the media row so that
+     * replacing a photo invalidates the browser cache without weakening the
+     * short private max-age on the response.
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        $media = $this->relationLoaded('media')
+            ? $this->getMedia('avatar')->first()
+            : $this->getFirstMedia('avatar');
+
+        if (! $media) {
+            return asset('images/default-avatar.png');
+        }
+
+        return route('employees.avatar', [
+            'employee' => $this->getKey(),
+            'v' => $media->updated_at?->getTimestamp(),
+        ]);
+    }
+
+    /**
+     * A short-lived signed photo URL for the unauthenticated digital ID card.
+     *
+     * Only ShowDigitalId should call this, and only after the bearer token has
+     * been matched to an active employee.
+     */
+    public function signedAvatarUrl(): string
+    {
+        if (! $this->getFirstMedia('avatar')) {
+            return asset('images/default-avatar.png');
+        }
+
+        return URL::temporarySignedRoute(
+            'digital-id.avatar',
+            now()->addMinutes((int) config('uploads.digital_id_avatar_ttl', 10)),
+            ['employee' => $this->getKey()],
+        );
     }
 
     public function getJoinAtAttribute()
@@ -448,21 +614,17 @@ class Employee extends Model implements HasMedia
     {
         return LogOptions::defaults()
             ->useLogName('employee')
+            // Parents' names, home address, and dates of birth identify a
+            // person and their family; for staff of an NGO operating in Syria
+            // they are protection-sensitive. Only the fact that they changed is
+            // logged — see $sensitiveLogAttributes.
             ->logOnly([
                 'name',
-                'father_name_en',
-                'mother_name_en',
-                'father_name_ar',
-                'mother_name_ar',
-                'address',
                 'city_id',
-                'dob',
-                'actual_dob',
                 'board_member_started_at',
                 'board_member_end_at',
                 'is_active',
                 'is_board_member',
-                'children',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

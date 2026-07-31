@@ -87,7 +87,7 @@
                             wire:key="dir-{{ $employee->id }}"
                             class="group flex items-center gap-3 rounded-2xl border border-gray-200 bg-white p-3 text-start shadow-sm transition hover:-translate-y-0.5 hover:border-secondary-light hover:shadow-md">
                         <div class="relative shrink-0">
-                            <img src="{{ $employee->getFirstMediaUrl('avatar') }}" alt="{{ $employee->name }}" loading="lazy"
+                            <img src="{{ $employee->avatar_url }}" alt="{{ $employee->name }}" loading="lazy"
                                  class="size-14 rounded-full object-cover ring-2 ring-white outline outline-1 outline-gray-200 group-hover:outline-secondary-medium">
                             @if($employee->is_board_member)
                                 <span class="absolute -bottom-0.5 -end-0.5 flex size-5 items-center justify-center rounded-full border-2 border-white bg-primary text-[9px] font-bold text-white">★</span>
