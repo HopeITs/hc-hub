@@ -11,7 +11,7 @@ class AllItems extends Component
     public function getItemsProperty()
     {
         $employee = Auth::user()->profile ?? null;
-        if (!$employee) {
+        if (! $employee) {
             return collect();
         }
 
@@ -25,6 +25,7 @@ class AllItems extends Component
                     $item->delivered_status === 'delivered' => 'Delivered',
                     default => 'On Hold',
                 };
+
                 return $item;
             });
     }

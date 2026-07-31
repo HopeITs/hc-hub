@@ -4,10 +4,10 @@ namespace App\Models;
 
 use App\Traits\HasTranslation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class JobLevel extends Model
 {
@@ -20,14 +20,6 @@ class JobLevel extends Model
         'grade',
         'email',
     ];
-
-    protected function name(): Attribute
-    {
-        return Attribute::make(
-            get: fn() => $this->getTranslatableAttribute('name'),
-            set: fn($value) => $this->setTranslatableAttribute('name', $value)
-        );
-    }
 
     public function positions()
     {
@@ -48,5 +40,13 @@ class JobLevel extends Model
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('name'),
+            set: fn ($value) => $this->setTranslatableAttribute('name', $value),
+        );
     }
 }

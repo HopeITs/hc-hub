@@ -26,18 +26,6 @@ class PrivilegeEscalationTest extends TestCase
 {
     use CreatesHrFixtures, RefreshDatabase;
 
-    private function victim(string $city = 'HMS'): User
-    {
-        $employee = $this->makeEmployee($this->makeCity($city, '002'), 'patsy');
-        $user = User::factory()->create(['employee_id' => $employee->id]);
-
-        $role = Role::findOrCreate('employee', 'web');
-        $user->assignRole($role);
-        $user->roles()->updateExistingPivot($role->id, ['is_active' => true]);
-
-        return $user->fresh();
-    }
-
     public function test_headquarters_hr_cannot_promote_another_user_to_super_admin(): void
     {
         $hq = $this->makeUser($this->makeCity('SYR', '000'), 'HR-SYR');
@@ -169,5 +157,17 @@ class PrivilegeEscalationTest extends TestCase
         Livewire::actingAs($regional)
             ->test(Index::class)
             ->call('selectUser', $outsider->id);
+    }
+
+    private function victim(string $city = 'HMS'): User
+    {
+        $employee = $this->makeEmployee($this->makeCity($city, '002'), 'patsy');
+        $user = User::factory()->create(['employee_id' => $employee->id]);
+
+        $role = Role::findOrCreate('employee', 'web');
+        $user->assignRole($role);
+        $user->roles()->updateExistingPivot($role->id, ['is_active' => true]);
+
+        return $user->fresh();
     }
 }

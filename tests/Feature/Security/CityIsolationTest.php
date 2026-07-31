@@ -30,19 +30,6 @@ class CityIsolationTest extends TestCase
 {
     use CreatesHrFixtures, RefreshDatabase;
 
-    private function makeCenter(int $cityId, string $name): Center
-    {
-        return Center::query()->create([
-            'name_en' => $name,
-            'name_ar' => $name,
-            'city_id' => $cityId,
-            'is_active' => true,
-            'weekends' => 'friday',
-            'open_at' => '08:00:00',
-            'close_at' => '16:00:00',
-        ]);
-    }
-
     public function test_a_regional_user_cannot_update_a_centre_in_another_city(): void
     {
         $aleppo = $this->makeCity('ALP', '001');
@@ -164,50 +151,6 @@ class CityIsolationTest extends TestCase
         $this->assertDatabaseHas('default_deliverables', ['id' => $remote->id]);
     }
 
-    /** Positions carry several non-nullable foreign keys; build them once. */
-    private function positionPrerequisites(): array
-    {
-        return [
-            Department::query()->forceCreate(['name' => 'IT', 'code' => 'IT']),
-            JobLevel::query()->forceCreate(['name_en' => 'Officer', 'name_ar' => 'Officer']),
-            Program::query()->forceCreate([
-                'name' => 'Core',
-                'slug' => 'core',
-                'code' => 'CORE',
-                'start_date' => now()->subYear(),
-                'is_active' => true,
-            ]),
-            ContractType::query()->forceCreate(['name_en' => 'Annual Full', 'name_ar' => 'Annual Full']),
-        ];
-    }
-
-    private function makePosition(int $cityId, string $prefix, $department, $jobLevel, $program): Position
-    {
-        return Position::query()->forceCreate([
-            'title_en' => $prefix.'-position',
-            'title_ar' => $prefix.'-position',
-            'city_id' => $cityId,
-            'department_id' => $department->id,
-            'job_level_id' => $jobLevel->id,
-            'program_id' => $program->id,
-            'is_active' => true,
-        ]);
-    }
-
-    private function makeContract(int $employeeId, int $positionId, int $typeId): Contract
-    {
-        return Contract::query()->forceCreate([
-            'employee_id' => $employeeId,
-            'position_id' => $positionId,
-            'contract_type_id' => $typeId,
-            'start_date' => now()->subMonth(),
-            'end_date' => now()->addYear(),
-            'currency' => 2,
-            'weekly_hours' => 40,
-            'is_active' => true,
-        ]);
-    }
-
     /**
      * The inference case: no record crosses the boundary, but the aggregate
      * would have disclosed other cities' headcount.
@@ -263,5 +206,62 @@ class CityIsolationTest extends TestCase
             ->getData(true);
 
         $this->assertSame(1, array_sum($payload['new']));
+    }
+
+    private function makeCenter(int $cityId, string $name): Center
+    {
+        return Center::query()->create([
+            'name_en' => $name,
+            'name_ar' => $name,
+            'city_id' => $cityId,
+            'is_active' => true,
+            'weekends' => 'friday',
+            'open_at' => '08:00:00',
+            'close_at' => '16:00:00',
+        ]);
+    }
+
+    /** Positions carry several non-nullable foreign keys; build them once. */
+    private function positionPrerequisites(): array
+    {
+        return [
+            Department::query()->forceCreate(['name' => 'IT', 'code' => 'IT']),
+            JobLevel::query()->forceCreate(['name_en' => 'Officer', 'name_ar' => 'Officer']),
+            Program::query()->forceCreate([
+                'name' => 'Core',
+                'slug' => 'core',
+                'code' => 'CORE',
+                'start_date' => now()->subYear(),
+                'is_active' => true,
+            ]),
+            ContractType::query()->forceCreate(['name_en' => 'Annual Full', 'name_ar' => 'Annual Full']),
+        ];
+    }
+
+    private function makePosition(int $cityId, string $prefix, $department, $jobLevel, $program): Position
+    {
+        return Position::query()->forceCreate([
+            'title_en' => $prefix.'-position',
+            'title_ar' => $prefix.'-position',
+            'city_id' => $cityId,
+            'department_id' => $department->id,
+            'job_level_id' => $jobLevel->id,
+            'program_id' => $program->id,
+            'is_active' => true,
+        ]);
+    }
+
+    private function makeContract(int $employeeId, int $positionId, int $typeId): Contract
+    {
+        return Contract::query()->forceCreate([
+            'employee_id' => $employeeId,
+            'position_id' => $positionId,
+            'contract_type_id' => $typeId,
+            'start_date' => now()->subMonth(),
+            'end_date' => now()->addYear(),
+            'currency' => 2,
+            'weekly_hours' => 40,
+            'is_active' => true,
+        ]);
     }
 }

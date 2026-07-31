@@ -12,7 +12,7 @@ return [
     'alpha_dash' => 'The :attribute may only contain letters, numbers, dashes and underscores.',
     'alpha_num' => 'The :attribute must only contain letters and numbers.',
     'array' => 'The :attribute must be an array.',
-    'one-year-period'=> 'The :attribute must be one year period.',
+    'one-year-period' => 'The :attribute must be one year period.',
     'before' => 'The :attribute must be a date before :date.',
     'before_or_equal' => 'The :attribute must be a date before or equal to :date.',
     'between' => [
@@ -150,40 +150,40 @@ return [
         'message' => 'Message',
         'name' => [
             'ar' => 'Name (Arabic)',
-            'en' => 'Name (English)'
+            'en' => 'Name (English)',
         ],
         'father_name' => [
             'ar' => 'Father\'s Name (Arabic)',
-            'en' => 'Father\'s Name (English)'
+            'en' => 'Father\'s Name (English)',
         ],
         'mother_name' => [
             'ar' => 'Mother\'s Name (Arabic)',
-            'en' => 'Mother\'s Name (English)'
+            'en' => 'Mother\'s Name (English)',
         ],
         'address' => [
             'ar' => 'Address (Arabic)',
-            'en' => 'Address (English)'
+            'en' => 'Address (English)',
         ],
         'item' => [
             'weekly_hours' => 'Weekly Working Hours',
             'type' => [
                 'ar' => 'Type (Arabic)',
-                'en' => 'Type (English)'
+                'en' => 'Type (English)',
             ],
             'name' => [
                 'ar' => 'Name (Arabic)',
-                'en' => 'Name (English)'
+                'en' => 'Name (English)',
             ],
             'description' => [
                 'ar' => 'Description (Arabic)',
-                'en' => 'Description (English)'
+                'en' => 'Description (English)',
             ],
             'order' => 'Order',
             'place' => 'Place',
         ],
 
         'g-recaptcha-response' => 'captcha (I\'m not a robot)',
-        'leave_balance_id' => 'Leave Type'
+        'leave_balance_id' => 'Leave Type',
 
     ],
     'leave-max-date' => 'The total leave duration (:days days) exceeds the allowed (:max days).',

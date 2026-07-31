@@ -19,19 +19,6 @@ class PrivateAvatarAccessTest extends TestCase
 {
     use CreatesHrFixtures, RefreshDatabase;
 
-    private function withPhoto(Employee $employee): Employee
-    {
-        $image = imagecreatetruecolor(50, 50);
-        $path = tempnam(sys_get_temp_dir(), 'av');
-        imagejpeg($image, $path);
-        imagedestroy($image);
-
-        $employee->addMedia(new UploadedFile($path, 'p.jpg', null, null, true))
-            ->toMediaCollection('avatar', 'local');
-
-        return $employee->fresh();
-    }
-
     public function test_the_photo_is_not_stored_on_the_public_disk(): void
     {
         $city = $this->makeCity('ALP', '001');
@@ -160,5 +147,18 @@ class PrivateAvatarAccessTest extends TestCase
 
         $this->get(route('digital-id.show', $employee->digital_id_token))
             ->assertHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, noimageindex');
+    }
+
+    private function withPhoto(Employee $employee): Employee
+    {
+        $image = imagecreatetruecolor(50, 50);
+        $path = tempnam(sys_get_temp_dir(), 'av');
+        imagejpeg($image, $path);
+        imagedestroy($image);
+
+        $employee->addMedia(new UploadedFile($path, 'p.jpg', null, null, true))
+            ->toMediaCollection('avatar', 'local');
+
+        return $employee->fresh();
     }
 }

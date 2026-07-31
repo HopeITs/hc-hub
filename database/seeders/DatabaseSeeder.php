@@ -2,10 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Employee;
-use App\Models\Position;
 use App\Models\User;
-
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -17,7 +14,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
-
 
         $this->call([
             ProgramSeeder::class,
@@ -36,7 +32,7 @@ class DatabaseSeeder extends Seeder
             EmployeeContractSeeder::class,
             EducationFieldSeeder::class,
             CourseCategorySeeder::class,
-            TerminationReasonSeeder::class
+            TerminationReasonSeeder::class,
         ]);
 
         //    $user = User::factory()->create([

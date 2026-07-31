@@ -17,7 +17,7 @@ class TerminationReason extends Model
     {
         return Attribute::make(
             get: fn () => $this->getTranslatableAttribute('title'),
-            set: fn ($value) => $this->setTranslatableAttribute('title', $value)
+            set: fn ($value) => $this->setTranslatableAttribute('title', $value),
         );
     }
 }

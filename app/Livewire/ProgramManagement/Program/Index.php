@@ -12,13 +12,15 @@ use Livewire\WithPagination;
 
 class Index extends Component
 {
-    use WithPagination, WithFileUploads;
-
-    protected $listeners = ['load-more' => 'loadMore'];
+    use WithFileUploads, WithPagination;
 
     public Program $program;
+
     public ProgramForm $form;
+
     public $perPage = 6;
+
+    protected $listeners = ['load-more' => 'loadMore'];
 
     public function loadMore(): void
     {
@@ -87,7 +89,7 @@ class Index extends Component
                 'cities as cities_count' => function ($query) {
                     $query->select(DB::raw('count(distinct city_id)'));
                 },
-                'contracts'
+                'contracts',
             ])
             ->with('contracts')
             ->orderBy('is_active', 'desc')

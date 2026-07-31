@@ -3,10 +3,9 @@
 namespace App\Livewire\Dashboard;
 
 use App\Enums\LeaveRequestStatus;
-use App\Models\Contract;
 use App\Models\LeaveRequest;
-use Livewire\Component;
 use Carbon\Carbon;
+use Livewire\Component;
 
 class UpcomingLeavesCard extends Component
 {
@@ -17,8 +16,7 @@ class UpcomingLeavesCard extends Component
         $user = auth()->user()->load('profile');
 
         $role = $user->myRole();
-        $query = LeaveRequest::
-        whereDate('start_at', '>=', Carbon::now());
+        $query = LeaveRequest::whereDate('start_at', '>=', Carbon::now());
         if ($role === 'HR-SYR') {
             $query->whereIn('status', [LeaveRequestStatus::Accepted, LeaveRequestStatus::Pending]);
         } elseif (str_starts_with($role, 'HR-')) {
@@ -34,12 +32,11 @@ class UpcomingLeavesCard extends Component
                 ->with(['leaveBalance.contract.position' => function ($query) use ($user) {
                     return $query->where('department_id', $user->profile->latestActiveContract()->position->department_id)
                         ->orWhere('center_id', $user->profile->latestActiveContract()->position->center_id);
-                }, 'leaveBalance.contract.employee'
+                }, 'leaveBalance.contract.employee',
                 ]);
         }
 
         $this->upcomingLeaves = $query->orderBy('start_at')->get();
-
 
     }
 

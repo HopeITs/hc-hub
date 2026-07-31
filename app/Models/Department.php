@@ -17,14 +17,6 @@ class Department extends Model
         'name', 'code', 'description_en', 'description_ar', 'email',
     ];
 
-    protected function description(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->getTranslatableAttribute('description'),
-            set: fn ($value) => $this->setTranslatableAttribute('description', $value)
-        );
-    }
-
     public function positions()
     {
         return $this->hasMany(Position::class, 'department_id');
@@ -39,5 +31,13 @@ class Department extends Model
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    protected function description(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('description'),
+            set: fn ($value) => $this->setTranslatableAttribute('description', $value),
+        );
     }
 }

@@ -43,7 +43,7 @@ class Login extends Component
 
         if (! Auth::attempt(
             ['email' => $this->email, 'password' => $this->password],
-            $this->remember
+            $this->remember,
         )) {
             $this->failAuthentication();
         }
@@ -81,7 +81,7 @@ class Login extends Component
 
         $this->redirectIntended(
             default: route('dashboard', absolute: false),
-            navigate: true
+            navigate: true,
         );
     }
 
@@ -126,7 +126,7 @@ class Login extends Component
     protected function throttleKey(): string
     {
         return Str::transliterate(
-            Str::lower($this->email).'|'.request()->ip()
+            Str::lower($this->email).'|'.request()->ip(),
         );
     }
 

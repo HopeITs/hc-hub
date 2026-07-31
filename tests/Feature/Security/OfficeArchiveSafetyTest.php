@@ -6,6 +6,7 @@ use App\Livewire\Archives\ArchivedFilesModule;
 use Illuminate\Validation\ValidationException;
 use ReflectionMethod;
 use Tests\TestCase;
+use ZipArchive;
 
 class OfficeArchiveSafetyTest extends TestCase
 {
@@ -52,8 +53,8 @@ class OfficeArchiveSafetyTest extends TestCase
         $path = tempnam(sys_get_temp_dir(), 'office-safety-');
         $this->temporaryFiles[] = $path;
 
-        $zip = new \ZipArchive;
-        $this->assertTrue($zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE));
+        $zip = new ZipArchive;
+        $this->assertTrue($zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE));
         $zip->addFromString('[Content_Types].xml', '<Types/>');
         $zip->addFromString('word/document.xml', $documentXml);
         $zip->close();

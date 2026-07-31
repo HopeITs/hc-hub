@@ -25,6 +25,77 @@ class EmployeeTable extends LivewireTable
 
     protected $listeners = ['delete', 'toggleItemStatusConfirmed', 'exportExcel' => 'exportExcel'];
 
+    public function confirmDelete($id): void
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete($payload): void
+    {
+        $employee = Employee::findOrFail($payload['id']);
+        Gate::authorize('delete', $employee);
+        $employee->delete();
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
+    public function confirmToggleItemStatus($id): void
+    {
+        LivewireAlert::title(__('general.toggle-status'))
+            ->text(__('general.confirm-status-change'))
+            ->question()
+            ->withConfirmButton(__('general.save'))
+            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function toggleItemStatusConfirmed($payload): void
+    {
+        $item = Employee::findOrFail($payload['id']);
+        Gate::authorize('update', $item);
+        $item->is_active = ! $item->is_active;
+        $item->save();
+
+        LivewireAlert::title(__('general.item-updated'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery();
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns;
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible())
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions') && $column->code() !== 'photo')
+            ->map(fn ($column) => $column->code())
+            ->toArray();
+
+        $filename = 'employees_'.now()->format('Y-m-d').'.xlsx';
+
+        return Excel::download(
+            new EmployeeExport($data, $visibleColumnCodes),
+            $filename,
+        );
+    }
+
     protected function query(): Builder
     {
         return $this->model()::query()
@@ -160,7 +231,7 @@ class EmployeeTable extends LivewireTable
                     ? Blade::render(
                         '<x-forms.toggle-input class="p-2 m-2 text-xl" active="'.$isActive.
                             '" :model-id="'.$model->getKey().
-                            '" wire-event="confirmToggleItemStatus" />'
+                            '" wire-event="confirmToggleItemStatus" />',
                     )
                     : '';
 
@@ -170,7 +241,7 @@ class EmployeeTable extends LivewireTable
                     ? Blade::render(
                         '<a  href="'.route('employees.show', ['employee' => $model->username]).'" class="p-2 " title="View Profile">
                                 <x-icons.eye class="transition text-secondary-light hover:text-primary" />
-                            </a>'
+                            </a>',
                     )
                     : '';
 
@@ -188,76 +259,5 @@ class EmployeeTable extends LivewireTable
             })->asHtml(),
 
         ];
-    }
-
-    public function confirmDelete($id): void
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete($payload): void
-    {
-        $employee = Employee::findOrFail($payload['id']);
-        Gate::authorize('delete', $employee);
-        $employee->delete();
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
-    }
-
-    public function confirmToggleItemStatus($id): void
-    {
-        LivewireAlert::title(__('general.toggle-status'))
-            ->text(__('general.confirm-status-change'))
-            ->question()
-            ->withConfirmButton(__('general.save'))
-            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function toggleItemStatusConfirmed($payload): void
-    {
-        $item = Employee::findOrFail($payload['id']);
-        Gate::authorize('update', $item);
-        $item->is_active = ! $item->is_active;
-        $item->save();
-
-        LivewireAlert::title(__('general.item-updated'))
-            ->success()->toast()->position('top-start')->show();
-    }
-
-    public function exportExcel(): BinaryFileResponse
-    {
-        $query = $this->appliedQuery();
-        $data = $query->get();
-
-        $userSelectedColumns = $this->columns;
-
-        $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible())
-            ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) {
-                    return true;
-                }
-
-                return in_array($column->code(), $userSelectedColumns);
-            })
-            ->filter(fn ($column) => $column->label() !== __('general.actions') && $column->code() !== 'photo')
-            ->map(fn ($column) => $column->code())
-            ->toArray();
-
-        $filename = 'employees_'.now()->format('Y-m-d').'.xlsx';
-
-        return Excel::download(
-            new EmployeeExport($data, $visibleColumnCodes),
-            $filename
-        );
     }
 }

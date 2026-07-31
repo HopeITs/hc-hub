@@ -10,10 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class VerifyEmployeePii extends Command
 {
-    protected $signature = 'security:verify-pii {--chunk=200 : Rows per batch}';
-
-    protected $description = 'Verify that employee PII is encrypted and blind indexes match';
-
     private const COLUMNS = [
         'national_number',
         'civil_registry_number',
@@ -26,6 +22,10 @@ class VerifyEmployeePii extends Command
         'whatsapp_work',
         'telegram_work',
     ];
+
+    protected $signature = 'security:verify-pii {--chunk=200 : Rows per batch}';
+
+    protected $description = 'Verify that employee PII is encrypted and blind indexes match';
 
     public function handle(): int
     {

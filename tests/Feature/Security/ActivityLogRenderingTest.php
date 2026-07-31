@@ -16,14 +16,6 @@ class ActivityLogRenderingTest extends TestCase
 {
     use CreatesHrFixtures, RefreshDatabase;
 
-    private function summarise(array $attributes): string
-    {
-        $method = new ReflectionMethod(ActivityLogTable::class, 'summarise');
-        $method->setAccessible(true);
-
-        return $method->invoke(new ActivityLogTable, $attributes);
-    }
-
     /**
      * @return array<string, array{0: string}>
      */
@@ -75,5 +67,13 @@ class ActivityLogRenderingTest extends TestCase
         $rendered = $this->summarise(['meta' => ['note' => '<script>alert(1)</script>']]);
 
         $this->assertStringNotContainsString('<script', $rendered);
+    }
+
+    private function summarise(array $attributes): string
+    {
+        $method = new ReflectionMethod(ActivityLogTable::class, 'summarise');
+        $method->setAccessible(true);
+
+        return $method->invoke(new ActivityLogTable, $attributes);
     }
 }

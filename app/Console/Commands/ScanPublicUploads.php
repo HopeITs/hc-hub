@@ -16,12 +16,6 @@ use Illuminate\Support\Facades\Storage;
  */
 class ScanPublicUploads extends Command
 {
-    protected $signature = 'security:scan-uploads
-        {--disk=public : The filesystem disk to sweep}
-        {--days=0 : Also report every file modified within this many days}';
-
-    protected $description = 'Report executable, double-extension, or otherwise suspicious files in public storage';
-
     /** Extensions that must never exist under a publicly served path. */
     private const EXECUTABLE = [
         'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'phps', 'phar',
@@ -31,6 +25,12 @@ class ScanPublicUploads extends Command
 
     /** Only these may be served as user-uploaded content. */
     private const EXPECTED = ['jpg', 'jpeg', 'png', 'webp', 'svg', 'pdf', 'ico', 'gitignore', 'htaccess'];
+
+    protected $signature = 'security:scan-uploads
+        {--disk=public : The filesystem disk to sweep}
+        {--days=0 : Also report every file modified within this many days}';
+
+    protected $description = 'Report executable, double-extension, or otherwise suspicious files in public storage';
 
     public function handle(): int
     {

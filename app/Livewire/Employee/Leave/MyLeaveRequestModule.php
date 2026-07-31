@@ -39,15 +39,15 @@ class MyLeaveRequestModule extends Component
     #[Url(as: 'leave')]
     public ?int $linkedLeaveId = null;
 
+    public string $statusFilter = 'all';
+
+    public array $counts = [];
+
     protected $listeners = [
         'openRequestLeaveEdit' => 'edit',
         'openMyLeaveDetails' => 'openDetails',
         'processSave' => 'processSave',
     ];
-
-    public string $statusFilter = 'all';
-
-    public array $counts = [];
 
     public function mount()
     {
@@ -145,12 +145,12 @@ class MyLeaveRequestModule extends Component
 
         $alternativeEmployees = Employee::where('city_id', $employee->city_id)
             ->where('id', '!=', $employee->id)
-            ->whereHas('contracts.position.department', fn ($q) => $q->where('id', $employee->department->id ?? null)
+            ->whereHas('contracts.position.department', fn ($q) => $q->where('id', $employee->department->id ?? null),
             )
             ->get();
 
         return view('livewire.employee.leave.index', compact(
-            'availableLeaves', 'allAvailableLeaves', 'alternativeEmployees'
+            'availableLeaves', 'allAvailableLeaves', 'alternativeEmployees',
         ));
     }
 
@@ -180,7 +180,7 @@ class MyLeaveRequestModule extends Component
 
             app(LeaveNotificationService::class)->sendNewRequest(
                 $this->form->leaveRequest,
-                auth()->user()
+                auth()->user(),
             );
             $this->dispatch('notification-created');
         }
@@ -222,7 +222,7 @@ class MyLeaveRequestModule extends Component
                 :reason="$reason"
                 :date="$date"
             />',
-            compact('type', 'leaveTypeName', 'start', 'end', 'duration', 'reason', 'date')
+            compact('type', 'leaveTypeName', 'start', 'end', 'duration', 'reason', 'date'),
         );
     }
 
@@ -262,7 +262,7 @@ class MyLeaveRequestModule extends Component
         return LeaveRequest::query()
             ->whereHas(
                 'leaveBalance.contract',
-                fn (Builder $query) => $query->where('employee_id', $employeeId)
+                fn (Builder $query) => $query->where('employee_id', $employeeId),
             );
     }
 }

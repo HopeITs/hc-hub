@@ -3,13 +3,13 @@
 namespace App\Services;
 
 use App\Enums\Gender;
+use App\Enums\LeaveType as LeaveTypeEnum;
 use App\Enums\LeaveTypeCases;
 use App\Enums\MaritalStatus;
 use App\Models\AnnualLeaveRule;
 use App\Models\Contract;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
-use App\Enums\LeaveType as LeaveTypeEnum;
 use Carbon\Carbon;
 
 /**
@@ -88,7 +88,6 @@ class LeaveBalanceService
     /** ------------------------------------------------------------
      *  HELPER METHODS
      * -------------------------------------------------------------*/
-
     private function getAnnualLeaveRule($employee): AnnualLeaveRule
     {
         return AnnualLeaveRule::where('years_of_volunteering', '<=', $employee->years_of_service)
@@ -182,7 +181,7 @@ class LeaveBalanceService
     private function createSpecificLeaves($employee, $contract, $leaveTypes, $dailyWorkHours): void
     {
         $allowedForAll = $leaveTypes->filter(fn ($t) => $t->allowed_gender === LeaveTypeEnum::GENDER_ANY &&
-            $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_ANY
+            $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_ANY,
         );
 
         foreach ($allowedForAll as $type) {
@@ -251,7 +250,7 @@ class LeaveBalanceService
     private function createMarriedLeaves($employee, $contract, $leaveTypes, $dailyWorkHours): void
     {
         $types = $leaveTypes->filter(fn ($t) => $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED &&
-            $t->allowed_gender === $employee->gender
+            $t->allowed_gender === $employee->gender,
         );
         foreach ($types as $type) {
             if ($employee->gender === Gender::Female && ! $employee->abilityToTakeLeave($type->id)) {
@@ -275,7 +274,7 @@ class LeaveBalanceService
         $contract->leaveBalances->where('type_id', LeaveTypeCases::Marriage)->first()?->delete();
 
         $types = $leaveTypes->filter(fn ($t) => $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED &&
-            $t->allowed_gender === $employee->gender
+            $t->allowed_gender === $employee->gender,
         );
 
         foreach ($types as $type) {

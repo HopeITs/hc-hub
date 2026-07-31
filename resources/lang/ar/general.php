@@ -3,7 +3,7 @@
 return [
     'first_name' => 'الاسم',
     'last_name' => 'الكنية',
-        'termination_reasons' => 'أسباب إنهاء الخدمة' ,
+    'termination_reasons' => 'أسباب إنهاء الخدمة',
     'new_folder' => 'مجلد جديد',
     'upload_files' => 'رفع الملفات',
     'by_me' => 'بواسطتي',
@@ -327,7 +327,7 @@ return [
     'period' => 'الفترة',
     'next' => 'التالي',
     'loading' => 'جاري التحميل',
-    'export-excel' =>'التصدير الى اكسل',
+    'export-excel' => 'التصدير الى اكسل',
     'previous' => 'السابق',
     'month' => 'الشهر',
     'year' => 'سنوات|سنة',
@@ -678,7 +678,6 @@ return [
     'work-contact' => 'بيانات التواصل للعمل',
     'personal-contact' => 'بيانات التواصل الشخصية',
     'family-information' => 'معلومات العائلة',
-
 
     'time' => 'الوقت',
     'leave-decision' => 'قرار الإجازة',

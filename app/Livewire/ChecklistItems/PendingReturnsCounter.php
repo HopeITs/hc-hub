@@ -13,7 +13,7 @@ class PendingReturnsCounter extends Component
     public function getPendingReturnsCountProperty(): int
     {
         $employee = Auth::user()->profile ?? null;
-        if (!$employee) {
+        if (! $employee) {
             return 0;
         }
 

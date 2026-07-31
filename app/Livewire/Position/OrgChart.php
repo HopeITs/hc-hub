@@ -15,6 +15,15 @@ use Livewire\Component;
 
 class OrgChart extends Component
 {
+    /** Filter keys that, when changed, require the tree to be rebuilt. */
+    private const TREE_FILTERS = [
+        'city_id', 'program_id', 'center_id', 'department_id',
+        'job_level_id', 'focus_manager_id', 'manager_type',
+    ];
+
+    /** The main "parent" city (Syria) that scopes the whole org. */
+    private const MAIN_CITY_ID = 1;
+
     /** @var Collection<int, City> */
     public $cities;
 
@@ -32,19 +41,6 @@ class OrgChart extends Component
 
     /** Flat manager list for the "focus on a manager" filter. */
     public Collection $managers;
-
-    /**
-     * The built chart tree. Protected (not a Livewire public property) so the
-     * Eloquent models — with their *filtered* eager-loaded team relations — are
-     * never serialized/rehydrated between requests. Rehydration re-fetches models
-     * fresh and drops the constrained eager loads, which would make collapsing /
-     * zooming lazy-load every report unfiltered. Instead it is rebuilt once per
-     * request in render().
-     */
-    protected array $tree = [];
-
-    /** Whether the tree has already been built during the current request. */
-    protected bool $treeBuilt = false;
 
     public array $collapsed = [];
 
@@ -86,48 +82,24 @@ class OrgChart extends Component
 
     public int $managersCount = 0;
 
-    /** Filter keys that, when changed, require the tree to be rebuilt. */
-    private const TREE_FILTERS = [
-        'city_id', 'program_id', 'center_id', 'department_id',
-        'job_level_id', 'focus_manager_id', 'manager_type',
-    ];
+    /**
+     * The built chart tree. Protected (not a Livewire public property) so the
+     * Eloquent models — with their *filtered* eager-loaded team relations — are
+     * never serialized/rehydrated between requests. Rehydration re-fetches models
+     * fresh and drops the constrained eager loads, which would make collapsing /
+     * zooming lazy-load every report unfiltered. Instead it is rebuilt once per
+     * request in render().
+     */
+    protected array $tree = [];
 
-    /** The main "parent" city (Syria) that scopes the whole org. */
-    private const MAIN_CITY_ID = 1;
+    /** Whether the tree has already been built during the current request. */
+    protected bool $treeBuilt = false;
 
     public function mount(): void
     {
         $this->managers = collect();
         $this->loadLookups();
         $this->refreshTree();
-    }
-
-    // -------------------------------------------------------------------
-    // Lookups
-    // -------------------------------------------------------------------
-
-    private function loadLookups(): void
-    {
-        $this->cities = City::where('is_active', true)->orderBy(transColumn('name'))->get();
-        $this->programs = Program::where('is_active', true)->orderBy('name')->get();
-        $this->centers = Center::where('is_active', true)->orderBy(transColumn('name'))->get();
-        $this->departments = Department::orderBy('name')->get();
-        $this->jobLevels = JobLevel::orderBy('grade')->get();
-        $this->refreshManagerOptions();
-    }
-
-    /** Managers available to focus on, scoped by the active reporting line. */
-    private function refreshManagerOptions(): void
-    {
-        $this->managers = Position::query()
-            ->visible()
-            ->managersOnly($this->manager_type)
-            ->whereHas('activeContracts')
-            ->when($this->cityFilterIds(), fn (Builder $q, array $ids) => $q->whereIn('city_id', $ids))
-            ->when($this->program_id, fn (Builder $q) => $q->where('program_id', $this->program_id))
-            ->with(['activeContracts.employee', 'jobLevel'])
-            ->orderByGrade()
-            ->get();
     }
 
     // -------------------------------------------------------------------
@@ -222,40 +194,6 @@ class OrgChart extends Component
         }
     }
 
-    private function updateCityOptions(): void
-    {
-        if ($this->city_id === 1 || $this->city_id === null) {
-            $this->centers = Center::where('is_active', true)->orderBy(transColumn('name'))->get();
-            $this->programs = Program::where('is_active', true)->orderBy('name')->get();
-        } else {
-            $this->centers = Center::where('is_active', true)
-                ->where('city_id', $this->city_id)
-                ->orderBy(transColumn('name'))
-                ->get();
-            $this->programs = Program::where('is_active', true)
-                ->whereHas('positions', fn (Builder $query) => $query->where('city_id', $this->city_id))
-                ->orderBy('name')
-                ->get();
-        }
-
-        $this->center_id = null;
-        $this->program_id = null;
-    }
-
-    private function updateProgramOptions(): void
-    {
-        if ($this->program_id === 1 || $this->program_id === null) {
-            $this->centers = Center::where('is_active', true)->orderBy(transColumn('name'))->get();
-        } else {
-            $this->centers = Center::where('is_active', true)
-                ->whereHas('positions', fn (Builder $query) => $query->where('program_id', $this->program_id))
-                ->orderBy(transColumn('name'))
-                ->get();
-        }
-
-        $this->center_id = null;
-    }
-
     /** Whether a free-text search is currently active. */
     public function getIsSearchingProperty(): bool
     {
@@ -267,7 +205,7 @@ class OrgChart extends Component
      * employee name, in either locale), honouring the active lookup filters.
      * A flat grid is clearer than trying to prune the hierarchy.
      *
-     * @return \Illuminate\Support\Collection<int, Position>
+     * @return Collection<int, Position>
      */
     public function getSearchResultsProperty(): Collection
     {
@@ -307,6 +245,80 @@ class OrgChart extends Component
             $this->city_id, $this->program_id, $this->center_id,
             $this->department_id, $this->job_level_id, $this->focus_manager_id,
         ])->filter()->count();
+    }
+
+    public function render()
+    {
+        // Actions that don't change a tree filter (collapse, zoom, density…) skip
+        // refreshTree(); rebuild here so the view always renders a freshly filtered
+        // tree rather than a rehydrated, unfiltered one.
+        if (! $this->treeBuilt) {
+            $this->refreshTree();
+        }
+
+        return view('livewire.position.org-chart', ['tree' => $this->tree]);
+    }
+
+    // -------------------------------------------------------------------
+    // Lookups
+    // -------------------------------------------------------------------
+
+    private function loadLookups(): void
+    {
+        $this->cities = City::where('is_active', true)->orderBy(transColumn('name'))->get();
+        $this->programs = Program::where('is_active', true)->orderBy('name')->get();
+        $this->centers = Center::where('is_active', true)->orderBy(transColumn('name'))->get();
+        $this->departments = Department::orderBy('name')->get();
+        $this->jobLevels = JobLevel::orderBy('grade')->get();
+        $this->refreshManagerOptions();
+    }
+
+    /** Managers available to focus on, scoped by the active reporting line. */
+    private function refreshManagerOptions(): void
+    {
+        $this->managers = Position::query()
+            ->visible()
+            ->managersOnly($this->manager_type)
+            ->whereHas('activeContracts')
+            ->when($this->cityFilterIds(), fn (Builder $q, array $ids) => $q->whereIn('city_id', $ids))
+            ->when($this->program_id, fn (Builder $q) => $q->where('program_id', $this->program_id))
+            ->with(['activeContracts.employee', 'jobLevel'])
+            ->orderByGrade()
+            ->get();
+    }
+
+    private function updateCityOptions(): void
+    {
+        if ($this->city_id === 1 || $this->city_id === null) {
+            $this->centers = Center::where('is_active', true)->orderBy(transColumn('name'))->get();
+            $this->programs = Program::where('is_active', true)->orderBy('name')->get();
+        } else {
+            $this->centers = Center::where('is_active', true)
+                ->where('city_id', $this->city_id)
+                ->orderBy(transColumn('name'))
+                ->get();
+            $this->programs = Program::where('is_active', true)
+                ->whereHas('positions', fn (Builder $query) => $query->where('city_id', $this->city_id))
+                ->orderBy('name')
+                ->get();
+        }
+
+        $this->center_id = null;
+        $this->program_id = null;
+    }
+
+    private function updateProgramOptions(): void
+    {
+        if ($this->program_id === 1 || $this->program_id === null) {
+            $this->centers = Center::where('is_active', true)->orderBy(transColumn('name'))->get();
+        } else {
+            $this->centers = Center::where('is_active', true)
+                ->whereHas('positions', fn (Builder $query) => $query->where('program_id', $this->program_id))
+                ->orderBy(transColumn('name'))
+                ->get();
+        }
+
+        $this->center_id = null;
     }
 
     // -------------------------------------------------------------------
@@ -484,7 +496,7 @@ class OrgChart extends Component
         $positions = $positions->unique('id')->values();
         $employees = $positions->sum(fn (Position $position) => $position->activeContracts->count());
         $vacancies = $positions->sum(
-            fn (Position $position) => max(0, $position->max_emp - $position->activeContracts->count())
+            fn (Position $position) => max(0, $position->max_emp - $position->activeContracts->count()),
         );
 
         $this->stats = [
@@ -493,17 +505,5 @@ class OrgChart extends Component
             'vacancies' => $vacancies,
             'managers' => $this->managersCount,
         ];
-    }
-
-    public function render()
-    {
-        // Actions that don't change a tree filter (collapse, zoom, density…) skip
-        // refreshTree(); rebuild here so the view always renders a freshly filtered
-        // tree rather than a rehydrated, unfiltered one.
-        if (! $this->treeBuilt) {
-            $this->refreshTree();
-        }
-
-        return view('livewire.position.org-chart', ['tree' => $this->tree]);
     }
 }

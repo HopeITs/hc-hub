@@ -24,35 +24,13 @@ use Spatie\Activitylog\Models\Activity;
  */
 class PurgeSensitiveActivityLog extends Command
 {
+    private const REDACTED = '[redacted]';
+
     protected $signature = 'security:purge-activity-log
         {--dry-run : Report what would be redacted without writing}
         {--chunk=500 : Rows per batch}';
 
     protected $description = 'Redact sensitive attribute values from historical activity log entries';
-
-    private const REDACTED = '[redacted]';
-
-    /**
-     * Subject type => attributes whose values must not persist in the log.
-     * Mirrors the $sensitiveLogAttributes lists on the models themselves.
-     */
-    private function map(): array
-    {
-        return [
-            Employee::class => [
-                'national_number', 'civil_registry_number', 'civil_registry_office',
-                'address', 'address_en', 'address_ar', 'dob', 'actual_dob',
-                'personal_phone', 'work_phone', 'personal_email', 'whatsapp_work',
-                'telegram_work', 'father_name_en', 'father_name_ar',
-                'mother_name_en', 'mother_name_ar', 'children', 'marital_status',
-                'digital_id_token',
-            ],
-            Contract::class => ['salary', 'attending_notes_en', 'attending_notes_ar'],
-            Badge::class => ['current_salary', 'new_salary', 'reason', 'notes'],
-            Relative::class => ['name', 'phone'],
-            EmployeeNote::class => ['content'],
-        ];
-    }
 
     public function handle(): int
     {
@@ -103,7 +81,7 @@ class PurgeSensitiveActivityLog extends Command
                     // Written without touching updated_at: the audit record's
                     // own timestamps must keep reflecting the original event.
                     Activity::withoutTimestamps(
-                        fn () => $activity->forceFill(['properties' => $properties])->save()
+                        fn () => $activity->forceFill(['properties' => $properties])->save(),
                     );
                 }
             });
@@ -116,5 +94,27 @@ class PurgeSensitiveActivityLog extends Command
         ));
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Subject type => attributes whose values must not persist in the log.
+     * Mirrors the $sensitiveLogAttributes lists on the models themselves.
+     */
+    private function map(): array
+    {
+        return [
+            Employee::class => [
+                'national_number', 'civil_registry_number', 'civil_registry_office',
+                'address', 'address_en', 'address_ar', 'dob', 'actual_dob',
+                'personal_phone', 'work_phone', 'personal_email', 'whatsapp_work',
+                'telegram_work', 'father_name_en', 'father_name_ar',
+                'mother_name_en', 'mother_name_ar', 'children', 'marital_status',
+                'digital_id_token',
+            ],
+            Contract::class => ['salary', 'attending_notes_en', 'attending_notes_ar'],
+            Badge::class => ['current_salary', 'new_salary', 'reason', 'notes'],
+            Relative::class => ['name', 'phone'],
+            EmployeeNote::class => ['content'],
+        ];
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\AnnualLeaveRule;
+use Illuminate\Database\Seeder;
 
 class AnnualLeaveRuleSeeder extends Seeder
 {

@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class EmployeeNote extends Model
 {
@@ -21,7 +21,7 @@ class EmployeeNote extends Model
 
     protected $casts = [
         'is_done' => 'boolean',
-        'order'   => 'integer',
+        'order' => 'integer',
     ];
 
     public function scopeForEmployee($q, int $employeeId)

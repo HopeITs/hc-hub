@@ -25,7 +25,7 @@ class SecurityHeadersTest extends TestCase
             ->assertHeader('Cross-Origin-Resource-Policy', 'same-origin')
             ->assertHeader(
                 'Strict-Transport-Security',
-                'max-age=63072000; includeSubDomains; preload'
+                'max-age=63072000; includeSubDomains; preload',
             );
 
         $policy = $response->headers->get('Content-Security-Policy-Report-Only');

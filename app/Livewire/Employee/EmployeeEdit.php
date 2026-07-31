@@ -95,7 +95,7 @@ class EmployeeEdit extends Component
         $this->checklistForm->setEmployeeAndAllItems(
             $this->employee->fresh(),
             $this->getChecklistItems(),
-            DefaultDeliverable::all()
+            DefaultDeliverable::all(),
         );
     }
 
@@ -268,7 +268,7 @@ class EmployeeEdit extends Component
         $this->checklistForm->setEmployeeAndAllItems(
             $this->employee->fresh(),
             $this->getChecklistItems(),
-            DefaultDeliverable::all()
+            DefaultDeliverable::all(),
         );
     }
 
@@ -283,7 +283,7 @@ class EmployeeEdit extends Component
         $this->checklistForm->setEmployeeAndAllItems(
             $this->employee->fresh(),
             $this->getChecklistItems(),
-            DefaultDeliverable::all()
+            DefaultDeliverable::all(),
         );
     }
 
@@ -301,7 +301,7 @@ class EmployeeEdit extends Component
                     $q->whereHas('position.department', function ($q) {
                         $q->whereIn('name', ['IT', 'Communication', 'HR']);
                     });
-                }
+                },
             )->get();
         }
         $cities = City::where('is_active', true)->pluck(transColumn('name'), 'id')->toArray();

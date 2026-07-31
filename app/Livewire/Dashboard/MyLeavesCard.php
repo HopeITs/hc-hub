@@ -2,20 +2,24 @@
 
 namespace App\Livewire\Dashboard;
 
-use App\Models\Contract;
-use App\Models\LeaveRequest;
 use Livewire\Component;
-use Carbon\Carbon;
 
 class MyLeavesCard extends Component
 {
     public $title = '';
+
     public $total = 12;
+
     public $remaining = 12;
+
     public $totalDays = 12;
+
     public $remainingDays = 12;
+
     public $used = 0;
+
     public $pending = 0;
+
     public $percentage = 50;
 
     public function mount()

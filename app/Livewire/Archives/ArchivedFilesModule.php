@@ -10,6 +10,7 @@ use App\Models\JobLevel;
 use App\Models\Program;
 use App\Models\User;
 use App\Notifications\FolderShared;
+use DOMDocument;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -21,6 +22,8 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\Process\Process;
+use Throwable;
+use ZipArchive;
 
 class ArchivedFilesModule extends Component
 {
@@ -188,90 +191,6 @@ class ArchivedFilesModule extends Component
         }
     }
 
-    private function applyPermissionFilters(Builder $query): Builder
-    {
-        if (empty($this->activeFilters)) {
-            return $query;
-        }
-
-        return $query->where(function ($q) {
-            foreach ($this->activeFilters as $filter) {
-                $q->whereHas('profile.contracts.position', function ($positionQuery) use ($filter) {
-                    match ($filter['type']) {
-                        'department' => $positionQuery->where('department_id', $filter['value']),
-                        'job_level' => $positionQuery->where('job_level_id', $filter['value']),
-                        'program' => $positionQuery->where('program_id', $filter['value']),
-                        'center' => $positionQuery->where('center_id', $filter['value']),
-                        'city' => $positionQuery->where('city_id', $filter['value']),
-                        default => null,
-                    };
-                });
-            }
-        });
-    }
-
-    private function userCanAccessFolder(Folder $folder): bool
-    {
-        return $this->user->isActiveAdministrator()
-            || $folder->users()->whereKey($this->user->id)->exists();
-    }
-
-    private function userCanManageFolder(?Folder $folder = null): bool
-    {
-        if ($this->isShared && ! $this->user->isActiveAdministrator()) {
-            return false;
-        }
-
-        if (! $folder) {
-            return ! $this->isShared || $this->user->isActiveAdministrator();
-        }
-
-        return $this->user->isActiveAdministrator() || (int) $folder->user_id === (int) $this->user->id;
-    }
-
-    private function authorizeSharedAction(): void
-    {
-        if ($this->isShared && ! $this->user->isActiveAdministrator()) {
-            abort(403, 'You are not authorized to perform this action in Shared Folders.');
-        }
-    }
-
-    private function authorizeCurrentFolderManagement(): void
-    {
-        if (! $this->userCanManageFolder($this->currentFolder)) {
-            abort(403, 'Only the folder creator can manage this folder.');
-        }
-    }
-
-    private function authorizeFolderManagement(Folder $folder): void
-    {
-        if (! $this->userCanManageFolder($folder)) {
-            abort(403, 'Only the folder creator can manage this folder.');
-        }
-    }
-
-    private function folderForMedia(int $mediaId): Folder
-    {
-        $media = Media::findOrFail($mediaId);
-
-        abort_if($media->model_type !== Folder::class, 404);
-
-        $folder = Folder::with('users')->findOrFail($media->model_id);
-
-        if (! $this->userCanAccessFolder($folder)) {
-            abort(403, 'You do not have permission to access this file.');
-        }
-
-        abort_unless($this->isAllowedArchiveMedia($media), 404);
-
-        return $folder;
-    }
-
-    private function isAllowedArchiveMedia(Media $media): bool
-    {
-        return in_array(strtolower($media->extension ?? ''), self::ALLOWED_UPLOAD_EXTENSIONS, true);
-    }
-
     public function loadContent(): void
     {
         $parentId = $this->currentFolder?->id;
@@ -297,29 +216,6 @@ class ArchivedFilesModule extends Component
             ? $this->currentFolder->getMedia('archived_files')->filter(fn (Media $media) => $this->isAllowedArchiveMedia($media))->values()
             : collect();
         $this->generateBreadcrumbs();
-    }
-
-    protected function generateBreadcrumbs(): void
-    {
-        $baseCrumbUrl = $this->isShared ? route('shared-folders.index') : route('my-folders.index');
-        $crumbs = [['label' => __('general.archived-files'), 'url' => $baseCrumbUrl]];
-        $folderLinks = [];
-        $folder = $this->currentFolder;
-
-        while ($folder) {
-            array_unshift($folderLinks, [
-                'label' => $folder->name,
-                'url' => $this->isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]),
-            ]);
-            $folder = $folder->parent;
-        }
-
-        $this->finalCrumbs = array_merge($crumbs, $folderLinks);
-
-        if (count($this->finalCrumbs) > 1) {
-            $lastIndex = count($this->finalCrumbs) - 1;
-            unset($this->finalCrumbs[$lastIndex]['url']);
-        }
     }
 
     public function createFolder()
@@ -456,7 +352,7 @@ class ArchivedFilesModule extends Component
                     ->usingFileName($safeFile['storedName'])
                     ->withCustomProperties(['validated_upload' => true])
                     ->toMediaCollection('archived_files', 'local');
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 report($e);
                 $failed[] = $safeFile['displayName'];
             }
@@ -468,6 +364,317 @@ class ArchivedFilesModule extends Component
         if ($failed !== []) {
             $this->addError('filesToUpload', __('general.upload-failed-for').' '.implode(', ', $failed));
         }
+    }
+
+    public function downloadFile($mediaId)
+    {
+        $this->folderForMedia((int) $mediaId);
+
+        return redirect()->route('folder-files.download', ['media' => $mediaId]);
+    }
+
+    public function previewFile(int $mediaId): void
+    {
+        $this->folderForMedia($mediaId);
+
+        $this->previewFileId = $mediaId;
+        $this->showPreviewModal = true;
+    }
+
+    public function closePreviewModal(): void
+    {
+        $this->showPreviewModal = false;
+        $this->previewFileId = null;
+    }
+
+    public function confirmFileDeletion($mediaId)
+    {
+        $folder = $this->folderForMedia((int) $mediaId);
+        $this->authorizeFolderManagement($folder);
+        $media = Media::findOrFail($mediaId);
+        $this->itemToDeleteType = 'file';
+        $this->itemToDeleteId = $mediaId;
+        $this->itemNameToDelete = $media->name;
+        $this->showDeleteConfirmationModal = true;
+    }
+
+    public function confirmFolderDeletion($folderId)
+    {
+        $folder = Folder::findOrFail($folderId);
+        $this->authorizeFolderManagement($folder);
+        $this->itemToDeleteType = 'folder';
+        $this->itemToDeleteId = $folderId;
+        $this->itemNameToDelete = $folder->name;
+        $this->showDeleteConfirmationModal = true;
+    }
+
+    public function deleteItem()
+    {
+        if ($this->itemToDeleteType === 'file') {
+            $folder = $this->folderForMedia((int) $this->itemToDeleteId);
+            $this->authorizeFolderManagement($folder);
+            Media::findOrFail($this->itemToDeleteId)->delete();
+        } elseif ($this->itemToDeleteType === 'folder') {
+            $folder = Folder::findOrFail($this->itemToDeleteId);
+            $this->authorizeFolderManagement($folder);
+            $folder->delete();
+        }
+        $this->showDeleteConfirmationModal = false;
+        $this->itemNameToDelete = '';
+        $this->loadContent();
+    }
+
+    public function startEditingFolder(int $folderId)
+    {
+        $folder = Folder::findOrFail($folderId);
+        $this->authorizeFolderManagement($folder);
+        $this->editingFolderId = $folder->id;
+        $this->editingFolderName = $folder->name;
+    }
+
+    public function saveEditedFolder()
+    {
+        $this->validate(['editingFolderName' => 'required|string|max:255']);
+        $folder = Folder::findOrFail($this->editingFolderId);
+        $this->authorizeFolderManagement($folder);
+        $folder->update(['name' => $this->editingFolderName]);
+        $this->editingFolderId = null;
+        $this->editingFolderName = '';
+        $this->loadContent();
+    }
+
+    public function startEditingFile(int $fileId)
+    {
+        $folder = $this->folderForMedia($fileId);
+        $this->authorizeFolderManagement($folder);
+        $file = Media::findOrFail($fileId);
+        $this->editingFileId = $file->id;
+        $this->editingFileName = pathinfo($file->name, PATHINFO_FILENAME);
+    }
+
+    public function saveEditedFile()
+    {
+        $this->validate(['editingFileName' => 'required|string|max:255']);
+        $file = Media::findOrFail($this->editingFileId);
+        $folder = $this->folderForMedia((int) $file->id);
+        $this->authorizeFolderManagement($folder);
+
+        $newFileName = $this->safeDisplayFileName($this->editingFileName.'.'.$file->extension, $file->extension);
+        $file->name = $newFileName;
+        $file->save();
+
+        $this->editingFileId = null;
+        $this->editingFileName = '';
+        $this->loadContent();
+    }
+
+    /**
+     * Toggle a single user in/out of the selection.
+     *
+     * Selection is managed entirely server-side (the checkboxes are plain
+     * wire:click buttons, NOT wire:model). This avoids Livewire's array-checkbox
+     * morphing bug that previously assigned `true` to $selectedUsers and crashed
+     * the modal whenever the filtered list re-rendered.
+     */
+    public function toggleUser(int $userId): void
+    {
+        // The creator always keeps access and cannot be toggled off.
+        if ($userId === (int) $this->folderForPermissions?->user_id) {
+            return;
+        }
+
+        $selected = array_map('intval', $this->selectedUsers);
+
+        if (in_array($userId, $selected, true)) {
+            $selected = array_diff($selected, [$userId]);
+        } else {
+            $selected[] = $userId;
+        }
+
+        // array_values keeps a sequential list so Livewire serializes it as a JSON array.
+        $this->selectedUsers = array_values(array_unique($selected));
+    }
+
+    public function toggleSelectAllVisible(): void
+    {
+        $visibleUserIds = ($this->allUsers ?? collect())->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $creatorId = (int) $this->folderForPermissions?->user_id;
+
+        $toggleableUserIds = array_values(array_diff($visibleUserIds, [$creatorId]));
+        $current = array_map('intval', $this->selectedUsers);
+
+        // Decide from the actual selection state, not a stale flag.
+        $allAlreadySelected = ! empty($toggleableUserIds) && empty(array_diff($toggleableUserIds, $current));
+
+        if ($allAlreadySelected) {
+            $this->selectedUsers = array_values(array_diff($current, $toggleableUserIds));
+        } else {
+            $this->selectedUsers = array_values(array_unique(array_merge($current, $toggleableUserIds)));
+        }
+    }
+
+    public function clearFilters(): void
+    {
+        $this->activeFilters = [];
+        $this->permissionFilterType = '';
+        $this->permissionFilterValue = '';
+        $this->permissionFilterOptions = [];
+        $this->permissionUsersNeedRefresh = true;
+    }
+
+    public function render()
+    {
+        $hasAccessUsers = collect();
+        $noAccessUsers = collect();
+
+        if ($this->showPermissionsModal) {
+            if ($this->allUsers === null || $this->permissionUsersNeedRefresh) {
+                $this->allUsers = $this->getVisibleUsersQuery()->get();
+                $this->permissionUsersNeedRefresh = false;
+            }
+
+            $creatorId = (int) $this->folderForPermissions?->user_id;
+            $selectedIds = array_map('intval', $this->selectedUsers);
+
+            [$creatorCollection, $otherUsers] = $this->allUsers->partition(fn ($u) => (int) $u->id === $creatorId);
+            [$withAccess, $withoutAccess] = $otherUsers->partition(fn ($u) => in_array((int) $u->id, $selectedIds, true));
+
+            $hasAccessUsers = $creatorCollection->merge(
+                $withAccess->sortBy(fn ($u) => optional($u->profile)->name ?? $u->email),
+            );
+            $noAccessUsers = $withoutAccess
+                ->sortBy(fn ($u) => optional($u->profile)->name ?? $u->email)
+                ->values();
+
+            $this->allUsers = $hasAccessUsers->merge($noAccessUsers);
+
+            $toggleable = $otherUsers->pluck('id')->map(fn ($id) => (int) $id);
+            $this->allVisibleUsersSelected = $toggleable->isNotEmpty()
+                && $toggleable->every(fn ($id) => in_array($id, $selectedIds, true));
+        }
+
+        $previewFile = null;
+
+        if ($this->previewFileId) {
+            $this->folderForMedia((int) $this->previewFileId);
+            $previewFile = Media::find($this->previewFileId);
+        }
+
+        return view('livewire.archives.archived-files-module', [
+            'hasAccessUsers' => $hasAccessUsers,
+            'noAccessUsers' => $noAccessUsers,
+            'canManageCurrentFolder' => $this->userCanManageFolder($this->currentFolder),
+            'previewFile' => $previewFile,
+            'convertedOfficePdfUrl' => $this->convertedOfficePdfUrl($previewFile),
+            'officePreviewData' => $this->officePreviewData($previewFile),
+        ]);
+    }
+
+    protected function generateBreadcrumbs(): void
+    {
+        $baseCrumbUrl = $this->isShared ? route('shared-folders.index') : route('my-folders.index');
+        $crumbs = [['label' => __('general.archived-files'), 'url' => $baseCrumbUrl]];
+        $folderLinks = [];
+        $folder = $this->currentFolder;
+
+        while ($folder) {
+            array_unshift($folderLinks, [
+                'label' => $folder->name,
+                'url' => $this->isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]),
+            ]);
+            $folder = $folder->parent;
+        }
+
+        $this->finalCrumbs = array_merge($crumbs, $folderLinks);
+
+        if (count($this->finalCrumbs) > 1) {
+            $lastIndex = count($this->finalCrumbs) - 1;
+            unset($this->finalCrumbs[$lastIndex]['url']);
+        }
+    }
+
+    private function applyPermissionFilters(Builder $query): Builder
+    {
+        if (empty($this->activeFilters)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) {
+            foreach ($this->activeFilters as $filter) {
+                $q->whereHas('profile.contracts.position', function ($positionQuery) use ($filter) {
+                    match ($filter['type']) {
+                        'department' => $positionQuery->where('department_id', $filter['value']),
+                        'job_level' => $positionQuery->where('job_level_id', $filter['value']),
+                        'program' => $positionQuery->where('program_id', $filter['value']),
+                        'center' => $positionQuery->where('center_id', $filter['value']),
+                        'city' => $positionQuery->where('city_id', $filter['value']),
+                        default => null,
+                    };
+                });
+            }
+        });
+    }
+
+    private function userCanAccessFolder(Folder $folder): bool
+    {
+        return $this->user->isActiveAdministrator()
+            || $folder->users()->whereKey($this->user->id)->exists();
+    }
+
+    private function userCanManageFolder(?Folder $folder = null): bool
+    {
+        if ($this->isShared && ! $this->user->isActiveAdministrator()) {
+            return false;
+        }
+
+        if (! $folder) {
+            return ! $this->isShared || $this->user->isActiveAdministrator();
+        }
+
+        return $this->user->isActiveAdministrator() || (int) $folder->user_id === (int) $this->user->id;
+    }
+
+    private function authorizeSharedAction(): void
+    {
+        if ($this->isShared && ! $this->user->isActiveAdministrator()) {
+            abort(403, 'You are not authorized to perform this action in Shared Folders.');
+        }
+    }
+
+    private function authorizeCurrentFolderManagement(): void
+    {
+        if (! $this->userCanManageFolder($this->currentFolder)) {
+            abort(403, 'Only the folder creator can manage this folder.');
+        }
+    }
+
+    private function authorizeFolderManagement(Folder $folder): void
+    {
+        if (! $this->userCanManageFolder($folder)) {
+            abort(403, 'Only the folder creator can manage this folder.');
+        }
+    }
+
+    private function folderForMedia(int $mediaId): Folder
+    {
+        $media = Media::findOrFail($mediaId);
+
+        abort_if($media->model_type !== Folder::class, 404);
+
+        $folder = Folder::with('users')->findOrFail($media->model_id);
+
+        if (! $this->userCanAccessFolder($folder)) {
+            abort(403, 'You do not have permission to access this file.');
+        }
+
+        abort_unless($this->isAllowedArchiveMedia($media), 404);
+
+        return $folder;
+    }
+
+    private function isAllowedArchiveMedia(Media $media): bool
+    {
+        return in_array(strtolower($media->extension ?? ''), self::ALLOWED_UPLOAD_EXTENSIONS, true);
     }
 
     private function validateArchiveUpload(TemporaryUploadedFile $file): array
@@ -607,7 +814,7 @@ class ArchivedFilesModule extends Component
         }
 
         $previous = libxml_use_internal_errors(true);
-        $document = new \DOMDocument;
+        $document = new DOMDocument;
         $loaded = $document->loadXML($contents, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
         libxml_clear_errors();
         libxml_use_internal_errors($previous);
@@ -631,11 +838,11 @@ class ArchivedFilesModule extends Component
 
     private function validateOfficeOpenXml(string $path, string $extension, string $originalName): void
     {
-        if (! class_exists(\ZipArchive::class)) {
+        if (! class_exists(ZipArchive::class)) {
             $this->rejectUpload($originalName, 'Office file validation is not available on this server.');
         }
 
-        $zip = new \ZipArchive;
+        $zip = new ZipArchive;
 
         if ($zip->open($path) !== true) {
             $this->rejectUpload($originalName, 'The Office file is not a valid zipped Office document.');
@@ -749,27 +956,6 @@ class ArchivedFilesModule extends Component
         ]);
     }
 
-    public function downloadFile($mediaId)
-    {
-        $this->folderForMedia((int) $mediaId);
-
-        return redirect()->route('folder-files.download', ['media' => $mediaId]);
-    }
-
-    public function previewFile(int $mediaId): void
-    {
-        $this->folderForMedia($mediaId);
-
-        $this->previewFileId = $mediaId;
-        $this->showPreviewModal = true;
-    }
-
-    public function closePreviewModal(): void
-    {
-        $this->showPreviewModal = false;
-        $this->previewFileId = null;
-    }
-
     private function decodeXmlText(string $value): string
     {
         return trim(html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_XML1, 'UTF-8'));
@@ -817,7 +1003,7 @@ class ArchivedFilesModule extends Component
 
                     return $path;
                 }
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 continue;
             }
         }
@@ -887,7 +1073,7 @@ class ArchivedFilesModule extends Component
             ]);
             $process->setTimeout(90);
             $process->run();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return false;
         }
 
@@ -971,7 +1157,7 @@ POWERSHELL;
         $fullScript = str_replace(
             ['__INPUT__', '__OUTPUT__'],
             [$encodedInput, $encodedOutput],
-            $bootstrap
+            $bootstrap,
         ).PHP_EOL.$script;
 
         try {
@@ -985,7 +1171,7 @@ POWERSHELL;
             ]);
             $process->setTimeout(120);
             $process->run();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return false;
         }
 
@@ -994,7 +1180,7 @@ POWERSHELL;
 
     private function officePreviewData(?Media $media): array
     {
-        if (! $media || ! class_exists(\ZipArchive::class)) {
+        if (! $media || ! class_exists(ZipArchive::class)) {
             return ['available' => false, 'message' => 'Preview is not available for this file on this server.'];
         }
 
@@ -1004,7 +1190,7 @@ POWERSHELL;
             return ['available' => false, 'message' => 'Preview is not available for this file type.'];
         }
 
-        $zip = new \ZipArchive;
+        $zip = new ZipArchive;
 
         if ($zip->open($media->getPath()) !== true) {
             return ['available' => false, 'message' => 'This file could not be opened for preview.'];
@@ -1021,7 +1207,7 @@ POWERSHELL;
         }
     }
 
-    private function docxPreviewData(\ZipArchive $zip): array
+    private function docxPreviewData(ZipArchive $zip): array
     {
         $xml = $this->readPreviewXml($zip, 'word/document.xml');
 
@@ -1050,7 +1236,7 @@ POWERSHELL;
         ];
     }
 
-    private function xlsxPreviewData(\ZipArchive $zip): array
+    private function xlsxPreviewData(ZipArchive $zip): array
     {
         $sharedStrings = [];
         $sharedXml = $this->readPreviewXml($zip, 'xl/sharedStrings.xml');
@@ -1117,7 +1303,7 @@ POWERSHELL;
         ];
     }
 
-    private function readPreviewXml(\ZipArchive $zip, string $entry): ?string
+    private function readPreviewXml(ZipArchive $zip, string $entry): ?string
     {
         $stat = $zip->statName($entry);
         $maxBytes = (int) config('uploads.office.max_preview_xml_bytes', 10 * 1024 * 1024);
@@ -1131,141 +1317,6 @@ POWERSHELL;
         return is_string($contents) && strlen($contents) <= $maxBytes
             ? $contents
             : null;
-    }
-
-    public function confirmFileDeletion($mediaId)
-    {
-        $folder = $this->folderForMedia((int) $mediaId);
-        $this->authorizeFolderManagement($folder);
-        $media = Media::findOrFail($mediaId);
-        $this->itemToDeleteType = 'file';
-        $this->itemToDeleteId = $mediaId;
-        $this->itemNameToDelete = $media->name;
-        $this->showDeleteConfirmationModal = true;
-    }
-
-    public function confirmFolderDeletion($folderId)
-    {
-        $folder = Folder::findOrFail($folderId);
-        $this->authorizeFolderManagement($folder);
-        $this->itemToDeleteType = 'folder';
-        $this->itemToDeleteId = $folderId;
-        $this->itemNameToDelete = $folder->name;
-        $this->showDeleteConfirmationModal = true;
-    }
-
-    public function deleteItem()
-    {
-        if ($this->itemToDeleteType === 'file') {
-            $folder = $this->folderForMedia((int) $this->itemToDeleteId);
-            $this->authorizeFolderManagement($folder);
-            Media::findOrFail($this->itemToDeleteId)->delete();
-        } elseif ($this->itemToDeleteType === 'folder') {
-            $folder = Folder::findOrFail($this->itemToDeleteId);
-            $this->authorizeFolderManagement($folder);
-            $folder->delete();
-        }
-        $this->showDeleteConfirmationModal = false;
-        $this->itemNameToDelete = '';
-        $this->loadContent();
-    }
-
-    public function startEditingFolder(int $folderId)
-    {
-        $folder = Folder::findOrFail($folderId);
-        $this->authorizeFolderManagement($folder);
-        $this->editingFolderId = $folder->id;
-        $this->editingFolderName = $folder->name;
-    }
-
-    public function saveEditedFolder()
-    {
-        $this->validate(['editingFolderName' => 'required|string|max:255']);
-        $folder = Folder::findOrFail($this->editingFolderId);
-        $this->authorizeFolderManagement($folder);
-        $folder->update(['name' => $this->editingFolderName]);
-        $this->editingFolderId = null;
-        $this->editingFolderName = '';
-        $this->loadContent();
-    }
-
-    public function startEditingFile(int $fileId)
-    {
-        $folder = $this->folderForMedia($fileId);
-        $this->authorizeFolderManagement($folder);
-        $file = Media::findOrFail($fileId);
-        $this->editingFileId = $file->id;
-        $this->editingFileName = pathinfo($file->name, PATHINFO_FILENAME);
-    }
-
-    public function saveEditedFile()
-    {
-        $this->validate(['editingFileName' => 'required|string|max:255']);
-        $file = Media::findOrFail($this->editingFileId);
-        $folder = $this->folderForMedia((int) $file->id);
-        $this->authorizeFolderManagement($folder);
-
-        $newFileName = $this->safeDisplayFileName($this->editingFileName.'.'.$file->extension, $file->extension);
-        $file->name = $newFileName;
-        $file->save();
-
-        $this->editingFileId = null;
-        $this->editingFileName = '';
-        $this->loadContent();
-    }
-
-    /**
-     * Toggle a single user in/out of the selection.
-     *
-     * Selection is managed entirely server-side (the checkboxes are plain
-     * wire:click buttons, NOT wire:model). This avoids Livewire's array-checkbox
-     * morphing bug that previously assigned `true` to $selectedUsers and crashed
-     * the modal whenever the filtered list re-rendered.
-     */
-    public function toggleUser(int $userId): void
-    {
-        // The creator always keeps access and cannot be toggled off.
-        if ($userId === (int) $this->folderForPermissions?->user_id) {
-            return;
-        }
-
-        $selected = array_map('intval', $this->selectedUsers);
-
-        if (in_array($userId, $selected, true)) {
-            $selected = array_diff($selected, [$userId]);
-        } else {
-            $selected[] = $userId;
-        }
-
-        // array_values keeps a sequential list so Livewire serializes it as a JSON array.
-        $this->selectedUsers = array_values(array_unique($selected));
-    }
-
-    public function toggleSelectAllVisible(): void
-    {
-        $visibleUserIds = ($this->allUsers ?? collect())->pluck('id')->map(fn ($id) => (int) $id)->all();
-        $creatorId = (int) $this->folderForPermissions?->user_id;
-
-        $toggleableUserIds = array_values(array_diff($visibleUserIds, [$creatorId]));
-        $current = array_map('intval', $this->selectedUsers);
-
-        // Decide from the actual selection state, not a stale flag.
-        $allAlreadySelected = ! empty($toggleableUserIds) && empty(array_diff($toggleableUserIds, $current));
-
-        if ($allAlreadySelected) {
-            $this->selectedUsers = array_values(array_diff($current, $toggleableUserIds));
-        } else {
-            $this->selectedUsers = array_values(array_unique(array_merge($current, $toggleableUserIds)));
-        }
-    }
-
-    public function clearFilters(): void
-    {
-        $this->activeFilters = [];
-        $this->permissionFilterType = '';
-        $this->permissionFilterValue = '';
-        $this->permissionFilterOptions = [];
-        $this->permissionUsersNeedRefresh = true;
     }
 
     private function getVisibleUsersQuery(): Builder
@@ -1290,53 +1341,5 @@ POWERSHELL;
         }
 
         return $this->applyPermissionFilters($query);
-    }
-
-    public function render()
-    {
-        $hasAccessUsers = collect();
-        $noAccessUsers = collect();
-
-        if ($this->showPermissionsModal) {
-            if ($this->allUsers === null || $this->permissionUsersNeedRefresh) {
-                $this->allUsers = $this->getVisibleUsersQuery()->get();
-                $this->permissionUsersNeedRefresh = false;
-            }
-
-            $creatorId = (int) $this->folderForPermissions?->user_id;
-            $selectedIds = array_map('intval', $this->selectedUsers);
-
-            [$creatorCollection, $otherUsers] = $this->allUsers->partition(fn ($u) => (int) $u->id === $creatorId);
-            [$withAccess, $withoutAccess] = $otherUsers->partition(fn ($u) => in_array((int) $u->id, $selectedIds, true));
-
-            $hasAccessUsers = $creatorCollection->merge(
-                $withAccess->sortBy(fn ($u) => optional($u->profile)->name ?? $u->email)
-            );
-            $noAccessUsers = $withoutAccess
-                ->sortBy(fn ($u) => optional($u->profile)->name ?? $u->email)
-                ->values();
-
-            $this->allUsers = $hasAccessUsers->merge($noAccessUsers);
-
-            $toggleable = $otherUsers->pluck('id')->map(fn ($id) => (int) $id);
-            $this->allVisibleUsersSelected = $toggleable->isNotEmpty()
-                && $toggleable->every(fn ($id) => in_array($id, $selectedIds, true));
-        }
-
-        $previewFile = null;
-
-        if ($this->previewFileId) {
-            $this->folderForMedia((int) $this->previewFileId);
-            $previewFile = Media::find($this->previewFileId);
-        }
-
-        return view('livewire.archives.archived-files-module', [
-            'hasAccessUsers' => $hasAccessUsers,
-            'noAccessUsers' => $noAccessUsers,
-            'canManageCurrentFolder' => $this->userCanManageFolder($this->currentFolder),
-            'previewFile' => $previewFile,
-            'convertedOfficePdfUrl' => $this->convertedOfficePdfUrl($previewFile),
-            'officePreviewData' => $this->officePreviewData($previewFile),
-        ]);
     }
 }

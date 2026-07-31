@@ -2,12 +2,13 @@
 
 namespace App\Livewire\Dashboard;
 
-use Livewire\Component;
 use App\Models\Employee;
+use Livewire\Component;
 
 class DepartmentEmployeeStatistics extends Component
 {
     public $departmentLabels = [];
+
     public $employeeCounts = [];
 
     public function mount()
@@ -19,6 +20,7 @@ class DepartmentEmployeeStatistics extends Component
         $departments = $employees
             ->map(function ($employee) {
                 $contract = $employee->contracts->sortByDesc('start_date')->first();
+
                 return optional($contract?->position?->department)->code;
             })
             ->filter()

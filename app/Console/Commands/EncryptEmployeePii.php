@@ -29,13 +29,6 @@ use Throwable;
  */
 class EncryptEmployeePii extends Command
 {
-    protected $signature = 'security:encrypt-pii
-        {--decrypt : Reverse the conversion, for a rollback}
-        {--chunk=200 : Rows per batch}
-        {--dry-run : Report what would change without writing}';
-
-    protected $description = 'Encrypt (or decrypt) high-risk employee PII columns and rebuild the blind index';
-
     /** Must match the EncryptedPii casts on App\Models\Employee. */
     private const COLUMNS = [
         'national_number',
@@ -49,6 +42,13 @@ class EncryptEmployeePii extends Command
         'whatsapp_work',
         'telegram_work',
     ];
+
+    protected $signature = 'security:encrypt-pii
+        {--decrypt : Reverse the conversion, for a rollback}
+        {--chunk=200 : Rows per batch}
+        {--dry-run : Report what would change without writing}';
+
+    protected $description = 'Encrypt (or decrypt) high-risk employee PII columns and rebuild the blind index';
 
     public function handle(): int
     {

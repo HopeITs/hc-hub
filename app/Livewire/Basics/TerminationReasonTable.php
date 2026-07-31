@@ -19,6 +19,27 @@ class TerminationReasonTable extends LivewireTable
         'delete',
     ];
 
+    public function confirmDelete(int $id): void
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete(array $payload): void
+    {
+        TerminationReason::findOrFail($payload['id'])->delete();
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+
+        $this->dispatch('refreshTerminationReasonTable');
+    }
+
     protected function query(): Builder
     {
         return TerminationReason::query();
@@ -56,26 +77,5 @@ class TerminationReasonTable extends LivewireTable
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
             })->asHtml()->visible($canUpdate || $canDelete),
         ];
-    }
-
-    public function confirmDelete(int $id): void
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete(array $payload): void
-    {
-        TerminationReason::findOrFail($payload['id'])->delete();
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
-
-        $this->dispatch('refreshTerminationReasonTable');
     }
 }

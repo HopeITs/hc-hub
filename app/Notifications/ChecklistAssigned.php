@@ -11,6 +11,7 @@ class ChecklistAssigned extends Notification
     use Queueable;
 
     protected string $type;
+
     protected Checklist $checklist;
 
     public function __construct(Checklist $checklist, string $type)
@@ -33,14 +34,14 @@ class ChecklistAssigned extends Notification
             $titleEn = 'Deliver Item';
             $titleAr = 'تسليم عنصر';
 
-            $bodyEn  = "Please deliver {$item} to {$employee?->name_en}";
-            $bodyAr  = "يرجى تسليم {$item} إلى {$employee?->name_ar}";
+            $bodyEn = "Please deliver {$item} to {$employee?->name_en}";
+            $bodyAr = "يرجى تسليم {$item} إلى {$employee?->name_ar}";
         } else {
             $titleEn = 'Receive Item';
             $titleAr = 'استلام عنصر';
 
-            $bodyEn  = "Please receive {$item} from {$employee?->name_en}";
-            $bodyAr  = "يرجى استلام {$item} من {$employee?->name_ar}";
+            $bodyEn = "Please receive {$item} from {$employee?->name_en}";
+            $bodyAr = "يرجى استلام {$item} من {$employee?->name_ar}";
         }
 
         return [

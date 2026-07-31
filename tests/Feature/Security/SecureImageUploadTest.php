@@ -15,37 +15,6 @@ use Tests\TestCase;
  */
 class SecureImageUploadTest extends TestCase
 {
-    private function service(): SecureImageUploadService
-    {
-        return app(SecureImageUploadService::class);
-    }
-
-    private function tempFile(string $name, string $contents): UploadedFile
-    {
-        $path = tempnam(sys_get_temp_dir(), 'up');
-        file_put_contents($path, $contents);
-
-        return new UploadedFile($path, $name, null, null, true);
-    }
-
-    /** A real, decodable image of the given size and type. */
-    private function realImage(string $type = 'png', int $width = 200, int $height = 200): UploadedFile
-    {
-        $image = imagecreatetruecolor($width, $height);
-        imagefilledrectangle($image, 0, 0, $width - 1, $height - 1, imagecolorallocate($image, 10, 120, 200));
-
-        $path = tempnam(sys_get_temp_dir(), 'img');
-        match ($type) {
-            'png' => imagepng($image, $path),
-            'jpeg' => imagejpeg($image, $path),
-            'webp' => imagewebp($image, $path),
-            'gif' => imagegif($image, $path),
-        };
-        imagedestroy($image);
-
-        return new UploadedFile($path, "photo.{$type}", null, null, true);
-    }
-
     public function test_it_rejects_a_php_script_renamed_as_an_image(): void
     {
         $this->expectException(UnsafeImageException::class);
@@ -188,5 +157,36 @@ class SecureImageUploadTest extends TestCase
         $this->assertSame('image/png', mime_content_type($processed->path));
 
         $processed->discard();
+    }
+
+    private function service(): SecureImageUploadService
+    {
+        return app(SecureImageUploadService::class);
+    }
+
+    private function tempFile(string $name, string $contents): UploadedFile
+    {
+        $path = tempnam(sys_get_temp_dir(), 'up');
+        file_put_contents($path, $contents);
+
+        return new UploadedFile($path, $name, null, null, true);
+    }
+
+    /** A real, decodable image of the given size and type. */
+    private function realImage(string $type = 'png', int $width = 200, int $height = 200): UploadedFile
+    {
+        $image = imagecreatetruecolor($width, $height);
+        imagefilledrectangle($image, 0, 0, $width - 1, $height - 1, imagecolorallocate($image, 10, 120, 200));
+
+        $path = tempnam(sys_get_temp_dir(), 'img');
+        match ($type) {
+            'png' => imagepng($image, $path),
+            'jpeg' => imagejpeg($image, $path),
+            'webp' => imagewebp($image, $path),
+            'gif' => imagegif($image, $path),
+        };
+        imagedestroy($image);
+
+        return new UploadedFile($path, "photo.{$type}", null, null, true);
     }
 }

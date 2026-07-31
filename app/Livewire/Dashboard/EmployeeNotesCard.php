@@ -36,34 +36,6 @@ class EmployeeNotesCard extends Component
         $this->employeeId = $this->ownerId();
     }
 
-    /**
-     * The employee record behind the current session.
-     *
-     * Resolved fresh from the authenticated user on every call rather than
-     * read back from component state, so a tampered snapshot changes nothing.
-     */
-    private function ownerId(): ?int
-    {
-        $employeeId = auth()->user()?->employee_id;
-
-        return $employeeId ? (int) $employeeId : null;
-    }
-
-    /** Every query and mutation goes through this scope. */
-    private function notesQuery(): Builder
-    {
-        $ownerId = $this->ownerId();
-
-        // A user without a linked employee record has no notes and cannot
-        // create any; returning an impossible query keeps the card rendering
-        // empty instead of erroring on the dashboard.
-        if ($ownerId === null) {
-            return EmployeeNote::query()->whereRaw('1 = 0');
-        }
-
-        return EmployeeNote::query()->forEmployee($ownerId);
-    }
-
     public function getNotesProperty()
     {
         return $this->notesQuery()->orderBy('order')->get();
@@ -128,6 +100,41 @@ class EmployeeNotesCard extends Component
         $this->findOwned($id)->delete();
     }
 
+    public function render()
+    {
+        return view('livewire.dashboard.employee-notes-card', [
+            'notes' => $this->notes,
+        ]);
+    }
+
+    /**
+     * The employee record behind the current session.
+     *
+     * Resolved fresh from the authenticated user on every call rather than
+     * read back from component state, so a tampered snapshot changes nothing.
+     */
+    private function ownerId(): ?int
+    {
+        $employeeId = auth()->user()?->employee_id;
+
+        return $employeeId ? (int) $employeeId : null;
+    }
+
+    /** Every query and mutation goes through this scope. */
+    private function notesQuery(): Builder
+    {
+        $ownerId = $this->ownerId();
+
+        // A user without a linked employee record has no notes and cannot
+        // create any; returning an impossible query keeps the card rendering
+        // empty instead of erroring on the dashboard.
+        if ($ownerId === null) {
+            return EmployeeNote::query()->whereRaw('1 = 0');
+        }
+
+        return EmployeeNote::query()->forEmployee($ownerId);
+    }
+
     /**
      * Look a note up *through* the owner scope.
      *
@@ -137,12 +144,5 @@ class EmployeeNotesCard extends Component
     private function findOwned(int $id): EmployeeNote
     {
         return $this->notesQuery()->findOrFail($id);
-    }
-
-    public function render()
-    {
-        return view('livewire.dashboard.employee-notes-card', [
-            'notes' => $this->notes,
-        ]);
     }
 }

@@ -15,18 +15,17 @@ class ContractObserver
             return;
         }
 
-        $pos = \App\Models\Position::query()
+        $pos = Position::query()
             ->whereKey($contract->position_id)
             ->lockForUpdate()
             ->firstOrFail();
 
         if (! $pos->canAssign()) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'form.position_id' => __('validation.custom.position_id.max_reached'),
             ]);
         }
     }
-
 
     public function created(Contract $contract): void
     {
@@ -90,8 +89,12 @@ class ContractObserver
         $old = $locked[$oldId] ?? null;
         $new = $locked[$newId] ?? null;
 
-        if ($old) $old->dec();
-        if ($new) $new->inc();
+        if ($old) {
+            $old->dec();
+        }
+        if ($new) {
+            $new->inc();
+        }
     }
 
     public function deleted(Contract $contract): void
@@ -107,5 +110,4 @@ class ContractObserver
             }
         });
     }
-
 }

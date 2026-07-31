@@ -11,8 +11,6 @@ class AnnualLeaveRuleModule extends Component
 {
     use AuthorizesActivePermissions;
 
-    protected $listeners = ['openAnnualLeaveRuleEdit' => 'edit'];
-
     public bool $showModal = false;
 
     public string $modalTitle = '';
@@ -24,14 +22,7 @@ class AnnualLeaveRuleModule extends Component
         'years_of_volunteering' => null,
     ];
 
-    protected function rules(): array
-    {
-        return [
-            'item.days' => 'required|integer',
-            'item.day_per_month' => 'required|numeric',
-            'item.years_of_volunteering' => 'required|integer',
-        ];
-    }
+    protected $listeners = ['openAnnualLeaveRuleEdit' => 'edit'];
 
     public function render()
     {
@@ -72,7 +63,7 @@ class AnnualLeaveRuleModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update',
         );
         $this->validate();
 
@@ -88,5 +79,14 @@ class AnnualLeaveRuleModule extends Component
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'item.days' => 'required|integer',
+            'item.day_per_month' => 'required|numeric',
+            'item.years_of_volunteering' => 'required|integer',
+        ];
     }
 }

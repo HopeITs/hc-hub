@@ -217,7 +217,7 @@ return [
         ['name_en' => 'LEAP Aleppo', 'name_ar' => 'تكوين القادة حلب', 'city_id' => 2, 'address_en' => 'Aleppo', 'address_ar' => 'حلب', 'is_active' => true, 'weekends' => '0'],
         ['name_en' => 'LEAP Homs', 'name_ar' => 'تكوين القادة حمص', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0'],
         ['name_en' => 'Study Zone Al Inshaat', 'name_ar' => 'ستادي زون الانشائات', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0'],
-        ['name_en' => 'Al Wadi Training Center', 'name_ar' => 'مركز تدريب الوادي', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0']
+        ['name_en' => 'Al Wadi Training Center', 'name_ar' => 'مركز تدريب الوادي', 'city_id' => 3, 'address_en' => 'Homs', 'address_ar' => 'حمص', 'is_active' => true, 'weekends' => '0'],
 
     ],
 

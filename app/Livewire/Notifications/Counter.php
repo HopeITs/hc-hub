@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Notifications;
 
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class Counter extends Component
 {

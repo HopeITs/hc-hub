@@ -24,11 +24,6 @@ class EmployeePiiEncryptionTest extends TestCase
 {
     use CreatesHrFixtures, RefreshDatabase;
 
-    private function raw(Employee $employee): object
-    {
-        return DB::table('employees')->where('id', $employee->id)->first();
-    }
-
     public function test_identifying_fields_are_ciphertext_in_the_database(): void
     {
         $employee = $this->makeEmployee($this->makeCity('ALP', '001'), 'pii-subject', [
@@ -205,5 +200,10 @@ class EmployeePiiEncryptionTest extends TestCase
         $this->assertFalse($employee->isFillable('digital_id_token'));
         $this->assertFalse($employee->isFillable('digital_id_enabled'));
         $this->assertTrue($employee->isFillable('first_name_en'));
+    }
+
+    private function raw(Employee $employee): object
+    {
+        return DB::table('employees')->where('id', $employee->id)->first();
     }
 }

@@ -3,8 +3,8 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\Contract;
-use Livewire\Component;
 use Carbon\Carbon;
+use Livewire\Component;
 
 class SoonEndingContractsCard extends Component
 {

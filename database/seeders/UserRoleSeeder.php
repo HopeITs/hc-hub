@@ -6,13 +6,14 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use LogicException;
 
 class UserRoleSeeder extends Seeder
 {
     public function run(): void
     {
         if (! app()->environment(['local', 'testing'])) {
-            throw new \LogicException('Development users must never be seeded outside local or testing environments.');
+            throw new LogicException('Development users must never be seeded outside local or testing environments.');
         }
 
         $password = env('LOCAL_SEED_PASSWORD', Str::password(24));

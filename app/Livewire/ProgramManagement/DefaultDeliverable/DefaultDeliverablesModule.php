@@ -17,47 +17,18 @@ class DefaultDeliverablesModule extends Component
 {
     use AuthorizesActivePermissions, ScopesToAuthorizedCity;
 
-    protected $listeners = ['openDefaultDeliverableEdit' => 'edit'];
-
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
-        'id'          => null,
+        'id' => null,
         'employee_id' => '',
-        'city_id'     => '',
-        'item_id'     => '',
+        'city_id' => '',
+        'item_id' => '',
     ];
 
-    protected function rules()
-    {
-        $emp  = $this->item['employee_id'] ?? null;
-        $city = $this->item['city_id'] ?? null;
-
-        $uniqueCombo = Rule::unique('default_deliverables', 'item_id')
-            ->where(fn ($q) => $q->where('employee_id', $emp)
-                ->where('city_id', $city));
-
-        if (!empty($this->item['id'])) {
-            $uniqueCombo->ignore($this->item['id']);
-        }
-
-        return [
-            // The employee must belong to the selected city, and (via
-            // assertCityIsAuthorized in save()) that city must be the actor's.
-            // 'exists:employees,id' alone let any employee in the country be
-            // nominated as the deliverer for a city.
-            'item.employee_id' => [
-                'required',
-                Rule::exists('employees', 'id')->where(
-                    fn ($q) => $q->where('city_id', $this->item['city_id'] ?: 0)
-                ),
-            ],
-            'item.city_id'     => ['required', 'exists:cities,id'],
-            'item.item_id'     => ['required', 'exists:checklist_items,id', $uniqueCombo],
-        ];
-    }
-
+    protected $listeners = ['openDefaultDeliverableEdit' => 'edit'];
 
     /**
      * The three role branches this method used to carry all computed the same
@@ -101,19 +72,18 @@ class DefaultDeliverablesModule extends Component
         return view('livewire.program-management.default-deliverables-module', compact(
             'employees',
             'cities',
-            'checklistItems'
+            'checklistItems',
         ));
     }
-
 
     public function create(): void
     {
         $this->authorizeActivePermission('checklists.manage');
 
-        $this->item = ['id'=>null,'employee_id'=>'','city_id'=>'','item_id'=>''];
+        $this->item = ['id' => null, 'employee_id' => '', 'city_id' => '', 'item_id' => ''];
         $this->resetValidation();
         $this->modalTitle = __('general.add-new');
-        $this->showModal  = true;
+        $this->showModal = true;
     }
 
     public function edit(int $id): void
@@ -125,54 +95,83 @@ class DefaultDeliverablesModule extends Component
         Gate::authorize('update', $model);
 
         $this->item = [
-            'id'          => $model->id,
+            'id' => $model->id,
             'employee_id' => $model->employee_id,
-            'city_id'     => $model->city_id,
-            'item_id'     => $model->item_id,
+            'city_id' => $model->city_id,
+            'item_id' => $model->item_id,
         ];
 
         $this->resetValidation();
         $this->modalTitle = __('general.edit');
-        $this->showModal  = true;
+        $this->showModal = true;
     }
 
+    public function save(): void
+    {
+        $this->authorizeActivePermission('checklists.manage');
 
-public function save(): void
-{
-    $this->authorizeActivePermission('checklists.manage');
+        // Same check as before, but via the shared scope rather than a role-name
+        // split that assumed every role name contains a hyphen.
+        $this->assertCityIsAuthorized($this->item['city_id']);
 
-    // Same check as before, but via the shared scope rather than a role-name
-    // split that assumed every role name contains a hyphen.
-    $this->assertCityIsAuthorized($this->item['city_id']);
+        // Validated after the city check, because the employee rule depends on
+        // the selected city being one this user may actually write to.
+        $this->validate();
 
-    // Validated after the city check, because the employee rule depends on
-    // the selected city being one this user may actually write to.
-    $this->validate();
+        $model = ! empty($this->item['id'])
+            ? DefaultDeliverableModel::findOrFail($this->item['id'])
+            : new DefaultDeliverableModel;
 
-    $model = !empty($this->item['id'])
-        ? DefaultDeliverableModel::findOrFail($this->item['id'])
-        : new DefaultDeliverableModel();
+        Gate::authorize(
+            $model->exists ? 'update' : 'create',
+            $model->exists ? $model : [DefaultDeliverableModel::class, (int) $this->item['city_id']],
+        );
 
-    Gate::authorize(
-        $model->exists ? 'update' : 'create',
-        $model->exists ? $model : [DefaultDeliverableModel::class, (int) $this->item['city_id']],
-    );
+        $model->employee_id = $this->item['employee_id'];
+        $model->city_id = $this->item['city_id'];
+        $model->item_id = $this->item['item_id'];
+        $model->save();
 
-    $model->employee_id = $this->item['employee_id'];
-    $model->city_id     = $this->item['city_id'];
-    $model->item_id     = $this->item['item_id'];
-    $model->save();
+        $this->showModal = false;
+        $this->resetErrorBag();
+        $this->resetValidation();
 
-    $this->showModal = false;
-    $this->resetErrorBag();
-    $this->resetValidation();
+        $this->dispatch('closeModal');
+        $this->dispatch('refreshDefaultDeliverablesTable');
 
-    $this->dispatch('closeModal');
-    $this->dispatch('refreshDefaultDeliverablesTable');
+        LivewireAlert::title(__('general.success-message'))
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
+    }
 
-    LivewireAlert::title(__('general.success-message'))
-        ->success()
-        ->toast()
-        ->position('top-start')
-        ->show();
-}}
+    protected function rules()
+    {
+        $emp = $this->item['employee_id'] ?? null;
+        $city = $this->item['city_id'] ?? null;
+
+        $uniqueCombo = Rule::unique('default_deliverables', 'item_id')
+            ->where(fn ($q) => $q->where('employee_id', $emp)
+                ->where('city_id', $city));
+
+        if (! empty($this->item['id'])) {
+            $uniqueCombo->ignore($this->item['id']);
+        }
+
+        return [
+            // The employee must belong to the selected city, and (via
+            // assertCityIsAuthorized in save()) that city must be the actor's.
+            // 'exists:employees,id' alone let any employee in the country be
+            // nominated as the deliverer for a city.
+            'item.employee_id' => [
+                'required',
+                Rule::exists('employees', 'id')->where(
+                    fn ($q) => $q->where('city_id', $this->item['city_id'] ?: 0),
+                ),
+            ],
+            'item.city_id' => ['required', 'exists:cities,id'],
+            'item.item_id' => ['required', 'exists:checklist_items,id', $uniqueCombo],
+        ];
+    }
+}

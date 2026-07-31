@@ -89,29 +89,6 @@ class Employee extends Model implements HasMedia
         'digital_id_token',
     ];
 
-    protected static function booted(): void
-    {
-        static::creating(function (Employee $employee): void {
-            $employee->digital_id_token ??= Str::random(64);
-        });
-
-        // Keep the blind index in step with the encrypted national number.
-        // Registered on the model rather than left to callers so that imports,
-        // seeders, the Livewire forms, and any future write path all get it —
-        // a row saved without an index would silently escape the uniqueness
-        // constraint that the index now carries.
-        static::saving(function (Employee $employee): void {
-            if ($employee->isDirty('national_number')) {
-                $employee->national_number_index = BlindIndex::of($employee->national_number);
-            }
-        });
-    }
-
-    public function digitalIdUrl(): string
-    {
-        return route('digital-id.show', ['token' => $this->digital_id_token]);
-    }
-
     protected $casts = [
         'dob' => 'datetime',
         'actual_dob' => 'datetime',
@@ -141,24 +118,20 @@ class Employee extends Model implements HasMedia
         'telegram_work' => EncryptedPii::class,
     ];
 
+    /** Memoized result of latestActiveContract() — not a database column. */
+    protected ?Contract $latestActiveContractMemo = null;
+
+    protected bool $latestActiveContractResolved = false;
+
+    public function digitalIdUrl(): string
+    {
+        return route('digital-id.show', ['token' => $this->digital_id_token]);
+    }
+
     /** Exact-match lookup on the encrypted national number. */
     public function scopeWhereNationalNumber($query, ?string $nationalNumber)
     {
         return $query->where('national_number_index', BlindIndex::of($nationalNumber));
-    }
-
-    protected function long_fullname(): Attribute
-    {
-        return Attribute::get(
-            fn () => "{$this->first_name} {$this->father_name} {$this->last_name}"
-        );
-    }
-
-    protected function name(): Attribute
-    {
-        return Attribute::get(
-            fn () => "{$this->first_name} {$this->last_name}"
-        );
     }
 
     public function nameForLocale(string $locale): string
@@ -172,49 +145,9 @@ class Employee extends Model implements HasMedia
         return $name !== '' ? $name : trim((string) $this->name);
     }
 
-    protected function firstName(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->getTranslatableAttribute('first_name'),
-            set: fn ($value) => $this->setTranslatableAttribute('first_name', $value)
-        );
-    }
-
-    protected function lastName(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->getTranslatableAttribute('last_name'),
-            set: fn ($value) => $this->setTranslatableAttribute('last_name', $value)
-        );
-    }
-
-    protected function father_name(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->getTranslatableAttribute('father_name'),
-            set: fn ($value) => $this->setTranslatableAttribute('father_name', $value)
-        );
-    }
-
-    protected function mother_name(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->getTranslatableAttribute('mother_name'),
-            set: fn ($value) => $this->setTranslatableAttribute('mother_name', $value)
-        );
-    }
-
     public function getDepartmentAttribute()
     {
         return $this->latestActiveContract()?->position->department;
-    }
-
-    protected function address(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->getTranslatableAttribute('address'),
-            set: fn ($value) => $this->setTranslatableAttribute('address', $value)
-        );
     }
 
     public function city(): BelongsTo
@@ -250,11 +183,6 @@ class Employee extends Model implements HasMedia
 
         return $this->latestActiveContractMemo = $contract;
     }
-
-    /** Memoized result of latestActiveContract() — not a database column. */
-    protected ?Contract $latestActiveContractMemo = null;
-
-    protected bool $latestActiveContractResolved = false;
 
     public function defaultDeliverItems(): Employee|HasMany
     {
@@ -628,5 +556,77 @@ class Employee extends Model implements HasMedia
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Employee $employee): void {
+            $employee->digital_id_token ??= Str::random(64);
+        });
+
+        // Keep the blind index in step with the encrypted national number.
+        // Registered on the model rather than left to callers so that imports,
+        // seeders, the Livewire forms, and any future write path all get it —
+        // a row saved without an index would silently escape the uniqueness
+        // constraint that the index now carries.
+        static::saving(function (Employee $employee): void {
+            if ($employee->isDirty('national_number')) {
+                $employee->national_number_index = BlindIndex::of($employee->national_number);
+            }
+        });
+    }
+
+    protected function long_fullname(): Attribute
+    {
+        return Attribute::get(
+            fn () => "{$this->first_name} {$this->father_name} {$this->last_name}",
+        );
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::get(
+            fn () => "{$this->first_name} {$this->last_name}",
+        );
+    }
+
+    protected function firstName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('first_name'),
+            set: fn ($value) => $this->setTranslatableAttribute('first_name', $value),
+        );
+    }
+
+    protected function lastName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('last_name'),
+            set: fn ($value) => $this->setTranslatableAttribute('last_name', $value),
+        );
+    }
+
+    protected function father_name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('father_name'),
+            set: fn ($value) => $this->setTranslatableAttribute('father_name', $value),
+        );
+    }
+
+    protected function mother_name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('mother_name'),
+            set: fn ($value) => $this->setTranslatableAttribute('mother_name', $value),
+        );
+    }
+
+    protected function address(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('address'),
+            set: fn ($value) => $this->setTranslatableAttribute('address', $value),
+        );
     }
 }

@@ -43,7 +43,7 @@ class LeaveRequest extends Model
             'id',                  // LeaveBalance.id
             'id',                  // LeaveType.id
             'leave_balance_id',    // LeaveRequest.leave_balance_id
-            'type_id'        // LeaveBalance.leave_type_id
+            'type_id',        // LeaveBalance.leave_type_id
         );
     }
 
@@ -141,7 +141,7 @@ class LeaveRequest extends Model
 
             return $query->whereHas(
                 'leaveBalance.contract.employee.city',
-                fn (Builder $cityQuery) => $cityQuery->where('slug', $cityCode)
+                fn (Builder $cityQuery) => $cityQuery->where('slug', $cityCode),
             );
         }
 
@@ -159,7 +159,7 @@ class LeaveRequest extends Model
                 'leaveBalance.contract.position',
                 fn (Builder $positionQuery) => $positionQuery
                     ->whereIn('direct_manager_id', $managerPositionIds)
-                    ->orWhereIn('tech_manager_id', $managerPositionIds)
+                    ->orWhereIn('tech_manager_id', $managerPositionIds),
             );
         }
 

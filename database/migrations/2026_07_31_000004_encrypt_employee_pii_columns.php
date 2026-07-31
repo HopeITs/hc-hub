@@ -73,7 +73,7 @@ return new class extends Migration
 
         if ($encrypted) {
             throw new RuntimeException(
-                'Employee PII is still encrypted. Run "php artisan security:encrypt-pii --decrypt" before rolling back this migration.'
+                'Employee PII is still encrypted. Run "php artisan security:encrypt-pii --decrypt" before rolling back this migration.',
             );
         }
 

@@ -72,7 +72,7 @@ class BadgesModule extends Component
             1 => 'SYP',
             2 => 'USD',
             3 => 'EUR',
-            default => trans('general.unknown')
+            default => trans('general.unknown'),
         };
     }
 }

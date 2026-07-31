@@ -1,4 +1,6 @@
-<?php /*
+<?php
+
+/*
 
 namespace App\Exports;
 
@@ -37,7 +39,7 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
             __('general.name') . ' (EN)',
             __('general.place'),
             __('general.type'),
-            __('general.created-at'), 
+            __('general.created-at'),
         ];
     }
 
@@ -55,16 +57,15 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
 
     public function styles(Worksheet $sheet): array
     {
-     
+
         return [
             1 => ['font' => ['bold' => true]],
         ];
     }
 
- 
+
 }
 */
-
 
 // namespace App\Exports;
 
@@ -127,42 +128,38 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
 //     }
 // }
 
-
-
-
 namespace App\Exports;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithProperties;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Worksheet\Table;
-use PhpOffice\PhpSpreadsheet\Worksheet\Table\TableStyle;
-use Illuminate\Support\Collection;
+
 use App\Enums\ContractPlace;
 use App\Enums\ContractType as ContractTypeEnum;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithProperties;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Table;
+use PhpOffice\PhpSpreadsheet\Worksheet\Table\TableStyle;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithProperties
+class ContractTypeExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithProperties, WithStyles
 {
     public function __construct(
         protected Collection $collection,
-        protected array $visibleColumnCodes 
-    ) {
-
-    }
+        protected array $visibleColumnCodes,
+    ) {}
 
     public function properties(): array
     {
         return [
-            'creator'        => 'Hope HR',
+            'creator' => 'Hope HR',
             'lastModifiedBy' => ' ',
-            'title'          => ' ', 
-            'company'        => 'Hope Center', 
+            'title' => ' ',
+            'company' => 'Hope Center',
         ];
     }
 
@@ -174,16 +171,15 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
     public function headings(): array
     {
         $headers = [];
-        
-        
+
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
-                'id'      => 'ID',
-                'name_ar' => __('general.name', [], 'en') . ' (AR)',
-                'name_en' => __('general.name', [], 'en') . ' (EN)',
-                'place'   => __('general.place', [], 'en'),
-                'type'    => __('general.type', [], 'en'),
-                default   => $code,
+                'id' => 'ID',
+                'name_ar' => __('general.name', [], 'en').' (AR)',
+                'name_en' => __('general.name', [], 'en').' (EN)',
+                'place' => __('general.place', [], 'en'),
+                'type' => __('general.type', [], 'en'),
+                default => $code,
             };
         }
 
@@ -196,39 +192,36 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
         app()->setLocale('en');
 
         $mappedRow = [];
-        
+
         foreach ($this->visibleColumnCodes as $code) {
             $mappedRow[] = match ($code) {
-                'id'      => $row->id,
+                'id' => $row->id,
                 'name_ar' => $row->name_ar,
                 'name_en' => $row->name_en,
-                'place'   => ContractPlace::getLocalizedName($row->place)['value'] ?? '', 
-                'type'    => ContractTypeEnum::getLocalizedName($row->type)['value'] ?? '', 
-                default   => '',
+                'place' => ContractPlace::getLocalizedName($row->place)['value'] ?? '',
+                'type' => ContractTypeEnum::getLocalizedName($row->type)['value'] ?? '',
+                default => '',
             };
         }
         app()->setLocale($orig);
-        
+
         return $mappedRow;
     }
 
-
-public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet)
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
-        $globalRange = 'A1:' . $highestColumn . $highestRow;
+        $globalRange = 'A1:'.$highestColumn.$highestRow;
         $table = new Table($globalRange, 'ContractTypes');
-        
-        $tableStyle = new TableStyle();
-        $tableStyle->setTheme(TableStyle::TABLE_STYLE_LIGHT1); 
-        $tableStyle->setShowRowStripes(true); 
-        $table->setStyle($tableStyle);
-        
-        $sheet->addTable($table);
-       
 
-        
+        $tableStyle = new TableStyle;
+        $tableStyle->setTheme(TableStyle::TABLE_STYLE_LIGHT1);
+        $tableStyle->setShowRowStripes(true);
+        $table->setStyle($tableStyle);
+
+        $sheet->addTable($table);
+
         return [
             $globalRange => [
                 'font' => [
@@ -237,7 +230,7 @@ public function styles(Worksheet $sheet)
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical'   => Alignment::VERTICAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
                 ],
                 'borders' => [
                     'allBorders' => [
@@ -247,14 +240,14 @@ public function styles(Worksheet $sheet)
             ],
             1 => [
                 'font' => [
-                    'name'  => 'Somar Sans',
-                    'bold'  => true,
-                    'size'  => 12,
-                    'color' => ['argb' => 'FFFFFFFF'], 
+                    'name' => 'Somar Sans',
+                    'bold' => true,
+                    'size' => 12,
+                    'color' => ['argb' => 'FFFFFFFF'],
                 ],
                 'fill' => [
-                    'fillType'   => Fill::FILL_SOLID,
-                    'startColor' => ['argb' => 'FFC2151C'], 
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['argb' => 'FFC2151C'],
                 ],
             ],
         ];

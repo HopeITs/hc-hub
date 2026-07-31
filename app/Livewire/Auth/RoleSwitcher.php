@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Auth;
 
-use App\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -14,7 +13,9 @@ class RoleSwitcher extends Component
     public bool $onlySwitchables = false;
 
     public ?string $activeRoleName = null;
+
     public array $inactive = [];
+
     public array $all = [];
 
     public array $roles = [];
@@ -29,9 +30,10 @@ class RoleSwitcher extends Component
     public function refreshRoles(): void
     {
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             $this->activeRoleName = null;
             $this->inactive = $this->all = $this->roles = [];
+
             return;
         }
 

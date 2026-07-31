@@ -14,8 +14,8 @@ class ContractTypeEmployeesStatistics extends Component
     {
         // Mapping of main donut sections → contract type IDs
         $groups = [
-            'Annual'          => [1, 2],
-            'Trial Period'    => [3, 4],
+            'Annual' => [1, 2],
+            'Trial Period' => [3, 4],
             'Service Agreement' => [5, 6],
         ];
 
@@ -45,13 +45,13 @@ class ContractTypeEmployeesStatistics extends Component
 
                 return [
                     'category' => $label,
-                    'value'    => $contracts->where('contract_type_id', $typeId)->count(),
+                    'value' => $contracts->where('contract_type_id', $typeId)->count(),
                 ];
             });
 
             return [
-                'category'  => $mainCategory,
-                'value'     => $total,
+                'category' => $mainCategory,
+                'value' => $total,
                 'breakdown' => $breakdown->values(),
             ];
         })->values();

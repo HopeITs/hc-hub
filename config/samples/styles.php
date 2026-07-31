@@ -8,7 +8,7 @@ return [
         'secondary-light' => '#939598',
         'primary-soft' => '#dcddde',
 
-        'confirm' => '#34D399'
+        'confirm' => '#34D399',
 
-    ]
+    ],
 ];

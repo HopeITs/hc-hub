@@ -11,38 +11,25 @@ use Livewire\Form;
 
 class ProgramForm extends Form
 {
-
     public ?Program $program = null;
 
     public $name;
+
     public $description_en = '';
+
     public $description_ar = '';
+
     public $start_date;
+
     public $end_date;
+
     public $code;
+
     public $slug;
+
     public $logo = null;
+
     public $is_active = true;
-
-    protected function rules()
-    {
-        return [
-            'name' => ['required', 'string'],
-            'description_en' => ['nullable', 'min:3', 'max:255'],
-            'description_ar' => ['nullable', 'min:3', 'max:255'],
-            'start_date' => ['required', 'date'],
-            'end_date' => ['nullable', 'date', 'after:start_date'],
-            'slug' => [
-                'required',
-                Rule::unique('programs')->ignore($this->program),
-            ],
-            'code' => 'required',
-            // The mimes list is a first pass only; SafeImage inspects the file
-            // content and SecureImageUploadService re-encodes it at store time.
-            'logo' => ['nullable', 'mimes:jpeg,jpg,png,webp', new SafeImage('logo')],
-
-        ];
-    }
 
     public function setProgram(Program $program)
     {
@@ -69,7 +56,6 @@ class ProgramForm extends Form
 
         $this->reset();
 
-
     }
 
     public function update()
@@ -77,12 +63,41 @@ class ProgramForm extends Form
         $this->validate();
 
         $this->program->update(
-            $this->except('logo')
+            $this->except('logo'),
         );
 
         $this->storeLogo($this->program);
 
         $this->reset();
+    }
+
+    public function statusToggle()
+    {
+        $this->program->update(
+            [
+                'is_active' => ! $this->program->is_active,
+            ],
+        );
+    }
+
+    protected function rules()
+    {
+        return [
+            'name' => ['required', 'string'],
+            'description_en' => ['nullable', 'min:3', 'max:255'],
+            'description_ar' => ['nullable', 'min:3', 'max:255'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['nullable', 'date', 'after:start_date'],
+            'slug' => [
+                'required',
+                Rule::unique('programs')->ignore($this->program),
+            ],
+            'code' => 'required',
+            // The mimes list is a first pass only; SafeImage inspects the file
+            // content and SecureImageUploadService re-encodes it at store time.
+            'logo' => ['nullable', 'mimes:jpeg,jpg,png,webp', new SafeImage('logo')],
+
+        ];
     }
 
     /**
@@ -107,14 +122,4 @@ class ProgramForm extends Form
             disk: 'public',
         );
     }
-
-    public function statusToggle()
-    {
-        $this->program->update(
-            [
-                'is_active' => !$this->program->is_active,
-            ]
-        );
-    }
-
 }

@@ -85,7 +85,7 @@ class ProfileDrawer extends Component
                 'department', 'center', 'program', 'city', 'jobLevel',
                 'directManager.activeContracts.employee.media',
                 'directManager.jobLevel',
-            ])
+            ]),
         )->find($contract->position_id);
     }
 
@@ -101,8 +101,13 @@ class ProfileDrawer extends Component
                 ->visible()
                 ->where('direct_manager_id', $this->position->id)
                 ->with(['activeContracts.employee.media', 'jobLevel'])
-                ->orderByGrade()
+                ->orderByGrade(),
         )->get();
+    }
+
+    public function render()
+    {
+        return view('livewire.position.profile-drawer');
     }
 
     /**
@@ -117,10 +122,5 @@ class ProfileDrawer extends Component
         $cityId = auth()->user()?->activeCityId();
 
         return $cityId === null ? $query : $query->inCity($cityId);
-    }
-
-    public function render()
-    {
-        return view('livewire.position.profile-drawer');
     }
 }

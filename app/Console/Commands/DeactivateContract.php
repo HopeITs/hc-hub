@@ -27,7 +27,7 @@ class DeactivateContract extends Command
     public function handle(): void
     {
 
-       Contract::where('is_active',true)->whereDate('end_date', '<', today())->get()->each(function ($contract) {
+        Contract::where('is_active', true)->whereDate('end_date', '<', today())->get()->each(function ($contract) {
             $contract->is_active = false;
             $contract->save();
         });

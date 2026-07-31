@@ -23,50 +23,6 @@ class JobLevelTable extends LivewireTable
         'exportExcel' => 'exportExcel',
     ];
 
-    protected function query(): Builder
-    {
-        return JobLevel::query();
-    }
-
-    protected function globalSearchColumns(): array
-    {
-        return ['id', 'name_ar', 'name_en', 'grade', 'email'];
-    }
-
-    protected function columns(): array
-    {
-        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
-        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
-
-        return [
-            Column::make('ID', 'id')->sortable()->searchable(),
-
-            Column::make(__('general.name').' (AR)', 'name_ar')->sortable()->searchable(),
-            Column::make(__('general.name').' (EN)', 'name_en')->sortable()->searchable(),
-
-            Column::make(__('general.grade'), 'grade')
-                ->sortable()
-                ->searchable(),
-
-            Column::make(__('general.email'), 'email')
-                ->sortable()
-                ->searchable(),
-
-            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
-                $id = $m->id;
-
-                $editBtn = $canUpdate
-                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openJobLevelEdit\', { id: '.$id.' })" />')
-                    : '';
-                $deleteBtn = $canDelete
-                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
-                    : '';
-
-                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml()->visible($canUpdate || $canDelete),
-        ];
-    }
-
     public function confirmDelete(int $id): void
     {
         LivewireAlert::title(__('general.delete-item'))
@@ -115,7 +71,51 @@ class JobLevelTable extends LivewireTable
 
         return Excel::download(
             new JobLevelExport($data, $visibleColumnCodes),
-            $filename
+            $filename,
         );
+    }
+
+    protected function query(): Builder
+    {
+        return JobLevel::query();
+    }
+
+    protected function globalSearchColumns(): array
+    {
+        return ['id', 'name_ar', 'name_en', 'grade', 'email'];
+    }
+
+    protected function columns(): array
+    {
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
+
+        return [
+            Column::make('ID', 'id')->sortable()->searchable(),
+
+            Column::make(__('general.name').' (AR)', 'name_ar')->sortable()->searchable(),
+            Column::make(__('general.name').' (EN)', 'name_en')->sortable()->searchable(),
+
+            Column::make(__('general.grade'), 'grade')
+                ->sortable()
+                ->searchable(),
+
+            Column::make(__('general.email'), 'email')
+                ->sortable()
+                ->searchable(),
+
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
+                $id = $m->id;
+
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openJobLevelEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
+
+                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
+            })->asHtml()->visible($canUpdate || $canDelete),
+        ];
     }
 }

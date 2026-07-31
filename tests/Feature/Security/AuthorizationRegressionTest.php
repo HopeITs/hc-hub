@@ -150,18 +150,6 @@ class AuthorizationRegressionTest extends TestCase
             ->assertSet('employeeId', $colleague->id);
     }
 
-    // --- Checklist transitions (report item 6) ---------------------------
-
-    private function checklist(array $attributes): Checklist
-    {
-        $item = ChecklistItem::query()->create(['name' => 'Laptop '.uniqid(), 'order' => 1]);
-
-        return Checklist::create(array_merge([
-            'item_id' => $item->id,
-            'delivered_status' => 'pending',
-        ], $attributes));
-    }
-
     public function test_delivery_cannot_be_confirmed_for_someone_elses_assignment(): void
     {
         $city = $this->makeCity('ALP', '001');
@@ -334,5 +322,17 @@ class AuthorizationRegressionTest extends TestCase
         // The audit trail still records which fields changed.
         $this->assertStringContainsString('sensitive_fields_changed', $properties);
         $this->assertStringContainsString('national_number', $properties);
+    }
+
+    // --- Checklist transitions (report item 6) ---------------------------
+
+    private function checklist(array $attributes): Checklist
+    {
+        $item = ChecklistItem::query()->create(['name' => 'Laptop '.uniqid(), 'order' => 1]);
+
+        return Checklist::create(array_merge([
+            'item_id' => $item->id,
+            'delivered_status' => 'pending',
+        ], $attributes));
     }
 }

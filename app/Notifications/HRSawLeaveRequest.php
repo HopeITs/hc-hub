@@ -16,7 +16,7 @@ class HRSawLeaveRequest extends Notification
      */
     public function __construct(
         public LeaveRequest $leaveRequest,
-        public string $recipientType = 'employee'// employee | manager
+        public string $recipientType = 'employee',// employee | manager
     ) {}
 
     /**

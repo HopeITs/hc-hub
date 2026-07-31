@@ -17,6 +17,24 @@ class NewsTable extends LivewireTable
 
     protected $listeners = ['delete', 'refreshNewsTable' => '$refresh'];
 
+    public function confirmDelete(int $id): void
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete(array $payload): void
+    {
+        News::findOrFail($payload['id'])->delete();
+        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
+        $this->dispatch('refreshNewsTable');
+    }
+
     protected function query(): Builder
     {
         $employee = auth()->user()?->profile;
@@ -64,23 +82,5 @@ class NewsTable extends LivewireTable
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
             })->asHtml()->visible($canUpdate || $canDelete),
         ];
-    }
-
-    public function confirmDelete(int $id): void
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete(array $payload): void
-    {
-        News::findOrFail($payload['id'])->delete();
-        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
-        $this->dispatch('refreshNewsTable');
     }
 }

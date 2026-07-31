@@ -68,7 +68,7 @@ class ResetPassword extends Component
                 }
 
                 event(new PasswordReset($user));
-            }
+            },
         );
 
         // If the password was successfully reset, we will redirect the user back to

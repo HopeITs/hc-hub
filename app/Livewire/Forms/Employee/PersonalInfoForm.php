@@ -193,18 +193,6 @@ class PersonalInfoForm extends Form
         return $rules;
     }
 
-    protected function buildWorkEmail(?string $username): ?string
-    {
-        $username = trim($username ?? '');
-
-        return $username ? strtolower($username).'@hcsyria.org' : null;
-    }
-
-    protected function extractUsernameFromEmail(?string $email): ?string
-    {
-        return $email ? explode('@', $email, 2)[0] ?? null : null;
-    }
-
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
@@ -295,6 +283,43 @@ class PersonalInfoForm extends Form
         return $this->employee;
     }
 
+    protected function buildWorkEmail(?string $username): ?string
+    {
+        $username = trim($username ?? '');
+
+        return $username ? strtolower($username).'@hcsyria.org' : null;
+    }
+
+    protected function extractUsernameFromEmail(?string $email): ?string
+    {
+        return $email ? explode('@', $email, 2)[0] ?? null : null;
+    }
+
+    /**
+     * Create/update the login account. Privileged role changes are deliberately
+     * restricted to the dedicated Access Management module.
+     */
+    protected function persistAccount(): void
+    {
+        if ($this->employee->account) {
+            $this->employee->account->update(['email' => $this->email]);
+
+            return;
+        }
+
+        $user = User::create([
+            'email' => $this->email,
+            'password' => Hash::make(Str::password(64)),
+            'employee_id' => $this->employee->id,
+        ]);
+
+        if (Role::query()->where('name', 'employee')->exists()) {
+            $user->assignRole('employee');
+        }
+
+        Password::sendResetLink(['email' => $user->email]);
+    }
+
     private function authorizeScope(): void
     {
         $user = auth()->user();
@@ -324,30 +349,5 @@ class PersonalInfoForm extends Form
                 ]);
             }
         }
-    }
-
-    /**
-     * Create/update the login account. Privileged role changes are deliberately
-     * restricted to the dedicated Access Management module.
-     */
-    protected function persistAccount(): void
-    {
-        if ($this->employee->account) {
-            $this->employee->account->update(['email' => $this->email]);
-
-            return;
-        }
-
-        $user = User::create([
-            'email' => $this->email,
-            'password' => Hash::make(Str::password(64)),
-            'employee_id' => $this->employee->id,
-        ]);
-
-        if (Role::query()->where('name', 'employee')->exists()) {
-            $user->assignRole('employee');
-        }
-
-        Password::sendResetLink(['email' => $user->email]);
     }
 }

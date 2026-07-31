@@ -2,14 +2,13 @@
 
 namespace App\Livewire\Dashboard;
 
-use Livewire\Component;
 use App\Models\Employee;
-use App\Models\JobLevel;
-use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class JobLevelEmployeeStatistics extends Component
 {
     public $jobLevelLabels = [];
+
     public $employeeCounts = [];
 
     public function mount()

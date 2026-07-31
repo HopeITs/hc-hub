@@ -14,7 +14,7 @@ class PendingReturns extends Component
     public function getItemsProperty()
     {
         $employee = Auth::user()->profile ?? null;
-        if (!$employee) {
+        if (! $employee) {
             return collect();
         }
 

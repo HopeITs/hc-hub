@@ -2,36 +2,32 @@
 
 namespace App\Exports;
 
-use App\Models\CourseCategory;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithProperties;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Table;
 use PhpOffice\PhpSpreadsheet\Worksheet\Table\TableStyle;
-use Illuminate\Support\Collection;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class CourseCategoryExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithProperties
+class CourseCategoryExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithProperties, WithStyles
 {
     public function __construct(
         protected Collection $collection,
-        protected array $visibleColumnCodes
-    ) {
-        
-  
-    }
+        protected array $visibleColumnCodes,
+    ) {}
 
     public function properties(): array
     {
         return [
-            'creator'        => 'Hope HR',
-            'lastModifiedBy' => ' ', 
-            'title'          => ' ', 
-            'company'        => 'Hope Center',
+            'creator' => 'Hope HR',
+            'lastModifiedBy' => ' ',
+            'title' => ' ',
+            'company' => 'Hope Center',
         ];
     }
 
@@ -43,14 +39,14 @@ class CourseCategoryExport implements FromCollection, WithHeadings, WithMapping,
     public function headings(): array
     {
         $headers = [];
-        
+
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
-                'id'            => 'ID',
-                'name_ar'       => __('general.name', [], 'en') . ' (AR)',
-                'name_en'       => __('general.name', [], 'en') . ' (EN)',
+                'id' => 'ID',
+                'name_ar' => __('general.name', [], 'en').' (AR)',
+                'name_en' => __('general.name', [], 'en').' (EN)',
                 'courses_count' => trans_choice('general.course', 2, [], 'en'),
-                default         => $code,
+                default => $code,
             };
         }
 
@@ -60,13 +56,13 @@ class CourseCategoryExport implements FromCollection, WithHeadings, WithMapping,
     public function map($row): array
     {
         $mappedRow = [];
-        
+
         foreach ($this->visibleColumnCodes as $code) {
             $mappedRow[] = match ($code) {
-                'id'            => $row->id,
-                'name_ar'       => $row->name_ar,
-                'name_en'       => $row->name_en,
-                'courses_count' => empty($row->courses_count) ? '0' :  $row->courses_count,                default         => '',
+                'id' => $row->id,
+                'name_ar' => $row->name_ar,
+                'name_en' => $row->name_en,
+                'courses_count' => empty($row->courses_count) ? '0' : $row->courses_count,                default => '',
             };
         }
 
@@ -77,14 +73,14 @@ class CourseCategoryExport implements FromCollection, WithHeadings, WithMapping,
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
-        $globalRange = 'A1:' . $highestColumn . $highestRow;
+        $globalRange = 'A1:'.$highestColumn.$highestRow;
 
         $table = new Table($globalRange, 'CourseCategories');
-        $tableStyle = new TableStyle();
-        $tableStyle->setTheme(TableStyle::TABLE_STYLE_LIGHT1); 
+        $tableStyle = new TableStyle;
+        $tableStyle->setTheme(TableStyle::TABLE_STYLE_LIGHT1);
         $tableStyle->setShowRowStripes(true);
         $table->setStyle($tableStyle);
-        
+
         $sheet->addTable($table);
 
         return [
@@ -95,7 +91,7 @@ class CourseCategoryExport implements FromCollection, WithHeadings, WithMapping,
                 ],
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                 ],
                 'borders' => [
                     'allBorders' => [
@@ -105,14 +101,14 @@ class CourseCategoryExport implements FromCollection, WithHeadings, WithMapping,
             ],
             1 => [
                 'font' => [
-                    'name'  => 'Somar Sans',
-                    'bold'  => true,
-                    'size'  => 12,
-                    'color' => ['argb' => 'FFFFFFFF'], 
+                    'name' => 'Somar Sans',
+                    'bold' => true,
+                    'size' => 12,
+                    'color' => ['argb' => 'FFFFFFFF'],
                 ],
                 'fill' => [
-                    'fillType'   => Fill::FILL_SOLID,
-                    'startColor' => ['argb' => 'FFC2151C'], 
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['argb' => 'FFC2151C'],
                 ],
             ],
         ];

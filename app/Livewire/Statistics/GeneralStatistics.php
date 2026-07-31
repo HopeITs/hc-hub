@@ -2,18 +2,22 @@
 
 namespace App\Livewire\Statistics;
 
-use Carbon\Carbon;
-use App\Models\{Badge, Checklist, Employee, Contract};
+use App\Models\Contract;
 use Livewire\Component;
+
 class GeneralStatistics extends Component
 {
     public $employee;
-    public $contract;
-    public $positionTitle;
-    public $departmentName;
-    public $joinedOn;
-    public $workEmail;
 
+    public $contract;
+
+    public $positionTitle;
+
+    public $departmentName;
+
+    public $joinedOn;
+
+    public $workEmail;
 
     public function mount(): void
     {
@@ -22,7 +26,7 @@ class GeneralStatistics extends Component
         $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
 
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             abort(403, 'Unauthorized');
         }
 

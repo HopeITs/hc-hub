@@ -38,25 +38,6 @@ class PositionForm extends Form
 
     public $is_active = true;
 
-    protected function rules()
-    {
-        return [
-            'title_en' => ['nullable', 'min:3', 'max:255'],
-            'title_ar' => ['nullable', 'min:3', 'max:255'],
-            'program_id' => 'required|exists:programs,id',
-            'center_id' => 'nullable|exists:centers,id',
-            'city_id' => 'required|exists:cities,id',
-            'tech_manager_id' => 'nullable|exists:positions,id',
-            'direct_manager_id' => 'nullable|exists:positions,id',
-            'job_level_id' => 'required|exists:job_levels,id',
-            'department_id' => 'required|exists:departments,id',
-            'qualifications' => 'required|string',
-            'responsibilities' => 'required|string',
-            'max_emp' => 'required|integer|min:1',
-
-        ];
-    }
-
     public function setPosition(Position $position): void
     {
         $this->position = $position;
@@ -93,7 +74,7 @@ class PositionForm extends Form
         $this->authorizeScope();
 
         $this->position->update(
-            $this->all()
+            $this->all(),
         );
 
         $this->reset();
@@ -104,8 +85,27 @@ class PositionForm extends Form
         $this->program->update(
             [
                 'is_active' => ! $this->position->is_active,
-            ]
+            ],
         );
+    }
+
+    protected function rules()
+    {
+        return [
+            'title_en' => ['nullable', 'min:3', 'max:255'],
+            'title_ar' => ['nullable', 'min:3', 'max:255'],
+            'program_id' => 'required|exists:programs,id',
+            'center_id' => 'nullable|exists:centers,id',
+            'city_id' => 'required|exists:cities,id',
+            'tech_manager_id' => 'nullable|exists:positions,id',
+            'direct_manager_id' => 'nullable|exists:positions,id',
+            'job_level_id' => 'required|exists:job_levels,id',
+            'department_id' => 'required|exists:departments,id',
+            'qualifications' => 'required|string',
+            'responsibilities' => 'required|string',
+            'max_emp' => 'required|integer|min:1',
+
+        ];
     }
 
     private function normalizeNullableManagers(): void

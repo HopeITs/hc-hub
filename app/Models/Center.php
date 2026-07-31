@@ -20,14 +20,6 @@ class Center extends Model
         'address_en', 'address_ar', 'is_active',
     ];
 
-    protected function name(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->getTranslatableAttribute('name'),
-            set: fn ($value) => $this->setTranslatableAttribute('name', $value)
-        );
-    }
-
     public function getOpenAtFormattedAttribute(): string
     {
         return Carbon::createFromFormat('H:i:s', $this->open_at)->format('H:i');
@@ -36,14 +28,6 @@ class Center extends Model
     public function getCloseAtFormattedAttribute(): string
     {
         return Carbon::createFromFormat('H:i:s', $this->close_at)->format('H:i');
-    }
-
-    protected function address(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->getTranslatableAttribute('address'),
-            set: fn ($value) => $this->setTranslatableAttribute('address', $value)
-        );
     }
 
     public function city(): BelongsTo
@@ -59,6 +43,38 @@ class Center extends Model
     public function contracts()
     {
         return $this->hasManyThrough(Contract::class, Position::class);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('center')
+            ->logOnly([
+                'name_en',
+                'name_ar',
+                'city_id',
+                'open_at',
+                'close_at',
+                'address',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
+
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('name'),
+            set: fn ($value) => $this->setTranslatableAttribute('name', $value),
+        );
+    }
+
+    protected function address(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('address'),
+            set: fn ($value) => $this->setTranslatableAttribute('address', $value),
+        );
     }
 
     // Add this accessor to your model
@@ -79,21 +95,5 @@ class Center extends Model
         // 3. Calculate difference in decimal hours
         // Using floatDiffInHours is cleaner than calculating minutes manually (Carbon 2+)
         return $open->floatDiffInHours($close);
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->useLogName('center')
-            ->logOnly([
-                'name_en',
-                'name_ar',
-                'city_id',
-                'open_at',
-                'close_at',
-                'address',
-            ])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
     }
 }

@@ -54,13 +54,6 @@ class CentersModule extends Component
         return view('livewire.program-management.centers-module', compact('cities'));
     }
 
-    private function authorizedCityQuery()
-    {
-        $cityId = $this->authorizedCityId();
-
-        return $cityId === null ? City::query() : City::query()->whereKey($cityId);
-    }
-
     public function create(): void
     {
         $this->authorizeActivePermission('centers.create');
@@ -115,7 +108,7 @@ class CentersModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'centers.create' : 'centers.update'
+            empty($this->item['id']) ? 'centers.create' : 'centers.update',
         );
 
         $this->validate();
@@ -149,5 +142,12 @@ class CentersModule extends Component
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
+    }
+
+    private function authorizedCityQuery()
+    {
+        $cityId = $this->authorizedCityId();
+
+        return $cityId === null ? City::query() : City::query()->whereKey($cityId);
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-use Barryvdh\Snappy\Facades\SnappyPdf;
-
 return [
     'name' => env('APP_NAME', 'Laravel'),
 
@@ -11,7 +9,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'timezone' =>  'Europe/Istanbul',
+    'timezone' => 'Europe/Istanbul',
 
     'locale' => env('APP_LOCALE', 'en'),
 

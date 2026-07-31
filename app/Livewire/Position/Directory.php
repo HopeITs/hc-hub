@@ -76,35 +76,6 @@ class Directory extends Component
         $this->resetPage();
     }
 
-    /** Base query shared by the paginated list and the CSV export. */
-    private function baseQuery(): Builder
-    {
-        $term = '%'.trim($this->search).'%';
-
-        return Employee::query()
-            ->whereHas('contracts.position', fn (Builder $p) => $p->visible())
-            ->when($this->status === 'board', fn (Builder $q) => $q->where('is_board_member', true))
-            ->when($this->status === 'active', fn (Builder $q) => $q->where('is_active', true))
-            ->when(trim($this->search) !== '', fn (Builder $q) => $q->where(function (Builder $sub) use ($term) {
-                $sub->where('first_name_en', 'like', $term)
-                    ->orWhere('last_name_en', 'like', $term)
-                    ->orWhere('first_name_ar', 'like', $term)
-                    ->orWhere('last_name_ar', 'like', $term)
-                    ->orWhereHas('contracts.position', fn (Builder $p) => $p->visible()->where(fn (Builder $t) => $t->where('title_en', 'like', $term)->orWhere('title_ar', 'like', $term)));
-            }))
-            ->when($this->program_id || $this->department_id || $this->center_id || $this->job_level_id, function (Builder $q) {
-                $q->whereHas('contracts.position', function (Builder $p) {
-                    $p->visible()
-                        ->when($this->program_id, fn (Builder $b) => $b->where('program_id', $this->program_id))
-                        ->when($this->department_id, fn (Builder $b) => $b->where('department_id', $this->department_id))
-                        ->when($this->center_id, fn (Builder $b) => $b->where('center_id', $this->center_id))
-                        ->when($this->job_level_id, fn (Builder $b) => $b->where('job_level_id', $this->job_level_id));
-                });
-            })
-            ->when($this->city_id, fn (Builder $q) => $q->where('city_id', $this->city_id))
-            ->orderBy('first_name_'.app()->getLocale());
-    }
-
     public function getActiveFilterCountProperty(): int
     {
         return collect([
@@ -160,6 +131,35 @@ class Directory extends Component
             ->paginate($this->perPage);
 
         return view('livewire.position.directory', compact('employees'));
+    }
+
+    /** Base query shared by the paginated list and the CSV export. */
+    private function baseQuery(): Builder
+    {
+        $term = '%'.trim($this->search).'%';
+
+        return Employee::query()
+            ->whereHas('contracts.position', fn (Builder $p) => $p->visible())
+            ->when($this->status === 'board', fn (Builder $q) => $q->where('is_board_member', true))
+            ->when($this->status === 'active', fn (Builder $q) => $q->where('is_active', true))
+            ->when(trim($this->search) !== '', fn (Builder $q) => $q->where(function (Builder $sub) use ($term) {
+                $sub->where('first_name_en', 'like', $term)
+                    ->orWhere('last_name_en', 'like', $term)
+                    ->orWhere('first_name_ar', 'like', $term)
+                    ->orWhere('last_name_ar', 'like', $term)
+                    ->orWhereHas('contracts.position', fn (Builder $p) => $p->visible()->where(fn (Builder $t) => $t->where('title_en', 'like', $term)->orWhere('title_ar', 'like', $term)));
+            }))
+            ->when($this->program_id || $this->department_id || $this->center_id || $this->job_level_id, function (Builder $q) {
+                $q->whereHas('contracts.position', function (Builder $p) {
+                    $p->visible()
+                        ->when($this->program_id, fn (Builder $b) => $b->where('program_id', $this->program_id))
+                        ->when($this->department_id, fn (Builder $b) => $b->where('department_id', $this->department_id))
+                        ->when($this->center_id, fn (Builder $b) => $b->where('center_id', $this->center_id))
+                        ->when($this->job_level_id, fn (Builder $b) => $b->where('job_level_id', $this->job_level_id));
+                });
+            })
+            ->when($this->city_id, fn (Builder $q) => $q->where('city_id', $this->city_id))
+            ->orderBy('first_name_'.app()->getLocale());
     }
 
     private function withVisiblePosition($query)

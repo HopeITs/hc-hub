@@ -32,6 +32,58 @@ class ContractsTable extends LivewireTable
         'exportExcel' => 'exportExcel',
     ];
 
+    public function confirmDelete(int $id): void
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete(array $payload): void
+    {
+        $contract = Contract::findOrFail($payload['id']);
+        Gate::authorize('delete', $contract);
+
+        DB::transaction(fn () => $contract->delete());
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+
+        $this->dispatch('refreshContractsTable');
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery();
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns;
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible())
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code())
+            ->toArray();
+
+        $filename = 'contracts_'.now()->format('Y-m-d').'.xlsx';
+
+        return Excel::download(
+            new ContractExport($data, $visibleColumnCodes),
+            $filename,
+        );
+    }
+
     protected function query(): Builder
     {
         return $this->model()::query()
@@ -120,7 +172,7 @@ class ContractsTable extends LivewireTable
                 ->options(
                     collect(SalaryPer::getValues())->mapWithKeys(fn ($value) => [
                         $value => SalaryPer::getLocalizedName((int) $value)['value'],
-                    ])->toArray()
+                    ])->toArray(),
                 )
                 ->displayUsing(function ($value) {
                     $value = $value instanceof SalaryPer ? $value->value : (int) $value;
@@ -154,57 +206,5 @@ class ContractsTable extends LivewireTable
                 return '<div class="flex items-center justify-center gap-2">'.$view.$edit.$delete.'</div>';
             })->asHtml(),
         ];
-    }
-
-    public function confirmDelete(int $id): void
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete(array $payload): void
-    {
-        $contract = Contract::findOrFail($payload['id']);
-        Gate::authorize('delete', $contract);
-
-        DB::transaction(fn () => $contract->delete());
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
-
-        $this->dispatch('refreshContractsTable');
-    }
-
-    public function exportExcel(): BinaryFileResponse
-    {
-        $query = $this->appliedQuery();
-        $data = $query->get();
-
-        $userSelectedColumns = $this->columns;
-
-        $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible())
-            ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) {
-                    return true;
-                }
-
-                return in_array($column->code(), $userSelectedColumns);
-            })
-            ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code())
-            ->toArray();
-
-        $filename = 'contracts_'.now()->format('Y-m-d').'.xlsx';
-
-        return Excel::download(
-            new ContractExport($data, $visibleColumnCodes),
-            $filename
-        );
     }
 }

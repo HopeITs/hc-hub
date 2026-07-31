@@ -17,11 +17,15 @@ class ContractStatistics extends Component
     use ScopesToAuthorizedCity;
 
     public ?int $selectedCity = null;
+
     public ?int $selectedProgram = null;
 
     public $cities = [];
+
     public $programs = [];
+
     public $cards = [];
+
     public string $cardType = 'program';
 
     public function mount(): void
@@ -37,6 +41,123 @@ class ContractStatistics extends Component
             ->get();
 
         $this->enforceCityScope();
+    }
+
+    public function loadData(): void
+    {
+        $this->enforceCityScope();
+
+        $this->cards = [];
+
+        if (! $this->selectedCity && ! $this->selectedProgram) {
+            $this->cardType = 'program';
+            $programs = Program::where('is_active', true)
+                ->get();
+
+            foreach ($programs as $program) {
+                $positionsQuery = Position::where('program_id', $program->id);
+
+                $contractsQuery = Contract::where('is_active', true)
+                    ->whereHas('position', fn ($q) => $q->where('program_id', $program->id));
+
+                $this->cards[] = [
+                    'name' => $program->slug,
+                    'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
+                    'color' => 'bg-primary',
+                    'program_slug' => $program->slug,
+                ] + $this->getCardBreakdown($contractsQuery);
+            }
+
+        } elseif (! $this->selectedCity && $this->selectedProgram) {
+            $this->cardType = 'center';
+            $centers = Center::where('is_active', true)
+                ->whereHas('positions', fn ($q) => $q->where('program_id', $this->selectedProgram))
+                ->get();
+
+            foreach ($centers as $center) {
+                $contractsQuery = Contract::where('is_active', true)
+                    ->whereHas('position', fn ($q) => $q
+                        ->where('center_id', $center->id)
+                        ->where('program_id', $this->selectedProgram),
+                    );
+
+                $this->cards[] = [
+                    'name' => $center->name,
+                    'centers' => null,
+                    'color' => 'bg-green-500',
+                    'center_id' => $center->id,
+                ] + $this->getCardBreakdown($contractsQuery);
+            }
+
+        } elseif ($this->selectedCity && ! $this->selectedProgram) {
+            $this->cardType = 'program';
+            $programs = Program::where('is_active', true)
+                ->whereHas('positions', fn ($q) => $q->where('city_id', $this->selectedCity))
+                ->get();
+
+            foreach ($programs as $program) {
+                $positionsQuery = Position::where('program_id', $program->id)
+                    ->where('city_id', $this->selectedCity);
+
+                $contractsQuery = Contract::where('is_active', true)
+                    ->whereHas('position', fn ($q) => $q
+                        ->where('program_id', $program->id)
+                        ->where('city_id', $this->selectedCity),
+                    );
+
+                $this->cards[] = [
+                    'name' => $program->name,
+                    'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
+                    'color' => 'bg-primary',
+                    'program_slug' => $program->slug,
+                ] + $this->getCardBreakdown($contractsQuery);
+            }
+
+        } elseif ($this->selectedCity && $this->selectedProgram) {
+            $this->cardType = 'center';
+            $centers = Center::where('is_active', true)
+                ->where('city_id', $this->selectedCity)
+                ->whereHas('positions', fn ($q) => $q->where('program_id', $this->selectedProgram))
+                ->get();
+
+            foreach ($centers as $center) {
+                $contractsQuery = Contract::where('is_active', true)
+                    ->whereHas('position', fn ($q) => $q
+                        ->where('center_id', $center->id)
+                        ->where('program_id', $this->selectedProgram)
+                        ->where('city_id', $this->selectedCity),
+                    );
+
+                $this->cards[] = [
+                    'name' => $center->name,
+                    'centers' => null,
+                    'color' => 'bg-green-500',
+                    'center_id' => $center->id,
+                ] + $this->getCardBreakdown($contractsQuery);
+            }
+        }
+    }
+
+    public function resetFilters(): void
+    {
+        $this->selectedCity = null;
+        $this->selectedProgram = null;
+
+        // "Clear filters" must not become a way back to nationwide figures.
+        $this->enforceCityScope();
+    }
+
+    public function render(): View
+    {
+        $this->loadData();
+
+        //        dd($this->cards, $this->programs);
+        return view('livewire.dashboard.contract-statistics', [
+            'cards' => $this->cards,
+            'cities' => $this->cities,
+            'programs' => $this->programs,
+            'cardType' => $this->cardType,
+        ]);
     }
 
     /**
@@ -89,122 +210,5 @@ class ContractStatistics extends Component
                 'part' => $this->countByTypeTokens($q, ['Trial', 'Partial']),
             ],
         ];
-    }
-
-    public function loadData(): void
-    {
-        $this->enforceCityScope();
-
-        $this->cards = [];
-
-        if (!$this->selectedCity && !$this->selectedProgram) {
-            $this->cardType = 'program';
-            $programs = Program::where('is_active', true)
-                ->get();
-
-            foreach ($programs as $program) {
-                $positionsQuery = Position::where('program_id', $program->id);
-
-                $contractsQuery = Contract::where('is_active', true)
-                    ->whereHas('position', fn($q) => $q->where('program_id', $program->id));
-
-                $this->cards[] = [
-                        'name' => $program->slug,
-                        'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
-                        'color' => 'bg-primary',
-                        'program_slug' => $program->slug,
-                    ] + $this->getCardBreakdown($contractsQuery);
-            }
-
-        } elseif (!$this->selectedCity && $this->selectedProgram) {
-            $this->cardType = 'center';
-            $centers = Center::where('is_active', true)
-                ->whereHas('positions', fn($q) => $q->where('program_id', $this->selectedProgram))
-                ->get();
-
-            foreach ($centers as $center) {
-                $contractsQuery = Contract::where('is_active', true)
-                    ->whereHas('position', fn($q) => $q
-                        ->where('center_id', $center->id)
-                        ->where('program_id', $this->selectedProgram)
-                    );
-
-                $this->cards[] = [
-                        'name' => $center->name,
-                        'centers' => null,
-                        'color' => 'bg-green-500',
-                        'center_id' => $center->id,
-                    ] + $this->getCardBreakdown($contractsQuery);
-            }
-
-        } elseif ($this->selectedCity && !$this->selectedProgram) {
-            $this->cardType = 'program';
-            $programs = Program::where('is_active', true)
-                ->whereHas('positions', fn($q) => $q->where('city_id', $this->selectedCity))
-                ->get();
-
-            foreach ($programs as $program) {
-                $positionsQuery = Position::where('program_id', $program->id)
-                    ->where('city_id', $this->selectedCity);
-
-                $contractsQuery = Contract::where('is_active', true)
-                    ->whereHas('position', fn($q) => $q
-                        ->where('program_id', $program->id)
-                        ->where('city_id', $this->selectedCity)
-                    );
-
-                $this->cards[] = [
-                        'name' => $program->name,
-                        'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
-                        'color' => 'bg-primary',
-                        'program_slug' => $program->slug,
-                    ] + $this->getCardBreakdown($contractsQuery);
-            }
-
-        } elseif ($this->selectedCity && $this->selectedProgram) {
-            $this->cardType = 'center';
-            $centers = Center::where('is_active', true)
-                ->where('city_id', $this->selectedCity)
-                ->whereHas('positions', fn($q) => $q->where('program_id', $this->selectedProgram))
-                ->get();
-
-            foreach ($centers as $center) {
-                $contractsQuery = Contract::where('is_active', true)
-                    ->whereHas('position', fn($q) => $q
-                        ->where('center_id', $center->id)
-                        ->where('program_id', $this->selectedProgram)
-                        ->where('city_id', $this->selectedCity)
-                    );
-
-                $this->cards[] = [
-                        'name' => $center->name,
-                        'centers' => null,
-                        'color' => 'bg-green-500',
-                        'center_id' => $center->id,
-                    ] + $this->getCardBreakdown($contractsQuery);
-            }
-        }
-    }
-
-
-    public function resetFilters(): void
-    {
-        $this->selectedCity = null;
-        $this->selectedProgram = null;
-
-        // "Clear filters" must not become a way back to nationwide figures.
-        $this->enforceCityScope();
-    }
-
-    public function render(): View
-    {
-        $this->loadData();
-//        dd($this->cards, $this->programs);
-        return view('livewire.dashboard.contract-statistics', [
-            'cards' => $this->cards,
-            'cities' => $this->cities,
-            'programs' => $this->programs,
-            'cardType' => $this->cardType,
-        ]);
     }
 }

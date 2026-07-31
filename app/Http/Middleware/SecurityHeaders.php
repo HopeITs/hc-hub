@@ -36,7 +36,7 @@ class SecurityHeaders
         if (config('security-headers.hsts.enabled')) {
             $response->headers->set(
                 'Strict-Transport-Security',
-                config('security-headers.hsts.value')
+                config('security-headers.hsts.value'),
             );
         }
 
@@ -57,7 +57,7 @@ class SecurityHeaders
 
         return collect($directives)
             ->map(fn (array $sources, string $directive) => trim(
-                $directive.' '.implode(' ', array_unique($sources))
+                $directive.' '.implode(' ', array_unique($sources)),
             ))
             ->implode('; ');
     }

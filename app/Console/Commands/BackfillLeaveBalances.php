@@ -51,7 +51,7 @@ class BackfillLeaveBalances extends Command
                     $c->employee?->name ?? '—',
                     $c->contract_type_id,
                     $c->duration,
-                ])->all()
+                ])->all(),
             );
             $this->warn('Dry run — no changes were written.');
 

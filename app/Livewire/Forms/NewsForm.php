@@ -57,7 +57,7 @@ class NewsForm extends Form
                 'nullable',
                 Rule::when(
                     $this->photo instanceof TemporaryUploadedFile,
-                    ['image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048']
+                    ['image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
                 ),
             ],
         ];

@@ -25,55 +25,6 @@ class ChecklistItemTable extends LivewireTable
         'exportExcel' => 'exportExcel',
     ];
 
-    protected function query(): Builder
-    {
-        return ChecklistItem::query();
-    }
-
-    protected function globalSearchColumns(): array
-    {
-        return ['id', 'name', 'order'];
-    }
-
-    protected function columns(): array
-    {
-        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
-        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
-
-        return [
-            Column::make('ID', 'id')->sortable()->searchable(),
-
-            Column::make(__('general.name'), 'name')
-                ->sortable()
-                ->searchable(),
-
-            SelectColumn::make(__('general.order'), 'order')
-                ->options([
-                    ChecklistItemOrder::ProbationContract => ChecklistItemOrder::getLocalizedName(ChecklistItemOrder::ProbationContract)['value'],
-
-                    ChecklistItemOrder::AnnualContract => ChecklistItemOrder::getLocalizedName(ChecklistItemOrder::AnnualContract)['value'],
-
-                    ChecklistItemOrder::Resignation => ChecklistItemOrder::getLocalizedName(ChecklistItemOrder::Resignation)['value'],
-                ])
-                ->displayUsing(fn ($value) => ChecklistItemOrder::getLocalizedName($value)['value'])
-                ->sortable()
-                ->searchable(),
-
-            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
-                $id = $m->id;
-
-                $editBtn = $canUpdate
-                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openChecklistItemEdit\', { id: '.$id.' })" />')
-                    : '';
-                $deleteBtn = $canDelete
-                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
-                    : '';
-
-                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml()->visible($canUpdate || $canDelete),
-        ];
-    }
-
     public function confirmDelete(int $id): void
     {
         LivewireAlert::title(__('general.delete-item'))
@@ -122,7 +73,56 @@ class ChecklistItemTable extends LivewireTable
 
         return Excel::download(
             new ChecklistItemExport($data, $visibleColumnCodes),
-            $filename
+            $filename,
         );
+    }
+
+    protected function query(): Builder
+    {
+        return ChecklistItem::query();
+    }
+
+    protected function globalSearchColumns(): array
+    {
+        return ['id', 'name', 'order'];
+    }
+
+    protected function columns(): array
+    {
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
+
+        return [
+            Column::make('ID', 'id')->sortable()->searchable(),
+
+            Column::make(__('general.name'), 'name')
+                ->sortable()
+                ->searchable(),
+
+            SelectColumn::make(__('general.order'), 'order')
+                ->options([
+                    ChecklistItemOrder::ProbationContract => ChecklistItemOrder::getLocalizedName(ChecklistItemOrder::ProbationContract)['value'],
+
+                    ChecklistItemOrder::AnnualContract => ChecklistItemOrder::getLocalizedName(ChecklistItemOrder::AnnualContract)['value'],
+
+                    ChecklistItemOrder::Resignation => ChecklistItemOrder::getLocalizedName(ChecklistItemOrder::Resignation)['value'],
+                ])
+                ->displayUsing(fn ($value) => ChecklistItemOrder::getLocalizedName($value)['value'])
+                ->sortable()
+                ->searchable(),
+
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
+                $id = $m->id;
+
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openChecklistItemEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
+
+                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
+            })->asHtml()->visible($canUpdate || $canDelete),
+        ];
     }
 }

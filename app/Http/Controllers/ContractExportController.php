@@ -50,7 +50,7 @@ class ContractExportController extends Controller
             '%s-%s-%s.pdf',
             Str::slug($contract->employee?->name ?? 'contract'),
             $category,
-            now()->format('Ymd')
+            now()->format('Ymd'),
         );
 
         return $pdf->stream($file);

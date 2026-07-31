@@ -40,7 +40,7 @@ class SendTestNotification extends Command
         $count = max(1, (int) $this->option('count'));
 
         for ($i = 0; $i < $count; $i++) {
-            $user->notify(new TestNotification());
+            $user->notify(new TestNotification);
         }
 
         $this->info("Sent {$count} test notification(s) to {$user->email}. Unread total: {$user->unreadNotifications()->count()}");

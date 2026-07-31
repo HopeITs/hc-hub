@@ -14,6 +14,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
+use LogicException;
 
 class LeaveRequestForm extends Form
 {
@@ -186,7 +187,7 @@ class LeaveRequestForm extends Form
     public function submitDecision(): LeaveRequest
     {
         if (! $this->decisionLeave) {
-            throw new \LogicException('A leave request must be selected before submitting a decision.');
+            throw new LogicException('A leave request must be selected before submitting a decision.');
         }
 
         $this->validate([
@@ -227,7 +228,7 @@ class LeaveRequestForm extends Form
                 ]);
                 $leaveRequest->leaveBalance()->increment(
                     'used',
-                    $leaveRequest->duration_in_hours
+                    $leaveRequest->duration_in_hours,
                 );
             } else {
                 $leaveRequest->update([
@@ -341,6 +342,24 @@ class LeaveRequestForm extends Form
         $this->resetForm();
     }
 
+    public function selectedBalance(): LeaveBalance
+    {
+        $activeContract = $this->targetEmployee()?->latestActiveContract();
+        $leaveBalance = $activeContract?->leaveBalances()
+            ->with(['leaveType', 'contract.position.center'])
+            ->find($this->leave_balance_id);
+
+        if (! $leaveBalance) {
+            throw ValidationException::withMessages([
+                'leave_balance_id' => __('validation.exists', [
+                    'attribute' => trans_choice('general.leave-type', 1),
+                ]),
+            ]);
+        }
+
+        return $leaveBalance;
+    }
+
     /**
      * Combine date + time safely
      */
@@ -451,24 +470,6 @@ class LeaveRequestForm extends Form
                 ]),
             ]);
         }
-    }
-
-    public function selectedBalance(): LeaveBalance
-    {
-        $activeContract = $this->targetEmployee()?->latestActiveContract();
-        $leaveBalance = $activeContract?->leaveBalances()
-            ->with(['leaveType', 'contract.position.center'])
-            ->find($this->leave_balance_id);
-
-        if (! $leaveBalance) {
-            throw ValidationException::withMessages([
-                'leave_balance_id' => __('validation.exists', [
-                    'attribute' => trans_choice('general.leave-type', 1),
-                ]),
-            ]);
-        }
-
-        return $leaveBalance;
     }
 
     private function targetEmployee(): ?Employee

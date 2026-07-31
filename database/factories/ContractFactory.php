@@ -7,8 +7,6 @@ use App\Models\ContractType;
 use App\Models\Employee;
 use App\Models\Position;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -20,7 +18,7 @@ class ContractFactory extends Factory
     public function definition(): array
     {
         $startDate = $this->faker->dateTimeBetween('-2 years', 'now');
-        $endDate   = (clone $startDate)->modify('+1 year');
+        $endDate = (clone $startDate)->modify('+1 year');
 
         return [
             'employee_id' => Employee::factory(),

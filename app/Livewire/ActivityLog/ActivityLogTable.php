@@ -2,12 +2,12 @@
 
 namespace App\Livewire\ActivityLog;
 
-use Spatie\Activitylog\Models\Activity as ActivityLog;
 use App\Models\User;
 use Illuminate\Support\Str;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
+use Spatie\Activitylog\Models\Activity as ActivityLog;
 
 class ActivityLogTable extends LivewireTable
 {
@@ -44,7 +44,7 @@ class ActivityLogTable extends LivewireTable
             Column::make(__('Model'), 'subject_type')
                 ->sortable()
                 ->searchable()
-                ->displayUsing(fn($value) => class_basename($value)),
+                ->displayUsing(fn ($value) => class_basename($value)),
 
             Column::make(__('Event'), 'event')
                 ->sortable()
@@ -78,8 +78,55 @@ class ActivityLogTable extends LivewireTable
 
             Column::make(__('Date'), 'created_at')
                 ->sortable()
-                ->displayUsing(fn($value) => $value->format('Y-m-d H:i')),
+                ->displayUsing(fn ($value) => $value->format('Y-m-d H:i')),
         ];
+    }
+
+    protected function filters(): array
+    {
+        return [
+
+            SelectFilter::make(__('User'), 'causer_id')
+                ->options(
+                    User::query()
+                        ->with('profile')
+                        ->get()
+                        ->mapWithKeys(function ($user) {
+                            $profile = $user->profile;
+
+                            $name = $profile
+                                ? $profile->name
+                                : 'Unknown';
+
+                            return [$user->id => $name];
+                        })
+                        ->toArray(),
+                ),
+
+            SelectFilter::make(__('Model'), 'subject_type')
+                ->options(
+                    ActivityLog::query()
+                        ->select('subject_type')
+                        ->distinct()
+                        ->pluck('subject_type')
+                        ->mapWithKeys(fn ($type) => [$type => class_basename($type)])
+                        ->toArray(),
+                ),
+
+            SelectFilter::make(__('Event'), 'event')
+                ->options(
+                    ActivityLog::query()
+                        ->select('event')
+                        ->distinct()
+                        ->pluck('event', 'event')
+                        ->toArray(),
+                ),
+        ];
+    }
+
+    protected function actions(): array
+    {
+        return [];
     }
 
     /**
@@ -103,52 +150,5 @@ class ActivityLogTable extends LivewireTable
                 return e($key).': '.e(Str::limit((string) $rendered, 120));
             })
             ->implode(', ');
-    }
-
-    protected function filters(): array
-    {
-        return [
-
-            SelectFilter::make(__('User'), 'causer_id')
-                ->options(
-                    User::query()
-                        ->with('profile')
-                        ->get()
-                        ->mapWithKeys(function ($user) {
-                            $profile = $user->profile;
-
-                            $name = $profile
-                                ? $profile->name
-                                : 'Unknown';
-
-                            return [$user->id => $name];
-                        })
-                        ->toArray()
-                ),
-
-            SelectFilter::make(__('Model'), 'subject_type')
-                ->options(
-                    ActivityLog::query()
-                        ->select('subject_type')
-                        ->distinct()
-                        ->pluck('subject_type')
-                        ->mapWithKeys(fn($type) => [$type => class_basename($type)])
-                        ->toArray()
-                ),
-
-            SelectFilter::make(__('Event'), 'event')
-                ->options(
-                    ActivityLog::query()
-                        ->select('event')
-                        ->distinct()
-                        ->pluck('event', 'event')
-                        ->toArray()
-                ),
-        ];
-    }
-
-    protected function actions(): array
-    {
-        return [];
     }
 }

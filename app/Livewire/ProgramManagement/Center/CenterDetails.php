@@ -11,8 +11,11 @@ use Livewire\Component;
 class CenterDetails extends Component
 {
     public Center $center;
+
     public string $activeTab = 'contracts';
+
     public array $contractData = [];
+
     public array $programData = [];
 
     public function mount(Center $center): void
@@ -31,6 +34,11 @@ class CenterDetails extends Component
         $this->activeTab = $tab;
     }
 
+    public function render()
+    {
+        return view('livewire.program-management.center-details');
+    }
+
     /**
      * Load employee counts by contract type for this center.
      */
@@ -46,7 +54,7 @@ class CenterDetails extends Component
                         ->whereDate('start_date', '<=', now())
                         ->whereDate('end_date', '>=', now());
                 },
-                'contracts.contractType'
+                'contracts.contractType',
             ])
             ->get()
             ->pluck('contracts')
@@ -54,10 +62,11 @@ class CenterDetails extends Component
 
         // Group contracts by contract_type_id and count unique employees
         $grouped = $contracts->groupBy('contract_type_id')
-            ->map(fn($group) => $group->unique('employee_id')->count());
+            ->map(fn ($group) => $group->unique('employee_id')->count());
 
         if ($grouped->isEmpty()) {
             $this->contractData = [];
+
             return;
         }
 
@@ -83,9 +92,9 @@ class CenterDetails extends Component
         ];
 
         foreach ($grouped as $typeId => $count) {
-            /** @var \App\Models\ContractType|null $ct */
+            /** @var ContractType|null $ct */
             $ct = $contractTypes->get($typeId);
-            if (!$ct) {
+            if (! $ct) {
                 continue;
             }
 
@@ -105,7 +114,7 @@ class CenterDetails extends Component
             }
 
             // Unknown type → skip or put in a separate group if you like
-            if (!$groupKey) {
+            if (! $groupKey) {
                 continue;
             }
 
@@ -118,11 +127,9 @@ class CenterDetails extends Component
         // Remove empty groups so you don't get empty cards
         $this->contractData = array_filter(
             $data,
-            fn ($group) => !empty($group['items'])
+            fn ($group) => ! empty($group['items']),
         );
     }
-
-
 
     /**
      * Load employee counts by program for this center.
@@ -146,13 +153,8 @@ class CenterDetails extends Component
         }
 
         $this->programData = collect($programCounts)
-            ->map(fn($count, $program) => ['program' => $program, 'count' => $count])
+            ->map(fn ($count, $program) => ['program' => $program, 'count' => $count])
             ->values()
             ->toArray();
-    }
-
-    public function render()
-    {
-        return view('livewire.program-management.center-details');
     }
 }

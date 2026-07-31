@@ -15,7 +15,7 @@ return [
     'hsts' => [
         'enabled' => env(
             'SECURITY_HEADERS_HSTS',
-            ! in_array($environment, ['local', 'testing'], true)
+            ! in_array($environment, ['local', 'testing'], true),
         ),
         'value' => 'max-age=63072000; includeSubDomains; preload',
     ],
@@ -33,7 +33,7 @@ return [
     'csp' => [
         'report_only' => env(
             'CSP_REPORT_ONLY',
-            in_array($environment, ['local', 'testing'], true)
+            in_array($environment, ['local', 'testing'], true),
         ),
         'directives' => [
             'default-src' => ["'self'"],

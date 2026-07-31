@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\ContractType;
-
+use Illuminate\Database\Seeder;
 
 class ContractTypeSeeder extends Seeder
 {

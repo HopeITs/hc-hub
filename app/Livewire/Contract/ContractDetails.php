@@ -8,6 +8,12 @@ use Livewire\Component;
 
 class ContractDetails extends Component
 {
+    private const TEMPLATE_PAGES = [
+        'annual' => 5,
+        'trial' => 4,
+        'service' => 4,
+    ];
+
     public Contract $contract;
 
     public string $displayView = 'annual';
@@ -20,12 +26,6 @@ class ContractDetails extends Component
 
     protected $queryString = [
         'pageNo' => ['as' => 'p', 'except' => 1],
-    ];
-
-    private const TEMPLATE_PAGES = [
-        'annual' => 5,
-        'trial' => 4,
-        'service' => 4,
     ];
 
     public function mount(Contract $contract): void

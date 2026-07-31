@@ -16,7 +16,7 @@ abstract class TestCase extends BaseTestCase
 
         if ($app->environment('testing') && ($connection !== 'sqlite' || $database !== ':memory:')) {
             throw new RuntimeException(
-                'Tests are blocked because the database is not SQLite :memory:. Clear cached configuration before running the suite.'
+                'Tests are blocked because the database is not SQLite :memory:. Clear cached configuration before running the suite.',
             );
         }
 

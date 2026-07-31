@@ -131,7 +131,7 @@ class EmployeeProfile extends Component
 
         return array_values(array_filter(array_map(
             fn ($tag) => trim((string) $tag),
-            $tags
+            $tags,
         )));
     }
 }

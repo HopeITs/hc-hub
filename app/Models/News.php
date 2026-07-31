@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\Activitylog\LogOptions;
@@ -45,7 +44,7 @@ class News extends Model implements HasMedia
 
     public function getNewsableNameAttribute(): string
     {
-        if (!$this->newsable) {
+        if (! $this->newsable) {
             return __('general.all_org');
         }
 
@@ -61,7 +60,7 @@ class News extends Model implements HasMedia
         };
 
         if (in_array($type, ['City', 'Center', 'Program', 'Employee'])) {
-            return $name . ': ' . $relation->name;
+            return $name.': '.$relation->name;
         }
 
         return $name;

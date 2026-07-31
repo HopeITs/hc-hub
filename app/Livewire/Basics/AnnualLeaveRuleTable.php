@@ -23,56 +23,6 @@ class AnnualLeaveRuleTable extends LivewireTable
         'exportExcel' => 'exportExcel',
     ];
 
-    protected function query(): Builder
-    {
-        return AnnualLeaveRule::query();
-    }
-
-    protected function globalSearchColumns(): array
-    {
-        return ['id', 'days', 'day_per_month', 'years_of_volunteering'];
-    }
-
-    protected function columns(): array
-    {
-        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
-        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
-
-        return [
-            Column::make(__('general.days_per_year'), 'days')
-                ->displayUsing(
-                    fn ($value) => $value.' '.trans_choice('general.day', $value)
-                )
-                ->sortable()->searchable(),
-
-            Column::make(__('general.day_per_month'), 'day_per_month')
-                ->displayUsing(
-                    fn ($value) => $value.' '.trans_choice('general.day', $value)
-                )
-                ->sortable()->searchable(),
-
-            Column::make(__('general.years_of_volunteering'), 'years_of_volunteering')
-                ->displayUsing(
-                    fn ($value) => $value.' '.trans_choice('general.year', $value)
-                )
-                ->sortable()
-                ->searchable(),
-
-            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
-                $id = $m->id;
-
-                $editBtn = $canUpdate
-                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openAnnualLeaveRuleEdit\', { id: '.$id.' })" />')
-                    : '';
-                $deleteBtn = $canDelete
-                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
-                    : '';
-
-                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml()->visible($canUpdate || $canDelete),
-        ];
-    }
-
     public function confirmDelete(int $id): void
     {
         LivewireAlert::title(__('general.delete-item'))
@@ -118,7 +68,57 @@ class AnnualLeaveRuleTable extends LivewireTable
 
         return Excel::download(
             new AnnualLeaveRuleExport($data, $visibleColumnCodes),
-            $filename
+            $filename,
         );
+    }
+
+    protected function query(): Builder
+    {
+        return AnnualLeaveRule::query();
+    }
+
+    protected function globalSearchColumns(): array
+    {
+        return ['id', 'days', 'day_per_month', 'years_of_volunteering'];
+    }
+
+    protected function columns(): array
+    {
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
+
+        return [
+            Column::make(__('general.days_per_year'), 'days')
+                ->displayUsing(
+                    fn ($value) => $value.' '.trans_choice('general.day', $value),
+                )
+                ->sortable()->searchable(),
+
+            Column::make(__('general.day_per_month'), 'day_per_month')
+                ->displayUsing(
+                    fn ($value) => $value.' '.trans_choice('general.day', $value),
+                )
+                ->sortable()->searchable(),
+
+            Column::make(__('general.years_of_volunteering'), 'years_of_volunteering')
+                ->displayUsing(
+                    fn ($value) => $value.' '.trans_choice('general.year', $value),
+                )
+                ->sortable()
+                ->searchable(),
+
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
+                $id = $m->id;
+
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openAnnualLeaveRuleEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
+
+                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
+            })->asHtml()->visible($canUpdate || $canDelete),
+        ];
     }
 }

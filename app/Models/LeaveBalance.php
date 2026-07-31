@@ -21,35 +21,6 @@ class LeaveBalance extends Model
         return $this->belongsTo(Contract::class, 'contract_id');
     }
 
-    /**
-     * Daily work hours of the contract, guarded against zero so the
-     * day/hour breakdown never divides by zero (e.g. imported contracts
-     * with weekly_hours = 0). Falls back to null when unknown.
-     */
-    private function workHoursPerDay(): ?float
-    {
-        $perDay = ($this->contract->weekly_hours ?? 0) / 5;
-
-        return $perDay > 0 ? $perDay : null;
-    }
-
-    /**
-     * Split an amount of hours into [whole days, remaining hours].
-     * When the daily work hours are unknown, everything stays as hours.
-     */
-    private function splitIntoDays(float $hours): array
-    {
-        $perDay = $this->workHoursPerDay();
-
-        if ($perDay === null) {
-            return [0, $hours];
-        }
-
-        $days = floor($hours / $perDay);
-
-        return [$days, $hours - ($days * $perDay)];
-    }
-
     public function getIntTotalAttribute(): int
     {
         [$days] = $this->splitIntoDays($this->deserved ?? 0);
@@ -222,5 +193,34 @@ class LeaveBalance extends Model
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * Daily work hours of the contract, guarded against zero so the
+     * day/hour breakdown never divides by zero (e.g. imported contracts
+     * with weekly_hours = 0). Falls back to null when unknown.
+     */
+    private function workHoursPerDay(): ?float
+    {
+        $perDay = ($this->contract->weekly_hours ?? 0) / 5;
+
+        return $perDay > 0 ? $perDay : null;
+    }
+
+    /**
+     * Split an amount of hours into [whole days, remaining hours].
+     * When the daily work hours are unknown, everything stays as hours.
+     */
+    private function splitIntoDays(float $hours): array
+    {
+        $perDay = $this->workHoursPerDay();
+
+        if ($perDay === null) {
+            return [0, $hours];
+        }
+
+        $days = floor($hours / $perDay);
+
+        return [$days, $hours - ($days * $perDay)];
     }
 }

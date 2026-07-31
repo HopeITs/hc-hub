@@ -25,14 +25,6 @@ class User extends Authenticatable
 
     protected $hidden = ['password', 'remember_token'];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
     public function profile(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'employee_id');
@@ -265,5 +257,13 @@ class User extends Authenticatable
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 }

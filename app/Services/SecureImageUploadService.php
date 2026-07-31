@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Exceptions\UnsafeImageException;
+use finfo;
 use GdImage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -164,7 +166,7 @@ class SecureImageUploadService
         // Independent second opinion. getimagesize() reads magic bytes only;
         // finfo applies its own rule set, so a container crafted to satisfy one
         // of them still has to satisfy the other.
-        $detected = (new \finfo(FILEINFO_MIME_TYPE))->file($path);
+        $detected = (new finfo(FILEINFO_MIME_TYPE))->file($path);
         $allowed = config('uploads.allowed_image_mimes', []);
 
         if (! is_string($detected) || ! in_array($detected, $allowed, true)) {
@@ -305,7 +307,7 @@ class SecureImageUploadService
         $rules = config("uploads.images.{$profile}");
 
         if (! is_array($rules)) {
-            throw new \InvalidArgumentException("Unknown image upload profile [{$profile}].");
+            throw new InvalidArgumentException("Unknown image upload profile [{$profile}].");
         }
 
         return $rules;

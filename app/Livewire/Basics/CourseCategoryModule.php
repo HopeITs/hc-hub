@@ -11,10 +11,6 @@ class CourseCategoryModule extends Component
 {
     use AuthorizesActivePermissions;
 
-    protected $listeners = [
-        'openCourseCategoryEdit' => 'edit',
-    ];
-
     public bool $showModal = false;
 
     public string $modalTitle = '';
@@ -23,6 +19,10 @@ class CourseCategoryModule extends Component
         'id' => null,
         'name_en' => '',
         'name_ar' => '',
+    ];
+
+    protected $listeners = [
+        'openCourseCategoryEdit' => 'edit',
     ];
 
     protected array $rules = [
@@ -70,7 +70,7 @@ class CourseCategoryModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update',
         );
         $this->validate();
 

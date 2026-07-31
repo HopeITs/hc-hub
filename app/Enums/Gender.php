@@ -7,7 +7,9 @@ use BenSampo\Enum\Enum;
 final class Gender extends Enum
 {
     const Unknown = 0;
+
     const Male = 1;
+
     const Female = 2;
 
     public static function getLocalizedName(int $value): array

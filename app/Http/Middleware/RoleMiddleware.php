@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use BackedEnum;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -43,7 +44,7 @@ class RoleMiddleware
     /**
      * Specify the role and guard for the middleware.
      *
-     * @param  array|string|\BackedEnum  $role
+     * @param  array|string|BackedEnum  $role
      * @param  string|null  $guard
      * @return string
      */
@@ -61,15 +62,15 @@ class RoleMiddleware
      *
      * @return string
      */
-    protected static function parseRolesToString(array|string|\BackedEnum $role)
+    protected static function parseRolesToString(array|string|BackedEnum $role)
     {
         // Convert Enum to its value if an Enum is passed
-        if ($role instanceof \BackedEnum) {
+        if ($role instanceof BackedEnum) {
             $role = $role->value;
         }
 
         if (is_array($role)) {
-            $role = array_map(fn ($r) => $r instanceof \BackedEnum ? $r->value : $r, $role);
+            $role = array_map(fn ($r) => $r instanceof BackedEnum ? $r->value : $r, $role);
 
             return implode('|', $role);
         }

@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ActionLeaveBalance extends Notification
@@ -16,7 +15,7 @@ class ActionLeaveBalance extends Notification
         public string $unit,      // day | hour
         public float $amount,
         public ?string $notes,
-        public string $recipientType // employee | manager
+        public string $recipientType, // employee | manager
     ) {}
 
     public function via(object $notifiable): array

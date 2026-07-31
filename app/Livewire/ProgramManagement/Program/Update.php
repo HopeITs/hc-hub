@@ -4,10 +4,7 @@ namespace App\Livewire\ProgramManagement\Program;
 
 use App\Livewire\Forms\ProgramManagement\ProgramForm;
 use App\Models\Program;
-use App\Models\Employee;
 use App\Traits\WithAlerts;
-use Illuminate\Support\Facades\DB;
-use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -16,8 +13,8 @@ class Update extends Component
     use WithAlerts, WithFileUploads;
 
     public ProgramForm $form;
-    public $existingLogoUrl = '';
 
+    public $existingLogoUrl = '';
 
     public function mount(Program $program)
     {
@@ -29,6 +26,7 @@ class Update extends Component
         $this->validate();
         $this->form->update();
         $this->successToast(__('general.success-message'));
+
         return redirect()->route('programs.index');
     }
 
@@ -37,7 +35,7 @@ class Update extends Component
 
         return view('livewire.program-management.program.form', [
             'title' => $this->form->program->name,
-     
+
         ]);
     }
 }

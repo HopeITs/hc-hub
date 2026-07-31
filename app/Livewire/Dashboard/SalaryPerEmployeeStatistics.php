@@ -2,28 +2,32 @@
 
 namespace App\Livewire\Dashboard;
 
-use Livewire\Component;
 use App\Models\Employee;
+use Livewire\Component;
 
 class SalaryPerEmployeeStatistics extends Component
 {
     public array $series = [];
+
     public int $totalEmployees = 0;
+
     public int $highlightPercentage = 0;
 
     public function mount()
     {
         $buckets = [
-            'per_month'   => 0,
+            'per_month' => 0,
             'per_session' => 0,
-            'per_hour'    => 0,
+            'per_hour' => 0,
         ];
 
-        $employees = Employee::with(['contracts' => fn($q) => $q->orderByDesc('start_date')])->get();
+        $employees = Employee::with(['contracts' => fn ($q) => $q->orderByDesc('start_date')])->get();
 
         foreach ($employees as $employee) {
             $contract = $employee->contracts->first();
-            if (!$contract) continue;
+            if (! $contract) {
+                continue;
+            }
 
             $type = $contract->salary_per;
 
@@ -39,9 +43,9 @@ class SalaryPerEmployeeStatistics extends Component
         }
 
         $meta = [
-            'per_month'   => ['label' => 'Per Month',   'color' => '#c2151c'],
+            'per_month' => ['label' => 'Per Month',   'color' => '#c2151c'],
             'per_session' => ['label' => 'Per Session', 'color' => '#4b4b4b'],
-            'per_hour'    => ['label' => 'Per Hour',    'color' => '#cdcdcd'],
+            'per_hour' => ['label' => 'Per Hour',    'color' => '#cdcdcd'],
         ];
 
         $this->series = [];
