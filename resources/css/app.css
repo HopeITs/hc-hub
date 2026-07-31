@@ -10,12 +10,10 @@
 @source "../../vendor/ramonrietdijk/livewire-tables/resources/**/*.blade.php";
 @source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
 @source '../../vendor/livewire/flux/stubs/**/*.blade.php';
-@source "../node_modules/flowbite-datepicker";
 
-/*  */
+/* select2 is required by 20+ Blade views; its stylesheet must load globally. */
 @import "select2/dist/css/select2.min.css";
 
-/*  */
 @font-face {
     font-family: 'SomarSans';
     src: url('/fonts/SomarSans/SomarSans-Thin.otf') format('opentype');

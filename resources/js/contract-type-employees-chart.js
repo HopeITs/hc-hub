@@ -3,7 +3,9 @@ import * as am5xy from "@amcharts/amcharts5/xy";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
-if (document.getElementById("chartdiv")) {
+// The presence check that used to guard this block now lives in
+// charts/lazy-charts.js, which is also what triggers the dynamic import.
+export default function initContractTypeChart() {
     am5.ready(function () {
 
         const rootStyle = getComputedStyle(document.documentElement);
