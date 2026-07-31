@@ -14,7 +14,12 @@
                         <div class="swiper-slide">
                             <div class="relative h-[240px] flex flex-col items-center justify-center">
                                 @if($event['type'] === 'birthday')
+                                    {{-- Decorative celebration animation: the birthday is
+                                         already stated in the text below, so an empty alt
+                                         keeps a screen reader from announcing it twice. --}}
                                     <img src="/assets/GIF/01-Confetti.gif"
+                                         alt=""
+                                         aria-hidden="true"
                                          class="absolute inset-0 w-full h-full pe-2 pb-10 object-cover pointer-events-none opacity-100 z-0">
                                 @endif
 

@@ -705,4 +705,18 @@ return [
     'export-png' => 'Export PNG',
     'export-csv' => 'Export CSV',
     'no-department' => 'Unassigned',
+
+    // Strings that exist only for assistive technology. They are read aloud by
+    // screen readers but never painted, so they must stay translated like any
+    // other user-facing copy.
+    'a11y' => [
+        'skip-to-content' => 'Skip to main content',
+        'main-content' => 'Main content',
+        'required-field' => 'required',
+        'loading' => 'Loading',
+        'error-prefix' => 'Error:',
+        'logo-preview' => 'Selected logo preview',
+        'current-logo' => 'Current logo',
+        'toggle-password' => 'Show or hide password',
+    ],
 ];

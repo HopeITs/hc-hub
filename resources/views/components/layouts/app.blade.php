@@ -18,9 +18,27 @@
           localStorage.setItem('sidebar-collapsed', sidebarCollapsed);
       ">
 
+{{--
+    The skip link is the first thing in the tab order. Without it a keyboard
+    user has to tab through the entire sidebar on every single page before
+    reaching the content. It stays off-screen until focused.
+--}}
+<a href="#main-content"
+   class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-[10000]
+          focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-white
+          focus:outline-none focus:ring-2 focus:ring-white">
+    {{ __('general.a11y.skip-to-content') }}
+</a>
+
+{{--
+    Decorative brand animation. It is hidden from assistive technology entirely:
+    it carries no information, and without aria-hidden a screen reader would
+    land on an unlabelled <video> element on every navigation.
+--}}
 <div id="page-gif-overlay"
+     aria-hidden="true"
      style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:#ffffff; z-index:9999;">
-    <video autoplay loop muted playsinline style="width:18.5rem; height:18.5rem; object-fit:contain;">
+    <video autoplay loop muted playsinline tabindex="-1" style="width:18.5rem; height:18.5rem; object-fit:contain;">
         <source src="{{ asset('assets/GIF/hr-website-2.mp4') }}" type="video/mp4">
     </video>
 </div>
@@ -34,11 +52,19 @@
 
     <livewire:layout.header/>
 
-    <main class="{{ View::hasSection('greeting') ? '' : 'pt-[120px] ' }} bg-gray-100 flex-grow flex flex-col items-center">
+    <main id="main-content"
+          tabindex="-1"
+          aria-label="{{ __('general.a11y.main-content') }}"
+          class="{{ View::hasSection('greeting') ? '' : 'pt-[120px] ' }} bg-gray-100 flex-grow flex flex-col items-center focus:outline-none">
 
 
+        {{--
+            role="status" makes the flash message announced when it appears.
+            Without it the text is painted silently and a screen reader user
+            never learns the action succeeded.
+        --}}
         @if (session('status'))
-            <div class="alert alert-success">
+            <div class="alert alert-success" role="status" aria-live="polite">
                 {{ session('status') }}
             </div>
         @endif

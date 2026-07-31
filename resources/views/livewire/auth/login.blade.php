@@ -29,12 +29,14 @@
                     <x-forms.input
                         id="email"
                         type="email"
+                        error-key="email"
+                        required
                         wire:model.live.debounce.500ms="email"
                         placeholder="email@example.com"
                         autocomplete="email"
                     />
 
-                    <x-forms.input-error field="email" />
+                    <x-forms.input-error field="email" input-id="email" />
                 </div>
 
                 <div>
@@ -42,11 +44,13 @@
                     <x-forms.password-input
                         id="password"
                         model="password"
+                        error-key="password"
+                        required
                         placeholder="••••••••"
                         autocomplete="current-password"
                     />
 
-                    <x-forms.input-error field="password" />
+                    <x-forms.input-error field="password" input-id="password" />
                 </div>
 
                 <div class="flex items-center justify-between text-sm text-gray-600">

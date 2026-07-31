@@ -706,4 +706,18 @@ return [
     'export-png' => 'تصدير PNG',
     'export-csv' => 'تصدير CSV',
     'no-department' => 'غير محدد',
+
+    // Strings that exist only for assistive technology. They are read aloud by
+    // screen readers but never painted, so they must stay translated like any
+    // other user-facing copy.
+    'a11y' => [
+        'skip-to-content' => 'تخطَّ إلى المحتوى الرئيسي',
+        'main-content' => 'المحتوى الرئيسي',
+        'required-field' => 'مطلوب',
+        'loading' => 'جارٍ التحميل',
+        'error-prefix' => 'خطأ:',
+        'logo-preview' => 'معاينة الشعار المحدد',
+        'current-logo' => 'الشعار الحالي',
+        'toggle-password' => 'إظهار أو إخفاء كلمة المرور',
+    ],
 ];
