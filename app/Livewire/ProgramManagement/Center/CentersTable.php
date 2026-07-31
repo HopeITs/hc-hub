@@ -51,7 +51,9 @@ class CentersTable extends LivewireTable
     {
         $locale = app()->getLocale();
         $user = auth()->user();
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
+        $canViewPositions = $user?->hasActivePermission('positions.view') ?? false;
+        $canUpdate = $user?->hasActivePermission('centers.update') ?? false;
+        $canDelete = $user?->hasActivePermission('centers.delete') ?? false;
 
         return [
             Column::make('ID', 'id')->sortable(),
@@ -117,9 +119,9 @@ class CentersTable extends LivewireTable
                             $badge.
                             '</a>'
                     );
-                })->asHtml()->visible($isHR),
+                })->asHtml()->visible($canViewPositions),
 
-            Column::make(__('general.actions'), function (Model $m) use ($isHR): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $viewUrl = route('centers.show', $m->getKey());
                 $viewBtn = Blade::render(
                     '<a href="'.$viewUrl.'"
@@ -136,23 +138,25 @@ class CentersTable extends LivewireTable
                             </a>'
                 );
 
-                if (! $isHR) {
+                if (! $canUpdate && ! $canDelete) {
                     return $viewBtn;
                 }
 
-                $toggleBtn = Blade::render(
-                    '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="'.($m->is_active ? 1 : 0).'" :model-id="'.$m->getKey().'" wire-event="confirmToggleItemStatus" />'
-                );
+                $toggleBtn = $canUpdate
+                    ? Blade::render(
+                        '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="'.($m->is_active ? 1 : 0).'" :model-id="'.$m->getKey().'" wire-event="confirmToggleItemStatus" />'
+                    )
+                    : '';
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openCenterEdit\', { id: '.$m->getKey().' })" />'
-                );
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openCenterEdit\', { id: '.$m->getKey().' })" />')
+                    : '';
 
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn :modelId="'.$m->getKey().'" />'
-                );
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn :modelId="'.$m->getKey().'" />')
+                    : '';
 
-                return $toggleBtn.$viewBtn.$editBtn;
+                return $toggleBtn.$viewBtn.$editBtn.$deleteBtn;
             })->asHtml(),
         ];
     }

@@ -37,6 +37,21 @@ class BadgeAuthorizationTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_direct_badges_view_permission_is_honored_for_a_non_hr_user(): void
+    {
+        $city = $this->createCity('ALP', '001');
+        $user = $this->createUserWithActiveRole('employee', $city);
+        $user->givePermissionTo('badges.view');
+
+        $this->actingAs($user)
+            ->get(route('badges.index'))
+            ->assertOk();
+
+        Livewire::actingAs($user)
+            ->test(BadgesTable::class)
+            ->assertOk();
+    }
+
     public function test_inactive_hr_assignment_does_not_grant_badges_access(): void
     {
         $city = $this->createCity('ALP', '001');

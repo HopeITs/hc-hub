@@ -1,4 +1,5 @@
-<div class="@container/access mx-auto w-full max-w-[1800px] space-y-[clamp(1rem,1.5vw,1.5rem)]">
+<div class="@container/access mx-auto w-full max-w-[1800px] space-y-[clamp(1rem,1.5vw,1.5rem)]"
+    data-access-mode="{{ $canManageEmployees || $canManageRoles || $canManagePermissions ? 'managed' : 'read-only' }}">
     <header class="rounded-xl border border-gray-200 border-s-4 border-s-[#be1f24] bg-white px-[clamp(1rem,2vw,1.5rem)] py-[clamp(1rem,1.5vw,1.25rem)] shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="min-w-0">
@@ -211,6 +212,7 @@
                                     @foreach ($roles as $role)
                                         <label class="relative flex min-h-11 cursor-pointer items-center gap-2.5 rounded-lg border border-gray-200 px-3 py-2 text-sm transition hover:border-gray-300">
                                             <input type="checkbox" wire:model.live="employeeRoleIds" value="{{ $role->id }}"
+                                                @disabled(! $canManageEmployees)
                                                 class="peer rounded border-gray-300 text-[#be1f24] focus:ring-[#be1f24]">
                                             <span class="min-w-0 truncate font-semibold text-gray-700 peer-checked:text-[#be1f24]">
                                                 {{ $role->name }}
@@ -226,6 +228,7 @@
                                     {{ __('access.active-role') }}
                                 </label>
                                 <select id="employee-active-role" wire:model.live="employeeActiveRoleId"
+                                    @disabled(! $canManageEmployees)
                                     class="min-h-11 w-full rounded-lg border-gray-200 bg-white text-sm text-gray-700 focus:border-[#be1f24] focus:ring-[#be1f24] sm:max-w-sm">
                                     <option value="">—</option>
                                     @foreach ($roles->whereIn('id', array_map('intval', $employeeRoleIds)) as $role)
@@ -253,6 +256,7 @@
                                                 @foreach ($group['permissions'] as $permission)
                                                     <label class="flex min-h-8 cursor-pointer items-center gap-2 text-sm text-gray-600">
                                                         <input type="checkbox" wire:model.live="employeePermissionIds" value="{{ $permission['id'] }}"
+                                                            @disabled(! $canManageEmployees)
                                                             class="rounded border-gray-300 text-[#be1f24] focus:ring-[#be1f24]">
                                                         <span>{{ $permission['label'] }}</span>
                                                     </label>
@@ -264,16 +268,18 @@
                             </section>
                         </div>
 
-                        <div class="sticky bottom-0 flex justify-end border-t border-gray-200 bg-white/95 px-[clamp(1rem,2vw,1.5rem)] py-3 backdrop-blur-sm">
-                            <button type="submit" wire:loading.attr="disabled"
-                                @disabled(! $this->employeeAccessIsDirty)
-                                data-testid="save-employee-access"
-                                data-access-dirty="{{ $this->employeeAccessIsDirty ? 'true' : 'false' }}"
-                                class="min-h-11 rounded-lg px-5 text-sm font-bold shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24] enabled:bg-[#be1f24] enabled:text-white enabled:hover:opacity-90 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 disabled:shadow-none">
-                                <span wire:loading.remove wire:target="saveEmployeeAccess">{{ __('access.save-access') }}</span>
-                                <span wire:loading wire:target="saveEmployeeAccess">{{ __('general.saving') }}…</span>
-                            </button>
-                        </div>
+                        @if ($canManageEmployees)
+                            <div class="sticky bottom-0 flex justify-end border-t border-gray-200 bg-white/95 px-[clamp(1rem,2vw,1.5rem)] py-3 backdrop-blur-sm">
+                                <button type="submit" wire:loading.attr="disabled"
+                                    @disabled(! $this->employeeAccessIsDirty)
+                                    data-testid="save-employee-access"
+                                    data-access-dirty="{{ $this->employeeAccessIsDirty ? 'true' : 'false' }}"
+                                    class="min-h-11 rounded-lg px-5 text-sm font-bold shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24] enabled:bg-[#be1f24] enabled:text-white enabled:hover:opacity-90 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 disabled:shadow-none">
+                                    <span wire:loading.remove wire:target="saveEmployeeAccess">{{ __('access.save-access') }}</span>
+                                    <span wire:loading wire:target="saveEmployeeAccess">{{ __('general.saving') }}…</span>
+                                </button>
+                            </div>
+                        @endif
                     </form>
                 @else
                     <div class="flex min-h-[clamp(22rem,55vh,38rem)] flex-1 items-center justify-center p-6 text-center">
@@ -295,18 +301,20 @@
     @else
         <div class="grid min-w-0 gap-[clamp(1rem,1.5vw,1.5rem)] xl:grid-cols-[19rem_minmax(0,1fr)]">
             <aside class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <form wire:submit="createRole" class="border-b border-gray-200 p-3">
-                    <label for="new-role-name" class="mb-2 block text-sm font-bold text-gray-900">{{ __('access.new-role') }}</label>
-                    <div class="grid gap-2">
-                        <input id="new-role-name" wire:model="newRoleName"
-                            class="min-h-11 min-w-0 rounded-lg border-gray-200 text-sm focus:border-[#be1f24] focus:ring-[#be1f24]"
-                            placeholder="regional-auditor">
-                        <button class="min-h-11 rounded-lg bg-[#be1f24] px-4 text-sm font-bold text-white transition hover:bg-[#be1f24] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
-                            {{ __('access.create-role') }}
-                        </button>
-                    </div>
-                    <x-error-span>{{ $errors->first('newRoleName') }}</x-error-span>
-                </form>
+                @if ($canManageRoles)
+                    <form wire:submit="createRole" class="border-b border-gray-200 p-3" data-testid="create-role-form">
+                        <label for="new-role-name" class="mb-2 block text-sm font-bold text-gray-900">{{ __('access.new-role') }}</label>
+                        <div class="grid gap-2">
+                            <input id="new-role-name" wire:model="newRoleName"
+                                class="min-h-11 min-w-0 rounded-lg border-gray-200 text-sm focus:border-[#be1f24] focus:ring-[#be1f24]"
+                                placeholder="regional-auditor">
+                            <button class="min-h-11 rounded-lg bg-[#be1f24] px-4 text-sm font-bold text-white transition hover:bg-[#be1f24] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
+                                {{ __('access.create-role') }}
+                            </button>
+                        </div>
+                        <x-error-span>{{ $errors->first('newRoleName') }}</x-error-span>
+                    </form>
+                @endif
 
                 <div data-testid="access-role-directory" class="divide-y divide-gray-100">
                     @foreach ($roles as $role)
@@ -363,7 +371,7 @@
                             @endif
                         </div>
 
-                        @if (! $selectedRoleIsSystem)
+                        @if ($canManageRoles && ! $selectedRoleIsSystem)
                             <div class="grid w-full items-end gap-2 sm:w-auto sm:grid-cols-[minmax(13rem,1fr)_auto_auto]">
                                 <div class="min-w-0">
                                     <label class="mb-1.5 block text-xs font-bold text-gray-700" for="selected-role-name">
@@ -389,16 +397,18 @@
                     <form wire:submit="saveRolePermissions">
                         <div class="flex flex-wrap items-center justify-between gap-3 px-[clamp(1rem,2vw,1.5rem)] pt-4">
                             <h3 class="text-sm font-bold text-gray-900">{{ __('access.permissions') }}</h3>
-                            <div class="flex flex-wrap gap-2">
-                                <button type="button" wire:click="selectAllRolePermissions"
-                                    class="min-h-9 rounded-md border border-gray-200 px-3 text-xs font-bold text-gray-600 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
-                                    {{ __('access.select-all') }}
-                                </button>
-                                <button type="button" wire:click="clearRolePermissions" @disabled($selectedRoleIsAdministrator)
-                                    class="min-h-9 rounded-md border border-gray-200 px-3 text-xs font-bold text-gray-600 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24] disabled:cursor-not-allowed disabled:opacity-40">
-                                    {{ __('access.clear-all') }}
-                                </button>
-                            </div>
+                            @if ($canManagePermissions)
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" wire:click="selectAllRolePermissions"
+                                        class="min-h-9 rounded-md border border-gray-200 px-3 text-xs font-bold text-gray-600 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
+                                        {{ __('access.select-all') }}
+                                    </button>
+                                    <button type="button" wire:click="clearRolePermissions" @disabled($selectedRoleIsAdministrator)
+                                        class="min-h-9 rounded-md border border-gray-200 px-3 text-xs font-bold text-gray-600 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24] disabled:cursor-not-allowed disabled:opacity-40">
+                                        {{ __('access.clear-all') }}
+                                    </button>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-3 p-[clamp(1rem,2vw,1.5rem)]">
@@ -411,7 +421,7 @@
                                         @foreach ($group['permissions'] as $permission)
                                             <label class="flex min-h-8 items-center gap-2 text-sm text-gray-600">
                                                 <input type="checkbox" wire:model="rolePermissionIds" value="{{ $permission['id'] }}"
-                                                    @disabled($selectedRoleIsAdministrator)
+                                                    @disabled($selectedRoleIsAdministrator || ! $canManagePermissions)
                                                     class="rounded border-gray-300 text-[#be1f24] focus:ring-[#be1f24] disabled:opacity-70">
                                                 <span>{{ $permission['label'] }}</span>
                                             </label>
@@ -421,12 +431,14 @@
                             @endforeach
                         </div>
 
-                        <div class="sticky bottom-0 flex justify-end border-t border-gray-200 bg-white/95 px-[clamp(1rem,2vw,1.5rem)] py-3 backdrop-blur-sm">
-                            <button type="submit"
-                                class="min-h-11 rounded-lg bg-[#be1f24] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#be1f24] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
-                                {{ __('access.save-permissions') }}
-                            </button>
-                        </div>
+                        @if ($canManagePermissions)
+                            <div class="sticky bottom-0 flex justify-end border-t border-gray-200 bg-white/95 px-[clamp(1rem,2vw,1.5rem)] py-3 backdrop-blur-sm">
+                                <button type="submit" data-testid="save-role-permissions"
+                                    class="min-h-11 rounded-lg bg-[#be1f24] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#be1f24] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
+                                    {{ __('access.save-permissions') }}
+                                </button>
+                            </div>
+                        @endif
                     </form>
                 @endif
             </section>

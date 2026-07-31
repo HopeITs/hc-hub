@@ -61,7 +61,19 @@ return [
      * inside the component because the required permission depends on state.
      */
     'livewire' => [
-        'basics.city-table' => ['exportExcel' => 'project-basics.export'],
+        'access-management.index' => [
+            'saveEmployeeAccess' => 'access-management.manage-employees',
+            'saveRolePermissions' => 'access-management.manage-permissions',
+            'selectAllRolePermissions' => 'access-management.manage-permissions',
+            'clearRolePermissions' => 'access-management.manage-permissions',
+            'createRole' => 'access-management.manage-roles',
+            'renameRole' => 'access-management.manage-roles',
+            'deleteRole' => 'access-management.manage-roles',
+        ],
+        'basics.city-table' => [
+            'toggleItemStatusConfirmed' => 'project-basics.update',
+            'exportExcel' => 'project-basics.export',
+        ],
         'basics.contract-type-table' => ['delete' => 'project-basics.delete', 'exportExcel' => 'project-basics.export'],
         'basics.checklist-item-table' => ['delete' => 'project-basics.delete', 'exportExcel' => 'project-basics.export'],
         'basics.leave-type-table' => ['delete' => 'project-basics.delete', 'exportExcel' => 'project-basics.export'],
@@ -72,13 +84,27 @@ return [
         'basics.termination-reason-table' => ['delete' => 'project-basics.delete'],
         'program-management.program.create' => ['save' => 'programs.create'],
         'program-management.program.update' => ['save' => 'programs.update'],
-        'program-management.program.index' => ['delete' => 'programs.delete'],
-        'program-management.program.detail' => ['delete' => 'programs.delete'],
+        'program-management.program.index' => [
+            'delete' => 'programs.delete',
+            'toggleItemStatusConfirmed' => 'programs.update',
+        ],
+        'program-management.program.detail' => [
+            'delete' => 'programs.delete',
+            'toggleItemStatusConfirmed' => 'programs.update',
+        ],
         'program-management.center.center-create' => ['save' => 'centers.create'],
-        'program-management.center.centers-table' => ['delete' => 'centers.delete', 'exportExcel' => 'centers.export'],
+        'program-management.center.centers-table' => [
+            'delete' => 'centers.delete',
+            'toggleItemStatusConfirmed' => 'centers.update',
+            'exportExcel' => 'centers.export',
+        ],
         'position.position-create' => ['save' => 'positions.create'],
         'position.position-edit' => ['save' => 'positions.update'],
-        'position.position-table' => ['delete' => 'positions.delete', 'exportExcel' => 'positions.export'],
+        'position.position-table' => [
+            'delete' => 'positions.delete',
+            'toggleItemStatusConfirmed' => 'positions.update',
+            'exportExcel' => 'positions.export',
+        ],
         'employee.employee-create' => ['saveInformation' => 'employees.create'],
         'employee.employee-edit' => [
             'saveChecklist' => 'employees.update',
@@ -99,7 +125,11 @@ return [
             'initiateReturn' => 'employees.update',
             'finalizeReturnCycle' => 'employees.update',
         ],
-        'employee.employee-table' => ['delete' => 'employees.delete', 'exportExcel' => 'employees.export'],
+        'employee.employee-table' => [
+            'delete' => 'employees.delete',
+            'toggleItemStatusConfirmed' => 'employees.update',
+            'exportExcel' => 'employees.export',
+        ],
         'contract.contract-create' => ['save' => 'contracts.create', 'submit' => 'contracts.create'],
         'contract.contract-edit' => ['save' => 'contracts.update', 'submit' => 'contracts.update'],
         'contract.contracts-table' => ['delete' => 'contracts.delete', 'exportExcel' => 'contracts.export'],

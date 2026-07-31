@@ -2,16 +2,15 @@
 
 namespace App\Livewire\Basics;
 
+use App\Exports\CourseCategoryExport;
 use App\Models\CourseCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\CourseCategoryExport;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CourseCategoryTable extends LivewireTable
@@ -40,40 +39,39 @@ class CourseCategoryTable extends LivewireTable
 
     protected function columns(): array
     {
-        $user = auth()->user();
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
 
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
         return [
             Column::make('ID', 'id')
                 ->sortable()
                 ->searchable(),
 
-                Column::make(__('general.name') . ' (AR)', 'name_ar')
+            Column::make(__('general.name').' (AR)', 'name_ar')
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('general.name') . ' (EN)', 'name_en')
+            Column::make(__('general.name').' (EN)', 'name_en')
                 ->sortable()
                 ->searchable(),
-                
+
             Column::make(trans_choice('general.course', 2), 'courses_count')
                 ->sortable(),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $id = $m->id;
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openCourseCategoryEdit\', { id: ' . $id . ' })" />'
-                );
-
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />'
-                );
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openCourseCategoryEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
 
                 return '<div class="flex items-center justify-center gap-2">'
-                    . $editBtn . $deleteBtn .
+                    .$editBtn.$deleteBtn.
                     '</div>';
-            })->asHtml()->visible($isHR),
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 
@@ -117,24 +115,27 @@ class CourseCategoryTable extends LivewireTable
 
     public function exportExcel(): BinaryFileResponse
     {
-        $query = $this->appliedQuery(); 
+        $query = $this->appliedQuery();
         $data = $query->get();
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn ($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) return true;
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
                 return in_array($column->code(), $userSelectedColumns);
             })
             ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code()) 
+            ->map(fn ($column) => $column->code())
             ->toArray();
 
-        $filename = 'course_categories_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'course_categories_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(
-            new CourseCategoryExport($data, $visibleColumnCodes), 
+            new CourseCategoryExport($data, $visibleColumnCodes),
             $filename
         );
     }

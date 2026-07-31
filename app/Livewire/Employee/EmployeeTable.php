@@ -63,6 +63,8 @@ class EmployeeTable extends LivewireTable
     protected function columns(): array
     {
         $user = auth()->user();
+        $canUpdate = $user->hasActivePermission('employees.update');
+        $canDelete = $user->hasActivePermission('employees.delete');
 
         return [
             Column::make('ID', 'id')->sortable(),
@@ -150,14 +152,16 @@ class EmployeeTable extends LivewireTable
 
             BooleanColumn::make(trans('general.is-active'), 'is_active')->searchable(),
 
-            Column::make(__('general.actions'), function (Model $model): string {
+            Column::make(__('general.actions'), function (Model $model) use ($canUpdate, $canDelete): string {
                 $isActive = $model->is_active ? 1 : 0;
 
-                $toggleBtn = Blade::render(
-                    '<x-forms.toggle-input class="p-2 m-2 text-xl" active="'.$isActive.
-                        '" :model-id="'.$model->getKey().
-                        '" wire-event="confirmToggleItemStatus" />'
-                );
+                $toggleBtn = $canUpdate
+                    ? Blade::render(
+                        '<x-forms.toggle-input class="p-2 m-2 text-xl" active="'.$isActive.
+                            '" :model-id="'.$model->getKey().
+                            '" wire-event="confirmToggleItemStatus" />'
+                    )
+                    : '';
 
                 // Profile route is keyed by username; imported employees may
                 // not have one yet, so only link when it exists.
@@ -169,19 +173,18 @@ class EmployeeTable extends LivewireTable
                     )
                     : '';
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn href="'.route('employees.edit', $model->getKey()).'" />'
-                );
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn href="'.route('employees.edit', $model->getKey()).'" />')
+                    : '';
 
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn :modelId="'.$model->getKey().'" />'
-                );
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn :modelId="'.$model->getKey().'" />')
+                    : '';
 
-                // Wrap everything in a flex row
                 return '<div class="flex items-center gap-1">'.
-                    $toggleBtn.$viewBtn.$editBtn.
+                    $toggleBtn.$viewBtn.$editBtn.$deleteBtn.
                     '</div>';
-            })->visible($user->activeRoleIs('HR') || $user->activeRoleIs('super-admin'))->asHtml(),
+            })->asHtml(),
 
         ];
     }

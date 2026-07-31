@@ -105,7 +105,7 @@ Route::group(
                 ->middleware('active_permission:activity-log.view');
 
             Route::get('/access-management', AccessManagementIndex::class)
-                ->middleware(['role:HR-SYR|super-admin', 'active_permission:access-management.view'])
+                ->middleware('active_permission:access-management.view')
                 ->name('access-management.index');
 
         });

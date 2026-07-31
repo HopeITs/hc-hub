@@ -10,27 +10,27 @@ class BadgePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->activeRoleIs('HR', 'super-admin');
+        return $user->hasActivePermission('badges.view');
     }
 
     public function view(User $user, Badge $badge): bool
     {
-        return $this->canManageEmployee($user, $badge->employee);
+        return $this->canAccessEmployee($user, $badge->employee, 'badges.view');
     }
 
     public function create(User $user, Employee $employee): bool
     {
-        return $this->canManageEmployee($user, $employee);
+        return $this->canAccessEmployee($user, $employee, 'badges.create');
     }
 
     public function delete(User $user, Badge $badge): bool
     {
-        return $this->canManageEmployee($user, $badge->employee);
+        return $this->canAccessEmployee($user, $badge->employee, 'badges.delete');
     }
 
-    private function canManageEmployee(User $user, ?Employee $employee): bool
+    private function canAccessEmployee(User $user, ?Employee $employee, string $permission): bool
     {
-        if (! $employee || ! $this->viewAny($user)) {
+        if (! $employee || ! $user->hasActivePermission($permission)) {
             return false;
         }
 

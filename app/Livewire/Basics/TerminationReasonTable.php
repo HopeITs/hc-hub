@@ -31,8 +31,8 @@ class TerminationReasonTable extends LivewireTable
 
     protected function columns(): array
     {
-        $user = auth()->user();
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
 
         return [
             Column::make(__('general.title').' (EN)', 'title_en')
@@ -43,19 +43,18 @@ class TerminationReasonTable extends LivewireTable
                 ->sortable()
                 ->searchable(),
 
-
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $id = $m->id;
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openTerminationReasonEdit\', { id: ' . $id . ' })" />'
-                );
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />'
-                );
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openTerminationReasonEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
 
-                return '<div class="flex items-center justify-center gap-2">' . $editBtn . $deleteBtn . '</div>';
-            })->asHtml()->visible($isHR),
+                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 

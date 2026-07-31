@@ -2,20 +2,19 @@
 
 namespace App\Livewire\Basics;
 
-use App\Models\LeaveType;
 use App\Enums\LeaveType as LeaveTypeEnum;
+use App\Exports\LeaveTypeExport;
+use App\Models\LeaveType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
-use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\LeaveTypeExport;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 class LeaveTypeTable extends LivewireTable
 {
     protected string $model = LeaveType::class;
@@ -36,18 +35,16 @@ class LeaveTypeTable extends LivewireTable
         return ['id', 'name_ar', 'name_en', 'base_days', 'allowed_gender', 'marital_status'];
     }
 
-
-
     protected function columns(): array
     {
-        $user = auth()->user();
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
 
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
         return [
             Column::make('ID', 'id')->sortable()->searchable(),
 
-            Column::make(__('general.name') . ' (AR)', 'name_ar')->sortable()->searchable(),
-            Column::make(__('general.name') . ' (EN)', 'name_en')->sortable()->searchable(),
+            Column::make(__('general.name').' (AR)', 'name_ar')->sortable()->searchable(),
+            Column::make(__('general.name').' (EN)', 'name_en')->sortable()->searchable(),
 
             Column::make(__('general.base-days'), 'base_days')->sortable()->searchable(),
 
@@ -57,7 +54,7 @@ class LeaveTypeTable extends LivewireTable
                     LeaveTypeEnum::GENDER_MALE => LeaveTypeEnum::getGender(LeaveTypeEnum::GENDER_MALE)['value'],
                     LeaveTypeEnum::GENDER_FEMALE => LeaveTypeEnum::getGender(LeaveTypeEnum::GENDER_FEMALE)['value'],
                 ])
-                ->displayUsing(fn($value) => LeaveTypeEnum::getGender($value)['value'])
+                ->displayUsing(fn ($value) => LeaveTypeEnum::getGender($value)['value'])
                 ->sortable()
                 ->searchable(),
 
@@ -67,22 +64,21 @@ class LeaveTypeTable extends LivewireTable
                     LeaveTypeEnum::MARITAL_STATUS_SINGLE => LeaveTypeEnum::getMaritalStatus(LeaveTypeEnum::MARITAL_STATUS_SINGLE)['value'],
                     LeaveTypeEnum::MARITAL_STATUS_MARRIED => LeaveTypeEnum::getMaritalStatus(LeaveTypeEnum::MARITAL_STATUS_MARRIED)['value'],
                 ])
-                ->displayUsing(fn($value) => LeaveTypeEnum::getMaritalStatus($value)['value'])
+                ->displayUsing(fn ($value) => LeaveTypeEnum::getMaritalStatus($value)['value'])
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $id = $m->id;
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openLeaveTypeEdit\', { id: ' . $id . ' })" />'
-                );
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />'
-                );
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openLeaveTypeEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
 
-                // return '<div class="flex items-center justify-center gap-2">' . $editBtn . '</div>';
-                return $editBtn;
-            })->asHtml()->visible($isHR),
+                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 
@@ -107,28 +103,30 @@ class LeaveTypeTable extends LivewireTable
         $this->dispatch('refreshLeaveTypeTable');
     }
 
-
     public function exportExcel(): BinaryFileResponse
     {
-        $query = $this->appliedQuery(); 
+        $query = $this->appliedQuery();
         $data = $query->get();
 
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn ($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) return true;
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
                 return in_array($column->code(), $userSelectedColumns);
             })
             ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code()) 
+            ->map(fn ($column) => $column->code())
             ->toArray();
 
-        $filename = 'leave_types_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'leave_types_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(
-            new LeaveTypeExport($data, $visibleColumnCodes), 
+            new LeaveTypeExport($data, $visibleColumnCodes),
             $filename
         );
     }

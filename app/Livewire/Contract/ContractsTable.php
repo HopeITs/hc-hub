@@ -65,6 +65,8 @@ class ContractsTable extends LivewireTable
         $loc = app()->getLocale();
         $name = $loc === 'ar' ? 'name_ar' : 'name_en';
         $title = $loc === 'ar' ? 'title_ar' : 'title_en';
+        $canUpdate = auth()->user()?->hasActivePermission('contracts.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('contracts.delete') ?? false;
 
         return [
             Column::make(trans_choice('general.employee', 1), 'employee')
@@ -139,12 +141,16 @@ class ContractsTable extends LivewireTable
 
             BooleanColumn::make(__('general.status'), 'is_active')->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $view = Blade::render('<x-table.show-btn :href="route(\'contracts.show\', $id)" />', ['id' => $m->getKey()]);
-                $edit = Blade::render('<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />', ['id' => $m->getKey()]);
-                $delete = Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $m->getKey()]);
+                $edit = $canUpdate
+                    ? Blade::render('<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />', ['id' => $m->getKey()])
+                    : '';
+                $delete = $canDelete
+                    ? Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $m->getKey()])
+                    : '';
 
-                return '<div class="flex items-center justify-center gap-2">'.$view.$edit.'</div>';
+                return '<div class="flex items-center justify-center gap-2">'.$view.$edit.$delete.'</div>';
             })->asHtml(),
         ];
     }

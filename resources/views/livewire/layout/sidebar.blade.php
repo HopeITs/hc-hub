@@ -92,36 +92,28 @@
                             <x-layouts.app.sidebar.nav-item :href="route('cities.index')" :active="request()->routeIs('cities.index')">
                                 {{ trans_choice('general.city', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-                            {{-- Contract Types (HR + super-admin) --}}
-                            @activerole('HR', 'super-admin')
-                                <x-layouts.app.sidebar.nav-item :href="route('contract-types.index')" :active="request()->routeIs('contract-types.index')">
-                                    {{ trans_choice('general.contract-type', 2) }}
-                                </x-layouts.app.sidebar.nav-item>
-                            @endactiverole
+                            <x-layouts.app.sidebar.nav-item :href="route('contract-types.index')" :active="request()->routeIs('contract-types.index')">
+                                {{ trans_choice('general.contract-type', 2) }}
+                            </x-layouts.app.sidebar.nav-item>
 
                             {{-- Leave Types (All) --}}
                             <x-layouts.app.sidebar.nav-item :href="route('leave-types.index')" :active="request()->routeIs('leave-types.index')">
                                 {{ trans_choice('general.leave-type', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-                            @activerole('HR', 'super-admin')
-                                <x-layouts.app.sidebar.nav-item :href="route('annual-leave-rules.index')" :active="request()->routeIs('annual-leave-rules.*')" wire:navigate>
-                                    {{ __('general.annual_leave_rules') }}
-                                </x-layouts.app.sidebar.nav-item>
-                                   <x-layouts.app.sidebar.nav-item :href="route('termination-reasons.index')" :active="request()->routeIs('termination-reasons.*')" wire:navigate>
-                                    {{ __('general.termination_reasons') }}
-                                </x-layouts.app.sidebar.nav-item>
-                            @endactiverole
+                            <x-layouts.app.sidebar.nav-item :href="route('annual-leave-rules.index')" :active="request()->routeIs('annual-leave-rules.*')" wire:navigate>
+                                {{ __('general.annual_leave_rules') }}
+                            </x-layouts.app.sidebar.nav-item>
+                            <x-layouts.app.sidebar.nav-item :href="route('termination-reasons.index')" :active="request()->routeIs('termination-reasons.*')" wire:navigate>
+                                {{ __('general.termination_reasons') }}
+                            </x-layouts.app.sidebar.nav-item>
 
                             {{-- Checklist items (All) --}}
                             <x-layouts.app.sidebar.nav-item :href="route('basic-checklist-items.index')" :active="request()->routeIs('basic-checklist-items.index')">
                                 {{ trans_choice('general.checklist-items', 2) }}
                             </x-layouts.app.sidebar.nav-item>
-                            {{-- Job Levels (HR + super-admin) --}}
-                            @activerole('HR', 'super-admin')
-                                <x-layouts.app.sidebar.nav-item :href="route('job-levels.index')" :active="request()->routeIs('job-levels.index')">
-                                    {{ trans_choice('general.job-level', 2) }}
-                                </x-layouts.app.sidebar.nav-item>
-                            @endactiverole
+                            <x-layouts.app.sidebar.nav-item :href="route('job-levels.index')" :active="request()->routeIs('job-levels.index')">
+                                {{ trans_choice('general.job-level', 2) }}
+                            </x-layouts.app.sidebar.nav-item>
 
                             {{-- Departments (All) --}}
                             <x-layouts.app.sidebar.nav-item :href="route('departments.index')" :active="request()->routeIs('departments.index')" wire:navigate>
@@ -342,7 +334,7 @@
                         </x-layouts.app.sidebar.single-item>
                     @endactivepermission
 
-                    @activerole('HR-SYR', 'super-admin')
+                    @activepermission('access-management.view')
                         <x-layouts.app.sidebar.single-item :href="route('access-management.index')" :active="request()->routeIs('access-management.*')">
                             <x-slot name="icon">
                                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -351,7 +343,7 @@
                             </x-slot>
                             {{ __('access.title') }}
                         </x-layouts.app.sidebar.single-item>
-                    @endactiverole
+                    @endactivepermission
 
                 </ul>
             </div>

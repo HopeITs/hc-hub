@@ -2,16 +2,15 @@
 
 namespace App\Livewire\Basics;
 
+use App\Exports\DepartmentExport;
 use App\Models\Department;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\DepartmentExport;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class DepartmentTable extends LivewireTable
@@ -43,9 +42,8 @@ class DepartmentTable extends LivewireTable
 
     protected function columns(): array
     {
-        $user = auth()->user();
-
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
 
         return [
             Column::make('ID', 'id')
@@ -72,21 +70,18 @@ class DepartmentTable extends LivewireTable
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $id = $m->id;
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openDepartmentEdit\', { id: ' . $id . ' })" />'
-                );
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openDepartmentEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
 
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />'
-                );
-
-                // return '<div class="flex items-center justify-center gap-2">'
-                //     . $editBtn . $deleteBtn . '</div>';
-                return $editBtn;
-            })->asHtml()->visible($isHR),
+                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 
@@ -116,25 +111,28 @@ class DepartmentTable extends LivewireTable
 
     public function exportExcel(): BinaryFileResponse
     {
-        $query = $this->appliedQuery(); 
+        $query = $this->appliedQuery();
         $data = $query->get();
 
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn ($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) return true;
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
                 return in_array($column->code(), $userSelectedColumns);
             })
             ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code()) 
+            ->map(fn ($column) => $column->code())
             ->toArray();
 
-        $filename = 'departments_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'departments_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(
-            new DepartmentExport($data, $visibleColumnCodes), 
+            new DepartmentExport($data, $visibleColumnCodes),
             $filename
         );
     }

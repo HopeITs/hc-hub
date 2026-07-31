@@ -43,6 +43,8 @@ class BadgesTable extends LivewireTable
 
     protected function columns(): array
     {
+        $canDelete = auth()->user()?->hasActivePermission('badges.delete') ?? false;
+
         return [
             SelectColumn::make(trans_choice('general.employee', 1), 'employee_id')
                 ->options($this->employeeOptions())
@@ -80,7 +82,7 @@ class BadgesTable extends LivewireTable
                 ->displayUsing(fn ($v, Model $m) => optional($m->date)->format('Y-m-d') ?? '—')
                 ->sortable(),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canDelete): string {
 
                 $id = $m->getKey();
 
@@ -102,7 +104,9 @@ class BadgesTable extends LivewireTable
                     </button>', ['id' => $id]
                 );
 
-                $deleteBtn = Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $id]);
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $id])
+                    : '';
 
                 return '<div class="flex items-center justify-center gap-2">'.$viewBtn.$deleteBtn.'</div>';
             })->asHtml(),

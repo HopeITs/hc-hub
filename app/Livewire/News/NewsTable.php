@@ -34,6 +34,9 @@ class NewsTable extends LivewireTable
 
     protected function columns(): array
     {
+        $canUpdate = auth()->user()?->hasActivePermission('news.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('news.delete') ?? false;
+
         return [
             Column::make('ID', 'id')->sortable(),
             Column::make(__('general.title'), 'title')->sortable()->searchable(),
@@ -48,14 +51,18 @@ class NewsTable extends LivewireTable
             Column::make(__('general.published_at'), 'published_at')
                 ->displayUsing(fn ($v) => optional($v)->diffForHumans())
                 ->sortable(),
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $id = $m->getKey();
                 $editUrl = route('news.edit', ['news' => $id]);
-                $editBtn = Blade::render('<x-table.edit-btn href="'.$editUrl.'" />');
-                $deleteBtn = Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />');
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn href="'.$editUrl.'" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
 
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml(),
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 

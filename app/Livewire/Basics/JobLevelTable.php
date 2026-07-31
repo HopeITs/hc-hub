@@ -2,18 +2,15 @@
 
 namespace App\Livewire\Basics;
 
+use App\Exports\JobLevelExport;
 use App\Models\JobLevel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
-use RamonRietdijk\LivewireTables\Columns\Column;
-use RamonRietdijk\LivewireTables\Columns\SelectColumn;
-use RamonRietdijk\LivewireTables\Filters\SelectFilter;
-use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\JobLevelExport;
+use RamonRietdijk\LivewireTables\Columns\Column;
+use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class JobLevelTable extends LivewireTable
@@ -38,17 +35,14 @@ class JobLevelTable extends LivewireTable
 
     protected function columns(): array
     {
-        $user = auth()->user();
-
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
 
         return [
             Column::make('ID', 'id')->sortable()->searchable(),
 
-            Column::make(__('general.name') . ' (AR)', 'name_ar')->sortable()->searchable(),
-            Column::make(__('general.name') . ' (EN)', 'name_en')->sortable()->searchable(),
-
-
+            Column::make(__('general.name').' (AR)', 'name_ar')->sortable()->searchable(),
+            Column::make(__('general.name').' (EN)', 'name_en')->sortable()->searchable(),
 
             Column::make(__('general.grade'), 'grade')
                 ->sortable()
@@ -58,22 +52,18 @@ class JobLevelTable extends LivewireTable
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $id = $m->id;
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openJobLevelEdit\', { id: ' . $id . ' })" />'
-                );
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openJobLevelEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
 
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />'
-                );
-
-                // return '<div class="flex items-center justify-center gap-2">'
-                //     . $editBtn . $deleteBtn .
-                //     '</div>';
-                return $editBtn;
-            })->asHtml()->visible($isHR),
+                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 
@@ -100,30 +90,32 @@ class JobLevelTable extends LivewireTable
 
         $this->dispatch('refreshJobLevelTable');
     }
-public function exportExcel(): BinaryFileResponse
+
+    public function exportExcel(): BinaryFileResponse
     {
-        $query = $this->appliedQuery(); 
+        $query = $this->appliedQuery();
         $data = $query->get();
 
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn ($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) return true;
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
                 return in_array($column->code(), $userSelectedColumns);
             })
             ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code()) 
+            ->map(fn ($column) => $column->code())
             ->toArray();
 
-        $filename = 'job_levels_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'job_levels_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(
-            new JobLevelExport($data, $visibleColumnCodes), 
+            new JobLevelExport($data, $visibleColumnCodes),
             $filename
         );
     }
-
 }
-

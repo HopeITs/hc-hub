@@ -74,7 +74,7 @@ class Index extends Component
 
     public function mount(): void
     {
-        $this->authorizePage();
+        $this->authorizeView();
 
         $this->selectedRoleId = Role::query()->orderBy('name')->value('id');
         $this->loadSelectedRole();
@@ -131,7 +131,7 @@ class Index extends Component
 
     public function selectUser(int $userId): void
     {
-        $this->authorizePage();
+        $this->authorizeView();
 
         $user = $this->findManagedUser($userId);
         $directoryPosition = (clone $this->employeeQuery())
@@ -165,7 +165,7 @@ class Index extends Component
 
     public function saveEmployeeAccess(ActivityLogger $activityLogger): void
     {
-        $this->authorizePage();
+        $this->authorizePermission('access-management.manage-employees');
 
         if (! $this->employeeAccessIsDirty) {
             return;
@@ -240,7 +240,7 @@ class Index extends Component
 
     public function selectRole(int $roleId): void
     {
-        $this->authorizePage();
+        $this->authorizeView();
         $this->selectedRoleId = Role::query()->whereKey($roleId)->value('id');
         abort_unless($this->selectedRoleId, 404);
         $this->showAssignedUsersModal = false;
@@ -249,7 +249,7 @@ class Index extends Component
 
     public function showAssignedUsers(): void
     {
-        $this->authorizePage();
+        $this->authorizeView();
         abort_unless(
             $this->selectedRoleId && Role::query()->whereKey($this->selectedRoleId)->exists(),
             404,
@@ -260,7 +260,7 @@ class Index extends Component
 
     public function saveRolePermissions(ActivityLogger $activityLogger): void
     {
-        $this->authorizePage();
+        $this->authorizePermission('access-management.manage-permissions');
         $role = Role::query()->with('permissions')->findOrFail($this->selectedRoleId);
 
         $this->validate([
@@ -300,7 +300,7 @@ class Index extends Component
 
     public function selectAllRolePermissions(): void
     {
-        $this->authorizePage();
+        $this->authorizePermission('access-management.manage-permissions');
         $this->rolePermissionIds = Permission::query()
             ->whereIn('name', AccessPermissionCatalog::names())
             ->pluck('id')
@@ -310,7 +310,7 @@ class Index extends Component
 
     public function clearRolePermissions(): void
     {
-        $this->authorizePage();
+        $this->authorizePermission('access-management.manage-permissions');
         $role = Role::query()->findOrFail($this->selectedRoleId);
 
         if (! $this->isAdministratorRole($role)) {
@@ -320,7 +320,7 @@ class Index extends Component
 
     public function createRole(ActivityLogger $activityLogger): void
     {
-        $this->authorizePage();
+        $this->authorizePermission('access-management.manage-roles');
         $this->newRoleName = Str::slug($this->newRoleName);
 
         $validated = $this->validate([
@@ -341,7 +341,7 @@ class Index extends Component
 
     public function renameRole(ActivityLogger $activityLogger): void
     {
-        $this->authorizePage();
+        $this->authorizePermission('access-management.manage-roles');
         $role = Role::query()->findOrFail($this->selectedRoleId);
         $this->ensureCustomRole($role);
         $this->selectedRoleName = Str::slug($this->selectedRoleName);
@@ -369,7 +369,7 @@ class Index extends Component
 
     public function deleteRole(ActivityLogger $activityLogger): void
     {
-        $this->authorizePage();
+        $this->authorizePermission('access-management.manage-roles');
         $role = Role::query()->withCount('users')->findOrFail($this->selectedRoleId);
         $this->ensureCustomRole($role);
 
@@ -393,7 +393,7 @@ class Index extends Component
 
     public function render(): View
     {
-        $this->authorizePage();
+        $this->authorizeView();
 
         $roles = Role::query()->withCount('users')->orderBy('name')->get();
         $permissions = Permission::query()
@@ -427,6 +427,9 @@ class Index extends Component
             'selectedRoleUsers' => $selectedRoleUsers,
             'selectedRoleIsSystem' => $selectedRole ? $this->isSystemRole($selectedRole) : false,
             'selectedRoleIsAdministrator' => $selectedRole ? $this->isAdministratorRole($selectedRole) : false,
+            'canManageEmployees' => auth()->user()->hasActivePermission('access-management.manage-employees'),
+            'canManageRoles' => auth()->user()->hasActivePermission('access-management.manage-roles'),
+            'canManagePermissions' => auth()->user()->hasActivePermission('access-management.manage-permissions'),
         ]);
     }
 
@@ -480,12 +483,14 @@ class Index extends Component
         $this->resetValidation();
     }
 
-    private function authorizePage(): void
+    private function authorizeView(): void
     {
-        abort_unless(
-            auth()->user()?->activeRoleIs(...config('access-control.administrator_roles', [])),
-            403,
-        );
+        $this->authorizePermission('access-management.view');
+    }
+
+    private function authorizePermission(string $permission): void
+    {
+        abort_unless(auth()->user()?->hasActivePermission($permission), 403);
     }
 
     private function isAdministratorRole(Role $role): bool

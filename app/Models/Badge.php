@@ -40,7 +40,7 @@ class Badge extends Model
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if (! $user->activeRoleIs('HR', 'super-admin')) {
+        if (! $user->hasActivePermission('badges.view')) {
             return $query->whereRaw('1 = 0');
         }
 

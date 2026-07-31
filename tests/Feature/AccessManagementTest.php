@@ -6,6 +6,7 @@ use App\Http\Middleware\ActiveLivewirePermissionMiddleware;
 use App\Http\Middleware\ActivePermissionMiddleware;
 use App\Livewire\AccessManagement\Index;
 use App\Livewire\Basics\DepartmentModule;
+use App\Livewire\Layout\Sidebar;
 use App\Models\City;
 use App\Models\Department;
 use App\Models\Employee;
@@ -15,6 +16,7 @@ use App\Models\User;
 use App\Support\AccessPermissionCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route as RouteFacade;
 use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\Response;
@@ -52,6 +54,144 @@ class AccessManagementTest extends TestCase
                 ->get(route('access-management.index'))
                 ->assertForbidden();
         }
+    }
+
+    public function test_direct_view_permission_shows_navigation_and_opens_access_management_read_only(): void
+    {
+        $viewer = $this->createUserWithActiveRole('manager');
+        $viewer->givePermissionTo('access-management.view');
+        $target = $this->createUserWithActiveRole('employee');
+
+        $this->actingAs($viewer)
+            ->get(route('access-management.index'))
+            ->assertOk()
+            ->assertSee(__('access.title'));
+
+        Livewire::actingAs($viewer)
+            ->test(Sidebar::class)
+            ->assertSeeHtml('href="'.route('access-management.index').'"');
+
+        Livewire::actingAs($viewer)
+            ->test(Index::class)
+            ->assertSeeHtml('data-access-mode="read-only"')
+            ->call('selectUser', $target->id)
+            ->assertSet('selectedUserId', $target->id)
+            ->assertDontSeeHtml('data-testid="save-employee-access"')
+            ->call('showTab', 'roles')
+            ->assertDontSeeHtml('data-testid="create-role-form"')
+            ->assertDontSeeHtml('data-testid="save-role-permissions"');
+    }
+
+    public function test_view_only_permission_cannot_invoke_any_access_management_mutation(): void
+    {
+        $viewer = $this->createUserWithActiveRole('manager');
+        $viewer->givePermissionTo('access-management.view');
+        $target = $this->createUserWithActiveRole('employee');
+        $customRole = Role::findOrCreate('view-only-target', 'web');
+        $permission = Permission::findOrCreate('statistics.view', 'web');
+
+        Livewire::actingAs($viewer)
+            ->test(Index::class)
+            ->call('selectUser', $target->id)
+            ->set('employeePermissionIds', [$permission->id])
+            ->call('saveEmployeeAccess')
+            ->assertForbidden();
+
+        Livewire::actingAs($viewer)
+            ->test(Index::class)
+            ->set('newRoleName', 'forbidden-role')
+            ->call('createRole')
+            ->assertForbidden();
+
+        foreach (['renameRole', 'deleteRole'] as $method) {
+            Livewire::actingAs($viewer)
+                ->test(Index::class)
+                ->call('selectRole', $customRole->id)
+                ->set('selectedRoleName', 'forbidden-change')
+                ->call($method)
+                ->assertForbidden();
+        }
+
+        foreach (['saveRolePermissions', 'selectAllRolePermissions', 'clearRolePermissions'] as $method) {
+            Livewire::actingAs($viewer)
+                ->test(Index::class)
+                ->call('selectRole', $customRole->id)
+                ->set('rolePermissionIds', [$permission->id])
+                ->call($method)
+                ->assertForbidden();
+        }
+
+        $this->assertFalse($target->fresh()->hasDirectPermission($permission));
+        $this->assertDatabaseMissing('roles', ['name' => 'forbidden-role']);
+        $this->assertDatabaseHas('roles', ['id' => $customRole->id, 'name' => 'view-only-target']);
+        $this->assertFalse($customRole->fresh()->hasPermissionTo($permission));
+    }
+
+    public function test_each_access_management_capability_only_allows_its_own_mutations(): void
+    {
+        $target = $this->createUserWithActiveRole('employee');
+        $directAccessPermission = Permission::findOrCreate('access-management.view', 'web');
+        $rolePermission = Permission::findOrCreate('statistics.view', 'web');
+
+        $employeeManager = $this->createUserWithActiveRole('employee-access-manager');
+        $employeeManager->givePermissionTo([
+            'access-management.view',
+            'access-management.manage-employees',
+        ]);
+
+        Livewire::actingAs($employeeManager)
+            ->test(Index::class)
+            ->call('selectUser', $target->id)
+            ->set('employeePermissionIds', [$directAccessPermission->id])
+            ->call('saveEmployeeAccess')
+            ->assertHasNoErrors()
+            ->set('newRoleName', 'not-allowed-role')
+            ->call('createRole')
+            ->assertForbidden();
+
+        $this->assertTrue($target->fresh()->hasDirectPermission($directAccessPermission));
+        $this->actingAs($target->fresh())
+            ->get(route('access-management.index'))
+            ->assertOk();
+
+        $roleManager = $this->createUserWithActiveRole('role-manager');
+        $roleManager->givePermissionTo([
+            'access-management.view',
+            'access-management.manage-roles',
+        ]);
+
+        Livewire::actingAs($roleManager)
+            ->test(Index::class)
+            ->set('newRoleName', 'allowed-custom-role')
+            ->call('createRole')
+            ->assertHasNoErrors()
+            ->set('rolePermissionIds', [$rolePermission->id])
+            ->call('saveRolePermissions')
+            ->assertForbidden();
+
+        $managedRole = Role::findByName('allowed-custom-role', 'web');
+        $this->assertFalse($managedRole->hasPermissionTo($rolePermission));
+
+        $permissionManager = $this->createUserWithActiveRole('permission-manager');
+        $permissionManager->givePermissionTo([
+            'access-management.view',
+            'access-management.manage-permissions',
+        ]);
+
+        Livewire::actingAs($permissionManager)
+            ->test(Index::class)
+            ->call('selectRole', $managedRole->id)
+            ->set('rolePermissionIds', [$rolePermission->id])
+            ->call('saveRolePermissions')
+            ->assertHasNoErrors()
+            ->set('selectedRoleName', 'not-allowed-rename')
+            ->call('renameRole')
+            ->assertForbidden();
+
+        $this->assertTrue($managedRole->fresh()->hasPermissionTo($rolePermission));
+
+        $roleBeneficiary = $this->createUserWithActiveRole($managedRole->name);
+        $this->assertTrue($roleBeneficiary->hasActivePermission($rolePermission->name));
     }
 
     public function test_an_inactive_administrator_assignment_does_not_grant_access(): void
@@ -583,6 +723,83 @@ class AccessManagementTest extends TestCase
                 ->where('guard_name', 'web')
                 ->whereIn('name', $names)
                 ->count(),
+        );
+    }
+
+    public function test_every_catalog_permission_applies_directly_and_only_from_the_active_role(): void
+    {
+        $names = AccessPermissionCatalog::names();
+        $user = $this->createUserWithActiveRole('permission-matrix-role');
+        $role = Role::findByName('permission-matrix-role', 'web');
+
+        $role->syncPermissions($names);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $user->unsetRelation('roles')->unsetRelation('permissions');
+
+        foreach ($names as $permission) {
+            $this->assertTrue(
+                $user->hasActivePermission($permission),
+                "Active-role grant was not applied for {$permission}.",
+            );
+        }
+
+        $user->roles()->updateExistingPivot($role->id, ['is_active' => false]);
+        $user->unsetRelation('roles')->unsetRelation('permissions');
+
+        foreach ($names as $permission) {
+            $this->assertFalse(
+                $user->hasActivePermission($permission),
+                "Inactive-role grant leaked for {$permission}.",
+            );
+        }
+
+        $role->syncPermissions([]);
+        $user->syncPermissions($names);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $user->unsetRelation('roles')->unsetRelation('permissions');
+
+        foreach ($names as $permission) {
+            $this->assertTrue(
+                $user->hasActivePermission($permission),
+                "Direct user grant was not applied for {$permission}.",
+            );
+        }
+    }
+
+    public function test_every_configured_route_and_livewire_permission_exists_in_the_catalog(): void
+    {
+        $catalog = AccessPermissionCatalog::names();
+        $routePermissions = collect(RouteFacade::getRoutes()->getRoutes())
+            ->flatMap(fn ($route) => $route->gatherMiddleware())
+            ->filter(fn (string $middleware): bool => str_starts_with($middleware, 'active_permission:')
+                || str_starts_with($middleware, ActivePermissionMiddleware::class.':'))
+            ->map(fn (string $middleware): string => str($middleware)->afterLast(':')->toString())
+            ->unique()
+            ->values();
+        $livewirePermissions = collect(config('access-control.livewire'))
+            ->flatMap(fn (array $methods): array => array_values($methods))
+            ->unique()
+            ->values();
+
+        foreach ($routePermissions->merge($livewirePermissions)->unique() as $permission) {
+            $this->assertContains(
+                $permission,
+                $catalog,
+                "Configured authorization references unknown permission {$permission}.",
+            );
+        }
+
+        $accessRouteMiddleware = RouteFacade::getRoutes()
+            ->getByName('access-management.index')
+            ->gatherMiddleware();
+
+        $this->assertContains(
+            'active_permission:access-management.view',
+            $accessRouteMiddleware,
+        );
+        $this->assertNotContains(
+            'role:HR-SYR|super-admin',
+            $accessRouteMiddleware,
         );
     }
 
