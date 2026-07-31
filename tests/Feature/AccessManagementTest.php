@@ -339,6 +339,9 @@ class AccessManagementTest extends TestCase
             ->assertSee(__('access.role-name'))
             ->call('showAssignedUsers')
             ->assertSet('showAssignedUsersModal', true)
+            ->assertSeeHtml('class="fixed inset-0 z-50 overflow-y-auto"')
+            ->assertSeeHtml('class="fixed inset-0 z-0 transform bg-gray-500/75 transition-all"')
+            ->assertSeeHtml('class="pointer-events-none relative z-10 flex min-h-full items-center justify-center p-4 sm:p-6"')
             ->assertViewHas('selectedRoleUsers', fn ($users): bool => $users->count() === 2
                 && $users->contains('id', $firstUser->id)
                 && $users->contains('id', $secondUser->id))
