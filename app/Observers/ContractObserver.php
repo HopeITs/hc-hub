@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Contract;
 use App\Models\Position;
+use App\Support\StatisticsCache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -109,5 +110,21 @@ class ContractObserver
                 $pos->decrement('exist_emp');
             }
         });
+
+        StatisticsCache::flush();
+    }
+
+    /**
+     * Every dashboard aggregate is derived from contracts, so any write to this
+     * table invalidates all of them.
+     *
+     * `saved` deliberately covers both insert and update in one hook rather than
+     * duplicating the call in created() and updated() — a future code path that
+     * saves a contract some other way inherits the invalidation for free.
+     * Deletion is handled separately above because `saved` does not fire for it.
+     */
+    public function saved(Contract $contract): void
+    {
+        StatisticsCache::flush();
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -83,6 +84,60 @@ class Contract extends Model
             ->where('is_active', true)
             ->whereDate('start_date', '<=', now())
             ->whereDate('end_date', '>=', now());
+    }
+
+    /**
+     * Restrict the query to exactly one contract per employee: the most recent
+     * one by start_date, ties broken by the higher id.
+     *
+     * WHY: every dashboard statistic needs "the employee's current contract".
+     * The previous approach was to load all employees with all their contracts
+     * eager-loaded and then call ->sortByDesc('start_date')->first() in PHP,
+     * which pulls the entire employees + contracts + positions tables into
+     * memory to produce what is ultimately a GROUP BY COUNT.
+     *
+     * Do NOT replace this with `->with(['contracts' => fn ($q) => $q->limit(1)])`.
+     * A limit inside an eager load applies to the combined result set, not per
+     * parent row, so it returns one contract for the entire page rather than
+     * one per employee — that exact bug was live in JobLevelEmployeeStatistics.
+     *
+     * Implemented as NOT EXISTS ("no newer contract exists for this employee")
+     * rather than a window function, because the suite runs on SQLite in-memory
+     * while dev/prod run MySQL, and NOT EXISTS behaves identically on both.
+     *
+     * @param  Closure|null  $constrain  Optional filter applied to BOTH the outer query
+     *                                   and the inner "is there a newer one" subquery.
+     *                                   Passing it only to the outer query would ask
+     *                                   "latest contract overall, that happens to be
+     *                                   active" instead of "latest active contract" —
+     *                                   which silently drops employees whose newest
+     *                                   contract is expired. Callers that need an
+     *                                   active-only view must go through this argument.
+     */
+    public function scopeLatestPerEmployee(Builder $query, ?Closure $constrain = null): Builder
+    {
+        if ($constrain) {
+            $constrain($query);
+        }
+
+        return $query->whereNotExists(function ($sub) use ($constrain) {
+            $sub->selectRaw('1')
+                ->from('contracts as newer')
+                ->whereColumn('newer.employee_id', 'contracts.employee_id')
+                ->where(function ($tie) {
+                    $tie->whereColumn('newer.start_date', '>', 'contracts.start_date')
+                        ->orWhere(function ($sameDate) {
+                            $sameDate->whereColumn('newer.start_date', '=', 'contracts.start_date')
+                                ->whereColumn('newer.id', '>', 'contracts.id');
+                        });
+                });
+
+            if ($constrain) {
+                // Re-apply against the aliased table so the comparison stays
+                // within the same population as the outer query.
+                $constrain($sub, 'newer');
+            }
+        });
     }
 
     public function contractType()

@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Employee;
 use App\Services\AccessRevoker;
 use App\Services\DigitalIdManager;
+use App\Support\StatisticsCache;
 
 /**
  * Ties access revocation to the employee's active flag.
@@ -36,5 +37,22 @@ class EmployeeObserver
         }
 
         app(AccessRevoker::class)->revoke($user, 'employee_deactivated');
+    }
+
+    /**
+     * Headcount aggregates are keyed off employees as well as contracts (a
+     * deactivated or newly created employee changes the totals), so any write
+     * here starts a new cache generation.
+     *
+     * @see StatisticsCache
+     */
+    public function saved(Employee $employee): void
+    {
+        StatisticsCache::flush();
+    }
+
+    public function deleted(Employee $employee): void
+    {
+        StatisticsCache::flush();
     }
 }
