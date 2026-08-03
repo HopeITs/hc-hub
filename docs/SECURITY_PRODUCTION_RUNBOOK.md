@@ -186,13 +186,21 @@ matching (`LIKE '%123%'`) on these columns is not possible by design.
 Deploy order is **strict**:
 
 1. `php artisan migrate` — widens the columns and adds the index
-2. deploy the application code
+2. set `PII_MIGRATION_ALLOW_PLAINTEXT_READS=true`, then deploy the application
+   code
 3. `php artisan security:encrypt-pii --dry-run` then without the flag
+4. `php artisan security:verify-pii`, then set
+   `PII_MIGRATION_ALLOW_PLAINTEXT_READS=false` and clear the config cache
+
+Step 2 is not optional. The `EncryptedPii` cast **fails closed**: between the
+code deploy and the end of step 3 every unconverted row still holds plaintext,
+and reading one throws a `DecryptException` that takes the page down. The
+migration flag is what keeps the application serving during that window; step 4
+closes it again so later plaintext regressions stay visible.
 
 The command is resumable, batched, verifies every row it writes, and reverses
 with `--decrypt` if the release has to be rolled back. Running steps out of
-order will not corrupt data — the cast reads plaintext and ciphertext alike
-during the transition — but leaves PII readable until step 3 completes.
+order will not corrupt data, but leaves PII readable until step 3 completes.
 
 ## Known gaps
 
