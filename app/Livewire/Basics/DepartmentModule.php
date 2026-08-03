@@ -2,18 +2,22 @@
 
 namespace App\Livewire\Basics;
 
+use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\Department;
 use Illuminate\Validation\Rule;
-use Livewire\Component;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Component;
 
 class DepartmentModule extends Component
 {
+    use AuthorizesHrAction;
+
     protected $listeners = [
         'openDepartmentEdit' => 'edit',
     ];
 
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -35,7 +39,7 @@ class DepartmentModule extends Component
                 'string',
                 'max:5',
                 Rule::unique('departments', 'code')
-                ->ignore($this->item['id'] ?? null),
+                    ->ignore($this->item['id'] ?? null),
             ],
 
             'item.description_ar' => 'nullable|string',
@@ -87,11 +91,13 @@ class DepartmentModule extends Component
 
     public function save(): void
     {
+        $this->authorizeHrAction();
+
         $this->validate();
 
-        $model = !empty($this->item['id'])
+        $model = ! empty($this->item['id'])
             ? Department::findOrFail($this->item['id'])
-            : new Department();
+            : new Department;
 
         $model->fill($this->item)->save();
 

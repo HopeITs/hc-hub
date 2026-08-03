@@ -18,7 +18,7 @@
             <div class="pb-3  border-b border-b-secondary-soft">
                 <div class="flex justify-between items-center">
                     <p class="text-[13px] font-bold text-[#58595B]">{{$upcomingLeave->leaveBalance->contract->employee->name}}</p>
-                    @activerole('HR','super-admin')
+                    @activerole('HR','super-admin','general-manager','manager')
                     <span
                             class="text-[10px] h-5.5 w-16 font-normal tracking-wide mt-4 text-center text-white bg-{{LeaveRequestStatus::getLocalizedName($upcomingLeave->status)['color']}} px-1 py-1  rounded-full">{{LeaveRequestStatus::getLocalizedName($upcomingLeave->status)['value']}}</span>
                     @endactiverole

@@ -96,7 +96,7 @@
                         <div class="min-w-0 flex-1">
                             <div class="truncate text-sm font-extrabold text-secondary-dark">{{ $employee->name }}</div>
                             <div class="truncate text-xs font-semibold text-secondary-medium">{{ $position?->title ?? __('general.not-specified') }}</div>
-                            <div class="mt-1 flex items-center gap-1 truncate text-[11px] text-secondary-light">
+                            <div class="mt-1 flex items-center gap-1 truncate text-[10px]  text-secondary-light">
                                 <x-icons.map-pin class="size-3 shrink-0" />
                                 <span class="truncate">{{ $position?->center?->name ?? $position?->city?->name ?? $employee->city?->name ?? __('general.not-specified') }}</span>
                             </div>

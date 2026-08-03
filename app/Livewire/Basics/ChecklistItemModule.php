@@ -2,17 +2,21 @@
 
 namespace App\Livewire\Basics;
 
+use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\ChecklistItem;
-use Livewire\Component;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Component;
 
 class ChecklistItemModule extends Component
 {
+    use AuthorizesHrAction;
+
     protected $listeners = [
         'openChecklistItemEdit' => 'edit',
     ];
 
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -33,8 +37,6 @@ class ChecklistItemModule extends Component
     {
         return view('livewire.basics.checklist-item-module');
     }
-
-
 
     public function create(): void
     {
@@ -66,12 +68,14 @@ class ChecklistItemModule extends Component
 
     public function save(): void
     {
+        $this->authorizeHrAction();
+
         $this->validate();
 
-        $model = !empty($this->item['id'])
+        $model = ! empty($this->item['id'])
         // $model = $this->item['id']
             ? ChecklistItem::findOrFail($this->item['id'])
-            : new ChecklistItem();
+            : new ChecklistItem;
 
         $model->fill($this->item)->save();
 

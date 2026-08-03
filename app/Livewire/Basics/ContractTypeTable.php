@@ -2,24 +2,25 @@
 
 namespace App\Livewire\Basics;
 
+use App\Enums\ContractPlace;
+use App\Enums\ContractType as ContractTypeEnum;
+use App\Exports\ContractTypeExport;
+use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\ContractType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
-use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-use App\Enums\ContractPlace;
-use App\Enums\ContractType as ContractTypeEnum;
-
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ContractTypeExport;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ContractTypeTable extends LivewireTable
 {
+    use AuthorizesHrAction;
+
     protected string $model = ContractType::class;
 
     protected $listeners = [
@@ -41,16 +42,17 @@ class ContractTypeTable extends LivewireTable
     protected function columns(): array
     {
         $user = auth()->user();
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
+        $isHR = (bool) $user?->activeRoleIs('HR', 'super-admin');
+
         return [
 
             Column::make('ID', 'id')->sortable()->searchable(),
 
-            Column::make(__('general.name') . ' (AR)', 'name_ar')
+            Column::make(__('general.name').' (AR)', 'name_ar')
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('general.name') . ' (EN)', 'name_en')
+            Column::make(__('general.name').' (EN)', 'name_en')
                 ->sortable()
                 ->searchable(),
 
@@ -86,7 +88,7 @@ class ContractTypeTable extends LivewireTable
                 $id = $m->id;
 
                 $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openContractTypeEdit\', { id: ' . $id . ' })" />'
+                    '<x-table.edit-btn wire:click="$dispatch(\'openContractTypeEdit\', { id: '.$id.' })" />'
                 );
 
                 return $editBtn;
@@ -105,10 +107,10 @@ class ContractTypeTable extends LivewireTable
             ->show();
     }
 
-
-
     public function delete(array $payload): void
     {
+        $this->authorizeHrAction();
+
         ContractType::findOrFail($payload['id'])->delete();
 
         LivewireAlert::title(__('general.success-message'))
@@ -117,30 +119,33 @@ class ContractTypeTable extends LivewireTable
         $this->dispatch('refreshContractTypeTable');
     }
 
-    public function exportExcel():BinaryFileResponse
+    public function exportExcel(): BinaryFileResponse
     {
 
-        $query = $this->appliedQuery(); 
-        
+        $query = $this->appliedQuery();
+
         $data = $query->get();
 
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         // Get the static CODES instead of the translated LABELS
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn ($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) return true;
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
                 return in_array($column->code(), $userSelectedColumns);
             })
             ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code()) 
+            ->map(fn ($column) => $column->code())
             ->toArray();
 
-        $filename = 'contract_types_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'contract_types_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(
-            new ContractTypeExport($data, $visibleColumnCodes), 
+            new ContractTypeExport($data, $visibleColumnCodes),
             $filename
         );
     }

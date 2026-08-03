@@ -19,14 +19,14 @@
         {{-- Start time --}}
         <div>
             <x-forms.input-label for="work_hours_from">@lang('general.work-hours-from')</x-forms.input-label>
-            <x-forms.input type="time" id="work_hours_from"  wire:model.defer="form.work_hours_from"/>
+            <x-forms.time-picker id="work_hours_from" wire-model="form.work_hours_from" format="HH:mm" />
             <x-error-span>{{ $errors->first('form.work_hours_from') }}</x-error-span>
         </div>
 
         {{-- End time --}}
         <div>
             <x-forms.input-label for="work_hours_to">@lang('general.work-hours-to')</x-forms.input-label>
-            <x-forms.input type="time" id="work_hours_to"   wire:model.defer="form.work_hours_to"/>
+            <x-forms.time-picker id="work_hours_to" wire-model="form.work_hours_to" format="HH:mm" />
             <x-error-span>{{ $errors->first('form.work_hours_to') }}</x-error-span>
         </div>
     </div>

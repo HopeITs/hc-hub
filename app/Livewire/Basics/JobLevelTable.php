@@ -2,22 +2,22 @@
 
 namespace App\Livewire\Basics;
 
+use App\Exports\JobLevelExport;
+use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\JobLevel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
-use RamonRietdijk\LivewireTables\Columns\Column;
-use RamonRietdijk\LivewireTables\Columns\SelectColumn;
-use RamonRietdijk\LivewireTables\Filters\SelectFilter;
-use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\JobLevelExport;
+use RamonRietdijk\LivewireTables\Columns\Column;
+use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class JobLevelTable extends LivewireTable
 {
+    use AuthorizesHrAction;
+
     protected string $model = JobLevel::class;
 
     protected $listeners = [
@@ -40,15 +40,13 @@ class JobLevelTable extends LivewireTable
     {
         $user = auth()->user();
 
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
+        $isHR = (bool) $user?->activeRoleIs('HR', 'super-admin');
 
         return [
             Column::make('ID', 'id')->sortable()->searchable(),
 
-            Column::make(__('general.name') . ' (AR)', 'name_ar')->sortable()->searchable(),
-            Column::make(__('general.name') . ' (EN)', 'name_en')->sortable()->searchable(),
-
-
+            Column::make(__('general.name').' (AR)', 'name_ar')->sortable()->searchable(),
+            Column::make(__('general.name').' (EN)', 'name_en')->sortable()->searchable(),
 
             Column::make(__('general.grade'), 'grade')
                 ->sortable()
@@ -62,11 +60,11 @@ class JobLevelTable extends LivewireTable
                 $id = $m->id;
 
                 $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openJobLevelEdit\', { id: ' . $id . ' })" />'
+                    '<x-table.edit-btn wire:click="$dispatch(\'openJobLevelEdit\', { id: '.$id.' })" />'
                 );
 
                 $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete(' . $id . ')" :modelId="' . $id . '" />'
+                    '<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />'
                 );
 
                 // return '<div class="flex items-center justify-center gap-2">'
@@ -90,6 +88,8 @@ class JobLevelTable extends LivewireTable
 
     public function delete(array $payload): void
     {
+        $this->authorizeHrAction();
+
         JobLevel::findOrFail($payload['id'])->delete();
 
         LivewireAlert::title(__('general.success-message'))
@@ -100,30 +100,32 @@ class JobLevelTable extends LivewireTable
 
         $this->dispatch('refreshJobLevelTable');
     }
-public function exportExcel(): BinaryFileResponse
+
+    public function exportExcel(): BinaryFileResponse
     {
-        $query = $this->appliedQuery(); 
+        $query = $this->appliedQuery();
         $data = $query->get();
 
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn ($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) return true;
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
                 return in_array($column->code(), $userSelectedColumns);
             })
             ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code()) 
+            ->map(fn ($column) => $column->code())
             ->toArray();
 
-        $filename = 'job_levels_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'job_levels_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(
-            new JobLevelExport($data, $visibleColumnCodes), 
+            new JobLevelExport($data, $visibleColumnCodes),
             $filename
         );
     }
-
 }
-

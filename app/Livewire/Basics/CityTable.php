@@ -2,24 +2,25 @@
 
 namespace App\Livewire\Basics;
 
+use App\Exports\CityExport;
+use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\City;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
-use RamonRietdijk\LivewireTables\Columns\Column;
-use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
-use RamonRietdijk\LivewireTables\Filters\SelectFilter;
-use RamonRietdijk\LivewireTables\Columns\SelectColumn;
-use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\CityExport;
+use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
+use RamonRietdijk\LivewireTables\Columns\Column;
+use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CityTable extends LivewireTable
 {
+    use AuthorizesHrAction;
+
     protected string $model = City::class;
+
     protected $listeners = [
         'refreshCityTable' => '$refresh',
         'toggleItemStatusConfirmed',
@@ -39,16 +40,16 @@ class CityTable extends LivewireTable
     protected function columns(): array
     {
         $user = auth()->user();
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
+        $isHR = (bool) $user?->activeRoleIs('HR', 'super-admin');
 
         return [
 
             Column::make('ID', 'id')->sortable()->searchable(),
 
-            Column::make(__('general.name') . ' (AR)', 'name_ar')
+            Column::make(__('general.name').' (AR)', 'name_ar')
                 ->sortable()->searchable(),
 
-            Column::make(__('general.name') . ' (EN)', 'name_en')
+            Column::make(__('general.name').' (EN)', 'name_en')
                 ->sortable()->searchable(),
 
             Column::make(__('general.code'), 'code')
@@ -56,7 +57,6 @@ class CityTable extends LivewireTable
 
             Column::make(__('general.slug'), 'slug')
                 ->sortable()->searchable(),
-
 
             BooleanColumn::make(__('general.active'), 'is_active')
                 ->searchable(),
@@ -66,8 +66,8 @@ class CityTable extends LivewireTable
                 return Blade::render(
                     '<x-forms.toggle-input 
             class="!me-2 text-xl p-2 mb-3"
-            active="' . ($m->is_active ? 1 : 0) . '" 
-            :model-id="' . $m->id . '" 
+            active="'.($m->is_active ? 1 : 0).'" 
+            :model-id="'.$m->id.'" 
             wire-event="confirmToggleItemStatus" />'
                 );
             })
@@ -89,8 +89,10 @@ class CityTable extends LivewireTable
 
     public function toggleItemStatusConfirmed($payload): void
     {
+        $this->authorizeHrAction();
+
         $item = City::findOrFail($payload['id']);
-        $item->is_active = !$item->is_active;
+        $item->is_active = ! $item->is_active;
         $item->save();
 
         LivewireAlert::title(__('general.item-updated'))
@@ -104,25 +106,28 @@ class CityTable extends LivewireTable
 
     public function exportExcel(): BinaryFileResponse
     {
-        $query = $this->appliedQuery(); 
+        $query = $this->appliedQuery();
         $data = $query->get();
 
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn ($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) return true;
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
                 return in_array($column->code(), $userSelectedColumns);
             })
             ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code()) 
+            ->map(fn ($column) => $column->code())
             ->toArray();
 
-        $filename = 'cities_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'cities_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(
-            new CityExport($data, $visibleColumnCodes), 
+            new CityExport($data, $visibleColumnCodes),
             $filename
         );
     }

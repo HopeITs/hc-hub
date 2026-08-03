@@ -2,15 +2,19 @@
 
 namespace App\Livewire\Basics;
 
+use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\TerminationReason;
-use Livewire\Component;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Component;
 
 class TerminationReasonModule extends Component
 {
+    use AuthorizesHrAction;
+
     protected $listeners = ['openTerminationReasonEdit' => 'edit'];
 
     public bool $showModal = false;
+
     public string $modalTitle = '';
 
     public array $item = [
@@ -61,11 +65,13 @@ class TerminationReasonModule extends Component
 
     public function save(): void
     {
+        $this->authorizeHrAction();
+
         $this->validate();
 
-        $model = !empty($this->item['id'])
+        $model = ! empty($this->item['id'])
             ? TerminationReason::findOrFail($this->item['id'])
-            : new TerminationReason();
+            : new TerminationReason;
 
         $model->fill($this->item)->save();
 

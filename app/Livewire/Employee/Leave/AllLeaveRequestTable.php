@@ -70,37 +70,10 @@ class AllLeaveRequestTable extends LivewireTable
                 ->options(LeaveType::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()
                 ->searchable(),
-            // SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee.' . transColumn('first_name'))
-            //     ->options(Employee::query()->orderby(transColumn('first_name'))->pluck(transColumn('first_name'), transColumn('first_name'))->toArray())
-            //     ->sortable()
-            //     ->searchable()->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
-            // SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee_id')
-            //     ->options(
-            //         Employee::query()
-            //             ->orderBy(transColumn('first_name'))
-            //             ->get()
-            //             ->mapWithKeys(fn($e) => [$e->id => $e->name])
-            //             ->toArray()
-            //     )
-            //     ->displayUsing(fn($v, Model $m) => $m->leaveBalance?->contract?->employee?->name ?? '—')
-            //     ->sortable()
-            //     ->searchable(function (Builder $query, $value) {
-            //         $parts = array_filter(explode(' ', trim($value)));
-            //         $query->whereHas('leaveBalance.contract.employee', function (Builder $q) use ($parts) {
-            //             foreach ($parts as $part) {
-            //                 $q->where(function (Builder $inner) use ($part) {
-            //                     $inner->where('first_name_en', 'LIKE', "%{$part}%")
-            //                         ->orWhere('first_name_ar', 'LIKE', "%{$part}%")
-            //                         ->orWhere('last_name_en',  'LIKE', "%{$part}%")
-            //                         ->orWhere('last_name_ar',  'LIKE', "%{$part}%");
-            //                 });
-            //             }
-            //         });
-            //     })
-            //     ->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
             SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee_id')
                 ->options(
                     Employee::query()
+                        ->select(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
                         ->orderBy(transColumn('first_name'))
                         ->get()
                         ->mapWithKeys(fn ($e) => [$e->id => $e->name])

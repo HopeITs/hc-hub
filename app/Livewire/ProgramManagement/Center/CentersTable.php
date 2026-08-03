@@ -51,7 +51,7 @@ class CentersTable extends LivewireTable
     {
         $locale = app()->getLocale();
         $user = auth()->user();
-        $isHR = $user?->activeRoleIs('HR') || $user?->activeRoleIs('super-admin');
+        $isHR = (bool) $user?->activeRoleIs('HR', 'super-admin');
 
         return [
             Column::make('ID', 'id')->sortable(),

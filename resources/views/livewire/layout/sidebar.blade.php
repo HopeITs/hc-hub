@@ -161,7 +161,7 @@
                     @endactiverole
 
                     {{-- Centers for everyone else (Single item) --}}
-                    @notactiverole('super-admin', 'HR')
+                    @notactiverole('super-admin', 'HR', 'manager', 'general-manager')
                         <x-layouts.app.sidebar.single-item :href="route('centers.index')" :active="request()->routeIs('centers.*')">
                             <x-slot name="icon">
                                 <x-icons.layers class="size-5" />
