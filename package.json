@@ -8,6 +8,7 @@
     "dependencies": {
         "@amcharts/amcharts5": "^5.14.3",
         "chart.js": "^4.5.1",
+        "clock-timepicker": "^1.0.8",
         "concurrently": "^9.0.1",
         "flowbite": "^3.1.2",
         "jquery": "^4.0.0",

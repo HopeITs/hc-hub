@@ -62,13 +62,19 @@
         {{ $slot }}
     </label>
 @else
+    @php
+        $isTime = $type === 'time';
+        $inputClass = 'w-full py-2 text-sm text-gray-900 placeholder-gray-400 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary-light focus:border-primary transition '
+            . ($isTime ? 'ps-3 pe-10 time-input-native' : 'px-3');
+    @endphp
+
     <div class="relative w-full">
         <input
             @php
                 $base = [
                     'id' => $inputId,
                     'type' => $type,
-                    'class' => 'w-full py-2 px-3 text-sm text-gray-900 placeholder-gray-400 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary-light focus:border-primary transition',
+                    'class' => $inputClass,
                 ];
                 if ($wireAttr) { $base[$wireAttr] = $model; }
                 $base = array_merge($base, $aria);
@@ -76,6 +82,10 @@
             {{ $attributes->merge($base) }}
         />
 
-
+        @if ($isTime)
+            <div class="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-3">
+                <x-icons.clock class="size-4 text-secondary-light" />
+            </div>
+        @endif
     </div>
 @endif

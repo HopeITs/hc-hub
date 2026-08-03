@@ -166,6 +166,83 @@ class LeaveRequest extends Model
         return $query->whereRaw('1 = 0');
     }
 
+    public function scopeUpcoming($query)
+    {
+        return $query->whereDate('start_at', '>=', now());
+    }
+
+    /**
+     * Upcoming leave requests visible on the dashboard card.
+     *
+     * - super-admin, general-manager, HR-SYR: all statuses, org-wide
+     * - HR-{city}: all statuses, city-scoped
+     * - manager: pending + accepted for direct/tech reports
+     * - employee: accepted only, same department or center
+     */
+    public function scopeUpcomingVisibleTo($query, User $user)
+    {
+        $role = $user->myRole() ?? '';
+
+        if (in_array($role, ['HR-SYR', 'super-admin', 'general-manager'], true)) {
+            return $query;
+        }
+
+        if (str_starts_with($role, 'HR-')) {
+            $cityCode = substr($role, 3);
+
+            return $query->whereHas(
+                'leaveBalance.contract.employee.city',
+                fn ($q) => $q->where('slug', $cityCode),
+            );
+        }
+
+        if ($role === 'manager') {
+            $positionIds = $user->profile?->positions->modelKeys() ?? [];
+
+            if ($positionIds === []) {
+                return $query->whereRaw('0 = 1');
+            }
+
+            return $query
+                ->whereIn('status', [LeaveRequestStatus::Pending, LeaveRequestStatus::Accepted])
+                ->whereHas(
+                    'leaveBalance.contract.employee.positions',
+                    fn ($q) => $q->whereIn('direct_manager_id', $positionIds)
+                        ->orWhereIn('tech_manager_id', $positionIds),
+                );
+        }
+
+        $positions = $user->profile?->positions;
+
+        if (! $positions || $positions->isEmpty()) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        $departmentIds = $positions->pluck('department_id')->filter()->unique()->values();
+        $centerIds = $positions->pluck('center_id')->filter()->unique()->values();
+
+        if ($departmentIds->isEmpty() && $centerIds->isEmpty()) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        return $query
+            ->where('status', LeaveRequestStatus::Accepted)
+            ->whereHas(
+                'leaveBalance.contract.position',
+                fn ($q) => $q->where(function ($q) use ($departmentIds, $centerIds) {
+                    if ($departmentIds->isNotEmpty()) {
+                        $q->whereIn('department_id', $departmentIds);
+                    }
+
+                    if ($centerIds->isNotEmpty()) {
+                        $departmentIds->isNotEmpty()
+                            ? $q->orWhereIn('center_id', $centerIds)
+                            : $q->whereIn('center_id', $centerIds);
+                    }
+                }),
+            );
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

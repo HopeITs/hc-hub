@@ -274,6 +274,9 @@ class LeaveRequestForm extends Form
             }
         }
 
+        // status / approved_* are never taken from the form: Livewire public
+        // properties are client-writable, and decisions only happen through
+        // submitDecision(). A new request is always pending.
         $this->leaveRequest = LeaveRequest::create([
             'leave_balance_id' => $this->leave_balance_id,
             'type' => $this->type,
@@ -358,6 +361,25 @@ class LeaveRequestForm extends Form
         }
 
         return $leaveBalance;
+    }
+
+    /**
+     * The columns an edit is allowed to change. status / approved_* / hr_approved
+     * must never come from the form — they are set by submitDecision() and the
+     * HR-seen toggle only.
+     *
+     * @return array<string, mixed>
+     */
+    protected function contentAttributes(): array
+    {
+        return [
+            'leave_balance_id' => $this->leave_balance_id,
+            'type' => $this->type,
+            'start_at' => $this->start_at,
+            'end_at' => $this->end_at,
+            'reason' => $this->reason,
+            'alternative_employee_id' => $this->alternative_employee,
+        ];
     }
 
     /**

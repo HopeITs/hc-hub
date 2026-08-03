@@ -71,6 +71,7 @@ window.Swal = Swal;
 import './password-toggle.js';
 import './password-strength.js';
 import './scatter-chart.js';
+import { initClockTimepickers } from './clock-timepicker.js';
 
 // amCharts 5 is dashboard-only and the single heaviest dependency, so its three
 // chart modules are fetched on demand instead of being bundled in here.
@@ -78,16 +79,21 @@ import registerLazyCharts from './charts/lazy-charts.js';
 
 registerLazyCharts();
 
+document.addEventListener('DOMContentLoaded', () => initClockTimepickers());
+
 // Flowbite binds its behaviour on load, but Livewire replaces DOM afterwards,
 // so any swapped-in dropdown/modal/tooltip has to be re-initialised.
 Livewire.hook('commit', ({ succeed }) => {
     succeed(() => {
         queueMicrotask(() => {
             initFlowbite();
+            initClockTimepickers();
         });
     });
 });
 
 document.addEventListener('livewire:navigated', () => {
     initFlowbite();
+    initClockTimepickers();
 });
+

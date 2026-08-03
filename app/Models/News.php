@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -16,8 +17,10 @@ class News extends Model implements HasMedia
     protected $table = 'news';
 
     protected $fillable = [
-        'title',
-        'description',
+        'title_ar',
+        'title_en',
+        'description_ar',
+        'description_en',
         'photo',
         'display_until',
         'published_at',
@@ -37,9 +40,57 @@ class News extends Model implements HasMedia
         return $this->morphTo();
     }
 
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->creator();
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function updatedBy(): BelongsTo
+    {
+        return $this->updater();
+    }
+
     public function getIsExpiredAttribute(): bool
     {
         return $this->display_until && $this->display_until->isPast();
+    }
+
+    public function getTitleAttribute(): string
+    {
+        return $this->localizedTitle();
+    }
+
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->localizedDescription();
+    }
+
+    public function localizedTitle(?string $locale = null): string
+    {
+        $locale ??= app()->getLocale();
+
+        return $locale === 'ar'
+            ? ($this->title_ar ?: ($this->title_en ?? ''))
+            : ($this->title_en ?: ($this->title_ar ?? ''));
+    }
+
+    public function localizedDescription(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+
+        return $locale === 'ar'
+            ? ($this->description_ar ?: $this->description_en)
+            : ($this->description_en ?: $this->description_ar);
     }
 
     public function getNewsableNameAttribute(): string
@@ -76,8 +127,12 @@ class News extends Model implements HasMedia
         return LogOptions::defaults()
             ->useLogName('news')
             ->logOnly([
-                'title',
-                'description',
+                'title_ar',
+                'title_en',
+                'created_by',
+                'updated_by',
+                'description_ar',
+                'description_en',
                 'photo',
                 'display_until',
                 'published_at',
