@@ -3,6 +3,7 @@
 namespace App\Livewire\News;
 
 use App\Models\News;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
@@ -22,24 +23,34 @@ class NewsTable extends LivewireTable
         $employee = auth()->user()?->profile;
 
         return News::query()
-            ->with('newsable')
-            ->when($employee && method_exists(News::class, 'scopeVisibleTo'), fn (Builder $q) => $q->visibleTo($employee))
-            ->latest();
+            ->with(['newsable', 'creator.profile', 'updater.profile'])
+            ->when(
+                $employee
+                    && ! ($this->canManageAllNews() || $this->isManager())
+                    && method_exists(News::class, 'scopeVisibleTo'),
+                fn (Builder $q) => $q->visibleTo($employee)
+            );
     }
 
     protected function globalSearchColumns(): array
     {
-        return ['title', 'description'];
+        return ['title_ar', 'description_ar'];
     }
 
     protected function columns(): array
     {
-        $canUpdate = auth()->user()?->hasActivePermission('news.update') ?? false;
-        $canDelete = auth()->user()?->hasActivePermission('news.delete') ?? false;
+        $showActions = $this->canManageAllNews() || $this->isManager();
+        $titleColumn = 'title_ar';
 
         return [
             Column::make('ID', 'id')->sortable(),
-            Column::make(__('general.title'), 'title')->sortable()->searchable(),
+            Column::make(__('general.title'), $titleColumn)
+                ->displayUsing(function ($value, Model $m): string {
+                    /** @var News $m */
+                    return $m->localizedTitle();
+                })
+                ->sortable()
+                ->searchable(),
             Column::make(__('general.target_group'), 'newsable_name')
                 ->sortable(fn (Builder $query, Direction $direction) => $query->orderBy('newsable_type', $direction->value)),
             Column::make(__('general.display_until'), 'display_until')
@@ -51,23 +62,38 @@ class NewsTable extends LivewireTable
             Column::make(__('general.published_at'), 'published_at')
                 ->displayUsing(fn ($v) => optional($v)->diffForHumans())
                 ->sortable(),
-            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
+            Column::make(__('general.created_by'), function (Model $m): string {
+                /** @var News $m */
+                return $this->authorName($m->creator);
+            }),
+            Column::make(__('general.updated_by'), function (Model $m): string {
+                /** @var News $m */
+                return $this->authorName($m->updater);
+            }),
+            Column::make(__('general.actions'), function (Model $m): string {
+                /** @var News $m */
                 $id = $m->getKey();
+
+                if (! $this->canManageNews($m)) {
+                    return '';
+                }
+
                 $editUrl = route('news.edit', ['news' => $id]);
-                $editBtn = $canUpdate
-                    ? Blade::render('<x-table.edit-btn href="'.$editUrl.'" />')
-                    : '';
-                $deleteBtn = $canDelete
-                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
-                    : '';
+                $editBtn = Blade::render('<x-table.edit-btn href="'.$editUrl.'" />');
+                $deleteBtn = Blade::render(
+                    '<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />'
+                );
 
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml()->visible($canUpdate || $canDelete),
+            })->asHtml()->visible($showActions),
         ];
     }
 
     public function confirmDelete(int $id): void
     {
+        $news = News::findOrFail($id);
+        abort_unless($this->canManageNews($news), 403);
+
         LivewireAlert::title(__('general.delete-item'))
             ->text(__('general.confirm-delete-item'))
             ->question()
@@ -79,8 +105,34 @@ class NewsTable extends LivewireTable
 
     public function delete(array $payload): void
     {
-        News::findOrFail($payload['id'])->delete();
+        $news = News::findOrFail($payload['id']);
+        abort_unless($this->canManageNews($news), 403);
+
+        $news->delete();
         LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
         $this->dispatch('refreshNewsTable');
+    }
+
+    private function canManageNews(News $news): bool
+    {
+        return $this->canManageAllNews()
+            || ($this->isManager() && (int) $news->created_by === (int) auth()->id());
+    }
+
+    private function canManageAllNews(): bool
+    {
+        return auth()->user()?->activeRoleIs('HR', 'super-admin', 'general-manager') ?? false;
+    }
+
+    private function authorName(?User $user): string
+    {
+        return $user?->profile?->name
+            ?? $user?->email
+            ?? __('general.unknown');
+    }
+
+    private function isManager(): bool
+    {
+        return auth()->user()?->activeRoleIs('manager') ?? false;
     }
 }

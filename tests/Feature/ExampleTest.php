@@ -11,8 +11,9 @@ class ExampleTest extends TestCase
 
     public function test_returns_a_successful_response(): void
     {
-        $response = $this->get('/');
+        // The root URL is the dashboard (auth-protected); guests are sent to login.
+        $this->get('/')->assertRedirect('/login');
 
-        $response->assertStatus(200);
+        $this->get('/login')->assertStatus(200);
     }
 }

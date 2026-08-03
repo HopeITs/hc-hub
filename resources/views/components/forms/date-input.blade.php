@@ -1,22 +1,18 @@
-{{--<div class="relative w-full">--}}
-{{--    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">--}}
-{{--        <x-icons.calendar/>--}}
-{{--    </div>--}}
-{{--    <input {{$attributes->merge([--}}
-{{--    'class' => 'w-full py-2 px-8 text-sm text-gray-900 placeholder-gray-400 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary-light focus:border-primary transition',--}}
-{{--    'type' => 'text',--}}
+@php
+    $type = $attributes->get('type', 'date');
+    $isTime = $type === 'time';
+    $inputClass = 'w-full py-2 text-sm text-gray-900 placeholder-gray-400 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary-light focus:border-primary transition '
+        . ($isTime ? 'ps-3 pe-10 time-input-native' : 'px-3');
+@endphp
 
-{{--])}}--}}
-{{--           datepicker datepicker-autoselect-today datepicker-autohide datepicker-orientation="top right" datepicker-format="dd-mm-yyyy">--}}
-{{--</div>--}}
-
-
-<input
-    {{$attributes->merge([
-        'type' => 'date',
-        'class' => 'w-full py-2 px-3 text-sm text-gray-900 placeholder-gray-400 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary-light focus:border-primary transition',
-
-    ])}}
-
-/>
+@if ($isTime)
+    <div class="relative w-full">
+        <input {{ $attributes->merge(['type' => 'time', 'class' => $inputClass]) }} />
+        <div class="pointer-events-none absolute inset-y-0 end-0 flex items-center pe-3">
+            <x-icons.clock class="size-4 text-secondary-light" />
+        </div>
+    </div>
+@else
+    <input {{ $attributes->merge(['type' => 'date', 'class' => $inputClass]) }} />
+@endif
 

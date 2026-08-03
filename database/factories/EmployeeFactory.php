@@ -2,8 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\City;
 use App\Models\Contract;
+use App\Models\ContractType;
 use App\Models\Employee;
+use App\Models\Position;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class EmployeeFactory extends Factory
@@ -13,22 +16,22 @@ class EmployeeFactory extends Factory
     public function definition()
     {
         return [
-            'name_en' => $this->faker->name,
-            'name_ar' => 'اسم ' . $this->faker->unique()->numberBetween(1, 1000),
-            'city_id' => $this->faker->numberBetween(2, 6),
+            'first_name_en' => $this->faker->firstName,
+            'first_name_ar' => 'اسم '.$this->faker->unique()->numberBetween(1, 1000),
+            'last_name_en' => $this->faker->lastName,
+            'last_name_ar' => 'كنية '.$this->faker->unique()->numberBetween(1, 1000),
+            'city_id' => City::query()->inRandomOrder()->value('id'),
             'username' => $this->faker->userName,
             'actual_dob' => $this->faker->date('Y-m-d', '-20 years'),
-            'years_of_service' => $this->faker->randomFloat(1, 0, 8),
             'national_number' => $this->faker->unique()->numerify('###########'),
             'dob' => $this->faker->date('Y-m-d', '-20 years'),
             'civil_registry_office' => $this->faker->city,
             'civil_registry_number' => strtoupper($this->faker->bothify('###??')),
-            'place_of_registration' => $this->faker->city,
             'gender' => $this->faker->randomElement([0, 1, 2]),
             'father_name_en' => $this->faker->firstNameMale,
-            'father_name_ar' => 'اسمأب' . $this->faker->unique()->numberBetween(1, 1000),
+            'father_name_ar' => 'اسمأب'.$this->faker->unique()->numberBetween(1, 1000),
             'mother_name_en' => $this->faker->firstNameFemale,
-            'mother_name_ar' => 'اسمأم' . $this->faker->unique()->numberBetween(1, 1000),
+            'mother_name_ar' => 'اسمأم'.$this->faker->unique()->numberBetween(1, 1000),
             'nationality' => 1,
             'marital_status' => $this->faker->randomElement([0, 1, 2]),
             'children' => $this->faker->numberBetween(0, 5),
@@ -36,7 +39,7 @@ class EmployeeFactory extends Factory
             'personal_phone' => $this->faker->numerify('09########'),
             'personal_email' => $this->faker->unique()->safeEmail,
             'address_en' => $this->faker->city,
-            'address_ar' => 'مدينة' . $this->faker->unique()->numberBetween(1, 1000),
+            'address_ar' => 'مدينة'.$this->faker->unique()->numberBetween(1, 1000),
             'skills' => implode(', ', $this->faker->words(3)),
             'interests' => implode(', ', $this->faker->words(3)),
             'is_active' => $this->faker->boolean(90),
@@ -51,8 +54,13 @@ class EmployeeFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function ($employee) {
+            // A contract needs a real position and contract type; skip when the
+            // database has none (e.g. unseeded test runs).
+            if (! Position::query()->exists() || ! ContractType::query()->exists()) {
+                return;
+            }
 
-          Contract::factory()->create([
+            Contract::factory()->create([
                 'employee_id' => $employee->id,
             ]);
         });
