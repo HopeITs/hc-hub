@@ -21,4 +21,7 @@ return [
     'forgot-password-text' => 'If you forgot your password, we’ll send you instructions to reset it via email.',
     'submit' => 'Submit',
     'send-link-reset-password-status' => 'A password reset link will be sent if the account exists.',
+
+    'meta-title' => 'Sign In · HopeHR — Christian Hope Center',
+    'meta-description' => 'Sign in to HopeHR, the internal human resources portal of Christian Hope Center. Access is limited to authorised staff accounts.',
 ];

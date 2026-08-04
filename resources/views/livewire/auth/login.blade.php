@@ -8,7 +8,7 @@
         <x-auth-card class="w-96 space-y-6">
 
             <div class="text-center space-y-1">
-                <h2 class="text-2xl font-bold text-gray-900">{{ __('auth.sign-in') }}</h2>
+                <h1 class="text-2xl font-bold text-gray-900">{{ __('auth.sign-in') }}</h1>
                 <p class="text-sm text-gray-500">{{ __('auth.sign-in-text') }}</p>
             </div>
 
