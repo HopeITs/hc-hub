@@ -1,13 +1,11 @@
 <div
     class="w-full h-full bg-white rounded-surface shadow-e1 ring-1 ring-neutral-200 overflow-hidden relative flex flex-col">
     <div class="js-today-events flex h-full min-h-0 flex-col">
-        <div class="flex items-center justify-between px-6 pt-4 pb-4 flex-shrink-0">
-            <div class="flex items-center gap-2">
-                <h3 class="text-body font-semibold text-[#58595B]">@lang('general.today-events')</h3>
-                <span class="text-body font-medium text-secondary-light">{{ now()->format('j/n/Y') }}</span>
-                <x-icons.event class="size-5 ms-1 mb-1 text-secondary-medium"/>
-            </div>
-        </div>
+        <x-dashboard-cards.card-header :title="__('general.today-events')" :count="now()->format('j/n/Y')">
+            <x-slot:icon>
+                <x-icons.event class="size-full"/>
+            </x-slot:icon>
+        </x-dashboard-cards.card-header>
         @if(count($events) > 0)
             <div class="swiper">
                 <div class="swiper-wrapper">

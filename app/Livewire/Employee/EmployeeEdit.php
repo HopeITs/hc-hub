@@ -11,6 +11,7 @@ use App\Livewire\Forms\Employee\ExperienceForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Livewire\Forms\Employee\RelativeForm;
 use App\Livewire\Forms\LeaveBalanceForm;
+use App\Models\Badge;
 use App\Models\Checklist;
 use App\Models\ChecklistItem;
 use App\Models\City;
@@ -20,42 +21,62 @@ use App\Models\Role;
 use App\Traits\WithAlerts;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class EmployeeEdit extends Component
 {
-    use WithFileUploads, WithAlerts;
+    use WithAlerts, WithFileUploads;
 
     public ?Employee $employee = null;
+
+    #[Locked]
+    public bool $canManageBadges = false;
+
     public PersonalInfoForm $infoForm;
+
     public EducationForm $educationForm;
+
     public ChecklistForm $checklistForm;
+
     public CourseForm $courseForm;
+
     public ExperienceForm $experienceForm;
+
     public RelativeForm $relativeForm;
+
     public BadgeForm $badgeForm;
+
     public AttachmentForm $attachmentForm;
+
     public LeaveBalanceForm $balanceForm;
 
     public $activeTab = 'information';
+
     public $title = '';
 
     public $showInitiateReturnModal = false;
+
     public $selectedChecklistForReturn;
+
     public $return_receiver_id;
 
     public function mount(Employee $employee)
     {
         $this->employee = $employee;
         $this->title = $employee->name;
+        $this->canManageBadges = Gate::allows('create', [Badge::class, $employee]);
 
         $this->infoForm->setEmployee($employee);
         $this->educationForm->setEmployee($employee);
         $this->courseForm->setEmployee($employee);
         $this->experienceForm->setEmployee($employee);
         $this->relativeForm->setEmployee($employee);
-        $this->badgeForm->setEmployee($employee);
+        if ($this->canManageBadges) {
+            $this->badgeForm->setEmployee($employee);
+        }
         $this->attachmentForm->setEmployee($employee);
 
         $hasExistingChecklist = Checklist::where('employee_id', $employee->id)->exists();
@@ -84,21 +105,22 @@ class EmployeeEdit extends Component
     public function saveInformation()
     {
 
-
         $this->infoForm->saveInformation();
         $employee = $this->infoForm->employee;
-        if($employee->wasChanged('gender') || $employee->wasChanged('marital_status')){
-            if($employee->contracts()->exists()){
+        if ($employee->wasChanged('gender') || $employee->wasChanged('marital_status')) {
+            if ($employee->contracts()->exists()) {
                 $contract = $employee->contracts()->whereHas('leaveBalances')->first();
-                if(isset($contract)){
+                if (isset($contract)) {
                     if ($contract->leaveBalances()->exists()) {
                         $this->balanceForm->update($contract->id);
-                    }else{
+                    } else {
                         $this->balanceForm->store($contract->id);
                     }
                 }
-            }        }
+            }
+        }
         $this->successToast();
+
         return $this->redirect(route('employees.index'), navigate: true);
     }
 
@@ -128,6 +150,7 @@ class EmployeeEdit extends Component
 
     public function saveBadges()
     {
+        Gate::authorize('create', [Badge::class, $this->employee]);
         $this->badgeForm->save();
         $this->successToast();
     }
@@ -195,12 +218,14 @@ class EmployeeEdit extends Component
 
     public function addBadge()
     {
+        Gate::authorize('create', [Badge::class, $this->employee]);
         $this->badgeForm->addBadge();
     }
 
-    public function removeBadge(int $index, ?int $id = null)
+    public function removeBadge(int $index)
     {
-        $this->badgeForm->removeBadge($index, $id);
+        Gate::authorize('create', [Badge::class, $this->employee]);
+        $this->badgeForm->removeBadge($index);
         $this->resetErrorBag();
     }
 
@@ -252,7 +277,7 @@ class EmployeeEdit extends Component
 
     public function toggleBoardMember($checked): void
     {
-        $this->infoForm->is_board_member = (bool)$checked;
+        $this->infoForm->is_board_member = (bool) $checked;
     }
 
     public function render()
@@ -262,10 +287,10 @@ class EmployeeEdit extends Component
         if ($delivereds->isEmpty()) {
             $delivereds = Employee::whereHas(
                 'contracts', function ($q) {
-                $q->whereHas('position.department', function ($q) {
-                    $q->whereIn('name', ['IT', 'Communication', 'HR']);
-                });
-            }
+                    $q->whereHas('position.department', function ($q) {
+                        $q->whereIn('name', ['IT', 'Communication', 'HR']);
+                    });
+                }
             )->get();
         }
         $cities = City::where('is_active', true)->pluck(transColumn('name'), 'id')->toArray();

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\ProgramManagement\DefaultDeliverable;
 
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Models\ChecklistItem;
 use App\Models\City;
 use App\Models\DefaultDeliverable as DefaultDeliverableModel;
@@ -12,6 +13,8 @@ use Livewire\Component;
 
 class DefaultDeliverablesModule extends Component
 {
+    use AuthorizesActivePermissions;
+
     protected $listeners = ['openDefaultDeliverableEdit' => 'edit'];
 
     public bool $showModal = false;
@@ -123,6 +126,8 @@ class DefaultDeliverablesModule extends Component
 
     public function create(): void
     {
+        $this->authorizeActivePermission('checklists.manage');
+
         $this->item = ['id'=>null,'employee_id'=>'','city_id'=>'','item_id'=>''];
         $this->resetValidation();
         $this->modalTitle = __('general.add-new');
@@ -131,6 +136,8 @@ class DefaultDeliverablesModule extends Component
 
     public function edit(int $id): void
     {
+        $this->authorizeActivePermission('checklists.manage');
+
         $model = DefaultDeliverableModel::findOrFail($id);
 
         $this->item = [
@@ -148,6 +155,8 @@ class DefaultDeliverablesModule extends Component
 
 public function save(): void
 {
+    $this->authorizeActivePermission('checklists.manage');
+
     $user = auth()->user();
     $roleArr = explode('-', $user->myRole());
 

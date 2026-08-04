@@ -22,8 +22,8 @@ class CenterClosed extends Notification implements ShouldQueue
     {
         return [
             'title' => [
-                'en' => "Center \"{$this->center->name}\" has sadly been closed.",
-                'ar' => "المركز \"{$this->center->name}\" تم إغلاقه للأسف.",
+                'en' => "Center \"{$this->center->name_en}\" has sadly been closed.",
+                'ar' => "المركز \"{$this->center->name_ar}\" تم إغلاقه للأسف.",
             ],
 
             'body' => [

@@ -2,14 +2,14 @@
 
 namespace App\Livewire\Basics;
 
-use App\Livewire\Concerns\AuthorizesHrAction;
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Models\AnnualLeaveRule;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 class AnnualLeaveRuleModule extends Component
 {
-    use AuthorizesHrAction;
+    use AuthorizesActivePermissions;
 
     protected $listeners = ['openAnnualLeaveRuleEdit' => 'edit'];
 
@@ -40,6 +40,7 @@ class AnnualLeaveRuleModule extends Component
 
     public function create(): void
     {
+        $this->authorizeActivePermission('project-basics.create');
         $this->item = [
             'id' => null,
             'days' => null,
@@ -53,6 +54,7 @@ class AnnualLeaveRuleModule extends Component
 
     public function edit(int $id): void
     {
+        $this->authorizeActivePermission('project-basics.update');
         $model = AnnualLeaveRule::findOrFail($id);
 
         $this->item = [
@@ -69,8 +71,9 @@ class AnnualLeaveRuleModule extends Component
 
     public function save(): void
     {
-        $this->authorizeHrAction();
-
+        $this->authorizeActivePermission(
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+        );
         $this->validate();
 
         $model = ! empty($this->item['id'])

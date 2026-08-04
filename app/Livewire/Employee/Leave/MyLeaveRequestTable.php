@@ -4,11 +4,13 @@ namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Forms\LeaveRequestForm;
+use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
@@ -101,6 +103,9 @@ class MyLeaveRequestTable extends LivewireTable
                 ->sortable(),
             BooleanColumn::make(__('general.seen-by-hr'), 'hr_approved'),
             Column::make(__('general.actions'), function (Model $model): string {
+                $showBtn = Blade::render(
+                    '<x-table.show-btn wire:click="$dispatch(\'openMyLeaveDetails\', { id: '.$model->getKey().' })" />'
+                );
 
                 if ($model->status === LeaveRequestStatus::Pending) {
                     $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: '.$model->getKey().' })" />');
@@ -108,10 +113,10 @@ class MyLeaveRequestTable extends LivewireTable
                         '<x-table.delete-btn :modelId="'.$model->getKey().'" />'
                     );
 
-                    return $editBtn.$deleteBtn;
+                    return $showBtn.$editBtn.$deleteBtn;
                 }
 
-                return '';
+                return $showBtn;
 
             })->asHtml(),
 
@@ -129,19 +134,30 @@ class MyLeaveRequestTable extends LivewireTable
             ->show();
     }
 
+    public function edit($id)
+    {
+        $model = LeaveRequest::findOrFail($id);
+        Gate::authorize('update', $model);
+
+        $this->form->setLeaveRequest($model);
+        $employee = auth()->user()->profile;
+        $modalTitle = __('general.edit');
+        $form = $this->form;
+        $availableLeaves = auth()->user()->profile->availableLeaves();
+        $allAvailableLeaves = $employee->allAvailableLeaves();
+        $alternativeEmployees = Employee::where('city_id', $employee->city_id)->where('id', '!=', $employee->id)
+            ->whereHas('contracts', function ($query) use ($employee) {
+                $query->whereHas('position.department', function ($query) use ($employee) {
+                    $query->where('id', $employee->department->id ?? null);
+                });
+            })->get();
+        $this->showModal = true;
+    }
+
     public function delete($payload): void
     {
-        // Only the owner may delete, and only while still pending — deleting
-        // an accepted request would leave the balance deducted.
-        $leaveRequest = LeaveRequest::query()
-            ->whereKey($payload['id'])
-            ->pending()
-            ->whereHas('leaveBalance.contract', function (Builder $q) {
-                $q->where('employee_id', auth()->user()->profile?->id);
-            })
-            ->first();
-
-        abort_unless($leaveRequest !== null, 403);
+        $leaveRequest = LeaveRequest::findOrFail($payload['id']);
+        Gate::authorize('delete', $leaveRequest);
 
         $leaveRequest->delete();
 

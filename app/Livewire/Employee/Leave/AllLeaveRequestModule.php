@@ -3,20 +3,24 @@
 namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
-use App\Models\User;
-use App\Notifications\ActionLeaveRequest;
+use App\Services\LeaveNotificationService;
 use Blade;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class AllLeaveRequestModule extends Component
 {
+    use AuthorizesActivePermissions;
+
     public LeaveBalance $leaveBalance;
 
     public LeaveRequest $leaveRequest;
@@ -44,6 +48,12 @@ class AllLeaveRequestModule extends Component
 
     public $decisionLeave;
 
+    #[Url(as: 'leave')]
+    public ?int $linkedLeaveId = null;
+
+    #[Url(as: 'mode')]
+    public ?string $linkedLeaveMode = null;
+
     public array $counts = [];
 
     public $allAvailableLeaves = [];
@@ -53,6 +63,19 @@ class AllLeaveRequestModule extends Component
     public function mount()
     {
         $this->refreshCounts();
+
+        if ($this->linkedLeaveId !== null) {
+            $leaveRequest = LeaveRequest::findOrFail($this->linkedLeaveId);
+
+            if (
+                $this->linkedLeaveMode === 'decision'
+                && $leaveRequest->status === LeaveRequestStatus::Pending
+            ) {
+                $this->openDecision($leaveRequest);
+            } else {
+                $this->show($leaveRequest->id);
+            }
+        }
     }
 
     /**
@@ -78,10 +101,12 @@ class AllLeaveRequestModule extends Component
 
     public function show($id)
     {
-        $this->selectedLeave = LeaveRequest::query()
-            ->visibleTo(auth()->user())
-            ->with(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee'])
-            ->findOrFail($id);
+        $leaveRequest = LeaveRequest::with(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee'])->findOrFail($id);
+        Gate::authorize('view', $leaveRequest);
+
+        $this->selectedLeave = $leaveRequest;
+        $this->linkedLeaveId = $leaveRequest->id;
+        $this->linkedLeaveMode = 'details';
 
         $this->modalTitle = 'Leave Details';
         $this->showModal = true;
@@ -89,7 +114,7 @@ class AllLeaveRequestModule extends Component
 
     public function edit(LeaveRequest $id)
     {
-        $this->authorizeVisibleLeaveRequest($id);
+        Gate::authorize('update', $id);
 
         $this->form->setLeaveRequest($id);
 
@@ -127,48 +152,14 @@ class AllLeaveRequestModule extends Component
         $this->form->alternative_employee = null;
     }
 
-    /**
-     * Creating on behalf of an employee: the chosen balance must belong to an
-     * employee this user could have picked in the dropdown.
-     */
-    protected function authorizeVisibleLeaveBalance($leaveBalanceId): void
-    {
-        // Null falls through to the form's "required" validation message.
-        if (! $leaveBalanceId) {
-            return;
-        }
-
-        $balance = LeaveBalance::with('contract')->find($leaveBalanceId);
-
-        abort_unless(
-            $balance !== null
-            && $this->scopedEmployees()->contains('id', $balance->contract?->employee_id),
-            403
-        );
-    }
-
-    /**
-     * Actions on this page receive arbitrary ids from the client; every one
-     * must be re-checked against the caller's visibility scope (city for HR,
-     * managed employees for managers).
-     */
-    protected function authorizeVisibleLeaveRequest(LeaveRequest $leaveRequest): void
-    {
-        abort_unless(
-            LeaveRequest::query()
-                ->visibleTo(auth()->user())
-                ->whereKey($leaveRequest->getKey())
-                ->exists(),
-            403
-        );
-    }
-
     public function openDecision(LeaveRequest $id)
     {
-        $this->authorizeVisibleLeaveRequest($id);
+        Gate::authorize('decide', $id);
 
         $this->form->setDecisionLeave($id);
         $this->decisionLeave = $id->load(['leaveType', 'leaveBalance.contract.employee', 'alternativeEmployee']);
+        $this->linkedLeaveId = $id->id;
+        $this->linkedLeaveMode = 'decision';
 
         $this->modalTitle = __('general.leave-decision');
         $this->decisionModal = true;
@@ -176,21 +167,17 @@ class AllLeaveRequestModule extends Component
 
     public function submitDecision()
     {
-        $this->form->submitDecision();
+        $leaveRequest = $this->form->submitDecision();
 
-        // Notify
-        $leaveRequest = $this->form->decisionLeave->load('leaveBalance.contract.employee.city');
-        $city = $leaveRequest->leaveBalance->contract->employee->city;
-        $hr = User::whereHas('roles', function ($query) use ($city) {
-            $query->where('name', 'HR-'.$city->slug);
-        })->first();
-        $employee = $leaveRequest->leaveBalance->contract->employee->account;
-        isset($hr) ? $hr->notify(new ActionLeaveRequest($leaveRequest, 'hr')) : '';
-        isset($employee) ? $employee->notify(new ActionLeaveRequest($leaveRequest)) : '';
+        app(LeaveNotificationService::class)->sendDecision(
+            $leaveRequest,
+            auth()->user()
+        );
         $this->dispatch('notification-created');
 
         $this->refreshCounts();
         $this->decisionModal = false;
+        $this->clearLinkedLeave();
 
         LivewireAlert::title(__('general.success-message'))
             ->success()
@@ -199,6 +186,7 @@ class AllLeaveRequestModule extends Component
             ->show();
 
         $this->dispatch('$refresh');
+        $this->dispatch('leaveRequestDecisionSaved')->to(AllLeaveRequestTable::class);
     }
 
     public function setActiveTab(string $status)
@@ -207,9 +195,24 @@ class AllLeaveRequestModule extends Component
         $this->dispatch('$refresh');
     }
 
+    public function closeDetails(): void
+    {
+        $this->showModal = false;
+        $this->selectedLeave = null;
+        $this->clearLinkedLeave();
+    }
+
+    public function closeDecision(): void
+    {
+        $this->decisionModal = false;
+        $this->decisionLeave = null;
+        $this->clearLinkedLeave();
+    }
+
     public function refreshCounts(): void
     {
-        $leaveRequests = LeaveRequest::query()->visibleTo(auth()->user());
+        $user = auth()->user();
+        $leaveRequests = LeaveRequest::query()->manageableBy($user);
 
         $this->counts = ['all' => (clone $leaveRequests)->count(),
             'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)->count(),
@@ -249,12 +252,12 @@ class AllLeaveRequestModule extends Component
 
     public function processSave()
     {
+        $this->authorizeActivePermission($this->form->id ? 'leaves.update' : 'leaves.create');
+
         if ($this->form->id) {
-            abort_unless($this->form->leaveRequest !== null, 403);
-            $this->authorizeVisibleLeaveRequest($this->form->leaveRequest);
+            Gate::authorize('update', $this->form->leaveRequest);
             $this->form->update();
         } else {
-            $this->authorizeVisibleLeaveBalance($this->form->leave_balance_id);
             $this->form->store();
         }
 
@@ -272,7 +275,7 @@ class AllLeaveRequestModule extends Component
 
     protected function confirmationMessage(): string
     {
-        $leaveTypeName = LeaveBalance::find($this->form->leave_balance_id)
+        $leaveTypeName = $this->form->selectedBalance()
             ->leaveType
             ->name ?? 'N/A';
 
@@ -313,11 +316,12 @@ class AllLeaveRequestModule extends Component
 
     public function delete($id)
     {
-        LeaveRequest::query()
-            ->visibleTo(auth()->user())
-            ->findOrFail($id['id'])
-            ->delete();
+        $leaveRequest = LeaveRequest::findOrFail($id['id']);
+        Gate::authorize('delete', $leaveRequest);
+
+        $leaveRequest->delete();
         $this->showModal = false;
+        $this->clearLinkedLeave();
         $this->refreshCounts();
         LivewireAlert::title(__('general.success-message'))
             ->success()
@@ -380,5 +384,11 @@ class AllLeaveRequestModule extends Component
 
         return Carbon::parse($this->form->start_hour)
             ->floatDiffInHours(Carbon::parse($this->form->end_hour));
+    }
+
+    private function clearLinkedLeave(): void
+    {
+        $this->linkedLeaveId = null;
+        $this->linkedLeaveMode = null;
     }
 }

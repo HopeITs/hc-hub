@@ -28,13 +28,13 @@
 <div class="space-y-6">
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div class="flex flex-col h-full gap-6 lg:col-span-2">
+        <div class="flex h-full min-h-0 flex-col gap-6 lg:col-span-2">
             @if($hasLeaves)
                 <div class="flex items-center justify-start font-semibold text-white rounded-surface">
                     <livewire:dashboard.my-leaves-card/>
                 </div>
             @endif
-            <div class="flex items-center justify-start font-semibold text-white rounded-surface h-68">
+            <div class="flex min-h-68 flex-1 items-stretch justify-start rounded-xl font-semibold text-white">
                 <livewire:dashboard.employee-notes-card :employee="auth()->id()"/>
             </div>
         </div>

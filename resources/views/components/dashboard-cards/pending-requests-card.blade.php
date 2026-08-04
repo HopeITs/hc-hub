@@ -1,23 +1,9 @@
-<div class="w-full h-full bg-white rounded-surface shadow-e1 overflow-hidden flex flex-col
-            max-w-full md:max-w-md lg:max-w-full md:h-full">
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 pt-4 pb-4 flex-shrink-0">
-
-        <div class="flex items-center gap-2 md:gap-3">
-            <h3 class="sm:text-h4 md:text-body font-semibold text-[#58595B]">
-                {{ __('general.pending-delivers') }}
-            </h3>
-
-            <span class="text-secondary-light sm:text-h4 md:text-body font-medium">
-                {{ $pendingRequests->count() }}
-            </span>
-
-            <div class="text-primary w-4 h-4">
-                <img src="{{ asset('assets/icons/pending-delivers.svg') }}"
-                     alt="Pending delivers icon">
-            </div>
-        </div>
-    </div>
+<div class="flex h-full w-full flex-col overflow-hidden rounded-3xl bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
+    <x-dashboard-cards.card-header :title="__('general.pending-delivers')" :count="$pendingRequests->count()">
+        <x-slot:icon>
+            <img class="block size-full object-contain" src="{{ asset('assets/icons/pending-delivers.svg') }}" alt="">
+        </x-slot:icon>
+    </x-dashboard-cards.card-header>
 
     <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto
@@ -30,11 +16,11 @@
             <div class="flex justify-between items-center pb-2 border-b border-b-secondary-light"
                  wire:key="pending-request-{{ $req['id'] }}">
 
-                <p class="sm:text-body md:text-caption font-bold text-[#58595B]">
+                <p class="text-[13px] font-bold text-[#58595B]">
                     {{ ucfirst($req['item']) }}
                 </p>
 
-                <span class=" text-caption sm:text-caption md:text-caption text-[#888]">
+                <span class="text-[11px] text-[#888]">
                     {{ $req['request_date'] }}
                 </span>
             </div>

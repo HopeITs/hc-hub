@@ -5,7 +5,6 @@ namespace App\Livewire\Basics;
 use App\Enums\ContractPlace;
 use App\Enums\ContractType as ContractTypeEnum;
 use App\Exports\ContractTypeExport;
-use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\ContractType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -19,8 +18,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ContractTypeTable extends LivewireTable
 {
-    use AuthorizesHrAction;
-
     protected string $model = ContractType::class;
 
     protected $listeners = [
@@ -41,8 +38,8 @@ class ContractTypeTable extends LivewireTable
 
     protected function columns(): array
     {
-        $user = auth()->user();
-        $isHR = (bool) $user?->activeRoleIs('HR', 'super-admin');
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
 
         return [
 
@@ -83,16 +80,26 @@ class ContractTypeTable extends LivewireTable
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
 
                 $id = $m->id;
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openContractTypeEdit\', { id: '.$id.' })" />'
-                );
+                $buttons = [];
 
-                return $editBtn;
-            })->asHtml()->visible($isHR),
+                if ($canUpdate) {
+                    $buttons[] = Blade::render(
+                        '<x-table.edit-btn wire:click="$dispatch(\'openContractTypeEdit\', { id: '.$id.' })" />'
+                    );
+                }
+
+                if ($canDelete) {
+                    $buttons[] = Blade::render(
+                        '<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />'
+                    );
+                }
+
+                return '<div class="flex items-center justify-center gap-2">'.implode('', $buttons).'</div>';
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 
@@ -109,8 +116,6 @@ class ContractTypeTable extends LivewireTable
 
     public function delete(array $payload): void
     {
-        $this->authorizeHrAction();
-
         ContractType::findOrFail($payload['id'])->delete();
 
         LivewireAlert::title(__('general.success-message'))

@@ -7,22 +7,18 @@
 <div x-data="{ search: '' }"
     class="relative w-full h-full bg-white rounded-surface shadow-e1 overflow-hidden flex flex-col">
 
-    <!-- Header -->
-    <div class="flex items-center justify-between gap-6 px-6 pt-4 pb-4">
-        <h2 class="flex items-center gap-2 text-body font-semibold text-secondary-medium whitespace-nowrap">
-            @lang('general.contact-the-team')
-        </h2>
-
-        <div class="relative flex-1">
-            <input x-model="search" type="text" placeholder="{{ __('general.search') }}"
-                class="w-full h-6 text-small rounded-full border border-neutral-300 bg-white
-                       ps-8 pt-2 pe-3 py-3 placeholder-secondary-light text-neutral-800
-                       focus:border-neutral-400 focus:ring-0 outline-none transition">
-            <div class="absolute left-2 top-[13px] -translate-y-1/2 text-secondary-light pointer-events-none">
-                <x-icons.search class="w-2 h-2" />
+    <x-dashboard-cards.card-header :title="__('general.contact-the-team')">
+        <x-slot:actions>
+            <div class="relative w-36 shrink-0">
+                <input x-model="search" type="text" placeholder="{{ __('general.search') }}"
+                    class="h-6 w-full rounded-full border border-gray-300 bg-white py-3 pe-3 ps-8 pt-2.5 text-xs text-gray-700
+                           placeholder-secondary-light outline-none transition focus:border-gray-400 focus:ring-0">
+                <div class="pointer-events-none absolute left-2 top-[13px] -translate-y-1/2 text-gray-400">
+                    <x-icons.search class="size-2" />
+                </div>
             </div>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-dashboard-cards.card-header>
 
     <!-- Team List -->
     <div

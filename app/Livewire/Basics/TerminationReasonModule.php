@@ -2,14 +2,14 @@
 
 namespace App\Livewire\Basics;
 
-use App\Livewire\Concerns\AuthorizesHrAction;
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Models\TerminationReason;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 class TerminationReasonModule extends Component
 {
-    use AuthorizesHrAction;
+    use AuthorizesActivePermissions;
 
     protected $listeners = ['openTerminationReasonEdit' => 'edit'];
 
@@ -38,6 +38,7 @@ class TerminationReasonModule extends Component
 
     public function create(): void
     {
+        $this->authorizeActivePermission('project-basics.create');
         $this->item = [
             'id' => null,
             'title_en' => null,
@@ -50,6 +51,7 @@ class TerminationReasonModule extends Component
 
     public function edit(int $id): void
     {
+        $this->authorizeActivePermission('project-basics.update');
         $model = TerminationReason::findOrFail($id);
 
         $this->item = [
@@ -65,8 +67,9 @@ class TerminationReasonModule extends Component
 
     public function save(): void
     {
-        $this->authorizeHrAction();
-
+        $this->authorizeActivePermission(
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+        );
         $this->validate();
 
         $model = ! empty($this->item['id'])

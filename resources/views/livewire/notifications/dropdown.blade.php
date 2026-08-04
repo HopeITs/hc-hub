@@ -17,13 +17,24 @@
 
     {{-- List --}}
     @forelse($notifications as $note)
-        @php $isUnread = is_null($note->read_at); @endphp
+        @php
+            $isUnread = is_null($note->read_at);
+            $safeUrl = $this->safeNotificationUrl($note->data['url'] ?? null);
+        @endphp
 
         <a
             wire:key="note-{{ $note->id }}"
             x-data="{ clicked: false }"
-            @if(array_key_exists('url', $note->data)) href="{{ $note->data['url'] }}" @endif
-            @if($isUnread) wire:click="markAsRead('{{ $note->id }}')" @click="clicked = true" @endif
+            @if($safeUrl)
+                href="{{ $safeUrl }}"
+                wire:click.prevent="openNotification('{{ $note->id }}')"
+            @elseif($isUnread)
+                role="button"
+                tabindex="0"
+                wire:click="markAsRead('{{ $note->id }}')"
+                wire:keydown.enter="markAsRead('{{ $note->id }}')"
+            @endif
+            @if($isUnread) @click="clicked = true" @endif
             x-bind:style="clicked ? 'background-color: transparent' : ''"
             class="notif-row group relative flex items-start gap-3 border-b border-neutral-100 px-4 py-3 transition-colors duration-300 last:border-b-0
                    {{ $isUnread

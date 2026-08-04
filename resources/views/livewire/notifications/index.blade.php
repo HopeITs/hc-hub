@@ -6,7 +6,7 @@
         @if($notifications->getCollection()->contains(fn ($n) => is_null($n->read_at)))
             <button
                 type="button"
-                wire:click="markAllRead"
+                wire:click="markAllAsRead"
                 class="text-body font-medium text-secondary-medium transition hover:text-neutral-900 hover:underline">
                 @lang('general.mark-all-read')
             </button>
@@ -16,13 +16,24 @@
     {{-- Card list --}}
     <div class="overflow-hidden rounded-surface border border-neutral-100 bg-white shadow-[0_25px_80px_-40px_rgba(2,6,23,0.35)] ring-1 ring-black/5">
         @forelse ($notifications as $notification)
-            @php $isUnread = is_null($notification->read_at); @endphp
+            @php
+                $isUnread = is_null($notification->read_at);
+                $safeUrl = $this->safeNotificationUrl($notification->data['url'] ?? null);
+            @endphp
 
             <a
                 wire:key="note-{{ $notification->id }}"
                 x-data="{ clicked: false }"
-                @if(array_key_exists('url', $notification->data)) href="{{ $notification->data['url'] }}" @endif
-                @if($isUnread) wire:click="markAsRead('{{ $notification->id }}')" @click="clicked = true" @endif
+                @if($safeUrl)
+                    href="{{ $safeUrl }}"
+                    wire:click.prevent="openNotification('{{ $notification->id }}')"
+                @elseif($isUnread)
+                    role="button"
+                    tabindex="0"
+                    wire:click="markAsRead('{{ $notification->id }}')"
+                    wire:keydown.enter="markAsRead('{{ $notification->id }}')"
+                @endif
+                @if($isUnread) @click="clicked = true" @endif
                 x-bind:style="clicked ? 'background-color: transparent' : ''"
                 class="group relative flex items-start gap-3 border-b border-neutral-100 px-4 py-4 transition-colors duration-300 last:border-b-0
                        {{ $isUnread

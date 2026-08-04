@@ -2,6 +2,7 @@
 
 namespace App\Livewire\ProgramManagement\Center;
 
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\User;
@@ -12,13 +13,16 @@ use Livewire\Component;
 
 class CentersModule extends Component
 {
+    use AuthorizesActivePermissions;
+
     public bool $showModal = false;
 
     public string $modalTitle = '';
 
     public array $item = [
         'id' => null,
-        'name' => '',
+        'name_en' => '',
+        'name_ar' => '',
         'city_id' => '',
         'address_ar' => '',
         'address_en' => '',
@@ -29,7 +33,8 @@ class CentersModule extends Component
     ];
 
     protected $rules = [
-        'item.name' => 'required|string|max:255',
+        'item.name_en' => 'required|string|max:255',
+        'item.name_ar' => 'required|string|max:255',
         'item.city_id' => 'required|exists:cities,id',
         'item.address_en' => 'nullable|string|max:255',
         'item.address_ar' => 'nullable|string|max:255',
@@ -47,9 +52,12 @@ class CentersModule extends Component
 
     public function create(): void
     {
+        $this->authorizeActivePermission('centers.create');
+
         $this->item = [
             'id' => null,
-            'name' => '',
+            'name_en' => '',
+            'name_ar' => '',
             'city_id' => '',
             'address_ar' => '',
             'address_en' => '',
@@ -67,11 +75,14 @@ class CentersModule extends Component
     #[On('openCenterEdit')]
     public function edit(int $id): void
     {
+        $this->authorizeActivePermission('centers.update');
+
         $model = Center::findOrFail($id);
 
         $this->item = [
             'id' => $model->id,
-            'name' => $model->name,
+            'name_en' => $model->name_en,
+            'name_ar' => $model->name_ar,
             'city_id' => $model->city_id,
             'address_ar' => $model->address_ar,
             'address_en' => $model->address_en,
@@ -88,6 +99,10 @@ class CentersModule extends Component
 
     public function save(): void
     {
+        $this->authorizeActivePermission(
+            empty($this->item['id']) ? 'centers.create' : 'centers.update'
+        );
+
         $this->validate();
 
         $this->item['weekends'] = implode(',', $this->item['weekends']);

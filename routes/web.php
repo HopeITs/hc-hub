@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ArchiveFileController;
+use App\Http\Middleware\ActiveLivewirePermissionMiddleware;
+use App\Livewire\AccessManagement\Index as AccessManagementIndex;
 use App\Livewire\ActivityLog\ActivityLogModule;
 use App\Livewire\Archives\ArchivedFilesModule;
 use App\Livewire\Badges\BadgesModule;
@@ -34,14 +36,15 @@ Route::group(
         'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath'],
     ],
     function () {
-        Livewire::setUpdateRoute(fn ($handle) => Route::post('/livewire/update', $handle));
+        Livewire::setUpdateRoute(fn ($handle) => Route::post('/livewire/update', $handle)
+            ->middleware(['web', ActiveLivewirePermissionMiddleware::class]));
 
         Route::middleware(['auth'])->group(function () {
             Route::get('/', DashboardIndex::class)
                 ->name('dashboard');
             Route::prefix('statistics')
                 ->name('statistics.')
-                ->middleware('role:HR|super-admin')
+                ->middleware('active_permission:statistics.view')
                 ->group(function () {
                     Route::get('/general', GeneralStatistics::class)->name('general');
                     Route::get('/contract', ContractStatistics::class)->name('contract');
@@ -61,42 +64,49 @@ Route::group(
             Route::prefix('leaves')
                 ->name('leaves.')
                 ->group(function () {
-                    Route::get('/', MyLeaveRequestModule::class)->name('index');
-                    Route::get('/all', AllLeaveRequestModule::class)->name('all')->middleware('role:HR|super-admin|manager|general-manager');
-                    Route::get('/balance', EmpLeaveBalanceModule::class)->name('balance')->middleware('role:HR|super-admin|general-manager');
+                    Route::get('/', MyLeaveRequestModule::class)->middleware('active_permission:leaves.view-own')->name('index');
+                    Route::get('/all', AllLeaveRequestModule::class)->name('all')->middleware('active_permission:leaves.view-all');
+                    Route::get('/balance', EmpLeaveBalanceModule::class)->name('balance')->middleware('active_permission:leaves.manage-balances');
                 });
 
-            Route::view('archived-files/{folder?}', 'archives.index')->name('archived-files.index');
-            Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', false)->name('my-folders.index');
-            Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', true)->name('shared-folders.index');
-            Route::get('folder-files/{media}/preview', [ArchiveFileController::class, 'preview'])->name('folder-files.preview');
-            Route::get('folder-files/{media}/download', [ArchiveFileController::class, 'download'])->name('folder-files.download');
-            Route::get('folder-files/{media}/office-preview', [ArchiveFileController::class, 'officePreview'])->name('folder-files.office-preview');
+            Route::view('archived-files/{folder?}', 'archives.index')->middleware('active_permission:archives.view')->name('archived-files.index');
+            Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', false)->middleware('active_permission:archives.view')->name('my-folders.index');
+            Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', true)->middleware('active_permission:archives.view')->name('shared-folders.index');
+            Route::get('folder-files/{media}/preview', [ArchiveFileController::class, 'preview'])->middleware('active_permission:archives.view')->name('folder-files.preview');
+            Route::get('folder-files/{media}/download', [ArchiveFileController::class, 'download'])->middleware('active_permission:archives.download')->name('folder-files.download');
+            Route::get('folder-files/{media}/office-preview', [ArchiveFileController::class, 'officePreview'])->middleware('active_permission:archives.view')->name('folder-files.office-preview');
 
             Route::prefix('checklist-items')
                 ->name('checklist-items.')
                 ->group(function () {
-                    Route::get('/pending-delivers', PendingItems::class)->name('pending-delivers');
-                    Route::get('/pending-returns', PendingReturns::class)->name('pending-returns');
-                    Route::get('/done-requests', DoneRequests::class)->name('done-requests');
-                    Route::get('/all', AllItems::class)->name('index');
+                    Route::get('/pending-delivers', PendingItems::class)->middleware('active_permission:checklists.deliver')->name('pending-delivers');
+                    Route::get('/pending-returns', PendingReturns::class)->middleware('active_permission:checklists.receive')->name('pending-returns');
+                    Route::get('/done-requests', DoneRequests::class)->middleware('active_permission:checklists.manage')->name('done-requests');
+                    Route::get('/all', AllItems::class)->middleware('active_permission:checklists.view-own')->name('index');
                 });
 
             Route::get('/notifications', Index::class)->name('notifications.index');
 
-            Route::get('/news', NewsModule::class)->name('news.index');
+            Route::get('/news', NewsModule::class)->name('news.index')->middleware('active_permission:news.view');
 
-            Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics']);
+            Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics'])
+                ->middleware('active_permission:statistics.view');
 
-            Route::get('/badges', BadgesModule::class)->name('badges.index');
+            Route::get('/badges', BadgesModule::class)
+                ->middleware('active_permission:badges.view')
+                ->name('badges.index');
 
-            Route::get('/news/create', NewsCreate::class)->name('news.create')->middleware('role:HR|super-admin|general-manager|manager');
-            Route::get('/news/{news}/edit', NewsCreate::class)->name('news.edit')->middleware('role:HR|super-admin|general-manager|manager');
+            Route::get('/news/create', NewsCreate::class)->name('news.create')->middleware('active_permission:news.create');
+            Route::get('/news/{news}/edit', NewsCreate::class)->name('news.edit')->middleware('active_permission:news.update');
 
-            Route::get('/course-categories', CourseCategoryModule::class)->name('course-categories.index');
+            Route::get('/course-categories', CourseCategoryModule::class)->middleware('active_permission:project-basics.view')->name('course-categories.index');
             Route::get('/activity-log', ActivityLogModule::class)
                 ->name('activity-log.index')
-                ->middleware('role:HR|super-admin');
+                ->middleware('active_permission:activity-log.view');
+
+            Route::get('/access-management', AccessManagementIndex::class)
+                ->middleware('active_permission:access-management.view')
+                ->name('access-management.index');
 
         });
 

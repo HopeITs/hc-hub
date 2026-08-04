@@ -81,6 +81,71 @@ use App\Enums\LeaveRequestStatus;
         <livewire:employee.leave.my-leave-request-table :statusFilter="$statusFilter" key="table-{{ $statusFilter }}"/>
     </div>
 
+    <x-modal.dialog
+        max-width="4xl"
+        id="leaveDetailsModal"
+        :title="__('general.leave-details')"
+        wire:model.defer="detailsModal"
+        wire:ignore.self>
+        @php
+            $selectedLeave = $this->selectedLeave;
+        @endphp
+
+        @if($selectedLeave)
+            <div class="space-y-6">
+                <x-leave.decision-summary :leave-request="$selectedLeave" />
+
+                <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="rounded-xl border border-neutral-200 p-4">
+                        <dt class="text-sm text-neutral-500">{{ trans_choice('general.leave-type', 1) }}</dt>
+                        <dd class="mt-1 font-semibold text-neutral-800">{{ $selectedLeave->leaveBalance->leaveType->name }}</dd>
+                    </div>
+
+                    <div class="rounded-xl border border-neutral-200 p-4">
+                        <dt class="text-sm text-neutral-500">@lang('general.type')</dt>
+                        <dd class="mt-1 font-semibold text-neutral-800">{{ trans_choice('general.'.$selectedLeave->type, 1) }}</dd>
+                    </div>
+
+                    <div class="rounded-xl border border-neutral-200 p-4">
+                        <dt class="text-sm text-neutral-500">@lang('general.during-period')</dt>
+                        <dd class="mt-1 font-semibold text-neutral-800">
+                            @if($selectedLeave->type === 'hour')
+                                {{ $selectedLeave->start_at->format('d-m-Y, H:i') }}
+                                <span aria-hidden="true">→</span>
+                                {{ $selectedLeave->end_at->format('H:i') }}
+                            @else
+                                {{ $selectedLeave->start_at->format('d-m-Y') }}
+                                <span aria-hidden="true">→</span>
+                                {{ $selectedLeave->end_at->format('d-m-Y') }}
+                            @endif
+                        </dd>
+                    </div>
+
+                    <div class="rounded-xl border border-neutral-200 p-4">
+                        <dt class="text-sm text-neutral-500">@lang('general.duration')</dt>
+                        <dd class="mt-1 font-semibold text-neutral-800">{{ $selectedLeave->duration }}</dd>
+                    </div>
+
+                    <div class="rounded-xl border border-neutral-200 p-4 sm:col-span-2">
+                        <dt class="text-sm text-neutral-500">@lang('general.alternative-employee')</dt>
+                        <dd class="mt-1 font-semibold text-neutral-800">{{ $selectedLeave->alternativeEmployee?->name ?? '—' }}</dd>
+                    </div>
+
+                    <div class="rounded-xl border border-neutral-200 p-4 sm:col-span-2">
+                        <dt class="text-sm text-neutral-500">@lang('general.reason')</dt>
+                        <dd class="mt-1 whitespace-pre-line break-words text-neutral-800">{{ $selectedLeave->reason }}</dd>
+                    </div>
+                </dl>
+
+                <div class="flex justify-end">
+                    <x-primary-button type="button" wire:click="closeDetails" class="!w-auto !bg-secondary-light">
+                        @lang('general.cancel')
+                    </x-primary-button>
+                </div>
+            </div>
+        @endif
+    </x-modal.dialog>
+
 
     <x-modal.dialog
         max-width="6xl"
@@ -131,7 +196,7 @@ use App\Enums\LeaveRequestStatus;
                     </div>
 
                     @if($form->leave_balance_id !== null)
-                        @if(optional($availableLeaves->find($form->leave_balance_id))->leaveType->id === LeaveTypeCases::Annual)
+                        @if($availableLeaves->find($form->leave_balance_id)?->leaveType?->id === LeaveTypeCases::Annual)
                             <div class="mt-4">
                                 <x-forms.input-label>{{trans_choice('general.leave-type',1)}}</x-forms.input-label>
                                 <div class="flex gap-4">
@@ -143,7 +208,7 @@ use App\Enums\LeaveRequestStatus;
                             </div>
                         @endif
                     @endif
-                    @if($form->leave_balance_id === null || optional($availableLeaves->find($form->leave_balance_id))->leaveType->id !== LeaveTypeCases::Annual)
+                    @if($form->leave_balance_id === null || $availableLeaves->find($form->leave_balance_id)?->leaveType?->id !== LeaveTypeCases::Annual)
 
                         <div>
                             <x-forms.input-label for="start_at" required>{{__('general.start-date')}}</x-forms.input-label>

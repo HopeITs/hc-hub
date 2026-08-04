@@ -158,6 +158,8 @@ return [
         'birth_date' => 'تاريخ الميلاد',
         'role' => 'الدور',
         'city_id' => 'اسم المدينة',
+        'attending_notes_en' => 'ملاحظات الحضور (بالإنجليزية)',
+        'attending_notes_ar' => 'ملاحظات الحضور (بالعربية)',
         'location' => 'الموقع',
         'message' => 'الرسالة',
 

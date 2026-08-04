@@ -2,21 +2,12 @@
     use App\Enums\LeaveRequestStatus;
 @endphp
 <div
-        class="w-full h-full  bg-white rounded-surface shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 pt-4 pb-4 flex-shrink-0">
-        <div class="flex items-center gap-2">
-            <h3 class="text-body font-semibold text-[#58595B]">
-                @lang('general.upcoming-leaves')
-            </h3>
-            <span class="text-secondary-light text-body font-medium">
-                {{$upcomingLeaves->count()}}
-            </span>
-            <div class="text-red-500 w-4 h-4 text-body">
-                <img src="{{ asset('assets/icons/upcoming-leaves.svg') }}" alt="Notes icon">
-            </div>
-        </div>
-    </div>
+        class="w-full h-full  bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
+    <x-dashboard-cards.card-header :title="__('general.upcoming-leaves')" :count="$upcomingLeaves->count()">
+        <x-slot:icon>
+            <img class="block size-full object-contain" src="{{ asset('assets/icons/upcoming-leaves.svg') }}" alt="">
+        </x-slot:icon>
+    </x-dashboard-cards.card-header>
 
     <!-- Scrollable Content -->
     <div

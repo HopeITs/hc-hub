@@ -4,7 +4,6 @@ namespace App\Livewire\Basics;
 
 use App\Enums\LeaveType as LeaveTypeEnum;
 use App\Exports\LeaveTypeExport;
-use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\LeaveType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -18,8 +17,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class LeaveTypeTable extends LivewireTable
 {
-    use AuthorizesHrAction;
-
     protected string $model = LeaveType::class;
 
     protected $listeners = [
@@ -40,9 +37,8 @@ class LeaveTypeTable extends LivewireTable
 
     protected function columns(): array
     {
-        $user = auth()->user();
-
-        $isHR = (bool) $user?->activeRoleIs('HR', 'super-admin');
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
 
         return [
             Column::make('ID', 'id')->sortable()->searchable(),
@@ -72,18 +68,17 @@ class LeaveTypeTable extends LivewireTable
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $id = $m->id;
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openLeaveTypeEdit\', { id: '.$id.' })" />'
-                );
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />'
-                );
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openLeaveTypeEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
 
-                // return '<div class="flex items-center justify-center gap-2">' . $editBtn . '</div>';
-                return $editBtn;
-            })->asHtml()->visible($isHR),
+                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 
@@ -100,8 +95,6 @@ class LeaveTypeTable extends LivewireTable
 
     public function delete(array $payload): void
     {
-        $this->authorizeHrAction();
-
         LeaveType::findOrFail($payload['id'])->delete();
 
         LivewireAlert::title(__('general.success-message'))

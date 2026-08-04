@@ -3,26 +3,12 @@
     $nameCol = "name_{$locale}";
 @endphp
 
-<div class="w-full h-full bg-white rounded-surface shadow-e1 overflow-hidden flex flex-col
-            max-w-full md:max-w-md  md:h-full lg:max-w-full">
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 pt-4 pb-4 flex-shrink-0">
-
-        <div class="flex items-center gap-2 md:gap-3">
-            <h3 class="sm:text[20px] md:text-body font-semibold text-[#58595B]">
-                {{ __('general.personal-inventory') }}
-            </h3>
-
-            <span class="text-secondary-light sm:text[20px] md:text-body font-medium">
-                {{ $deliveredItems->count() }}
-            </span>
-
-            <div class="text-primary w-4 h-4  md:w-3.5 md:h-3.5">
-                <img src="{{ asset('assets/icons/personal-inventory.svg') }}"
-                     alt="Personal inventory icon">
-            </div>
-        </div>
-    </div>
+<div class="flex h-full w-full flex-col overflow-hidden rounded-3xl bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
+    <x-dashboard-cards.card-header :title="__('general.personal-inventory')" :count="$deliveredItems->count()">
+        <x-slot:icon>
+            <img class="block size-full object-contain" src="{{ asset('assets/icons/personal-inventory.svg') }}" alt="">
+        </x-slot:icon>
+    </x-dashboard-cards.card-header>
 
     <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto
@@ -35,11 +21,11 @@
             <div class="pb-2 border-b border-b-secondary-light">
 
                 <div class="flex justify-between items-center">
-                    <p class="sm:text[14px] md:text-caption font-bold text-[#58595B]">
+                    <p class="text-[13px] font-bold text-[#58595B]">
                         {{ $item->item?->name ?? 'Item #'.$item->item_id }}
                     </p>
 
-                    <span class=" text-caption sm:text-caption md:text-caption text-[#58595B]">
+                    <span class="text-[11px] text-[#58595B]">
                         {{ optional($item->delivered_at)->format('d/m/Y') }}
                     </span>
                 </div>

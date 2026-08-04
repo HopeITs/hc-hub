@@ -3,7 +3,6 @@
 namespace App\Livewire\Basics;
 
 use App\Exports\JobLevelExport;
-use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\JobLevel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -16,8 +15,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class JobLevelTable extends LivewireTable
 {
-    use AuthorizesHrAction;
-
     protected string $model = JobLevel::class;
 
     protected $listeners = [
@@ -38,9 +35,8 @@ class JobLevelTable extends LivewireTable
 
     protected function columns(): array
     {
-        $user = auth()->user();
-
-        $isHR = (bool) $user?->activeRoleIs('HR', 'super-admin');
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
 
         return [
             Column::make('ID', 'id')->sortable()->searchable(),
@@ -56,22 +52,18 @@ class JobLevelTable extends LivewireTable
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $id = $m->id;
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openJobLevelEdit\', { id: '.$id.' })" />'
-                );
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openJobLevelEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
 
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />'
-                );
-
-                // return '<div class="flex items-center justify-center gap-2">'
-                //     . $editBtn . $deleteBtn .
-                //     '</div>';
-                return $editBtn;
-            })->asHtml()->visible($isHR),
+                return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 
@@ -88,8 +80,6 @@ class JobLevelTable extends LivewireTable
 
     public function delete(array $payload): void
     {
-        $this->authorizeHrAction();
-
         JobLevel::findOrFail($payload['id'])->delete();
 
         LivewireAlert::title(__('general.success-message'))

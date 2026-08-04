@@ -2,23 +2,22 @@
 
 namespace App\Livewire\Position;
 
+use App\Exports\PositionExport;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\Department;
 use App\Models\JobLevel;
 use App\Models\Position;
 use App\Models\Program;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
-use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
-
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\PositionExport;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PositionTable extends LivewireTable
@@ -26,11 +25,13 @@ class PositionTable extends LivewireTable
     protected string $model = Position::class;
 
     public ?int $centerId = null;
+
     public ?int $cityId = null;
+
     public $itemID;
 
-   protected $listeners = [
-        'exportExcel' => 'exportExcel', 
+    protected $listeners = [
+        'exportExcel' => 'exportExcel',
     ];
 
     public function mount(?int $centerId = null, ?int $cityId = null): void
@@ -39,7 +40,7 @@ class PositionTable extends LivewireTable
         $this->cityId = $cityId ?? request()->get('city');
     }
 
-    protected function query(): \Illuminate\Database\Eloquent\Builder
+    protected function query(): Builder
     {
         $query = $this->model()::query()->with(['city', 'program', 'center', 'jobLevel', 'department', 'directManager', 'techManager']);
 
@@ -55,53 +56,56 @@ class PositionTable extends LivewireTable
 
     protected function columns(): array
     {
+        $canUpdate = auth()->user()?->hasActivePermission('positions.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('positions.delete') ?? false;
+
         return [
-            Column::make(__('general.title') . ' (EN)', 'title_en')->sortable()->searchable(),
-            Column::make(__('general.title') . ' (AR)', 'title_ar')->sortable()->searchable(),
+            Column::make(__('general.title').' (EN)', 'title_en')->sortable()->searchable(),
+            Column::make(__('general.title').' (AR)', 'title_ar')->sortable()->searchable(),
             SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
                 ->options(City::query()->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
-                ->sortable()     ->searchable(),
+                ->sortable()->searchable(),
             SelectColumn::make(trans_choice('general.program', 1), 'program.name')
                 ->options(Program::query()->orderby('name')->get()->pluck('name', 'name')->toArray())
-                ->sortable()     ->searchable(),
-            SelectColumn::make(trans_choice('general.center', 1), 'center.name')
-                ->options(Center::query()->orderby('name')->get()->pluck('name', 'name')->toArray())
-                ->sortable()     ->searchable(),
+                ->sortable()->searchable(),
+            SelectColumn::make(trans_choice('general.center', 1), 'center.'.transColumn('name'))
+                ->options(Center::query()->orderBy(transColumn('name'))->pluck(transColumn('name'), transColumn('name'))->toArray())
+                ->sortable()->searchable(),
             SelectColumn::make(trans_choice('general.department', 1), 'department.name')
                 ->options(Department::query()->orderby('name')->get()->pluck('name', 'name')->toArray())
-                ->sortable()     ->searchable(),
+                ->sortable()->searchable(),
             SelectColumn::make(trans_choice('general.job-level', 1), 'jobLevel.'.transColumn('name'))
                 ->options(JobLevel::query()->orderBy('grade')->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
-                ->sortable()     ->searchable(),
+                ->sortable()->searchable(),
             SelectColumn::make(__('general.direct-manager'), 'directManager.'.transColumn('title'))
                 ->options(Position::query()->orderby(transColumn('title'))->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
-                ->sortable()     ->searchable(),
+                ->sortable()->searchable(),
             SelectColumn::make(__('general.tech-manager'), 'techManager.'.transColumn('title'))
                 ->options(Position::query()->orderby(transColumn('title'))->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
-                ->sortable()     ->searchable(),
+                ->sortable()->searchable(),
 
             BooleanColumn::make(__('general.is-active'), 'is_active'),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $isActive = $m->is_active ? 1 : 0;
 
-                $toggleBtn = Blade::render(
-                    '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3"
-                        active="' . $isActive . '"
-                        :model-id="' . $m->id . '"
-                        wire-event="confirmToggleItemStatus" />'
-                );
+                $toggleBtn = $canUpdate
+                    ? Blade::render(
+                        '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3"
+                            active="'.$isActive.'"
+                            :model-id="'.$m->id.'"
+                            wire-event="confirmToggleItemStatus" />'
+                    )
+                    : '';
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn href="'.route('positions.edit', $m->id).'" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn :modelId="'.$m->id.'" />')
+                    : '';
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn href="' . route('positions.edit', $m->id) . '" />'
-                );
-
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn :modelId="' . $m->id . '" />'
-                );
-
-                return $toggleBtn . $editBtn . $deleteBtn;
-            })->asHtml(),
+                return $toggleBtn.$editBtn.$deleteBtn;
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 
@@ -145,7 +149,7 @@ class PositionTable extends LivewireTable
     public function toggleItemStatusConfirmed($payload)
     {
         $item = Position::findOrFail($payload['id']);
-        $item->is_active = !$item->is_active;
+        $item->is_active = ! $item->is_active;
         $item->save();
 
         LivewireAlert::title(__('general.item-updated'))
@@ -154,25 +158,28 @@ class PositionTable extends LivewireTable
 
     public function exportExcel(): BinaryFileResponse
     {
-        $query = $this->appliedQuery(); 
+        $query = $this->appliedQuery();
         $data = $query->get();
 
-        $userSelectedColumns = $this->columns; 
+        $userSelectedColumns = $this->columns;
 
         $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible()) 
+            ->filter(fn ($column) => $column->isVisible())
             ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) return true;
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
                 return in_array($column->code(), $userSelectedColumns);
             })
             ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code()) 
+            ->map(fn ($column) => $column->code())
             ->toArray();
 
-        $filename = 'positions_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'positions_'.now()->format('Y-m-d').'.xlsx';
 
         return Excel::download(
-            new PositionExport($data, $visibleColumnCodes), 
+            new PositionExport($data, $visibleColumnCodes),
             $filename
         );
     }

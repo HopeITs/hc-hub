@@ -11,13 +11,15 @@ use App\Livewire\Basics\TerminationReasonModule;
 use App\Livewire\Position\OrgChart;
 use Illuminate\Support\Facades\Route;
 
-Route::get('cities', CityModule::class)->name('cities.index');
-Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index')->middleware('role:HR|super-admin');
-Route::get('checklist-items', ChecklistItemModule::class)->name('basic-checklist-items.index');
-Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
-Route::get('job-levels', JobLevelModule::class)->name('job-levels.index')->middleware('role:HR|super-admin');
-Route::get('departments', DepartmentModule::class)->name('departments.index');
-Route::get('annual-leave-rules', AnnualLeaveRuleModule::class)->name('annual-leave-rules.index')->middleware('role:HR|super-admin');
-Route::get('termination-reasons', TerminationReasonModule::class)->name('termination-reasons.index')->middleware('role:HR|super-admin');
+Route::middleware('active_permission:project-basics.view')->group(function () {
+    Route::get('cities', CityModule::class)->name('cities.index');
+    Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index');
+    Route::get('checklist-items', ChecklistItemModule::class)->name('basic-checklist-items.index');
+    Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
+    Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');
+    Route::get('departments', DepartmentModule::class)->name('departments.index');
+    Route::get('annual-leave-rules', AnnualLeaveRuleModule::class)->name('annual-leave-rules.index');
+    Route::get('termination-reasons', TerminationReasonModule::class)->name('termination-reasons.index');
+});
 
-Route::get('/org-chart', OrgChart::class)->name('org.chart');
+Route::get('/org-chart', OrgChart::class)->middleware('active_permission:positions.view')->name('org.chart');

@@ -17,6 +17,14 @@ class Center extends Model
 
     protected $guarded = ['id'];
 
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('name'),
+            set: fn ($value) => $this->setTranslatableAttribute('name', $value)
+        );
+    }
+
     public function getOpenAtFormattedAttribute(): string
     {
         return Carbon::createFromFormat('H:i:s', $this->open_at)->format('H:i');
@@ -77,6 +85,8 @@ class Center extends Model
         return LogOptions::defaults()
             ->useLogName('center')
             ->logOnly([
+                'name_en',
+                'name_ar',
                 'city_id',
                 'open_at',
                 'close_at',

@@ -13,23 +13,21 @@ use App\Livewire\ProgramManagement\DefaultDeliverable\DefaultDeliverablesModule;
 
 Route::prefix('employees')
     ->name('employees.')
-    ->middleware('role:HR|super-admin|general-manager')
     ->group(function () {
-        Route::get('/', EmployeeModule::class)->name('index');
-        Route::get('/create', EmployeeCreate::class)->name('create');
-        Route::get('/{employee}/edit', EmployeeEdit::class)->name('edit');
+        Route::get('/', EmployeeModule::class)->middleware('active_permission:employees.view')->name('index');
+        Route::get('/create', EmployeeCreate::class)->middleware('active_permission:employees.create')->name('create');
+        Route::get('/{employee}/edit', EmployeeEdit::class)->middleware('active_permission:employees.update')->name('edit');
 
     });
 Route::get('employees/{employee:username}/show', EmployeeProfile::class)->name('employees.show');
-Route::get('/default-deliverables', DefaultDeliverablesModule::class)->middleware('role:HR|super-admin|general-manager')->name('default-deliverables.index');
+Route::get('/default-deliverables', DefaultDeliverablesModule::class)->middleware('active_permission:checklists.manage')->name('default-deliverables.index');
 
 Route::prefix('contracts')
     ->name('contracts.')
-    ->middleware('role:HR|super-admin|general-manager')
     ->group(function () {
-        Route::get('/', ContractsModule::class)->name('index');
-        Route::get('/create', ContractCreate::class)->name('create');
-        Route::get('/{contract}/edit', ContractEdit::class)->name('edit');
-        Route::get('/{contract}/export', [ContractExportController::class, 'pdf'])->name('export');
-        Route::get('/{contract}', ContractDetails::class)->name('show');
+        Route::get('/', ContractsModule::class)->middleware('active_permission:contracts.view')->name('index');
+        Route::get('/create', ContractCreate::class)->middleware('active_permission:contracts.create')->name('create');
+        Route::get('/{contract}/edit', ContractEdit::class)->middleware('active_permission:contracts.update')->name('edit');
+        Route::get('/{contract}/export', [ContractExportController::class, 'pdf'])->middleware('active_permission:contracts.export')->name('export');
+        Route::get('/{contract}', ContractDetails::class)->middleware('active_permission:contracts.view')->name('show');
     });

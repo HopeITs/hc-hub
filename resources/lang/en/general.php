@@ -100,6 +100,9 @@ return [
     'work-hours-from' => 'Work Hours From',
     'work-hours-to' => 'Work Hours To',
     'work-days' => 'Work Days',
+    'attending-notes' => 'Attendance Notes',
+    'attending-notes-placeholder-en' => 'Example: Flexible arrival is allowed on field-visit days…',
+    'attending-notes-placeholder-ar' => 'مثال: يسمح بمرونة وقت الحضور في أيام الزيارات الميدانية…',
     'from-hour-to-hour' => 'From :from To :to',
     'weekly-hours' => 'Weekly Hours',
     'status' => 'Status',
@@ -594,6 +597,10 @@ return [
     'start-time' => 'Start Time',
     'end-time' => 'End Time',
     'seen-by-hr' => 'Seen By HR',
+    'reviewed' => 'Reviewed',
+    'mark-reviewed' => 'Mark reviewed',
+    'review-leave-request' => 'Review leave request',
+    'confirm-review-leave-request' => 'Mark this leave request as reviewed by HR? This action cannot be undone.',
     'actions' => 'Actions',
     'search-all-columns' => 'Search All Columns',
     'no-available-data' => 'No available data',
@@ -634,6 +641,11 @@ return [
     '500-title2' => '“We hit an unexpected error.”',
     '500-message' => 'It’s not you. It’s us. Try refreshing the page, or come back a little later.',
     '500-button' => 'Go to homepage',
+    '503-title1' => 'Maintenance Mode',
+    '503-title2' => 'The system is getting a careful tune-up.',
+    '503-message' => 'The website is temporarily unavailable while we make things better. Please check back in later.',
+    '503-button' => 'Check again',
+
     'course-category' => 'Course Category|Course Categories',
     'collapse-all' => 'Collapse All',
     'expand-all' => 'Expand All',
@@ -676,6 +688,8 @@ return [
 
     'time' => 'Time',
     'leave-decision' => 'Leave Decision',
+    'leave-details' => 'Leave Details',
+    'decision-date' => 'Decision Date',
 
     // Org chart
     'filters' => 'Filters',

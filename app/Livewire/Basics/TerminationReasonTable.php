@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Basics;
 
-use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\TerminationReason;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -13,8 +12,6 @@ use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 class TerminationReasonTable extends LivewireTable
 {
-    use AuthorizesHrAction;
-
     protected string $model = TerminationReason::class;
 
     protected $listeners = [
@@ -34,8 +31,8 @@ class TerminationReasonTable extends LivewireTable
 
     protected function columns(): array
     {
-        $user = auth()->user();
-        $isHR = (bool) $user?->activeRoleIs('HR', 'super-admin');
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
 
         return [
             Column::make(__('general.title').' (EN)', 'title_en')
@@ -46,18 +43,18 @@ class TerminationReasonTable extends LivewireTable
                 ->sortable()
                 ->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $id = $m->id;
 
-                $editBtn = Blade::render(
-                    '<x-table.edit-btn wire:click="$dispatch(\'openTerminationReasonEdit\', { id: '.$id.' })" />'
-                );
-                $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />'
-                );
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openTerminationReasonEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
 
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml()->visible($isHR),
+            })->asHtml()->visible($canUpdate || $canDelete),
         ];
     }
 
@@ -74,8 +71,6 @@ class TerminationReasonTable extends LivewireTable
 
     public function delete(array $payload): void
     {
-        $this->authorizeHrAction();
-
         TerminationReason::findOrFail($payload['id'])->delete();
 
         LivewireAlert::title(__('general.success-message'))

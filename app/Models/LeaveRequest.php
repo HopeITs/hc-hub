@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\LeaveRequestStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +21,9 @@ class LeaveRequest extends Model
     protected $casts = [
         'start_at' => 'datetime',
         'end_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'hr_approved' => 'boolean',
+        'status' => 'integer',
     ];
 
     public function leaveBalance(): BelongsTo
@@ -120,6 +124,44 @@ class LeaveRequest extends Model
         return $q->where('status', LeaveRequestStatus::Pending);
     }
 
+    public function scopeManageableBy(Builder $query, User $user): Builder
+    {
+        $role = $user->myRole();
+
+        if ($role === 'super-admin' || $role === 'HR-SYR') {
+            return $query;
+        }
+
+        if ($role && str_starts_with($role, 'HR-')) {
+            $cityCode = substr($role, 3);
+
+            return $query->whereHas(
+                'leaveBalance.contract.employee.city',
+                fn (Builder $cityQuery) => $cityQuery->where('slug', $cityCode)
+            );
+        }
+
+        if (in_array($role, ['manager', 'general-manager'], true)) {
+            $managerPositionIds = Contract::query()
+                ->activeNow()
+                ->where('employee_id', $user->employee_id)
+                ->pluck('position_id');
+
+            if ($managerPositionIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->whereHas(
+                'leaveBalance.contract.position',
+                fn (Builder $positionQuery) => $positionQuery
+                    ->whereIn('direct_manager_id', $managerPositionIds)
+                    ->orWhereIn('tech_manager_id', $managerPositionIds)
+            );
+        }
+
+        return $query->whereRaw('1 = 0');
+    }
+
     public function scopeUpcoming($query)
     {
         return $query->whereDate('start_at', '>=', now());
@@ -195,39 +237,6 @@ class LeaveRequest extends Model
                     }
                 })
             );
-    }
-
-    /**
-     * Leave requests the given user may see and act on: HR-SYR sees all,
-     * other HR roles see their city, everyone else (managers) sees the
-     * employees whose position they directly or technically manage.
-     * Single source of truth — use this both for listing AND when resolving
-     * an id passed to a Livewire action.
-     */
-    public function scopeVisibleTo($query, User $user)
-    {
-        $role = $user->myRole() ?? '';
-
-        if ($role === 'HR-SYR') {
-            return $query;
-        }
-
-        if (str_starts_with($role, 'HR-')) {
-            $cityCode = substr($role, 3);
-
-            return $query->whereHas(
-                'leaveBalance.contract.employee.city',
-                fn ($q) => $q->where('slug', $cityCode)
-            );
-        }
-
-        $positionIds = $user->profile?->positions->modelKeys() ?? [];
-
-        return $query->whereHas(
-            'leaveBalance.contract.employee.positions',
-            fn ($q) => $q->whereIn('direct_manager_id', $positionIds)
-                ->orWhereIn('tech_manager_id', $positionIds)
-        );
     }
 
     public function getActivitylogOptions(): LogOptions

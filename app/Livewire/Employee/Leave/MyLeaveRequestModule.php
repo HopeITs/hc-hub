@@ -3,19 +3,25 @@
 namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
+use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
-use App\Models\User;
-use App\Notifications\NewLeaveRequest;
+use App\Services\LeaveNotificationService;
 use Blade;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Attributes\Computed;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class MyLeaveRequestModule extends Component
 {
+    use AuthorizesActivePermissions;
+
     public LeaveBalance $leaveBalance;
 
     public LeaveRequest $leaveRequest;
@@ -26,8 +32,16 @@ class MyLeaveRequestModule extends Component
 
     public $modalTitle = 'Modal title';
 
+    public bool $detailsModal = false;
+
+    public ?int $selectedLeaveId = null;
+
+    #[Url(as: 'leave')]
+    public ?int $linkedLeaveId = null;
+
     protected $listeners = [
         'openRequestLeaveEdit' => 'edit',
+        'openMyLeaveDetails' => 'openDetails',
         'processSave' => 'processSave',
     ];
 
@@ -38,6 +52,10 @@ class MyLeaveRequestModule extends Component
     public function mount()
     {
         $this->refreshCounts();
+
+        if ($this->linkedLeaveId !== null) {
+            $this->openDetails($this->linkedLeaveId);
+        }
     }
 
     public function setActiveTab(string $status)
@@ -65,6 +83,8 @@ class MyLeaveRequestModule extends Component
 
     public function create()
     {
+        $this->authorizeActivePermission('leaves.create');
+
         $this->form->reset();
         $this->modalTitle = __('general.add-new');
         $this->showModal = true;
@@ -72,7 +92,8 @@ class MyLeaveRequestModule extends Component
 
     public function edit(LeaveRequest $id)
     {
-        $this->authorizeOwnLeaveRequest($id);
+        $this->authorizeActivePermission('leaves.update');
+        Gate::authorize('update', $id);
 
         $this->form->setLeaveRequest($id);
 
@@ -80,35 +101,40 @@ class MyLeaveRequestModule extends Component
         $this->showModal = true;
     }
 
-    /**
-     * This page is reachable by every authenticated employee, so every action
-     * must verify the leave request (or balance) actually belongs to them.
-     */
-    protected function authorizeOwnLeaveRequest(?LeaveRequest $leaveRequest): void
+    #[Computed]
+    public function selectedLeave(): ?LeaveRequest
     {
-        $employeeId = auth()->user()->profile?->id;
-
-        abort_unless(
-            $employeeId !== null
-            && $leaveRequest?->leaveBalance?->contract?->employee_id === $employeeId,
-            403
-        );
-    }
-
-    protected function authorizeOwnLeaveBalance($leaveBalanceId): void
-    {
-        // Null falls through to the form's "required" validation message.
-        if (! $leaveBalanceId) {
-            return;
+        if ($this->selectedLeaveId === null) {
+            return null;
         }
 
-        $employeeId = auth()->user()->profile?->id;
-        $balance = LeaveBalance::find($leaveBalanceId);
+        return $this->ownedLeaveRequests()
+            ->with([
+                'leaveBalance.leaveType',
+                'leaveBalance.contract.position.center',
+                'alternativeEmployee',
+            ])
+            ->find($this->selectedLeaveId);
+    }
 
-        abort_unless(
-            $employeeId !== null && $balance?->contract?->employee_id === $employeeId,
-            403
-        );
+    public function openDetails(int $id): void
+    {
+        $leaveRequest = $this->ownedLeaveRequests()->findOrFail($id);
+        Gate::authorize('view', $leaveRequest);
+
+        $this->selectedLeaveId = $leaveRequest->id;
+        $this->linkedLeaveId = $leaveRequest->id;
+        unset($this->selectedLeave);
+
+        $this->detailsModal = true;
+    }
+
+    public function closeDetails(): void
+    {
+        $this->detailsModal = false;
+        $this->selectedLeaveId = null;
+        $this->linkedLeaveId = null;
+        unset($this->selectedLeave);
     }
 
     public function render()
@@ -144,25 +170,18 @@ class MyLeaveRequestModule extends Component
 
     public function processSave()
     {
-        $this->authorizeOwnLeaveBalance($this->form->leave_balance_id);
+        $this->authorizeActivePermission($this->form->id ? 'leaves.update' : 'leaves.create');
 
         if ($this->form->id) {
-            $this->authorizeOwnLeaveRequest($this->form->leaveRequest);
+            Gate::authorize('update', $this->form->leaveRequest);
             $this->form->update();
         } else {
             $this->form->store();
 
-            // Notify
-            $leaveRequest = $this->form->leaveRequest->load('leaveBalance.contract.position');
-            $directManage = $leaveRequest->leaveBalance->contract->position->directManager?->employee()?->account;
-            $techManager = $leaveRequest->leaveBalance->contract->position->techManager?->employee()?->account;
-            $city = $leaveRequest->leaveBalance->contract->employee->city;
-            $hr = User::whereHas('roles', function ($query) use ($city) {
-                $query->where('name', 'HR-'.$city->slug);
-            })->first();
-            isset($directManage) ? $directManage->notify(new NewLeaveRequest($leaveRequest)) : '';
-            isset($techManager) ? $techManager->notify(new NewLeaveRequest($leaveRequest)) : '';
-            isset($hr) ? $hr->notify(new NewLeaveRequest($leaveRequest)) : '';
+            app(LeaveNotificationService::class)->sendNewRequest(
+                $this->form->leaveRequest,
+                auth()->user()
+            );
             $this->dispatch('notification-created');
         }
 
@@ -181,7 +200,7 @@ class MyLeaveRequestModule extends Component
 
     protected function confirmationMessage(): string
     {
-        $balance = LeaveBalance::find($this->form->leave_balance_id);
+        $balance = $this->form->selectedBalance();
         $leaveTypeName = $balance->leaveType->name ?? 'N/A';
         $weekends = $balance->contract->position->center->weekends ?? '0,6';
         $type = $this->form->type;
@@ -234,5 +253,16 @@ class MyLeaveRequestModule extends Component
 
         return Carbon::parse($this->form->start_hour)
             ->floatDiffInHours(Carbon::parse($this->form->end_hour));
+    }
+
+    private function ownedLeaveRequests(): Builder
+    {
+        $employeeId = auth()->user()->profile->id;
+
+        return LeaveRequest::query()
+            ->whereHas(
+                'leaveBalance.contract',
+                fn (Builder $query) => $query->where('employee_id', $employeeId)
+            );
     }
 }

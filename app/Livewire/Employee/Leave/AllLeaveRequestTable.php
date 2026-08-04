@@ -7,10 +7,12 @@ use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
-use App\Notifications\HRSawLeaveRequest;
+use App\Services\LeaveNotificationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\DateColumn;
@@ -29,7 +31,10 @@ class AllLeaveRequestTable extends LivewireTable
 
     public $modalTitle = 'Modal title';
 
-    protected $listeners = ['filterStatus' => 'setStatusFilter', 'toggleItemStatusConfirmed'];
+    protected $listeners = [
+        'filterStatus' => 'setStatusFilter',
+        'leaveRequestDecisionSaved' => 'refreshTable',
+    ];
 
     public function setStatusFilter(string $status): void
     {
@@ -37,11 +42,15 @@ class AllLeaveRequestTable extends LivewireTable
         $this->resetPage();
     }
 
+    public function refreshTable(): void {}
+
     protected function query(): Builder
     {
+        $user = auth()->user();
+
         $query = LeaveRequest::query()
-            ->visibleTo(auth()->user())
             ->with(['leaveBalance.contract.employee', 'leaveBalance.contract.position'])
+            ->manageableBy($user)
             ->orderBy('created_at', 'desc');
 
         if ($this->statusFilter !== 'all') {
@@ -120,20 +129,24 @@ class AllLeaveRequestTable extends LivewireTable
                 })
                 ->sortable(),
             Column::make(__('general.seen-by-hr'), function (Model $model): string {
-                if ($model->status !== LeaveRequestStatus::Pending) {
-                    $isActive = $model->hr_approved ? 1 : 0;
-
-                    $toggleBtn = Blade::render(
-                        '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="'.$isActive.
-                            '" :model-id="'.$model->getKey().
-                            '" wire-event="confirmToggleItemStatus" />'
-                    );
-
-                    return $toggleBtn;
+                if ($model->status === LeaveRequestStatus::Pending) {
+                    return '';
                 }
 
-                return '';
-            })->visible(str_contains($user->myRole(), 'HR-'))->asHtml(),
+                return Blade::render(
+                    '<x-table.hr-review
+                        :reviewed="$reviewed"
+                        :model-id="$modelId"
+                    />',
+                    [
+                        'reviewed' => $model->hr_approved,
+                        'modelId' => $model->getKey(),
+                    ]
+                );
+            })->visible(
+                $user->myRole() === 'super-admin'
+                || str_starts_with((string) $user->myRole(), 'HR-')
+            )->asHtml(),
             Column::make(__('general.actions'), function (Model $model): string {
 
                 $decisionBtn = '';
@@ -165,52 +178,73 @@ class AllLeaveRequestTable extends LivewireTable
             ->show();
     }
 
+    public function edit($id)
+    {
+        $model = LeaveRequest::findOrFail($id);
+        Gate::authorize('update', $model);
+
+        $this->form->setLeaveRequest($model);
+        $employee = auth()->user()->profile;
+        $modalTitle = __('general.edit');
+        $form = $this->form;
+        $availableLeaves = auth()->user()->profile->availableLeaves();
+        $allAvailableLeaves = $employee->allAvailableLeaves();
+        $alternativeEmployees = Employee::where('city_id', $employee->city_id)->where('id', '!=', $employee->id)
+            ->whereHas('contracts', function ($query) use ($employee) {
+                $query->whereHas('position.department', function ($query) use ($employee) {
+                    $query->where('id', $employee->department->id ?? null);
+                });
+            })->get();
+        $this->showModal = true;
+    }
+
     public function delete($payload): void
     {
-        // Resolve through the visibility scope so HR/managers can only delete
-        // requests they are allowed to see.
-        LeaveRequest::query()
-            ->visibleTo(auth()->user())
-            ->findOrFail($payload['id'])
-            ->delete();
+        $leaveRequest = LeaveRequest::findOrFail($payload['id']);
+        Gate::authorize('delete', $leaveRequest);
+
+        $leaveRequest->delete();
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
     }
 
-    public function confirmToggleItemStatus($id): void
+    public function confirmHrReview(int $id): void
     {
-        LivewireAlert::title(__('general.toggle-status'))
-            ->text(__('general.confirm-status-change'))
+        $leaveRequest = LeaveRequest::findOrFail($id);
+        Gate::authorize('review', $leaveRequest);
+
+        LivewireAlert::title(__('general.review-leave-request'))
+            ->text(__('general.confirm-review-leave-request'))
             ->question()
-            ->withConfirmButton(__('general.save'))
-            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
+            ->withConfirmButton(__('general.mark-reviewed'))
+            ->onConfirm('markAsReviewed', ['id' => $id])
             ->withCancelButton(__('general.cancel'))
             ->show();
     }
 
-    public function toggleItemStatusConfirmed($payload): void
+    public function markAsReviewed(array $payload): void
     {
-        // The "seen by HR" flag is an HR-only control (the column itself is
-        // only rendered for HR roles).
-        abort_unless(auth()->user()->activeRoleIs('HR', 'super-admin'), 403);
+        $item = DB::transaction(function () use ($payload): LeaveRequest {
+            $leaveRequest = LeaveRequest::query()
+                ->lockForUpdate()
+                ->findOrFail($payload['id']);
 
-        $item = LeaveRequest::query()
-            ->visibleTo(auth()->user())
-            ->findOrFail($payload['id']);
-        $item->hr_approved = ! $item->hr_approved;
-        $item->save();
+            // Authorization runs after acquiring the lock so a concurrent
+            // request cannot pass with a stale, unreviewed model.
+            Gate::authorize('review', $leaveRequest);
 
-        // Notify
-        $leaveRequest = $item->load('leaveBalance.contract.position');
-        $directManage = $leaveRequest->leaveBalance->contract->position->directManager?->employee()->account;
-        $techManager = $leaveRequest->leaveBalance->contract->position->techManager?->employee()->account;
-        $employee = $leaveRequest->leaveBalance->contract->employee->account;
+            $leaveRequest->update(['hr_approved' => true]);
 
-        isset($directManage) ? $directManage->notify(new HRSawLeaveRequest($leaveRequest, 'manager')) : '';
-        isset($techManager) ? $techManager->notify(new HRSawLeaveRequest($leaveRequest, 'manager')) : '';
-        isset($employee) ? $employee->notify(new HRSawLeaveRequest($leaveRequest, 'employee')) : '';
+            return $leaveRequest;
+        });
+
+        app(LeaveNotificationService::class)->sendHrReview(
+            $item,
+            auth()->user()
+        );
         $this->dispatch('notification-created');
+        $this->dispatch('$refresh');
 
         LivewireAlert::title(__('general.item-updated'))
             ->success()->toast()->position('top-start')->show();

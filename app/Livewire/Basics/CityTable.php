@@ -3,7 +3,6 @@
 namespace App\Livewire\Basics;
 
 use App\Exports\CityExport;
-use App\Livewire\Concerns\AuthorizesHrAction;
 use App\Models\City;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -17,8 +16,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CityTable extends LivewireTable
 {
-    use AuthorizesHrAction;
-
     protected string $model = City::class;
 
     protected $listeners = [
@@ -39,8 +36,7 @@ class CityTable extends LivewireTable
 
     protected function columns(): array
     {
-        $user = auth()->user();
-        $isHR = (bool) $user?->activeRoleIs('HR', 'super-admin');
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
 
         return [
 
@@ -64,15 +60,15 @@ class CityTable extends LivewireTable
             Column::make(__('general.actions'), function (Model $m): string {
 
                 return Blade::render(
-                    '<x-forms.toggle-input 
+                    '<x-forms.toggle-input
             class="!me-2 text-xl p-2 mb-3"
-            active="'.($m->is_active ? 1 : 0).'" 
-            :model-id="'.$m->id.'" 
+            active="'.($m->is_active ? 1 : 0).'"
+            :model-id="'.$m->id.'"
             wire-event="confirmToggleItemStatus" />'
                 );
             })
                 ->asHtml()
-                ->visible($isHR),
+                ->visible($canUpdate),
         ];
     }
 
@@ -89,8 +85,6 @@ class CityTable extends LivewireTable
 
     public function toggleItemStatusConfirmed($payload): void
     {
-        $this->authorizeHrAction();
-
         $item = City::findOrFail($payload['id']);
         $item->is_active = ! $item->is_active;
         $item->save();

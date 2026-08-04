@@ -103,6 +103,9 @@ return [
     'work-hours-from' => 'بداية يوم العمل',
     'work-hours-to' => 'نهاية يوم العمل',
     'work-days' => 'أيام العمل',
+    'attending-notes' => 'ملاحظات الحضور',
+    'attending-notes-placeholder-en' => 'Example: Flexible arrival is allowed on field-visit days…',
+    'attending-notes-placeholder-ar' => 'مثال: يسمح بمرونة وقت الحضور في أيام الزيارات الميدانية…',
     'from-hour-to-hour' => 'من :from حتى :to',
     'role' => 'الأدوار|الدور',
     'weekly-hours' => 'ساعات العمل الأسبوعية',
@@ -594,6 +597,10 @@ return [
     'start-time' => 'وقت البدء',
     'end-time' => 'وقت الانتهاء',
     'seen-by-hr' => 'مراجَع من الـ HR',
+    'reviewed' => 'تمت المراجعة',
+    'mark-reviewed' => 'تحديد كمراجَع',
+    'review-leave-request' => 'مراجعة طلب الإجازة',
+    'confirm-review-leave-request' => 'هل تريد تحديد طلب الإجازة هذا كمراجَع من الموارد البشرية؟ لا يمكن التراجع عن هذا الإجراء.',
     'actions' => 'الإجراءات',
     'search-all-columns' => 'البحث في جميع الأعمدة',
     'no-available-data' => 'لا توجد بيانات متاحة',
@@ -634,6 +641,11 @@ return [
     '500-title2' => '”واجهنا خطأ غير متوقع.“',
     '500-message' => 'ليس أنت. نحن السبب. حاول تحديث الصفحة، أو عد إليها لاحقًا.',
     '500-button' => 'انتقل إلى الصفحة الرئيسية',
+    '503-title1' => 'وضع الصيانة',
+    '503-title2' => 'نقوم بإجراء بعض التحسينات بعناية',
+    '503-message' => 'الموقع غير متاح مؤقتاً بينما نعمل على تحسينه. يرجى المحاولة مرة أخرى لاحقاً',
+    '503-button' => 'حاول مرة أخرى',
+
     'course-category' => 'تصنيفات الدورات|تصنيف الدورات',
     'collapse-all' => 'طيّ الكل',
     'expand-all' => 'توسيع الكل',
@@ -676,6 +688,8 @@ return [
 
     'time' => 'الوقت',
     'leave-decision' => 'قرار الإجازة',
+    'leave-details' => 'تفاصيل الإجازة',
+    'decision-date' => 'تاريخ القرار',
 
     // المخطط التنظيمي
     'filters' => 'عوامل التصفية',

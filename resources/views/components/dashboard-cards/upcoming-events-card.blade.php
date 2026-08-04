@@ -1,17 +1,11 @@
 @props(['upcomingEvents' => collect()])
 
-<div class="w-full h-full bg-white rounded-surface shadow-e1 ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
-    <div class="flex items-center justify-between px-6 pt-4 pb-4 flex-shrink-0">
-        <div class="flex items-center gap-2">
-            <h3 class="text-body font-semibold text-[#58595B]">
-                @lang('general.upcoming-events')
-            </h3>
-            <span class="text-secondary-light text-body font-medium">
-                {{ $upcomingEvents->count() }}
-            </span>
-            <x-icons.event class="size-5 ms-1 mb-1 text-secondary-medium"/>
-        </div>
-    </div>
+<div class="w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] ring-1 ring-[var(--color-neutral-200)] overflow-hidden flex flex-col">
+    <x-dashboard-cards.card-header :title="__('general.upcoming-events')" :count="$upcomingEvents->count()">
+        <x-slot:icon>
+            <x-icons.event class="size-full"/>
+        </x-slot:icon>
+    </x-dashboard-cards.card-header>
 
     <div class="flex-1 overflow-y-auto px-6 pb-4 space-y-4 scrollbar-thin scrollbar-thumb-[var(--color-secondary-medium)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-secondary-medium)]">
         @forelse ($upcomingEvents as $event)

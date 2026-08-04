@@ -5,7 +5,7 @@
             :crumbs="[
         ['label' => __('general.programs-management')],
         ['label' => __('general.centers'), 'url' => route('centers.index')],
-        ['label' => (string) $center->getTranslation('name', $locale) . ' (' . $center->city->getTranslation('name', $locale) . ')'],
+        ['label' => (string) $center->name . ' (' . $center->city->name . ')'],
             ]"
             :showButton="true"
         />
@@ -60,8 +60,8 @@
                     </x-table.cell>
 
                     {{-- Center name --}}
-                    <x-table.cell class="max-w-64 truncate" title="{{ optional($row->center)->getTranslation('name', $locale) }}">
-                        {{ optional($row->center)->getTranslation('name', $locale) ?? '-' }}
+                    <x-table.cell class="max-w-64 truncate" title="{{ optional($row->center)->name }}">
+                        {{ optional($row->center)->name ?? '-' }}
                     </x-table.cell>
 
                     {{-- Responsibilities --}}

@@ -46,7 +46,7 @@ class CenterExport implements FromCollection, WithHeadings, WithMapping, ShouldA
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
                 'id'                           => 'ID',
-                'name'                         => __('general.center-name', [], 'en'),
+                'name_en', 'name_ar'           => __('general.center-name'),
                 'open_at'                      => __('general.working-hours', [], 'en'),
                 'city_name_en', 'city_name_ar' => trans_choice('general.city', 1, [], 'en'),
                 'address'                      => __('general.address', [], 'en'),
@@ -66,7 +66,7 @@ class CenterExport implements FromCollection, WithHeadings, WithMapping, ShouldA
         foreach ($this->visibleColumnCodes as $code) {
             $mappedRow[] = match ($code) {
                 'id'                           => $row->id,
-                'name'                         => $row->name,
+                'name_en', 'name_ar'           => $row->name,
                 'open_at'                      => $row->open_at_formatted . ' - ' . $row->close_at_formatted,
                 
                 'city_name_en', 'city_name_ar' => $row->city?->name_en ?? '',

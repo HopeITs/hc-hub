@@ -2,12 +2,19 @@
 
 namespace App\Livewire\Forms\Employee;
 
+use App\Enums\BadgeType;
 use App\Models\Badge;
 use App\Models\Employee;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class BadgeForm extends Form
 {
+    #[Locked]
     public ?Employee $employee = null;
 
     public array $badges = [];
@@ -20,7 +27,7 @@ class BadgeForm extends Form
             ->select('id', 'evaluation_id', 'type', 'currency', 'date', 'reason', 'current_salary', 'new_salary', 'notes')
             ->get()
             ->map(
-                fn(Badge $badge) => [
+                fn (Badge $badge) => [
                     'id' => $badge->id,
                     'evaluation_id' => $badge->evaluation_id,
                     'type' => $badge->type,
@@ -37,22 +44,39 @@ class BadgeForm extends Form
 
     public function rules(): array
     {
+        $employeeId = $this->employee?->id ?? 0;
+
         return [
             'badges' => ['array'],
-            'badges.*.id' => ['nullable', 'exists:badges,id'],
-            'badges.*.evaluation_id' => ['nullable', 'exists:evaluations,id'],
-            'badges.*.type' => ['required', 'string', 'max:255'],
+            'badges.*.id' => [
+                'nullable',
+                'integer',
+                Rule::exists('badges', 'id')->where('employee_id', $employeeId),
+            ],
+            'badges.*.evaluation_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('evaluations', 'id')->where(
+                    fn ($query) => $query->whereIn(
+                        'contract_id',
+                        $this->employee?->allContracts()->select('id') ?? [],
+                    ),
+                ),
+            ],
+            'badges.*.type' => ['required', Rule::in(BadgeType::getValues())],
             'badges.*.currency' => ['nullable', 'integer', 'in:0,1,2,3'],
             'badges.*.date' => ['required', 'date'],
-            'badges.*.reason' => ['nullable', 'string'],
+            'badges.*.reason' => ['nullable', 'string', 'max:5000'],
             'badges.*.current_salary' => ['nullable', 'numeric', 'min:0'],
             'badges.*.new_salary' => ['nullable', 'numeric', 'min:0'],
-            'badges.*.notes' => ['nullable', 'string'],
+            'badges.*.notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
 
     public function addBadge(): void
     {
+        $this->authorizeCreate();
+
         $this->badges[] = [
             'id' => null,
             'evaluation_id' => null,
@@ -66,31 +90,64 @@ class BadgeForm extends Form
         ];
     }
 
-    public function removeBadge(int $index, ?int $id = null): void
+    public function removeBadge(int $index): void
     {
-        if (!array_key_exists($index, $this->badges)) {
+        $this->authorizeCreate();
+
+        if (! array_key_exists($index, $this->badges)) {
             return;
         }
 
-        unset($this->badges[$index]);
+        $id = $this->badges[$index]['id'] ?? null;
 
-        if (isset($id)) {
-            Badge::find($id)?->delete();
+        if ($id !== null) {
+            $badge = $this->employee
+                ->badges()
+                ->find((int) $id);
+
+            abort_unless($badge, 404);
+
+            Gate::authorize('delete', $badge);
+            $badge->delete();
         }
 
+        unset($this->badges[$index]);
         $this->badges = array_values($this->badges);
     }
 
     public function save(): void
     {
-        $badge = collect($this->badges)->last(fn($b) => empty($b['id']));
+        $this->authorizeCreate();
 
-        if (!$badge || !$this->employee) {
+        $validated = $this->validate();
+        $newBadges = collect($validated['badges'])
+            ->filter(fn (array $badge) => empty($badge['id']));
+
+        if ($newBadges->isEmpty()) {
             return;
         }
 
-        $this->employee->badges()->create($badge);
+        DB::transaction(function () use ($newBadges): void {
+            $newBadges->each(function (array $badge): void {
+                $this->employee->badges()->create(Arr::only($badge, [
+                    'evaluation_id',
+                    'type',
+                    'currency',
+                    'date',
+                    'reason',
+                    'current_salary',
+                    'new_salary',
+                    'notes',
+                ]));
+            });
+        });
 
         $this->setEmployee($this->employee->fresh());
+    }
+
+    private function authorizeCreate(): void
+    {
+        abort_unless($this->employee, 404);
+        Gate::authorize('create', [Badge::class, $this->employee]);
     }
 }

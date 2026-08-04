@@ -2,21 +2,23 @@
 
 namespace App\Livewire\Notifications;
 
-use Livewire\Component;
+use App\Livewire\Concerns\HandlesNotificationActions;
+use Illuminate\View\View;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class Dropdown extends Component
 {
+    use HandlesNotificationActions;
+
     #[On('notification-read')]
     #[On('notification-created')]
     #[On('notif-arrived')]
     #[On('center-created')]
     #[On('center-closed')]
-    public function refreshList()
-    {
-    }
+    public function refreshList(): void {}
 
-    public function render()
+    public function render(): View
     {
         $user = auth()->user();
 
@@ -31,24 +33,7 @@ class Dropdown extends Component
 
         return view('livewire.notifications.dropdown', [
             'notifications' => $unread->merge($read),
-            'hasUnread'     => $user->unreadNotifications()->exists(),
+            'hasUnread' => $user->unreadNotifications()->exists(),
         ]);
-    }
-
-    public function markAsRead($id): void
-    {
-        auth()->user()
-            ->notifications()
-            ->where('id', $id)
-            ->update(['read_at' => now()]);
-
-        $this->dispatch('notification-read');
-    }
-
-    public function markAllAsRead(): void
-    {
-        auth()->user()->unreadNotifications()->update(['read_at' => now()]);
-
-        $this->dispatch('notification-read');
     }
 }

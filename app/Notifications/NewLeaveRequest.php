@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\LeaveRequest;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -52,18 +51,24 @@ class NewLeaveRequest extends Notification
         $employee = $leaveRequest->leaveBalance->contract->employee;
 
         $leaveType = $leaveRequest->leaveBalance->leaveType;
+        $employeeNameEn = $employee->nameForLocale('en');
+        $employeeNameAr = $employee->nameForLocale('ar');
+
         return [
             'title' => [
-                'en' => "New Leave Request",
-                'ar' => "طلب إجازة جديد",
+                'en' => 'New Leave Request',
+                'ar' => 'طلب إجازة جديد',
             ],
 
             'body' => [
-                'en' => "$employee->name_en has submitted a $leaveType->name_en request",
-                'ar' => " قام $employee->name_ar بتقديم طلب $leaveType->name_ar",
+                'en' => "{$employeeNameEn} has submitted a {$leaveType->name_en} request",
+                'ar' => "قام {$employeeNameAr} بتقديم طلب {$leaveType->name_ar}",
             ],
 
-            'url'   => route('leaves.all'),
+            'url' => route('leaves.all', [
+                'leave' => $leaveRequest->id,
+                'mode' => 'decision',
+            ]),
         ];
     }
 }
