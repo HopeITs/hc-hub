@@ -25,7 +25,7 @@
                 </span>
             </div>
         @empty
-            <div class="flex flex-col items-center justify-center  text-sm font-light text-secondary-light h-full">
+            <div class="flex flex-col items-center justify-center  text-body font-light text-secondary-light h-full">
                 <span>@lang('general.no-available-data')</span>
             </div>
         @endforelse

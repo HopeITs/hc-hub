@@ -10,7 +10,7 @@
         @click="open = !open"
         :aria-expanded="open"
         aria-haspopup="menu"
-        class="relative inline-flex items-center justify-center transition rounded-full cursor-pointer size-9 text-secondary-light hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:text-white">
+        class="relative inline-flex items-center justify-center transition rounded-full cursor-pointer size-9 text-secondary-light hover:bg-neutral-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-neutral-200 dark:text-secondary-light dark:hover:text-white">
 
         <span :class="ring && 'animate-notif-shake'" class="inline-flex">
             <x-icons.notification class="size-5" />
@@ -43,8 +43,8 @@
             });
         }) }"
         class="absolute end-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-1.5rem)] origin-top overflow-hidden
-               rounded-2xl border border-gray-100 bg-white shadow-[0_25px_80px_-20px_rgba(2,6,23,0.35)] ring-1 ring-black/5
-               dark:bg-gray-800 dark:border-gray-700"
+               rounded-surface border border-neutral-100 bg-white shadow-e3 ring-1 ring-black/5
+               dark:bg-neutral-800 dark:border-neutral-700"
         role="menu">
 
         <!-- Livewire component renders its own header + list -->
@@ -54,8 +54,8 @@
 
         <!-- Footer -->
         <a href="{{ route('notifications.index') }}"
-           class="flex items-center justify-center gap-2 border-t border-gray-100 bg-gray-50 py-2.5 text-sm font-semibold
-                  text-gray-900 transition hover:bg-gray-100">
+           class="flex items-center justify-center gap-2 border-t border-neutral-100 bg-neutral-50 py-2 text-body font-semibold
+                  text-neutral-900 transition hover:bg-neutral-100">
             <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 14">
                 <path d="M10 0C4.612 0 0 5.336 0 7c0 1.742 3.546 7 10 7 6.454 0 10-5.258 10-7 0-1.664-4.612-7-10-7Zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>
             </svg>

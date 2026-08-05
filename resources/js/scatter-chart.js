@@ -36,7 +36,7 @@ function initSalaryTypeScatter() {
                     })),
                     pointBackgroundColor: colors,
                     pointBorderColor: colors,
-                    pointRadius: 4,
+                    pointRadius: 2.8,
                     borderWidth: 0,
                     showLine: false
                 }
@@ -52,16 +52,7 @@ function initSalaryTypeScatter() {
                     min: 0.7,
                     max: numericX.length + 0.3,
                     grid: { display: false },
-                    ticks: {
-                        callback: function(value, index) {
-                            return labels[index];
-                        },
-                        color: "#414042",
-                        font: {
-                            size: 10,
-                            weight: "600"
-                        }
-                    }
+                    ticks: { display: false }
                 },
 
                 y: {
@@ -69,10 +60,10 @@ function initSalaryTypeScatter() {
                     suggestedMax,
                     grid: { color: "#e5e7eb" },
                     ticks: {
-                        color: "#414042",
+                        color: "#6b7280",
                         font: {
-                            size: 10,
-                            weight: "600"
+                            size: 12,
+                            family: "SomarSans"
                         }
                     }
                 }

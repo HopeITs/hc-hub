@@ -71,7 +71,7 @@
                 @lang('general.save')
             </x-primary-button>
 
-            <x-primary-button type="button" class="!w-auto !bg-gray-200 !text-black hover:!bg-gray-300"
+            <x-primary-button type="button" class="!w-auto !bg-neutral-200 !text-black hover:!bg-neutral-300"
                               x-on:click="window.location.href = @js(route('centers.index'))">
                 @lang('general.cancel')
             </x-primary-button>

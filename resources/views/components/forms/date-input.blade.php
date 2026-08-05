@@ -1,8 +1,8 @@
 @php
     $type = $attributes->get('type', 'date');
     $isTime = $type === 'time';
-    $inputClass = 'w-full py-2 text-sm text-gray-900 placeholder-gray-400 rounded-md border border-gray-300 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary-light focus:border-primary transition '
-        . ($isTime ? 'ps-3 pe-10 time-input-native' : 'px-3');
+    $inputClass = 'w-full py-2 text-body text-neutral-900 placeholder-neutral-400 rounded-control border border-neutral-300 bg-white shadow-e1 focus:outline-none focus:ring-2 focus:ring-secondary-light focus:border-primary transition '
+        . ($isTime ? 'ps-3 pe-12 time-input-native' : 'px-3');
 @endphp
 
 @if ($isTime)

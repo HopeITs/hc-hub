@@ -3,7 +3,7 @@
     open: @entangle('open').live
 }" x-cloak>
     <aside x-cloak @click.outside="open = false"
-        class="fixed top-0 z-40 h-full pt-4 bg-white shadow-[4px_0_20px_-18px_rgba(0,0,0,0.35)] transition-[width,transform] duration-300 md:translate-x-0"
+        class="sidebar-material fixed top-0 z-40 h-full pt-4 border-e border-black/[0.06] shadow-e3 transition-[width,transform] duration-[400ms] ease-fluid md:translate-x-0"
         :class="[
             sidebarCollapsed ? 'md:w-20' : 'md:w-64',
             open ? 'w-64 translate-x-0' : 'w-64',
@@ -13,10 +13,10 @@
     >
         <button type="button"
                 x-on:click="$dispatch('sidebar-collapse-toggle')"
-                class="absolute z-50 items-center justify-center hidden transition bg-white border border-gray-200 rounded-full shadow-md top-7 size-8 text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary md:flex"
+                class="nav-press absolute z-50 items-center justify-center hidden bg-white border border-neutral-200 rounded-full shadow-e2 top-7 size-8 text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary md:flex"
                 :class="rtl ? '-left-4' : '-right-4'"
                 :title="sidebarCollapsed ? @js(__('general.expand-sidebar')) : @js(__('general.collapse-sidebar'))">
-            <svg class="transition-transform duration-300 size-4"
+            <svg class="transition-transform duration-[400ms] ease-fluid size-4"
                  :class="sidebarCollapsed ? (rtl ? 'rotate-0' : 'rotate-180') : (rtl ? 'rotate-180' : 'rotate-0')"
                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m15 18-6-6 6-6"/>
@@ -24,16 +24,21 @@
         </button>
 
         <div class="flex flex-col justify-between h-full">
-            <div class="h-full px-3 pb-4 overflow-x-hidden overflow-y-auto bg-white">
-                <a href="{{ route('dashboard') }}" class="flex items-center justify-center h-16 mb-4">
-                    <x-app-logo class="w-[11rem] h-auto object-fit" x-show="!sidebarCollapsed || open" />
+            <div class="h-full px-3 pb-4 overflow-x-hidden overflow-y-auto">
+                <a href="{{ route('dashboard') }}" class="flex items-center justify-start ps-3 h-16 mb-4">
+                    <x-app-logo class="w-[8.25rem] h-auto object-fit" x-show="!sidebarCollapsed || open" />
                     <img src="{{ asset('assets/img/hope-center-icon.svg') }}"
                          alt="{{ config('app.name') }}"
                          x-show="sidebarCollapsed && !open"
                          class="hidden object-contain size-8 md:block" />
                 </a>
 
-                <ul class="space-y-2 font-medium" :class="sidebarCollapsed && !open ? 'md:flex md:flex-col md:items-center' : ''">
+                <ul class="space-y-1 font-medium" :class="sidebarCollapsed && !open ? 'md:flex md:flex-col md:items-center' : ''">
+
+                    {{-- Group: Main --}}
+                    <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
+                        <span class="text-caption font-semibold uppercase tracking-wider text-secondary-light">{{ app()->getLocale() === 'ar' ? 'الرئيسية' : 'Main' }}</span>
+                    </li>
 
                     {{-- 1. Employee Dashboard (Seen by all) --}}
                     <x-layouts.app.sidebar.single-item :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('employee.dashboard')">
@@ -72,6 +77,11 @@
                             {{ __('general.orgn-chart') }}
                         </x-layouts.app.sidebar.single-item>
                     @endactivepermission
+
+                    {{-- Group: Management --}}
+                    <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
+                        <span class="text-caption font-semibold uppercase tracking-wider text-secondary-light">{{ app()->getLocale() === 'ar' ? 'الإدارة' : 'Management' }}</span>
+                    </li>
 
                     {{-- 2. Project Basics --}}
                     @activepermission('project-basics.view')
@@ -201,6 +211,11 @@
                         </x-layouts.app.sidebar.dropdown-nav-list>
                     @endif
 
+                    {{-- Group: Time & Leave --}}
+                    <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
+                        <span class="text-caption font-semibold uppercase tracking-wider text-secondary-light">{{ app()->getLocale() === 'ar' ? 'الإجازات' : 'Time & Leave' }}</span>
+                    </li>
+
                     {{-- 5. Leave Management (Holidays and leaves) --}}
                     {{-- Visible to: HR, super-admin, AND Managers --}}
                     @if ($user->hasActivePermission('leaves.view-all') || $user->hasActivePermission('leaves.manage-balances'))
@@ -237,6 +252,11 @@
                         {{ __('general.my-leaves') }}
                     </x-layouts.app.sidebar.single-item>
                     @endactivepermission
+
+                    {{-- Group: Files & Tasks --}}
+                    <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
+                        <span class="text-caption font-semibold uppercase tracking-wider text-secondary-light">{{ app()->getLocale() === 'ar' ? 'الملفات والمهام' : 'Files & Tasks' }}</span>
+                    </li>
 
                     {{-- 6. Archived Files (All) --}}
                     @activepermission('archives.view')
@@ -305,6 +325,13 @@
                     </x-layouts.app.sidebar.single-item>
                     @endactivepermission
 
+                    {{-- Group: More (only for roles that can see any item below) --}}
+                    @activerole('HR', 'super-admin', 'general-manager', 'manager')
+                        <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
+                            <span class="text-caption font-semibold uppercase tracking-wider text-secondary-light">{{ app()->getLocale() === 'ar' ? 'أخرى' : 'More' }}</span>
+                        </li>
+                    @endactiverole
+
                     {{-- 8. News Management (super-admin, Managers, HRs) --}}
                     @activepermission('news.view')
                         <x-layouts.app.sidebar.single-item :href="route('news.index')" :active="request()->routeIs('news.*')">
@@ -349,6 +376,8 @@
             </div>
         </div>
     </aside>
+    {{-- Dim to focus: the drawer is a modal layer on mobile, so the page behind
+         it is both dimmed and pushed out of focus. --}}
     <div x-show="open" x-transition.opacity @click="open = false"
-        class="fixed inset-0 z-30 bg-secondary-light/50 md:hidden" x-cloak></div>
+        class="fixed inset-0 z-30 bg-neutral-950/30 backdrop-blur-sm md:hidden" x-cloak></div>
 </div>

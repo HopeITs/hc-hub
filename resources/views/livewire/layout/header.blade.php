@@ -12,9 +12,9 @@
 @endphp
 
 <nav dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
-    class="fixed inset-x-0 top-0 z-10 w-screen bg-white md:w-full dark:bg-gray-800 backdrop-blur">
+    class="fixed inset-x-0 top-0 z-10 w-screen bg-white md:w-full dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
 
-    <div class="px-3 py-1 lg:px-5 lg:ps-3">
+    <div class="px-3 py-1 lg:px-4 lg:ps-3">
         <div class="flex items-center justify-end gap-2 md:pe-0 pe-4">
             <button wire:click="$dispatch('sidebar.toggle')" type="button"
                 class="p-2 transition bg-transparent border border-transparent cursor-pointer md:hidden me-auto text-heading text-secondary-light hover:text-secondary-dark rounded-base">
@@ -25,7 +25,7 @@
                 </svg>
             </button>
             <a href="{{ $localized }}"
-                class="inline-flex items-center justify-center h-9 min-w-9 px-2 pt-px text-base font-medium leading-none tracking-wide transition rounded-full text-secondary-medium hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
+                class="inline-flex items-center justify-center h-9 min-w-9 px-2 pt-px text-body font-medium leading-none tracking-wide transition rounded-full text-secondary-medium hover:bg-neutral-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-neutral-200"
                 title="{{ $switchTo === 'ar' ? 'العربية' : 'English' }}"
                 aria-label="{{ $switchTo === 'ar' ? 'Switch to Arabic' : 'Switch to English' }}">
                 {{ $switchTo === 'ar' ? 'AR' : 'EN' }}
@@ -35,7 +35,7 @@
 
             <a href="https://docs.google.com/document/d/1AcrvWNBzoD-bTem3Gy_35EtDgwD-SXST/edit?usp=sharing&ouid=105248334092459549739&rtpof=true&sd=true"
                 target="_blank" rel="noopener"
-                class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
+                class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-neutral-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-neutral-200"
                 title="{{ $guideLabel }}"
                 aria-label="{{ $guideLabel }}">
                 <x-icons.user-guide class="size-[24px]" />
@@ -44,7 +44,7 @@
             <span class="w-px h-6 bg-secondary-soft" aria-hidden="true"></span>
 
             <a href="https://hcsyria.org/home" target="_blank" rel="noopener"
-                class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
+                class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-neutral-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-neutral-200"
                 title="{{ $homepageLabel }}"
                 aria-label="{{ $homepageLabel }}">
                 <x-icons.homepage class="size-5" />
@@ -54,7 +54,7 @@
 
             <a href="https://docs.google.com/forms/d/e/1FAIpQLSdxNuk6xkFZY1t4vb3kYEKkwMMPM6VnvfGPO-iH1VfTCiEHMQ/viewform"
                 target="_blank" rel="noopener"
-                class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-gray-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-gray-200"
+                class="inline-flex items-center justify-center transition rounded-full size-9 text-secondary-light hover:bg-neutral-100 hover:text-secondary-dark focus:outline-none focus:ring-2 focus:ring-neutral-200"
                 title="{{ $feedbackLabel }}"
                 aria-label="{{ $feedbackLabel }}">
                 <x-icons.guide class="size-5" />
@@ -67,7 +67,7 @@
             @auth
                 <div x-data="roleDropdown()" x-init="$store.dir = { rtl: @js($isRtl) }" class="relative ms-3" @keydown.escape.window="open=false">
 
-                    <button @click="toggle()" :aria-expanded="open" aria-haspopup="menu" class="inline-flex items-center justify-center transition rounded-full size-9 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
+                    <button @click="toggle()" :aria-expanded="open" aria-haspopup="menu" class="inline-flex items-center justify-center transition rounded-full size-9 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-200">
 
                         <span class="relative inline-flex items-center justify-center rounded-full size-9 shrink-0">
                             <img class="object-cover border rounded-full size-8 border-primary"
@@ -81,11 +81,11 @@
 
                     <div x-cloak x-show="open" x-transition.duration.160ms.origin.bottom @click.outside="open=false"
                         :class="$store.dir.rtl ? 'end-0' : 'end-0'"
-                        class="z-50 absolute top-full mt-2 w-[250px] rounded-3xl border bg-white
+                        class="z-50 absolute top-full mt-2 w-[250px] rounded-surface border bg-white
                                 shadow-[0_25px_80px_-20px_rgba(2,6,23,0.35)] ring-1 ring-black/5"
                         role="menu">
 
-                        <div class="relative px-5 pt-5 pb-4">
+                        <div class="relative px-4 pt-4 pb-4">
                             <div
                                 class="pointer-events-none absolute inset-0 opacity-[0.07]
                                     bg-[radial-gradient(1200px_400px_{{ $isRtl ? 'at_90%_-20%' : 'at_10%_-20%' }},theme(colors.primary.500/.6),transparent_40%)]">
@@ -98,20 +98,20 @@
                                 </span>
 
                                 <div class="min-w-0">
-                                    <div class="text-sm font-semibold text-gray-900 truncate">
+                                    <div class="text-body font-semibold text-neutral-900 truncate">
                                         {{ $user->profile?->name }}
                                     </div>
-                                    <div class="text-xs text-gray-500 truncate">{{ $user->email }}</div>
-                                    <div class="text-xs text-gray-500 truncate">{{ $user->myRole() }}</div>
+                                    <div class="text-small text-secondary-medium truncate">{{ $user->email }}</div>
+                                    <div class="text-small text-secondary-medium truncate">{{ $user->myRole() }}</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                        <div class="h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent"></div>
 
                         <div class="px-2 py-2">
                             <a href="{{ route('my-profile') }}" wire:navigate
-                                class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-800 transition rounded-xl hover:bg-secondary-soft hover:text-primary hover:shadow-sm">
+                                class="flex items-center gap-3 px-3 py-2 text-body font-medium text-neutral-800 transition rounded-surface hover:bg-secondary-soft hover:text-primary hover:shadow-e1">
                                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="1.8">
                                     <circle cx="12" cy="8" r="4" />
@@ -121,8 +121,8 @@
                             </a>
 
                             <a href="{{ route('settings.password') }}"
-                                class="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-800 transition rounded-xl hover:bg-gray-100/90 hover:shadow-sm">
-                                <svg class="text-gray-700 size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                class="flex items-center gap-3 px-3 py-2 text-body font-medium text-neutral-800 transition rounded-surface hover:bg-neutral-100/90 hover:shadow-e1">
+                                <svg class="text-neutral-800 size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="1.8">
                                     <rect x="5" y="10" width="14" height="10" rx="2" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 10V7a4 4 0 0 1 8 0v3" />
@@ -131,18 +131,18 @@
                             </a>
                         </div>
 
-                        <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                        <div class="h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent"></div>
 
                         {{--                        @if ($user->hasMultipleRoles()) --}}
-                        {{--                            <div class="px-5 py-4"> --}}
+                        {{--                            <div class="px-4 py-4"> --}}
                         {{--                                <div class="flex items-center justify-between mb-2"> --}}
-                        {{--                                    <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide"> --}}
+                        {{--                                    <div class="text-caption font-semibold text-secondary-light uppercase tracking-wide"> --}}
                         {{--                                        {{ __('Switch role') }} --}}
                         {{--                                    </div> --}}
 
                         {{--                                    <button @click="rolesOpen = !rolesOpen" --}}
-                        {{--                                            class="inline-flex items-center gap-2 rounded-xl border border-gray-200 --}}
-                        {{--                                                   px-3 py-1.5 text-xs font-medium hover:border-secondary-medium --}}
+                        {{--                                            class="inline-flex items-center gap-2 rounded-surface border border-neutral-200 --}}
+                        {{--                                                   px-3 py-2 text-small font-medium hover:border-secondary-medium --}}
                         {{--                                                   hover:bg-secondary-soft transition"> --}}
                         {{--                                        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" --}}
                         {{--                                             stroke-width="1.8"> --}}
@@ -160,17 +160,17 @@
                         {{--                                    <livewire:auth.role-switcher :onlySwitchables="true" :wire:key="'role-switcher-pill'"/> --}}
                         {{--                                </div> --}}
 
-                        {{--                                <p class="mt-2 text-[11px] text-gray-500">{{ __('Choose a role to make it active instantly.') }}</p> --}}
+                        {{--                                <p class="mt-2 text-caption text-secondary-medium">{{ __('Choose a role to make it active instantly.') }}</p> --}}
                         {{--                            </div> --}}
 
-                        {{--                            <div class="h-px bg-gray-100"></div> --}}
+                        {{--                            <div class="h-px bg-neutral-100"></div> --}}
                         {{--                        @endif --}}
 
                         <div class="px-2 py-2">
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit"
-                                    class="flex items-center w-full gap-3 px-3 py-2 text-sm font-semibold text-red-600 transition rounded-xl hover:bg-red-50/80 hover:shadow-sm">
+                                    class="flex items-center w-full gap-3 px-3 py-2 text-body font-semibold text-red-600 transition rounded-surface hover:bg-red-50/80 hover:shadow-e1">
                                     <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="1.8">
                                         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />

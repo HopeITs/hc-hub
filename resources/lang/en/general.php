@@ -727,4 +727,7 @@ return [
         'current-logo' => 'Current logo',
         'toggle-password' => 'Show or hide password',
     ],
+
+    // Default <meta> copy, overridden per page via $title / $description
+    'meta-description' => 'HopeHR is the internal human resources portal of Christian Hope Center, used by authorised staff to manage employees, contracts and leave.',
 ];

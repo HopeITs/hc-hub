@@ -4,7 +4,7 @@
     </div>
 
 </div>
-<div class="card border border-borderColor rounded-[5px] shadow-xs bg-white mt-2 mb-8">
+<div class="card border border-borderColor rounded-surface shadow-e1 bg-white mt-2 mb-8">
     <div class="card-body p-0">
 
         <div class="custom-datatable-filter overflow-x-auto">

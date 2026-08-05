@@ -8,8 +8,8 @@
     use Illuminate\Support\Str;
 
     $baseClass = match($theme) {
-        'settings' => 'text-sm text-red-600 dark:text-red-400 mt-1',
-        default    => 'text-primary text-sm mt-1',
+        'settings' => 'text-body text-red-600 dark:text-red-400 mt-1',
+        default    => 'text-primary text-body mt-1',
     };
 
     /**

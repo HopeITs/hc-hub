@@ -13,7 +13,7 @@
                     placeholder="username" />
                 @if (data_get($infoForm, 'create_account'))
                     <span
-                        class="inline-flex items-center px-3 ltr:rounded-e-md rtl:rounded-s-md shadow-md border ltr:border-s-0 rtl:border-e-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                        class="inline-flex items-center px-3 ltr:rounded-e-md rtl:rounded-s-md shadow-e2 border ltr:border-s-0 rtl:border-e-0 border-neutral-300 bg-neutral-50 text-secondary-medium sm:text-body">
                         @hcsyria.org
                     </span>
                 @endif
@@ -25,9 +25,9 @@
                 <x-forms.input type="checkbox" wire:model.live="infoForm.create_account" value="1"
                     id="create_account" class="mt-1" />
                 <span>
-                    <span class="text-sm text-secondary-dark">@lang('general.create_login_account')</span>
+                    <span class="text-body text-secondary-dark">@lang('general.create_login_account')</span>
                     @if (data_get($infoForm, 'create_account'))
-                        <span class="block text-xs text-secondary-light">@lang('general.create_login_account_hint')</span>
+                        <span class="block text-small text-secondary-light">@lang('general.create_login_account_hint')</span>
                     @endif
                 </span>
             </label>

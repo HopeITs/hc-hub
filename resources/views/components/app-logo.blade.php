@@ -1,4 +1,10 @@
+{{-- Intrinsic size of assets/img/001_HC.png; reserves the box so the logo cannot shift layout.
+     CSS classes passed by the caller still win over the width/height attributes. --}}
 <img src="{{ asset('assets/img/001_HC.png') }}"
-     alt="Logo"
+     alt="{{ config('app.name') }}"
+     width="276"
+     height="74"
+     decoding="async"
+     fetchpriority="high"
      {{$attributes->merge(['class' => ''])}}
 />

@@ -10,7 +10,7 @@
                 <x-forms.input-label for="leave_balance_id" required>{{__('general.type')}}</x-forms.input-label>
                 <x-forms.select2-input wire:model.live="form.leave_balance_id" id="leave_balance_id">
                     <option
-                        class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                        class="text-secondary-light" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                         @lang('general.select')..
                     </option>
                     @foreach($allAvailableLeaves ?? [] as $availableLeave)
@@ -23,7 +23,7 @@
                 <x-forms.input-label for="alternative_employee">{{__('general.alternative-employee')}}</x-forms.input-label>
                 <x-forms.select2-input wire:model="form.alternative_employee" id="alternative_employee">
                     <option
-                        class="text-gray-400" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
+                        class="text-secondary-light" @disabled($form->leaveRequest !== null) @selected($form->leaveRequest === null)>
                         @lang('general.select')..
                     </option>
                     @foreach($alternativeEmployees as $alternativeEmployee)

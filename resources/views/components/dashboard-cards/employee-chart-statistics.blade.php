@@ -1,13 +1,13 @@
-<div class="w-full h-full rounded-3xl bg-white border border-neutral-200 shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] hover:shadow-md transition-all duration-300 p-6 flex flex-col">
+<div class="w-full h-full rounded-surface bg-white border border-neutral-200 shadow-e1 hover:shadow-e2 transition-all duration-300 p-9 flex flex-col">
 
     <div class="flex items-center justify-between mb-4">
-        <h2 class="text-[18px] font-semibold text-secondary-medium flex items-center gap-2">
+        <h2 class="text-h4 font-semibold text-secondary-medium flex items-center gap-2">
             @lang('general.employees-statistics')
-            <x-icons.chart class="w-5 h-5 mb-1 text-primary"/>
+            <x-icons.chart class="size-5 mb-1 text-primary"/>
         </h2>
 
         <select
-            class="text-xs border border-neutral-300 rounded-xl px-4 py-1.5 bg-white shadow-sm text-neutral-700">
+            class="text-small border border-neutral-300 rounded-surface px-3 py-1.5 bg-white shadow-e1 text-neutral-700">
             <option value="monthly">@lang('general.monthly')</option>
             <option value="quarterly">@lang('general.quarterly')</option>
             <option value="yearly">@lang('general.yearly')</option>
@@ -18,7 +18,7 @@
         <canvas id="employeeChart"></canvas>
     </div>
 
-    <div id="chartLegend" class="flex items-center gap-6 mt-6 text-sm font-medium ms-3 text-neutral-600"></div>
+    <div id="chartLegend" class="flex items-center gap-6 mt-6 text-body font-medium ms-3 text-neutral-600"></div>
 
 </div>
 
@@ -58,10 +58,10 @@
                         borderColor: primary,
                         fill: false,
                         tension: 0.3,
-                        borderWidth: 2,
+                        borderWidth: 0.7,
                         pointBackgroundColor: primary,
-                        pointRadius: 3,
-                        pointHoverRadius: 6
+                        pointRadius: 2.1,
+                        pointHoverRadius: 4.2
                     },
                     {
                         label: "Ended",
@@ -69,10 +69,10 @@
                         borderColor: secondary,
                         fill: false,
                         tension: 0.3,
-                        borderWidth: 2,
+                        borderWidth: 0.7,
                         pointBackgroundColor: secondary,
-                        pointRadius: 3,
-                        pointHoverRadius: 6
+                        pointRadius: 2.1,
+                        pointHoverRadius: 4.2
                     },
                     {
                         label: "Terminated",
@@ -80,10 +80,10 @@
                         borderColor: neutral,
                         fill: false,
                         tension: 0.3,
-                        borderWidth: 2,
+                        borderWidth: 0.7,
                         pointBackgroundColor: neutral,
-                        pointRadius: 3,
-                        pointHoverRadius: 6
+                        pointRadius: 2.1,
+                        pointHoverRadius: 4.2
                     },
                 ]
             },
@@ -115,10 +115,10 @@
                             drawOnChartArea: true
                         },
                         ticks: {
-                            color: styles.getPropertyValue("--color-secondary-dark"),
+                            color: "#6b7280",
                             font: {
                                 size: 12,
-                                weight: "bold",
+                                family: "SomarSans",
                             }
                         }
                     },
@@ -131,10 +131,10 @@
                         },
                         ticks: {
                             stepSize: 1,
-                            color: styles.getPropertyValue("--color-secondary-dark"),
+                            color: "#6b7280",
                             font: {
                                 size: 12,
-                                weight: "bold",
+                                family: "SomarSans",
                             },
                             callback: value => Number.isInteger(value) ? value : ""
                         }
@@ -154,13 +154,13 @@
                 const isHidden = chartInstance.isDatasetVisible(index) === false;
 
                 const dot = document.createElement("span");
-                dot.className = "w-2.5 h-2.5 rounded-full inline-block";
+                dot.className = "w-[7.7px] h-[7.7px] rounded-full inline-block";
                 dot.style.backgroundColor = isHidden ? "transparent" : ds.borderColor;
-                dot.style.border = `2px solid ${ds.borderColor}`;
+                dot.style.border = `1.54px solid ${ds.borderColor}`;
 
                 const label = document.createElement("span");
                 label.textContent = ds.label;
-                label.className = "text-xs";
+                label.className = "text-[9.24px]";
                 label.style.opacity = isHidden ? 0.4 : 1;
 
                 item.appendChild(dot);

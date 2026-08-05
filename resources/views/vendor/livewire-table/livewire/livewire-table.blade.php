@@ -4,7 +4,7 @@
 >
     @include('livewire-table::bar.bar')
     <div
-            class="overflow-x-auto bg-white border border-secondary-dark  shadow-xs rounded-md overscroll-x-none">
+            class="overflow-x-auto bg-white border border-[var(--line-hairline)] shadow-e1 rounded-surface overscroll-x-none">
         @include('livewire-table::table.table')
     </div>
     {{ $paginator->links('livewire-table::pagination.pagination') }}

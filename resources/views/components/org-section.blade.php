@@ -2,9 +2,10 @@
 
 @php
     // Solid connectors for the direct line, dashed for the technical line.
+    // The dash pattern (not colour) distinguishes the two — colour-blind safe, on-brand.
     $isTech = $managerType === 'tech';
-    $vLine = $isTech ? 'w-0 border-s border-dashed border-amber-300' : 'w-px bg-gray-300';
-    $hBorder = $isTech ? 'border-t border-dashed border-amber-300' : 'border-t border-gray-300';
+    $vLine = $isTech ? 'w-0 border-s border-dashed border-neutral-400' : 'w-px bg-neutral-300';
+    $hBorder = $isTech ? 'border-t border-dashed border-neutral-400' : 'border-t border-neutral-300';
     $gap = $compact ? 'gap-2' : 'gap-4';
     $teamRel = $managerType.'Team';
 
@@ -25,11 +26,11 @@
                     x-data="{ open: @js(!($collapsed[$position->id] ?? true)) }"
                     x-on:expand-all.window="open = true"
                     x-on:collapse-all.window="open = false"
-                    class="relative flex flex-col items-center {{ $compact ? 'gap-2 pt-4' : 'gap-3 pt-5' }}"
+                    class="relative flex flex-col items-center {{ $compact ? 'gap-2 pt-4' : 'gap-3 pt-4' }}"
                 >
                     <span class="absolute start-1/2 top-0 {{ $compact ? 'h-4' : 'h-5' }} {{ $vLine }}"></span>
 
-                    <div class="rounded-3xl border border-gray-200 bg-white/80 {{ $compact ? 'p-2' : 'p-3' }} shadow-sm backdrop-blur-sm">
+                    <div class="rounded-surface border border-neutral-200 bg-white {{ $compact ? 'p-2' : 'p-3' }} shadow-e1">
                         <div class="flex flex-wrap justify-center gap-2">
                             @foreach($position->activeContracts as $contract)
                                 <x-org-node
@@ -58,7 +59,7 @@
                             <button type="button"
                                     wire:click="toggleCollapse({{ $position->id }})"
                                     x-on:click="open = !open"
-                                    class="mt-2 flex w-full items-center justify-between gap-2 rounded-[0.5cqw] bg-gray-100 px-2.5 py-1.5 text-[10px] font-bold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                                    class="mt-2 flex w-full items-center justify-between gap-2 rounded-[0.5cqw] bg-neutral-100 px-2 py-2 text-caption font-bold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                                     :aria-expanded="open"
                                     :title="open ? @js(__('general.collapse')) : @js(__('general.expand'))">
                                 <span>{{ $subTeam->count() }} @lang('general.direct-reports')</span>

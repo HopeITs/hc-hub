@@ -77,7 +77,7 @@
 
     <div class="pointer-events-none relative z-10 flex min-h-full items-center justify-center p-4 sm:p-6">
         <div x-show="show"
-             class="pointer-events-auto w-full overflow-hidden rounded-lg bg-white shadow-xl transform transition-all {{ $maxWidth }}"
+             class="pointer-events-auto w-full overflow-hidden rounded-surface bg-white shadow-e3 transform transition-all {{ $maxWidth }}"
              x-transition:enter="ease-out duration-300"
              x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
              x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"

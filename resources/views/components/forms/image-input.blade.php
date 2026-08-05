@@ -1,7 +1,7 @@
 @props(['item' => null])
 <div x-data="{ preview: null }" x-init="@this.on('resetPreview', () => preview = null);">
     <label for="logo-upload"
-        class="cursor-pointer relative block aspect-video w-4/12 rounded-sm overflow-hidden border-2 border-dashed border-gray-300 group hover:border-secondary-medium transition">
+        class="cursor-pointer relative block aspect-video w-4/12 rounded-inset overflow-hidden border-2 border-dashed border-neutral-300 group hover:border-secondary-medium transition">
         <input id="logo-upload" type="file" class="hidden" wire:model="item.logo" x-ref="logo"
             x-on:change="
                     const file = $refs.logo.files[0];
@@ -12,15 +12,15 @@
                     }
                 ">
 
-        <div class="flex items-center justify-center h-full bg-gray-100 group-hover:bg-secondary-soft transition">
+        <div class="flex items-center justify-center h-full bg-neutral-100 group-hover:bg-secondary-soft transition">
             <template x-if="preview">
                 <img :src="preview" alt="{{ __('general.a11y.logo-preview') }}"
-                     class="object-fit w-full h-full rounded-sm" />
+                     class="object-fit w-full h-full rounded-inset" />
             </template>
 
             @isset($item['logo'])
                 <img src="{{ $logo->temporaryUrl() }}" alt="{{ __('general.a11y.logo-preview') }}"
-                     class="object-fit w-full h-full rounded-sm" />
+                     class="object-fit w-full h-full rounded-inset" />
             @else(array_key_exists('id', $item->toArray()) && $item->getFirstMediaUrl('logo'))
                 <img src="{{ $item->getFirstMediaUrl('logo') }}" alt="{{ __('general.a11y.current-logo') }}"
                      class="object-fit w-full h-full rounded-full" />

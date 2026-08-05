@@ -5,8 +5,8 @@
 
 @php
     $base = 'py-2 px-3 inline-flex items-center justify-center 
-             rounded-md border border-gray-300
-             bg-white hover:bg-gray-50 shadow-sm cursor-pointer
+             rounded-control border border-neutral-300
+             bg-white hover:bg-neutral-50 shadow-e1 cursor-pointer
              transition duration-150 ease-in-out
              disabled:opacity-60 disabled:cursor-not-allowed
              focus:outline-none focus:ring-0 active:ring-0';
@@ -45,8 +45,8 @@
 
 @php
     $base = 'py-2 px-3 inline-flex items-center justify-center 
-             rounded-md border border-gray-300
-             bg-white hover:bg-gray-50 shadow-sm cursor-pointer
+             rounded-control border border-neutral-300
+             bg-white hover:bg-neutral-50 shadow-e1 cursor-pointer
              transition duration-150 ease-in-out
              focus:outline-none focus:ring-0 active:ring-0';
 @endphp

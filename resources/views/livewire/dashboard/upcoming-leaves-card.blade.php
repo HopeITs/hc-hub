@@ -17,10 +17,10 @@
         @forelse($upcomingLeaves as $upcomingLeave)
             <div class="pb-3  border-b border-b-secondary-soft">
                 <div class="flex justify-between items-center">
-                    <p class="text-[13px] font-bold text-[#58595B]">{{$upcomingLeave->leaveBalance->contract->employee->name}}</p>
+                    <p class="text-body font-bold text-[#58595B]">{{$upcomingLeave->leaveBalance->contract->employee->name}}</p>
                     @activerole('HR','super-admin','general-manager','manager')
                     <span
-                            class="text-[10px] h-5.5 w-16 font-normal tracking-wide mt-4 text-center text-white bg-{{LeaveRequestStatus::getLocalizedName($upcomingLeave->status)['color']}} px-1 py-1  rounded-full">{{LeaveRequestStatus::getLocalizedName($upcomingLeave->status)['value']}}</span>
+                            class="text-caption h-5.5 w-16 font-normal tracking-wide mt-4 text-center text-white bg-{{LeaveRequestStatus::getLocalizedName($upcomingLeave->status)['color']}} px-1 py-1  rounded-full">{{LeaveRequestStatus::getLocalizedName($upcomingLeave->status)['value']}}</span>
                     @endactiverole
                 </div>
 
@@ -37,7 +37,7 @@
                             $leave_date ='<span>' . $upcomingLeave->start_at->format('d M') .  '</span><span class="me-1"> - '.$upcomingLeave->end_at->format('d M') .'</span>';
                         }
                     @endphp
-                    <p class="text-[10px] font-light mt-1 text-gray-500 gap-1 flex">{{ $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') ' }}</p>
+                    <p class="text-caption font-light mt-1 text-secondary-medium gap-1 flex">{!! $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') ' !!}</p>
 
                 @else
                     @php
@@ -50,12 +50,12 @@
                         }
 
                     @endphp
-                    <p class="text-[10px] font-light mt-1 text-gray-500 space-x-1">{{ $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') ' }}
+                    <p class="text-caption font-light mt-1 text-secondary-medium space-x-1">{!!   $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') '  !!}
                     </p>
                 @endif
             </div>
         @empty
-            <div class="flex flex-col items-center justify-center  text-sm font-light text-secondary-light h-full">
+            <div class="flex flex-col items-center justify-center  text-body font-light text-secondary-light h-full">
                 <span>@lang('general.no-available-data')</span>
             </div>
         @endforelse

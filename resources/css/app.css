@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './tokens.css';
 @import '../../vendor/livewire/flux/dist/flux.css';
 
 @import "flowbite/src/themes/default";
@@ -118,6 +119,12 @@
 
 body {
     font-family: 'SomarSans', sans-serif;
+
+    /* The type scale's base. Without this, any element that carries no
+       size utility falls back to the browser's 16px, which is a step
+       the scale does not contain. */
+    font-size: var(--text-body);
+    line-height: 1.55;
 }
 
 @theme {
@@ -129,6 +136,7 @@ body {
     --color-accent-foreground: var(--color-white);
 
     --color-primary: #c2151c; /* HOPE brand primary red */
+    --color-primary-hover: #a51218; /* one step darker, for button hover */
     --color-secondary-dark: #58595b;
     --color-secondary-medium: #6d6e71;
     --color-secondary-light: #939598;
@@ -154,6 +162,24 @@ body {
     --color-black: #414042;
     --tag-remove-btn-bg--hover: #c2151c;
 
+    /* Simple-Modern: lighter, cleaner elevation ramp */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 1px 4px 0 rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 6px 16px -6px rgba(0, 0, 0, 0.12);
+
+    /* Subtle warm-neutral sidebar surface */
+    --color-sidebar-surface: #f9fafb;
+    --color-app-surface: #f4f5f7;
+
+    /* Selected-state fill. Never tint the brand red down for this — a
+       low-opacity #c2151c reads as pink, which is not allowed in this UI. */
+    --color-selection: #e6e7e8;
+
+    /* Critically damped easing — reaches the target quickly, settles without
+       overshoot. Used for chrome that resizes (sidebar collapse) so the panel
+       and the content it pushes stay locked together. */
+    --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
 
 }
 
@@ -442,8 +468,7 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
     }
 
     button.org-id-card:hover {
-        border-color: var(--color-secondary-light);
-        box-shadow: 0 5cqw 10cqw rgb(65 64 66 / 26%);
+        border-color: var(--color-secondary-dark);
         transform: translateY(-2px);
     }
 
@@ -693,5 +718,78 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
     .animate-notif-shake,
     .animate-notif-pop {
         animation: none;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* Sidebar — translucent material + press feedback                     */
+/* ------------------------------------------------------------------ */
+
+/* The sidebar is a structural region, so it carries a heavier material:
+   a strong blur with boosted saturation, so whatever passes beneath keeps
+   its colour instead of turning grey. Reads fully on mobile, where the
+   drawer overlays the page; subtle on desktop, where content sits beside it. */
+.sidebar-material {
+    background-color: color-mix(in srgb, var(--color-sidebar-surface) 72%, transparent);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+}
+
+/* Press feedback: instant, on pointer-down — not on release. */
+.nav-press {
+    transition:
+        background-color 150ms ease-out,
+        color 150ms ease-out,
+        transform 120ms ease-out;
+}
+
+.nav-press:active {
+    transform: scale(0.975);
+}
+
+/* Chevron points where the disclosure is going. Keyed off the submenu's own
+   visibility class, not aria-expanded — Flowbite toggles the class but leaves
+   the attribute stale. */
+.nav-chevron {
+    transition: transform 200ms var(--ease-fluid);
+}
+
+li:has(> ul:not(.hidden)) .nav-chevron {
+    transform: rotate(180deg);
+}
+
+/* Reduced motion: keep the colour feedback, drop the movement. */
+@media (prefers-reduced-motion: reduce) {
+    .nav-press {
+        transition:
+            background-color 150ms ease-out,
+            color 150ms ease-out;
+    }
+
+    .nav-press:active {
+        transform: none;
+    }
+
+    .nav-chevron {
+        transition: none;
+    }
+}
+
+/* Reduced transparency: frost the material into a solid surface. */
+@media (prefers-reduced-transparency: reduce) {
+    .sidebar-material {
+        background-color: var(--color-sidebar-surface);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+}
+
+/* Increased contrast: solid background behind a defined edge. */
+@media (prefers-contrast: more) {
+    .sidebar-material {
+        background-color: #ffffff;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        border-inline-end-color: var(--color-neutral-700);
     }
 }

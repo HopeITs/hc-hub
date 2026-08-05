@@ -45,8 +45,8 @@
 <livewire:layout.sidebar/>
 
 
-<div class="flex flex-col min-h-screen transition-[margin] duration-300 md:ms-60"
-     :class="sidebarCollapsed ? 'md:!ms-20' : 'md:!ms-60'">
+<div class="flex flex-col min-h-screen transition-[margin] duration-[400ms] ease-fluid md:ms-60"
+     :class="sidebarCollapsed ? 'md:!ms-24' : 'md:!ms-60'">
 
 
 
@@ -55,7 +55,7 @@
     <main id="main-content"
           tabindex="-1"
           aria-label="{{ __('general.a11y.main-content') }}"
-          class="{{ View::hasSection('greeting') ? '' : 'pt-[120px] ' }} bg-gray-100 flex-grow flex flex-col items-center focus:outline-none">
+          class="{{ View::hasSection('greeting') ? '' : 'pt-[120px] ' }} bg-app-surface flex-grow flex flex-col items-center focus:outline-none">
 
 
         {{--
@@ -68,13 +68,13 @@
                 {{ session('status') }}
             </div>
         @endif
-        <div class="px-4 pb-6 max-lg:w-full md:w-11/12  min-h-full">
+        <div class="px-4 pb-18 max-lg:w-full md:w-11/12  min-h-full">
             @yield('greeting')
             {{ $slot }}
         </div>
     </main>
 
-    <x-layouts.app.footer class="bg-gray-100"/>
+    <x-layouts.app.footer class="bg-app-surface"/>
 </div>
 
 @include('partials.scripts')

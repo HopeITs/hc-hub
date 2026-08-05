@@ -1,18 +1,18 @@
-<section class="min-h-[86.7dvh]  rtl:text-right bg-gray-100 flex items-center justify-center px-4">
+<section class="min-h-[86.7dvh]  rtl:text-right bg-neutral-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
 
-        <div class="text-center mb-6">
+        <div class="mb-6 text-center">
             <x-app-logo class="mx-auto " />
         </div>
 
-        <x-auth-card class="w-96 space-y-6">
+        <x-auth-card class="space-y-6 w-96">
 
-            <div class="text-center space-y-1">
-                <h2 class="text-2xl font-bold text-gray-900">{{ __('auth.sign-in') }}</h2>
+            <div class="space-y-1 text-center">
+                <h1 class="text-2xl font-bold text-gray-900">{{ __('auth.sign-in') }}</h1>
                 <p class="text-sm text-gray-500">{{ __('auth.sign-in-text') }}</p>
             </div>
 
-            <x-auth-session-status class="text-center text-green-600 text-sm mb-2" :status="session('status')" />
+            <x-auth-session-status class="mb-2 text-center text-green-600 text-body" :status="session('status')" />
 
             <form
                 x-data
@@ -21,7 +21,7 @@
                     $wire.set('password', document.getElementById('password').value, false);
                     $wire.login()
                 "
-                class="space-y-5"
+                class="space-y-4"
             >
 
                 <div>
@@ -53,7 +53,7 @@
                     <x-forms.input-error field="password" input-id="password" />
                 </div>
 
-                <div class="flex items-center justify-between text-sm text-gray-600">
+                <div class="flex items-center justify-between text-body text-secondary-medium">
                     <x-forms.checkbox-input type="checkbox" id="remember" wire:model="remember">
                     {{ __('auth.remember-me') }}
                     </x-forms.checkbox-input>

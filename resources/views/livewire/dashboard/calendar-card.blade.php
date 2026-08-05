@@ -13,7 +13,7 @@
             {{ $current->format('F Y') }}
         </p>
 
-        <div class="flex gap-1 text-[16px] font-light text-secondary-dark">
+        <div class="flex gap-1 text-body font-light text-secondary-dark">
             <button wire:click="prev" >&lt;</button>
             <button wire:click="next" >&gt;</button>
         </div>
@@ -65,7 +65,7 @@
                 </div>
 
                 @if(count($day['tooltip']) > 0)
-                    <div class="absolute bottom-7 left-1/2 -translate-x-1/2 bg-white text-secondary-dark text-[10px] px-2 py-1 rounded shadow hidden group-hover:block whitespace-nowrap z-20">
+                    <div class="absolute bottom-7 left-1/2 -translate-x-1/2 bg-white text-secondary-dark text-caption px-2 py-1 rounded shadow hidden group-hover:block whitespace-nowrap z-20">
                         @foreach($day['tooltip'] as $t)
                             <div>{{ $t }}</div>
                         @endforeach

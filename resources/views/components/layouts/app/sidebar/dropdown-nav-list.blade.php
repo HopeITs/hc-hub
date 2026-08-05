@@ -17,24 +17,24 @@
         aria-expanded="{{ $ariaExpanded }}"
         title="{{ $title }}"
 
-        class=" cursor-pointer
-            group flex items-center w-full p-2 rounded-lg transition duration-150
+        class="nav-press cursor-pointer
+            group flex items-center w-full px-3 py-2 rounded-control
+            font-medium
 
-            font-medium text-secondary-light bg-white
-            hover:text-secondary-dark hover:font-bold hover:bg-secondary-soft
-
-            {{ $active ? 'text-secondary-dark font-bold bg-secondary-soft' : '' }}
+            {{ $active
+                ? 'text-secondary-dark bg-selection'
+                : 'text-secondary-light hover:text-secondary-dark hover:bg-black/[0.03]' }}
         "
-        :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0' : ''"
+        :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0 md:mx-auto' : ''"
     >
         {{-- Icon --}}
-        <span class="size-5 shrink-0 text-inherit group-hover:text-inherit">
+        <span class="flex items-center justify-center size-5 shrink-0 text-inherit group-hover:text-inherit">
             {{ $icon }}
         </span>
 
         {{-- Label --}}
         <span
-            class="flex-1 text-sm text-left  ms-3 rtl:me-3 rtl:text-right whitespace-nowrap text-inherit group-hover:text-inherit"
+            class="flex-1 text-body text-left  ms-2 rtl:me-2 rtl:text-right whitespace-nowrap text-inherit group-hover:text-inherit"
             x-show="!sidebarCollapsed || open"
         >
             {{ $title }}
@@ -42,7 +42,7 @@
 
         {{-- Chevron --}}
         <svg
-            class=" size-3 shrink-0 text-inherit group-hover:text-inherit"
+            class="nav-chevron size-3 shrink-0 text-inherit group-hover:text-inherit"
             x-show="!sidebarCollapsed || open"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
@@ -53,7 +53,7 @@
         </svg>
     </button>
 
-    <ul id="{{ $id }}" class="{{ $isActive }} ps-4" x-show="!sidebarCollapsed || open">
+    <ul id="{{ $id }}" class="{{ $isActive }} ps-[21px]" x-show="!sidebarCollapsed || open">
         {{ $list }}
     </ul>
 </li>

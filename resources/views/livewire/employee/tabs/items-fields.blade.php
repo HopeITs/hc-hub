@@ -2,17 +2,17 @@
     <x-heading-label>@lang('general.items_from_checklist')</x-heading-label>
 
     @if(!empty($employeeChecklistItems) && $employeeChecklistItems->isNotEmpty())
-        <div class="overflow-x-auto rounded-lg border">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+        <div class="overflow-x-auto rounded-surface border">
+            <table class="min-w-full divide-y divide-neutral-200">
+                <thead class="bg-neutral-50">
                     <tr>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">@lang('general.item')</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">@lang('general.note')</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">@lang('general.status')</th>
-                        <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">@lang('general.received_at')</th>
+                        <th class="px-6 py-3 text-start text-small font-medium text-secondary-medium uppercase tracking-wider">@lang('general.item')</th>
+                        <th class="px-6 py-3 text-start text-small font-medium text-secondary-medium uppercase tracking-wider">@lang('general.note')</th>
+                        <th class="px-6 py-3 text-start text-small font-medium text-secondary-medium uppercase tracking-wider">@lang('general.status')</th>
+                        <th class="px-6 py-3 text-start text-small font-medium text-secondary-medium uppercase tracking-wider">@lang('general.received_at')</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white divide-y divide-neutral-200">
                     @foreach ($employeeChecklistItems as $item)
                         @php
                             $status = match (true) {
@@ -28,14 +28,14 @@
                             };
                         @endphp
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $item->item?->name ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->notes ?: '-' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <span class="px-2 py-1 inline-flex text-xs font-medium rounded-full {{ $statusColor }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-body text-neutral-900">{{ $item->item?->name ?? 'N/A' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-body text-secondary-medium">{{ $item->notes ?: '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-body">
+                                <span class="px-2 py-1 inline-flex text-small font-medium rounded-full {{ $statusColor }}">
                                     {{ $status }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-body text-secondary-medium">
                                 {{-- Fix: Only show date if status is delivered AND date exists --}}
                                 {{ $item->delivered_status === 'delivered' && $item->delivered_at ? $item->delivered_at->format('Y-m-d') : '-' }}
                             </td>
@@ -45,7 +45,7 @@
             </table>
         </div>
     @else
-        <div class="text-center text-gray-500 italic py-8">
+        <div class="text-center text-secondary-medium italic py-8">
             @lang('general.no_items_from_checklist')
         </div>
     @endif

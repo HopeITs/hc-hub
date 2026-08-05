@@ -3,7 +3,7 @@
 <button
     {{
         $attributes->class([
-            'flex items-center gap-1 relative bg-white border transition ease-in-out rounded-md shadow-xs h-full text-sm' => true,
+            'flex items-center gap-1 relative bg-white border transition ease-in-out rounded-control shadow-e1 h-full text-body' => true,
             'active:bg-neutral-100 dark:bg-neutral-800 dark:active:bg-neutral-900' => true,
             'border-neutral-200 text-neutral-800 hover:text-neutral-500 focus:border-secondary-medium active:text-neutral-800 dark:border-neutral-700 dark:focus:border-primary dark:text-neutral-300 dark:hover:text-white dark:focus:border-primary dark:active:text-white' => ! $active,
             'border-secondary-medium text-primary dark:border-secondary-medium dark:text-primary' => $active,

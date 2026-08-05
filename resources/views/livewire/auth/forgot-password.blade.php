@@ -1,4 +1,4 @@
-<section class="min-h-[90dvh] rtl text-right bg-gray-100 flex items-center justify-center px-4">
+<section class="min-h-[90dvh] rtl text-right bg-neutral-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
 
         {{-- Logo --}}
@@ -10,17 +10,17 @@
         <x-auth-card class="w-96 space-y-6">
             {{-- Title --}}
             <div class="text-center space-y-1">
-                <h2 class="text-2xl font-bold text-gray-900">{{ __('auth.forgot-password') }}</h2>
-                <p class="text-sm text-gray-500">
+                <h2 class="text-h3 font-bold text-neutral-900">{{ __('auth.forgot-password') }}</h2>
+                <p class="text-body text-secondary-medium">
                     {{ __('auth.forgot-password-text') }}
                 </p>
             </div>
 
             {{-- Status --}}
-            <x-auth-session-status class="text-center text-green-600 text-sm" :status="session('status')" />
+            <x-auth-session-status class="text-center text-green-600 text-body" :status="session('status')" />
 
             {{-- Form --}}
-            <form wire:submit.prevent="sendPasswordResetLink" class="space-y-5">
+            <form wire:submit.prevent="sendPasswordResetLink" class="space-y-4">
                 {{-- Email --}}
                 <div>
                     <x-forms.input-label for="email" required :value="__('auth.email-address')" />
@@ -42,7 +42,7 @@
         </x-auth-card>
 
         {{-- Back to Login --}}
-        <div class="text-center text-gray-500 text-sm mt-6">
+        <div class="text-center text-secondary-medium text-body mt-6">
             {{ __('auth.back-to') }}
             <a href="{{ route('login') }}" class="text-primary hover:underline">
                 {{ __('auth.sign-in') }}

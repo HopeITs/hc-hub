@@ -1,7 +1,7 @@
 @props(['title' , 'active' => false ,'activeTab'])
 <li>
     <button {{$attributes->merge([
-    'class' => $active ? 'w-full flex items-center p-3 rounded-lg bg-primary text-white ' : 'w-full flex items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 disabled:hover:bg-gray-50 disabled:text-secondary-light'
+    'class' => $active ? 'w-full flex items-center p-3 rounded-control bg-primary text-white ' : 'w-full flex items-center p-3 rounded-control bg-neutral-50 hover:bg-neutral-100 disabled:hover:bg-neutral-50 disabled:text-secondary-light'
 ])
 }} wire:click="setActiveTab('{{$activeTab}}')"
 

@@ -5,7 +5,7 @@
 @endphp
 
 <div x-data="{ search: '' }"
-    class="relative w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
+    class="relative w-full h-full bg-white rounded-surface shadow-e1 overflow-hidden flex flex-col">
 
     <x-dashboard-cards.card-header :title="__('general.contact-the-team')">
         <x-slot:actions>
@@ -51,18 +51,18 @@
                     <!-- Avatar -->
                     <div
                         class="flex items-center justify-center h-10 w-10 flex-shrink-0 rounded-full overflow-hidden
-                                bg-[var(--color-primary)] text-white font-semibold uppercase shadow-sm">
+                                bg-[var(--color-primary)] text-white font-semibold uppercase shadow-e1">
                         <img src="{{ $member->avatar_url }}"
                             alt="{{ $member->displayName ?? $member->name }}" class="object-fit w-full h-full">
                     </div>
 
                     <!-- Name + Position -->
                     <div class="min-w-0">
-                        <p class="text-[10px] font-bold text-secondary-medium truncate">
+                        <p class="text-caption font-bold text-secondary-medium truncate">
                             {{ $member->displayName ?? $member->name }}
                         </p>
 
-                        <p class="text-xs font-light truncate text-secondary-light">
+                        <p class="text-small font-light truncate text-secondary-light">
                             {{ Str::limit($memberTitle, 40) }}
                         </p>
                     </div>
@@ -76,7 +76,7 @@
                     </a>
 
                     <a href="tel:{{ $phone }}" title="Call">
-                        <x-icons.phone class="text-secondary-light ml-0.5 hover:text-primary transition" />
+                        <x-icons.phone class="text-secondary-light ml-1 hover:text-primary transition" />
                     </a>
 
                     <a href="tg://resolve?phone={{ $phone }}"
@@ -93,7 +93,7 @@
             </div>
 
         @empty
-            <div class="flex flex-col items-center justify-center h-full text-sm font-light text-secondary-light">
+            <div class="flex flex-col items-center justify-center h-full text-body font-light text-secondary-light">
                 <span>@lang('general.no-available-data')</span>
             </div>
         @endforelse
@@ -103,7 +103,7 @@
     <!-- Footer -->
     <div class="border-t border-[var(--color-neutral-200)] bg-white px-6 py-3 text-center mt-auto">
         <a href="{{ route('org.chart') }}"
-            class="text-[12px] font-semibold text-[var(--color-primary)] hover:underline">
+            class="text-small font-semibold text-[var(--color-primary)] hover:underline">
             @lang('general.view-all') →
         </a>
     </div>

@@ -8,7 +8,7 @@
 
         <div class="flex justify-end gap-2">
             <x-primary-button type="submit">@lang('general.save')</x-primary-button>
-            <x-primary-button type="button" class="!bg-gray-200 !text-black hover:!bg-gray-300"
+            <x-primary-button type="button" class="!bg-neutral-200 !text-black hover:!bg-neutral-300"
                 x-on:click="window.location.href = @js(route('news.index'))">
                 @lang('general.cancel')
             </x-primary-button>

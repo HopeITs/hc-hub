@@ -1,63 +1,63 @@
 <div class="space-y-8">
     <div class="flex items-center justify-between">
         <x-heading-label>{{ __('general.checklist_items') }}</x-heading-label>
-        <span class="text-sm text-gray-500">
+        <span class="text-body text-secondary-medium">
             {{ $items->count() }} {{ \Illuminate\Support\Str::plural(__('general.item'), $items->count()) }}
         </span>
     </div>
 
     @if($items->isEmpty())
-        <div class="text-center text-gray-500 italic py-12 bg-gray-50 rounded-lg border border-dashed">
+        <div class="text-center text-secondary-medium italic py-12 bg-neutral-50 rounded-surface border border-dashed">
             {{ __('general.no_items') }}
         </div>
     @else
-        <div class="overflow-hidden shadow-sm border border-gray-200 rounded-lg">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+        <div class="overflow-hidden shadow-e1 border border-neutral-200 rounded-surface">
+            <table class="min-w-full divide-y divide-neutral-200">
+                <thead class="bg-neutral-50">
                     <tr>
-                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-small font-semibold text-secondary-medium uppercase tracking-wider">
                             {{trans_choice('general.employee',2)}}
                         </th>
-                        <th class="px-6 py-3ltr:text-left rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="px-6 py-3ltr:text-left rtl:text-right text-small font-semibold text-secondary-medium uppercase tracking-wider">
                             @lang('general.item')
                         </th>
-                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-small font-semibold text-secondary-medium uppercase tracking-wider">
                             @lang('general.status')
                         </th>
-                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-small font-semibold text-secondary-medium uppercase tracking-wider">
                             @lang('general.delivered_at')
                         </th>
-                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="px-6 py-3 ltr:text-left rtl:text-right text-small font-semibold text-secondary-medium uppercase tracking-wider">
                             @lang('general.notes')
                         </th>
                     </tr>
                 </thead>
 
-                <tbody class="bg-white divide-y divide-gray-100">
+                <tbody class="bg-white divide-y divide-neutral-100">
                     @foreach ($items as $item)
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 text-sm text-gray-800">
+                        <tr class="hover:bg-neutral-50 transition">
+                            <td class="px-6 py-4 text-body text-neutral-800">
                                 {{ $item->employee->name }}
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-800">
+                            <td class="px-6 py-4 text-body text-neutral-800">
                                 {{ $item->item->name }}
                             </td>
-                            <td class="ps-6 pe-2 py-4 text-sm">
-                                <span class="px-2 py-1 inline-flex text-xs ltr:-ms-2 rtl:text-right font-medium rounded-full
+                            <td class="ps-6 pe-2 py-4 text-body">
+                                <span class="px-2 py-1 inline-flex text-small ltr:-ms-2 rtl:text-right font-medium rounded-full
                                     @if(strtolower($item->display_status) === 'delivered')
                                         bg-green-100 text-green-700
                                     @elseif(strtolower($item->display_status) === 'on hold')
                                         bg-yellow-100 text-yellow-700
                                     @else
-                                        bg-gray-100 text-gray-700
+                                        bg-neutral-100 text-neutral-800
                                     @endif">
                                     {{ $item->display_status }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm  text-gray-500">
+                            <td class="px-6 py-4 text-body  text-secondary-medium">
                                 {{ $item->delivered_at ? $item->delivered_at->format('Y-m-d') : '-' }}
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-500">
+                            <td class="px-6 py-4 text-body text-secondary-medium">
                                 {{ $item->notes ?: '-' }}
                             </td>
                         </tr>

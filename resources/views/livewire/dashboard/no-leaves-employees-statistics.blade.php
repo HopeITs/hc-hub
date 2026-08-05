@@ -3,16 +3,16 @@
     $titleField = 'title_' . $locale;
 @endphp
 
-<div class="relative w-full h-full bg-white rounded-3xl shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
+<div class="relative w-full h-full bg-white rounded-surface shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] overflow-hidden flex flex-col">
 
     <div class="flex items-center gap-2 px-6 pt-6 pb-4">
-        <h2 class="text-[18px] font-semibold text-secondary-medium">
+        <h2 class="text-h4 font-semibold text-secondary-medium">
             @lang('general.no-leaves-employees')
         </h2>
-        <span class="text-secondary-light sm:text-[20px] md:text-sm font-medium">
+        <span class="text-secondary-light sm:text-h4 md:text-body font-medium">
                 {{ $noLeavesEmployees->count() }}
             </span>
-        <x-icons.no-leaves class=" mb-0.5 text-primary"/>
+        <x-icons.no-leaves class="size-5 mb-1 text-primary"/>
     </div>
 
     <div class="relative px-6 pb-6 pt-2 space-y-3 overflow-y-auto flex-grow
@@ -25,7 +25,7 @@
                 <div class="flex items-center gap-3">
 
                     <div class="flex items-center justify-center h-11 w-11 flex-shrink-0 rounded-full overflow-hidden
-                                bg-[var(--color-primary)] text-white font-semibold uppercase shadow-sm">
+                                bg-[var(--color-primary)] text-white font-semibold uppercase shadow-e1">
 
 
                             <img src="{{ $emp->avatar_url }}"
@@ -36,11 +36,11 @@
                     </div>
 
                     <div class="min-w-0">
-                        <p class="text-sm font-semibold text-[var(--color-neutral-800)] truncate">
+                        <p class="text-body font-semibold text-[var(--color-neutral-800)] truncate">
                             {{ $emp->name }}
                         </p>
 
-                        <p class="text-xs text-[var(--color-neutral-500)] truncate">
+                        <p class="text-small text-[var(--color-neutral-500)] truncate">
                             {{ $emp->latestActiveContract()->position->title . ' - ' .$emp->department->name }}
                         </p>
                     </div>
@@ -49,7 +49,7 @@
 
             </div>
         @empty
-            <div class="text-center p-4 text-sm text-[var(--color-neutral-500)]">
+            <div class="text-center p-4 text-body text-[var(--color-neutral-500)]">
                 No active contracts are set to end in the next 30 days.
             </div>
         @endforelse
