@@ -31,7 +31,8 @@ class DepartmentEmployeeStatistics extends Component
             ->join('departments', 'departments.id', '=', 'positions.department_id')
             ->groupBy('departments.code')
             ->orderBy('departments.code')
-            ->selectRaw('departments.code as label, COUNT(*) as total')
+            ->select('departments.code as label')
+            ->selectRaw('COUNT(*) as total')
             ->pluck('total', 'label')
             ->all());
 

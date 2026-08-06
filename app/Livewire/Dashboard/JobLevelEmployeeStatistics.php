@@ -40,7 +40,8 @@ class JobLevelEmployeeStatistics extends Component
             ->join('job_levels', 'job_levels.id', '=', 'positions.job_level_id')
             ->groupBy($labelColumn)
             ->orderBy($labelColumn)
-            ->selectRaw("{$labelColumn} as label, COUNT(*) as total")
+            ->select("{$labelColumn} as label")
+            ->selectRaw('COUNT(*) as total')
             ->pluck('total', 'label')
             ->all());
 
