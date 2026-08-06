@@ -43,6 +43,11 @@ return [
             'form-action' => ["'self'"],
             'script-src' => [
                 "'self'",
+                // Alpine.js (and Livewire's own directive evaluator) compiles
+                // x-data/x-on/wire: expressions into `new Function(...)` at
+                // runtime. Without this, every Alpine/Livewire directive in
+                // the app throws an EvalError and silently no-ops.
+                "'unsafe-eval'",
                 'https://cdnjs.cloudflare.com',
                 'https://cdn.jsdelivr.net',
                 'https://esm.sh',
