@@ -57,7 +57,6 @@ class Contract extends Model
         'weekly_hours' => 'integer',
         'currency' => 'integer',
         'salary' => 'decimal:2',
-
     ];
 
     //    protected function work_days(): Attribute

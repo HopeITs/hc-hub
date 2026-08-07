@@ -7,7 +7,6 @@ use App\Models\Role;
 use App\Models\User;
 use App\Rules\SafeImage;
 use App\Services\SecureImageUploadService;
-use App\Support\BlindIndex;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -162,18 +161,9 @@ class PersonalInfoForm extends Form
             'photo' => $this->photo instanceof TemporaryUploadedFile
                 ? ['mimes:jpeg,jpg,png,webp', 'max:4096', new SafeImage('avatar')]
                 : ['nullable'],
-            // Uniqueness is checked against the blind index, not the column
-            // itself: the encrypted value differs on every write, so a
-            // unique rule on national_number would never match and the same
-            // person could be entered twice.
             'national_number' => [
                 'required',
-                Rule::unique('employees', 'national_number_index')
-                    ->ignore($this->employee?->id)
-                    ->where(fn ($query) => $query->where(
-                        'national_number_index',
-                        BlindIndex::of($this->national_number),
-                    )),
+                Rule::unique('employees', 'national_number')->ignore($this->employee?->id),
             ],
             // Username is always required: it drives the profile page and QR scan ID.
             'username' => [

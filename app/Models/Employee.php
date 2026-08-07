@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Casts\EncryptedPii;
-use App\Support\BlindIndex;
 use App\Traits\HasTranslation;
 use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
@@ -100,22 +98,6 @@ class Employee extends Model implements HasMedia
         'digital_id_enabled' => 'boolean',
         'digital_id_rotated_at' => 'datetime',
         'digital_id_revoked_at' => 'datetime',
-
-        // Encrypted at rest. A stolen database backup, a misconfigured replica,
-        // or a SQL-injection read yields ciphertext for the fields that
-        // identify a person and let someone find them physically. Nothing in
-        // the application queries these columns except the national-number
-        // uniqueness check, which goes through the blind index below.
-        'national_number' => EncryptedPii::class,
-        'civil_registry_number' => EncryptedPii::class,
-        'civil_registry_office' => EncryptedPii::class,
-        'address_en' => EncryptedPii::class,
-        'address_ar' => EncryptedPii::class,
-        'personal_phone' => EncryptedPii::class,
-        'work_phone' => EncryptedPii::class,
-        'personal_email' => EncryptedPii::class,
-        'whatsapp_work' => EncryptedPii::class,
-        'telegram_work' => EncryptedPii::class,
     ];
 
     /** Memoized result of latestActiveContract() — not a database column. */
@@ -126,12 +108,6 @@ class Employee extends Model implements HasMedia
     public function digitalIdUrl(): string
     {
         return route('digital-id.show', ['token' => $this->digital_id_token]);
-    }
-
-    /** Exact-match lookup on the encrypted national number. */
-    public function scopeWhereNationalNumber($query, ?string $nationalNumber)
-    {
-        return $query->where('national_number_index', BlindIndex::of($nationalNumber));
     }
 
     public function nameForLocale(string $locale): string
@@ -562,17 +538,6 @@ class Employee extends Model implements HasMedia
     {
         static::creating(function (Employee $employee): void {
             $employee->digital_id_token ??= Str::random(64);
-        });
-
-        // Keep the blind index in step with the encrypted national number.
-        // Registered on the model rather than left to callers so that imports,
-        // seeders, the Livewire forms, and any future write path all get it —
-        // a row saved without an index would silently escape the uniqueness
-        // constraint that the index now carries.
-        static::saving(function (Employee $employee): void {
-            if ($employee->isDirty('national_number')) {
-                $employee->national_number_index = BlindIndex::of($employee->national_number);
-            }
         });
     }
 

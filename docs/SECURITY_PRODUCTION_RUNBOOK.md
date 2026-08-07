@@ -45,15 +45,11 @@ npm ci
 npm run build
 php artisan migrate --force
 php artisan security:migrate-employee-media
-php artisan security:encrypt-pii
 php artisan security:purge-activity-log
 php artisan security:scan-uploads --days=30
 php artisan optimize
 php artisan queue:restart
 ```
-
-`security:encrypt-pii` must run **after** the new code is live — see "Encrypted
-PII" below for why the order matters and how to reverse it.
 
 The media migration copies each sensitive employee document **and every
 employee photograph** to the private disk, verifies file sizes, updates the
@@ -171,37 +167,6 @@ keys. Any value that originates in the database or from a user must be passed
 through `e()` first — see `ActivityLogTable::summarise()` for the pattern, and
 `ActivityLogRenderingTest` for the regression coverage.
 
-## Encrypted PII
-
-These employee columns are encrypted at rest via the `EncryptedPii` cast:
-national number, civil registry number and office, both address fields, personal
-and work phone, personal email, WhatsApp and Telegram handles.
-
-Uniqueness and exact lookup of the national number are preserved by a **blind
-index** (`national_number_index`) — HMAC-SHA256 of the normalized value under a
-key derived from `APP_KEY`. Use `Employee::whereNationalNumber($value)` for
-lookups; the plaintext column can no longer be queried directly. Partial
-matching (`LIKE '%123%'`) on these columns is not possible by design.
-
-Deploy order is **strict**:
-
-1. `php artisan migrate` — widens the columns and adds the index
-2. set `PII_MIGRATION_ALLOW_PLAINTEXT_READS=true`, then deploy the application
-   code
-3. `php artisan security:encrypt-pii --dry-run` then without the flag
-4. `php artisan security:verify-pii`, then set
-   `PII_MIGRATION_ALLOW_PLAINTEXT_READS=false` and clear the config cache
-
-Step 2 is not optional. The `EncryptedPii` cast **fails closed**: between the
-code deploy and the end of step 3 every unconverted row still holds plaintext,
-and reading one throws a `DecryptException` that takes the page down. The
-migration flag is what keeps the application serving during that window; step 4
-closes it again so later plaintext regressions stay visible.
-
-The command is resumable, batched, verifies every row it writes, and reverses
-with `--decrypt` if the release has to be rolled back. Running steps out of
-order will not corrupt data, but leaves PII readable until step 3 completes.
-
 ## Known gaps
 
 These remain open and are **not** closed by code:
@@ -219,11 +184,9 @@ These remain open and are **not** closed by code:
 
 ## Key management
 
-`APP_KEY` now protects two separate things: session encryption and all
-encrypted PII. It must live in the deployment secret
-manager, be backed up separately from the database, and never be rotated without
-a planned re-encryption pass (`security:encrypt-pii --decrypt`, rotate, re-run).
-A database backup and a key backup stored together defeat the entire scheme.
+`APP_KEY` protects session encryption. It must live in the deployment secret
+manager and be backed up separately from the database. A database backup and
+a key backup stored together defeat the purpose of keeping them apart.
 
 ## Operational controls
 
