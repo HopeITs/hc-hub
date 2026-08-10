@@ -114,6 +114,13 @@ class PositionTable extends LivewireTable
         );
     }
 
+    protected function link(Model $model): ?string
+    {
+        return auth()->user()?->hasActivePermission('positions.update')
+            ? route('positions.edit', $model->getKey())
+            : null;
+    }
+
     protected function query(): Builder
     {
         $query = $this->model()::query()->with(['city', 'program', 'center', 'jobLevel', 'department', 'directManager', 'techManager']);
@@ -184,7 +191,7 @@ class PositionTable extends LivewireTable
                     : '';
 
                 return $toggleBtn.$editBtn.$deleteBtn;
-            })->asHtml()->visible($canUpdate || $canDelete),
+            })->asHtml()->visible($canUpdate || $canDelete)->clickable(false),
         ];
     }
 

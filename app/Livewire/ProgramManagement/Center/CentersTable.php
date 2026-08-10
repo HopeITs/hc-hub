@@ -111,6 +111,13 @@ class CentersTable extends LivewireTable
         );
     }
 
+    protected function rowClickAction(Model $model): ?string
+    {
+        return auth()->user()?->hasActivePermission('centers.update')
+            ? "\$dispatch('openCenterEdit', { id: {$model->getKey()} })"
+            : null;
+    }
+
     protected function query(): Builder
     {
         // Applied at the query, so it covers the table, the global search, the
@@ -227,7 +234,7 @@ class CentersTable extends LivewireTable
                             $badge.
                             '</a>',
                     );
-                })->asHtml()->visible($canViewPositions),
+                })->asHtml()->visible($canViewPositions)->clickable(false),
 
             Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $viewUrl = route('centers.show', $m->getKey());
@@ -265,7 +272,7 @@ class CentersTable extends LivewireTable
                     : '';
 
                 return $toggleBtn.$viewBtn.$editBtn.$deleteBtn;
-            })->asHtml(),
+            })->asHtml()->clickable(false),
         ];
     }
 }

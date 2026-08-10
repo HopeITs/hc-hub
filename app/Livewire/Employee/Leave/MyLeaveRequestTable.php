@@ -80,6 +80,13 @@ class MyLeaveRequestTable extends LivewireTable
             ->success()->toast()->position('top-start')->show();
     }
 
+    protected function rowClickAction(Model $model): ?string
+    {
+        return $model->status === LeaveRequestStatus::Pending
+            ? "\$dispatch('openRequestLeaveEdit', { id: {$model->getKey()} })"
+            : "\$dispatch('openMyLeaveDetails', { id: {$model->getKey()} })";
+    }
+
     protected function query(): Builder
     {
         $user = auth()->user();
@@ -160,7 +167,7 @@ class MyLeaveRequestTable extends LivewireTable
 
                 return $showBtn;
 
-            })->asHtml(),
+            })->asHtml()->clickable(false),
 
         ];
     }

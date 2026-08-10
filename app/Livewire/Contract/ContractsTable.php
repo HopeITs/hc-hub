@@ -85,6 +85,13 @@ class ContractsTable extends LivewireTable
         );
     }
 
+    protected function link(Model $model): ?string
+    {
+        return auth()->user()->hasActivePermission('contracts.update')
+            ? route('contracts.edit', $model->getKey())
+            : null;
+    }
+
     protected function query(): Builder
     {
         return $this->model()::query()
@@ -217,7 +224,7 @@ class ContractsTable extends LivewireTable
                     : '';
 
                 return '<div class="flex items-center justify-center gap-2">'.$view.$edit.$delete.'</div>';
-            })->asHtml(),
+            })->asHtml()->clickable(false),
         ];
     }
 }

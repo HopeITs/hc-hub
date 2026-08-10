@@ -72,6 +72,13 @@ class AnnualLeaveRuleTable extends LivewireTable
         );
     }
 
+    protected function rowClickAction(Model $model): ?string
+    {
+        return auth()->user()?->hasActivePermission('project-basics.update')
+            ? "\$dispatch('openAnnualLeaveRuleEdit', { id: {$model->getKey()} })"
+            : null;
+    }
+
     protected function query(): Builder
     {
         return AnnualLeaveRule::query();
@@ -118,7 +125,7 @@ class AnnualLeaveRuleTable extends LivewireTable
                     : '';
 
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml()->visible($canUpdate || $canDelete),
+            })->asHtml()->visible($canUpdate || $canDelete)->clickable(false),
         ];
     }
 }

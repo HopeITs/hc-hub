@@ -78,6 +78,13 @@ class ContractTypeTable extends LivewireTable
         );
     }
 
+    protected function rowClickAction(Model $model): ?string
+    {
+        return auth()->user()?->hasActivePermission('project-basics.update')
+            ? "\$dispatch('openContractTypeEdit', { id: {$model->getKey()} })"
+            : null;
+    }
+
     protected function query(): Builder
     {
         return ContractType::query();
@@ -151,7 +158,7 @@ class ContractTypeTable extends LivewireTable
                 }
 
                 return '<div class="flex items-center justify-center gap-2">'.implode('', $buttons).'</div>';
-            })->asHtml()->visible($canUpdate || $canDelete),
+            })->asHtml()->visible($canUpdate || $canDelete)->clickable(false),
         ];
     }
 }

@@ -66,6 +66,13 @@ class EmpLeaveBalanceTable extends LivewireTable
         );
     }
 
+    protected function rowClickAction(Model $model): ?string
+    {
+        $balanceId = $this->annualBalance($model)?->id;
+
+        return $balanceId ? "\$dispatch('openEdit', { id: {$balanceId} })" : null;
+    }
+
     protected function query(): Builder
     {
         $user = auth()->user();
@@ -157,7 +164,7 @@ class EmpLeaveBalanceTable extends LivewireTable
                 }
 
                 return $editBtn;
-            })->asHtml(),
+            })->asHtml()->clickable(false),
 
         ];
     }

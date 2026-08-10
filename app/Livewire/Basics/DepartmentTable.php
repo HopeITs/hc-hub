@@ -75,6 +75,13 @@ class DepartmentTable extends LivewireTable
         );
     }
 
+    protected function rowClickAction(Model $model): ?string
+    {
+        return auth()->user()?->hasActivePermission('project-basics.update')
+            ? "\$dispatch('openDepartmentEdit', { id: {$model->getKey()} })"
+            : null;
+    }
+
     protected function query(): Builder
     {
         return Department::query();
@@ -133,7 +140,7 @@ class DepartmentTable extends LivewireTable
                     : '';
 
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml()->visible($canUpdate || $canDelete),
+            })->asHtml()->visible($canUpdate || $canDelete)->clickable(false),
         ];
     }
 }

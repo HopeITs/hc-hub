@@ -96,6 +96,13 @@ class EmployeeTable extends LivewireTable
         );
     }
 
+    protected function link(Model $model): ?string
+    {
+        return auth()->user()->hasActivePermission('employees.update')
+            ? route('employees.edit', $model->getKey())
+            : null;
+    }
+
     protected function query(): Builder
     {
         return $this->model()::query()
@@ -256,7 +263,7 @@ class EmployeeTable extends LivewireTable
                 return '<div class="flex items-center gap-1">'.
                     $toggleBtn.$viewBtn.$editBtn.$deleteBtn.
                     '</div>';
-            })->asHtml(),
+            })->asHtml()->clickable(false),
 
         ];
     }

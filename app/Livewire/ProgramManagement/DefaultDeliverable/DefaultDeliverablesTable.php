@@ -88,6 +88,13 @@ class DefaultDeliverablesTable extends LivewireTable
         );
     }
 
+    protected function rowClickAction(Model $model): ?string
+    {
+        return auth()->user()?->can('update', $model)
+            ? "\$dispatch('openDefaultDeliverableEdit', { id: {$model->getKey()} })"
+            : null;
+    }
+
     protected function query(): Builder
     {
         // Scoping the base query covers rows, search, filters, and the export,
@@ -204,7 +211,7 @@ class DefaultDeliverablesTable extends LivewireTable
 
                 return '<div class="flex items-center justify-center gap-2">'
                     .$editBtn.$deleteBtn.'</div>';
-            })->asHtml(),
+            })->asHtml()->clickable(false),
         ];
     }
 }

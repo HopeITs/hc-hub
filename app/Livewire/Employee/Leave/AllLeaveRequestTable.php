@@ -127,6 +127,13 @@ class AllLeaveRequestTable extends LivewireTable
             ->success()->toast()->position('top-start')->show();
     }
 
+    protected function rowClickAction(Model $model): ?string
+    {
+        return $model->status === LeaveRequestStatus::Pending
+            ? "\$dispatch('openDecisionRequestLeave', { id: {$model->getKey()} })"
+            : "\$dispatch('openRequestLeaveEdit', { id: {$model->getKey()} })";
+    }
+
     protected function query(): Builder
     {
         $user = auth()->user();
@@ -229,7 +236,7 @@ class AllLeaveRequestTable extends LivewireTable
             })->visible(
                 $user->myRole() === 'super-admin'
                 || str_starts_with((string) $user->myRole(), 'HR-'),
-            )->asHtml(),
+            )->asHtml()->clickable(false),
             Column::make(__('general.actions'), function (Model $model): string {
 
                 $decisionBtn = '';
@@ -245,7 +252,7 @@ class AllLeaveRequestTable extends LivewireTable
                 $showBtn = Blade::render('<x-table.show-btn wire:click="$dispatch(\'openShowRequestLeave\', { id: '.$model->getKey().' })" />');
 
                 return $decisionBtn.$editBtn.$showBtn;
-            })->asHtml(),
+            })->asHtml()->clickable(false),
 
         ];
     }

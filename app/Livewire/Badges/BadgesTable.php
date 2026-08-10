@@ -62,6 +62,11 @@ class BadgesTable extends LivewireTable
         $this->dispatch('refreshBadgesTable');
     }
 
+    protected function rowClickAction(Model $model): ?string
+    {
+        return "\$dispatch('open-badge-modal', { id: {$model->getKey()} })";
+    }
+
     protected function query(): Builder
     {
         return $this->model()::query()
@@ -140,7 +145,7 @@ class BadgesTable extends LivewireTable
                     : '';
 
                 return '<div class="flex items-center justify-center gap-2">'.$viewBtn.$deleteBtn.'</div>';
-            })->asHtml(),
+            })->asHtml()->clickable(false),
         ];
     }
 

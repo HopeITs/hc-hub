@@ -42,6 +42,12 @@ class NewsTable extends LivewireTable
         $this->dispatch('refreshNewsTable');
     }
 
+    protected function link(Model $model): ?string
+    {
+        /** @var News $model */
+        return $this->canManageNews($model) ? route('news.edit', ['news' => $model->getKey()]) : null;
+    }
+
     protected function query(): Builder
     {
         $employee = auth()->user()?->profile;
@@ -109,7 +115,7 @@ class NewsTable extends LivewireTable
                 );
 
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml()->visible($showActions),
+            })->asHtml()->visible($showActions)->clickable(false),
         ];
     }
 
