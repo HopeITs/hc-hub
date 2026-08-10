@@ -4,6 +4,7 @@ namespace App\Livewire\Contract;
 
 use App\Enums\SalaryPer;
 use App\Exports\ContractExport;
+use App\Models\City;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Department;
@@ -91,6 +92,8 @@ class ContractsTable extends LivewireTable
                 'employee',
                 'position.department',
                 'position.jobLevel',
+                'position.city',
+                'position.center.city',
                 'contractType',
                 'leaveBalances',
             ])
@@ -145,6 +148,16 @@ class ContractsTable extends LivewireTable
             SelectColumn::make(trans_choice('general.contract-type', 1), 'contractType.'.$name)
                 ->options(ContractType::orderBy($name)->pluck($name, $name)->toArray())
                 ->sortable()->searchable(),
+
+            SelectColumn::make(trans_choice('general.city', 1), 'city')
+                ->options(City::orderBy($name)->pluck($name, 'id')->toArray())
+                ->displayUsing(fn ($v, Model $m) => $m->position?->city?->name ?? $m->position?->center?->city?->name ?? '—')
+                ->searchable(function (Builder $query, $value) {
+                    $query->whereHas('position', function (Builder $q) use ($value) {
+                        $q->where('city_id', $value)
+                            ->orWhereHas('center', fn (Builder $c) => $c->where('city_id', $value));
+                    });
+                }),
 
             SelectColumn::make(trans_choice('general.department', 1), 'position.department.name')
                 ->options(Department::orderBy('name')->pluck('name', 'name')->toArray())

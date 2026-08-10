@@ -45,6 +45,7 @@ class ContractExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
             $headers[] = match ($code) {
                 'id' => 'ID',
                 'employee' => trans_choice('general.employee', 1, [], 'en'),
+                'city' => trans_choice('general.city', 1, [], 'en'),
                 'position_title_en', 'position_title_ar' => trans_choice('general.positions', 1, [], 'en'),
                 'contractType_name_en', 'contractType_name_ar' => trans_choice('general.contract-type', 1, [], 'en'),
                 'position_department_name' => trans_choice('general.department', 1, [], 'en'),
@@ -73,6 +74,7 @@ class ContractExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
             $mappedRow[] = match ($code) {
                 'id' => $row->id,
                 'employee' => $row->employee?->name ?? '—',
+                'city' => $row->position?->city?->name_en ?? $row->position?->center?->city?->name_en ?? '—',
                 'position_title_en', 'position_title_ar' => $row->position?->title_en ?? '—',
                 'contractType_name_en', 'contractType_name_ar' => $row->contractType?->name_en ?? '—',
                 'position_department_name' => $row->position?->department?->name ?? '—',
