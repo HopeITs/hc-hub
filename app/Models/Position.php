@@ -15,11 +15,7 @@ class Position extends Model
 {
     use HasFactory, HasTranslation, LogsActivity;
 
-    protected $fillable = [
-        'program_id', 'center_id', 'city_id', 'job_level_id', 'department_id',
-        'direct_manager_id', 'tech_manager_id', 'title_en', 'title_ar',
-        'qualifications', 'responsibilities', 'max_emp', 'is_active',
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'max_emp' => 'integer',
