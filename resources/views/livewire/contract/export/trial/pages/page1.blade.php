@@ -184,7 +184,7 @@
         'SYR' => ['en' => 'Syrian', 'ar' => 'سوري'],
     ];
     $natEn = $NATIONALITY_MAP[$natKey]['en'] ?? ($nationalityRaw ?: '—');
-    $natAr = $Glyphs($NATIONALITY_MAP[$natKey]['ar'] ?? ($nationalityRaw ?: '—'));
+    $natAr = $NATIONALITY_MAP[$natKey]['ar'] ?? ($nationalityRaw ?: '—');
 
     // ── Position & Work Place ──
     $req        = $position?->requiredPosition;
@@ -216,7 +216,7 @@
 @endphp
 
 
-    
+
     {{-- ── TITLE SECTION ── --}}
     <div class="avoid-break contract-title-center">
         <div class="dual-row dual-tight">
