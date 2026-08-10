@@ -1,5 +1,5 @@
 <div>
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex items-center justify-between mb-6">
         <livewire:layout.breadcrumbs
             :title="__('general.positions')"
             :crumbs="[
@@ -14,7 +14,7 @@
 
     <x-forms.form-body wire:submit.prevent="save">
         <x-forms.errors-validation-list/>
-        <div class="grid md:grid-cols-2 gap-4">
+        <div class="grid gap-4 md:grid-cols-2">
 
 
             <div wire:key="title">
@@ -77,7 +77,7 @@
                     <option value="">Select Any..</option>
                     @foreach($positions as $position)
                         @php
-                            $centerName = isset($position->center) ? $position->center->name : 'Online';
+                            $centerName = isset($position->center) ? $position->center->name . ' - ' .$position->center->city->name : 'Online';
                             $programName = isset($position->program) ? $position->program->name : '_'
                         @endphp
                         <option value="{{$position->id}}">{{$position->title . " ( ".$programName .' - '.$centerName." ) "}}</option>
@@ -91,7 +91,7 @@
                     <option value="">Select Any..</option>
                     @foreach($positions as $position)
                         @php
-                        $centerName = isset($position->center) ? $position->center->name : 'Online';
+                        $centerName = isset($position->center) ? $position->center->name . ' - ' .$position->center->city->name : 'Online';
                         $programName = isset($position->program) ? $position->program->name : '-'
                         @endphp
                         <option value="{{$position->id}}">{{$position->title . " ( ".$programName.' - '.$centerName ." ) "}}</option>
