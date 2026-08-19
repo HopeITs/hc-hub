@@ -362,7 +362,7 @@ return [
     'national_number' => 'الرقم الوطني',
     'civil_registry_office' => 'أمانة السجل المدني',
     'place_of_registration' => 'مكان القيد',
-    'place_and_birth_date' => 'مكان وتاريخ الولادة',
+    'place_and_birth_date' => 'مكان الولادة',
     'civil_registry_number' => 'رقم القيد',
     'employment_info' => 'معلومات التوظيف',
     'work_email' => 'بريد العمل الإلكتروني',

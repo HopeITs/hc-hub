@@ -368,7 +368,7 @@ return [
     'board-since' => 'Board Since',
     'civil_registry_office' => 'Civil Registry Office',
     'place_of_registration' => 'Place Of Registration',
-    'place_and_birth_date' => 'Place & BD',
+    'place_and_birth_date' => 'Place Of Birth',
     'civil_registry_number' => 'Civil Registry Number',
     'work_email' => 'Work Email',
     'username' => 'Username',

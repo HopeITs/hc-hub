@@ -53,6 +53,7 @@ class EmployeeCreate extends Component
             'cities' => $cities,
             'isCreateMode' => true,
             'employeeChecklistItems' => collect(),
+            'canManageBadges' => false,
         ]);
     }
 }
