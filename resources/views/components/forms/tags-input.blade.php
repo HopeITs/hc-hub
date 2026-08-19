@@ -2,6 +2,9 @@
     'placeholder' => 'Add tag',
     'suggestions' => [],
     'forceSuggestion' => false,
+    // Without this the inner text field falls back to id="input", so every
+    // tags-input on a page collides and their labels point at nothing.
+    'inputId' => null,
 ])
 
 @php
@@ -25,6 +28,7 @@
     <x-forms.input
         x-ref="input"
         type="text"
+        :id="$inputId"
         :placeholder="$placeholder"
         @focus="showAllSuggestions()"
         @click="showAllSuggestions()"
