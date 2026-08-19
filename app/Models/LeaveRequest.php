@@ -54,7 +54,7 @@ class LeaveRequest extends Model
 
     public function getDurationAttribute(): string
     {
-        $weekends = array_map('intval', explode(',', $this->leaveBalance->contract->position->center->weekends));
+        $weekends = array_map('intval', explode(',', $this->leaveBalance->contract->position->center->weekends ?? '0,6'));
         Carbon::setWeekendDays($weekends);
 
         // Hour-based leave: show hours + minutes
@@ -97,7 +97,7 @@ class LeaveRequest extends Model
     public function getDurationInHoursAttribute(): float
     {
         // Determine weekend days from the center
-        $weekends = array_map('intval', explode(',', $this->leaveBalance->contract->position->center->weekends));
+        $weekends = array_map('intval', explode(',', $this->leaveBalance->contract->position->center->weekends ?? '0,6'));
         Carbon::setWeekendDays($weekends);
 
         // For hour-type leave, we already have precise decimal hours

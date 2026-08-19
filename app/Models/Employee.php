@@ -273,7 +273,7 @@ class Employee extends Model implements HasMedia
                 foreach ($leave->leaveRequests as $req) {
 
                     if ($req->type === 'day') {
-                        $weekends = array_map('intval', explode(',', $req->leaveBalance->contract->position->center->weekends));
+                        $weekends = array_map('intval', explode(',', $req->leaveBalance->contract->position->center->weekends ?? '0,6'));
 
                         Carbon::setWeekendDays($weekends);
 
