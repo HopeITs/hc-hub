@@ -3,11 +3,10 @@
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-h4 font-semibold text-secondary-medium flex items-center gap-2">
             @lang('general.employees-statistics')
-            <x-icons.chart class="size-5 mb-1 text-primary"/>
         </h2>
 
         <select
-            class="text-small border border-neutral-300 rounded-surface px-3 py-1.5 bg-white shadow-e1 text-neutral-700">
+            class="text-small border border-neutral-300 rounded-surface ps-3 pe-8 py-1.5 bg-white shadow-e1 text-neutral-700">
             <option value="monthly">@lang('general.monthly')</option>
             <option value="quarterly">@lang('general.quarterly')</option>
             <option value="yearly">@lang('general.yearly')</option>
