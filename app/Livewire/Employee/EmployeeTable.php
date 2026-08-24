@@ -14,6 +14,7 @@ use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
+use RamonRietdijk\LivewireTables\Columns\DateColumn;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Enums\SearchScope;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
@@ -182,7 +183,7 @@ class EmployeeTable extends LivewireTable
 
             Column::make(trans('general.years-of-service'), 'years_of_service_formatted')->computed()->sortable(),
 
-            Column::make(trans('general.join-at'), 'join_at')->computed()->sortable(),
+            DateColumn::make(trans('general.join-at'), 'joined_at')->format('d-M-Y')->sortable(),
             SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
                 ->options(City::query()->whereNot('code', '000')->where('is_active', true)->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()->searchable(),

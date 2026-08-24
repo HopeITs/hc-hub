@@ -88,6 +88,12 @@ class LeaveBalanceService
     /** ------------------------------------------------------------
      *  HELPER METHODS
      * -------------------------------------------------------------*/
+    /**
+     * Seniority is the employee's current one, measured from
+     * Employee::serviceStartDate() — the stored joined_at, or the first
+     * contract's start when no joining date has been recorded. For someone who
+     * has left it stops at the end of their last contract.
+     */
     private function getAnnualLeaveRule($employee): AnnualLeaveRule
     {
         return AnnualLeaveRule::where('years_of_volunteering', '<=', $employee->years_of_service)
@@ -101,8 +107,14 @@ class LeaveBalanceService
         $extra = 0;
 
         if ($employee->allContracts->count() <= 3 && $employee->allContracts->count() > 1) {
+            // The contract that actually precedes this one. Ordering by
+            // end_date alone would pick the *latest* contract even when it
+            // starts after this one, which made two consecutive contracts
+            // carry leave over from each other and inflate on every
+            // recalculation.
             $prevContract = $employee->allContracts()
                 ->whereNot('id', $contract->id)
+                ->where('end_date', '<=', $contract->start_date)
                 ->with(['leaveBalances' => fn ($q) => $q->where('type_id', LeaveTypeCases::Annual)])
                 ->orderBy('end_date', 'desc')
                 ->first();
