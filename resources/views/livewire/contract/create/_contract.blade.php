@@ -14,7 +14,7 @@
             ContractForm::updatedContractTypeId() itself, so a card can never
             promise something the form would not actually do.
         --}}
-        <div class="mt-1 grid gap-2 sm:grid-cols-2 lg:grid-cols-3" role="radiogroup"
+        <div class="mt-1 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3" role="radiogroup"
              aria-label="{{ trans_choice('general.contract-type', 1) }}">
             @foreach($types as $type)
                 <label class="group cursor-pointer">
@@ -22,27 +22,37 @@
                            value="{{ $type->id }}"
                            x-model="selected.contractType"
                            x-on:change="chooseType('{{ $type->id }}')"/>
-                    <span class="flex h-full flex-col gap-2 rounded-control border border-neutral-200 bg-white p-3
-                                 transition
-                                 hover:border-neutral-300
-                                 peer-checked:border-primary peer-checked:bg-red-50/60
+                    <span class="flex h-full flex-col gap-2 rounded-control border-2 border-neutral-200 bg-white p-3
+                                 shadow-e1 transition
+                                 group-hover:border-neutral-400
+                                 peer-checked:border-primary peer-checked:shadow-e2
                                  peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2
                                  peer-focus-visible:outline-primary">
-                        <span class="text-body font-semibold text-neutral-900">{{ $type->name }}</span>
+                        <span class="flex items-start gap-2">
+                            {{-- Selection is stated, not just implied by a border. --}}
+                            <span class="mt-0.5 grid size-4 shrink-0 place-items-center rounded-round border-2 transition"
+                                  x-bind:class="selected.contractType === '{{ $type->id }}'
+                                      ? 'border-primary bg-primary' : 'border-neutral-300 bg-white'"
+                                  aria-hidden="true">
+                                <span class="size-1.5 rounded-round bg-white"
+                                      x-show="selected.contractType === '{{ $type->id }}'"></span>
+                            </span>
+                            <span class="text-body font-semibold text-neutral-900">{{ $type->name }}</span>
+                        </span>
 
                         <span class="flex flex-wrap gap-1">
-                            <span class="rounded-round bg-neutral-100 px-2 py-0.5 text-caption text-secondary-medium">
+                            <span class="rounded-round bg-neutral-100 px-2 py-0.5 text-caption font-medium text-secondary-dark">
                                 {{ \App\Enums\ContractType::getLocalizedName($type->type)['value'] }}
                             </span>
-                            <span class="rounded-round bg-neutral-100 px-2 py-0.5 text-caption text-secondary-medium">
+                            <span class="rounded-round bg-neutral-100 px-2 py-0.5 text-caption font-medium text-secondary-dark">
                                 {{ \App\Enums\ContractPlace::getLocalizedName($type->place)['value'] }}
                             </span>
                         </span>
 
                         {{-- Nested, so peer-checked: cannot reach it — bind directly. --}}
-                        <span class="mt-auto text-caption"
+                        <span class="mt-auto text-caption font-medium"
                               x-bind:class="selected.contractType === '{{ $type->id }}'
-                                  ? 'text-primary font-medium' : 'text-secondary-light'">
+                                  ? 'text-primary' : 'text-secondary-medium'">
                             @if($type->category === 'trial')
                                 → {{ __('general.composer.lasts-months', ['count' => 3]) }}
                             @else
@@ -66,17 +76,18 @@
             <x-forms.date-input
                 id="composer_start_date"
                 x-model="startDate"
-                x-bind:class="datesJustSet && 'ring-2 ring-primary/40 border-primary'"
+                x-bind:class="datesJustSet && 'border-primary ring-2 ring-neutral-300'"
             />
             <x-error-span>{{ $errors->first('form.start_date') }}</x-error-span>
         </div>
 
         <div class="flex shrink-0 items-center gap-2 self-center pt-0 sm:pt-6" aria-hidden="true">
-            <span class="hidden h-px w-5 bg-neutral-200 sm:block"></span>
+            <span class="hidden h-px w-5 bg-neutral-300 sm:block"></span>
             <span x-cloak x-show="durationLabel"
-                  class="whitespace-nowrap rounded-round bg-red-50 px-3 py-1 text-caption font-medium text-primary"
+                  class="whitespace-nowrap rounded-round border border-primary bg-white px-3 py-1
+                         text-caption font-semibold text-primary"
                   x-text="durationLabel"></span>
-            <span class="hidden h-px w-5 bg-neutral-200 sm:block"></span>
+            <span class="hidden h-px w-5 bg-neutral-300 sm:block"></span>
         </div>
 
         <div class="sm:flex-1">
@@ -86,13 +97,13 @@
                 x-model="endDate"
                 x-bind:max="maxEndDate"
                 x-bind:class="[
-                    datesJustSet && 'ring-2 ring-primary/40 border-primary',
-                    endDateTooFar && 'border-red-500',
+                    datesJustSet && 'border-primary ring-2 ring-neutral-300',
+                    endDateTooFar && 'border-primary',
                 ]"
             />
             {{-- The one-year ceiling is a hint, not a surprise. --}}
-            <p class="mt-1 text-caption"
-               x-bind:class="endDateTooFar ? 'text-red-600' : 'text-secondary-light'"
+            <p class="mt-1.5 text-caption"
+               x-bind:class="endDateTooFar ? 'font-semibold text-primary' : 'text-secondary-medium'"
                x-text="endDateTooFar
                    ? @js(__('general.composer.end-date-too-far'))
                    : @js(__('general.composer.max-end-date'))"></p>

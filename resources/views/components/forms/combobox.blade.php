@@ -24,7 +24,7 @@
     $control = preg_replace('/\s+/', ' ', trim(
         'w-full min-h-[2.375rem] py-2 ps-3 pe-9 text-body rounded-control border bg-white shadow-e1
          transition outline-none placeholder:text-neutral-400
-         focus:ring-2 focus:ring-secondary-light focus:border-primary
+         focus:ring-2 focus:ring-neutral-300 focus:border-primary
          disabled:bg-neutral-100 disabled:text-secondary-medium disabled:cursor-not-allowed
          disabled:shadow-none'
     ));
@@ -55,7 +55,7 @@
         x-ref="input"
         x-bind:class="[
             '{{ $control }}',
-            hasError ? 'border-red-500 text-red-700' : 'border-neutral-300 text-neutral-900',
+            hasError ? 'border-primary text-primary' : 'border-neutral-300 text-neutral-900',
         ]"
         x-bind:value="open ? query : selectedLabel"
         x-bind:placeholder="isDisabled() ? '' : placeholder"
@@ -78,8 +78,8 @@
     <button
         type="button"
         tabindex="-1"
-        class="absolute inset-y-0 end-0 flex items-center pe-3 text-secondary-light
-               hover:text-secondary-medium disabled:opacity-40 disabled:hover:text-secondary-light"
+        class="absolute inset-y-0 end-0 flex items-center pe-3 text-secondary-medium transition
+               hover:text-primary disabled:opacity-40 disabled:hover:text-secondary-medium"
         x-bind:disabled="isDisabled()"
         x-bind:aria-label="canClear ? @js(__('general.composer.clear')) : @js($placeholder)"
         x-on:click="canClear ? clear() : toggle()"
@@ -124,6 +124,7 @@
                     'flex items-center gap-2.5 px-3 py-2 text-body',
                     isFull(option) ? 'cursor-not-allowed text-secondary-light' : 'cursor-pointer text-neutral-800',
                     active === index && !isFull(option) ? 'bg-neutral-100' : '',
+                    isSelected(option) ? 'bg-neutral-50' : '',
                     isSelected(option) ? 'font-semibold text-primary' : '',
                 ]"
             >
@@ -136,7 +137,7 @@
                     ></span>
                     <span class="min-w-0 flex-1 truncate" x-text="option.label"></span>
                     <template x-if="option.activeContractEndsAt">
-                        <span class="shrink-0 rounded-inset bg-red-50 px-1.5 py-0.5 text-caption font-medium text-primary">
+                        <span class="shrink-0 rounded-round border border-primary px-2 py-0.5 text-caption font-semibold text-primary">
                             @lang('general.composer.duplicate-short')
                         </span>
                     </template>

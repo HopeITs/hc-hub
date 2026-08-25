@@ -608,6 +608,14 @@ document.addEventListener('alpine:init', () => {
                 && this.endDate > this.maxEndDate);
         },
 
+        /**
+         * Months to one decimal place, mirroring Contract::getDurationAttribute()
+         * — the same figure the leave calculation runs on.
+         *
+         * Reporting "3 months · 30 days" for 1 Sep → 31 Dec was accurate but read
+         * as a shorter contract than it is, and disagreed with the number the
+         * server would store for the very same dates.
+         */
         get durationLabel() {
             if (!this.startDate || !this.endDate || this.endDate < this.startDate) {
                 return '';
@@ -619,28 +627,31 @@ document.addEventListener('alpine:init', () => {
             let months = (end.getFullYear() - start.getFullYear()) * 12
                 + (end.getMonth() - start.getMonth());
 
-            if (end.getDate() < start.getDate()) {
-                months -= 1;
-            }
-
-            months = Math.max(0, months);
-
             const anchor = new Date(start);
             anchor.setMonth(anchor.getMonth() + months);
 
-            const days = Math.max(0, Math.round((end - anchor) / 86400000));
-
-            const parts = [];
-
-            if (months > 0) {
-                parts.push(`${months} ${months === 1 ? this.labels.month : this.labels.months}`);
+            if (anchor > end) {
+                months -= 1;
+                anchor.setMonth(anchor.getMonth() - 1);
             }
 
-            if (days > 0 || parts.length === 0) {
-                parts.push(`${days} ${days === 1 ? this.labels.day : this.labels.days}`);
+            if (months < 0) {
+                return '';
             }
 
-            return parts.join(' · ');
+            // How far into the following month the end date falls.
+            const nextAnchor = new Date(anchor);
+            nextAnchor.setMonth(nextAnchor.getMonth() + 1);
+
+            const total = Math.round((months + (end - anchor) / (nextAnchor - anchor)) * 10) / 10;
+
+            if (total < 1) {
+                const days = Math.max(0, Math.round((end - start) / 86400000));
+
+                return `${days} ${days === 1 ? this.labels.day : this.labels.days}`;
+            }
+
+            return `${total} ${total === 1 ? this.labels.month : this.labels.months}`;
         },
 
         // =============================================================
