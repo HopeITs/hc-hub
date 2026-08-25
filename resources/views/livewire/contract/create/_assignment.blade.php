@@ -47,19 +47,25 @@
                 disabled="loading || !selected.city"
             />
 
-            {{-- Warn, never block: renewals and replacements legitimately overlap. --}}
-            <template x-if="selectedEmployee && selectedEmployee.activeContractEndsAt">
-                <p class="mt-2 flex gap-2 rounded-control border border-neutral-200 border-s-4 border-s-primary
-                          bg-neutral-50 px-3 py-2 text-small leading-relaxed text-neutral-800">
-                    <svg class="mt-0.5 size-4 shrink-0 text-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path d="M10 1.5a8.5 8.5 0 100 17 8.5 8.5 0 000-17zM9 5.5h2v6H9v-6zm0 7.5h2v2H9v-2z"/>
-                    </svg>
-                    <span x-text="duplicateContractNotice"></span>
-                </p>
-            </template>
-
             <x-error-span>{{ $errors->first('form.employee_id') }}</x-error-span>
         </div>
+
+        {{--
+            Warn, never block: renewals and replacements legitimately overlap.
+
+            Spans the full width as its own grid row rather than sitting inside
+            the Employee cell — growing that cell would stretch the whole row and
+            leave a dead gap under City.
+        --}}
+        <template x-if="selectedEmployee && selectedEmployee.activeContractEndsAt">
+            <p class="flex gap-2 rounded-control border border-neutral-200 border-s-4 border-s-primary
+                      bg-neutral-50 px-3 py-2 text-small leading-relaxed text-neutral-800 md:col-span-2">
+                <svg class="mt-0.5 size-4 shrink-0 text-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path d="M10 1.5a8.5 8.5 0 100 17 8.5 8.5 0 000-17zM9 5.5h2v6H9v-6zm0 7.5h2v2H9v-2z"/>
+                </svg>
+                <span x-text="duplicateContractNotice"></span>
+            </p>
+        </template>
 
         {{-- Program --}}
         <div>

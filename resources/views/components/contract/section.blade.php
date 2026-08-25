@@ -9,7 +9,9 @@
 @php($state = "stateOf('{$name}')")
 
 <section
-    class="overflow-hidden rounded-surface border transition-colors"
+    {{-- No overflow-hidden: the comboboxes inside render an absolutely
+         positioned listbox that must be free to escape this card. --}}
+    class="rounded-surface border transition-colors"
     x-bind:class="{
         'border-primary bg-white shadow-e1': {{ $state }} === 'open',
         'border-neutral-200 bg-neutral-50': {{ $state }} === 'locked',
@@ -22,7 +24,12 @@
             class="group flex w-full items-center gap-3 px-4 py-3 text-start transition
                    focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary
                    disabled:cursor-not-allowed"
-            x-bind:class="{{ $state }} === 'done' || {{ $state }} === 'idle' ? 'hover:bg-neutral-50' : ''"
+            {{-- Corner radius follows the header: it is the whole card when the
+                 section is collapsed, and only its top when it is open. --}}
+            x-bind:class="[
+                section === '{{ $name }}' ? 'rounded-t-surface' : 'rounded-surface',
+                {{ $state }} === 'done' || {{ $state }} === 'idle' ? 'hover:bg-neutral-50' : '',
+            ]"
             x-bind:disabled="!isUnlocked('{{ $name }}')"
             x-bind:aria-expanded="section === '{{ $name }}'"
             aria-controls="composer-section-{{ $name }}"
@@ -91,8 +98,9 @@
 
     <div
         id="composer-section-{{ $name }}"
+        {{-- Plain x-show, not x-collapse: the collapse plugin pins
+             overflow:hidden on this element, which clipped every dropdown. --}}
         x-show="section === '{{ $name }}'"
-        x-collapse
         x-cloak
     >
         <div class="border-t border-neutral-100 px-4 pb-5 pt-1">

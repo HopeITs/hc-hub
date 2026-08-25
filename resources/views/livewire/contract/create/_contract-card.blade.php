@@ -33,7 +33,13 @@
         </div>
     </div>
 
-    <dl class="flex-1 px-4 py-2">
+    {{--
+        Rows share the spare height rather than bunching at the top. They grow
+        only to a comfortable maximum; past that the surplus becomes even
+        spacing between them, so a very tall card never turns an 11px label
+        into a 120px row.
+    --}}
+    <dl class="flex flex-1 flex-col justify-between px-4 py-1">
         @foreach([
             ['key' => __('general.composer.card-position'), 'value' => 'cardPosition'],
             ['key' => __('general.composer.card-center'),   'value' => 'cardCenter'],
@@ -43,7 +49,7 @@
             ['key' => __('general.weekly-hours'),           'value' => 'cardHours'],
             ['key' => __('general.salary'),                 'value' => 'cardSalary'],
         ] as $row)
-            <div class="flex items-baseline justify-between gap-3 border-b border-neutral-100 py-2 last:border-b-0">
+            <div class="flex max-h-[4.25rem] flex-1 items-center justify-between gap-3 border-b border-neutral-100 py-2 last:border-b-0">
                 <dt class="shrink-0 text-caption text-secondary-medium">{{ $row['key'] }}</dt>
                 <dd
                     class="min-w-0 truncate text-end text-small font-medium tabular-nums"

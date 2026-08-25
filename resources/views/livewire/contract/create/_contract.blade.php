@@ -81,10 +81,12 @@
             <x-error-span>{{ $errors->first('form.start_date') }}</x-error-span>
         </div>
 
-        <div class="flex shrink-0 items-center gap-2 self-center pt-0 sm:pt-6" aria-hidden="true">
+        {{-- The whole connector hides until there is a duration, otherwise two
+             stray dashes float between the empty date fields. --}}
+        <div x-cloak x-show="durationLabel"
+             class="flex shrink-0 items-center gap-2 self-center pt-0 sm:pt-6" aria-hidden="true">
             <span class="hidden h-px w-5 bg-neutral-300 sm:block"></span>
-            <span x-cloak x-show="durationLabel"
-                  class="whitespace-nowrap rounded-round border border-primary bg-white px-3 py-1
+            <span class="whitespace-nowrap rounded-round border border-primary bg-white px-3 py-1
                          text-caption font-semibold text-primary"
                   x-text="durationLabel"></span>
             <span class="hidden h-px w-5 bg-neutral-300 sm:block"></span>
