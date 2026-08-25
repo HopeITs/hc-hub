@@ -3,13 +3,13 @@
 namespace App\Livewire\Contract\Concerns;
 
 use App\Livewire\Forms\ContractForm;
-use App\Models\Center;
 use App\Models\City;
 use App\Models\ContractType;
 use App\Models\Employee;
 use App\Models\Position;
-use App\Models\Program;
+use App\Models\User;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Renderless;
 
 /**
  * Shared dropdown queries and position/city consistency checks for
@@ -22,6 +22,133 @@ use Illuminate\Support\Collection;
  */
 trait ResolvesContractLocationOptions
 {
+    /**
+     * Return the complete, compact option graph for one authorized city.
+     *
+     * This method is intentionally renderless: changing a city performs one
+     * small JSON request without rebuilding the contract form or its Select2
+     * instances. Program, center, and position filtering then happens locally.
+     */
+    #[Renderless]
+    public function locationOptions(int $cityId): array
+    {
+        $user = auth()->user();
+
+        abort_unless($user, 403);
+        $user->loadMissing(['profile:id,city_id', 'roles']);
+
+        abort_unless($user->hasActivePermission($this->locationOptionsPermission()), 403);
+
+        $activeCityId = $user->activeCityId();
+
+        abort_unless(
+            City::query()
+                ->whereKey($cityId)
+                ->where('is_active', true)
+                ->when($activeCityId, fn ($query, int $allowedCityId) => $query->whereKey($allowedCityId))
+                ->exists(),
+            403,
+        );
+
+        $locale = app()->getLocale();
+        $positionTitleColumn = "title_{$locale}";
+        $centerNameColumn = "name_{$locale}";
+        $ensureEmployeeId = $this->locationOptionsEmployeeId();
+
+        $positions = Position::query()
+            ->inCity($cityId)
+            ->with([
+                'program:id,name',
+                'center' => fn ($query) => $query->select('id', 'city_id', $centerNameColumn),
+            ])
+            ->select('id', 'program_id', 'center_id', 'city_id', $positionTitleColumn)
+            ->orderBy($positionTitleColumn)
+            ->get();
+
+        $employees = $this->employeeOptionsForCity($cityId, $locale, $user);
+
+        if ($ensureEmployeeId && ! collect($employees)->contains('value', $ensureEmployeeId)) {
+            $currentEmployee = Employee::query()
+                ->select('id', 'city_id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar')
+                ->find($ensureEmployeeId);
+
+            if ($currentEmployee) {
+                $employees[] = [
+                    'value' => $currentEmployee->id,
+                    'label' => $currentEmployee->nameForLocale($locale),
+                ];
+            }
+        }
+
+        return [
+            'employees' => collect($employees)
+                ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values()
+                ->all(),
+            'programs' => $positions
+                ->filter(fn (Position $position) => $position->program !== null)
+                ->unique('program_id')
+                ->map(fn (Position $position) => [
+                    'value' => $position->program_id,
+                    'label' => $position->program->name,
+                ])
+                ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values()
+                ->all(),
+            'centers' => $positions
+                ->filter(fn (Position $position) => $position->center !== null)
+                ->groupBy('center_id')
+                ->map(function (Collection $centerPositions) use ($centerNameColumn): array {
+                    /** @var Position $first */
+                    $first = $centerPositions->first();
+
+                    return [
+                        'value' => $first->center_id,
+                        'label' => $first->center->{$centerNameColumn},
+                        'programIds' => $centerPositions->pluck('program_id')->unique()->values()->all(),
+                    ];
+                })
+                ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
+                ->values()
+                ->all(),
+            'positions' => $positions
+                ->map(fn (Position $position) => [
+                    'value' => $position->id,
+                    'label' => $position->{$positionTitleColumn},
+                    'programId' => $position->program_id,
+                    'centerId' => $position->center_id,
+                ])
+                ->values()
+                ->all(),
+        ];
+    }
+
+    /**
+     * Apply the locally selected identity graph as one atomic server update.
+     */
+    protected function applyIdentitySelection(array $selection): void
+    {
+        $previousContractTypeId = $this->form->contract_type_id;
+
+        $this->city_id = $this->selectionId($selection, 'cityId');
+        $this->form->employee_id = $this->selectionId($selection, 'employeeId');
+        $this->program_id = $this->selectionId($selection, 'programId');
+        $this->center_id = $this->selectionId($selection, 'centerId');
+        $this->form->position_id = $this->selectionId($selection, 'positionId');
+        $this->form->contract_type_id = $this->selectionId($selection, 'contractTypeId');
+
+        if ($this->form->contract_type_id && $this->form->contract_type_id !== $previousContractTypeId) {
+            $this->form->updatedContractTypeId($this->form->contract_type_id);
+        }
+    }
+
+    abstract protected function locationOptionsPermission(): string;
+
+    protected function locationOptionsEmployeeId(): ?int
+    {
+        return null;
+    }
+
     private function getCities(string $col): Collection
     {
         return City::select('id', $col)
@@ -34,70 +161,6 @@ trait ResolvesContractLocationOptions
             ->each(fn (City $city) => $city->name = $city->{$col});
     }
 
-    private function getPrograms(): Collection
-    {
-        if (! $this->city_id) {
-            return collect();
-        }
-
-        $programIds = Position::query()
-            ->inCity($this->city_id)
-            ->pluck('program_id')
-            ->unique();
-
-        return Program::whereIn('id', $programIds)
-            ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
-    }
-
-    private function getCenters(): Collection
-    {
-        if (! $this->city_id || ! $this->program_id) {
-            return collect();
-        }
-
-        $nameColumn = transColumn('name');
-
-        return Center::select('centers.id', "centers.{$nameColumn}")
-            ->whereHas('positions', function ($q) {
-                $q->where('program_id', $this->program_id)
-                    ->inCity($this->city_id);
-            })
-            ->orderBy("centers.{$nameColumn}")
-            ->get();
-    }
-
-    private function getPositions(string $col, ?int $ensurePositionId = null): Collection
-    {
-        if (! $this->city_id || ! $this->program_id) {
-            return collect();
-        }
-
-        $positions = Position::where('program_id', $this->program_id)
-            ->inCity($this->city_id)
-            ->when(
-                $this->center_id,
-                fn ($q) => $q->where('center_id', $this->center_id),
-                fn ($q) => $q->whereNull('center_id'),
-            )
-            ->select('id', $col, 'center_id', 'city_id')
-            ->orderBy($col)
-            ->get()
-            ->each(fn (Position $p) => $p->title = $p->{$col});
-
-        if ($ensurePositionId && $positions->doesntContain('id', $ensurePositionId)) {
-            $current = Position::select('id', $col)->find($ensurePositionId);
-
-            if ($current) {
-                $current->title = $current->{$col};
-                $positions->push($current);
-            }
-        }
-
-        return $positions;
-    }
-
     private function getContractTypes(string $col): Collection
     {
         return ContractType::select('id', $col)
@@ -107,52 +170,37 @@ trait ResolvesContractLocationOptions
     }
 
     /**
-     * Employees selectable for the contract, scoped by the current user's role.
+     * Hydrate only the six columns needed to build employee dropdown labels.
      */
-    private function resolveEmployees(string $orderCol, bool $requireCity = true): Collection
+    private function employeeOptionsForCity(int $cityId, string $locale, User $user): array
     {
-        if ($requireCity && ! $this->city_id) {
-            return collect();
+        [$roleType] = array_pad(explode('-', (string) $user->myRole(), 2), 2, null);
+
+        if ($roleType !== 'HR' && (int) $user->profile?->city_id !== $cityId) {
+            return [];
         }
 
-        $user = auth()->user()->load('profile');
-        [$roleType, $roleScope] = array_pad(explode('-', $user->myRole(), 2), 2, null);
-
-        if ($roleType !== 'HR') {
-            $cityId = optional($user->profile)->city_id;
-            abort_unless($cityId, 403, 'User has no linked city.');
-
-            return Employee::where('is_active', true)
-                ->where('city_id', $cityId)
-                ->when($this->city_id, fn ($query) => $query->where('city_id', $this->city_id))
-                ->orderBy($orderCol)
-                ->get();
-        }
-
-        $query = Employee::where('is_active', true)->orderBy($orderCol);
-
-        if ($roleScope !== 'SYR') {
-            $query->whereHas('city', fn ($q) => $q->where('slug', $roleScope));
-        }
-
-        if ($this->city_id) {
-            $query->where('city_id', $this->city_id);
-        }
-
-        return $query->get();
+        return Employee::query()
+            ->select('id', 'city_id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar')
+            ->where('is_active', true)
+            ->where('city_id', $cityId)
+            ->orderBy("first_name_{$locale}")
+            ->orderBy("last_name_{$locale}")
+            ->get()
+            ->map(fn (Employee $employee) => [
+                'value' => $employee->id,
+                'label' => $employee->nameForLocale($locale),
+            ])
+            ->all();
     }
 
-    private function ensureEmployeeInList(Collection $employees, ?int $employeeId): Collection
+    private function selectionId(array $selection, string $key): ?int
     {
-        if ($employeeId && $employees->doesntContain('id', $employeeId)) {
-            $current = Employee::find($employeeId);
+        $value = filter_var($selection[$key] ?? null, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1],
+        ]);
 
-            if ($current) {
-                $employees = $employees->push($current)->unique('id')->values();
-            }
-        }
-
-        return $employees;
+        return $value === false ? null : $value;
     }
 
     private function validateCityConsistency(): bool

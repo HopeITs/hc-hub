@@ -198,6 +198,16 @@ class ContractForm extends Form
     }
 
     /**
+     * Create from data that the owning component has already fully validated.
+     */
+    public function create(): Contract
+    {
+        return DB::transaction(function (): Contract {
+            return $this->contract = Contract::create($this->buildPayload());
+        });
+    }
+
+    /**
      * Update a specific contract instance without re-running validation
      * (callers are responsible for validating beforehand).
      */
@@ -299,7 +309,9 @@ class ContractForm extends Form
                 return;
             }
 
-            $position = Position::find($value);
+            $position = Position::query()
+                ->select('id', 'max_emp', 'exist_emp')
+                ->find($value);
 
             if ($position && ! $position->canAssign()) {
                 $fail(__('This position exceeded the number of max employees.'));

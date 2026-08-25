@@ -47,17 +47,31 @@
                 {{-- step 1 --}}
                 <x-tab.container active-tab="identity">
                     @if($step === 1)
-                        <div class="mb-4 pb-3 border-b border-neutral-200">
-                            <h2 class="text-body font-semibold text-neutral-900">@lang('general.identity-org')</h2>
-                        </div>
+                        <div
+                            x-data="contractLocationPicker({
+                                cityId: @js($city_id),
+                                employeeId: @js($form->employee_id),
+                                programId: @js($program_id),
+                                centerId: @js($center_id),
+                                positionId: @js($form->position_id),
+                                contractTypeId: @js($form->contract_type_id),
+                                placeholder: @js(__('general.select')),
+                                loadingText: @js(__('general.loading')),
+                            })"
+                            x-init="initialize()"
+                        >
+                            <div class="mb-4 pb-3 border-b border-neutral-200">
+                                <h2 class="text-body font-semibold text-neutral-900">@lang('general.identity-org')</h2>
+                            </div>
 
-                        @include('livewire.contract.Partials.identity-fields')
+                            @include('livewire.contract.Partials.identity-fields')
 
-                        <div class="mt-6 flex items-center justify-end gap-3">
-                            <x-primary-button type="button" wire:click="next" wire:loading.attr="disabled">
-                                <span wire:loading.remove>@lang('general.next')</span>
-                                <span wire:loading>@lang('general.loading')…</span>
-                            </x-primary-button>
+                            <div class="mt-6 flex items-center justify-end gap-3">
+                                <x-primary-button type="button" x-on:click="advanceIdentity()" x-bind:disabled="loading || advancing" wire:loading.attr="disabled" wire:target="advanceIdentity">
+                                    <span x-show="!advancing">@lang('general.next')</span>
+                                    <span x-cloak x-show="advancing">@lang('general.loading')…</span>
+                                </x-primary-button>
+                            </div>
                         </div>
                     @endif
                 </x-tab.container>

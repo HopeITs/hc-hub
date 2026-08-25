@@ -17,6 +17,8 @@ import select2 from 'select2';
 
 select2();
 
+import './contract-location-picker.js';
+
 import '../css/app.css';
 import { initFlowbite } from 'flowbite';
 import 'flowbite';
@@ -96,4 +98,3 @@ document.addEventListener('livewire:navigated', () => {
     initFlowbite();
     initClockTimepickers();
 });
-

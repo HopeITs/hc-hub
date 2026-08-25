@@ -9,7 +9,6 @@ use App\Models\Center;
 use App\Models\Contract;
 use App\Models\Position;
 use App\Models\TerminationReason;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -85,11 +84,31 @@ class ContractEdit extends Component
             return;
         }
 
-        $position = Position::find($value);
+        $position = Position::query()
+            ->select('id', 'max_emp', 'exist_emp')
+            ->find($value);
 
         if ($position && ! $position->canAssign()) {
             $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
         }
+    }
+
+    /**
+     * Synchronize the Alpine-owned cascade once, then validate it server-side.
+     */
+    public function advanceIdentity(array $selection): void
+    {
+        Gate::authorize('update', $this->contract);
+
+        $this->applyIdentitySelection($selection);
+        $this->form->validateIdentity();
+
+        if (! $this->validateCityConsistency()) {
+            return;
+        }
+
+        $this->step = 2;
+        $this->maxStep = max($this->maxStep, $this->step);
     }
 
     // ────────────────────────────────────────────────
@@ -169,28 +188,32 @@ class ContractEdit extends Component
     public function render(): View
     {
         $locale = app()->getLocale();
-        $posCol = "title_{$locale}";
         $typeCol = "name_{$locale}";
         $cityCol = "name_{$locale}";
-        $empCol = transColumn('first_name');
 
-        $cities = $this->getCities($cityCol);
-        $employees = $this->getEmployees($empCol);
-        $programs = $this->getPrograms();
-        $centers = $this->getCenters();
-        $positions = $this->getPositions($posCol, $this->form->position_id);
-        $types = $this->getContractTypes($typeCol);
-        $terminationReasons = TerminationReason::all();
+        $cities = $this->step === 1 ? $this->getCities($cityCol) : collect();
+        $types = $this->step === 1 ? $this->getContractTypes($typeCol) : collect();
+        $terminationReasons = $this->step === 2
+            ? TerminationReason::query()->select('id', "title_{$locale}")->get()
+            : collect();
 
         return view('livewire.contract.contract-edit', compact(
             'cities',
-            'employees',
-            'programs',
-            'centers',
-            'positions',
             'types',
             'terminationReasons',
         ));
+    }
+
+    protected function locationOptionsPermission(): string
+    {
+        return 'contracts.update';
+    }
+
+    protected function locationOptionsEmployeeId(): ?int
+    {
+        Gate::authorize('update', $this->contract);
+
+        return $this->contract->employee_id;
     }
 
     // ────────────────────────────────────────────────
@@ -208,13 +231,5 @@ class ContractEdit extends Component
         $this->city_id = $effectiveCityId ?? $this->contract->employee?->city_id;
         $this->program_id = $position?->program_id;
         $this->center_id = $position?->center_id;
-    }
-
-    private function getEmployees(string $orderCol): Collection
-    {
-        return $this->ensureEmployeeInList(
-            $this->resolveEmployees($orderCol, requireCity: false),
-            $this->contract->employee_id,
-        );
     }
 }

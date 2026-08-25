@@ -131,8 +131,18 @@ return [
             'toggleItemStatusConfirmed' => 'employees.update',
             'exportExcel' => 'employees.export',
         ],
-        'contract.contract-create' => ['save' => 'contracts.create', 'submit' => 'contracts.create'],
-        'contract.contract-edit' => ['save' => 'contracts.update', 'submit' => 'contracts.update'],
+        'contract.contract-create' => [
+            'save' => 'contracts.create',
+            'submit' => 'contracts.create',
+            'locationOptions' => 'contracts.create',
+            'advanceIdentity' => 'contracts.create',
+        ],
+        'contract.contract-edit' => [
+            'save' => 'contracts.update',
+            'submit' => 'contracts.update',
+            'locationOptions' => 'contracts.update',
+            'advanceIdentity' => 'contracts.update',
+        ],
         'contract.contracts-table' => ['delete' => 'contracts.delete', 'exportExcel' => 'contracts.export'],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [

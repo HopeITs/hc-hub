@@ -11,7 +11,6 @@ use App\Models\Position;
 use App\Models\TerminationReason;
 use App\Models\User;
 use App\Notifications\NewEmployeeWelcome;
-use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -80,11 +79,29 @@ class ContractCreate extends Component
     {
         $this->resetErrorBag('form.position_id');
 
-        $position = Position::find($value);
+        $position = Position::query()
+            ->select('id', 'max_emp', 'exist_emp')
+            ->find($value);
 
         if ($position && ! $position->canAssign()) {
             $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
         }
+    }
+
+    /**
+     * Synchronize the Alpine-owned cascade once, then validate it server-side.
+     */
+    public function advanceIdentity(array $selection): void
+    {
+        $this->applyIdentitySelection($selection);
+        $this->form->validateIdentity();
+
+        if (! $this->validateCityConsistency()) {
+            return;
+        }
+
+        $this->step = 2;
+        $this->maxStep = max($this->maxStep, $this->step);
     }
 
     // ────────────────────────────────────────────────
@@ -135,7 +152,9 @@ class ContractCreate extends Component
             return null;
         }
 
-        $contract = $this->form->save();
+        // The three form sections and the cross-city graph were validated
+        // immediately above, so persist without running the same queries twice.
+        $contract = $this->form->create();
 
         // All contract types receive annual leave balances.
         $this->balanceForm->store($contract->id);
@@ -162,25 +181,21 @@ class ContractCreate extends Component
     public function render(): View
     {
         $locale = app()->getLocale();
-        $posCol = "title_{$locale}";
         $typeCol = "name_{$locale}";
         $cityCol = "name_{$locale}";
-        $empCol = transColumn('first_name');
 
         return view('livewire.contract.contract-create', [
-            'cities' => $this->getCities($cityCol),
-            'employees' => $this->getEmployees($empCol),
-            'programs' => $this->getPrograms(),
-            'centers' => $this->getCenters(),
-            'positions' => $this->getPositions($posCol, null),
-            'types' => $this->getContractTypes($typeCol),
-            'terminationReasons' => TerminationReason::all(),
+            'cities' => $this->step === 1 ? $this->getCities($cityCol) : collect(),
+            'types' => $this->step === 1 ? $this->getContractTypes($typeCol) : collect(),
+            'terminationReasons' => $this->step === 2
+                ? TerminationReason::query()->select('id', "title_{$locale}")->get()
+                : collect(),
         ]);
     }
 
-    private function getEmployees(string $orderCol): Collection
+    protected function locationOptionsPermission(): string
     {
-        return $this->resolveEmployees($orderCol);
+        return 'contracts.create';
     }
 
     private function notifyIfFirstContract(Contract $contract): void
