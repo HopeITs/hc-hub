@@ -53,10 +53,12 @@
             'noSeatsLeft' => __('general.composer.no-seats-left'),
             'duplicate' => __('general.composer.duplicate-contract'),
             'derivation' => __('general.composer.hours-derivation'),
-            'month' => __('general.month'),
-            'months' => __('general.months'),
-            'day' => trans_choice('general.day', 1),
-            'days' => trans_choice('general.day', 2),
+            // Lowercase units, because these are read inside a phrase
+            // ("3 months") rather than as standalone labels.
+            'month' => __('general.composer.duration-month'),
+            'months' => __('general.composer.duration-months'),
+            'day' => __('general.composer.duration-day'),
+            'days' => __('general.composer.duration-days'),
             'daysUnit' => __('general.composer.days-unit'),
             'unknownCurrency' => __('general.unknown'),
             'perMonth' => __('general.composer.per-month'),

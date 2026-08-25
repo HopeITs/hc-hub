@@ -16,11 +16,18 @@
     $placeholder ??= __('general.select');
     $emptyText ??= __('general.composer.no-results');
 
-    $control = 'w-full min-h-[2.375rem] py-2 ps-3 pe-9 text-body rounded-control border bg-white shadow-e1
-                transition outline-none placeholder:text-neutral-400
-                focus:ring-2 focus:ring-secondary-light focus:border-primary
-                disabled:bg-neutral-100 disabled:text-secondary-medium disabled:cursor-not-allowed
-                disabled:shadow-none';
+    /*
+     * Interpolated into an Alpine expression as a JavaScript string literal, so
+     * it has to be a single line — a wrapped class list would put a raw newline
+     * inside the quotes and break the whole binding.
+     */
+    $control = preg_replace('/\s+/', ' ', trim(
+        'w-full min-h-[2.375rem] py-2 ps-3 pe-9 text-body rounded-control border bg-white shadow-e1
+         transition outline-none placeholder:text-neutral-400
+         focus:ring-2 focus:ring-secondary-light focus:border-primary
+         disabled:bg-neutral-100 disabled:text-secondary-medium disabled:cursor-not-allowed
+         disabled:shadow-none'
+    ));
 @endphp
 
 <div
