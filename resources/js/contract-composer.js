@@ -205,6 +205,7 @@ document.addEventListener('alpine:init', () => {
     window.Alpine.data('contractComposer', (config) => ({
         // ---- configuration handed down from Blade
         dayNames: config.dayNames,
+        dayShort: config.dayShort,
         listSeparator: config.listSeparator,
         typeDefaults: config.typeDefaults,
         labels: config.labels,
@@ -910,8 +911,29 @@ document.addEventListener('alpine:init', () => {
             return this.selectedType?.name ?? this.labels.empty;
         },
 
+        get cardStart() {
+            return this.formatDate(this.startDate) || this.labels.empty;
+        },
+
+        get cardEnd() {
+            return this.formatDate(this.endDate) || this.labels.empty;
+        },
+
         get cardPeriod() {
             return this.durationLabel || this.labels.empty;
+        },
+
+        /** Short day names, so the value still reads inside a narrow column. */
+        get cardWorkDays() {
+            if (this.manualDays) {
+                return (this.locale === 'ar' ? this.workDaysAr : this.workDaysEn) || this.labels.empty;
+            }
+
+            const names = this.days
+                .map((on, index) => (on ? this.dayShort[this.locale][index] : null))
+                .filter(Boolean);
+
+            return names.length ? names.join(', ') : this.labels.empty;
         },
 
         get cardHours() {

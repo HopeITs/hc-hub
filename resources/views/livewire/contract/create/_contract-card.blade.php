@@ -8,7 +8,7 @@
     belongs.
 --}}
 <div class="rounded-surface border border-neutral-200 bg-white shadow-e1">
-    <div class="flex items-center gap-3 border-b border-neutral-200 p-2.5">
+    <div class="flex items-center gap-3 border-b border-neutral-200 p-4">
         <template x-if="selectedEmployee">
             <img
                 class="size-10 shrink-0 rounded-round object-cover ring-1 ring-neutral-200"
@@ -40,11 +40,14 @@
             ['key' => __('general.composer.card-center'),   'value' => 'cardCenter'],
             ['key' => __('general.composer.capacity'),      'value' => 'cardCapacity', 'accent' => true],
             ['key' => trans_choice('general.contract-type', 1), 'value' => 'cardType'],
+            ['key' => __('general.start-date'),             'value' => 'cardStart'],
+            ['key' => __('general.end-date'),               'value' => 'cardEnd'],
             ['key' => __('general.period'),                 'value' => 'cardPeriod'],
+            ['key' => __('general.work-days'),              'value' => 'cardWorkDays'],
             ['key' => __('general.weekly-hours'),           'value' => 'cardHours'],
             ['key' => __('general.salary'),                 'value' => 'cardSalary'],
         ] as $row)
-            <div class="flex items-center justify-between gap-3 border-b border-neutral-100 py-1.5 last:border-b-0">
+            <div class="flex items-center justify-between gap-3 border-b border-neutral-100 py-2 last:border-b-0">
                 <dt class="shrink-0 text-caption text-secondary-medium">{{ $row['key'] }}</dt>
                 <dd
                     class="min-w-0 truncate text-end text-small font-medium tabular-nums"
@@ -67,7 +70,7 @@
         at the foot of the card like a total.
     --}}
     <div class="flex items-baseline justify-between gap-3 rounded-b-surface border-t border-neutral-200
-                bg-neutral-50 px-4 py-1.5">
+                bg-neutral-50 px-4 pt-3 pb-[11px]">
         <dt class="shrink-0 text-caption font-semibold uppercase tracking-wider text-secondary-medium">
             @lang('general.composer.annual-leave')
         </dt>

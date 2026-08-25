@@ -25,6 +25,7 @@
         'cityId' => $lockedCity?->id,
         'cities' => $cities->map(fn ($city) => ['value' => $city->id, 'label' => $city->name])->values(),
         'dayNames' => $dayNames,
+        'dayShort' => $dayShort,
         // The Arabic string is always joined with the Arabic comma, whatever
         // locale the interface happens to be in.
         'listSeparator' => '، ',
