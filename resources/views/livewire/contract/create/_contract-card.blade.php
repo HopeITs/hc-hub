@@ -8,17 +8,17 @@
     belongs.
 --}}
 <div class="rounded-surface border border-neutral-200 bg-white shadow-e1">
-    <div class="flex items-center gap-3 border-b border-neutral-200 p-4">
+    <div class="flex items-center gap-3 border-b border-neutral-200 p-2.5">
         <template x-if="selectedEmployee">
             <img
-                class="size-11 shrink-0 rounded-round object-cover ring-1 ring-neutral-200"
+                class="size-10 shrink-0 rounded-round object-cover ring-1 ring-neutral-200"
                 x-bind:src="selectedEmployee.avatar"
                 x-bind:alt="selectedEmployee.label"
                 loading="lazy"
             />
         </template>
         <template x-if="!selectedEmployee">
-            <span class="grid size-11 shrink-0 place-items-center rounded-round border-2 border-dashed
+            <span class="grid size-10 shrink-0 place-items-center rounded-round border-2 border-dashed
                          border-neutral-300 bg-neutral-50" aria-hidden="true">
                 <svg class="size-5 text-neutral-300" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10 9a3 3 0 100-6 3 3 0 000 6zM3 18a7 7 0 1114 0H3z"/>
@@ -34,7 +34,7 @@
         </div>
     </div>
 
-    <dl class="px-4 py-1">
+    <dl class="px-4">
         @foreach([
             ['key' => __('general.composer.card-position'), 'value' => 'cardPosition'],
             ['key' => __('general.composer.card-center'),   'value' => 'cardCenter'],
@@ -44,7 +44,7 @@
             ['key' => __('general.weekly-hours'),           'value' => 'cardHours'],
             ['key' => __('general.salary'),                 'value' => 'cardSalary'],
         ] as $row)
-            <div class="flex items-center justify-between gap-3 border-b border-neutral-100 py-2.5 last:border-b-0">
+            <div class="flex items-center justify-between gap-3 border-b border-neutral-100 py-1.5 last:border-b-0">
                 <dt class="shrink-0 text-caption text-secondary-medium">{{ $row['key'] }}</dt>
                 <dd
                     class="min-w-0 truncate text-end text-small font-medium tabular-nums"
@@ -67,7 +67,7 @@
         at the foot of the card like a total.
     --}}
     <div class="flex items-baseline justify-between gap-3 rounded-b-surface border-t border-neutral-200
-                bg-neutral-50 px-4 py-3">
+                bg-neutral-50 px-4 py-1.5">
         <dt class="shrink-0 text-caption font-semibold uppercase tracking-wider text-secondary-medium">
             @lang('general.composer.annual-leave')
         </dt>
