@@ -732,6 +732,65 @@ return [
     // Strings that exist only for assistive technology. They are read aloud by
     // screen readers but never painted, so they must stay translated like any
     // other user-facing copy.
+    // شاشة إنشاء العقد — صفحة واحدة "Composer".
+    'composer' => [
+        'title' => 'عقد جديد',
+        'subtitle' => 'تُفتح الأقسام تباعاً',
+
+        'assignment' => 'التعيين',
+        'assignment-hint' => 'من، وأين يعمل',
+        'contract' => 'العقد',
+        'contract-hint' => 'نوع العقد يحدد التواريخ',
+        'schedule' => 'الدوام',
+        'schedule-hint' => 'تُحتسب ساعات الأسبوع تلقائياً',
+        'pay' => 'الأجر',
+        'pay-hint' => 'القسم الأخير',
+
+        'who' => 'من',
+        'where' => 'أين',
+        'locked-city' => 'محددة حسب دورك',
+        'all-centers' => 'كل المراكز',
+        'city-level' => 'على مستوى المحافظة (بدون مركز)',
+        'center-hint' => 'يحصر القائمة أدناه فقط، ولا يُحفظ في العقد.',
+        'position-full' => 'مكتمل',
+        'seats-left' => ':taken من :max مشغولة · يتبقى :left',
+        'no-seats-left' => ':taken من :max مشغولة · لا شواغر',
+        'duplicate-contract' => 'لديه عقد ساري ينتهي في :date. إنشاء هذا العقد لن يُنهي العقد السابق.',
+        'duplicate-short' => 'ساري',
+
+        'max-end-date' => 'سنة واحدة كحد أقصى بعد تاريخ البداية.',
+        'end-date-too-far' => 'لا يمكن أن يتجاوز تاريخ النهاية سنة من تاريخ البداية.',
+        'runs-to' => 'حتى :date',
+        'lasts-months' => ':count أشهر',
+
+        'work-days-required' => 'اختر يوم عمل واحداً على الأقل.',
+        'hours-derivation' => ':days أيام × :hours س',
+        'auto' => 'تلقائي',
+        'override' => 'تعديل يدوي',
+        'use-picker' => 'استخدام محدد الأيام',
+        'enter-manually' => 'إدخال يدوي',
+        'add-notes' => 'إضافة ملاحظات الدوام',
+        'per-month' => 'شهرياً',
+        'per-hour' => 'بالساعة',
+        'per-session' => 'بالجلسة',
+        'per-year' => 'سنوياً',
+
+        'card-title' => 'العقد',
+        'capacity' => 'الشواغر',
+        'annual-leave' => 'الإجازة السنوية',
+        'days-unit' => 'يوم',
+        'locked-because' => 'أكمل :section أولاً',
+        'progress' => 'اكتمل :done من :total أقسام',
+        'create' => 'إنشاء العقد',
+        'continue' => 'متابعة',
+
+        'restore-title' => 'لديك عقد غير محفوظ في هذه الصفحة.',
+        'restore' => 'استعادته',
+        'discard' => 'تجاهل',
+        'no-results' => 'لا نتائج مطابقة',
+        'clear' => 'مسح',
+    ],
+
     'a11y' => [
         'skip-to-content' => 'تخطَّ إلى المحتوى الرئيسي',
         'main-content' => 'المحتوى الرئيسي',

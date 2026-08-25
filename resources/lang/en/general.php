@@ -729,6 +729,65 @@ return [
     'export-csv' => 'Export CSV',
     'no-department' => 'Unassigned',
 
+    // Contract create — the single-page "Composer" screen.
+    'composer' => [
+        'title' => 'New contract',
+        'subtitle' => 'sections unlock as you go',
+
+        'assignment' => 'Assignment',
+        'assignment-hint' => 'who, and where they sit',
+        'contract' => 'Contract',
+        'contract-hint' => 'the type decides the dates',
+        'schedule' => 'Schedule',
+        'schedule-hint' => 'hours per week are worked out for you',
+        'pay' => 'Pay',
+        'pay-hint' => 'last one',
+
+        'who' => 'Who',
+        'where' => 'Where',
+        'locked-city' => 'locked to your role',
+        'all-centers' => 'All centers',
+        'city-level' => 'City-level (no center)',
+        'center-hint' => 'Narrows the list below. Not stored on the contract.',
+        'position-full' => 'Full',
+        'seats-left' => ':taken of :max filled · :left left',
+        'no-seats-left' => ':taken of :max filled · no seats left',
+        'duplicate-contract' => 'Already has an active contract ending :date. Creating this one will not close it.',
+        'duplicate-short' => 'Active',
+
+        'max-end-date' => 'At most one year after the start date.',
+        'end-date-too-far' => 'The end date cannot be more than a year after the start date.',
+        'runs-to' => 'runs to :date',
+        'lasts-months' => ':count months',
+
+        'work-days-required' => 'Pick at least one work day.',
+        'hours-derivation' => ':days days × :hours h',
+        'auto' => 'auto',
+        'override' => 'override',
+        'use-picker' => 'use the day picker',
+        'enter-manually' => 'enter manually',
+        'add-notes' => 'Add attending notes',
+        'per-month' => 'per month',
+        'per-hour' => 'per hour',
+        'per-session' => 'per session',
+        'per-year' => 'per year',
+
+        'card-title' => 'Contract',
+        'capacity' => 'Capacity',
+        'annual-leave' => 'Annual leave',
+        'days-unit' => 'days',
+        'locked-because' => 'finish :section first',
+        'progress' => ':done of :total sections complete',
+        'create' => 'Create contract',
+        'continue' => 'Continue',
+
+        'restore-title' => 'You have an unsaved contract on this tab.',
+        'restore' => 'Restore it',
+        'discard' => 'Discard',
+        'no-results' => 'Nothing matches',
+        'clear' => 'Clear',
+    ],
+
     // Strings that exist only for assistive technology. They are read aloud by
     // screen readers but never painted, so they must stay translated like any
     // other user-facing copy.

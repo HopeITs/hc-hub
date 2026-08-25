@@ -333,3 +333,47 @@ city-scoped user never sees a city dropdown; a full position cannot be picked fr
 contract type card states its own date consequence before it is clicked; weekly hours computes
 itself; the Contract Card fills in live; Edit behaves exactly as it does today; and all tests
 above pass.
+
+---
+
+## 18. Built — deviations from this spec
+
+Recorded during implementation. Everything else was built as written above.
+
+1. **Avatars use `Employee::$avatar_url`, not `getFirstMediaUrl('avatar')`.** The model
+   documents that every view must use the accessor, because `getFirstMediaUrl()` returns a
+   directly fetchable public path that bypasses `EmployeePolicy::view`. The accessor routes
+   through `EmployeeAvatarController::internal` instead. Section 6 said the wrong thing.
+
+2. **Center became an explicit filter with an "All centers" default.** The spec kept the old
+   semantics (blank centre = centre-less positions only) and merely relabelled the blank
+   option. That still hides most positions behind an unmarked control. The centre selector now
+   offers *All centers* (default, every position in the program), *City-level (no center)* when
+   such positions exist, and each real centre. Position rows carry their centre name so the
+   unfiltered list stays readable. Server compatibility is unchanged: `center_id` is only a
+   filter — contracts never store it, and `validateCityConsistency()` only checks a centre when
+   one was actually chosen.
+
+3. **The leave preview is a third renderless action, not a local calculation.** Computing it in
+   JavaScript would have required shipping `AnnualLeaveRule` per employee and duplicating the
+   entitlement maths. `leavePreview()` is debounced at 500 ms, fires only once employee, dates
+   and weekly hours are all present, and is city-scoped so it cannot leak figures for employees
+   outside the caller's scope. Network cost per contract is therefore up to three requests, not
+   two.
+
+4. **Two extra Blade components.** `components/contract/section.blade.php` holds the shared
+   card chrome (locked / open / done states) rather than repeating it four times, and
+   `components/contract/continue.blade.php` renders a quiet "Continue" link that appears once a
+   section is valid. The link is a navigation shortcut, not a confirm button — the section is
+   already valid and already held in state when it appears, and clicking any other section
+   header does the same thing.
+
+5. **`config/access-control.php` was updated.** `LivewireMutationCoverageTest` requires every
+   public Livewire action to be classified. `leavePreview` is mapped to `contracts.create`;
+   `save` and `advanceIdentity` were removed from the create map, and the create screen's
+   exempt list was emptied, because the wizard methods behind those entries no longer exist.
+
+6. **The `locationOptions` query budget moved from 12 to 14.** Two additional constant-time
+   queries: one eager-load of the avatar media collection, one lookup of active contracts for
+   the duplicate warning. Neither is an N+1. The assertion in
+   `ContractCreatePerformanceTest` carries this reasoning inline.

@@ -8,6 +8,7 @@ use App\Enums\LeaveTypeCases;
 use App\Enums\MaritalStatus;
 use App\Models\AnnualLeaveRule;
 use App\Models\Contract;
+use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
 use Carbon\Carbon;
@@ -53,6 +54,53 @@ class LeaveBalanceService
 
         // Gender and marital-specific leaves
         $this->createSpecificLeaves($employee, $contract, $leaveTypes, $dailyWorkHours);
+    }
+
+    /**
+     * Annual-leave entitlement a contract *would* receive, in days.
+     *
+     * Read-only sibling of create(): it runs the same two calculators against
+     * an unsaved Contract so the create screen can show the entitlement before
+     * committing, rather than creating it silently afterwards. Nothing is
+     * persisted and no relation on the passed model is mutated.
+     *
+     * Returns null when the contract is not yet complete enough to price.
+     */
+    public function previewAnnual(Contract $contract): ?float
+    {
+        if (! $contract->employee_id || ! $contract->start_date || ! $contract->end_date) {
+            return null;
+        }
+
+        $dailyWorkHours = $contract->work_hour_per_day;
+
+        if ($dailyWorkHours < 1) {
+            return null;
+        }
+
+        $employee = Employee::with('allContracts')->find($contract->employee_id);
+
+        if (! $employee) {
+            return null;
+        }
+
+        // calculateExtraLeave() excludes the contract being priced by primary
+        // key. An unsaved model has none, and `whereNot('id', null)` matches
+        // no rows at all — which would silently drop every previous contract
+        // from the carry-over check. A zero key excludes nothing instead.
+        $probe = clone $contract;
+
+        if (! $probe->getKey()) {
+            $probe->setAttribute('id', 0);
+        }
+
+        $rule = $this->getAnnualLeaveRule($employee);
+        $extra = $this->calculateExtraLeave($employee, $probe);
+
+        [$yearly] = $this->calculateDeservedLeaves($probe->duration, $rule, $dailyWorkHours, $extra);
+
+        // Balances are stored in hours; the screen speaks in days.
+        return round($yearly / $dailyWorkHours, 1);
     }
 
     /**

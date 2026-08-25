@@ -4,6 +4,7 @@ namespace App\Livewire\Contract\Concerns;
 
 use App\Livewire\Forms\ContractForm;
 use App\Models\City;
+use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Employee;
 use App\Models\Position;
@@ -61,7 +62,7 @@ trait ResolvesContractLocationOptions
                 'program:id,name',
                 'center' => fn ($query) => $query->select('id', 'city_id', $centerNameColumn),
             ])
-            ->select('id', 'program_id', 'center_id', 'city_id', $positionTitleColumn)
+            ->select('id', 'program_id', 'center_id', 'city_id', 'max_emp', 'exist_emp', $positionTitleColumn)
             ->orderBy($positionTitleColumn)
             ->get();
 
@@ -76,6 +77,8 @@ trait ResolvesContractLocationOptions
                 $employees[] = [
                     'value' => $currentEmployee->id,
                     'label' => $currentEmployee->nameForLocale($locale),
+                    'avatar' => $currentEmployee->avatar_url,
+                    'activeContractEndsAt' => null,
                 ];
             }
         }
@@ -117,6 +120,11 @@ trait ResolvesContractLocationOptions
                     'label' => $position->{$positionTitleColumn},
                     'programId' => $position->program_id,
                     'centerId' => $position->center_id,
+                    // Capacity travels with the option so the create screen can
+                    // show "4 of 5" before the choice instead of failing after it.
+                    // Additive: contract-location-picker.js ignores both keys.
+                    'maxEmp' => (int) $position->max_emp,
+                    'existEmp' => (int) $position->exist_emp,
                 ])
                 ->values()
                 ->all(),
@@ -163,7 +171,9 @@ trait ResolvesContractLocationOptions
 
     private function getContractTypes(string $col): Collection
     {
-        return ContractType::select('id', $col)
+        // `type` and `place` are already stored on every row but were never
+        // displayed; the create screen surfaces them as badges on the type cards.
+        return ContractType::select('id', 'type', 'place', $col)
             ->orderBy($col)
             ->get()
             ->each(fn (ContractType $t) => $t->name = $t->{$col});
@@ -180,17 +190,56 @@ trait ResolvesContractLocationOptions
             return [];
         }
 
-        return Employee::query()
+        $employees = Employee::query()
             ->select('id', 'city_id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar')
+            // avatar_url reads from the loaded media collection when present, so
+            // eager-loading turns one lookup per employee into a single query.
+            // Constrained to the avatar collection so it does not drag in every
+            // other media row an employee happens to own.
+            ->with(['media' => fn ($query) => $query->where('collection_name', 'avatar')])
             ->where('is_active', true)
             ->where('city_id', $cityId)
             ->orderBy("first_name_{$locale}")
             ->orderBy("last_name_{$locale}")
-            ->get()
+            ->get();
+
+        $activeContractEnds = $this->activeContractEndDates($employees->modelKeys());
+
+        return $employees
             ->map(fn (Employee $employee) => [
                 'value' => $employee->id,
                 'label' => $employee->nameForLocale($locale),
+                // Additive keys, consumed only by the create composer.
+                'avatar' => $employee->avatar_url,
+                'activeContractEndsAt' => $activeContractEnds[$employee->id] ?? null,
             ])
+            ->all();
+    }
+
+    /**
+     * End dates of the currently active contracts, keyed by employee.
+     *
+     * Their presence is the duplicate-contract signal the create screen warns
+     * about; it never blocks, because renewals legitimately overlap.
+     *
+     * @param  array<int, int>  $employeeIds
+     * @return array<int, string>
+     */
+    private function activeContractEndDates(array $employeeIds): array
+    {
+        if ($employeeIds === []) {
+            return [];
+        }
+
+        return Contract::query()
+            ->activeNow()
+            ->whereIn('employee_id', $employeeIds)
+            ->orderBy('end_date')
+            ->get(['employee_id', 'end_date'])
+            ->mapWithKeys(fn (Contract $contract) => [
+                $contract->employee_id => $contract->end_date?->toDateString(),
+            ])
+            ->filter()
             ->all();
     }
 
