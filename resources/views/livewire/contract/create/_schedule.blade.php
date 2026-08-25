@@ -11,7 +11,6 @@
     name="schedule"
     index="3"
     :title="__('general.composer.schedule')"
-    :hint="__('general.composer.schedule-hint')"
     summary="scheduleSummary"
 >
     {{-- Day strip. Writes both work_days_en and work_days_ar, which is why each

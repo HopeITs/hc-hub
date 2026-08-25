@@ -209,7 +209,6 @@ document.addEventListener('alpine:init', () => {
         listSeparator: config.listSeparator,
         typeDefaults: config.typeDefaults,
         labels: config.labels,
-        draftKey: config.draftKey,
         locale: config.locale,
         cities: config.cities ?? [],
 
@@ -250,11 +249,9 @@ document.addEventListener('alpine:init', () => {
         loading: false,
         submitting: false,
         leaveDays: null,
-        draftAvailable: false,
         serverErrors: {},
         requestSequence: 0,
         leaveTimer: null,
-        draftTimer: null,
         // Set while the composer rewrites its own selections, so the cascade
         // watchers do not mistake a programmatic tidy-up for a user choice.
         syncing: false,
@@ -264,13 +261,10 @@ document.addEventListener('alpine:init', () => {
         // =============================================================
 
         initialize() {
-            this.draftAvailable = this.readDraft() !== null;
-
             this.$watch('selected.city', () => this.syncing || this.loadCityOptions(true));
             this.$watch('selected.program', () => this.syncing || this.onProgramChange());
             this.$watch('selected.center', () => this.syncing || this.onCenterChange());
             this.$watch('leaveInputs', () => this.scheduleLeavePreview());
-            this.$watch('persistable', () => this.scheduleDraftSave());
 
             if (this.selected.city) {
                 this.loadCityOptions(false);
@@ -943,7 +937,7 @@ document.addEventListener('alpine:init', () => {
         get cardSalary() {
             return this.salary === ''
                 ? this.labels.empty
-                : `${this.formatNumber(this.salary)} ${this.currencyLabel}`;
+                : `${this.formatNumber(this.salary)} ${this.currencyLabel} ${this.salaryPerLabel}`;
         },
 
         get cardLeave() {
@@ -987,90 +981,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         // =============================================================
-        // Draft
-        // =============================================================
-
-        get persistable() {
-            return JSON.stringify(this.snapshot());
-        },
-
-        snapshot() {
-            return {
-                selected: this.selected,
-                startDate: this.startDate,
-                endDate: this.endDate,
-                days: this.days,
-                workHoursFrom: this.workHoursFrom,
-                workHoursTo: this.workHoursTo,
-                weeklyHoursOverride: this.weeklyHoursOverride,
-                manualDays: this.manualDays,
-                workDaysEnManual: this.workDaysEnManual,
-                workDaysArManual: this.workDaysArManual,
-                attendingNotesEn: this.attendingNotesEn,
-                attendingNotesAr: this.attendingNotesAr,
-                salary: this.salary,
-                currency: this.currency,
-                salaryPer: this.salaryPer,
-            };
-        },
-
-        scheduleDraftSave() {
-            clearTimeout(this.draftTimer);
-
-            this.draftTimer = setTimeout(() => {
-                if (!this.selected.employee && !this.selected.position && this.salary === '') {
-                    return;
-                }
-
-                try {
-                    sessionStorage.setItem(this.draftKey, this.persistable);
-                } catch {
-                    // Storage unavailable (private mode, quota) — drafting is a
-                    // convenience, never a requirement.
-                }
-            }, 400);
-        },
-
-        readDraft() {
-            try {
-                const raw = sessionStorage.getItem(this.draftKey);
-
-                return raw ? JSON.parse(raw) : null;
-            } catch {
-                return null;
-            }
-        },
-
-        clearDraft() {
-            this.draftAvailable = false;
-
-            try {
-                sessionStorage.removeItem(this.draftKey);
-            } catch {
-                // ignored — see scheduleDraftSave()
-            }
-        },
-
-        async restoreDraft() {
-            const draft = this.readDraft();
-
-            this.draftAvailable = false;
-
-            if (!draft) {
-                return;
-            }
-
-            Object.assign(this, {
-                ...draft,
-                selected: { ...this.selected, ...draft.selected },
-            });
-
-            if (this.selected.city) {
-                await this.loadCityOptions(false);
-            }
-        },
-
-        // =============================================================
         // Submit
         // =============================================================
 
@@ -1102,8 +1012,6 @@ document.addEventListener('alpine:init', () => {
                     currency: this.currency,
                     salaryPer: this.salaryPer,
                 });
-
-                this.clearDraft();
             } finally {
                 this.submitting = false;
             }

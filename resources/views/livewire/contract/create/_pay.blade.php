@@ -26,7 +26,6 @@
     name="pay"
     index="4"
     :title="__('general.composer.pay')"
-    :hint="__('general.composer.pay-hint')"
     summary="paySummary"
 >
     <div class="mt-4 grid gap-5 lg:grid-cols-[1.1fr_1fr]">

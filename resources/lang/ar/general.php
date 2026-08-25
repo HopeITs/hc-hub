@@ -734,22 +734,15 @@ return [
     // other user-facing copy.
     // شاشة إنشاء العقد — صفحة واحدة "Composer".
     'composer' => [
-        'title' => 'عقد جديد',
-        'subtitle' => 'تُفتح الأقسام تباعاً',
 
         'assignment' => 'التعيين',
-        'assignment-hint' => 'من، وأين يعمل',
         'contract' => 'العقد',
-        'contract-hint' => 'نوع العقد يحدد التواريخ',
         'schedule' => 'الدوام',
-        'schedule-hint' => 'تُحتسب ساعات الأسبوع تلقائياً',
         'pay' => 'الأجر',
-        'pay-hint' => 'القسم الأخير',
 
         'locked-city' => 'محددة حسب دورك',
         'all-centers' => 'كل المراكز',
         'city-level' => 'على مستوى المحافظة (بدون مركز)',
-        'center-hint' => 'يحصر القائمة أدناه فقط، ولا يُحفظ في العقد.',
         'position-full' => 'مكتمل',
         'seats-left' => ':taken من :max مشغولة · يتبقى :left',
         'no-seats-left' => ':taken من :max مشغولة · لا شواغر',
@@ -790,9 +783,6 @@ return [
         'create' => 'إنشاء العقد',
         'continue' => 'متابعة',
 
-        'restore-title' => 'لديك عقد غير محفوظ في هذه الصفحة.',
-        'restore' => 'استعادته',
-        'discard' => 'تجاهل',
         'no-results' => 'لا نتائج مطابقة',
         'clear' => 'مسح',
     ],

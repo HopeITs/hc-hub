@@ -36,7 +36,6 @@
                 'end' => $type->endDate,
             ],
         ]),
-        'draftKey' => 'hc-contract-draft:'.auth()->id(),
         'labels' => [
             'allCenters' => __('general.composer.all-centers'),
             'cityLevel' => __('general.composer.city-level'),
@@ -83,35 +82,6 @@
         x-init="initialize()"
         class="pb-2 max-lg:pb-28"
     >
-        {{-- Survives an accidental refresh; dies with the tab. --}}
-        <div
-            x-cloak
-            x-show="draftAvailable"
-            x-collapse
-            class="mb-3 flex flex-wrap items-center gap-3 rounded-surface border border-neutral-200
-                   bg-white px-4 py-2.5 shadow-e1"
-        >
-            <p class="flex-1 text-small font-medium text-neutral-800">@lang('general.composer.restore-title')</p>
-            <button type="button"
-                    class="rounded-control border border-primary bg-white px-3 py-1.5 text-small font-semibold
-                           text-primary shadow-e1 transition hover:bg-primary hover:text-white
-                           active:scale-[0.98]
-                           focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                    x-on:click="restoreDraft()">@lang('general.composer.restore')</button>
-            <button type="button"
-                    class="rounded-control border border-neutral-300 bg-white px-3 py-1.5 text-small font-semibold
-                           text-secondary-dark shadow-e1 transition hover:bg-neutral-100 active:scale-[0.98]
-                           focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                    x-on:click="clearDraft()">@lang('general.composer.discard')</button>
-        </div>
-
-        <div class="mb-3">
-            <h1 class="text-h4 font-semibold text-neutral-900">@lang('general.composer.title')</h1>
-            <p class="mt-0.5 text-small text-secondary-light">
-                <span x-cloak x-show="cityName"><span x-text="cityName"></span> · </span>@lang('general.composer.subtitle')
-            </p>
-        </div>
-
         {{--
             items-stretch is what actually guarantees the two columns share a
             height: a grid row is as tall as its tallest cell, and both cells

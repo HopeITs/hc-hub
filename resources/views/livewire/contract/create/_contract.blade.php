@@ -3,7 +3,6 @@
     name="contract"
     index="2"
     :title="__('general.composer.contract')"
-    :hint="__('general.composer.contract-hint')"
     summary="contractSummary"
 >
     <div class="mt-4">

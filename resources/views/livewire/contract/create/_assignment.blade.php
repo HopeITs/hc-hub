@@ -3,7 +3,6 @@
     name="assignment"
     index="1"
     :title="__('general.composer.assignment')"
-    :hint="__('general.composer.assignment-hint')"
     summary="assignmentSummary"
 >
     {{--
@@ -89,7 +88,6 @@
                 model="selected.center"
                 disabled="loading || !selected.program"
             />
-            <p class="mt-1.5 text-caption text-secondary-medium">@lang('general.composer.center-hint')</p>
         </div>
 
         {{-- Position --}}

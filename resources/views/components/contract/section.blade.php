@@ -2,7 +2,6 @@
     'name',        // assignment | contract | schedule | pay
     'index',
     'title',
-    'hint' => null,
     'summary',     // Alpine expression producing the collapsed one-line summary
 ])
 
@@ -68,12 +67,6 @@
                 <template x-if="{{ $state }} === 'locked'">
                     <span class="truncate text-secondary-light" x-text="lockedHintFor('{{ $name }}')"></span>
                 </template>
-
-                @if($hint)
-                    <template x-if="{{ $state }} === 'open'">
-                        <span class="hidden truncate text-secondary-light sm:inline">{{ $hint }}</span>
-                    </template>
-                @endif
 
                 <template x-if="{{ $state }} === 'done'">
                     <span class="flex min-w-0 items-center gap-3">

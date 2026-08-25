@@ -731,22 +731,15 @@ return [
 
     // Contract create — the single-page "Composer" screen.
     'composer' => [
-        'title' => 'New contract',
-        'subtitle' => 'sections unlock as you go',
 
         'assignment' => 'Assignment',
-        'assignment-hint' => 'who, and where they sit',
         'contract' => 'Contract',
-        'contract-hint' => 'the type decides the dates',
         'schedule' => 'Schedule',
-        'schedule-hint' => 'hours per week are worked out for you',
         'pay' => 'Pay',
-        'pay-hint' => 'last one',
 
         'locked-city' => 'locked to your role',
         'all-centers' => 'All centers',
         'city-level' => 'City-level (no center)',
-        'center-hint' => 'Narrows the list below. Not stored on the contract.',
         'position-full' => 'Full',
         'seats-left' => ':taken of :max filled · :left left',
         'no-seats-left' => ':taken of :max filled · no seats left',
@@ -787,9 +780,6 @@ return [
         'create' => 'Create contract',
         'continue' => 'Continue',
 
-        'restore-title' => 'You have an unsaved contract on this tab.',
-        'restore' => 'Restore it',
-        'discard' => 'Discard',
         'no-results' => 'Nothing matches',
         'clear' => 'Clear',
     ],
