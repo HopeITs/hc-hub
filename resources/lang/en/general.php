@@ -787,8 +787,6 @@ return [
         'create' => 'Create contract',
         'continue' => 'Continue',
 
-        'ready-title' => 'Everything is filled in',
-        'ready-body' => 'Check the summary on the right, then create the contract.',
         'restore-title' => 'You have an unsaved contract on this tab.',
         'restore' => 'Restore it',
         'discard' => 'Discard',

@@ -111,43 +111,18 @@
             </p>
         </div>
 
-        {{-- items-stretch so the contract card runs the full height of the composer. --}}
-        <div class="grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5">
-            {{-- Flex column so the action bar can be pushed to the foot when the
-                 card is the taller of the two, keeping both columns level. --}}
+        <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5">
             <div class="flex min-w-0 flex-col gap-2.5">
                 @include('livewire.contract.create._assignment')
                 @include('livewire.contract.create._contract')
                 @include('livewire.contract.create._schedule')
                 @include('livewire.contract.create._pay')
-
-                {{--
-                    Absorbs whatever height the collapsed sections leave over, so
-                    the column ends level with the contract card instead of
-                    trailing off into a gap. Empty until the form is complete,
-                    at which point the space becomes the hand-off to the button.
-                --}}
-                <div class="flex min-h-0 flex-1">
-                    <div
-                        x-cloak
-                        x-show="completedCount === 4"
-                        class="flex w-full flex-col items-center justify-center gap-2 rounded-surface
-                               border border-neutral-200 bg-white px-6 py-6 text-center shadow-e1"
-                    >
-                        <span class="grid size-10 place-items-center rounded-round bg-primary text-white" aria-hidden="true">
-                            <svg class="size-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <path d="M4.5 10.5l3.5 3.5 7.5-8" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </span>
-                        <p class="text-body font-semibold text-neutral-900">@lang('general.composer.ready-title')</p>
-                        <p class="max-w-xs text-small text-secondary-medium">@lang('general.composer.ready-body')</p>
-                    </div>
-                </div>
-
                 @include('livewire.contract.create._action-bar')
             </div>
 
-            <aside class="hidden lg:block">
+            {{-- Natural height, fixed by its own content, and sticky so it stays
+                 in view. It does not stretch to the composer column. --}}
+            <aside class="hidden lg:sticky lg:top-6 lg:block">
                 @include('livewire.contract.create._contract-card')
             </aside>
         </div>

@@ -107,29 +107,32 @@
             <x-error-span>{{ $errors->first('form.position_id') }}</x-error-span>
         </div>
 
-        {{-- Capacity of the chosen position, filling the fourth cell. --}}
-        <div class="flex items-end">
-            <div class="w-full rounded-control border border-neutral-200 bg-neutral-50 px-3 py-2.5">
-                <p class="text-caption font-semibold uppercase tracking-wider text-secondary-medium">
-                    @lang('general.composer.capacity')
-                </p>
+        {{-- Capacity of the chosen position. Deliberately built to the same
+             label + control shape and height as the Positions field beside it,
+             so the pair reads as one row rather than two odd blocks. --}}
+        <div>
+            <x-forms.input-label>@lang('general.composer.capacity')</x-forms.input-label>
 
+            <div class="flex min-h-[2.375rem] w-full items-center gap-2.5 rounded-control
+                        border border-neutral-200 bg-neutral-50 px-3 py-2">
                 <template x-if="!capacity">
-                    <p class="mt-1.5 text-small text-secondary-light">@lang('general.composer.capacity-empty')</p>
+                    <span class="text-body text-secondary-light">@lang('general.composer.capacity-empty')</span>
+                </template>
+
+                {{-- A one-segment bar conveys nothing, so it only draws from two seats up. --}}
+                <template x-if="capacity && capacity.max > 1">
+                    <span class="flex gap-1" aria-hidden="true">
+                        <template x-for="seat in capacityBar" :key="seat.i">
+                            <span class="h-1.5 w-5 rounded-full"
+                                  x-bind:class="seat.taken ? 'bg-primary' : 'bg-neutral-300'"></span>
+                        </template>
+                    </span>
                 </template>
 
                 <template x-if="capacity">
-                    <div class="mt-1.5 flex items-center gap-2.5">
-                        <span class="flex gap-1" aria-hidden="true">
-                            <template x-for="seat in capacityBar" :key="seat.i">
-                                <span class="h-1.5 w-5 rounded-full"
-                                      x-bind:class="seat.taken ? 'bg-primary' : 'bg-neutral-300'"></span>
-                            </template>
-                        </span>
-                        <span class="text-small font-medium tabular-nums"
-                              x-bind:class="capacity.left === 0 ? 'text-primary' : 'text-neutral-800'"
-                              x-text="capacityLabel"></span>
-                    </div>
+                    <span class="text-body font-medium tabular-nums"
+                          x-bind:class="capacity.left === 0 ? 'text-primary' : 'text-neutral-800'"
+                          x-text="capacityLabel"></span>
                 </template>
             </div>
         </div>

@@ -3,10 +3,11 @@
     label present, so the shape of what is being built is visible from the very
     first field rather than assembled in the user's head.
 
-    Stretches to the full height of the composer column; the entitlement row is
-    pinned to the foot, where a total belongs.
+    Sized by its own content and nothing else, so its height never shifts as
+    sections open and close. The entitlement row closes it out, where a total
+    belongs.
 --}}
-<div class="flex h-full flex-col rounded-surface border border-neutral-200 bg-white shadow-e1">
+<div class="rounded-surface border border-neutral-200 bg-white shadow-e1">
     <div class="flex items-center gap-3 border-b border-neutral-200 p-4">
         <template x-if="selectedEmployee">
             <img
@@ -33,13 +34,7 @@
         </div>
     </div>
 
-    {{--
-        Rows share the spare height rather than bunching at the top. They grow
-        only to a comfortable maximum; past that the surplus becomes even
-        spacing between them, so a very tall card never turns an 11px label
-        into a 120px row.
-    --}}
-    <dl class="flex flex-1 flex-col justify-between px-4 py-1">
+    <dl class="px-4 py-1">
         @foreach([
             ['key' => __('general.composer.card-position'), 'value' => 'cardPosition'],
             ['key' => __('general.composer.card-center'),   'value' => 'cardCenter'],
@@ -49,7 +44,7 @@
             ['key' => __('general.weekly-hours'),           'value' => 'cardHours'],
             ['key' => __('general.salary'),                 'value' => 'cardSalary'],
         ] as $row)
-            <div class="flex max-h-[4.25rem] flex-1 items-center justify-between gap-3 border-b border-neutral-100 py-2 last:border-b-0">
+            <div class="flex items-center justify-between gap-3 border-b border-neutral-100 py-2.5 last:border-b-0">
                 <dt class="shrink-0 text-caption text-secondary-medium">{{ $row['key'] }}</dt>
                 <dd
                     class="min-w-0 truncate text-end text-small font-medium tabular-nums"
@@ -71,7 +66,7 @@
         place the user ever learns what the contract actually grants, so it sits
         at the foot of the card like a total.
     --}}
-    <div class="mt-auto flex items-baseline justify-between gap-3 rounded-b-surface border-t border-neutral-200
+    <div class="flex items-baseline justify-between gap-3 rounded-b-surface border-t border-neutral-200
                 bg-neutral-50 px-4 py-3">
         <dt class="shrink-0 text-caption font-semibold uppercase tracking-wider text-secondary-medium">
             @lang('general.composer.annual-leave')
