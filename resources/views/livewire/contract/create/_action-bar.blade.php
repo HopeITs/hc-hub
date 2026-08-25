@@ -1,11 +1,11 @@
 {{--
-    On desktop this is the last card in the stack; the flexible spacer above it
-    takes up any slack so it stays level with the bottom of the contract card.
-    Below lg it detaches to the bottom of the viewport and carries a compressed
-    version of the card with it.
+    On desktop this is the last card in the stack, pinned to the foot of its
+    column (lg:mt-auto) so the column fills the grid row whichever side is
+    taller. Below lg it detaches to the bottom of the viewport and carries a
+    compressed version of the contract card with it.
 --}}
 <div
-    class="rounded-surface border border-neutral-200 bg-white shadow-e1
+    class="rounded-surface border border-neutral-200 bg-white shadow-e1 lg:mt-auto
            max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-20 max-lg:rounded-b-none
            max-lg:border-x-0 max-lg:border-b-0 max-lg:shadow-e3"
 >

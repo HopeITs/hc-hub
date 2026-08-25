@@ -112,7 +112,12 @@
             </p>
         </div>
 
-        <div class="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5">
+        {{--
+            items-stretch is what actually guarantees the two columns share a
+            height: a grid row is as tall as its tallest cell, and both cells
+            fill it. Neither side is tuned to the other.
+        --}}
+        <div class="grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5">
             <div class="flex min-w-0 flex-col gap-2.5">
                 @include('livewire.contract.create._assignment')
                 @include('livewire.contract.create._contract')
@@ -121,9 +126,7 @@
                 @include('livewire.contract.create._action-bar')
             </div>
 
-            {{-- Natural height, fixed by its own content, and sticky so it stays
-                 in view. It does not stretch to the composer column. --}}
-            <aside class="hidden lg:sticky lg:top-6 lg:block">
+            <aside class="hidden lg:block">
                 @include('livewire.contract.create._contract-card')
             </aside>
         </div>
