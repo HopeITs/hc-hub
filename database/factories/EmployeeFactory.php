@@ -3,10 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Employee;
-use App\Models\Position;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class EmployeeFactory extends Factory
@@ -60,20 +57,5 @@ class EmployeeFactory extends Factory
     public function inactive(): static
     {
         return $this->state(fn (): array => ['is_active' => false]);
-    }
-
-    public function configure()
-    {
-        return $this->afterCreating(function ($employee) {
-            // A contract needs a real position and contract type; skip when the
-            // database has none (e.g. unseeded test runs).
-            if (! Position::query()->exists() || ! ContractType::query()->exists()) {
-                return;
-            }
-
-            Contract::factory()->create([
-                'employee_id' => $employee->id,
-            ]);
-        });
     }
 }

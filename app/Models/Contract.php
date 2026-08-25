@@ -80,9 +80,18 @@ class Contract extends Model
     public function scopeActiveNow(Builder $query): Builder
     {
         return $query
-            ->where('is_active', true)
-            ->whereDate('start_date', '<=', now())
-            ->whereDate('end_date', '>=', now());
+            ->where($query->qualifyColumn('is_active'), true)
+            ->whereDate($query->qualifyColumn('start_date'), '<=', now())
+            ->whereDate($query->qualifyColumn('end_date'), '>=', now());
+    }
+
+    /** Restrict contracts to assignments belonging to one center. */
+    public function scopeAtCenter(Builder $query, int $centerId): Builder
+    {
+        return $query->whereHas(
+            'position',
+            fn (Builder $position): Builder => $position->where('center_id', $centerId),
+        );
     }
 
     /**

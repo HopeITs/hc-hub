@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasTranslation;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -43,6 +44,24 @@ class Center extends Model
     public function contracts()
     {
         return $this->hasManyThrough(Contract::class, Position::class);
+    }
+
+    /**
+     * The distinct people with a current contract assignment at this center.
+     *
+     * Both the center headline and its employee directory use this query so a
+     * person holding two positions is displayed and counted exactly once.
+     */
+    public function activeEmployeesQuery(): Builder
+    {
+        $centerId = (int) $this->getKey();
+
+        return Employee::query()->whereHas(
+            'allContracts',
+            fn (Builder $contracts): Builder => $contracts
+                ->activeNow()
+                ->atCenter($centerId),
+        );
     }
 
     public function getActivitylogOptions(): LogOptions

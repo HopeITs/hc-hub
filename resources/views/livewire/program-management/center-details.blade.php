@@ -1,177 +1,215 @@
-<div class="relative isolate">
+<div
+    class="relative isolate"
+    x-data="{
+        activeTab: 'contracts',
+        selectTab(tab) {
+            this.activeTab = tab;
+        },
+        moveTab(event, direction) {
+            const tabs = Array.from(event.currentTarget.closest('[role=tablist]').querySelectorAll('[role=tab]'));
+            const currentIndex = tabs.indexOf(event.currentTarget);
+            const nextTab = tabs[(currentIndex + direction + tabs.length) % tabs.length];
 
-    <div class="space-y-12 ">
-        <div class="grid h-full gap-6 md:grid-cols-[1fr_auto] items-start">
-            <div
-                class="relative overflow-hidden rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-9 shadow-e1">
-                <div class="absolute inset-0 opacity-50 bg-neutral-100 dark:bg-neutral-800"></div>
+            this.activeTab = nextTab.dataset.tab;
+            nextTab.focus();
+        }
+    }"
+>
+    <div class="@container mx-auto max-w-[100rem] space-y-[clamp(1.5rem,4vw,3rem)]">
+        <div class="grid items-stretch gap-4 @5xl:grid-cols-[minmax(0,1fr)_13rem] @5xl:gap-6">
+            <section class="relative overflow-hidden rounded-surface border border-neutral-200 bg-white p-[clamp(1rem,3vw,2.25rem)] shadow-e1 dark:border-neutral-700 dark:bg-neutral-900">
+                <div class="pointer-events-none absolute inset-0 bg-neutral-100/50 dark:bg-neutral-800/50"></div>
 
-                <div class="relative flex flex-col gap-3">
-                    <div class="flex flex-row w-full ">
-                        <h1 class="text-h2 font-black  w-2/3 text-neutral-900 dark:text-white">
-                            {{ $center->name }}
-                        </h1>
-                        <div class=" flex flex-row justify-end items-center h-12 w-1/3  gap-3">
-                            <a href="{{ route('centers.index') }}"
-                               class="group relative inline-flex items-center gap-2 rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-neutral-800 dark:text-white shadow-e1 transition-all duration-300  active:translate-y-0">
-                                <span class="font-semibold text-small">@lang('general.back')</span>
+                <div class="relative flex flex-col gap-[clamp(1rem,2vw,1.5rem)]">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div class="min-w-0 flex-1 basis-[22rem]">
+                            <h1 class="text-[clamp(1.75rem,4vw,2.5rem)] font-black leading-tight text-neutral-900 dark:text-white">
+                                {{ $center->name }}
+                            </h1>
+                            <p class="mt-3 max-w-3xl text-body leading-relaxed text-neutral-600 dark:text-neutral-300">
+                                <span>@lang('general.located-in')</span>
+                                <span class="font-semibold text-neutral-900 dark:text-white">{{ $center->city?->name ?? '—' }}</span>
+                                <span aria-hidden="true"> · </span>
+                                <span>@lang('general.centers-text')</span>
+                            </p>
+                        </div>
+
+                        <div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
+                            <a
+                                href="{{ route('centers.index') }}"
+                                wire:navigate
+                                class="inline-flex min-h-11 items-center justify-center rounded-surface border border-neutral-200 bg-white px-4 py-2 text-small font-semibold text-neutral-800 shadow-e1 transition hover:border-neutral-300 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+                            >
+                                @lang('general.back')
                             </a>
-                            @activerole('HR','super-admin')
-                            <a href="{{ route('positions.index', ['center' => $center->id]) }}"
-                               class="group relative flex items-center gap-2 rounded-surface px-3 py-2 bg-primary text-white hover:bg-primary shadow-e3 transition-all duration-300 hover:shadow-e3 ">
-                                <span class="z-10 text-small font-semibold">@lang('general.view-positions')</span>
+
+                            @activepermission('positions.view')
+                            <a
+                                href="{{ route('positions.index', ['center' => $center->id]) }}"
+                                wire:navigate
+                                class="inline-flex min-h-11 items-center justify-center rounded-surface bg-primary px-4 py-2 text-small font-semibold text-white shadow-e2 transition hover:bg-primary-hover hover:shadow-e3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                            >
+                                @lang('general.view-positions')
                             </a>
-                            @endactiverole
+                            @endactivepermission
                         </div>
                     </div>
 
-                    <p class="text-neutral-600 h-18 dark:text-neutral-300 max-w-prose line-clamp-2">
-                        <span>@lang('general.located-in')<span
-                                class="ms-1 font-semibold text-neutral-900 dark:text-white">{{ optional($center->city)->name ?? '—' }}</span></span>
-                        ,@lang('general.centers-text')
-                    </p>
-
-
-                    <div class="relative mt-2 -ms-1">
+                    <div class="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:thin]">
                         <div
-                            class="inline-flex rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-1 shadow-e3">
+                            role="tablist"
+                            aria-label="{{ __('general.center-details-sections') }}"
+                            class="inline-flex min-w-max rounded-surface border border-neutral-200 bg-white p-1 shadow-e2 dark:border-neutral-700 dark:bg-neutral-900"
+                        >
                             <button
-                                wire:click="switchTab('contracts')"
-                                class="ui-tab group relative inline-flex items-center gap-2 rounded-surface px-4 py-2 text-body font-semibold transition-all duration-300  {{ $activeTab === 'contracts' ? 'bg-primary text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
-                                <span class="z-10">@lang('general.employees-by-contract-type')</span>
+                                id="center-tab-contracts"
+                                type="button"
+                                role="tab"
+                                data-tab="contracts"
+                                aria-controls="center-panel-contracts"
+                                :aria-selected="activeTab === 'contracts'"
+                                :tabindex="activeTab === 'contracts' ? 0 : -1"
+                                @click="selectTab('contracts')"
+                                @keydown.right.prevent="moveTab($event, 1)"
+                                @keydown.left.prevent="moveTab($event, -1)"
+                                :class="activeTab === 'contracts' ? 'bg-primary text-white shadow-e1' : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'"
+                                class="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-surface px-[clamp(0.75rem,2vw,1rem)] py-2 text-body font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                            >
+                                <x-icons.contracts class="size-4" />
+                                <span>@lang('general.employees-by-contract-type')</span>
                             </button>
+
                             <button
-                                wire:click="switchTab('programs')"
-                                class="ui-tab group relative inline-flex items-center gap-2 rounded-surface px-4 py-2 text-body font-semibold transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-light {{ $activeTab === 'programs' ? 'bg-primary text-white' : 'text-neutral-700 dark:text-neutral-300' }}">
-                                <span class="z-10">@lang('general.employees-by-program')</span>
+                                id="center-tab-programs"
+                                type="button"
+                                role="tab"
+                                data-tab="programs"
+                                aria-controls="center-panel-programs"
+                                :aria-selected="activeTab === 'programs'"
+                                :tabindex="activeTab === 'programs' ? 0 : -1"
+                                @click="selectTab('programs')"
+                                @keydown.right.prevent="moveTab($event, 1)"
+                                @keydown.left.prevent="moveTab($event, -1)"
+                                :class="activeTab === 'programs' ? 'bg-primary text-white shadow-e1' : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'"
+                                class="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-surface px-[clamp(0.75rem,2vw,1rem)] py-2 text-body font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                            >
+                                <x-icons.program class="size-4" />
+                                <span>@lang('general.employees-by-program')</span>
                             </button>
+
+                            @if ($canViewEmployees)
+                                <button
+                                    id="center-tab-employees"
+                                    type="button"
+                                    role="tab"
+                                    data-tab="employees"
+                                    aria-controls="center-panel-employees"
+                                    :aria-selected="activeTab === 'employees'"
+                                    :tabindex="activeTab === 'employees' ? 0 : -1"
+                                    @click="selectTab('employees')"
+                                    @keydown.right.prevent="moveTab($event, 1)"
+                                    @keydown.left.prevent="moveTab($event, -1)"
+                                    :class="activeTab === 'employees' ? 'bg-primary text-white shadow-e1' : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'"
+                                    class="inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-surface px-[clamp(0.75rem,2vw,1rem)] py-2 text-body font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                                >
+                                    <x-icons.users
+                                        class="size-4"
+                                        x-bind:class="activeTab === 'employees' ? '!text-white' : ''"
+                                    />
+                                    <span>{{ trans_choice('general.employee', 2) }}</span>
+                                    <span class="rounded-full px-2 py-0.5 text-caption font-bold" :class="activeTab === 'employees' ? 'bg-white/20 text-white' : 'bg-neutral-100 text-secondary-medium dark:bg-neutral-800 dark:text-neutral-300'">
+                                        {{ number_format($totalEmployees) }}
+                                    </span>
+                                </button>
+                            @endif
                         </div>
                     </div>
-
                 </div>
-            </div>
+            </section>
 
-            <div
-                class=" w-full h-full text-center flex items-center  relative overflow-hidden rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl px-4 shadow-e1">
-                <div class="relative grid grid-rows-2 gap-4">
-                    <div>
-                        <p class="text-body font-semibold tracking-wide text-neutral-500 dark:text-neutral-400">@lang('general.total-employees')</p>
-                        <p class=" text-h3 font-bold text-secondary-dark dark:text-white">
-                            {{ $totalEmployees ?? collect($programData)->sum('count') }}
-                        </p>
-                    </div>
-                    <div>
-                        <p class="text-body  font-semibold tracking-wide text-neutral-500 dark:text-neutral-400">{{trans_choice('general.program' ,1)}}</p>
-                        <p class="mt-1 text-h3 font-bold text-secondary-dark dark:text-white">
-                            {{ is_countable($programData) ? count($programData) : 0 }}
-                        </p>
-                    </div>
+            <aside class="grid [grid-template-columns:repeat(auto-fit,minmax(min(100%,8rem),1fr))] overflow-hidden rounded-surface border border-neutral-200 bg-white shadow-e1 dark:border-neutral-700 dark:bg-neutral-900" aria-label="{{ __('general.center-summary') }}">
+                <div class="flex min-h-28 flex-col items-center justify-center p-4 text-center">
+                    <p class="text-small font-semibold text-neutral-500 dark:text-neutral-400">@lang('general.total-employees')</p>
+                    <p class="mt-1 text-h3 font-black text-secondary-dark dark:text-white">{{ number_format($totalEmployees) }}</p>
                 </div>
-            </div>
+                <div class="flex min-h-28 flex-col items-center justify-center border-s border-neutral-100 p-4 text-center @5xl:border-s-0 @5xl:border-t dark:border-neutral-800">
+                    <p class="text-small font-semibold text-neutral-500 dark:text-neutral-400">@lang('general.active-assignments')</p>
+                    <p class="mt-1 text-h3 font-black text-primary">{{ number_format($totalAssignments) }}</p>
+                </div>
+                <div class="flex min-h-28 flex-col items-center justify-center border-s border-neutral-100 p-4 text-center @5xl:border-s-0 @5xl:border-t dark:border-neutral-800">
+                    <p class="text-small font-semibold text-neutral-500 dark:text-neutral-400">{{ trans_choice('general.program', 2) }}</p>
+                    <p class="mt-1 text-h3 font-black text-secondary-dark dark:text-white">{{ number_format(count($programData)) }}</p>
+                </div>
+            </aside>
         </div>
 
-
-        <div class="pt-4">
-            @if ($activeTab === 'contracts')
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    @foreach ($contractData as $type => $categories)
-                        @php $__total = array_sum(array_column($categories['items'], 'count')); @endphp
-                        <div
-                            class="group relative overflow-hidden rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-9 shadow-e3 transition-all duration-300 hover:-translate-y-1 hover:shadow-e3">
-                            <div class="relative flex items-center justify-between gap-4">
-                                <h3 class="text-h4 font-bold capitalize text-neutral-900 dark:text-white">{{ $categories['label'] }}</h3>
-                                <span
-                                    class="inline-flex  items-center gap-1  px-3 py-2 text-body font-semibold text-secondary-dark dark:text-secondary-medium">
-                                    <i class="ti ti-users"></i>
-                                    @lang('general.total') {{ $__total }}
-                                </span>
+        <section id="center-panel-contracts" role="tabpanel" aria-labelledby="center-tab-contracts" x-show="activeTab === 'contracts'">
+            @if ($contractData !== [])
+                <div class="grid justify-start gap-4 [grid-template-columns:repeat(auto-fill,minmax(min(100%,20rem),28rem))]">
+                    @foreach ($contractData as $categories)
+                        @php($categoryTotal = array_sum(array_column($categories['items'], 'count')))
+                        <article class="rounded-surface border border-neutral-200 bg-white p-[clamp(1rem,2.5vw,2rem)] shadow-e2 transition hover:-translate-y-0.5 hover:shadow-e3 dark:border-neutral-700 dark:bg-neutral-900">
+                            <div class="flex items-center justify-between gap-4">
+                                <h2 class="text-h4 font-bold text-neutral-900 dark:text-white">{{ $categories['label'] }}</h2>
+                                <span class="text-body font-semibold text-secondary-medium">@lang('general.total') {{ $categoryTotal }}</span>
                             </div>
-
-                            <div class="relative mt-4 space-y-3">
+                            <div class="mt-5 space-y-4">
                                 @foreach ($categories['items'] as $item)
-                                    @php
-                                        $count = $item['count'];
-                                        $label = $item['label'];
-                                        $__pct = $__total ? round(($count / $__total) * 100) : 0;
-                                    @endphp
-
+                                    @php($percentage = $categoryTotal ? round(($item['count'] / $categoryTotal) * 100) : 0)
                                     <div class="space-y-2">
-                                        <div class="flex items-center justify-between text-body">
-                                            <span class="text-neutral-600 dark:text-neutral-300">{{ $label }}</span>
-                                            <span
-                                                class="font-semibold text-neutral-900 dark:text-white">{{ $count }}</span>
+                                        <div class="flex items-center justify-between gap-3 text-body">
+                                            <span class="text-neutral-600 dark:text-neutral-300">{{ $item['label'] }}</span>
+                                            <span class="font-bold text-neutral-900 dark:text-white">{{ $item['count'] }}</span>
                                         </div>
-
-                                        <div
-                                            class="h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800">
-                                            <div class="h-full rounded-full bg-primary"
-                                                 style="width: {{ $__pct }}%"></div>
+                                        <div class="h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800" role="progressbar" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="h-full rounded-full bg-primary" style="width: {{ $percentage }}%"></div>
                                         </div>
                                     </div>
                                 @endforeach
-
                             </div>
-
-                        </div>
+                        </article>
                     @endforeach
                 </div>
-
-            @elseif ($activeTab === 'programs')
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    @forelse ($programData as $program)
-                        <div
-                            class="group relative overflow-hidden rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-9 shadow-e3 transition-all duration-300 hover:-translate-y-1 hover:shadow-e3">
-                            <h3 class="relative text-h4 font-extrabold text-secondary-dark dark:text-white">
-                                {{ $program['program'] ?? 'Unassigned Program' }}
-                            </h3>
-
-                            <p class="mt-1 text-body text-secondary-light dark:text-neutral-300">@lang('general.total-employees')</p>
-                            <p class="text-h2 font-black mt-3 tracking-normal text-primary dark:text-secondary-medium">
-                                {{ $program['count'] }}
-                            </p>
-
-                        </div>
-                    @empty
-                        <div class="col-span-full">
-                            <div
-                                class="flex flex-col items-center justify-center rounded-surface border border-dashed border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-12 text-center shadow-e1">
-                                <div
-                                    class="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-surface bg-neutral-100 dark:bg-neutral-800 shadow">
-                                    <i class="ti ti-info-circle text-h3 text-neutral-500 dark:text-neutral-300"></i>
-                                </div>
-                                <p class="text-h4 font-semibold text-neutral-800 dark:text-white">No programs found for
-                                    this center</p>
-                                <p class="mt-1 text-neutral-600 dark:text-neutral-300">Try assigning employees to
-                                    programs to populate this view.</p>
-                            </div>
-                        </div>
-                    @endforelse
-                </div>
+            @else
+                <x-center-empty-state :title="__('general.no-contract-data')" :description="__('general.no-contract-data-help')" />
             @endif
-        </div>
+        </section>
 
-        <div wire:loading.delay.class.remove="hidden" class="hidden">
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                @for ($i = 0; $i < 6; $i++)
-                    <div
-                        class="animate-pulse rounded-surface border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 backdrop-blur-xl p-9 shadow">
-                        <div class="h-6 w-1/3 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-                        <div class="mt-4 space-y-3">
-                            <div class="h-3 w-full rounded bg-neutral-200 dark:bg-neutral-700"></div>
-                            <div class="h-3 w-5/6 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-                            <div class="h-3 w-2/3 rounded bg-neutral-200 dark:bg-neutral-700"></div>
-                        </div>
-                    </div>
-                @endfor
-            </div>
-        </div>
+        <section id="center-panel-programs" role="tabpanel" aria-labelledby="center-tab-programs" x-show="activeTab === 'programs'" x-cloak>
+            @if ($programData !== [])
+                <div class="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr))]">
+                    @foreach ($programData as $program)
+                        <article class="rounded-surface border border-neutral-200 bg-white p-[clamp(1rem,2.5vw,2rem)] shadow-e2 transition hover:-translate-y-0.5 hover:shadow-e3 dark:border-neutral-700 dark:bg-neutral-900">
+                            <div class="flex size-10 items-center justify-center rounded-surface bg-neutral-100 text-primary dark:bg-neutral-800">
+                                <x-icons.program class="size-5" />
+                            </div>
+                            <h2 class="mt-4 text-h4 font-extrabold text-secondary-dark dark:text-white">{{ $program['program'] }}</h2>
+                            <p class="mt-1 text-body text-secondary-light">@lang('general.total-employees')</p>
+                            <p class="mt-3 text-h2 font-black text-primary">{{ number_format($program['count']) }}</p>
+                        </article>
+                    @endforeach
+                </div>
+            @else
+                <x-center-empty-state :title="__('general.no-programs-for-center')" :description="__('general.no-programs-for-center-help')" />
+            @endif
+        </section>
 
-        <style>
-            @media (prefers-reduced-motion: reduce) {
-                .ui-tab, a {
-                    transition: none !important;
-                }
-            }
-        </style>
+        @if ($canViewEmployees)
+            <section id="center-panel-employees" role="tabpanel" aria-labelledby="center-tab-employees" x-show="activeTab === 'employees'" x-cloak>
+                <livewire:program-management.center.center-employees :center-id="$center->id" :key="'center-employees-'.$center->id" />
+            </section>
+        @endif
     </div>
+
+    <style>
+        [x-cloak] { display: none !important; }
+
+        @media (prefers-reduced-motion: reduce) {
+            #center-panel-contracts *,
+            #center-panel-programs *,
+            #center-panel-employees * {
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </div>

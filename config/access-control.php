@@ -276,7 +276,9 @@ return [
         'basics.job-level-module' => ['save'],
         'basics.leave-type-module' => ['save'],
         'basics.termination-reason-module' => ['save'],
-        'news.news-create' => ['save'],
+        // updatedFormNewsableType() only clears dependent form selections;
+        // it does not read a record or persist data. save() authorizes before writing.
+        'news.news-create' => ['save', 'updatedFormNewsableType'],
         // Also runs assertCityIsAuthorized() and a Gate check on the city.
         'program-management.center.centers-module' => ['save'],
         'program-management.default-deliverable.default-deliverables-module' => ['save'],
