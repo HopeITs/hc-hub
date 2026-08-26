@@ -18,7 +18,7 @@
                                          class="absolute inset-0 w-full h-full pe-2 pb-12 object-cover pointer-events-none opacity-100 z-0">
                                 @endif
 
-                                <div class="flex flex-col h-full justify-center z-30 bg-white items-center ">
+                                <div class="flex flex-col h-full justify-center z-30 items-center ">
                                     {{-- Avatar --}}
                                     @php $isDefaultIcon = str_ends_with($event['photo'], '.svg'); @endphp
                                     @if($isDefaultIcon)
@@ -32,7 +32,7 @@
                                     @endif
 
                                     {{-- Info --}}
-                                    <div class="mt-2 bg-white z-20 text-center">
+                                    <div class="mt-2 z-20 text-center">
                                         <p class="font-semibold text-body mt-2 text-[#58595B]">{{ $event['name'] }}</p>
 
                                         @php
