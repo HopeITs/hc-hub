@@ -17,6 +17,16 @@ class Contract extends Model
     use HasFactory, LogsActivity, RedactsSensitiveActivityLog;
 
     /**
+     * The contract this row is being created as the successor of.
+     *
+     * Transient and never persisted — it exists only between building the model
+     * and ContractObserver::creating() reading it. It MUST stay a declared
+     * property: assigned dynamically, Eloquent would treat it as an attribute
+     * and try to insert a `renewal_source_id` column that does not exist.
+     */
+    public ?int $renewalSourceId = null;
+
+    /**
      * Salary and free-text attendance notes are logged by name only.
      *
      * @see RedactsSensitiveActivityLog
@@ -161,6 +171,54 @@ class Contract extends Model
     public function leaveBalances()
     {
         return $this->hasMany(LeaveBalance::class, 'contract_id');
+    }
+
+    /**
+     * The dates a renewal of this contract should default to: it picks up the
+     * day after this one ends and runs for the same number of months.
+     *
+     * The length is measured in whole months rather than days so a Jan–Jun
+     * contract renews as Jul–Dec instead of ending three days short, and it is
+     * clamped to [1, 12] because ContractForm::validateTerms() rejects a term
+     * longer than a year and a zero-month term would end before it starts.
+     *
+     * @return array{0: string, 1: string} [start_date, end_date]
+     */
+    public function renewalWindow(): array
+    {
+        $sourceStart = Carbon::parse($this->start_date);
+        $sourceEnd = Carbon::parse($this->end_date);
+
+        $start = $sourceEnd->copy()->addDay();
+        $months = min(12, max(1, (int) round($sourceStart->diffInMonths($sourceEnd))));
+
+        return [
+            $start->toDateString(),
+            $start->copy()->addMonthsNoOverflow($months)->subDay()->toDateString(),
+        ];
+    }
+
+    /**
+     * Is a contract created from $sourceId onto $positionId a renewal in place?
+     *
+     * Such a renewal does not add headcount — the seat is already counted for
+     * this employee — so the position capacity check is skipped for it, which
+     * is what makes renewing a max_emp = 1 position possible at all. Renewing
+     * onto a *different* position is a real new assignment and stays checked.
+     */
+    public static function isRenewalOfPosition(?int $sourceId, ?int $positionId): bool
+    {
+        return $sourceId !== null
+            && $positionId !== null
+            && static::query()
+                ->whereKey($sourceId)
+                ->where('position_id', $positionId)
+                ->exists();
+    }
+
+    public function isRenewalInPlace(): bool
+    {
+        return static::isRenewalOfPosition($this->renewalSourceId, $this->position_id);
     }
 
     public function getDurationAttribute()

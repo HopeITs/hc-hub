@@ -20,7 +20,7 @@
             "*" or read it as "star", neither of which conveys the requirement.
             The visually hidden word is what actually gets announced.
         --}}
-        <span class="text-red-600 ltr:ml-1 rtl:mr-1" aria-hidden="true">*</span>
+        <span class="text-primary ltr:ml-1 rtl:mr-1" aria-hidden="true">*</span>
         <span class="sr-only">({{ __('general.a11y.required-field') }})</span>
     @endif
 </label>

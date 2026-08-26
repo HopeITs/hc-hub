@@ -11,8 +11,10 @@ use App\Models\Position;
 use App\Models\TerminationReason;
 use App\Models\User;
 use App\Notifications\NewEmployeeWelcome;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class ContractCreate extends Component
@@ -33,6 +35,14 @@ class ContractCreate extends Component
 
     public ?int $center_id = null;
 
+    /**
+     * The contract being renewed, when this page was opened as a renewal.
+     * Locked: it decides the term anchor and the heading, and mount() is the
+     * only place allowed to establish it (after the renew gate has passed).
+     */
+    #[Locked]
+    public ?Contract $renewalSource = null;
+
     protected array $validatorsByStep = [
         1 => 'validateIdentity',
         2 => 'validateTerms',
@@ -43,9 +53,18 @@ class ContractCreate extends Component
     // Lifecycle
     // ────────────────────────────────────────────────
 
-    public function mount(): void
+    /**
+     * Serves both `/contracts/create` and `/contracts/{contract}/renew`. With a
+     * source contract the wizard opens fully prefilled from it; without one it
+     * behaves exactly as it always has.
+     */
+    public function mount(?Contract $contract = null): void
     {
         $this->form->setDefaults();
+
+        if ($contract?->exists) {
+            $this->initializeRenewal($contract);
+        }
     }
 
     // ────────────────────────────────────────────────
@@ -72,12 +91,18 @@ class ContractCreate extends Component
 
     public function updatedFormContractTypeId(mixed $value): void
     {
-        $this->form->updatedContractTypeId($value);
+        $this->form->updatedContractTypeId($value, $this->contractTermAnchor());
     }
 
     public function updatedFormPositionId(mixed $value): void
     {
         $this->resetErrorBag('form.position_id');
+
+        // Renewing onto the position the source contract already holds does not
+        // consume a new seat, so the inline capacity warning must not fire.
+        if (Contract::isRenewalOfPosition($this->form->renewal_source_id, (int) $value)) {
+            return;
+        }
 
         $position = Position::query()
             ->select('id', 'max_emp', 'exist_emp')
@@ -144,6 +169,19 @@ class ContractCreate extends Component
 
     public function submit(): mixed
     {
+        // A renewal may sit open for a while. Re-read the source and re-check
+        // the gate, so a contract terminated or moved between opening the
+        // wizard and saving it cannot still be carried forward.
+        if ($this->renewalSource) {
+            $source = $this->renewalSource->fresh();
+
+            // Deleted out from under the wizard: there is nothing left to renew,
+            // and re-checking the gate against the stale copy would be a lie.
+            abort_if($source === null, 403);
+
+            Gate::authorize('renew', $source);
+        }
+
         $this->form->validateIdentity();
         $this->form->validateTerms();
         $this->form->validatePay();
@@ -196,6 +234,79 @@ class ContractCreate extends Component
     protected function locationOptionsPermission(): string
     {
         return 'contracts.create';
+    }
+
+    protected function locationOptionsEmployeeId(): ?int
+    {
+        // A renewal keeps its employee even when that employee has since been
+        // deactivated, so the dropdown must still be able to show them.
+        return $this->renewalSource?->employee_id;
+    }
+
+    protected function contractTermAnchor(): ?string
+    {
+        return $this->isRenewal() ? $this->form->start_date : null;
+    }
+
+    private function isRenewal(): bool
+    {
+        return $this->renewalSource !== null;
+    }
+
+    // ────────────────────────────────────────────────
+    // Private — renewal
+    // ────────────────────────────────────────────────
+
+    private function initializeRenewal(Contract $contract): void
+    {
+        Gate::authorize('renew', $contract);
+
+        // employee.media so the banner's avatar_url resolves from the loaded
+        // relation rather than firing a media lookup of its own.
+        $this->renewalSource = $contract->loadMissing(['position', 'employee.media']);
+
+        [$start, $end] = $this->renewalWindowFromRequest($contract);
+
+        $this->form->fillFromRenewal($contract, $start, $end);
+        $this->initLocationContext($contract);
+
+        // Every field arrives prefilled, so all three steps are already valid
+        // destinations rather than being unlocked one at a time.
+        $this->maxStep = 3;
+
+        // Open on Terms, not Identity. A renewal already knows its employee and
+        // position, and step 1 is the expensive screen: rendering it queries the
+        // city and contract-type lists, then Alpine fires a second round trip to
+        // locationOptions() for every employee and position in the city and
+        // builds Select2 over them. Skipping it makes "Renew with Edit" land in
+        // one page load instead of three sequential requests. Previous still
+        // goes back to Identity for the rarer case of changing the assignment.
+        $this->step = 2;
+    }
+
+    /**
+     * The dates chosen in the renew modal, passed through the query string.
+     *
+     * They come from the browser and are re-validated here; anything missing or
+     * malformed falls back to the contract's own default renewal window rather
+     * than failing the page.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function renewalWindowFromRequest(Contract $contract): array
+    {
+        $requested = validator(request()->only(['start', 'end']), [
+            'start' => ['required', 'date_format:Y-m-d'],
+            'end' => ['required', 'date_format:Y-m-d', 'after_or_equal:start'],
+        ]);
+
+        if ($requested->fails()) {
+            return $contract->renewalWindow();
+        }
+
+        $validated = $requested->validated();
+
+        return [$validated['start'], $validated['end']];
     }
 
     private function notifyIfFirstContract(Contract $contract): void

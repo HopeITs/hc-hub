@@ -21,5 +21,14 @@
         @endactiverole
     </div>
 
-    <livewire:contract.contracts-table />
+    {{-- Keeps the employee and position columns pinned while the rest of this
+         wide table scrolls sideways. Scoped here on purpose: every other table
+         in the app shares the same vendor view and is left alone. --}}
+    <div class="table-frozen-2">
+        <livewire:contract.contracts-table />
+    </div>
+
+    {{-- One instance for the whole table; each row's Renew button addresses it
+         by dispatching `open-renew-modal`. --}}
+    <livewire:contract.contract-renew-modal />
 </div>

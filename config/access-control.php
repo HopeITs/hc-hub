@@ -143,6 +143,15 @@ return [
             'locationOptions' => 'contracts.update',
             'advanceIdentity' => 'contracts.update',
         ],
+        // A renewal creates a contract. The permission here is the coarse
+        // gate; ContractRenewModal re-reads the contract and runs the `renew`
+        // policy on every one of these, which is what enforces city scope and
+        // rejects a terminated source.
+        'contract.contract-renew-modal' => [
+            'open' => 'contracts.create',
+            'renewAsIs' => 'contracts.create',
+            'renewWithEdit' => 'contracts.create',
+        ],
         'contract.contracts-table' => ['delete' => 'contracts.delete', 'exportExcel' => 'contracts.export'],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
@@ -349,6 +358,9 @@ return [
             'updatedCenterId', 'updatedFormPositionId',
         ],
         'contract.contract-details' => ['nextPage', 'prevPage', 'setPage'],
+        // Dismisses the modal and clears its state. Writes nothing; the two
+        // actions that do write are mapped to contracts.create above.
+        'contract.contract-renew-modal' => ['close'],
         'dashboard.calendar-card' => ['next', 'prev'],
         'employee.employee-create' => ['setActiveTab', 'toggleBoardMember'],
         // The add*/openInitiateReturnModal methods stage rows in the in-memory

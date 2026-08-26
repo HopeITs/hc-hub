@@ -746,4 +746,13 @@ return [
 
     // Default <meta> copy, overridden per page via $title / $description
     'meta-description' => 'HopeHR is the internal human resources portal of Christian Hope Center, used by authorised staff to manage employees, contracts and leave.',
+
+    'renew' => 'Renew',
+    'renew-contract' => 'Renew Contract',
+    'renew-as-is' => 'Renew As Is',
+    'renew-with-edit' => 'Renew with Edit',
+    'renewing-contract-for' => 'Renewing the contract of :name',
+    'current-period' => 'Current Period',
+    'new-period' => 'New Period',
+    'renew-explanation' => 'Renew As Is creates an identical contract for the new period. Renew with Edit opens the full form so you can change any detail before saving.',
 ];

@@ -5,7 +5,6 @@ namespace App\Livewire\Contract;
 use App\Livewire\Contract\Concerns\ResolvesContractLocationOptions;
 use App\Livewire\Forms\ContractForm;
 use App\Livewire\Forms\LeaveBalanceForm;
-use App\Models\Center;
 use App\Models\Contract;
 use App\Models\Position;
 use App\Models\TerminationReason;
@@ -53,7 +52,7 @@ class ContractEdit extends Component
         $this->form->setDefaults();
         $this->form->setContract($contract);
 
-        $this->initLocationContext();
+        $this->initLocationContext($contract);
     }
 
     // ────────────────────────────────────────────────
@@ -214,22 +213,5 @@ class ContractEdit extends Component
         Gate::authorize('update', $this->contract);
 
         return $this->contract->employee_id;
-    }
-
-    // ────────────────────────────────────────────────
-    // Private — initialisation
-    // ────────────────────────────────────────────────
-
-    private function initLocationContext(): void
-    {
-        $position = $this->contract->position;
-
-        $effectiveCityId = $position?->center_id
-            ? Center::whereKey($position->center_id)->value('city_id')
-            : $position?->city_id;
-
-        $this->city_id = $effectiveCityId ?? $this->contract->employee?->city_id;
-        $this->program_id = $position?->program_id;
-        $this->center_id = $position?->center_id;
     }
 }

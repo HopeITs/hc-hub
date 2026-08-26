@@ -17,6 +17,20 @@ class ContractPolicy
         return $user->hasActivePermission('contracts.update') && $this->isInActiveCity($user, $contract);
     }
 
+    /**
+     * A renewal creates a contract, so it is gated on `contracts.create` rather
+     * than on update. A terminated or already-deactivated contract has no term
+     * left to carry forward and is never renewable — the successor would have
+     * to be created from scratch.
+     */
+    public function renew(User $user, Contract $contract): bool
+    {
+        return $user->hasActivePermission('contracts.create')
+            && $contract->is_active
+            && $contract->terminated_at === null
+            && $this->isInActiveCity($user, $contract);
+    }
+
     public function delete(User $user, Contract $contract): bool
     {
         return $user->hasActivePermission('contracts.delete') && $this->isInActiveCity($user, $contract);

@@ -26,6 +26,14 @@
                 </svg>
                 @lang('general.export-pdf')
             </a>
+            @can('renew', $contract)
+                {{-- Tailwind 4 puts the important modifier at the end (mb-0!),
+                     not at the front; the v3 "!mb-0" form is inert here. --}}
+                <x-outline-button type="button" class="mb-0! me-0!"
+                                  x-on:click="Livewire.dispatch('open-renew-modal', { contractId: {{ $contract->id }} })">
+                    {{ __('general.renew') }}
+                </x-outline-button>
+            @endcan
             <x-primary-button :href="route('contracts.edit', $contract->id)">
                 {{ __('general.edit') }}
             </x-primary-button>
@@ -45,6 +53,9 @@
 
     @includeIf($partialPath)
 
+    @can('renew', $contract)
+        <livewire:contract.contract-renew-modal />
+    @endcan
 </div>
 
 <script nonce="{{ Vite::cspNonce() }}">
