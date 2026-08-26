@@ -1,6 +1,7 @@
 @props([
     'title',
     'count' => null,
+    'showIcon' => false,
 ])
 
 <header {{ $attributes->class('flex min-h-16 shrink-0 items-center justify-start gap-4 px-6 pt-2 text-left') }}>
@@ -14,6 +15,14 @@
                 {{ $count }}
             </span>
         @endif
+
+        @isset($icon)
+            @if($showIcon)
+                <span class="flex size-4 shrink-0 items-center justify-center text-primary">
+                    {{ $icon }}
+                </span>
+            @endif
+        @endisset
     </div>
 
     @isset($actions)

@@ -14,7 +14,7 @@
             @include('livewire-table::bar.dropdowns.actions')
             @include('livewire-table::bar.dropdowns.trashed')
             <select wire:model.live="perPage"
-                    class="border border-neutral-200 shadow-e1 rounded-control outline-hidden focus:border-secondary-medium px-3 py-2 bg-white text-black transition ease-in-out dark:bg-neutral-800 dark:border-neutral-700 dark:focus:border-primary dark:text-white">
+                    class="border border-neutral-200 shadow-e1 rounded-control outline-hidden focus:border-secondary-medium ps-3 pe-8 py-2 bg-white text-black transition ease-in-out dark:bg-neutral-800 dark:border-neutral-700 dark:focus:border-primary dark:text-white">
                 @foreach($perPageOptions as $perPage)
                     <option wire:key="{{ $perPage }}" value="{{ $perPage }}">{{ $perPage }}</option>
                 @endforeach
