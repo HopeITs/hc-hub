@@ -1,11 +1,8 @@
 <div
     class="w-full h-full bg-white rounded-surface shadow-e1 ring-1 ring-neutral-200 overflow-hidden relative flex flex-col">
     <div class="js-today-events flex h-full min-h-0 flex-col">
-        <x-dashboard-cards.card-header :title="__('general.today-events')" :count="now()->format('j/n/Y')" show-icon>
-            <x-slot:icon>
-                <x-icons.event class="size-full"/>
-            </x-slot:icon>
-        </x-dashboard-cards.card-header>
+        <x-dashboard-cards.card-header :title="__('general.today-events')" :count="now()->format('j/n/Y')" />
+
         @if(count($events) > 0)
             <div class="swiper">
                 <div class="swiper-wrapper">

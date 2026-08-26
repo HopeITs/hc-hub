@@ -211,6 +211,10 @@ body {
 
     --livewire-progress-bar-color: var(--color-primary);
 
+    /* Custom overlay scrollbar (public/js/custom-scrollbar.js) */
+    --csb-color: #bcbec0;
+    --csb-hover: #a7a9ac;
+
 }
 [data-flux-field]:not(ui-radio, ui-checkbox) {
     @apply grid gap-2;
