@@ -540,6 +540,7 @@ return [
     'display_until' => 'Display Until Date',
     'always_display' => 'Always Display',
     'city' => 'City|Cities',
+    'current-residence' => 'Current Place of Residence',
     'center' => 'Center|Centers',
     'event_date' => 'Event Date',
     'company_news' => 'News',

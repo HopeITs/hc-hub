@@ -536,6 +536,7 @@ return [
     'display_until' => 'تاريخ انتهاء العرض',
     'always_display' => 'عرض دائم',
     'city' => 'المدن|المدينة',
+    'current-residence' => 'مكان الإقامة الحالي',
     'center' => 'المراكز|المركز',
     'program' => 'البرامج|البرنامج',
     'event_date' => 'تاريخ الحدث',
