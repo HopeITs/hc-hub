@@ -2,63 +2,69 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Models\Contract;
+use App\Support\StatisticsCache;
 use Livewire\Component;
-use App\Models\Employee;
 
 class SalaryPerEmployeeStatistics extends Component
 {
+    /**
+     * salary_per is stored as a tinyint (see the contracts migration:
+     * 0=Unknown, 1=Month, 2=Hour, 3=Session). Presentation metadata is keyed by
+     * that raw value so the DB code, the label and the slice colour stay in one
+     * place — previously the id→bucket map and the label/colour map were two
+     * separate arrays that had to be kept in sync by hand.
+     *
+     * Colours are unchanged from the original implementation; the middle entry
+     * is the brand primary (#c2151c).
+     */
+    private const SALARY_PER_META = [
+        1 => ['key' => 'per_month', 'label' => 'Per Month', 'color' => '#c2151c'],
+        3 => ['key' => 'per_session', 'label' => 'Per Session', 'color' => '#4b4b4b'],
+        2 => ['key' => 'per_hour', 'label' => 'Per Hour', 'color' => '#cdcdcd'],
+    ];
+
     public array $series = [];
+
     public int $totalEmployees = 0;
+
     public int $highlightPercentage = 0;
 
     public function mount()
     {
-        $buckets = [
-            'per_month'   => 0,
-            'per_session' => 0,
-            'per_hour'    => 0,
-        ];
-
-        $employees = Employee::with(['contracts' => fn($q) => $q->orderByDesc('start_date')])->get();
-
-        foreach ($employees as $employee) {
-            $contract = $employee->contracts->first();
-            if (!$contract) continue;
-
-            $type = $contract->salary_per;
-
-            $map = [
-                1 => 'per_month',
-                2 => 'per_hour',
-                3 => 'per_session',
-            ];
-
-            if (isset($map[$type])) {
-                $buckets[$map[$type]]++;
-            }
-        }
-
-        $meta = [
-            'per_month'   => ['label' => 'Per Month',   'color' => '#c2151c'],
-            'per_session' => ['label' => 'Per Session', 'color' => '#4b4b4b'],
-            'per_hour'    => ['label' => 'Per Hour',    'color' => '#cdcdcd'],
-        ];
+        /**
+         * Distribution of salary periods across each employee's current contract.
+         *
+         * Was: load every Employee with every contract eager-loaded, then loop in
+         * PHP incrementing three counters. Now a single GROUP BY over one row per
+         * employee. Only the three known salary_per values are charted; unknown (0)
+         * is excluded, matching the original `isset($map[$type])` guard.
+         */
+        $counts = StatisticsCache::remember('employees.by-salary-per', fn () => Contract::query()
+            ->latestPerEmployee()
+            ->whereIn('salary_per', array_keys(self::SALARY_PER_META))
+            ->groupBy('salary_per')
+            ->selectRaw('salary_per, COUNT(*) as total')
+            ->pluck('total', 'salary_per')
+            ->all());
 
         $this->series = [];
-        $this->totalEmployees = array_sum($buckets);
 
-        foreach ($meta as $key => $info) {
+        foreach (self::SALARY_PER_META as $salaryPer => $meta) {
             $this->series[] = [
-                'label' => $info['label'],
-                'color' => $info['color'],
-                'value' => $buckets[$key],
+                'label' => $meta['label'],
+                'color' => $meta['color'],
+                'value' => (int) ($counts[$salaryPer] ?? 0),
             ];
         }
 
-        $this->highlightPercentage =
-            $this->totalEmployees > 0
-                ? (int) round($buckets['per_month'] / $this->totalEmployees * 100)
-                : 0;
+        $this->totalEmployees = array_sum(array_column($this->series, 'value'));
+
+        $perMonth = (int) ($counts[1] ?? 0);
+
+        $this->highlightPercentage = $this->totalEmployees > 0
+            ? (int) round($perMonth / $this->totalEmployees * 100)
+            : 0;
     }
 
     public function render()

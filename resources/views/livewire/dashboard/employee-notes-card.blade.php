@@ -178,7 +178,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ Vite::cspNonce() }}">
         function notesBoard() {
             return {
                 showModal: false,

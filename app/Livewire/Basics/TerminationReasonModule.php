@@ -11,8 +11,6 @@ class TerminationReasonModule extends Component
 {
     use AuthorizesActivePermissions;
 
-    protected $listeners = ['openTerminationReasonEdit' => 'edit'];
-
     public bool $showModal = false;
 
     public string $modalTitle = '';
@@ -23,13 +21,7 @@ class TerminationReasonModule extends Component
         'title_ar' => null,
     ];
 
-    protected function rules(): array
-    {
-        return [
-            'item.title_en' => 'required|string|max:255',
-            'item.title_ar' => 'required|string|max:255',
-        ];
-    }
+    protected $listeners = ['openTerminationReasonEdit' => 'edit'];
 
     public function render()
     {
@@ -68,7 +60,7 @@ class TerminationReasonModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update',
         );
         $this->validate();
 
@@ -84,5 +76,13 @@ class TerminationReasonModule extends Component
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'item.title_en' => 'required|string|max:255',
+            'item.title_ar' => 'required|string|max:255',
+        ];
     }
 }

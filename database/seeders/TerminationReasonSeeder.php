@@ -10,7 +10,7 @@ class TerminationReasonSeeder extends Seeder
     public function run(): void
     {
         $reasons = [
-        
+
             [
                 'title_en' => 'Resignation due to travel',
                 'title_ar' => 'استقالات بسبب السفر',

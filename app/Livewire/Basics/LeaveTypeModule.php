@@ -11,8 +11,6 @@ class LeaveTypeModule extends Component
 {
     use AuthorizesActivePermissions;
 
-    protected $listeners = ['openLeaveTypeEdit' => 'edit'];
-
     public bool $showModal = false;
 
     public string $modalTitle = '';
@@ -26,16 +24,7 @@ class LeaveTypeModule extends Component
         'marital_status' => null,
     ];
 
-    protected function rules(): array
-    {
-        return [
-            'item.name_ar' => 'required|string',
-            'item.name_en' => 'required|string',
-            'item.base_days' => 'required|integer',
-            'item.allowed_gender' => 'required|integer',
-            'item.marital_status' => 'required|integer',
-        ];
-    }
+    protected $listeners = ['openLeaveTypeEdit' => 'edit'];
 
     public function render()
     {
@@ -80,7 +69,7 @@ class LeaveTypeModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update',
         );
         $this->validate();
 
@@ -96,5 +85,16 @@ class LeaveTypeModule extends Component
 
         LivewireAlert::title(__('general.success-message'))
             ->success()->toast()->position('top-start')->show();
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'item.name_ar' => 'required|string',
+            'item.name_en' => 'required|string',
+            'item.base_days' => 'required|integer',
+            'item.allowed_gender' => 'required|integer',
+            'item.marital_status' => 'required|integer',
+        ];
     }
 }

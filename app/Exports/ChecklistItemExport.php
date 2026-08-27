@@ -2,35 +2,33 @@
 
 namespace App\Exports;
 
+use App\Enums\ChecklistItemOrder;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithProperties;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Table;
 use PhpOffice\PhpSpreadsheet\Worksheet\Table\TableStyle;
-use Illuminate\Support\Collection;
-use App\Enums\ChecklistItemOrder;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ChecklistItemExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithProperties
+class ChecklistItemExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithProperties, WithStyles
 {
     public function __construct(
         protected Collection $collection,
-        protected array $visibleColumnCodes
-    ) {
-   
-    }
+        protected array $visibleColumnCodes,
+    ) {}
 
     public function properties(): array
     {
         return [
-            'creator'        => 'Hope HR',
-            'lastModifiedBy' => ' ', 
-            'title'          => ' ', 
-            'company'        => 'Hope Center',
+            'creator' => 'Hope HR',
+            'lastModifiedBy' => ' ',
+            'title' => ' ',
+            'company' => 'Hope Center',
         ];
     }
 
@@ -42,11 +40,11 @@ class ChecklistItemExport implements FromCollection, WithHeadings, WithMapping, 
     public function headings(): array
     {
         $headers = [];
-        
+
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
-                'id'    => 'ID',
-                'name'  => __('general.name', [], 'en'),
+                'id' => 'ID',
+                'name' => __('general.name', [], 'en'),
                 'order' => __('general.order', [], 'en'),
                 default => $code,
             };
@@ -60,16 +58,17 @@ class ChecklistItemExport implements FromCollection, WithHeadings, WithMapping, 
         $orig = app()->getLocale();
         app()->setLocale('en');
         $mappedRow = [];
-        
+
         foreach ($this->visibleColumnCodes as $code) {
             $mappedRow[] = match ($code) {
-                'id'    => $row->id,
-                'name'  => $row->name,
-                'order' => ChecklistItemOrder::getLocalizedName($row->order)['value'] ?? '', 
+                'id' => $row->id,
+                'name' => $row->name,
+                'order' => ChecklistItemOrder::getLocalizedName($row->order)['value'] ?? '',
                 default => '',
             };
         }
         app()->setLocale($orig);
+
         return $mappedRow;
     }
 
@@ -77,14 +76,14 @@ class ChecklistItemExport implements FromCollection, WithHeadings, WithMapping, 
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
-        $globalRange = 'A1:' . $highestColumn . $highestRow;
+        $globalRange = 'A1:'.$highestColumn.$highestRow;
 
         $table = new Table($globalRange, 'ChecklistItems');
-        $tableStyle = new TableStyle();
-        $tableStyle->setTheme(TableStyle::TABLE_STYLE_LIGHT1); 
+        $tableStyle = new TableStyle;
+        $tableStyle->setTheme(TableStyle::TABLE_STYLE_LIGHT1);
         $tableStyle->setShowRowStripes(true);
         $table->setStyle($tableStyle);
-        
+
         $sheet->addTable($table);
 
         return [
@@ -95,7 +94,7 @@ class ChecklistItemExport implements FromCollection, WithHeadings, WithMapping, 
                 ],
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                 ],
                 'borders' => [
                     'allBorders' => [
@@ -105,23 +104,16 @@ class ChecklistItemExport implements FromCollection, WithHeadings, WithMapping, 
             ],
             1 => [
                 'font' => [
-                    'name'  => 'Somar Sans',
-                    'bold'  => true,
-                    'size'  => 12,
-                    'color' => ['argb' => 'FFFFFFFF'], 
+                    'name' => 'Somar Sans',
+                    'bold' => true,
+                    'size' => 12,
+                    'color' => ['argb' => 'FFFFFFFF'],
                 ],
                 'fill' => [
-                    'fillType'   => Fill::FILL_SOLID,
-                    'startColor' => ['argb' => 'FFC2151C'], 
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['argb' => 'FFC2151C'],
                 ],
             ],
         ];
     }
 }
-
-
-
-
-
-
-

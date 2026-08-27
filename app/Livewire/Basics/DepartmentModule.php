@@ -12,10 +12,6 @@ class DepartmentModule extends Component
 {
     use AuthorizesActivePermissions;
 
-    protected $listeners = [
-        'openDepartmentEdit' => 'edit',
-    ];
-
     public bool $showModal = false;
 
     public string $modalTitle = '';
@@ -29,24 +25,9 @@ class DepartmentModule extends Component
         'email' => null,
     ];
 
-    protected function rules(): array
-    {
-        return [
-            'item.name' => 'required|string|max:255',
-
-            'item.code' => [
-                'required',
-                'string',
-                'max:5',
-                Rule::unique('departments', 'code')
-                    ->ignore($this->item['id'] ?? null),
-            ],
-
-            'item.description_ar' => 'nullable|string',
-            'item.description_en' => 'nullable|string',
-            'item.email' => 'nullable|email|max:255',
-        ];
-    }
+    protected $listeners = [
+        'openDepartmentEdit' => 'edit',
+    ];
 
     public function render()
     {
@@ -94,7 +75,7 @@ class DepartmentModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update',
         );
         $this->validate();
 
@@ -113,5 +94,24 @@ class DepartmentModule extends Component
             ->toast()
             ->position('top-start')
             ->show();
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'item.name' => 'required|string|max:255',
+
+            'item.code' => [
+                'required',
+                'string',
+                'max:5',
+                Rule::unique('departments', 'code')
+                    ->ignore($this->item['id'] ?? null),
+            ],
+
+            'item.description_ar' => 'nullable|string',
+            'item.description_en' => 'nullable|string',
+            'item.email' => 'nullable|email|max:255',
+        ];
     }
 }

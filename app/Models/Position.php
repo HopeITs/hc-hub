@@ -24,18 +24,6 @@ class Position extends Model
     ];
 
     // --------------------------------------------
-    // Accessors & Mutators
-    // --------------------------------------------
-
-    protected function title(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->getTranslatableAttribute('title'),
-            set: fn ($value) => $this->setTranslatableAttribute('title', $value)
-        );
-    }
-
-    // --------------------------------------------
     // Relationships
     // --------------------------------------------
 
@@ -165,7 +153,7 @@ class Position extends Model
             JobLevel::query()
                 ->select('grade')
                 ->whereColumn('job_levels.id', $query->qualifyColumn('job_level_id')),
-            $direction
+            $direction,
         );
     }
 
@@ -263,5 +251,17 @@ class Position extends Model
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    // --------------------------------------------
+    // Accessors & Mutators
+    // --------------------------------------------
+
+    protected function title(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('title'),
+            set: fn ($value) => $this->setTranslatableAttribute('title', $value),
+        );
     }
 }

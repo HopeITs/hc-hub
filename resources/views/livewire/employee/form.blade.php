@@ -5,6 +5,13 @@
         ['label' => $title ?? __('general.add-new')],
     ]" />
 
+    {{--
+        Rendered outside the tab container on purpose: only the active tab is
+        rendered below, so an error list living inside a tab is invisible
+        whenever the offending field belongs to a different tab.
+    --}}
+    <x-forms.errors-validation-list />
+
     <x-tab.form activeTab="information">
         <x-tab.list>
             <x-tab.item :title="__('general.information')" activeTab="information" :active="$activeTab === 'information'">

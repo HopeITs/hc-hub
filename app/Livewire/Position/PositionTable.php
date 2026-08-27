@@ -12,6 +12,7 @@ use App\Models\Program;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
@@ -22,13 +23,13 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PositionTable extends LivewireTable
 {
-    protected string $model = Position::class;
-
     public ?int $centerId = null;
 
     public ?int $cityId = null;
 
     public $itemID;
+
+    protected string $model = Position::class;
 
     protected $listeners = [
         'exportExcel' => 'exportExcel',
@@ -40,9 +41,94 @@ class PositionTable extends LivewireTable
         $this->cityId = $cityId ?? request()->get('city');
     }
 
+    public function confirmDelete($id)
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete($payload)
+    {
+        $position = Position::findOrFail($payload['id']);
+        Gate::authorize('delete', $position);
+        $position->delete();
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
+    public function confirmToggleItemStatus($id)
+    {
+        $this->itemID = $id;
+
+        LivewireAlert::title(__('general.toggle-status'))
+            ->text(__('general.confirm-status-change'))
+            ->question()
+            ->withConfirmButton(__('general.save'))
+            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function toggleItemStatusConfirmed($payload)
+    {
+        $item = Position::findOrFail($payload['id']);
+        Gate::authorize('update', $item);
+        $item->is_active = ! $item->is_active;
+        $item->save();
+
+        LivewireAlert::title(__('general.item-updated'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery();
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns;
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible())
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code())
+            ->toArray();
+
+        $filename = 'positions_'.now()->format('Y-m-d').'.xlsx';
+
+        return Excel::download(
+            new PositionExport($data, $visibleColumnCodes),
+            $filename,
+        );
+    }
+
+    protected function link(Model $model): ?string
+    {
+        return auth()->user()?->hasActivePermission('positions.update')
+            ? route('positions.edit', $model->getKey())
+            : null;
+    }
+
     protected function query(): Builder
     {
         $query = $this->model()::query()->with(['city', 'program', 'center', 'jobLevel', 'department', 'directManager', 'techManager']);
+
+        $query->when(
+            auth()->user()?->activeCityId(),
+            fn (Builder $query, int $cityId) => $query->inCity($cityId),
+        );
 
         if ($this->centerId) {
             $query->where('positions.center_id', $this->centerId);
@@ -94,7 +180,7 @@ class PositionTable extends LivewireTable
                         '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3"
                             active="'.$isActive.'"
                             :model-id="'.$m->id.'"
-                            wire-event="confirmToggleItemStatus" />'
+                            wire-event="confirmToggleItemStatus" />',
                     )
                     : '';
                 $editBtn = $canUpdate
@@ -105,82 +191,12 @@ class PositionTable extends LivewireTable
                     : '';
 
                 return $toggleBtn.$editBtn.$deleteBtn;
-            })->asHtml()->visible($canUpdate || $canDelete),
+            })->asHtml()->visible($canUpdate || $canDelete)->clickable(false),
         ];
     }
 
     protected function actions(): array
     {
         return [];
-    }
-
-    public function confirmDelete($id)
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete($payload)
-    {
-        Position::findOrFail($payload['id'])->delete();
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
-    }
-
-    public function confirmToggleItemStatus($id)
-    {
-        $this->itemID = $id;
-
-        LivewireAlert::title(__('general.toggle-status'))
-            ->text(__('general.confirm-status-change'))
-            ->question()
-            ->withConfirmButton(__('general.save'))
-            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function toggleItemStatusConfirmed($payload)
-    {
-        $item = Position::findOrFail($payload['id']);
-        $item->is_active = ! $item->is_active;
-        $item->save();
-
-        LivewireAlert::title(__('general.item-updated'))
-            ->success()->toast()->position('top-start')->show();
-    }
-
-    public function exportExcel(): BinaryFileResponse
-    {
-        $query = $this->appliedQuery();
-        $data = $query->get();
-
-        $userSelectedColumns = $this->columns;
-
-        $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible())
-            ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) {
-                    return true;
-                }
-
-                return in_array($column->code(), $userSelectedColumns);
-            })
-            ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code())
-            ->toArray();
-
-        $filename = 'positions_'.now()->format('Y-m-d').'.xlsx';
-
-        return Excel::download(
-            new PositionExport($data, $visibleColumnCodes),
-            $filename
-        );
     }
 }

@@ -2,20 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
 
 class Course extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia, LogsActivity;
 
-    protected $guarded = [
-        'id',
+    protected $fillable = [
+        'employee_id', 'category_id', 'title', 'organization', 'place',
+        'granted_by', 'notes', 'start_date', 'end_date', 'has_certificate',
+        'duration', 'cost', 'status',
     ];
+
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
@@ -26,10 +29,12 @@ class Course extends Model implements HasMedia
     {
         return $this->belongsTo(Employee::class);
     }
+
     public function category()
     {
         return $this->belongsTo(CourseCategory::class, 'category_id');
     }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('file')

@@ -2,39 +2,51 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Models\Contract;
+use App\Support\StatisticsCache;
 use Livewire\Component;
-use App\Models\Employee;
-use App\Models\JobLevel;
-use Illuminate\Support\Facades\DB;
 
 class JobLevelEmployeeStatistics extends Component
 {
     public $jobLevelLabels = [];
+
     public $employeeCounts = [];
 
     public function mount()
     {
-        $employeeData = Employee::query()
-            ->with(['contracts' => function ($query) {
-                $query->where('is_active', true)
-                    ->orderByDesc('start_date')
-                    ->limit(1);
-            }, 'contracts.position.jobLevel'])
-            ->get();
+        /**
+         * Headcount per job level, based on each employee's latest ACTIVE contract.
+         *
+         * BEHAVIOUR CHANGE — this card was previously wrong, not merely slow. It used
+         * `->with(['contracts' => fn ($q) => $q->where('is_active', true)->limit(1)])`,
+         * but a limit inside an eager load caps the whole result set rather than each
+         * parent row, so one contract was returned for the entire page and every other
+         * employee resolved to null. The chart was effectively rendering a count of one.
+         * The grouped query below reports the real distribution.
+         *
+         * The active-contract filter is passed through latestPerEmployee() so that it
+         * also constrains the "is there a newer one" subquery — see that scope's
+         * docblock for why applying it to only the outer query would drop employees
+         * whose newest contract has expired.
+         *
+         * Job level names follow the {attribute}_{locale} column convention, so the
+         * label column is resolved per request; StatisticsCache keys by locale.
+         */
+        $labelColumn = 'job_levels.'.transColumn('name');
 
-        $jobLevelCounts = $employeeData
-            ->map(function ($employee) {
-                $contract = $employee->contracts->first();
+        $counts = StatisticsCache::remember('employees.by-job-level', fn () => Contract::query()
+            ->latestPerEmployee(fn ($query, $table = 'contracts') => $query->where($table.'.is_active', true))
+            ->join('positions', 'positions.id', '=', 'contracts.position_id')
+            ->join('job_levels', 'job_levels.id', '=', 'positions.job_level_id')
+            ->groupBy($labelColumn)
+            ->orderBy($labelColumn)
+            ->select("{$labelColumn} as label")
+            ->selectRaw('COUNT(*) as total')
+            ->pluck('total', 'label')
+            ->all());
 
-                return optional($contract?->position?->jobLevel)->name;
-            })
-            ->filter()
-            ->countBy()
-            ->sortKeys()
-            ->toArray();
-
-        $this->jobLevelLabels = array_keys($jobLevelCounts);
-        $this->employeeCounts = array_values($jobLevelCounts);
+        $this->jobLevelLabels = array_keys($counts);
+        $this->employeeCounts = array_map('intval', array_values($counts));
     }
 
     public function render()

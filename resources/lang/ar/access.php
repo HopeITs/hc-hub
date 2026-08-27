@@ -34,6 +34,8 @@ return [
     'save-permissions' => 'حفظ صلاحيات الدور',
     'select-all' => 'تحديد الكل', 'clear-all' => 'إلغاء تحديد الكل',
     'cannot-edit-self' => 'لا يمكنك إزالة دور الإدارة النشط الخاص بك أو تغييره.',
+    'cannot-assign-administrator-role' => 'يمكن لمدير النظام الفعّال فقط إسناد الأدوار التالية: :roles.',
+    'cannot-grant-unheld-permission' => 'لا يمكنك منح صلاحيات لا تملكها بنفسك: :permissions.',
     'role-in-use' => 'لا يمكن حذف هذا الدور ما دام مسنداً إلى مستخدمين.',
     'system-role-locked' => 'لا يمكن إعادة تسمية أدوار النظام أو حذفها.',
     'pagination' => [

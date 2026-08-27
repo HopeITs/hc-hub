@@ -4,10 +4,11 @@ namespace App\Livewire\Forms\Employee;
 
 use App\Enums\AttachmentCategory;
 use App\Models\Employee;
-use Livewire\Form;
-use Livewire\WithFileUploads;
 use Illuminate\Validation\Rule;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\Form;
+use Livewire\WithFileUploads;
+use Throwable;
 
 class AttachmentForm extends Form
 {
@@ -17,36 +18,17 @@ class AttachmentForm extends Form
 
     public array $attachments = [];
 
-    protected function rules(): array
-    {
-        $rules = [];
-
-        foreach ($this->attachments as $index => $item) {
-            $rules["attachments.{$index}.name"] = 'required|string|max:255';
-            $rules["attachments.{$index}.category"] = ['nullable', Rule::in(array_keys(AttachmentCategory::options()))];
-            $fileValidation = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'];
-
-            if (empty($item['media_id']) || (!empty($item['file']) && $item['file'] instanceof TemporaryUploadedFile)) {
-                $fileValidation[] = 'required_if:attachments.' . $index . '.media_id,null';
-            }
-
-            $rules["attachments.{$index}.file"] = $fileValidation;
-        }
-
-        return $rules;
-    }
-
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
         $this->attachments = $employee
             ->getMedia('attachments')
             ->map(
-                fn($media) => [
+                fn ($media) => [
                     'media_id' => $media->id,
                     'name' => $media->getCustomProperty('name', ''),
                     'category' => $media->getCustomProperty('category', ''),
-                    'old_file_url' => $media->getUrl(),
+                    'old_file_url' => route('employee-files.download', $media),
                     'file_name' => $media->file_name,
                     'file' => null,
                 ],
@@ -85,7 +67,7 @@ class AttachmentForm extends Form
 
     public function save(): void
     {
-        if (!$this->employee) {
+        if (! $this->employee) {
             return;
         }
 
@@ -100,10 +82,10 @@ class AttachmentForm extends Form
                         ->preservingOriginal()
                         ->withCustomProperties([
                             'name' => $item['name'],
-                            'category' => $item['category']
+                            'category' => $item['category'],
                         ])
-                        ->toMediaCollection('attachments');
-                } catch (\Throwable $e) {
+                        ->toMediaCollection('attachments', 'local');
+                } catch (Throwable $e) {
                     // Surface a field error instead of a 500; keep the old
                     // media untouched so a failed replacement loses nothing.
                     report($e);
@@ -129,5 +111,24 @@ class AttachmentForm extends Form
         }
 
         $this->setEmployee($this->employee->fresh());
+    }
+
+    protected function rules(): array
+    {
+        $rules = [];
+
+        foreach ($this->attachments as $index => $item) {
+            $rules["attachments.{$index}.name"] = 'required|string|max:255';
+            $rules["attachments.{$index}.category"] = ['nullable', Rule::in(array_keys(AttachmentCategory::options()))];
+            $fileValidation = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'];
+
+            if (empty($item['media_id']) || (! empty($item['file']) && $item['file'] instanceof TemporaryUploadedFile)) {
+                $fileValidation[] = 'required_if:attachments.'.$index.'.media_id,null';
+            }
+
+            $rules["attachments.{$index}.file"] = $fileValidation;
+        }
+
+        return $rules;
     }
 }

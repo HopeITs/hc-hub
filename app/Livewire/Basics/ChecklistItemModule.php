@@ -11,10 +11,6 @@ class ChecklistItemModule extends Component
 {
     use AuthorizesActivePermissions;
 
-    protected $listeners = [
-        'openChecklistItemEdit' => 'edit',
-    ];
-
     public bool $showModal = false;
 
     public string $modalTitle = '';
@@ -25,13 +21,9 @@ class ChecklistItemModule extends Component
         'order' => null,
     ];
 
-    protected function rules(): array
-    {
-        return [
-            'item.name' => 'required|string',
-            'item.order' => 'required|integer',
-        ];
-    }
+    protected $listeners = [
+        'openChecklistItemEdit' => 'edit',
+    ];
 
     public function render()
     {
@@ -71,7 +63,7 @@ class ChecklistItemModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update',
         );
         $this->validate();
 
@@ -91,5 +83,13 @@ class ChecklistItemModule extends Component
             ->toast()
             ->position('top-start')
             ->show();
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'item.name' => 'required|string',
+            'item.order' => 'required|integer',
+        ];
     }
 }

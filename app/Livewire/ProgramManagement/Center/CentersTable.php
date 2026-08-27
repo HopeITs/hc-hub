@@ -3,6 +3,7 @@
 namespace App\Livewire\ProgramManagement\Center;
 
 use App\Exports\CenterExport;
+use App\Livewire\Concerns\ScopesToAuthorizedCity;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\User;
@@ -10,6 +11,7 @@ use App\Notifications\CenterClosed;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
@@ -20,15 +22,111 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CentersTable extends LivewireTable
 {
+    use ScopesToAuthorizedCity;
+
     protected string $model = Center::class;
 
     protected $listeners = ['delete', 'toggleItemStatusConfirmed', 'exportExcel' => 'exportExcel'];
 
+    public function confirmToggleItemStatus($id): void
+    {
+        LivewireAlert::title(__('general.toggle-status'))
+            ->text(__('general.confirm-status-change'))
+            ->question()
+            ->withConfirmButton(__('general.save'))
+            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function toggleItemStatusConfirmed($payload): void
+    {
+        $item = Center::findOrFail($payload['id']);
+
+        // The id comes from a browser-dispatched confirmation payload.
+        Gate::authorize('update', $item);
+
+        $item->is_active = ! $item->is_active;
+        $item->save();
+
+        if (! $item->is_active) {
+            $item->load('city');
+            User::sendBroadcast(new CenterClosed($item), $item->city_id);
+            $this->dispatch('center-closed');
+        }
+
+        LivewireAlert::title(__('general.item-updated'))->success()->toast()->position('top-start')->show();
+    }
+
+    public function confirmDelete($id): void
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete($payload): void
+    {
+        $center = Center::findOrFail($payload['id']);
+
+        Gate::authorize('delete', $center);
+
+        $center->delete();
+
+        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        Gate::authorize('export', Center::class);
+
+        // appliedQuery() derives from query(), which is already city-scoped, so
+        // the export cannot contain rows the table would not have shown.
+        $query = $this->appliedQuery();
+        $data = $query->get();
+        $userSelectedColumns = $this->columns;
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible())
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code())
+            ->toArray();
+
+        $filename = 'centers_'.now()->format('Y-m-d').'.xlsx';
+
+        return Excel::download(
+            new CenterExport($data, $visibleColumnCodes),
+            $filename,
+        );
+    }
+
+    protected function rowClickAction(Model $model): ?string
+    {
+        return auth()->user()?->hasActivePermission('centers.update')
+            ? "\$dispatch('openCenterEdit', { id: {$model->getKey()} })"
+            : null;
+    }
+
     protected function query(): Builder
     {
-        return $this->model()::query()
-            ->with(['city'])
-            ->withCount('positions');
+        // Applied at the query, so it covers the table, the global search, the
+        // filters, and exportExcel() (which builds on appliedQuery()) at once.
+        return $this->scopeToAuthorizedCity(
+            $this->model()::query()
+                ->with(['city'])
+                ->withCount('positions'),
+        );
     }
 
     protected function globalSearchColumns(): array
@@ -40,11 +138,28 @@ class CentersTable extends LivewireTable
     {
         $locale = app()->getLocale();
 
-        return City::query()->whereHas('centers')
+        return $this->authorizedCities()
+            ->whereHas('centers')
             ->orderBy(transColumn('name'))
             ->get(['id', transColumn('name')])
             ->mapWithKeys(fn ($c) => [$c->id => $c->name])
             ->all();
+    }
+
+    /**
+     * Cities this user may filter by.
+     *
+     * The dropdown and the row query are both derived from authorizedCityId(),
+     * so a filter option can never select rows the query would exclude — and,
+     * more importantly, the option list itself stops disclosing which other
+     * cities exist and have centers.
+     */
+    protected function authorizedCities(): Builder
+    {
+        $query = City::query();
+        $cityId = $this->authorizedCityId();
+
+        return $cityId === null ? $query : $query->whereKey($cityId);
     }
 
     protected function columns(): array
@@ -68,12 +183,12 @@ class CentersTable extends LivewireTable
 
             SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
                 ->options(
-                    City::query()
+                    $this->authorizedCities()
                         ->whereNot('code', '000')
                         ->where('is_active', true)
                         ->get()
                         ->pluck(transColumn('name'), transColumn('name'))
-                        ->toArray()
+                        ->toArray(),
                 )
                 ->sortable()
                 ->searchable(),
@@ -117,9 +232,9 @@ class CentersTable extends LivewireTable
                 <i class="ti ti-briefcase text-base"></i>
                 <span>'.e(trans_choice('general.positions', 2)).'</span>'.
                             $badge.
-                            '</a>'
+                            '</a>',
                     );
-                })->asHtml()->visible($canViewPositions),
+                })->asHtml()->visible($canViewPositions)->clickable(false),
 
             Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
                 $viewUrl = route('centers.show', $m->getKey());
@@ -135,7 +250,7 @@ class CentersTable extends LivewireTable
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                           d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                            </a>'
+                            </a>',
                 );
 
                 if (! $canUpdate && ! $canDelete) {
@@ -144,7 +259,7 @@ class CentersTable extends LivewireTable
 
                 $toggleBtn = $canUpdate
                     ? Blade::render(
-                        '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="'.($m->is_active ? 1 : 0).'" :model-id="'.$m->getKey().'" wire-event="confirmToggleItemStatus" />'
+                        '<x-forms.toggle-input class="!me-2 text-xl p-2 mb-3" active="'.($m->is_active ? 1 : 0).'" :model-id="'.$m->getKey().'" wire-event="confirmToggleItemStatus" />',
                     )
                     : '';
 
@@ -157,78 +272,7 @@ class CentersTable extends LivewireTable
                     : '';
 
                 return $toggleBtn.$viewBtn.$editBtn.$deleteBtn;
-            })->asHtml(),
+            })->asHtml()->clickable(false),
         ];
-    }
-
-    public function confirmToggleItemStatus($id): void
-    {
-        LivewireAlert::title(__('general.toggle-status'))
-            ->text(__('general.confirm-status-change'))
-            ->question()
-            ->withConfirmButton(__('general.save'))
-            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function toggleItemStatusConfirmed($payload): void
-    {
-        $item = Center::findOrFail($payload['id']);
-        $item->is_active = ! $item->is_active;
-        $item->save();
-
-        if (! $item->is_active) {
-            $item->load('city');
-            User::sendBroadcast(new CenterClosed($item), $item->city_id);
-            $this->dispatch('center-closed');
-        }
-
-        LivewireAlert::title(__('general.item-updated'))->success()->toast()->position('top-start')->show();
-    }
-
-    public function confirmDelete($id): void
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete($payload): void
-    {
-        Center::findOrFail($payload['id'])->delete();
-
-        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
-    }
-
-    public function exportExcel(): BinaryFileResponse
-    {
-        $query = $this->appliedQuery();
-        $data = $query->get();
-        $userSelectedColumns = $this->columns;
-
-        $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible())
-            ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) {
-                    return true;
-                }
-
-                return in_array($column->code(), $userSelectedColumns);
-            })
-            ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code())
-            ->toArray();
-
-        $filename = 'centers_'.now()->format('Y-m-d').'.xlsx';
-
-        return Excel::download(
-            new CenterExport($data, $visibleColumnCodes),
-            $filename
-        );
     }
 }

@@ -31,7 +31,7 @@
                     <x-table.cell>{{ $item->id }}</x-table.cell>
                     <x-table.cell>{{ $item->{'name_' . app()->getLocale()} }}</x-table.cell>
                     <x-table.cell>
-                        <img src="{{ $item->getFirstMediaUrl('avatar') }}"
+                        <img src="{{ $item->avatar_url }}"
                             alt="{{ $item->{'name_' . app()->getLocale()} }}" class="h-12 w-12 rounded-full object-cover">
                     </x-table.cell>
                     <x-table.cell>{{ $item->years_of_service }}</x-table.cell>

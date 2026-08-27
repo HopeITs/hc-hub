@@ -2,36 +2,33 @@
 
 namespace App\Exports;
 
-use App\Models\Employee;
 use App\Enums\LeaveTypeCases;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithProperties;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Table;
 use PhpOffice\PhpSpreadsheet\Worksheet\Table\TableStyle;
-use Illuminate\Support\Collection;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class EmployeeLeaveBalanceExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithProperties
+class EmployeeLeaveBalanceExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithProperties, WithStyles
 {
     public function __construct(
         protected Collection $collection,
-        protected array $visibleColumnCodes
-    ) {
-        
-    }
+        protected array $visibleColumnCodes,
+    ) {}
 
     public function properties(): array
     {
         return [
-            'creator'        => 'Hope HR',
-            'lastModifiedBy' => ' ', 
-            'title'          => ' ', 
-            'company'        => 'Hope Center',
+            'creator' => 'Hope HR',
+            'lastModifiedBy' => ' ',
+            'title' => ' ',
+            'company' => 'Hope Center',
         ];
     }
 
@@ -43,15 +40,15 @@ class EmployeeLeaveBalanceExport implements FromCollection, WithHeadings, WithMa
     public function headings(): array
     {
         $headers = [];
-        
+
         foreach ($this->visibleColumnCodes as $code) {
             $headers[] = match ($code) {
-                'employee'        => __('general.name', [], 'en'),
+                'employee' => __('general.name', [], 'en'),
                 'years_of_service_formatted' => __('general.years-of-service', [], 'en'),
-                'deserved'                   => __('general.deserved', [], 'en'),
-                'used'                       => __('general.used', [], 'en'),
-                'remaining'                  => __('general.remaining', [], 'en'),
-                default                      => $code,
+                'deserved' => __('general.deserved', [], 'en'),
+                'used' => __('general.used', [], 'en'),
+                'remaining' => __('general.remaining', [], 'en'),
+                default => $code,
             };
         }
 
@@ -65,18 +62,18 @@ class EmployeeLeaveBalanceExport implements FromCollection, WithHeadings, WithMa
         app()->setLocale('en');
 
         $mappedRow = [];
-        
+
         foreach ($this->visibleColumnCodes as $code) {
             $mappedRow[] = match ($code) {
-                'employee'        => $row->name,
+                'employee' => $row->name,
                 'years_of_service_formatted' => $row->years_of_service_formatted,
-                
+
                 // FIX: Strip HTML tags to make the Excel sheet clean!
-                'deserved'                   => strip_tags($this->annualBalance($row)?->deserved_formatted ?? '0'),
-                'used'                       => strip_tags($this->annualBalance($row)?->used_formatted ?? '0'),
-                'remaining'                  => strip_tags($this->annualBalance($row)?->remaining ?? '0'),
-                
-                default                      => '',
+                'deserved' => strip_tags($this->annualBalance($row)?->deserved_formatted ?? '0'),
+                'used' => strip_tags($this->annualBalance($row)?->used_formatted ?? '0'),
+                'remaining' => strip_tags($this->annualBalance($row)?->remaining ?? '0'),
+
+                default => '',
             };
         }
 
@@ -86,25 +83,18 @@ class EmployeeLeaveBalanceExport implements FromCollection, WithHeadings, WithMa
         return $mappedRow;
     }
 
-    private function annualBalance($employee): ?\App\Models\LeaveBalance
-    {
-        return $employee->latestActiveContract()
-            ?->leaveBalances
-            ->firstWhere('type_id', LeaveTypeCases::Annual);
-    }
-
     public function styles(Worksheet $sheet)
     {
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
-        $globalRange = 'A1:' . $highestColumn . $highestRow;
+        $globalRange = 'A1:'.$highestColumn.$highestRow;
 
         $table = new Table($globalRange, 'LeaveBalances');
-        $tableStyle = new TableStyle();
-        $tableStyle->setTheme(TableStyle::TABLE_STYLE_LIGHT1); 
+        $tableStyle = new TableStyle;
+        $tableStyle->setTheme(TableStyle::TABLE_STYLE_LIGHT1);
         $tableStyle->setShowRowStripes(true);
         $table->setStyle($tableStyle);
-        
+
         $sheet->addTable($table);
 
         return [
@@ -115,7 +105,7 @@ class EmployeeLeaveBalanceExport implements FromCollection, WithHeadings, WithMa
                 ],
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                    'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                 ],
                 'borders' => [
                     'allBorders' => [
@@ -125,16 +115,23 @@ class EmployeeLeaveBalanceExport implements FromCollection, WithHeadings, WithMa
             ],
             1 => [
                 'font' => [
-                    'name'  => 'Somar Sans',
-                    'bold'  => true,
-                    'size'  => 12,
-                    'color' => ['argb' => 'FFFFFFFF'], 
+                    'name' => 'Somar Sans',
+                    'bold' => true,
+                    'size' => 12,
+                    'color' => ['argb' => 'FFFFFFFF'],
                 ],
                 'fill' => [
-                    'fillType'   => Fill::FILL_SOLID,
-                    'startColor' => ['argb' => 'FFC2151C'], 
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['argb' => 'FFC2151C'],
                 ],
             ],
         ];
+    }
+
+    private function annualBalance($employee): ?\App\Models\LeaveBalance
+    {
+        return $employee->latestActiveContract()
+            ?->leaveBalances
+            ->firstWhere('type_id', LeaveTypeCases::Annual);
     }
 }

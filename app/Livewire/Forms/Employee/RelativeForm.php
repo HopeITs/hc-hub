@@ -9,6 +9,7 @@ use Livewire\Form;
 class RelativeForm extends Form
 {
     public ?Employee $employee = null;
+
     public array $relatives = [];
 
     public function setEmployee(Employee $employee): void
@@ -20,7 +21,7 @@ class RelativeForm extends Form
             ->select('id', 'name', 'phone', 'relation')
             ->get()
             ->map(
-                fn(Relative $relative) => [
+                fn (Relative $relative) => [
                     'id' => $relative->id,
                     'name' => $relative->name,
                     'phone' => $relative->phone,
@@ -53,7 +54,7 @@ class RelativeForm extends Form
 
     public function removeRelative(int $index, ?int $id = null): void
     {
-        if (!array_key_exists($index, $this->relatives)) {
+        if (! array_key_exists($index, $this->relatives)) {
             return;
         }
 

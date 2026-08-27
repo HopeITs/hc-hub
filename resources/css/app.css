@@ -11,12 +11,10 @@
 @source "../../vendor/ramonrietdijk/livewire-tables/resources/**/*.blade.php";
 @source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
 @source '../../vendor/livewire/flux/stubs/**/*.blade.php';
-@source "../node_modules/flowbite-datepicker";
 
-/*  */
+/* select2 is required by 20+ Blade views; its stylesheet must load globally. */
 @import "select2/dist/css/select2.min.css";
 
-/*  */
 @font-face {
     font-family: 'SomarSans';
     src: url('/fonts/SomarSans/SomarSans-Thin.otf') format('opentype');
@@ -793,5 +791,88 @@ li:has(> ul:not(.hidden)) .nav-chevron {
         -webkit-backdrop-filter: none;
         backdrop-filter: none;
         border-inline-end-color: var(--color-neutral-700);
+    }
+}
+
+/* ── Frozen table columns ───────────────────────────────────────────────────
+   Pins the first two columns of a wide table so their labels stay readable
+   while the rest scrolls sideways. Opt in per table with .table-frozen-2 on a
+   wrapper around the <livewire:*-table /> tag; the scroll container is the
+   vendor view's own .overflow-x-auto div.
+
+   The frozen columns need fixed widths, because column 2 can only be offset by
+   a known amount. Cell content already carries `truncate`, so anything longer
+   clips with an ellipsis instead of forcing the column wider.
+
+   The edge is drawn with box-shadow rather than a border: tables render with
+   border-collapse: collapse, under which borders on a sticky cell detach and
+   scroll away with the content. A shadow stays put.
+
+   Kept outside @layer on purpose: every cell carries Tailwind's `relative`
+   utility, and a layered `position: sticky` would lose to it no matter how
+   specific, because layer order outranks specificity. Unlayered rules win.
+   The flip side is that these rules also outrank utilities, so this block
+   must never set anything a utility owns — backgrounds above all. */
+.table-frozen-2 {
+    --frozen-col-1: 13rem;
+    --frozen-col-2: 11rem;
+}
+
+.table-frozen-2 table :is(th, td):nth-child(1),
+.table-frozen-2 table :is(th, td):nth-child(2) {
+    position: sticky;
+    z-index: 1;
+}
+
+.table-frozen-2 table :is(th, td):nth-child(1) {
+    inset-inline-start: 0;
+    width: var(--frozen-col-1);
+    min-width: var(--frozen-col-1);
+    max-width: var(--frozen-col-1);
+}
+
+.table-frozen-2 table :is(th, td):nth-child(2) {
+    inset-inline-start: var(--frozen-col-1);
+    width: var(--frozen-col-2);
+    min-width: var(--frozen-col-2);
+    max-width: var(--frozen-col-2);
+    box-shadow: 1px 0 0 0 var(--color-neutral-200);
+}
+
+[dir="rtl"] .table-frozen-2 table :is(th, td):nth-child(2) {
+    box-shadow: -1px 0 0 0 var(--color-neutral-200);
+}
+
+/* Header and footer cells ride above the body cells they overlap. */
+.table-frozen-2 table :is(thead, tfoot) th:nth-child(1),
+.table-frozen-2 table :is(thead, tfoot) th:nth-child(2) {
+    z-index: 2;
+}
+
+/* Deliberately NOT background-painted here. Each cell already receives the
+   row's own colour from the table view's x-bind:class (striping, hover and
+   selected states); adding a background of our own repaints the frozen
+   columns white and breaks the striping. Those Alpine classes also keep the
+   cells opaque, which is all the sticky positioning needs.
+
+   The search row's <select> carries min-w-full but no upper bound, so a long
+   option label stretches it past a frozen column and over its neighbour.
+   Cap it to the cell. */
+.table-frozen-2 table :is(th, td):nth-child(1) :is(input, select),
+.table-frozen-2 table :is(th, td):nth-child(2) :is(input, select) {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Narrow screens: freezing two columns would leave almost nothing to scroll,
+   so hand the width back and let the table scroll normally. */
+@media (max-width: 48rem) {
+    .table-frozen-2 table :is(th, td):nth-child(1),
+    .table-frozen-2 table :is(th, td):nth-child(2) {
+        position: static;
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        box-shadow: none;
     }
 }

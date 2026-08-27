@@ -2,13 +2,17 @@
 
 namespace App\Livewire\Employee;
 
+use App\Livewire\Concerns\ScopesToAuthorizedCity;
 use App\Models\Contract;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Livewire\Component;
 
 class EmployeeStatistics extends Component
 {
+    use ScopesToAuthorizedCity;
+
     public function getStatistics($mode): JsonResponse
     {
         return match ($mode) {
@@ -19,6 +23,25 @@ class EmployeeStatistics extends Component
         };
     }
 
+    /**
+     * Base query for every chart series on this endpoint.
+     *
+     * All nine aggregates previously counted Contract rows across the whole
+     * organization, so a regional HR user reading the dashboard chart learned
+     * national hiring, expiry, and termination volumes. Position::inCity is
+     * the same scope the contract forms use, so a contract is attributed to a
+     * city through its position or that position's centre.
+     */
+    private function contracts(): Builder
+    {
+        $cityId = $this->authorizedCityId();
+
+        return Contract::query()->when(
+            $cityId !== null,
+            fn (Builder $query) => $query->whereHas('position', fn ($p) => $p->inCity($cityId)),
+        );
+    }
+
     private function getMonthlyData(): JsonResponse
     {
         $months = collect(range(0, 5))->map(function ($i) {
@@ -27,7 +50,8 @@ class EmployeeStatistics extends Component
 
         $new = $months->map(function ($label, $i) {
             $date = now()->subMonths(5 - $i);
-            return Contract::where('is_active', true)
+
+            return $this->contracts()->where('is_active', true)
                 ->whereMonth('start_date', $date->month)
                 ->whereYear('start_date', $date->year)
                 ->count();
@@ -35,14 +59,16 @@ class EmployeeStatistics extends Component
 
         $ended = $months->map(function ($label, $i) {
             $date = now()->subMonths(5 - $i);
-            return Contract::whereMonth('end_date', $date->month)
+
+            return $this->contracts()->whereMonth('end_date', $date->month)
                 ->whereYear('end_date', $date->year)
                 ->count();
         });
 
         $terminated = $months->map(function ($label, $i) {
             $date = now()->subMonths(5 - $i);
-            return Contract::whereNotNull('terminated_at')
+
+            return $this->contracts()->whereNotNull('terminated_at')
                 ->whereMonth('terminated_at', $date->month)
                 ->whereYear('terminated_at', $date->year)
                 ->count();
@@ -60,9 +86,9 @@ class EmployeeStatistics extends Component
     {
         $quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
 
-        $new = collect($quarters)->map(fn($q) => $this->countInQuarter('start_date', $q));
-        $ended = collect($quarters)->map(fn($q) => $this->countInQuarter('end_date', $q));
-        $terminated = collect($quarters)->map(fn($q) => $this->countInQuarter('terminated_at', $q, true));
+        $new = collect($quarters)->map(fn ($q) => $this->countInQuarter('start_date', $q));
+        $ended = collect($quarters)->map(fn ($q) => $this->countInQuarter('end_date', $q));
+        $terminated = collect($quarters)->map(fn ($q) => $this->countInQuarter('terminated_at', $q, true));
 
         return response()->json([
             'labels' => $quarters,
@@ -76,16 +102,13 @@ class EmployeeStatistics extends Component
     {
         $years = range(now()->year - 4, now()->year);
 
-        $new = collect($years)->map(fn($year) =>
-            Contract::where('is_active', true)->whereYear('start_date', $year)->count()
+        $new = collect($years)->map(fn ($year) => $this->contracts()->where('is_active', true)->whereYear('start_date', $year)->count(),
         );
 
-        $ended = collect($years)->map(fn($year) =>
-            Contract::whereYear('end_date', $year)->count()
+        $ended = collect($years)->map(fn ($year) => $this->contracts()->whereYear('end_date', $year)->count(),
         );
 
-        $terminated = collect($years)->map(fn($year) =>
-            Contract::whereNotNull('terminated_at')->whereYear('terminated_at', $year)->count()
+        $terminated = collect($years)->map(fn ($year) => $this->contracts()->whereNotNull('terminated_at')->whereYear('terminated_at', $year)->count(),
         );
 
         return response()->json([
@@ -111,7 +134,7 @@ class EmployeeStatistics extends Component
         $start = Carbon::create($year, $startMonth, 1)->startOfMonth();
         $end = Carbon::create($year, $endMonth, 1)->endOfMonth();
 
-        $query = Contract::whereBetween($column, [$start, $end]);
+        $query = $this->contracts()->whereBetween($column, [$start, $end]);
 
         if ($checkNull) {
             $query->whereNotNull($column);

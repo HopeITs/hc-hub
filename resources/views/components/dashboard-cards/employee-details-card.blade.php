@@ -1,7 +1,7 @@
 <div class="w-full h-full  bg-white rounded-surface shadow-e1 ring-1 ring-neutral-100 overflow-hidden">
     <div class="bg-primary text-white px-6 py-4 flex items-center gap-4">
         <img
-            src="{{ $employee?->getFirstMediaUrl('avatar') ?: 'https://ui-avatars.com/api/?name=' . urlencode($employee?->name_en ?? 'Employee') }}"
+            src="{{ $employee?->avatar_url ?: asset('images/default-avatar.png') }}"
             alt="Employee Avatar"
             class="h-16 w-16 rounded-full object-cover">
 

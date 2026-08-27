@@ -14,7 +14,7 @@
 </div>
 
 @push('scripts')
-    <script>
+    <script nonce="{{ Vite::cspNonce() }}">
         document.addEventListener("DOMContentLoaded", () => {
 
             const ctx = document.getElementById("departmentEmployeesChart");

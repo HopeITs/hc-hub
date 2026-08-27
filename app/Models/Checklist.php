@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Checklist extends Model
 {
@@ -67,7 +67,9 @@ class Checklist extends Model
                 'delivered_status',
                 'returned_at',
                 'returned_status',
-                'notes',
+                // 'notes' is free text written by staff about a specific
+                // person and is not needed to audit a state change. The
+                // transition itself is recorded by ChecklistWorkflow.
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

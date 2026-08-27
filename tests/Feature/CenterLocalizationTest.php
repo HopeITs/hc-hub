@@ -43,13 +43,13 @@ class CenterLocalizationTest extends TestCase
         app()->setLocale('en');
         $this->assertSame(
             ['Aleppo Center', 'Homs Center'],
-            Center::query()->orderBy(transColumn('name'))->pluck(transColumn('name'))->all()
+            Center::query()->orderBy(transColumn('name'))->pluck(transColumn('name'))->all(),
         );
 
         app()->setLocale('ar');
         $this->assertSame(
             'مركز حمص',
-            Center::query()->where(transColumn('name'), 'مركز حمص')->value(transColumn('name'))
+            Center::query()->where(transColumn('name'), 'مركز حمص')->value(transColumn('name')),
         );
     }
 }

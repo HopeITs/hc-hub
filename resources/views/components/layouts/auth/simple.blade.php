@@ -5,19 +5,21 @@
 </head>
 <body class="font-SomarSans h-full  bg-neutral-100">
 
-<div class=" flex items-center justify-center px-4">
+<main class=" flex items-center justify-center px-4">
 
     <div class="flex w-full max-w-sm flex-col gap-6">
-        <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
-            <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
-        </a>
+        <header>
+            <a href="{{ route('dashboard') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
+                <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
+            </a>
+        </header>
 
         <div>
             {{ $slot }}
         </div>
     </div>
 
-</div>
+</main>
 
 <x-layouts.app.footer  class="absolute bottom-0"/>
 

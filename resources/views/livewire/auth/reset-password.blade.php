@@ -30,7 +30,7 @@
                         model="password"
                         placeholder="••••••••"
                         autocomplete="new-password"
-                        oninput="checkPasswordStrength(this.value)"
+                        x-on:input="checkPasswordStrength($event.target.value)"
                     />
 
                     {{-- Password Strength Bar --}}

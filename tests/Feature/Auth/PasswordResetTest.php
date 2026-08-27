@@ -67,8 +67,10 @@ class PasswordResetTest extends TestCase
         Notification::assertSentTo($user, ResetPasswordNotification::class, function ($notification) use ($user) {
             $response = Livewire::test(ResetPassword::class, ['token' => $notification->token])
                 ->set('email', $user->email)
-                ->set('password', 'password')
-                ->set('password_confirmation', 'password')
+                // At least 12 characters: see the Password::defaults() rule
+                // registered in AppServiceProvider.
+                ->set('password', 'correct-horse-battery-staple')
+                ->set('password_confirmation', 'correct-horse-battery-staple')
                 ->call('resetPassword');
 
             $response

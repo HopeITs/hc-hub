@@ -20,8 +20,6 @@ use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 class MyLeaveRequestTable extends LivewireTable
 {
-    protected string $model = LeaveRequest::class;
-
     public LeaveRequestForm $form;
 
     public string $statusFilter = 'all';
@@ -30,12 +28,63 @@ class MyLeaveRequestTable extends LivewireTable
 
     public $modalTitle = 'Modal title';
 
+    protected string $model = LeaveRequest::class;
+
     protected $listeners = ['filterStatus' => 'setStatusFilter', 'leaveRequestSaved' => '$refresh'];
 
     public function setStatusFilter(string $status): void
     {
         $this->statusFilter = $status;
         $this->resetPage();
+    }
+
+    public function confirmDelete($id): void
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function edit($id)
+    {
+        $model = LeaveRequest::findOrFail($id);
+        Gate::authorize('update', $model);
+
+        $this->form->setLeaveRequest($model);
+        $employee = auth()->user()->profile;
+        $modalTitle = __('general.edit');
+        $form = $this->form;
+        $availableLeaves = auth()->user()->profile->availableLeaves();
+        $allAvailableLeaves = $employee->allAvailableLeaves();
+        $alternativeEmployees = Employee::where('city_id', $employee->city_id)->where('id', '!=', $employee->id)
+            ->whereHas('contracts', function ($query) use ($employee) {
+                $query->whereHas('position.department', function ($query) use ($employee) {
+                    $query->where('id', $employee->department->id ?? null);
+                });
+            })->get();
+        $this->showModal = true;
+    }
+
+    public function delete($payload): void
+    {
+        $leaveRequest = LeaveRequest::findOrFail($payload['id']);
+        Gate::authorize('delete', $leaveRequest);
+
+        $leaveRequest->delete();
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
+    protected function rowClickAction(Model $model): ?string
+    {
+        return $model->status === LeaveRequestStatus::Pending
+            ? "\$dispatch('openRequestLeaveEdit', { id: {$model->getKey()} })"
+            : "\$dispatch('openMyLeaveDetails', { id: {$model->getKey()} })";
     }
 
     protected function query(): Builder
@@ -104,13 +153,13 @@ class MyLeaveRequestTable extends LivewireTable
             BooleanColumn::make(__('general.seen-by-hr'), 'hr_approved'),
             Column::make(__('general.actions'), function (Model $model): string {
                 $showBtn = Blade::render(
-                    '<x-table.show-btn wire:click="$dispatch(\'openMyLeaveDetails\', { id: '.$model->getKey().' })" />'
+                    '<x-table.show-btn wire:click="$dispatch(\'openMyLeaveDetails\', { id: '.$model->getKey().' })" />',
                 );
 
                 if ($model->status === LeaveRequestStatus::Pending) {
                     $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: '.$model->getKey().' })" />');
                     $deleteBtn = Blade::render(
-                        '<x-table.delete-btn :modelId="'.$model->getKey().'" />'
+                        '<x-table.delete-btn :modelId="'.$model->getKey().'" />',
                     );
 
                     return $showBtn.$editBtn.$deleteBtn;
@@ -118,50 +167,8 @@ class MyLeaveRequestTable extends LivewireTable
 
                 return $showBtn;
 
-            })->asHtml(),
+            })->asHtml()->clickable(false),
 
         ];
-    }
-
-    public function confirmDelete($id): void
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function edit($id)
-    {
-        $model = LeaveRequest::findOrFail($id);
-        Gate::authorize('update', $model);
-
-        $this->form->setLeaveRequest($model);
-        $employee = auth()->user()->profile;
-        $modalTitle = __('general.edit');
-        $form = $this->form;
-        $availableLeaves = auth()->user()->profile->availableLeaves();
-        $allAvailableLeaves = $employee->allAvailableLeaves();
-        $alternativeEmployees = Employee::where('city_id', $employee->city_id)->where('id', '!=', $employee->id)
-            ->whereHas('contracts', function ($query) use ($employee) {
-                $query->whereHas('position.department', function ($query) use ($employee) {
-                    $query->where('id', $employee->department->id ?? null);
-                });
-            })->get();
-        $this->showModal = true;
-    }
-
-    public function delete($payload): void
-    {
-        $leaveRequest = LeaveRequest::findOrFail($payload['id']);
-        Gate::authorize('delete', $leaveRequest);
-
-        $leaveRequest->delete();
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
     }
 }

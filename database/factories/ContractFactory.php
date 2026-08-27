@@ -7,8 +7,6 @@ use App\Models\ContractType;
 use App\Models\Employee;
 use App\Models\Position;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -20,7 +18,7 @@ class ContractFactory extends Factory
     public function definition(): array
     {
         $startDate = $this->faker->dateTimeBetween('-2 years', 'now');
-        $endDate   = (clone $startDate)->modify('+1 year');
+        $endDate = (clone $startDate)->modify('+1 year');
 
         return [
             'employee_id' => Employee::factory(),
@@ -33,8 +31,10 @@ class ContractFactory extends Factory
             'salary' => $this->faker->randomFloat(2, 500, 3000),
             'currency' => $this->faker->numberBetween(1, 3), // 1=SYP, 2=USD, 3=EUR
             'salary_per' => $this->faker->numberBetween(1, 3), // 1=Month,2=Hour,3=Session
-            'work_days' => json_encode([1, 2, 3, 4, 5]), // Mon–Fri
-            'work_hours' => json_encode(['09:00-17:00']),
+            'work_days_en' => 'Monday,Tuesday,Wednesday,Thursday,Friday',
+            'work_days_ar' => 'الاثنين,الثلاثاء,الأربعاء,الخميس,الجمعة',
+            'work_hours_from' => '09:00:00',
+            'work_hours_to' => '17:00:00',
             'weekly_hours' => 40,
             'is_active' => true,
         ];

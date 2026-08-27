@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Contract;
 use App\Models\Position;
+use App\Support\StatisticsCache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -15,18 +16,25 @@ class ContractObserver
             return;
         }
 
-        $pos = \App\Models\Position::query()
+        // A renewal onto the same position is the same person keeping the same
+        // seat, so it is exempt from the capacity check. exist_emp still rises
+        // by one for the overlap between issuing the renewal and the source
+        // expiring, and `deactivate:contract` brings it back down from there.
+        if ($contract->isRenewalInPlace()) {
+            return;
+        }
+
+        $pos = Position::query()
             ->whereKey($contract->position_id)
             ->lockForUpdate()
             ->firstOrFail();
 
         if (! $pos->canAssign()) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'form.position_id' => __('validation.custom.position_id.max_reached'),
             ]);
         }
     }
-
 
     public function created(Contract $contract): void
     {
@@ -90,8 +98,12 @@ class ContractObserver
         $old = $locked[$oldId] ?? null;
         $new = $locked[$newId] ?? null;
 
-        if ($old) $old->dec();
-        if ($new) $new->inc();
+        if ($old) {
+            $old->dec();
+        }
+        if ($new) {
+            $new->inc();
+        }
     }
 
     public function deleted(Contract $contract): void
@@ -106,6 +118,21 @@ class ContractObserver
                 $pos->decrement('exist_emp');
             }
         });
+
+        StatisticsCache::flush();
     }
 
+    /**
+     * Every dashboard aggregate is derived from contracts, so any write to this
+     * table invalidates all of them.
+     *
+     * `saved` deliberately covers both insert and update in one hook rather than
+     * duplicating the call in created() and updated() — a future code path that
+     * saves a contract some other way inherits the invalidation for free.
+     * Deletion is handled separately above because `saved` does not fire for it.
+     */
+    public function saved(Contract $contract): void
+    {
+        StatisticsCache::flush();
+    }
 }

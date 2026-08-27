@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\Enums\SalaryPer;
+use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,9 +14,50 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Contract extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, RedactsSensitiveActivityLog;
 
-    protected $guarded = ['id'];
+    /**
+     * The contract this row is being created as the successor of.
+     *
+     * Transient and never persisted — it exists only between building the model
+     * and ContractObserver::creating() reading it. It MUST stay a declared
+     * property: assigned dynamically, Eloquent would treat it as an attribute
+     * and try to insert a `renewal_source_id` column that does not exist.
+     */
+    public ?int $renewalSourceId = null;
+
+    /**
+     * Salary and free-text attendance notes are logged by name only.
+     *
+     * @see RedactsSensitiveActivityLog
+     */
+    protected array $sensitiveLogAttributes = [
+        'salary',
+        'attending_notes_en',
+        'attending_notes_ar',
+    ];
+
+    protected $fillable = [
+        'employee_id',
+        'position_id',
+        'contract_type_id',
+        'start_date',
+        'end_date',
+        'termination_reason_id',
+        'terminated_at',
+        'reason_of_termination',
+        'salary',
+        'currency',
+        'salary_per',
+        'work_hours_from',
+        'work_hours_to',
+        'work_days_en',
+        'work_days_ar',
+        'attending_notes_ar',
+        'attending_notes_en',
+        'weekly_hours',
+        'is_active',
+    ];
 
     protected $casts = [
         'start_date' => 'date',
@@ -25,7 +67,6 @@ class Contract extends Model
         'weekly_hours' => 'integer',
         'currency' => 'integer',
         'salary' => 'decimal:2',
-
     ];
 
     //    protected function work_days(): Attribute
@@ -49,9 +90,72 @@ class Contract extends Model
     public function scopeActiveNow(Builder $query): Builder
     {
         return $query
-            ->where('is_active', true)
-            ->whereDate('start_date', '<=', now())
-            ->whereDate('end_date', '>=', now());
+            ->where($query->qualifyColumn('is_active'), true)
+            ->whereDate($query->qualifyColumn('start_date'), '<=', now())
+            ->whereDate($query->qualifyColumn('end_date'), '>=', now());
+    }
+
+    /** Restrict contracts to assignments belonging to one center. */
+    public function scopeAtCenter(Builder $query, int $centerId): Builder
+    {
+        return $query->whereHas(
+            'position',
+            fn (Builder $position): Builder => $position->where('center_id', $centerId),
+        );
+    }
+
+    /**
+     * Restrict the query to exactly one contract per employee: the most recent
+     * one by start_date, ties broken by the higher id.
+     *
+     * WHY: every dashboard statistic needs "the employee's current contract".
+     * The previous approach was to load all employees with all their contracts
+     * eager-loaded and then call ->sortByDesc('start_date')->first() in PHP,
+     * which pulls the entire employees + contracts + positions tables into
+     * memory to produce what is ultimately a GROUP BY COUNT.
+     *
+     * Do NOT replace this with `->with(['contracts' => fn ($q) => $q->limit(1)])`.
+     * A limit inside an eager load applies to the combined result set, not per
+     * parent row, so it returns one contract for the entire page rather than
+     * one per employee — that exact bug was live in JobLevelEmployeeStatistics.
+     *
+     * Implemented as NOT EXISTS ("no newer contract exists for this employee")
+     * rather than a window function, because the suite runs on SQLite in-memory
+     * while dev/prod run MySQL, and NOT EXISTS behaves identically on both.
+     *
+     * @param  Closure|null  $constrain  Optional filter applied to BOTH the outer query
+     *                                   and the inner "is there a newer one" subquery.
+     *                                   Passing it only to the outer query would ask
+     *                                   "latest contract overall, that happens to be
+     *                                   active" instead of "latest active contract" —
+     *                                   which silently drops employees whose newest
+     *                                   contract is expired. Callers that need an
+     *                                   active-only view must go through this argument.
+     */
+    public function scopeLatestPerEmployee(Builder $query, ?Closure $constrain = null): Builder
+    {
+        if ($constrain) {
+            $constrain($query);
+        }
+
+        return $query->whereNotExists(function ($sub) use ($constrain) {
+            $sub->selectRaw('1')
+                ->from('contracts as newer')
+                ->whereColumn('newer.employee_id', 'contracts.employee_id')
+                ->where(function ($tie) {
+                    $tie->whereColumn('newer.start_date', '>', 'contracts.start_date')
+                        ->orWhere(function ($sameDate) {
+                            $sameDate->whereColumn('newer.start_date', '=', 'contracts.start_date')
+                                ->whereColumn('newer.id', '>', 'contracts.id');
+                        });
+                });
+
+            if ($constrain) {
+                // Re-apply against the aliased table so the comparison stays
+                // within the same population as the outer query.
+                $constrain($sub, 'newer');
+            }
+        });
     }
 
     public function contractType()
@@ -59,7 +163,7 @@ class Contract extends Model
         return $this->belongsTo(ContractType::class, 'contract_type_id');
     }
 
-      public function terminationReason()
+    public function terminationReason()
     {
         return $this->belongsTo(TerminationReason::class, 'termination_reason_id');
     }
@@ -67,6 +171,54 @@ class Contract extends Model
     public function leaveBalances()
     {
         return $this->hasMany(LeaveBalance::class, 'contract_id');
+    }
+
+    /**
+     * The dates a renewal of this contract should default to: it picks up the
+     * day after this one ends and runs for the same number of months.
+     *
+     * The length is measured in whole months rather than days so a Jan–Jun
+     * contract renews as Jul–Dec instead of ending three days short, and it is
+     * clamped to [1, 12] because ContractForm::validateTerms() rejects a term
+     * longer than a year and a zero-month term would end before it starts.
+     *
+     * @return array{0: string, 1: string} [start_date, end_date]
+     */
+    public function renewalWindow(): array
+    {
+        $sourceStart = Carbon::parse($this->start_date);
+        $sourceEnd = Carbon::parse($this->end_date);
+
+        $start = $sourceEnd->copy()->addDay();
+        $months = min(12, max(1, (int) round($sourceStart->diffInMonths($sourceEnd))));
+
+        return [
+            $start->toDateString(),
+            $start->copy()->addMonthsNoOverflow($months)->subDay()->toDateString(),
+        ];
+    }
+
+    /**
+     * Is a contract created from $sourceId onto $positionId a renewal in place?
+     *
+     * Such a renewal does not add headcount — the seat is already counted for
+     * this employee — so the position capacity check is skipped for it, which
+     * is what makes renewing a max_emp = 1 position possible at all. Renewing
+     * onto a *different* position is a real new assignment and stays checked.
+     */
+    public static function isRenewalOfPosition(?int $sourceId, ?int $positionId): bool
+    {
+        return $sourceId !== null
+            && $positionId !== null
+            && static::query()
+                ->whereKey($sourceId)
+                ->where('position_id', $positionId)
+                ->exists();
+    }
+
+    public function isRenewalInPlace(): bool
+    {
+        return static::isRenewalOfPosition($this->renewalSourceId, $this->position_id);
     }
 
     public function getDurationAttribute()
@@ -82,8 +234,6 @@ class Contract extends Model
         return $this->weekly_hours / 5;
     }
 
-
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -98,12 +248,9 @@ class Contract extends Model
                 'is_active',
                 'weekly_hours',
                 'currency',
-                'salary',
                 'salary_per',
                 'work_days_en',
                 'work_days_ar',
-                'attending_notes_en',
-                'attending_notes_ar',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

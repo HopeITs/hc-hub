@@ -1,0 +1,22 @@
+# Gitleaks configuration for HC-HR.
+#
+# The default rule set is extended with the placeholder keys this repository
+# legitimately ships in .env.example so that blank placeholders never trip the
+# scanner, while any real value committed to a tracked file does.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "hc-hr-env-credential"
+description = "Non-empty credential value committed to a tracked env template"
+regex = '''(?i)^(MAIL_PASSWORD|MAIL_USERNAME|DB_PASSWORD|AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|GOOGLE_DRIVE_API_KEY|LOCAL_SEED_PASSWORD|APP_KEY)\s*=\s*(?!\s*$)(?!null$)(?!"?\$\{)\S+'''
+path = '''\.env\.example$'''
+
+[allowlist]
+description = "Placeholders and generated lockfiles"
+paths = [
+  '''composer\.lock''',
+  '''package-lock\.json''',
+  '''public/build/''',
+]

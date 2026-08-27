@@ -18,6 +18,36 @@ class NewsTable extends LivewireTable
 
     protected $listeners = ['delete', 'refreshNewsTable' => '$refresh'];
 
+    public function confirmDelete(int $id): void
+    {
+        $news = News::findOrFail($id);
+        abort_unless($this->canManageNews($news), 403);
+
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete(array $payload): void
+    {
+        $news = News::findOrFail($payload['id']);
+        abort_unless($this->canManageNews($news), 403);
+
+        $news->delete();
+        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
+        $this->dispatch('refreshNewsTable');
+    }
+
+    protected function link(Model $model): ?string
+    {
+        /** @var News $model */
+        return $this->canManageNews($model) ? route('news.edit', ['news' => $model->getKey()]) : null;
+    }
+
     protected function query(): Builder
     {
         $employee = auth()->user()?->profile;
@@ -28,7 +58,7 @@ class NewsTable extends LivewireTable
                 $employee
                     && ! ($this->canManageAllNews() || $this->isManager())
                     && method_exists(News::class, 'scopeVisibleTo'),
-                fn (Builder $q) => $q->visibleTo($employee)
+                fn (Builder $q) => $q->visibleTo($employee),
             );
     }
 
@@ -81,36 +111,12 @@ class NewsTable extends LivewireTable
                 $editUrl = route('news.edit', ['news' => $id]);
                 $editBtn = Blade::render('<x-table.edit-btn href="'.$editUrl.'" />');
                 $deleteBtn = Blade::render(
-                    '<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />'
+                    '<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />',
                 );
 
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml()->visible($showActions),
+            })->asHtml()->visible($showActions)->clickable(false),
         ];
-    }
-
-    public function confirmDelete(int $id): void
-    {
-        $news = News::findOrFail($id);
-        abort_unless($this->canManageNews($news), 403);
-
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete(array $payload): void
-    {
-        $news = News::findOrFail($payload['id']);
-        abort_unless($this->canManageNews($news), 403);
-
-        $news->delete();
-        LivewireAlert::title(__('general.success-message'))->success()->toast()->position('top-start')->show();
-        $this->dispatch('refreshNewsTable');
     }
 
     private function canManageNews(News $news): bool

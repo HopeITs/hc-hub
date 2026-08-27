@@ -39,7 +39,7 @@ class NewsCreate extends Component
     {
         abort_unless(
             $this->news ? $this->canManageNews($this->news) : $this->canCreateNews(),
-            403
+            403,
         );
 
         $this->news = $this->form->persist($this->news);

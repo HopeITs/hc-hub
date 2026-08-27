@@ -9,11 +9,11 @@ class ExampleTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_returns_a_successful_response(): void
+    public function test_root_requires_authentication(): void
     {
         // The root URL is the dashboard (auth-protected); guests are sent to login.
-        $this->get('/')->assertRedirect('/login');
+        $this->get('/')->assertRedirect(route('login'));
 
-        $this->get('/login')->assertStatus(200);
+        $this->get(route('login'))->assertOk();
     }
 }

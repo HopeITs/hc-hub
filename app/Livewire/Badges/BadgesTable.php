@@ -31,6 +31,42 @@ class BadgesTable extends LivewireTable
         Gate::authorize('viewAny', Badge::class);
     }
 
+    public function confirmDelete(int $id): void
+    {
+        $badge = $this->findVisibleBadge($id);
+        Gate::authorize('delete', $badge);
+
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete(array $payload): void
+    {
+        $validated = validator($payload, [
+            'id' => ['required', 'integer', 'min:1'],
+        ])->validate();
+
+        $badge = $this->findVisibleBadge((int) $validated['id']);
+        Gate::authorize('delete', $badge);
+
+        DB::transaction(fn () => $badge->delete());
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+
+        $this->dispatch('refreshBadgesTable');
+    }
+
+    protected function rowClickAction(Model $model): ?string
+    {
+        return "\$dispatch('open-badge-modal', { id: {$model->getKey()} })";
+    }
+
     protected function query(): Builder
     {
         return $this->model()::query()
@@ -101,7 +137,7 @@ class BadgesTable extends LivewireTable
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                    </button>', ['id' => $id]
+                    </button>', ['id' => $id],
                 );
 
                 $deleteBtn = $canDelete
@@ -109,39 +145,8 @@ class BadgesTable extends LivewireTable
                     : '';
 
                 return '<div class="flex items-center justify-center gap-2">'.$viewBtn.$deleteBtn.'</div>';
-            })->asHtml(),
+            })->asHtml()->clickable(false),
         ];
-    }
-
-    public function confirmDelete(int $id): void
-    {
-        $badge = $this->findVisibleBadge($id);
-        Gate::authorize('delete', $badge);
-
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete(array $payload): void
-    {
-        $validated = validator($payload, [
-            'id' => ['required', 'integer', 'min:1'],
-        ])->validate();
-
-        $badge = $this->findVisibleBadge((int) $validated['id']);
-        Gate::authorize('delete', $badge);
-
-        DB::transaction(fn () => $badge->delete());
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
-
-        $this->dispatch('refreshBadgesTable');
     }
 
     protected function badgeTypeOptions(): array

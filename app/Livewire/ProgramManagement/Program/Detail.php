@@ -3,7 +3,6 @@
 namespace App\Livewire\ProgramManagement\Program;
 
 use App\Livewire\Forms\ProgramManagement\ProgramForm;
-use App\Models\Employee;
 use App\Models\Program;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -11,6 +10,7 @@ use Livewire\Component;
 class Detail extends Component
 {
     public $slug;
+
     public ProgramForm $form;
 
     public function mount(Program $program)

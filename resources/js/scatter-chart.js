@@ -1,4 +1,9 @@
-import Chart from "chart.js/auto";
+// Import the bare Chart class, NOT 'chart.js/auto'. The /auto entry point
+// registers every controller Chart.js ships and is a separate module graph, so
+// using it here bundled a second full copy of Chart.js alongside the selective
+// registration in app.js. This chart is a line type, whose controller, elements
+// and scales are all already registered there.
+import { Chart } from "chart.js";
 
 function initSalaryTypeScatter() {
     const canvas = document.getElementById("salaryTypeMiniChart");

@@ -3,13 +3,14 @@
 namespace App\Services;
 
 use App\Enums\Gender;
+use App\Enums\LeaveType as LeaveTypeEnum;
 use App\Enums\LeaveTypeCases;
 use App\Enums\MaritalStatus;
 use App\Models\AnnualLeaveRule;
 use App\Models\Contract;
+use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveType;
-use App\Enums\LeaveType as LeaveTypeEnum;
 use Carbon\Carbon;
 
 /**
@@ -56,6 +57,53 @@ class LeaveBalanceService
     }
 
     /**
+     * Annual-leave entitlement a contract *would* receive, in days.
+     *
+     * Read-only sibling of create(): it runs the same two calculators against
+     * an unsaved Contract so the create screen can show the entitlement before
+     * committing, rather than creating it silently afterwards. Nothing is
+     * persisted and no relation on the passed model is mutated.
+     *
+     * Returns null when the contract is not yet complete enough to price.
+     */
+    public function previewAnnual(Contract $contract): ?float
+    {
+        if (! $contract->employee_id || ! $contract->start_date || ! $contract->end_date) {
+            return null;
+        }
+
+        $dailyWorkHours = $contract->work_hour_per_day;
+
+        if ($dailyWorkHours < 1) {
+            return null;
+        }
+
+        $employee = Employee::with('allContracts')->find($contract->employee_id);
+
+        if (! $employee) {
+            return null;
+        }
+
+        // calculateExtraLeave() excludes the contract being priced by primary
+        // key. An unsaved model has none, and `whereNot('id', null)` matches
+        // no rows at all — which would silently drop every previous contract
+        // from the carry-over check. A zero key excludes nothing instead.
+        $probe = clone $contract;
+
+        if (! $probe->getKey()) {
+            $probe->setAttribute('id', 0);
+        }
+
+        $rule = $this->getAnnualLeaveRule($employee);
+        $extra = $this->calculateExtraLeave($employee, $probe);
+
+        [$yearly] = $this->calculateDeservedLeaves($probe->duration, $rule, $dailyWorkHours, $extra);
+
+        // Balances are stored in hours; the screen speaks in days.
+        return round($yearly / $dailyWorkHours, 1);
+    }
+
+    /**
      * Recalculate and reconcile the leave balances of an existing contract.
      */
     public function update(Contract $contract): void
@@ -88,7 +136,12 @@ class LeaveBalanceService
     /** ------------------------------------------------------------
      *  HELPER METHODS
      * -------------------------------------------------------------*/
-
+    /**
+     * Seniority is the employee's current one, measured from
+     * Employee::serviceStartDate() — the stored joined_at, or the first
+     * contract's start when no joining date has been recorded. For someone who
+     * has left it stops at the end of their last contract.
+     */
     private function getAnnualLeaveRule($employee): AnnualLeaveRule
     {
         return AnnualLeaveRule::where('years_of_volunteering', '<=', $employee->years_of_service)
@@ -102,8 +155,14 @@ class LeaveBalanceService
         $extra = 0;
 
         if ($employee->allContracts->count() <= 3 && $employee->allContracts->count() > 1) {
+            // The contract that actually precedes this one. Ordering by
+            // end_date alone would pick the *latest* contract even when it
+            // starts after this one, which made two consecutive contracts
+            // carry leave over from each other and inflate on every
+            // recalculation.
             $prevContract = $employee->allContracts()
                 ->whereNot('id', $contract->id)
+                ->where('end_date', '<=', $contract->start_date)
                 ->with(['leaveBalances' => fn ($q) => $q->where('type_id', LeaveTypeCases::Annual)])
                 ->orderBy('end_date', 'desc')
                 ->first();
@@ -182,7 +241,7 @@ class LeaveBalanceService
     private function createSpecificLeaves($employee, $contract, $leaveTypes, $dailyWorkHours): void
     {
         $allowedForAll = $leaveTypes->filter(fn ($t) => $t->allowed_gender === LeaveTypeEnum::GENDER_ANY &&
-            $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_ANY
+            $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_ANY,
         );
 
         foreach ($allowedForAll as $type) {
@@ -251,7 +310,7 @@ class LeaveBalanceService
     private function createMarriedLeaves($employee, $contract, $leaveTypes, $dailyWorkHours): void
     {
         $types = $leaveTypes->filter(fn ($t) => $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED &&
-            $t->allowed_gender === $employee->gender
+            $t->allowed_gender === $employee->gender,
         );
         foreach ($types as $type) {
             if ($employee->gender === Gender::Female && ! $employee->abilityToTakeLeave($type->id)) {
@@ -275,7 +334,7 @@ class LeaveBalanceService
         $contract->leaveBalances->where('type_id', LeaveTypeCases::Marriage)->first()?->delete();
 
         $types = $leaveTypes->filter(fn ($t) => $t->marital_status === LeaveTypeEnum::MARITAL_STATUS_MARRIED &&
-            $t->allowed_gender === $employee->gender
+            $t->allowed_gender === $employee->gender,
         );
 
         foreach ($types as $type) {

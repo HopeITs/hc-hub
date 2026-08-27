@@ -31,13 +31,6 @@ class LeaveBalanceForm extends Form
 
     public $notes = null;
 
-    protected function rules()
-    {
-        return [
-            'contract_id' => 'required|exists:contracts,id',
-        ];
-    }
-
     public function setLeaveBalance(LeaveBalance $balance): void
     {
         $this->balance = $balance;
@@ -107,7 +100,7 @@ class LeaveBalanceForm extends Form
             unit: $this->unit,
             amount: $this->amount,
             notes: $this->notes,
-            recipientType: 'manager'
+            recipientType: 'manager',
         )) : '';
 
         isset($techManager) ? $techManager->notify(new ActionLeaveBalance(
@@ -116,7 +109,7 @@ class LeaveBalanceForm extends Form
             unit: $this->unit,
             amount: $this->amount,
             notes: $this->notes,
-            recipientType: 'manager'
+            recipientType: 'manager',
         )) : '';
 
         $employee?->notify(new ActionLeaveBalance(
@@ -125,8 +118,15 @@ class LeaveBalanceForm extends Form
             unit: $this->unit,
             amount: $this->amount,
             notes: $this->notes,
-            recipientType: 'employee'
+            recipientType: 'employee',
         ));
 
+    }
+
+    protected function rules()
+    {
+        return [
+            'contract_id' => 'required|exists:contracts,id',
+        ];
     }
 }

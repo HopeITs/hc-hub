@@ -13,7 +13,6 @@ class CenterSeeder extends Seeder
 
         foreach ($centers as $center) {
 
-
             Center::create($center);
         }
     }

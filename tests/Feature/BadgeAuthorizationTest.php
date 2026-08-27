@@ -163,10 +163,8 @@ class BadgeAuthorizationTest extends TestCase
         $user = $this->createUserWithActiveRole('HR-ALP', $aleppo);
         $foreignEmployee = $this->createEmployee($homs, 'foreign.form');
 
-        Livewire::actingAs($user)
-            ->test(EmployeeEdit::class, ['employee' => $foreignEmployee])
-            ->assertSet('canManageBadges', false)
-            ->call('addBadge')
+        $this->actingAs($user)
+            ->get(route('employees.edit', $foreignEmployee))
             ->assertForbidden();
     }
 

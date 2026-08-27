@@ -11,7 +11,7 @@ class CourseCategory extends Model
 {
     use HasFactory, HasTranslation;
 
-    protected $guarded = ['id'];
+    protected $fillable = ['name_en', 'name_ar'];
 
     public function getNameAttribute()
     {

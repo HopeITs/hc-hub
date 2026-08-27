@@ -31,22 +31,22 @@ class LeaveNotificationService
 
         $employeeRecipients = $this->eligibleUniqueUsers(
             collect([$employee]),
-            $excludedIds
+            $excludedIds,
         );
 
         Notification::send(
             $employeeRecipients,
-            new ActionLeaveRequest($leaveRequest)
+            new ActionLeaveRequest($leaveRequest),
         );
 
         $hrRecipients = $this->eligibleUniqueUsers(
             $this->hrRecipients($leaveRequest),
-            [...$excludedIds, ...$employeeRecipients->pluck('id')->all()]
+            [...$excludedIds, ...$employeeRecipients->pluck('id')->all()],
         );
 
         Notification::send(
             $hrRecipients,
-            new ActionLeaveRequest($leaveRequest, 'hr')
+            new ActionLeaveRequest($leaveRequest, 'hr'),
         );
     }
 
@@ -58,22 +58,22 @@ class LeaveNotificationService
 
         $employeeRecipients = $this->eligibleUniqueUsers(
             collect([$employee]),
-            $excludedIds
+            $excludedIds,
         );
 
         Notification::send(
             $employeeRecipients,
-            new HRSawLeaveRequest($leaveRequest, 'employee')
+            new HRSawLeaveRequest($leaveRequest, 'employee'),
         );
 
         $managerRecipients = $this->eligibleUniqueUsers(
             $this->managerRecipients($leaveRequest),
-            [...$excludedIds, ...$employeeRecipients->pluck('id')->all()]
+            [...$excludedIds, ...$employeeRecipients->pluck('id')->all()],
         );
 
         Notification::send(
             $managerRecipients,
-            new HRSawLeaveRequest($leaveRequest, 'manager')
+            new HRSawLeaveRequest($leaveRequest, 'manager'),
         );
     }
 

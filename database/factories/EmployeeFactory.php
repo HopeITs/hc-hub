@@ -3,10 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Employee;
-use App\Models\Position;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class EmployeeFactory extends Factory
@@ -19,7 +16,7 @@ class EmployeeFactory extends Factory
             'first_name_en' => $this->faker->firstName,
             'first_name_ar' => 'اسم '.$this->faker->unique()->numberBetween(1, 1000),
             'last_name_en' => $this->faker->lastName,
-            'last_name_ar' => 'كنية '.$this->faker->unique()->numberBetween(1, 1000),
+            'last_name_ar' => 'عائلة '.$this->faker->unique()->numberBetween(1, 1000),
             'city_id' => City::query()->inRandomOrder()->value('id'),
             'username' => $this->faker->userName,
             'actual_dob' => $this->faker->date('Y-m-d', '-20 years'),
@@ -42,7 +39,13 @@ class EmployeeFactory extends Factory
             'address_ar' => 'مدينة'.$this->faker->unique()->numberBetween(1, 1000),
             'skills' => implode(', ', $this->faker->words(3)),
             'interests' => implode(', ', $this->faker->words(3)),
-            'is_active' => $this->faker->boolean(90),
+            // Deterministically active. This was faker->boolean(90), which made
+            // roughly one in ten factory-built employees inactive at random —
+            // so any test that signs a user in was silently flaky, and now that
+            // EnsureAccountIsActive rejects inactive accounts it would fail
+            // outright about a tenth of the time. Use the inactive() state when
+            // a test actually wants a deactivated employee.
+            'is_active' => true,
             'is_board_member' => $this->faker->boolean(10),
             'board_member_started_at' => null,
             'board_member_end_at' => null,
@@ -51,18 +54,8 @@ class EmployeeFactory extends Factory
         ];
     }
 
-    public function configure()
+    public function inactive(): static
     {
-        return $this->afterCreating(function ($employee) {
-            // A contract needs a real position and contract type; skip when the
-            // database has none (e.g. unseeded test runs).
-            if (! Position::query()->exists() || ! ContractType::query()->exists()) {
-                return;
-            }
-
-            Contract::factory()->create([
-                'employee_id' => $employee->id,
-            ]);
-        });
+        return $this->state(fn (): array => ['is_active' => false]);
     }
 }

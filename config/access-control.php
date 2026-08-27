@@ -87,6 +87,7 @@ return [
         'program-management.program.index' => [
             'delete' => 'programs.delete',
             'toggleItemStatusConfirmed' => 'programs.update',
+            'show' => 'programs.view',
         ],
         'program-management.program.detail' => [
             'delete' => 'programs.delete',
@@ -130,8 +131,28 @@ return [
             'toggleItemStatusConfirmed' => 'employees.update',
             'exportExcel' => 'employees.export',
         ],
-        'contract.contract-create' => ['save' => 'contracts.create', 'submit' => 'contracts.create'],
-        'contract.contract-edit' => ['save' => 'contracts.update', 'submit' => 'contracts.update'],
+        // The composer exposes exactly three actions: one option load, one
+        // entitlement preview, and the create itself.
+        'contract.contract-create' => [
+            'submit' => 'contracts.create',
+            'locationOptions' => 'contracts.create',
+            'leavePreview' => 'contracts.create',
+        ],
+        'contract.contract-edit' => [
+            'save' => 'contracts.update',
+            'submit' => 'contracts.update',
+            'locationOptions' => 'contracts.update',
+            'advanceIdentity' => 'contracts.update',
+        ],
+        // A renewal creates a contract. The permission here is the coarse
+        // gate; ContractRenewModal re-reads the contract and runs the `renew`
+        // policy on every one of these, which is what enforces city scope and
+        // rejects a terminated source.
+        'contract.contract-renew-modal' => [
+            'open' => 'contracts.create',
+            'renewAsIs' => 'contracts.create',
+            'renewWithEdit' => 'contracts.create',
+        ],
         'contract.contracts-table' => ['delete' => 'contracts.delete', 'exportExcel' => 'contracts.export'],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
@@ -142,8 +163,15 @@ return [
             'delete' => 'leaves.delete', 'markAsReviewed' => 'leaves.review',
         ],
         'employee.leave.my-leave-request-table' => ['delete' => 'leaves.delete'],
-        'employee.leave.emp-leave-balance-module' => ['processSave' => 'leaves.manage-balances'],
-        'employee.leave.emp-leave-balance-table' => ['exportExcel' => 'leaves.export'],
+        // 'edit' loads a balance record into the modal, before processSave().
+        'employee.leave.emp-leave-balance-module' => [
+            'processSave' => 'leaves.manage-balances',
+            'edit' => 'leaves.manage-balances',
+        ],
+        'employee.leave.emp-leave-balance-table' => [
+            'exportExcel' => 'leaves.export',
+            'edit' => 'leaves.manage-balances',
+        ],
         'badges.badges-table' => ['delete' => 'badges.delete'],
         'program-management.default-deliverable.default-deliverables-table' => [
             'delete' => 'checklists.manage', 'exportExcel' => 'checklists.manage',
@@ -154,6 +182,7 @@ return [
             'savePermissions' => 'archives.share',
             'updatedFilesToUpload' => 'archives.create',
             'downloadFile' => 'archives.download',
+            'previewFile' => 'archives.view',
             'confirmFileDeletion' => 'archives.delete',
             'confirmFolderDeletion' => 'archives.delete',
             'deleteItem' => 'archives.delete',
@@ -166,5 +195,193 @@ return [
         ],
         'checklist-items.pending-items' => ['markDelivered' => 'checklists.deliver'],
         'checklist-items.pending-returns' => ['markReceived' => 'checklists.receive'],
+
+        // Project-basics lookup tables. create/edit open the modal and disclose
+        // the record; save() is create-or-update and decides its own permission
+        // in-method, so it appears under livewire_exempt instead.
+        'basics.annual-leave-rule-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
+        'basics.checklist-item-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
+        'basics.contract-type-module' => [
+            'create' => 'project-basics.create',
+            'edit' => 'project-basics.update',
+            'delete' => 'project-basics.delete',
+        ],
+        'basics.course-category-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
+        'basics.department-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
+        'basics.job-level-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
+        'basics.leave-type-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
+        'basics.termination-reason-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
+
+        'program-management.center.centers-module' => ['create' => 'centers.create', 'edit' => 'centers.update'],
+        'program-management.default-deliverable.default-deliverables-module' => [
+            'create' => 'checklists.manage',
+            'edit' => 'checklists.manage',
+        ],
+        // Streams the whole org directory to CSV; had no check of its own.
+        'position.directory' => ['exportCsv' => 'positions.export'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reviewed Livewire actions that need no middleware permission
+    |--------------------------------------------------------------------------
+    |
+    | Every public method on a Livewire component is callable over HTTP with
+    | arbitrary arguments, whether or not the page renders a button for it.
+    | ActiveLivewirePermissionMiddleware only checks methods listed in
+    | 'livewire' above and lets everything else through, so an unlisted action
+    | is unprotected *and* silent about it.
+    |
+    | LivewireMutationCoverageTest turns that silence into a build failure:
+    | every public action written in app/Livewire must appear either in
+    | 'livewire' above or here. This list is therefore a record of decisions,
+    | not a bypass — each group below says why the middleware layer adds
+    | nothing, and in most cases the real control (a Gate call, a scoped query,
+    | or a route middleware) is stronger than a permission name would be.
+    |
+    | Adding a method here without a reason defeats the entire mechanism.
+    |
+    */
+
+    'livewire_exempt' => [
+
+        // --- Authentication -------------------------------------------------
+        // Reached before a session exists, or acting only on the caller's own
+        // account. A permission check would be meaningless: there is no active
+        // role yet. Login is rate limited per account and per IP.
+        'auth.login' => ['login', 'updatedEmail'],
+        'auth.register' => ['register'],
+        'auth.forgot-password' => ['sendPasswordResetLink'],
+        'auth.reset-password' => ['resetPassword'],
+        'auth.confirm-password' => ['confirmPassword'],
+        'auth.verify-email' => ['sendVerification', 'logout'],
+        // switchTo() calls User::setActiveRole(), which aborts unless the role
+        // is already assigned to this user; it grants nothing new.
+        'auth.role-switcher' => ['switchTo', 'refreshRoles'],
+        'settings.password' => ['updatePassword'],
+
+        // --- Confirmation dialogs -------------------------------------------
+        // These only render a "are you sure?" prompt. The action it confirms
+        // is the mapped one (delete / toggleItemStatusConfirmed), and that is
+        // where the permission and the policy check live.
+        'badges.badges-table' => ['confirmDelete'],
+        'basics.annual-leave-rule-table' => ['confirmDelete'],
+        'basics.checklist-item-table' => ['confirmDelete'],
+        'basics.city-table' => ['confirmToggleItemStatus'],
+        'basics.contract-type-table' => ['confirmDelete'],
+        'basics.course-category-table' => ['confirmDelete'],
+        'basics.department-table' => ['confirmDelete'],
+        'basics.job-level-table' => ['confirmDelete'],
+        'basics.leave-type-table' => ['confirmDelete'],
+        'basics.termination-reason-table' => ['confirmDelete'],
+        'contract.contracts-table' => ['confirmDelete'],
+        'news.news-table' => ['confirmDelete'],
+        'position.position-table' => ['confirmDelete', 'confirmToggleItemStatus'],
+        'program-management.center.centers-table' => ['confirmDelete', 'confirmToggleItemStatus'],
+        'program-management.default-deliverable.default-deliverables-table' => ['confirmDelete'],
+        'program-management.program.detail' => ['confirmDelete', 'confirmToggleItemStatus'],
+        'program-management.program.index' => ['confirmDelete', 'confirmToggleItemStatus', 'loadMore'],
+        'employee.employee-table' => ['confirmDelete', 'confirmToggleItemStatus'],
+
+        // --- Authorized inside the method -----------------------------------
+        // save() is create-or-update, so a single permission name in the
+        // middleware map would be wrong in one direction or the other. Each of
+        // these calls authorizeActivePermission() with the correct permission
+        // for the branch it is taking, which the middleware cannot do.
+        'basics.annual-leave-rule-module' => ['save'],
+        'basics.checklist-item-module' => ['save'],
+        'basics.contract-type-module' => ['save'],
+        'basics.course-category-module' => ['save'],
+        'basics.department-module' => ['save'],
+        'basics.job-level-module' => ['save'],
+        'basics.leave-type-module' => ['save'],
+        'basics.termination-reason-module' => ['save'],
+        // updatedFormNewsableType() only clears dependent form selections;
+        // it does not read a record or persist data. save() authorizes before writing.
+        'news.news-create' => ['save', 'updatedFormNewsableType'],
+        // Also runs assertCityIsAuthorized() and a Gate check on the city.
+        'program-management.center.centers-module' => ['save'],
+        'program-management.default-deliverable.default-deliverables-module' => ['save'],
+        // Each calls authorizeActivePermission() plus a LeaveRequestPolicy
+        // check on the specific record, which is the stronger control.
+        'employee.leave.my-leave-request-module' => [
+            'create', 'edit', 'processSave', 'confirmSave', 'openDetails',
+            'closeDetails', 'selectedLeave', 'refreshCounts', 'setActiveTab',
+        ],
+        'employee.leave.all-leave-request-module' => [
+            'edit', 'show', 'processSave', 'confirmSave', 'confirmDelete',
+            'closeDecision', 'closeDetails', 'refreshCounts', 'setActiveTab',
+            'updatedFormEmployeeId',
+        ],
+        'employee.leave.emp-leave-balance-module' => ['confirmSave'],
+        'employee.leave.all-leave-request-table' => [
+            'edit', 'confirmDelete', 'confirmHrReview', 'refreshTable', 'setStatusFilter',
+        ],
+        'employee.leave.my-leave-request-table' => ['edit', 'confirmDelete', 'setStatusFilter'],
+
+        // --- Scoped to the caller -------------------------------------------
+        // These resolve their subject from auth() and never accept a
+        // caller-supplied owner id, so there is no cross-user surface for a
+        // permission to protect.
+        'dashboard.employee-notes-card' => [
+            'addText', 'createNote', 'toggleDone', 'updateContent', 'delete',
+        ],
+        'notifications.dropdown' => [
+            'markAsRead', 'markAllAsRead', 'openNotification', 'refreshList', 'safeNotificationUrl',
+        ],
+        'notifications.index' => [
+            'markAsRead', 'markAllAsRead', 'openNotification', 'refreshList', 'safeNotificationUrl',
+        ],
+        'notifications.counter' => ['updateCount'],
+        'layout.sidebar' => ['toggle', 'close', 'refreshCounts'],
+
+        // --- Component-state only -------------------------------------------
+        // Tab switches, wizard steps, modal open/close, filter changes, zoom
+        // and pagination controls. They mutate Livewire properties, never the
+        // database, and the page they belong to is already route-gated.
+        'access-management.index' => [
+            'showTab', 'selectRole', 'selectUser', 'showAssignedUsers', 'clearSearch',
+            'employeeAccessIsDirty', 'updatedSearch', 'updatedRoleFilter',
+            'updatedStatusFilter', 'updatedEmployeeRoleIds',
+        ],
+        'archives.archived-files-module' => [
+            'loadContent', 'addFilter', 'removeFilter', 'clearFilters',
+            'closePreviewModal', 'closePermissionsModal', 'updatedUserSearch',
+            'updatedPermissionFilterType', 'updatedPermissionFilterValue',
+        ],
+        'badges.badges-module' => ['openBadgeModal'],
+        // contract.contract-create has no exempt actions: the composer's step
+        // navigation and updated* hooks were removed with the wizard.
+        'contract.contract-edit' => [
+            'next', 'prev', 'jumpTo', 'updatedCityId', 'updatedProgramId',
+            'updatedCenterId', 'updatedFormPositionId',
+        ],
+        'contract.contract-details' => ['nextPage', 'prevPage', 'setPage'],
+        // Dismisses the modal and clears its state. Writes nothing; the two
+        // actions that do write are mapped to contracts.create above.
+        'contract.contract-renew-modal' => ['close'],
+        'dashboard.calendar-card' => ['next', 'prev'],
+        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember'],
+        // The add*/openInitiateReturnModal methods stage rows in the in-memory
+        // form object; nothing is written until the mapped save* action runs,
+        // and mount() has already authorized 'update' on this employee.
+        'employee.employee-edit' => [
+            'setActiveTab', 'toggleBoardMember', 'addEducation', 'addCourse',
+            'addExperience', 'addRelative', 'addAttachment', 'openInitiateReturnModal',
+        ],
+        'position.org-chart' => [
+            'zoomIn', 'zoomOut', 'resetZoom', 'fitToScreen', 'expandAll',
+            'collapseAll', 'toggleCollapse', 'toggleDensity', 'resetFilters',
+        ],
+        'position.directory' => ['resetFilters'],
+        'position.profile-drawer' => ['openProfile', 'close'],
+        'program-management.center.center-details' => ['switchTab'],
+        'news.today-events-card' => ['loadEvents'],
+
+        // --- Route-gated reads ----------------------------------------------
+        // Reached only through routes carrying active_permission:statistics.view,
+        // and both now apply the caller's city scope to every aggregate.
+        'statistics.contract-statistics' => ['loadData', 'resetFilters'],
+        'employee.employee-statistics' => ['getStatistics'],
     ],
 ];

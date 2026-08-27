@@ -25,6 +25,62 @@ class LeaveTypeTable extends LivewireTable
         'exportExcel' => 'exportExcel',
     ];
 
+    public function confirmDelete(int $id): void
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete(array $payload): void
+    {
+        LeaveType::findOrFail($payload['id'])->delete();
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+
+        $this->dispatch('refreshLeaveTypeTable');
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery();
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns;
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible())
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions'))
+            ->map(fn ($column) => $column->code())
+            ->toArray();
+
+        $filename = 'leave_types_'.now()->format('Y-m-d').'.xlsx';
+
+        return Excel::download(
+            new LeaveTypeExport($data, $visibleColumnCodes),
+            $filename,
+        );
+    }
+
+    protected function rowClickAction(Model $model): ?string
+    {
+        return auth()->user()?->hasActivePermission('project-basics.update')
+            ? "\$dispatch('openLeaveTypeEdit', { id: {$model->getKey()} })"
+            : null;
+    }
+
     protected function query(): Builder
     {
         return LeaveType::query();
@@ -78,56 +134,7 @@ class LeaveTypeTable extends LivewireTable
                     : '';
 
                 return '<div class="flex items-center justify-center gap-2">'.$editBtn.$deleteBtn.'</div>';
-            })->asHtml()->visible($canUpdate || $canDelete),
+            })->asHtml()->visible($canUpdate || $canDelete)->clickable(false),
         ];
-    }
-
-    public function confirmDelete(int $id): void
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete(array $payload): void
-    {
-        LeaveType::findOrFail($payload['id'])->delete();
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
-
-        $this->dispatch('refreshLeaveTypeTable');
-    }
-
-    public function exportExcel(): BinaryFileResponse
-    {
-        $query = $this->appliedQuery();
-        $data = $query->get();
-
-        $userSelectedColumns = $this->columns;
-
-        $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible())
-            ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) {
-                    return true;
-                }
-
-                return in_array($column->code(), $userSelectedColumns);
-            })
-            ->filter(fn ($column) => $column->label() !== __('general.actions'))
-            ->map(fn ($column) => $column->code())
-            ->toArray();
-
-        $filename = 'leave_types_'.now()->format('Y-m-d').'.xlsx';
-
-        return Excel::download(
-            new LeaveTypeExport($data, $visibleColumnCodes),
-            $filename
-        );
     }
 }

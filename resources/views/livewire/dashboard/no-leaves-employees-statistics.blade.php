@@ -27,7 +27,7 @@
                                 bg-[var(--color-primary)] text-white font-semibold uppercase shadow-e1">
 
 
-                            <img src="{{ $emp->getFirstMediaUrl('avatar') }}"
+                            <img src="{{ $emp->avatar_url }}"
                                  alt="{{ $emp->name }}"
                                  class="h-full w-full object-cover">
 

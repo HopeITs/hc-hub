@@ -24,54 +24,6 @@ class CityTable extends LivewireTable
         'exportExcel' => 'exportExcel',
     ];
 
-    protected function query(): Builder
-    {
-        return City::query();
-    }
-
-    protected function globalSearchColumns(): array
-    {
-        return ['id', 'name_ar', 'name_en', 'code', 'slug'];
-    }
-
-    protected function columns(): array
-    {
-        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
-
-        return [
-
-            Column::make('ID', 'id')->sortable()->searchable(),
-
-            Column::make(__('general.name').' (AR)', 'name_ar')
-                ->sortable()->searchable(),
-
-            Column::make(__('general.name').' (EN)', 'name_en')
-                ->sortable()->searchable(),
-
-            Column::make(__('general.code'), 'code')
-                ->sortable()->searchable(),
-
-            Column::make(__('general.slug'), 'slug')
-                ->sortable()->searchable(),
-
-            BooleanColumn::make(__('general.active'), 'is_active')
-                ->searchable(),
-
-            Column::make(__('general.actions'), function (Model $m): string {
-
-                return Blade::render(
-                    '<x-forms.toggle-input
-            class="!me-2 text-xl p-2 mb-3"
-            active="'.($m->is_active ? 1 : 0).'"
-            :model-id="'.$m->id.'"
-            wire-event="confirmToggleItemStatus" />'
-                );
-            })
-                ->asHtml()
-                ->visible($canUpdate),
-        ];
-    }
-
     public function confirmToggleItemStatus($id): void
     {
         LivewireAlert::title(__('general.toggle-status'))
@@ -122,7 +74,55 @@ class CityTable extends LivewireTable
 
         return Excel::download(
             new CityExport($data, $visibleColumnCodes),
-            $filename
+            $filename,
         );
+    }
+
+    protected function query(): Builder
+    {
+        return City::query();
+    }
+
+    protected function globalSearchColumns(): array
+    {
+        return ['id', 'name_ar', 'name_en', 'code', 'slug'];
+    }
+
+    protected function columns(): array
+    {
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+
+        return [
+
+            Column::make('ID', 'id')->sortable()->searchable(),
+
+            Column::make(__('general.name').' (AR)', 'name_ar')
+                ->sortable()->searchable(),
+
+            Column::make(__('general.name').' (EN)', 'name_en')
+                ->sortable()->searchable(),
+
+            Column::make(__('general.code'), 'code')
+                ->sortable()->searchable(),
+
+            Column::make(__('general.slug'), 'slug')
+                ->sortable()->searchable(),
+
+            BooleanColumn::make(__('general.active'), 'is_active')
+                ->searchable(),
+
+            Column::make(__('general.actions'), function (Model $m): string {
+
+                return Blade::render(
+                    '<x-forms.toggle-input
+            class="!me-2 text-xl p-2 mb-3"
+            active="'.($m->is_active ? 1 : 0).'"
+            :model-id="'.$m->id.'"
+            wire-event="confirmToggleItemStatus" />',
+                );
+            })
+                ->asHtml()
+                ->visible($canUpdate),
+        ];
     }
 }

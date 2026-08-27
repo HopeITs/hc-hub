@@ -26,8 +26,8 @@ class DeactivateEmployee extends Command
      */
     public function handle(): void
     {
-        Employee::where("is_active", 1)->whereDoesntHave('contracts')->get()->each(function ($employee) {
-            $employee->update(["is_active" => 0]);
+        Employee::where('is_active', 1)->whereDoesntHave('contracts')->get()->each(function ($employee) {
+            $employee->update(['is_active' => 0]);
         });
 
         $this->info('Finished deactivating employees');

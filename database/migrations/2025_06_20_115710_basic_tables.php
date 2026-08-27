@@ -34,7 +34,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('weekends')->nullable();
-            $table->time('open_at')->nullable()->default('09:30');
+            $table->time('open_at')->nullable()->default('09:00');
             $table->time('close_at')->nullable()->default('17:00');
             $table->foreignId('city_id')->nullable()->constrained()->onDelete('restrict');
             $table->text('address_en')->nullable();
@@ -267,7 +267,7 @@ return new class extends Migration
             $table->integer('salary')->nullable();
             $table->unsignedTinyInteger('currency')->comment('0 = Unknown, 1 = SYP, 2 = USD, 3 = EUR');
             $table->unsignedTinyInteger('salary_per')->comment('0=Unknown, 1=Month, 2=Hour, 3=Session')->default(0);
-            $table->time('work_hours_from')->nullable()->default('09:30');
+            $table->time('work_hours_from')->nullable()->default('09:00');
             $table->time('work_hours_to')->nullable()->default('17:00');
             $table->string('work_days_en')->nullable();
             $table->string('work_days_ar')->nullable();

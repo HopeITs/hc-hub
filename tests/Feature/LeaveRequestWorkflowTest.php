@@ -18,6 +18,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
+use LogicException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -54,7 +55,7 @@ class LeaveRequestWorkflowTest extends TestCase
         [$otherUser] = $this->createRejectedLeaveFixture(
             'Different employee reason.',
             'other.employee@example.test',
-            'other-employee'
+            'other-employee',
         );
 
         $this->expectException(ModelNotFoundException::class);
@@ -146,12 +147,12 @@ class LeaveRequestWorkflowTest extends TestCase
         [$employee] = $this->createRejectedLeaveFixture(
             null,
             'balance.owner@example.test',
-            'balance-owner'
+            'balance-owner',
         );
         [, $otherLeave] = $this->createRejectedLeaveFixture(
             null,
             'other.balance.owner@example.test',
-            'other-balance-owner'
+            'other-balance-owner',
         );
         $before = LeaveRequest::query()->count();
 
@@ -261,7 +262,7 @@ class LeaveRequestWorkflowTest extends TestCase
         ]);
         Notification::assertSentTo(
             $leaveRequest->leaveBalance->contract->employee->account,
-            ActionLeaveRequest::class
+            ActionLeaveRequest::class,
         );
     }
 
@@ -286,11 +287,11 @@ class LeaveRequestWorkflowTest extends TestCase
         ]);
         $this->assertGreaterThan(
             0,
-            (float) DB::table('leave_balances')->where('id', $leaveRequest->leave_balance_id)->value('used')
+            (float) DB::table('leave_balances')->where('id', $leaveRequest->leave_balance_id)->value('used'),
         );
         Notification::assertSentTo(
             $leaveRequest->leaveBalance->contract->employee->account,
-            ActionLeaveRequest::class
+            ActionLeaveRequest::class,
         );
     }
 
@@ -300,7 +301,7 @@ class LeaveRequestWorkflowTest extends TestCase
         [$outOfScopeHr] = $this->createRejectedLeaveFixture(
             null,
             'out-of-scope.hr@example.test',
-            'out-of-scope-hr'
+            'out-of-scope-hr',
         );
         $outOfScopeHr->assignRole(Role::findOrCreate('HR-XXX', 'web'));
 
@@ -318,7 +319,7 @@ class LeaveRequestWorkflowTest extends TestCase
         [$outOfScopeHr] = $this->createRejectedLeaveFixture(
             null,
             'restricted.hr@example.test',
-            'restricted-hr'
+            'restricted-hr',
         );
         $outOfScopeHr->assignRole(Role::findOrCreate('HR-XXX', 'web'));
 
@@ -394,7 +395,7 @@ class LeaveRequestWorkflowTest extends TestCase
         [$manager] = $this->createRejectedLeaveFixture(
             null,
             'direct.manager@example.test',
-            'direct-manager'
+            'direct-manager',
         );
         $manager->assignRole(Role::findOrCreate('manager', 'web'));
 
@@ -441,12 +442,12 @@ class LeaveRequestWorkflowTest extends TestCase
             $usedAfterFirstDecision,
             (float) DB::table('leave_balances')
                 ->where('id', $leaveRequest->leave_balance_id)
-                ->value('used')
+                ->value('used'),
         );
         Notification::assertSentToTimes(
             $leaveRequest->leaveBalance->contract->employee->account,
             ActionLeaveRequest::class,
-            1
+            1,
         );
     }
 
@@ -454,7 +455,7 @@ class LeaveRequestWorkflowTest extends TestCase
     {
         [$user, $leaveRequest] = $this->createPendingDecisionFixture();
 
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Cannot create a leave decision notification');
 
         (new ActionLeaveRequest($leaveRequest))->toArray($user);
@@ -492,7 +493,7 @@ class LeaveRequestWorkflowTest extends TestCase
     {
         [$user, $leaveRequest] = $this->createRejectedLeaveFixture(null);
 
-        $this->expectException(\LogicException::class);
+        $this->expectException(LogicException::class);
         $this->expectExceptionMessage('requires a rejection reason');
 
         (new ActionLeaveRequest($leaveRequest))->toArray($user);
@@ -604,7 +605,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $inactiveHr = $this->createHrUserForLeave(
             $leaveRequest,
             'inactive.hr@example.test',
-            false
+            false,
         );
         Notification::fake();
 
@@ -627,7 +628,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $inactiveHr = $this->createHrUserForLeave(
             $leaveRequest,
             'inactive.decision.hr@example.test',
-            false
+            false,
         );
         $leaveRequest->update([
             'status' => LeaveRequestStatus::Rejected,
@@ -637,13 +638,13 @@ class LeaveRequestWorkflowTest extends TestCase
 
         app(LeaveNotificationService::class)->sendDecision(
             $leaveRequest->fresh(),
-            $decisionMaker
+            $decisionMaker,
         );
 
         Notification::assertSentToTimes($employee, ActionLeaveRequest::class, 1);
         Notification::assertSentTo(
             $otherHr,
-            fn (ActionLeaveRequest $notification) => $notification->recipientType === 'hr'
+            fn (ActionLeaveRequest $notification) => $notification->recipientType === 'hr',
         );
         Notification::assertNotSentTo($decisionMaker, ActionLeaveRequest::class);
         Notification::assertNotSentTo($inactiveHr, ActionLeaveRequest::class);
@@ -677,7 +678,7 @@ class LeaveRequestWorkflowTest extends TestCase
     private function createRejectedLeaveFixture(
         ?string $rejectReason,
         string $email = 'employee@example.test',
-        string $username = 'employee'
+        string $username = 'employee',
     ): array {
         $suffix = str_replace(['@', '.', '-'], '_', $email);
 
@@ -821,7 +822,7 @@ class LeaveRequestWorkflowTest extends TestCase
         [$decisionMaker] = $this->createRejectedLeaveFixture(
             null,
             'decision.maker@example.test',
-            'decision-maker'
+            'decision-maker',
         );
         $citySlug = $leaveRequest->leaveBalance->contract->employee->city->slug;
         $role = Role::findOrCreate('HR-'.$citySlug, 'web');
@@ -833,7 +834,7 @@ class LeaveRequestWorkflowTest extends TestCase
     private function createHrUserForLeave(
         LeaveRequest $leaveRequest,
         string $email,
-        bool $active = true
+        bool $active = true,
     ): User {
         $suffix = substr(md5($email), 0, 8);
         $employee = $leaveRequest->leaveBalance->contract->employee;

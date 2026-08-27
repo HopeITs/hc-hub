@@ -61,19 +61,18 @@ class CalendarCard extends Component
         ]);
     }
 
-
     private function formatDay(Carbon $date, bool $isCurrentMonth)
     {
         $fakeHolidays = config('samples.calendar.holidays', []);
-        $fakeEvents   = config('samples.calendar.events', []);
-        $fakeSaints   = config('samples.calendar.saints', []);
+        $fakeEvents = config('samples.calendar.events', []);
+        $fakeSaints = config('samples.calendar.saints', []);
 
         $iso = $date->toDateString();
 
         $isHoliday = array_key_exists($iso, $fakeHolidays);
-        $isSaint   = array_key_exists($iso, $fakeSaints);
-        $hasEvent  = array_key_exists($iso, $fakeEvents);
-        $isToday   = $date->isToday();
+        $isSaint = array_key_exists($iso, $fakeSaints);
+        $hasEvent = array_key_exists($iso, $fakeEvents);
+        $isToday = $date->isToday();
 
         $numberColor = $isCurrentMonth ? 'text-secondary-light' : 'text-secondary-soft';
         $fontWeight = 'font-normal';
@@ -89,7 +88,7 @@ class CalendarCard extends Component
             $circleFill = 'bg-secondary-medium';
             $textColorOverride = 'text-white';
 
-            if ($isSaint && !$isHoliday) {
+            if ($isSaint && ! $isHoliday) {
                 $circleFill = 'bg-secondary-light';
                 $fontWeight = 'font-extrabold';
             }
@@ -113,22 +112,17 @@ class CalendarCard extends Component
                 if ($hasEvent) {
                     $underline = true;
                 }
-            }
-
-            elseif ($isSaint) {
+            } elseif ($isSaint) {
                 $numberColor = 'text-secondary-dark';
                 $fontWeight = 'font-extrabold';
 
                 if ($hasEvent) {
                     $underline = true;
                 }
-            }
-
-            elseif ($hasEvent) {
+            } elseif ($hasEvent) {
                 $underline = true;
             }
         }
-
 
         $tooltip = [];
 
@@ -137,7 +131,6 @@ class CalendarCard extends Component
                 $tooltip[] = $h;
             }
         }
-
 
         if ($isSaint) {
             foreach ($fakeSaints[$iso] as $s) {
@@ -153,22 +146,20 @@ class CalendarCard extends Component
         }
 
         return [
-            'date'           => $date,
-            'day'            => $date->day,
-            'isToday'        => $isToday,
+            'date' => $date,
+            'day' => $date->day,
+            'isToday' => $isToday,
 
-            'numberColor'    => $textColorOverride ?? $numberColor,
-            'fontWeight'     => $fontWeight,
+            'numberColor' => $textColorOverride ?? $numberColor,
+            'fontWeight' => $fontWeight,
 
-            'circle'         => false,
-            'circleFill'     => $circleFill,
+            'circle' => false,
+            'circleFill' => $circleFill,
 
-            'underline'      => $underline,
+            'underline' => $underline,
             'underlineColor' => $underlineColor,
 
-            'tooltip'        => $tooltip,
+            'tooltip' => $tooltip,
         ];
     }
-
-
 }

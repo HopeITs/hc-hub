@@ -20,7 +20,7 @@
             <span
                 class="relative inline-grid place-items-center rounded-full shrink-0 ring-2 ring-primary/30">
                 <img class="size-14 border border-1 border-primary rounded-full object-cover"
-                     src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt="user"/>
+                     src="{{ $user->profile->avatar_url }}" alt="user"/>
                 <span
                     class="absolute bottom-1.5 {{ $isRtl ? 'left-1.5' : 'right-1.5' }} size-2 rounded-full bg-emerald-500 ring-2 ring-white"></span>
             </span>
@@ -73,7 +73,7 @@
                     <span
                         class="rounded-full shrink-0 ring-2 ring-primary/30">
                         <img class="size-12 border border-1 border-primary rounded-full object-cover"
-                             src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt="user">
+                             src="{{ $user->profile->avatar_url }}" alt="user">
                     </span>
                     <div class="min-w-0">
                         <div class="text-body font-semibold text-neutral-900 truncate">{{ $user->profile?->name }}</div>
@@ -189,7 +189,7 @@
     </div>
 @endguest
 
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
     function roleDropdown() {
         return {
             open: false,

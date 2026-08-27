@@ -28,6 +28,8 @@ Route::prefix('contracts')
         Route::get('/', ContractsModule::class)->middleware('active_permission:contracts.view')->name('index');
         Route::get('/create', ContractCreate::class)->middleware('active_permission:contracts.create')->name('create');
         Route::get('/{contract}/edit', ContractEdit::class)->middleware('active_permission:contracts.update')->name('edit');
+        // The creation wizard again, prefilled from the contract being renewed.
+        Route::get('/{contract}/renew', ContractCreate::class)->middleware('active_permission:contracts.create')->name('renew');
         Route::get('/{contract}/export', [ContractExportController::class, 'pdf'])->middleware('active_permission:contracts.export')->name('export');
         Route::get('/{contract}', ContractDetails::class)->middleware('active_permission:contracts.view')->name('show');
     });

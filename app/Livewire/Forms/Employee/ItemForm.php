@@ -51,7 +51,9 @@ class ItemForm extends Form
 
     public function save(): void
     {
-        if (!$this->employee) return;
+        if (! $this->employee) {
+            return;
+        }
 
         foreach ($this->items as $data) {
             EmployeeItem::updateOrCreate(
@@ -64,7 +66,7 @@ class ItemForm extends Form
                     'serial_number' => $data['serial_number'],
                     'status' => $data['status'],
                     'notes' => $data['notes'],
-                ]
+                ],
             );
         }
     }

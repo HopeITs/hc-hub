@@ -6,6 +6,7 @@ use App\Enums\LeaveRequestStatus;
 use App\Models\LeaveRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use LogicException;
 
 class ActionLeaveRequest extends Notification
 {
@@ -13,7 +14,7 @@ class ActionLeaveRequest extends Notification
 
     public function __construct(
         public LeaveRequest $leaveRequest,
-        public string $recipientType = 'employee'// employee | hr
+        public string $recipientType = 'employee',// employee | hr
     ) {}
 
     public function via(object $notifiable): array
@@ -30,15 +31,15 @@ class ActionLeaveRequest extends Notification
         $isAccepted = match ($status) {
             LeaveRequestStatus::Accepted => true,
             LeaveRequestStatus::Rejected => false,
-            default => throw new \LogicException(
-                "Cannot create a leave decision notification for status [{$status}]."
+            default => throw new LogicException(
+                "Cannot create a leave decision notification for status [{$status}].",
             ),
         };
 
         $rejectReason = trim((string) $leaveRequest->reject_reason);
 
         if (! $isAccepted && $rejectReason === '') {
-            throw new \LogicException('A rejected leave notification requires a rejection reason.');
+            throw new LogicException('A rejected leave notification requires a rejection reason.');
         }
 
         if ($this->recipientType === 'employee') {

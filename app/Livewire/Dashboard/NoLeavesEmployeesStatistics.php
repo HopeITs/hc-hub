@@ -3,10 +3,8 @@
 namespace App\Livewire\Dashboard;
 
 use App\Enums\LeaveTypeCases;
-use App\Models\Contract;
 use App\Models\Employee;
 use Livewire\Component;
-use Carbon\Carbon;
 
 class NoLeavesEmployeesStatistics extends Component
 {
@@ -21,10 +19,9 @@ class NoLeavesEmployeesStatistics extends Component
             });
         })->get();
     }
+
     public function render()
     {
-
-
 
         return view('livewire.dashboard.no-leaves-employees-statistics');
     }

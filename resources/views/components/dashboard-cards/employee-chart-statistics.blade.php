@@ -21,9 +21,9 @@
 
 </div>
 
-<script src="{{ asset('js/chart.umd.js') }}"></script>
+<script nonce="{{ Vite::cspNonce() }}" src="{{ asset('js/chart.umd.js') }}"></script>
 
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
     document.addEventListener("DOMContentLoaded", async () => {
 
         const canvas = document.getElementById("employeeChart");

@@ -14,13 +14,16 @@
 
         <div class="flex items-center justify-center h-full bg-neutral-100 group-hover:bg-secondary-soft transition">
             <template x-if="preview">
-                <img :src="preview" class="object-fit w-full h-full rounded-inset" />
+                <img :src="preview" alt="{{ __('general.a11y.logo-preview') }}"
+                     class="object-fit w-full h-full rounded-inset" />
             </template>
 
             @isset($item['logo'])
-                <img src="{{ $logo->temporaryUrl() }}" class="object-fit w-full h-full rounded-inset" />
+                <img src="{{ $logo->temporaryUrl() }}" alt="{{ __('general.a11y.logo-preview') }}"
+                     class="object-fit w-full h-full rounded-inset" />
             @else(array_key_exists('id', $item->toArray()) && $item->getFirstMediaUrl('logo'))
-                <img src="{{ $item->getFirstMediaUrl('logo') }}" class="object-fit w-full h-full rounded-full" />
+                <img src="{{ $item->getFirstMediaUrl('logo') }}" alt="{{ __('general.a11y.current-logo') }}"
+                     class="object-fit w-full h-full rounded-full" />
             @endisset
         </div>
     </label>

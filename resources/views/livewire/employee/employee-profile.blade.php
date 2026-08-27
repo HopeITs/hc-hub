@@ -17,7 +17,7 @@
             <div
                 class="relative flex flex-col items-start gap-3 p-4 pt-4 sm:gap-6 sm:p-8 min-[900px]:flex-row min-[900px]:items-center">
                 <div class="shrink-0 self-start">
-                    <img src="{{ $employee->getFirstMediaUrl('avatar') }}" alt="{{ $employee->name }}"
+                    <img src="{{ $employee->avatar_url }}" alt="{{ $employee->name }}"
                         class="h-20 w-20 rounded-surface border-2 border-white object-fit shadow-e2 ring-1 ring-neutral-200 sm:h-40 sm:w-40 sm:rounded-surface sm:border-4 sm:shadow-e3">
                 </div>
 

@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use LaravelIdea\Helper\App\Models\_IH_Employee_QB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
@@ -14,7 +16,10 @@ class Program extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia, LogsActivity;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'name', 'description_en', 'description_ar', 'code', 'slug',
+        'start_date', 'end_date', 'is_active',
+    ];
 
     protected $casts = [
         'start_date' => 'datetime',
@@ -26,7 +31,8 @@ class Program extends Model implements HasMedia
         return $this->belongsToMany(City::class, 'positions', 'program_id', 'city_id');
     }
 
-    public function holidays() {
+    public function holidays()
+    {
         return $this->morphMany(Holiday::class, 'holidayable');
     }
 
@@ -50,19 +56,45 @@ class Program extends Model implements HasMedia
         return $this->hasMany(Position::class);
     }
 
+    /**
+     * Add the aggregate values displayed on the program index cards.
+     *
+     * A program's cities are determined by its positions' centers. The direct
+     * positions.city_id value may differ from the center's city, so it must not
+     * be used for this count.
+     */
+    public function scopeWithCardCounts(Builder $query): Builder
+    {
+        return $query
+            ->addSelect([
+                'cities_count' => Center::query()
+                    ->selectRaw('count(distinct city_id)')
+                    ->whereExists(fn ($positions) => $positions
+                        ->selectRaw('1')
+                        ->from('positions')
+                        ->whereColumn('positions.center_id', 'centers.id')
+                        ->whereColumn('positions.program_id', 'programs.id')),
+            ])
+            ->withCount('contracts');
+    }
+
     public function registerMediaCollections(): void
     {
+        // Local fallback: the previous ui-avatars.com URL disclosed program
+        // names to a third-party host and would need an img-src exception in
+        // the content security policy.
         $this->addMediaCollection('logo')
-            ->useFallbackUrl('https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=c2151c&background=FEE2E2')
+            ->useFallbackUrl(asset('images/default-avatar.png'))
+            ->useFallbackPath(public_path('images/default-avatar.png'))
             ->singleFile();
     }
 
     public function contracts()
     {
-        return $this->hasManyThrough(Contract::class , Position::class)->where('contracts.is_active', true);
+        return $this->hasManyThrough(Contract::class, Position::class)->where('contracts.is_active', true);
     }
 
-    public function employees(): \Illuminate\Database\Eloquent\Builder|\LaravelIdea\Helper\App\Models\_IH_Employee_QB
+    public function employees(): Builder|_IH_Employee_QB
     {
         return Employee::query()
             ->select('employees.*')

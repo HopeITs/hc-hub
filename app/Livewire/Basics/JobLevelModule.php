@@ -12,10 +12,6 @@ class JobLevelModule extends Component
 {
     use AuthorizesActivePermissions;
 
-    protected $listeners = [
-        'openJobLevelEdit' => 'edit',
-    ];
-
     public bool $showModal = false;
 
     public string $modalTitle = '';
@@ -29,20 +25,9 @@ class JobLevelModule extends Component
         'email' => null,
     ];
 
-    protected function rules(): array
-    {
-        return [
-            'item.name_ar' => 'required|string|max:255',
-            'item.name_en' => 'required|string|max:255',
-            'item.description' => 'nullable|string',
-            'item.grade' => 'nullable|integer',
-            'item.email' => [
-                'nullable',
-                'email',
-                Rule::unique('job_levels', 'email')->ignore($this->item['id']),
-            ],
-        ];
-    }
+    protected $listeners = [
+        'openJobLevelEdit' => 'edit',
+    ];
 
     public function render()
     {
@@ -89,7 +74,7 @@ class JobLevelModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update',
         );
         $this->validate();
 
@@ -108,5 +93,20 @@ class JobLevelModule extends Component
             ->toast()
             ->position('top-start')
             ->show();
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'item.name_ar' => 'required|string|max:255',
+            'item.name_en' => 'required|string|max:255',
+            'item.description' => 'nullable|string',
+            'item.grade' => 'nullable|integer',
+            'item.email' => [
+                'nullable',
+                'email',
+                Rule::unique('job_levels', 'email')->ignore($this->item['id']),
+            ],
+        ];
     }
 }

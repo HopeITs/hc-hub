@@ -7,9 +7,13 @@ use BenSampo\Enum\Enum;
 final class KinshipType extends Enum
 {
     const Other = 0;
+
     const Parents = 1;
+
     const Spouse = 2;
+
     const Siblings = 3;
+
     const Children = 4;
 
     public static function getLocalizedName(int $value): string

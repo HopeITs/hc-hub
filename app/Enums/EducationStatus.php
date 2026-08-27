@@ -7,7 +7,9 @@ use BenSampo\Enum\Enum;
 final class EducationStatus extends Enum
 {
     const Graduated = 0;
+
     const Student = 1;
+
     const Stopped = 2;
 
     public static function getLocalizedName(int $value): string

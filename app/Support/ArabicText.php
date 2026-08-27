@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 // namespace App\Support;
 
@@ -37,9 +37,6 @@
 //     }
 // }
 
-
-
-
 namespace App\Support;
 
 use ArPHP\I18N\Arabic;
@@ -50,7 +47,7 @@ class ArabicText
 
     public function __construct()
     {
-        $this->ar = new Arabic();
+        $this->ar = new Arabic;
     }
 
     /**
@@ -59,7 +56,7 @@ class ArabicText
     public static function glyphs(string $text): string
     {
         // Limit set to 2000 to prevent internal wrapping, false protects English numbers
-        return (new static())->ar->utf8Glyphs($text, 2000, false);
+        return (new static)->ar->utf8Glyphs($text, 2000, false);
     }
 
     /**
@@ -73,7 +70,7 @@ class ArabicText
 
         // Fast-path: If there are no HTML tags, use standard processing
         if ($text === strip_tags($text)) {
-            return (new static())->ar->utf8Glyphs($text, $limit, false);
+            return (new static)->ar->utf8Glyphs($text, $limit, false);
         }
 
         // 1. Split text based on <br> tags to maintain vertical line flow
@@ -84,24 +81,26 @@ class ArabicText
             // Keep <br> tags exactly as they are
             if (preg_match('/^<br\s*\/?>$/i', $line)) {
                 $processedLines[] = $line;
+
                 continue;
             }
 
             if ($line === '') {
                 $processedLines[] = '';
+
                 continue;
             }
 
             // 2. Split the line into HTML tags and plain text segments
             $parts = preg_split('/(<[^>]+>)/u', $line, -1, PREG_SPLIT_DELIM_CAPTURE);
-            
+
             $textSegments = [];
             foreach ($parts as $index => $part) {
                 if (strpos($part, '<') !== 0 && $part !== '') {
                     $textSegments[] = [
                         'index' => $index,
                         'text' => $part,
-                        'length' => mb_strlen($part, 'UTF-8')
+                        'length' => mb_strlen($part, 'UTF-8'),
                     ];
                 }
             }
@@ -109,6 +108,7 @@ class ArabicText
             // If the line has no text (only HTML), keep it as is
             if (empty($textSegments)) {
                 $processedLines[] = $line;
+
                 continue;
             }
 
@@ -121,7 +121,7 @@ class ArabicText
             // 4. Shape the text
             // THE FIX: High limit prevents '\n' injection disrupting mb_substr offsets.
             // false parameter native protects English digits.
-            $reversedPlainText = (new static())->ar->utf8Glyphs($plainText, $limit, false);
+            $reversedPlainText = (new static)->ar->utf8Glyphs($plainText, $limit, false);
 
             // 5. Slice the shaped text back into the original array segments
             $offset = 0;
@@ -144,13 +144,13 @@ class ArabicText
             foreach ($parts as $index => $token) {
                 if (strpos($token, '<') === 0) {
                     if (strpos($token, '</') === 0) {
-                        if (!empty($openTagsStack)) {
+                        if (! empty($openTagsStack)) {
                             $openIndex = array_pop($openTagsStack);
                             $pairs[] = [$openIndex, $index];
                         }
                     } else {
                         // Ignore self-closing tags
-                        if (substr($token, -2) !== '/>' && !preg_match('/<input|<img|<hr/i', $token)) {
+                        if (substr($token, -2) !== '/>' && ! preg_match('/<input|<img|<hr/i', $token)) {
                             $openTagsStack[] = $index;
                         }
                     }
@@ -165,10 +165,10 @@ class ArabicText
             foreach ($pairs as $pair) {
                 $oldOpen = $pair[0];
                 $oldClose = $pair[1];
-                
+
                 $newOpenPos = $count - 1 - $oldClose;
                 $newClosePos = $count - 1 - $oldOpen;
-                
+
                 $tmp = $reversedParts[$newOpenPos];
                 $reversedParts[$newOpenPos] = $reversedParts[$newClosePos];
                 $reversedParts[$newClosePos] = $tmp;
@@ -185,7 +185,8 @@ class ArabicText
      */
     public static function words(int|float $n): string
     {
-        $s = (new static())->ar->int2str((int)$n);
+        $s = (new static)->ar->int2str((int) $n);
+
         return self::glyphs($s);
     }
 
@@ -195,7 +196,8 @@ class ArabicText
     public static function date(string $format, ?int $timestamp = null): string
     {
         $ts = $timestamp ?? time();
-        $s  = (new static())->ar->date($format, $ts);
+        $s = (new static)->ar->date($format, $ts);
+
         return self::glyphs($s);
     }
 
@@ -204,6 +206,6 @@ class ArabicText
      */
     public static function digits(string $text): string
     {
-        return (new static())->ar->en2ar($text);
+        return (new static)->ar->en2ar($text);
     }
 }

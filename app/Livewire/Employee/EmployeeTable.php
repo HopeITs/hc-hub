@@ -9,10 +9,12 @@ use App\Models\Position;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
+use RamonRietdijk\LivewireTables\Columns\DateColumn;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Enums\SearchScope;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
@@ -23,6 +25,84 @@ class EmployeeTable extends LivewireTable
     protected string $model = Employee::class;
 
     protected $listeners = ['delete', 'toggleItemStatusConfirmed', 'exportExcel' => 'exportExcel'];
+
+    public function confirmDelete($id): void
+    {
+        LivewireAlert::title(__('general.delete-item'))
+            ->text(__('general.confirm-delete-item'))
+            ->question()
+            ->withConfirmButton(__('general.delete'))
+            ->onConfirm('delete', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function delete($payload): void
+    {
+        $employee = Employee::findOrFail($payload['id']);
+        Gate::authorize('delete', $employee);
+        $employee->delete();
+
+        LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
+    public function confirmToggleItemStatus($id): void
+    {
+        LivewireAlert::title(__('general.toggle-status'))
+            ->text(__('general.confirm-status-change'))
+            ->question()
+            ->withConfirmButton(__('general.save'))
+            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function toggleItemStatusConfirmed($payload): void
+    {
+        $item = Employee::findOrFail($payload['id']);
+        Gate::authorize('update', $item);
+        $item->is_active = ! $item->is_active;
+        $item->save();
+
+        LivewireAlert::title(__('general.item-updated'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        $query = $this->appliedQuery();
+        $data = $query->get();
+
+        $userSelectedColumns = $this->columns;
+
+        $visibleColumnCodes = collect($this->resolveColumns())
+            ->filter(fn ($column) => $column->isVisible())
+            ->filter(function ($column) use ($userSelectedColumns) {
+                if (empty($userSelectedColumns)) {
+                    return true;
+                }
+
+                return in_array($column->code(), $userSelectedColumns);
+            })
+            ->filter(fn ($column) => $column->label() !== __('general.actions') && $column->code() !== 'photo')
+            ->map(fn ($column) => $column->code())
+            ->toArray();
+
+        $filename = 'employees_'.now()->format('Y-m-d').'.xlsx';
+
+        return Excel::download(
+            new EmployeeExport($data, $visibleColumnCodes),
+            $filename,
+        );
+    }
+
+    protected function link(Model $model): ?string
+    {
+        return auth()->user()->hasActivePermission('employees.update')
+            ? route('employees.edit', $model->getKey())
+            : null;
+    }
 
     protected function query(): Builder
     {
@@ -71,10 +151,10 @@ class EmployeeTable extends LivewireTable
 
             Column::make(trans('general.photo'), 'photo')
                 ->displayUsing(function ($v, Model $m): string {
-                    $src = $m->getFirstMediaUrl('avatar');
+                    $src = $m->avatar_url;
 
                     return $src
-                        ? '<img src="'.e($src).'" alt="'.e($m->name).'" class="border rounded-full object-fit size-12 border-1 border-primary" />'
+                        ? '<img src="'.e($src).'" alt="'.e($m->name).'" class="size-12 max-w-none shrink-0 rounded-full border border-primary bg-white object-cover" />'
                         : '<div class="bg-gray-200 rounded-full size-12"></div>';
                 })->asHtml(),
 
@@ -103,7 +183,7 @@ class EmployeeTable extends LivewireTable
 
             Column::make(trans('general.years-of-service'), 'years_of_service_formatted')->computed()->sortable(),
 
-            Column::make(trans('general.join-at'), 'join_at')->computed()->sortable(),
+            DateColumn::make(trans('general.join-at'), 'joined_at')->format('d-M-Y')->sortable(),
             SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
                 ->options(City::query()->whereNot('code', '000')->where('is_active', true)->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()->searchable(),
@@ -159,7 +239,7 @@ class EmployeeTable extends LivewireTable
                     ? Blade::render(
                         '<x-forms.toggle-input class="p-2 m-2 text-xl" active="'.$isActive.
                             '" :model-id="'.$model->getKey().
-                            '" wire-event="confirmToggleItemStatus" />'
+                            '" wire-event="confirmToggleItemStatus" />',
                     )
                     : '';
 
@@ -169,7 +249,7 @@ class EmployeeTable extends LivewireTable
                     ? Blade::render(
                         '<a  href="'.route('employees.show', ['employee' => $model->username]).'" class="p-2 " title="View Profile">
                                 <x-icons.eye class="transition text-secondary-light hover:text-primary" />
-                            </a>'
+                            </a>',
                     )
                     : '';
 
@@ -184,76 +264,8 @@ class EmployeeTable extends LivewireTable
                 return '<div class="flex items-center gap-1">'.
                     $toggleBtn.$viewBtn.$editBtn.$deleteBtn.
                     '</div>';
-            })->asHtml(),
+            })->asHtml()->clickable(false),
 
         ];
-    }
-
-    public function confirmDelete($id): void
-    {
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function delete($payload): void
-    {
-        Employee::find($payload['id'])?->delete();
-
-        LivewireAlert::title(__('general.success-message'))
-            ->success()->toast()->position('top-start')->show();
-    }
-
-    public function confirmToggleItemStatus($id): void
-    {
-        LivewireAlert::title(__('general.toggle-status'))
-            ->text(__('general.confirm-status-change'))
-            ->question()
-            ->withConfirmButton(__('general.save'))
-            ->onConfirm('toggleItemStatusConfirmed', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
-    }
-
-    public function toggleItemStatusConfirmed($payload): void
-    {
-        $item = Employee::findOrFail($payload['id']);
-        $item->is_active = ! $item->is_active;
-        $item->save();
-
-        LivewireAlert::title(__('general.item-updated'))
-            ->success()->toast()->position('top-start')->show();
-    }
-
-    public function exportExcel(): BinaryFileResponse
-    {
-        $query = $this->appliedQuery();
-        $data = $query->get();
-
-        $userSelectedColumns = $this->columns;
-
-        $visibleColumnCodes = collect($this->resolveColumns())
-            ->filter(fn ($column) => $column->isVisible())
-            ->filter(function ($column) use ($userSelectedColumns) {
-                if (empty($userSelectedColumns)) {
-                    return true;
-                }
-
-                return in_array($column->code(), $userSelectedColumns);
-            })
-            ->filter(fn ($column) => $column->label() !== __('general.actions') && $column->code() !== 'photo')
-            ->map(fn ($column) => $column->code())
-            ->toArray();
-
-        $filename = 'employees_'.now()->format('Y-m-d').'.xlsx';
-
-        return Excel::download(
-            new EmployeeExport($data, $visibleColumnCodes),
-            $filename
-        );
     }
 }

@@ -47,6 +47,8 @@ return [
     'select-all' => 'Select all',
     'clear-all' => 'Clear all',
     'cannot-edit-self' => 'You cannot remove or change your own active administrator role.',
+    'cannot-assign-administrator-role' => 'Only an active super-admin may assign the following role(s): :roles.',
+    'cannot-grant-unheld-permission' => 'You cannot grant permissions you do not hold yourself: :permissions.',
     'role-in-use' => 'This role cannot be deleted while it is assigned to users.',
     'system-role-locked' => 'System roles cannot be renamed or deleted.',
     'pagination' => [

@@ -2,14 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Traits\RedactsSensitiveActivityLog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Relative extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, RedactsSensitiveActivityLog;
+
+    /**
+     * A relative's name and phone number identify a third party who never
+     * consented to being in an audit trail. @see RedactsSensitiveActivityLog
+     */
+    protected array $sensitiveLogAttributes = [
+        'name',
+        'phone',
+    ];
 
     protected $fillable = [
         'employee_id',
@@ -29,8 +39,6 @@ class Relative extends Model
             ->useLogName('relative')
             ->logOnly([
                 'employee_id',
-                'name',
-                'phone',
                 'relation',
             ])
             ->logOnlyDirty()

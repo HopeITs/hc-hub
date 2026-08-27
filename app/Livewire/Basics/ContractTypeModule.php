@@ -11,8 +11,6 @@ class ContractTypeModule extends Component
 {
     use AuthorizesActivePermissions;
 
-    protected $listeners = ['openContractTypeEdit' => 'edit'];
-
     public bool $showModal = false;
 
     public string $modalTitle = '';
@@ -25,15 +23,7 @@ class ContractTypeModule extends Component
         'type' => null,
     ];
 
-    protected function rules()
-    {
-        return [
-            'item.name_ar' => 'required|string',
-            'item.name_en' => 'required|string',
-            'item.place' => 'required|integer',
-            'item.type' => 'required|integer',
-        ];
-    }
+    protected $listeners = ['openContractTypeEdit' => 'edit'];
 
     public function render()
     {
@@ -77,7 +67,7 @@ class ContractTypeModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update'
+            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update',
         );
         $this->validate();
 
@@ -111,5 +101,15 @@ class ContractTypeModule extends Component
             ->toast()
             ->position('top-start')
             ->show();
+    }
+
+    protected function rules()
+    {
+        return [
+            'item.name_ar' => 'required|string',
+            'item.name_en' => 'required|string',
+            'item.place' => 'required|integer',
+            'item.type' => 'required|integer',
+        ];
     }
 }

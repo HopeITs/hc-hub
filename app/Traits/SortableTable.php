@@ -5,6 +5,7 @@ namespace App\Traits;
 trait SortableTable
 {
     public string $sortField = 'id';
+
     public string $sortDirection = 'asc';
 
     public function sortBy(string $field)

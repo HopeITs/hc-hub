@@ -4,8 +4,6 @@
 @endphp
 
 <form wire:submit.prevent="saveInformation" class="flex flex-col space-y-6">
-    <x-forms.errors-validation-list />
-
     <div class="">
         <x-forms.input-label for="photo">@lang('general.photo')</x-forms.input-label>
         <x-forms.file-input wire:model.live="infoForm.photo" id="photo" name="infoForm.photo" preview-type="avatar"
@@ -16,19 +14,19 @@
         <x-heading-label class="col-span-full">@lang('general.general_info')</x-heading-label>
         <div class="grid md:grid-cols-4 col-span-full gap-x-6 gap-y-3">
             @foreach (config('app.supported_locales') as $locale)
-                <div wire:key="emp-name-{{ $locale }}">
-                    <x-forms.input-label for="first_name{{ $locale }}" required>@lang('general.first_name') ({{ strtoupper($locale) }})
+                <div wire:key="emp-first-name-{{ $locale }}">
+                    <x-forms.input-label for="first_name_{{ $locale }}" required>@lang('general.first_name') ({{ strtoupper($locale) }})
                     </x-forms.input-label>
                     <x-forms.input type="text" wire:model="infoForm.first_name_{{ $locale }}"
-                        id="name_{{ $locale }}" />
+                        id="first_name_{{ $locale }}" />
                     <x-error-span>{{ $errors->first('infoForm.first_name_' . $locale) }}</x-error-span>
                 </div>
 
-                <div wire:key="emp-name-{{ $locale }}">
+                <div wire:key="emp-last-name-{{ $locale }}">
                     <x-forms.input-label for="last_name_{{ $locale }}" required>@lang('general.last_name') ({{ strtoupper($locale) }})
                     </x-forms.input-label>
                     <x-forms.input type="text" wire:model="infoForm.last_name_{{ $locale }}"
-                        id="name_{{ $locale }}" />
+                        id="last_name_{{ $locale }}" />
                     <x-error-span>{{ $errors->first('infoForm.last_name_' . $locale) }}</x-error-span>
                 </div>
             @endforeach
@@ -41,8 +39,8 @@
                 <x-forms.date-input wire:model="infoForm.actual_dob" id="actual_dob" />
                 <x-error-span>{{ $errors->first('infoForm.actual_dob') }}</x-error-span>
             </div>
-            <div wire:key="emp-actual-dob">
-                <x-forms.input-label for="city_id" required>{{ trans_choice('general.city', 1) }}</x-forms.input-label>
+            <div wire:key="emp-city">
+                <x-forms.input-label for="city_id" required>@lang('general.current-residence')</x-forms.input-label>
                 <x-forms.select2-input wire:model="infoForm.city_id" id="city_id">
                     <option value="">{{ __('general.unknown') }}</option>
                     @foreach ($cities as $cityId => $city)
@@ -53,12 +51,16 @@
             </div>
         </div>
 
-        <div wire:key="emp-gender">
-            <x-forms.input-label for="gender" required>@lang('general.gender')</x-forms.input-label>
+        {{--
+            A radio group has no single input to point a `for` at, so the group
+            is named through aria-labelledby instead of a dangling label.
+        --}}
+        <div wire:key="emp-gender" role="radiogroup" aria-labelledby="gender-label">
+            <x-forms.input-label id="gender-label" required>@lang('general.gender')</x-forms.input-label>
             <div class="flex mt-2 space-x-4">
-                <x-forms.radio-input name="gender" value="1"
+                <x-forms.radio-input id="gender_male" name="gender" value="1"
                     wire:model="infoForm.gender">@lang('general.male')</x-forms.radio-input>
-                <x-forms.radio-input name="gender" value="2"
+                <x-forms.radio-input id="gender_female" name="gender" value="2"
                     wire:model="infoForm.gender">@lang('general.female')</x-forms.radio-input>
             </div>
             <x-error-span>{{ $errors->first('infoForm.gender') }}</x-error-span>
@@ -171,12 +173,6 @@
     <div class="grid pb-8 mb-8 border-b md:grid-cols-1 gap-x-6 gap-y-3">
         <x-heading-label class="col-span-1 ">@lang('general.membership')</x-heading-label>
 
-        <div class="col-span-full">
-            <x-forms.input-label for="roles">{{ trans_choice('general.role', 2) }}</x-forms.input-label>
-            <x-forms.tags-input placeholder='Add tag' :suggestions="implode(',', $roles)" :forceSuggestion=true
-                wire:model="infoForm.roles" />
-            <x-error-span>{{ $errors->first('infoForm.roles') }}</x-error-span>
-        </div>
         <div class="flex items-center col-span-1 space-x-2 ">
             <x-forms.input type="checkbox" wire:model.live="infoForm.is_board_member"
                 wire:change="toggleBoardMember($event.target.checked)" value="1" id="is_board_member" />
@@ -206,7 +202,7 @@
 
         <div class="md:col-span-2" wire:ignore>
             <x-forms.input-label for="skills">@lang('general.skills')</x-forms.input-label>
-            <x-forms.tags-input placeholder='Add tag'
+            <x-forms.tags-input inputId="skills" placeholder='Add tag'
                 suggestions="Resilience,Initiative,MS Office,Teamwork,Time management,Critical thinking,Problem Solving,Adaptability,Willingness to learn,Active listening,Emotion Intelligence,Creativity,Data analysis"
                 :forceSuggestion=true wire:model="infoForm.skills" />
             <x-error-span>{{ $errors->first('infoForm.skills') }}</x-error-span>
@@ -214,7 +210,7 @@
 
         <div class="md:col-span-2" wire:ignore>
             <x-forms.input-label for="interests">@lang('general.interests')</x-forms.input-label>
-            <x-forms.tags-input placeholder='Add tag'
+            <x-forms.tags-input inputId="interests" placeholder='Add tag'
                 suggestions="Reading,Swimming,Cooking,Sports,Football,Basketball,Tennis,Hiking,Traveling"
                 :forceSuggestion=true wire:model="infoForm.interests" />
             <x-error-span>{{ $errors->first('infoForm.interests') }}</x-error-span>
@@ -222,7 +218,13 @@
     </div>
 
     <div class="flex justify-end space-x-2 ">
-        <x-primary-button type="button" wire:click="saveInformation" x-on:click="$wire.setActiveTab('contact')"
+        {{--
+            The tab is deliberately NOT advanced here. saveInformation()
+            redirects on success, so switching tabs client-side only ever took
+            effect when validation FAILED — which hid this tab, and with it
+            every error message belonging to its fields.
+        --}}
+        <x-primary-button type="button" wire:click="saveInformation"
             class="!w-auto">
             @lang('general.next')
         </x-primary-button>

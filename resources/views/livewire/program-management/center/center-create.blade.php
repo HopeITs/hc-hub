@@ -72,7 +72,7 @@
             </x-primary-button>
 
             <x-primary-button type="button" class="!w-auto !bg-neutral-200 !text-black hover:!bg-neutral-300"
-                              onclick="window.location='{{ route('centers.index') }}'">
+                              x-on:click="window.location.href = @js(route('centers.index'))">
                 @lang('general.cancel')
             </x-primary-button>
         </div>

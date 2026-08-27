@@ -16,7 +16,11 @@ class LeaveRequest extends Model
 {
     use HasFactory, LogsActivity;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'leave_balance_id', 'type', 'start_at', 'end_at', 'reason',
+        'approved_by', 'approved_at', 'hr_approved', 'reject_reason', 'status',
+        'alternative_employee_id',
+    ];
 
     protected $casts = [
         'start_at' => 'datetime',
@@ -39,7 +43,7 @@ class LeaveRequest extends Model
             'id',                  // LeaveBalance.id
             'id',                  // LeaveType.id
             'leave_balance_id',    // LeaveRequest.leave_balance_id
-            'type_id'        // LeaveBalance.leave_type_id
+            'type_id',        // LeaveBalance.leave_type_id
         );
     }
 
@@ -50,7 +54,7 @@ class LeaveRequest extends Model
 
     public function getDurationAttribute(): string
     {
-        $weekends = array_map('intval', explode(',', $this->leaveBalance->contract->position->center->weekends));
+        $weekends = array_map('intval', explode(',', $this->leaveBalance->contract->position->center->weekends ?? '0,6'));
         Carbon::setWeekendDays($weekends);
 
         // Hour-based leave: show hours + minutes
@@ -93,7 +97,7 @@ class LeaveRequest extends Model
     public function getDurationInHoursAttribute(): float
     {
         // Determine weekend days from the center
-        $weekends = array_map('intval', explode(',', $this->leaveBalance->contract->position->center->weekends));
+        $weekends = array_map('intval', explode(',', $this->leaveBalance->contract->position->center->weekends ?? '0,6'));
         Carbon::setWeekendDays($weekends);
 
         // For hour-type leave, we already have precise decimal hours
@@ -137,7 +141,7 @@ class LeaveRequest extends Model
 
             return $query->whereHas(
                 'leaveBalance.contract.employee.city',
-                fn (Builder $cityQuery) => $cityQuery->where('slug', $cityCode)
+                fn (Builder $cityQuery) => $cityQuery->where('slug', $cityCode),
             );
         }
 
@@ -155,7 +159,7 @@ class LeaveRequest extends Model
                 'leaveBalance.contract.position',
                 fn (Builder $positionQuery) => $positionQuery
                     ->whereIn('direct_manager_id', $managerPositionIds)
-                    ->orWhereIn('tech_manager_id', $managerPositionIds)
+                    ->orWhereIn('tech_manager_id', $managerPositionIds),
             );
         }
 
@@ -188,7 +192,7 @@ class LeaveRequest extends Model
 
             return $query->whereHas(
                 'leaveBalance.contract.employee.city',
-                fn ($q) => $q->where('slug', $cityCode)
+                fn ($q) => $q->where('slug', $cityCode),
             );
         }
 
@@ -204,7 +208,7 @@ class LeaveRequest extends Model
                 ->whereHas(
                     'leaveBalance.contract.employee.positions',
                     fn ($q) => $q->whereIn('direct_manager_id', $positionIds)
-                        ->orWhereIn('tech_manager_id', $positionIds)
+                        ->orWhereIn('tech_manager_id', $positionIds),
                 );
         }
 
@@ -235,7 +239,7 @@ class LeaveRequest extends Model
                             ? $q->orWhereIn('center_id', $centerIds)
                             : $q->whereIn('center_id', $centerIds);
                     }
-                })
+                }),
             );
     }
 

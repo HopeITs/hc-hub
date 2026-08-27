@@ -2,9 +2,6 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
-const dynamicLabels = window.jobLevelLabels || [];
-const dynamicCounts = window.employeeCounts || [];
-
 const chartPalette = () => {
     const rootStyle = getComputedStyle(document.documentElement);
 
@@ -20,18 +17,31 @@ const chartPalette = () => {
     ].map((color) => color || "#c2151c");
 };
 
-const chartData = dynamicLabels.map((label, index) => {
+// Read the Livewire-published globals on every call rather than once at module
+// evaluation. A module body runs a single time, so the previous top-level
+// version captured whatever the counts were on first load and then rendered
+// stale data after any Livewire re-render that changed them.
+const buildChartData = () => {
+    const dynamicLabels = window.jobLevelLabels || [];
+    const dynamicCounts = window.employeeCounts || [];
     const palette = chartPalette();
 
-    return {
+    return dynamicLabels.map((label, index) => ({
         category: label,
         value: dynamicCounts[index],
         color: am5.color(palette[index % palette.length]),
-    };
-});
+    }));
+};
 
+// The #jobLevelsChart presence check now lives in charts/lazy-charts.js; the
+// empty-data guard stays here because it depends on the Livewire globals.
+export default function initJobLevelsChart() {
+    const chartData = buildChartData();
 
-if (document.getElementById("jobLevelsChart") && chartData.length > 0) {
+    if (chartData.length === 0) {
+        return;
+    }
+
     am5.ready(function () {
         const root = am5.Root.new("jobLevelsChart");
 

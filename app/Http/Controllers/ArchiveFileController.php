@@ -65,8 +65,8 @@ class ArchiveFileController extends Controller
         $user = auth()->user();
 
         abort_unless(
-            $user?->hasRole('super-admin') || $folder->users()->whereKey($user?->id)->exists(),
-            403
+            $user?->isActiveAdministrator() || $folder->users()->whereKey($user?->id)->exists(),
+            403,
         );
     }
 

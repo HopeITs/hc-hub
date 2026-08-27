@@ -23,58 +23,6 @@ class CourseCategoryTable extends LivewireTable
         'exportExcel' => 'exportExcel',
     ];
 
-    protected function query(): Builder
-    {
-        return CourseCategory::query()->withCount('courses');
-    }
-
-    protected function globalSearchColumns(): array
-    {
-        return [
-            'id',
-            'name_en',
-            'name_ar',
-        ];
-    }
-
-    protected function columns(): array
-    {
-        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
-        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
-
-        return [
-            Column::make('ID', 'id')
-                ->sortable()
-                ->searchable(),
-
-            Column::make(__('general.name').' (AR)', 'name_ar')
-                ->sortable()
-                ->searchable(),
-
-            Column::make(__('general.name').' (EN)', 'name_en')
-                ->sortable()
-                ->searchable(),
-
-            Column::make(trans_choice('general.course', 2), 'courses_count')
-                ->sortable(),
-
-            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
-                $id = $m->id;
-
-                $editBtn = $canUpdate
-                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openCourseCategoryEdit\', { id: '.$id.' })" />')
-                    : '';
-                $deleteBtn = $canDelete
-                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
-                    : '';
-
-                return '<div class="flex items-center justify-center gap-2">'
-                    .$editBtn.$deleteBtn.
-                    '</div>';
-            })->asHtml()->visible($canUpdate || $canDelete),
-        ];
-    }
-
     public function confirmDelete(int $id): void
     {
         LivewireAlert::title(__('general.delete-item'))
@@ -136,7 +84,66 @@ class CourseCategoryTable extends LivewireTable
 
         return Excel::download(
             new CourseCategoryExport($data, $visibleColumnCodes),
-            $filename
+            $filename,
         );
+    }
+
+    protected function rowClickAction(Model $model): ?string
+    {
+        return auth()->user()?->hasActivePermission('project-basics.update')
+            ? "\$dispatch('openCourseCategoryEdit', { id: {$model->getKey()} })"
+            : null;
+    }
+
+    protected function query(): Builder
+    {
+        return CourseCategory::query()->withCount('courses');
+    }
+
+    protected function globalSearchColumns(): array
+    {
+        return [
+            'id',
+            'name_en',
+            'name_ar',
+        ];
+    }
+
+    protected function columns(): array
+    {
+        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
+
+        return [
+            Column::make('ID', 'id')
+                ->sortable()
+                ->searchable(),
+
+            Column::make(__('general.name').' (AR)', 'name_ar')
+                ->sortable()
+                ->searchable(),
+
+            Column::make(__('general.name').' (EN)', 'name_en')
+                ->sortable()
+                ->searchable(),
+
+            Column::make(trans_choice('general.course', 2), 'courses_count')
+                ->sortable(),
+
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
+                $id = $m->id;
+
+                $editBtn = $canUpdate
+                    ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openCourseCategoryEdit\', { id: '.$id.' })" />')
+                    : '';
+                $deleteBtn = $canDelete
+                    ? Blade::render('<x-table.delete-btn wire:click="confirmDelete('.$id.')" :modelId="'.$id.'" />')
+                    : '';
+
+                return '<div class="flex items-center justify-center gap-2">'
+                    .$editBtn.$deleteBtn.
+                    '</div>';
+            })->asHtml()->visible($canUpdate || $canDelete)->clickable(false),
+        ];
     }
 }

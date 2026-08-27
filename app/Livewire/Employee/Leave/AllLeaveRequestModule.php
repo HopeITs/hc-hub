@@ -31,13 +31,6 @@ class AllLeaveRequestModule extends Component
 
     public $modalTitle = 'Modal title';
 
-    protected $listeners = [
-        'openRequestLeaveEdit' => 'edit',
-        'openShowRequestLeave' => 'show',
-        'openDecisionRequestLeave' => 'openDecision',
-        'processSave' => 'processSave',
-    ];
-
     public string $statusFilter = 'all';
 
     public $selectedLeave;
@@ -60,6 +53,13 @@ class AllLeaveRequestModule extends Component
 
     public $alternativeEmployees = [];
 
+    protected $listeners = [
+        'openRequestLeaveEdit' => 'edit',
+        'openShowRequestLeave' => 'show',
+        'openDecisionRequestLeave' => 'openDecision',
+        'processSave' => 'processSave',
+    ];
+
     public function mount()
     {
         $this->refreshCounts();
@@ -76,27 +76,6 @@ class AllLeaveRequestModule extends Component
                 $this->show($leaveRequest->id);
             }
         }
-    }
-
-    /**
-     * Employees selectable in the dropdown, scoped to the HR user's city.
-     * Computed per render (not stored as state) so the heavy list is never
-     * serialized into the Livewire payload on every request.
-     */
-    protected function scopedEmployees(): Collection
-    {
-        $role = auth()->user()->myRole();
-
-        if (! str_contains($role, 'HR-')) {
-            return collect();
-        }
-
-        $cityCode = explode('-', $role)[1];
-
-        return Employee::query()
-            ->when($cityCode !== 'SYR', fn ($q) => $q->whereHas('city', fn ($c) => $c->where('slug', $cityCode)))
-            ->orderBy(transColumn('first_name'))
-            ->get();
     }
 
     public function show($id)
@@ -171,7 +150,7 @@ class AllLeaveRequestModule extends Component
 
         app(LeaveNotificationService::class)->sendDecision(
             $leaveRequest,
-            auth()->user()
+            auth()->user(),
         );
         $this->dispatch('notification-created');
 
@@ -273,34 +252,6 @@ class AllLeaveRequestModule extends Component
         $this->refreshCounts();
     }
 
-    protected function confirmationMessage(): string
-    {
-        $leaveTypeName = $this->form->selectedBalance()
-            ->leaveType
-            ->name ?? 'N/A';
-
-        $type = $this->form->type;
-
-        $start = $this->resolveStart();
-        $end = $this->resolveEnd();
-        $duration = $this->resolveDuration();
-        $date = $this->form->leave_date;
-        $reason = $this->form->reason;
-
-        return Blade::render(
-            '<x-alerts.leave-request-confirmation
-                :type="$type"
-                :leave_type="$leaveTypeName"
-                :start="$start"
-                :end="$end"
-                :duration="$duration"
-                :reason="$reason"
-                :date="$date"
-            />',
-            compact('type', 'leaveTypeName', 'start', 'end', 'duration', 'reason', 'date')
-        );
-    }
-
     public function confirmDelete($id)
     {
 
@@ -329,6 +280,55 @@ class AllLeaveRequestModule extends Component
             ->position('top-start')
             ->show();
 
+    }
+
+    /**
+     * Employees selectable in the dropdown, scoped to the HR user's city.
+     * Computed per render (not stored as state) so the heavy list is never
+     * serialized into the Livewire payload on every request.
+     */
+    protected function scopedEmployees(): Collection
+    {
+        $role = auth()->user()->myRole();
+
+        if (! str_contains($role, 'HR-')) {
+            return collect();
+        }
+
+        $cityCode = explode('-', $role)[1];
+
+        return Employee::query()
+            ->when($cityCode !== 'SYR', fn ($q) => $q->whereHas('city', fn ($c) => $c->where('slug', $cityCode)))
+            ->orderBy(transColumn('first_name'))
+            ->get();
+    }
+
+    protected function confirmationMessage(): string
+    {
+        $leaveTypeName = $this->form->selectedBalance()
+            ->leaveType
+            ->name ?? 'N/A';
+
+        $type = $this->form->type;
+
+        $start = $this->resolveStart();
+        $end = $this->resolveEnd();
+        $duration = $this->resolveDuration();
+        $date = $this->form->leave_date;
+        $reason = $this->form->reason;
+
+        return Blade::render(
+            '<x-alerts.leave-request-confirmation
+                :type="$type"
+                :leave_type="$leaveTypeName"
+                :start="$start"
+                :end="$end"
+                :duration="$duration"
+                :reason="$reason"
+                :date="$date"
+            />',
+            compact('type', 'leaveTypeName', 'start', 'end', 'duration', 'reason', 'date'),
+        );
     }
 
     /**

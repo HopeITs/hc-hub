@@ -2,8 +2,8 @@
 
 namespace App\Livewire\Forms\Employee;
 
-use App\Enums\EducationType;
 use App\Enums\EducationStatus;
+use App\Enums\EducationType;
 use App\Models\Education;
 use App\Models\Employee;
 use Illuminate\Validation\Rule;
@@ -13,6 +13,7 @@ use Livewire\Form;
 class EducationForm extends Form
 {
     public ?Employee $employee = null;
+
     public ?Education $education = null;
 
     public array $educations = [];
@@ -22,15 +23,17 @@ class EducationForm extends Form
         $this->employee = $employee;
 
         $this->educations = $this->employee->educations()
-            ->select('id', 'name', 'specialization', 'degree', 'status' , 'notes')
+            ->select('id', 'name', 'specialization', 'degree', 'status', 'notes')
             ->get()
-            ->map(fn($e) => [
+            ->map(fn ($e) => [
                 'id' => $e->id,
                 'name' => $e->name,
                 'specialization' => $e->specialization,
                 'degree' => $e->degree,
                 'status' => $e->status,
-                'edu_attachment' => $e->getFirstMediaUrl('file'),
+                'edu_attachment' => $e->getFirstMedia('file')
+                    ? route('employee-files.download', $e->getFirstMedia('file'))
+                    : null,
                 'file_name' => $e->getFirstMedia('file')->file_name ?? null,
                 'notes' => $e->notes,
             ])->toArray();
@@ -38,7 +41,7 @@ class EducationForm extends Form
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'educations' => ['array'],
             'educations.*.id' => ['nullable', 'exists:educations,id'],
             'educations.*.name' => ['required', 'string', 'max:255'],
@@ -48,6 +51,14 @@ class EducationForm extends Form
             'educations.*.edu_attachment' => ['nullable'],
             'educations.*.notes' => ['nullable', 'string', 'max:1000'],
         ];
+
+        foreach ($this->educations as $index => $education) {
+            if (($education['edu_attachment'] ?? null) instanceof TemporaryUploadedFile) {
+                $rules["educations.{$index}.edu_attachment"] = ['file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'];
+            }
+        }
+
+        return $rules;
     }
 
     public function addEducation(): void
@@ -66,12 +77,14 @@ class EducationForm extends Form
 
     public function removeEducation(int $index, $id = null): void
     {
-        if (!array_key_exists($index, $this->educations)) return;
+        if (! array_key_exists($index, $this->educations)) {
+            return;
+        }
 
         unset($this->educations[$index]);
 
         if (isset($id)) {
-            Education::find($id)?->delete();
+            $this->employee->educations()->find($id)?->delete();
         }
 
         $this->educations = array_values($this->educations);
@@ -83,18 +96,20 @@ class EducationForm extends Form
 
         foreach ($this->educations as $index => $education) {
             if (isset($education['id'])) {
-                $this->education = Education::find($education['id']);
-                $this->education->update($education);
+                $this->education = $this->employee->educations()->findOrFail($education['id']);
+                $this->education->update(collect($education)
+                    ->except(['edu_attachment', 'file_name', 'id'])
+                    ->toArray());
             } else {
-
-                $this->employee->educations()->create($education);
-
+                $this->education = $this->employee->educations()->create(collect($education)
+                    ->except(['edu_attachment', 'file_name', 'id'])
+                    ->toArray());
             }
 
             if ($education['edu_attachment'] instanceof TemporaryUploadedFile) {
                 $this->education->addMedia($education['edu_attachment']->getRealPath())
-                    ->usingFileName('edu-file-' . $index . '.' . $education['edu_attachment']->getClientOriginalExtension())
-                    ->toMediaCollection('file');
+                    ->usingFileName('edu-file-'.$index.'.'.$education['edu_attachment']->getClientOriginalExtension())
+                    ->toMediaCollection('file', 'local');
             }
         }
     }

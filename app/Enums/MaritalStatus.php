@@ -6,12 +6,18 @@ use BenSampo\Enum\Enum;
 
 final class MaritalStatus extends Enum
 {
-    const Unknown   = 0;
-    const Single    = 1;
-    const Engaged   = 2;
-    const Married   = 3;
-    const Divorced  = 4;
-    const Widowed   = 5;
+    const Unknown = 0;
+
+    const Single = 1;
+
+    const Engaged = 2;
+
+    const Married = 3;
+
+    const Divorced = 4;
+
+    const Widowed = 5;
+
     const Separated = 6;
 
     public static function getLocalizedName(int $value): array
@@ -19,31 +25,31 @@ final class MaritalStatus extends Enum
         $val = match ($value) {
             self::Single => [
                 'text' => ['en' => 'Single', 'ar' => 'أعزب'],
-                'color' => 'green'
+                'color' => 'green',
             ],
             self::Engaged => [
                 'text' => ['en' => 'Engaged', 'ar' => 'خاطب'],
-                'color' => 'blue'
+                'color' => 'blue',
             ],
             self::Married => [
                 'text' => ['en' => 'Married', 'ar' => 'متزوج'],
-                'color' => 'blue'
+                'color' => 'blue',
             ],
             self::Divorced => [
                 'text' => ['en' => 'Divorced', 'ar' => 'مطلق'],
-                'color' => 'blue'
+                'color' => 'blue',
             ],
             self::Widowed => [
                 'text' => ['en' => 'Widowed', 'ar' => 'أرمل'],
-                'color' => 'blue'
+                'color' => 'blue',
             ],
             self::Separated => [
                 'text' => ['en' => 'Separated', 'ar' => 'منفصل'],
-                'color' => 'blue'
+                'color' => 'blue',
             ],
             default => [
                 'text' => ['en' => 'Unknown', 'ar' => 'غير معروف'],
-                'color' => 'blue'
+                'color' => 'blue',
             ],
         };
 

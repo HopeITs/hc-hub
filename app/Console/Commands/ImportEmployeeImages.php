@@ -91,10 +91,13 @@ class ImportEmployeeImages extends Command
 
             try {
                 // singleFile collection: adding replaces any previous avatar.
+                // Explicit private disk, matching the runtime upload path in
+                // PersonalInfoForm — a bulk import must not reintroduce
+                // publicly fetchable photographs.
                 $employee->addMedia($filePath)
                     ->preservingOriginal()
                     ->usingFileName($filename)
-                    ->toMediaCollection('avatar');
+                    ->toMediaCollection('avatar', 'local');
 
                 $stored++;
                 $this->line("✔ {$filename} → #{$employee->id} {$employee->name}");
@@ -110,7 +113,7 @@ class ImportEmployeeImages extends Command
 
         if ($unmatched) {
             $this->newLine();
-            $this->warn(count($unmatched) . ' file(s) could not be processed:');
+            $this->warn(count($unmatched).' file(s) could not be processed:');
             $this->table(['File', 'Parsed ID', 'Reason'], $unmatched);
         }
 
@@ -162,13 +165,13 @@ class ImportEmployeeImages extends Command
             ]));
 
             if ($response->failed()) {
-                $this->error('Google Drive listing failed: ' . $response->json('error.message', $response->status()));
+                $this->error('Google Drive listing failed: '.$response->json('error.message', $response->status()));
 
                 return null;
             }
 
             foreach ($response->json('files', []) as $file) {
-                $local = $tempDir . DIRECTORY_SEPARATOR . $file['name'];
+                $local = $tempDir.DIRECTORY_SEPARATOR.$file['name'];
 
                 // Treat an empty/partial leftover as not-yet-downloaded so a
                 // resumed run re-fetches it.
@@ -185,7 +188,7 @@ class ImportEmployeeImages extends Command
                             ->sink($local)
                             ->get(
                                 "https://www.googleapis.com/drive/v3/files/{$file['id']}",
-                                ['alt' => 'media', 'key' => $apiKey]
+                                ['alt' => 'media', 'key' => $apiKey],
                             );
                     } catch (Throwable $e) {
                         $this->warn("Failed to download {$file['name']} ({$e->getMessage()}) — skipping.");

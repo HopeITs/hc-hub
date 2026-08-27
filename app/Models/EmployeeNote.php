@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class EmployeeNote extends Model
 {
@@ -21,7 +21,7 @@ class EmployeeNote extends Model
 
     protected $casts = [
         'is_done' => 'boolean',
-        'order'   => 'integer',
+        'order' => 'integer',
     ];
 
     public function scopeForEmployee($q, int $employeeId)
@@ -33,12 +33,14 @@ class EmployeeNote extends Model
     {
         return LogOptions::defaults()
             ->useLogName('employee_note')
+            // Note bodies are free-text personal content and must not be
+            // copied into the activity log, which has a far wider audience and
+            // a much longer retention than the note itself. The event, the
+            // record, and the actor are enough for an audit trail.
             ->logOnly([
                 'employee_id',
                 'type',
-                'content',
                 'is_done',
-                'color',
                 'order',
             ])
             ->logOnlyDirty()

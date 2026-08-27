@@ -21,8 +21,6 @@ use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 class AllLeaveRequestTable extends LivewireTable
 {
-    protected string $model = LeaveRequest::class;
-
     public LeaveRequestForm $form;
 
     public string $statusFilter = 'all';
@@ -30,6 +28,8 @@ class AllLeaveRequestTable extends LivewireTable
     public $showModal = false;
 
     public $modalTitle = 'Modal title';
+
+    protected string $model = LeaveRequest::class;
 
     protected $listeners = [
         'filterStatus' => 'setStatusFilter',
@@ -43,129 +43,6 @@ class AllLeaveRequestTable extends LivewireTable
     }
 
     public function refreshTable(): void {}
-
-    protected function query(): Builder
-    {
-        $user = auth()->user();
-
-        $query = LeaveRequest::query()
-            ->with(['leaveBalance.contract.employee', 'leaveBalance.contract.position'])
-            ->manageableBy($user)
-            ->orderBy('created_at', 'desc');
-
-        if ($this->statusFilter !== 'all') {
-            $query->where('status', $this->statusFilter);
-        }
-
-        return $query;
-    }
-
-    protected function columns(): array
-    {
-        $user = auth()->user();
-
-        return [
-
-            SelectColumn::make(trans_choice('general.leave-type', 1), 'leaveBalance.leaveType.'.transColumn('name'))
-                ->options(LeaveType::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
-                ->sortable()
-                ->searchable(),
-            SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee_id')
-                ->options(
-                    Employee::query()
-                        ->select(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
-                        ->orderBy(transColumn('first_name'))
-                        ->get()
-                        ->mapWithKeys(fn ($e) => [$e->id => $e->name])
-                        ->toArray()
-                )
-                ->displayUsing(fn ($v, Model $m) => $m->leaveBalance?->contract?->employee?->name ?? '—')
-                ->sortable()
-                ->searchable()
-                ->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
-            SelectColumn::make(trans_choice('general.type', 1), 'type')
-                ->options(['hour' => trans_choice('general.hour', 1), 'day' => trans_choice('general.day', 1)])
-                ->displayUsing(fn ($v, Model $m) => trans_choice('general.'.$m->type, 1))
-                ->sortable()
-                ->searchable(),
-
-            Column::make(__('general.duration'), 'duration')->computed(),
-            Column::make(__('general.status'), function (mixed $value, Model $model): string {
-                $status = LeaveRequestStatus::getLocalizedName($value->status);
-
-                return "<span class='px-2 py-1 text-xs font-semibold rounded-md bg-{$status['color']}-100 text-{$status['color']}-800'>
-                    {$status['value']}
-                </span>";
-            })->asHtml(),
-            DateColumn::make(__('general.request_date'), 'created_at')
-                ->format('d-m-Y H:i') // keep it; used for default/export/sort context
-                ->displayUsing(function (mixed $value, Model $model): string {
-                    if (! $value) {
-                        return '-';
-                    }
-
-                    return $model->created_at->format('d-m-Y');
-                })
-                ->sortable(),
-
-            DateColumn::make(__('general.start-date'), 'start_at')
-                ->format('d-m-Y H:i') // keep it; used for default/export/sort context
-                ->displayUsing(function (mixed $value, Model $model): string {
-                    if (! $value) {
-                        return '-';
-                    }
-
-                    return $model->type === 'hour' ? $model->start_at->format('H:i d-m-Y') : $model->start_at->format('d-m-Y');
-                })
-                ->sortable(),
-            DateColumn::make(__('general.end-date'), 'end_at')
-                ->format('d-m-Y H:i') // keep it; used for default/export/sort context
-                ->displayUsing(function (mixed $value, Model $model): string {
-                    if (! $value) {
-                        return '-';
-                    }
-
-                    return $model->type === 'hour' ? $model->end_at->format('H:i d-m-Y') : $model->end_at->format('d-m-Y');
-                })
-                ->sortable(),
-            Column::make(__('general.seen-by-hr'), function (Model $model): string {
-                if ($model->status === LeaveRequestStatus::Pending) {
-                    return '';
-                }
-
-                return Blade::render(
-                    '<x-table.hr-review
-                        :reviewed="$reviewed"
-                        :model-id="$modelId"
-                    />',
-                    [
-                        'reviewed' => $model->hr_approved,
-                        'modelId' => $model->getKey(),
-                    ]
-                );
-            })->visible(
-                $user->myRole() === 'super-admin'
-                || str_starts_with((string) $user->myRole(), 'HR-')
-            )->asHtml(),
-            Column::make(__('general.actions'), function (Model $model): string {
-
-                $decisionBtn = '';
-                $editBtn = '';
-
-                if ($model->status === LeaveRequestStatus::Pending) {
-                    $decisionBtn = Blade::render('<x-table.decision-btn wire:click="$dispatch(\'openDecisionRequestLeave\', { id: '.$model->getKey().' })" />');
-                }
-                if ($model->status !== LeaveRequestStatus::Pending) {
-                    $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: '.$model->getKey().' })" />');
-                }
-
-                $showBtn = Blade::render('<x-table.show-btn wire:click="$dispatch(\'openShowRequestLeave\', { id: '.$model->getKey().' })" />');
-
-                return $decisionBtn.$editBtn.$showBtn;
-            })->asHtml(),
-
-        ];
-    }
 
     public function confirmDelete($id): void
     {
@@ -241,12 +118,142 @@ class AllLeaveRequestTable extends LivewireTable
 
         app(LeaveNotificationService::class)->sendHrReview(
             $item,
-            auth()->user()
+            auth()->user(),
         );
         $this->dispatch('notification-created');
         $this->dispatch('$refresh');
 
         LivewireAlert::title(__('general.item-updated'))
             ->success()->toast()->position('top-start')->show();
+    }
+
+    protected function rowClickAction(Model $model): ?string
+    {
+        return $model->status === LeaveRequestStatus::Pending
+            ? "\$dispatch('openDecisionRequestLeave', { id: {$model->getKey()} })"
+            : "\$dispatch('openRequestLeaveEdit', { id: {$model->getKey()} })";
+    }
+
+    protected function query(): Builder
+    {
+        $user = auth()->user();
+
+        $query = LeaveRequest::query()
+            ->with(['leaveBalance.contract.employee', 'leaveBalance.contract.position'])
+            ->manageableBy($user)
+            ->orderBy('created_at', 'desc');
+
+        if ($this->statusFilter !== 'all') {
+            $query->where('status', $this->statusFilter);
+        }
+
+        return $query;
+    }
+
+    protected function columns(): array
+    {
+        $user = auth()->user();
+
+        return [
+
+            SelectColumn::make(trans_choice('general.leave-type', 1), 'leaveBalance.leaveType.'.transColumn('name'))
+                ->options(LeaveType::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
+                ->sortable()
+                ->searchable(),
+            SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee_id')
+                ->options(
+                    Employee::query()
+                        ->select(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
+                        ->orderBy(transColumn('first_name'))
+                        ->get()
+                        ->mapWithKeys(fn ($e) => [$e->id => $e->name])
+                        ->toArray(),
+                )
+                ->displayUsing(fn ($v, Model $m) => $m->leaveBalance?->contract?->employee?->name ?? '—')
+                ->sortable()
+                ->searchable()
+                ->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
+            SelectColumn::make(trans_choice('general.type', 1), 'type')
+                ->options(['hour' => trans_choice('general.hour', 1), 'day' => trans_choice('general.day', 1)])
+                ->displayUsing(fn ($v, Model $m) => trans_choice('general.'.$m->type, 1))
+                ->sortable()
+                ->searchable(),
+
+            Column::make(__('general.duration'), 'duration')->computed(),
+            Column::make(__('general.status'), function (mixed $value, Model $model): string {
+                $status = LeaveRequestStatus::getLocalizedName($value->status);
+
+                return "<span class='px-2 py-1 text-xs font-semibold rounded-md bg-{$status['color']}-100 text-{$status['color']}-800'>
+                    {$status['value']}
+                </span>";
+            })->asHtml(),
+            DateColumn::make(__('general.request_date'), 'created_at')
+                ->format('d-m-Y H:i') // keep it; used for default/export/sort context
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    if (! $value) {
+                        return '-';
+                    }
+
+                    return $model->created_at->format('d-m-Y');
+                })
+                ->sortable(),
+
+            DateColumn::make(__('general.start-date'), 'start_at')
+                ->format('d-m-Y H:i') // keep it; used for default/export/sort context
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    if (! $value) {
+                        return '-';
+                    }
+
+                    return $model->type === 'hour' ? $model->start_at->format('H:i d-m-Y') : $model->start_at->format('d-m-Y');
+                })
+                ->sortable(),
+            DateColumn::make(__('general.end-date'), 'end_at')
+                ->format('d-m-Y H:i') // keep it; used for default/export/sort context
+                ->displayUsing(function (mixed $value, Model $model): string {
+                    if (! $value) {
+                        return '-';
+                    }
+
+                    return $model->type === 'hour' ? $model->end_at->format('H:i d-m-Y') : $model->end_at->format('d-m-Y');
+                })
+                ->sortable(),
+            Column::make(__('general.seen-by-hr'), function (Model $model): string {
+                if ($model->status === LeaveRequestStatus::Pending) {
+                    return '';
+                }
+
+                return Blade::render(
+                    '<x-table.hr-review
+                        :reviewed="$reviewed"
+                        :model-id="$modelId"
+                    />',
+                    [
+                        'reviewed' => $model->hr_approved,
+                        'modelId' => $model->getKey(),
+                    ],
+                );
+            })->visible(
+                $user->myRole() === 'super-admin'
+                || str_starts_with((string) $user->myRole(), 'HR-'),
+            )->asHtml()->clickable(false),
+            Column::make(__('general.actions'), function (Model $model): string {
+
+                $decisionBtn = '';
+                $editBtn = '';
+
+                if ($model->status === LeaveRequestStatus::Pending) {
+                    $decisionBtn = Blade::render('<x-table.decision-btn wire:click="$dispatch(\'openDecisionRequestLeave\', { id: '.$model->getKey().' })" />');
+                }
+                if ($model->status !== LeaveRequestStatus::Pending) {
+                    $editBtn = Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: '.$model->getKey().' })" />');
+                }
+
+                $showBtn = Blade::render('<x-table.show-btn wire:click="$dispatch(\'openShowRequestLeave\', { id: '.$model->getKey().' })" />');
+
+                return $decisionBtn.$editBtn.$showBtn;
+            })->asHtml()->clickable(false),
+
+        ];
     }
 }

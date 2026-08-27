@@ -7,8 +7,11 @@ use BenSampo\Enum\Enum;
 final class BadgeType extends Enum
 {
     const Unknown = 0;
+
     const Warning = 1;
+
     const Reward = 2;
+
     const Salary_Increase = 3;
 
     public static function getLocalizedName(int $value): string
@@ -19,6 +22,7 @@ final class BadgeType extends Enum
             self::Salary_Increase => ['en' => 'Salary Increase', 'ar' => 'زيادة راتب'],
             default => ['en' => 'Unknown', 'ar' => 'غير معروف'],
         };
+
         return $res[app()->getLocale()] ?? '';
     }
 }

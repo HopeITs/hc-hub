@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\LeaveTypeCases;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -13,40 +14,11 @@ class LeaveBalance extends Model
 {
     use HasFactory, LogsActivity;
 
-    protected $guarded = ['id'];
+    protected $fillable = ['contract_id', 'type_id', 'deserved', 'used'];
 
     public function contract(): BelongsTo
     {
         return $this->belongsTo(Contract::class, 'contract_id');
-    }
-
-    /**
-     * Daily work hours of the contract, guarded against zero so the
-     * day/hour breakdown never divides by zero (e.g. imported contracts
-     * with weekly_hours = 0). Falls back to null when unknown.
-     */
-    private function workHoursPerDay(): ?float
-    {
-        $perDay = ($this->contract->weekly_hours ?? 0) / 5;
-
-        return $perDay > 0 ? $perDay : null;
-    }
-
-    /**
-     * Split an amount of hours into [whole days, remaining hours].
-     * When the daily work hours are unknown, everything stays as hours.
-     */
-    private function splitIntoDays(float $hours): array
-    {
-        $perDay = $this->workHoursPerDay();
-
-        if ($perDay === null) {
-            return [0, $hours];
-        }
-
-        $days = floor($hours / $perDay);
-
-        return [$days, $hours - ($days * $perDay)];
     }
 
     public function getIntTotalAttribute(): int
@@ -73,7 +45,7 @@ class LeaveBalance extends Model
     public function eligibleAnnualLeaveHours(?Carbon $contractStart = null, ?Carbon $contractEnd = null): int
     {
         $contract = $this->contract;
-        if (!$contract) {
+        if (! $contract) {
             return 0;
         }
 
@@ -105,7 +77,6 @@ class LeaveBalance extends Model
         return round(min($sectionsPassed * $hoursPerSection, $totalHours));
     }
 
-
     /**
      * Whether employee can request specific number of hours right now.
      */
@@ -122,7 +93,7 @@ class LeaveBalance extends Model
 
     public function isAnnual(): bool
     {
-        return $this->leaveType->id === \App\Enums\LeaveTypeCases::Annual;
+        return $this->leaveType->id === LeaveTypeCases::Annual;
     }
 
     public function getIntRemainingAttribute(): int
@@ -138,7 +109,6 @@ class LeaveBalance extends Model
 
         return $this->getFormattedLabel($days, $remaining);
     }
-
 
     public function getFormattedLabel($days, $remaining): string
     {
@@ -157,8 +127,8 @@ class LeaveBalance extends Model
         // -------------------------------------------
         $text = '';
         if ($days > 0) {
-            $text = '<strong class="text-secondary-dark">'.$days.'</strong>' . ' ' .
-                trans_choice('general.day', $days) . ' ';
+            $text = '<strong class="text-secondary-dark">'.$days.'</strong>'.' '.
+                trans_choice('general.day', $days).' ';
         }
 
         $result = $text;
@@ -171,12 +141,12 @@ class LeaveBalance extends Model
             $timeText = [];
 
             if ($hours > 0) {
-                $timeText[] = '<strong class="text-secondary-dark">'.$hours.'</strong>' . ' ' .
+                $timeText[] = '<strong class="text-secondary-dark">'.$hours.'</strong>'.' '.
                     trans_choice('general.hour', $hours);
             }
 
             if ($minutes > 0) {
-                $timeText[] = '<strong class="text-secondary-dark">'.$minutes.'</strong>' . ' ' .
+                $timeText[] = '<strong class="text-secondary-dark">'.$minutes.'</strong>'.' '.
                     trans_choice('general.minute', $minutes);
             }
 
@@ -185,7 +155,7 @@ class LeaveBalance extends Model
             if ($text !== '') {
                 $result = __('general.and', [
                     'attr1' => $text,
-                    'attr2' => $finalTime
+                    'attr2' => $finalTime,
                 ]);
             } else {
                 $result = $finalTime;
@@ -194,19 +164,17 @@ class LeaveBalance extends Model
 
         // Original fallback behavior
         if ($text === '' && $hours === 0 && $minutes === 0) {
-            $result = '<strong class="text-secondary-dark">0</strong>' . ' ' .
+            $result = '<strong class="text-secondary-dark">0</strong>'.' '.
                 trans_choice('general.day', $days);
         }
 
         return $result;
     }
 
-
     public function leaveType(): BelongsTo
     {
         return $this->belongsTo(LeaveType::class, 'type_id');
     }
-
 
     public function leaveRequests()
     {
@@ -227,5 +195,32 @@ class LeaveBalance extends Model
             ->dontSubmitEmptyLogs();
     }
 
-}
+    /**
+     * Daily work hours of the contract, guarded against zero so the
+     * day/hour breakdown never divides by zero (e.g. imported contracts
+     * with weekly_hours = 0). Falls back to null when unknown.
+     */
+    private function workHoursPerDay(): ?float
+    {
+        $perDay = ($this->contract->weekly_hours ?? 0) / 5;
 
+        return $perDay > 0 ? $perDay : null;
+    }
+
+    /**
+     * Split an amount of hours into [whole days, remaining hours].
+     * When the daily work hours are unknown, everything stays as hours.
+     */
+    private function splitIntoDays(float $hours): array
+    {
+        $perDay = $this->workHoursPerDay();
+
+        if ($perDay === null) {
+            return [0, $hours];
+        }
+
+        $days = floor($hours / $perDay);
+
+        return [$days, $hours - ($days * $perDay)];
+    }
+}

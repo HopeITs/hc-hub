@@ -66,5 +66,8 @@ function initEmployeesByPayType() {
     chart.appear(700);
 }
 
-document.addEventListener("DOMContentLoaded", initEmployeesByPayType);
-window.Livewire?.hook("message.processed", initEmployeesByPayType);
+// Invocation is owned by charts/lazy-charts.js, which imports this module only
+// once #salaryTypePieChart is actually on the page and re-runs it after Livewire
+// navigations. Self-registering DOMContentLoaded here would never fire, because
+// the dynamic import resolves long after that event.
+export default initEmployeesByPayType;

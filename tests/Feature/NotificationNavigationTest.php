@@ -28,7 +28,7 @@ class NotificationNavigationTest extends TestCase
             ->assertRedirect($expectedPath);
 
         $this->assertNotNull(
-            DB::table('notifications')->where('id', $id)->value('read_at')
+            DB::table('notifications')->where('id', $id)->value('read_at'),
         );
     }
 
@@ -48,7 +48,7 @@ class NotificationNavigationTest extends TestCase
             ->call('markAsRead', $id);
 
         $this->assertNull(
-            DB::table('notifications')->where('id', $id)->value('read_at')
+            DB::table('notifications')->where('id', $id)->value('read_at'),
         );
     }
 
@@ -69,7 +69,7 @@ class NotificationNavigationTest extends TestCase
             ->assertNoRedirect();
 
         $this->assertNotNull(
-            DB::table('notifications')->where('id', $externalId)->value('read_at')
+            DB::table('notifications')->where('id', $externalId)->value('read_at'),
         );
     }
 
@@ -84,10 +84,10 @@ class NotificationNavigationTest extends TestCase
             ->call('markAllAsRead');
 
         $this->assertNotNull(
-            DB::table('notifications')->where('id', $linkedId)->value('read_at')
+            DB::table('notifications')->where('id', $linkedId)->value('read_at'),
         );
         $this->assertNotNull(
-            DB::table('notifications')->where('id', $plainId)->value('read_at')
+            DB::table('notifications')->where('id', $plainId)->value('read_at'),
         );
         $this->assertSame(0, $user->unreadNotifications()->count());
     }

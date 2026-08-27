@@ -13,7 +13,7 @@ class PendingDeliversCounter extends Component
     public function getPendingDeliversCountProperty(): int
     {
         $employee = Auth::user()->profile ?? null;
-        if (!$employee) {
+        if (! $employee) {
             return 0;
         }
 

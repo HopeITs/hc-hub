@@ -15,7 +15,7 @@ class CurrencyTest extends TestCase
         );
 
         $this->assertSame(
-            ['en' => 'EUR', 'ar' => 'يورو '],
+            ['en' => 'EUR', 'ar' => 'يورو'],
             Currency::getLocalizedName(Currency::EUR),
         );
 

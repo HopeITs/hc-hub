@@ -25,91 +25,47 @@ class Login extends Component
 
     public bool $remember = false;
 
-    public ?int $selectedRoleId = null;
-    public array $roleOptions = [];
-
-    /** NEW */
-    public bool $employeeInactive = false;
-    public string $inactiveMessage = '';
-
     public function render()
     {
-        return view('livewire.auth.login');
+        // $title / $description are read by partials/head.blade.php through the layout.
+        return view('livewire.auth.login')
+            ->title(__('auth.meta-title'))
+            ->layoutData(['description' => __('auth.meta-description')]);
     }
 
     public function updatedEmail(): void
     {
-        $this->reset([
-            'selectedRoleId',
-            'roleOptions',
-            'employeeInactive',
-            'inactiveMessage',
-        ]);
-
-        if ($this->email === '') {
-            return;
-        }
-
-        $user = User::query()
-            ->where('email', $this->email)
-            ->with(['roles', 'profile'])
-            ->first();
-
-        // Unknown email or no employee → do nothing (no leaks)
-        if (!$user || !$user->profile) {
-            return;
-        }
-
-        // Employee exists but inactive → block immediately
-        if (!$user->profile->is_active) {
-            $this->employeeInactive = true;
-            $this->inactiveMessage = __('You cannot access this website anymore');
-            return;
-        }
-
-        // Normal role handling
-        if ($user->roles()->count() > 1) {
-            $this->roleOptions = $user->roles
-                ->map(fn ($r) => ['id' => $r->id, 'name' => $r->name])
-                ->values()
-                ->all();
-        }
+        $this->resetValidation();
     }
 
     public function login(): void
     {
         $this->validate();
 
-        // HARD BACKEND GUARD (cannot be bypassed)
-        $user = User::query()
-            ->where('email', $this->email)
-            ->with('profile')
-            ->first();
-
-        if ($user && $user->profile && !$user->profile->is_active) {
-            $this->employeeInactive = true;
-            $this->inactiveMessage = __('You cannot access this website anymore');
-            return;
-        }
-
         $this->ensureIsNotRateLimited();
 
-        if (!Auth::attempt(
+        if (! Auth::attempt(
             ['email' => $this->email, 'password' => $this->password],
-            $this->remember
+            $this->remember,
         )) {
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
-            ]);
+            $this->failAuthentication();
         }
 
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (! $user?->profile?->is_active) {
+            Auth::guard('web')->logout();
+            Session::invalidate();
+            Session::regenerateToken();
+            $this->failAuthentication();
+        }
+
+        // Only the per-account counter is cleared. Clearing the IP counter on
+        // success would let an attacker who holds one valid credential reset
+        // the spray limiter at will.
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
-
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
 
         DB::transaction(function () use ($user) {
             $allIds = $user->roles()->pluck('roles.id')->all();
@@ -118,17 +74,7 @@ class Login extends Component
                 $user->roles()->updateExistingPivot($allIds, ['is_active' => false]);
             }
 
-            $roleIdToActivate = null;
-
-            if ($this->selectedRoleId &&
-                $user->roles()->where('roles.id', $this->selectedRoleId)->exists()) {
-                $roleIdToActivate = $this->selectedRoleId;
-            } else {
-                $ids = $user->roles()->pluck('roles.id');
-                $roleIdToActivate = $ids->count() === 1
-                    ? $ids->first()
-                    : $ids->sort()->first();
-            }
+            $roleIdToActivate = $user->roles()->pluck('roles.id')->sort()->first();
 
             if ($roleIdToActivate) {
                 $user->roles()->updateExistingPivot($roleIdToActivate, ['is_active' => true]);
@@ -138,32 +84,69 @@ class Login extends Component
 
         $this->redirectIntended(
             default: route('dashboard', absolute: false),
-            navigate: true
+            navigate: true,
         );
     }
 
+    /**
+     * Two independent limiters, because they stop different attacks.
+     *
+     * The account+IP limiter stops brute force against one account. It does
+     * nothing against password spraying, where an attacker tries one common
+     * password against thousands of accounts: each account+IP pair sees a
+     * single failure and never approaches its threshold. The IP-only limiter
+     * closes that, because every one of those attempts shares a source.
+     */
     protected function ensureIsNotRateLimited(): void
     {
-        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
-            return;
+        if (RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+            event(new Lockout(request()));
+
+            $seconds = RateLimiter::availableIn($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => __('auth.throttle', [
+                    'seconds' => $seconds,
+                    'minutes' => ceil($seconds / 60),
+                ]),
+            ]);
         }
 
-        event(new Lockout(request()));
+        // Deliberately generous relative to the per-account limit: a shared
+        // office NAT can legitimately produce a run of failures, so this is
+        // sized to stop automation rather than to police typos.
+        if (RateLimiter::tooManyAttempts($this->ipThrottleKey(), 25)) {
+            event(new Lockout(request()));
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
-
-        throw ValidationException::withMessages([
-            'email' => __('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
-        ]);
+            throw ValidationException::withMessages([
+                'email' => __('auth.throttle_ip', [
+                    'seconds' => RateLimiter::availableIn($this->ipThrottleKey()),
+                ]),
+            ]);
+        }
     }
 
     protected function throttleKey(): string
     {
         return Str::transliterate(
-            Str::lower($this->email) . '|' . request()->ip()
+            Str::lower($this->email).'|'.request()->ip(),
         );
+    }
+
+    protected function ipThrottleKey(): string
+    {
+        return 'login-ip|'.request()->ip();
+    }
+
+    private function failAuthentication(): never
+    {
+        RateLimiter::hit($this->throttleKey(), 60);
+        // Held for 15 minutes: spraying is slow and low-volume by design, so a
+        // one-minute window would reset before the pattern became visible.
+        RateLimiter::hit($this->ipThrottleKey(), 900);
+
+        throw ValidationException::withMessages([
+            'email' => __('auth.failed'),
+        ]);
     }
 }

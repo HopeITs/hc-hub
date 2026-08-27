@@ -106,7 +106,7 @@
                                 <span class="absolute inset-y-2 start-0 w-0.5 rounded-full bg-[#be1f24]" aria-hidden="true"></span>
                             @endif
 
-                            <img src="{{ $user->profile->getFirstMediaUrl('avatar') }}" alt=""
+                            <img src="{{ $user->profile->avatar_url }}" alt=""
                                 class="size-10 shrink-0 rounded-full object-cover ring-1 ring-gray-200">
                             <span class="min-w-0 flex-1">
                                 <span @class([
@@ -161,12 +161,12 @@
                                 <a href="{{ route('employees.show', ['employee' => $selectedUser->profile->username]) }}"
                                     aria-label="{{ __('general.view-profile-of', ['name' => $selectedUser->profile->name]) }}"
                                     class="shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
-                                    <img src="{{ $selectedUser->profile->getFirstMediaUrl('avatar') }}"
+                                    <img src="{{ $selectedUser->profile->avatar_url }}"
                                         alt="{{ $selectedUser->profile->name }}"
                                         class="size-12 rounded-full object-cover ring-1 ring-gray-200 transition hover:ring-[#be1f24]">
                                 </a>
                             @else
-                                <img src="{{ $selectedUser->profile->getFirstMediaUrl('avatar') }}" alt=""
+                                <img src="{{ $selectedUser->profile->avatar_url }}" alt=""
                                     class="size-12 shrink-0 rounded-full object-cover ring-1 ring-gray-200">
                             @endif
 
@@ -488,7 +488,7 @@
                                 <a href="{{ route('employees.show', ['employee' => $roleProfile->username]) }}"
                                     class="shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]"
                                     aria-label="{{ __('access.view-employee', ['name' => $roleProfile->nameForLocale(app()->getLocale())]) }}">
-                                    <img src="{{ $roleProfile->getFirstMediaUrl('avatar') }}" alt=""
+                                    <img src="{{ $roleProfile->avatar_url }}" alt=""
                                         class="size-11 rounded-full border border-gray-200 bg-gray-50 object-cover">
                                 </a>
                             @else

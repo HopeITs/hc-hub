@@ -1,12 +1,12 @@
 <?php
 
 return [
-    'isHtml5ParserEnabled'   => true,
-    'isRemoteEnabled'        => true,
+    'isHtml5ParserEnabled' => true,
+    'isRemoteEnabled' => false,
     'enable_font_subsetting' => true,
 
-    'chroot'      => public_path(),
-    'font_dir'   => public_path('fonts'),
+    'chroot' => public_path(),
+    'font_dir' => public_path('fonts'),
     'font_cache' => storage_path('fonts'),
     'default_font' => 'somar',
     'fonts' => [
