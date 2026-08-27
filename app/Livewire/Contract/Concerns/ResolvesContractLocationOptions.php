@@ -3,6 +3,7 @@
 namespace App\Livewire\Contract\Concerns;
 
 use App\Livewire\Forms\ContractForm;
+use App\Models\Center;
 use App\Models\City;
 use App\Models\Contract;
 use App\Models\ContractType;
@@ -146,8 +147,39 @@ trait ResolvesContractLocationOptions
         $this->form->contract_type_id = $this->selectionId($selection, 'contractTypeId');
 
         if ($this->form->contract_type_id && $this->form->contract_type_id !== $previousContractTypeId) {
-            $this->form->updatedContractTypeId($this->form->contract_type_id);
+            $this->form->updatedContractTypeId($this->form->contract_type_id, $this->contractTermAnchor());
         }
+    }
+
+    /**
+     * The date a term recomputed by a contract-type change must start from.
+     * Null keeps the "starts next month" default; renewals override it with the
+     * date their predecessor hands over on.
+     */
+    protected function contractTermAnchor(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Seed the city / program / center cascade from an existing contract, so
+     * the identity step opens on the position that contract already holds.
+     *
+     * Shared by editing a contract and renewing one; the effective city comes
+     * from the position's center when it has one, because Position::inCity()
+     * treats a center's city as authoritative over the position's own city_id.
+     */
+    protected function initLocationContext(Contract $contract): void
+    {
+        $position = $contract->position;
+
+        $effectiveCityId = $position?->center_id
+            ? Center::whereKey($position->center_id)->value('city_id')
+            : $position?->city_id;
+
+        $this->city_id = $effectiveCityId ?? $contract->employee?->city_id;
+        $this->program_id = $position?->program_id;
+        $this->center_id = $position?->center_id;
     }
 
     abstract protected function locationOptionsPermission(): string;

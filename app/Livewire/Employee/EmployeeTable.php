@@ -154,7 +154,7 @@ class EmployeeTable extends LivewireTable
                     $src = $m->avatar_url;
 
                     return $src
-                        ? '<img src="'.e($src).'" alt="'.e($m->name).'" class="border rounded-full object-fit size-12 border-1 border-primary" />'
+                        ? '<img src="'.e($src).'" alt="'.e($m->name).'" class="size-12 max-w-none shrink-0 rounded-full border border-primary bg-white object-cover" />'
                         : '<div class="bg-gray-200 rounded-full size-12"></div>';
                 })->asHtml(),
 

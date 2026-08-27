@@ -213,36 +213,42 @@ document.addEventListener('alpine:init', () => {
         cities: config.cities ?? [],
 
         // ---- assignment
+        // config.renewal is present only when this page was opened as a
+        // renewal, seeding every field below from the source contract instead
+        // of opening blank. Everything it sets stays user-editable afterwards.
         selected: {
             city: str(config.cityId),
-            employee: '',
-            program: '',
-            center: ALL_CENTERS,
-            position: '',
-            contractType: '',
+            employee: str(config.renewal?.employeeId),
+            program: str(config.renewal?.programId),
+            center: config.renewal?.centerId != null ? str(config.renewal.centerId) : ALL_CENTERS,
+            position: str(config.renewal?.positionId),
+            contractType: str(config.renewal?.contractTypeId),
         },
         options: { employees: [], programs: [], centers: [], positions: [] },
 
         // ---- contract
-        startDate: '',
-        endDate: '',
+        startDate: config.renewal?.startDate ?? '',
+        endDate: config.renewal?.endDate ?? '',
 
         // ---- schedule
         days: [false, false, false, false, false, false, false],
-        workHoursFrom: '09:00',
-        workHoursTo: '17:00',
-        weeklyHoursOverride: null,
-        manualDays: false,
-        workDaysEnManual: '',
-        workDaysArManual: '',
-        showNotes: false,
-        attendingNotesEn: '',
-        attendingNotesAr: '',
+        workHoursFrom: config.renewal?.workHoursFrom ?? '09:00',
+        workHoursTo: config.renewal?.workHoursTo ?? '17:00',
+        weeklyHoursOverride: config.renewal ? str(config.renewal.weeklyHours) : null,
+        // A renewal's day list is carried over as free text rather than
+        // reverse-parsed into the checkbox grid, so it round-trips exactly
+        // even if the source was ever hand-edited into a non-standard set.
+        manualDays: Boolean(config.renewal),
+        workDaysEnManual: config.renewal?.workDaysEn ?? '',
+        workDaysArManual: config.renewal?.workDaysAr ?? '',
+        showNotes: Boolean(config.renewal?.attendingNotesEn || config.renewal?.attendingNotesAr),
+        attendingNotesEn: config.renewal?.attendingNotesEn ?? '',
+        attendingNotesAr: config.renewal?.attendingNotesAr ?? '',
 
         // ---- pay
-        salary: '',
-        currency: '1',
-        salaryPer: '1',
+        salary: config.renewal?.salary ?? '',
+        currency: str(config.renewal?.currency ?? '1'),
+        salaryPer: str(config.renewal?.salaryPer ?? '1'),
 
         // ---- ui
         section: 'assignment',

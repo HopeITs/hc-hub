@@ -1,11 +1,9 @@
 <div x-data @open-badge-modal.window="$wire.openBadgeModal($event.detail.id)">
     <div class="flex items-center justify-between mb-6">
-        <livewire:layout.breadcrumbs :title="__('general.all-badges')" :crumbs="[['label' => __('general.all-badges')]]" :showButton="false" />
+        <livewire:layout.breadcrumbs :title="__('general.all-badges')" :crumbs="[['label' => __('general.all-badges')]]" />
     </div>
 
-    <div class="rounded-surface border border-neutral-200 bg-white/60 backdrop-blur p-3 dark:border-neutral-700 dark:bg-neutral-800/60">
-        <livewire:badges.badges-table />
-    </div>
+    <livewire:badges.badges-table />
 
     {{-- Modal triggered by the View button in BadgesTable --}}
     <x-modal.dialog id="badgeDetails" :title="$modalTitle" wire:model="showModal">

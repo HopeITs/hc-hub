@@ -10,9 +10,11 @@ use App\Models\Employee;
 use App\Models\User;
 use App\Notifications\NewEmployeeWelcome;
 use App\Services\LeaveBalanceService;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
@@ -69,9 +71,30 @@ class ContractCreate extends Component
 
     public ?int $center_id = null;
 
-    public function mount(): void
+    /**
+     * The contract being renewed, when this page was opened as a renewal.
+     * Locked: it decides the term anchor and the heading, and mount() is the
+     * only place allowed to establish it (after the renew gate has passed).
+     */
+    #[Locked]
+    public ?Contract $renewalSource = null;
+
+    // ────────────────────────────────────────────────
+    // Lifecycle
+    // ────────────────────────────────────────────────
+
+    /**
+     * Serves both `/contracts/create` and `/contracts/{contract}/renew`. With a
+     * source contract the composer opens fully prefilled from it; without one
+     * it behaves exactly as it always has.
+     */
+    public function mount(?Contract $contract = null): void
     {
         $this->form->setDefaults();
+
+        if ($contract?->exists) {
+            $this->initializeRenewal($contract);
+        }
     }
 
     // ────────────────────────────────────────────────
@@ -130,6 +153,20 @@ class ContractCreate extends Component
 
     public function submit(array $payload): mixed
     {
+        // A renewal may sit open for a while. Re-read the source and re-check
+        // the gate, so a contract terminated or moved between opening the
+        // composer and saving it cannot still be carried forward.
+        if ($this->renewalSource) {
+            $source = $this->renewalSource->fresh();
+
+            // Deleted out from under the composer: there is nothing left to
+            // renew, and re-checking the gate against the stale copy would be
+            // a lie.
+            abort_if($source === null, 403);
+
+            Gate::authorize('renew', $source);
+        }
+
         $this->applyComposerPayload($payload);
 
         try {
@@ -181,6 +218,7 @@ class ContractCreate extends Component
             'cities' => $cities,
             'lockedCity' => $cities->count() === 1 ? $cities->first() : null,
             'types' => $this->contractTypeCards($nameColumn),
+            'renewalSeed' => $this->renewalComposerSeed(),
         ]);
     }
 
@@ -189,9 +227,26 @@ class ContractCreate extends Component
         return 'contracts.create';
     }
 
+    protected function locationOptionsEmployeeId(): ?int
+    {
+        // A renewal keeps its employee even when that employee has since been
+        // deactivated, so the dropdown must still be able to show them.
+        return $this->renewalSource?->employee_id;
+    }
+
+    protected function contractTermAnchor(): ?string
+    {
+        return $this->isRenewal() ? $this->form->start_date : null;
+    }
+
     // ────────────────────────────────────────────────
     // Private helpers
     // ────────────────────────────────────────────────
+
+    private function isRenewal(): bool
+    {
+        return $this->renewalSource !== null;
+    }
 
     /**
      * Contract types decorated with the dates each one implies.
@@ -199,7 +254,10 @@ class ContractCreate extends Component
      * The dates are produced by ContractForm::updatedContractTypeId() itself
      * rather than re-derived here, so a card can never state a consequence the
      * form would not actually apply. The form's own dates are restored
-     * afterwards because probing must not be observable.
+     * afterwards because probing must not be observable. A renewal anchors the
+     * preview to its own start date rather than "next month", so switching
+     * contract type mid-renewal cannot back-date the successor before its
+     * predecessor ends.
      *
      * @return \Illuminate\Support\Collection<int, object>
      */
@@ -213,7 +271,7 @@ class ContractCreate extends Component
             ->sortBy(fn ($type) => [$categories[$type->id] ?? 'zzz', $type->id])
             ->values()
             ->map(function ($type) use ($categories) {
-                $this->form->updatedContractTypeId($type->id);
+                $this->form->updatedContractTypeId($type->id, $this->contractTermAnchor());
 
                 return (object) [
                     'id' => $type->id,
@@ -322,6 +380,83 @@ class ContractCreate extends Component
         $value = is_string($value) ? trim($value) : '';
 
         return $value === '' ? null : $value;
+    }
+
+    // ────────────────────────────────────────────────
+    // Private — renewal
+    // ────────────────────────────────────────────────
+
+    private function initializeRenewal(Contract $contract): void
+    {
+        Gate::authorize('renew', $contract);
+
+        // employee.media so the banner's avatar_url resolves from the loaded
+        // relation rather than firing a media lookup of its own.
+        $this->renewalSource = $contract->loadMissing(['position', 'employee.media']);
+
+        [$start, $end] = $this->renewalWindowFromRequest($contract);
+
+        $this->form->fillFromRenewal($contract, $start, $end);
+        $this->initLocationContext($contract);
+    }
+
+    /**
+     * The dates chosen in the renew modal, passed through the query string.
+     *
+     * They come from the browser and are re-validated here; anything missing or
+     * malformed falls back to the contract's own default renewal window rather
+     * than failing the page.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private function renewalWindowFromRequest(Contract $contract): array
+    {
+        $requested = validator(request()->only(['start', 'end']), [
+            'start' => ['required', 'date_format:Y-m-d'],
+            'end' => ['required', 'date_format:Y-m-d', 'after_or_equal:start'],
+        ]);
+
+        if ($requested->fails()) {
+            return $contract->renewalWindow();
+        }
+
+        $validated = $requested->validated();
+
+        return [$validated['start'], $validated['end']];
+    }
+
+    /**
+     * The renewal's current values, handed to Alpine so the composer opens
+     * pre-filled instead of blank. Null outside of a renewal.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function renewalComposerSeed(): ?array
+    {
+        if (! $this->renewalSource) {
+            return null;
+        }
+
+        return [
+            'cityId' => $this->city_id,
+            'programId' => $this->program_id,
+            'centerId' => $this->center_id,
+            'employeeId' => $this->form->employee_id,
+            'positionId' => $this->form->position_id,
+            'contractTypeId' => $this->form->contract_type_id,
+            'startDate' => $this->form->start_date,
+            'endDate' => $this->form->end_date,
+            'workHoursFrom' => $this->form->work_hours_from,
+            'workHoursTo' => $this->form->work_hours_to,
+            'weeklyHours' => $this->form->weekly_hours,
+            'workDaysEn' => $this->form->work_days_en,
+            'workDaysAr' => $this->form->work_days_ar,
+            'attendingNotesEn' => $this->form->attending_notes_en,
+            'attendingNotesAr' => $this->form->attending_notes_ar,
+            'salary' => $this->form->salary,
+            'currency' => $this->form->currency,
+            'salaryPer' => $this->form->salary_per,
+        ];
     }
 
     private function notifyIfFirstContract(Contract $contract): void

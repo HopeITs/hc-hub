@@ -40,7 +40,7 @@
                 <x-error-span>{{ $errors->first('infoForm.actual_dob') }}</x-error-span>
             </div>
             <div wire:key="emp-city">
-                <x-forms.input-label for="city_id" required>{{ trans_choice('general.city', 1) }}</x-forms.input-label>
+                <x-forms.input-label for="city_id" required>@lang('general.current-residence')</x-forms.input-label>
                 <x-forms.select2-input wire:model="infoForm.city_id" id="city_id">
                     <option value="">{{ __('general.unknown') }}</option>
                     @foreach ($cities as $cityId => $city)
