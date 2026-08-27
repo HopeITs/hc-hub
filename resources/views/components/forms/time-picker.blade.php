@@ -3,6 +3,8 @@
     'wireModel',
     'format' => 'HH:mm',
     'disabled' => false,
+    'min' => null,
+    'max' => null,
 ])
 
 @php($pickerId = $id . '_picker')
@@ -18,6 +20,8 @@
         id="{{ $pickerId }}"
         data-bind-target="{{ $id }}"
         format="{{ $format }}"
+        @if($min) minimum="{{ $min }}" @endif
+        @if($max) maximum="{{ $max }}" @endif
         @disabled($disabled)
         class="block w-full min-h-[2.375rem]"
     ></clock-timepicker>
