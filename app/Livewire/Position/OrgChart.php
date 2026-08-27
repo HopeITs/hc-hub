@@ -24,6 +24,20 @@ class OrgChart extends Component
     /** The main "parent" city (Syria) that scopes the whole org. */
     private const MAIN_CITY_ID = 1;
 
+    /**
+     * Job-level grade shared by the chief executive and the deputies. The top of
+     * the chart is grouped by *grade* rather than by the stored reporting line, so
+     * an executive parented into a branch still reads at their real rank.
+     */
+    private const EXECUTIVE_GRADE = 1;
+
+    /**
+     * Title fragments that split the deputy tier (level 2) off from the chief
+     * executive. Matched against the raw title columns so the tier is stable
+     * whichever locale is active.
+     */
+    private const DEPUTY_TITLES = ['deputy', 'نائب'];
+
     /** @var Collection<int, City> */
     public $cities;
 
@@ -372,34 +386,53 @@ class OrgChart extends Component
         if ($rootPositions->isEmpty()) {
             $this->managersCount = 0;
 
-            return ['root' => collect(), 'rootAssistant' => collect(), 'managers' => collect()];
+            return ['root' => collect(), 'deputies' => collect(), 'managers' => collect()];
         }
 
         $rootIds = $rootPositions->pluck('id');
 
-        // When focusing on a specific manager there is no "assistant" tier — the
+        // Tier 2: the deputy executives, selected by grade + title and lifted out of
+        // whatever branch they happen to be parented to, so the rank reads as one row
+        // instead of scattering down the chart. They render as plain cards — their own
+        // reports are not nested beneath them but promoted onto tier 3, where their
+        // grade puts them. Focusing on a manager collapses this tier: the focused
         // manager IS the root and their team becomes the first level.
-        $rootAssistant = $this->focus_manager_id
+        $deputies = $this->focus_manager_id
             ? collect()
             : Position::query()
                 ->visible()
-                ->whereIn($managerColumn, $rootIds)
-                ->whereHas('jobLevel', fn (Builder $query) => $query->where('grade', 2))
+                ->whereNotIn('id', $rootIds)
+                ->whereHas('jobLevel', fn (Builder $query) => $query->where('grade', self::EXECUTIVE_GRADE))
                 ->with($relations)
-                ->get();
+                ->orderBy('id')
+                ->get()
+                ->filter($this->isDeputy(...))
+                ->values();
 
-        $teamLoader = function (Relation $query) use (&$teamLoader, $teamRelation, $relations): void {
+        // Tiers 1-2 combined. Excluded from the recursion below so a lifted deputy
+        // never renders twice — once on their own row and once inside a branch.
+        $topIds = $rootIds->concat($deputies->pluck('id'))->all();
+
+        $teamLoader = function (Relation $query) use (&$teamLoader, $teamRelation, $relations, $topIds): void {
             $this->applyFilters($query)
+                ->whereNotIn('id', $topIds)
                 ->orderByGrade()
                 ->with([...$relations, $teamRelation => $teamLoader]);
         };
 
-        // Top managers report directly to the root. They flow through the same
-        // applyFilters() as the recursion so every tier obeys one rule; the root
-        // always stays visible and the filters only prune the branches below it.
+        // Tier 3: the managerial row, sourced from the children of tiers 1 *and* 2.
+        // Reading from the root alone is what used to crop a position parented to a
+        // deputy — the Senior Financial Manager hangs off the Deputy CEO — silently
+        // taking its whole sub-tree off the chart with it. Grade drives the split
+        // from here: the view keeps managerial grades on this row and pools the
+        // operational grades into tier 4, and every sub-tree expands as before.
+        //
+        // They flow through the same applyFilters() as the recursion so every tier
+        // obeys one rule; the root always stays visible and the filters only prune
+        // the branches below it.
         $managers = Position::query()
-            ->whereIn($managerColumn, $rootIds)
-            ->whereNotIn('id', $rootAssistant->pluck('id'))
+            ->whereIn($managerColumn, $topIds)
+            ->whereNotIn('id', $topIds)
             ->tap(fn (Builder $query) => $this->applyFilters($query))
             ->orderByGrade()
             ->with([...$relations, $teamRelation => $teamLoader])
@@ -409,9 +442,27 @@ class OrgChart extends Component
 
         return [
             'root' => $rootPositions,
-            'rootAssistant' => $rootAssistant,
+            'deputies' => $deputies,
             'managers' => $managers,
         ];
+    }
+
+    /**
+     * Does this executive belong on the deputy row rather than beside the chief
+     * executive? Matched on the raw title columns rather than the locale accessor
+     * so the tier does not shift between EN and AR.
+     */
+    private function isDeputy(Position $position): bool
+    {
+        $title = mb_strtolower($position->title_en.' '.$position->title_ar);
+
+        foreach (self::DEPUTY_TITLES as $needle) {
+            if (str_contains($title, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function resolveRoots(string $managerColumn, array $relations): Collection
@@ -425,14 +476,22 @@ class OrgChart extends Component
                 ->get();
         }
 
+        // Deputies are rejected here so they fall through to tier 2 rather than
+        // sharing the level 1 row — the Deputy CEO carries no manager of their own
+        // and would otherwise qualify as a root. Same reason on the tech line, where
+        // most executives have no tech manager: rejecting only the deputies keeps
+        // that row populated without dropping the other roots, and their branches,
+        // off the chart entirely.
         $roots = Position::query()
             ->visible()
             ->whereNull($managerColumn)
-            ->whereHas('jobLevel', fn (Builder $query) => $query->where('grade', 1))
+            ->whereHas('jobLevel', fn (Builder $query) => $query->where('grade', self::EXECUTIVE_GRADE))
             ->with($relations)
             ->orderByGrade()
             ->orderBy('id')
-            ->get();
+            ->get()
+            ->reject($this->isDeputy(...))
+            ->values();
 
         if ($roots->isNotEmpty()) {
             return $roots;
@@ -478,7 +537,7 @@ class OrgChart extends Component
     private function updateStats(): void
     {
         $positions = collect($this->tree['root'])
-            ->concat($this->tree['rootAssistant'])
+            ->concat($this->tree['deputies'])
             ->concat($this->tree['managers']);
         $teamRelation = $this->manager_type.'Team';
 
@@ -490,7 +549,7 @@ class OrgChart extends Component
             }
         };
 
-        $walk($this->tree['rootAssistant']);
+        // Only tier 3 carries loaded team relations; tiers 1 and 2 are flat rows.
         $walk($this->tree['managers']);
 
         $positions = $positions->unique('id')->values();

@@ -380,7 +380,7 @@
                     <div class="origin-top-left will-change-transform"
                          :style="transformStyle()">
                         <div id="org-chart-export" class="flex min-w-max flex-col items-center {{ $compact ? 'px-8 py-8' : 'px-16 py-12' }}">
-                            {{-- Root (CEO) and their deputies/assistants share the first row. --}}
+                            {{-- Level 1 — the chief executive sits alone on the first row. --}}
                             <div class="relative flex items-end justify-center gap-4 pb-12">
                                 @foreach($tree['root'] as $root)
                                     @forelse($root->activeContracts as $contract)
@@ -390,17 +390,28 @@
                                     @endforelse
                                 @endforeach
 
-                                @foreach($tree['rootAssistant'] as $assistant)
-                                    @forelse($assistant->activeContracts as $contract)
-                                        <x-org-node :position="$assistant" :employee="$contract->employee" :manager-type="$manager_type" :compact="$compact"/>
-                                    @empty
-                                        <x-org-empty-node :position="$assistant" :compact="$compact"/>
-                                    @endforelse
-                                @endforeach
-
                                 <span class="absolute bottom-0 start-1/2 h-10 w-px {{ $trunk }}"></span>
                             </div>
 
+                            {{-- Level 2 — the deputy executives, as a flat row of cards. Their own
+                                 reports are promoted onto level 3 by grade, so no expander here. --}}
+                            @if(collect($tree['deputies'])->isNotEmpty())
+                                <div class="relative flex w-full items-end justify-center {{ $colGap }} border-t {{ $branchBorder }} px-4 pt-8 pb-12">
+                                    @foreach($tree['deputies'] as $deputy)
+                                        @forelse($deputy->activeContracts as $contract)
+                                            <x-org-node :position="$deputy" :employee="$contract->employee" :manager-type="$manager_type" :compact="$compact"/>
+                                        @empty
+                                            <x-org-empty-node :position="$deputy" :compact="$compact"/>
+                                        @endforelse
+                                    @endforeach
+
+                                    <span class="absolute bottom-0 start-1/2 h-10 w-px {{ $trunk }}"></span>
+                                </div>
+                            @endif
+
+                            {{-- Level 3 — department managers and key staff. The grade split below
+                                 keeps managerial grades on this row and pools the operational
+                                 grades into level 4; sub-trees expand exactly as before. --}}
                             @php($teamRel = $manager_type.'Team')
                             @php($topManagers = collect($tree['managers']))
                             @php($topBranches = $topManagers->filter(fn ($p) => $p->{$teamRel}->isNotEmpty()))
