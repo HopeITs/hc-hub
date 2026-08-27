@@ -761,8 +761,8 @@ return [
 
         // الحقلان يُطبعان كما هما في العقد، لذلك يُكتب كل مثال بلغة حقله
         // لا بلغة الواجهة.
-        'work-days-placeholder-en' => 'Example: Monday to Friday',
-        'work-days-placeholder-ar' => 'مثال: الإثنين إلى الجمعة',
+        'work-days-placeholder-en' => 'From Monday to Friday',
+        'work-days-placeholder-ar' => 'من الاثنين إلى الجمعة',
         'add-notes' => 'إضافة ملاحظات الدوام',
         'capacity-empty' => 'اختر مسمى وظيفياً لعرض الشواغر',
         'card-position' => 'المسمى الوظيفي',

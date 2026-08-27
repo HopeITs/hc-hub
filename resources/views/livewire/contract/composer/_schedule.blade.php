@@ -1,4 +1,6 @@
 @php
+    use Illuminate\Support\Js;
+
     // Work days are demanded when a contract is written from scratch, but not
     // when an imported one is being edited — those predate the field entirely.
     $requireWorkDays ??= true;
@@ -34,8 +36,10 @@
                 maxlength="255"
                 x-model="workDaysEn"
                 {{-- x-forms.input declares `placeholder` as a prop and drops it,
-                     so it is bound through Alpine instead of passed as one. --}}
-                x-bind:placeholder="@js(__('general.composer.work-days-placeholder-en'))"
+                     so it is bound through Alpine instead of passed as one.
+                     Blade directives are left uncompiled inside a component
+                     tag's attributes, hence the echoed Js::from literal. --}}
+                x-bind:placeholder="{{ Js::from(__('general.composer.work-days-placeholder-en')) }}"
             />
             <x-error-span>{{ $errors->first('form.work_days_en') }}</x-error-span>
         </div>
@@ -50,7 +54,7 @@
                 dir="rtl"
                 maxlength="255"
                 x-model="workDaysAr"
-                x-bind:placeholder="@js(__('general.composer.work-days-placeholder-ar'))"
+                x-bind:placeholder="{{ Js::from(__('general.composer.work-days-placeholder-ar')) }}"
             />
             <x-error-span>{{ $errors->first('form.work_days_ar') }}</x-error-span>
         </div>
