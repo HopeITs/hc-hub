@@ -91,8 +91,8 @@
         </x-primary-button>
     </div>
 
-    <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
-        <x-primary-button type="submit" class="!w-auto">@lang('general.save-education')</x-primary-button>
-        <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
-    </div>
+    <x-forms.dirty-gate watch="educationForm" :active="! $isCreateMode"
+        class="flex justify-end space-x-2 pt-4 mt-6 border-t">
+        <x-primary-button type="submit" class="!w-auto" x-bind:disabled="! dirty">@lang('general.save-education')</x-primary-button>
+    </x-forms.dirty-gate>
 </form>

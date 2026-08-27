@@ -49,8 +49,4 @@
             @lang('general.no_items_from_checklist')
         </div>
     @endif
-
-    <div class="flex justify-end pt-4 mt-6 border-t">
-        <x-secondary-button :href="route('employees.index')">@lang('general.back_to_list')</x-secondary-button>
-    </div>
 </div>

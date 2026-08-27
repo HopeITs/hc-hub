@@ -118,17 +118,55 @@ class AttachmentForm extends Form
         $rules = [];
 
         foreach ($this->attachments as $index => $item) {
-            $rules["attachments.{$index}.name"] = 'required|string|max:255';
-            $rules["attachments.{$index}.category"] = ['nullable', Rule::in(array_keys(AttachmentCategory::options()))];
-            $fileValidation = ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'];
-
-            if (empty($item['media_id']) || (! empty($item['file']) && $item['file'] instanceof TemporaryUploadedFile)) {
-                $fileValidation[] = 'required_if:attachments.'.$index.'.media_id,null';
+            // An untouched blank row (the one setEmployee() seeds when the
+            // employee has no attachments yet, or one just added and left
+            // alone) is not something to complain about — save() ignores it.
+            if ($this->isBlankRow($item)) {
+                continue;
             }
 
-            $rules["attachments.{$index}.file"] = $fileValidation;
+            $rules["attachments.{$index}.name"] = ['required', 'string', 'max:255'];
+            $rules["attachments.{$index}.category"] = ['nullable', Rule::in(array_keys(AttachmentCategory::options()))];
+
+            // A row that has no stored media behind it needs a file. This was
+            // `required_if:attachments.N.media_id,null`, which rendered as
+            // "The attachments.0.file field is required when attachments.0
+            // media id is empty." — the rule is unconditional here anyway.
+            $rules["attachments.{$index}.file"] = [
+                empty($item['media_id']) ? 'required' : 'nullable',
+                'file',
+                'mimes:pdf,jpg,jpeg,png',
+                'max:10240',
+            ];
         }
 
         return $rules;
+    }
+
+    /**
+     * Human field names, so errors read "The file (attachment 1) field is
+     * required." instead of leaking the array path at the user.
+     */
+    protected function validationAttributes(): array
+    {
+        $attributes = [];
+
+        foreach (array_keys($this->attachments) as $index) {
+            $row = __('general.attachment').' '.($index + 1);
+
+            $attributes["attachments.{$index}.name"] = __('general.name').' ('.$row.')';
+            $attributes["attachments.{$index}.category"] = __('general.category').' ('.$row.')';
+            $attributes["attachments.{$index}.file"] = __('general.file').' ('.$row.')';
+        }
+
+        return $attributes;
+    }
+
+    private function isBlankRow(array $item): bool
+    {
+        return empty($item['media_id'])
+            && ! ($item['file'] ?? null) instanceof TemporaryUploadedFile
+            && blank($item['name'] ?? null)
+            && blank($item['category'] ?? null);
     }
 }

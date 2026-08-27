@@ -91,10 +91,12 @@
         </div>
     </div>
 
-    <div class="flex justify-end space-x-2">
-        <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-        <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
-    </div>
+    <x-forms.dirty-gate watch="infoForm" :active="! $isCreateMode" class="flex justify-end space-x-2">
+        <x-primary-button type="submit" class="!w-auto" x-bind:disabled="! dirty">@lang('general.save')</x-primary-button>
+        @if ($isCreateMode)
+            <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
+        @endif
+    </x-forms.dirty-gate>
 
 
 </form>

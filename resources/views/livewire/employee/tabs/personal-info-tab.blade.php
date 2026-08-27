@@ -217,19 +217,22 @@
         </div>
     </div>
 
-    <div class="flex justify-end space-x-2 ">
+    <x-forms.dirty-gate watch="infoForm" :active="! $isCreateMode" class="flex justify-end space-x-2 ">
         {{--
-            The tab is deliberately NOT advanced here. saveInformation()
-            redirects on success, so switching tabs client-side only ever took
-            effect when validation FAILED — which hid this tab, and with it
-            every error message belonging to its fields.
+            The tab is deliberately NOT advanced here. In create mode
+            saveInformation() redirects into the edit form on success, so
+            switching tabs client-side only ever took effect when validation
+            FAILED — which hid this tab, and with it every error message
+            belonging to its fields. In edit mode the save simply stays put.
         --}}
         <x-primary-button type="button" wire:click="saveInformation"
-            class="!w-auto">
-            @lang('general.next')
+            class="!w-auto" x-bind:disabled="! dirty">
+            @lang($isCreateMode ? 'general.next' : 'general.save')
         </x-primary-button>
 
-        <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
-    </div>
+        @if ($isCreateMode)
+            <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
+        @endif
+    </x-forms.dirty-gate>
 
 </form>

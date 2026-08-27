@@ -5,6 +5,18 @@
         ['label' => $title ?? __('general.add-new')],
     ]" />
 
+    @unless ($isCreateMode)
+        {{--
+            The only exit from the edit form. Every tab's save now stays put,
+            so this button is the single way back to the employees table.
+        --}}
+        <div class="flex justify-end mb-4">
+            <x-secondary-button :href="route('employees.index')" wire:navigate class="!w-auto">
+                @lang('general.back_to_employees')
+            </x-secondary-button>
+        </div>
+    @endunless
+
     {{--
         Rendered outside the tab container on purpose: only the active tab is
         rendered below, so an error list living inside a tab is invisible
