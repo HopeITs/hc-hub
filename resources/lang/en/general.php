@@ -732,6 +732,61 @@ return [
     'export-csv' => 'Export CSV',
     'no-department' => 'Unassigned',
 
+    // Contract create — the single-page "Composer" screen.
+    'composer' => [
+
+        'assignment' => 'Assignment',
+        'contract' => 'Contract',
+        'schedule' => 'Schedule',
+        'pay' => 'Pay',
+
+        'locked-city' => 'locked to your role',
+        'all-centers' => 'All centers',
+        'city-level' => 'City-level (no center)',
+        'position-full' => 'Full',
+        'seats-left' => ':taken of :max filled · :left left',
+        'no-seats-left' => ':taken of :max filled · no seats left',
+        'duplicate-contract' => 'Already has an active contract ending :date. Creating this one will not close it.',
+        'duplicate-short' => 'Active',
+
+        'max-end-date' => 'At most one year after the start date.',
+        'end-date-too-far' => 'The end date cannot be more than a year after the start date.',
+        'runs-to' => 'runs to :date',
+        'lasts-months' => ':count months',
+
+        'work-days-required' => 'Pick at least one work day.',
+        'hours-derivation' => ':days days × :hours h',
+        'auto' => 'auto',
+        'override' => 'override',
+        'use-picker' => 'use the day picker',
+        'enter-manually' => 'enter manually',
+        'add-notes' => 'Add attending notes',
+        'capacity-empty' => 'Pick a position to see its seats',
+        'card-position' => 'Position',
+        'card-center' => 'Center',
+        'card-employee' => 'Employee',
+        'duration-month' => 'month',
+        'duration-months' => 'months',
+        'duration-day' => 'day',
+        'duration-days' => 'days',
+        'per-month' => 'per month',
+        'per-hour' => 'per hour',
+        'per-session' => 'per session',
+        'per-year' => 'per year',
+
+        'card-title' => 'Contract',
+        'capacity' => 'Capacity',
+        'annual-leave' => 'Annual leave',
+        'days-unit' => 'days',
+        'locked-because' => 'finish :section first',
+        'progress' => ':done of :total sections complete',
+        'create' => 'Create contract',
+        'continue' => 'Continue',
+
+        'no-results' => 'Nothing matches',
+        'clear' => 'Clear',
+    ],
+
     // Strings that exist only for assistive technology. They are read aloud by
     // screen readers but never painted, so they must stay translated like any
     // other user-facing copy.

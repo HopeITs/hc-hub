@@ -5,7 +5,6 @@
             @lang('general.employees-per-salary-type')
         </h3>
 
-        <x-icons.chart class="size-5 mb-1 text-primary"/>
     </div>
 
     <div class="grid grid-cols-2 -mt-3 items-center">

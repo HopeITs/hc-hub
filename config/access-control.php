@@ -131,11 +131,12 @@ return [
             'toggleItemStatusConfirmed' => 'employees.update',
             'exportExcel' => 'employees.export',
         ],
+        // The composer exposes exactly three actions: one option load, one
+        // entitlement preview, and the create itself.
         'contract.contract-create' => [
-            'save' => 'contracts.create',
             'submit' => 'contracts.create',
             'locationOptions' => 'contracts.create',
-            'advanceIdentity' => 'contracts.create',
+            'leavePreview' => 'contracts.create',
         ],
         'contract.contract-edit' => [
             'save' => 'contracts.update',
@@ -349,10 +350,8 @@ return [
             'updatedPermissionFilterType', 'updatedPermissionFilterValue',
         ],
         'badges.badges-module' => ['openBadgeModal'],
-        'contract.contract-create' => [
-            'next', 'prev', 'jumpTo', 'updatedCityId', 'updatedProgramId',
-            'updatedCenterId', 'updatedFormPositionId', 'updatedFormContractTypeId',
-        ],
+        // contract.contract-create has no exempt actions: the composer's step
+        // navigation and updated* hooks were removed with the wizard.
         'contract.contract-edit' => [
             'next', 'prev', 'jumpTo', 'updatedCityId', 'updatedProgramId',
             'updatedCenterId', 'updatedFormPositionId',

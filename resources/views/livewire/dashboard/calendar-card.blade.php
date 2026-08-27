@@ -1,4 +1,4 @@
-<div class="mx-auto h-full w-full max-w-3xl rounded-[32px] bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
+<div class="mx-auto h-full w-full max-w-3xl rounded-surface bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
     <x-dashboard-cards.card-header :title="__('general.calendar')">
         <x-slot:icon>
             <svg class="block size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@
 
         @foreach ($calendar as $day)
             @php
-                $wrapperClasses = "size-5 flex items-center justify-center transition";
+                $wrapperClasses = "size-5 relative flex items-center justify-center transition";
 
                 if ($day['circleFill']) {
                     $wrapperClasses .= " rounded-full {$day['circleFill']}";
@@ -51,17 +51,13 @@
             <div class="relative group flex justify-center">
 
                 <div class="{{ $wrapperClasses }}">
-                    <div class="flex flex-col items-center leading-none">
+                    <span class="{{ $numberClasses }} leading-none translate-y-[1px]">
+                        {{ $day['day'] }}
+                    </span>
 
-                <span class="{{ $numberClasses }}">
-                    {{ $day['day'] }}
-                </span>
-
-                        @if($day['underline'])
-                            <div class="w-full border-b {{ $day['underlineColor'] }} mt-[-1px]"></div>
-                        @endif
-
-                    </div>
+                    @if($day['underline'])
+                        <span class="absolute bottom-[3px] left-1/2 w-2.5 -translate-x-1/2 border-b {{ $day['underlineColor'] }}"></span>
+                    @endif
                 </div>
 
                 @if(count($day['tooltip']) > 0)

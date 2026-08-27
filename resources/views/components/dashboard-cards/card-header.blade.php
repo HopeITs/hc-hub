@@ -14,12 +14,6 @@
                 {{ $count }}
             </span>
         @endif
-
-        @isset($icon)
-            <span class="flex size-4 shrink-0 items-center justify-center text-primary">
-                {{ $icon }}
-            </span>
-        @endisset
     </div>
 
     @isset($actions)

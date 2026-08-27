@@ -155,7 +155,7 @@ class ContractRenewalTest extends TestCase
 
         Livewire::actingAs($fixtures['hr'])
             ->test(ContractCreate::class)
-            ->call('advanceIdentity', [
+            ->call('submit', [
                 'cityId' => $fixtures['city']->id,
                 'employeeId' => $fixtures['employee']->id,
                 'programId' => $fixtures['program']->id,
@@ -265,52 +265,6 @@ class ContractRenewalTest extends TestCase
             ->assertSet('form.renewal_source_id', $source->id);
     }
 
-    public function test_renew_with_edit_opens_on_terms_and_skips_the_identity_lookups(): void
-    {
-        $fixtures = $this->makeFixtures();
-        $source = $this->makeContract($fixtures);
-
-        $statements = [];
-        DB::listen(function ($query) use (&$statements): void {
-            $statements[] = $query->sql;
-        });
-
-        Livewire::actingAs($fixtures['hr'])
-            ->test(ContractCreate::class, ['contract' => $source])
-            ->assertSet('step', 2)
-            ->assertSet('maxStep', 3);
-
-        // Step 1 is what makes this page slow: it lists cities and contract
-        // types, then Alpine round-trips to locationOptions() for the whole
-        // city. A renewal already knows its assignment, so none of it should
-        // run on load.
-        $touched = fn (string $table): bool => collect($statements)
-            ->contains(fn (string $sql): bool => str_contains($sql, $table));
-
-        // The city *list* filters on is_active; the lone `cities where slug`
-        // query is ContractPolicy resolving the active city, which is expected.
-        $this->assertFalse(
-            collect($statements)->contains(
-                fn (string $sql): bool => str_contains($sql, '"cities"') && str_contains($sql, 'is_active'),
-            ),
-            'The renew page still queried the city dropdown list.',
-        );
-        $this->assertFalse($touched('"contract_types"'), 'The renew page still queried the contract-type list.');
-    }
-
-    public function test_going_back_from_terms_still_reaches_the_identity_step(): void
-    {
-        $fixtures = $this->makeFixtures();
-        $source = $this->makeContract($fixtures);
-
-        // Changing the position during a renewal must remain possible.
-        Livewire::actingAs($fixtures['hr'])
-            ->test(ContractCreate::class, ['contract' => $source])
-            ->call('prev')
-            ->assertSet('step', 1)
-            ->assertOk();
-    }
-
     public function test_renew_with_edit_falls_back_to_the_default_window_without_query_dates(): void
     {
         $fixtures = $this->makeFixtures();
@@ -332,8 +286,24 @@ class ContractRenewalTest extends TestCase
 
         Livewire::actingAs($fixtures['hr'])
             ->test(ContractCreate::class, ['contract' => $source])
-            ->set('form.salary', 999)
-            ->call('submit')
+            ->call('submit', [
+                'cityId' => $fixtures['city']->id,
+                'employeeId' => $source->employee_id,
+                'programId' => $fixtures['program']->id,
+                'centerId' => $fixtures['center']->id,
+                'positionId' => $source->position_id,
+                'contractTypeId' => $source->contract_type_id,
+                'startDate' => '2027-01-01',
+                'endDate' => '2027-12-31',
+                'workHoursFrom' => $source->work_hours_from,
+                'workHoursTo' => $source->work_hours_to,
+                'weeklyHours' => $source->weekly_hours,
+                'workDaysEn' => $source->work_days_en,
+                'workDaysAr' => $source->work_days_ar,
+                'salary' => 999,
+                'currency' => $source->currency,
+                'salaryPer' => $source->salary_per,
+            ])
             ->assertHasNoErrors()
             ->assertRedirect();
 
@@ -355,7 +325,7 @@ class ContractRenewalTest extends TestCase
 
         Livewire::actingAs($fixtures['hr'])
             ->test(ContractCreate::class, ['contract' => $source])
-            ->call('advanceIdentity', [
+            ->call('submit', [
                 'cityId' => $fixtures['city']->id,
                 'employeeId' => $fixtures['employee']->id,
                 'programId' => $fixtures['program']->id,
@@ -373,21 +343,20 @@ class ContractRenewalTest extends TestCase
         $fixtures = $this->makeFixtures();
         $source = $this->makeContract($fixtures);
 
-        Livewire::actingAs($fixtures['hr'])
+        // The composer previews each type's dates client-side from the
+        // typeDefaults handed down at render time; switching to the trial
+        // type must shorten the term to three months from the renewal's own
+        // start date, never "start of next month".
+        $rendered = Livewire::actingAs($fixtures['hr'])
             ->test(ContractCreate::class, ['contract' => $source])
-            ->call('advanceIdentity', [
-                'cityId' => $fixtures['city']->id,
-                'employeeId' => $fixtures['employee']->id,
-                'programId' => $fixtures['program']->id,
-                'centerId' => $fixtures['center']->id,
-                'positionId' => $fixtures['position']->id,
-                'contractTypeId' => $fixtures['trialType']->id,
-            ])
-            ->assertHasNoErrors()
-            // Switching to a trial type shortens the term to three months, but
-            // it must never back-date the renewal to "start of next month".
-            ->assertSet('form.start_date', '2027-01-01')
-            ->assertSet('form.end_date', '2027-04-01');
+            ->html();
+
+        // @js() encodes with JSON_HEX_QUOT, so every double quote in the
+        // embedded JSON — including the ones around these keys — comes out
+        // as the escape sequence below rather than a literal ".
+        $escapedQuote = '\\u0022';
+        $this->assertStringContainsString("{$escapedQuote}start{$escapedQuote}:{$escapedQuote}2027-01-01{$escapedQuote}", $rendered);
+        $this->assertStringContainsString("{$escapedQuote}end{$escapedQuote}:{$escapedQuote}2027-04-01{$escapedQuote}", $rendered);
     }
 
     // ────────────────────────────────────────────────
@@ -687,7 +656,7 @@ class ContractRenewalTest extends TestCase
         // Terminated after the wizard was opened but before it was submitted.
         $source->update(['terminated_at' => '2026-10-01']);
 
-        $component->call('submit')->assertStatus(403);
+        $component->call('submit', [])->assertStatus(403);
 
         $this->assertSame(1, Contract::query()->count());
     }
@@ -711,7 +680,7 @@ class ContractRenewalTest extends TestCase
         $this->expectException(ModelNotFoundException::class);
 
         try {
-            $component->call('submit');
+            $component->call('submit', []);
         } finally {
             $this->assertSame(0, Contract::query()->count());
         }

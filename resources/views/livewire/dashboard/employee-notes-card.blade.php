@@ -3,7 +3,7 @@
         x-data="notesBoard()"
         x-init="init(@js($this->notes->pluck('id')))"
         class="relative h-full w-full">
-        <div class="flex h-full w-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
+        <div class="flex h-full w-full flex-col overflow-hidden rounded-surface border border-gray-200 bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
             <x-dashboard-cards.card-header :title="__('general.notes')" :count="$this->notes->count()">
                 <x-slot:icon>
                     <img class="block size-full object-contain" src="{{ asset('assets/icons/notes.svg') }}" alt="">

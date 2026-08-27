@@ -1,10 +1,80 @@
 @php
-    $steps  = [1 => 'identity', 2 => 'terms', 3 => 'comp'];
-    $active = $steps[$step] ?? 'identity';
+    use Carbon\Carbon;
+
+    $locale = app()->getLocale();
     $heading = $renewalSource ? __('general.renew-contract') : __('general.add-new');
+
+    /*
+     * Day names come from Carbon rather than a hand-written list, so the two
+     * strings written into work_days_en / work_days_ar always match the names
+     * the rest of the application prints. Monday-first.
+     */
+    $weekStart = Carbon::now()->startOfWeek(Carbon::MONDAY);
+    $dayNames = [];
+    $dayShort = [];
+
+    foreach (['en', 'ar'] as $dayLocale) {
+        foreach (range(0, 6) as $offset) {
+            $day = $weekStart->copy()->addDays($offset)->locale($dayLocale);
+            $dayNames[$dayLocale][$offset] = $day->dayName;
+            $dayShort[$dayLocale][$offset] = $day->shortDayName;
+        }
+    }
+
+    $composerConfig = [
+        'locale' => $locale,
+        'cityId' => $lockedCity?->id ?? ($renewalSeed['cityId'] ?? null),
+        'cities' => $cities->map(fn ($city) => ['value' => $city->id, 'label' => $city->name])->values(),
+        'dayNames' => $dayNames,
+        'dayShort' => $dayShort,
+        // The Arabic string is always joined with the Arabic comma, whatever
+        // locale the interface happens to be in.
+        'listSeparator' => '، ',
+        'typeDefaults' => $types->mapWithKeys(fn ($type) => [
+            (string) $type->id => [
+                'name' => $type->name,
+                'start' => $type->startDate,
+                'end' => $type->endDate,
+            ],
+        ]),
+        // Present only when this page was opened as a renewal, so Alpine can
+        // seed every field from the source contract instead of opening blank.
+        'renewal' => $renewalSeed,
+        'labels' => [
+            'allCenters' => __('general.composer.all-centers'),
+            'cityLevel' => __('general.composer.city-level'),
+            'lockedBecause' => __('general.composer.locked-because'),
+            'sections' => [
+                'assignment' => __('general.composer.assignment'),
+                'contract' => __('general.composer.contract'),
+                'schedule' => __('general.composer.schedule'),
+                'pay' => __('general.composer.pay'),
+            ],
+            // Passed with their :placeholders intact; the composer substitutes
+            // them client-side so no formatting logic is duplicated in PHP.
+            'progress' => __('general.composer.progress'),
+            'seatsLeft' => __('general.composer.seats-left'),
+            'noSeatsLeft' => __('general.composer.no-seats-left'),
+            'duplicate' => __('general.composer.duplicate-contract'),
+            'derivation' => __('general.composer.hours-derivation'),
+            // Lowercase units, because these are read inside a phrase
+            // ("3 months") rather than as standalone labels.
+            'month' => __('general.composer.duration-month'),
+            'months' => __('general.composer.duration-months'),
+            'day' => __('general.composer.duration-day'),
+            'days' => __('general.composer.duration-days'),
+            'daysUnit' => __('general.composer.days-unit'),
+            'unknownCurrency' => __('general.unknown'),
+            'perMonth' => __('general.composer.per-month'),
+            'perHour' => __('general.composer.per-hour'),
+            'perSession' => __('general.composer.per-session'),
+            'perYear' => __('general.composer.per-year'),
+            'empty' => '—',
+        ],
+    ];
 @endphp
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <livewire:layout.breadcrumbs :title="$heading" :crumbs="[
         ['label' => trans_choice('general.employee-management', 2)],
         ['label' => trans_choice('general.contracts', 2), 'url' => route('contracts.index')],
@@ -36,115 +106,28 @@
         </div>
     @endif
 
-    <form wire:submit.prevent="submit" class="mt-2">
-
-
-        <x-tab.form :activeTab="$active" wire:key="contract-wizard-{{ $step }}">
-            <x-tab.list>
-                {{-- Identity --}}
-                <x-tab.item :title="__('general.identity-org')" activeTab="identity"
-                            class="pointer-events-none select-none {{ $active === 'identity' ? 'bg-primary text-white' : '' }}">
-                    <svg class="w-5 h-5 me-2 opacity-80" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zM3 18a7 7 0 1114 0H3z"
-                              clip-rule="evenodd"/>
-                    </svg>
-                </x-tab.item>
-
-                {{-- Terms --}}
-                <x-tab.item :title="__('general.terms-status')" activeTab="terms"
-                            class="{{ $maxStep < 2 ? 'opacity-50' : '' }} pointer-events-none select-none {{ $active === 'terms' ? 'bg-primary text-white' : '' }}">
-                    <svg class="w-5 h-5 me-2 opacity-80" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1z"/>
-                        <path d="M18 9H2v7a2 2 0 002 2h12a2 2 0 002-2V9z"/>
-                    </svg>
-                </x-tab.item>
-
-                {{-- Pay --}}
-                <x-tab.item :title="__('general.Pay-schedule')" activeTab="comp"
-                            class="{{ $maxStep < 3 ? 'opacity-50' : '' }} pointer-events-none select-none {{ $active === 'comp' ? 'bg-primary text-white' : '' }}">
-                    <x-icons.cash class="w-5 h-5 me-2" :title="__('general.Pay-schedule')"/>
-                </x-tab.item>
-            </x-tab.list>
-
-
-            <div class="flex-grow w-full">
-                {{-- step 1 --}}
-                <x-tab.container active-tab="identity">
-                    @if($step === 1)
-                        <div
-                            x-data="contractLocationPicker({
-                                cityId: @js($city_id),
-                                employeeId: @js($form->employee_id),
-                                programId: @js($program_id),
-                                centerId: @js($center_id),
-                                positionId: @js($form->position_id),
-                                contractTypeId: @js($form->contract_type_id),
-                                placeholder: @js(__('general.select')),
-                                loadingText: @js(__('general.loading')),
-                            })"
-                            x-init="initialize()"
-                        >
-                            <div class="mb-4 pb-3 border-b border-neutral-200">
-                                <h2 class="text-body font-semibold text-neutral-900">@lang('general.identity-org')</h2>
-                            </div>
-
-                            @include('livewire.contract.Partials.identity-fields')
-
-                            <div class="mt-6 flex items-center justify-end gap-3">
-                                <x-primary-button type="button" x-on:click="advanceIdentity()" x-bind:disabled="loading || advancing" wire:loading.attr="disabled" wire:target="advanceIdentity">
-                                    <span x-show="!advancing">@lang('general.next')</span>
-                                    <span x-cloak x-show="advancing">@lang('general.loading')…</span>
-                                </x-primary-button>
-                            </div>
-                        </div>
-                    @endif
-                </x-tab.container>
-
-                {{-- step 2 --}}
-                <x-tab.container active-tab="terms">
-                    @if($step === 2)
-                        <div class="mb-4 pb-3 border-b border-neutral-200">
-                            <h2 class="text-body font-semibold text-neutral-900">@lang('general.terms-status')</h2>
-                        </div>
-
-                        @include('livewire.contract.Partials.terms-fields')
-
-                        <div class="mt-6 flex items-center justify-between">
-                            <x-secondary-button type="button" wire:click="prev" class="hover:bg-neutral-100"
-                                                wire:loading.attr="disabled">
-                                @lang('general.previous')
-                            </x-secondary-button>
-                            <x-primary-button type="button" wire:click="next" wire:loading.attr="disabled">
-                                <span wire:loading.remove>@lang('general.next')</span>
-                                <span wire:loading>@lang('general.loading')…</span>
-                            </x-primary-button>
-                        </div>
-                    @endif
-                </x-tab.container>
-
-                {{-- step 3 --}}
-                <x-tab.container active-tab="comp">
-                    @if($step === 3)
-                        <div class="mb-4 pb-3 border-b border-neutral-200">
-                            <h2 class="text-body font-semibold text-neutral-900">@lang('general.Pay-schedule')</h2>
-                        </div>
-
-                        @include('livewire.contract.Partials.pay-fields')
-
-                        <div class="mt-6 flex items-center justify-between">
-                            <x-secondary-button type="button" wire:click="prev" class="hover:bg-neutral-100"
-                                                wire:loading.attr="disabled">
-                                @lang('general.previous')
-                            </x-secondary-button>
-                            <x-primary-button type="submit" wire:loading.attr="disabled">
-                                <span wire:loading.remove>@lang('general.save')</span>
-                                <span wire:loading>@lang('general.saving')…</span>
-                            </x-primary-button>
-                        </div>
-                    @endif
-                </x-tab.container>
+    <div
+        x-data="contractComposer(@js($composerConfig))"
+        x-init="initialize()"
+        class="pb-2 max-lg:pb-28"
+    >
+        {{--
+            items-stretch is what actually guarantees the two columns share a
+            height: a grid row is as tall as its tallest cell, and both cells
+            fill it. Neither side is tuned to the other.
+        --}}
+        <div class="grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5">
+            <div class="flex min-w-0 flex-col gap-2.5">
+                @include('livewire.contract.create._assignment')
+                @include('livewire.contract.create._contract')
+                @include('livewire.contract.create._schedule')
+                @include('livewire.contract.create._pay')
+                @include('livewire.contract.create._action-bar')
             </div>
-        </x-tab.form>
-    </form>
+
+            <aside class="hidden lg:block">
+                @include('livewire.contract.create._contract-card')
+            </aside>
+        </div>
+    </div>
 </div>
