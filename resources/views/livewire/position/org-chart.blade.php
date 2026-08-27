@@ -396,13 +396,19 @@
                             {{-- Level 2 — the deputy executives, as a flat row of cards. Their own
                                  reports are promoted onto level 3 by grade, so no expander here. --}}
                             @if(collect($tree['deputies'])->isNotEmpty())
-                                <div class="relative flex w-full items-end justify-center {{ $colGap }} border-t {{ $branchBorder }} px-4 pt-8 pb-12">
+                                <div class="relative flex w-full items-start justify-center {{ $colGap }} border-t {{ $branchBorder }} px-4 pb-12">
                                     @foreach($tree['deputies'] as $deputy)
-                                        @forelse($deputy->activeContracts as $contract)
-                                            <x-org-node :position="$deputy" :employee="$contract->employee" :manager-type="$manager_type" :compact="$compact"/>
-                                        @empty
-                                            <x-org-empty-node :position="$deputy" :compact="$compact"/>
-                                        @endforelse
+                                        {{-- Same stem geometry as a top-level manager column, so the
+                                             drop from level 1 lands on each card the way level 3 does. --}}
+                                        <div class="relative flex flex-col items-center pt-6">
+                                            <span class="absolute start-1/2 top-0 h-6 w-px {{ $trunk }}"></span>
+
+                                            @forelse($deputy->activeContracts as $contract)
+                                                <x-org-node :position="$deputy" :employee="$contract->employee" :manager-type="$manager_type" :compact="$compact"/>
+                                            @empty
+                                                <x-org-empty-node :position="$deputy" :compact="$compact"/>
+                                            @endforelse
+                                        </div>
                                     @endforeach
 
                                     <span class="absolute bottom-0 start-1/2 h-10 w-px {{ $trunk }}"></span>
