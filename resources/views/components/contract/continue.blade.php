@@ -7,7 +7,7 @@
     Clicking any other section header does the same thing.
 --}}
 <div class="mt-5 flex justify-end border-t border-neutral-100 pt-4"
-     x-cloak x-show="isValid('{{ $section }}') && '{{ $section }}' !== 'pay'">
+     x-cloak x-show="isValid('{{ $section }}') && !isLastSection('{{ $section }}')">
     <button
         type="button"
         class="inline-flex items-center gap-2 rounded-control border border-primary bg-white px-4 py-2

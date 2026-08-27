@@ -32,6 +32,17 @@
                x-bind:class="selectedEmployee ? 'text-neutral-900' : 'text-neutral-300'"
                x-text="selectedEmployee ? selectedEmployee.label : '—'"></p>
             <p class="truncate text-caption text-secondary-medium" x-text="cardSubtitle"></p>
+
+            @if($currentPeriod ?? null)
+                {{-- The period as the contract stands today. The Start/End rows
+                     below move as the form is edited; this line does not, so
+                     what is being changed stays comparable to what it was. --}}
+                <p class="truncate text-caption tabular-nums text-secondary-light"
+                   title="{{ __('general.current-period') }}: {{ $currentPeriod }}">
+                    <span class="sr-only">@lang('general.current-period'):</span>
+                    {{ $currentPeriod }}
+                </p>
+            @endif
         </div>
     </div>
 

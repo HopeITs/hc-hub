@@ -739,6 +739,11 @@ return [
         'contract' => 'Contract',
         'schedule' => 'Schedule',
         'pay' => 'Pay',
+        // Editing only — a contract cannot already have ended when it is written.
+        'termination' => 'Termination',
+        'termination-hint' => 'Optional. Recording a termination date or reason deactivates this contract.',
+        'not-terminated' => 'Not terminated',
+        'clear-termination' => 'Clear termination',
 
         'locked-city' => 'locked to your role',
         'all-centers' => 'All centers',
@@ -754,12 +759,11 @@ return [
         'runs-to' => 'runs to :date',
         'lasts-months' => ':count months',
 
-        'work-days-required' => 'Pick at least one work day.',
-        'hours-derivation' => ':days days × :hours h',
-        'auto' => 'auto',
-        'override' => 'override',
-        'use-picker' => 'use the day picker',
-        'enter-manually' => 'enter manually',
+        // Both fields hold the phrase the contract PDF prints verbatim, so each
+        // placeholder is written in its own field's language rather than the
+        // interface's — the AR field is Arabic even on the English screen.
+        'work-days-placeholder-en' => 'Example: Monday to Friday',
+        'work-days-placeholder-ar' => 'مثال: الإثنين إلى الجمعة',
         'add-notes' => 'Add attending notes',
         'capacity-empty' => 'Pick a position to see its seats',
         'card-position' => 'Position',

@@ -22,19 +22,21 @@
 
     <div class="flex flex-wrap items-center gap-3 p-3 sm:px-4">
         <p class="flex min-w-0 flex-1 items-center gap-2.5 text-small">
+            {{-- One pip per required section. Termination is optional, so it
+                 has no pip: it can never be the thing holding the save back. --}}
             <span class="flex gap-1" aria-hidden="true">
-                @foreach(['assignment', 'contract', 'schedule', 'pay'] as $sectionName)
+                <template x-for="name in requiredSections" :key="name">
                     <span class="h-1.5 w-6 rounded-full transition-colors"
-                          x-bind:class="isValid('{{ $sectionName }}') ? 'bg-primary' : 'bg-neutral-300'"></span>
-                @endforeach
+                          x-bind:class="isValid(name) ? 'bg-primary' : 'bg-neutral-300'"></span>
+                </template>
             </span>
             <span class="truncate font-medium"
-                  x-bind:class="completedCount === 4 ? 'text-neutral-900' : 'text-secondary-dark'"
+                  x-bind:class="completedCount === requiredSections.length ? 'text-neutral-900' : 'text-secondary-dark'"
                   x-text="progressLabel"></span>
         </p>
 
         <div class="flex shrink-0 items-center gap-2">
-            <a href="{{ route('contracts.index') }}" wire:navigate
+            <a href="{{ $cancelUrl }}" wire:navigate
                class="rounded-control border border-neutral-300 bg-white px-4 py-2 text-body font-semibold
                       text-secondary-dark shadow-e1 transition hover:bg-neutral-100 active:scale-[0.98]
                       focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
@@ -56,7 +58,7 @@
                     <x-icons.spinner class="size-4 animate-spin" />
                     <span class="sr-only">@lang('general.a11y.loading')</span>
                 </span>
-                <span x-text="submitting ? @js(__('general.saving')) : @js(__('general.composer.create'))"></span>
+                <span x-text="submitting ? @js(__('general.saving')) : @js($submitLabel)"></span>
             </button>
         </div>
     </div>

@@ -9,7 +9,6 @@ use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Employee;
 use App\Models\Position;
-use App\Models\User;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Renderless;
 
@@ -43,14 +42,13 @@ trait ResolvesContractLocationOptions
 
         $activeCityId = $user->activeCityId();
 
-        abort_unless(
-            City::query()
-                ->whereKey($cityId)
-                ->where('is_active', true)
-                ->when($activeCityId, fn ($query, int $allowedCityId) => $query->whereKey($allowedCityId))
-                ->exists(),
-            403,
-        );
+        $city = City::query()
+            ->whereKey($cityId)
+            ->where('is_active', true)
+            ->when($activeCityId, fn ($query, int $allowedCityId) => $query->whereKey($allowedCityId))
+            ->first(['id', 'slug']);
+
+        abort_unless($city !== null, 403);
 
         $locale = app()->getLocale();
         $positionTitleColumn = "title_{$locale}";
@@ -67,7 +65,7 @@ trait ResolvesContractLocationOptions
             ->orderBy($positionTitleColumn)
             ->get();
 
-        $employees = $this->employeeOptionsForCity($cityId, $locale, $user);
+        $employees = $this->employeeOptionsForCity($city, $locale);
 
         if ($ensureEmployeeId && ! collect($employees)->contains('value', $ensureEmployeeId)) {
             $currentEmployee = Employee::query()
@@ -214,13 +212,27 @@ trait ResolvesContractLocationOptions
     /**
      * Hydrate only the six columns needed to build employee dropdown labels.
      */
-    private function employeeOptionsForCity(int $cityId, string $locale, User $user): array
+    private function employeeOptionsForCity(City $city, string $locale): array
     {
-        [$roleType] = array_pad(explode('-', (string) $user->myRole(), 2), 2, null);
+        /*
+         * No role check here. Which cities this user may touch was already
+         * decided by locationOptions() above, from activeCityId(): a city-scoped
+         * role never reaches this method with anything but its own city, and a
+         * nationwide one (super-admin, general-manager, HR-SYR) is meant to
+         * reach all of them.
+         *
+         * This method used to pin every non-HR role to its own profile city on
+         * top of that, which predates activeCityId() being the single scoping
+         * rule. The two disagreed, and the narrower one won silently: a
+         * general-manager was offered every position in a city and no employees
+         * at all, which read as "there are none" rather than "you may not".
+         * Positions have never carried a second check — Position::inCity() is
+         * their whole rule — and employees now match.
+         */
 
-        if ($roleType !== 'HR' && (int) $user->profile?->city_id !== $cityId) {
-            return [];
-        }
+        // Syria is the headquarters scope rather than a city of its own, so a
+        // contract issued against it may be held by anyone, anywhere.
+        $isNationwide = $city->slug === City::NATIONAL_SLUG;
 
         $employees = Employee::query()
             ->select('id', 'city_id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar')
@@ -230,7 +242,7 @@ trait ResolvesContractLocationOptions
             // other media row an employee happens to own.
             ->with(['media' => fn ($query) => $query->where('collection_name', 'avatar')])
             ->where('is_active', true)
-            ->where('city_id', $cityId)
+            ->unless($isNationwide, fn ($query) => $query->where('city_id', $city->id))
             ->orderBy("first_name_{$locale}")
             ->orderBy("last_name_{$locale}")
             ->get();
@@ -293,10 +305,18 @@ trait ResolvesContractLocationOptions
             return false;
         }
 
-        if (! Employee::query()
+        // Same exemption as the dropdown that offered the employee: a contract
+        // on the nationwide scope accepts an employee from any city, and the
+        // two rules have to agree or the form offers what it then rejects.
+        $employeeMatchesCity = Employee::query()
             ->whereKey($this->form->employee_id)
-            ->where('city_id', $this->city_id)
-            ->exists()) {
+            ->unless(
+                City::isNational($this->city_id),
+                fn ($query) => $query->where('city_id', $this->city_id),
+            )
+            ->exists();
+
+        if (! $employeeMatchesCity) {
             $this->addError('form.employee_id', __('The selected employee must belong to the contract city.'));
 
             return false;

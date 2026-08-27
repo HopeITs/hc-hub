@@ -739,6 +739,11 @@ return [
         'contract' => 'العقد',
         'schedule' => 'الدوام',
         'pay' => 'الأجر',
+        // في شاشة التعديل فقط — لا يمكن لعقد أن يكون منتهياً لحظة إنشائه.
+        'termination' => 'إنهاء العقد',
+        'termination-hint' => 'اختياري. تسجيل تاريخ أو سبب للإنهاء يوقف هذا العقد.',
+        'not-terminated' => 'غير منتهٍ',
+        'clear-termination' => 'إلغاء الإنهاء',
 
         'locked-city' => 'محددة حسب دورك',
         'all-centers' => 'كل المراكز',
@@ -754,12 +759,10 @@ return [
         'runs-to' => 'حتى :date',
         'lasts-months' => ':count أشهر',
 
-        'work-days-required' => 'اختر يوم عمل واحداً على الأقل.',
-        'hours-derivation' => ':days أيام × :hours س',
-        'auto' => 'تلقائي',
-        'override' => 'تعديل يدوي',
-        'use-picker' => 'استخدام محدد الأيام',
-        'enter-manually' => 'إدخال يدوي',
+        // الحقلان يُطبعان كما هما في العقد، لذلك يُكتب كل مثال بلغة حقله
+        // لا بلغة الواجهة.
+        'work-days-placeholder-en' => 'Example: Monday to Friday',
+        'work-days-placeholder-ar' => 'مثال: الإثنين إلى الجمعة',
         'add-notes' => 'إضافة ملاحظات الدوام',
         'capacity-empty' => 'اختر مسمى وظيفياً لعرض الشواغر',
         'card-position' => 'المسمى الوظيفي',
