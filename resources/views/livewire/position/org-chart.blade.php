@@ -40,7 +40,7 @@
      }"
      x-on:keydown.escape.window="filtersOpen = false">
 
-    <section class="overflow-hidden bg-white border border-neutral-200 shadow-e1 rounded-surface">
+    <section class="isolate overflow-hidden bg-white border border-neutral-200 shadow-e1 rounded-surface">
         {{-- ---------- Header + stats ---------- --}}
         <div class="relative px-6 py-6 text-white bg-secondary-dark">
             <div class="relative flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
