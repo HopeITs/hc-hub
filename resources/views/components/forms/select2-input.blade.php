@@ -1,4 +1,4 @@
-@props(['disabled' => false])
+@props(['disabled' => false, 'hideSearch' => false])
 
 <div class="w-full" 
     x-data="{
@@ -9,6 +9,7 @@
             select.select2({
                 width: '100%',
                 dir: document.documentElement.dir || 'rtl',
+                minimumResultsForSearch: {{ $hideSearch ? 'Infinity' : 0 }}, // hide search only when hideSearch is set
                 templateSelection: function (data) {
                     // This prevents long text from breaking the layout
                     return data.text;

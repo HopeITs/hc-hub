@@ -13,7 +13,7 @@
                 {{ trans_choice('general.city', 1) }}
             </label>
 
-            <x-forms.select2-input wire:model.lazy="selectedCity">
+            <x-forms.select2-input wire:model.lazy="selectedCity" :hideSearch="true">
                 <option value="">{{ __('general.all') }} {{ trans_choice('general.city', 2) }}</option>
                 @foreach($cities as $city)
                     <option value="{{ $city->id }}">{{ $city->name }}</option>
@@ -26,7 +26,7 @@
                     {{ trans_choice('general.program', 1) }}
                 </label>
 
-                <x-forms.select2-input wire:model.lazy="selectedProgram">
+                <x-forms.select2-input wire:model.lazy="selectedProgram" :hideSearch="true">
                     <option value="">{{ __('general.all') }} {{ trans_choice('general.program', 2) }}</option>
                     @foreach($programs as $program)
                         <option value="{{ $program->id }}">{{ $program->name }}</option>
