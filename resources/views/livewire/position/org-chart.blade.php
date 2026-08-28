@@ -141,6 +141,23 @@
                     <x-icons.code-fork class="size-3.5" />
                     {{ $compact ? __('general.comfortable-view') : __('general.compact-view') }}
                 </button>
+
+                {{-- Goes solid red once vacancies are hidden, so the chart never
+                     silently omits cards without the toolbar saying so. --}}
+                <button type="button" wire:click="toggleVacancies"
+                        aria-pressed="{{ $showVacancies ? 'false' : 'true' }}"
+                        @unless($showVacancies) title="{{ __('general.vacancies-kept-help') }}" @endunless
+                        class="flex items-center gap-2 rounded-surface border px-3 py-2 text-small font-semibold transition {{ $showVacancies ? 'border-neutral-200 bg-white text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary' : 'border-primary bg-primary text-white hover:opacity-90' }}">
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        @if($showVacancies)
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/>
+                            <circle cx="12" cy="12" r="2.5"/>
+                        @else
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 6.2A9.9 9.9 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3.3 3.9M6.5 8.1A17 17 0 0 0 2 12s3.6 6 10 6a9.8 9.8 0 0 0 3.3-.5"/>
+                        @endif
+                    </svg>
+                    {{ $showVacancies ? __('general.hide-vacancies') : __('general.show-vacancies') }}
+                </button>
             </div>
 
             <div class="flex flex-wrap items-center gap-2">

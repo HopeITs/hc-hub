@@ -85,6 +85,13 @@ class OrgChart extends Component
     /** Active structural reporting line: "direct" (solid) or "tech" (dashed). */
     public string $manager_type = 'direct';
 
+    /**
+     * Whether unfilled positions are drawn. Turning this off hides vacant *leaves*
+     * only — a vacancy that manages a team stays, because dropping it would take
+     * its whole branch off the chart with it.
+     */
+    public bool $showVacancies = true;
+
     // ---- View options ---------------------------------------------------
     /** Active page view: "chart" (tree) or "directory" (employee list). */
     public string $view = 'chart';
@@ -146,6 +153,12 @@ class OrgChart extends Component
     public function toggleDensity(): void
     {
         $this->density = $this->density === 'compact' ? 'comfortable' : 'compact';
+    }
+
+    public function toggleVacancies(): void
+    {
+        $this->showVacancies = ! $this->showVacancies;
+        $this->refreshTree();
     }
 
     public function zoomIn(): void
@@ -527,6 +540,16 @@ class OrgChart extends Component
         return $query
             ->visible()
             ->whereNotNull($this->manager_type.'_manager_id')
+            // Hiding vacancies keeps the ones that lead a team: removing a vacant
+            // manager would orphan its reports and silently drop the whole branch.
+            // The child check is deliberately unqualified — inside a self-referencing
+            // whereHas Laravel aliases the table, so visible() would resolve its
+            // qualified columns against the outer query instead.
+            ->when(! $this->showVacancies, fn (Builder $query) => $query->where(
+                fn (Builder $inner) => $inner
+                    ->whereHas('activeContracts')
+                    ->orWhereHas($this->manager_type.'Team', fn (Builder $team) => $team->where('is_active', true)),
+            ))
             ->when($this->cityFilterIds(), fn (Builder $query, array $ids) => $query->whereIn('city_id', $ids))
             ->when($this->program_id, fn (Builder $query) => $query->where('program_id', $this->program_id))
             ->when($this->center_id, fn (Builder $query) => $query->where('center_id', $this->center_id))
