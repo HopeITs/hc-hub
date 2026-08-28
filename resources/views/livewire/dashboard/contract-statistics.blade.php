@@ -13,14 +13,12 @@
                 {{ trans_choice('general.city', 1) }}
             </label>
 
-            <select wire:model.lazy="selectedCity"
-                    class="w-full border border-secondary-soft rounded-surface px-4 py-2
-                           text-neutral-900 bg-white focus:ring-primary focus:ring-2 transition">
+            <x-forms.select2-input wire:model.lazy="selectedCity">
                 <option value="">{{ __('general.all') }} {{ trans_choice('general.city', 2) }}</option>
                 @foreach($cities as $city)
                     <option value="{{ $city->id }}">{{ $city->name }}</option>
                 @endforeach
-            </select>
+            </x-forms.select2-input>
         </div>
 
             <div class="flex flex-col gap-2">
@@ -28,14 +26,12 @@
                     {{ trans_choice('general.program', 1) }}
                 </label>
 
-                <select wire:model.lazy="selectedProgram"
-                        class="w-full border border-secondary-soft rounded-surface px-4 py-2
-                           text-neutral-900 bg-white focus:ring-primary focus:ring-2 transition">
+                <x-forms.select2-input wire:model.lazy="selectedProgram">
                     <option value="">{{ __('general.all') }} {{ trans_choice('general.program', 2) }}</option>
                     @foreach($programs as $program)
                         <option value="{{ $program->id }}">{{ $program->name }}</option>
                     @endforeach
-                </select>
+                </x-forms.select2-input>
             </div>
 
             <div class="flex sm:col-span-2 lg:col-span-1 justify-start lg:justify-start">
@@ -99,7 +95,7 @@
                     </div>
 
                     <div class="text-right">
-                        <span class="inline-block px-2 py-1 text-caption font-semibold text-white rounded-control
+                        <span class="inline-block px-2 py-1 text-caption font-semibold text-white rounded-control scale-[0.8] origin-right
                                      {{ $card['color'] }}">
                             {{ $cardType === 'program'
                                 ? trans_choice('general.program', 2)
