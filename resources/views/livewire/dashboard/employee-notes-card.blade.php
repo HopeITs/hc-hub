@@ -92,7 +92,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center py-6 pt-24 text-secondary-light font-light text-body">
+                                <td colspan="4" class="text-center py-6 pt-[76px] text-secondary-light font-light text-[11.2px]">
                                     <p>@lang('general.no-notes-1') <span class="text-red-600 font-light">“@lang('general.add-note')”</span> @lang('general.no-notes-2') </p>
                                 </td>
                             </tr>

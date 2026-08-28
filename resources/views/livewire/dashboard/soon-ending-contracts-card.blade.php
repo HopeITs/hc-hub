@@ -61,7 +61,7 @@
 
             </div>
         @empty
-            <div class="text-center p-4 text-body text-[var(--color-neutral-500)]">
+            <div class="flex h-full flex-col items-center justify-center text-center text-[10.5px] text-[var(--color-neutral-500)]">
                 @lang('general.no_active_contracts_ending_soon')
             </div>
         @endforelse
