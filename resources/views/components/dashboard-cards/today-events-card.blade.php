@@ -4,18 +4,18 @@
         <x-dashboard-cards.card-header :title="__('general.today-events')" :count="now()->format('j/n/Y')" />
 
         @if(count($events) > 0)
-            <div class="swiper">
+            <div class="swiper w-full flex-1 min-h-0">
                 <div class="swiper-wrapper">
 
                     @foreach($events as $event)
                         <div class="swiper-slide">
-                            <div class="relative h-[240px] flex flex-col items-center justify-center">
+                            <div class="relative h-full min-h-[240px] flex flex-col items-center justify-center">
                                 @if($event['type'] === 'birthday')
                                     <img src="/assets/GIF/01-Confetti.gif"
                                          class="absolute inset-0 w-full h-full pe-2 pb-12 object-cover pointer-events-none opacity-100 z-0">
                                 @endif
 
-                                <div class="flex flex-col h-full justify-center z-30 items-center ">
+                                <div class="flex flex-col h-full w-full justify-center z-30 items-center -translate-y-[15px]">
                                     {{-- Avatar --}}
                                     @php $isDefaultIcon = str_ends_with($event['photo'], '.svg'); @endphp
                                     @if($isDefaultIcon)
@@ -29,7 +29,7 @@
                                     @endif
 
                                     {{-- Info --}}
-                                    <div class="mt-2 z-20 text-center">
+                                    <div class="mt-2 z-20 text-center w-full">
                                         <p class="font-semibold text-body mt-2 text-[#58595B]">{{ $event['name'] }}</p>
 
                                         @php
@@ -49,7 +49,7 @@
                                 {{-- Watermark --}}
                                 <img
                                     src="{{ $event['type'] === 'birthday' ? '/assets/icons/birthday-cake.svg' : '/assets/icons/event.svg' }}"
-                                    class="pointer-events-none absolute {{ $event['type'] === 'birthday' ? 'right-0 -bottom-2' : 'right-1 -bottom-3' }} w-20 h-20 opacity-10 select-none"
+                                    class="pointer-events-none absolute {{ $event['type'] === 'birthday' ? 'right-0 bottom-0' : 'right-1 -bottom-3' }} w-20 h-20 opacity-10 select-none"
                                     alt="{{ ucfirst($event['type']) }} watermark">
                             </div>
                         </div>
