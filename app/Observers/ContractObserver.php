@@ -16,6 +16,14 @@ class ContractObserver
             return;
         }
 
+        // A renewal onto the same position is the same person keeping the same
+        // seat, so it is exempt from the capacity check. exist_emp still rises
+        // by one for the overlap between issuing the renewal and the source
+        // expiring, and `deactivate:contract` brings it back down from there.
+        if ($contract->isRenewalInPlace()) {
+            return;
+        }
+
         $pos = Position::query()
             ->whereKey($contract->position_id)
             ->lockForUpdate()

@@ -34,7 +34,7 @@
                     <livewire:dashboard.my-leaves-card/>
                 </div>
             @endif
-            <div class="flex min-h-68 flex-1 items-stretch justify-start rounded-xl font-semibold text-white">
+            <div class="flex min-h-68 flex-1 items-stretch justify-start rounded-surface font-semibold text-white">
                 {{-- No identifier is passed: the card derives its owner from
                      the session. Passing auth()->id() here supplied a User id
                      where an Employee id was expected. --}}

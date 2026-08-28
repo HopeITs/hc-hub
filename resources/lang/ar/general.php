@@ -319,6 +319,21 @@ return [
     'centers-text' => 'وهو المكتب الرئيسي المسؤول عن مركز الرجاء في سوريا.',
     'employees-by-contract-type' => 'الموظفون حسب نوع العقد',
     'employees-by-program' => 'الموظفون حسب البرنامج',
+    'center-details-sections' => 'أقسام تفاصيل المركز',
+    'center-summary' => 'ملخص المركز',
+    'active-assignments' => 'التكليفات النشطة',
+    'center-employees' => 'موظفو المركز',
+    'center-employee-count' => '{0}لا يوجد موظفون نشطون|{1}موظف نشط واحد|{2}موظفان نشطان|[3,10]:count موظفين نشطين|[11,*]:count موظفًا نشطًا',
+    'search-center-employees' => 'البحث بالاسم أو المنصب أو البرنامج',
+    'assignment-count' => '{1}منصب واحد|{2}منصبان|[3,10]:count مناصب|[11,*]:count منصبًا',
+    'view-profile' => 'عرض الملف الشخصي',
+    'unassigned-program' => 'دون برنامج',
+    'no-center-employees' => 'لا يوجد موظفون نشطون',
+    'no-center-employees-help' => 'سيظهر هنا الموظفون الذين لديهم تكليف تعاقدي حالي في هذا المركز.',
+    'no-contract-data' => 'لا توجد بيانات عقود نشطة',
+    'no-contract-data-help' => 'سيظهر توزيع العقود عندما يحتوي المركز على تكليفات موظفين حالية.',
+    'no-programs-for-center' => 'لا توجد برامج نشطة',
+    'no-programs-for-center-help' => 'سيظهر توزيع البرامج عند إسناد الموظفين الحاليين إلى البرامج.',
     'contact' => 'التواصل',
     'items' => 'الممتلكات',
     'months' => 'شهر',
@@ -521,6 +536,7 @@ return [
     'display_until' => 'تاريخ انتهاء العرض',
     'always_display' => 'عرض دائم',
     'city' => 'المدن|المدينة',
+    'current-residence' => 'مكان الإقامة الحالي',
     'center' => 'المراكز|المركز',
     'program' => 'البرامج|البرنامج',
     'event_date' => 'تاريخ الحدث',
@@ -717,6 +733,61 @@ return [
     // Strings that exist only for assistive technology. They are read aloud by
     // screen readers but never painted, so they must stay translated like any
     // other user-facing copy.
+    // شاشة إنشاء العقد — صفحة واحدة "Composer".
+    'composer' => [
+
+        'assignment' => 'التعيين',
+        'contract' => 'العقد',
+        'schedule' => 'الدوام',
+        'pay' => 'الأجر',
+
+        'locked-city' => 'محددة حسب دورك',
+        'all-centers' => 'كل المراكز',
+        'city-level' => 'على مستوى المحافظة (بدون مركز)',
+        'position-full' => 'مكتمل',
+        'seats-left' => ':taken من :max مشغولة · يتبقى :left',
+        'no-seats-left' => ':taken من :max مشغولة · لا شواغر',
+        'duplicate-contract' => 'لديه عقد ساري ينتهي في :date. إنشاء هذا العقد لن يُنهي العقد السابق.',
+        'duplicate-short' => 'ساري',
+
+        'max-end-date' => 'سنة واحدة كحد أقصى بعد تاريخ البداية.',
+        'end-date-too-far' => 'لا يمكن أن يتجاوز تاريخ النهاية سنة من تاريخ البداية.',
+        'runs-to' => 'حتى :date',
+        'lasts-months' => ':count أشهر',
+
+        'work-days-required' => 'اختر يوم عمل واحداً على الأقل.',
+        'hours-derivation' => ':days أيام × :hours س',
+        'auto' => 'تلقائي',
+        'override' => 'تعديل يدوي',
+        'use-picker' => 'استخدام محدد الأيام',
+        'enter-manually' => 'إدخال يدوي',
+        'add-notes' => 'إضافة ملاحظات الدوام',
+        'capacity-empty' => 'اختر مسمى وظيفياً لعرض الشواغر',
+        'card-position' => 'المسمى الوظيفي',
+        'card-center' => 'المركز',
+        'card-employee' => 'الموظف',
+        'duration-month' => 'شهر',
+        'duration-months' => 'أشهر',
+        'duration-day' => 'يوم',
+        'duration-days' => 'أيام',
+        'per-month' => 'شهرياً',
+        'per-hour' => 'بالساعة',
+        'per-session' => 'بالجلسة',
+        'per-year' => 'سنوياً',
+
+        'card-title' => 'العقد',
+        'capacity' => 'الشواغر',
+        'annual-leave' => 'الإجازة السنوية',
+        'days-unit' => 'يوم',
+        'locked-because' => 'أكمل :section أولاً',
+        'progress' => 'اكتمل :done من :total أقسام',
+        'create' => 'إنشاء العقد',
+        'continue' => 'متابعة',
+
+        'no-results' => 'لا نتائج مطابقة',
+        'clear' => 'مسح',
+    ],
+
     'a11y' => [
         'skip-to-content' => 'تخطَّ إلى المحتوى الرئيسي',
         'main-content' => 'المحتوى الرئيسي',
@@ -730,4 +801,13 @@ return [
 
     // نصوص <meta> الافتراضية، ويمكن تجاوزها لكل صفحة عبر $title / $description
     'meta-description' => 'HopeHR هي بوابة الموارد البشرية الداخلية لمركز الرجاء المسيحي، يستخدمها الموظفون المخوّلون لإدارة الموظفين والعقود والإجازات.',
+
+    'renew' => 'تجديد',
+    'renew-contract' => 'تجديد العقد',
+    'renew-as-is' => 'تجديد كما هو',
+    'renew-with-edit' => 'تجديد مع تعديل',
+    'renewing-contract-for' => 'تجديد عقد :name',
+    'current-period' => 'الفترة الحالية',
+    'new-period' => 'الفترة الجديدة',
+    'renew-explanation' => 'التجديد كما هو ينشئ عقداً مطابقاً للفترة الجديدة. التجديد مع تعديل يفتح النموذج كاملاً لتعديل أي تفصيل قبل الحفظ.',
 ];

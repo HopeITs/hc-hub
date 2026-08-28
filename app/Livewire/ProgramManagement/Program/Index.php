@@ -4,7 +4,6 @@ namespace App\Livewire\ProgramManagement\Program;
 
 use App\Livewire\Forms\ProgramManagement\ProgramForm;
 use App\Models\Program;
-use Illuminate\Support\Facades\DB;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -85,12 +84,7 @@ class Index extends Component
     public function render()
     {
         $items = Program::with('media')
-            ->withCount([
-                'cities as cities_count' => function ($query) {
-                    $query->select(DB::raw('count(distinct city_id)'));
-                },
-                'contracts',
-            ])
+            ->withCardCounts()
             ->with('contracts')
             ->orderBy('is_active', 'desc')
             ->orderBy('created_at', 'desc')

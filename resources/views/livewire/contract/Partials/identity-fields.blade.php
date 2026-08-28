@@ -12,65 +12,47 @@
 
     <div class="md:col-span-6">
         <x-forms.input-label for="city_id">{{ trans_choice('general.city', 1) }}</x-forms.input-label>
-        <x-forms.select2-input id="city_id" wire:model.live="city_id">
+        <x-forms.client-select2 id="city_id" x-ref="city">
             <option value="">{{ __('general.select') }}</option>
             @foreach ($cities as $c)
                 <option value="{{ $c->id }}">{{ $c->name }}</option>
             @endforeach
-        </x-forms.select2-input>
+        </x-forms.client-select2>
         <x-error-span>{{ $errors->first('city_id') }}</x-error-span>
     </div>
 
-
-
-    <div class="md:col-span-6" wire:key="container-program-city-{{ $city_id }}">
+    <div class="md:col-span-6">
         <x-forms.input-label for="program_id">{{ trans_choice('general.program', 2) }}</x-forms.input-label>
-        <x-forms.select2-input id="program_id" wire:model.live="program_id" :disabled="!$city_id">
+        <x-forms.client-select2 id="program_id" x-ref="program" disabled>
             <option value="">{{ __('general.select') }}</option>
-            @foreach ($programs as $p)
-                <option value="{{ $p->id }}">{{ $p->name }}</option>
-            @endforeach
-        </x-forms.select2-input>
+        </x-forms.client-select2>
         <x-error-span>{{ $errors->first('program_id') }}</x-error-span>
     </div>
-    <div class="md:col-span-6" wire:key="employee-for-city-{{ $city_id }}">
-        <x-forms.input-label for="employee_id" required>{{ trans_choice('general.employee', 2) }}</x-forms.input-label>
-        <x-forms.select2-input wire:model.live="form.employee_id" id="employee_id">
-            <option value="">{{ __('general.select') }}</option>
 
-            @foreach ($employees as $e)
-                <option value="{{ $e->id }}">
-                    {{ $e->name }}
-                </option>
-            @endforeach
-        </x-forms.select2-input>
+    <div class="md:col-span-6">
+        <x-forms.input-label for="employee_id" required>{{ trans_choice('general.employee', 2) }}</x-forms.input-label>
+        <x-forms.client-select2 id="employee_id" x-ref="employee" disabled>
+            <option value="">{{ __('general.select') }}</option>
+        </x-forms.client-select2>
         <x-error-span>{{ $errors->first('form.employee_id') }}</x-error-span>
     </div>
 
-    <div class="md:col-span-6" wire:key="center-for-city-{{ $city_id }}-prog-{{ $program_id }}">
+    <div class="md:col-span-6">
         <x-forms.input-label for="center_id">{{ trans_choice('general.centers', 1) }}</x-forms.input-label>
-        <x-forms.select2-input id="center_id" wire:model.live="center_id" :disabled="!$city_id || !$program_id">
+        <x-forms.client-select2 id="center_id" x-ref="center" disabled>
             <option value="">{{ __('general.select') }}</option>
-            @foreach ($centers as $center)
-                <option value="{{ $center->id }}">{{ $center->name }}</option>
-            @endforeach
-        </x-forms.select2-input>
+        </x-forms.client-select2>
         <x-error-span>{{ $errors->first('center_id') }}</x-error-span>
     </div>
 
-    <div class="md:col-span-6" wire:key="pos-for-city-{{ $city_id }}-prog-{{ $program_id }}-center-{{ $center_id }}">
+    <div class="md:col-span-6">
         <x-forms.input-label for="position_id" required>
             {{ trans_choice('general.positions', 1) }}
         </x-forms.input-label>
 
-        <x-forms.select2-input id="position_id" wire:model.live="form.position_id" :disabled="!$city_id || !$program_id">
+        <x-forms.client-select2 id="position_id" x-ref="position" disabled>
             <option value="">{{ __('general.select') }}</option>
-            @foreach ($positions as $pos)
-                <option value="{{ $pos->id }}">
-                    {{ $pos->title ?? '#' . $pos->id }}
-                </option>
-            @endforeach
-        </x-forms.select2-input>
+        </x-forms.client-select2>
 
         @error('form.position_id')
             <x-error-span>{{ $message }}</x-error-span>
@@ -80,13 +62,26 @@
     <div class="md:col-span-6">
         <x-forms.input-label
             for="contract_type_id" required>{{ trans_choice('general.contract-type', 1) }}</x-forms.input-label>
-        <x-forms.select2-input id="contract_type_id" wire:model.live="form.contract_type_id">
+        <x-forms.client-select2 id="contract_type_id" x-ref="contractType">
             <option value="">{{ __('general.select') }}</option>
             @foreach ($types as $t)
                 <option value="{{ $t->id }}">{{ $t->name }}</option>
             @endforeach
-        </x-forms.select2-input>
+        </x-forms.client-select2>
         <x-error-span>{{ $errors->first('form.contract_type_id') }}</x-error-span>
+    </div>
+
+    <div
+        x-cloak
+        x-show="loading"
+        class="md:col-span-12"
+        role="status"
+        aria-live="polite"
+    >
+        <div class="inline-flex min-h-11 items-center gap-2 rounded-surface bg-neutral-100 px-3 py-2 text-small font-semibold text-secondary-medium dark:bg-neutral-800 dark:text-neutral-200">
+            <x-icons.spinner class="size-4 animate-spin text-primary" />
+            <span x-text="loadingText"></span>
+        </div>
     </div>
 
 </div>

@@ -131,8 +131,28 @@ return [
             'toggleItemStatusConfirmed' => 'employees.update',
             'exportExcel' => 'employees.export',
         ],
-        'contract.contract-create' => ['save' => 'contracts.create', 'submit' => 'contracts.create'],
-        'contract.contract-edit' => ['save' => 'contracts.update', 'submit' => 'contracts.update'],
+        // The composer exposes exactly three actions: one option load, one
+        // entitlement preview, and the create itself.
+        'contract.contract-create' => [
+            'submit' => 'contracts.create',
+            'locationOptions' => 'contracts.create',
+            'leavePreview' => 'contracts.create',
+        ],
+        'contract.contract-edit' => [
+            'save' => 'contracts.update',
+            'submit' => 'contracts.update',
+            'locationOptions' => 'contracts.update',
+            'advanceIdentity' => 'contracts.update',
+        ],
+        // A renewal creates a contract. The permission here is the coarse
+        // gate; ContractRenewModal re-reads the contract and runs the `renew`
+        // policy on every one of these, which is what enforces city scope and
+        // rejects a terminated source.
+        'contract.contract-renew-modal' => [
+            'open' => 'contracts.create',
+            'renewAsIs' => 'contracts.create',
+            'renewWithEdit' => 'contracts.create',
+        ],
         'contract.contracts-table' => ['delete' => 'contracts.delete', 'exportExcel' => 'contracts.export'],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
@@ -276,7 +296,9 @@ return [
         'basics.job-level-module' => ['save'],
         'basics.leave-type-module' => ['save'],
         'basics.termination-reason-module' => ['save'],
-        'news.news-create' => ['save'],
+        // updatedFormNewsableType() only clears dependent form selections;
+        // it does not read a record or persist data. save() authorizes before writing.
+        'news.news-create' => ['save', 'updatedFormNewsableType'],
         // Also runs assertCityIsAuthorized() and a Gate check on the city.
         'program-management.center.centers-module' => ['save'],
         'program-management.default-deliverable.default-deliverables-module' => ['save'],
@@ -328,15 +350,16 @@ return [
             'updatedPermissionFilterType', 'updatedPermissionFilterValue',
         ],
         'badges.badges-module' => ['openBadgeModal'],
-        'contract.contract-create' => [
-            'next', 'prev', 'jumpTo', 'updatedCityId', 'updatedProgramId',
-            'updatedCenterId', 'updatedFormPositionId', 'updatedFormContractTypeId',
-        ],
+        // contract.contract-create has no exempt actions: the composer's step
+        // navigation and updated* hooks were removed with the wizard.
         'contract.contract-edit' => [
             'next', 'prev', 'jumpTo', 'updatedCityId', 'updatedProgramId',
             'updatedCenterId', 'updatedFormPositionId',
         ],
         'contract.contract-details' => ['nextPage', 'prevPage', 'setPage'],
+        // Dismisses the modal and clears its state. Writes nothing; the two
+        // actions that do write are mapped to contracts.create above.
+        'contract.contract-renew-modal' => ['close'],
         'dashboard.calendar-card' => ['next', 'prev'],
         'employee.employee-create' => ['setActiveTab', 'toggleBoardMember'],
         // The add*/openInitiateReturnModal methods stage rows in the in-memory

@@ -13,7 +13,7 @@
 
 
 
-<div x-data="{ open: false, selected: null }" class="relative flex h-full w-full flex-col overflow-hidden rounded-3xl bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
+<div x-data="{ open: false, selected: null }" class="relative flex h-full w-full flex-col overflow-hidden rounded-surface bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
     <x-dashboard-cards.card-header :title="__('general.news')" :count="$newsItems->count()">
         <x-slot:icon>
             <img class="block size-full object-contain" src="{{ asset('assets/icons/news.svg') }}" alt="">

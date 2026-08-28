@@ -9,12 +9,23 @@ use Carbon\Carbon;
 use Closure;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Form;
 
 class ContractForm extends Form
 {
     // ── Model reference
     public ?Contract $contract = null;
+
+    /**
+     * Set when this form is drafting the successor of an existing contract.
+     *
+     * Locked: this marker is what waives the position capacity check, so a
+     * client able to set it could point an ordinary create at any contract on a
+     * full position and overflow max_emp. Only the server may assign it.
+     */
+    #[Locked]
+    public ?int $renewal_source_id = null;
 
     // ── Identity
     public ?int $employee_id = null;
@@ -62,19 +73,38 @@ class ContractForm extends Form
     // Lifecycle hooks
     // ────────────────────────────────────────────────
 
-    public function updatedContractTypeId(mixed $value): void
+    /**
+     * Recompute the term when the contract type changes.
+     *
+     * $anchor is the date the term must start from. A renewal passes the date
+     * its predecessor hands over on; without it the term would be reset to the
+     * start of next month, silently back-dating the renewal to before the
+     * contract it replaces has even ended. A fresh contract passes nothing and
+     * keeps the original "starts next month" default.
+     */
+    public function updatedContractTypeId(mixed $value, ?string $anchor = null): void
     {
         if (! $value) {
             return;
         }
 
-        $nextMonthStart = Carbon::now()->addMonthNoOverflow()->startOfMonth()->toDateString();
+        $start = Carbon::parse($anchor ?? Carbon::now()->addMonthNoOverflow()->startOfMonth());
 
-        $this->start_date = $nextMonthStart;
+        $this->start_date = $start->toDateString();
 
         // Contract types 3 & 4 are trial contracts (3-month duration)
-        $this->end_date = in_array((int) $value, [3, 4])
-            ? Carbon::parse($nextMonthStart)->addMonthsNoOverflow(3)->toDateString()
+        if (in_array((int) $value, [3, 4])) {
+            $this->end_date = $start->copy()->addMonthsNoOverflow(3)->toDateString();
+
+            return;
+        }
+
+        // A fresh contract runs to the end of the current year. A renewal has
+        // no such anchor to fall back on — the current year may already be
+        // behind it — so it runs a full year from its own start instead, which
+        // is also the longest term validateTerms() accepts.
+        $this->end_date = $anchor
+            ? $start->copy()->addYear()->subDay()->toDateString()
             : Carbon::now()->endOfYear()->toDateString();
     }
 
@@ -100,6 +130,31 @@ class ContractForm extends Form
     {
         $this->contract = $contract;
         $this->fillFromModel($contract);
+    }
+
+    /**
+     * Draft the successor of $source: every term carried over, only the dates
+     * replaced.
+     *
+     * Nulling `contract` is what makes the shared save()/create() path insert a
+     * new row instead of updating the source, and clearing the termination trio
+     * stops a contract that was terminated and later reactivated from passing a
+     * stale termination on to its successor.
+     */
+    public function fillFromRenewal(Contract $source, string $start, string $end): void
+    {
+        $this->fillFromModel($source);
+
+        $this->contract = null;
+        $this->renewal_source_id = $source->id;
+
+        $this->is_active = true;
+        $this->terminated_at = null;
+        $this->termination_reason_id = null;
+        $this->reason_of_termination = null;
+
+        $this->start_date = $start;
+        $this->end_date = $end;
     }
 
     public function fillFromModel(Contract $contract): void
@@ -190,11 +245,19 @@ class ContractForm extends Form
             if ($this->contract) {
                 $this->contract->update($this->buildPayload());
             } else {
-                $this->contract = Contract::create($this->buildPayload());
+                $this->contract = $this->insert();
             }
 
             return $this->contract;
         });
+    }
+
+    /**
+     * Create from data that the owning component has already fully validated.
+     */
+    public function create(): Contract
+    {
+        return DB::transaction(fn (): Contract => $this->contract = $this->insert());
     }
 
     /**
@@ -261,6 +324,19 @@ class ContractForm extends Form
     // Private helpers
     // ────────────────────────────────────────────────
 
+    /**
+     * Insert a new contract, carrying the transient renewal marker onto the
+     * model so ContractObserver::creating() can recognise a renewal in place.
+     */
+    private function insert(): Contract
+    {
+        $contract = new Contract($this->buildPayload());
+        $contract->renewalSourceId = $this->renewal_source_id;
+        $contract->save();
+
+        return $contract;
+    }
+
     private function buildPayload(): array
     {
         return [
@@ -287,19 +363,24 @@ class ContractForm extends Form
     }
 
     /**
-     * Closure-based validation rule that enforces position capacity,
-     * skipping the check when the position has not changed on an existing contract.
+     * Closure-based validation rule that enforces position capacity, skipping
+     * the check whenever the seat is already held by the record this write
+     * descends from: an edit that leaves the position alone, or a renewal
+     * issued onto the same position as its source. Neither adds headcount, and
+     * checking them would make renewing a max_emp = 1 position impossible.
      */
     private function positionCapacityRule(): Closure
     {
         return function (string $attribute, mixed $value, Closure $fail): void {
             $isUnchanged = $this->contract && $this->contract->position_id === (int) $value;
 
-            if ($isUnchanged) {
+            if ($isUnchanged || Contract::isRenewalOfPosition($this->renewal_source_id, (int) $value)) {
                 return;
             }
 
-            $position = Position::find($value);
+            $position = Position::query()
+                ->select('id', 'max_emp', 'exist_emp')
+                ->find($value);
 
             if ($position && ! $position->canAssign()) {
                 $fail(__('This position exceeded the number of max employees.'));

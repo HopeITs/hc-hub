@@ -17,6 +17,12 @@ import select2 from 'select2';
 
 select2();
 
+import './contract-location-picker.js';
+
+// The create screen's composer. Independent of the picker above, which stays
+// in place for ContractEdit.
+import './contract-composer.js';
+
 import '../css/app.css';
 import { initFlowbite } from 'flowbite';
 import 'flowbite';
@@ -96,4 +102,3 @@ document.addEventListener('livewire:navigated', () => {
     initFlowbite();
     initClockTimepickers();
 });
-

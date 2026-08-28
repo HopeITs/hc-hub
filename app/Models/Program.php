@@ -56,6 +56,28 @@ class Program extends Model implements HasMedia
         return $this->hasMany(Position::class);
     }
 
+    /**
+     * Add the aggregate values displayed on the program index cards.
+     *
+     * A program's cities are determined by its positions' centers. The direct
+     * positions.city_id value may differ from the center's city, so it must not
+     * be used for this count.
+     */
+    public function scopeWithCardCounts(Builder $query): Builder
+    {
+        return $query
+            ->addSelect([
+                'cities_count' => Center::query()
+                    ->selectRaw('count(distinct city_id)')
+                    ->whereExists(fn ($positions) => $positions
+                        ->selectRaw('1')
+                        ->from('positions')
+                        ->whereColumn('positions.center_id', 'centers.id')
+                        ->whereColumn('positions.program_id', 'programs.id')),
+            ])
+            ->withCount('contracts');
+    }
+
     public function registerMediaCollections(): void
     {
         // Local fallback: the previous ui-avatars.com URL disclosed program

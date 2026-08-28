@@ -3,20 +3,15 @@
 namespace App\Livewire\ProgramManagement\Center;
 
 use App\Models\Center;
-use App\Models\ContractType;
-use App\Models\Program;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class CenterDetails extends Component
 {
-    public Center $center;
-
-    public string $activeTab = 'contracts';
-
-    public array $contractData = [];
-
-    public array $programData = [];
+    #[Locked]
+    public int $centerId;
 
     public function mount(Center $center): void
     {
@@ -24,56 +19,43 @@ class CenterDetails extends Component
         // regional user could read another city's centre detail page directly.
         Gate::authorize('view', $center);
 
-        $this->center = $center->load('city');
-        $this->loadContractData();
-        $this->loadProgramData();
-    }
-
-    public function switchTab(string $tab): void
-    {
-        $this->activeTab = $tab;
+        $this->centerId = (int) $center->getKey();
     }
 
     public function render()
     {
-        return view('livewire.program-management.center-details');
+        $center = Center::query()->with('city')->findOrFail($this->centerId);
+        Gate::authorize('view', $center);
+
+        $activeContracts = $center->contracts()
+            ->activeNow()
+            ->with(['contractType', 'position.program'])
+            ->get();
+
+        return view('livewire.program-management.center-details', [
+            'center' => $center,
+            'contractData' => $this->contractData($activeContracts),
+            'programData' => $this->programData($activeContracts),
+            'totalEmployees' => $center->activeEmployeesQuery()->count(),
+            'totalAssignments' => $activeContracts->count(),
+            'canViewEmployees' => auth()->user()?->hasActivePermission('employees.view') ?? false,
+        ]);
     }
 
     /**
      * Load employee counts by contract type for this center.
      */
-    protected function loadContractData(): void
+    private function contractData(Collection $contracts): array
     {
         $locale = app()->getLocale();
-
-        // Fetch all active contracts for this center
-        $contracts = $this->center->positions()
-            ->with([
-                'contracts' => function ($query) {
-                    $query->where('is_active', true)
-                        ->whereDate('start_date', '<=', now())
-                        ->whereDate('end_date', '>=', now());
-                },
-                'contracts.contractType',
-            ])
-            ->get()
-            ->pluck('contracts')
-            ->flatten();
 
         // Group contracts by contract_type_id and count unique employees
         $grouped = $contracts->groupBy('contract_type_id')
             ->map(fn ($group) => $group->unique('employee_id')->count());
 
         if ($grouped->isEmpty()) {
-            $this->contractData = [];
-
-            return;
+            return [];
         }
-
-        // Load all related contract types
-        $contractTypes = ContractType::whereIn('id', $grouped->keys())
-            ->get()
-            ->keyBy('id');
 
         // Prepare groups (card titles are the only thing written by hand)
         $data = [
@@ -92,8 +74,7 @@ class CenterDetails extends Component
         ];
 
         foreach ($grouped as $typeId => $count) {
-            /** @var ContractType|null $ct */
-            $ct = $contractTypes->get($typeId);
+            $ct = $contracts->firstWhere('contract_type_id', $typeId)?->contractType;
             if (! $ct) {
                 continue;
             }
@@ -125,7 +106,7 @@ class CenterDetails extends Component
         }
 
         // Remove empty groups so you don't get empty cards
-        $this->contractData = array_filter(
+        return array_filter(
             $data,
             fn ($group) => ! empty($group['items']),
         );
@@ -134,26 +115,18 @@ class CenterDetails extends Component
     /**
      * Load employee counts by program for this center.
      */
-    protected function loadProgramData(): void
+    private function programData(Collection $contracts): array
     {
-        $positions = $this->center->positions()
-            ->with(['contracts' => function ($query) {
-                $query->where('is_active', true)
-                    ->whereDate('start_date', '<=', now())
-                    ->whereDate('end_date', '>=', now());
-            }, 'program'])
-            ->get();
+        return $contracts
+            ->groupBy(fn ($contract) => $contract->position?->program_id ?? 0)
+            ->map(function (Collection $programContracts): array {
+                $program = $programContracts->first()?->position?->program;
 
-        $programCounts = [];
-
-        foreach ($positions as $position) {
-            $programName = $position->program?->name ?? $position->program?->name_en ?? $position->program?->name_ar ?? 'Unknown Program';
-            $activeContracts = $position->contracts->unique('employee_id')->count();
-            $programCounts[$programName] = ($programCounts[$programName] ?? 0) + $activeContracts;
-        }
-
-        $this->programData = collect($programCounts)
-            ->map(fn ($count, $program) => ['program' => $program, 'count' => $count])
+                return [
+                    'program' => $program?->name ?? __('general.unassigned-program'),
+                    'count' => $programContracts->unique('employee_id')->count(),
+                ];
+            })
             ->values()
             ->toArray();
     }

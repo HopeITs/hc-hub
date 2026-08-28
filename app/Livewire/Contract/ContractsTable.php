@@ -130,6 +130,12 @@ class ContractsTable extends LivewireTable
         $title = $loc === 'ar' ? 'title_ar' : 'title_en';
         $canUpdate = auth()->user()?->hasActivePermission('contracts.update') ?? false;
         $canDelete = auth()->user()?->hasActivePermission('contracts.delete') ?? false;
+        // Resolved once, like the flags above. Calling Gate::allows('renew')
+        // per row would re-run ContractPolicy::renew's city-scope query for
+        // every contract on the page; query() has already restricted the whole
+        // result set to the active city, so only the row's own state is left
+        // to check — which is done inline below, without touching the database.
+        $canCreate = auth()->user()?->hasActivePermission('contracts.create') ?? false;
 
         return [
             Column::make(trans_choice('general.employee', 1), 'employee')
@@ -214,16 +220,22 @@ class ContractsTable extends LivewireTable
 
             BooleanColumn::make(__('general.status'), 'is_active')->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete, $canCreate): string {
                 $view = Blade::render('<x-table.show-btn :href="route(\'contracts.show\', $id)" />', ['id' => $m->getKey()]);
                 $edit = $canUpdate
                     ? Blade::render('<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />', ['id' => $m->getKey()])
+                    : '';
+                // Mirrors ContractPolicy::renew: permission (hoisted), city
+                // scope (guaranteed by query()), and the contract's own state.
+                $isRenewable = $canCreate && $m->is_active && $m->terminated_at === null;
+                $renew = $isRenewable
+                    ? Blade::render('<x-table.renew-btn :modelId="$id" />', ['id' => $m->getKey()])
                     : '';
                 $delete = $canDelete
                     ? Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $m->getKey()])
                     : '';
 
-                return '<div class="flex items-center justify-center gap-2">'.$view.$edit.$delete.'</div>';
+                return '<div class="flex items-center justify-center gap-2">'.$view.$edit.$renew.$delete.'</div>';
             })->asHtml()->clickable(false),
         ];
     }
