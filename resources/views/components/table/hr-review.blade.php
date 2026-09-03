@@ -14,7 +14,7 @@
     <button
         type="button"
         wire:click="confirmHrReview({{ $modelId }})"
-        class="inline-flex items-center rounded-lg border border-primary/30 bg-primary/5 px-2.5 py-1 text-xs font-semibold text-primary transition hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+        class="inline-flex items-center rounded-lg border border-neutral-200 bg-white px-2.5 py-1 text-xs font-semibold text-primary transition hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-primary"
     >
         {{ __('general.mark-reviewed') }}
     </button>

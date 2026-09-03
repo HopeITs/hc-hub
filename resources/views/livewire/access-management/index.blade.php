@@ -90,7 +90,7 @@
                 @endphp
 
                 <div @class([
-                    'divide-y divide-gray-100 overscroll-contain',
+                    'divide-y divide-gray-100 overscroll-contain pe-4',
                     'max-h-[min(62vh,44rem)] overflow-y-auto' => ! $selectedUser,
                     'max-h-[min(62vh,44rem)] overflow-y-auto xl:grid xl:max-h-none xl:flex-1 xl:auto-rows-fr xl:overflow-visible' => $selectedUser && ! $directoryIsFiltered,
                     'max-h-[min(62vh,44rem)] overflow-y-auto xl:max-h-none xl:flex-1 xl:overflow-visible' => $selectedUser && $directoryIsFiltered,
