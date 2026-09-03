@@ -25,6 +25,12 @@
                         </span>
                     </div>
                 </div>
+                @if(!empty($badge['subtype']))
+                    <div>
+                        <x-field-caption class="text-red-600 dark:text-red-400">{{ $badge['detail_label'] ?? __('general.badge-detail') }}</x-field-caption>
+                        <div>{{ $badge['subtype'] }}</div>
+                    </div>
+                @endif
                 <div>
                     <x-field-caption class="text-red-600 dark:text-red-400">@lang('general.date')</x-field-caption>
                     <div>{{ $badge['date'] ?? '—' }}</div>
@@ -38,6 +44,47 @@
                     <div>{{ $badge['department'] ?? '—' }}</div>
                 </div>
             </div>
+
+            @if(!empty($badge['subtype']))
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    @if(!empty($badge['is_financial_detail']))
+                        <div>
+                            <x-field-caption class="text-red-600 dark:text-red-400">@lang('general.financial-amount')</x-field-caption>
+                            <div>
+                                @if(!empty($badge['amount']))
+                                    {{ number_format((float)$badge['amount'], 2) }} {{ $badge['currency'] ?? '' }}
+                                @else
+                                    —
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if(!empty($badge['is_promotion']))
+                        <div>
+                            <x-field-caption class="text-red-600 dark:text-red-400">@lang('general.new-position')</x-field-caption>
+                            <div>{{ $badge['new_position'] ?? '—' }}</div>
+                        </div>
+                    @endif
+
+                    @if(!empty($badge['is_leave']))
+                        <div>
+                            <x-field-caption class="text-red-600 dark:text-red-400">@lang('general.leave-calculation')</x-field-caption>
+                            <div>{{ $badge['leave_unit'] ?? '—' }}</div>
+                        </div>
+                        <div>
+                            <x-field-caption class="text-red-600 dark:text-red-400">{{ $badge['leave_amount_label'] ?? __('general.leave-quantity') }}</x-field-caption>
+                            <div>
+                                @if(!empty($badge['amount']))
+                                    {{ number_format((float)$badge['amount']) }}
+                                @else
+                                    —
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endif
 
             <div>
                 <x-field-caption class="text-red-600 dark:text-red-400">@lang('general.reason')</x-field-caption>
