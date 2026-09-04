@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms\Employee;
 
+use App\Enums\Nationality;
 use App\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
@@ -95,10 +96,10 @@ class PersonalInfoForm extends Form
     #[Validate('nullable|string')]
     public $pob_ar;
 
-    #[Validate('nullable|string')]
+    #[Validate('nullable|string|regex:/^09\d{8}$/')]
     public $work_phone;
 
-    #[Validate('nullable|string')]
+    #[Validate('nullable|string|regex:/^09\d{8}$/')]
     public $personal_phone;
 
     #[Validate('nullable|email')]
@@ -163,8 +164,12 @@ class PersonalInfoForm extends Form
                 : ['nullable'],
             'national_number' => [
                 'required',
+                'string',
+                Rule::when($this->isSyrianNationality(), ['digits:11'], ['max:255']),
                 Rule::unique('employees', 'national_number')->ignore($this->employee?->id),
             ],
+            'work_phone' => ['nullable', 'regex:/^09\d{8}$/'],
+            'personal_phone' => ['nullable', 'regex:/^09\d{8}$/'],
             // Username is always required: it drives the profile page and QR scan ID.
             'username' => [
                 'required',
@@ -181,6 +186,32 @@ class PersonalInfoForm extends Form
         }
 
         return $rules;
+    }
+
+    public function messages(): array
+    {
+        if (app()->getLocale() !== 'ar') {
+            return [
+                'work_phone.regex' => 'The work phone must be exactly 10 digits and start with 09.',
+                'personal_phone.regex' => 'The personal phone must be exactly 10 digits and start with 09.',
+                'national_number.digits' => 'The national number must be exactly 11 digits for Syrian employees.',
+            ];
+        }
+
+        return [
+            'work_phone.regex' => 'يجب أن يتكون هاتف العمل من 10 أرقام تماماً وأن يبدأ بـ 09.',
+            'personal_phone.regex' => 'يجب أن يتكون الهاتف الشخصي من 10 أرقام تماماً وأن يبدأ بـ 09.',
+            'national_number.digits' => 'يجب أن يتكون الرقم الوطني للسوريين من 11 رقماً تماماً.',
+        ];
+    }
+
+    public function validationAttributes(): array
+    {
+        return [
+            'national_number' => __('general.national_number'),
+            'work_phone' => __('general.work_phone'),
+            'personal_phone' => __('general.personal_phone'),
+        ];
     }
 
     public function setEmployee(Employee $employee): void
@@ -238,6 +269,7 @@ class PersonalInfoForm extends Form
     {
         // Work email is derived from the username, only when an account is wanted.
         $this->email = $this->create_account ? $this->buildWorkEmail($this->username) : null;
+        $this->normalizeIdentityAndPhoneFields();
 
         $this->validate();
         $this->authorizeScope();
@@ -308,6 +340,20 @@ class PersonalInfoForm extends Form
         }
 
         Password::sendResetLink(['email' => $user->email]);
+    }
+
+    private function normalizeIdentityAndPhoneFields(): void
+    {
+        foreach (['national_number', 'work_phone', 'personal_phone'] as $field) {
+            $this->{$field} = filled($this->{$field})
+                ? trim(en_digits($this->{$field}))
+                : null;
+        }
+    }
+
+    private function isSyrianNationality(): bool
+    {
+        return (int) $this->nationality === Nationality::Syrian;
     }
 
     private function authorizeScope(): void
