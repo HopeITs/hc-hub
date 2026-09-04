@@ -19,6 +19,9 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('deactivate:contract')->dailyAt('09:00');
         $schedule->command('deactivate:employee')->weekly();
+        $schedule->call(function () {
+    \Log::info('الكرون جوب يعمل بنجاح!');
+})->everyMinute();
     }
 
     protected function commands(): void
