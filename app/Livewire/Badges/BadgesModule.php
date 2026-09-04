@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Badges;
 
+use App\Enums\BadgeSubtype;
 use App\Enums\BadgeType;
 use App\Models\Badge;
 use Illuminate\Support\Facades\Gate;
@@ -46,8 +47,14 @@ class BadgesModule extends Component
             'id' => $b->id,
             'employee' => $b->employee?->name,
             'type' => BadgeType::getLocalizedName((int) $b->type),
+            'detail_label' => BadgeSubtype::selectorLabelForType($b->type),
+            'subtype' => $b->subtype ? BadgeSubtype::getLocalizedName($b->subtype) : null,
             'date' => optional($b->date)->format('Y-m-d'),
             'reason' => $b->reason,
+            'amount' => $b->amount,
+            'new_position' => $b->new_position,
+            'leave_unit' => $this->leaveUnitLabel($b->leave_unit),
+            'leave_amount_label' => $this->leaveAmountLabel($b->leave_unit),
             'currency' => $this->currencyLabel($b->currency),
             'current_salary' => $b->current_salary,
             'new_salary' => $b->new_salary,
@@ -55,6 +62,9 @@ class BadgesModule extends Component
             'program' => $b->employee?->latestActiveContract()?->position?->program?->name,
             'department' => $b->employee?->latestActiveContract()?->position?->department?->name,
             'is_salary' => (int) $b->type === BadgeType::Salary_Increase,
+            'is_financial_detail' => BadgeSubtype::isFinancial($b->subtype),
+            'is_promotion' => BadgeSubtype::isPromotion($b->subtype),
+            'is_leave' => BadgeSubtype::isLeave($b->subtype),
         ];
 
         $this->modalTitle = __('general.badges');
@@ -73,6 +83,24 @@ class BadgesModule extends Component
             2 => 'USD',
             3 => 'EUR',
             default => trans('general.unknown'),
+        };
+    }
+
+    protected function leaveUnitLabel(?string $value): ?string
+    {
+        return match ($value) {
+            'hour' => trans('general.leave-hours'),
+            'day' => trans('general.leave-days'),
+            default => null,
+        };
+    }
+
+    protected function leaveAmountLabel(?string $value): string
+    {
+        return match ($value) {
+            'hour' => trans('general.number-of-hours'),
+            'day' => trans('general.number-of-days'),
+            default => trans('general.leave-quantity'),
         };
     }
 }

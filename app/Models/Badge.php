@@ -29,14 +29,19 @@ class Badge extends Model
         'evaluation_id',
         'currency',
         'type',
+        'subtype',
         'date',
         'reason',
+        'amount',
+        'new_position',
+        'leave_unit',
         'current_salary',
         'new_salary',
         'notes',
     ];
 
     protected $casts = [
+        'amount' => 'decimal:2',
         'date' => 'datetime:d-m-Y',
     ];
 
@@ -75,8 +80,12 @@ class Badge extends Model
                 'employee_id',
                 'evaluation_id',
                 'type',
+                'subtype',
                 'currency',
                 'date',
+                'amount',
+                'new_position',
+                'leave_unit',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

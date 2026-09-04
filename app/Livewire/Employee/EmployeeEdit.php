@@ -106,6 +106,17 @@ class EmployeeEdit extends Component
         $this->activeTab = $tab;
     }
 
+    public function updated(string $property, mixed $value = null): void
+    {
+        if (preg_match('/^badgeForm\.badges\.(\d+)\.type$/', $property, $matches)) {
+            $this->badgeForm->resetSubtypeDetails((int) $matches[1]);
+        }
+
+        if (preg_match('/^badgeForm\.badges\.(\d+)\.subtype$/', $property, $matches)) {
+            $this->badgeForm->resetConditionalDetails((int) $matches[1]);
+        }
+    }
+
     public function saveInformation()
     {
         $this->persist('infoForm', function () {
