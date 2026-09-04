@@ -139,17 +139,9 @@ class PositionForm extends Form
             ]);
         }
 
-        foreach (['direct_manager_id', 'tech_manager_id'] as $field) {
-            $managerId = $this->{$field};
-            if ($managerId && ! Position::query()
-                ->inCity((int) $this->city_id)
-                ->whereKey($managerId)
-                ->exists()) {
-                throw ValidationException::withMessages([
-                    $field => __('The selected manager must belong to the position city.'),
-                ]);
-            }
-        }
+        // Managers can be cross-city: headquarters positions may directly or
+        // technically manage branch positions, so rules() only validates that
+        // the selected manager ids exist.
     }
 
     private function centerIsAllowedForCity(): bool
