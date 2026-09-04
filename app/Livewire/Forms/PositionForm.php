@@ -3,6 +3,7 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Center;
+use App\Models\City;
 use App\Models\Position;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -132,10 +133,7 @@ class PositionForm extends Form
             ]);
         }
 
-        if ($this->center_id && ! Center::query()
-            ->whereKey($this->center_id)
-            ->where('city_id', $this->city_id)
-            ->exists()) {
+        if ($this->center_id && ! $this->centerIsAllowedForCity()) {
             throw ValidationException::withMessages([
                 'center_id' => __('The selected center must belong to the position city.'),
             ]);
@@ -152,5 +150,18 @@ class PositionForm extends Form
                 ]);
             }
         }
+    }
+
+    private function centerIsAllowedForCity(): bool
+    {
+        $query = Center::query()->whereKey($this->center_id);
+
+        if (! City::isNational($this->city_id)) {
+            $query->where(fn ($query) => $query
+                ->where('city_id', $this->city_id)
+                ->orWhereNull('city_id'));
+        }
+
+        return $query->exists();
     }
 }

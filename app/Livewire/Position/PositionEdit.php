@@ -3,7 +3,7 @@
 namespace App\Livewire\Position;
 
 use App\Livewire\Forms\PositionForm;
-use App\Models\Center;
+use App\Livewire\Position\Concerns\ResolvesPositionFormOptions;
 use App\Models\City;
 use App\Models\Department;
 use App\Models\JobLevel;
@@ -15,6 +15,7 @@ use Livewire\Component;
 
 class PositionEdit extends Component
 {
+    use ResolvesPositionFormOptions;
     use WithAlerts;
 
     public PositionForm $form;
@@ -35,9 +36,7 @@ class PositionEdit extends Component
             ->when($activeCityId, fn ($query) => $query->whereKey($activeCityId))
             ->get();
         $programs = Program::where('is_active', true)->orderBy('name')->get();
-        $centers = Center::where('is_active', true)
-            ->when($activeCityId, fn ($query) => $query->where('city_id', $activeCityId))
-            ->with('city')->orderBy(transColumn('name'))->get();
+        $centers = $this->positionFormCenters();
         $jobLevels = JobLevel::orderBy('grade')->get();
         $positions = Position::with(['center', 'program'])
             ->when($activeCityId, fn ($query) => $query->inCity($activeCityId))
