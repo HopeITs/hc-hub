@@ -11,8 +11,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command(DeactivateContract::class)->dailyAt('15:32');
+Schedule::command(DeactivateContract::class)->dailyAt('21:30');
 Schedule::command(DeactivateEmployee::class)->weekly();
 Schedule::call(function () {
     Log::info('الكرون جوب يعمل بنجاح!');
-})->everyMinute();
+})->daily();
