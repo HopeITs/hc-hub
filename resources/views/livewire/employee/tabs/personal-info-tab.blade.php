@@ -128,7 +128,7 @@
 
         <div wire:key="emp-nationality">
             <x-forms.input-label for="nationality">@lang('general.nationality')</x-forms.input-label>
-            <x-forms.select2-input wire:model="infoForm.nationality" id="nationality">
+            <x-forms.select2-input wire:model.live="infoForm.nationality" id="nationality">
                 @foreach (Nationality::getValues() as $statusValue)
                     @php $status = Nationality::getLocalizedName($statusValue); @endphp
                     <option value="{{ $statusValue }}">{{ $status }}</option>
@@ -139,7 +139,13 @@
 
         <div wire:key="emp-national-number">
             <x-forms.input-label for="national_number" required>@lang('general.national_number')</x-forms.input-label>
-            <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number" />
+            @if ((int) data_get($infoForm, 'nationality') === Nationality::Syrian)
+                <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number"
+                    inputmode="numeric" maxlength="11" />
+            @else
+                <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number"
+                    inputmode="text" maxlength="255" />
+            @endif
             <x-error-span>{{ $errors->first('infoForm.national_number') }}</x-error-span>
         </div>
 

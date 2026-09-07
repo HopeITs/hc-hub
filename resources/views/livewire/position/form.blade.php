@@ -32,8 +32,8 @@
             </div>
             <div class="md:col-span-1">
                 <x-forms.input-label for="city" required>{{trans_choice('general.city',1)}}</x-forms.input-label>
-                <x-forms.select2-input wire:model="form.city_id" id="city">
-                    <option class="text-secondary-light" @disabled($form->position !== null) @selected($form->position === null)>Select Any..</option>
+                <x-forms.select2-input wire:model.live="form.city_id" id="city">
+                    <option value="" class="text-secondary-light" @disabled($form->position !== null) @selected($form->position === null)>Select Any..</option>
                     @foreach($cities as $city)
                         <option value="{{$city->id}}">{{$city->name}}</option>
                     @endforeach
@@ -99,12 +99,14 @@
                 </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.direct_manager_id') }}</x-error-span>
             </div>
-            <div class="md:col-span-1">
+            <div class="md:col-span-1" wire:key="center-field-{{ $form->city_id ?: 'all' }}">
                 <x-forms.input-label for="center">{{trans_choice('general.center',1)}}</x-forms.input-label>
                 <x-forms.select2-input wire:model="form.center_id" id="center">
                     <option value="">@lang('general.online')</option>
                     @foreach($centers as $center)
-                        <option value="{{$center->id}}">{{$center->name .' - ' . $center->city->name}}</option>
+                        <option value="{{$center->id}}">
+                            {{ $center->city ? $center->name .' - ' . $center->city->name : $center->name }}
+                        </option>
                     @endforeach
                 </x-forms.select2-input>
                 <x-error-span>{{ $errors->first('form.center_id') }}</x-error-span>
