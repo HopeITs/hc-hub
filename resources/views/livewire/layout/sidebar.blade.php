@@ -23,16 +23,18 @@
             </svg>
         </button>
 
-        <div class="flex flex-col justify-between h-full">
-            <div class="h-full px-3 pb-4 overflow-x-hidden overflow-y-auto">
-                <a href="{{ route('dashboard') }}" class="flex items-center justify-start ps-3 h-16 mb-4">
-                    <x-app-logo class="w-[8.25rem] h-auto object-fit" x-show="!sidebarCollapsed || open" />
-                    <img src="{{ asset('assets/img/hope-center-icon.svg') }}"
-                         alt="{{ config('app.name') }}"
-                         x-show="sidebarCollapsed && !open"
-                         class="hidden object-contain size-8 md:block" />
-                </a>
+        <div class="flex flex-col h-full">
+            {{-- Fixed header: logo stays put; scrolling begins below the divider --}}
+            <a href="{{ route('dashboard') }}" class="flex items-center justify-start ps-3 h-16 shrink-0 border-b border-black/[0.06]">
+                <x-app-logo class="w-[8.25rem] h-auto object-fit" x-show="!sidebarCollapsed || open" />
+                <img src="{{ asset('assets/img/hope-center-icon.svg') }}"
+                     alt="{{ config('app.name') }}"
+                     x-show="sidebarCollapsed && !open"
+                     class="hidden object-contain size-8 md:block" />
+            </a>
 
+            {{-- Scrollable navigation area (starts directly below the header) --}}
+            <div class="flex-1 min-h-0 px-3 pt-3 pb-4 overflow-x-hidden overflow-y-auto">
                 <ul class="space-y-1 font-medium" :class="sidebarCollapsed && !open ? 'md:flex md:flex-col md:items-center' : ''">
 
                     {{-- Group: Main --}}
