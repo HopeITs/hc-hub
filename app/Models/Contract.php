@@ -56,6 +56,10 @@ class Contract extends Model
         'attending_notes_ar',
         'attending_notes_en',
         'weekly_hours',
+        'daily_hours',
+        'work_days_per_week',
+        'shift_type',
+        'is_split_shift',
         'is_active',
     ];
 
@@ -65,6 +69,9 @@ class Contract extends Model
         'terminated_at' => 'date',
         'is_active' => 'boolean',
         'weekly_hours' => 'integer',
+        'daily_hours' => 'decimal:2',
+        'work_days_per_week' => 'integer',
+        'is_split_shift' => 'boolean',
         'currency' => 'integer',
         'salary' => 'decimal:2',
     ];
@@ -247,6 +254,10 @@ class Contract extends Model
                 'terminated_at',
                 'is_active',
                 'weekly_hours',
+                'daily_hours',
+                'work_days_per_week',
+                'shift_type',
+                'is_split_shift',
                 'currency',
                 'salary_per',
                 'work_days_en',

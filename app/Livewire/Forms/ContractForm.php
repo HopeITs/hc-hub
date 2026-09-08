@@ -49,6 +49,14 @@ class ContractForm extends Form
 
     public int $weekly_hours = 40;
 
+    public mixed $daily_hours = 8;
+
+    public ?int $work_days_per_week = 5;
+
+    public string $shift_type = 'standard';
+
+    public bool $is_split_shift = false;
+
     // ── Schedule
     public mixed $work_days_ar = null;
 
@@ -117,6 +125,10 @@ class ContractForm extends Form
 
         $this->is_active = true;
         $this->weekly_hours = 40;
+        $this->daily_hours = 8;
+        $this->work_days_per_week = 5;
+        $this->shift_type = 'standard';
+        $this->is_split_shift = false;
         $this->currency = 1; // SYP
         $this->salary_per = SalaryPer::Month;
         $this->terminated_at = null;
@@ -170,6 +182,10 @@ class ContractForm extends Form
         $this->termination_reason_id = $contract->termination_reason_id;
         $this->reason_of_termination = $contract->reason_of_termination;
         $this->weekly_hours = (int) $contract->weekly_hours;
+        $this->daily_hours = $contract->daily_hours ?? 8;
+        $this->work_days_per_week = $contract->work_days_per_week ?? 5;
+        $this->shift_type = $contract->shift_type ?: 'standard';
+        $this->is_split_shift = (bool) $contract->is_split_shift || $this->shift_type === 'split';
 
         $this->currency = (int) $contract->currency;
         $this->salary = $contract->salary;
@@ -178,8 +194,8 @@ class ContractForm extends Form
         $this->work_days_en = $contract->work_days_en;
         $this->attending_notes_ar = $contract->attending_notes_ar;
         $this->attending_notes_en = $contract->attending_notes_en;
-        $this->work_hours_from = $contract->work_hours_from ?? $this->work_hours_from;
-        $this->work_hours_to = $contract->work_hours_to ?? $this->work_hours_to;
+        $this->work_hours_from = $this->timeForInput($contract->work_hours_from, $this->work_hours_from);
+        $this->work_hours_to = $this->timeForInput($contract->work_hours_to, $this->work_hours_to);
     }
 
     // ────────────────────────────────────────────────
@@ -214,6 +230,10 @@ class ContractForm extends Form
             'termination_reason_id' => ['nullable', 'exists:termination_reasons,id'],
             'reason_of_termination' => ['nullable', 'string'],
             'weekly_hours' => ['required', 'integer', 'min:1'],
+            'daily_hours' => ['required', 'numeric', 'min:0.25', 'max:24'],
+            'work_days_per_week' => ['required', 'integer', 'min:1', 'max:7'],
+            'shift_type' => ['required', Rule::in(['standard', 'split'])],
+            'is_split_shift' => ['required', 'boolean'],
             'attending_notes_ar' => ['nullable', 'string', 'max:255'],
             'attending_notes_en' => ['nullable', 'string', 'max:255'],
         ]);
@@ -298,6 +318,10 @@ class ContractForm extends Form
             'termination_reason_id' => $this->termination_reason_id ?? null,
             'reason_of_termination' => $this->reason_of_termination ?? null,
             'weekly_hours' => (int) $this->weekly_hours,
+            'daily_hours' => $this->daily_hours,
+            'work_days_per_week' => $this->work_days_per_week,
+            'shift_type' => $this->shift_type,
+            'is_split_shift' => $this->is_split_shift,
             'work_days_ar' => $this->work_days_ar,
             'work_days_en' => $this->work_days_en,
             'attending_notes_ar' => filled($this->attending_notes_ar) ? trim($this->attending_notes_ar) : null,
@@ -350,6 +374,10 @@ class ContractForm extends Form
             'termination_reason_id' => $this->termination_reason_id,
             'reason_of_termination' => $this->reason_of_termination ?? null,
             'weekly_hours' => (int) $this->weekly_hours,
+            'daily_hours' => $this->daily_hours,
+            'work_days_per_week' => $this->work_days_per_week,
+            'shift_type' => $this->shift_type,
+            'is_split_shift' => $this->is_split_shift,
             'work_days_ar' => $this->work_days_ar,
             'work_days_en' => $this->work_days_en,
             'attending_notes_ar' => filled($this->attending_notes_ar) ? trim($this->attending_notes_ar) : null,
@@ -360,6 +388,19 @@ class ContractForm extends Form
             'salary' => $this->salary,
             'salary_per' => (string) $this->salary_per,
         ];
+    }
+
+    private function timeForInput(mixed $value, ?string $fallback = null): ?string
+    {
+        if ($value === null || $value === '') {
+            return $fallback;
+        }
+
+        if (is_string($value) && preg_match('/^\d{2}:\d{2}/', $value) === 1) {
+            return substr($value, 0, 5);
+        }
+
+        return Carbon::parse($value)->format('H:i');
     }
 
     /**

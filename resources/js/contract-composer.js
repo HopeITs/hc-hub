@@ -239,6 +239,9 @@ document.addEventListener('alpine:init', () => {
         workHoursFrom: config.seed?.workHoursFrom ?? '09:00',
         workHoursTo: config.seed?.workHoursTo ?? '17:00',
         weeklyHours: config.seed ? str(config.seed.weeklyHours) : '40',
+        dailyHours: config.seed ? str(config.seed.dailyHours) : '8',
+        workDaysPerWeek: config.seed ? str(config.seed.workDaysPerWeek) : '5',
+        shiftType: config.seed?.shiftType ?? 'standard',
         // Free text in both languages — "Monday to Friday", not a row of seven
         // toggles. It is what the contract PDF prints, verbatim.
         workDaysEn: config.seed?.workDaysEn ?? '',
@@ -320,7 +323,11 @@ document.addEventListener('alpine:init', () => {
                 return false;
             }
 
-            return Number(this.weeklyHours) >= 1;
+            return Number(this.weeklyHours) >= 1
+                && Number(this.dailyHours) > 0
+                && Number(this.workDaysPerWeek) >= 1
+                && Number(this.workDaysPerWeek) <= 7
+                && ['standard', 'split'].includes(this.shiftType);
         },
 
         get payValid() {
@@ -437,6 +444,10 @@ document.addEventListener('alpine:init', () => {
                 };
 
                 await this.withSync(() => this.dropUnavailableSelections());
+
+                if (!this.isStudyzoneProgram) {
+                    this.shiftType = 'standard';
+                }
             } finally {
                 if (request === this.requestSequence) {
                     this.loading = false;
@@ -493,6 +504,10 @@ document.addEventListener('alpine:init', () => {
         onProgramChange() {
             this.selected.center = ALL_CENTERS;
             this.selected.position = '';
+
+            if (!this.isStudyzoneProgram) {
+                this.shiftType = 'standard';
+            }
         },
 
         onCenterChange() {
@@ -564,6 +579,26 @@ document.addEventListener('alpine:init', () => {
         get selectedProgramLabel() {
             return this.options.programs
                 .find((program) => str(program.value) === this.selected.program)?.label ?? '';
+        },
+
+        get selectedProgram() {
+            return this.options.programs
+                .find((program) => str(program.value) === this.selected.program) ?? null;
+        },
+
+        get selectedProjectType() {
+            const slug = String(this.selectedProgram?.slug ?? '').trim().toUpperCase();
+            const label = String(this.selectedProgram?.label ?? '').trim().toLowerCase();
+
+            if (slug === 'SZ' || label.includes('study zone') || label.includes('studyzone')) {
+                return 'studyzone';
+            }
+
+            return 'default';
+        },
+
+        get isStudyzoneProgram() {
+            return this.selectedProjectType === 'studyzone';
         },
 
         get selectedCenterLabel() {
@@ -833,7 +868,7 @@ document.addEventListener('alpine:init', () => {
         get scheduleSummary() {
             const days = this.locale === 'ar' ? this.workDaysAr : this.workDaysEn;
 
-            return [days, `${this.workHoursFrom}–${this.workHoursTo}`, `${this.weeklyHours} h`]
+            return [days, `${this.workHoursFrom}–${this.workHoursTo}`, `${this.weeklyHours} h`, `${this.dailyHours} h/day`]
                 .filter(Boolean).join(' · ');
         },
 
@@ -893,6 +928,14 @@ document.addEventListener('alpine:init', () => {
             return Number(this.weeklyHours) >= 1 ? `${this.weeklyHours} h` : this.labels.empty;
         },
 
+        get cardDailyHours() {
+            return Number(this.dailyHours) > 0 ? `${this.dailyHours} h` : this.labels.empty;
+        },
+
+        get cardShiftType() {
+            return this.shiftType === 'split' ? this.labels.splitShift : this.labels.standardShift;
+        },
+
         get cardSalary() {
             return this.salary === ''
                 ? this.labels.empty
@@ -922,7 +965,8 @@ document.addEventListener('alpine:init', () => {
         scheduleLeavePreview() {
             clearTimeout(this.leaveTimer);
 
-            if (!this.selected.employee || !this.startDate || !this.endDate || Number(this.weeklyHours) < 1) {
+            if (!this.selected.employee || !this.startDate || !this.endDate
+                || Number(this.weeklyHours) < 1) {
                 this.leaveDays = null;
 
                 return;
@@ -963,6 +1007,9 @@ document.addEventListener('alpine:init', () => {
                     workHoursFrom: this.workHoursFrom,
                     workHoursTo: this.workHoursTo,
                     weeklyHours: this.weeklyHours,
+                    dailyHours: this.dailyHours,
+                    workDaysPerWeek: this.workDaysPerWeek,
+                    shiftType: this.isStudyzoneProgram ? this.shiftType : 'standard',
                     workDaysEn: this.workDaysEn,
                     workDaysAr: this.workDaysAr,
                     attendingNotesEn: this.attendingNotesEn,

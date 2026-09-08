@@ -109,6 +109,11 @@ return [
     'from-hour-to-hour' => 'من :from حتى :to',
     'role' => 'الأدوار|الدور',
     'weekly-hours' => 'ساعات العمل الأسبوعية',
+    'daily-hours' => 'ساعات العمل اليومية',
+    'work-days-per-week' => 'أيام العمل أسبوعياً',
+    'shift-type' => 'نوع الدوام',
+    'standard-shift' => 'دوام عادي',
+    'split-shift' => 'دوام مجزء',
     'status' => 'الحالة',
     'code' => 'الرمز',
     'slug' => 'الاسم المختصر',
@@ -778,8 +783,8 @@ return [
 
         // الحقلان يُطبعان كما هما في العقد، لذلك يُكتب كل مثال بلغة حقله
         // لا بلغة الواجهة.
-        'work-days-placeholder-en' => 'From Monday to Friday',
-        'work-days-placeholder-ar' => 'من الاثنين إلى الجمعة',
+        'work-days-placeholder-en' => 'Monday to Friday',
+        'work-days-placeholder-ar' => 'الاثنين إلى الجمعة',
         'add-notes' => 'إضافة ملاحظات الدوام',
         'capacity-empty' => 'اختر مسمى وظيفياً لعرض الشواغر',
         'card-position' => 'المسمى الوظيفي',

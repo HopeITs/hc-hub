@@ -60,7 +60,7 @@
         </div>
     </div>
 
-    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
             <x-forms.input-label for="composer_work_hours_from">@lang('general.work-hours-from')</x-forms.input-label>
             <x-forms.date-input id="composer_work_hours_from" type="time" x-model="workHoursFrom" />
@@ -89,6 +89,81 @@
             </div>
 
             <x-error-span>{{ $errors->first('form.weekly_hours') }}</x-error-span>
+        </div>
+
+        <div>
+            <x-forms.input-label for="composer_daily_hours" required>@lang('general.daily-hours')</x-forms.input-label>
+
+            <div class="relative">
+                <x-forms.input
+                    id="composer_daily_hours"
+                    type="number"
+                    min="0"
+                    step="0.25"
+                    x-model="dailyHours"
+                    x-bind:placeholder="'8'"
+                    class="pe-14"
+                />
+                <span class="pointer-events-none absolute inset-y-0 end-3 flex items-center text-small text-secondary-medium">
+                    {{ app()->getLocale() === 'ar' ? 'س/يوم' : 'h/day' }}
+                </span>
+            </div>
+
+            <x-error-span>{{ $errors->first('form.daily_hours') }}</x-error-span>
+        </div>
+
+        <div>
+            <x-forms.input-label for="composer_work_days_per_week" required>@lang('general.work-days-per-week')</x-forms.input-label>
+
+            <div class="relative">
+                <x-forms.input
+                    id="composer_work_days_per_week"
+                    type="number"
+                    min="1"
+                    max="7"
+                    x-model="workDaysPerWeek"
+                    x-bind:placeholder="'5'"
+                    class="pe-16"
+                />
+                <span class="pointer-events-none absolute inset-y-0 end-3 flex items-center text-small text-secondary-medium">
+                    {{ app()->getLocale() === 'ar' ? 'يوم/أسبوع' : 'd/week' }}
+                </span>
+            </div>
+
+            <x-error-span>{{ $errors->first('form.work_days_per_week') }}</x-error-span>
+        </div>
+
+        <div x-cloak x-show="isStudyzoneProgram" x-transition>
+            <x-forms.input-label for="composer_shift_type" required>@lang('general.shift-type')</x-forms.input-label>
+            <div
+                wire:ignore
+                x-init="
+                    const shiftSelect = $($refs.shiftTypeSelect);
+                    shiftSelect.select2({
+                        width: '100%',
+                        dir: document.documentElement.dir || 'ltr',
+                        minimumResultsForSearch: Infinity,
+                    });
+                    shiftSelect.val(shiftType).trigger('change.select2');
+                    shiftSelect.on('change', (event) => { shiftType = event.target.value; });
+                    $watch('shiftType', (value) => {
+                        if (shiftSelect.val() !== value) {
+                            shiftSelect.val(value).trigger('change.select2');
+                        }
+                    });
+                "
+            >
+                <x-forms.select
+                    id="composer_shift_type"
+                    x-ref="shiftTypeSelect"
+                    :options="[
+                        'standard' => __('general.standard-shift'),
+                        'split' => __('general.split-shift'),
+                    ]"
+                />
+            </div>
+
+            <x-error-span>{{ $errors->first('form.shift_type') }}</x-error-span>
         </div>
     </div>
 

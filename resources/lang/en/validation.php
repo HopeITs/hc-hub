@@ -166,6 +166,9 @@ return [
         ],
         'item' => [
             'weekly_hours' => 'Weekly Working Hours',
+            'daily_hours' => 'Daily Working Hours',
+            'work_days_per_week' => 'Work Days per Week',
+            'shift_type' => 'Shift Type',
             'type' => [
                 'ar' => 'Type (Arabic)',
                 'en' => 'Type (English)',

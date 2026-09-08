@@ -83,6 +83,53 @@ if (! function_exists('formatDuration')) {
 
 }
 
+if (! function_exists('contract_weekend_days')) {
+    /**
+     * Parse Center::weekends where Sunday is 0 and Saturday is 6.
+     *
+     * @return array<int, int>
+     */
+    function contract_weekend_days(mixed $weekends): array
+    {
+        return collect(is_array($weekends) ? $weekends : explode(',', (string) $weekends))
+            ->map(fn ($day) => filter_var(trim((string) $day), FILTER_VALIDATE_INT))
+            ->filter(fn ($day) => $day !== false && $day >= 0 && $day <= 6)
+            ->unique()
+            ->map(fn ($day) => (int) $day)
+            ->values()
+            ->all();
+    }
+}
+
+if (! function_exists('contract_primary_weekend_day')) {
+    function contract_primary_weekend_day(mixed $weekends): ?int
+    {
+        $days = contract_weekend_days($weekends);
+
+        if (count($days) > 1 && in_array(6, $days, true)) {
+            return 6;
+        }
+
+        return $days[0] ?? null;
+    }
+}
+
+if (! function_exists('contract_project_type')) {
+    function contract_project_type($contract): string
+    {
+        $program = $contract?->position?->program;
+        $slug = strtoupper(trim((string) ($program?->slug ?? '')));
+        $name = strtolower(trim((string) ($program?->name ?? '')));
+
+        return match (true) {
+            $slug === 'CU' => 'cu',
+            in_array($slug, ['DISC', 'LEAP'], true) => 'disc_leap',
+            $slug === 'SZ' || str_contains($name, 'study zone') || str_contains($name, 'studyzone') => 'studyzone',
+            default => 'default',
+        };
+    }
+}
+
 if (! function_exists('orgCardTokens')) {
     /** Org-chart card size modifier (layout in app.css `.org-id-card`). */
     function orgCardTokens(bool $compact = false): array

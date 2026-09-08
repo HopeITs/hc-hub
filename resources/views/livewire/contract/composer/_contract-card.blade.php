@@ -59,6 +59,8 @@
             ['key' => __('general.period'),                 'value' => 'cardPeriod'],
             ['key' => __('general.work-days'),              'value' => 'cardWorkDays'],
             ['key' => __('general.weekly-hours'),           'value' => 'cardHours'],
+            ['key' => __('general.daily-hours'),            'value' => 'cardDailyHours'],
+            ['key' => __('general.shift-type'),             'value' => 'cardShiftType'],
             ['key' => __('general.salary'),                 'value' => 'cardSalary'],
         ] as $row)
             <div class="flex max-h-14 min-h-[1.75rem] flex-1 items-center justify-between gap-3 border-b border-neutral-100 py-1 last:border-b-0">
