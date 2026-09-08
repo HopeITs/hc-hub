@@ -16,4 +16,18 @@ trait WithAlerts
             ->show();
 
     }
+
+    /**
+     * Neutral counterpart to successToast(), for outcomes that are not
+     * failures but did not change anything either — a save on an untouched
+     * form should say so rather than claim an operation completed.
+     */
+    public function infoToast($message = 'general.no-changes-message', $position = 'top-start')
+    {
+        LivewireAlert::title(__($message))
+            ->info()
+            ->toast()
+            ->position($position)
+            ->show();
+    }
 }

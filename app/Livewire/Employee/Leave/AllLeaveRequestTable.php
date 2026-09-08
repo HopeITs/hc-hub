@@ -4,7 +4,9 @@ namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Forms\LeaveRequestForm;
+use App\Models\Contract;
 use App\Models\Employee;
+use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use App\Services\LeaveNotificationService;
@@ -150,29 +152,56 @@ class AllLeaveRequestTable extends LivewireTable
         return $query;
     }
 
+    /**
+     * Employees appearing in the leave requests this user can manage.
+     *
+     * Built through the same manageableBy scope as query(), so the header
+     * filter never offers employees the viewer cannot see anyway (a manager
+     * only gets their own reports, HR-{city} only that city).
+     *
+     * @return array<int, string>
+     */
+    protected function employeeFilterOptions(): array
+    {
+        $employeeIds = Contract::query()
+            ->whereIn(
+                'id',
+                LeaveBalance::query()
+                    ->whereIn(
+                        'id',
+                        LeaveRequest::query()
+                            ->manageableBy(auth()->user())
+                            ->select('leave_balance_id'),
+                    )
+                    ->select('contract_id'),
+            )
+            ->distinct()
+            ->pluck('employee_id');
+
+        return Employee::query()
+            ->whereIn('id', $employeeIds)
+            ->select(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
+            ->orderBy(transColumn('first_name'))
+            ->get()
+            ->mapWithKeys(fn ($e) => [$e->id => $e->name])
+            ->toArray();
+    }
+
     protected function columns(): array
     {
         $user = auth()->user();
 
         return [
 
+            SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee_id')
+                ->options($this->employeeFilterOptions())
+                ->displayUsing(fn ($v, Model $m) => $m->leaveBalance?->contract?->employee?->name ?? '—')
+                ->sortable()
+                ->searchable(),
             SelectColumn::make(trans_choice('general.leave-type', 1), 'leaveBalance.leaveType.'.transColumn('name'))
                 ->options(LeaveType::query()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()
                 ->searchable(),
-            SelectColumn::make(trans_choice('general.employee', 1), 'leaveBalance.contract.employee_id')
-                ->options(
-                    Employee::query()
-                        ->select(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
-                        ->orderBy(transColumn('first_name'))
-                        ->get()
-                        ->mapWithKeys(fn ($e) => [$e->id => $e->name])
-                        ->toArray(),
-                )
-                ->displayUsing(fn ($v, Model $m) => $m->leaveBalance?->contract?->employee?->name ?? '—')
-                ->sortable()
-                ->searchable()
-                ->visible(str_starts_with($user->myRole(), 'HR-') || $user->myRole() === 'manager'),
             SelectColumn::make(trans_choice('general.type', 1), 'type')
                 ->options(['hour' => trans_choice('general.hour', 1), 'day' => trans_choice('general.day', 1)])
                 ->displayUsing(fn ($v, Model $m) => trans_choice('general.'.$m->type, 1))

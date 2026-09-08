@@ -128,7 +128,7 @@
 
         <div wire:key="emp-nationality">
             <x-forms.input-label for="nationality">@lang('general.nationality')</x-forms.input-label>
-            <x-forms.select2-input wire:model="infoForm.nationality" id="nationality">
+            <x-forms.select2-input wire:model.live="infoForm.nationality" id="nationality">
                 @foreach (Nationality::getValues() as $statusValue)
                     @php $status = Nationality::getLocalizedName($statusValue); @endphp
                     <option value="{{ $statusValue }}">{{ $status }}</option>
@@ -139,7 +139,13 @@
 
         <div wire:key="emp-national-number">
             <x-forms.input-label for="national_number" required>@lang('general.national_number')</x-forms.input-label>
-            <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number" />
+            @if ((int) data_get($infoForm, 'nationality') === Nationality::Syrian)
+                <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number"
+                    inputmode="numeric" maxlength="11" />
+            @else
+                <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number"
+                    inputmode="text" maxlength="255" />
+            @endif
             <x-error-span>{{ $errors->first('infoForm.national_number') }}</x-error-span>
         </div>
 
@@ -217,19 +223,22 @@
         </div>
     </div>
 
-    <div class="flex justify-end space-x-2 ">
+    <x-forms.dirty-gate watch="infoForm" :active="! $isCreateMode" class="flex justify-end space-x-2 ">
         {{--
-            The tab is deliberately NOT advanced here. saveInformation()
-            redirects on success, so switching tabs client-side only ever took
-            effect when validation FAILED — which hid this tab, and with it
-            every error message belonging to its fields.
+            The tab is deliberately NOT advanced here. In create mode
+            saveInformation() redirects into the edit form on success, so
+            switching tabs client-side only ever took effect when validation
+            FAILED — which hid this tab, and with it every error message
+            belonging to its fields. In edit mode the save simply stays put.
         --}}
         <x-primary-button type="button" wire:click="saveInformation"
-            class="!w-auto">
-            @lang('general.next')
+            class="!w-auto" x-bind:disabled="! dirty">
+            @lang($isCreateMode ? 'general.next' : 'general.save')
         </x-primary-button>
 
-        <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
-    </div>
+        @if ($isCreateMode)
+            <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
+        @endif
+    </x-forms.dirty-gate>
 
 </form>

@@ -40,7 +40,7 @@
      }"
      x-on:keydown.escape.window="filtersOpen = false">
 
-    <section class="overflow-hidden bg-white border border-neutral-200 shadow-e1 rounded-surface">
+    <section class="isolate overflow-hidden bg-white border border-neutral-200 shadow-e1 rounded-surface">
         {{-- ---------- Header + stats ---------- --}}
         <div class="relative px-6 py-6 text-white bg-secondary-dark">
             <div class="relative flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
@@ -140,6 +140,23 @@
                         class="flex items-center gap-2 rounded-surface border border-neutral-200 bg-white px-3 py-2 text-small font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
                     <x-icons.code-fork class="size-3.5" />
                     {{ $compact ? __('general.comfortable-view') : __('general.compact-view') }}
+                </button>
+
+                {{-- Goes solid red once vacancies are hidden, so the chart never
+                     silently omits cards without the toolbar saying so. --}}
+                <button type="button" wire:click="toggleVacancies"
+                        aria-pressed="{{ $showVacancies ? 'false' : 'true' }}"
+                        @unless($showVacancies) title="{{ __('general.vacancies-kept-help') }}" @endunless
+                        class="flex items-center gap-2 rounded-surface border px-3 py-2 text-small font-semibold transition {{ $showVacancies ? 'border-neutral-200 bg-white text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary' : 'border-primary bg-primary text-white hover:opacity-90' }}">
+                    <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        @if($showVacancies)
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/>
+                            <circle cx="12" cy="12" r="2.5"/>
+                        @else
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.6 6.2A9.9 9.9 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3.3 3.9M6.5 8.1A17 17 0 0 0 2 12s3.6 6 10 6a9.8 9.8 0 0 0 3.3-.5"/>
+                        @endif
+                    </svg>
+                    {{ $showVacancies ? __('general.hide-vacancies') : __('general.show-vacancies') }}
                 </button>
             </div>
 
@@ -380,7 +397,7 @@
                     <div class="origin-top-left will-change-transform"
                          :style="transformStyle()">
                         <div id="org-chart-export" class="flex min-w-max flex-col items-center {{ $compact ? 'px-8 py-8' : 'px-16 py-12' }}">
-                            {{-- Root (CEO) and their deputies/assistants share the first row. --}}
+                            {{-- Level 1 — the chief executive sits alone on the first row. --}}
                             <div class="relative flex items-end justify-center gap-4 pb-12">
                                 @foreach($tree['root'] as $root)
                                     @forelse($root->activeContracts as $contract)
@@ -390,17 +407,34 @@
                                     @endforelse
                                 @endforeach
 
-                                @foreach($tree['rootAssistant'] as $assistant)
-                                    @forelse($assistant->activeContracts as $contract)
-                                        <x-org-node :position="$assistant" :employee="$contract->employee" :manager-type="$manager_type" :compact="$compact"/>
-                                    @empty
-                                        <x-org-empty-node :position="$assistant" :compact="$compact"/>
-                                    @endforelse
-                                @endforeach
-
                                 <span class="absolute bottom-0 start-1/2 h-10 w-px {{ $trunk }}"></span>
                             </div>
 
+                            {{-- Level 2 — the deputy executives, as a flat row of cards. Their own
+                                 reports are promoted onto level 3 by grade, so no expander here. --}}
+                            @if(collect($tree['deputies'])->isNotEmpty())
+                                <div class="relative flex w-full items-start justify-center {{ $colGap }} border-t {{ $branchBorder }} px-4 pb-12">
+                                    @foreach($tree['deputies'] as $deputy)
+                                        {{-- Same stem geometry as a top-level manager column, so the
+                                             drop from level 1 lands on each card the way level 3 does. --}}
+                                        <div class="relative flex flex-col items-center pt-6">
+                                            <span class="absolute start-1/2 top-0 h-6 w-px {{ $trunk }}"></span>
+
+                                            @forelse($deputy->activeContracts as $contract)
+                                                <x-org-node :position="$deputy" :employee="$contract->employee" :manager-type="$manager_type" :compact="$compact"/>
+                                            @empty
+                                                <x-org-empty-node :position="$deputy" :compact="$compact"/>
+                                            @endforelse
+                                        </div>
+                                    @endforeach
+
+                                    <span class="absolute bottom-0 start-1/2 h-10 w-px {{ $trunk }}"></span>
+                                </div>
+                            @endif
+
+                            {{-- Level 3 — department managers and key staff. The grade split below
+                                 keeps managerial grades on this row and pools the operational
+                                 grades into level 4; sub-trees expand exactly as before. --}}
                             @php($teamRel = $manager_type.'Team')
                             @php($topManagers = collect($tree['managers']))
                             @php($topBranches = $topManagers->filter(fn ($p) => $p->{$teamRel}->isNotEmpty()))

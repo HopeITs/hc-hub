@@ -39,8 +39,14 @@
 
                 <div>
                     <x-forms.input-label>@lang('general.file')</x-forms.input-label>
+                    {{--
+                        A just-picked file takes precedence over the stored
+                        one. Passing only `old_file_url` here meant the
+                        preview kept showing the OLD attachment after you
+                        chose a replacement, as if the pick had not taken.
+                    --}}
                     <x-forms.file-input wire:model="attachmentForm.attachments.{{ $index }}.file"
-                        preview-type="pdf" :old-file="$attachment['old_file_url'] ?? null" :file-name="$attachment['file_name'] ?? null" accept=".pdf, .jpg, .jpeg, .png" />
+                        preview-type="pdf" :old-file="$attachment['file'] ?: ($attachment['old_file_url'] ?? null)" :file-name="$attachment['file_name'] ?? null" accept=".pdf, .jpg, .jpeg, .png" />
                     @error("attachmentForm.attachments.{$index}.file")
                         <x-error-span>{{ $message }}</x-error-span>
                     @enderror
@@ -56,8 +62,8 @@
         </x-primary-button>
     </div>
 
-    <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
-        <x-primary-button type="submit">@lang('general.save-attachments')</x-primary-button>
-        <x-secondary-button :href="route('employees.index')">@lang('general.cancel')</x-secondary-button>
-    </div>
+    <x-forms.dirty-gate watch="attachmentForm" :active="! $isCreateMode"
+        class="flex justify-end space-x-2 pt-4 mt-6 border-t">
+        <x-primary-button type="submit" x-bind:disabled="! dirty">@lang('general.save-attachments')</x-primary-button>
+    </x-forms.dirty-gate>
 </form>

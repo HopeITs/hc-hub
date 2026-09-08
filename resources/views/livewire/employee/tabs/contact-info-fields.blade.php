@@ -36,7 +36,8 @@
 
         <div>
             <x-forms.input-label for="work_phone">@lang('general.work_phone')</x-forms.input-label>
-            <x-forms.input type="tel" wire:model="infoForm.work_phone" id="work_phone" />
+            <x-forms.input type="tel" wire:model="infoForm.work_phone" id="work_phone"
+                inputmode="numeric" maxlength="10" autocomplete="tel" />
             <x-error-span>{{ $errors->first('infoForm.work_phone') }}</x-error-span>
         </div>
 
@@ -47,7 +48,8 @@
 
         <div>
             <x-forms.input-label for="personal_phone">@lang('general.personal_phone')</x-forms.input-label>
-            <x-forms.input type="tel" wire:model="infoForm.personal_phone" id="personal_phone" />
+            <x-forms.input type="tel" wire:model="infoForm.personal_phone" id="personal_phone"
+                inputmode="numeric" maxlength="10" autocomplete="tel" />
             <x-error-span>{{ $errors->first('infoForm.personal_phone') }}</x-error-span>
         </div>
 
@@ -91,13 +93,13 @@
         </div>
     </div>
 
-    <div class="flex justify-end space-x-2">
-        <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-        <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
-    </div>
+    <x-forms.dirty-gate watch="infoForm" :active="! $isCreateMode" class="flex justify-end space-x-2">
+        <x-primary-button type="submit" class="!w-auto" x-bind:disabled="! dirty">@lang('general.save')</x-primary-button>
+        @if ($isCreateMode)
+            <x-secondary-button :href="route('employees.index')" class="!w-auto">@lang('general.cancel')</x-secondary-button>
+        @endif
+    </x-forms.dirty-gate>
 
 
 </form>
-
-
 

@@ -17,10 +17,7 @@ import select2 from 'select2';
 
 select2();
 
-import './contract-location-picker.js';
-
-// The create screen's composer. Independent of the picker above, which stays
-// in place for ContractEdit.
+// The single-page composer behind both creating and editing a contract.
 import './contract-composer.js';
 
 import '../css/app.css';

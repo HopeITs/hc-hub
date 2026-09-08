@@ -13,12 +13,37 @@ class City extends Model
 {
     use HasFactory, HasTranslation, LogsActivity;
 
+    /**
+     * Slug of the nationwide "city".
+     *
+     * Syria is not a city beside Aleppo or Homs — it is the headquarters scope
+     * that sits above all of them. A contract issued against it may be held by
+     * an employee from any city, so the employee dropdown and the city
+     * consistency check both drop their city filter for this one row.
+     */
+    public const NATIONAL_SLUG = 'SYR';
+
     protected $fillable = [
         'name_en',
         'name_ar',
         'code',
         'is_active',
     ];
+
+    /**
+     * Is $cityId the nationwide scope?
+     *
+     * Resolved by slug rather than by a hard-coded id, because the ids are
+     * assigned by whichever order CitySeeder happened to run in.
+     */
+    public static function isNational(?int $cityId): bool
+    {
+        return $cityId !== null
+            && static::query()
+                ->whereKey($cityId)
+                ->where('slug', self::NATIONAL_SLUG)
+                ->exists();
+    }
 
     public function holidays()
     {

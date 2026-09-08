@@ -106,12 +106,15 @@ class ContractCreatePerformanceTest extends TestCase
             // A city-scoped role gets a locked chip, never a dropdown of one.
             ->assertSee(__('general.composer.locked-city'))
             ->assertDontSeeHtml('id="composer_city"')
+            // Work days are a plain text field in each language, not a picker.
+            ->assertSeeHtml('id="composer_work_days_en"')
+            ->assertSeeHtml('id="composer_work_days_ar"')
             // Termination has no place on a contract that does not exist yet.
             // The properties still ride along in the Livewire snapshot as nulls;
-            // what must be gone is any control bound to them.
-            ->assertDontSeeHtml('id="terminated_at"')
-            ->assertDontSeeHtml('id="termination_reason_id"')
-            ->assertDontSeeHtml('id="reason_of_termination"')
+            // what must be gone is the whole section and every control in it.
+            ->assertDontSeeHtml('composer-section-termination')
+            ->assertDontSeeHtml('id="composer_terminated_at"')
+            ->assertDontSeeHtml('id="composer_reason_of_termination"')
             // The contract card and its entitlement row.
             ->assertSee(__('general.composer.annual-leave'))
             ->assertSee(__('general.composer.capacity'));
@@ -204,47 +207,217 @@ class ContractCreatePerformanceTest extends TestCase
             ->assertReturned(null);
     }
 
-    public function test_edit_uses_the_same_fast_options_without_changing_existing_dates(): void
+    /**
+     * Syria is the headquarters scope, not a city beside Aleppo and Homs, so a
+     * contract issued against it may be held by an employee from anywhere.
+     */
+    public function test_the_nationwide_city_offers_employees_from_every_city(): void
     {
         $fixtures = $this->makeFixtures();
-        $startDate = now()->subMonth()->startOfMonth()->toDateString();
-        $endDate = now()->addMonths(5)->endOfMonth()->toDateString();
+        $syria = $this->makeCity('SYR', '000');
 
-        $contract = Contract::query()->forceCreate([
-            'employee_id' => $fixtures['employee']->id,
-            'position_id' => $fixtures['position']->id,
-            'contract_type_id' => $fixtures['trialType']->id,
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'currency' => 1,
-            'salary' => 100,
-            'salary_per' => 1,
-            'weekly_hours' => 40,
-            'is_active' => true,
-        ]);
+        // Both roles that can reach Syria: headquarters HR, and the nationwide
+        // roles above it. Nobody lives in Syria itself, so an unexempted query
+        // returns nothing at all — which is exactly how this used to fail.
+        $nationwide = [
+            $this->makeUser($syria, 'HR-SYR', ['contracts.create']),
+            $this->makeUser($fixtures['city'], 'general-manager', ['contracts.create']),
+        ];
 
-        $fixtures['employee']->update(['is_active' => false]);
+        foreach ($nationwide as $user) {
+            Livewire::actingAs($user)
+                ->test(ContractCreate::class)
+                ->call('locationOptions', $syria->id)
+                ->assertReturned(function (array $options) use ($fixtures): bool {
+                    $employeeIds = collect($options['employees'])->pluck('value');
 
-        $component = Livewire::actingAs($fixtures['hr'])
-            ->test(ContractEdit::class, ['contract' => $contract])
+                    // Neither of these lives in Syria, and both are offered.
+                    return $employeeIds->contains($fixtures['employee']->id)
+                        && $employeeIds->contains($fixtures['remoteEmployee']->id);
+                });
+        }
+    }
+
+    /**
+     * A nationwide role is not pinned to its own profile city.
+     *
+     * Which cities a user may touch is decided once, from activeCityId(). This
+     * method used to narrow it a second time for any non-HR role, so a
+     * general-manager was offered every position in a city and no employees at
+     * all — the screen read "Nothing matches" rather than refusing outright.
+     */
+    public function test_a_nationwide_role_is_not_pinned_to_its_own_profile_city(): void
+    {
+        $fixtures = $this->makeFixtures();
+
+        // Profile sits in the remote city; the contract is being written in the
+        // other one, which a nationwide role is entitled to do.
+        $manager = $this->makeUser($fixtures['remoteCity'], 'general-manager', ['contracts.create']);
+
+        Livewire::actingAs($manager)
+            ->test(ContractCreate::class)
             ->call('locationOptions', $fixtures['city']->id)
             ->assertReturned(fn (array $options): bool => collect($options['employees'])
                 ->pluck('value')
                 ->contains($fixtures['employee']->id));
+    }
 
-        $component
-            ->call('advanceIdentity', [
-                'cityId' => $fixtures['city']->id,
-                'employeeId' => $fixtures['employee']->id,
-                'programId' => $fixtures['program']->id,
-                'centerId' => $fixtures['center']->id,
-                'positionId' => $fixtures['position']->id,
-                'contractTypeId' => $fixtures['trialType']->id,
-            ])
+    /** A city-scoped role still cannot reach past its own city at all. */
+    public function test_a_city_scoped_role_is_still_refused_another_city(): void
+    {
+        $fixtures = $this->makeFixtures();
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractCreate::class)
+            ->call('locationOptions', $fixtures['remoteCity']->id)
+            ->assertStatus(403);
+    }
+
+    /** Every other city still shows only its own people. */
+    public function test_an_ordinary_city_still_offers_only_its_own_employees(): void
+    {
+        $fixtures = $this->makeFixtures();
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractCreate::class)
+            ->call('locationOptions', $fixtures['city']->id)
+            ->assertReturned(function (array $options) use ($fixtures): bool {
+                $employeeIds = collect($options['employees'])->pluck('value');
+
+                return $employeeIds->contains($fixtures['employee']->id)
+                    && ! $employeeIds->contains($fixtures['remoteEmployee']->id);
+            });
+    }
+
+    public function test_edit_uses_the_same_fast_options_and_opens_on_the_contracts_own_dates(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $contract = $this->makeExistingContract($fixtures);
+
+        $fixtures['employee']->update(['is_active' => false]);
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractEdit::class, ['contract' => $contract])
+            // A deactivated employee is still offered, because this contract
+            // already belongs to them.
+            ->call('locationOptions', $fixtures['city']->id)
+            ->assertReturned(fn (array $options): bool => collect($options['employees'])
+                ->pluck('value')
+                ->contains($fixtures['employee']->id))
+            // Probing the type cards must not move the dates the screen opens on.
+            ->assertSet('form.start_date', $contract->start_date->toDateString())
+            ->assertSet('form.end_date', $contract->end_date->toDateString());
+    }
+
+    public function test_the_edit_screen_is_the_same_composer_plus_termination(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $contract = $this->makeExistingContract($fixtures);
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractEdit::class, ['contract' => $contract])
+            // The four sections the create screen has, unchanged...
+            ->assertSeeHtml('composer-section-assignment')
+            ->assertSeeHtml('composer-section-contract')
+            ->assertSeeHtml('composer-section-schedule')
+            ->assertSeeHtml('composer-section-pay')
+            ->assertSeeHtml('id="composer_employee"')
+            ->assertSeeHtml('id="composer_position"')
+            ->assertSee(__('general.composer.annual-leave'))
+            // ...plus the one only an existing contract can have.
+            ->assertSeeHtml('composer-section-termination')
+            ->assertSeeHtml('id="composer_terminated_at"')
+            ->assertSeeHtml('id="composer_reason_of_termination"')
+            // Work days are a plain text field again, never a day picker.
+            ->assertSeeHtml('id="composer_work_days_en"')
+            ->assertSeeHtml('id="composer_work_days_ar"')
+            // Whose contract this is, and the term it runs for, are stated once
+            // — in the card — rather than repeated in a banner above the form.
+            ->assertSeeHtml(sprintf(
+                '%s: %s — %s',
+                __('general.current-period'),
+                $contract->start_date->format('d-m-Y'),
+                $contract->end_date->format('d-m-Y'),
+            ))
+            ->assertDontSee(__('general.renewing-contract-for', ['name' => '']));
+    }
+
+    public function test_the_edit_composer_saves_everything_in_one_request(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $contract = $this->makeExistingContract($fixtures);
+
+        $this->mock(LeaveBalanceService::class)->shouldReceive('create')->once();
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractEdit::class, ['contract' => $contract])
+            ->call('submit', $this->payload($fixtures, [
+                'salary' => 750,
+                'workDaysEn' => 'Monday to Friday',
+                'workDaysAr' => 'الإثنين إلى الجمعة',
+                'startDate' => $contract->start_date->toDateString(),
+                'endDate' => $contract->end_date->toDateString(),
+            ]))
             ->assertHasNoErrors()
-            ->assertSet('step', 2)
-            ->assertSet('form.start_date', $startDate)
-            ->assertSet('form.end_date', $endDate);
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('contracts', [
+            'id' => $contract->id,
+            'salary' => 750,
+            'work_days_en' => 'Monday to Friday',
+            'is_active' => true,
+            'terminated_at' => null,
+        ]);
+    }
+
+    public function test_recording_a_termination_on_edit_deactivates_the_contract(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $contract = $this->makeExistingContract($fixtures);
+        $terminatedAt = $contract->start_date->copy()->addMonth()->toDateString();
+
+        $this->mock(LeaveBalanceService::class)->shouldReceive('create')->once();
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractEdit::class, ['contract' => $contract])
+            ->call('submit', $this->payload($fixtures, [
+                'startDate' => $contract->start_date->toDateString(),
+                'endDate' => $contract->end_date->toDateString(),
+                'terminatedAt' => $terminatedAt,
+                'reasonOfTermination' => 'Resigned.',
+            ]))
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('contracts', [
+            'id' => $contract->id,
+            'terminated_at' => $terminatedAt.' 00:00:00',
+            'reason_of_termination' => 'Resigned.',
+            'is_active' => false,
+        ]);
+    }
+
+    /**
+     * Editing must not be blocked on work days: contracts imported from Excel
+     * before the field existed have none, and an unrelated salary change would
+     * otherwise be impossible to save.
+     */
+    public function test_work_days_are_not_required_on_edit(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $contract = $this->makeExistingContract($fixtures);
+
+        $this->mock(LeaveBalanceService::class)->shouldReceive('create')->once();
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractEdit::class, ['contract' => $contract])
+            ->call('submit', $this->payload($fixtures, [
+                'startDate' => $contract->start_date->toDateString(),
+                'endDate' => $contract->end_date->toDateString(),
+                'workDaysEn' => '',
+                'workDaysAr' => '',
+            ]))
+            ->assertHasNoErrors()
+            ->assertRedirect();
     }
 
     public function test_the_composer_creates_the_complete_contract_in_one_request(): void
@@ -274,6 +447,22 @@ class ContractCreatePerformanceTest extends TestCase
             // Never set on create, whatever the client sends.
             'terminated_at' => null,
             'termination_reason_id' => null,
+        ]);
+    }
+
+    private function makeExistingContract(array $fixtures): Contract
+    {
+        return Contract::query()->forceCreate([
+            'employee_id' => $fixtures['employee']->id,
+            'position_id' => $fixtures['position']->id,
+            'contract_type_id' => $fixtures['trialType']->id,
+            'start_date' => now()->subMonth()->startOfMonth()->toDateString(),
+            'end_date' => now()->addMonths(5)->endOfMonth()->toDateString(),
+            'currency' => 1,
+            'salary' => 100,
+            'salary_per' => 1,
+            'weekly_hours' => 40,
+            'is_active' => true,
         ]);
     }
 

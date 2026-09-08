@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\BadgeSubtype;
 use App\Enums\BadgeType;
 use App\Livewire\Badges\BadgesModule;
 use App\Livewire\Badges\BadgesTable;
@@ -182,6 +183,76 @@ class BadgeAuthorizationTest extends TestCase
             ->assertHasErrors(['badgeForm.badges.0.type']);
 
         $this->assertDatabaseCount('badges', 0);
+    }
+
+    public function test_employee_form_requires_subtype_for_warning_and_reward_badges(): void
+    {
+        $aleppo = $this->createCity('ALP', '001');
+        $user = $this->createUserWithActiveRole('HR-ALP', $aleppo);
+        $employee = $this->createEmployee($aleppo, 'subtype.required');
+
+        Livewire::actingAs($user)
+            ->test(EmployeeEdit::class, ['employee' => $employee])
+            ->call('addBadge')
+            ->set('badgeForm.badges.0.type', BadgeType::Warning)
+            ->call('saveBadges')
+            ->assertHasErrors(['badgeForm.badges.0.subtype']);
+
+        $this->assertDatabaseCount('badges', 0);
+    }
+
+    public function test_employee_form_saves_financial_reward_badge_details(): void
+    {
+        $aleppo = $this->createCity('ALP', '001');
+        $user = $this->createUserWithActiveRole('HR-ALP', $aleppo);
+        $employee = $this->createEmployee($aleppo, 'reward.amount');
+
+        Livewire::actingAs($user)
+            ->test(EmployeeEdit::class, ['employee' => $employee])
+            ->call('addBadge')
+            ->set('badgeForm.badges.0.type', BadgeType::Reward)
+            ->set('badgeForm.badges.0.subtype', BadgeSubtype::RewardFinancial)
+            ->set('badgeForm.badges.0.amount', 250)
+            ->set('badgeForm.badges.0.currency', 2)
+            ->call('saveBadges')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('badges', [
+            'employee_id' => $employee->id,
+            'type' => BadgeType::Reward,
+            'subtype' => BadgeSubtype::RewardFinancial,
+            'amount' => 250,
+            'currency' => 2,
+        ]);
+    }
+
+    public function test_employee_form_updates_existing_badge_details(): void
+    {
+        $aleppo = $this->createCity('ALP', '001');
+        $user = $this->createUserWithActiveRole('HR-ALP', $aleppo);
+        $employee = $this->createEmployee($aleppo, 'reward.edit');
+        $badge = $this->createBadge($employee);
+
+        Livewire::actingAs($user)
+            ->test(EmployeeEdit::class, ['employee' => $employee])
+            ->set('badgeForm.badges.0.type', BadgeType::Reward)
+            ->set('badgeForm.badges.0.subtype', BadgeSubtype::RewardPromotion)
+            ->set('badgeForm.badges.0.new_position', 'Program Coordinator')
+            ->call('saveBadges')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseCount('badges', 1);
+        $this->assertDatabaseHas('badges', [
+            'id' => $badge->id,
+            'employee_id' => $employee->id,
+            'type' => BadgeType::Reward,
+            'subtype' => BadgeSubtype::RewardPromotion,
+            'new_position' => 'Program Coordinator',
+            'amount' => null,
+            'currency' => null,
+            'current_salary' => null,
+            'new_salary' => null,
+        ]);
     }
 
     public function test_other_users_cannot_see_badge_reasons_on_employee_profiles(): void

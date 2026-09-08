@@ -1,12 +1,14 @@
 /**
- * Contract create — "Composer".
+ * Contract "Composer" — the single-page screen behind both creating a contract
+ * and editing one.
  *
  * Alpine owns the whole form while it is being filled in. Only three things
  * cross the wire: one renderless request per city change, one debounced
  * request for the leave-entitlement figure, and one request on submit.
  *
- * Deliberately independent of contract-location-picker.js / jQuery / Select2,
- * which stay in place for ContractEdit.
+ * The two screens differ only in what Blade hands down: an edit seeds every
+ * field from the contract it opened on, and appends a `termination` section
+ * that a contract which does not exist yet cannot have.
  */
 
 const ALL_CENTERS = '__all__';
@@ -204,54 +206,61 @@ document.addEventListener('alpine:init', () => {
      * ------------------------------------------------------------------ */
     window.Alpine.data('contractComposer', (config) => ({
         // ---- configuration handed down from Blade
-        dayNames: config.dayNames,
-        dayShort: config.dayShort,
-        listSeparator: config.listSeparator,
         typeDefaults: config.typeDefaults,
         labels: config.labels,
         locale: config.locale,
         cities: config.cities ?? [],
+        terminationReasons: config.terminationReasons ?? [],
+        // Create renders four sections; edit adds `termination` on the end.
+        sections: config.sections ?? ['assignment', 'contract', 'schedule', 'pay'],
+        // Only create insists on work days: contracts imported before the field
+        // existed have none, and editing one must not be blocked on that.
+        requireWorkDays: config.requireWorkDays ?? true,
 
         // ---- assignment
-        // config.renewal is present only when this page was opened as a
-        // renewal, seeding every field below from the source contract instead
+        // config.seed is present when this page opened on an existing contract
+        // — a renewal or an edit — and fills every field below from it instead
         // of opening blank. Everything it sets stays user-editable afterwards.
         selected: {
             city: str(config.cityId),
-            employee: str(config.renewal?.employeeId),
-            program: str(config.renewal?.programId),
-            center: config.renewal?.centerId != null ? str(config.renewal.centerId) : ALL_CENTERS,
-            position: str(config.renewal?.positionId),
-            contractType: str(config.renewal?.contractTypeId),
+            employee: str(config.seed?.employeeId),
+            program: str(config.seed?.programId),
+            center: config.seed?.centerId != null ? str(config.seed.centerId) : ALL_CENTERS,
+            position: str(config.seed?.positionId),
+            contractType: str(config.seed?.contractTypeId),
         },
         options: { employees: [], programs: [], centers: [], positions: [] },
 
         // ---- contract
-        startDate: config.renewal?.startDate ?? '',
-        endDate: config.renewal?.endDate ?? '',
+        startDate: config.seed?.startDate ?? '',
+        endDate: config.seed?.endDate ?? '',
 
         // ---- schedule
-        days: [false, false, false, false, false, false, false],
-        workHoursFrom: config.renewal?.workHoursFrom ?? '09:00',
-        workHoursTo: config.renewal?.workHoursTo ?? '17:00',
-        weeklyHoursOverride: config.renewal ? str(config.renewal.weeklyHours) : null,
-        // A renewal's day list is carried over as free text rather than
-        // reverse-parsed into the checkbox grid, so it round-trips exactly
-        // even if the source was ever hand-edited into a non-standard set.
-        manualDays: Boolean(config.renewal),
-        workDaysEnManual: config.renewal?.workDaysEn ?? '',
-        workDaysArManual: config.renewal?.workDaysAr ?? '',
-        showNotes: Boolean(config.renewal?.attendingNotesEn || config.renewal?.attendingNotesAr),
-        attendingNotesEn: config.renewal?.attendingNotesEn ?? '',
-        attendingNotesAr: config.renewal?.attendingNotesAr ?? '',
+        workHoursFrom: config.seed?.workHoursFrom ?? '09:00',
+        workHoursTo: config.seed?.workHoursTo ?? '17:00',
+        weeklyHours: config.seed ? str(config.seed.weeklyHours) : '40',
+        // Free text in both languages — "Monday to Friday", not a row of seven
+        // toggles. It is what the contract PDF prints, verbatim.
+        workDaysEn: config.seed?.workDaysEn ?? '',
+        workDaysAr: config.seed?.workDaysAr ?? '',
+        showNotes: Boolean(config.seed?.attendingNotesEn || config.seed?.attendingNotesAr),
+        attendingNotesEn: config.seed?.attendingNotesEn ?? '',
+        attendingNotesAr: config.seed?.attendingNotesAr ?? '',
 
         // ---- pay
-        salary: config.renewal?.salary ?? '',
-        currency: str(config.renewal?.currency ?? '1'),
-        salaryPer: str(config.renewal?.salaryPer ?? '1'),
+        salary: config.seed?.salary ?? '',
+        currency: str(config.seed?.currency ?? '1'),
+        salaryPer: str(config.seed?.salaryPer ?? '1'),
+
+        // ---- termination (edit only; create does not render the section)
+        terminatedAt: config.seed?.terminatedAt ?? '',
+        terminationReasonId: str(config.seed?.terminationReasonId ?? ''),
+        reasonOfTermination: config.seed?.reasonOfTermination ?? '',
 
         // ---- ui
-        section: 'assignment',
+        // An edit opens with every section collapsed and summarised: there is
+        // nothing to fill in there, only something to change.
+        section: config.initialSection ?? 'assignment',
         loading: false,
         submitting: false,
         leaveDays: null,
@@ -275,6 +284,11 @@ document.addEventListener('alpine:init', () => {
             if (this.selected.city) {
                 this.loadCityOptions(false);
             }
+
+            // A seeded screen — an edit, or a renewal — arrives with every
+            // entitlement input already complete, so the watcher above has
+            // nothing to react to. Ask once, up front.
+            this.scheduleLeavePreview();
 
             window.addEventListener('composer-invalid', (event) => {
                 const sections = event.detail?.sections ?? [];
@@ -302,7 +316,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         get scheduleValid() {
-            return this.workDaysEn !== '' && this.workDaysAr !== '' && this.weeklyHours >= 1;
+            if (this.requireWorkDays && (this.workDaysEn.trim() === '' || this.workDaysAr.trim() === '')) {
+                return false;
+            }
+
+            return Number(this.weeklyHours) >= 1;
         },
 
         get payValid() {
@@ -315,17 +333,28 @@ document.addEventListener('alpine:init', () => {
                 contract: this.contractValid,
                 schedule: this.scheduleValid,
                 pay: this.payValid,
+                // Optional by nature: a contract is complete whether or not it
+                // ended early, so this section never locks the ones after it.
+                termination: true,
             }[name] ?? false;
+        },
+
+        /** The sections that must be filled in before the form can be sent. */
+        get requiredSections() {
+            return this.sections.filter((name) => name !== 'termination');
+        },
+
+        isLastSection(name) {
+            return this.sections[this.sections.length - 1] === name;
         },
 
         /** The first earlier section that is not yet satisfied, or null. */
         blockedBy(name) {
-            const order = ['assignment', 'contract', 'schedule', 'pay'];
-            const index = order.indexOf(name);
+            const index = this.sections.indexOf(name);
 
             for (let i = 0; i < index; i += 1) {
-                if (!this.isValid(order[i])) {
-                    return order[i];
+                if (!this.isValid(this.sections[i])) {
+                    return this.sections[i];
                 }
             }
 
@@ -357,8 +386,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         nextSection() {
-            const order = ['assignment', 'contract', 'schedule', 'pay'];
-            const next = order[order.indexOf(this.section) + 1];
+            const next = this.sections[this.sections.indexOf(this.section) + 1];
 
             if (next && this.isUnlocked(next)) {
                 this.section = next;
@@ -366,12 +394,12 @@ document.addEventListener('alpine:init', () => {
         },
 
         get completedCount() {
-            return ['assignment', 'contract', 'schedule', 'pay']
-                .filter((name) => this.isValid(name)).length;
+            return this.requiredSections.filter((name) => this.isValid(name)).length;
         },
 
         get canSubmit() {
-            return this.completedCount === 4 && !this.submitting && !this.loading;
+            return this.completedCount === this.requiredSections.length
+                && !this.submitting && !this.loading;
         },
 
         // =============================================================
@@ -656,90 +684,22 @@ document.addEventListener('alpine:init', () => {
         },
 
         // =============================================================
-        // Schedule
+        // Termination — rendered by the edit screen only.
         // =============================================================
 
-        toggleDay(index) {
-            this.days[index] = !this.days[index];
+        get isTerminated() {
+            return Boolean(this.terminatedAt || this.terminationReasonId);
         },
 
-        get selectedDayCount() {
-            return this.days.filter(Boolean).length;
+        get terminationReasonLabel() {
+            return this.terminationReasons
+                .find((reason) => str(reason.value) === this.terminationReasonId)?.label ?? '';
         },
 
-        get workDaysEn() {
-            if (this.manualDays) {
-                return this.workDaysEnManual.trim();
-            }
-
-            return this.days
-                .map((on, index) => (on ? this.dayNames.en[index] : null))
-                .filter(Boolean)
-                .join(', ');
-        },
-
-        get workDaysAr() {
-            if (this.manualDays) {
-                return this.workDaysArManual.trim();
-            }
-
-            return this.days
-                .map((on, index) => (on ? this.dayNames.ar[index] : null))
-                .filter(Boolean)
-                .join(this.listSeparator);
-        },
-
-        /** Hours between the two times, rolling over midnight when needed. */
-        get hoursPerDay() {
-            const toMinutes = (value) => {
-                const [h, m] = str(value).split(':').map(Number);
-
-                return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null;
-            };
-
-            const from = toMinutes(this.workHoursFrom);
-            const to = toMinutes(this.workHoursTo);
-
-            if (from === null || to === null) {
-                return 0;
-            }
-
-            const span = to > from ? to - from : to + 1440 - from;
-
-            return Math.round((span / 60) * 100) / 100;
-        },
-
-        get computedWeeklyHours() {
-            return Math.round(this.selectedDayCount * this.hoursPerDay);
-        },
-
-        get weeklyHours() {
-            return this.weeklyHoursOverride === null
-                ? this.computedWeeklyHours
-                : Number(this.weeklyHoursOverride) || 0;
-        },
-
-        get weeklyHoursIsAuto() {
-            return this.weeklyHoursOverride === null;
-        },
-
-        startOverride() {
-            this.weeklyHoursOverride = String(this.computedWeeklyHours);
-            this.$nextTick(() => this.$refs.weeklyHours?.focus());
-        },
-
-        clearOverride() {
-            this.weeklyHoursOverride = null;
-        },
-
-        enableManualDays() {
-            this.workDaysEnManual = this.workDaysEn;
-            this.workDaysArManual = this.workDaysAr;
-            this.manualDays = true;
-        },
-
-        disableManualDays() {
-            this.manualDays = false;
+        clearTermination() {
+            this.terminatedAt = '';
+            this.terminationReasonId = '';
+            this.reasonOfTermination = '';
         },
 
         // =============================================================
@@ -855,13 +815,6 @@ document.addEventListener('alpine:init', () => {
                 });
         },
 
-        get hoursDerivation() {
-            return this.fill(this.labels.derivation, {
-                days: this.selectedDayCount,
-                hours: this.hoursPerDay,
-            });
-        },
-
         // ---- collapsed section summaries -------------------------------
 
         get assignmentSummary() {
@@ -881,6 +834,15 @@ document.addEventListener('alpine:init', () => {
             const days = this.locale === 'ar' ? this.workDaysAr : this.workDaysEn;
 
             return [days, `${this.workHoursFrom}–${this.workHoursTo}`, `${this.weeklyHours} h`]
+                .filter(Boolean).join(' · ');
+        },
+
+        get terminationSummary() {
+            if (!this.isTerminated) {
+                return this.labels.notTerminated;
+            }
+
+            return [this.formatDate(this.terminatedAt), this.terminationReasonLabel]
                 .filter(Boolean).join(' · ');
         },
 
@@ -923,21 +885,12 @@ document.addEventListener('alpine:init', () => {
             return this.durationLabel || this.labels.empty;
         },
 
-        /** Short day names, so the value still reads inside a narrow column. */
         get cardWorkDays() {
-            if (this.manualDays) {
-                return (this.locale === 'ar' ? this.workDaysAr : this.workDaysEn) || this.labels.empty;
-            }
-
-            const names = this.days
-                .map((on, index) => (on ? this.dayShort[this.locale][index] : null))
-                .filter(Boolean);
-
-            return names.length ? names.join(', ') : this.labels.empty;
+            return (this.locale === 'ar' ? this.workDaysAr : this.workDaysEn) || this.labels.empty;
         },
 
         get cardHours() {
-            return this.weeklyHours >= 1 ? `${this.weeklyHours} h` : this.labels.empty;
+            return Number(this.weeklyHours) >= 1 ? `${this.weeklyHours} h` : this.labels.empty;
         },
 
         get cardSalary() {
@@ -969,7 +922,7 @@ document.addEventListener('alpine:init', () => {
         scheduleLeavePreview() {
             clearTimeout(this.leaveTimer);
 
-            if (!this.selected.employee || !this.startDate || !this.endDate || this.weeklyHours < 1) {
+            if (!this.selected.employee || !this.startDate || !this.endDate || Number(this.weeklyHours) < 1) {
                 this.leaveDays = null;
 
                 return;
@@ -1017,6 +970,11 @@ document.addEventListener('alpine:init', () => {
                     salary: this.salary,
                     currency: this.currency,
                     salaryPer: this.salaryPer,
+                    // Ignored by ContractCreate, which always writes a contract
+                    // that is active and un-terminated.
+                    terminatedAt: this.terminatedAt,
+                    terminationReasonId: this.terminationReasonId,
+                    reasonOfTermination: this.reasonOfTermination,
                 });
             } finally {
                 this.submitting = false;

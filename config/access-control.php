@@ -132,17 +132,17 @@ return [
             'exportExcel' => 'employees.export',
         ],
         // The composer exposes exactly three actions: one option load, one
-        // entitlement preview, and the create itself.
+        // entitlement preview, and the save itself. Both screens are the same
+        // component; only the permission each one demands differs.
         'contract.contract-create' => [
             'submit' => 'contracts.create',
             'locationOptions' => 'contracts.create',
             'leavePreview' => 'contracts.create',
         ],
         'contract.contract-edit' => [
-            'save' => 'contracts.update',
             'submit' => 'contracts.update',
             'locationOptions' => 'contracts.update',
-            'advanceIdentity' => 'contracts.update',
+            'leavePreview' => 'contracts.update',
         ],
         // A renewal creates a contract. The permission here is the coarse
         // gate; ContractRenewModal re-reads the contract and runs the `renew`
@@ -350,12 +350,10 @@ return [
             'updatedPermissionFilterType', 'updatedPermissionFilterValue',
         ],
         'badges.badges-module' => ['openBadgeModal'],
-        // contract.contract-create has no exempt actions: the composer's step
-        // navigation and updated* hooks were removed with the wizard.
-        'contract.contract-edit' => [
-            'next', 'prev', 'jumpTo', 'updatedCityId', 'updatedProgramId',
-            'updatedCenterId', 'updatedFormPositionId',
-        ],
+        // Neither contract.contract-create nor contract.contract-edit has any
+        // exempt action: the wizard's step navigation and updated* hooks were
+        // removed along with the wizard itself, and every action that remains
+        // is mapped to a permission above.
         'contract.contract-details' => ['nextPage', 'prevPage', 'setPage'],
         // Dismisses the modal and clears its state. Writes nothing; the two
         // actions that do write are mapped to contracts.create above.

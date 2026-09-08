@@ -148,12 +148,10 @@
         </x-primary-button>
     </div>
 
-    <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
-        <x-primary-button type="submit" class="!w-auto" wire:loading.attr="disabled" wire:target="saveCourses">
+    <x-forms.dirty-gate watch="courseForm" :active="! $isCreateMode"
+        class="flex justify-end space-x-2 pt-4 mt-6 border-t">
+        <x-primary-button type="submit" class="!w-auto" wire:target="saveCourses" x-bind:disabled="! dirty">
             @lang('general.save-courses')
         </x-primary-button>
-        <x-secondary-button :href="route('employees.index')" class="!w-auto">
-            @lang('general.cancel')
-        </x-secondary-button>
-    </div>
+    </x-forms.dirty-gate>
 </form>

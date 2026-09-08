@@ -2,6 +2,19 @@
     @foreach ($badgeForm->badges as $index => $badge)
         <input type="hidden" wire:model="badgeForm.badges.{{ $index }}.id">
 
+        @php
+            $badgeType = (int) ($badgeForm->badges[$index]['type'] ?? \App\Enums\BadgeType::Unknown);
+            $badgeSubtype = $badgeForm->badges[$index]['subtype'] ?? null;
+            $leaveUnit = $badgeForm->badges[$index]['leave_unit'] ?? null;
+            $showsSubtype = in_array($badgeType, [\App\Enums\BadgeType::Warning, \App\Enums\BadgeType::Reward], true);
+            $badgeDetailLabel = \App\Enums\BadgeSubtype::selectorLabelForType($badgeType);
+            $leaveAmountLabel = match ($leaveUnit) {
+                'hour' => __('general.number-of-hours'),
+                'day' => __('general.number-of-days'),
+                default => __('general.leave-quantity'),
+            };
+        @endphp
+
         <div wire:key="badge-{{ $index }}" class="relative border-b pb-6 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="md:col-span-3 flex justify-end">
@@ -40,6 +53,93 @@
                         </x-forms.select2-input>
                         <x-error-span>{{ $errors->first("badgeForm.badges.$index.evaluation_id") }}</x-error-span>
                     </div>
+
+                @if($showsSubtype)
+                    <div wire:key="badge-subtype-{{ $index }}-{{ $badgeType }}">
+                        <x-forms.input-label
+                            for="badge_subtype_{{ $index }}"
+                            required>{{ $badgeDetailLabel }}</x-forms.input-label>
+                        <x-forms.select2-input id="badge_subtype_{{ $index }}"
+                                              wire:model.live="badgeForm.badges.{{ $index }}.subtype">
+                            <option value="">-- @lang('general.select') --</option>
+                            @foreach(\App\Enums\BadgeSubtype::optionsForType($badgeType) as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+                        </x-forms.select2-input>
+                        <x-error-span>{{ $errors->first("badgeForm.badges.$index.subtype") }}</x-error-span>
+                    </div>
+                @endif
+
+                @if($showsSubtype && \App\Enums\BadgeSubtype::isFinancial($badgeSubtype))
+                    <div>
+                        <x-forms.input-label
+                            for="badge_amount_{{ $index }}"
+                            required>@lang('general.financial-amount')</x-forms.input-label>
+                        <x-forms.input id="badge_amount_{{ $index }}"
+                                       type="number"
+                                       step="0.01"
+                                       min="0"
+                                       wire:model.defer="badgeForm.badges.{{ $index }}.amount"/>
+                        <x-error-span>{{ $errors->first("badgeForm.badges.$index.amount") }}</x-error-span>
+                    </div>
+
+                    <div>
+                        <x-forms.input-label
+                            for="badge_financial_currency_{{ $index }}"
+                            required>@lang('general.currency')</x-forms.input-label>
+                        <x-forms.select2-input id="badge_financial_currency_{{ $index }}"
+                                              wire:model.defer="badgeForm.badges.{{ $index }}.currency">
+                            <option value="">-- @lang('general.select') --</option>
+                            <option value="1">SYP</option>
+                            <option value="2">USD</option>
+                            <option value="3">EUR</option>
+                        </x-forms.select2-input>
+                        <x-error-span>{{ $errors->first("badgeForm.badges.$index.currency") }}</x-error-span>
+                    </div>
+                @endif
+
+                @if($showsSubtype && \App\Enums\BadgeSubtype::isPromotion($badgeSubtype))
+                    <div>
+                        <x-forms.input-label
+                            for="badge_new_position_{{ $index }}"
+                            required>@lang('general.new-position')</x-forms.input-label>
+                        <x-forms.input id="badge_new_position_{{ $index }}"
+                                       type="text"
+                                       wire:model.defer="badgeForm.badges.{{ $index }}.new_position"/>
+                        <x-error-span>{{ $errors->first("badgeForm.badges.$index.new_position") }}</x-error-span>
+                    </div>
+                @endif
+
+                @if($showsSubtype && \App\Enums\BadgeSubtype::isLeave($badgeSubtype))
+                    <div wire:key="badge-leave-unit-{{ $index }}-{{ $badgeSubtype }}">
+                        <x-forms.input-label required>@lang('general.leave-calculation')</x-forms.input-label>
+                        <div class="mt-2 flex flex-wrap gap-4">
+                            <x-forms.radio-input
+                                id="badge_leave_unit_hour_{{ $index }}"
+                                wire:model.live="badgeForm.badges.{{ $index }}.leave_unit"
+                                value="hour">@lang('general.leave-hours')</x-forms.radio-input>
+                            <x-forms.radio-input
+                                id="badge_leave_unit_day_{{ $index }}"
+                                wire:model.live="badgeForm.badges.{{ $index }}.leave_unit"
+                                value="day">@lang('general.leave-days')</x-forms.radio-input>
+                        </div>
+                        <x-error-span>{{ $errors->first("badgeForm.badges.$index.leave_unit") }}</x-error-span>
+                    </div>
+
+                    @if(in_array($leaveUnit, ['hour', 'day'], true))
+                        <div wire:key="badge-leave-amount-{{ $index }}-{{ $leaveUnit }}">
+                            <x-forms.input-label
+                                for="badge_leave_amount_{{ $index }}"
+                                required>{{ $leaveAmountLabel }}</x-forms.input-label>
+                            <x-forms.input id="badge_leave_amount_{{ $index }}"
+                                           type="number"
+                                           step="1"
+                                           min="1"
+                                           wire:model.live="badgeForm.badges.{{ $index }}.amount"/>
+                            <x-error-span>{{ $errors->first("badgeForm.badges.$index.amount") }}</x-error-span>
+                        </div>
+                    @endif
+                @endif
 
 
                 {{-- Show salary and currency inputs only if type == Salary_Increase --}}
@@ -100,9 +200,8 @@
         </x-primary-button>
     </div>
 
-    <div class="flex justify-end space-x-2 pt-4 mt-6 border-t">
-        <x-primary-button type="submit" class="!w-auto">@lang('general.save-badges')</x-primary-button>
-        <x-secondary-button :href="route('employees.index')"
-                            class="!w-auto">@lang('general.cancel')</x-secondary-button>
-    </div>
+    <x-forms.dirty-gate watch="badgeForm" :active="! $isCreateMode"
+        class="flex justify-end space-x-2 pt-4 mt-6 border-t">
+        <x-primary-button type="submit" class="!w-auto" x-bind:disabled="! dirty">@lang('general.save-badges')</x-primary-button>
+    </x-forms.dirty-gate>
 </form>

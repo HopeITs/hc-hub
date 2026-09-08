@@ -417,6 +417,16 @@ class LeaveRequestWorkflowTest extends TestCase
             ->assertSet('decisionModal', true);
     }
 
+    public function test_all_leaves_table_names_the_requesting_employee_for_a_direct_manager(): void
+    {
+        $this->assertAllLeavesTableNamesRequestingEmployee('manager');
+    }
+
+    public function test_all_leaves_table_names_the_requesting_employee_for_a_general_manager(): void
+    {
+        $this->assertAllLeavesTableNamesRequestingEmployee('general-manager');
+    }
+
     public function test_a_decided_leave_cannot_be_decided_again_or_deducted_twice(): void
     {
         [$decisionMaker, $leaveRequest] = $this->createPendingDecisionFixture();
@@ -665,6 +675,60 @@ class LeaveRequestWorkflowTest extends TestCase
         Notification::assertSentToTimes($secondManager, HRSawLeaveRequest::class, 1);
         Notification::assertNotSentTo($hrActor, HRSawLeaveRequest::class);
         Notification::assertCount(3);
+    }
+
+    public function test_all_leaves_table_names_the_requesting_employee_for_a_super_admin(): void
+    {
+        [$decisionMaker, $leave] = $this->createPendingDecisionFixture();
+
+        // A bare super-admin account: the role sees every request org-wide,
+        // so it needs no team or city fixture of its own.
+        $admin = User::query()->create([
+            'employee_id' => $decisionMaker->employee_id,
+            'email' => 'super.admin@example.test',
+            'password' => 'password',
+        ]);
+        $admin->assignRole(Role::findOrCreate('super-admin', 'web'));
+
+        $employee = $leave->leaveBalance->contract->employee;
+
+        Livewire::actingAs($admin->fresh())
+            ->test(AllLeaveRequestTable::class)
+            ->assertSee(trans_choice('general.employee', 1))
+            ->assertSee($employee->name);
+    }
+
+    /**
+     * The all-leaves table lists other people's requests, so the employee
+     * column has to be there for every role that can reach the page.
+     */
+    private function assertAllLeavesTableNamesRequestingEmployee(string $roleName): void
+    {
+        [, $teamMemberLeave] = $this->createPendingDecisionFixture();
+        [$manager] = $this->createRejectedLeaveFixture(
+            null,
+            $roleName.'@example.test',
+            $roleName.'-holder',
+        );
+        $manager->assignRole(Role::findOrCreate($roleName, 'web'));
+
+        $managerPositionId = DB::table('contracts')
+            ->where('employee_id', $manager->employee_id)
+            ->value('position_id');
+        $teamMemberPositionId = DB::table('contracts')
+            ->where('id', $teamMemberLeave->leaveBalance->contract_id)
+            ->value('position_id');
+
+        DB::table('positions')
+            ->where('id', $teamMemberPositionId)
+            ->update(['direct_manager_id' => $managerPositionId]);
+
+        $teamMember = $teamMemberLeave->leaveBalance->contract->employee;
+
+        Livewire::actingAs($manager->fresh())
+            ->test(AllLeaveRequestTable::class)
+            ->assertSee(trans_choice('general.employee', 1))
+            ->assertSee($teamMember->name);
     }
 
     /**

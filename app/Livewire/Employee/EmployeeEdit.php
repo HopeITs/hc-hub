@@ -21,6 +21,7 @@ use App\Services\ChecklistWorkflow;
 use App\Traits\WithAlerts;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -89,14 +90,15 @@ class EmployeeEdit extends Component
 
     public function saveChecklist()
     {
-        $this->checklistForm->save();
-        $this->successToast();
+        $this->persist('checklistForm', function () {
+            $this->checklistForm->save();
 
-        $this->checklistForm->setEmployeeAndAllItems(
-            $this->employee->fresh(),
-            $this->getChecklistItems(),
-            DefaultDeliverable::all(),
-        );
+            $this->checklistForm->setEmployeeAndAllItems(
+                $this->employee->fresh(),
+                $this->getChecklistItems(),
+                DefaultDeliverable::all(),
+            );
+        });
     }
 
     public function setActiveTab($tab)
@@ -104,63 +106,72 @@ class EmployeeEdit extends Component
         $this->activeTab = $tab;
     }
 
+    public function updated(string $property, mixed $value = null): void
+    {
+        if (preg_match('/^badgeForm\.badges\.(\d+)\.type$/', $property, $matches)) {
+            $this->badgeForm->resetSubtypeDetails((int) $matches[1]);
+        }
+
+        if (preg_match('/^badgeForm\.badges\.(\d+)\.subtype$/', $property, $matches)) {
+            $this->badgeForm->resetConditionalDetails((int) $matches[1]);
+        }
+    }
+
     public function saveInformation()
     {
-
-        $this->infoForm->saveInformation();
-        $employee = $this->infoForm->employee;
-        if ($employee->wasChanged('gender') || $employee->wasChanged('marital_status')) {
-            if ($employee->contracts()->exists()) {
-                $contract = $employee->contracts()->whereHas('leaveBalances')->first();
-                if (isset($contract)) {
-                    if ($contract->leaveBalances()->exists()) {
-                        $this->balanceForm->update($contract->id);
-                    } else {
-                        $this->balanceForm->store($contract->id);
+        $this->persist('infoForm', function () {
+            $this->infoForm->saveInformation();
+            $employee = $this->infoForm->employee;
+            if ($employee->wasChanged('gender') || $employee->wasChanged('marital_status')) {
+                if ($employee->contracts()->exists()) {
+                    $contract = $employee->contracts()->whereHas('leaveBalances')->first();
+                    if (isset($contract)) {
+                        if ($contract->leaveBalances()->exists()) {
+                            $this->balanceForm->update($contract->id);
+                        } else {
+                            $this->balanceForm->store($contract->id);
+                        }
                     }
                 }
             }
-        }
-        $this->successToast();
 
-        return $this->redirect(route('employees.index'), navigate: true);
+            // Stay on the current tab: editing is a multi-tab session, and
+            // bouncing back to the employees table after every save threw away
+            // the user's place in it. `back_to_employees` is the only way out.
+            $this->title = $employee->name;
+        });
     }
 
     public function saveEducation()
     {
-        $this->educationForm->save();
-        $this->successToast();
+        $this->persist('educationForm', fn () => $this->educationForm->save());
     }
 
     public function saveCourses()
     {
-        $this->courseForm->save();
-        $this->successToast();
+        $this->persist('courseForm', fn () => $this->courseForm->save());
     }
 
     public function saveExperience()
     {
-        $this->experienceForm->save();
-        $this->successToast();
+        $this->persist('experienceForm', fn () => $this->experienceForm->save());
     }
 
     public function saveRelatives()
     {
-        $this->relativeForm->save();
-        $this->successToast();
+        $this->persist('relativeForm', fn () => $this->relativeForm->save());
     }
 
     public function saveBadges()
     {
         Gate::authorize('create', [Badge::class, $this->employee]);
-        $this->badgeForm->save();
-        $this->successToast();
+
+        $this->persist('badgeForm', fn () => $this->badgeForm->save());
     }
 
     public function saveAttachments()
     {
-        $this->attachmentForm->save();
-        $this->successToast();
+        $this->persist('attachmentForm', fn () => $this->attachmentForm->save());
     }
 
     public function addAttachment()
@@ -322,6 +333,37 @@ class EmployeeEdit extends Component
             'employeeChecklistItems' => $employeeChecklistItems,
             'isCreateMode' => false,
         ]);
+    }
+
+    /**
+     * Run a tab's save, then report what actually happened.
+     *
+     * Eloquent fires created/updated/deleted only when a row is really
+     * written — saving an untouched model fires none of them — so watching
+     * those events answers "did this change anything?" accurately, whatever
+     * shape the form behind the tab happens to have. Without it every save
+     * claimed success, including saves of a form nobody had touched.
+     */
+    private function persist(string $form, callable $save): void
+    {
+        $wrote = false;
+
+        // Not paired with an Event::forget(): that drops every wildcard
+        // listener for these events, not just this one. Livewire runs a
+        // single action per request, so the listener dies with the request.
+        Event::listen(
+            ['eloquent.created: *', 'eloquent.updated: *', 'eloquent.deleted: *'],
+            function () use (&$wrote) {
+                $wrote = true;
+            },
+        );
+
+        $save();
+
+        // Re-arms the save button's dirty gate against the freshly saved state.
+        $this->dispatch('form-saved', form: $form);
+
+        $wrote ? $this->successToast() : $this->infoToast();
     }
 
     private function getChecklistItems(): Collection

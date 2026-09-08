@@ -127,6 +127,7 @@ return [
     'item-updated' => 'تم تحديث العنصر بنجاح.',
     'item-added' => 'تم إضافة العنصر بنجاح.',
     'success-message' => 'تم إتمام العملية بنجاح',
+    'no-changes-message' => 'لا يوجد ما يتم حفظه — لم يتم إجراء أي تغييرات.',
     'cannot-delete-category-has-courses' => 'لا يمكن حذف التصنيف لأنه يحتوي على دورات',
     'add-new' => 'إضافة جديد',
     'base-days' => 'أيام الأساس',
@@ -350,6 +351,7 @@ return [
     'year' => 'سنوات|سنة',
     'session' => 'الجلسة',
     'back' => 'رجوع',
+    'back_to_employees' => 'العودة إلى الموظفين',
     'contract-details' => 'تفاصيل العقد',
     'from' => 'من',
     'to' => 'إلى',
@@ -602,6 +604,20 @@ return [
     'sub' => 'خصم',
     'unit' => 'الواحدة',
     'amount' => 'الكمية',
+    'subtype' => 'النوع الفرعي',
+    'badge-detail' => 'تفاصيل الشارة',
+    'penalty-type' => 'نوع العقوبة',
+    'reward-type' => 'نوع المكافأة',
+    'financial-amount' => 'المبلغ المالي',
+    'leave-quantity' => 'مقدار الإجازة',
+    'leave-calculation' => 'احتساب الإجازة',
+    'leave-hours' => 'ساعات',
+    'leave-days' => 'أيام',
+    'number-of-hours' => 'عدد الساعات',
+    'number-of-days' => 'عدد الأيام',
+    'new-position' => 'المنصب الجديد',
+    'hourly' => 'ساعية',
+    'daily' => 'يومية',
     'add-as-badge' => 'إضافة كشارة',
     'confirmation' => 'تأكيد',
     'yes' => 'نعم',
@@ -714,6 +730,9 @@ return [
     'all-managers' => 'جميع المدراء',
     'compact-view' => 'مضغوط',
     'comfortable-view' => 'مريح',
+    'hide-vacancies' => 'إخفاء الشواغر',
+    'show-vacancies' => 'إظهار الشواغر',
+    'vacancies-kept-help' => 'تبقى المناصب الشاغرة التي تدير فريقًا ظاهرة على المخطط حتى لا ينفصل مرؤوسوها عن فرعهم.',
     'reporting-line-help' => 'بدّل الشجرة الهيكلية بين خط الإشراف المباشر والخط الفني. يظهر الخط الآخر كشارة منقّطة على كل بطاقة.',
     'search-name-or-position' => 'ابحث بالاسم أو المنصب…',
     'clear-search' => 'مسح البحث',
@@ -730,9 +749,6 @@ return [
     'export-csv' => 'تصدير CSV',
     'no-department' => 'غير محدد',
 
-    // Strings that exist only for assistive technology. They are read aloud by
-    // screen readers but never painted, so they must stay translated like any
-    // other user-facing copy.
     // شاشة إنشاء العقد — صفحة واحدة "Composer".
     'composer' => [
 
@@ -740,6 +756,11 @@ return [
         'contract' => 'العقد',
         'schedule' => 'الدوام',
         'pay' => 'الأجر',
+        // في شاشة التعديل فقط — لا يمكن لعقد أن يكون منتهياً لحظة إنشائه.
+        'termination' => 'إنهاء العقد',
+        'termination-hint' => 'اختياري. تسجيل تاريخ أو سبب للإنهاء يوقف هذا العقد.',
+        'not-terminated' => 'غير منتهٍ',
+        'clear-termination' => 'إلغاء الإنهاء',
 
         'locked-city' => 'محددة حسب دورك',
         'all-centers' => 'كل المراكز',
@@ -755,12 +776,10 @@ return [
         'runs-to' => 'حتى :date',
         'lasts-months' => ':count أشهر',
 
-        'work-days-required' => 'اختر يوم عمل واحداً على الأقل.',
-        'hours-derivation' => ':days أيام × :hours س',
-        'auto' => 'تلقائي',
-        'override' => 'تعديل يدوي',
-        'use-picker' => 'استخدام محدد الأيام',
-        'enter-manually' => 'إدخال يدوي',
+        // الحقلان يُطبعان كما هما في العقد، لذلك يُكتب كل مثال بلغة حقله
+        // لا بلغة الواجهة.
+        'work-days-placeholder-en' => 'From Monday to Friday',
+        'work-days-placeholder-ar' => 'من الاثنين إلى الجمعة',
         'add-notes' => 'إضافة ملاحظات الدوام',
         'capacity-empty' => 'اختر مسمى وظيفياً لعرض الشواغر',
         'card-position' => 'المسمى الوظيفي',
@@ -788,6 +807,9 @@ return [
         'clear' => 'مسح',
     ],
 
+    // Strings that exist only for assistive technology. They are read aloud by
+    // screen readers but never painted, so they must stay translated like any
+    // other user-facing copy.
     'a11y' => [
         'skip-to-content' => 'تخطَّ إلى المحتوى الرئيسي',
         'main-content' => 'المحتوى الرئيسي',

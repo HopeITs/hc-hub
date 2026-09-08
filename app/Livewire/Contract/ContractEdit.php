@@ -2,20 +2,36 @@
 
 namespace App\Livewire\Contract;
 
+use App\Livewire\Contract\Concerns\DrivesContractComposer;
 use App\Livewire\Contract\Concerns\ResolvesContractLocationOptions;
 use App\Livewire\Forms\ContractForm;
 use App\Livewire\Forms\LeaveBalanceForm;
 use App\Models\Contract;
-use App\Models\Position;
 use App\Models\TerminationReason;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
+/**
+ * Single-page contract composer, editing an existing contract.
+ *
+ * The same screen as ContractCreate — same sections, same Alpine component,
+ * same one-request submit — opened on a contract that already exists and with
+ * one extra section on the end: termination, which cannot apply to a contract
+ * that has not been signed yet.
+ *
+ * Work days are deliberately *not* required here even though create demands
+ * them: contracts imported from Excel before the field existed have null work
+ * days, and editing an unrelated salary must not be blocked on filling them in.
+ */
 class ContractEdit extends Component
 {
-    use ResolvesContractLocationOptions;
+    use DrivesContractComposer, ResolvesContractLocationOptions {
+        DrivesContractComposer::composerSections as private baseComposerSections;
+        DrivesContractComposer::sectionOfField as private baseSectionOfField;
+    }
 
     public ContractForm $form;
 
@@ -23,21 +39,11 @@ class ContractEdit extends Component
 
     public Contract $contract;
 
-    public int $step = 1;
-
-    public int $maxStep = 1;
-
     public ?int $city_id = null;
 
     public ?int $program_id = null;
 
     public ?int $center_id = null;
-
-    protected array $validatorsByStep = [
-        1 => 'validateIdentity',
-        2 => 'validateTerms',
-        3 => 'validatePay',
-    ];
 
     // ────────────────────────────────────────────────
     // Lifecycle
@@ -56,107 +62,29 @@ class ContractEdit extends Component
     }
 
     // ────────────────────────────────────────────────
-    // Wired property hooks
-    // ────────────────────────────────────────────────
-
-    public function updatedCityId(): void
-    {
-        $this->reset(['form.employee_id', 'program_id', 'center_id', 'form.position_id']);
-    }
-
-    public function updatedProgramId(): void
-    {
-        $this->reset(['center_id', 'form.position_id']);
-    }
-
-    public function updatedCenterId(): void
-    {
-        $this->reset(['form.position_id']);
-    }
-
-    public function updatedFormPositionId(mixed $value): void
-    {
-        $this->resetErrorBag('form.position_id');
-
-        // Skip capacity check when the position is unchanged
-        if ($this->contract->position_id === (int) $value) {
-            return;
-        }
-
-        $position = Position::query()
-            ->select('id', 'max_emp', 'exist_emp')
-            ->find($value);
-
-        if ($position && ! $position->canAssign()) {
-            $this->addError('form.position_id', __('This position exceeded the number of max employees.'));
-        }
-    }
-
-    /**
-     * Synchronize the Alpine-owned cascade once, then validate it server-side.
-     */
-    public function advanceIdentity(array $selection): void
-    {
-        Gate::authorize('update', $this->contract);
-
-        $this->applyIdentitySelection($selection);
-        $this->form->validateIdentity();
-
-        if (! $this->validateCityConsistency()) {
-            return;
-        }
-
-        $this->step = 2;
-        $this->maxStep = max($this->maxStep, $this->step);
-    }
-
-    // ────────────────────────────────────────────────
-    // Step navigation
-    // ────────────────────────────────────────────────
-
-    public function next(): void
-    {
-        $validator = $this->validatorsByStep[$this->step] ?? null;
-
-        if ($validator && method_exists($this->form, $validator)) {
-            $this->form->{$validator}();
-        }
-
-        if ($this->step < 3) {
-            $this->step++;
-            $this->maxStep = max($this->maxStep, $this->step);
-        }
-    }
-
-    public function prev(): void
-    {
-        if ($this->step > 1) {
-            $this->step--;
-        }
-    }
-
-    public function jumpTo(int $target): void
-    {
-        $target = max(1, min(3, $target));
-
-        if ($target <= $this->maxStep) {
-            $this->step = $target;
-        }
-    }
-
-    // ────────────────────────────────────────────────
     // Submission
     // ────────────────────────────────────────────────
 
-    public function submit(): mixed
+    public function submit(array $payload): mixed
     {
         Gate::authorize('update', $this->contract);
 
-        $this->form->validateIdentity();
-        $this->form->validateTerms();
-        $this->form->validatePay();
+        $this->applyComposerPayload($payload);
+
+        try {
+            $this->form->validateIdentity();
+            $this->form->validateTerms();
+            $this->form->validatePay();
+        } catch (ValidationException $exception) {
+            // Reopen the offending section before Livewire renders the errors.
+            $this->dispatch('composer-invalid', sections: $this->sectionsFor(array_keys($exception->errors())));
+
+            throw $exception;
+        }
 
         if (! $this->validateCityConsistency()) {
+            $this->dispatch('composer-invalid', sections: $this->sectionsFor($this->getErrorBag()->keys()));
+
             return null;
         }
 
@@ -174,12 +102,6 @@ class ContractEdit extends Component
         return redirect()->route('contracts.show', $this->contract->id);
     }
 
-    /** Alias kept for view compatibility. */
-    public function save(): mixed
-    {
-        return $this->submit();
-    }
-
     // ────────────────────────────────────────────────
     // Rendering
     // ────────────────────────────────────────────────
@@ -187,20 +109,20 @@ class ContractEdit extends Component
     public function render(): View
     {
         $locale = app()->getLocale();
-        $typeCol = "name_{$locale}";
-        $cityCol = "name_{$locale}";
+        $nameColumn = "name_{$locale}";
 
-        $cities = $this->step === 1 ? $this->getCities($cityCol) : collect();
-        $types = $this->step === 1 ? $this->getContractTypes($typeCol) : collect();
-        $terminationReasons = $this->step === 2
-            ? TerminationReason::query()->select('id', "title_{$locale}")->get()
-            : collect();
+        $cities = $this->getCities($nameColumn);
 
-        return view('livewire.contract.contract-edit', compact(
-            'cities',
-            'types',
-            'terminationReasons',
-        ));
+        return view('livewire.contract.contract-edit', [
+            'cities' => $cities,
+            'lockedCity' => $cities->count() === 1 ? $cities->first() : null,
+            'types' => $this->contractTypeCards($nameColumn),
+            'terminationReasons' => TerminationReason::query()
+                ->select('id', "title_{$locale}")
+                ->orderBy("title_{$locale}")
+                ->get(),
+            'seed' => $this->composerSeed(),
+        ]);
     }
 
     protected function locationOptionsPermission(): string
@@ -213,5 +135,54 @@ class ContractEdit extends Component
         Gate::authorize('update', $this->contract);
 
         return $this->contract->employee_id;
+    }
+
+    protected function composerContractKey(): ?int
+    {
+        return $this->contract->id;
+    }
+
+    /** Editing adds the one section a contract that does not exist cannot have. */
+    protected function composerSections(): array
+    {
+        return [...$this->baseComposerSections(), 'termination'];
+    }
+
+    /**
+     * The termination trio is editable here, and recording one deactivates the
+     * contract — the same rule ContractForm::saveTerms() has always applied.
+     * Clearing the date again does not reactivate: that is a decision for the
+     * contract list, not a side effect of tidying up a field.
+     */
+    protected function applyComposerTermination(array $payload): void
+    {
+        $this->form->terminated_at = $this->dateOrNull($payload['terminatedAt'] ?? null);
+        $this->form->termination_reason_id = $this->selectionId($payload, 'terminationReasonId');
+        $this->form->reason_of_termination = $this->textOrNull($payload['reasonOfTermination'] ?? null);
+
+        $isTerminated = filled($this->form->terminated_at) || filled($this->form->termination_reason_id);
+
+        $this->form->is_active = $isTerminated ? false : (bool) $this->contract->is_active;
+    }
+
+    /** The termination fields belong to the section that owns them. */
+    protected function sectionOfField(): array
+    {
+        return array_merge($this->baseSectionOfField(), [
+            'terminated_at' => 'termination',
+            'termination_reason_id' => 'termination',
+            'reason_of_termination' => 'termination',
+        ]);
+    }
+
+    /**
+     * An edit keeps the term it already runs from.
+     *
+     * Without this, switching contract type on a contract that started in March
+     * would advertise — and on submit apply — a term beginning next month.
+     */
+    protected function contractTermAnchor(): ?string
+    {
+        return $this->form->start_date;
     }
 }
