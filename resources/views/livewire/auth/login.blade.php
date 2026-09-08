@@ -2,7 +2,7 @@
     <x-auth-card-wrapper>
 
         <div class="mb-6 text-center">
-            <x-app-logo class="mx-auto " />
+            <x-app-logo class="mx-auto w-[207px]" />
         </div>
 
         <x-auth-card class="space-y-6 w-96">
