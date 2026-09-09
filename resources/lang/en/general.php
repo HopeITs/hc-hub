@@ -99,6 +99,8 @@ return [
     'working-hours' => 'Working Hours',
     'work-hours-from' => 'Work Hours From',
     'work-hours-to' => 'Work Hours To',
+    'second-shift-work-hours-from' => 'Second Shift From',
+    'second-shift-work-hours-to' => 'Second Shift To',
     'work-days' => 'Work Days',
     'attending-notes' => 'Attendance Notes',
     'attending-notes-placeholder-en' => 'Example: Flexible arrival is allowed on field-visit days…',

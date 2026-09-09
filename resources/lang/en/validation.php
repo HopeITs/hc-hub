@@ -169,6 +169,8 @@ return [
             'daily_hours' => 'Daily Working Hours',
             'work_days_per_week' => 'Work Days per Week',
             'shift_type' => 'Shift Type',
+            'second_shift_work_hours_from' => 'Second Shift From',
+            'second_shift_work_hours_to' => 'Second Shift To',
             'type' => [
                 'ar' => 'Type (Arabic)',
                 'en' => 'Type (English)',

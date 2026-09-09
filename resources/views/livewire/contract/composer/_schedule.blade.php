@@ -71,6 +71,30 @@
             <x-forms.date-input id="composer_work_hours_to" type="time" x-model="workHoursTo" />
         </div>
 
+        <div x-cloak x-show="isStudyzoneSplitShift" x-transition>
+            <x-forms.input-label for="composer_second_shift_work_hours_from" required>
+                @lang('general.second-shift-work-hours-from')
+            </x-forms.input-label>
+            <x-forms.date-input
+                id="composer_second_shift_work_hours_from"
+                type="time"
+                x-model="secondShiftWorkHoursFrom"
+            />
+            <x-error-span>{{ $errors->first('form.second_shift_work_hours_from') }}</x-error-span>
+        </div>
+
+        <div x-cloak x-show="isStudyzoneSplitShift" x-transition>
+            <x-forms.input-label for="composer_second_shift_work_hours_to" required>
+                @lang('general.second-shift-work-hours-to')
+            </x-forms.input-label>
+            <x-forms.date-input
+                id="composer_second_shift_work_hours_to"
+                type="time"
+                x-model="secondShiftWorkHoursTo"
+            />
+            <x-error-span>{{ $errors->first('form.second_shift_work_hours_to') }}</x-error-span>
+        </div>
+
         <div>
             <x-forms.input-label for="composer_weekly_hours" required>@lang('general.weekly-hours')</x-forms.input-label>
 
@@ -98,8 +122,9 @@
                 <x-forms.input
                     id="composer_daily_hours"
                     type="number"
-                    min="0"
-                    step="0.25"
+                    min="1"
+                    max="24"
+                    step="1"
                     x-model="dailyHours"
                     x-bind:placeholder="'8'"
                     class="pe-14"

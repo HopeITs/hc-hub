@@ -49,6 +49,8 @@ class EmployeeContractSeeder extends Seeder
                 'work_days_per_week' => 5,
                 'shift_type' => 'standard',
                 'is_split_shift' => false,
+                'second_shift_work_hours_from' => null,
+                'second_shift_work_hours_to' => null,
                 'is_active' => true,
             ]);
         }

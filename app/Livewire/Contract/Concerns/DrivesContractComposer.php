@@ -165,6 +165,8 @@ trait DrivesContractComposer
             'endDate' => $this->form->end_date,
             'workHoursFrom' => $this->form->work_hours_from,
             'workHoursTo' => $this->form->work_hours_to,
+            'secondShiftWorkHoursFrom' => $this->form->second_shift_work_hours_from,
+            'secondShiftWorkHoursTo' => $this->form->second_shift_work_hours_to,
             'weeklyHours' => $this->form->weekly_hours,
             'dailyHours' => $this->form->daily_hours,
             'workDaysPerWeek' => $this->form->work_days_per_week,
@@ -200,12 +202,18 @@ trait DrivesContractComposer
         $this->form->work_hours_from = $this->timeOrNull($payload['workHoursFrom'] ?? null);
         $this->form->work_hours_to = $this->timeOrNull($payload['workHoursTo'] ?? null);
         $this->form->weekly_hours = max(0, (int) ($payload['weeklyHours'] ?? 0));
-        $this->form->daily_hours = $this->decimalOrNull($payload['dailyHours'] ?? null);
+        $this->form->daily_hours = $this->intOrNull($payload['dailyHours'] ?? null) ?? 0;
         $this->form->work_days_per_week = $this->intOrNull($payload['workDaysPerWeek'] ?? null);
         $this->form->shift_type = $this->composerProgramIsStudyzone() && ($payload['shiftType'] ?? null) === 'split'
             ? 'split'
             : 'standard';
         $this->form->is_split_shift = $this->form->shift_type === 'split';
+        $this->form->second_shift_work_hours_from = $this->form->is_split_shift
+            ? $this->timeOrNull($payload['secondShiftWorkHoursFrom'] ?? null)
+            : null;
+        $this->form->second_shift_work_hours_to = $this->form->is_split_shift
+            ? $this->timeOrNull($payload['secondShiftWorkHoursTo'] ?? null)
+            : null;
 
         $this->form->work_days_en = $this->textOrNull($payload['workDaysEn'] ?? null);
         $this->form->work_days_ar = $this->textOrNull($payload['workDaysAr'] ?? null);
@@ -255,6 +263,8 @@ trait DrivesContractComposer
             'work_days_ar' => 'schedule',
             'work_hours_from' => 'schedule',
             'work_hours_to' => 'schedule',
+            'second_shift_work_hours_from' => 'schedule',
+            'second_shift_work_hours_to' => 'schedule',
             'attending_notes_en' => 'schedule',
             'attending_notes_ar' => 'schedule',
             'salary' => 'pay',

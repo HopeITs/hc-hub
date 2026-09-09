@@ -161,7 +161,7 @@
 
     $annualLeaveDays = $contract->leaveBalances->first()?->int_total ?? '—';
     $weeklyHours = (int) ($contract->weekly_hours ?? 40);
-    $dailyHours = rtrim(rtrim(number_format((float) ($contract->daily_hours ?? 8), 2, '.', ''), '0'), '.');
+    $dailyHours = (int) ($contract->daily_hours ?? 8);
     $workDaysPerWeek = (int) ($contract->work_days_per_week ?? 5);
 
     $workDaysEn = $contract->work_days_en ?: 'Monday to Friday';
@@ -171,6 +171,8 @@
 
     $dailyStart = $contract->work_hours_from ? Carbon::parse($contract->work_hours_from)->format('g:i A') : '9:00 AM';
     $dailyEnd = $contract->work_hours_to ? Carbon::parse($contract->work_hours_to)->format('g:i A') : '5:00 PM';
+    $secondShiftStart = $contract->second_shift_work_hours_from ? Carbon::parse($contract->second_shift_work_hours_from)->format('g:i A') : '3:00 PM';
+    $secondShiftEnd = $contract->second_shift_work_hours_to ? Carbon::parse($contract->second_shift_work_hours_to)->format('g:i A') : '7:00 PM';
 
     $esc = fn($v) => e((string) ($v ?: '—'));
     $escAr = fn($v) => e((string) ($v ? $Glyphs($v) : '—'));
@@ -287,12 +289,12 @@
         @case('studyzone')
             @if ($isSplitShift)
                 <x-contract.dual rowClass="mt-1"
-                    :en="'<strong>' . $dailyHours . ' hours</strong> per day, <strong>' . $workDaysPerWeek . ' days</strong> per week, Standard office hours are from 8:00 AM to 12:00 PM and from 3:00 PM to 7:00 PM.'"
+                    :en="'<strong>' . $dailyHours . ' hours</strong> per day, <strong>' . $workDaysPerWeek . ' days</strong> per week, Standard office hours are from ' . $dailyStart . ' to ' . $dailyEnd . ' and from ' . $secondShiftStart . ' to ' . $secondShiftEnd . '.'"
                     :ar="$SmartGlyphs('أيام أسبوعياً،').' <strong>'.$workDaysPerWeek.'</strong> '.$SmartGlyphs('ساعات يومياً،').' <strong>'.$dailyHours.'</strong>' .
                     '<br>' .
-                    '12:00 PM '.$SmartGlyphs('حتى الساعة').' 8:00 AM '.$SmartGlyphs('من الساعة') .
+                    $dailyEnd.' '.$SmartGlyphs('حتى الساعة').' '.$dailyStart.' '.$SmartGlyphs('من الساعة') .
                     '<br>' .
-                    '7:00 PM '.$SmartGlyphs('حتى الساعة').' 3:00 PM '.$SmartGlyphs('و')" />
+                    $secondShiftEnd.' '.$SmartGlyphs('حتى الساعة').' '.$secondShiftStart.' '.$SmartGlyphs('و')" />
             @else
                 <x-contract.dual rowClass="mt-1"
                     :en="'<strong>' . $dailyHours . ' hours</strong> per day, <strong>' . $workDaysPerWeek . ' days</strong> per week, Standard office hours are from ' . $dailyStart . ' to ' . $dailyEnd . '.'"

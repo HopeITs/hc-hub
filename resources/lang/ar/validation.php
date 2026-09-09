@@ -188,6 +188,8 @@ return [
             'daily_hours' => 'ساعات العمل اليومية',
             'work_days_per_week' => 'أيام العمل أسبوعياً',
             'shift_type' => 'نوع الدوام',
+            'second_shift_work_hours_from' => 'بداية الدوام الثاني',
+            'second_shift_work_hours_to' => 'نهاية الدوام الثاني',
 
             'type' => [
                 'ar' => 'النوع (بالعربية)',

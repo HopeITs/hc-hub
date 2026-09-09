@@ -238,6 +238,8 @@ document.addEventListener('alpine:init', () => {
         // ---- schedule
         workHoursFrom: config.seed?.workHoursFrom ?? '09:00',
         workHoursTo: config.seed?.workHoursTo ?? '17:00',
+        secondShiftWorkHoursFrom: config.seed?.secondShiftWorkHoursFrom ?? '15:00',
+        secondShiftWorkHoursTo: config.seed?.secondShiftWorkHoursTo ?? '19:00',
         weeklyHours: config.seed ? str(config.seed.weeklyHours) : '40',
         dailyHours: config.seed ? str(config.seed.dailyHours) : '8',
         workDaysPerWeek: config.seed ? str(config.seed.workDaysPerWeek) : '5',
@@ -282,6 +284,7 @@ document.addEventListener('alpine:init', () => {
             this.$watch('selected.city', () => this.syncing || this.loadCityOptions(true));
             this.$watch('selected.program', () => this.syncing || this.onProgramChange());
             this.$watch('selected.center', () => this.syncing || this.onCenterChange());
+            this.$watch('shiftType', (value, oldValue) => this.onShiftTypeChange(value, oldValue));
             this.$watch('leaveInputs', () => this.scheduleLeavePreview());
 
             if (this.selected.city) {
@@ -323,11 +326,17 @@ document.addEventListener('alpine:init', () => {
                 return false;
             }
 
+            const secondShiftValid = !this.isStudyzoneSplitShift
+                || Boolean(this.secondShiftWorkHoursFrom && this.secondShiftWorkHoursTo);
+
             return Number(this.weeklyHours) >= 1
-                && Number(this.dailyHours) > 0
+                && Number.isInteger(Number(this.dailyHours))
+                && Number(this.dailyHours) >= 1
+                && Number(this.dailyHours) <= 24
                 && Number(this.workDaysPerWeek) >= 1
                 && Number(this.workDaysPerWeek) <= 7
-                && ['standard', 'split'].includes(this.shiftType);
+                && ['standard', 'split'].includes(this.shiftType)
+                && secondShiftValid;
         },
 
         get payValid() {
@@ -447,6 +456,8 @@ document.addEventListener('alpine:init', () => {
 
                 if (!this.isStudyzoneProgram) {
                     this.shiftType = 'standard';
+                    this.secondShiftWorkHoursFrom = '15:00';
+                    this.secondShiftWorkHoursTo = '19:00';
                 }
             } finally {
                 if (request === this.requestSequence) {
@@ -507,6 +518,8 @@ document.addEventListener('alpine:init', () => {
 
             if (!this.isStudyzoneProgram) {
                 this.shiftType = 'standard';
+                this.secondShiftWorkHoursFrom = '15:00';
+                this.secondShiftWorkHoursTo = '19:00';
             }
         },
 
@@ -599,6 +612,47 @@ document.addEventListener('alpine:init', () => {
 
         get isStudyzoneProgram() {
             return this.selectedProjectType === 'studyzone';
+        },
+
+        get isStudyzoneSplitShift() {
+            return this.isStudyzoneProgram && this.shiftType === 'split';
+        },
+
+        onShiftTypeChange(value, oldValue) {
+            if (!this.isStudyzoneProgram) {
+                return;
+            }
+
+            if (value === 'split') {
+                const hasStandardDefaults = (!this.workHoursFrom || this.workHoursFrom === '09:00')
+                    && (!this.workHoursTo || this.workHoursTo === '17:00');
+
+                if (hasStandardDefaults) {
+                    this.workHoursFrom = '08:00';
+                    this.workHoursTo = '12:00';
+                }
+
+                this.ensureSecondShiftDefaults();
+
+                return;
+            }
+
+            if (oldValue === 'split'
+                && this.workHoursFrom === '08:00'
+                && this.workHoursTo === '12:00') {
+                this.workHoursFrom = '09:00';
+                this.workHoursTo = '17:00';
+            }
+        },
+
+        ensureSecondShiftDefaults() {
+            if (!this.secondShiftWorkHoursFrom) {
+                this.secondShiftWorkHoursFrom = '15:00';
+            }
+
+            if (!this.secondShiftWorkHoursTo) {
+                this.secondShiftWorkHoursTo = '19:00';
+            }
         },
 
         get selectedCenterLabel() {
@@ -867,8 +921,11 @@ document.addEventListener('alpine:init', () => {
 
         get scheduleSummary() {
             const days = this.locale === 'ar' ? this.workDaysAr : this.workDaysEn;
+            const hours = this.isStudyzoneSplitShift
+                ? `${this.workHoursFrom}–${this.workHoursTo} / ${this.secondShiftWorkHoursFrom}–${this.secondShiftWorkHoursTo}`
+                : `${this.workHoursFrom}–${this.workHoursTo}`;
 
-            return [days, `${this.workHoursFrom}–${this.workHoursTo}`, `${this.weeklyHours} h`, `${this.dailyHours} h/day`]
+            return [days, hours, `${this.weeklyHours} h`, `${this.dailyHours} h/day`]
                 .filter(Boolean).join(' · ');
         },
 
@@ -1006,6 +1063,8 @@ document.addEventListener('alpine:init', () => {
                     endDate: this.endDate,
                     workHoursFrom: this.workHoursFrom,
                     workHoursTo: this.workHoursTo,
+                    secondShiftWorkHoursFrom: this.isStudyzoneSplitShift ? this.secondShiftWorkHoursFrom : '',
+                    secondShiftWorkHoursTo: this.isStudyzoneSplitShift ? this.secondShiftWorkHoursTo : '',
                     weeklyHours: this.weeklyHours,
                     dailyHours: this.dailyHours,
                     workDaysPerWeek: this.workDaysPerWeek,

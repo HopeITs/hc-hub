@@ -102,6 +102,8 @@ return [
     'working-hours' => 'ساعات العمل',
     'work-hours-from' => 'بداية يوم العمل',
     'work-hours-to' => 'نهاية يوم العمل',
+    'second-shift-work-hours-from' => 'بداية الدوام الثاني',
+    'second-shift-work-hours-to' => 'نهاية الدوام الثاني',
     'work-days' => 'أيام العمل',
     'attending-notes' => 'ملاحظات الحضور',
     'attending-notes-placeholder-en' => 'Example: Flexible arrival is allowed on field-visit days…',
