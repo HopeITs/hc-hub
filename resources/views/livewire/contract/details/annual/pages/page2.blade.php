@@ -133,7 +133,7 @@ $durationMonths = (int) round($contract->duration);
         @case('disc_leap')
             <x-contract.dual class="mt-1"
                 :en="'<strong>' . $weeklyHours . ' working hours</strong> it changes according to the requirements of the job.'"
-                :ar="$Glyphs('ساعة أسبوعياً تتغير بحسب متطلبات العمل.') . ' <strong>' . $Digits($weeklyHours) . '</strong>'" />
+                :ar="'<strong dir=&quot;ltr&quot;>' . $Digits($weeklyHours) . '</strong> ' . $Glyphs('ساعة أسبوعياً تتغير بحسب متطلبات العمل.')" />
             @break
 
         @case('studyzone')
