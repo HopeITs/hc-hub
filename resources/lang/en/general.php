@@ -99,6 +99,8 @@ return [
     'working-hours' => 'Working Hours',
     'work-hours-from' => 'Work Hours From',
     'work-hours-to' => 'Work Hours To',
+    'first-shift-work-hours-from' => 'First Shift From',
+    'first-shift-work-hours-to' => 'First Shift To',
     'second-shift-work-hours-from' => 'Second Shift From',
     'second-shift-work-hours-to' => 'Second Shift To',
     'work-days' => 'Work Days',

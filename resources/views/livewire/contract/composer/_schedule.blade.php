@@ -62,23 +62,35 @@
 
     <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-            <x-forms.input-label for="composer_work_hours_from">@lang('general.work-hours-from')</x-forms.input-label>
-            <x-forms.date-input id="composer_work_hours_from" type="time" x-model="workHoursFrom" />
+            <x-forms.input-label for="composer_work_hours_from">
+                <span x-text="isStudyzoneSplitShift ? @js(__('general.first-shift-work-hours-from')) : @js(__('general.work-hours-from'))"></span>
+            </x-forms.input-label>
+            <x-forms.time-picker
+                id="composer_work_hours_from"
+                alpine-model="workHoursFrom"
+                format="HH:mm"
+            />
         </div>
 
         <div>
-            <x-forms.input-label for="composer_work_hours_to">@lang('general.work-hours-to')</x-forms.input-label>
-            <x-forms.date-input id="composer_work_hours_to" type="time" x-model="workHoursTo" />
+            <x-forms.input-label for="composer_work_hours_to">
+                <span x-text="isStudyzoneSplitShift ? @js(__('general.first-shift-work-hours-to')) : @js(__('general.work-hours-to'))"></span>
+            </x-forms.input-label>
+            <x-forms.time-picker
+                id="composer_work_hours_to"
+                alpine-model="workHoursTo"
+                format="HH:mm"
+            />
         </div>
 
         <div x-cloak x-show="isStudyzoneSplitShift" x-transition>
             <x-forms.input-label for="composer_second_shift_work_hours_from" required>
                 @lang('general.second-shift-work-hours-from')
             </x-forms.input-label>
-            <x-forms.date-input
+            <x-forms.time-picker
                 id="composer_second_shift_work_hours_from"
-                type="time"
-                x-model="secondShiftWorkHoursFrom"
+                alpine-model="secondShiftWorkHoursFrom"
+                format="HH:mm"
             />
             <x-error-span>{{ $errors->first('form.second_shift_work_hours_from') }}</x-error-span>
         </div>
@@ -87,10 +99,10 @@
             <x-forms.input-label for="composer_second_shift_work_hours_to" required>
                 @lang('general.second-shift-work-hours-to')
             </x-forms.input-label>
-            <x-forms.date-input
+            <x-forms.time-picker
                 id="composer_second_shift_work_hours_to"
-                type="time"
-                x-model="secondShiftWorkHoursTo"
+                alpine-model="secondShiftWorkHoursTo"
+                format="HH:mm"
             />
             <x-error-span>{{ $errors->first('form.second_shift_work_hours_to') }}</x-error-span>
         </div>
@@ -146,6 +158,7 @@
                     type="number"
                     min="1"
                     max="7"
+                    step="1"
                     x-model="workDaysPerWeek"
                     x-bind:placeholder="'5'"
                     class="pe-16"

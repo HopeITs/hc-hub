@@ -102,6 +102,8 @@ return [
     'working-hours' => 'ساعات العمل',
     'work-hours-from' => 'بداية يوم العمل',
     'work-hours-to' => 'نهاية يوم العمل',
+    'first-shift-work-hours-from' => 'بداية الدوام الأول',
+    'first-shift-work-hours-to' => 'نهاية الدوام الأول',
     'second-shift-work-hours-from' => 'بداية الدوام الثاني',
     'second-shift-work-hours-to' => 'نهاية الدوام الثاني',
     'work-days' => 'أيام العمل',
