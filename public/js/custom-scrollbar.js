@@ -39,6 +39,7 @@
     thumbGap:    2,         // gap between the thumb and each track end (px)
     minThumb:    24,        // minimum thumb length (px)
     zIndex:      2000,      // overlay stacking
+    headerSelector: null,   // CSS selector of a fixed/sticky page header the overlay must not paint over
     exclude:     []         // extra CSS selectors to skip, e.g. [".my-popup", "#chat"]
   };
   var C = {}, over = window.CustomScrollbarConfig || {};
@@ -46,6 +47,20 @@
 
   var OFFSET = C.offset, TRACKW = C.trackWidth, MIN = C.minThumb, PAD = C.padY, TPAD = C.thumbGap;
   var PADB = (C.padBottom == null ? PAD : C.padBottom);
+  var HEADER_SEL = C.headerSelector;
+
+  /* Bottom of a fixed/sticky page header, in viewport coords — the overlay is
+     clipped so it never paints above it (e.g. an internal card scrollbar must
+     not ride over the top navbar when the whole page scrolls). 0 when none. */
+  function headerInset() {
+    if (!HEADER_SEL) return 0;
+    var h = document.querySelector(HEADER_SEL);
+    if (!h) return 0;
+    var pos = getComputedStyle(h).position;
+    if (pos !== "fixed" && pos !== "sticky") return 0;
+    var hr = h.getBoundingClientRect();
+    return (hr.width > 0 && hr.height > 0) ? hr.bottom : 0;
+  }
   var attached = new WeakSet(), seen = new WeakSet(), instances = [];
 
   /* ---------- Inject CSS (colours via CSS vars so the host can re-theme in plain CSS) ---------- */
@@ -89,13 +104,21 @@
       var left = rtl ? (r.left + OFFSET) : (r.right - OFFSET - TRACKW);
       var trackH = Math.max(0, ch - PAD - PADB);   // empty PAD at top, PADB at bottom
       var innerH = Math.max(0, trackH - 2 * TPAD); // thumb travel band inside the track
+      var overlayTop = r.top + el.clientTop + PAD;
       wrap.style.left = left + "px";
-      wrap.style.top = (r.top + el.clientTop + PAD) + "px";
+      wrap.style.top = overlayTop + "px";
       wrap.style.height = trackH + "px";
       var thumbH = Math.max(MIN, innerH * ch / sh), maxS = sh - ch;
       var ratio = maxS > 0 ? el.scrollTop / maxS : 0;
       thumb.style.height = thumbH + "px";
       thumb.style.top = (TPAD + ratio * (innerH - thumbH)) + "px";
+
+      // Clip whatever scrolls up behind a fixed page header, so the overlay
+      // stays inside its container and never rides over the top navbar.
+      var hiddenTop = Math.max(0, headerInset() - overlayTop);
+      if (hiddenTop >= trackH) { wrap.classList.remove("on"); return; }
+      wrap.style.clipPath = hiddenTop > 0 ? ("inset(" + hiddenTop + "px 0 0 0)") : "";
+
       wrap.classList.add("on");
     }
 

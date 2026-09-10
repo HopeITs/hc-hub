@@ -45,12 +45,6 @@
             <span class="absolute inset-y-0 start-0 w-[3px] transition-all duration-300 {{ $isUnread ? 'bg-[#c2151c]' : 'bg-transparent' }}"
                   x-bind:style="clicked ? 'background-color: transparent' : ''"></span>
 
-            {{-- Icon bubble --}}
-            <span class="mt-1 inline-flex size-8 shrink-0 items-center justify-center rounded-full transition-colors duration-300
-                         {{ $isUnread ? 'bg-neutral-200 text-secondary-medium' : 'bg-neutral-100 text-secondary-light' }}">
-                <x-icons.notification class="size-4" />
-            </span>
-
             {{-- Text --}}
             <div class="min-w-0 flex-1">
                 <p class="truncate text-body font-semibold transition-colors duration-300

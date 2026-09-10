@@ -22,13 +22,13 @@
             font-medium
 
             {{ $active
-                ? 'text-secondary-dark bg-selection'
+                ? 'text-white font-semibold bg-primary'
                 : 'text-secondary-light hover:text-secondary-dark hover:bg-black/[0.03]' }}
         "
         :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0 md:mx-auto' : ''"
     >
         {{-- Icon --}}
-        <span class="flex items-center justify-center size-5 shrink-0 text-inherit group-hover:text-inherit">
+        <span class="flex items-center justify-center size-5 shrink-0 text-inherit group-hover:text-inherit [&_svg]:text-inherit">
             {{ $icon }}
         </span>
 
