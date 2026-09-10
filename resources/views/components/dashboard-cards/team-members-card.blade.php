@@ -50,7 +50,7 @@
 
                     <!-- Avatar -->
                     <div
-                        class="flex items-center justify-center h-10 w-10 flex-shrink-0 rounded-full overflow-hidden
+                        class="flex items-center justify-center size-[34px] flex-shrink-0 rounded-full overflow-hidden
                                 bg-[var(--color-primary)] text-white font-semibold uppercase shadow-e1">
                         <img src="{{ $member->avatar_url }}"
                             alt="{{ $member->displayName ?? $member->name }}" class="object-fit w-full h-full">
@@ -58,11 +58,11 @@
 
                     <!-- Name + Position -->
                     <div class="min-w-0">
-                        <p class="text-caption font-bold text-secondary-medium truncate">
+                        <p class="text-[12.1px] font-bold text-secondary-medium truncate">
                             {{ $member->displayName ?? $member->name }}
                         </p>
 
-                        <p class="text-small font-light truncate text-secondary-light">
+                        <p class="text-[9.6px] font-light truncate text-secondary-light">
                             {{ Str::limit($memberTitle, 40) }}
                         </p>
                     </div>

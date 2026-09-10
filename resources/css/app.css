@@ -476,8 +476,11 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
        control (rounded-control corners, border, shadow). Scoped via
        .perpage-select-box so no other dropdown is affected. */
     .perpage-select-box .select2-container--default .select2-selection--single {
-        height: auto !important;
-        padding-block: 0.5rem !important;
+        height: 41px !important;
+        display: flex !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+        padding-block: 0 !important;
         padding-inline: 0.75rem 2rem !important;
         border: 1px solid var(--color-neutral-200) !important;
         border-radius: var(--radius-control) !important;
