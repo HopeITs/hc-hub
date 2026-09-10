@@ -11,7 +11,7 @@
     $feedbackLabel = $isRtl ? 'إرسال مشكلة أو ملاحظة' : 'Send problem or feedback';
 @endphp
 
-<nav dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
+<nav id="app-navbar" dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
     class="fixed inset-x-0 top-0 z-10 w-screen bg-white md:w-full dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
 
     <div class="px-3 py-1 lg:px-4 lg:ps-3">
