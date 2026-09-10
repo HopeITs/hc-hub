@@ -143,7 +143,7 @@
 <div class="avoid-break">
     <x-contract.dual :en="$LB('10. Internal Rules and Regulations:')" :ar="$LB($Glyphs('القوانين والأنظمة الداخلية:') . ' .10')" />
 
-    <x-contract.dual rowClass="mt-1" :en="'The second party acknowledges and pledges to commit to the following attached documents:'" :ar="$SmartGlyphs('يُقر الفريق الثاني ويتعهد بالاطلاع والالتزام<br>بالمستندات المرفقة التالية:')" />
+    <x-contract.dual rowClass="mt-1" :en="'The second party acknowledges and pledges to commit to the following attached documents:'" :ar="$SmartGlyphs('الفريق الثاني يُقر ويتعهد بالاطلاع والالتزام<br>بالمستندات المرفقة التالية:')" />
 
     @php
         $EN_RULES = ['- Job description.', '- Code of Conduct.', '- Christian Hope Center Policies.'];

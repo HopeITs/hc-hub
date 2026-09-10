@@ -37,7 +37,7 @@
     
     <x-contract.dual class="mt-1"
         :en="'The second party acknowledges and pledges to commit to the following attached documents:'"
-        :ar="$Glyphs('يُقر الفريق الثاني  ويتعهد بالاطلاع والالتزام بالمستندات المرفقة التالية:')" />
+        :ar="$Glyphs('الفريق الثاني يُقر ويتعهد بالاطلاع والالتزام بالمستندات المرفقة التالية:')" />
 
     @php
         $EN_RULES = ['- Job description.', '- Code of Conduct.', '- Christian Hope Center Policies.'];
@@ -81,4 +81,3 @@
         :en="$asList($EN_TERMINATION)" 
         :ar="$asList($AR_TERMINATION)" />
 </div>
-
