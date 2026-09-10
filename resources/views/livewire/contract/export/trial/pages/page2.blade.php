@@ -88,36 +88,50 @@
     $salaryFormattedAr = $salary ? number_format($salary, 0, '.', ',') : '—';
 
     $weeklyHours = (int) ($contract->weekly_hours ?? 40);
-    $dailyHours = $weeklyHours / 5;
+    $dailyHours = (int) ($contract->daily_hours ?? 8);
+    $workDaysPerWeek = (int) ($contract->work_days_per_week ?? 5);
 
     $workDaysEn = $contract->work_days_en ?: 'Monday to Friday';
     $workDaysAr = $contract->work_days_ar ?: 'الإثنين إلى الجمعة';
+    $workDaysEnForClause = trim(preg_replace('/^\s*from\s+/i', '', $workDaysEn));
+    $workDaysArForClause = trim(preg_replace('/^\s*من\s+/u', '', $workDaysAr));
 
     $dailyStart = $contract->work_hours_from ? Carbon::parse($contract->work_hours_from)->format('g:i A') : '9:00 AM';
     $dailyEnd = $contract->work_hours_to ? Carbon::parse($contract->work_hours_to)->format('g:i A') : '5:00 PM';
+    $secondShiftStart = $contract->second_shift_work_hours_from ? Carbon::parse($contract->second_shift_work_hours_from)->format('g:i A') : '3:00 PM';
+    $secondShiftEnd = $contract->second_shift_work_hours_to ? Carbon::parse($contract->second_shift_work_hours_to)->format('g:i A') : '7:00 PM';
 
     $esc = fn($v) => e((string) ($v ?: '—'));
     $escAr = fn($v) => e((string) ($v ? $Glyphs($v) : '—'));
     $LB = fn($t) => '<span class="h-label-bold">' . $t . '</span>';
     $wrapLtr = fn($v) => '<span dir="ltr">' . $v . '</span>';
 
-    $durationMonths = (int) round($contract->duration);
-
-    if ($durationMonths == 12) {
-        $durationLabelEn = 'One Year';
-        $durationLabelAr = $Glyphs('سنة واحدة');
-    } elseif ($durationMonths == 1) {
-        $durationLabelEn = 'One Month';
-        $durationLabelAr = $Glyphs('شهر واحد');
-    } elseif ($durationMonths == 2) {
-        $durationLabelEn = 'Two Months';
-        $durationLabelAr = $Glyphs('شهرين');
-    } else {
-        $durationLabelEn = $durationMonths . ' Months';
-        $durationLabelAr = $Glyphs('أشهر') . ' ' . $durationMonths;
-    }
-
     $programId = $contract->position?->program_id;
+    $project_type = contract_project_type($contract);
+    $isSplitShift = (bool) $contract->is_split_shift || $contract->shift_type === 'split';
+    $weekendDay = contract_primary_weekend_day($pos?->center?->weekends);
+    $weekendDaysEn = [
+        0 => 'Sundays', 1 => 'Mondays', 2 => 'Tuesdays', 3 => 'Wednesdays',
+        4 => 'Thursdays', 5 => 'Fridays', 6 => 'Saturdays',
+    ];
+    $weekendDaysAr = [
+        0 => 'الاحد', 1 => 'الإثنين', 2 => 'الثلاثاء', 3 => 'الأربعاء',
+        4 => 'الخميس', 5 => 'الجمعة', 6 => 'السبت',
+    ];
+    $weekendClauseEn = $weekendDay === null ? '' : $weekendDaysEn[$weekendDay].' are considered working days when necessary and not treated as extra hours.';
+    $weekendClauseAr = $weekendDay === null ? '' : $SmartGlyphs('يعتبر يوم '.$weekendDaysAr[$weekendDay].' يوم عمل في حال رأت الإدارة الحاجة<br>لذلك، ولا يعتبر دوام إضافي.');
+    $dayOffDay = $weekendDay ?? 0;
+    $dayOffDaysEn = [
+        0 => 'Sunday', 1 => 'Monday', 2 => 'Tuesday', 3 => 'Wednesday',
+        4 => 'Thursday', 5 => 'Friday', 6 => 'Saturday',
+    ];
+    $dayOffDaysAr = [
+        0 => 'الأحد', 1 => 'الإثنين', 2 => 'الثلاثاء', 3 => 'الأربعاء',
+        4 => 'الخميس', 5 => 'الجمعة', 6 => 'السبت',
+    ];
+    $dayOffClauseEn = $dayOffDaysEn[$dayOffDay].' is considered a day off, unless management deems it necessary, and is not considered overtime.';
+    $dayOffClauseAr = $SmartGlyphs('يعتبر يوم '.$dayOffDaysAr[$dayOffDay].' يوم عطلة، إلا في حال رأت الإدارة الحاجة<br>لذلك، ولا يعتبر دوام إضافي.');
+
     $isStudyZone = $programId == 8;
     $isGeneralProject = !$isStudyZone;
 @endphp
@@ -133,9 +147,6 @@
 
 <div class="avoid-break mt-2">
     <x-contract.dual :en="$LB('5. Duration of the contract:')" :ar="$LB($Glyphs('مدة العقد (الفترة التجريبية):') . ' .5')" />
-
-    <x-contract.dual rowClass="mt-1 lh-tight" :en="'<strong>' . $durationLabelEn . '</strong>'" :ar="'<strong>'.$durationLabelAr.
-    '</strong>'" />
 
     <x-contract.dual rowClass="mt-1 lh-tight" :en="'Start date: <strong>' . $esc($startStr) . '</strong>'"
         :ar="$Glyphs('تبدأ من تاريخ: <strong>'.$esc($startStrAr).
@@ -156,41 +167,99 @@
 <div class="avoid-break mt-2">
     <x-contract.dual :en="$LB('6. Volunteer Work Hours:')" :ar="$LB($Glyphs('ساعات العمل التطوعّي:') . ' .6')" />
 
-    <x-contract.dual rowClass="mt-1 lh-tight" :en="'<strong>' .
-        $weeklyHours .
-        ' working hours</strong> per week, <strong>' .
-        $dailyHours .
-        ' hours</strong> per day.'"
-        :ar="$SmartGlyphs('ساعات يومياً.').
-        ' <strong>'.$dailyHours.
-        '</strong> '.$SmartGlyphs('ساعة عمل أسبوعياً،').
-        ' <strong>'.$weeklyHours.
-        '</strong>'" />
+    @switch($project_type)
+        @case('cu')
+            <x-contract.dual rowClass="mt-1 lh-tight" :en="'<strong>' .
+                $weeklyHours .
+                ' working hours</strong> per week, <strong>' .
+                $dailyHours .
+                ' hours</strong> per day.'"
+                :ar="$SmartGlyphs('ساعات يومياً.').
+                ' <strong>'.$dailyHours.
+                '</strong> '.$SmartGlyphs('ساعة عمل أسبوعياً،').
+                ' <strong>'.$weeklyHours.
+                '</strong>'" />
+            <x-contract.dual rowClass="mt-1 lh-tight"
+                :en="'Standard office hours are ' . $workDaysEnForClause . ' from ' . $dailyStart . ' to ' . $dailyEnd . '.'"
+                :ar="$SmartGlyphs('من نهار ' . $workDaysArForClause) .
+                '<br>' .
+                '. ' .
+                $wrapLtr($dailyEnd) .
+                ' ' .
+                $SmartGlyphs('حتى الساعة') .
+                ' ' .
+                $wrapLtr($dailyStart) .
+                ' ' .
+                $SmartGlyphs('من الساعة')" />
+            @if ($weekendClauseEn)
+                <x-contract.dual rowClass="mt-1 lh-tight" :en="$weekendClauseEn" :ar="$weekendClauseAr" />
+            @endif
+            @break
 
-    <x-contract.dual rowClass="mt-1 lh-tight" :en="'Standard office hours are ' . $workDaysEn . ' from ' . $dailyStart . ' to ' . $dailyEnd . '.'" :ar="$SmartGlyphs('من نهار ' . $workDaysAr) .
-        '<br>' .
-        '. ' .
-        $wrapLtr($dailyEnd) .
-        ' ' .
-        $SmartGlyphs('حتى الساعة') .
-        ' ' .
-        $wrapLtr($dailyStart) .
-        ' ' .
-        $SmartGlyphs('من الساعة')" />
+        @case('disc_leap')
+            <x-contract.dual rowClass="mt-1 lh-tight"
+                :en="'<strong>' . $weeklyHours . ' Working hours</strong> It changes according to the requirments of the job.'"
+                :ar="$SmartGlyphs('ساعة أسبوعياً تتغير بحسب متطلبات العمل يومياً.') . ' <strong>'.$weeklyHours.'</strong>'" />
+            @if ($weekendClauseEn)
+                <x-contract.dual rowClass="mt-1 lh-tight" :en="$weekendClauseEn" :ar="$weekendClauseAr" />
+            @endif
+            @break
 
-    @if ($isGeneralProject)
-        <x-contract.dual rowClass="mt-1 lh-tight" :en="'Saturdays are considered working days when necessary and not treated as extra hours.'" :ar="$SmartGlyphs('يعتبر يوم السبت يوم عمل في حال رأت الإدارة الحاجة<br>لذلك، ولا يعتبر دوام إضافي.')" />
-    @endif
+        @case('studyzone')
+            @if ($isSplitShift)
+                <x-contract.dual rowClass="mt-1 lh-tight"
+                    :en="'<strong>' . $dailyHours . ' hours</strong> per day, <strong>' . $workDaysPerWeek . ' days</strong> per week, Standard office hours are from ' . $dailyStart . ' to ' . $dailyEnd . ' and from ' . $secondShiftStart . ' to ' . $secondShiftEnd . '.'"
+                    :ar="$SmartGlyphs('أيام أسبوعياً،').' <strong>'.$workDaysPerWeek.'</strong> '.$SmartGlyphs('ساعات يومياً،').' <strong>'.$dailyHours.'</strong>' .
+                    '<br>' .
+                    $dailyEnd.' '.$SmartGlyphs('حتى الساعة').' '.$dailyStart.' '.$SmartGlyphs('من الساعة') .
+                    '<br>' .
+                    $secondShiftEnd.' '.$SmartGlyphs('حتى الساعة').' '.$secondShiftStart.' '.$SmartGlyphs('و')" />
+            @else
+                <x-contract.dual rowClass="mt-1 lh-tight"
+                    :en="'<strong>' . $dailyHours . ' hours</strong> per day, <strong>' . $workDaysPerWeek . ' days</strong> per week, Standard office hours are from ' . $dailyStart . ' to ' . $dailyEnd . '.'"
+                    :ar="$SmartGlyphs('أيام أسبوعياً،').' <strong>'.$workDaysPerWeek.'</strong> '.$SmartGlyphs('ساعات يومياً،').' <strong>'.$dailyHours.'</strong>' .
+                    '<br>' .
+                    '. '.$dailyEnd.' '.$SmartGlyphs('حتى الساعة').' '.$dailyStart.' '.$SmartGlyphs('من الساعة')" />
+            @endif
+            <x-contract.dual rowClass="mt-1 lh-tight"
+                :en="$dayOffClauseEn"
+                :ar="$dayOffClauseAr" />
+            <x-contract.dual rowClass="mt-1 lh-tight" :en="'Volunteers are entitled to a second day off in the week, to be determined in coordination with management and based on work requirements.'" :ar="$SmartGlyphs('يحق للمتطوع يوم عطلة ثانٍ ضمن الأسبوع، يتم تحديده') .
+                '<br>' .
+                $SmartGlyphs('بالتنسيق مع الإدارة وما يتطلبه العمل. يسمح بتعديل أوقات') .
+                '<br>' .
+                $SmartGlyphs('الدوام والعطل في الأشهر التي تتطلب فتح المركز 7 أيام،') .
+                '<br>' .
+                $SmartGlyphs('وذلك بالتنسيق مع المدير المباشر ومسؤول الموارد البشرية.')" />
+            @break
 
-    @if ($isStudyZone)
-        <x-contract.dual rowClass="mt-1 lh-tight" :en="'Volunteers are entitled to a second day off in the week, to be determined in coordination with management and based on work requirements. It is permitted to adjust working hours and holidays in months that require opening the center 7 days, in coordination with the direct manager and the HR officer.'" :ar="$SmartGlyphs('يحق للمتطوع يوم عطلة ثان ضمن الأسبوع، يتم تحديده') .
-            '<br>' .
-            $SmartGlyphs('بالتنسيق مع الإدارة وما يتطلبه العمل. يسمح بتعديل أوقات') .
-            '<br>' .
-            $SmartGlyphs('الدوام والعطل في الأشهر التي تتطلب فتح المركز 7 أيام،') .
-            '<br>' .
-            $SmartGlyphs('وذلك بالتنسيق مع المدير المباشر ومسؤول الموارد البشرية.')" />
-    @endif
+        @default
+            <x-contract.dual rowClass="mt-1 lh-tight" :en="'<strong>' .
+                $weeklyHours .
+                ' working hours</strong> per week, <strong>' .
+                $dailyHours .
+                ' hours</strong> per day.'"
+                :ar="$SmartGlyphs('ساعات يومياً.').
+                ' <strong>'.$dailyHours.
+                '</strong> '.$SmartGlyphs('ساعة عمل أسبوعياً،').
+                ' <strong>'.$weeklyHours.
+                '</strong>'" />
+            <x-contract.dual rowClass="mt-1 lh-tight"
+                :en="'Standard office hours are ' . $workDaysEnForClause . ' from ' . $dailyStart . ' to ' . $dailyEnd . '.'"
+                :ar="$SmartGlyphs('من نهار ' . $workDaysArForClause) .
+                '<br>' .
+                '. ' .
+                $wrapLtr($dailyEnd) .
+                ' ' .
+                $SmartGlyphs('حتى الساعة') .
+                ' ' .
+                $wrapLtr($dailyStart) .
+                ' ' .
+                $SmartGlyphs('من الساعة')" />
+            @if ($weekendClauseEn)
+                <x-contract.dual rowClass="mt-1 lh-tight" :en="$weekendClauseEn" :ar="$weekendClauseAr" />
+            @endif
+    @endswitch
 </div>
 
 <div class="avoid-break mt-2">

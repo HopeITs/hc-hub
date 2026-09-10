@@ -284,6 +284,9 @@
             <x-contract.dual rowClass="mt-1"
                 :en="'<strong>' . $weeklyHours . ' working hours</strong> it changes according to the requirements of the job.'"
                 :ar="$SmartGlyphs('ساعة أسبوعياً تتغير بحسب متطلبات العمل.') . ' <strong>'.$weeklyHours.'</strong>'" />
+            @if ($weekendClauseEn)
+                <x-contract.dual rowClass="mt-1" :en="$weekendClauseEn" :ar="$weekendClauseAr" />
+            @endif
             @break
 
         @case('studyzone')
