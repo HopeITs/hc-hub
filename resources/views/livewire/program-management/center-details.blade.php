@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ $center->name }}
+</x-slot:title>
+
 <div
     class="relative isolate"
     x-data="{

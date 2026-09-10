@@ -2,6 +2,10 @@
     use App\Enums\LeaveTypeCases;
 use App\Enums\LeaveRequestStatus;
 @endphp
+<x-slot:title>
+    {{ __('general.all-leaves') }}
+</x-slot:title>
+
 <div>
     <div class="flex justify-between items-center">
         <livewire:layout.breadcrumbs

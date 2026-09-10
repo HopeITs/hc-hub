@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('auth.confirm-password') }}
+</x-slot:title>
+
 <div class="flex flex-col gap-6">
     <x-auth-header
         :title="__('Confirm password')"

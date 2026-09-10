@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ $title ?? __('general.add-new') }}
+</x-slot:title>
+
 <div>
     <livewire:layout.breadcrumbs :title="$title ?? __('general.add-new')" :crumbs="[
         ['label' => trans_choice('general.employee-management', 2)],

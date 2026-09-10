@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ trans_choice('general.department', 2) }}
+</x-slot:title>
+
 <div>
     {{-- Header --}}
     {{-- <div class="flex justify-between">

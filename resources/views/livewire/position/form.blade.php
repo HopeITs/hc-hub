@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ $title }}
+</x-slot:title>
+
 <div>
     <div class="flex items-center justify-between mb-6">
         <livewire:layout.breadcrumbs

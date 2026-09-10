@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.add-new') }} - {{ __('general.centers') }}
+</x-slot:title>
+
 <div>
     <div class="flex justify-between items-center mb-6">
         <livewire:layout.breadcrumbs

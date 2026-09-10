@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.activity-log') }}
+</x-slot:title>
+
 <div>
     <livewire:layout.breadcrumbs
         :title="__('general.activity-log')"

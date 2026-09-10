@@ -2,6 +2,10 @@
     use App\Enums\ChecklistItemOrder;
 @endphp
 
+<x-slot:title>
+    {{ trans_choice('general.checklist-items', 2) }}
+</x-slot:title>
+
 <div>
     {{-- <div class="flex justify-between">
         <livewire:layout.breadcrumbs

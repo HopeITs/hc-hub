@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.my-items') }}
+</x-slot:title>
+
 <div class="space-y-8">
     <div class="flex items-center justify-between">
         <x-heading-label>{{ __('general.checklist_items') }}</x-heading-label>

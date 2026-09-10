@@ -2,6 +2,10 @@
     use App\Enums\LeaveTypeCases;
 use App\Enums\LeaveRequestStatus;
 @endphp
+<x-slot:title>
+    {{ __('general.balance') }}
+</x-slot:title>
+
 <div>
     <div class="flex justify-between items-center mb-6">
         <livewire:layout.breadcrumbs

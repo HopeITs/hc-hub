@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.news') }}
+</x-slot:title>
+
 <div>
     <div class="flex justify-between items-center mb-6">
         <livewire:layout.breadcrumbs :title="__('general.news')" :crumbs="[['label' => __('general.news-management')]]" :showButton="true" />

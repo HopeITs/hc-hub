@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ trans_choice('general.city', 2) }}
+</x-slot:title>
+
 <div>
 
     @php($locale = app()->getLocale())

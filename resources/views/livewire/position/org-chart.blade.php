@@ -9,6 +9,10 @@
     $colGap = $compact ? 'gap-3' : 'gap-6';
 @endphp
 
+<x-slot:title>
+    {{ __('general.orgn-chart') }}
+</x-slot:title>
+
 <div class="pb-8 space-y-4"
      x-data="{
         filtersOpen: false,

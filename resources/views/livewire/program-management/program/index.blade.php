@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.programs-management') }}
+</x-slot:title>
+
 <div>
     <div class="space-y-12">
         <div class="flex items-center justify-between mb-6">

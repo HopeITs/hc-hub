@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('access.title') }}
+</x-slot:title>
+
 <div class="@container/access mx-auto w-full max-w-[1800px] space-y-[clamp(1rem,1.5vw,1.5rem)]"
     data-access-mode="{{ $canManageEmployees || $canManageRoles || $canManagePermissions ? 'managed' : 'read-only' }}">
     <header class="rounded-xl border border-gray-200 border-s-4 border-s-[#be1f24] bg-white px-[clamp(1rem,2vw,1.5rem)] py-[clamp(1rem,1.5vw,1.25rem)] shadow-sm">

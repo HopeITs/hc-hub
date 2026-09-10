@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('auth.forgot-password') }}
+</x-slot:title>
+
 <section class="min-h-[90dvh] rtl text-right bg-neutral-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
 

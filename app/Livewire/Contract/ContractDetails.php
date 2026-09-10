@@ -80,7 +80,7 @@ class ContractDetails extends Component
             'crumbs' => $this->crumbs,
             'pageNo' => $this->pageNo,
             'totalPages' => $this->totalPages,
-        ])->title(trans_choice('general.contracts', 1));
+        ]);
     }
 
     public function setPage(int $page): void

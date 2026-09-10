@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ $isShared ? __('general.shared-folders') : __('general.my-folders') }}
+</x-slot:title>
+
 <div>
     <div class="flex flex-col gap-4 md:flex-row md:justify-between md:items-start">
         <livewire:layout.breadcrumbs

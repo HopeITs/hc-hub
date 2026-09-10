@@ -2,6 +2,10 @@
     $heading = $renewalSource ? __('general.renew-contract') : __('general.add-new');
 @endphp
 
+<x-slot:title>
+    {{ $heading }}
+</x-slot:title>
+
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <livewire:layout.breadcrumbs :title="$heading" :crumbs="[
         ['label' => trans_choice('general.employee-management', 2)],

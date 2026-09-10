@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.all-badges') }}
+</x-slot:title>
+
 <div x-data @open-badge-modal.window="$wire.openBadgeModal($event.detail.id)">
     <div class="flex items-center justify-between mb-6">
         <livewire:layout.breadcrumbs :title="__('general.all-badges')" :crumbs="[['label' => __('general.all-badges')]]" />

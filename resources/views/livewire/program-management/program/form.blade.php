@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ $title }} - {{ trans_choice('general.program', 1) }}
+</x-slot:title>
+
 <div>
     <livewire:layout.breadcrumbs
         :title="__('general.programs-management')"

@@ -2,6 +2,10 @@
     use App\Enums\ContractPlace;
     use App\Enums\ContractType;
 @endphp
+<x-slot:title>
+    {{ trans_choice('general.contract-type', 2) }}
+</x-slot:title>
+
 <div>
     {{-- <div class="flex justify-between">
         <livewire:layout.breadcrumbs :title="trans_choice('general.contract-type', 2)" :crumbs="[

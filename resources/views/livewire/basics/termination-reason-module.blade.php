@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.termination_reasons') }}
+</x-slot:title>
+
 <div>
     <div class="flex justify-between">
         <livewire:layout.breadcrumbs :title="__('general.termination_reasons')" :crumbs="[
