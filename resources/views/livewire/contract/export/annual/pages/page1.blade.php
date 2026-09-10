@@ -192,6 +192,12 @@
     $workPlaceEn = $position?->center_id ? ($cityNameEn . ' - ' . $centerNameEn) : $centerNameEn;
     $workPlaceAr = $position?->center_id ? ($cityNameAr . ' - ' . $centerNameAr) : $centerNameAr;
 
+    // A center name holding a slash (e.g. "مركز الرجاء المسيحي/ المكتب الرئيسي") overflows the
+    // Arabic column, and DomPDF wraps the pre-shaped RTL text in the wrong order. Break at the
+    // slash ourselves so the tail gets its own line.
+    [$workPlaceArHead, $workPlaceArTail] = array_pad(array_map('trim', explode('/', $workPlaceAr, 2)), 2, '');
+    $workPlaceArHead .= $workPlaceArTail !== '' ? '/' : '';
+
     // ── Text Helpers ──
     $esc = fn($v) => e((string) ($v === '' || $v === null ? '—' : $v));
     $escAr = fn($v) => e((string) ($v === '' || $v === null ? '—' : $Glyphs($v)));
@@ -284,7 +290,8 @@
             ' .2')" />
 
     <x-contract.dual :en="$LB('3. Place of Work:') . ' <strong>' . $esc($workPlaceEn) . '</strong>'"
-        :ar="'<strong>'.$escAr($workPlaceAr).
+        :ar="'<strong>'.$escAr($workPlaceArHead).
         '</strong> '.$LB($Glyphs('مكان العمل:').
-            ' .3')" />
+            ' .3').
+        ($workPlaceArTail !== '' ? '<br><strong>'.$escAr($workPlaceArTail).'</strong>' : '')" />
 </div>
