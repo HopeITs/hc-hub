@@ -25,7 +25,7 @@
 
         <div class="flex flex-col h-full">
             {{-- Fixed header: logo stays put; scrolling begins below the divider --}}
-            <a href="{{ route('dashboard') }}" class="flex items-center justify-start ps-3 h-16 shrink-0 border-b border-black/[0.06]">
+            <a href="{{ route('dashboard') }}" class="flex items-center justify-start ps-6 h-16 shrink-0 border-b border-black/[0.06]">
                 <x-app-logo class="w-[8.25rem] h-auto object-fit" x-show="!sidebarCollapsed || open" />
                 <img src="{{ asset('assets/img/hope-center-icon.svg') }}"
                      alt="{{ config('app.name') }}"
