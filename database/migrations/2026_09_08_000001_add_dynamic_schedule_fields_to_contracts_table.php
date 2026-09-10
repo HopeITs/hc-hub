@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('contracts', function (Blueprint $table) {
-            $table->decimal('daily_hours', 4, 2)->default(8)->after('weekly_hours');
-            $table->unsignedTinyInteger('work_days_per_week')->default(5)->after('daily_hours');
-            $table->string('shift_type', 20)->default('standard')->after('work_days_per_week');
-            $table->boolean('is_split_shift')->default(false)->after('shift_type');
+            $table->unsignedTinyInteger('daily_hours')->nullable()->after('weekly_hours');
+            $table->unsignedTinyInteger('work_days_per_week')->nullable()->after('daily_hours');
+            $table->string('shift_type', 20)->nullable()->after('work_days_per_week');
+            $table->boolean('is_split_shift')->nullable()->after('shift_type');
         });
     }
 

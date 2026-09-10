@@ -49,16 +49,14 @@ return new class extends Migration
                 'work_hours_to' => '12:00',
             ]);
 
-        if (Schema::hasColumn('contracts', 'daily_hours')) {
+        if (Schema::hasColumn('contracts', 'daily_hours') && DB::getDriverName() === 'mysql') {
             DB::table('contracts')
                 ->whereNotNull('daily_hours')
-            ->update(['daily_hours' => DB::raw('ROUND(daily_hours)')]);
+                ->update(['daily_hours' => DB::raw('ROUND(daily_hours)')]);
 
-            if (DB::getDriverName() === 'mysql') {
-                $contractsTable = DB::getTablePrefix().'contracts';
+            $contractsTable = DB::getTablePrefix().'contracts';
 
-                DB::statement("ALTER TABLE `{$contractsTable}` MODIFY daily_hours TINYINT UNSIGNED NOT NULL DEFAULT 8");
-            }
+            DB::statement("ALTER TABLE `{$contractsTable}` MODIFY daily_hours TINYINT UNSIGNED NULL DEFAULT NULL");
         }
     }
 
@@ -77,7 +75,7 @@ return new class extends Migration
         if (Schema::hasColumn('contracts', 'daily_hours') && DB::getDriverName() === 'mysql') {
             $contractsTable = DB::getTablePrefix().'contracts';
 
-            DB::statement("ALTER TABLE `{$contractsTable}` MODIFY daily_hours DECIMAL(4, 2) NOT NULL DEFAULT 8");
+            DB::statement("ALTER TABLE `{$contractsTable}` MODIFY daily_hours TINYINT UNSIGNED NULL DEFAULT NULL");
         }
     }
 };
