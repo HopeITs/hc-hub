@@ -85,7 +85,7 @@ class CalendarCard extends Component
 
         if ($isToday) {
 
-            $circleFill = 'bg-secondary-medium';
+            $circleFill = 'calendar-today-fill';
             $textColorOverride = 'text-white';
 
             if ($isSaint && ! $isHoliday) {
