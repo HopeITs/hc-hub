@@ -10,7 +10,7 @@
         </h1>
 
 
-        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-end">
+        <div class="filter-select-box grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-end">
 
         <div class="flex flex-col gap-2">
             <label class="text-small font-semibold text-secondary-dark uppercase tracking-wide">
@@ -45,7 +45,7 @@
            flex items-center justify-center"> --}}
 
               <button wire:click="resetFilters"
-                        class="px-4 py-3 text-body text-secondary-dark font-semibold border border-secondary-soft
+                        class="px-4 h-[38px] text-body text-secondary-dark font-semibold border border-secondary-soft
            rounded-surface bg-white hover:shadow-e1 cursor-pointer transition w-full sm:w-auto
            flex items-center justify-center gap-2">
 

@@ -11,9 +11,9 @@
         <x-slot:actions>
             <div class="relative w-36 shrink-0">
                 <input x-model="search" type="text" placeholder="{{ __('general.search') }}"
-                    class="h-6 w-full rounded-full border border-gray-300 bg-white py-3 pe-3 ps-8 pt-2.5 text-xs text-gray-700
+                    class="h-6 w-full rounded-full border border-gray-300 bg-white pe-3 ps-8 text-xs leading-none text-gray-700
                            placeholder-secondary-light outline-none transition focus:border-gray-400 focus:ring-0">
-                <div class="pointer-events-none absolute left-2 top-[13px] -translate-y-1/2 text-gray-400">
+                <div class="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
                     <x-icons.search class="size-2" />
                 </div>
             </div>

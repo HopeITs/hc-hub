@@ -1,7 +1,7 @@
 <div class="flex min-h-[330px] w-full flex-col justify-between space-y-4 rounded-surface border border-gray-200 bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] sm:min-h-[360px] md:min-h-0">
     <x-dashboard-cards.card-header :title="__('general.my-leaves')">
         <x-slot:actions>
-            <a href="{{route('leaves.index')}}" class="flex flex-row gap-2 rounded-md bg-primary px-3 py-2 text-xs font-medium text-white transition">
+            <a href="{{route('leaves.index')}}" class="flex flex-row gap-2 rounded-[10px] bg-primary px-3 py-2 text-xs font-medium text-white transition">
                 {{ __('general.show-more') }}
             </a>
         </x-slot:actions>
