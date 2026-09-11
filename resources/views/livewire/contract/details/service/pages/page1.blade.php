@@ -56,6 +56,12 @@
 
     $workPlaceEn = $position?->center_id ? ($cityNameEn . ' - ' . $centerNameEn) : $centerNameEn;
     $workPlaceAr = $position?->center_id ? ($cityNameAr . ' - ' . $centerNameAr) : $centerNameAr;
+    $isOnlineAgreement = (int) ($contract->contractType?->place ?? 0) === \App\Enums\ContractPlace::Online
+        || str_contains(strtolower((string) ($contract->contractType?->name_en ?? '')), 'online');
+    if ($isOnlineAgreement) {
+        $workPlaceEn = 'online';
+        $workPlaceAr = 'اونلاين';
+    }
     // Escaping
     $esc = fn($v) => e((string) ($v === '' || $v === null ? '—' : $v));
     $escAr = fn($v) => e((string) ($v === '' || $v === null ? '—' : $Glyphs($v)));

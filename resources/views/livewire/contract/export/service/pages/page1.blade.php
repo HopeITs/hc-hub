@@ -601,6 +601,12 @@
 
     $workPlaceEn  = $position?->center_id ? ($cityNameEn . ' - ' . $centerNameEn) : $centerNameEn;
     $workPlaceAr  = $position?->center_id ? ($cityNameAr . ' - ' . $centerNameAr) : $centerNameAr;
+    $isOnlineAgreement = (int) ($contract->contractType?->place ?? 0) === \App\Enums\ContractPlace::Online
+        || str_contains(strtolower((string) ($contract->contractType?->name_en ?? '')), 'online');
+    if ($isOnlineAgreement) {
+        $workPlaceEn = 'online';
+        $workPlaceAr = 'اونلاين';
+    }
 
     // A center name holding a slash (e.g. "مركز الرجاء المسيحي/ المكتب الرئيسي") overflows the
     // Arabic column, and DomPDF wraps the pre-shaped RTL text in the wrong order. Break at the
