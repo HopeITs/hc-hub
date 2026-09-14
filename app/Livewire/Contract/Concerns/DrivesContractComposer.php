@@ -128,8 +128,6 @@ trait DrivesContractComposer
                 return (object) [
                     'id' => $type->id,
                     'name' => $type->name,
-                    'type' => (int) $type->type,
-                    'place' => (int) $type->place,
                     'category' => $categories[$type->id] ?? 'annual',
                     'startDate' => $this->form->start_date,
                     'endDate' => $this->form->end_date,
@@ -160,6 +158,8 @@ trait DrivesContractComposer
             'employeeId' => $this->form->employee_id,
             'positionId' => $this->form->position_id,
             'contractTypeId' => $this->form->contract_type_id,
+            'type' => $this->form->type,
+            'place' => $this->form->place,
             'startDate' => $this->form->start_date,
             'endDate' => $this->form->end_date,
             'workHoursFrom' => $this->form->work_hours_from,
@@ -188,6 +188,9 @@ trait DrivesContractComposer
         // Sets city / employee / program / center / position / contract type,
         // and — as a side effect of the type change — the default dates.
         $this->applyIdentitySelection($payload);
+
+        $this->form->type = (int) ($payload['type'] ?? 1);
+        $this->form->place = (int) ($payload['place'] ?? 1);
 
         // ...which the dates the user actually chose then override.
         $this->form->start_date = $this->dateOrNull($payload['startDate'] ?? null);
@@ -234,6 +237,8 @@ trait DrivesContractComposer
             'employee_id' => 'assignment',
             'position_id' => 'assignment',
             'contract_type_id' => 'contract',
+            'type' => 'contract',
+            'place' => 'contract',
             'start_date' => 'contract',
             'end_date' => 'contract',
             'weekly_hours' => 'schedule',

@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Forms;
 
+use App\Enums\ContractPlace;
+use App\Enums\ContractType as ContractTypeEnum;
 use App\Enums\SalaryPer;
 use App\Models\Contract;
 use App\Models\Position;
@@ -33,6 +35,10 @@ class ContractForm extends Form
     public ?int $position_id = null;
 
     public ?int $contract_type_id = null;
+
+    public int $type = 1;
+
+    public int $place = 1;
 
     public bool $is_active = true;
 
@@ -116,6 +122,8 @@ class ContractForm extends Form
     {
 
         $this->is_active = true;
+        $this->type = 1;
+        $this->place = 1;
         $this->weekly_hours = 40;
         $this->currency = 1; // SYP
         $this->salary_per = SalaryPer::Month;
@@ -162,6 +170,8 @@ class ContractForm extends Form
         $this->employee_id = $contract->employee_id;
         $this->position_id = $contract->position_id;
         $this->contract_type_id = $contract->contract_type_id;
+        $this->type = (int) $contract->type;
+        $this->place = (int) $contract->place;
         $this->is_active = (bool) $contract->is_active;
 
         $this->start_date = $contract->start_date?->toDateString();
@@ -192,6 +202,8 @@ class ContractForm extends Form
             'employee_id' => ['required', 'exists:employees,id'],
             'position_id' => ['required', 'exists:positions,id', $this->positionCapacityRule()],
             'contract_type_id' => ['required', 'exists:contract_types,id'],
+            'type' => ['required', Rule::in([ContractTypeEnum::FullTime, ContractTypeEnum::PartTime, ContractTypeEnum::Freelance])],
+            'place' => ['required', Rule::in([ContractPlace::Onsite, ContractPlace::Online])],
             'is_active' => ['required', 'boolean'],
         ]);
     }
@@ -277,6 +289,8 @@ class ContractForm extends Form
             'employee_id' => $this->employee_id,
             'position_id' => $this->position_id,
             'contract_type_id' => $this->contract_type_id,
+            'type' => $this->type,
+            'place' => $this->place,
             'is_active' => (bool) $this->is_active,
         ]);
     }
@@ -343,6 +357,8 @@ class ContractForm extends Form
             'employee_id' => $this->employee_id,
             'position_id' => $this->position_id,
             'contract_type_id' => $this->contract_type_id,
+            'type' => $this->type,
+            'place' => $this->place,
             'is_active' => (bool) $this->is_active,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,

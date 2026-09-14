@@ -234,6 +234,8 @@ document.addEventListener('alpine:init', () => {
         // ---- contract
         startDate: config.seed?.startDate ?? '',
         endDate: config.seed?.endDate ?? '',
+        type: str(config.seed?.type ?? '1'),
+        place: str(config.seed?.place ?? '1'),
 
         // ---- schedule
         workHoursFrom: config.seed?.workHoursFrom ?? '09:00',
@@ -311,7 +313,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         get contractValid() {
-            return Boolean(this.selected.contractType && this.startDate && this.endDate
+            return Boolean(this.selected.contractType && this.type && this.place
+                && this.startDate && this.endDate
                 && this.endDate >= this.startDate && !this.endDateTooFar);
         },
 
@@ -958,6 +961,8 @@ document.addEventListener('alpine:init', () => {
                     centerId: this.selected.center === ALL_CENTERS ? '' : this.selected.center,
                     positionId: this.selected.position,
                     contractTypeId: this.selected.contractType,
+                    type: this.type,
+                    place: this.place,
                     startDate: this.startDate,
                     endDate: this.endDate,
                     workHoursFrom: this.workHoursFrom,

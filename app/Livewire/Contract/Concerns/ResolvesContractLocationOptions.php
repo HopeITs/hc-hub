@@ -201,9 +201,7 @@ trait ResolvesContractLocationOptions
 
     private function getContractTypes(string $col): Collection
     {
-        // `type` and `place` are already stored on every row but were never
-        // displayed; the create screen surfaces them as badges on the type cards.
-        return ContractType::select('id', 'type', 'place', $col)
+        return ContractType::select('id', $col)
             ->orderBy($col)
             ->get()
             ->each(fn (ContractType $t) => $t->name = $t->{$col});

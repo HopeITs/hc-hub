@@ -26,43 +26,16 @@ return [
         ['slug' => 'RHO', 'name_en' => 'Homs Rural', 'name_ar' => 'ريف حمص', 'is_active' => true, 'code' => '015'],
     ],
 
+    // `type` (full/part/freelance) and `place` (onsite/online) describe one
+    // contract, not the category it belongs to, so they live on `contracts`
+    // rather than here — these rows are category labels only.
     'ContractType' => [
-        [
-            'name_en' => 'Full Annual',
-            'name_ar' => 'سنوي كامل',
-            'place' => ContractPlace::Onsite,
-            'type' => ContractType::FullTime,
-        ],
-        [
-            'name_en' => 'Partial Annual',
-            'name_ar' => 'سنوي جزئي',
-            'place' => ContractPlace::Onsite,
-            'type' => ContractType::PartTime,
-        ],
-        [
-            'name_en' => 'Trial Full',
-            'name_ar' => 'تجريبي كامل',
-            'place' => ContractPlace::Onsite,
-            'type' => ContractType::FullTime,
-        ],
-        [
-            'name_en' => 'Trial Partial',
-            'name_ar' => 'تجريبي جزئي',
-            'place' => ContractPlace::Onsite,
-            'type' => ContractType::PartTime,
-        ],
-        [
-            'name_en' => 'Online Agreement',
-            'name_ar' => 'اتفاق اونلاين',
-            'place' => ContractPlace::Online,
-            'type' => ContractType::Freelance,
-        ],
-        [
-            'name_en' => 'Service Agreement',
-            'name_ar' => 'اتفاق خدمة محددة',
-            'place' => ContractPlace::Onsite,
-            'type' => ContractType::Freelance,
-        ],
+        ['name_en' => 'Full Annual', 'name_ar' => 'سنوي كامل'],
+        ['name_en' => 'Partial Annual', 'name_ar' => 'سنوي جزئي'],
+        ['name_en' => 'Trial Full', 'name_ar' => 'تجريبي كامل'],
+        ['name_en' => 'Trial Partial', 'name_ar' => 'تجريبي جزئي'],
+        ['name_en' => 'Online Agreement', 'name_ar' => 'اتفاق اونلاين'],
+        ['name_en' => 'Service Agreement', 'name_ar' => 'اتفاق خدمة محددة'],
     ],
 
     'departments' => [
