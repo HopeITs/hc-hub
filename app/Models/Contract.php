@@ -58,6 +58,20 @@ class Contract extends Model
         'attending_notes_ar',
         'attending_notes_en',
         'weekly_hours',
+        'schedule_mode',
+        'work_day_from',
+        'work_day_to',
+        'show_days_per_week',
+        'show_hours_per_week',
+        'flex_days_per_week',
+        'flex_hours_per_week',
+        'flex_hours_per_day',
+        'flex_varies_by_requirements',
+        'flex_coordinated_with_manager',
+        'flex_custom_en',
+        'flex_custom_ar',
+        'pay_mode',
+        'session_duration',
         'is_active',
     ];
 
@@ -69,6 +83,18 @@ class Contract extends Model
         'weekly_hours' => 'integer',
         'type' => 'integer',
         'place' => 'integer',
+        'schedule_mode' => 'integer',
+        'work_day_from' => 'integer',
+        'work_day_to' => 'integer',
+        'show_days_per_week' => 'boolean',
+        'show_hours_per_week' => 'boolean',
+        'flex_days_per_week' => 'integer',
+        'flex_hours_per_week' => 'integer',
+        'flex_hours_per_day' => 'integer',
+        'flex_varies_by_requirements' => 'boolean',
+        'flex_coordinated_with_manager' => 'boolean',
+        'pay_mode' => 'integer',
+        'session_duration' => 'integer',
         'currency' => 'integer',
         'salary' => 'decimal:2',
     ];
@@ -175,6 +201,11 @@ class Contract extends Model
     public function leaveBalances()
     {
         return $this->hasMany(LeaveBalance::class, 'contract_id');
+    }
+
+    public function payTiers()
+    {
+        return $this->hasMany(ContractPayTier::class)->orderBy('sort_order');
     }
 
     /**
