@@ -48,6 +48,51 @@ class EmployeeCreateDraftContractTest extends TestCase
     }
 
     /**
+     * Regression coverage for a real bug: username lives on the Contact tab,
+     * but clicking "Next" on the Profile tab validates the whole form. A
+     * missing username failed validation while the user was still on
+     * Profile, where that field (and its error) is not rendered at all —
+     * the click just silently "did nothing" from their point of view.
+     */
+    public function test_a_validation_error_on_a_contact_only_field_switches_to_the_contact_tab(): void
+    {
+        $fixtures = $this->makeFixtures();
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(EmployeeCreate::class)
+            ->set('infoForm.first_name_en', 'Test')->set('infoForm.first_name_ar', 'اختبار')
+            ->set('infoForm.last_name_en', 'Person')->set('infoForm.last_name_ar', 'شخص')
+            ->set('infoForm.father_name_en', 'Father')->set('infoForm.father_name_ar', 'أب')
+            ->set('infoForm.mother_name_en', 'Mother')->set('infoForm.mother_name_ar', 'أم')
+            ->set('infoForm.gender', 1)
+            ->set('infoForm.marital_status', 1)
+            ->set('infoForm.nationality', 1)
+            ->set('infoForm.national_number', '12345678903')
+            ->set('infoForm.city_id', $fixtures['city']->id)
+            // username left blank on purpose — it lives on Contact, never visited.
+            ->call('saveInformation')
+            ->assertHasErrors('infoForm.username')
+            ->assertSet('activeTab', 'contact')
+            ->assertSet('showDraftPrompt', false);
+    }
+
+    /** Symmetric case: a Profile-only error while on the Contact tab jumps back to Profile. */
+    public function test_a_validation_error_on_a_profile_only_field_switches_back_from_the_contact_tab(): void
+    {
+        $fixtures = $this->makeFixtures();
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(EmployeeCreate::class)
+            ->set('activeTab', 'contact')
+            ->set('infoForm.username', 'draft.tab-switch-back.employee')
+            ->set('infoForm.create_account', false)
+            // Every Profile field (first_name, gender, city_id, ...) left blank.
+            ->call('saveInformation')
+            ->assertHasErrors('infoForm.first_name_en')
+            ->assertSet('activeTab', 'information');
+    }
+
+    /**
      * saveInformation() is bound to a Save/Next button on more than one tab
      * (Profile and Contact both call it on the same underlying Form object),
      * but the draft-position prompt only lives in the Profile tab's view.
