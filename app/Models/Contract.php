@@ -53,6 +53,8 @@ class Contract extends Model
         'salary_per',
         'work_hours_from',
         'work_hours_to',
+        'work_hours_2_from',
+        'work_hours_2_to',
         'work_days_en',
         'work_days_ar',
         'attending_notes_ar',

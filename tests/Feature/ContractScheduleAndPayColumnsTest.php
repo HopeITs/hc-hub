@@ -48,6 +48,29 @@ class ContractScheduleAndPayColumnsTest extends TestCase
         $this->assertSame(3, $fresh->session_duration);
     }
 
+    public function test_a_second_fixed_shift_is_mass_assignable(): void
+    {
+        $splitShift = $this->makeContract([
+            'work_hours_from' => '09:00',
+            'work_hours_to' => '13:00',
+            'work_hours_2_from' => '17:00',
+            'work_hours_2_to' => '21:00',
+        ]);
+
+        $fresh = $splitShift->fresh();
+
+        $this->assertSame('17:00', $fresh->work_hours_2_from);
+        $this->assertSame('21:00', $fresh->work_hours_2_to);
+    }
+
+    public function test_a_second_fixed_shift_is_optional(): void
+    {
+        $singleShift = $this->makeContract();
+
+        $this->assertNull($singleShift->fresh()->work_hours_2_from);
+        $this->assertNull($singleShift->fresh()->work_hours_2_to);
+    }
+
     public function test_pay_tiers_relation_returns_tiers_ordered_by_sort_order(): void
     {
         $contract = $this->makeContract();
