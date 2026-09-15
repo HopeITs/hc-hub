@@ -131,7 +131,11 @@ old) that predated every JS change in this phase, so the composer's Alpine compo
 initialize at all — `npm run build` fixed it locally. `public/build/` is gitignored, so a real
 deploy must run its own build step to pick up `contract-composer.js`.
 
-### Phase 3 — Schedule step
+### Phase 3 — Schedule step — DONE
+
+Commit `0984b38e`. Verified via `php artisan test` (360 passed, the same 2 pre-existing unrelated
+failures) and a real browser walkthrough of both modes end to end, including a full submission
+checked against the database directly, plus an Arabic/RTL pass.
 
 Fixed (time range + **optional second time range for a split shift, e.g. 9:00-13:00 and
 17:00-21:00** + day range + two computed, non-editable "N days/week" / "M hours/week" display
@@ -140,6 +144,35 @@ toggles) vs. flexible (5 independent checkboxes + one bilingual custom-text box)
 (`work_hours_2_from`/`work_hours_2_to`, nullable — a contract has one only when
 `work_hours_2_from` is set) were added to `contracts` in a follow-up migration after Phase 0
 shipped; see `docs/superpowers/plans/2026-09-15-contract-composer-phase-0.md`.
+
+- `weekly_hours` is computed client-side only — fixed mode from the day range × daily hours
+  (both shifts combined), flexible mode straight from the "hours/week" box — and the server
+  (`DrivesContractComposer::applyComposerPayload()`) trusts whatever `weeklyHours` the client
+  sends, same as every other composer field. A contract created before this phase has no day
+  range to compute from, so the JS seeds `initialWeeklyHours` from the contract's own stored
+  figure once and falls back to it until someone actually edits the schedule — this stops an
+  untouched renewal/edit screen from silently zeroing out historically-valid data.
+- `work_day_from`/`work_day_to` are `nullable` + `required_with` each other server-side (not
+  `required`) for the same reason: a pre-Phase-3 row has neither, and renewing it must not be
+  blocked by fields that did not exist when it was created.
+
+**Found via browser testing, not caught by PHPUnit:** the "custom description" checkbox in
+flexible mode (`flexCustomOn`) was a derived getter/setter — `get` returned whether the two text
+boxes already held text, `set` only handled the *uncheck* case (clearing them) and did nothing on
+check. Checking the box therefore always sprang back to unchecked, permanently hiding the text
+fields it was supposed to reveal: a genuine dead end for any flexible-schedule contract that
+needed a custom description. PHPUnit's `->call('submit', $payload)` tests never touch the
+checkbox at all (Livewire's `submit()` receives `flexCustomEn`/`flexCustomAr` directly), so this
+only ever surfaced by actually clicking it in a browser. Fixed by giving `flexCustomOn` a real,
+independent boolean rather than deriving it from the text fields — same shape as the plain
+`showDaysPerWeek`/`showHoursPerWeek` toggles — with a `$watch` in `initialize()` that clears both
+text fields on uncheck.
+
+**Also found via browser testing:** the schedule summary box's "N h/week" text was a hardcoded
+English literal (`x-text="weeklyHours + ' h/week'"`) shown even on the Arabic screen. Replaced
+with a `general.composer.weekly-hours-value` translation (`:count h/week` / `:count
+ساعة/أسبوعيًا`) formatted through the same `fill()` templating every other computed label already
+uses.
 
 ### Phase 4 — Pay step
 
