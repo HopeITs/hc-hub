@@ -230,6 +230,41 @@ class EmployeeCreateDraftContractTest extends TestCase
         $this->assertSame(1, Contract::where('employee_id', $employee->id)->count());
     }
 
+    public function test_a_headquarters_level_position_is_labeled_with_its_own_national_city(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $syria = $this->makeCity('SYR', '000');
+        $hqPosition = Position::query()->forceCreate([
+            'center_id' => $fixtures['center']->id, // the center itself sits in $fixtures['city'] (Aleppo)
+            'city_id' => $syria->id, // but this position's own label is the national scope
+            'department_id' => $fixtures['department']->id,
+            'job_level_id' => $fixtures['jobLevel']->id,
+            'program_id' => $fixtures['program']->id,
+            'title_en' => 'Chief Executive Officer',
+            'title_ar' => 'المدير التنفيذي',
+            'max_emp' => 1,
+            'exist_emp' => 0,
+            'is_active' => true,
+        ]);
+        $employee = $this->makeSavedEmployee($fixtures, 'draft.hq-label.employee');
+
+        $component = Livewire::actingAs($fixtures['hr'])
+            ->test(EmployeeCreate::class)
+            ->set('infoForm.employee', $employee)
+            ->set('draftCityId', $fixtures['city']->id)
+            ->set('draftProgramId', $fixtures['program']->id);
+
+        $options = $component->instance()->positionOptionsForDraft();
+
+        // makeCity() names a city after its own slug, so the suffix here is
+        // literally "(SYR)" — in the real app (config/samples/sampleData.php)
+        // that same row is named "Syria" / "سوريا".
+        $this->assertArrayHasKey($hqPosition->id, $options);
+        $this->assertSame('Chief Executive Officer (SYR)', $options[$hqPosition->id]);
+        // A position whose own city genuinely is $fixtures['city'] must stay unlabeled.
+        $this->assertSame('Program Officer', $options[$fixtures['position']->id]);
+    }
+
     public function test_position_options_are_empty_until_a_program_is_chosen(): void
     {
         $fixtures = $this->makeFixtures();

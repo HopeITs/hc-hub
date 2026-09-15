@@ -161,6 +161,13 @@ class EmployeeCreate extends Component
      * Positions the draft-position dropdown may offer, scoped to draftCityId
      * AND the chosen program — empty until a program is picked, matching the
      * cascade in the view.
+     *
+     * Position::inCity() treats a center's city as authoritative over the
+     * position's own city_id (see ResolvesContractLocationOptions), so a
+     * headquarters-level position (city_id = Syria) whose center happens to
+     * sit in this city correctly shows up here — but nothing on screen would
+     * otherwise say so. A "(Syria)" suffix flags it for awareness without
+     * changing which positions are offered.
      */
     public function positionOptionsForDraft(): array
     {
@@ -168,13 +175,21 @@ class EmployeeCreate extends Component
             return [];
         }
 
-        return Position::query()
+        $positions = Position::query()
             ->inCity($this->draftCityId)
             ->where('program_id', $this->draftProgramId)
             ->visible()
             ->orderBy(transColumn('title'))
-            ->get(['id', 'title_en', 'title_ar'])
-            ->pluck('title', 'id')
+            ->get(['id', 'city_id', 'title_en', 'title_ar']);
+
+        $nationalLabel = City::query()->where('slug', City::NATIONAL_SLUG)->value(transColumn('name'));
+
+        return $positions
+            ->mapWithKeys(fn (Position $position): array => [
+                $position->id => City::isNational($position->city_id)
+                    ? "{$position->title} ({$nationalLabel})"
+                    : $position->title,
+            ])
             ->all();
     }
 
