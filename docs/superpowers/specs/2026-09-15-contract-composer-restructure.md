@@ -1,0 +1,102 @@
+# Contract Composer restructure — schedule, pay tiers & draft contracts
+
+**Date:** 2026-09-15
+**Scope:** `contracts`/`contract_types` schema, `ContractObserver`, `LeaveBalanceService`, the
+contract composer (`ContractCreate`/`ContractEdit` + `DrivesContractComposer`), `EmployeeCreate`,
+and the printed contract templates (screen + PDF).
+
+---
+
+## 1. Why
+
+The current contract model was built for one shape: one contract type row (which bundled
+`type`/`place` until the 2026-09-14 migration moved them onto `contracts`), one fixed work
+schedule (`work_hours_from/to` + free-text `work_days`), one salary at one unit
+(monthly/hourly/session). An audit of 16 real signed contract PDFs found this does not cover the
+organization's actual variety:
+
+1. Contracts with a work day **split into two periods**.
+2. Contracts with **fully variable** hours ("varies by work requirements" / "coordinated with the
+   direct manager").
+3. Contracts with a **conditional, tiered** salary (e.g. $200 if 60h/month, $300 if 70h/month),
+   with an unbounded number of tiers.
+4. No way to create a **draft contract** (position + center only) from the employee-create screen
+   that later upgrades into the same row as a full formal contract, without creating a second row.
+5. `contract_types` has 6 rows that are redundant now that `type`/`place` live on `contracts` —
+   they should collapse to the 3 real categories (volunteer / trial volunteer / specific voluntary
+   service).
+6. `LeaveBalanceService` grants annual leave to `service`-category contracts even though every
+   real service contract examined has no leave clause at all — a bug to fix alongside the rest.
+
+## 2. Decisions the user confirmed
+
+| Decision | Outcome |
+| --- | --- |
+| Draft contract | A **4th value of the existing `type` column** (`Draft`), not a separate category |
+| Flexible pay tiers | **Unbounded** rows via an "Add condition" repeater, not a fixed max |
+| Draft exemptions | While `type = Draft`, the contract is fully exempt from `Position::canAssign()` capacity checks **and** from leave-balance generation |
+
+## 3. Phased scope
+
+Each phase ships and is verifiable on its own; a plan document exists per phase.
+
+### Phase 0 — Database & core models
+See `docs/superpowers/plans/2026-09-15-contract-composer-phase-0.md`.
+
+- Consolidate `contract_types` from 6 rows to 3 (volunteer / trial volunteer / specific voluntary
+  service), remapping every contract's `contract_type_id` and updating `config/contracts.php`'s
+  `map_by_id` and `config/samples/sampleData.php`'s `ContractType` seed to match.
+- Add `App\Enums\ContractType::Draft` (`= 4`).
+- Add schedule columns (`schedule_mode`, `work_day_from/to`, `show_days_per_week`,
+  `show_hours_per_week`, `flex_*`) and pay columns (`pay_mode`, `session_duration`) to `contracts`,
+  plus a new `contract_pay_tiers` table (`contract_id`, `condition_en/ar`, `amount`, `sort_order`).
+- Add `App\Enums\SessionDuration` (Hour / HourAndHalf / TwoHours).
+- `Contract` model: fillable/casts for every new column + `payTiers(): HasMany`.
+- New `App\Models\ContractPayTier` model (bilingual `condition` via `HasTranslation`).
+
+### Phase 1 — Draft contract lifecycle
+
+- Employee-create screen: an optional step after saving personal info to pick a position (and
+  therefore its center), creating a `Contract` with `type = Draft`, the default volunteer
+  `contract_type_id`, no schedule/pay filled in, `is_active = true`.
+- `ContractObserver::creating()`/`updating()`: skip the capacity check entirely while `type` stays
+  `Draft` across the write; apply the normal capacity check (and `inc()`) when `type` transitions
+  *from* `Draft` to a real value (an "upgrade", not a renewal).
+- `LeaveBalanceService`: replace the `contract_type_id`-based trial check with a category-based
+  one — skip entirely for `type === Draft` and for `category === 'service'`; keep the existing
+  trial behavior for `category === 'trial'`.
+
+### Phase 2 — Composer step 1 (contract type + assignment)
+
+- 3 contract-type cards (a direct consequence of the Phase 0 consolidation).
+- The `type` (full/part/freelance) radio becomes conditional on the chosen category.
+- Selecting a volunteer with a `Draft` last contract auto-fills position/center and upgrades that
+  row in place via `ContractForm::setContract()` instead of creating a new one.
+- Study Zone program (`slug === 'SZ'`) skips center selection, relying on city-level positions.
+
+### Phase 3 — Schedule step
+
+Fixed (time range + day range + two computed, non-editable "N days/week" / "M hours/week"
+display toggles) vs. flexible (5 independent checkboxes + one bilingual custom-text box) modes for
+`resources/views/livewire/contract/composer/_schedule.blade.php`.
+
+### Phase 4 — Pay step
+
+Fixed (amount + currency + `SalaryPer` + `SessionDuration` when `Session`) vs. flexible
+(`contract_pay_tiers` repeater) modes for `_pay.blade.php`.
+
+### Phase 5 — Printed contract templates
+
+Data-driven schedule/pay clauses shared between the screen and PDF export via
+`<x-contract.schedule-clause>` / `<x-contract.pay-clause>` Blade components.
+
+## 4. Verification (whole project)
+
+- `php artisan migrate` on a dev copy first, then `php artisan migrate:rollback` to confirm `down()`
+  works.
+- Manual walk-through: add employee → create draft → create a real contract for the same employee
+  → confirm auto-fill and in-place upgrade.
+- One real contract per category × per schedule/pay mode combination, checked on screen and in the
+  exported PDF.
+- `composer test` stays green; update any test that assumed 6 `contract_types` rows or the old
+  `LeaveBalanceService` trial check.
