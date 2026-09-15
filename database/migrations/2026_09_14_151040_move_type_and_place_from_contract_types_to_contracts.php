@@ -23,9 +23,9 @@ return new class extends Migration
 
         DB::statement('
             UPDATE contracts
-            INNER JOIN contract_types ON contract_types.id = contracts.contract_type_id
-            SET contracts.type = contract_types.type,
-                contracts.place = contract_types.place
+            SET type = (SELECT contract_types.type FROM contract_types WHERE contract_types.id = contracts.contract_type_id),
+                place = (SELECT contract_types.place FROM contract_types WHERE contract_types.id = contracts.contract_type_id)
+            WHERE EXISTS (SELECT 1 FROM contract_types WHERE contract_types.id = contracts.contract_type_id)
         ');
 
         Schema::table('contract_types', function (Blueprint $table) {
@@ -45,9 +45,9 @@ return new class extends Migration
         // does not leave every row stuck at the default.
         DB::statement('
             UPDATE contract_types
-            INNER JOIN contracts ON contracts.contract_type_id = contract_types.id
-            SET contract_types.type = contracts.type,
-                contract_types.place = contracts.place
+            SET type = (SELECT contracts.type FROM contracts WHERE contracts.contract_type_id = contract_types.id ORDER BY contracts.id DESC LIMIT 1),
+                place = (SELECT contracts.place FROM contracts WHERE contracts.contract_type_id = contract_types.id ORDER BY contracts.id DESC LIMIT 1)
+            WHERE EXISTS (SELECT 1 FROM contracts WHERE contracts.contract_type_id = contract_types.id)
         ');
 
         Schema::table('contracts', function (Blueprint $table) {
