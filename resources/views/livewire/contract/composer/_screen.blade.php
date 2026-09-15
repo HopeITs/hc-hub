@@ -77,6 +77,11 @@
             'noSeatsLeft' => __('general.composer.no-seats-left'),
             'duplicate' => __('general.composer.duplicate-contract'),
             'draftFound' => __('general.composer.draft-found'),
+            // :count substituted client-side, same as the duration labels below.
+            'daysPerWeek' => __('general.composer.days-per-week'),
+            'hoursPerWeek' => __('general.composer.hours-per-week'),
+            'weeklyHoursValue' => __('general.composer.weekly-hours-value'),
+            'flexible' => __('general.composer.schedule-flexible'),
             // Lowercase units, because these are read inside a phrase
             // ("3 months") rather than as standalone labels.
             'month' => __('general.composer.duration-month'),

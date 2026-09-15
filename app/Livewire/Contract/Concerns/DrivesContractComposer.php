@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Contract\Concerns;
 
+use App\Enums\ScheduleMode;
 use App\Livewire\Forms\ContractForm;
 use App\Models\Contract;
 use App\Models\Employee;
@@ -162,8 +163,22 @@ trait DrivesContractComposer
             'place' => $this->form->place,
             'startDate' => $this->form->start_date,
             'endDate' => $this->form->end_date,
+            'scheduleMode' => $this->form->schedule_mode,
             'workHoursFrom' => $this->form->work_hours_from,
             'workHoursTo' => $this->form->work_hours_to,
+            'workHours2From' => $this->form->work_hours_2_from,
+            'workHours2To' => $this->form->work_hours_2_to,
+            'workDayFrom' => $this->form->work_day_from,
+            'workDayTo' => $this->form->work_day_to,
+            'showDaysPerWeek' => $this->form->show_days_per_week,
+            'showHoursPerWeek' => $this->form->show_hours_per_week,
+            'flexDaysPerWeek' => $this->form->flex_days_per_week,
+            'flexHoursPerWeek' => $this->form->flex_hours_per_week,
+            'flexHoursPerDay' => $this->form->flex_hours_per_day,
+            'flexVariesByRequirements' => $this->form->flex_varies_by_requirements,
+            'flexCoordinatedWithManager' => $this->form->flex_coordinated_with_manager,
+            'flexCustomEn' => $this->form->flex_custom_en,
+            'flexCustomAr' => $this->form->flex_custom_ar,
             'weeklyHours' => $this->form->weekly_hours,
             'workDaysEn' => $this->form->work_days_en,
             'workDaysAr' => $this->form->work_days_ar,
@@ -196,14 +211,31 @@ trait DrivesContractComposer
         $this->form->start_date = $this->dateOrNull($payload['startDate'] ?? null);
         $this->form->end_date = $this->dateOrNull($payload['endDate'] ?? null);
 
-        $this->form->work_hours_from = $this->timeOrNull($payload['workHoursFrom'] ?? null);
-        $this->form->work_hours_to = $this->timeOrNull($payload['workHoursTo'] ?? null);
         $this->form->weekly_hours = max(0, (int) ($payload['weeklyHours'] ?? 0));
 
         $this->form->work_days_en = $this->textOrNull($payload['workDaysEn'] ?? null);
         $this->form->work_days_ar = $this->textOrNull($payload['workDaysAr'] ?? null);
         $this->form->attending_notes_en = $this->textOrNull($payload['attendingNotesEn'] ?? null);
         $this->form->attending_notes_ar = $this->textOrNull($payload['attendingNotesAr'] ?? null);
+
+        $this->form->schedule_mode = (int) ($payload['scheduleMode'] ?? ScheduleMode::Fixed);
+
+        $this->form->work_hours_from = $this->timeOrNull($payload['workHoursFrom'] ?? null);
+        $this->form->work_hours_to = $this->timeOrNull($payload['workHoursTo'] ?? null);
+        $this->form->work_hours_2_from = $this->timeOrNull($payload['workHours2From'] ?? null);
+        $this->form->work_hours_2_to = $this->timeOrNull($payload['workHours2To'] ?? null);
+        $this->form->work_day_from = $this->intOrNull($payload['workDayFrom'] ?? null);
+        $this->form->work_day_to = $this->intOrNull($payload['workDayTo'] ?? null);
+        $this->form->show_days_per_week = (bool) ($payload['showDaysPerWeek'] ?? false);
+        $this->form->show_hours_per_week = (bool) ($payload['showHoursPerWeek'] ?? false);
+
+        $this->form->flex_days_per_week = $this->intOrNull($payload['flexDaysPerWeek'] ?? null);
+        $this->form->flex_hours_per_week = $this->intOrNull($payload['flexHoursPerWeek'] ?? null);
+        $this->form->flex_hours_per_day = $this->intOrNull($payload['flexHoursPerDay'] ?? null);
+        $this->form->flex_varies_by_requirements = (bool) ($payload['flexVariesByRequirements'] ?? false);
+        $this->form->flex_coordinated_with_manager = (bool) ($payload['flexCoordinatedWithManager'] ?? false);
+        $this->form->flex_custom_en = $this->textOrNull($payload['flexCustomEn'] ?? null);
+        $this->form->flex_custom_ar = $this->textOrNull($payload['flexCustomAr'] ?? null);
 
         $this->form->currency = (int) ($payload['currency'] ?? 1);
         $this->form->salary = $payload['salary'] ?? null;
@@ -278,6 +310,11 @@ trait DrivesContractComposer
         $value = is_string($value) ? trim($value) : null;
 
         return preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $value) === 1 ? $value : null;
+    }
+
+    protected function intOrNull(mixed $value): ?int
+    {
+        return is_numeric($value) ? (int) $value : null;
     }
 
     protected function timeOrNull(mixed $value): ?string
