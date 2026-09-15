@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Contract;
+use App\Models\ContractType;
 use App\Models\Position;
 use App\Support\StatisticsCache;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,16 @@ class ContractObserver
 {
     public function creating(Contract $contract): void
     {
+        // Auto-renew defaults true (right for volunteer and service
+        // contracts) except for trial/probation contracts, which default
+        // false — a trial is meant to end and be evaluated, not roll over
+        // silently. Only applied when the caller left it unset, so an
+        // explicit true/false (e.g. from the composer, once it exposes this
+        // field) is never overridden.
+        if (! array_key_exists('auto_renew', $contract->getAttributes())) {
+            $contract->auto_renew = ContractType::find($contract->contract_type_id)?->category !== 'trial';
+        }
+
         if (app()->runningInConsole()) {
             return;
         }

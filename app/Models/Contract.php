@@ -75,6 +75,7 @@ class Contract extends Model
         'pay_mode',
         'session_duration',
         'is_active',
+        'auto_renew',
     ];
 
     protected $casts = [
@@ -99,6 +100,7 @@ class Contract extends Model
         'session_duration' => 'integer',
         'currency' => 'integer',
         'salary' => 'decimal:2',
+        'auto_renew' => 'boolean',
     ];
 
     //    protected function work_days(): Attribute
