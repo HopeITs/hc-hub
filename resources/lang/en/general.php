@@ -833,4 +833,9 @@ return [
     'current-period' => 'Current Period',
     'new-period' => 'New Period',
     'renew-explanation' => 'Renew As Is creates an identical contract for the new period. Renew with Edit opens the full form so you can change any detail before saving.',
+
+    'assign-position-draft' => 'Assign a Position (Optional)',
+    'assign-position-draft-description' => 'You can reserve a position for this employee now and finish their contract later, or skip this and add a contract whenever you are ready.',
+    'create-draft-and-continue' => 'Reserve Position & Continue',
+    'skip-for-now' => 'Skip for Now',
 ];

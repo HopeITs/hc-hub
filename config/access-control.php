@@ -106,7 +106,11 @@ return [
             'toggleItemStatusConfirmed' => 'positions.update',
             'exportExcel' => 'positions.export',
         ],
-        'employee.employee-create' => ['saveInformation' => 'employees.create'],
+        'employee.employee-create' => [
+            'saveInformation' => 'employees.create',
+            'createDraftAndContinue' => 'employees.create',
+            'positionOptionsForDraft' => 'employees.create',
+        ],
         'employee.employee-edit' => [
             'saveChecklist' => 'employees.update',
             'saveInformation' => 'employees.update',
@@ -359,7 +363,10 @@ return [
         // actions that do write are mapped to contracts.create above.
         'contract.contract-renew-modal' => ['close'],
         'dashboard.calendar-card' => ['next', 'prev'],
-        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember'],
+        // skipDraft is pure navigation (a redirect, no data read or write) —
+        // the same class as setActiveTab, not the mapped createDraftAndContinue/
+        // positionOptionsForDraft above.
+        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember', 'skipDraft'],
         // The add*/openInitiateReturnModal methods stage rows in the in-memory
         // form object; nothing is written until the mapped save* action runs,
         // and mount() has already authorized 'update' on this employee.

@@ -3,6 +3,28 @@
     use App\Enums\Nationality;
 @endphp
 
+@if ($isCreateMode && $showDraftPrompt)
+    <div class="flex flex-col space-y-6">
+        <x-heading-label>@lang('general.assign-position-draft')</x-heading-label>
+        <p class="text-sm text-neutral-500">@lang('general.assign-position-draft-description')</p>
+
+        <div>
+            <x-forms.input-label for="draft_position_id">@lang('general.position')</x-forms.input-label>
+            <x-forms.select wire:model="draftForm.position_id" id="draft_position_id"
+                :options="$this->positionOptionsForDraft()" :placeholder="__('general.select')" />
+            <x-error-span>{{ $errors->first('draftForm.position_id') }}</x-error-span>
+        </div>
+
+        <div class="flex justify-end space-x-2">
+            <x-primary-button type="button" wire:click="createDraftAndContinue" class="!w-auto">
+                @lang('general.create-draft-and-continue')
+            </x-primary-button>
+            <x-secondary-button type="button" wire:click="skipDraft" class="!w-auto">
+                @lang('general.skip-for-now')
+            </x-secondary-button>
+        </div>
+    </div>
+@else
 <form wire:submit.prevent="saveInformation" class="flex flex-col space-y-6">
     <div class="">
         <x-forms.input-label for="photo">@lang('general.photo')</x-forms.input-label>
@@ -242,3 +264,4 @@
     </x-forms.dirty-gate>
 
 </form>
+@endif
