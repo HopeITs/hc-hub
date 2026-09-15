@@ -110,6 +110,9 @@ return [
             'saveInformation' => 'employees.create',
             'createDraftAndContinue' => 'employees.create',
             'positionOptionsForDraft' => 'employees.create',
+            'programOptionsForDraft' => 'employees.create',
+            'citiesForDraft' => 'employees.create',
+            'canPickAnyDraftCity' => 'employees.create',
         ],
         'employee.employee-edit' => [
             'saveChecklist' => 'employees.update',
@@ -363,10 +366,13 @@ return [
         // actions that do write are mapped to contracts.create above.
         'contract.contract-renew-modal' => ['close'],
         'dashboard.calendar-card' => ['next', 'prev'],
-        // skipDraft is pure navigation (a redirect, no data read or write) —
-        // the same class as setActiveTab, not the mapped createDraftAndContinue/
-        // positionOptionsForDraft above.
-        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember', 'skipDraft'],
+        // skipDraft is pure navigation (a redirect, no data read or write) and
+        // updatedDraftCityId/updatedDraftProgramId only reset the draft
+        // cascade's own in-memory selections — the same class as
+        // setActiveTab, not the mapped createDraftAndContinue/
+        // positionOptionsForDraft/programOptionsForDraft/citiesForDraft/
+        // canPickAnyDraftCity above.
+        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember', 'skipDraft', 'updatedDraftCityId', 'updatedDraftProgramId'],
         // The add*/openInitiateReturnModal methods stage rows in the in-memory
         // form object; nothing is written until the mapped save* action runs,
         // and mount() has already authorized 'update' on this employee.

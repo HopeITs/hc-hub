@@ -94,6 +94,7 @@ class EmployeeCreateDraftContractTest extends TestCase
         Livewire::actingAs($fixtures['hr'])
             ->test(EmployeeCreate::class)
             ->set('infoForm.employee', $employee)
+            ->set('draftCityId', $fixtures['city']->id)
             ->set('draftForm.position_id', $fixtures['position']->id)
             ->call('createDraftAndContinue')
             ->assertRedirect(route('employees.edit', $employee->id));
@@ -131,6 +132,7 @@ class EmployeeCreateDraftContractTest extends TestCase
         Livewire::actingAs($fixtures['hr'])
             ->test(EmployeeCreate::class)
             ->set('infoForm.employee', $employee)
+            ->set('draftCityId', $fixtures['city']->id)
             ->set('draftForm.position_id', $otherPosition->id)
             ->call('createDraftAndContinue')
             ->assertHasErrors('draftForm.position_id');
@@ -175,11 +177,180 @@ class EmployeeCreateDraftContractTest extends TestCase
         Livewire::actingAs($fixtures['hr'])
             ->test(EmployeeCreate::class)
             ->set('infoForm.employee', $employee)
+            ->set('draftCityId', $fixtures['city']->id)
             ->set('draftForm.position_id', $fixtures['position']->id)
             ->call('createDraftAndContinue')
             ->assertHasNoErrors();
 
         $this->assertSame(1, Contract::where('employee_id', $employee->id)->count());
+    }
+
+    public function test_position_options_are_empty_until_a_program_is_chosen(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $employee = $this->makeSavedEmployee($fixtures, 'draft.no-program.employee');
+
+        $component = Livewire::actingAs($fixtures['hr'])
+            ->test(EmployeeCreate::class)
+            ->set('infoForm.employee', $employee)
+            ->set('draftCityId', $fixtures['city']->id);
+
+        $this->assertSame([], $component->instance()->positionOptionsForDraft());
+        $this->assertCount(2, $component->instance()->programOptionsForDraft());
+    }
+
+    public function test_choosing_a_program_narrows_the_position_options_to_it(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $employee = $this->makeSavedEmployee($fixtures, 'draft.narrowed.employee');
+
+        $component = Livewire::actingAs($fixtures['hr'])
+            ->test(EmployeeCreate::class)
+            ->set('infoForm.employee', $employee)
+            ->set('draftCityId', $fixtures['city']->id)
+            ->set('draftProgramId', $fixtures['program']->id);
+
+        $options = $component->instance()->positionOptionsForDraft();
+
+        $this->assertArrayHasKey($fixtures['position']->id, $options);
+        $this->assertArrayNotHasKey($fixtures['otherPosition']->id, $options);
+    }
+
+    public function test_changing_the_program_clears_a_previously_chosen_position(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $employee = $this->makeSavedEmployee($fixtures, 'draft.reset.employee');
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(EmployeeCreate::class)
+            ->set('infoForm.employee', $employee)
+            ->set('draftCityId', $fixtures['city']->id)
+            ->set('draftProgramId', $fixtures['program']->id)
+            ->set('draftForm.position_id', $fixtures['position']->id)
+            ->set('draftProgramId', $fixtures['otherProgram']->id)
+            ->assertSet('draftForm.position_id', null);
+    }
+
+    public function test_changing_the_city_clears_a_previously_chosen_program_and_position(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $otherCity = $this->makeCity('HMS', '002');
+        $employee = $this->makeSavedEmployee($fixtures, 'draft.city-reset.employee');
+        $nationwideHr = $this->makeUser($fixtures['city'], 'HR-SYR', ['employees.create', 'employees.update']);
+
+        Livewire::actingAs($nationwideHr)
+            ->test(EmployeeCreate::class)
+            ->set('infoForm.employee', $employee)
+            ->set('draftCityId', $fixtures['city']->id)
+            ->set('draftProgramId', $fixtures['program']->id)
+            ->set('draftForm.position_id', $fixtures['position']->id)
+            ->set('draftCityId', $otherCity->id)
+            ->assertSet('draftProgramId', null)
+            ->assertSet('draftForm.position_id', null);
+    }
+
+    public function test_reserving_a_position_from_a_different_program_than_selected_is_rejected(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $employee = $this->makeSavedEmployee($fixtures, 'draft.program-mismatch.employee');
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(EmployeeCreate::class)
+            ->set('infoForm.employee', $employee)
+            ->set('draftCityId', $fixtures['city']->id)
+            ->set('draftProgramId', $fixtures['program']->id)
+            // Bypasses the dropdown entirely: position belongs to otherProgram,
+            // not the program the (still-set) draftProgramId claims.
+            ->set('draftForm.position_id', $fixtures['otherPosition']->id)
+            ->call('createDraftAndContinue')
+            ->assertHasErrors('draftForm.position_id');
+
+        $this->assertSame(0, Contract::where('employee_id', $employee->id)->count());
+    }
+
+    public function test_a_city_scoped_hr_role_cannot_pick_any_city(): void
+    {
+        $fixtures = $this->makeFixtures();
+
+        $component = Livewire::actingAs($fixtures['hr'])->test(EmployeeCreate::class);
+
+        $this->assertFalse($component->instance()->canPickAnyDraftCity());
+    }
+
+    public function test_hr_syr_can_pick_any_city_and_reserve_a_position_outside_the_employee_city(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $otherCity = $this->makeCity('HMS', '002');
+        $otherCityDepartment = Department::query()->forceCreate(['name' => 'HMS Programs', 'code' => 'HPRG']);
+        $otherCityPosition = Position::query()->forceCreate([
+            'city_id' => $otherCity->id,
+            'department_id' => $otherCityDepartment->id,
+            'job_level_id' => $fixtures['jobLevel']->id,
+            'program_id' => $fixtures['program']->id,
+            'title_en' => 'HMS Officer', 'title_ar' => 'مسؤول حمص',
+            'max_emp' => 2, 'exist_emp' => 0, 'is_active' => true,
+        ]);
+
+        $employee = $this->makeSavedEmployee($fixtures, 'draft.hrsyr.employee'); // lives in $fixtures['city'] (ALP)
+        $nationwideHr = $this->makeUser($fixtures['city'], 'HR-SYR', ['employees.create', 'employees.update']);
+
+        $component = Livewire::actingAs($nationwideHr)
+            ->test(EmployeeCreate::class)
+            ->set('infoForm.employee', $employee);
+
+        $this->assertTrue($component->instance()->canPickAnyDraftCity());
+
+        $component
+            ->set('draftCityId', $otherCity->id)
+            ->set('draftProgramId', $fixtures['program']->id)
+            ->set('draftForm.position_id', $otherCityPosition->id)
+            ->call('createDraftAndContinue')
+            ->assertHasNoErrors();
+
+        $contract = Contract::where('employee_id', $employee->id)->first();
+        $this->assertNotNull($contract);
+        $this->assertSame($otherCityPosition->id, $contract->position_id);
+    }
+
+    public function test_a_city_scoped_hr_role_cannot_bypass_its_own_city_by_forging_draft_city_id(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $otherCity = $this->makeCity('HMS', '002');
+        $otherCityDepartment = Department::query()->forceCreate(['name' => 'HMS Programs 2', 'code' => 'HPRG2']);
+        $otherCityPosition = Position::query()->forceCreate([
+            'city_id' => $otherCity->id,
+            'department_id' => $otherCityDepartment->id,
+            'job_level_id' => $fixtures['jobLevel']->id,
+            'program_id' => $fixtures['program']->id,
+            'title_en' => 'HMS Officer 2', 'title_ar' => 'مسؤول حمص 2',
+            'max_emp' => 2, 'exist_emp' => 0, 'is_active' => true,
+        ]);
+
+        $employee = $this->makeSavedEmployee($fixtures, 'draft.forged-city.employee');
+
+        // HR-ALP has no open city dropdown in the view at all, but a direct
+        // request could still try to set draftCityId to another city.
+        Livewire::actingAs($fixtures['hr'])
+            ->test(EmployeeCreate::class)
+            ->set('infoForm.employee', $employee)
+            ->set('draftCityId', $otherCity->id)
+            ->set('draftProgramId', $fixtures['program']->id)
+            ->set('draftForm.position_id', $otherCityPosition->id)
+            ->call('createDraftAndContinue')
+            ->assertHasErrors('draftForm.position_id');
+
+        $this->assertSame(0, Contract::where('employee_id', $employee->id)->count());
+    }
+
+    private function makeSavedEmployee(array $fixtures, string $username): Employee
+    {
+        return Employee::query()->create([
+            'city_id' => $fixtures['city']->id,
+            'first_name_en' => 'Test', 'first_name_ar' => 'اختبار',
+            'last_name_en' => 'Person', 'last_name_ar' => 'شخص',
+            'username' => $username,
+            'is_active' => true,
+        ]);
     }
 
     private function makeFixtures(): array
@@ -199,6 +370,7 @@ class EmployeeCreateDraftContractTest extends TestCase
         $department = Department::query()->forceCreate(['name' => 'Programs', 'code' => 'PRG']);
         $jobLevel = JobLevel::query()->forceCreate(['name_en' => 'Officer', 'name_ar' => 'مسؤول', 'grade' => 2]);
         $program = Program::query()->forceCreate(['name' => 'Core Program', 'slug' => 'core-program', 'code' => 'CORE', 'is_active' => true]);
+        $otherProgram = Program::query()->forceCreate(['name' => 'Outreach Program', 'slug' => 'outreach-program', 'code' => 'OUT', 'is_active' => true]);
 
         $position = Position::query()->forceCreate([
             'center_id' => $center->id,
@@ -213,10 +385,23 @@ class EmployeeCreateDraftContractTest extends TestCase
             'is_active' => true,
         ]);
 
+        $otherPosition = Position::query()->forceCreate([
+            'center_id' => $center->id,
+            'city_id' => $city->id,
+            'department_id' => $department->id,
+            'job_level_id' => $jobLevel->id,
+            'program_id' => $otherProgram->id,
+            'title_en' => 'Outreach Coordinator',
+            'title_ar' => 'منسق برنامج التوعية',
+            'max_emp' => 5,
+            'exist_emp' => 0,
+            'is_active' => true,
+        ]);
+
         ContractType::query()->forceCreate(['id' => 1, 'name_en' => 'Volunteer Contract', 'name_ar' => 'عقد تطوّع']);
 
         $hr = $this->makeUser($city, 'HR-ALP', ['employees.create', 'employees.update']);
 
-        return compact('city', 'center', 'department', 'jobLevel', 'program', 'position', 'hr');
+        return compact('city', 'center', 'department', 'jobLevel', 'program', 'otherProgram', 'position', 'otherPosition', 'hr');
     }
 }

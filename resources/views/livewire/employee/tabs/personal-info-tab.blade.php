@@ -8,10 +8,51 @@
         <x-heading-label>@lang('general.assign-position-draft')</x-heading-label>
         <p class="text-sm text-neutral-500">@lang('general.assign-position-draft-description')</p>
 
-        <div>
+        <div wire:key="draft-city-{{ $this->canPickAnyDraftCity() ? 'open' : 'locked' }}">
+            <x-forms.input-label for="draft_city_id">{{ trans_choice('general.city', 1) }}</x-forms.input-label>
+            @if ($this->canPickAnyDraftCity())
+                {{-- A nationwide role (HR-SYR, super-admin, general-manager) is not
+                     limited to the employee's own city elsewhere in the app either. --}}
+                <x-forms.select2-input wire:model.live="draftCityId" id="draft_city_id">
+                    <option value="">{{ __('general.select') }}</option>
+                    @foreach ($this->citiesForDraft() as $cityId => $cityName)
+                        <option value="{{ $cityId }}">{{ $cityName }}</option>
+                    @endforeach
+                </x-forms.select2-input>
+            @else
+                <x-forms.input type="text" id="draft_city_id" :value="$infoForm->employee?->city?->name" disabled />
+            @endif
+        </div>
+
+        {{--
+            select2-input wraps its real <select> in wire:ignore so Alpine's
+            own entangle can own the selected VALUE without Livewire's morph
+            fighting it — but that also means Livewire never touches its
+            <option> list on a normal re-render. Program's options depend on
+            draftCityId and Position's depend on draftProgramId, so each
+            wrapper carries a wire:key tied to the value it depends on: when
+            that value changes, Livewire treats the keyed element as a brand
+            new node instead of patching it, which tears down and remounts
+            the whole select2 instance with the fresh <option> list baked in.
+        --}}
+        <div wire:key="draft-program-wrap-{{ $draftCityId }}">
+            <x-forms.input-label for="draft_program_id">{{ trans_choice('general.program', 1) }}</x-forms.input-label>
+            <x-forms.select2-input wire:model.live="draftProgramId" id="draft_program_id">
+                <option value="">{{ __('general.select') }}</option>
+                @foreach ($this->programOptionsForDraft() as $programId => $programName)
+                    <option value="{{ $programId }}">{{ $programName }}</option>
+                @endforeach
+            </x-forms.select2-input>
+        </div>
+
+        <div wire:key="draft-position-wrap-{{ $draftProgramId }}">
             <x-forms.input-label for="draft_position_id">@lang('general.position')</x-forms.input-label>
-            <x-forms.select wire:model="draftForm.position_id" id="draft_position_id"
-                :options="$this->positionOptionsForDraft()" :placeholder="__('general.select')" />
+            <x-forms.select2-input wire:model="draftForm.position_id" id="draft_position_id">
+                <option value="">{{ __('general.select') }}</option>
+                @foreach ($this->positionOptionsForDraft() as $positionId => $positionTitle)
+                    <option value="{{ $positionId }}">{{ $positionTitle }}</option>
+                @endforeach
+            </x-forms.select2-input>
             <x-error-span>{{ $errors->first('draftForm.position_id') }}</x-error-span>
         </div>
 

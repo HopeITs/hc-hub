@@ -30,6 +30,17 @@ class EmployeeCreate extends Component
      */
     public bool $showDraftPrompt = false;
 
+    /**
+     * City the draft-position cascade is scoped to. Defaults to the employee's
+     * own city; a nationwide HR role (HR-SYR, super-admin, general-manager —
+     * see User::activeCityId()) may change it, since their reach was never
+     * limited to the employee's own city elsewhere in the app either.
+     */
+    public ?int $draftCityId = null;
+
+    /** Narrows the draft-position dropdown within draftCityId. */
+    public ?int $draftProgramId = null;
+
     public function mount()
     {
         $this->title = __('general.add-new');
@@ -54,6 +65,7 @@ class EmployeeCreate extends Component
         $this->infoForm->saveInformation();
         $this->successToast();
         $this->showDraftPrompt = true;
+        $this->draftCityId = $this->infoForm->employee->city_id;
 
         // saveInformation() is reachable from more than one tab's own Save
         // button (Profile and Contact share the same Form object and both
@@ -63,15 +75,61 @@ class EmployeeCreate extends Component
         $this->activeTab = 'information';
     }
 
-    /** Positions the draft-position dropdown may offer, scoped to the just-saved employee's city. */
-    public function positionOptionsForDraft(): array
+    /** Whether the acting user may point the draft-position cascade at a city other than the employee's own. */
+    public function canPickAnyDraftCity(): bool
     {
-        if (! $this->infoForm->employee) {
+        return auth()->user()?->activeCityId() === null;
+    }
+
+    /**
+     * Cities the draft-position city dropdown may offer for a nationwide HR
+     * role. Unlike $cities in render() (the employee's own "current
+     * residence", which excludes the headquarters row), this includes Syria
+     * itself, since city-level positions can belong to it directly.
+     */
+    public function citiesForDraft(): array
+    {
+        return City::where('is_active', true)->pluck(transColumn('name'), 'id')->toArray();
+    }
+
+    /**
+     * Programs the draft-position program dropdown may offer: only those
+     * with at least one visible position in draftCityId — every position
+     * requires a program, so this never hides a reachable position behind
+     * an absent program option.
+     */
+    public function programOptionsForDraft(): array
+    {
+        if (! $this->draftCityId) {
             return [];
         }
 
         return Position::query()
-            ->inCity($this->infoForm->employee->city_id)
+            ->inCity($this->draftCityId)
+            ->visible()
+            ->with('program:id,name')
+            ->get(['id', 'program_id'])
+            ->pluck('program')
+            ->unique('id')
+            ->pluck('name', 'id')
+            ->sort()
+            ->all();
+    }
+
+    /**
+     * Positions the draft-position dropdown may offer, scoped to draftCityId
+     * AND the chosen program — empty until a program is picked, matching the
+     * cascade in the view.
+     */
+    public function positionOptionsForDraft(): array
+    {
+        if (! $this->draftCityId || ! $this->draftProgramId) {
+            return [];
+        }
+
+        return Position::query()
+            ->inCity($this->draftCityId)
+            ->where('program_id', $this->draftProgramId)
             ->visible()
             ->orderBy(transColumn('title'))
             ->get(['id', 'title_en', 'title_ar'])
@@ -79,9 +137,24 @@ class EmployeeCreate extends Component
             ->all();
     }
 
+    public function updatedDraftCityId(): void
+    {
+        // A program/position picked under the previous city cannot survive
+        // the switch — both dropdowns that offered them are about to change.
+        $this->draftProgramId = null;
+        $this->draftForm->position_id = null;
+    }
+
+    public function updatedDraftProgramId(): void
+    {
+        // A stale position choice from a previous program must not survive
+        // the switch — the dropdown that offered it is about to disappear.
+        $this->draftForm->position_id = null;
+    }
+
     public function createDraftAndContinue()
     {
-        $this->draftForm->createDraft($this->infoForm->employee);
+        $this->draftForm->createDraft($this->infoForm->employee, $this->draftCityId, $this->draftProgramId);
         $this->successToast();
 
         return $this->redirect(route('employees.edit', $this->infoForm->employee->id), navigate: true);
