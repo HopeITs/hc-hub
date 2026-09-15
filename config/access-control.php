@@ -138,13 +138,15 @@ return [
             'toggleItemStatusConfirmed' => 'employees.update',
             'exportExcel' => 'employees.export',
         ],
-        // The composer exposes exactly three actions: one option load, one
-        // entitlement preview, and the save itself. Both screens are the same
-        // component; only the permission each one demands differs.
+        // The composer exposes one option load, one entitlement preview, and
+        // the save itself on both screens; create additionally exposes the
+        // draft-contract lookup that only makes sense when creating a new
+        // contract (see ContractCreate::draftContractFor()).
         'contract.contract-create' => [
             'submit' => 'contracts.create',
             'locationOptions' => 'contracts.create',
             'leavePreview' => 'contracts.create',
+            'draftContractFor' => 'contracts.create',
         ],
         'contract.contract-edit' => [
             'submit' => 'contracts.update',

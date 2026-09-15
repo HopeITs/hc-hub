@@ -231,6 +231,15 @@ document.addEventListener('alpine:init', () => {
         },
         options: { employees: [], programs: [], centers: [], positions: [] },
 
+        // Set when the selected employee's most recent contract is a draft
+        // (type = Draft, created from the employee-create screen's
+        // position-reservation step) — submit() then upgrades that exact row
+        // instead of inserting a new one. See checkForDraftContract(). Only
+        // the create screen's component exposes the method this checks —
+        // an edit is always about a contract that already exists.
+        allowDraftUpgrade: config.allowDraftUpgrade ?? true,
+        draftContractId: null,
+
         // ---- contract
         startDate: config.seed?.startDate ?? '',
         endDate: config.seed?.endDate ?? '',
@@ -281,6 +290,7 @@ document.addEventListener('alpine:init', () => {
             this.$watch('selected.city', () => this.syncing || this.loadCityOptions(true));
             this.$watch('selected.program', () => this.syncing || this.onProgramChange());
             this.$watch('selected.center', () => this.syncing || this.onCenterChange());
+            this.$watch('selected.employee', () => this.syncing || this.checkForDraftContract());
             this.$watch('leaveInputs', () => this.scheduleLeavePreview());
 
             if (this.selected.city) {
@@ -493,9 +503,52 @@ document.addEventListener('alpine:init', () => {
             this.loadCityOptions(true);
         },
 
+        /**
+         * Auto-fills program/center/position from the selected employee's
+         * draft contract, if their most recently created contract is one.
+         * Fields set here stay user-editable afterwards, same as a renewal's
+         * seed — this only saves re-entering what the employee-create screen
+         * already captured, it does not lock anything in.
+         */
+        async checkForDraftContract() {
+            const employeeId = Number(this.selected.employee);
+
+            if (!this.allowDraftUpgrade || !Number.isInteger(employeeId) || employeeId < 1) {
+                this.draftContractId = null;
+
+                return;
+            }
+
+            const draft = await this.$wire.draftContractFor(employeeId);
+
+            if (!draft) {
+                this.draftContractId = null;
+
+                return;
+            }
+
+            this.draftContractId = draft.draftContractId;
+
+            await this.withSync(() => {
+                this.selected.program = str(draft.programId ?? '');
+                this.selected.center = draft.centerId != null ? str(draft.centerId) : CITY_LEVEL;
+                this.selected.position = str(draft.positionId ?? '');
+            });
+        },
+
         onProgramChange() {
-            this.selected.center = ALL_CENTERS;
+            // Study Zone positions are city-level by data, not by a center
+            // choice someone forgot to make — there is nothing to pick, so
+            // land on "city-level" directly instead of "all centers".
+            this.selected.center = this.isStudyZoneProgram ? CITY_LEVEL : ALL_CENTERS;
             this.selected.position = '';
+        },
+
+        /** Whether the selected program is Study Zone (slug 'SZ') — the one program whose positions never sit under a center. */
+        get isStudyZoneProgram() {
+            const program = this.options.programs.find((p) => str(p.value) === this.selected.program);
+
+            return program?.slug === 'SZ';
         },
 
         onCenterChange() {
@@ -614,6 +667,15 @@ document.addEventListener('alpine:init', () => {
                 this.startDate = defaults.start;
                 this.endDate = defaults.end;
                 this.flashDates();
+
+                // Full/Part time only make sense for a volunteer or trial
+                // contract; Freelance only for a service one — switching
+                // category must not leave a now-invalid type selected.
+                if (defaults.category === 'service') {
+                    this.type = '3'; // Freelance
+                } else if (this.type === '3') {
+                    this.type = '1'; // Full Time
+                }
             }
         },
 
@@ -791,6 +853,11 @@ document.addEventListener('alpine:init', () => {
             return endsAt ? this.fill(this.labels.duplicate, { date: this.formatDate(endsAt) }) : '';
         },
 
+        /** Non-empty once checkForDraftContract() finds this employee already has a reserved position. */
+        get draftContractNotice() {
+            return this.draftContractId ? this.labels.draftFound : '';
+        },
+
         get capacityBar() {
             const capacity = this.capacity;
 
@@ -960,6 +1027,7 @@ document.addEventListener('alpine:init', () => {
                     programId: this.selected.program,
                     centerId: this.selected.center === ALL_CENTERS ? '' : this.selected.center,
                     positionId: this.selected.position,
+                    draftContractId: this.draftContractId,
                     contractTypeId: this.selected.contractType,
                     type: this.type,
                     place: this.place,

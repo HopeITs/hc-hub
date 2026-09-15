@@ -6,6 +6,7 @@ use App\Enums\ContractPlace;
 use App\Enums\ContractType as ContractTypeEnum;
 use App\Enums\SalaryPer;
 use App\Models\Contract;
+use App\Models\ContractType;
 use App\Models\Position;
 use Carbon\Carbon;
 use Closure;
@@ -202,7 +203,7 @@ class ContractForm extends Form
             'employee_id' => ['required', 'exists:employees,id'],
             'position_id' => ['required', 'exists:positions,id', $this->positionCapacityRule()],
             'contract_type_id' => ['required', 'exists:contract_types,id'],
-            'type' => ['required', Rule::in([ContractTypeEnum::FullTime, ContractTypeEnum::PartTime, ContractTypeEnum::Freelance])],
+            'type' => ['required', Rule::in([ContractTypeEnum::FullTime, ContractTypeEnum::PartTime, ContractTypeEnum::Freelance]), $this->typeMatchesCategoryRule()],
             'place' => ['required', Rule::in([ContractPlace::Onsite, ContractPlace::Online])],
             'is_active' => ['required', 'boolean'],
         ]);
@@ -400,6 +401,31 @@ class ContractForm extends Form
 
             if ($position && ! $position->canAssign()) {
                 $fail(__('This position exceeded the number of max employees.'));
+            }
+        };
+    }
+
+    /**
+     * Full/Part time only make sense for a volunteer or trial contract;
+     * Freelance only for a service one — the composer's own UI already
+     * restricts the choice to match (see contract-composer.js::chooseType()),
+     * this is the matching server-side check for a request that bypasses it.
+     */
+    private function typeMatchesCategoryRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            $category = ContractType::find($this->contract_type_id)?->category;
+
+            if ($category === null) {
+                return; // contract_type_id's own `exists` rule already reports this.
+            }
+
+            $isFreelance = (int) $value === ContractTypeEnum::Freelance;
+
+            if ($category === 'service' && ! $isFreelance) {
+                $fail(__('validation.custom.type.service_requires_freelance'));
+            } elseif ($category !== 'service' && $isFreelance) {
+                $fail(__('validation.custom.type.freelance_requires_service'));
             }
         };
     }

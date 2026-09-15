@@ -770,6 +770,7 @@ return [
         'no-seats-left' => ':taken of :max filled · no seats left',
         'duplicate-contract' => 'Already has an active contract ending :date. Creating this one will not close it.',
         'duplicate-short' => 'Active',
+        'draft-found' => 'This volunteer already has a reserved position — the fields below were filled in from it, and saving will complete that same contract instead of creating a new one.',
 
         'max-end-date' => 'At most one year after the start date.',
         'end-date-too-far' => 'The end date cannot be more than a year after the start date.',

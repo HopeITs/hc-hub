@@ -32,6 +32,11 @@
 
     $composerConfig = [
         'locale' => app()->getLocale(),
+        // Draft-upgrade detection (see checkForDraftContract() in
+        // contract-composer.js) calls a method that exists only on the
+        // create screen's component — an edit is always about a contract
+        // that already exists, so there is no "latest contract" to check.
+        'allowDraftUpgrade' => ! $isEdit,
         'cityId' => $lockedCity?->id ?? ($seed['cityId'] ?? null),
         'cities' => $cities->map(fn ($city) => ['value' => $city->id, 'label' => $city->name])->values(),
         'sections' => $sections,
@@ -44,6 +49,7 @@
                 'name' => $type->name,
                 'start' => $type->startDate,
                 'end' => $type->endDate,
+                'category' => $type->category,
             ],
         ]),
         'terminationReasons' => $terminationReasons
@@ -70,6 +76,7 @@
             'seatsLeft' => __('general.composer.seats-left'),
             'noSeatsLeft' => __('general.composer.no-seats-left'),
             'duplicate' => __('general.composer.duplicate-contract'),
+            'draftFound' => __('general.composer.draft-found'),
             // Lowercase units, because these are read inside a phrase
             // ("3 months") rather than as standalone labels.
             'month' => __('general.composer.duration-month'),

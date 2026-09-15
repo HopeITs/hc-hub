@@ -82,8 +82,18 @@
     <div class="mt-5 grid gap-5 sm:grid-cols-2">
         <div>
             <x-forms.input-label required>@lang('general.type')</x-forms.input-label>
-            <div class="mt-1 grid grid-cols-3 gap-2" role="radiogroup" aria-label="@lang('general.type')">
+
+            {{--
+                Full/Part time only make sense for a volunteer or trial
+                contract; a service contract is always Freelance — chooseType()
+                auto-corrects `type` the moment a card of one category or the
+                other is picked, this just keeps the now-irrelevant options off
+                screen instead of offering a choice that would fail validation.
+            --}}
+            <div x-cloak x-show="selectedType?.category !== 'service'"
+                 class="mt-1 grid grid-cols-2 gap-2" role="radiogroup" aria-label="@lang('general.type')">
                 @foreach ($typeOptions as $value => $label)
+                    @continue($value === ContractTypeEnum::Freelance)
                     <label class="cursor-pointer">
                         <input type="radio" class="peer sr-only" name="composer_type"
                                value="{{ $value }}" x-model="type"/>
@@ -99,6 +109,13 @@
                     </label>
                 @endforeach
             </div>
+
+            <div x-cloak x-show="selectedType?.category === 'service'"
+                 class="mt-1 flex min-h-[2.625rem] items-center rounded-control border-2 border-neutral-200
+                        bg-neutral-50 px-3 text-body font-semibold text-neutral-700">
+                {{ $typeOptions[ContractTypeEnum::Freelance] }}
+            </div>
+
             <x-error-span>{{ $errors->first('form.type') }}</x-error-span>
         </div>
 
