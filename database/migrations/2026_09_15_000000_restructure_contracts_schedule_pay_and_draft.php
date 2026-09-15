@@ -41,10 +41,50 @@ return new class extends Migration
         foreach (self::FINAL_NAMES as $id => $names) {
             DB::table('contract_types')->where('id', $id)->update($names);
         }
+
+        Schema::table('contracts', function (Blueprint $table) {
+            $table->unsignedTinyInteger('schedule_mode')->default(1)->after('place');
+            $table->unsignedTinyInteger('work_day_from')->nullable()->after('work_hours_to');
+            $table->unsignedTinyInteger('work_day_to')->nullable()->after('work_day_from');
+            $table->boolean('show_days_per_week')->default(false)->after('work_day_to');
+            $table->boolean('show_hours_per_week')->default(false)->after('show_days_per_week');
+            $table->unsignedTinyInteger('flex_days_per_week')->nullable()->after('show_hours_per_week');
+            $table->unsignedSmallInteger('flex_hours_per_week')->nullable()->after('flex_days_per_week');
+            $table->unsignedTinyInteger('flex_hours_per_day')->nullable()->after('flex_hours_per_week');
+            $table->boolean('flex_varies_by_requirements')->default(false)->after('flex_hours_per_day');
+            $table->boolean('flex_coordinated_with_manager')->default(false)->after('flex_varies_by_requirements');
+            $table->string('flex_custom_en')->nullable()->after('flex_coordinated_with_manager');
+            $table->string('flex_custom_ar')->nullable()->after('flex_custom_en');
+            $table->unsignedTinyInteger('pay_mode')->default(1)->after('salary_per');
+            $table->unsignedTinyInteger('session_duration')->nullable()->after('pay_mode');
+        });
+
+        Schema::create('contract_pay_tiers', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('contract_id')->constrained()->cascadeOnDelete();
+            $table->string('condition_en');
+            $table->string('condition_ar');
+            $table->decimal('amount', 10, 2);
+            $table->unsignedInteger('sort_order')->default(0);
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('contract_pay_tiers');
+
+        Schema::table('contracts', function (Blueprint $table) {
+            $table->dropColumn([
+                'schedule_mode', 'work_day_from', 'work_day_to',
+                'show_days_per_week', 'show_hours_per_week',
+                'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_day',
+                'flex_varies_by_requirements', 'flex_coordinated_with_manager',
+                'flex_custom_en', 'flex_custom_ar',
+                'pay_mode', 'session_duration',
+            ]);
+        });
+
         foreach (self::MERGES as $droppedId => $survivorId) {
             $survivor = DB::table('contract_types')->where('id', $survivorId)->first();
 

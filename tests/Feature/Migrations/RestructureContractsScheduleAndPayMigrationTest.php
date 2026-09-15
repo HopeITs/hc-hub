@@ -5,6 +5,7 @@ namespace Tests\Feature\Migrations;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class RestructureContractsScheduleAndPayMigrationTest extends TestCase
@@ -101,6 +102,39 @@ class RestructureContractsScheduleAndPayMigrationTest extends TestCase
         foreach ([2, 4, 6] as $droppedId) {
             $this->assertDatabaseHas('contract_types', ['id' => $droppedId]);
         }
+    }
+
+    public function test_up_adds_the_new_schedule_and_pay_columns_to_contracts(): void
+    {
+        foreach ([
+            'schedule_mode', 'work_day_from', 'work_day_to',
+            'show_days_per_week', 'show_hours_per_week',
+            'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_day',
+            'flex_varies_by_requirements', 'flex_coordinated_with_manager',
+            'flex_custom_en', 'flex_custom_ar',
+            'pay_mode', 'session_duration',
+        ] as $column) {
+            $this->assertTrue(Schema::hasColumn('contracts', $column), "contracts.$column should exist after migrating.");
+        }
+    }
+
+    public function test_up_creates_the_contract_pay_tiers_table(): void
+    {
+        $this->assertTrue(Schema::hasTable('contract_pay_tiers'));
+
+        foreach (['id', 'contract_id', 'condition_en', 'condition_ar', 'amount', 'sort_order'] as $column) {
+            $this->assertTrue(Schema::hasColumn('contract_pay_tiers', $column), "contract_pay_tiers.$column should exist.");
+        }
+    }
+
+    public function test_down_drops_the_new_columns_and_the_pay_tiers_table(): void
+    {
+        $migration = $this->migrationInstance();
+
+        $migration->down();
+
+        $this->assertFalse(Schema::hasColumn('contracts', 'schedule_mode'));
+        $this->assertFalse(Schema::hasTable('contract_pay_tiers'));
     }
 
     private function migrationInstance(): Migration
