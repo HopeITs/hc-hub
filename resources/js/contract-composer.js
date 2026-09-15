@@ -213,9 +213,10 @@ document.addEventListener('alpine:init', () => {
         terminationReasons: config.terminationReasons ?? [],
         // Create renders four sections; edit adds `termination` on the end.
         sections: config.sections ?? ['assignment', 'contract', 'schedule', 'pay'],
-        // Only create insists on work days: contracts imported before the field
-        // existed have none, and editing one must not be blocked on that.
-        requireWorkDays: config.requireWorkDays ?? true,
+        // Sunday(0)..Saturday(6), localized — built from the day range picker's
+        // own options, reused here so the schedule summary can read "Sunday to
+        // Thursday" instead of the day numbers.
+        dayNames: config.dayNames ?? {},
 
         // ---- assignment
         // config.seed is present when this page opened on an existing contract
@@ -231,18 +232,59 @@ document.addEventListener('alpine:init', () => {
         },
         options: { employees: [], programs: [], centers: [], positions: [] },
 
+        // Set when the selected employee's most recent contract is a draft
+        // (type = Draft, created from the employee-create screen's
+        // position-reservation step) — submit() then upgrades that exact row
+        // instead of inserting a new one. See checkForDraftContract(). Only
+        // the create screen's component exposes the method this checks —
+        // an edit is always about a contract that already exists.
+        allowDraftUpgrade: config.allowDraftUpgrade ?? true,
+        draftContractId: null,
+
         // ---- contract
         startDate: config.seed?.startDate ?? '',
         endDate: config.seed?.endDate ?? '',
+        type: str(config.seed?.type ?? '1'),
+        place: str(config.seed?.place ?? '1'),
 
         // ---- schedule
+        // 1 = fixed, 2 = flexible (App\Enums\ScheduleMode). weeklyHours below
+        // is a computed getter, not a field anyone writes to directly — see it
+        // for how each mode arrives at a number.
+        scheduleMode: str(config.seed?.scheduleMode ?? '1'),
+        // A contract from before this field existed has neither a day range
+        // nor flex hours to compute from — its own stored figure is the only
+        // fallback until someone actually edits the schedule (see the
+        // weeklyHours getter).
+        initialWeeklyHours: config.seed ? Number(config.seed.weeklyHours) || 0 : 0,
+
+        // -- fixed mode
         workHoursFrom: config.seed?.workHoursFrom ?? '09:00',
         workHoursTo: config.seed?.workHoursTo ?? '17:00',
-        weeklyHours: config.seed ? str(config.seed.weeklyHours) : '40',
-        // Free text in both languages — "Monday to Friday", not a row of seven
-        // toggles. It is what the contract PDF prints, verbatim.
-        workDaysEn: config.seed?.workDaysEn ?? '',
-        workDaysAr: config.seed?.workDaysAr ?? '',
+        // Optional second daily shift, e.g. 9:00-13:00 and 17:00-21:00. Both
+        // empty, or both set — see hasSecondShift()/toggleSecondShift().
+        workHours2From: config.seed?.workHours2From ?? '',
+        workHours2To: config.seed?.workHours2To ?? '',
+        workDayFrom: config.seed?.workDayFrom != null ? str(config.seed.workDayFrom) : '',
+        workDayTo: config.seed?.workDayTo != null ? str(config.seed.workDayTo) : '',
+        // Whether the printed contract states the two computed sentences below
+        // — never edited directly, only ever toggled.
+        showDaysPerWeek: Boolean(config.seed?.showDaysPerWeek),
+        showHoursPerWeek: Boolean(config.seed?.showHoursPerWeek),
+
+        // -- flexible mode — up to 5 independent, combinable boxes plus one
+        // free-text fallback in both languages.
+        flexDaysPerWeek: config.seed?.flexDaysPerWeek != null ? str(config.seed.flexDaysPerWeek) : '',
+        flexHoursPerWeek: config.seed?.flexHoursPerWeek != null ? str(config.seed.flexHoursPerWeek) : '',
+        flexHoursPerMonth: config.seed?.flexHoursPerMonth != null ? str(config.seed.flexHoursPerMonth) : '',
+        flexVariesByRequirements: Boolean(config.seed?.flexVariesByRequirements),
+        flexCoordinatedWithManager: Boolean(config.seed?.flexCoordinatedWithManager),
+        flexCustomEn: config.seed?.flexCustomEn ?? '',
+        flexCustomAr: config.seed?.flexCustomAr ?? '',
+        // Unlike the numeric boxes above, free text has no non-empty "starting
+        // value" to seed — so this is a real flag, not a value-presence
+        // getter/setter, and initialize() clears the text when it goes off.
+        flexCustomOn: Boolean(config.seed?.flexCustomEn || config.seed?.flexCustomAr),
         showNotes: Boolean(config.seed?.attendingNotesEn || config.seed?.attendingNotesAr),
         attendingNotesEn: config.seed?.attendingNotesEn ?? '',
         attendingNotesAr: config.seed?.attendingNotesAr ?? '',
@@ -279,7 +321,14 @@ document.addEventListener('alpine:init', () => {
             this.$watch('selected.city', () => this.syncing || this.loadCityOptions(true));
             this.$watch('selected.program', () => this.syncing || this.onProgramChange());
             this.$watch('selected.center', () => this.syncing || this.onCenterChange());
+            this.$watch('selected.employee', () => this.syncing || this.checkForDraftContract());
             this.$watch('leaveInputs', () => this.scheduleLeavePreview());
+            this.$watch('flexCustomOn', (on) => {
+                if (!on) {
+                    this.flexCustomEn = '';
+                    this.flexCustomAr = '';
+                }
+            });
 
             if (this.selected.city) {
                 this.loadCityOptions(false);
@@ -311,13 +360,28 @@ document.addEventListener('alpine:init', () => {
         },
 
         get contractValid() {
-            return Boolean(this.selected.contractType && this.startDate && this.endDate
+            return Boolean(this.selected.contractType && this.type && this.place
+                && this.startDate && this.endDate
                 && this.endDate >= this.startDate && !this.endDateTooFar);
         },
 
         get scheduleValid() {
-            if (this.requireWorkDays && (this.workDaysEn.trim() === '' || this.workDaysAr.trim() === '')) {
-                return false;
+            if (this.scheduleMode === '1') {
+                if (this.workDayFrom === '' || this.workDayTo === '' || Number(this.workDayTo) < Number(this.workDayFrom)) {
+                    return false;
+                }
+
+                if (this.hasSecondShift() && !(this.workHours2From && this.workHours2To && this.workHours2To > this.workHours2From)) {
+                    return false;
+                }
+            }
+
+            // A service contract is the one category LeaveBalanceService
+            // exempts from leave entitlement entirely, so "varies" /
+            // "coordinated with manager" / free text with no explicit number
+            // is fine there — everywhere else needs an actual weekly figure.
+            if (this.selectedType?.category === 'service') {
+                return true;
             }
 
             return Number(this.weeklyHours) >= 1;
@@ -490,9 +554,52 @@ document.addEventListener('alpine:init', () => {
             this.loadCityOptions(true);
         },
 
+        /**
+         * Auto-fills program/center/position from the selected employee's
+         * draft contract, if their most recently created contract is one.
+         * Fields set here stay user-editable afterwards, same as a renewal's
+         * seed — this only saves re-entering what the employee-create screen
+         * already captured, it does not lock anything in.
+         */
+        async checkForDraftContract() {
+            const employeeId = Number(this.selected.employee);
+
+            if (!this.allowDraftUpgrade || !Number.isInteger(employeeId) || employeeId < 1) {
+                this.draftContractId = null;
+
+                return;
+            }
+
+            const draft = await this.$wire.draftContractFor(employeeId);
+
+            if (!draft) {
+                this.draftContractId = null;
+
+                return;
+            }
+
+            this.draftContractId = draft.draftContractId;
+
+            await this.withSync(() => {
+                this.selected.program = str(draft.programId ?? '');
+                this.selected.center = draft.centerId != null ? str(draft.centerId) : CITY_LEVEL;
+                this.selected.position = str(draft.positionId ?? '');
+            });
+        },
+
         onProgramChange() {
-            this.selected.center = ALL_CENTERS;
+            // Study Zone positions are city-level by data, not by a center
+            // choice someone forgot to make — there is nothing to pick, so
+            // land on "city-level" directly instead of "all centers".
+            this.selected.center = this.isStudyZoneProgram ? CITY_LEVEL : ALL_CENTERS;
             this.selected.position = '';
+        },
+
+        /** Whether the selected program is Study Zone (slug 'SZ') — the one program whose positions never sit under a center. */
+        get isStudyZoneProgram() {
+            const program = this.options.programs.find((p) => str(p.value) === this.selected.program);
+
+            return program?.slug === 'SZ';
         },
 
         onCenterChange() {
@@ -611,6 +718,15 @@ document.addEventListener('alpine:init', () => {
                 this.startDate = defaults.start;
                 this.endDate = defaults.end;
                 this.flashDates();
+
+                // Full/Part time only make sense for a volunteer or trial
+                // contract; Freelance only for a service one — switching
+                // category must not leave a now-invalid type selected.
+                if (defaults.category === 'service') {
+                    this.type = '3'; // Freelance
+                } else if (this.type === '3') {
+                    this.type = '1'; // Full Time
+                }
             }
         },
 
@@ -682,6 +798,156 @@ document.addEventListener('alpine:init', () => {
 
             return `${total} ${total === 1 ? this.labels.month : this.labels.months}`;
         },
+
+        // =============================================================
+        // Schedule
+        // =============================================================
+
+        /** Hours between two 'HH:MM' strings, or 0 if either is missing/inverted. */
+        hoursBetween(from, to) {
+            if (!from || !to) {
+                return 0;
+            }
+
+            const [fromHours, fromMinutes] = from.split(':').map(Number);
+            const [toHours, toMinutes] = to.split(':').map(Number);
+            const minutes = (toHours * 60 + toMinutes) - (fromHours * 60 + fromMinutes);
+
+            return minutes > 0 ? minutes / 60 : 0;
+        },
+
+        hasSecondShift() {
+            return Boolean(this.workHours2From || this.workHours2To);
+        },
+
+        toggleSecondShift(checked) {
+            if (!checked) {
+                this.workHours2From = '';
+                this.workHours2To = '';
+
+                return;
+            }
+
+            // A sensible starting point for the second shift, distinct from
+            // the first — the user is expected to adjust it.
+            this.workHours2From = this.workHours2From || '17:00';
+            this.workHours2To = this.workHours2To || '21:00';
+        },
+
+        /** Whole days in the fixed day range (no week-wrap: to must be >= from). */
+        get fixedDaysPerWeek() {
+            const from = Number(this.workDayFrom);
+            const to = Number(this.workDayTo);
+
+            if (this.workDayFrom === '' || this.workDayTo === '' || to < from) {
+                return 0;
+            }
+
+            return to - from + 1;
+        },
+
+        /** Hours in one working day under fixed mode — both shifts combined. */
+        get fixedHoursPerDay() {
+            return this.hoursBetween(this.workHoursFrom, this.workHoursTo)
+                + this.hoursBetween(this.workHours2From, this.workHours2To);
+        },
+
+        /**
+         * "Sunday to Thursday" — built from the day range, in the viewer's own
+         * locale, rather than typed in as free text (superseded: work days
+         * used to be a separate bilingual text box, replaced by this once the
+         * structured day range covered the same ground).
+         */
+        get fixedDayRangeLabel() {
+            if (this.workDayFrom === '' || this.workDayTo === '') {
+                return '';
+            }
+
+            const from = this.dayNames[this.workDayFrom] ?? '';
+
+            if (this.workDayFrom === this.workDayTo) {
+                return from;
+            }
+
+            const to = this.dayNames[this.workDayTo] ?? '';
+
+            return this.fill(this.labels.dayRange, { from, to });
+        },
+
+        /**
+         * The single source of truth for weekly_hours — LeaveBalanceService's
+         * real entitlement engine — computed, never typed in directly. Fixed
+         * mode derives it from the day/hour ranges above; flexible mode takes
+         * whatever was typed into the "hours/week" box (0 if that box is off,
+         * which is only valid for a service-category contract — scheduleValid
+         * enforces that, not this getter).
+         *
+         * A contract seeded from one that predates the day-range fields (no
+         * work_day_from/to, no flex hours) has nothing to compute from yet —
+         * falling straight to 0 would silently zero out a real, already-valid
+         * figure the moment its renewal or edit screen opens, before anyone
+         * touched anything. Its own stored weekly_hours is the fallback until
+         * the day range (or flex box) is actually filled in.
+         */
+        get weeklyHours() {
+            if (this.scheduleMode === '1') {
+                if (this.workDayFrom === '' && this.workDayTo === '') {
+                    return this.initialWeeklyHours;
+                }
+
+                return Math.round(this.fixedDaysPerWeek * this.fixedHoursPerDay * 100) / 100;
+            }
+
+            if (this.flexHoursPerWeek === '') {
+                return this.initialWeeklyHours;
+            }
+
+            return Number(this.flexHoursPerWeek) || 0;
+        },
+
+        /** "N days/week" — shown next to its own checkbox, fixed mode only. */
+        get fixedDaysPerWeekLabel() {
+            return this.fill(this.labels.daysPerWeek, { count: this.fixedDaysPerWeek });
+        },
+
+        /** "M hours/week" — shown next to its own checkbox, fixed mode only. */
+        get fixedHoursPerWeekLabel() {
+            return this.fill(this.labels.hoursPerWeek, { count: this.weeklyHours });
+        },
+
+        /** The always-visible read-only summary, e.g. "40 h/week" — both modes. */
+        get weeklyHoursSummary() {
+            return this.fill(this.labels.weeklyHoursValue, { count: this.weeklyHours });
+        },
+
+        /**
+         * Each numeric flex box is really a checkbox with a number attached:
+         * the getter/setter pair lets its own checkbox's x-model read "is a
+         * value set" and write "clear it" / "give it a starting value" in one
+         * place, instead of tracking a second on/off flag that could drift
+         * out of sync with whether the field is actually empty.
+         */
+        get flexDaysPerWeekOn() {
+            return this.flexDaysPerWeek !== '';
+        },
+        set flexDaysPerWeekOn(checked) {
+            this.flexDaysPerWeek = checked ? (this.flexDaysPerWeek || '5') : '';
+        },
+
+        get flexHoursPerWeekOn() {
+            return this.flexHoursPerWeek !== '';
+        },
+        set flexHoursPerWeekOn(checked) {
+            this.flexHoursPerWeek = checked ? (this.flexHoursPerWeek || '40') : '';
+        },
+
+        get flexHoursPerMonthOn() {
+            return this.flexHoursPerMonth !== '';
+        },
+        set flexHoursPerMonthOn(checked) {
+            this.flexHoursPerMonth = checked ? (this.flexHoursPerMonth || '60') : '';
+        },
+
 
         // =============================================================
         // Termination — rendered by the edit screen only.
@@ -788,6 +1054,11 @@ document.addEventListener('alpine:init', () => {
             return endsAt ? this.fill(this.labels.duplicate, { date: this.formatDate(endsAt) }) : '';
         },
 
+        /** Non-empty once checkForDraftContract() finds this employee already has a reserved position. */
+        get draftContractNotice() {
+            return this.draftContractId ? this.labels.draftFound : '';
+        },
+
         get capacityBar() {
             const capacity = this.capacity;
 
@@ -831,10 +1102,19 @@ document.addEventListener('alpine:init', () => {
         },
 
         get scheduleSummary() {
-            const days = this.locale === 'ar' ? this.workDaysAr : this.workDaysEn;
+            const hours = this.weeklyHours > 0 ? `${this.weeklyHours} h` : '';
 
-            return [days, `${this.workHoursFrom}–${this.workHoursTo}`, `${this.weeklyHours} h`]
-                .filter(Boolean).join(' · ');
+            if (this.scheduleMode === '1') {
+                let hoursRange = `${this.workHoursFrom}–${this.workHoursTo}`;
+
+                if (this.hasSecondShift()) {
+                    hoursRange += `, ${this.workHours2From}–${this.workHours2To}`;
+                }
+
+                return [this.fixedDayRangeLabel, hoursRange, hours].filter(Boolean).join(' · ');
+            }
+
+            return [hours || this.labels.flexible].filter(Boolean).join(' · ');
         },
 
         get terminationSummary() {
@@ -886,7 +1166,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         get cardWorkDays() {
-            return (this.locale === 'ar' ? this.workDaysAr : this.workDaysEn) || this.labels.empty;
+            return (this.scheduleMode === '1' ? this.fixedDayRangeLabel : '') || this.labels.empty;
         },
 
         get cardHours() {
@@ -957,14 +1237,29 @@ document.addEventListener('alpine:init', () => {
                     programId: this.selected.program,
                     centerId: this.selected.center === ALL_CENTERS ? '' : this.selected.center,
                     positionId: this.selected.position,
+                    draftContractId: this.draftContractId,
                     contractTypeId: this.selected.contractType,
+                    type: this.type,
+                    place: this.place,
                     startDate: this.startDate,
                     endDate: this.endDate,
+                    scheduleMode: this.scheduleMode,
                     workHoursFrom: this.workHoursFrom,
                     workHoursTo: this.workHoursTo,
+                    workHours2From: this.workHours2From,
+                    workHours2To: this.workHours2To,
+                    workDayFrom: this.workDayFrom,
+                    workDayTo: this.workDayTo,
+                    showDaysPerWeek: this.showDaysPerWeek,
+                    showHoursPerWeek: this.showHoursPerWeek,
+                    flexDaysPerWeek: this.flexDaysPerWeek,
+                    flexHoursPerWeek: this.flexHoursPerWeek,
+                    flexHoursPerMonth: this.flexHoursPerMonth,
+                    flexVariesByRequirements: this.flexVariesByRequirements,
+                    flexCoordinatedWithManager: this.flexCoordinatedWithManager,
+                    flexCustomEn: this.flexCustomEn,
+                    flexCustomAr: this.flexCustomAr,
                     weeklyHours: this.weeklyHours,
-                    workDaysEn: this.workDaysEn,
-                    workDaysAr: this.workDaysAr,
                     attendingNotesEn: this.attendingNotesEn,
                     attendingNotesAr: this.attendingNotesAr,
                     salary: this.salary,

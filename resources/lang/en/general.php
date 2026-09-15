@@ -770,18 +770,33 @@ return [
         'no-seats-left' => ':taken of :max filled · no seats left',
         'duplicate-contract' => 'Already has an active contract ending :date. Creating this one will not close it.',
         'duplicate-short' => 'Active',
+        'draft-found' => 'This volunteer already has a reserved position — the fields below were filled in from it, and saving will complete that same contract instead of creating a new one.',
 
         'max-end-date' => 'At most one year after the start date.',
         'end-date-too-far' => 'The end date cannot be more than a year after the start date.',
         'runs-to' => 'runs to :date',
         'lasts-months' => ':count months',
 
-        // Both fields hold the phrase the contract PDF prints verbatim, so each
-        // placeholder is written in its own field's language rather than the
-        // interface's — the AR field is Arabic even on the English screen.
-        'work-days-placeholder-en' => 'From Monday to Friday',
-        'work-days-placeholder-ar' => 'من الاثنين إلى الجمعة',
         'add-notes' => 'Add attending notes',
+
+        'schedule-mode' => 'Schedule',
+        'add-second-shift' => 'Add a second shift',
+        'second-shift' => 'Second shift',
+        'remove-second-shift' => 'Remove',
+        'work-day-from' => 'From day',
+        'work-day-to' => 'To day',
+        'day-range' => ':from to :to',
+        'days-per-week' => 'State ":count days/week" on the printed contract',
+        'hours-per-week' => 'State ":count hours/week" on the printed contract',
+        'weekly-hours-value' => ':count h/week',
+        'schedule-flexible' => 'Flexible',
+        'schedule-flexible-hint' => 'Tick whichever of the following apply. They can be combined.',
+        'flex-days-per-week' => 'Days per week',
+        'flex-hours-per-week' => 'Hours per week',
+        'flex-hours-per-month' => 'Hours per month',
+        'flex-varies-by-requirements' => 'Varies according to work requirements',
+        'flex-coordinated-with-manager' => 'Coordinated with the direct manager',
+        'flex-custom' => 'Custom description',
         'capacity-empty' => 'Pick a position to see its seats',
         'card-position' => 'Position',
         'card-center' => 'Center',
@@ -833,4 +848,9 @@ return [
     'current-period' => 'Current Period',
     'new-period' => 'New Period',
     'renew-explanation' => 'Renew As Is creates an identical contract for the new period. Renew with Edit opens the full form so you can change any detail before saving.',
+
+    'assign-position-draft' => 'Assign a Position (Optional)',
+    'assign-position-draft-description' => 'You can reserve a position for this employee now and finish their contract later, or skip this and add a contract whenever you are ready.',
+    'create-draft-and-continue' => 'Reserve Position & Continue',
+    'skip-for-now' => 'Skip for Now',
 ];

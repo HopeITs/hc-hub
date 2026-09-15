@@ -58,7 +58,7 @@ trait ResolvesContractLocationOptions
         $positions = Position::query()
             ->inCity($cityId)
             ->with([
-                'program:id,name',
+                'program:id,name,slug',
                 'center' => fn ($query) => $query->select('id', 'city_id', $centerNameColumn),
             ])
             ->select('id', 'program_id', 'center_id', 'city_id', 'max_emp', 'exist_emp', $positionTitleColumn)
@@ -93,6 +93,9 @@ trait ResolvesContractLocationOptions
                 ->map(fn (Position $position) => [
                     'value' => $position->program_id,
                     'label' => $position->program->name,
+                    // 'SZ' is the Study Zone program's actual data — see
+                    // contract-composer.js::isStudyZoneProgram.
+                    'slug' => $position->program->slug,
                 ])
                 ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
                 ->values()
@@ -201,9 +204,7 @@ trait ResolvesContractLocationOptions
 
     private function getContractTypes(string $col): Collection
     {
-        // `type` and `place` are already stored on every row but were never
-        // displayed; the create screen surfaces them as badges on the type cards.
-        return ContractType::select('id', 'type', 'place', $col)
+        return ContractType::select('id', $col)
             ->orderBy($col)
             ->get()
             ->each(fn (ContractType $t) => $t->name = $t->{$col});

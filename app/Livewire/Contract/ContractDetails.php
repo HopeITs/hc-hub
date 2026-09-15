@@ -46,7 +46,7 @@ class ContractDetails extends Component
 
         // 🔒 Safe category resolution (no crashes if contractType is null or misconfigured)
         $category = $contract->contractType->category
-            ?? match ((int) ($contract->contractType->type ?? $contract->contract_type_id ?? 0)) {
+            ?? match ((int) ($contract->type ?? $contract->contract_type_id ?? 0)) {
                 2 => 'trial',
                 3 => 'service',
                 default => 'annual',

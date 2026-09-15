@@ -770,17 +770,33 @@ return [
         'no-seats-left' => ':taken من :max مشغولة · لا شواغر',
         'duplicate-contract' => 'لديه عقد ساري ينتهي في :date. إنشاء هذا العقد لن يُنهي العقد السابق.',
         'duplicate-short' => 'ساري',
+        'draft-found' => 'لهذا المتطوع منصب محجوز مسبقًا — تمت تعبئة الحقول أدناه منه، وسيُكمل الحفظ نفس هذا العقد بدل إنشاء عقد جديد.',
 
         'max-end-date' => 'سنة واحدة كحد أقصى بعد تاريخ البداية.',
         'end-date-too-far' => 'لا يمكن أن يتجاوز تاريخ النهاية سنة من تاريخ البداية.',
         'runs-to' => 'حتى :date',
         'lasts-months' => ':count أشهر',
 
-        // الحقلان يُطبعان كما هما في العقد، لذلك يُكتب كل مثال بلغة حقله
-        // لا بلغة الواجهة.
-        'work-days-placeholder-en' => 'From Monday to Friday',
-        'work-days-placeholder-ar' => 'من الاثنين إلى الجمعة',
         'add-notes' => 'إضافة ملاحظات الدوام',
+
+        'schedule-mode' => 'نوع الدوام',
+        'add-second-shift' => 'إضافة فترة ثانية',
+        'second-shift' => 'الفترة الثانية',
+        'remove-second-shift' => 'إزالة',
+        'work-day-from' => 'من يوم',
+        'work-day-to' => 'إلى يوم',
+        'day-range' => 'من :from إلى :to',
+        'days-per-week' => 'ذكر ":count يوم أسبوعيًا" في العقد المطبوع',
+        'hours-per-week' => 'ذكر ":count ساعة أسبوعيًا" في العقد المطبوع',
+        'weekly-hours-value' => ':count ساعة/أسبوعيًا',
+        'schedule-flexible' => 'مرن',
+        'schedule-flexible-hint' => 'حدّد ما ينطبق مما يلي. يمكن الجمع بين أكثر من خيار.',
+        'flex-days-per-week' => 'عدد الأيام أسبوعيًا',
+        'flex-hours-per-week' => 'عدد الساعات أسبوعيًا',
+        'flex-hours-per-month' => 'عدد الساعات شهريًا',
+        'flex-varies-by-requirements' => 'تتغير بحسب متطلبات العمل',
+        'flex-coordinated-with-manager' => 'تُحدَّد بالتنسيق مع المدير المباشر',
+        'flex-custom' => 'وصف مخصص',
         'capacity-empty' => 'اختر مسمى وظيفياً لعرض الشواغر',
         'card-position' => 'المسمى الوظيفي',
         'card-center' => 'المركز',
@@ -832,4 +848,9 @@ return [
     'current-period' => 'الفترة الحالية',
     'new-period' => 'الفترة الجديدة',
     'renew-explanation' => 'التجديد كما هو ينشئ عقداً مطابقاً للفترة الجديدة. التجديد مع تعديل يفتح النموذج كاملاً لتعديل أي تفصيل قبل الحفظ.',
+
+    'assign-position-draft' => 'تعيين منصب (اختياري)',
+    'assign-position-draft-description' => 'يمكنك حجز منصب لهذا الموظف الآن وإكمال عقده لاحقًا، أو تخطي هذه الخطوة وإضافة عقد عندما تكون جاهزًا.',
+    'create-draft-and-continue' => 'حجز المنصب والمتابعة',
+    'skip-for-now' => 'تخطي الآن',
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Contract\Concerns;
 
+use App\Enums\ScheduleMode;
 use App\Livewire\Forms\ContractForm;
 use App\Models\Contract;
 use App\Models\Employee;
@@ -128,8 +129,6 @@ trait DrivesContractComposer
                 return (object) [
                     'id' => $type->id,
                     'name' => $type->name,
-                    'type' => (int) $type->type,
-                    'place' => (int) $type->place,
                     'category' => $categories[$type->id] ?? 'annual',
                     'startDate' => $this->form->start_date,
                     'endDate' => $this->form->end_date,
@@ -160,13 +159,27 @@ trait DrivesContractComposer
             'employeeId' => $this->form->employee_id,
             'positionId' => $this->form->position_id,
             'contractTypeId' => $this->form->contract_type_id,
+            'type' => $this->form->type,
+            'place' => $this->form->place,
             'startDate' => $this->form->start_date,
             'endDate' => $this->form->end_date,
+            'scheduleMode' => $this->form->schedule_mode,
             'workHoursFrom' => $this->form->work_hours_from,
             'workHoursTo' => $this->form->work_hours_to,
+            'workHours2From' => $this->form->work_hours_2_from,
+            'workHours2To' => $this->form->work_hours_2_to,
+            'workDayFrom' => $this->form->work_day_from,
+            'workDayTo' => $this->form->work_day_to,
+            'showDaysPerWeek' => $this->form->show_days_per_week,
+            'showHoursPerWeek' => $this->form->show_hours_per_week,
+            'flexDaysPerWeek' => $this->form->flex_days_per_week,
+            'flexHoursPerWeek' => $this->form->flex_hours_per_week,
+            'flexHoursPerMonth' => $this->form->flex_hours_per_month,
+            'flexVariesByRequirements' => $this->form->flex_varies_by_requirements,
+            'flexCoordinatedWithManager' => $this->form->flex_coordinated_with_manager,
+            'flexCustomEn' => $this->form->flex_custom_en,
+            'flexCustomAr' => $this->form->flex_custom_ar,
             'weeklyHours' => $this->form->weekly_hours,
-            'workDaysEn' => $this->form->work_days_en,
-            'workDaysAr' => $this->form->work_days_ar,
             'attendingNotesEn' => $this->form->attending_notes_en,
             'attendingNotesAr' => $this->form->attending_notes_ar,
             'salary' => $this->form->salary,
@@ -189,18 +202,41 @@ trait DrivesContractComposer
         // and — as a side effect of the type change — the default dates.
         $this->applyIdentitySelection($payload);
 
+        $this->form->type = (int) ($payload['type'] ?? 1);
+        $this->form->place = (int) ($payload['place'] ?? 1);
+
         // ...which the dates the user actually chose then override.
         $this->form->start_date = $this->dateOrNull($payload['startDate'] ?? null);
         $this->form->end_date = $this->dateOrNull($payload['endDate'] ?? null);
 
-        $this->form->work_hours_from = $this->timeOrNull($payload['workHoursFrom'] ?? null);
-        $this->form->work_hours_to = $this->timeOrNull($payload['workHoursTo'] ?? null);
         $this->form->weekly_hours = max(0, (int) ($payload['weeklyHours'] ?? 0));
 
-        $this->form->work_days_en = $this->textOrNull($payload['workDaysEn'] ?? null);
-        $this->form->work_days_ar = $this->textOrNull($payload['workDaysAr'] ?? null);
+        // work_days_en/ar are deliberately left untouched here: the composer no
+        // longer collects them (superseded by the structured day range and
+        // flex checkboxes), but an edit/renewal must not wipe out whatever an
+        // older contract already has stored — fillFromModel() already loaded
+        // it, and this is the only path that writes the form back to the DB.
         $this->form->attending_notes_en = $this->textOrNull($payload['attendingNotesEn'] ?? null);
         $this->form->attending_notes_ar = $this->textOrNull($payload['attendingNotesAr'] ?? null);
+
+        $this->form->schedule_mode = (int) ($payload['scheduleMode'] ?? ScheduleMode::Fixed);
+
+        $this->form->work_hours_from = $this->timeOrNull($payload['workHoursFrom'] ?? null);
+        $this->form->work_hours_to = $this->timeOrNull($payload['workHoursTo'] ?? null);
+        $this->form->work_hours_2_from = $this->timeOrNull($payload['workHours2From'] ?? null);
+        $this->form->work_hours_2_to = $this->timeOrNull($payload['workHours2To'] ?? null);
+        $this->form->work_day_from = $this->intOrNull($payload['workDayFrom'] ?? null);
+        $this->form->work_day_to = $this->intOrNull($payload['workDayTo'] ?? null);
+        $this->form->show_days_per_week = (bool) ($payload['showDaysPerWeek'] ?? false);
+        $this->form->show_hours_per_week = (bool) ($payload['showHoursPerWeek'] ?? false);
+
+        $this->form->flex_days_per_week = $this->intOrNull($payload['flexDaysPerWeek'] ?? null);
+        $this->form->flex_hours_per_week = $this->intOrNull($payload['flexHoursPerWeek'] ?? null);
+        $this->form->flex_hours_per_month = $this->intOrNull($payload['flexHoursPerMonth'] ?? null);
+        $this->form->flex_varies_by_requirements = (bool) ($payload['flexVariesByRequirements'] ?? false);
+        $this->form->flex_coordinated_with_manager = (bool) ($payload['flexCoordinatedWithManager'] ?? false);
+        $this->form->flex_custom_en = $this->textOrNull($payload['flexCustomEn'] ?? null);
+        $this->form->flex_custom_ar = $this->textOrNull($payload['flexCustomAr'] ?? null);
 
         $this->form->currency = (int) ($payload['currency'] ?? 1);
         $this->form->salary = $payload['salary'] ?? null;
@@ -234,13 +270,23 @@ trait DrivesContractComposer
             'employee_id' => 'assignment',
             'position_id' => 'assignment',
             'contract_type_id' => 'contract',
+            'type' => 'contract',
+            'place' => 'contract',
             'start_date' => 'contract',
             'end_date' => 'contract',
             'weekly_hours' => 'schedule',
-            'work_days_en' => 'schedule',
-            'work_days_ar' => 'schedule',
+            'schedule_mode' => 'schedule',
             'work_hours_from' => 'schedule',
             'work_hours_to' => 'schedule',
+            'work_hours_2_from' => 'schedule',
+            'work_hours_2_to' => 'schedule',
+            'work_day_from' => 'schedule',
+            'work_day_to' => 'schedule',
+            'flex_days_per_week' => 'schedule',
+            'flex_hours_per_week' => 'schedule',
+            'flex_hours_per_month' => 'schedule',
+            'flex_custom_en' => 'schedule',
+            'flex_custom_ar' => 'schedule',
             'attending_notes_en' => 'schedule',
             'attending_notes_ar' => 'schedule',
             'salary' => 'pay',
@@ -273,6 +319,11 @@ trait DrivesContractComposer
         $value = is_string($value) ? trim($value) : null;
 
         return preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $value) === 1 ? $value : null;
+    }
+
+    protected function intOrNull(mixed $value): ?int
+    {
+        return is_numeric($value) ? (int) $value : null;
     }
 
     protected function timeOrNull(mixed $value): ?string
