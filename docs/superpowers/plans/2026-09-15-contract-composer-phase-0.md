@@ -956,6 +956,28 @@ git commit -m "feat(contracts): expose schedule/pay columns and pay tiers on the
 
 ---
 
+## Addendum: second fixed shift (added after this plan shipped)
+
+While reviewing the finished Phase 0 work, the user asked for one more thing the original spec
+didn't cover: a fixed schedule can run two periods in the same day (e.g. 9:00-13:00 and
+17:00-21:00), not just one continuous block. Handled as a small follow-up migration rather than
+amending Task 2's migration, since that one had already been applied to the real dev database by
+the time this came up:
+
+- `database/migrations/2026_09_15_120000_add_second_fixed_shift_to_contracts.php` — adds nullable
+  `work_hours_2_from`/`work_hours_2_to` (time) to `contracts`. A contract has a second shift only
+  when `work_hours_2_from` is set — no separate boolean flag, per the user's explicit choice.
+- `Contract::$fillable` gained both columns (no cast — matches `work_hours_from`/`work_hours_to`,
+  which also have none).
+- Tests: `tests/Feature/Migrations/AddSecondFixedShiftToContractsMigrationTest.php` (schema) and
+  two new methods in `tests/Feature/ContractScheduleAndPayColumnsTest.php` (mass-assignment +
+  optionality).
+- Commit `b679abdb`. Applied to the real dev database via `php artisan migrate --force`, verified
+  green on the full suite (306 passed, the same 2 pre-existing unrelated failures as before).
+
+Phase 3 (the schedule step UI) must render this as a second optional time-range input in fixed
+mode — see the updated note in the spec's Phase 3 section.
+
 ## Explicitly out of scope for this plan
 
 Confirmed while researching this plan, left untouched on purpose:

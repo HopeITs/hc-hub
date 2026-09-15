@@ -76,9 +76,13 @@ See `docs/superpowers/plans/2026-09-15-contract-composer-phase-0.md`.
 
 ### Phase 3 — Schedule step
 
-Fixed (time range + day range + two computed, non-editable "N days/week" / "M hours/week"
-display toggles) vs. flexible (5 independent checkboxes + one bilingual custom-text box) modes for
-`resources/views/livewire/contract/composer/_schedule.blade.php`.
+Fixed (time range + **optional second time range for a split shift, e.g. 9:00-13:00 and
+17:00-21:00** + day range + two computed, non-editable "N days/week" / "M hours/week" display
+toggles) vs. flexible (5 independent checkboxes + one bilingual custom-text box) modes for
+`resources/views/livewire/contract/composer/_schedule.blade.php`. The second shift's columns
+(`work_hours_2_from`/`work_hours_2_to`, nullable — a contract has one only when
+`work_hours_2_from` is set) were added to `contracts` in a follow-up migration after Phase 0
+shipped; see `docs/superpowers/plans/2026-09-15-contract-composer-phase-0.md`.
 
 ### Phase 4 — Pay step
 
