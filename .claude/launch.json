@@ -11,8 +11,9 @@
     {
       "name": "hc-hr (artisan serve)",
       "runtimeExecutable": "php",
-      "runtimeArgs": ["artisan", "serve", "--port=8199"],
-      "port": 8199
+      "runtimeArgs": ["artisan", "serve", "--port=8299"],
+      "port": 8299,
+      "autoPort": false
     }
   ]
 }

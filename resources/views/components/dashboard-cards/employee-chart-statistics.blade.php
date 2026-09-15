@@ -5,12 +5,15 @@
             @lang('general.employees-statistics')
         </h2>
 
-        <select
-            class="text-small border border-neutral-300 rounded-surface ps-3 pe-8 py-1.5 bg-white shadow-e1 text-neutral-700">
-            <option value="monthly">@lang('general.monthly')</option>
-            <option value="quarterly">@lang('general.quarterly')</option>
-            <option value="yearly">@lang('general.yearly')</option>
-        </select>
+        <div class="range-select-box">
+            <select
+                id="employeeChartRange"
+                class="text-small border border-neutral-300 rounded-surface ps-3 pe-8 py-1.5 bg-white shadow-e1 text-neutral-700">
+                <option value="monthly">@lang('general.monthly')</option>
+                <option value="quarterly">@lang('general.quarterly')</option>
+                <option value="yearly">@lang('general.yearly')</option>
+            </select>
+        </div>
     </div>
 
     <div class=" max-h-[125px]">
@@ -27,7 +30,14 @@
     document.addEventListener("DOMContentLoaded", async () => {
 
         const canvas = document.getElementById("employeeChart");
-        const select = document.querySelector("select");
+        const select = document.getElementById("employeeChartRange");
+        if (select && window.$ && $.fn && $.fn.select2) {
+            $(select).select2({
+                width: '150px',
+                minimumResultsForSearch: Infinity, // only 3 options — no search box
+                dir: document.documentElement.dir || 'ltr',
+            });
+        }
         if (!canvas) return;
         if (typeof Chart === "undefined") return console.error("Chart.js not loaded.");
 
@@ -181,8 +191,8 @@
 
         renderLegend(chart);
 
-        select.addEventListener("change", async e => {
-            const mode = e.target.value;
+        $(select).on("change", async function () {
+            const mode = this.value;
             const newData = await fetchData(mode);
 
             chart.data.labels = newData.labels;

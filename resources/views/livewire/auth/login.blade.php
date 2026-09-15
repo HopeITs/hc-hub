@@ -1,8 +1,12 @@
+<x-slot:title>
+    {{ __('auth.sign-in') }}
+</x-slot:title>
+
 <section class="min-h-[86.7dvh]  rtl:text-right bg-neutral-100 flex items-center justify-center px-4">
     <x-auth-card-wrapper>
 
         <div class="mb-6 text-center">
-            <x-app-logo class="mx-auto " />
+            <x-app-logo class="mx-auto w-[207px]" />
         </div>
 
         <x-auth-card class="space-y-6 w-96">

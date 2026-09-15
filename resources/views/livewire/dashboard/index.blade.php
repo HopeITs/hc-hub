@@ -13,6 +13,10 @@
         ?? '—';
 @endphp
 
+<x-slot:title>
+    {{ __('general.dashboard') }}
+</x-slot:title>
+
 @section('greeting')
     <div class="py-4 pt-24">
         <h1 class="text-secondary-dark font-semibold text-h3">

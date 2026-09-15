@@ -5,6 +5,10 @@
     $locale = $locale ?? app()->getLocale();
 @endphp
 
+<x-slot:title>
+    {{ trans_choice('general.contracts', 1) }}
+</x-slot:title>
+
 <div class="space-y-4">
     <div class="flex items-center justify-between gap-3">
         <livewire:layout.breadcrumbs

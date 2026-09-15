@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ trans_choice('general.job-level', 2) }}
+</x-slot:title>
+
 <div>
     {{-- <div class="flex justify-between">
         <livewire:layout.breadcrumbs

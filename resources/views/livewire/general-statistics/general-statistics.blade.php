@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.general-statistics') }}
+</x-slot:title>
+
 <div class="space-y-12">
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -41,6 +41,8 @@ class Contract extends Model
         'employee_id',
         'position_id',
         'contract_type_id',
+        'type',
+        'place',
         'start_date',
         'end_date',
         'termination_reason_id',
@@ -53,6 +55,8 @@ class Contract extends Model
         'work_hours_to',
         'second_shift_work_hours_from',
         'second_shift_work_hours_to',
+        'work_hours_2_from',
+        'work_hours_2_to',
         'work_days_en',
         'work_days_ar',
         'attending_notes_ar',
@@ -62,7 +66,22 @@ class Contract extends Model
         'work_days_per_week',
         'shift_type',
         'is_split_shift',
+        'schedule_mode',
+        'work_day_from',
+        'work_day_to',
+        'show_days_per_week',
+        'show_hours_per_week',
+        'flex_days_per_week',
+        'flex_hours_per_week',
+        'flex_hours_per_month',
+        'flex_varies_by_requirements',
+        'flex_coordinated_with_manager',
+        'flex_custom_en',
+        'flex_custom_ar',
+        'pay_mode',
+        'session_duration',
         'is_active',
+        'auto_renew',
     ];
 
     protected $casts = [
@@ -74,8 +93,23 @@ class Contract extends Model
         'daily_hours' => 'integer',
         'work_days_per_week' => 'integer',
         'is_split_shift' => 'boolean',
+        'type' => 'integer',
+        'place' => 'integer',
+        'schedule_mode' => 'integer',
+        'work_day_from' => 'integer',
+        'work_day_to' => 'integer',
+        'show_days_per_week' => 'boolean',
+        'show_hours_per_week' => 'boolean',
+        'flex_days_per_week' => 'integer',
+        'flex_hours_per_week' => 'integer',
+        'flex_hours_per_month' => 'integer',
+        'flex_varies_by_requirements' => 'boolean',
+        'flex_coordinated_with_manager' => 'boolean',
+        'pay_mode' => 'integer',
+        'session_duration' => 'integer',
         'currency' => 'integer',
         'salary' => 'decimal:2',
+        'auto_renew' => 'boolean',
     ];
 
     //    protected function work_days(): Attribute
@@ -182,6 +216,11 @@ class Contract extends Model
         return $this->hasMany(LeaveBalance::class, 'contract_id');
     }
 
+    public function payTiers()
+    {
+        return $this->hasMany(ContractPayTier::class)->orderBy('sort_order');
+    }
+
     /**
      * The dates a renewal of this contract should default to: it picks up the
      * day after this one ends and runs for the same number of months.
@@ -251,6 +290,8 @@ class Contract extends Model
                 'employee_id',
                 'position_id',
                 'contract_type_id',
+                'type',
+                'place',
                 'start_date',
                 'end_date',
                 'terminated_at',

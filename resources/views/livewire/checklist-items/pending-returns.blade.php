@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.pending_returns') }}
+</x-slot:title>
+
 <div class="space-y-8">
     <div class="flex justify-between items-center">
         <x-heading-label>{{ __('general.pending_return_requests') }}</x-heading-label>

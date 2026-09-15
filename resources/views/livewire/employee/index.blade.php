@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ trans_choice('general.employee', 2) }}
+</x-slot:title>
+
 <div>
     <div class="flex justify-between items-center mb-6">
         <livewire:layout.breadcrumbs :title="trans_choice('general.employee', 2)" :crumbs="[

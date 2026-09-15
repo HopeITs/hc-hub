@@ -11,9 +11,9 @@
         <x-slot:actions>
             <div class="relative w-36 shrink-0">
                 <input x-model="search" type="text" placeholder="{{ __('general.search') }}"
-                    class="h-6 w-full rounded-full border border-gray-300 bg-white py-3 pe-3 ps-8 pt-2.5 text-xs text-gray-700
+                    class="h-6 w-full rounded-full border border-gray-300 bg-white pe-3 ps-8 text-xs leading-none text-gray-700
                            placeholder-secondary-light outline-none transition focus:border-gray-400 focus:ring-0">
-                <div class="pointer-events-none absolute left-2 top-[13px] -translate-y-1/2 text-gray-400">
+                <div class="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
                     <x-icons.search class="size-2" />
                 </div>
             </div>
@@ -50,7 +50,7 @@
 
                     <!-- Avatar -->
                     <div
-                        class="flex items-center justify-center h-10 w-10 flex-shrink-0 rounded-full overflow-hidden
+                        class="flex items-center justify-center size-[34px] flex-shrink-0 rounded-full overflow-hidden
                                 bg-[var(--color-primary)] text-white font-semibold uppercase shadow-e1">
                         <img src="{{ $member->avatar_url }}"
                             alt="{{ $member->displayName ?? $member->name }}" class="object-fit w-full h-full">
@@ -58,11 +58,11 @@
 
                     <!-- Name + Position -->
                     <div class="min-w-0">
-                        <p class="text-caption font-bold text-secondary-medium truncate">
+                        <p class="text-[12.1px] font-bold text-secondary-medium truncate">
                             {{ $member->displayName ?? $member->name }}
                         </p>
 
-                        <p class="text-small font-light truncate text-secondary-light">
+                        <p class="text-[9.6px] font-light truncate text-secondary-light">
                             {{ Str::limit($memberTitle, 40) }}
                         </p>
                     </div>
@@ -94,7 +94,7 @@
 
         @empty
             <div class="flex flex-col items-center justify-center h-full text-body font-light text-secondary-light">
-                <span>@lang('general.no-available-data')</span>
+                <span class="text-[10.5px]">@lang('general.no-available-data')</span>
             </div>
         @endforelse
 

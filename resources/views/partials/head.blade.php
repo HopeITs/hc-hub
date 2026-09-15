@@ -4,7 +4,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
 
 @php
-    $pageTitle = $title ?? config('app.name');
+    $pageTitle = isset($title) ? "{$title} - " . config('app.name') : config('app.name');
     $pageDescription = $description ?? __('general.meta-description');
     $pageImage = asset('assets/img/001_HC.png');
 @endphp

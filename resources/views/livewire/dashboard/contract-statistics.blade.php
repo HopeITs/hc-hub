@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.contract-statistics') }}
+</x-slot:title>
+
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8  py-12">
 
     <div class="mb-12 ">
@@ -6,21 +10,19 @@
         </h1>
 
 
-        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-end">
+        <div class="filter-select-box grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-end">
 
         <div class="flex flex-col gap-2">
             <label class="text-small font-semibold text-secondary-dark uppercase tracking-wide">
                 {{ trans_choice('general.city', 1) }}
             </label>
 
-            <select wire:model.lazy="selectedCity"
-                    class="w-full border border-secondary-soft rounded-surface px-4 py-2
-                           text-neutral-900 bg-white focus:ring-primary focus:ring-2 transition">
+            <x-forms.select2-input wire:model.lazy="selectedCity" :hideSearch="true">
                 <option value="">{{ __('general.all') }} {{ trans_choice('general.city', 2) }}</option>
                 @foreach($cities as $city)
                     <option value="{{ $city->id }}">{{ $city->name }}</option>
                 @endforeach
-            </select>
+            </x-forms.select2-input>
         </div>
 
             <div class="flex flex-col gap-2">
@@ -28,14 +30,12 @@
                     {{ trans_choice('general.program', 1) }}
                 </label>
 
-                <select wire:model.lazy="selectedProgram"
-                        class="w-full border border-secondary-soft rounded-surface px-4 py-2
-                           text-neutral-900 bg-white focus:ring-primary focus:ring-2 transition">
+                <x-forms.select2-input wire:model.lazy="selectedProgram" :hideSearch="true">
                     <option value="">{{ __('general.all') }} {{ trans_choice('general.program', 2) }}</option>
                     @foreach($programs as $program)
                         <option value="{{ $program->id }}">{{ $program->name }}</option>
                     @endforeach
-                </select>
+                </x-forms.select2-input>
             </div>
 
             <div class="flex sm:col-span-2 lg:col-span-1 justify-start lg:justify-start">
@@ -45,7 +45,7 @@
            flex items-center justify-center"> --}}
 
               <button wire:click="resetFilters"
-                        class="px-4 py-3 text-body text-secondary-dark font-semibold border border-secondary-soft
+                        class="px-4 h-[38px] text-body text-secondary-dark font-semibold border border-secondary-soft
            rounded-surface bg-white hover:shadow-e1 cursor-pointer transition w-full sm:w-auto
            flex items-center justify-center gap-2">
 
@@ -99,7 +99,7 @@
                     </div>
 
                     <div class="text-right">
-                        <span class="inline-block px-2 py-1 text-caption font-semibold text-white rounded-control
+                        <span class="inline-block px-2 py-1 text-caption font-semibold text-white rounded-control scale-[0.8] origin-right
                                      {{ $card['color'] }}">
                             {{ $cardType === 'program'
                                 ? trans_choice('general.program', 2)

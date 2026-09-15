@@ -209,6 +209,10 @@ body {
 
     --livewire-progress-bar-color: var(--color-primary);
 
+    /* Custom overlay scrollbar (public/js/custom-scrollbar.js) */
+    --csb-color: #bcbec0;
+    --csb-hover: #a7a9ac;
+
 }
 [data-flux-field]:not(ui-radio, ui-checkbox) {
     @apply grid gap-2;
@@ -262,6 +266,24 @@ input[type="date"]::-moz-focus-inner {
 /*::-webkit-inner-spin-button,*/
 ::-webkit-clear-button {
     color: var(--color-primary);
+}
+
+/* ------------------------------------------------------------------ */
+/* Native <select> option colours (site-wide)                          */
+/* Best-effort: Firefox honours option hover; Chrome/Edge render the   */
+/* OS popup and ignore it — Select2 covers those with full control.    */
+/* Font family/size are left untouched — only colours change.          */
+/* ------------------------------------------------------------------ */
+select option {
+    background-color: #ffffff;
+    color: #58595b;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+    background-color: #58595b;
+    color: #ffffff;
 }
 
 div:where(.swal2-icon).swal2-question {
@@ -401,14 +423,91 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
     }
 
 
-    .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
-        background-color: var(--color-primary) !important;
-        color: white !important;
+    /* Result option — default (no hover): white bg, #58595b text */
+    .select2-container--default .select2-results__option {
+        background-color: #ffffff !important;
+        color: #58595b !important;
+        padding-inline-start: 12px !important; /* double the default 6px start padding */
     }
 
+    /* Hover / keyboard-highlighted option: #58595b bg, white text */
+    .select2-container--default .select2-results__option--highlighted,
+    .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+        background-color: #58595b !important;
+        color: #ffffff !important;
+    }
+
+    /* Currently-selected option (when not hovered) follows the default look */
     .select2-container--default .select2-results__option--selected {
-        background-color: #f3f4f6 !important;
-        color: #111827 !important;
+        background-color: #ffffff !important;
+        color: #58595b !important;
+    }
+
+    /* Only when the results list actually scrolls (flagged with .results--scroll
+       from app.js): shrink the hover highlight to 80% width, trimmed from the
+       scrollbar (end) side so the grey fill stops before the bar. The left/start
+       edge stays put; inline flow + dir handle RTL (scrollbar side flips too). */
+    .select2-container--default .select2-results__options.results--scroll .select2-results__option--highlighted {
+        width: 95% !important;
+    }
+
+    /* Employee-chart range select — match its Select2 box to the original native
+       look (corners, height, border, shadow). Scoped via .range-select-box so no
+       other dropdown is affected. */
+    .range-select-box .select2-container--default .select2-selection--single {
+        height: auto !important;
+        padding-block: 0.375rem !important;
+        padding-inline: 0.75rem 2rem !important;
+        border: 1px solid var(--color-neutral-300) !important;
+        border-radius: var(--radius-surface) !important;
+        box-shadow: var(--shadow-e1) !important;
+        background-color: #ffffff !important;
+        font-size: var(--text-small) !important;
+        color: var(--color-neutral-700) !important;
+    }
+
+    .range-select-box .select2-container--default .select2-selection--single .select2-selection__rendered {
+        padding: 0 !important;
+        line-height: 1.5 !important;
+        color: var(--color-neutral-700) !important;
+    }
+
+    /* Table per-page select — match its Select2 box to the original native
+       control (rounded-control corners, border, shadow). Scoped via
+       .perpage-select-box so no other dropdown is affected. */
+    .perpage-select-box .select2-container--default .select2-selection--single {
+        height: 41px !important;
+        display: flex !important;
+        align-items: center !important;
+        box-sizing: border-box !important;
+        padding-block: 0 !important;
+        padding-inline: 0.75rem 2rem !important;
+        border: 1px solid var(--color-neutral-200) !important;
+        border-radius: var(--radius-control) !important;
+        box-shadow: var(--shadow-e1) !important;
+        background-color: #ffffff !important;
+        font-size: var(--text-small) !important;
+        color: #000000 !important;
+    }
+
+    .perpage-select-box .select2-container--default .select2-selection--single .select2-selection__rendered {
+        padding: 0 !important;
+        line-height: 1.5 !important;
+        color: #000000 !important;
+    }
+
+    /* Filter selects (city/program) — match the Reset Filters button's
+       surface corner radius. Scoped via .filter-select-box. */
+    .filter-select-box .select2-container--default .select2-selection--single {
+        border-radius: var(--radius-surface) !important;
+    }
+
+    /* Calendar "today" circle — exact gradient fill from the brand asset
+       (white top-right to dark bottom-left), replacing the flat grey. */
+    .calendar-today-fill {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 38.85 38.85'%3e%3cdefs%3e%3clinearGradient id='g' x1='45.72' y1='-43.78' x2='-1.01' y2='68.54' gradientUnits='userSpaceOnUse'%3e%3cstop offset='.11' stop-color='%23fff'/%3e%3cstop offset='1' stop-color='%23231f20'/%3e%3c/linearGradient%3e%3c/defs%3e%3ccircle cx='19.43' cy='19.43' r='19.43' fill='url(%23g)'/%3e%3c/svg%3e");
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
     }
 
     .select2-container--default .select2-selection--single .select2-selection__arrow b {

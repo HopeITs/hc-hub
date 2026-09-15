@@ -1,5 +1,10 @@
 @php
     $notSpecified = __('general.not-specified');
+@endphp
+<x-slot:title>
+    {{ $employee->name }}
+</x-slot:title>
+@php
     $currency = [0 => $notSpecified, 1 => 'SYP', 2 => 'USD', 3 => 'EUR'];
     $formatDate = fn($date) => $date ? \Carbon\Carbon::parse($date)->translatedFormat('d M Y') : $notSpecified;
     $positionName = $currentPosition?->title ?? $notSpecified;

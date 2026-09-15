@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.notifications') }}
+</x-slot:title>
+
 <div class="w-8/12 mx-auto space-y-4">
     {{-- Page header --}}
     <div class="flex items-center justify-between">

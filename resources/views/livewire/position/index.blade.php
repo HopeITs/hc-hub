@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.positions') }}
+</x-slot:title>
+
 <div>
     @php
         use App\Models\Center;$center = null;

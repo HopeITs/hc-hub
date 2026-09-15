@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.default-deliverables') }}
+</x-slot:title>
+
 <div>
     @php($locale = app()->getLocale())
 

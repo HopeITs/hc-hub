@@ -27,9 +27,7 @@ class Login extends Component
 
     public function render()
     {
-        // $title / $description are read by partials/head.blade.php through the layout.
         return view('livewire.auth.login')
-            ->title(__('auth.meta-title'))
             ->layoutData(['description' => __('auth.meta-description')]);
     }
 

@@ -1,18 +1,15 @@
 <div
     class="w-full h-full bg-white rounded-surface shadow-e1 ring-1 ring-neutral-200 overflow-hidden relative flex flex-col">
     <div class="js-today-events flex h-full min-h-0 flex-col">
-        <x-dashboard-cards.card-header :title="__('general.today-events')" :count="now()->format('j/n/Y')">
-            <x-slot:icon>
-                <x-icons.event class="size-full"/>
-            </x-slot:icon>
-        </x-dashboard-cards.card-header>
+        <x-dashboard-cards.card-header :title="__('general.today-events')" :count="now()->format('j/n/Y')" />
+
         @if(count($events) > 0)
-            <div class="swiper">
+            <div class="swiper w-full flex-1 min-h-0">
                 <div class="swiper-wrapper">
 
                     @foreach($events as $event)
                         <div class="swiper-slide">
-                            <div class="relative h-[240px] flex flex-col items-center justify-center">
+                            <div class="relative h-full min-h-[240px] flex flex-col items-center justify-center">
                                 @if($event['type'] === 'birthday')
                                     {{-- Decorative celebration animation: the birthday is
                                          already stated in the text below, so an empty alt
@@ -23,7 +20,7 @@
                                          class="absolute inset-0 w-full h-full pe-2 pb-12 object-cover pointer-events-none opacity-100 z-0">
                                 @endif
 
-                                <div class="flex flex-col h-full justify-center z-30 bg-white items-center ">
+                                <div class="flex flex-col h-full w-full justify-center z-30 items-center -translate-y-[15px]">
                                     {{-- Avatar --}}
                                     @php $isDefaultIcon = str_ends_with($event['photo'], '.svg'); @endphp
                                     @if($isDefaultIcon)
@@ -37,7 +34,7 @@
                                     @endif
 
                                     {{-- Info --}}
-                                    <div class="mt-2 bg-white z-20 text-center">
+                                    <div class="mt-2 z-20 text-center w-full">
                                         <p class="font-semibold text-body mt-2 text-[#58595B]">{{ $event['name'] }}</p>
 
                                         @php
@@ -57,7 +54,7 @@
                                 {{-- Watermark --}}
                                 <img
                                     src="{{ $event['type'] === 'birthday' ? '/assets/icons/birthday-cake.svg' : '/assets/icons/event.svg' }}"
-                                    class="pointer-events-none absolute {{ $event['type'] === 'birthday' ? 'right-0 -bottom-2' : 'right-1 -bottom-3' }} w-20 h-20 opacity-10 select-none"
+                                    class="pointer-events-none absolute {{ $event['type'] === 'birthday' ? 'right-0 bottom-0' : 'right-1 -bottom-3' }} w-20 h-20 opacity-10 select-none"
                                     alt="{{ ucfirst($event['type']) }} watermark">
                             </div>
                         </div>
@@ -70,7 +67,7 @@
         @else
 
             <div class="flex flex-col items-center justify-center  text-body font-light text-secondary-light h-full">
-                <span>@lang('general.no-available-data')</span>
+                <span class="text-[10.5px]">@lang('general.no-available-data')</span>
             </div>
         @endif
     </div>

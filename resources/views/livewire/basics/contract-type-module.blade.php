@@ -1,7 +1,7 @@
-@php
-    use App\Enums\ContractPlace;
-    use App\Enums\ContractType;
-@endphp
+<x-slot:title>
+    {{ trans_choice('general.contract-type', 2) }}
+</x-slot:title>
+
 <div>
     {{-- <div class="flex justify-between">
         <livewire:layout.breadcrumbs :title="trans_choice('general.contract-type', 2)" :crumbs="[
@@ -65,43 +65,6 @@
                         <x-error-span>{{ $errors->first('item.name_' . $locale) }}</x-error-span>
                     </div>
                 @endforeach
-
-                <div>
-                    <x-forms.input-label for="type" required>@lang('general.type')</x-forms.input-label>
-                    <div class="flex space-x-2">
-                        <x-forms.radio-input id="full" name="type" value="{{ ContractType::FullTime }}"
-                            wire:model="item.type">
-                            {{ ContractType::getLocalizedName(ContractType::FullTime)['value'] }}
-                        </x-forms.radio-input>
-
-                        <x-forms.radio-input id="part" name="type" value="{{ ContractType::PartTime }}"
-                            wire:model="item.type">
-                            {{ ContractType::getLocalizedName(ContractType::PartTime)['value'] }}
-                        </x-forms.radio-input>
-
-                        <x-forms.radio-input id="freelance" name="type" value="{{ ContractType::Freelance }}"
-                            wire:model="item.type">
-                            {{ ContractType::getLocalizedName(ContractType::Freelance)['value'] }}
-                        </x-forms.radio-input>
-                    </div>
-                    <x-error-span>{{ $errors->first('item.type') }}</x-error-span>
-                </div>
-
-                <div>
-                    <x-forms.input-label for="place" required>@lang('general.place')</x-forms.input-label>
-                    <div class="flex space-x-2">
-                        <x-forms.radio-input id="onsite" name="place" value="{{ ContractPlace::Onsite }}"
-                            wire:model="item.place">
-                            {{ ContractPlace::getLocalizedName(ContractPlace::Onsite)['value'] }}
-                        </x-forms.radio-input>
-
-                        <x-forms.radio-input id="online" name="place" value="{{ ContractPlace::Online }}"
-                            wire:model="item.place">
-                            {{ ContractPlace::getLocalizedName(ContractPlace::Online)['value'] }}
-                        </x-forms.radio-input>
-                    </div>
-                    <x-error-span>{{ $errors->first('item.place') }}</x-error-span>
-                </div>
             </div>
 
             <div class="flex justify-end space-x-2">

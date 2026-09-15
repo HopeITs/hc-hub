@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.annual_leave_rules') }}
+</x-slot:title>
+
 <div>
     {{-- <div class="flex justify-between">
         <livewire:layout.breadcrumbs :title="__('general.annual_leave_rules')" :crumbs="[

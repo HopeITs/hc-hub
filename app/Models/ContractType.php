@@ -14,15 +14,8 @@ class ContractType extends Model
     use HasFactory, HasTranslation, LogsActivity;
 
     protected $fillable = [
-        'type',
-        'place',
         'name_en',
         'name_ar',
-    ];
-
-    protected $casts = [
-        'type' => 'integer',
-        'place' => 'integer',
     ];
 
     public function contracts()
@@ -42,8 +35,6 @@ class ContractType extends Model
         return LogOptions::defaults()
             ->useLogName('contract_type')
             ->logOnly([
-                'type',
-                'place',
                 'name_en',
                 'name_ar',
                 'name',

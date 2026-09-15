@@ -5,6 +5,10 @@
     $hasContactLink = $hasPhone || $hasTelegram || $hasLinkedin;
 @endphp
 
+<x-slot:title>
+    {{ $employeeName }}
+</x-slot:title>
+
 <div class="digital-id-page">
     <style>
         .digital-id-page {

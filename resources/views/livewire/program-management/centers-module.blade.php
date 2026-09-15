@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.centers') }}
+</x-slot:title>
+
 <div>
     @php($locale = app()->getLocale())
 

@@ -99,3 +99,14 @@ document.addEventListener('livewire:navigated', () => {
     initFlowbite();
     initClockTimepickers();
 });
+
+// When a Select2 dropdown opens, flag its results list with `.results--scroll`
+// only if it actually scrolls, so the hover highlight can be trimmed on the
+// scrollbar side (see `.results--scroll` rule in app.css).
+$(document).on('select2:open', function () {
+    requestAnimationFrame(function () {
+        document.querySelectorAll('.select2-results__options').forEach(function (ul) {
+            ul.classList.toggle('results--scroll', ul.scrollHeight > ul.clientHeight + 1);
+        });
+    });
+});

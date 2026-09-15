@@ -1,6 +1,10 @@
 @php
     use App\Enums\LeaveType;
 @endphp
+<x-slot:title>
+    {{ trans_choice('general.leave-type', 2) }}
+</x-slot:title>
+
 <div>
     {{-- <div class="flex justify-between">
         <livewire:layout.breadcrumbs :title="trans_choice('general.leave-type', 2)" :crumbs="[

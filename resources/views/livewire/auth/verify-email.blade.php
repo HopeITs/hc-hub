@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('Verify Email') }}
+</x-slot:title>
+
 <div class="mt-4 flex flex-col gap-6">
     <flux:text class="text-center">
         {{ __('Please verify your email address by clicking on the link we just emailed to you.') }}

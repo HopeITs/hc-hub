@@ -106,7 +106,14 @@ return [
             'toggleItemStatusConfirmed' => 'positions.update',
             'exportExcel' => 'positions.export',
         ],
-        'employee.employee-create' => ['saveInformation' => 'employees.create'],
+        'employee.employee-create' => [
+            'saveInformation' => 'employees.create',
+            'createDraftAndContinue' => 'employees.create',
+            'positionOptionsForDraft' => 'employees.create',
+            'programOptionsForDraft' => 'employees.create',
+            'citiesForDraft' => 'employees.create',
+            'canPickAnyDraftCity' => 'employees.create',
+        ],
         'employee.employee-edit' => [
             'saveChecklist' => 'employees.update',
             'saveInformation' => 'employees.update',
@@ -131,13 +138,15 @@ return [
             'toggleItemStatusConfirmed' => 'employees.update',
             'exportExcel' => 'employees.export',
         ],
-        // The composer exposes exactly three actions: one option load, one
-        // entitlement preview, and the save itself. Both screens are the same
-        // component; only the permission each one demands differs.
+        // The composer exposes one option load, one entitlement preview, and
+        // the save itself on both screens; create additionally exposes the
+        // draft-contract lookup that only makes sense when creating a new
+        // contract (see ContractCreate::draftContractFor()).
         'contract.contract-create' => [
             'submit' => 'contracts.create',
             'locationOptions' => 'contracts.create',
             'leavePreview' => 'contracts.create',
+            'draftContractFor' => 'contracts.create',
         ],
         'contract.contract-edit' => [
             'submit' => 'contracts.update',
@@ -359,7 +368,13 @@ return [
         // actions that do write are mapped to contracts.create above.
         'contract.contract-renew-modal' => ['close'],
         'dashboard.calendar-card' => ['next', 'prev'],
-        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember'],
+        // skipDraft is pure navigation (a redirect, no data read or write) and
+        // updatedDraftCityId/updatedDraftProgramId only reset the draft
+        // cascade's own in-memory selections — the same class as
+        // setActiveTab, not the mapped createDraftAndContinue/
+        // positionOptionsForDraft/programOptionsForDraft/citiesForDraft/
+        // canPickAnyDraftCity above.
+        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember', 'skipDraft', 'updatedDraftCityId', 'updatedDraftProgramId'],
         // The add*/openInitiateReturnModal methods stage rows in the in-memory
         // form object; nothing is written until the mapped save* action runs,
         // and mount() has already authorized 'update' on this employee.

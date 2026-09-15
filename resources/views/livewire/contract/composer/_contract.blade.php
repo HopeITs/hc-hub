@@ -1,3 +1,20 @@
+@php
+    use App\Enums\ContractPlace;
+    use App\Enums\ContractType as ContractTypeEnum;
+
+    // Unknown/0 is a data-migration fallback, never a real choice — both
+    // groups below list only the values a person may actually pick.
+    $typeOptions = [
+        ContractTypeEnum::FullTime => ContractTypeEnum::getLocalizedName(ContractTypeEnum::FullTime)['value'],
+        ContractTypeEnum::PartTime => ContractTypeEnum::getLocalizedName(ContractTypeEnum::PartTime)['value'],
+        ContractTypeEnum::Freelance => ContractTypeEnum::getLocalizedName(ContractTypeEnum::Freelance)['value'],
+    ];
+
+    $placeOptions = [
+        ContractPlace::Onsite => ContractPlace::getLocalizedName(ContractPlace::Onsite)['value'],
+        ContractPlace::Online => ContractPlace::getLocalizedName(ContractPlace::Online)['value'],
+    ];
+@endphp
 {{-- Section 2 — the type, and the period it implies. --}}
 <x-contract.section
     name="contract"
@@ -39,15 +56,6 @@
                             <span class="text-body font-semibold text-neutral-900">{{ $type->name }}</span>
                         </span>
 
-                        <span class="flex flex-wrap gap-1">
-                            <span class="rounded-round bg-neutral-100 px-2 py-0.5 text-caption font-medium text-secondary-dark">
-                                {{ \App\Enums\ContractType::getLocalizedName($type->type)['value'] }}
-                            </span>
-                            <span class="rounded-round bg-neutral-100 px-2 py-0.5 text-caption font-medium text-secondary-dark">
-                                {{ \App\Enums\ContractPlace::getLocalizedName($type->place)['value'] }}
-                            </span>
-                        </span>
-
                         {{-- Nested, so peer-checked: cannot reach it — bind directly. --}}
                         <span class="mt-auto text-caption font-medium"
                               x-bind:class="selected.contractType === '{{ $type->id }}'
@@ -66,6 +74,72 @@
         </div>
 
         <x-error-span>{{ $errors->first('form.contract_type_id') }}</x-error-span>
+    </div>
+
+    {{-- Type and place describe this one contract, not the category it
+         belongs to — two contracts of the same type above can still differ
+         on both. --}}
+    <div class="mt-5 grid gap-5 sm:grid-cols-2">
+        <div>
+            <x-forms.input-label required>@lang('general.type')</x-forms.input-label>
+
+            {{--
+                Full/Part time only make sense for a volunteer or trial
+                contract; a service contract is always Freelance — chooseType()
+                auto-corrects `type` the moment a card of one category or the
+                other is picked, this just keeps the now-irrelevant options off
+                screen instead of offering a choice that would fail validation.
+            --}}
+            <div x-cloak x-show="selectedType?.category !== 'service'"
+                 class="mt-1 grid grid-cols-2 gap-2" role="radiogroup" aria-label="@lang('general.type')">
+                @foreach ($typeOptions as $value => $label)
+                    @continue($value === ContractTypeEnum::Freelance)
+                    <label class="cursor-pointer">
+                        <input type="radio" class="peer sr-only" name="composer_type"
+                               value="{{ $value }}" x-model="type"/>
+                        <span class="flex min-h-[2.625rem] items-center justify-center rounded-control
+                                     border-2 border-neutral-200 bg-white px-2 py-2 text-body text-neutral-800
+                                     shadow-e1 transition
+                                     hover:border-neutral-400
+                                     peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
+                                     peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2
+                                     peer-focus-visible:outline-primary">
+                            <span class="truncate font-semibold">{{ $label }}</span>
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+
+            <div x-cloak x-show="selectedType?.category === 'service'"
+                 class="mt-1 flex min-h-[2.625rem] items-center rounded-control border-2 border-neutral-200
+                        bg-neutral-50 px-3 text-body font-semibold text-neutral-700">
+                {{ $typeOptions[ContractTypeEnum::Freelance] }}
+            </div>
+
+            <x-error-span>{{ $errors->first('form.type') }}</x-error-span>
+        </div>
+
+        <div>
+            <x-forms.input-label required>@lang('general.place')</x-forms.input-label>
+            <div class="mt-1 grid grid-cols-2 gap-2" role="radiogroup" aria-label="@lang('general.place')">
+                @foreach ($placeOptions as $value => $label)
+                    <label class="cursor-pointer">
+                        <input type="radio" class="peer sr-only" name="composer_place"
+                               value="{{ $value }}" x-model="place"/>
+                        <span class="flex min-h-[2.625rem] items-center justify-center rounded-control
+                                     border-2 border-neutral-200 bg-white px-2 py-2 text-body text-neutral-800
+                                     shadow-e1 transition
+                                     hover:border-neutral-400
+                                     peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
+                                     peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2
+                                     peer-focus-visible:outline-primary">
+                            <span class="truncate font-semibold">{{ $label }}</span>
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+            <x-error-span>{{ $errors->first('form.place') }}</x-error-span>
+        </div>
     </div>
 
     {{-- Start ─ duration ─ end, so the period reads as one thing. --}}

@@ -127,6 +127,15 @@ return [
             'max_height' => 'Image height must not exceed :val px',
         ],
 
+        'type' => [
+            'service_requires_freelance' => 'A service contract must be Freelance.',
+            'freelance_requires_service' => 'Freelance is only available for service contracts.',
+        ],
+
+        'weekly_hours' => [
+            'required_unless_service' => 'Weekly hours must be an explicit number for this contract category — complete the day/hour range, or the flexible "hours/week" box.',
+        ],
+
         'required-fields' => 'Please fill in the required fields first.',
         'adult' => 'You must be at least 16 years old.',
         'password_rule' => 'The password must be at least 8 characters and contain letters, numbers, and special characters.',

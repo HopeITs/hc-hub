@@ -1,6 +1,10 @@
 @php
     $title = __('Course Categories');
 @endphp
+<x-slot:title>
+    {{ $title }}
+</x-slot:title>
+
 <div>
     {{-- <div class="flex justify-between">
         <livewire:layout.breadcrumbs :title="$title" :crumbs="[

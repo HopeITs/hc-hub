@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.edit') }} {{ trans_choice('general.contracts', 1) }}
+</x-slot:title>
+
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
     <livewire:layout.breadcrumbs :title="__('general.edit')" :crumbs="[
         ['label' => trans_choice('general.employee-management', 2)],

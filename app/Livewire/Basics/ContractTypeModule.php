@@ -19,8 +19,6 @@ class ContractTypeModule extends Component
         'id' => null,
         'name_ar' => '',
         'name_en' => '',
-        'place' => null,
-        'type' => null,
     ];
 
     protected $listeners = ['openContractTypeEdit' => 'edit'];
@@ -37,8 +35,6 @@ class ContractTypeModule extends Component
             'id' => null,
             'name_ar' => '',
             'name_en' => '',
-            'place' => null,
-            'type' => null,
         ];
 
         $this->resetValidation();
@@ -57,8 +53,6 @@ class ContractTypeModule extends Component
             'id' => $model->id,
             'name_ar' => $model->name_ar,
             'name_en' => $model->name_en,
-            'place' => $model->place,
-            'type' => $model->type,
         ];
 
         $this->showModal = true;
@@ -108,8 +102,6 @@ class ContractTypeModule extends Component
         return [
             'item.name_ar' => 'required|string',
             'item.name_en' => 'required|string',
-            'item.place' => 'required|integer',
-            'item.type' => 'required|integer',
         ];
     }
 }

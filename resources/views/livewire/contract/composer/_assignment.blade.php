@@ -66,6 +66,18 @@
             </p>
         </template>
 
+        {{-- The employee's own draft contract is being completed in place —
+             see checkForDraftContract() / ContractCreate::resolveDraftUpgrade(). --}}
+        <template x-if="draftContractNotice">
+            <p class="flex gap-2 rounded-control border border-neutral-200 border-s-4 border-s-primary
+                      bg-neutral-50 px-3 py-2 text-small leading-relaxed text-neutral-800 md:col-span-2">
+                <svg class="mt-0.5 size-4 shrink-0 text-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path d="M10 1.5a8.5 8.5 0 100 17 8.5 8.5 0 000-17zM9 5.5h2v6H9v-6zm0 7.5h2v2H9v-2z"/>
+                </svg>
+                <span x-text="draftContractNotice"></span>
+            </p>
+        </template>
+
         {{-- Program --}}
         <div>
             {{-- Required in fact as well as in name: no program, no positions. --}}
@@ -79,8 +91,9 @@
             />
         </div>
 
-        {{-- Center --}}
-        <div>
+        {{-- Center — Study Zone positions are city-level by data, not by a
+             choice anyone makes, so there is nothing to pick here for it. --}}
+        <div x-show="!isStudyZoneProgram" x-cloak>
             <x-forms.input-label for="composer_center">{{ trans_choice('general.centers', 1) }}</x-forms.input-label>
             <x-forms.combobox
                 id="composer_center"

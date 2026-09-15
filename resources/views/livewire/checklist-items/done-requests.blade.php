@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ __('general.done_requests') }}
+</x-slot:title>
+
 <div class="space-y-8">
     <div class="flex justify-between items-center">
         <x-heading-label>{{ __('general.done_requests') }}</x-heading-label>

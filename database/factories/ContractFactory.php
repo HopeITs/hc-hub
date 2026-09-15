@@ -24,6 +24,8 @@ class ContractFactory extends Factory
             'employee_id' => Employee::factory(),
             'position_id' => Position::inRandomOrder()->first()->id ?? 1,
             'contract_type_id' => ContractType::inRandomOrder()->first()->id ?? 1,
+            'type' => $this->faker->numberBetween(1, 3), // 1=FullTime,2=PartTime,3=Freelance
+            'place' => $this->faker->numberBetween(1, 2), // 1=Onsite,2=Online
             'start_date' => $startDate,
             'end_date' => $endDate,
             'terminated_at' => null,

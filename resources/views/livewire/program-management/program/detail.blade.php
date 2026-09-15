@@ -1,3 +1,7 @@
+<x-slot:title>
+    {{ $program->name }}
+</x-slot:title>
+
 <div class="relative isolate" x-data="{ activeTab: 'details' }">
 
     <div class="space-y-12">
