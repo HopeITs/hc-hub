@@ -30,12 +30,9 @@ return [
     // contract, not the category it belongs to, so they live on `contracts`
     // rather than here — these rows are category labels only.
     'ContractType' => [
-        ['name_en' => 'Full Annual', 'name_ar' => 'سنوي كامل'],
-        ['name_en' => 'Partial Annual', 'name_ar' => 'سنوي جزئي'],
-        ['name_en' => 'Trial Full', 'name_ar' => 'تجريبي كامل'],
-        ['name_en' => 'Trial Partial', 'name_ar' => 'تجريبي جزئي'],
-        ['name_en' => 'Online Agreement', 'name_ar' => 'اتفاق اونلاين'],
-        ['name_en' => 'Service Agreement', 'name_ar' => 'اتفاق خدمة محددة'],
+        ['id' => 1, 'name_en' => 'Volunteer Contract', 'name_ar' => 'عقد تطوّع'],
+        ['id' => 3, 'name_en' => 'Trial Volunteer Contract', 'name_ar' => 'عقد تطوّع تجريبي'],
+        ['id' => 5, 'name_en' => 'Specific Voluntary Service Contract', 'name_ar' => 'عقد تقديم خدمة تطوعية محددة'],
     ],
 
     'departments' => [
