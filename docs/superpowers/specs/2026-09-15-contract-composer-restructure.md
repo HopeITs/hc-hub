@@ -103,13 +103,33 @@ the UI indicates it's mandatory. Worth a follow-up fix (either mark it required 
   `@entangle`) — the Program/Position wrapper divs now carry a `wire:key` tied to the value their
   options depend on, forcing a full remount (fresh options included) whenever that value changes.
 
-### Phase 2 — Composer step 1 (contract type + assignment)
+### Phase 2 — Composer step 1 (contract type + assignment) — DONE
 
-- 3 contract-type cards (a direct consequence of the Phase 0 consolidation).
-- The `type` (full/part/freelance) radio becomes conditional on the chosen category.
-- Selecting a volunteer with a `Draft` last contract auto-fills position/center and upgrades that
-  row in place via `ContractForm::setContract()` instead of creating a new one.
-- Study Zone program (`slug === 'SZ'`) skips center selection, relying on city-level positions.
+Commit `4c724b43`. Verified via `composer test` (352 passed, the same 2 pre-existing unrelated
+failures) and a real browser walkthrough covering all three pieces, including a full submission
+checked against the database directly (not just the redirect).
+
+- 3 contract-type cards needed no code change — a direct consequence of the Phase 0 consolidation,
+  since `contractTypeCards()` already reads whatever rows exist in `contract_types`.
+- The `type` (full/part/freelance) radio is now conditional on the chosen card's category:
+  Full/Part for volunteer and trial, Freelance only for service. `chooseType()` auto-corrects
+  `type` when the category changes; `ContractForm::typeMatchesCategoryRule()` is the matching
+  server-side check.
+- Selecting an employee whose most-recently-created contract is `type = Draft` (the employee-create
+  screen's position-reservation step) auto-fills position/program/center from it via a new
+  renderless `ContractCreate::draftContractFor()` lookup, and `submit()` re-verifies the claimed
+  draft id from scratch before calling `ContractForm::update()` on that row instead of `create()`
+  — never `setContract()` + the shared `save()` path, since `submit()` already validates once and
+  `save()` would re-validate redundantly (the comment in the original code already called this out).
+  The Phase 1 `ContractObserver` upgrade-from-draft logic claims the position seat at exactly this
+  point.
+- Study Zone program (`slug === 'SZ'`) hides the Center field entirely and lands on "city-level"
+  directly, relying on `Position::scopeInCity()`'s existing centerless-position handling.
+
+**Found via browser testing, not a code bug:** `public/build/` was a stale Vite build (~5 days
+old) that predated every JS change in this phase, so the composer's Alpine component failed to
+initialize at all — `npm run build` fixed it locally. `public/build/` is gitignored, so a real
+deploy must run its own build step to pick up `contract-composer.js`.
 
 ### Phase 3 — Schedule step
 
