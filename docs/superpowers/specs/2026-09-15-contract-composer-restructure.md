@@ -88,6 +88,21 @@ nationality fails validation with "The nationality must be an integer," even tho
 the UI indicates it's mandatory. Worth a follow-up fix (either mark it required in the UI, or add
 `nullable` to the rule) — unrelated to contracts, so left untouched here.
 
+**Follow-up refinements from user review, commits `bc07c9e3` and `f63b92e1`:**
+- `x-forms.select` themed to the brand primary color on focus instead of Tailwind's default
+  indigo (it was the one form component left un-themed; `x-forms.input`/`select-input` already
+  used primary).
+- The single flat position dropdown was replaced with a cascading City → Program → Position
+  picker using `x-forms.select2-input`, matching the rest of the app's dropdown style. City-scoped
+  HR stays locked to the employee's own city; a nationwide role (`User::activeCityId() === null`
+  — HR-SYR, super-admin, general-manager) gets an open city dropdown that includes Syria itself,
+  and can reserve a position in a city other than the employee's own. `DraftContractForm`
+  re-validates the chosen city against the acting user's own scope server-side either way.
+  Caught and fixed in browser testing: `select2-input`'s `wire:ignore` wrapper means Livewire
+  never updates its `<option>` list on an ordinary re-render, only the selected value (via Alpine
+  `@entangle`) — the Program/Position wrapper divs now carry a `wire:key` tied to the value their
+  options depend on, forcing a full remount (fresh options included) whenever that value changes.
+
 ### Phase 2 — Composer step 1 (contract type + assignment)
 
 - 3 contract-type cards (a direct consequence of the Phase 0 consolidation).
