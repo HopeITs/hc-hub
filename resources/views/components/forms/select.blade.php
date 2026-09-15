@@ -8,7 +8,7 @@
 <select
     {{ $disabled ? 'disabled' : '' }}
     {!! $attributes->merge([
-        'class' => 'border-neutral-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-control shadow-e1 w-full ' .
+        'class' => 'border-neutral-300 focus:border-primary focus:ring-secondary-light rounded-control shadow-e1 w-full ' .
                     ($invalid ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '')
     ]) !!}
 >
