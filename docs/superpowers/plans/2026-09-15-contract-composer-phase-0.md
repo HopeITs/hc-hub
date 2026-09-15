@@ -978,6 +978,31 @@ the time this came up:
 Phase 3 (the schedule step UI) must render this as a second optional time-range input in fixed
 mode — see the updated note in the spec's Phase 3 section.
 
+## Addendum: `auto_renew` (added after this plan shipped)
+
+The user also asked for a boolean marking whether a contract renews automatically at term end,
+defaulting by category rather than a single flat default: true for volunteer and service
+contracts, false for trial/probation (a trial is meant to end and be evaluated, not roll over
+silently).
+
+- `database/migrations/2026_09_15_130000_add_auto_renew_to_contracts.php` — adds `auto_renew`
+  boolean, DB-level default `true`, then backfills existing trial-category rows to `false` by
+  reading `config('contracts.map_by_id')` (not a hardcoded id list, so it keeps working if the
+  category mapping changes).
+- `Contract::$fillable`/`$casts` gained `auto_renew` (boolean cast).
+- **`ContractObserver::creating()`** now sets the category-based default whenever the caller left
+  `auto_renew` unset (`! array_key_exists('auto_renew', $contract->getAttributes())`), so every
+  creation path — forms, seeders, bulk imports, and the future composer — gets the right default
+  without each one having to remember it; an explicit value is never overridden. This runs before
+  the existing `runningInConsole()` early return, so console-created contracts (imports) get it
+  too.
+- Tests: `tests/Feature/Migrations/AddAutoRenewToContractsMigrationTest.php` (schema + backfill)
+  and `tests/Feature/ContractAutoRenewDefaultTest.php` (per-category default + explicit-value
+  override, via the observer).
+- Commit `5c7f3d76`. Applied to the real dev database; verified the backfill against the actual
+  267 contracts (176 volunteer + 67 service → `true`, 24 trial → `false`). Full suite: 314 passed,
+  same 2 pre-existing unrelated failures as before.
+
 ## Explicitly out of scope for this plan
 
 Confirmed while researching this plan, left untouched on purpose:
