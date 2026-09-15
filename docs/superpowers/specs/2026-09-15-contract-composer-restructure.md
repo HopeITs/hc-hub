@@ -54,17 +54,39 @@ See `docs/superpowers/plans/2026-09-15-contract-composer-phase-0.md`.
 - `Contract` model: fillable/casts for every new column + `payTiers(): HasMany`.
 - New `App\Models\ContractPayTier` model (bilingual `condition` via `HasTranslation`).
 
-### Phase 1 — Draft contract lifecycle
+### Phase 1 — Draft contract lifecycle — DONE
 
-- Employee-create screen: an optional step after saving personal info to pick a position (and
-  therefore its center), creating a `Contract` with `type = Draft`, the default volunteer
-  `contract_type_id`, no schedule/pay filled in, `is_active = true`.
-- `ContractObserver::creating()`/`updating()`: skip the capacity check entirely while `type` stays
-  `Draft` across the write; apply the normal capacity check (and `inc()`) when `type` transitions
-  *from* `Draft` to a real value (an "upgrade", not a renewal).
-- `LeaveBalanceService`: replace the `contract_type_id`-based trial check with a category-based
-  one — skip entirely for `type === Draft` and for `category === 'service'`; keep the existing
-  trial behavior for `category === 'trial'`.
+Commits `25a86cd6`, `0a9479b5`, `4da51037`. Verified via `composer test` (330 passed, the same 2
+pre-existing unrelated failures as Phase 0) and a real browser walkthrough (login, fill personal
+info, save, see the draft prompt, reserve a position, confirm the resulting `Contract` row and
+that `exist_emp` was untouched) — not just PHPUnit.
+
+- Employee-create screen (`EmployeeCreate.php` + new `DraftContractForm`): after saving personal
+  info, the Profile tab shows an optional "Assign a Position" prompt instead of redirecting
+  immediately. Reserving a position creates a `Contract` with `type = Draft`, the volunteer
+  (`category === 'annual'`) `contract_type_id`, no schedule/pay, `is_active = true`. Position
+  choices and their server-side validation both go through `Position::scopeInCity()`.
+  Caught in browser testing and fixed: `saveInformation()` is also reachable from the Contact
+  tab's own Save button (same Form object), but the prompt only lives in the Profile tab's view —
+  the active tab is now forced back to `information` after any save.
+- `ContractObserver::creating()`/`created()`/`updating()`/`updated()`: a draft skips the capacity
+  check entirely and does not increment `exist_emp` on creation; the write where `type` changes
+  *from* `Draft` to a real value applies the capacity check and the increment at that point,
+  treated as the contract's true first assignment.
+- `contracts.start_date`/`end_date`/`weekly_hours`/`currency` made nullable (new migration) — a
+  draft has none of these yet and they were previously `NOT NULL` with no default.
+- `LeaveBalanceService`: replaced the `contract_type_id`-based trial check with a category-based
+  one (`$contract->contractType->category`), including in `calculateExtraLeave()`'s carry-over
+  lookup. `type === Draft` and `category === 'service'` are now both fully exempt (not even
+  annual leave, fixing a real pre-existing gap for service contracts); `category === 'trial'`
+  keeps the existing behavior.
+
+**Found via browser testing, not fixed (pre-existing, out of scope):** `PersonalInfoForm`'s
+`nationality` field has no `required` marker in the UI and defaults to `null`, but is validated
+with a bare `integer` rule (no `nullable`) — so saving an employee without explicitly picking a
+nationality fails validation with "The nationality must be an integer," even though nothing in
+the UI indicates it's mandatory. Worth a follow-up fix (either mark it required in the UI, or add
+`nullable` to the rule) — unrelated to contracts, so left untouched here.
 
 ### Phase 2 — Composer step 1 (contract type + assignment)
 
