@@ -1,0 +1,58 @@
+<div dir="rtl" align="right">
+
+# موديول التوظيف — وثائق المرحلة الأولى
+
+مخرجات **المهمة 1** من خطة التنفيذ: حالات الطلب، أنواع الطلبات، قواعد الـ Workflow، ومصفوفة الصلاحيات والنطاق.
+
+**الحالة: مكتملة وجاهزة للاعتماد.** كل مخرجات المهمة الخمسة مُنجَزة، وكل معايير القبول محققة، ولا يوجد قرار تقني معلّق يمنع البدء بالمهمة 4.
+
+| الملف | المحتوى |
+|---|---|
+| [00-decisions.md](00-decisions.md) | سجل القرارات التصميمية المُلزِمة |
+| [01-request-types.md](01-request-types.md) | مصفوفة أنواع الطلبات الستة — حقولها وقواعدها وأثرها |
+| [02-state-machine.md](02-state-machine.md) | آلة الحالات: 10 حالات للطلب + 6 للحملة + جداول الانتقالات |
+| [03-workflow-rules.md](03-workflow-rules.md) | خطوات الموافقة، قواعد التوجيه، الفحوصات الستة، قواعد Revalidation |
+| [04-permissions-and-scope.md](04-permissions-and-scope.md) | الصلاحيات، مستويات النطاق، مصفوفة الدور × النطاق، حالات الاختبار |
+| [05-open-questions.md](05-open-questions.md) | الأسئلة المتبقية — لا يمنع أيٌّ منها إغلاق المهمة 1 |
+| [06-technical-contract.md](06-technical-contract.md) | قيَم الـ Enums المجمّدة · جدول الأحداث · ملف إعدادات الـ Workflow |
+
+---
+
+## حالة المطابقة مع الـ ERD
+
+> **نسخة 3** — بعد مطابقة الـ ERD الذي بناه المطور الأول. **لا يُحذف أي جدول.**
+
+### المحصلة
+
+| الإجراء | العدد | التفصيل |
+|---|---|---|
+| تبقى بلا تعديل | 15 | بما فيها جداول تعريف الـ Workflow الثلاثة و `workflow_instances` و `_instance_steps` و `recruitment_campaign_invites` |
+| تُعدَّل أعمدتها | 2 | `recruitment_requests` · `_position_details` |
+| تُضاف | 2 | `recruitment_request_events` · `recruitment_request_external_confirmations` |
+| تُحذف | 0 | — |
+
+**19 جدولاً للمرحلة الأولى** بدل 17.
+
+### قراران انعكسا لصالح الـ ERD
+
+- **`D12`** — جداول تعريف الـ Workflow الثلاثة **تبقى**. كان القرار نقل التعريف إلى ملف إعدادات، وعُدل عنه. واجهة تعديل الخطوات تتأجل للنسخة الثانية.
+- **`D16`** — **موافِق واحد لكل خطوة**. كان القرار موافقة المدير المباشر والفني معاً بالتوازي، وعُدل عنه تبسيطاً. يسقط معه `approver_slot`، و `workflow_instance_steps` صحيح كما هو.
+
+### تعديلات الأعمدة
+
+1. **`recruitment_requests`** — الحالات من 7 إلى **10** (`resubmitted` · `cancelled` · `failed_application`) + حقل `mode` + خمسة حقول توثيق لمسار `direct_hr`
+2. **`recruitment_request_position_details`** — `currency` و `salary_per` بجانب `salary_amount`
+
+> **`recruitment_workflow_instances` بلا تعديل** — أُلغيت حالة `blocked` لندرتها، وقيَم الحالة الأربع في الـ ERD مطابقة للمعتمد.
+
+### ثلاث إضافات في الـ ERD كانت ناقصة من جهتنا وتبقى
+
+`recruitment_campaign_invites` (وضع الدعوة الداخلية) · `hiring_campaigns.link_mode` و `starts_at` و `ends_at` · حقول `_position_details` المبنية على نموذج طلب استقطاب متطوع الورقي.
+
+---
+
+## الأسئلة المفتوحة
+
+ستة أسئلة في [05-open-questions.md](05-open-questions.md)، **ولا واحد منها قبل الإطلاق** — أُغلق `Q5` بخريطة إسناد HR (`D21`).
+
+</div>
