@@ -173,50 +173,6 @@
             </label>
         </div>
 
-        <div>
-            <x-forms.input-label for="composer_daily_hours" required>@lang('general.daily-hours')</x-forms.input-label>
-
-            <div class="relative">
-                <x-forms.input
-                    id="composer_daily_hours"
-                    type="number"
-                    min="1"
-                    max="24"
-                    step="1"
-                    x-model="dailyHours"
-                    x-bind:placeholder="'8'"
-                    class="pe-14"
-                />
-                <span class="pointer-events-none absolute inset-y-0 end-3 flex items-center text-small text-secondary-medium">
-                    {{ app()->getLocale() === 'ar' ? 'س/يوم' : 'h/day' }}
-                </span>
-            </div>
-
-            <x-error-span>{{ $errors->first('form.daily_hours') }}</x-error-span>
-        </div>
-
-        <div>
-            <x-forms.input-label for="composer_work_days_per_week" required>@lang('general.work-days-per-week')</x-forms.input-label>
-
-            <div class="relative">
-                <x-forms.input
-                    id="composer_work_days_per_week"
-                    type="number"
-                    min="1"
-                    max="7"
-                    step="1"
-                    x-model="workDaysPerWeek"
-                    x-bind:placeholder="'5'"
-                    class="pe-16"
-                />
-                <span class="pointer-events-none absolute inset-y-0 end-3 flex items-center text-small text-secondary-medium">
-                    {{ app()->getLocale() === 'ar' ? 'يوم/أسبوع' : 'd/week' }}
-                </span>
-            </div>
-
-            <x-error-span>{{ $errors->first('form.work_days_per_week') }}</x-error-span>
-        </div>
-
         <div x-cloak x-show="isStudyzoneProgram" x-transition>
             <x-forms.input-label for="composer_shift_type" required>@lang('general.shift-type')</x-forms.input-label>
             <div
