@@ -93,7 +93,7 @@ class ContractForm extends Form
 
     public ?int $flex_hours_per_week = null;
 
-    public ?int $flex_hours_per_day = null;
+    public ?int $flex_hours_per_month = null;
 
     public bool $flex_varies_by_requirements = false;
 
@@ -177,7 +177,7 @@ class ContractForm extends Form
         $this->show_hours_per_week = false;
         $this->flex_days_per_week = null;
         $this->flex_hours_per_week = null;
-        $this->flex_hours_per_day = null;
+        $this->flex_hours_per_month = null;
         $this->flex_varies_by_requirements = false;
         $this->flex_coordinated_with_manager = false;
         $this->flex_custom_en = null;
@@ -250,7 +250,7 @@ class ContractForm extends Form
         $this->show_hours_per_week = (bool) $contract->show_hours_per_week;
         $this->flex_days_per_week = $contract->flex_days_per_week;
         $this->flex_hours_per_week = $contract->flex_hours_per_week;
-        $this->flex_hours_per_day = $contract->flex_hours_per_day;
+        $this->flex_hours_per_month = $contract->flex_hours_per_month;
         $this->flex_varies_by_requirements = (bool) $contract->flex_varies_by_requirements;
         $this->flex_coordinated_with_manager = (bool) $contract->flex_coordinated_with_manager;
         $this->flex_custom_en = $contract->flex_custom_en;
@@ -313,7 +313,7 @@ class ContractForm extends Form
 
             'flex_days_per_week' => ['nullable', 'integer', 'between:1,7'],
             'flex_hours_per_week' => ['nullable', 'integer', 'min:1'],
-            'flex_hours_per_day' => ['nullable', 'integer', 'between:1,24'],
+            'flex_hours_per_month' => ['nullable', 'integer', 'between:1,300'],
             'flex_custom_en' => ['nullable', 'string', 'max:255'],
             'flex_custom_ar' => ['nullable', 'string', 'max:255'],
         ]);
@@ -495,7 +495,7 @@ class ContractForm extends Form
 
             'flex_days_per_week' => $isFixed ? null : $this->flex_days_per_week,
             'flex_hours_per_week' => $isFixed ? null : $this->flex_hours_per_week,
-            'flex_hours_per_day' => $isFixed ? null : $this->flex_hours_per_day,
+            'flex_hours_per_month' => $isFixed ? null : $this->flex_hours_per_month,
             'flex_varies_by_requirements' => ! $isFixed && $this->flex_varies_by_requirements,
             'flex_coordinated_with_manager' => ! $isFixed && $this->flex_coordinated_with_manager,
             'flex_custom_en' => $isFixed ? null : (filled($this->flex_custom_en) ? trim($this->flex_custom_en) : null),

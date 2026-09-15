@@ -1,16 +1,10 @@
 @php
     use App\Enums\ScheduleMode;
-    use Illuminate\Support\Js;
-
-    // Work days are demanded when a contract is written from scratch, but not
-    // when an imported one is being edited — those predate the field entirely.
-    $requireWorkDays ??= true;
 
     // work_day_from/to store Carbon's own day-of-week numbering (0 = Sunday
-    // ... 6 = Saturday), so the picker options follow it too.
-    $dayNames = collect(range(0, 6))->mapWithKeys(
-        fn (int $day) => [$day => \Carbon\Carbon::now()->startOfWeek(\Carbon\Carbon::SUNDAY)->addDays($day)->translatedFormat('l')],
-    );
+    // ... 6 = Saturday), so the picker options follow it; passed down from
+    // _screen.blade.php so the JS-side schedule summary shares the same names.
+    $dayNames ??= collect();
 
     $scheduleModeOptions = [
         ScheduleMode::Fixed => ScheduleMode::getLocalizedName(ScheduleMode::Fixed)['value'],
@@ -32,49 +26,8 @@
     :title="__('general.composer.schedule')"
     summary="scheduleSummary"
 >
-    {{--
-        Free text in both languages rather than a row of day toggles: what is
-        typed here is what the contract PDF prints, so "Monday to Friday" has to
-        survive as that phrase and not be rebuilt from a list of five names.
-    --}}
-    <div class="mt-4 grid gap-3 sm:grid-cols-2">
-        <div>
-            <x-forms.input-label for="composer_work_days_en" :required="$requireWorkDays">
-                @lang('general.work-days') (EN)
-            </x-forms.input-label>
-            <x-forms.input
-                id="composer_work_days_en"
-                type="text"
-                dir="ltr"
-                maxlength="255"
-                x-model="workDaysEn"
-                {{-- x-forms.input declares `placeholder` as a prop and drops it,
-                     so it is bound through Alpine instead of passed as one.
-                     Blade directives are left uncompiled inside a component
-                     tag's attributes, hence the echoed Js::from literal. --}}
-                x-bind:placeholder="{{ Js::from(__('general.composer.work-days-placeholder-en')) }}"
-            />
-            <x-error-span>{{ $errors->first('form.work_days_en') }}</x-error-span>
-        </div>
-
-        <div>
-            <x-forms.input-label for="composer_work_days_ar" :required="$requireWorkDays">
-                @lang('general.work-days') (AR)
-            </x-forms.input-label>
-            <x-forms.input
-                id="composer_work_days_ar"
-                type="text"
-                dir="rtl"
-                maxlength="255"
-                x-model="workDaysAr"
-                x-bind:placeholder="{{ Js::from(__('general.composer.work-days-placeholder-ar')) }}"
-            />
-            <x-error-span>{{ $errors->first('form.work_days_ar') }}</x-error-span>
-        </div>
-    </div>
-
     {{-- Fixed vs flexible — everything below changes shape with it. --}}
-    <div class="mt-5">
+    <div class="mt-4">
         <x-forms.input-label required>@lang('general.composer.schedule-mode')</x-forms.input-label>
         <div class="mt-1 grid grid-cols-2 gap-2" role="radiogroup" aria-label="@lang('general.composer.schedule-mode')">
             @foreach ($scheduleModeOptions as $value => $label)
@@ -207,15 +160,15 @@
             </div>
         </div>
 
-        {{-- Hours/day --}}
+        {{-- Hours/month — teaching-style stipends tiered by a monthly hour count. --}}
         <div class="rounded-control border border-neutral-200 p-3">
             <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
-                <x-forms.input type="checkbox" x-model="flexHoursPerDayOn" id="composer_flex_hours_day_on" />
-                @lang('general.composer.flex-hours-per-day')
+                <x-forms.input type="checkbox" x-model="flexHoursPerMonthOn" id="composer_flex_hours_month_on" />
+                @lang('general.composer.flex-hours-per-month')
             </label>
-            <div x-cloak x-show="flexHoursPerDayOn" x-collapse class="mt-2 max-w-[10rem]">
-                <x-forms.input id="composer_flex_hours_per_day" type="number" min="1" max="24" x-model="flexHoursPerDay" />
-                <x-error-span>{{ $errors->first('form.flex_hours_per_day') }}</x-error-span>
+            <div x-cloak x-show="flexHoursPerMonthOn" x-collapse class="mt-2 max-w-[10rem]">
+                <x-forms.input id="composer_flex_hours_per_month" type="number" min="1" max="300" x-model="flexHoursPerMonth" />
+                <x-error-span>{{ $errors->first('form.flex_hours_per_month') }}</x-error-span>
             </div>
         </div>
 

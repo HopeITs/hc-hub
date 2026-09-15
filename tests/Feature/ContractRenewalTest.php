@@ -298,8 +298,6 @@ class ContractRenewalTest extends TestCase
                 'workHoursFrom' => $source->work_hours_from,
                 'workHoursTo' => $source->work_hours_to,
                 'weeklyHours' => $source->weekly_hours,
-                'workDaysEn' => $source->work_days_en,
-                'workDaysAr' => $source->work_days_ar,
                 'salary' => 999,
                 'currency' => $source->currency,
                 'salaryPer' => $source->salary_per,

@@ -100,7 +100,6 @@ class ContractCreate extends Component
         try {
             $this->form->validateIdentity();
             $this->form->validateTerms();
-            $this->validateWorkDays();
             $this->form->validatePay();
         } catch (ValidationException $exception) {
             // Reopen the offending section before Livewire renders the errors.
@@ -255,27 +254,6 @@ class ContractCreate extends Component
             ->where('employee_id', $this->form->employee_id)
             ->where('type', ContractTypeEnum::Draft)
             ->first();
-    }
-
-    /**
-     * Work days are mandatory on create only.
-     *
-     * This rule cannot live in ContractForm::validateTerms(): that method is
-     * shared with ContractEdit, and contracts imported before the day picker
-     * existed have null work days that editing must not be blocked on.
-     */
-    private function validateWorkDays(): void
-    {
-        $this->validate(
-            [
-                'form.work_days_en' => ['required', 'string', 'max:255'],
-                'form.work_days_ar' => ['required', 'string', 'max:255'],
-            ],
-            attributes: [
-                'form.work_days_en' => __('general.work-days').' (EN)',
-                'form.work_days_ar' => __('general.work-days').' (AR)',
-            ],
-        );
     }
 
     // ────────────────────────────────────────────────

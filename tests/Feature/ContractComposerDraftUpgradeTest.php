@@ -137,8 +137,6 @@ class ContractComposerDraftUpgradeTest extends TestCase
             'workHoursFrom' => '09:00',
             'workHoursTo' => '17:00',
             'weeklyHours' => 40,
-            'workDaysEn' => 'Monday to Friday',
-            'workDaysAr' => 'من الاثنين إلى الجمعة',
             'currency' => 1,
             'salary' => 100,
             'salaryPer' => 1,

@@ -19,6 +19,7 @@ class RestructureContractsScheduleAndPayMigrationTest extends TestCase
         // RefreshDatabase already ran up() once while building the schema for
         // this test. Roll it back to the pre-consolidation, 6-row shape so a
         // legacy contract pointing at the redundant id=2 row can be recreated.
+        $this->rollBackFlexHoursRename();
         $migration->down();
 
         DB::table('contract_types')->delete();
@@ -62,6 +63,7 @@ class RestructureContractsScheduleAndPayMigrationTest extends TestCase
     public function test_up_renames_the_three_surviving_rows_to_their_final_bilingual_names(): void
     {
         $migration = $this->migrationInstance();
+        $this->rollBackFlexHoursRename();
         $migration->down();
 
         DB::table('contract_types')->delete();
@@ -96,6 +98,7 @@ class RestructureContractsScheduleAndPayMigrationTest extends TestCase
             ['id' => 5, 'name_en' => 'Specific Voluntary Service Contract', 'name_ar' => 'عقد تقديم خدمة تطوعية محددة', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
+        $this->rollBackFlexHoursRename();
         $migration->down();
 
         $this->assertSame(6, DB::table('contract_types')->count());
@@ -109,7 +112,7 @@ class RestructureContractsScheduleAndPayMigrationTest extends TestCase
         foreach ([
             'schedule_mode', 'work_day_from', 'work_day_to',
             'show_days_per_week', 'show_hours_per_week',
-            'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_day',
+            'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_month',
             'flex_varies_by_requirements', 'flex_coordinated_with_manager',
             'flex_custom_en', 'flex_custom_ar',
             'pay_mode', 'session_duration',
@@ -131,6 +134,7 @@ class RestructureContractsScheduleAndPayMigrationTest extends TestCase
     {
         $migration = $this->migrationInstance();
 
+        $this->rollBackFlexHoursRename();
         $migration->down();
 
         $this->assertFalse(Schema::hasColumn('contracts', 'schedule_mode'));
@@ -140,5 +144,17 @@ class RestructureContractsScheduleAndPayMigrationTest extends TestCase
     private function migrationInstance(): Migration
     {
         return require database_path('migrations/2026_09_15_000000_restructure_contracts_schedule_pay_and_draft.php');
+    }
+
+    /**
+     * A later migration renamed flex_hours_per_day to flex_hours_per_month, so
+     * this one's down() — which unconditionally drops flex_hours_per_day — can
+     * no longer run against the current schema on its own. Every direct
+     * down() call on the older migration in this file must roll this one back
+     * first, the same order `artisan migrate:rollback` would use.
+     */
+    private function rollBackFlexHoursRename(): void
+    {
+        (require database_path('migrations/2026_09_15_150000_rename_flex_hours_per_day_to_per_month_on_contracts.php'))->down();
     }
 }

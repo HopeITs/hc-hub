@@ -28,7 +28,7 @@ class ContractScheduleAndPayColumnsTest extends TestCase
             'show_hours_per_week' => false,
             'flex_days_per_week' => 5,
             'flex_hours_per_week' => 40,
-            'flex_hours_per_day' => 8,
+            'flex_hours_per_month' => 60,
             'flex_varies_by_requirements' => true,
             'flex_coordinated_with_manager' => false,
             'flex_custom_en' => 'By arrangement',

@@ -777,10 +777,6 @@ return [
         'runs-to' => 'حتى :date',
         'lasts-months' => ':count أشهر',
 
-        // الحقلان يُطبعان كما هما في العقد، لذلك يُكتب كل مثال بلغة حقله
-        // لا بلغة الواجهة.
-        'work-days-placeholder-en' => 'From Monday to Friday',
-        'work-days-placeholder-ar' => 'من الاثنين إلى الجمعة',
         'add-notes' => 'إضافة ملاحظات الدوام',
 
         'schedule-mode' => 'نوع الدوام',
@@ -789,6 +785,7 @@ return [
         'remove-second-shift' => 'إزالة',
         'work-day-from' => 'من يوم',
         'work-day-to' => 'إلى يوم',
+        'day-range' => 'من :from إلى :to',
         'days-per-week' => 'ذكر ":count يوم أسبوعيًا" في العقد المطبوع',
         'hours-per-week' => 'ذكر ":count ساعة أسبوعيًا" في العقد المطبوع',
         'weekly-hours-value' => ':count ساعة/أسبوعيًا',
@@ -796,7 +793,7 @@ return [
         'schedule-flexible-hint' => 'حدّد ما ينطبق مما يلي. يمكن الجمع بين أكثر من خيار.',
         'flex-days-per-week' => 'عدد الأيام أسبوعيًا',
         'flex-hours-per-week' => 'عدد الساعات أسبوعيًا',
-        'flex-hours-per-day' => 'عدد الساعات يوميًا',
+        'flex-hours-per-month' => 'عدد الساعات شهريًا',
         'flex-varies-by-requirements' => 'تتغير بحسب متطلبات العمل',
         'flex-coordinated-with-manager' => 'تُحدَّد بالتنسيق مع المدير المباشر',
         'flex-custom' => 'وصف مخصص',

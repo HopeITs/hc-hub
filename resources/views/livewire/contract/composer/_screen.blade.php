@@ -26,9 +26,12 @@
         $sections[] = 'termination';
     }
 
-    // Create demands work days; edit does not, because contracts imported from
-    // Excel before the field existed have none and must still be editable.
-    $requireWorkDays = ! $isEdit;
+    // work_day_from/to store Carbon's own day-of-week numbering (0 = Sunday
+    // ... 6 = Saturday); shared by the day-range picker's options and the
+    // JS-side "Sunday to Thursday" summary so both agree on day names.
+    $dayNames = collect(range(0, 6))->mapWithKeys(
+        fn (int $day) => [$day => \Carbon\Carbon::now()->startOfWeek(\Carbon\Carbon::SUNDAY)->addDays($day)->translatedFormat('l')],
+    );
 
     $composerConfig = [
         'locale' => app()->getLocale(),
@@ -40,7 +43,7 @@
         'cityId' => $lockedCity?->id ?? ($seed['cityId'] ?? null),
         'cities' => $cities->map(fn ($city) => ['value' => $city->id, 'label' => $city->name])->values(),
         'sections' => $sections,
-        'requireWorkDays' => $requireWorkDays,
+        'dayNames' => $dayNames,
         // An edit opens with everything collapsed and summarised: there is
         // nothing to fill in, only something to change.
         'initialSection' => $isEdit ? '' : 'assignment',
@@ -81,6 +84,7 @@
             'daysPerWeek' => __('general.composer.days-per-week'),
             'hoursPerWeek' => __('general.composer.hours-per-week'),
             'weeklyHoursValue' => __('general.composer.weekly-hours-value'),
+            'dayRange' => __('general.composer.day-range'),
             'flexible' => __('general.composer.schedule-flexible'),
             // Lowercase units, because these are read inside a phrase
             // ("3 months") rather than as standalone labels.
@@ -113,7 +117,7 @@
         <div class="flex min-w-0 flex-col gap-2.5">
             @include('livewire.contract.composer._assignment')
             @include('livewire.contract.composer._contract')
-            @include('livewire.contract.composer._schedule', ['requireWorkDays' => $requireWorkDays])
+            @include('livewire.contract.composer._schedule', ['dayNames' => $dayNames])
 
             @include('livewire.contract.composer._pay')
 

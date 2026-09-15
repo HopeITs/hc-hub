@@ -213,9 +213,10 @@ document.addEventListener('alpine:init', () => {
         terminationReasons: config.terminationReasons ?? [],
         // Create renders four sections; edit adds `termination` on the end.
         sections: config.sections ?? ['assignment', 'contract', 'schedule', 'pay'],
-        // Only create insists on work days: contracts imported before the field
-        // existed have none, and editing one must not be blocked on that.
-        requireWorkDays: config.requireWorkDays ?? true,
+        // Sunday(0)..Saturday(6), localized — built from the day range picker's
+        // own options, reused here so the schedule summary can read "Sunday to
+        // Thursday" instead of the day numbers.
+        dayNames: config.dayNames ?? {},
 
         // ---- assignment
         // config.seed is present when this page opened on an existing contract
@@ -275,7 +276,7 @@ document.addEventListener('alpine:init', () => {
         // free-text fallback in both languages.
         flexDaysPerWeek: config.seed?.flexDaysPerWeek != null ? str(config.seed.flexDaysPerWeek) : '',
         flexHoursPerWeek: config.seed?.flexHoursPerWeek != null ? str(config.seed.flexHoursPerWeek) : '',
-        flexHoursPerDay: config.seed?.flexHoursPerDay != null ? str(config.seed.flexHoursPerDay) : '',
+        flexHoursPerMonth: config.seed?.flexHoursPerMonth != null ? str(config.seed.flexHoursPerMonth) : '',
         flexVariesByRequirements: Boolean(config.seed?.flexVariesByRequirements),
         flexCoordinatedWithManager: Boolean(config.seed?.flexCoordinatedWithManager),
         flexCustomEn: config.seed?.flexCustomEn ?? '',
@@ -284,11 +285,6 @@ document.addEventListener('alpine:init', () => {
         // value" to seed — so this is a real flag, not a value-presence
         // getter/setter, and initialize() clears the text when it goes off.
         flexCustomOn: Boolean(config.seed?.flexCustomEn || config.seed?.flexCustomAr),
-
-        // Free text in both languages — "Monday to Friday", not a row of seven
-        // toggles. It is what the contract PDF prints, verbatim.
-        workDaysEn: config.seed?.workDaysEn ?? '',
-        workDaysAr: config.seed?.workDaysAr ?? '',
         showNotes: Boolean(config.seed?.attendingNotesEn || config.seed?.attendingNotesAr),
         attendingNotesEn: config.seed?.attendingNotesEn ?? '',
         attendingNotesAr: config.seed?.attendingNotesAr ?? '',
@@ -370,10 +366,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         get scheduleValid() {
-            if (this.requireWorkDays && (this.workDaysEn.trim() === '' || this.workDaysAr.trim() === '')) {
-                return false;
-            }
-
             if (this.scheduleMode === '1') {
                 if (this.workDayFrom === '' || this.workDayTo === '' || Number(this.workDayTo) < Number(this.workDayFrom)) {
                     return false;
@@ -861,6 +853,28 @@ document.addEventListener('alpine:init', () => {
         },
 
         /**
+         * "Sunday to Thursday" — built from the day range, in the viewer's own
+         * locale, rather than typed in as free text (superseded: work days
+         * used to be a separate bilingual text box, replaced by this once the
+         * structured day range covered the same ground).
+         */
+        get fixedDayRangeLabel() {
+            if (this.workDayFrom === '' || this.workDayTo === '') {
+                return '';
+            }
+
+            const from = this.dayNames[this.workDayFrom] ?? '';
+
+            if (this.workDayFrom === this.workDayTo) {
+                return from;
+            }
+
+            const to = this.dayNames[this.workDayTo] ?? '';
+
+            return this.fill(this.labels.dayRange, { from, to });
+        },
+
+        /**
          * The single source of truth for weekly_hours — LeaveBalanceService's
          * real entitlement engine — computed, never typed in directly. Fixed
          * mode derives it from the day/hour ranges above; flexible mode takes
@@ -927,11 +941,11 @@ document.addEventListener('alpine:init', () => {
             this.flexHoursPerWeek = checked ? (this.flexHoursPerWeek || '40') : '';
         },
 
-        get flexHoursPerDayOn() {
-            return this.flexHoursPerDay !== '';
+        get flexHoursPerMonthOn() {
+            return this.flexHoursPerMonth !== '';
         },
-        set flexHoursPerDayOn(checked) {
-            this.flexHoursPerDay = checked ? (this.flexHoursPerDay || '8') : '';
+        set flexHoursPerMonthOn(checked) {
+            this.flexHoursPerMonth = checked ? (this.flexHoursPerMonth || '60') : '';
         },
 
 
@@ -1088,7 +1102,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         get scheduleSummary() {
-            const days = this.locale === 'ar' ? this.workDaysAr : this.workDaysEn;
             const hours = this.weeklyHours > 0 ? `${this.weeklyHours} h` : '';
 
             if (this.scheduleMode === '1') {
@@ -1098,10 +1111,10 @@ document.addEventListener('alpine:init', () => {
                     hoursRange += `, ${this.workHours2From}–${this.workHours2To}`;
                 }
 
-                return [days, hoursRange, hours].filter(Boolean).join(' · ');
+                return [this.fixedDayRangeLabel, hoursRange, hours].filter(Boolean).join(' · ');
             }
 
-            return [days, hours || this.labels.flexible].filter(Boolean).join(' · ');
+            return [hours || this.labels.flexible].filter(Boolean).join(' · ');
         },
 
         get terminationSummary() {
@@ -1153,7 +1166,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         get cardWorkDays() {
-            return (this.locale === 'ar' ? this.workDaysAr : this.workDaysEn) || this.labels.empty;
+            return (this.scheduleMode === '1' ? this.fixedDayRangeLabel : '') || this.labels.empty;
         },
 
         get cardHours() {
@@ -1241,14 +1254,12 @@ document.addEventListener('alpine:init', () => {
                     showHoursPerWeek: this.showHoursPerWeek,
                     flexDaysPerWeek: this.flexDaysPerWeek,
                     flexHoursPerWeek: this.flexHoursPerWeek,
-                    flexHoursPerDay: this.flexHoursPerDay,
+                    flexHoursPerMonth: this.flexHoursPerMonth,
                     flexVariesByRequirements: this.flexVariesByRequirements,
                     flexCoordinatedWithManager: this.flexCoordinatedWithManager,
                     flexCustomEn: this.flexCustomEn,
                     flexCustomAr: this.flexCustomAr,
                     weeklyHours: this.weeklyHours,
-                    workDaysEn: this.workDaysEn,
-                    workDaysAr: this.workDaysAr,
                     attendingNotesEn: this.attendingNotesEn,
                     attendingNotesAr: this.attendingNotesAr,
                     salary: this.salary,

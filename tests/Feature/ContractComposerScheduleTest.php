@@ -210,8 +210,6 @@ class ContractComposerScheduleTest extends TestCase
             'place' => 1,
             'startDate' => now()->addMonth()->startOfMonth()->toDateString(),
             'endDate' => now()->endOfYear()->toDateString(),
-            'workDaysEn' => 'Monday to Friday',
-            'workDaysAr' => 'من الاثنين إلى الجمعة',
             'currency' => 1,
             'salary' => 100,
             'salaryPer' => 1,
