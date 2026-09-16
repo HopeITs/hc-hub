@@ -238,15 +238,28 @@
     </div>
 
     {{--
-        The number every mode ultimately has to produce — LeaveBalanceService's
-        real entitlement engine. Always visible so it is never a surprise at
-        submit time, in both modes.
+        How the printed clause will actually read, in both languages at once
+        — built live from whichever fields/checkboxes are set, in either
+        mode, so "what will this print?" never requires creating the
+        contract and opening the PDF. weekly_hours (LeaveBalanceService's
+        real entitlement figure) rides along underneath as a plain number,
+        since it still needs to be sanity-checked on its own.
     --}}
-    <div class="mt-5 flex items-center justify-between rounded-control border border-neutral-200
-                bg-neutral-50 px-3 py-2">
-        <span class="text-body font-medium text-neutral-800">@lang('general.weekly-hours')</span>
-        <span class="text-body font-semibold tabular-nums" x-bind:class="weeklyHours > 0 ? 'text-neutral-900' : 'text-primary'"
-              x-text="weeklyHoursSummary"></span>
+    <div class="mt-5 rounded-control border border-neutral-200 bg-neutral-50 p-3">
+        <p class="text-caption font-semibold uppercase tracking-wider text-secondary-medium">
+            @lang('general.composer.schedule-preview-title')
+        </p>
+
+        <div class="mt-2 grid gap-3 sm:grid-cols-2">
+            <p dir="ltr" class="text-start text-body text-neutral-800" x-text="schedulePreviewEn"></p>
+            <p dir="rtl" class="text-start text-body text-neutral-800" x-text="schedulePreviewAr"></p>
+        </div>
+
+        <div class="mt-3 flex items-center justify-between border-t border-neutral-200 pt-2">
+            <span class="text-caption text-secondary-medium">@lang('general.composer.schedule-preview-weekly-hours')</span>
+            <span class="text-caption font-semibold tabular-nums" x-bind:class="weeklyHours > 0 ? 'text-neutral-900' : 'text-primary'"
+                  x-text="weeklyHoursSummary"></span>
+        </div>
     </div>
     <x-error-span>{{ $errors->first('form.weekly_hours') }}</x-error-span>
 

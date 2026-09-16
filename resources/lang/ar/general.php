@@ -787,6 +787,8 @@ return [
         'weekly-hours-value' => ':count ساعة/أسبوعيًا',
         'schedule-flexible' => 'مرن',
         'schedule-flexible-hint' => 'حدّد ما ينطبق مما يلي. يمكن الجمع بين أكثر من خيار.',
+        'schedule-preview-title' => 'معاينة نص العقد المطبوع',
+        'schedule-preview-weekly-hours' => 'الساعات الأسبوعية (لاحتساب الإجازات)',
         'schedule-hint-day-range' => 'اختر نطاق الأيام أعلاه للمتابعة.',
         'schedule-hint-second-shift' => 'أكمل أوقات الفترة الثانية، أو أزلها، للمتابعة.',
         'schedule-hint-weekly-hours' => 'فعّل "عدد الساعات أسبوعيًا" أدناه وأدخل رقمًا للمتابعة.',

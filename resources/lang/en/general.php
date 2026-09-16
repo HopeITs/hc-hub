@@ -787,6 +787,8 @@ return [
         'weekly-hours-value' => ':count h/week',
         'schedule-flexible' => 'Flexible',
         'schedule-flexible-hint' => 'Tick whichever of the following apply. They can be combined.',
+        'schedule-preview-title' => 'Printed wording preview',
+        'schedule-preview-weekly-hours' => 'Weekly hours (for leave entitlement)',
         'schedule-hint-day-range' => 'Select a day range above to continue.',
         'schedule-hint-second-shift' => "Finish the second shift's times, or remove it, to continue.",
         'schedule-hint-weekly-hours' => 'Check "Hours per week" below and enter a number to continue.',

@@ -14,6 +14,14 @@
 const ALL_CENTERS = '__all__';
 const CITY_LEVEL = '';
 
+// Sunday(0)..Saturday(6) — hardcoded rather than read from the server's own
+// (current-UI-locale-only) `dayNames`, because the printed-wording preview
+// below shows English and Arabic side by side regardless of which locale the
+// screen itself is in, same as the printed contract's own clause text is
+// hardcoded bilingual strings rather than routed through the app's i18n.
+const DAY_NAMES_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAY_NAMES_AR = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
 const str = (value) => (value === null || value === undefined ? '' : String(value));
 
 const clampIndex = (index, length) => (length === 0 ? -1 : Math.min(Math.max(index, 0), length - 1));
@@ -1152,6 +1160,112 @@ document.addEventListener('alpine:init', () => {
                 : '';
 
             return [this.selectedType?.name, period, this.durationLabel].filter(Boolean).join(' · ');
+        },
+
+        /**
+         * How the "Volunteer Work Hours" clause would read on the printed
+         * contract, in each language — built from whichever fields and
+         * checkboxes are currently set, so "what will this actually print?"
+         * does not require creating the contract and opening the PDF.
+         * Deliberately plain (fragments joined into sentences, not fully
+         * polished legal prose): this is a live preview, not the Phase 5
+         * print template itself, which is the actual source of truth.
+         */
+        schedulePreview(lang) {
+            const isAr = lang === 'ar';
+            const dayNames = isAr ? DAY_NAMES_AR : DAY_NAMES_EN;
+            const emptyText = isAr ? 'لم يتم تحديد تفاصيل الدوام بعد.' : 'No schedule details selected yet.';
+
+            if (this.scheduleMode === '1') {
+                if (this.workDayFrom === '' || this.workDayTo === '') {
+                    return emptyText;
+                }
+
+                const from = dayNames[Number(this.workDayFrom)] ?? '';
+                const to = dayNames[Number(this.workDayTo)] ?? '';
+                const days = from === to ? from : (isAr ? `من ${from} إلى ${to}` : `${from} to ${to}`);
+
+                const sentences = [
+                    isAr
+                        ? `${this.weeklyHours} ساعة عمل أسبوعيًا، ${this.fixedHoursPerDay} ساعات يوميًا.`
+                        : `${this.weeklyHours} working hours per week, ${this.fixedHoursPerDay} hours per day.`,
+                ];
+
+                let officeHours = isAr
+                    ? `الدوام ${days}، من الساعة ${this.workHoursFrom} حتى الساعة ${this.workHoursTo}`
+                    : `Office hours are ${days}, from ${this.workHoursFrom} to ${this.workHoursTo}`;
+
+                if (this.hasSecondShift()) {
+                    officeHours += isAr
+                        ? ` ومن الساعة ${this.workHours2From} حتى الساعة ${this.workHours2To}`
+                        : ` and from ${this.workHours2From} to ${this.workHours2To}`;
+                }
+
+                sentences.push(officeHours + '.');
+
+                if (this.showDaysPerWeek) {
+                    sentences.push(isAr
+                        ? `يُذكر في العقد: "${this.fixedDaysPerWeek} يوم أسبوعيًا".`
+                        : `States "${this.fixedDaysPerWeek} days/week" on the contract.`);
+                }
+
+                if (this.showHoursPerWeek) {
+                    sentences.push(isAr
+                        ? `يُذكر في العقد: "${this.weeklyHours} ساعة أسبوعيًا".`
+                        : `States "${this.weeklyHours} hours/week" on the contract.`);
+                }
+
+                return sentences.join(' ');
+            }
+
+            // Flexible mode: assemble whichever descriptive fragments are checked.
+            const fragments = [];
+
+            if (this.flexHoursPerWeekOn && this.flexHoursPerWeek !== '') {
+                fragments.push(isAr ? `${this.flexHoursPerWeek} ساعة أسبوعيًا` : `${this.flexHoursPerWeek} hours per week`);
+            }
+
+            if (this.flexDaysPerWeekOn && this.flexDaysPerWeek !== '') {
+                fragments.push(isAr ? `${this.flexDaysPerWeek} يوم أسبوعيًا` : `${this.flexDaysPerWeek} days per week`);
+            }
+
+            if (this.flexHoursPerMonthOn && this.flexHoursPerMonth !== '') {
+                fragments.push(isAr ? `${this.flexHoursPerMonth} ساعة شهريًا` : `${this.flexHoursPerMonth} hours per month`);
+            }
+
+            if (this.flexVariesByRequirements) {
+                fragments.push(isAr ? 'الساعات تتغير بحسب متطلبات العمل' : 'hours vary according to the requirements of the job');
+            }
+
+            if (this.flexCoordinatedWithManager) {
+                fragments.push(isAr
+                    ? 'أيام وساعات العمل تُحدَّد بالتنسيق مع المدير المباشر'
+                    : 'working days and hours are coordinated with the direct manager');
+            }
+
+            if (this.flexCustomOn) {
+                const custom = (isAr ? this.flexCustomAr : this.flexCustomEn).trim();
+
+                if (custom) {
+                    fragments.push(custom);
+                }
+            }
+
+            if (!fragments.length) {
+                return emptyText;
+            }
+
+            const joined = fragments.join(isAr ? '، ' : ', ');
+
+            return joined.charAt(0).toUpperCase() + joined.slice(1) + '.';
+        },
+
+        get schedulePreviewEn() {
+            return this.schedulePreview('en');
+        },
+
+        get schedulePreviewAr() {
+            return this.schedulePreview('ar');
         },
 
         get scheduleSummary() {
