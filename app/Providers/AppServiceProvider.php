@@ -3,22 +3,38 @@
 namespace App\Providers;
 
 use App\Http\Middleware\ActiveLivewirePermissionMiddleware;
+use App\Models\ApplicationForm;
 use App\Models\Badge;
 use App\Models\Center;
 use App\Models\Contract;
 use App\Models\DefaultDeliverable;
 use App\Models\Employee;
+use App\Models\HiringCampaign;
+use App\Models\JobPost;
 use App\Models\LeaveRequest;
 use App\Models\Position;
+use App\Models\PublicRecruitmentLink;
+use App\Models\RecruitmentRequest;
+use App\Models\RecruitmentRequestEvent;
+use App\Models\RecruitmentWorkflowInstanceStep;
+use App\Models\Vacancy;
 use App\Observers\ContractObserver;
 use App\Observers\EmployeeObserver;
+use App\Policies\ApplicationFormPolicy;
 use App\Policies\BadgePolicy;
 use App\Policies\CenterPolicy;
 use App\Policies\ContractPolicy;
 use App\Policies\DefaultDeliverablePolicy;
 use App\Policies\EmployeePolicy;
+use App\Policies\HiringCampaignPolicy;
+use App\Policies\JobPostPolicy;
 use App\Policies\LeaveRequestPolicy;
 use App\Policies\PositionPolicy;
+use App\Policies\PublicRecruitmentLinkPolicy;
+use App\Policies\RecruitmentRequestEventPolicy;
+use App\Policies\RecruitmentRequestPolicy;
+use App\Policies\RecruitmentWorkflowInstanceStepPolicy;
+use App\Policies\VacancyPolicy;
 use App\Services\ActivityLogger;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
@@ -61,6 +77,14 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Employee::class, EmployeePolicy::class);
         Gate::policy(LeaveRequest::class, LeaveRequestPolicy::class);
         Gate::policy(Position::class, PositionPolicy::class);
+        Gate::policy(RecruitmentRequest::class, RecruitmentRequestPolicy::class);
+        Gate::policy(RecruitmentWorkflowInstanceStep::class, RecruitmentWorkflowInstanceStepPolicy::class);
+        Gate::policy(Vacancy::class, VacancyPolicy::class);
+        Gate::policy(HiringCampaign::class, HiringCampaignPolicy::class);
+        Gate::policy(JobPost::class, JobPostPolicy::class);
+        Gate::policy(ApplicationForm::class, ApplicationFormPolicy::class);
+        Gate::policy(PublicRecruitmentLink::class, PublicRecruitmentLinkPolicy::class);
+        Gate::policy(RecruitmentRequestEvent::class, RecruitmentRequestEventPolicy::class);
 
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle)
