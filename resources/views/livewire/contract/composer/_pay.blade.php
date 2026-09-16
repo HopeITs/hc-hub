@@ -31,11 +31,12 @@
     $sessionDurationOptions = collect([SessionDuration::Hour, SessionDuration::HourAndHalf, SessionDuration::TwoHours])
         ->mapWithKeys(fn (int $value) => [$value => SessionDuration::getLocalizedName($value)['value']]);
 
-    // Quiet-but-visible control, used by the "Add a condition" / "Remove" buttons.
-    $miniButton = 'inline-flex items-center gap-1.5 rounded-control border border-neutral-300 bg-white
-                   px-2.5 py-1 text-caption font-semibold text-secondary-dark shadow-e1 transition
-                   hover:border-primary hover:text-primary active:scale-[0.98]
-                   focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+    $currencyOptions = [
+        0 => __('general.unknown'),
+        1 => 'SYP',
+        2 => 'USD',
+        3 => 'EUR',
+    ];
 @endphp
 
 {{-- Section 4 — the one field where a typo costs the most. --}}
@@ -49,41 +50,18 @@
          in the same currency. --}}
     <div class="mt-4 max-w-48">
         <x-forms.input-label for="composer_currency" required>@lang('general.currency')</x-forms.input-label>
-        <select
-            id="composer_currency"
-            x-model="currency"
-            class="w-full cursor-pointer rounded-control border border-neutral-300 bg-white px-3 py-2
-                   text-body font-medium text-neutral-800 shadow-e1 transition
-                   hover:bg-neutral-50
-                   focus:border-primary focus:outline-none focus:ring-2 focus:ring-neutral-300"
-        >
-            <option value="0">@lang('general.unknown')</option>
-            <option value="1">SYP</option>
-            <option value="2">USD</option>
-            <option value="3">EUR</option>
-        </select>
+        <x-forms.select id="composer_currency" :options="$currencyOptions" x-model="currency" />
         <x-error-span>{{ $errors->first('form.currency') }}</x-error-span>
     </div>
 
     <div class="mt-5">
         <x-forms.input-label required>@lang('general.composer.pay-mode')</x-forms.input-label>
-        <div class="mt-1 grid grid-cols-2 gap-2" role="radiogroup" aria-label="@lang('general.composer.pay-mode')">
-            @foreach ($payModeOptions as $value => $label)
-                <label class="cursor-pointer">
-                    <input type="radio" class="peer sr-only" name="composer_pay_mode"
-                           value="{{ $value }}" x-model="payMode"/>
-                    <span class="flex min-h-10.5 items-center justify-center rounded-control
-                                 border-2 border-neutral-200 bg-white px-2 py-2 text-body text-neutral-800
-                                 shadow-e1 transition
-                                 hover:border-neutral-400
-                                 peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
-                                 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2
-                                 peer-focus-visible:outline-primary">
-                        <span class="truncate font-semibold">{{ $label }}</span>
-                    </span>
-                </label>
-            @endforeach
-        </div>
+        <x-forms.segmented-control
+            name="composer_pay_mode"
+            model="payMode"
+            :options="$payModeOptions"
+            :aria-label="__('general.composer.pay-mode')"
+        />
         <x-error-span>{{ $errors->first('form.pay_mode') }}</x-error-span>
     </div>
 
@@ -167,35 +145,42 @@
             <div class="space-y-3 rounded-control border border-neutral-200 p-3">
                 <div class="flex items-center justify-between">
                     <span class="text-caption font-semibold text-secondary-medium" x-text="'#' + (index + 1)"></span>
-                    <button type="button" class="{{ $miniButton }}" x-on:click="removePayTier(index)">
+                    <x-contract.mini-button x-on:click="removePayTier(index)">
                         @lang('general.composer.remove-condition')
-                    </button>
+                    </x-contract.mini-button>
                 </div>
 
+                {{--
+                    Every row shares one template, so a plain Blade `id` would
+                    repeat itself once per tier — invalid HTML, and each
+                    <x-forms.input-label> below would silently point at
+                    nothing without it. x-bind:id ties each field to its own
+                    row's index instead.
+                --}}
                 <div class="grid gap-3 sm:grid-cols-2">
                     <div>
-                        <x-forms.input-label>@lang('general.composer.condition') (EN)</x-forms.input-label>
-                        <x-forms.input type="text" dir="ltr" maxlength="255" x-model="tier.conditionEn" />
+                        <x-forms.input-label x-bind:for="'composer_pay_tier_' + index + '_condition_en'">@lang('general.composer.condition') (EN)</x-forms.input-label>
+                        <x-forms.input type="text" dir="ltr" maxlength="255" x-model="tier.conditionEn"
+                                       x-bind:id="'composer_pay_tier_' + index + '_condition_en'" />
                     </div>
                     <div>
-                        <x-forms.input-label>@lang('general.composer.condition') (AR)</x-forms.input-label>
-                        <x-forms.input type="text" dir="rtl" maxlength="255" x-model="tier.conditionAr" />
+                        <x-forms.input-label x-bind:for="'composer_pay_tier_' + index + '_condition_ar'">@lang('general.composer.condition') (AR)</x-forms.input-label>
+                        <x-forms.input type="text" dir="rtl" maxlength="255" x-model="tier.conditionAr"
+                                       x-bind:id="'composer_pay_tier_' + index + '_condition_ar'" />
                     </div>
                 </div>
 
                 <div class="max-w-40">
-                    <x-forms.input-label>@lang('general.amount')</x-forms.input-label>
-                    <x-forms.input type="number" step="0.01" min="0" x-model="tier.amount" />
+                    <x-forms.input-label x-bind:for="'composer_pay_tier_' + index + '_amount'">@lang('general.amount')</x-forms.input-label>
+                    <x-forms.input type="number" step="0.01" min="0" x-model="tier.amount"
+                                   x-bind:id="'composer_pay_tier_' + index + '_amount'" />
                 </div>
             </div>
         </template>
 
-        <button type="button" class="{{ $miniButton }}" x-on:click="addPayTier()">
-            <svg class="size-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M10 5v10M5 10h10" stroke-linecap="round"/>
-            </svg>
+        <x-contract.mini-button plus x-on:click="addPayTier()">
             @lang('general.composer.add-condition')
-        </button>
+        </x-contract.mini-button>
 
         <x-error-span>{{ $errors->first('form.pay_tiers') }}</x-error-span>
     </div>
