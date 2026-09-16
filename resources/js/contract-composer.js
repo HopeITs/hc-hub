@@ -275,10 +275,17 @@ document.addEventListener('alpine:init', () => {
         workHours2To: config.seed?.workHours2To ?? '',
         workDayFrom: config.seed?.workDayFrom != null ? str(config.seed.workDayFrom) : '',
         workDayTo: config.seed?.workDayTo != null ? str(config.seed.workDayTo) : '',
-        // Whether the printed contract states the two computed sentences below
-        // — never edited directly, only ever toggled.
-        showDaysPerWeek: Boolean(config.seed?.showDaysPerWeek),
-        showHoursPerWeek: Boolean(config.seed?.showHoursPerWeek),
+        // Whether the printed clause states each of these four pieces —
+        // never edited directly, only ever toggled. A brand-new contract
+        // (no seed) starts with all four on, since the standard clause
+        // states all of them; an existing one keeps whatever it was saved
+        // with, seed defaulting a missing key to false rather than true so
+        // a contract from before these fields existed does not suddenly
+        // start stating pieces nobody ever confirmed.
+        showDaysPerWeek: config.seed ? Boolean(config.seed.showDaysPerWeek) : true,
+        showHoursPerWeek: config.seed ? Boolean(config.seed.showHoursPerWeek) : true,
+        showHoursPerDay: config.seed ? Boolean(config.seed.showHoursPerDay) : true,
+        showDayRange: config.seed ? Boolean(config.seed.showDayRange) : true,
 
         // -- flexible mode — up to 5 independent, combinable boxes plus one
         // free-text fallback in both languages.
@@ -881,6 +888,30 @@ document.addEventListener('alpine:init', () => {
             return Boolean(this.workHours2From || this.workHours2To);
         },
 
+        /**
+         * 'HH:MM' (24h, straight from the time input) -> '9:00 AM' — matches
+         * the format the actual print templates already use for office
+         * hours (see page2.blade.php's `g:i A`), so the preview reads the
+         * same way the printed contract will.
+         */
+        to12Hour(value) {
+            if (!value) {
+                return '';
+            }
+
+            const [hoursStr, minutes] = value.split(':');
+            let hours = Number(hoursStr);
+            const suffix = hours >= 12 ? 'PM' : 'AM';
+
+            hours %= 12;
+
+            if (hours === 0) {
+                hours = 12;
+            }
+
+            return `${hours}:${minutes} ${suffix}`;
+        },
+
         toggleSecondShift(checked) {
             if (!checked) {
                 this.workHours2From = '';
@@ -974,6 +1005,11 @@ document.addEventListener('alpine:init', () => {
         /** "M hours/week" — shown next to its own checkbox, fixed mode only. */
         get fixedHoursPerWeekLabel() {
             return this.fill(this.labels.hoursPerWeek, { count: this.weeklyHours });
+        },
+
+        /** "K hours/day" — shown next to its own checkbox, fixed mode only. */
+        get fixedHoursPerDayLabel() {
+            return this.fill(this.labels.hoursPerDay, { count: this.fixedHoursPerDay });
         },
 
         /** The always-visible read-only summary, e.g. "40 h/week" — both modes. */
@@ -1181,39 +1217,62 @@ document.addEventListener('alpine:init', () => {
                     return emptyText;
                 }
 
-                const from = dayNames[Number(this.workDayFrom)] ?? '';
-                const to = dayNames[Number(this.workDayTo)] ?? '';
-                const days = from === to ? from : (isAr ? `من ${from} إلى ${to}` : `${from} to ${to}`);
+                const sentences = [];
 
-                const sentences = [
-                    isAr
-                        ? `${this.weeklyHours} ساعة عمل أسبوعيًا، ${this.fixedHoursPerDay} ساعات يوميًا.`
-                        : `${this.weeklyHours} working hours per week, ${this.fixedHoursPerDay} hours per day.`,
-                ];
+                // Each checkbox controls whether its own piece is stated at
+                // all, rather than the number always appearing with the
+                // checkbox only adding a second, redundant "states X"
+                // sentence after it (the previous design).
+                const clauses = [];
 
-                let officeHours = isAr
-                    ? `الدوام ${days}، من الساعة ${this.workHoursFrom} حتى الساعة ${this.workHoursTo}`
-                    : `Office hours are ${days}, from ${this.workHoursFrom} to ${this.workHoursTo}`;
+                if (this.showHoursPerWeek) {
+                    clauses.push(isAr
+                        ? `${this.weeklyHours} ساعة عمل أسبوعيًا`
+                        : `${this.weeklyHours} working hours per week`);
+                }
+
+                if (this.showHoursPerDay) {
+                    clauses.push(isAr
+                        ? `${this.fixedHoursPerDay} ساعات يوميًا`
+                        : `${this.fixedHoursPerDay} hours per day`);
+                }
+
+                if (this.showDaysPerWeek) {
+                    clauses.push(isAr
+                        ? `${this.fixedDaysPerWeek} أيام أسبوعيًا`
+                        : `${this.fixedDaysPerWeek} days per week`);
+                }
+
+                if (clauses.length > 0) {
+                    sentences.push(clauses.join(isAr ? '، ' : ', ') + '.');
+                }
+
+                let timePart = isAr
+                    ? `من الساعة ${this.to12Hour(this.workHoursFrom)} حتى الساعة ${this.to12Hour(this.workHoursTo)}`
+                    : `from ${this.to12Hour(this.workHoursFrom)} to ${this.to12Hour(this.workHoursTo)}`;
 
                 if (this.hasSecondShift()) {
-                    officeHours += isAr
-                        ? ` ومن الساعة ${this.workHours2From} حتى الساعة ${this.workHours2To}`
-                        : ` and from ${this.workHours2From} to ${this.workHours2To}`;
+                    timePart += isAr
+                        ? ` ومن الساعة ${this.to12Hour(this.workHours2From)} حتى الساعة ${this.to12Hour(this.workHours2To)}`
+                        : ` and from ${this.to12Hour(this.workHours2From)} to ${this.to12Hour(this.workHours2To)}`;
+                }
+
+                let officeHours = isAr ? 'ساعات الدوام الرسمية هي' : 'Standard office hours are';
+
+                if (this.showDayRange) {
+                    const from = dayNames[Number(this.workDayFrom)] ?? '';
+                    const to = dayNames[Number(this.workDayTo)] ?? '';
+                    const days = from === to ? from : (isAr ? `من ${from} إلى ${to}` : `${from} to ${to}`);
+
+                    // Arabic joins "و" straight onto the next word ("ومن")
+                    // rather than as its own token — matching the second
+                    // shift join just above.
+                    officeHours += isAr ? ` ${days} و${timePart}` : ` ${days} and ${timePart}`;
+                } else {
+                    officeHours += ` ${timePart}`;
                 }
 
                 sentences.push(officeHours + '.');
-
-                if (this.showDaysPerWeek) {
-                    sentences.push(isAr
-                        ? `يُذكر في العقد: "${this.fixedDaysPerWeek} يوم أسبوعيًا".`
-                        : `States "${this.fixedDaysPerWeek} days/week" on the contract.`);
-                }
-
-                if (this.showHoursPerWeek) {
-                    sentences.push(isAr
-                        ? `يُذكر في العقد: "${this.weeklyHours} ساعة أسبوعيًا".`
-                        : `States "${this.weeklyHours} hours/week" on the contract.`);
-                }
 
                 return sentences.join(' ');
             }
@@ -1433,6 +1492,8 @@ document.addEventListener('alpine:init', () => {
                     workDayTo: this.workDayTo,
                     showDaysPerWeek: this.showDaysPerWeek,
                     showHoursPerWeek: this.showHoursPerWeek,
+                    showHoursPerDay: this.showHoursPerDay,
+                    showDayRange: this.showDayRange,
                     flexDaysPerWeek: this.flexDaysPerWeek,
                     flexHoursPerWeek: this.flexHoursPerWeek,
                     flexHoursPerMonth: this.flexHoursPerMonth,

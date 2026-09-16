@@ -174,6 +174,8 @@ trait DrivesContractComposer
             'workDayTo' => $this->form->work_day_to,
             'showDaysPerWeek' => $this->form->show_days_per_week,
             'showHoursPerWeek' => $this->form->show_hours_per_week,
+            'showHoursPerDay' => $this->form->show_hours_per_day,
+            'showDayRange' => $this->form->show_day_range,
             'flexDaysPerWeek' => $this->form->flex_days_per_week,
             'flexHoursPerWeek' => $this->form->flex_hours_per_week,
             'flexHoursPerMonth' => $this->form->flex_hours_per_month,
@@ -236,6 +238,8 @@ trait DrivesContractComposer
         $this->form->work_day_to = $this->intOrNull($payload['workDayTo'] ?? null);
         $this->form->show_days_per_week = (bool) ($payload['showDaysPerWeek'] ?? false);
         $this->form->show_hours_per_week = (bool) ($payload['showHoursPerWeek'] ?? false);
+        $this->form->show_hours_per_day = (bool) ($payload['showHoursPerDay'] ?? false);
+        $this->form->show_day_range = (bool) ($payload['showDayRange'] ?? false);
 
         $this->form->flex_days_per_week = $this->intOrNull($payload['flexDaysPerWeek'] ?? null);
         $this->form->flex_hours_per_week = $this->intOrNull($payload['flexHoursPerWeek'] ?? null);

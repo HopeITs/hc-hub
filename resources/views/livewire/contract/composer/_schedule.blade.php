@@ -104,18 +104,27 @@
         </div>
 
         {{--
-            Both figures are computed from the ranges above, never typed in —
-            the checkbox only controls whether the printed contract states the
-            sentence, so it stays off until someone deliberately wants it there.
+            Every figure here is computed from the ranges above, never typed
+            in — each checkbox only controls whether its own piece is stated
+            in the printed clause below, in the same order it reads there:
+            hours/week, hours/day, days/week, then the day range itself.
         --}}
         <div class="grid gap-2 sm:grid-cols-2">
-            <x-forms.input type="checkbox" x-model="showDaysPerWeek" id="composer_show_days_per_week">
-                <span x-text="fixedDaysPerWeekLabel"></span>
-            </x-forms.input>
-
-            <x-forms.input type="checkbox" x-model="showHoursPerWeek" id="composer_show_hours_per_week">
+            <x-forms.checkbox-card id="composer_show_hours_per_week" model="showHoursPerWeek">
                 <span x-text="fixedHoursPerWeekLabel"></span>
-            </x-forms.input>
+            </x-forms.checkbox-card>
+
+            <x-forms.checkbox-card id="composer_show_hours_per_day" model="showHoursPerDay">
+                <span x-text="fixedHoursPerDayLabel"></span>
+            </x-forms.checkbox-card>
+
+            <x-forms.checkbox-card id="composer_show_days_per_week" model="showDaysPerWeek">
+                <span x-text="fixedDaysPerWeekLabel"></span>
+            </x-forms.checkbox-card>
+
+            <x-forms.checkbox-card id="composer_show_day_range" model="showDayRange">
+                @lang('general.composer.show-day-range')
+            </x-forms.checkbox-card>
         </div>
     </div>
 
@@ -223,21 +232,13 @@
         — built live from whichever fields/checkboxes are set, in either
         mode, so "what will this print?" never requires creating the
         contract and opening the PDF. weekly_hours (LeaveBalanceService's
-        real entitlement figure) sits as a compact badge next to the
-        heading rather than its own footer row, so the card stays one
-        scannable unit instead of two stacked ones.
+        real entitlement figure) is not repeated here — it already has its
+        own line in the contract summary card alongside the composer.
     --}}
     <div class="p-3 mt-5 border rounded-control border-neutral-200 bg-neutral-50">
-        <div class="flex items-center justify-between gap-3">
-            <p class="font-semibold tracking-wider uppercase text-caption text-secondary-medium">
-                @lang('general.composer.schedule-preview-title')
-            </p>
-            <span class="font-semibold shrink-0 text-caption tabular-nums"
-                  x-bind:class="weeklyHours > 0 ? 'text-secondary-dark' : 'text-primary'">
-                <span class="sr-only">@lang('general.composer.schedule-preview-weekly-hours'):</span>
-                <span x-text="weeklyHoursSummary"></span>
-            </span>
-        </div>
+        <p class="font-semibold tracking-wider uppercase text-caption text-secondary-medium">
+            @lang('general.composer.schedule-preview-title')
+        </p>
 
         <div class="grid gap-3 mt-2 sm:grid-cols-2 sm:divide-x sm:divide-neutral-200">
             <p dir="ltr" class="text-start text-body text-neutral-800 sm:pe-3" x-text="schedulePreviewEn"></p>

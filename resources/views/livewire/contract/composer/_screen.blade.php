@@ -83,14 +83,14 @@
             // :count substituted client-side, same as the duration labels below.
             'daysPerWeek' => __('general.composer.days-per-week'),
             'hoursPerWeek' => __('general.composer.hours-per-week'),
+            'hoursPerDay' => __('general.composer.hours-per-day'),
+            'showDayRange' => __('general.composer.show-day-range'),
             'weeklyHoursValue' => __('general.composer.weekly-hours-value'),
             'dayRange' => __('general.composer.day-range'),
             'flexible' => __('general.composer.schedule-flexible'),
             'scheduleHintDayRange' => __('general.composer.schedule-hint-day-range'),
             'scheduleHintSecondShift' => __('general.composer.schedule-hint-second-shift'),
             'scheduleHintWeeklyHours' => __('general.composer.schedule-hint-weekly-hours'),
-            'schedulePreviewTitle' => __('general.composer.schedule-preview-title'),
-            'schedulePreviewWeeklyHours' => __('general.composer.schedule-preview-weekly-hours'),
             // Lowercase units, because these are read inside a phrase
             // ("3 months") rather than as standalone labels.
             'month' => __('general.composer.duration-month'),

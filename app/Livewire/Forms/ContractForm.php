@@ -82,10 +82,14 @@ class ContractForm extends Form
 
     public ?int $work_day_to = null;
 
-    /** Whether the printed contract states the computed "N days/week" / "M hours/week" — fixed mode only, never edited directly. */
+    /** Whether the printed contract states the computed "N days/week" / "M hours/week" / "M hours/day" / day range — fixed mode only, never edited directly. */
     public bool $show_days_per_week = false;
 
     public bool $show_hours_per_week = false;
+
+    public bool $show_hours_per_day = false;
+
+    public bool $show_day_range = false;
 
     // -- Flexible mode
     public ?int $flex_days_per_week = null;
@@ -186,8 +190,14 @@ class ContractForm extends Form
         $this->work_hours_2_to = null;
         $this->work_day_from = null;
         $this->work_day_to = null;
-        $this->show_days_per_week = false;
-        $this->show_hours_per_week = false;
+        // A brand-new contract starts with the full standard clause stated —
+        // "40 working hours per week, 8 hours per day, 5 days per week,
+        // Monday to Friday" — since that is the common case; HR unchecks
+        // whichever piece this particular contract should omit.
+        $this->show_days_per_week = true;
+        $this->show_hours_per_week = true;
+        $this->show_hours_per_day = true;
+        $this->show_day_range = true;
         $this->flex_days_per_week = null;
         $this->flex_hours_per_week = null;
         $this->flex_hours_per_month = null;
@@ -272,6 +282,8 @@ class ContractForm extends Form
         $this->work_day_to = $contract->work_day_to;
         $this->show_days_per_week = (bool) $contract->show_days_per_week;
         $this->show_hours_per_week = (bool) $contract->show_hours_per_week;
+        $this->show_hours_per_day = (bool) $contract->show_hours_per_day;
+        $this->show_day_range = (bool) $contract->show_day_range;
         $this->flex_days_per_week = $contract->flex_days_per_week;
         $this->flex_hours_per_week = $contract->flex_hours_per_week;
         $this->flex_hours_per_month = $contract->flex_hours_per_month;
@@ -339,25 +351,6 @@ class ContractForm extends Form
             'flex_custom_en' => ['nullable', 'string', 'max:255'],
             'flex_custom_ar' => ['nullable', 'string', 'max:255'],
         ]);
-    }
-
-    /**
-     * Every category except service must land on an explicit weekly-hours
-     * figure one way or another (computed from the fixed day/hour range, or
-     * typed into the flex "hours/week" box) — service is the one category
-     * LeaveBalanceService exempts from leave entitlement entirely, so a
-     * contract that only says "varies" / "coordinated with manager" / free
-     * text has nothing to compute a number from, and that is fine only there.
-     */
-    private function weeklyHoursRule(): Closure
-    {
-        return function (string $attribute, mixed $value, Closure $fail): void {
-            $category = ContractType::find($this->contract_type_id)?->category;
-
-            if ($category !== 'service' && (int) $value < 1) {
-                $fail(__('validation.custom.weekly_hours.required_unless_service'));
-            }
-        };
     }
 
     public function validatePay(): array
@@ -490,6 +483,25 @@ class ContractForm extends Form
         ]);
     }
 
+    /**
+     * Every category except service must land on an explicit weekly-hours
+     * figure one way or another (computed from the fixed day/hour range, or
+     * typed into the flex "hours/week" box) — service is the one category
+     * LeaveBalanceService exempts from leave entitlement entirely, so a
+     * contract that only says "varies" / "coordinated with manager" / free
+     * text has nothing to compute a number from, and that is fine only there.
+     */
+    private function weeklyHoursRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            $category = ContractType::find($this->contract_type_id)?->category;
+
+            if ($category !== 'service' && (int) $value < 1) {
+                $fail(__('validation.custom.weekly_hours.required_unless_service'));
+            }
+        };
+    }
+
     // ────────────────────────────────────────────────
     // Private helpers
     // ────────────────────────────────────────────────
@@ -566,6 +578,8 @@ class ContractForm extends Form
             'work_day_to' => $isFixed ? $this->work_day_to : null,
             'show_days_per_week' => $isFixed && $this->show_days_per_week,
             'show_hours_per_week' => $isFixed && $this->show_hours_per_week,
+            'show_hours_per_day' => $isFixed && $this->show_hours_per_day,
+            'show_day_range' => $isFixed && $this->show_day_range,
 
             'flex_days_per_week' => $isFixed ? null : $this->flex_days_per_week,
             'flex_hours_per_week' => $isFixed ? null : $this->flex_hours_per_week,
