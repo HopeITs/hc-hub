@@ -72,12 +72,11 @@
 </div> --}}
 
 @php
-    use App\Enums\Currency;
     use App\Support\ArabicText as AR;
     use Carbon\Carbon;
 
     $forPdf = $forPdf ?? false;
-    
+
     $Glyphs = fn($s) => $forPdf ? AR::glyphs((string) $s) : (string) $s;
     $SmartGlyphs = fn($s, $limit = 2000) => $forPdf ? AR::smartGlyphs((string)$s, $limit) : (string)$s;
     $Digits = fn($s) => $forPdf ? AR::digits((string) $s) : (string) $s;
@@ -89,26 +88,11 @@
 
     $startStr = $contract->start_date ? Carbon::parse($contract->start_date)->format('d/m/Y') : '—';
     $endStr = $contract->end_date ? Carbon::parse($contract->end_date)->format('d/m/Y') : '—';
-    
+
     $startStrAr = $startStr;
     $endStrAr = $endStr;
 
-    $salary = (float) ($contract->salary ?? 0);
-    $salaryFormattedEn = $salary ? number_format($salary, 0, '.', ',') : '—';
-    $salaryFormattedAr = $salary ? number_format($salary, 0, '.', ',') : '—';
-    $currencyLabels = Currency::getLocalizedName((int) $contract->currency);
-    $currencyEn = $currencyLabels['en'];
-    $currencyAr = $currencyLabels['ar'];
-    
     $annualLeaveDays = $contract->leaveBalances->first()?->int_total ?? '—';
-    $weeklyHours = (int) ($contract->weekly_hours ?? 40);
-    $dailyHours = $weeklyHours / 5;
-
-    $workDaysEn = $contract->work_days_en ?: 'Monday to Friday';
-    $workDaysAr = $contract->work_days_ar ?: 'الإثنين إلى الجمعة';
-
-    $dailyStart = $contract->work_hours_from ? Carbon::parse($contract->work_hours_from)->format('g:i A') : '9:00 AM';
-    $dailyEnd = $contract->work_hours_to ? Carbon::parse($contract->work_hours_to)->format('g:i A') : '5:00 PM';
 
     $esc = fn($v) => e((string) ($v ?: '—'));
     $escAr = fn($v) => e((string) ($v ? $Glyphs($v) : '—'));
@@ -166,26 +150,19 @@
 </div>
 
 <div class="avoid-break mt-2">
-    <x-contract.dual 
-        :en="$LB('6. Volunteer Work Hours:')" 
+    <x-contract.dual
+        :en="$LB('6. Volunteer Work Hours:')"
         :ar="$LB($Glyphs('ساعات العمل التطوعّي:') . ' .6')"
         />
 
-    <x-contract.dual class="mt-1"
-        :en="$weeklyHours . ' working hours per week, it changes according to the requirements of the job.'" 
-        :ar="$Glyphs('ساعة عمل أسبوعياً، تتغير بحسب متطلّبات العمل.') . ' ' . $weeklyHours" />
+    <x-contract.schedule-clause :contract="$contract" :for-pdf="$forPdf" />
 </div>
 <div class="avoid-break mt-2">
-    <x-contract.dual :en="$LB('7. Stipend and Benefits:')" 
+    <x-contract.dual :en="$LB('7. Stipend and Benefits:')"
     :ar="$LB($Glyphs('المكافأة المالية والمزايا:') . ' .7')"
     />
-    
 
-        <x-contract.dual class="mt-1" :en="'Christian Hope Center is to give a monthly stipend of<br><strong>/ ' . $salaryFormattedEn . ' ' . $currencyEn . ' /</strong>'"
-        :ar="$SmartGlyphs('خصص الفريق الأول للفريق الثاني شهرياً مكافأة وقدرها') . '<br><strong>/ ' . $Glyphs($currencyAr) . ' ' . $salaryFormattedAr . ' /</strong>'" />
-
-    <x-contract.dual :en="'or its equivalent in Syrian pounds, to be paid in cash to the volunteer at the end of each month.'" 
-        :ar="$SmartGlyphs('أو ما يعادلها بالليرة السورية، تُمنح نقداً في نهاية كل شهر.')" />
+    <x-contract.pay-clause :contract="$contract" :for-pdf="$forPdf" />
 </div>
 
 <div class="avoid-break mt-2">

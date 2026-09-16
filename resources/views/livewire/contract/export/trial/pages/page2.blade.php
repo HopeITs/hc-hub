@@ -83,19 +83,6 @@
     $startStrAr = $startStr;
     $endStrAr = $endStr;
 
-    $salary = (float) ($contract->salary ?? 0);
-    $salaryFormattedEn = $salary ? number_format($salary, 0, '.', ',') : '—';
-    $salaryFormattedAr = $salary ? number_format($salary, 0, '.', ',') : '—';
-
-    $weeklyHours = (int) ($contract->weekly_hours ?? 40);
-    $dailyHours = $weeklyHours / 5;
-
-    $workDaysEn = $contract->work_days_en ?: 'Monday to Friday';
-    $workDaysAr = $contract->work_days_ar ?: 'الإثنين إلى الجمعة';
-
-    $dailyStart = $contract->work_hours_from ? Carbon::parse($contract->work_hours_from)->format('g:i A') : '9:00 AM';
-    $dailyEnd = $contract->work_hours_to ? Carbon::parse($contract->work_hours_to)->format('g:i A') : '5:00 PM';
-
     $esc = fn($v) => e((string) ($v ?: '—'));
     $escAr = fn($v) => e((string) ($v ? $Glyphs($v) : '—'));
     $LB = fn($t) => '<span class="h-label-bold">' . $t . '</span>';
@@ -137,27 +124,7 @@
 <div class="avoid-break mt-2">
     <x-contract.dual :en="$LB('6. Volunteer Work Hours:')" :ar="$LB($Glyphs('ساعات العمل التطوعّي:') . ' .6')" />
 
-    <x-contract.dual rowClass="mt-1 lh-tight" :en="'<strong>' .
-        $weeklyHours .
-        ' working hours</strong> per week, <strong>' .
-        $dailyHours .
-        ' hours</strong> per day.'"
-        :ar="$SmartGlyphs('ساعات يومياً.').
-        ' <strong>'.$dailyHours.
-        '</strong> '.$SmartGlyphs('ساعة عمل أسبوعياً،').
-        ' <strong>'.$weeklyHours.
-        '</strong>'" />
-
-    <x-contract.dual rowClass="mt-1 lh-tight" :en="'Standard office hours are ' . $workDaysEn . ' from ' . $dailyStart . ' to ' . $dailyEnd . '.'" :ar="$SmartGlyphs('من نهار ' . $workDaysAr) .
-        '<br>' .
-        '. ' .
-        $wrapLtr($dailyEnd) .
-        ' ' .
-        $SmartGlyphs('حتى الساعة') .
-        ' ' .
-        $wrapLtr($dailyStart) .
-        ' ' .
-        $SmartGlyphs('من الساعة')" />
+    <x-contract.schedule-clause :contract="$contract" :for-pdf="$forPdf" />
 
     @if ($isGeneralProject)
         <x-contract.dual rowClass="mt-1 lh-tight" :en="'Saturdays are considered working days when necessary and not treated as extra hours.'" :ar="$SmartGlyphs('يعتبر يوم السبت يوم عمل في حال رأت الإدارة الحاجة<br>لذلك، ولا يعتبر دوام إضافي.')" />
@@ -177,15 +144,7 @@
 <div class="avoid-break mt-2">
     <x-contract.dual :en="$LB('7. Stipend and Benefits:')" :ar="$LB($Glyphs('المكافأة المالية والمزايا:') . ' .7')" />
 
-    <x-contract.dual rowClass="mt-1 lh-tight" :en="'Christian Hope Center is to give a monthly stipend of<br><strong>/ ' .
-        $salaryFormattedEn .
-        ' USD /</strong>'"
-        :ar="$SmartGlyphs('خصص الفريق الأول للفريق الثاني شهرياً مكافأة وقدرها').
-        '<br><strong>/ '.$Glyphs('دولار أمريكي').
-        ' '.$salaryFormattedAr.
-        ' /</strong>'" />
-
-    <x-contract.dual :en="'or its equivalent in Syrian pounds, to be paid in cash to the volunteer at the end of each month.'" :ar="$SmartGlyphs('أو ما يعادلها بالليرة السورية، تُمنح نقداً في نهاية كل شهر.')" />
+    <x-contract.pay-clause :contract="$contract" :for-pdf="$forPdf" />
 </div>
 
 <div class="avoid-break mt-2">
