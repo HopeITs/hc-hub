@@ -53,62 +53,20 @@
     <div x-cloak x-show="scheduleMode === '1'" class="mt-5 space-y-4">
         <div class="grid gap-4 sm:grid-cols-2">
             <div>
-                <x-forms.input-label for="composer_work_hours_from">
-                    <span x-text="isStudyzoneSplitShift ? @js(__('general.first-shift-work-hours-from')) : @js(__('general.work-hours-from'))"></span>
-                </x-forms.input-label>
-                <x-forms.time-picker
-                    id="composer_work_hours_from"
-                    alpine-model="workHoursFrom"
-                    format="HH:mm"
-                />
+                <x-forms.input-label for="composer_work_hours_from">@lang('general.work-hours-from')</x-forms.input-label>
+                <x-forms.date-input id="composer_work_hours_from" type="time" x-model="workHoursFrom" />
                 <x-error-span>{{ $errors->first('form.work_hours_from') }}</x-error-span>
             </div>
 
             <div>
-                <x-forms.input-label for="composer_work_hours_to">
-                    <span x-text="isStudyzoneSplitShift ? @js(__('general.first-shift-work-hours-to')) : @js(__('general.work-hours-to'))"></span>
-                </x-forms.input-label>
-                <x-forms.time-picker
-                    id="composer_work_hours_to"
-                    alpine-model="workHoursTo"
-                    format="HH:mm"
-                />
+                <x-forms.input-label for="composer_work_hours_to">@lang('general.work-hours-to')</x-forms.input-label>
+                <x-forms.date-input id="composer_work_hours_to" type="time" x-model="workHoursTo" />
                 <x-error-span>{{ $errors->first('form.work_hours_to') }}</x-error-span>
             </div>
         </div>
 
-        <div class="grid gap-4 sm:grid-cols-2" x-cloak x-show="isStudyzoneSplitShift" x-transition>
-            <div>
-                <x-forms.input-label for="composer_second_shift_work_hours_from" required>
-                    @lang('general.second-shift-work-hours-from')
-                </x-forms.input-label>
-                <x-forms.time-picker
-                    id="composer_second_shift_work_hours_from"
-                    alpine-model="secondShiftWorkHoursFrom"
-                    format="HH:mm"
-                />
-                <x-error-span>{{ $errors->first('form.second_shift_work_hours_from') }}</x-error-span>
-            </div>
-
-            <div>
-                <x-forms.input-label for="composer_second_shift_work_hours_to" required>
-                    @lang('general.second-shift-work-hours-to')
-                </x-forms.input-label>
-                <x-forms.time-picker
-                    id="composer_second_shift_work_hours_to"
-                    alpine-model="secondShiftWorkHoursTo"
-                    format="HH:mm"
-                />
-                <x-error-span>{{ $errors->first('form.second_shift_work_hours_to') }}</x-error-span>
-            </div>
-        </div>
-
-        {{--
-            A second shift in the same day, e.g. 9:00-13:00 and 17:00-21:00.
-            Study Zone programs use their own shift_type/second-shift fields
-            above instead — this generic toggle is for every other program.
-        --}}
-        <div x-cloak x-show="!isStudyzoneProgram">
+        {{-- A second shift in the same day, e.g. 9:00-13:00 and 17:00-21:00. --}}
+        <div>
             <button type="button" x-cloak x-show="!hasSecondShift()" class="{{ $miniButton }}"
                     x-on:click="toggleSecondShift(true)">
                 <svg class="size-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -171,39 +129,6 @@
                 <x-forms.input type="checkbox" x-model="showHoursPerWeek" id="composer_show_hours_per_week" />
                 <span x-text="fixedHoursPerWeekLabel"></span>
             </label>
-        </div>
-
-        <div x-cloak x-show="isStudyzoneProgram" x-transition>
-            <x-forms.input-label for="composer_shift_type" required>@lang('general.shift-type')</x-forms.input-label>
-            <div
-                wire:ignore
-                x-init="
-                    const shiftSelect = $($refs.shiftTypeSelect);
-                    shiftSelect.select2({
-                        width: '100%',
-                        dir: document.documentElement.dir || 'ltr',
-                        minimumResultsForSearch: Infinity,
-                    });
-                    shiftSelect.val(shiftType).trigger('change.select2');
-                    shiftSelect.on('change', (event) => { shiftType = event.target.value; });
-                    $watch('shiftType', (value) => {
-                        if (shiftSelect.val() !== value) {
-                            shiftSelect.val(value).trigger('change.select2');
-                        }
-                    });
-                "
-            >
-                <x-forms.select
-                    id="composer_shift_type"
-                    x-ref="shiftTypeSelect"
-                    :options="[
-                        'standard' => __('general.standard-shift'),
-                        'split' => __('general.split-shift'),
-                    ]"
-                />
-            </div>
-
-            <x-error-span>{{ $errors->first('form.shift_type') }}</x-error-span>
         </div>
     </div>
 

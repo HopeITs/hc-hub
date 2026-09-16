@@ -99,21 +99,12 @@ return [
     'working-hours' => 'Working Hours',
     'work-hours-from' => 'Work Hours From',
     'work-hours-to' => 'Work Hours To',
-    'first-shift-work-hours-from' => 'First Shift From',
-    'first-shift-work-hours-to' => 'First Shift To',
-    'second-shift-work-hours-from' => 'Second Shift From',
-    'second-shift-work-hours-to' => 'Second Shift To',
     'work-days' => 'Work Days',
     'attending-notes' => 'Attendance Notes',
     'attending-notes-placeholder-en' => 'Example: Flexible arrival is allowed on field-visit days…',
     'attending-notes-placeholder-ar' => 'مثال: يسمح بمرونة وقت الحضور في أيام الزيارات الميدانية…',
     'from-hour-to-hour' => 'From :from To :to',
     'weekly-hours' => 'Weekly Hours',
-    'daily-hours' => 'Daily Hours',
-    'work-days-per-week' => 'Work Days per Week',
-    'shift-type' => 'Shift Type',
-    'standard-shift' => 'Standard',
-    'split-shift' => 'Split shift',
     'status' => 'Status',
     'code' => 'Code',
     'slug' => 'Slug',
@@ -786,11 +777,6 @@ return [
         'runs-to' => 'runs to :date',
         'lasts-months' => ':count months',
 
-        // Both fields hold the phrase the contract PDF prints verbatim, so each
-        // placeholder is written in its own field's language rather than the
-        // interface's — the AR field is Arabic even on the English screen.
-        'work-days-placeholder-en' => 'Monday to Friday',
-        'work-days-placeholder-ar' => 'الاثنين إلى الجمعة',
         'add-notes' => 'Add attending notes',
 
         'schedule-mode' => 'Schedule',

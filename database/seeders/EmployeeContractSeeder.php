@@ -45,12 +45,6 @@ class EmployeeContractSeeder extends Seeder
                 'currency' => 1, // 1 = SYP
                 'salary_per' => 1, // 1 = شهري
                 'weekly_hours' => 40,
-                'daily_hours' => 8,
-                'work_days_per_week' => 5,
-                'shift_type' => 'standard',
-                'is_split_shift' => false,
-                'second_shift_work_hours_from' => null,
-                'second_shift_work_hours_to' => null,
                 'is_active' => true,
             ]);
         }

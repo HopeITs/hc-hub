@@ -57,14 +57,6 @@ class ContractForm extends Form
 
     public int $weekly_hours = 40;
 
-    public int $daily_hours = 8;
-
-    public ?int $work_days_per_week = 5;
-
-    public string $shift_type = 'standard';
-
-    public bool $is_split_shift = false;
-
     // ── Schedule
     public mixed $work_days_ar = null;
 
@@ -81,10 +73,6 @@ class ContractForm extends Form
     public ?string $work_hours_from = '09:00';
 
     public ?string $work_hours_to = '17:00';
-
-    public ?string $second_shift_work_hours_from = '15:00';
-
-    public ?string $second_shift_work_hours_to = '19:00';
 
     /** Optional second daily shift, e.g. 9:00-13:00 and 17:00-21:00. Both null, or both set. */
     public ?string $work_hours_2_from = null;
@@ -172,12 +160,6 @@ class ContractForm extends Form
         $this->type = 1;
         $this->place = 1;
         $this->weekly_hours = 40;
-        $this->daily_hours = 8;
-        $this->work_days_per_week = 5;
-        $this->shift_type = 'standard';
-        $this->is_split_shift = false;
-        $this->second_shift_work_hours_from = '15:00';
-        $this->second_shift_work_hours_to = '19:00';
         $this->currency = 1; // SYP
         $this->salary_per = SalaryPer::Month;
         $this->terminated_at = null;
@@ -248,10 +230,6 @@ class ContractForm extends Form
         $this->termination_reason_id = $contract->termination_reason_id;
         $this->reason_of_termination = $contract->reason_of_termination;
         $this->weekly_hours = (int) $contract->weekly_hours;
-        $this->daily_hours = (int) ($contract->daily_hours ?? 8);
-        $this->work_days_per_week = $contract->work_days_per_week ?? 5;
-        $this->shift_type = $contract->shift_type ?: 'standard';
-        $this->is_split_shift = (bool) $contract->is_split_shift || $this->shift_type === 'split';
 
         $this->currency = (int) $contract->currency;
         $this->salary = $contract->salary;
@@ -262,8 +240,6 @@ class ContractForm extends Form
         $this->attending_notes_en = $contract->attending_notes_en;
         $this->work_hours_from = $this->timeForInput($contract->work_hours_from, $this->work_hours_from);
         $this->work_hours_to = $this->timeForInput($contract->work_hours_to, $this->work_hours_to);
-        $this->second_shift_work_hours_from = $this->timeForInput($contract->second_shift_work_hours_from, $this->second_shift_work_hours_from);
-        $this->second_shift_work_hours_to = $this->timeForInput($contract->second_shift_work_hours_to, $this->second_shift_work_hours_to);
 
         $this->schedule_mode = (int) ($contract->schedule_mode ?? ScheduleMode::Fixed);
         $this->work_hours_2_from = $contract->work_hours_2_from;
@@ -319,18 +295,6 @@ class ContractForm extends Form
             // is the only category allowed to leave it at 0 — LeaveBalanceService
             // already skips leave entitlement entirely for that category.
             'weekly_hours' => ['required', 'integer', 'min:0', $this->weeklyHoursRule()],
-            // Superseded by the day-range/flex-box computation above as the
-            // real source of weekly_hours; kept nullable rather than required
-            // so a schedule_mode-driven submission (which never collects
-            // these) is not blocked by fields it no longer fills in.
-            'daily_hours' => ['nullable', 'integer', 'min:0', 'max:24'],
-            'work_days_per_week' => ['nullable', 'integer', 'min:0', 'max:7'],
-            'shift_type' => ['required', Rule::in(['standard', 'split'])],
-            'is_split_shift' => ['required', 'boolean'],
-            'work_hours_from' => ['nullable', 'date_format:H:i'],
-            'work_hours_to' => ['nullable', 'date_format:H:i'],
-            'second_shift_work_hours_from' => [Rule::requiredIf($this->is_split_shift), 'nullable', 'date_format:H:i'],
-            'second_shift_work_hours_to' => [Rule::requiredIf($this->is_split_shift), 'nullable', 'date_format:H:i'],
             'attending_notes_ar' => ['nullable', 'string', 'max:255'],
             'attending_notes_en' => ['nullable', 'string', 'max:255'],
 
@@ -455,18 +419,12 @@ class ContractForm extends Form
             'termination_reason_id' => $this->termination_reason_id ?? null,
             'reason_of_termination' => $this->reason_of_termination ?? null,
             'weekly_hours' => (int) $this->weekly_hours,
-            'daily_hours' => (int) $this->daily_hours,
-            'work_days_per_week' => $this->work_days_per_week,
-            'shift_type' => $this->shift_type,
-            'is_split_shift' => $this->is_split_shift,
             'work_days_ar' => $this->work_days_ar,
             'work_days_en' => $this->work_days_en,
             'attending_notes_ar' => filled($this->attending_notes_ar) ? trim($this->attending_notes_ar) : null,
             'attending_notes_en' => filled($this->attending_notes_en) ? trim($this->attending_notes_en) : null,
             'work_hours_from' => $this->work_hours_from,
             'work_hours_to' => $this->work_hours_to,
-            'second_shift_work_hours_from' => $this->is_split_shift ? $this->second_shift_work_hours_from : null,
-            'second_shift_work_hours_to' => $this->is_split_shift ? $this->second_shift_work_hours_to : null,
             // Automatically deactivate when a termination is recorded
             'is_active' => $isTerminated ? false : $this->is_active,
         ]);
@@ -517,18 +475,12 @@ class ContractForm extends Form
             'termination_reason_id' => $this->termination_reason_id,
             'reason_of_termination' => $this->reason_of_termination ?? null,
             'weekly_hours' => (int) $this->weekly_hours,
-            'daily_hours' => (int) $this->daily_hours,
-            'work_days_per_week' => $this->work_days_per_week,
-            'shift_type' => $this->shift_type,
-            'is_split_shift' => $this->is_split_shift,
             'work_days_ar' => $this->work_days_ar,
             'work_days_en' => $this->work_days_en,
             'attending_notes_ar' => filled($this->attending_notes_ar) ? trim($this->attending_notes_ar) : null,
             'attending_notes_en' => filled($this->attending_notes_en) ? trim($this->attending_notes_en) : null,
             'work_hours_from' => $isFixed ? $this->work_hours_from : null,
             'work_hours_to' => $isFixed ? $this->work_hours_to : null,
-            'second_shift_work_hours_from' => $this->is_split_shift ? $this->second_shift_work_hours_from : null,
-            'second_shift_work_hours_to' => $this->is_split_shift ? $this->second_shift_work_hours_to : null,
 
             'schedule_mode' => $this->schedule_mode,
             // Each mode's own fields are cleared when it is not the active one,

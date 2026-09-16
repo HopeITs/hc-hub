@@ -37,13 +37,7 @@ class ContractFactory extends Factory
             'work_days_ar' => 'الاثنين,الثلاثاء,الأربعاء,الخميس,الجمعة',
             'work_hours_from' => '09:00:00',
             'work_hours_to' => '17:00:00',
-            'second_shift_work_hours_from' => null,
-            'second_shift_work_hours_to' => null,
             'weekly_hours' => 40,
-            'daily_hours' => 8,
-            'work_days_per_week' => 5,
-            'shift_type' => 'standard',
-            'is_split_shift' => false,
             'is_active' => true,
         ];
     }

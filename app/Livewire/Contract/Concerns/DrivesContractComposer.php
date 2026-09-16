@@ -6,7 +6,6 @@ use App\Enums\ScheduleMode;
 use App\Livewire\Forms\ContractForm;
 use App\Models\Contract;
 use App\Models\Employee;
-use App\Models\Program;
 use App\Services\LeaveBalanceService;
 use Livewire\Attributes\Renderless;
 
@@ -167,14 +166,7 @@ trait DrivesContractComposer
             'scheduleMode' => $this->form->schedule_mode,
             'workHoursFrom' => $this->form->work_hours_from,
             'workHoursTo' => $this->form->work_hours_to,
-            'secondShiftWorkHoursFrom' => $this->form->second_shift_work_hours_from,
-            'secondShiftWorkHoursTo' => $this->form->second_shift_work_hours_to,
             'weeklyHours' => $this->form->weekly_hours,
-            'dailyHours' => $this->form->daily_hours,
-            'workDaysPerWeek' => $this->form->work_days_per_week,
-            'shiftType' => $this->form->shift_type,
-            'workDaysEn' => $this->form->work_days_en,
-            'workDaysAr' => $this->form->work_days_ar,
             'workHours2From' => $this->form->work_hours_2_from,
             'workHours2To' => $this->form->work_hours_2_to,
             'workDayFrom' => $this->form->work_day_from,
@@ -218,18 +210,6 @@ trait DrivesContractComposer
         $this->form->end_date = $this->dateOrNull($payload['endDate'] ?? null);
 
         $this->form->weekly_hours = max(0, (int) ($payload['weeklyHours'] ?? 0));
-        $this->form->daily_hours = $this->intOrNull($payload['dailyHours'] ?? null) ?? 0;
-        $this->form->work_days_per_week = $this->intOrNull($payload['workDaysPerWeek'] ?? null);
-        $this->form->shift_type = $this->composerProgramIsStudyzone() && ($payload['shiftType'] ?? null) === 'split'
-            ? 'split'
-            : 'standard';
-        $this->form->is_split_shift = $this->form->shift_type === 'split';
-        $this->form->second_shift_work_hours_from = $this->form->is_split_shift
-            ? $this->timeOrNull($payload['secondShiftWorkHoursFrom'] ?? null)
-            : null;
-        $this->form->second_shift_work_hours_to = $this->form->is_split_shift
-            ? $this->timeOrNull($payload['secondShiftWorkHoursTo'] ?? null)
-            : null;
 
         // work_days_en/ar are deliberately left untouched here: the composer no
         // longer collects them (superseded by the structured day range and
@@ -295,16 +275,8 @@ trait DrivesContractComposer
             'start_date' => 'contract',
             'end_date' => 'contract',
             'weekly_hours' => 'schedule',
-            'daily_hours' => 'schedule',
-            'work_days_per_week' => 'schedule',
-            'shift_type' => 'schedule',
-            'is_split_shift' => 'schedule',
-            'work_days_en' => 'schedule',
-            'work_days_ar' => 'schedule',
             'work_hours_from' => 'schedule',
             'work_hours_to' => 'schedule',
-            'second_shift_work_hours_from' => 'schedule',
-            'second_shift_work_hours_to' => 'schedule',
             'schedule_mode' => 'schedule',
             'work_hours_2_from' => 'schedule',
             'work_hours_2_to' => 'schedule',
@@ -359,28 +331,6 @@ trait DrivesContractComposer
         $value = is_string($value) ? trim($value) : null;
 
         return preg_match('/^\d{2}:\d{2}(?::\d{2})?$/', (string) $value) === 1 ? substr($value, 0, 5) : null;
-    }
-
-    protected function decimalOrNull(mixed $value): ?float
-    {
-        if (! is_numeric($value)) {
-            return null;
-        }
-
-        return round((float) $value, 2);
-    }
-
-    protected function composerProgramIsStudyzone(): bool
-    {
-        if (! $this->program_id) {
-            return false;
-        }
-
-        $program = Program::query()->select('id', 'name', 'slug')->find($this->program_id);
-        $slug = strtoupper(trim((string) ($program?->slug ?? '')));
-        $name = strtolower(trim((string) ($program?->name ?? '')));
-
-        return $slug === 'SZ' || str_contains($name, 'study zone') || str_contains($name, 'studyzone');
     }
 
     protected function textOrNull(mixed $value): ?string

@@ -102,10 +102,6 @@ return [
     'working-hours' => 'ساعات العمل',
     'work-hours-from' => 'بداية يوم العمل',
     'work-hours-to' => 'نهاية يوم العمل',
-    'first-shift-work-hours-from' => 'بداية الدوام الأول',
-    'first-shift-work-hours-to' => 'نهاية الدوام الأول',
-    'second-shift-work-hours-from' => 'بداية الدوام الثاني',
-    'second-shift-work-hours-to' => 'نهاية الدوام الثاني',
     'work-days' => 'أيام العمل',
     'attending-notes' => 'ملاحظات الحضور',
     'attending-notes-placeholder-en' => 'Example: Flexible arrival is allowed on field-visit days…',
@@ -113,11 +109,6 @@ return [
     'from-hour-to-hour' => 'من :from حتى :to',
     'role' => 'الأدوار|الدور',
     'weekly-hours' => 'ساعات العمل الأسبوعية',
-    'daily-hours' => 'ساعات العمل اليومية',
-    'work-days-per-week' => 'أيام العمل أسبوعياً',
-    'shift-type' => 'نوع الدوام',
-    'standard-shift' => 'دوام عادي',
-    'split-shift' => 'دوام مجزء',
     'status' => 'الحالة',
     'code' => 'الرمز',
     'slug' => 'الاسم المختصر',
@@ -786,10 +777,6 @@ return [
         'runs-to' => 'حتى :date',
         'lasts-months' => ':count أشهر',
 
-        // الحقلان يُطبعان كما هما في العقد، لذلك يُكتب كل مثال بلغة حقله
-        // لا بلغة الواجهة.
-        'work-days-placeholder-en' => 'Monday to Friday',
-        'work-days-placeholder-ar' => 'الاثنين إلى الجمعة',
         'add-notes' => 'إضافة ملاحظات الدوام',
 
         'schedule-mode' => 'نوع الدوام',

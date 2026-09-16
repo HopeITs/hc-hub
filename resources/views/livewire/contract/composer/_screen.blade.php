@@ -98,8 +98,6 @@
             'perHour' => __('general.composer.per-hour'),
             'perSession' => __('general.composer.per-session'),
             'perYear' => __('general.composer.per-year'),
-            'standardShift' => __('general.standard-shift'),
-            'splitShift' => __('general.split-shift'),
             'empty' => '—',
         ],
     ];
