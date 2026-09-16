@@ -1,7 +1,6 @@
 @props([
     'id',
-    'model',            // Alpine x-model target for the checkbox, e.g. 'flexDaysPerWeekOn'
-    'highlight' => null, // Alpine boolean expression; true paints the required-field accent stripe
+    'model', // Alpine x-model target for the checkbox, e.g. 'flexDaysPerWeekOn'
 ])
 
 {{--
@@ -12,12 +11,13 @@
     two <label> elements wrapping one input isn't valid HTML and confuses
     screen readers about the control's name). The slot is the checkbox's own
     label text; `hint` and `fields` are optional extras that only make sense
-    once the box is checked.
+    once the box is checked. A card whose box is conditionally required marks
+    that inline in its own label slot (the same asterisk <x-forms.input-label
+    required> uses elsewhere) rather than through a prop here — a highlighted
+    background/border for "required" reads as an error at a glance, which it
+    is not.
 --}}
-<div
-    {{ $attributes->class('rounded-control border border-neutral-200 p-3 transition') }}
-    @if ($highlight) x-bind:class="({{ $highlight }}) ? 'border-s-4 border-s-primary bg-neutral-50' : ''" @endif
->
+<div {{ $attributes->class('rounded-control border border-neutral-200 p-3 transition') }}>
     <x-forms.input type="checkbox" x-model="{{ $model }}" id="{{ $id }}" label-class="font-medium text-body text-neutral-800">
         {{ $slot }}
     </x-forms.input>

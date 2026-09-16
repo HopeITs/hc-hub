@@ -143,15 +143,26 @@
                 @lang('general.composer.flex-hours-group')
             </p>
 
-            <div class="mt-2 space-y-3">
-                {{-- Hours/week — required unless the category is exempt (service). --}}
-                <x-forms.checkbox-card id="composer_flex_hours_week_on" model="flexHoursPerWeekOn"
-                    highlight="!flexHoursPerWeekOn && selectedType?.category !== 'service'">
+            <div class="mt-2 grid items-start gap-3 sm:grid-cols-2">
+                {{--
+                    Hours/week — required unless the category is exempt
+                    (service). Flagged the same way any other required field
+                    is (an asterisk on its own label), not with a
+                    conditionally-appearing card highlight: that reads as an
+                    error the moment the box is unchecked, when it usually
+                    just has not been gotten to yet.
+                --}}
+                <x-forms.checkbox-card id="composer_flex_hours_week_on" model="flexHoursPerWeekOn">
                     @lang('general.composer.flex-hours-per-week')
+                    <span x-cloak x-show="selectedType?.category !== 'service'"
+                          class="text-primary ltr:ml-1 rtl:mr-1" aria-hidden="true">*</span>
+                    <span x-cloak x-show="selectedType?.category !== 'service'" class="sr-only">
+                        (@lang('general.a11y.required-field'))
+                    </span>
 
                     <x-slot:hint>
-                        <p x-cloak x-show="!flexHoursPerWeekOn && selectedType?.category !== 'service'"
-                           class="mt-1 text-caption text-secondary-medium">
+                        <p x-cloak x-show="selectedType?.category !== 'service'"
+                           class="mt-1 text-caption text-secondary-light">
                             @lang('general.composer.flex-hours-per-week-required')
                         </p>
                     </x-slot:hint>
@@ -195,7 +206,7 @@
                 @lang('general.composer.flex-descriptive-group')
             </p>
 
-            <div class="mt-2 space-y-3">
+            <div class="mt-2 grid items-start gap-3 sm:grid-cols-2">
                 <x-forms.checkbox-card id="composer_flex_varies" model="flexVariesByRequirements">
                     @lang('general.composer.flex-varies-by-requirements')
                 </x-forms.checkbox-card>
@@ -204,8 +215,8 @@
                     @lang('general.composer.flex-coordinated-with-manager')
                 </x-forms.checkbox-card>
 
-                {{-- Custom text, bilingual --}}
-                <x-forms.checkbox-card id="composer_flex_custom_on" model="flexCustomOn">
+                {{-- Custom text, bilingual — spans both columns so its EN/AR pair keeps a usable width. --}}
+                <x-forms.checkbox-card id="composer_flex_custom_on" model="flexCustomOn" class="sm:col-span-2">
                     @lang('general.composer.flex-custom')
 
                     <x-slot:fields>
