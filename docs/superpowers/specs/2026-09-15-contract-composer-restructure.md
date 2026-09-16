@@ -174,10 +174,29 @@ with a `general.composer.weekly-hours-value` translation (`:count h/week` / `:co
 ساعة/أسبوعيًا`) formatted through the same `fill()` templating every other computed label already
 uses.
 
-### Phase 4 — Pay step
+### Phase 4 — Pay step — DONE
+
+Commit `f384a310`. Verified via `php artisan test` (365 passed, the same 2 pre-existing unrelated
+failures) and a real browser walkthrough of both modes end to end — fixed, fixed paid per session,
+flexible with two pay tiers — each checked against the database directly, plus an Arabic/RTL pass.
 
 Fixed (amount + currency + `SalaryPer` + `SessionDuration` when `Session`) vs. flexible
-(`contract_pay_tiers` repeater) modes for `_pay.blade.php`.
+(`contract_pay_tiers` repeater) modes for `_pay.blade.php`, mirroring the schedule step's
+`PayMode` fixed/flexible toggle exactly. Currency is shared by both modes — one flat figure or a
+list of tiered ones, always in the same currency.
+
+- `ContractForm::syncPayTiers()` replaces a contract's `contract_pay_tiers` rows wholesale on
+  every save path (`save()`, `create()`, `update()`) — delete-then-recreate rather than diffing,
+  since the repeater has no stable per-row identity worth preserving and the row count is always
+  small.
+- `salary`/`session_duration` are nulled and `salary_per` reset to `SalaryPer::Unknown` when
+  `pay_mode` is Flexible, same null-the-inactive-mode's-fields pattern as the schedule step's
+  fixed/flex fields — so a contract switched from flexible back to fixed does not keep stale
+  tiers, and vice versa.
+- The pre-Phase-4 print templates were not touched: they still read `$contract->salary` directly
+  and degrade gracefully (DomPDF's own `$esc()` "—" fallback, no crash) for a flexible-pay
+  contract. Rendering the tiered clauses is Phase 5's job, same as the schedule step's fixed/flex
+  clauses.
 
 ### Phase 5 — Printed contract templates
 
