@@ -198,10 +198,65 @@ list of tiered ones, always in the same currency.
   contract. Rendering the tiered clauses is Phase 5's job, same as the schedule step's fixed/flex
   clauses.
 
-### Phase 5 — Printed contract templates
+### Phase 5 — Printed contract templates — DONE
 
-Data-driven schedule/pay clauses shared between the screen and PDF export via
-`<x-contract.schedule-clause>` / `<x-contract.pay-clause>` Blade components.
+Commit `3640d4ed`. Verified via `php artisan test` (376 passed, the same 2
+pre-existing unrelated failures) plus real output: the on-screen contract
+view for fixed, flexible, and tiered-pay contracts across all three
+categories, and actual generated PDFs (`Barryvdh\DomPDF`) inspected via
+`pdftotext` to confirm every figure survives the Arabic-shaping pass.
+
+Data-driven `<x-contract.schedule-clause>` / `<x-contract.pay-clause>`
+Blade components, shared between the on-screen contract view and the PDF
+export — which turned out to be *two* independently hand-maintained
+directory trees per category (`details/*/pages/page2.blade.php` for the
+screen, `export/*/pages/page2.blade.php` for the PDF; the latter also
+contained ~9 dead commented-out earlier drafts per file, left untouched),
+six files total now reduced to thin wrappers around the same two
+components instead of hand-diverged copies of the same prose.
+
+The replaced wording was completely stale relative to the Phase 3/4
+restructure: every category always printed a flat "$weeklyHours working
+hours per week, $weeklyHours/5 hours per day" regardless of
+`schedule_mode`, ignored the day range/second shift/flexible columns
+entirely, and always said "monthly stipend" regardless of `salary_per` —
+two of the three categories also hardcoded the currency to USD regardless
+of what the contract actually stored.
+
+- `<x-contract.schedule-clause>` branches on `schedule_mode`. Fixed states
+  only whichever of hours/week, hours/day, days/week the `show_*` toggles
+  have on, then an office-hours sentence with the day range (if
+  `show_day_range`) and second shift (if `work_hours_2_from` is set) — the
+  same structure `contract-composer.js`'s live preview already builds
+  client-side (Phase 3's follow-up work), now the server-side source of
+  truth for what actually prints. Flexible joins whichever `flex_*`
+  fragments are set.
+- `<x-contract.pay-clause>` branches on `pay_mode`. Fixed varies the
+  wording by `salary_per` (monthly/hourly/per-session, with the session's
+  own duration when relevant) instead of always saying "monthly", and
+  reads the contract's own `currency` instead of hardcoding USD. Flexible
+  lists every `pay_tiers` row. The SYP-equivalent-in-cash clause now only
+  appears for a foreign-denominated contract (USD/EUR), not one already in
+  SYP.
+
+**Found only by generating an actual PDF, not by the on-screen render or
+PHPUnit:** Arabic digit conversion (`ar_digits()`, PDF-only — the browser
+never needs it) was first applied to *both* dual-language columns. On
+screen this is invisible (the English column's `$digits()` call is a
+no-op there), but in the actual DomPDF output every English-column number
+printed as a blank glyph — the font/direction context that column renders
+in has no glyphs for Arabic-Indic digits. Digit conversion is now
+Arabic-column-only. Caught by rendering a real PDF via `Pdf::loadView(...)
+->output()` in `tinker` and reading it back with `pdftotext`, which is
+also how a second, smaller issue was caught: the flexible-pay tier
+bullet's en dash (`–`) doesn't appear to be in the custom PDF font either
+(rendered as a substitution glyph) — replaced with a plain hyphen.
+
+Both components assemble each Arabic phrase as one raw string before a
+single `glyphs()`/`smartGlyphs()` call — shaping "و" ("and") separately
+from what follows it (e.g. splitting "ومن" into "و" + "من") prints it
+disconnected, since ArPHP's shaper needs the full word in one call to pick
+the correct joined letterform.
 
 ## 4. Verification (whole project)
 
