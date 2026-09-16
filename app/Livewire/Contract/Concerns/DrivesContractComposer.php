@@ -97,7 +97,7 @@ trait DrivesContractComposer
      */
     protected function composerSections(): array
     {
-        return ['assignment', 'contract', 'schedule', 'pay'];
+        return ['assignment', 'schedule', 'pay'];
     }
 
     /**
@@ -290,11 +290,11 @@ trait DrivesContractComposer
             'city_id' => 'assignment',
             'employee_id' => 'assignment',
             'position_id' => 'assignment',
-            'contract_type_id' => 'contract',
-            'type' => 'contract',
-            'place' => 'contract',
-            'start_date' => 'contract',
-            'end_date' => 'contract',
+            'contract_type_id' => 'assignment',
+            'type' => 'assignment',
+            'place' => 'assignment',
+            'start_date' => 'assignment',
+            'end_date' => 'assignment',
             'weekly_hours' => 'schedule',
             'work_hours_from' => 'schedule',
             'work_hours_to' => 'schedule',

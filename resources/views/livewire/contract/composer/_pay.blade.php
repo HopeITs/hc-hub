@@ -42,7 +42,7 @@
 {{-- Section 4 — the one field where a typo costs the most. --}}
 <x-contract.section
     name="pay"
-    index="4"
+    index="3"
     :title="__('general.composer.pay')"
     summary="paySummary"
 >

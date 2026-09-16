@@ -85,15 +85,15 @@ class ContractCreatePerformanceTest extends TestCase
             ->assertSet('form.end_date', null);
     }
 
-    public function test_the_composer_renders_all_four_sections_and_locks_the_single_city(): void
+    public function test_the_composer_renders_all_three_sections_and_locks_the_single_city(): void
     {
         $fixtures = $this->makeFixtures();
 
         Livewire::actingAs($fixtures['hr'])
             ->test(ContractCreate::class)
-            // The four sections and their chrome.
+            // The three sections and their chrome — Assignment now also
+            // carries what used to be its own separate Contract section.
             ->assertSeeHtml('composer-section-assignment')
-            ->assertSeeHtml('composer-section-contract')
             ->assertSeeHtml('composer-section-schedule')
             ->assertSeeHtml('composer-section-pay')
             // All five cascade fields, laid out two per row.
@@ -298,9 +298,8 @@ class ContractCreatePerformanceTest extends TestCase
 
         Livewire::actingAs($fixtures['hr'])
             ->test(ContractEdit::class, ['contract' => $contract])
-            // The four sections the create screen has, unchanged...
+            // The three sections the create screen has, unchanged...
             ->assertSeeHtml('composer-section-assignment')
-            ->assertSeeHtml('composer-section-contract')
             ->assertSeeHtml('composer-section-schedule')
             ->assertSeeHtml('composer-section-pay')
             ->assertSeeHtml('id="composer_employee"')

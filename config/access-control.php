@@ -145,12 +145,14 @@ return [
         'contract.contract-create' => [
             'submit' => 'contracts.create',
             'locationOptions' => 'contracts.create',
+            'employeeSearchOptions' => 'contracts.create',
             'leavePreview' => 'contracts.create',
             'draftContractFor' => 'contracts.create',
         ],
         'contract.contract-edit' => [
             'submit' => 'contracts.update',
             'locationOptions' => 'contracts.update',
+            'employeeSearchOptions' => 'contracts.update',
             'leavePreview' => 'contracts.update',
         ],
         // A renewal creates a contract. The permission here is the coarse

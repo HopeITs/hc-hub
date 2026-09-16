@@ -7,6 +7,7 @@ use App\Livewire\Contract\Concerns\DrivesContractComposer;
 use App\Livewire\Contract\Concerns\ResolvesContractLocationOptions;
 use App\Livewire\Forms\ContractForm;
 use App\Livewire\Forms\LeaveBalanceForm;
+use App\Models\Center;
 use App\Models\Contract;
 use App\Models\Employee;
 use App\Models\User;
@@ -179,11 +180,19 @@ class ContractCreate extends Component
 
         $position = $latest->position;
 
+        // Same rule ResolvesContractLocationOptions::initLocationContext() uses
+        // for a renewal/edit: a center's own city is authoritative over the
+        // position's plain city_id (Position::inCity() agrees).
+        $effectiveCityId = $position?->center_id
+            ? Center::whereKey($position->center_id)->value('city_id')
+            : $position?->city_id;
+
         return [
             'draftContractId' => $latest->id,
             'positionId' => $latest->position_id,
             'programId' => $position?->program_id,
             'centerId' => $position?->center_id,
+            'cityId' => $effectiveCityId,
         ];
     }
 

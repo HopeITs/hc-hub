@@ -750,8 +750,7 @@ return [
     // Contract create — the single-page "Composer" screen.
     'composer' => [
 
-        'assignment' => 'Assignment',
-        'contract' => 'Contract',
+        'assignment' => 'Assignment & Contract',
         'schedule' => 'Schedule',
         'pay' => 'Pay',
         // Editing only — a contract cannot already have ended when it is written.

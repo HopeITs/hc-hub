@@ -34,6 +34,7 @@ class ContractComposerDraftUpgradeTest extends TestCase
                 'positionId' => $fixtures['position']->id,
                 'programId' => $fixtures['program']->id,
                 'centerId' => $fixtures['center']->id,
+                'cityId' => $fixtures['city']->id,
             ]);
     }
 

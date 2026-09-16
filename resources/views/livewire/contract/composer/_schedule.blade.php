@@ -19,10 +19,10 @@
                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
 @endphp
 
-{{-- Section 3 — the working week, in the contract's own words. --}}
+{{-- Section 2 — the working week, in the contract's own words. --}}
 <x-contract.section
     name="schedule"
-    index="3"
+    index="2"
     :title="__('general.composer.schedule')"
     summary="scheduleSummary"
 >

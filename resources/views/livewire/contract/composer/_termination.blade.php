@@ -14,7 +14,7 @@
 --}}
 <x-contract.section
     name="termination"
-    index="5"
+    index="4"
     :title="__('general.composer.termination')"
     summary="terminationSummary"
 >

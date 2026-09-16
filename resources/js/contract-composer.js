@@ -344,7 +344,7 @@ document.addEventListener('alpine:init', () => {
             this.$watch('selected.city', () => this.syncing || this.loadCityOptions(true));
             this.$watch('selected.program', () => this.syncing || this.onProgramChange());
             this.$watch('selected.center', () => this.syncing || this.onCenterChange());
-            this.$watch('selected.employee', () => this.syncing || this.checkForDraftContract());
+            this.$watch('selected.employee', () => this.syncing || this.onEmployeeChange());
             this.$watch('leaveInputs', () => this.scheduleLeavePreview());
             this.$watch('flexCustomOn', (on) => {
                 if (!on) {
@@ -355,6 +355,13 @@ document.addEventListener('alpine:init', () => {
 
             if (this.selected.city) {
                 this.loadCityOptions(false);
+            } else {
+                // No city yet (a fresh create, for a user who is not pinned
+                // to one) — open the Employee field with the full list this
+                // user may pick from anyway, rather than an empty one
+                // waiting on a city choice nobody has a reason to make
+                // first. See onEmployeeChange().
+                this.loadEmployeeSearchOptions();
             }
 
             // A seeded screen — an edit, or a renewal — arrives with every
@@ -377,13 +384,11 @@ document.addEventListener('alpine:init', () => {
         // Section state machine
         // =============================================================
 
+        /** Assignment (who/where) and Contract (type/term) merged into one section. */
         get assignmentValid() {
             return Boolean(this.selected.city && this.selected.employee
-                && this.selected.program && this.selected.position);
-        },
-
-        get contractValid() {
-            return Boolean(this.selected.contractType && this.type && this.place
+                && this.selected.program && this.selected.position
+                && this.selected.contractType && this.type && this.place
                 && this.startDate && this.endDate
                 && this.endDate >= this.startDate && !this.endDateTooFar);
         },
@@ -462,7 +467,6 @@ document.addEventListener('alpine:init', () => {
         isValid(name) {
             return {
                 assignment: this.assignmentValid,
-                contract: this.contractValid,
                 schedule: this.scheduleValid,
                 pay: this.payValid,
                 // Optional by nature: a contract is complete whether or not it
@@ -623,8 +627,61 @@ document.addEventListener('alpine:init', () => {
         },
 
         /**
-         * Auto-fills program/center/position from the selected employee's
-         * draft contract, if their most recently created contract is one.
+         * Loads the full employee list this user may pick from, with no city
+         * chosen yet — how the Assignment step opens for anyone not already
+         * pinned to one city. Picking a name here is what determines the
+         * city (see onEmployeeChange()), not the other way around.
+         */
+        async loadEmployeeSearchOptions() {
+            this.loading = true;
+
+            try {
+                const employees = await this.$wire.employeeSearchOptions();
+
+                // A city may already have been picked (or derived) by the
+                // time this resolves — never clobber a real, city-scoped
+                // list with the wider one it started from.
+                if (!this.selected.city) {
+                    this.options.employees = employees ?? [];
+                }
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        /**
+         * Runs whenever the chosen employee changes: derives their city (so
+         * picking someone is enough on its own — no separate city step), then
+         * checks for a draft contract, which may refine city/program/position
+         * further from data more specific than the employee's own residence.
+         */
+        async onEmployeeChange() {
+            const employeeId = Number(this.selected.employee);
+
+            if (!Number.isInteger(employeeId) || employeeId < 1) {
+                this.draftContractId = null;
+
+                return;
+            }
+
+            const employee = this.options.employees
+                .find((candidate) => str(candidate.value) === this.selected.employee);
+            const employeeCityId = employee?.cityId != null ? str(employee.cityId) : '';
+
+            if (employeeCityId && employeeCityId !== this.selected.city) {
+                await this.withSync(() => { this.selected.city = employeeCityId; });
+                await this.loadCityOptions(false);
+            }
+
+            await this.checkForDraftContract();
+        },
+
+        /**
+         * Auto-fills city/program/center/position from the selected employee's
+         * draft contract, if their most recently created contract is one —
+         * refining what onEmployeeChange() already set from their residence
+         * city, since the draft's own position is the more specific answer
+         * when the two disagree (e.g. a temporary assignment elsewhere).
          * Fields set here stay user-editable afterwards, same as a renewal's
          * seed — this only saves re-entering what the employee-create screen
          * already captured, it does not lock anything in.
@@ -647,6 +704,13 @@ document.addEventListener('alpine:init', () => {
             }
 
             this.draftContractId = draft.draftContractId;
+
+            const draftCityId = draft.cityId != null ? str(draft.cityId) : '';
+
+            if (draftCityId && draftCityId !== this.selected.city) {
+                await this.withSync(() => { this.selected.city = draftCityId; });
+                await this.loadCityOptions(false);
+            }
 
             await this.withSync(() => {
                 this.selected.program = str(draft.programId ?? '');
@@ -1142,7 +1206,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         get progressLabel() {
-            return this.fill(this.labels.progress, { done: this.completedCount, total: 4 });
+            return this.fill(this.labels.progress, { done: this.completedCount, total: this.requiredSections.length });
         },
 
         get duplicateContractNotice() {
@@ -1186,16 +1250,12 @@ document.addEventListener('alpine:init', () => {
         // ---- collapsed section summaries -------------------------------
 
         get assignmentSummary() {
-            return [this.selectedEmployee?.label, this.selectedPosition?.label, this.cityName]
-                .filter(Boolean).join(' · ');
-        },
-
-        get contractSummary() {
             const period = this.startDate && this.endDate
                 ? `${this.formatDate(this.startDate)} → ${this.formatDate(this.endDate)}`
                 : '';
 
-            return [this.selectedType?.name, period, this.durationLabel].filter(Boolean).join(' · ');
+            return [this.selectedEmployee?.label, this.selectedPosition?.label, this.selectedType?.name, period]
+                .filter(Boolean).join(' · ');
         },
 
         /**

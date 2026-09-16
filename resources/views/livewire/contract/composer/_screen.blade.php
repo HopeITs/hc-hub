@@ -20,7 +20,7 @@
     $isEdit = $mode === 'edit';
 
     // Editing adds the one section a contract that does not exist cannot have.
-    $sections = ['assignment', 'contract', 'schedule', 'pay'];
+    $sections = ['assignment', 'schedule', 'pay'];
 
     if ($isEdit) {
         $sections[] = 'termination';
@@ -68,7 +68,6 @@
             'notTerminated' => __('general.composer.not-terminated'),
             'sections' => [
                 'assignment' => __('general.composer.assignment'),
-                'contract' => __('general.composer.contract'),
                 'schedule' => __('general.composer.schedule'),
                 'pay' => __('general.composer.pay'),
                 'termination' => __('general.composer.termination'),
@@ -122,7 +121,6 @@
     <div class="grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5">
         <div class="flex min-w-0 flex-col gap-2.5">
             @include('livewire.contract.composer._assignment')
-            @include('livewire.contract.composer._contract')
             @include('livewire.contract.composer._schedule', ['dayNames' => $dayNames])
 
             @include('livewire.contract.composer._pay')
