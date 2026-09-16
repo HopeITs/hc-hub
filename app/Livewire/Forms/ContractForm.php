@@ -4,9 +4,12 @@ namespace App\Livewire\Forms;
 
 use App\Enums\ContractPlace;
 use App\Enums\ContractType as ContractTypeEnum;
+use App\Enums\PayMode;
 use App\Enums\SalaryPer;
 use App\Enums\ScheduleMode;
+use App\Enums\SessionDuration;
 use App\Models\Contract;
+use App\Models\ContractPayTier;
 use App\Models\ContractType;
 use App\Models\Position;
 use Carbon\Carbon;
@@ -100,11 +103,27 @@ class ContractForm extends Form
     public ?string $flex_custom_ar = null;
 
     // ── Pay
+    // 1 = fixed, 2 = flexible — see App\Enums\PayMode.
+    public int $pay_mode = 1;
+
     public int $currency = 1;
 
+    // -- Fixed mode
     public mixed $salary = null;
 
     public int $salary_per = 1;
+
+    /** Only meaningful when salary_per is Session — see App\Enums\SessionDuration. */
+    public ?int $session_duration = null;
+
+    /**
+     * -- Flexible mode: an unbounded "Add condition" repeater instead of one
+     * flat figure, e.g. "if teaching 60h/month" => 200, "70h/month" => 300.
+     * Each row: ['condition_en' => string, 'condition_ar' => string, 'amount' => numeric].
+     *
+     * @var array<int, array{condition_en: string, condition_ar: string, amount: mixed}>
+     */
+    public array $pay_tiers = [];
 
     // ────────────────────────────────────────────────
     // Lifecycle hooks
@@ -176,6 +195,10 @@ class ContractForm extends Form
         $this->flex_coordinated_with_manager = false;
         $this->flex_custom_en = null;
         $this->flex_custom_ar = null;
+
+        $this->pay_mode = PayMode::Fixed;
+        $this->session_duration = null;
+        $this->pay_tiers = [];
     }
 
     public function setContract(Contract $contract): void
@@ -225,9 +248,18 @@ class ContractForm extends Form
         $this->reason_of_termination = $contract->reason_of_termination;
         $this->weekly_hours = (int) $contract->weekly_hours;
 
+        $this->pay_mode = (int) ($contract->pay_mode ?? PayMode::Fixed);
         $this->currency = (int) $contract->currency;
         $this->salary = $contract->salary;
         $this->salary_per = $contract->salary_per;
+        $this->session_duration = $contract->session_duration;
+        $this->pay_tiers = $contract->payTiers
+            ->map(fn (ContractPayTier $tier): array => [
+                'condition_en' => $tier->condition_en,
+                'condition_ar' => $tier->condition_ar,
+                'amount' => $tier->amount,
+            ])
+            ->all();
         $this->work_days_ar = $contract->work_days_ar;
         $this->work_days_en = $contract->work_days_en;
         $this->work_hours_from = $this->timeForInput($contract->work_hours_from, $this->work_hours_from);
@@ -330,10 +362,27 @@ class ContractForm extends Form
 
     public function validatePay(): array
     {
+        $isFixed = $this->pay_mode === PayMode::Fixed;
+
         return $this->validate([
+            'pay_mode' => ['required', Rule::in([PayMode::Fixed, PayMode::Flexible])],
             'currency' => ['required', 'integer', Rule::in([0, 1, 2, 3])],
-            'salary' => ['required', 'numeric', 'min:0'],
-            'salary_per' => ['required', 'integer'],
+
+            // -- Fixed mode: one flat figure, plus a session length when paid per session.
+            'salary' => [Rule::requiredIf($isFixed), 'nullable', 'numeric', 'min:0'],
+            'salary_per' => [Rule::requiredIf($isFixed), 'nullable', 'integer'],
+            'session_duration' => [
+                Rule::requiredIf($isFixed && (int) $this->salary_per === SalaryPer::Session),
+                'nullable', 'integer',
+                Rule::in([SessionDuration::Hour, SessionDuration::HourAndHalf, SessionDuration::TwoHours]),
+            ],
+
+            // -- Flexible mode: an unbounded repeater instead of one figure —
+            // at least one condition, or the mode says nothing at all.
+            'pay_tiers' => [Rule::requiredIf(! $isFixed), 'array', $isFixed ? 'nullable' : 'min:1'],
+            'pay_tiers.*.condition_en' => ['required_with:pay_tiers', 'string', 'max:255'],
+            'pay_tiers.*.condition_ar' => ['required_with:pay_tiers', 'string', 'max:255'],
+            'pay_tiers.*.amount' => ['required_with:pay_tiers', 'numeric', 'min:0'],
         ]);
     }
 
@@ -357,6 +406,8 @@ class ContractForm extends Form
                 $this->contract = $this->insert();
             }
 
+            $this->syncPayTiers($this->contract);
+
             return $this->contract;
         });
     }
@@ -366,7 +417,12 @@ class ContractForm extends Form
      */
     public function create(): Contract
     {
-        return DB::transaction(fn (): Contract => $this->contract = $this->insert());
+        return DB::transaction(function (): Contract {
+            $this->contract = $this->insert();
+            $this->syncPayTiers($this->contract);
+
+            return $this->contract;
+        });
     }
 
     /**
@@ -375,7 +431,12 @@ class ContractForm extends Form
      */
     public function update(Contract $contract): bool
     {
-        return DB::transaction(fn () => $contract->update($this->buildPayload()));
+        return DB::transaction(function () use ($contract): bool {
+            $result = $contract->update($this->buildPayload());
+            $this->syncPayTiers($contract);
+
+            return $result;
+        });
     }
 
     public function saveIdentity(): void
@@ -446,9 +507,36 @@ class ContractForm extends Form
         return $contract;
     }
 
+    /**
+     * Replace this contract's pay tiers wholesale with $this->pay_tiers.
+     *
+     * Delete-then-recreate rather than diffing against existing rows: the
+     * repeater has no stable per-row identity the UI needs to preserve
+     * (no other table references a tier by id), and the row count is always
+     * small, so there is nothing a smarter sync would actually save.
+     */
+    private function syncPayTiers(Contract $contract): void
+    {
+        $contract->payTiers()->delete();
+
+        if ($this->pay_mode !== PayMode::Flexible) {
+            return;
+        }
+
+        foreach ($this->pay_tiers as $index => $tier) {
+            $contract->payTiers()->create([
+                'condition_en' => trim((string) ($tier['condition_en'] ?? '')),
+                'condition_ar' => trim((string) ($tier['condition_ar'] ?? '')),
+                'amount' => $tier['amount'] ?? 0,
+                'sort_order' => $index,
+            ]);
+        }
+    }
+
     private function buildPayload(): array
     {
         $isFixed = $this->schedule_mode === ScheduleMode::Fixed;
+        $isFixedPay = $this->pay_mode === PayMode::Fixed;
 
         return [
             'employee_id' => $this->employee_id,
@@ -487,9 +575,17 @@ class ContractForm extends Form
             'flex_custom_en' => $isFixed ? null : (filled($this->flex_custom_en) ? trim($this->flex_custom_en) : null),
             'flex_custom_ar' => $isFixed ? null : (filled($this->flex_custom_ar) ? trim($this->flex_custom_ar) : null),
 
+            'pay_mode' => $this->pay_mode,
+            // Currency applies to both modes — one flat figure or a list of
+            // tiered ones, always in the same currency. The other fields
+            // below are each mode's own, cleared when it is not active, same
+            // as the schedule fields above.
             'currency' => (int) $this->currency,
-            'salary' => $this->salary,
-            'salary_per' => (string) $this->salary_per,
+            'salary' => $isFixedPay ? $this->salary : null,
+            'salary_per' => $isFixedPay ? (string) $this->salary_per : (string) SalaryPer::Unknown,
+            'session_duration' => ($isFixedPay && (int) $this->salary_per === SalaryPer::Session)
+                ? $this->session_duration
+                : null,
         ];
     }
 

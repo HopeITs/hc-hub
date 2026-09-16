@@ -287,9 +287,20 @@ document.addEventListener('alpine:init', () => {
         flexCustomOn: Boolean(config.seed?.flexCustomEn || config.seed?.flexCustomAr),
 
         // ---- pay
+        // 1 = fixed, 2 = flexible (App\Enums\PayMode).
+        payMode: str(config.seed?.payMode ?? '1'),
         salary: config.seed?.salary ?? '',
         currency: str(config.seed?.currency ?? '1'),
         salaryPer: str(config.seed?.salaryPer ?? '1'),
+        // Only meaningful when salaryPer is Session (App\Enums\SessionDuration).
+        sessionDuration: config.seed?.sessionDuration != null ? str(config.seed.sessionDuration) : '',
+        // -- Flexible mode: an unbounded "Add condition" repeater instead of
+        // one flat figure, e.g. "if teaching 60h/month" => 200.
+        payTiers: (config.seed?.payTiers ?? []).map((tier) => ({
+            conditionEn: tier.conditionEn ?? '',
+            conditionAr: tier.conditionAr ?? '',
+            amount: tier.amount != null && tier.amount !== '' ? str(tier.amount) : '',
+        })),
 
         // ---- termination (edit only; create does not render the section)
         terminatedAt: config.seed?.terminatedAt ?? '',
@@ -385,7 +396,27 @@ document.addEventListener('alpine:init', () => {
         },
 
         get payValid() {
-            return this.salary !== '' && Number(this.salary) >= 0 && Number.isFinite(Number(this.salary));
+            if (this.payMode === '2') {
+                return this.payTiers.length >= 1 && this.payTiers.every((tier) => (
+                    tier.conditionEn.trim() !== ''
+                    && tier.conditionAr.trim() !== ''
+                    && tier.amount !== ''
+                    && Number.isFinite(Number(tier.amount))
+                    && Number(tier.amount) >= 0
+                ));
+            }
+
+            const sessionValid = this.salaryPer !== '3' || this.sessionDuration !== '';
+
+            return this.salary !== '' && Number(this.salary) >= 0 && Number.isFinite(Number(this.salary)) && sessionValid;
+        },
+
+        addPayTier() {
+            this.payTiers.push({ conditionEn: '', conditionAr: '', amount: '' });
+        },
+
+        removePayTier(index) {
+            this.payTiers.splice(index, 1);
         },
 
         isValid(name) {
@@ -1124,6 +1155,12 @@ document.addEventListener('alpine:init', () => {
         },
 
         get paySummary() {
+            if (this.payMode === '2') {
+                return this.payTiers.length > 0
+                    ? this.fill(this.labels.tiersCount, { count: this.payTiers.length })
+                    : this.labels.flexible;
+            }
+
             return this.salaryEcho.split(' · ')[0];
         },
 
@@ -1171,6 +1208,12 @@ document.addEventListener('alpine:init', () => {
         },
 
         get cardSalary() {
+            if (this.payMode === '2') {
+                return this.payTiers.length > 0
+                    ? this.fill(this.labels.tiersCount, { count: this.payTiers.length })
+                    : this.labels.empty;
+            }
+
             return this.salary === ''
                 ? this.labels.empty
                 : `${this.formatNumber(this.salary)} ${this.currencyLabel} ${this.salaryPerLabel}`;
@@ -1258,9 +1301,12 @@ document.addEventListener('alpine:init', () => {
                     flexCoordinatedWithManager: this.flexCoordinatedWithManager,
                     flexCustomEn: this.flexCustomEn,
                     flexCustomAr: this.flexCustomAr,
+                    payMode: this.payMode,
                     salary: this.salary,
                     currency: this.currency,
                     salaryPer: this.salaryPer,
+                    sessionDuration: this.sessionDuration,
+                    payTiers: this.payTiers,
                     // Ignored by ContractCreate, which always writes a contract
                     // that is active and un-terminated.
                     terminatedAt: this.terminatedAt,

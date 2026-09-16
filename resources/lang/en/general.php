@@ -202,6 +202,7 @@ return [
     'note-text1' => 'Choose a City First',
     'note-text2' => 'Employees, programs, centers, and jobs related to the selected city will be loaded',
     'salary-per' => 'Salary Per',
+    'session-duration' => 'Session Duration',
 
     'photo' => 'Photo',
     'is-board-member' => 'Board Member',
@@ -804,6 +805,13 @@ return [
         'per-hour' => 'per hour',
         'per-session' => 'per session',
         'per-year' => 'per year',
+        'tiers-count' => ':count conditions',
+
+        'pay-mode' => 'Pay',
+        'pay-flexible-hint' => 'A tiered stipend, e.g. one amount if teaching 60 hours a month, another if 70.',
+        'add-condition' => 'Add a condition',
+        'remove-condition' => 'Remove',
+        'condition' => 'Condition',
 
         'card-title' => 'Contract',
         'capacity' => 'Capacity',

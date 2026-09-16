@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Contract\Concerns;
 
+use App\Enums\PayMode;
 use App\Enums\ScheduleMode;
 use App\Livewire\Forms\ContractForm;
 use App\Models\Contract;
@@ -180,9 +181,19 @@ trait DrivesContractComposer
             'flexCoordinatedWithManager' => $this->form->flex_coordinated_with_manager,
             'flexCustomEn' => $this->form->flex_custom_en,
             'flexCustomAr' => $this->form->flex_custom_ar,
+            'payMode' => $this->form->pay_mode,
             'salary' => $this->form->salary,
             'currency' => $this->form->currency,
             'salaryPer' => $this->form->salary_per,
+            'sessionDuration' => $this->form->session_duration,
+            'payTiers' => collect($this->form->pay_tiers)
+                ->map(fn (array $tier) => [
+                    'conditionEn' => $tier['condition_en'] ?? '',
+                    'conditionAr' => $tier['condition_ar'] ?? '',
+                    'amount' => $tier['amount'] ?? '',
+                ])
+                ->values()
+                ->all(),
             // Always null on create, where the termination section is not
             // rendered at all; ContractEdit is the only screen that reads them.
             'terminatedAt' => $this->form->terminated_at,
@@ -234,9 +245,19 @@ trait DrivesContractComposer
         $this->form->flex_custom_en = $this->textOrNull($payload['flexCustomEn'] ?? null);
         $this->form->flex_custom_ar = $this->textOrNull($payload['flexCustomAr'] ?? null);
 
+        $this->form->pay_mode = (int) ($payload['payMode'] ?? PayMode::Fixed);
         $this->form->currency = (int) ($payload['currency'] ?? 1);
         $this->form->salary = $payload['salary'] ?? null;
         $this->form->salary_per = (int) ($payload['salaryPer'] ?? 1);
+        $this->form->session_duration = $this->intOrNull($payload['sessionDuration'] ?? null);
+        $this->form->pay_tiers = collect($payload['payTiers'] ?? [])
+            ->map(fn (array $tier) => [
+                'condition_en' => $this->textOrNull($tier['conditionEn'] ?? null),
+                'condition_ar' => $this->textOrNull($tier['conditionAr'] ?? null),
+                'amount' => is_numeric($tier['amount'] ?? null) ? $tier['amount'] : null,
+            ])
+            ->values()
+            ->all();
 
         $this->applyComposerTermination($payload);
     }
@@ -283,9 +304,12 @@ trait DrivesContractComposer
             'flex_hours_per_month' => 'schedule',
             'flex_custom_en' => 'schedule',
             'flex_custom_ar' => 'schedule',
+            'pay_mode' => 'pay',
             'salary' => 'pay',
             'currency' => 'pay',
             'salary_per' => 'pay',
+            'session_duration' => 'pay',
+            'pay_tiers' => 'pay',
         ];
     }
 
@@ -301,7 +325,17 @@ trait DrivesContractComposer
         $map = $this->sectionOfField();
 
         return collect($keys)
-            ->map(fn (string $key) => $map[str_replace('form.', '', $key)] ?? null)
+            ->map(function (string $key) use ($map) {
+                $field = str_replace('form.', '', $key);
+
+                // Repeater rows validate as 'pay_tiers.0.condition_en', not
+                // the bare 'pay_tiers' key the map above holds.
+                if (str_starts_with($field, 'pay_tiers.')) {
+                    return 'pay';
+                }
+
+                return $map[$field] ?? null;
+            })
             ->filter()
             ->unique()
             ->values()

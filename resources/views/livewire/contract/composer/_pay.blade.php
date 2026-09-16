@@ -1,4 +1,7 @@
 @php
+    use App\Enums\PayMode;
+    use App\Enums\SessionDuration;
+
     /*
      * Inlined rather than pulled from x-icons.*, because those components bake a
      * colour utility into their own class list (icons.calendar carries
@@ -19,6 +22,20 @@
             'path' => '<path d="M10 3.25L17.5 7 10 10.75 2.5 7 10 3.25z"/><path d="M5.5 8.75v3.9c0 1.4 2 2.6 4.5 2.6s4.5-1.2 4.5-2.6v-3.9"/>',
         ],
     ];
+
+    $payModeOptions = [
+        PayMode::Fixed => PayMode::getLocalizedName(PayMode::Fixed)['value'],
+        PayMode::Flexible => PayMode::getLocalizedName(PayMode::Flexible)['value'],
+    ];
+
+    $sessionDurationOptions = collect([SessionDuration::Hour, SessionDuration::HourAndHalf, SessionDuration::TwoHours])
+        ->mapWithKeys(fn (int $value) => [$value => SessionDuration::getLocalizedName($value)['value']]);
+
+    // Quiet-but-visible control, used by the "Add a condition" / "Remove" buttons.
+    $miniButton = 'inline-flex items-center gap-1.5 rounded-control border border-neutral-300 bg-white
+                   px-2.5 py-1 text-caption font-semibold text-secondary-dark shadow-e1 transition
+                   hover:border-primary hover:text-primary active:scale-[0.98]
+                   focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
 @endphp
 
 {{-- Section 4 — the one field where a typo costs the most. --}}
@@ -28,39 +45,66 @@
     :title="__('general.composer.pay')"
     summary="paySummary"
 >
-    <div class="mt-4 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
+    {{-- Shared by both modes: one flat figure or a list of tiered ones, always
+         in the same currency. --}}
+    <div class="mt-4 max-w-48">
+        <x-forms.input-label for="composer_currency" required>@lang('general.currency')</x-forms.input-label>
+        <select
+            id="composer_currency"
+            x-model="currency"
+            class="w-full cursor-pointer rounded-control border border-neutral-300 bg-white px-3 py-2
+                   text-body font-medium text-neutral-800 shadow-e1 transition
+                   hover:bg-neutral-50
+                   focus:border-primary focus:outline-none focus:ring-2 focus:ring-neutral-300"
+        >
+            <option value="0">@lang('general.unknown')</option>
+            <option value="1">SYP</option>
+            <option value="2">USD</option>
+            <option value="3">EUR</option>
+        </select>
+        <x-error-span>{{ $errors->first('form.currency') }}</x-error-span>
+    </div>
+
+    <div class="mt-5">
+        <x-forms.input-label required>@lang('general.composer.pay-mode')</x-forms.input-label>
+        <div class="mt-1 grid grid-cols-2 gap-2" role="radiogroup" aria-label="@lang('general.composer.pay-mode')">
+            @foreach ($payModeOptions as $value => $label)
+                <label class="cursor-pointer">
+                    <input type="radio" class="peer sr-only" name="composer_pay_mode"
+                           value="{{ $value }}" x-model="payMode"/>
+                    <span class="flex min-h-10.5 items-center justify-center rounded-control
+                                 border-2 border-neutral-200 bg-white px-2 py-2 text-body text-neutral-800
+                                 shadow-e1 transition
+                                 hover:border-neutral-400
+                                 peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
+                                 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2
+                                 peer-focus-visible:outline-primary">
+                        <span class="truncate font-semibold">{{ $label }}</span>
+                    </span>
+                </label>
+            @endforeach
+        </div>
+        <x-error-span>{{ $errors->first('form.pay_mode') }}</x-error-span>
+    </div>
+
+    {{-- ───────────────────────── Fixed ───────────────────────── --}}
+    <div x-cloak x-show="payMode === '1'" class="mt-5 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
         <div>
             <x-forms.input-label for="composer_salary" required>@lang('general.salary')</x-forms.input-label>
 
-            {{-- Amount and currency read as one control, because they are one value. --}}
-            <div class="flex">
-                <input
-                    id="composer_salary"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    inputmode="decimal"
-                    placeholder="0.00"
-                    x-model="salary"
-                    class="w-full min-w-0 rounded-control rounded-e-none border border-e-0 border-neutral-300
-                           bg-white px-3 py-2 text-end font-mono text-body tabular-nums text-neutral-900
-                           shadow-e1 transition placeholder:text-neutral-400
-                           focus:z-10 focus:border-primary focus:outline-none focus:ring-2 focus:ring-neutral-300"
-                />
-                <select
-                    aria-label="@lang('general.currency')"
-                    x-model="currency"
-                    class="shrink-0 cursor-pointer rounded-control rounded-s-none border border-neutral-300
-                           bg-neutral-100 px-2 py-2 text-body font-medium text-neutral-800 shadow-e1 transition
-                           hover:bg-neutral-200
-                           focus:z-10 focus:border-primary focus:outline-none focus:ring-2 focus:ring-neutral-300"
-                >
-                    <option value="0">@lang('general.unknown')</option>
-                    <option value="1">SYP</option>
-                    <option value="2">USD</option>
-                    <option value="3">EUR</option>
-                </select>
-            </div>
+            <input
+                id="composer_salary"
+                type="number"
+                step="0.01"
+                min="0"
+                inputmode="decimal"
+                placeholder="0.00"
+                x-model="salary"
+                class="w-full min-w-0 rounded-control border border-neutral-300
+                       bg-white px-3 py-2 text-end font-mono text-body tabular-nums text-neutral-900
+                       shadow-e1 transition placeholder:text-neutral-400
+                       focus:border-primary focus:outline-none focus:ring-2 focus:ring-neutral-300"
+            />
 
             {{-- Echoed back formatted, and annualised when paid monthly. --}}
             <p x-cloak x-show="salaryEcho"
@@ -68,7 +112,7 @@
                       text-small font-medium text-neutral-800"
                x-text="salaryEcho"></p>
 
-            <x-error-span>{{ $errors->first('form.salary') ?: $errors->first('form.currency') }}</x-error-span>
+            <x-error-span>{{ $errors->first('form.salary') }}</x-error-span>
         </div>
 
         <div>
@@ -79,7 +123,7 @@
                     <label class="cursor-pointer">
                         <input type="radio" class="peer sr-only" name="composer_salary_per"
                                value="{{ $value }}" x-model="salaryPer"/>
-                        <span class="flex min-h-[2.625rem] items-center justify-center gap-1.5 rounded-control
+                        <span class="flex min-h-10.5 items-center justify-center gap-1.5 rounded-control
                                      border-2 border-neutral-200 bg-white px-2 py-2 text-body text-neutral-800
                                      shadow-e1 transition
                                      hover:border-neutral-400
@@ -97,6 +141,62 @@
             </div>
 
             <x-error-span>{{ $errors->first('form.salary_per') }}</x-error-span>
+
+            {{-- Only "Session" implies a length — the other two units are
+                 self-explanatory without one. --}}
+            <div x-cloak x-show="salaryPer === '3'" x-transition class="mt-4">
+                <x-forms.input-label for="composer_session_duration" required>
+                    @lang('general.session-duration')
+                </x-forms.input-label>
+                <x-forms.select
+                    id="composer_session_duration"
+                    :options="$sessionDurationOptions"
+                    x-model="sessionDuration"
+                    :placeholder="__('general.select')"
+                />
+                <x-error-span>{{ $errors->first('form.session_duration') }}</x-error-span>
+            </div>
         </div>
+    </div>
+
+    {{-- ───────────────────────── Flexible ───────────────────────── --}}
+    <div x-cloak x-show="payMode === '2'" class="mt-5 space-y-3">
+        <p class="text-small text-secondary-medium">@lang('general.composer.pay-flexible-hint')</p>
+
+        <template x-for="(tier, index) in payTiers" :key="index">
+            <div class="space-y-3 rounded-control border border-neutral-200 p-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-caption font-semibold text-secondary-medium" x-text="'#' + (index + 1)"></span>
+                    <button type="button" class="{{ $miniButton }}" x-on:click="removePayTier(index)">
+                        @lang('general.composer.remove-condition')
+                    </button>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div>
+                        <x-forms.input-label>@lang('general.composer.condition') (EN)</x-forms.input-label>
+                        <x-forms.input type="text" dir="ltr" maxlength="255" x-model="tier.conditionEn" />
+                    </div>
+                    <div>
+                        <x-forms.input-label>@lang('general.composer.condition') (AR)</x-forms.input-label>
+                        <x-forms.input type="text" dir="rtl" maxlength="255" x-model="tier.conditionAr" />
+                    </div>
+                </div>
+
+                <div class="max-w-40">
+                    <x-forms.input-label>@lang('general.amount')</x-forms.input-label>
+                    <x-forms.input type="number" step="0.01" min="0" x-model="tier.amount" />
+                </div>
+            </div>
+        </template>
+
+        <button type="button" class="{{ $miniButton }}" x-on:click="addPayTier()">
+            <svg class="size-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M10 5v10M5 10h10" stroke-linecap="round"/>
+            </svg>
+            @lang('general.composer.add-condition')
+        </button>
+
+        <x-error-span>{{ $errors->first('form.pay_tiers') }}</x-error-span>
     </div>
 </x-contract.section>

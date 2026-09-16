@@ -194,6 +194,7 @@ return [
     'search' => 'بحث',
     'yearly-leave-days' => 'أيام الإجازة السنوية',
     'salary-per' => 'الراتب كل',
+    'session-duration' => 'مدة الجلسة',
     'employee' => 'الموظفين|الموظف',
     'photo' => 'الصورة',
     'salary' => 'الراتب',
@@ -804,6 +805,13 @@ return [
         'per-hour' => 'بالساعة',
         'per-session' => 'بالجلسة',
         'per-year' => 'سنوياً',
+        'tiers-count' => ':count شرط',
+
+        'pay-mode' => 'الأجر',
+        'pay-flexible-hint' => 'مكافأة متدرّجة، مثلاً مبلغ عند تدريس 60 ساعة شهريًا، ومبلغ آخر عند 70.',
+        'add-condition' => 'إضافة شرط',
+        'remove-condition' => 'إزالة',
+        'condition' => 'الشرط',
 
         'card-title' => 'العقد',
         'capacity' => 'الشواغر',

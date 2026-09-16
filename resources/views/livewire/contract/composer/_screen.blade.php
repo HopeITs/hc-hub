@@ -98,6 +98,7 @@
             'perHour' => __('general.composer.per-hour'),
             'perSession' => __('general.composer.per-session'),
             'perYear' => __('general.composer.per-year'),
+            'tiersCount' => __('general.composer.tiers-count'),
             'empty' => '—',
         ],
     ];
