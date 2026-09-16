@@ -8,6 +8,7 @@
     'update' => 'defer',
     'required' => false,
     'errorKey' => null,
+    'labelClass' => 'text-body text-neutral-800',
 ])
 
 @php
@@ -46,7 +47,7 @@
 @endphp
 
 @if ($type === 'checkbox')
-    <label for="{{ $inputId }}" class="flex items-center gap-2 text-body text-neutral-800">
+    <label for="{{ $inputId }}" class="flex items-center gap-2 {{ $labelClass }}">
         <input
             @php
                 $base = [
