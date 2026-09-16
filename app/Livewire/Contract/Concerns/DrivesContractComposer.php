@@ -180,8 +180,6 @@ trait DrivesContractComposer
             'flexCoordinatedWithManager' => $this->form->flex_coordinated_with_manager,
             'flexCustomEn' => $this->form->flex_custom_en,
             'flexCustomAr' => $this->form->flex_custom_ar,
-            'attendingNotesEn' => $this->form->attending_notes_en,
-            'attendingNotesAr' => $this->form->attending_notes_ar,
             'salary' => $this->form->salary,
             'currency' => $this->form->currency,
             'salaryPer' => $this->form->salary_per,
@@ -216,8 +214,6 @@ trait DrivesContractComposer
         // flex checkboxes), but an edit/renewal must not wipe out whatever an
         // older contract already has stored — fillFromModel() already loaded
         // it, and this is the only path that writes the form back to the DB.
-        $this->form->attending_notes_en = $this->textOrNull($payload['attendingNotesEn'] ?? null);
-        $this->form->attending_notes_ar = $this->textOrNull($payload['attendingNotesAr'] ?? null);
 
         $this->form->schedule_mode = (int) ($payload['scheduleMode'] ?? ScheduleMode::Fixed);
 
@@ -287,8 +283,6 @@ trait DrivesContractComposer
             'flex_hours_per_month' => 'schedule',
             'flex_custom_en' => 'schedule',
             'flex_custom_ar' => 'schedule',
-            'attending_notes_en' => 'schedule',
-            'attending_notes_ar' => 'schedule',
             'salary' => 'pay',
             'currency' => 'pay',
             'salary_per' => 'pay',

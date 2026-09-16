@@ -103,9 +103,6 @@ return [
     'work-hours-from' => 'بداية يوم العمل',
     'work-hours-to' => 'نهاية يوم العمل',
     'work-days' => 'أيام العمل',
-    'attending-notes' => 'ملاحظات الحضور',
-    'attending-notes-placeholder-en' => 'Example: Flexible arrival is allowed on field-visit days…',
-    'attending-notes-placeholder-ar' => 'مثال: يسمح بمرونة وقت الحضور في أيام الزيارات الميدانية…',
     'from-hour-to-hour' => 'من :from حتى :to',
     'role' => 'الأدوار|الدور',
     'weekly-hours' => 'ساعات العمل الأسبوعية',
@@ -776,8 +773,6 @@ return [
         'end-date-too-far' => 'لا يمكن أن يتجاوز تاريخ النهاية سنة من تاريخ البداية.',
         'runs-to' => 'حتى :date',
         'lasts-months' => ':count أشهر',
-
-        'add-notes' => 'إضافة ملاحظات الدوام',
 
         'schedule-mode' => 'نوع الدوام',
         'add-second-shift' => 'إضافة فترة ثانية',

@@ -222,34 +222,5 @@
     </div>
     <x-error-span>{{ $errors->first('form.weekly_hours') }}</x-error-span>
 
-    {{-- Optional and rarely used, so folded away rather than shown by default. --}}
-    <div class="mt-5">
-        <button type="button" x-cloak x-show="!showNotes" class="{{ $miniButton }}" x-on:click="showNotes = true">
-            <svg class="size-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M10 5v10M5 10h10" stroke-linecap="round"/>
-            </svg>
-            @lang('general.composer.add-notes')
-        </button>
-
-        <div x-cloak x-show="showNotes" x-collapse class="grid gap-3 sm:grid-cols-2">
-            @foreach(config('app.supported_locales') as $notesLocale)
-                <div>
-                    <x-forms.input-label for="composer_notes_{{ $notesLocale }}">
-                        @lang('general.attending-notes') ({{ strtoupper($notesLocale) }})
-                    </x-forms.input-label>
-                    <x-forms.textarea
-                        id="composer_notes_{{ $notesLocale }}"
-                        rows="3"
-                        maxlength="255"
-                        dir="{{ $notesLocale === 'ar' ? 'rtl' : 'ltr' }}"
-                        x-model="attendingNotes{{ ucfirst($notesLocale) }}"
-                        placeholder="{{ __('general.attending-notes-placeholder-'.$notesLocale) }}"
-                    />
-                    <x-error-span>{{ $errors->first('form.attending_notes_'.$notesLocale) }}</x-error-span>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
     <x-contract.continue section="schedule" />
 </x-contract.section>

@@ -100,9 +100,6 @@ return [
     'work-hours-from' => 'Work Hours From',
     'work-hours-to' => 'Work Hours To',
     'work-days' => 'Work Days',
-    'attending-notes' => 'Attendance Notes',
-    'attending-notes-placeholder-en' => 'Example: Flexible arrival is allowed on field-visit days…',
-    'attending-notes-placeholder-ar' => 'مثال: يسمح بمرونة وقت الحضور في أيام الزيارات الميدانية…',
     'from-hour-to-hour' => 'From :from To :to',
     'weekly-hours' => 'Weekly Hours',
     'status' => 'Status',
@@ -776,8 +773,6 @@ return [
         'end-date-too-far' => 'The end date cannot be more than a year after the start date.',
         'runs-to' => 'runs to :date',
         'lasts-months' => ':count months',
-
-        'add-notes' => 'Add attending notes',
 
         'schedule-mode' => 'Schedule',
         'add-second-shift' => 'Add a second shift',

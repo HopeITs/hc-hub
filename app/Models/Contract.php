@@ -27,14 +27,12 @@ class Contract extends Model
     public ?int $renewalSourceId = null;
 
     /**
-     * Salary and free-text attendance notes are logged by name only.
+     * Salary is logged by name only.
      *
      * @see RedactsSensitiveActivityLog
      */
     protected array $sensitiveLogAttributes = [
         'salary',
-        'attending_notes_en',
-        'attending_notes_ar',
     ];
 
     protected $fillable = [
@@ -57,8 +55,6 @@ class Contract extends Model
         'work_hours_2_to',
         'work_days_en',
         'work_days_ar',
-        'attending_notes_ar',
-        'attending_notes_en',
         'weekly_hours',
         'schedule_mode',
         'work_day_from',

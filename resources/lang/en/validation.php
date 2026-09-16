@@ -153,8 +153,6 @@ return [
         'birth_date' => 'Birth Date',
         'role' => 'Role',
         'city_id' => 'City Name',
-        'attending_notes_en' => 'Attendance Notes (English)',
-        'attending_notes_ar' => 'Attendance Notes (Arabic)',
         'location' => 'Location',
         'message' => 'Message',
         'name' => [

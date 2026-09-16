@@ -438,8 +438,6 @@ class ContractCreatePerformanceTest extends TestCase
             'workHoursFrom' => '09:00',
             'workHoursTo' => '17:00',
             'weeklyHours' => 40,
-            'attendingNotesEn' => null,
-            'attendingNotesAr' => null,
             'salary' => 500,
             'currency' => 1,
             'salaryPer' => 1,

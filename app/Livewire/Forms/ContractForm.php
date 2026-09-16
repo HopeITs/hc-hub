@@ -62,10 +62,6 @@ class ContractForm extends Form
 
     public mixed $work_days_en = null;
 
-    public ?string $attending_notes_ar = null;
-
-    public ?string $attending_notes_en = null;
-
     // 1 = fixed, 2 = flexible — see App\Enums\ScheduleMode.
     public int $schedule_mode = 1;
 
@@ -165,8 +161,6 @@ class ContractForm extends Form
         $this->terminated_at = null;
         $this->termination_reason_id = null;
         $this->reason_of_termination = null;
-        $this->attending_notes_ar = null;
-        $this->attending_notes_en = null;
 
         $this->schedule_mode = ScheduleMode::Fixed;
         $this->work_hours_2_from = null;
@@ -236,8 +230,6 @@ class ContractForm extends Form
         $this->salary_per = $contract->salary_per;
         $this->work_days_ar = $contract->work_days_ar;
         $this->work_days_en = $contract->work_days_en;
-        $this->attending_notes_ar = $contract->attending_notes_ar;
-        $this->attending_notes_en = $contract->attending_notes_en;
         $this->work_hours_from = $this->timeForInput($contract->work_hours_from, $this->work_hours_from);
         $this->work_hours_to = $this->timeForInput($contract->work_hours_to, $this->work_hours_to);
 
@@ -295,8 +287,6 @@ class ContractForm extends Form
             // is the only category allowed to leave it at 0 — LeaveBalanceService
             // already skips leave entitlement entirely for that category.
             'weekly_hours' => ['required', 'integer', 'min:0', $this->weeklyHoursRule()],
-            'attending_notes_ar' => ['nullable', 'string', 'max:255'],
-            'attending_notes_en' => ['nullable', 'string', 'max:255'],
 
             'schedule_mode' => ['required', Rule::in([ScheduleMode::Fixed, ScheduleMode::Flexible])],
 
@@ -421,8 +411,6 @@ class ContractForm extends Form
             'weekly_hours' => (int) $this->weekly_hours,
             'work_days_ar' => $this->work_days_ar,
             'work_days_en' => $this->work_days_en,
-            'attending_notes_ar' => filled($this->attending_notes_ar) ? trim($this->attending_notes_ar) : null,
-            'attending_notes_en' => filled($this->attending_notes_en) ? trim($this->attending_notes_en) : null,
             'work_hours_from' => $this->work_hours_from,
             'work_hours_to' => $this->work_hours_to,
             // Automatically deactivate when a termination is recorded
@@ -477,8 +465,6 @@ class ContractForm extends Form
             'weekly_hours' => (int) $this->weekly_hours,
             'work_days_ar' => $this->work_days_ar,
             'work_days_en' => $this->work_days_en,
-            'attending_notes_ar' => filled($this->attending_notes_ar) ? trim($this->attending_notes_ar) : null,
-            'attending_notes_en' => filled($this->attending_notes_en) ? trim($this->attending_notes_en) : null,
             'work_hours_from' => $isFixed ? $this->work_hours_from : null,
             'work_hours_to' => $isFixed ? $this->work_hours_to : null,
 

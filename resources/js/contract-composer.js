@@ -285,9 +285,6 @@ document.addEventListener('alpine:init', () => {
         // value" to seed — so this is a real flag, not a value-presence
         // getter/setter, and initialize() clears the text when it goes off.
         flexCustomOn: Boolean(config.seed?.flexCustomEn || config.seed?.flexCustomAr),
-        showNotes: Boolean(config.seed?.attendingNotesEn || config.seed?.attendingNotesAr),
-        attendingNotesEn: config.seed?.attendingNotesEn ?? '',
-        attendingNotesAr: config.seed?.attendingNotesAr ?? '',
 
         // ---- pay
         salary: config.seed?.salary ?? '',
@@ -1261,8 +1258,6 @@ document.addEventListener('alpine:init', () => {
                     flexCoordinatedWithManager: this.flexCoordinatedWithManager,
                     flexCustomEn: this.flexCustomEn,
                     flexCustomAr: this.flexCustomAr,
-                    attendingNotesEn: this.attendingNotesEn,
-                    attendingNotesAr: this.attendingNotesAr,
                     salary: this.salary,
                     currency: this.currency,
                     salaryPer: this.salaryPer,
