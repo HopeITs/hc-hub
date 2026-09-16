@@ -133,77 +133,105 @@
     </div>
 
     {{-- ───────────────────────── Flexible ───────────────────────── --}}
-    <div x-cloak x-show="scheduleMode === '2'" class="mt-5 space-y-3">
+    <div x-cloak x-show="scheduleMode === '2'" class="mt-5 space-y-5">
         <p class="text-small text-secondary-medium">@lang('general.composer.schedule-flexible-hint')</p>
 
-        {{-- Days/week --}}
-        <div class="rounded-control border border-neutral-200 p-3">
-            <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
-                <x-forms.input type="checkbox" x-model="flexDaysPerWeekOn" id="composer_flex_days_on" />
-                @lang('general.composer.flex-days-per-week')
-            </label>
-            <div x-cloak x-show="flexDaysPerWeekOn" x-collapse class="mt-2 max-w-[10rem]">
-                <x-forms.input id="composer_flex_days_per_week" type="number" min="1" max="7" x-model="flexDaysPerWeek" />
-                <x-error-span>{{ $errors->first('form.flex_days_per_week') }}</x-error-span>
-            </div>
-        </div>
+        {{--
+            "Hours per week" is the only box here that feeds weekly_hours —
+            LeaveBalanceService's entitlement figure — so it is grouped apart
+            from the purely descriptive boxes below, not just another item in
+            one long list.
+        --}}
+        <div>
+            <p class="text-caption font-semibold uppercase tracking-wider text-secondary-medium">
+                @lang('general.composer.flex-hours-group')
+            </p>
 
-        {{-- Hours/week — the one flex box that feeds weekly_hours directly. --}}
-        <div class="rounded-control border border-neutral-200 p-3">
-            <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
-                <x-forms.input type="checkbox" x-model="flexHoursPerWeekOn" id="composer_flex_hours_week_on" />
-                @lang('general.composer.flex-hours-per-week')
-            </label>
-            <div x-cloak x-show="flexHoursPerWeekOn" x-collapse class="mt-2 max-w-[10rem]">
-                <x-forms.input id="composer_flex_hours_per_week" type="number" min="1" x-model="flexHoursPerWeek" />
-                <x-error-span>{{ $errors->first('form.flex_hours_per_week') }}</x-error-span>
-            </div>
-        </div>
-
-        {{-- Hours/month — teaching-style stipends tiered by a monthly hour count. --}}
-        <div class="rounded-control border border-neutral-200 p-3">
-            <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
-                <x-forms.input type="checkbox" x-model="flexHoursPerMonthOn" id="composer_flex_hours_month_on" />
-                @lang('general.composer.flex-hours-per-month')
-            </label>
-            <div x-cloak x-show="flexHoursPerMonthOn" x-collapse class="mt-2 max-w-[10rem]">
-                <x-forms.input id="composer_flex_hours_per_month" type="number" min="1" max="300" x-model="flexHoursPerMonth" />
-                <x-error-span>{{ $errors->first('form.flex_hours_per_month') }}</x-error-span>
-            </div>
-        </div>
-
-        {{-- Varies by requirements --}}
-        <div class="rounded-control border border-neutral-200 p-3">
-            <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
-                <x-forms.input type="checkbox" x-model="flexVariesByRequirements" id="composer_flex_varies" />
-                @lang('general.composer.flex-varies-by-requirements')
-            </label>
-        </div>
-
-        {{-- Coordinated with direct manager --}}
-        <div class="rounded-control border border-neutral-200 p-3">
-            <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
-                <x-forms.input type="checkbox" x-model="flexCoordinatedWithManager" id="composer_flex_coordinated" />
-                @lang('general.composer.flex-coordinated-with-manager')
-            </label>
-        </div>
-
-        {{-- Custom text, bilingual --}}
-        <div class="rounded-control border border-neutral-200 p-3">
-            <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
-                <x-forms.input type="checkbox" x-model="flexCustomOn" id="composer_flex_custom_on" />
-                @lang('general.composer.flex-custom')
-            </label>
-            <div x-cloak x-show="flexCustomOn" x-collapse class="mt-2 grid gap-3 sm:grid-cols-2">
-                <div>
-                    <x-forms.input-label for="composer_flex_custom_en">@lang('general.composer.flex-custom') (EN)</x-forms.input-label>
-                    <x-forms.input id="composer_flex_custom_en" type="text" dir="ltr" maxlength="255" x-model="flexCustomEn" />
-                    <x-error-span>{{ $errors->first('form.flex_custom_en') }}</x-error-span>
+            <div class="mt-2 space-y-3">
+                {{-- Hours/week — required unless the category is exempt (service). --}}
+                <div class="rounded-control border border-neutral-200 p-3 transition"
+                     x-bind:class="!flexHoursPerWeekOn && selectedType?.category !== 'service'
+                         ? 'border-s-4 border-s-primary bg-neutral-50' : ''">
+                    <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
+                        <x-forms.input type="checkbox" x-model="flexHoursPerWeekOn" id="composer_flex_hours_week_on" />
+                        @lang('general.composer.flex-hours-per-week')
+                    </label>
+                    <p x-cloak x-show="!flexHoursPerWeekOn && selectedType?.category !== 'service'"
+                       class="mt-1 text-caption text-secondary-medium">
+                        @lang('general.composer.flex-hours-per-week-required')
+                    </p>
+                    <div x-cloak x-show="flexHoursPerWeekOn" x-collapse class="mt-2 max-w-40">
+                        <x-forms.input id="composer_flex_hours_per_week" type="number" min="1" x-model="flexHoursPerWeek" />
+                        <x-error-span>{{ $errors->first('form.flex_hours_per_week') }}</x-error-span>
+                    </div>
                 </div>
-                <div>
-                    <x-forms.input-label for="composer_flex_custom_ar">@lang('general.composer.flex-custom') (AR)</x-forms.input-label>
-                    <x-forms.input id="composer_flex_custom_ar" type="text" dir="rtl" maxlength="255" x-model="flexCustomAr" />
-                    <x-error-span>{{ $errors->first('form.flex_custom_ar') }}</x-error-span>
+
+                {{-- Days/week — print-only, does not affect weekly_hours. --}}
+                <div class="rounded-control border border-neutral-200 p-3">
+                    <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
+                        <x-forms.input type="checkbox" x-model="flexDaysPerWeekOn" id="composer_flex_days_on" />
+                        @lang('general.composer.flex-days-per-week')
+                    </label>
+                    <div x-cloak x-show="flexDaysPerWeekOn" x-collapse class="mt-2 max-w-40">
+                        <x-forms.input id="composer_flex_days_per_week" type="number" min="1" max="7" x-model="flexDaysPerWeek" />
+                        <x-error-span>{{ $errors->first('form.flex_days_per_week') }}</x-error-span>
+                    </div>
+                </div>
+
+                {{-- Hours/month — teaching-style stipends tiered by a monthly hour count. --}}
+                <div class="rounded-control border border-neutral-200 p-3">
+                    <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
+                        <x-forms.input type="checkbox" x-model="flexHoursPerMonthOn" id="composer_flex_hours_month_on" />
+                        @lang('general.composer.flex-hours-per-month')
+                    </label>
+                    <div x-cloak x-show="flexHoursPerMonthOn" x-collapse class="mt-2 max-w-40">
+                        <x-forms.input id="composer_flex_hours_per_month" type="number" min="1" max="300" x-model="flexHoursPerMonth" />
+                        <x-error-span>{{ $errors->first('form.flex_hours_per_month') }}</x-error-span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <p class="text-caption font-semibold uppercase tracking-wider text-secondary-medium">
+                @lang('general.composer.flex-descriptive-group')
+            </p>
+
+            <div class="mt-2 space-y-3">
+                {{-- Varies by requirements --}}
+                <div class="rounded-control border border-neutral-200 p-3">
+                    <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
+                        <x-forms.input type="checkbox" x-model="flexVariesByRequirements" id="composer_flex_varies" />
+                        @lang('general.composer.flex-varies-by-requirements')
+                    </label>
+                </div>
+
+                {{-- Coordinated with direct manager --}}
+                <div class="rounded-control border border-neutral-200 p-3">
+                    <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
+                        <x-forms.input type="checkbox" x-model="flexCoordinatedWithManager" id="composer_flex_coordinated" />
+                        @lang('general.composer.flex-coordinated-with-manager')
+                    </label>
+                </div>
+
+                {{-- Custom text, bilingual --}}
+                <div class="rounded-control border border-neutral-200 p-3">
+                    <label class="flex items-center gap-2 text-body font-medium text-neutral-800">
+                        <x-forms.input type="checkbox" x-model="flexCustomOn" id="composer_flex_custom_on" />
+                        @lang('general.composer.flex-custom')
+                    </label>
+                    <div x-cloak x-show="flexCustomOn" x-collapse class="mt-2 grid gap-3 sm:grid-cols-2">
+                        <div>
+                            <x-forms.input-label for="composer_flex_custom_en">@lang('general.composer.flex-custom') (EN)</x-forms.input-label>
+                            <x-forms.input id="composer_flex_custom_en" type="text" dir="ltr" maxlength="255" x-model="flexCustomEn" />
+                            <x-error-span>{{ $errors->first('form.flex_custom_en') }}</x-error-span>
+                        </div>
+                        <div>
+                            <x-forms.input-label for="composer_flex_custom_ar">@lang('general.composer.flex-custom') (AR)</x-forms.input-label>
+                            <x-forms.input id="composer_flex_custom_ar" type="text" dir="rtl" maxlength="255" x-model="flexCustomAr" />
+                            <x-error-span>{{ $errors->first('form.flex_custom_ar') }}</x-error-span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -221,6 +249,10 @@
               x-text="weeklyHoursSummary"></span>
     </div>
     <x-error-span>{{ $errors->first('form.weekly_hours') }}</x-error-span>
+
+    {{-- The Continue button below only appears once the section is valid —
+         this is the only place that says why, when it is not. --}}
+    <p x-cloak x-show="scheduleBlockedHint" class="mt-2 text-small font-medium text-primary" x-text="scheduleBlockedHint"></p>
 
     <x-contract.continue section="schedule" />
 </x-contract.section>

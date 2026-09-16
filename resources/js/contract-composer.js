@@ -395,6 +395,31 @@ document.addEventListener('alpine:init', () => {
             return Number(this.weeklyHours) >= 1;
         },
 
+        /**
+         * Why the section is not valid yet, in one short sentence — the
+         * Continue button (x-contract.continue) only appears once it is, and
+         * without this a blocked user has no way to tell what is missing,
+         * since none of the boxes above are individually marked invalid.
+         * Empty string once the section is actually valid.
+         */
+        get scheduleBlockedHint() {
+            if (this.scheduleValid) {
+                return '';
+            }
+
+            if (this.scheduleMode === '1') {
+                if (this.workDayFrom === '' || this.workDayTo === '') {
+                    return this.labels.scheduleHintDayRange;
+                }
+
+                if (this.hasSecondShift() && !(this.workHours2From && this.workHours2To && this.workHours2To > this.workHours2From)) {
+                    return this.labels.scheduleHintSecondShift;
+                }
+            }
+
+            return this.labels.scheduleHintWeeklyHours;
+        },
+
         get payValid() {
             if (this.payMode === '2') {
                 return this.payTiers.length >= 1 && this.payTiers.every((tier) => (

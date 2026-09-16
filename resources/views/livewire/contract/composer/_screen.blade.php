@@ -86,6 +86,9 @@
             'weeklyHoursValue' => __('general.composer.weekly-hours-value'),
             'dayRange' => __('general.composer.day-range'),
             'flexible' => __('general.composer.schedule-flexible'),
+            'scheduleHintDayRange' => __('general.composer.schedule-hint-day-range'),
+            'scheduleHintSecondShift' => __('general.composer.schedule-hint-second-shift'),
+            'scheduleHintWeeklyHours' => __('general.composer.schedule-hint-weekly-hours'),
             // Lowercase units, because these are read inside a phrase
             // ("3 months") rather than as standalone labels.
             'month' => __('general.composer.duration-month'),
