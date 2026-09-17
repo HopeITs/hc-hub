@@ -759,6 +759,8 @@ return [
         'not-terminated' => 'Not terminated',
         'clear-termination' => 'Clear termination',
 
+        'contract-terms' => 'Contract Terms',
+        'city-auto-hint' => "Filled in from the employee's own city — yours to change if needed.",
         'locked-city' => 'locked to your role',
         'all-centers' => 'All centers',
         'city-level' => 'City-level (no center)',

@@ -759,6 +759,8 @@ return [
         'not-terminated' => 'غير منتهٍ',
         'clear-termination' => 'إلغاء الإنهاء',
 
+        'contract-terms' => 'شروط العقد',
+        'city-auto-hint' => 'تُملأ تلقائيًا من مدينة الموظف نفسه — يمكنك تغييرها عند الحاجة.',
         'locked-city' => 'محددة حسب دورك',
         'all-centers' => 'كل المراكز',
         'city-level' => 'على مستوى المحافظة (بدون مركز)',
