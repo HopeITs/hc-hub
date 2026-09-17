@@ -201,6 +201,7 @@ trait DrivesContractComposer
             'terminatedAt' => $this->form->terminated_at,
             'terminationReasonId' => $this->form->termination_reason_id,
             'reasonOfTermination' => $this->form->reason_of_termination,
+            'autoRenew' => (bool) $this->form->auto_renew,
         ];
     }
 

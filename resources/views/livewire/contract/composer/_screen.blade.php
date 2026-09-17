@@ -14,6 +14,7 @@
     $mode ??= 'create';
     $seed ??= null;
     $terminationReasons ??= collect();
+    $canManageAutoRenew ??= false;
     $cancelUrl ??= route('contracts.index');
     $currentPeriod ??= null;
 
@@ -58,6 +59,7 @@
         'terminationReasons' => $terminationReasons
             ->map(fn ($reason) => ['value' => $reason->id, 'label' => $reason->title])
             ->values(),
+        'canManageAutoRenew' => $canManageAutoRenew,
         // Present whenever this page opened on an existing contract — a renewal
         // or an edit — so Alpine can fill every field from it instead of blank.
         'seed' => $seed,
