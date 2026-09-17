@@ -57,9 +57,9 @@ class ContractsExpiringAutoRenewWarning extends Notification
         $count = count($this->contracts);
 
         return [
-            'title' => [
-                'en' => $count === 1 ? 'Automatic renewal enabled' : 'Automatic renewal enabled',
-                'ar' => $count === 1 ? 'تنبيه تجديد تلقائي' : 'تنبيه عقود ذات تجديد تلقائي',
+           'title' => [
+                'en' => $count === 1 ? 'Contract renewal reminder' : 'Contract renewal reminders',
+                'ar' => $count === 1 ? 'تذكير بتجديد عقد' : 'تذكير بتجديد عقود',
             ],
             'body' => [
                 'en' => $count === 1
