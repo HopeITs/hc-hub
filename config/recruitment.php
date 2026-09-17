@@ -13,8 +13,10 @@ return [
     | grades — 1 Program Manager, 3 Project Manager, 5 Department Manager. The
     | CEO sits at grade 1, so he is already covered and is not listed again.
     |
-    | Eligibility is only half the check. The user still needs
-    | recruitment-requests.submit from their role.
+    | Grade eligibility alone does not authorize a normal request. D50 restricts
+    | that path to active manager/general-manager roles; HR uses Direct Opening
+    | only. D49 limits creation to descendants (plus self for a new parent),
+    | independently of the one-level visibility scope below.
     |
     */
 
