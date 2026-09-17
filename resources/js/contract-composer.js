@@ -591,8 +591,18 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        /**
+         * Employee is deliberately NOT cleared here. Since the Assignment step
+         * became employee-first, city is derived FROM the employee, not the
+         * other way around — a manual city override (e.g. switching to the
+         * nationwide/headquarters scope, which accepts an employee from any
+         * city) must not discard an already-made employee choice. Program,
+         * center, and position genuinely are city-scoped lists with no such
+         * exemption, so those still reset up front; dropUnavailableSelections()
+         * below is what decides the employee's fate once the new city's real
+         * employee list has actually loaded.
+         */
         resetDownstream() {
-            this.selected.employee = '';
             this.selected.program = '';
             this.selected.center = ALL_CENTERS;
             this.selected.position = '';
