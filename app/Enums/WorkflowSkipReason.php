@@ -20,7 +20,7 @@ final class WorkflowSkipReason extends Enum
     public static function getLocalizedName(int $value): array
     {
         $val = match ($value) {
-            self::SelfApprovalEscalated => ['text' => ['en' => 'Escalated to the approver's manager', 'ar' => 'صُعِّدت لمدير الموافِق'], 'color' => 'secondary-medium'],
+            self::SelfApprovalEscalated => ['text' => ['en' => "Escalated to the approver's manager", 'ar' => 'صُعِّدت لمدير الموافِق'], 'color' => 'secondary-medium'],
             self::TopLevelRequester => ['text' => ['en' => 'Requester is at the top of the org chart', 'ar' => 'المُقدِّم على رأس الهيكل'], 'color' => 'secondary-medium'],
             default => ['text' => ['en' => 'Unknown', 'ar' => 'غير معروف'], 'color' => 'secondary-light'],
         };
