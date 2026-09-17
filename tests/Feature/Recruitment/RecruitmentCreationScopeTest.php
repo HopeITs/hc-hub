@@ -1,0 +1,332 @@
+<?php
+
+namespace Tests\Feature\Recruitment;
+
+use App\Enums\RecruitmentRequestMode;
+use App\Enums\RecruitmentRequestStatus;
+use App\Enums\RecruitmentRequestType;
+use App\Livewire\Recruitment\Requests\Create;
+use App\Livewire\Recruitment\Requests\Details;
+use App\Livewire\Recruitment\Requests\Index;
+use App\Models\Contract;
+use App\Models\ContractType;
+use App\Models\Department;
+use App\Models\JobLevel;
+use App\Models\Position;
+use App\Models\Program;
+use App\Models\RecruitmentRequest;
+use App\Models\User;
+use App\Services\RecruitmentRequestDraftService;
+use App\Services\RecruitmentScopeResolver;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Livewire;
+use Tests\Concerns\CreatesHrFixtures;
+use Tests\TestCase;
+
+class RecruitmentCreationScopeTest extends TestCase
+{
+    use CreatesHrFixtures, RefreshDatabase;
+
+    private User $manager;
+
+    private Position $root;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        app()->setLocale('en');
+        $national = $this->makeCity('SYR', '000');
+        $this->manager = $this->makeUser($national, 'manager');
+        $this->root = Position::query()->create([
+            'city_id' => $national->id,
+            'program_id' => Program::query()->create(['name' => 'Finance', 'code' => 'FIN', 'slug' => 'finance', 'start_date' => now(), 'is_active' => true])->id,
+            'department_id' => Department::query()->create(['name' => 'Finance', 'code' => 'FIN'])->id,
+            'job_level_id' => JobLevel::query()->create(['name_en' => 'Manager', 'name_ar' => 'مدير', 'grade' => 5])->id,
+            'title_en' => 'National manager', 'title_ar' => 'مدير وطني',
+            'is_active' => true, 'max_emp' => 5, 'exist_emp' => 0,
+        ]);
+        Contract::query()->create([
+            'employee_id' => $this->manager->employee_id, 'position_id' => $this->root->id,
+            'contract_type_id' => ContractType::query()->create(['name_en' => 'Annual', 'name_ar' => 'سنوي'])->id,
+            'start_date' => now()->subMonth(), 'end_date' => now()->addYear(),
+            'currency' => 2, 'salary_per' => 1, 'weekly_hours' => 40, 'is_active' => true,
+        ]);
+    }
+
+    public function test_national_manager_can_target_a_descendant_in_another_city_and_program(): void
+    {
+        $city = $this->makeCity('HMS', '002');
+        $program = Program::query()->create(['name' => 'Other', 'code' => 'OTH', 'slug' => 'other', 'start_date' => now(), 'is_active' => true]);
+        $child = $this->child($this->root, ['city_id' => $city->id, 'program_id' => $program->id]);
+
+        $this->assertTrue(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $child]));
+        $this->assertTrue(Gate::forUser($this->manager)->allows('createUnderPosition', [RecruitmentRequest::class, $child]));
+    }
+
+    public function test_creation_reaches_arbitrary_depth_without_widening_one_level_visibility(): void
+    {
+        $child = $this->child($this->root);
+        $grandchild = $this->child($child);
+        $leaf = $this->child($grandchild);
+        $resolver = app(RecruitmentScopeResolver::class);
+
+        $this->assertTrue(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $leaf]));
+        $this->assertSame([$child->id], $resolver->directReportPositionIds($this->manager));
+        $this->assertEqualsCanonicalizing([$child->id, $grandchild->id, $leaf->id], $resolver->manageablePositionIds($this->manager));
+    }
+
+    public function test_same_city_and_program_do_not_authorize_another_tree_or_technical_reports(): void
+    {
+        $other = $this->child($this->root, ['direct_manager_id' => null, 'tech_manager_id' => $this->root->id]);
+        $leaf = $this->child($other);
+
+        foreach ([$other, $leaf, $this->root] as $target) {
+            $this->assertFalse(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $target]));
+        }
+        $this->assertFalse(Gate::forUser($this->manager)->allows('createUnderPosition', [RecruitmentRequest::class, $leaf]));
+    }
+
+    public function test_manager_without_reports_can_create_under_own_position(): void
+    {
+        $this->assertSame([], app(RecruitmentScopeResolver::class)->manageablePositionIds($this->manager));
+        $this->assertTrue(Gate::forUser($this->manager)->allows('createUnderPosition', [RecruitmentRequest::class, $this->root]));
+        $this->assertFalse(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $this->root]));
+    }
+
+    public function test_cycles_terminate_without_making_the_root_an_existing_target(): void
+    {
+        $child = $this->child($this->root);
+        $leaf = $this->child($child);
+        $this->root->update(['direct_manager_id' => $leaf->id]);
+
+        $this->assertEqualsCanonicalizing([$child->id, $leaf->id], app(RecruitmentScopeResolver::class)->manageablePositionIds($this->manager));
+    }
+
+    public function test_organization_wide_visibility_does_not_bypass_creation_tree(): void
+    {
+        $this->manager->syncRoles('general-manager');
+        $this->manager->roles()->updateExistingPivot($this->manager->roles()->first()->id, ['is_active' => true]);
+        $this->manager = $this->manager->fresh();
+        $outside = $this->child($this->root, ['direct_manager_id' => null]);
+
+        $this->assertTrue(app(RecruitmentScopeResolver::class)->isOrganizationWide($this->manager));
+        $this->assertFalse(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $outside]));
+    }
+
+    public function test_hr_with_any_eligible_grade_cannot_create_edit_or_submit_normal_requests(): void
+    {
+        $child = $this->child($this->root);
+        foreach (['HR-SYR', 'HR-HMS'] as $role) {
+            \App\Models\Role::findOrCreate($role, 'web');
+            $this->manager->syncRoles($role);
+            $this->manager->roles()->updateExistingPivot($this->manager->roles()->first()->id, ['is_active' => true]);
+            $this->makeCityIfMissingHoms();
+            foreach ([1, 3, 5] as $grade) {
+                $this->root->jobLevel->update(['grade' => $grade]);
+                $user = $this->manager->fresh();
+                $request = RecruitmentRequest::query()->create([
+                    'request_number' => $role.'-'.$grade, 'requester_user_id' => $user->id,
+                    'request_type' => RecruitmentRequestType::FillVacancy,
+                    'mode' => RecruitmentRequestMode::Normal, 'status' => RecruitmentRequestStatus::Draft,
+                    'scope_city_id' => \App\Models\City::where('slug', 'HMS')->value('id'),
+                    'target_position_id' => $child->id,
+                ]);
+                $this->assertTrue(app(RecruitmentScopeResolver::class)->isEligibleRequester($user));
+                $this->assertFalse(Gate::forUser($user)->allows('create', RecruitmentRequest::class));
+                $this->assertFalse(Gate::forUser($user)->allows('createForPosition', [RecruitmentRequest::class, $child]));
+                $this->assertFalse(Gate::forUser($user)->allows('createUnderPosition', [RecruitmentRequest::class, $this->root]));
+                $this->assertFalse(Gate::forUser($user)->allows('update', $request));
+                $this->assertFalse(Gate::forUser($user)->allows('submit', $request));
+                $this->assertTrue(Gate::forUser($user)->allows('directOpen', RecruitmentRequest::class));
+            }
+        }
+    }
+
+    public function test_losing_grade_or_reparenting_removes_creation_access(): void
+    {
+        $child = $this->child($this->root);
+        $this->assertTrue(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $child]));
+        $child->update(['direct_manager_id' => null]);
+        $this->assertFalse(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $child]));
+        $this->root->jobLevel->update(['grade' => 2]);
+        $this->assertFalse(Gate::forUser($this->manager->fresh())->allows('create', RecruitmentRequest::class));
+    }
+
+    public function test_create_screen_filters_by_tree_and_saves_a_draft_without_changing_positions(): void
+    {
+        $city = $this->makeCity('HMS', '002');
+        $child = $this->child($this->child($this->root), ['city_id' => $city->id, 'title_en' => 'Allowed remote position']);
+        $this->child($this->root, ['direct_manager_id' => null, 'title_en' => 'Unrelated private position']);
+        $before = Position::count();
+
+        Livewire::actingAs($this->manager)->test(Create::class)
+            ->assertSee('Allowed remote position')->assertDontSee('Unrelated private position')
+            ->set('data.position_id', $child->id)->set('data.justification', 'Recruitment need')
+            ->set('data.status', RecruitmentRequestStatus::Approved)->set('data.mode', RecruitmentRequestMode::DirectHr)
+            ->call('save')->assertHasNoErrors()->assertRedirect();
+
+        $request = RecruitmentRequest::sole();
+        $this->assertSame(RecruitmentRequestStatus::Draft, $request->status);
+        $this->assertSame(RecruitmentRequestMode::Normal, $request->mode);
+        $this->assertEquals($city->id, $request->scope_city_id);
+        $this->assertSame($before, Position::count());
+        $this->assertSame(0, $request->versions()->count());
+        $this->assertSame(1, $request->events()->count());
+        $this->assertArrayNotHasKey('status', $request->draft_payload_json);
+        Livewire::test(Details::class, ['requestId' => $request->id])->assertSee('Recruitment need');
+    }
+
+    public function test_forged_target_and_reparenting_after_loading_are_rejected_on_save(): void
+    {
+        $child = $this->child($this->root);
+        $screen = Livewire::actingAs($this->manager)->test(Create::class)->set('data.position_id', $child->id);
+        $child->update(['direct_manager_id' => null]);
+        $screen->call('save')->assertHasErrors('data.position_id');
+        $this->assertSame(0, RecruitmentRequest::count());
+    }
+
+    public function test_new_position_draft_under_own_root_accepts_other_city_and_program(): void
+    {
+        $city = $this->makeCity('HMS', '002');
+        $program = Program::create(['name' => 'Other', 'code' => 'OTH', 'slug' => 'other', 'start_date' => now(), 'is_active' => true]);
+        Livewire::actingAs($this->manager)->test(Create::class)
+            ->set('data.request_type', RecruitmentRequestType::CreatePosition)
+            ->set('data.direct_manager_id', $this->root->id)->set('data.city_id', $city->id)
+            ->set('data.program_id', $program->id)->set('data.title_ar', 'منصب مقترح')
+            ->call('save')->assertHasNoErrors()->assertRedirect();
+
+        $request = RecruitmentRequest::sole();
+        $this->assertNull($request->target_position_id);
+        $this->assertEquals($this->root->id, $request->draft_payload_json['direct_manager_id']);
+        $this->assertEquals($program->id, $request->draft_payload_json['program_id']);
+        $this->assertSame(1, Position::count());
+    }
+
+    public function test_valid_tree_does_not_bypass_center_city_consistency(): void
+    {
+        $city = $this->makeCity('HMS', '002');
+        $otherCity = $this->makeCity('DMS', '003');
+        $center = \App\Models\Center::create(['name_en' => 'Other center', 'name_ar' => 'مركز آخر', 'city_id' => $otherCity->id, 'is_active' => true]);
+        Livewire::actingAs($this->manager)->test(Create::class)
+            ->set('data.request_type', RecruitmentRequestType::CreatePosition)
+            ->set('data.direct_manager_id', $this->root->id)->set('data.city_id', $city->id)
+            ->set('data.center_id', $center->id)->call('save')->assertHasErrors('data.center_id');
+        $this->assertSame(0, RecruitmentRequest::count());
+    }
+
+    public function test_hr_cannot_open_normal_form_and_does_not_see_create_button(): void
+    {
+        $this->manager->syncRoles('HR-SYR');
+        $this->manager->roles()->updateExistingPivot($this->manager->roles()->first()->id, ['is_active' => true]);
+        $user = $this->manager->fresh();
+        Livewire::actingAs($user)->test(Index::class)->assertDontSee(route('recruitment.requests.create'), false);
+        Livewire::test(Create::class)->assertForbidden();
+    }
+
+    public function test_request_visibility_does_not_expose_someone_elses_draft(): void
+    {
+        $child = $this->child($this->root);
+        $request = app(RecruitmentRequestDraftService::class)->create($this->manager, [
+            'request_type' => RecruitmentRequestType::FillVacancy, 'position_id' => $child->id,
+        ]);
+        $hr = $this->makeUser($this->root->city, 'HR-SYR');
+        $this->assertFalse(RecruitmentRequest::visibleTo($hr)->whereKey($request->id)->exists());
+        $request->update(['status' => RecruitmentRequestStatus::UnderReview]);
+        $this->assertTrue(RecruitmentRequest::visibleTo($hr)->whereKey($request->id)->exists());
+    }
+
+    /**
+     * The governorates and programs a manager's tree already touches, used to
+     * sort his pickers — never to restrict them.
+     *
+     * D49 keeps city and program organizational data, so opening the first
+     * position in a new governorate stays possible. This only records which
+     * ones are his, and the test below proves the other ones still save.
+     */
+    public function test_own_organization_is_reported_for_sorting_without_restricting(): void
+    {
+        $homs = $this->makeCity('HMS', '002');
+        $aleppo = $this->makeCity('ALP', '001');
+        $mine = Program::query()->create(['name' => 'Mine', 'code' => 'MIN', 'slug' => 'mine', 'start_date' => now(), 'is_active' => true]);
+
+        $this->child($this->root, ['city_id' => $homs->id, 'program_id' => $mine->id]);
+
+        $organization = app(RecruitmentScopeResolver::class)->creatableOrganizationIds($this->manager);
+
+        $this->assertContains($homs->id, $organization['cities']);
+        $this->assertContains($mine->id, $organization['programs']);
+        $this->assertNotContains($aleppo->id, $organization['cities']);
+
+        // ...and a governorate outside that set is still accepted on save (D49).
+        app(RecruitmentRequestDraftService::class)->create($this->manager, [
+            'request_type' => RecruitmentRequestType::CreatePosition,
+            'direct_manager_id' => $this->root->id,
+            'city_id' => $aleppo->id,
+            'title_en' => 'First position in a new governorate',
+        ]);
+
+        $this->assertSame($aleppo->id, RecruitmentRequest::sole()->scope_city_id);
+    }
+
+    /**
+     * Only grades junior to the requester's own. The direction is read from the
+     * data — a larger grade number is the more junior rank.
+     *
+     * The org chart has 17 pairs that break this today (three inverted, fourteen
+     * level), which is data drift rather than intent: nobody creates a peer or a
+     * superior for himself.
+     */
+    public function test_a_requester_may_only_create_positions_at_a_junior_grade(): void
+    {
+        $senior = JobLevel::query()->create(['name_en' => 'Senior', 'name_ar' => 'أعلى', 'grade' => 3]);
+        $peer = JobLevel::query()->where('grade', 5)->first();
+        $junior = JobLevel::query()->create(['name_en' => 'Junior', 'name_ar' => 'أدنى', 'grade' => 6]);
+
+        $allowed = app(RecruitmentScopeResolver::class)->creatableJobLevelIds($this->manager);
+
+        $this->assertContains($junior->id, $allowed);
+        $this->assertNotContains($peer->id, $allowed, 'A requester may not create a position at his own grade.');
+        $this->assertNotContains($senior->id, $allowed);
+    }
+
+    /** The narrowed list is a convenience; the server re-derives the rule. */
+    public function test_a_hand_edited_request_cannot_create_a_peer_or_a_superior(): void
+    {
+        $senior = JobLevel::query()->create(['name_en' => 'Senior', 'name_ar' => 'أعلى', 'grade' => 2]);
+        $peer = JobLevel::query()->where('grade', 5)->sole();
+        $drafts = app(RecruitmentRequestDraftService::class);
+
+        $base = [
+            'request_type' => RecruitmentRequestType::CreatePosition,
+            'direct_manager_id' => $this->root->id,
+            'city_id' => $this->root->city_id,
+            'title_en' => 'New position',
+        ];
+
+        foreach ([$senior->id, $peer->id] as $levelId) {
+            try {
+                $drafts->create($this->manager, array_merge($base, ['job_level_id' => $levelId]));
+                $this->fail('A job level that is not junior should have been rejected.');
+            } catch (\Illuminate\Validation\ValidationException $exception) {
+                $this->assertArrayHasKey('data.job_level_id', $exception->errors());
+            }
+        }
+    }
+
+    private function child(Position $parent, array $attributes = []): Position
+    {
+        $child = $this->root->replicate();
+        $child->fill(array_merge(['direct_manager_id' => $parent->id, 'title_en' => 'Child '.uniqid(), 'exist_emp' => 0], $attributes));
+        $child->save();
+
+        return $child;
+    }
+
+    private function makeCityIfMissingHoms(): void
+    {
+        if (! \App\Models\City::where('slug', 'HMS')->exists()) {
+            $this->makeCity('HMS', '002');
+        }
+    }
+}

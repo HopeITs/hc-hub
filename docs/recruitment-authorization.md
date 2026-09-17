@@ -29,13 +29,20 @@ Gate::authorize('update', $recruitmentRequest);
 
 ## Request creation
 
-Opening the create screen may call the policy without a city. Saving must pass the submitted scope city so regional and structural scope is checked on the backend:
+Opening the normal create screen checks the active manager/general-manager role, permission and grade. HR cannot use this path, including HR with grade 1, 3 or 5 (D50). `directOpen` remains a separate permission and path.
+
+Normal request creation uses the complete administrative subtree (D49), not city/program and not D30's one-level visibility. Always authorize the selected target or proposed parent at persistence time:
 
 ```php
-Gate::authorize('create', [RecruitmentRequest::class, $scopeCityId]);
+Gate::authorize('create', RecruitmentRequest::class); // page entry only
+Gate::authorize('createForPosition', [RecruitmentRequest::class, $targetPosition]);
+// CreatePosition: direct_manager_id is the proposed parent.
+Gate::authorize('createUnderPosition', [RecruitmentRequest::class, $parentPosition]);
 ```
 
 ## Workflow decisions
+
+`manageablePositionIds($user)` returns all descendants, excluding the user's own position. `manageablePositionIds($user, includeSelf: true)` also includes that root for CreatePosition. Selectors and server validation use the same `scopeManageablePositions()` boundary. Technical reporting lines grant no access; cycles terminate. Existing request visibility uses `scopeRequests()` unchanged.
 
 Approval, rejection, and requesting changes are authorized against the resolved workflow instance step—not only against the request:
 

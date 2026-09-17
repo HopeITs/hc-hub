@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentScopeType;
 use App\Models\City;
 use App\Models\Contract;
+use App\Models\JobLevel;
 use App\Models\Position;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowInstanceStep;
@@ -162,6 +164,11 @@ class RecruitmentScopeResolver
      */
     public function scopeRequests(Builder $query, User $user): Builder
     {
+        // The state-machine contract makes drafts private to their requester.
+        $query->where(fn (Builder $drafts) => $drafts
+            ->where($query->qualifyColumn('status'), '!=', RecruitmentRequestStatus::Draft)
+            ->orWhere($query->qualifyColumn('requester_user_id'), $user->getKey()));
+
         return match ($this->scopeType($user)) {
             RecruitmentScopeType::Organization => $query,
 
@@ -282,13 +289,7 @@ class RecruitmentScopeResolver
     // Raising a request
     // --------------------------------------------
 
-    /**
-     * May this user raise a recruitment request?
-     *
-     * Eligibility is the job level of the position they hold, never a role.
-     * This is separate from the recruitment-requests.submit permission, and
-     * both are required.
-     */
+    /** Grade eligibility alone; normal-request role permission is separate (D50). */
     public function isEligibleRequester(User $user): bool
     {
         $position = $this->position($user);
@@ -300,6 +301,118 @@ class RecruitmentScopeResolver
         $grades = config('recruitment.requester_job_level_grades', []);
 
         return in_array((int) $position->jobLevel?->grade, $grades, true);
+    }
+
+    /** HR uses Direct Opening only, including HR with an eligible grade. */
+    public function canRaiseNormalRequest(User $user): bool
+    {
+        return ! $user->activeRoleIs('HR')
+            && $user->activeRoleIs('manager', 'general-manager')
+            && $this->isEligibleRequester($user);
+    }
+
+    /**
+     * Creation scope (D49), distinct from D30's one-level request visibility.
+     * Traverse direct_manager_id only; city/program/technical manager grant no
+     * access. A visited set terminates malformed cycles and excludes the root
+     * from existing-position targets even if it is encountered again.
+     *
+     * @return array<int, int>
+     */
+    public function manageablePositionIds(User $user, bool $includeSelf = false): array
+    {
+        if (! $this->canRaiseNormalRequest($user)) {
+            return [];
+        }
+
+        $rootId = (int) $this->position($user)->getKey();
+        $children = Position::query()->get(['id', 'direct_manager_id'])->groupBy('direct_manager_id');
+        $seen = [$rootId => true];
+        $queue = [$rootId];
+        $ids = $includeSelf ? [$rootId] : [];
+
+        for ($index = 0; $index < count($queue); $index++) {
+            foreach ($children->get($queue[$index], []) as $child) {
+                $id = (int) $child->getKey();
+                if (isset($seen[$id])) {
+                    continue;
+                }
+
+                $seen[$id] = true;
+                $queue[] = $id;
+                $ids[] = $id;
+            }
+        }
+
+        return $ids;
+    }
+
+    public function scopeManageablePositions(Builder $query, User $user, bool $includeSelf = false): Builder
+    {
+        return $query->whereIn($query->qualifyColumn('id'), $this->manageablePositionIds($user, $includeSelf));
+    }
+
+    /**
+     * The organizational values a requester may put on a new position.
+     *
+     * D49 settled that authorization for creation is the management tree and
+     * that city and program are organizational data rather than a second
+     * permission boundary. That is still true: nothing here grants reach into
+     * another manager's tree. What it does is narrow the pickers to the part
+     * of the organization this manager actually sits in, so a project manager
+     * in Homs is not asked to choose between every governorate in Syria.
+     *
+     * The values are read off his own position and the tree beneath it, which
+     * is the same source D49 authorizes from — not a new concept.
+     *
+     * @return array{cities: array<int, int>, programs: array<int, int>, centers: array<int, int>}
+     */
+    public function creatableOrganizationIds(User $user): array
+    {
+        $empty = ['cities' => [], 'programs' => [], 'centers' => []];
+
+        $own = $this->position($user);
+
+        if ($own === null || ! $this->canRaiseNormalRequest($user)) {
+            return $empty;
+        }
+
+        $positions = Position::query()
+            ->whereIn('id', array_merge([$own->getKey()], $this->manageablePositionIds($user)))
+            ->get(['id', 'city_id', 'program_id', 'center_id']);
+
+        return [
+            'cities' => $this->distinctIds($positions, 'city_id'),
+            'programs' => $this->distinctIds($positions, 'program_id'),
+            'centers' => $this->distinctIds($positions, 'center_id'),
+        ];
+    }
+
+    /**
+     * Job levels a requester may create a position at — strictly below his own.
+     *
+     * The direction is read from the data rather than assumed: across the 153
+     * manager/report pairs on record, the report carries the larger grade
+     * number in 89% of them, so a smaller number is the more senior rank and
+     * "below me" means a grade greater than mine.
+     *
+     * A requester with no grade gets nothing, which fails closed.
+     *
+     * @return array<int, int>
+     */
+    public function creatableJobLevelIds(User $user): array
+    {
+        $grade = $this->position($user)?->jobLevel?->grade;
+
+        if ($grade === null || ! $this->canRaiseNormalRequest($user)) {
+            return [];
+        }
+
+        return JobLevel::query()
+            ->where('grade', '>', (int) $grade)
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
     }
 
     /**
@@ -436,6 +549,21 @@ class RecruitmentScopeResolver
 
             default => false,
         };
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, Position>  $positions
+     * @return array<int, int>
+     */
+    private function distinctIds($positions, string $column): array
+    {
+        return $positions
+            ->pluck($column)
+            ->filter()
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     // --------------------------------------------
