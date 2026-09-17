@@ -66,12 +66,20 @@ class ProcessContractAutoRenewals extends Command
             return collect();
         }
 
+        $users = $this->hrUsersForRoles(['HR-'.strtoupper($slug)]);
+
+        return $users->isNotEmpty() ? $users : $this->hrUsersForRoles(['HR-SYR']);
+    }
+
+    /**
+     * @param  array<int, string>  $roles
+     * @return Collection<int, User>
+     */
+    private function hrUsersForRoles(array $roles): Collection
+    {
         return User::query()
-            ->whereHas('roles', function (Builder $query) use ($slug): void {
-                $query
-                    ->where('name', 'HR-'.strtoupper($slug))
-                    ->where(config('permission.table_names.model_has_roles').'.is_active', true);
-            })
+            ->whereHas('roles', fn (Builder $query): Builder => $query->whereIn('name', $roles))
+            ->whereHas('profile', fn (Builder $query): Builder => $query->where('is_active', true))
             ->get();
     }
 }

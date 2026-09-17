@@ -19,11 +19,9 @@ class ContractsExpiringAutoRenewWarning extends Notification
 
     /**
      * @param  Collection<int, Contract>  $contracts
-     * @param  array<int, string>  $hrEmails
      */
     public function __construct(
         Collection $contracts,
-        public array $hrEmails,
         public int $daysUntilExpiration = 7,
     ) {
         $this->contracts = $contracts
@@ -48,9 +46,7 @@ class ContractsExpiringAutoRenewWarning extends Notification
 
         return (new MailMessage)
             ->subject($data['title']['ar'])
-            ->line($data['body']['ar'])
-            ->line($this->contractList('ar'))
-            ->action('إرسال بريد إلى الموارد البشرية', $data['url']);
+            ->line($data['body']['ar']);
     }
 
     /**
@@ -62,18 +58,17 @@ class ContractsExpiringAutoRenewWarning extends Notification
 
         return [
             'title' => [
-                'en' => $count === 1 ? 'Contract renewal reminder' : 'Contract renewal reminders',
-                'ar' => $count === 1 ? 'تذكير بتجديد عقد' : 'تذكير بتجديد عقود',
+                'en' => $count === 1 ? 'Automatic renewal enabled' : 'Automatic renewal enabled',
+                'ar' => $count === 1 ? 'تنبيه تجديد تلقائي' : 'تنبيه عقود ذات تجديد تلقائي',
             ],
             'body' => [
                 'en' => $count === 1
-                    ? "{$this->contracts[0]['employee_name_en']}'s contract ends in {$this->daysUntilExpiration} days. If you want to disable automatic renewal, please email your Governorate HR."
-                    : "{$count} contracts end in {$this->daysUntilExpiration} days. If needed, please email Governorate HR the list of people you do not want renewed and the reason.",
+                    ? "Automatic renewal is enabled for {$this->contracts[0]['employee_name_en']}'s contract, which ends on {$this->contracts[0]['end_date']} in {$this->daysUntilExpiration} days. If you want to cancel automatic renewal and not renew this contract, please inform Governorate HR."
+                    : "Automatic renewal is enabled for the following {$count} contracts ending in {$this->daysUntilExpiration} days: {$this->contractListInline('en')}. If you want to cancel automatic renewal and not renew any of them, please inform Governorate HR.",
                 'ar' => $count === 1
                     ? $this->singleContractBodyAr()
                     : $this->multipleContractsBodyAr($count),
             ],
-            'url' => $this->mailtoUrl(),
             'contracts' => $this->contracts,
             'days_until_expiration' => $this->daysUntilExpiration,
         ];
@@ -81,42 +76,36 @@ class ContractsExpiringAutoRenewWarning extends Notification
 
     private function singleContractBodyAr(): string
     {
+        $contract = $this->contracts[0];
+        $name = $contract['employee_name_ar'] ?: $contract['employee_name_en'];
+        $date = $contract['end_date'];
+
         if ($this->daysUntilExpiration === 7) {
-            return "المتطوع {$this->contracts[0]['employee_name_ar']} ينتهي عقده في الاسبوع القادم في حال رغبتك بإلغاء خدمة التجديد التلقائي يرجى إعلام مسؤول الموارد البشرية ضمن محافظتك";
+            return "عقد المتطوع {$name} لديه خاصية التجديد التلقائي مفعّلة، وسينتهي في الاسبوع القادم بتاريخ {$date}. في حال رغبتك بإلغاء خاصية التجديد التلقائي وعدم تجديد العقد يرجى إعلام مسؤول الموارد البشرية ضمن محافظتك";
         }
 
-        return "المتطوع {$this->contracts[0]['employee_name_ar']} ينتهي عقده بعد {$this->daysUntilExpiration} يوم في حال رغبتك بإلغاء خدمة التجديد التلقائي يرجى إعلام مسؤول الموارد البشرية ضمن محافظتك";
+        return "عقد المتطوع {$name} لديه خاصية التجديد التلقائي مفعّلة، وسينتهي بعد {$this->daysUntilExpiration} يوم بتاريخ {$date}. في حال رغبتك بإلغاء خاصية التجديد التلقائي وعدم تجديد العقد يرجى إعلام مسؤول الموارد البشرية ضمن محافظتك";
     }
 
     private function multipleContractsBodyAr(int $count): string
     {
+        $list = $this->contractListInline('ar');
+
         if ($this->daysUntilExpiration === 7) {
-            return "يوجد {$count} عقود ستنتهي خلال الاسبوع القادم في حال رغبتك بذلك يرجى ارسال قائمة الافراد الذين ترغب بعدم التجديد لهم مع ذكر السبب";
+            return "العقود التالية لديها خاصية التجديد التلقائي مفعّلة وستنتهي خلال الاسبوع القادم: {$list}. في حال رغبتك بإلغاء خاصية التجديد التلقائي لأي من هذه العقود وعدم تجديدها يرجى إعلام مسؤول الموارد البشرية ضمن محافظتك";
         }
 
-        return "يوجد {$count} عقود ستنتهي بعد {$this->daysUntilExpiration} يوم في حال رغبتك بذلك يرجى ارسال قائمة الافراد الذين ترغب بعدم التجديد لهم مع ذكر السبب";
+        return "العقود التالية لديها خاصية التجديد التلقائي مفعّلة وستنتهي بعد {$this->daysUntilExpiration} يوم: {$list}. في حال رغبتك بإلغاء خاصية التجديد التلقائي لأي من هذه العقود وعدم تجديدها يرجى إعلام مسؤول الموارد البشرية ضمن محافظتك";
     }
 
-    private function contractList(string $locale): string
+    private function contractListInline(string $locale): string
     {
         return collect($this->contracts)
             ->map(fn (array $contract): string => sprintf(
-                '- %s (%s)',
+                '%s (%s)',
                 $contract["employee_name_{$locale}"] ?: $contract['employee_name_en'],
                 $contract['end_date'],
             ))
-            ->implode("\n");
-    }
-
-    private function mailtoUrl(): string
-    {
-        $subject = count($this->contracts) === 1
-            ? "طلب تعديل التجديد التلقائي قبل {$this->daysUntilExpiration} يوم"
-            : "قائمة عقود لا نرغب بتجديدها تلقائياً قبل {$this->daysUntilExpiration} يوم";
-
-        $body = $this->contractList('ar');
-        $to = implode(',', array_unique(array_filter($this->hrEmails)));
-
-        return 'mailto:'.$to.'?subject='.rawurlencode($subject).'&body='.rawurlencode($body);
+            ->implode($locale === 'ar' ? '، ' : '; ');
     }
 }

@@ -14,12 +14,12 @@ class SendContractExpirationWarnings extends Command
     /**
      * Exact reminder anchors, in days before the contract ends.
      *
-     * The command runs daily, so matching exact dates gives each contract at
-     * most one reminder per anchor without adding a separate notification log.
+     * The command runs daily, so matching exact dates sends weekly reminders
+     * during the last 30 days without adding a separate notification log.
      *
      * @var array<int, int>
      */
-    private const REMINDER_DAYS = [30, 7];
+    private const REMINDER_DAYS = [30, 21, 14, 7];
 
     protected $signature = 'contracts:send-expiration-warnings';
 
@@ -43,10 +43,18 @@ class SendContractExpirationWarnings extends Command
                     return;
                 }
 
+                $daysUntilExpiration = (int) today()->diffInDays($group->first()->end_date);
+                $group = $group
+                    ->reject(fn (Contract $contract): bool => $this->alreadyWarned($manager, $contract, $daysUntilExpiration))
+                    ->values();
+
+                if ($group->isEmpty()) {
+                    return;
+                }
+
                 $manager->notify(new ContractsExpiringAutoRenewWarning(
                     $group,
-                    $this->hrEmailsForContracts($group),
-                    (int) today()->diffInDays($group->first()->end_date),
+                    $daysUntilExpiration,
                 ));
 
                 $sent++;
@@ -93,33 +101,22 @@ class SendContractExpirationWarnings extends Command
         return $contract->position?->directManager?->employee()?->account;
     }
 
-    /**
-     * @param  Collection<int, Contract>  $contracts
-     * @return array<int, string>
-     */
-    private function hrEmailsForContracts(Collection $contracts): array
+    private function alreadyWarned(User $manager, Contract $contract, int $daysUntilExpiration): bool
     {
-        $roles = $contracts
-            ->map(fn (Contract $contract): ?string => $contract->employee?->city?->slug)
-            ->filter()
-            ->map(fn (string $slug): string => 'HR-'.strtoupper($slug))
-            ->unique()
-            ->values();
+        return $manager
+            ->notifications()
+            ->where('type', ContractsExpiringAutoRenewWarning::class)
+            ->whereDate('created_at', today()->toDateString())
+            ->get()
+            ->contains(function ($notification) use ($contract, $daysUntilExpiration): bool {
+                $data = $notification->data;
 
-        if ($roles->isEmpty()) {
-            return [];
-        }
+                if ((int) ($data['days_until_expiration'] ?? 0) !== $daysUntilExpiration) {
+                    return false;
+                }
 
-        return User::query()
-            ->whereHas('roles', function (Builder $query) use ($roles): void {
-                $query
-                    ->whereIn('name', $roles)
-                    ->where(config('permission.table_names.model_has_roles').'.is_active', true);
-            })
-            ->pluck('email')
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
+                return collect($data['contracts'] ?? [])
+                    ->contains(fn (array $notifiedContract): bool => (int) ($notifiedContract['id'] ?? 0) === $contract->id);
+            });
     }
 }

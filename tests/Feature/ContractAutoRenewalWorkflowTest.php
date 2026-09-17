@@ -55,8 +55,10 @@ class ContractAutoRenewalWorkflowTest extends TestCase
                     && in_array('mail', $channels, true)
                     && count($notification->contracts) === 1
                     && $notification->contracts[0]['id'] === $contract->id
-                    && str_contains($data['body']['ar'], 'ينتهي عقده في الاسبوع القادم')
-                    && str_contains($data['url'], $fixtures['hr']->email);
+                    && str_contains($data['body']['ar'], 'خاصية التجديد التلقائي مفعّلة')
+                    && str_contains($data['body']['ar'], 'إلغاء خاصية التجديد التلقائي')
+                    && str_contains($data['body']['ar'], '2026-09-23')
+                    && ! array_key_exists('url', $data);
             },
         );
     }
@@ -103,8 +105,12 @@ class ContractAutoRenewalWorkflowTest extends TestCase
                 return in_array('database', $channels, true)
                     && in_array('mail', $channels, true)
                     && count($notification->contracts) === 2
-                    && str_contains($data['body']['ar'], 'يوجد 2 عقود ستنتهي خلال الاسبوع القادم')
-                    && str_contains(urldecode($data['url']), 'Batch Expiring');
+                    && str_contains($data['body']['ar'], 'العقود التالية لديها خاصية التجديد التلقائي مفعّلة')
+                    && str_contains($data['body']['ar'], 'إلغاء خاصية التجديد التلقائي')
+                    && str_contains($data['body']['ar'], 'Batch Expiring One')
+                    && str_contains($data['body']['ar'], 'Batch Expiring Two')
+                    && str_contains($data['body']['ar'], '2026-09-23')
+                    && ! array_key_exists('url', $data);
             },
         );
     }
@@ -127,6 +133,57 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         Artisan::call(SendContractExpirationWarnings::class);
 
         Notification::assertNothingSent();
+    }
+
+    public function test_warning_command_does_not_repeat_same_contract_on_same_day(): void
+    {
+        $this->travelTo('2026-09-16 09:00:00');
+
+        $fixtures = $this->makeFixtures();
+        $manager = $this->makeManagerWithPosition($fixtures);
+        $employee = $this->makeEmployee($fixtures['city'], 'deduped-reminder');
+        $position = $this->makePosition($fixtures, 'Deduped Reminder Report', $manager['position']->id);
+
+        $this->makeContract($fixtures, $employee, $position, [
+            'end_date' => '2026-09-23',
+            'auto_renew' => true,
+        ]);
+
+        Artisan::call(SendContractExpirationWarnings::class);
+        Artisan::call(SendContractExpirationWarnings::class);
+
+        $this->assertSame(
+            1,
+            $manager['user']
+                ->notifications()
+                ->where('type', ContractsExpiringAutoRenewWarning::class)
+                ->count(),
+        );
+    }
+
+    public function test_warning_command_sends_weekly_reminders_during_last_thirty_days(): void
+    {
+        $this->travelTo('2026-09-16 09:00:00');
+        Notification::fake();
+
+        $fixtures = $this->makeFixtures();
+        $manager = $this->makeManagerWithPosition($fixtures);
+        $employee = $this->makeEmployee($fixtures['city'], 'weekly-reminded');
+        $position = $this->makePosition($fixtures, 'Weekly Reminded Report', $manager['position']->id);
+
+        $contract = $this->makeContract($fixtures, $employee, $position, [
+            'end_date' => '2026-10-07',
+            'auto_renew' => true,
+        ]);
+
+        Artisan::call(SendContractExpirationWarnings::class);
+
+        Notification::assertSentTo(
+            $manager['user'],
+            ContractsExpiringAutoRenewWarning::class,
+            fn (ContractsExpiringAutoRenewWarning $notification): bool => $notification->daysUntilExpiration === 21
+                && $notification->contracts[0]['id'] === $contract->id,
+        );
     }
 
     public function test_process_auto_renewals_duplicates_only_auto_renewable_expired_contracts(): void
