@@ -1,5 +1,9 @@
 <?php
 
+use App\Enums\RecruitmentCommentType;
+use App\Enums\RecruitmentRequestMode;
+use App\Enums\RecruitmentRequestStatus;
+use App\Enums\WorkflowInstanceStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,9 +16,9 @@ return new class extends Migration
             $table->id();
             $table->string('request_number', 50);
             $table->foreignId('requester_user_id');
-            $table->string('request_type', 60);
-            $table->string('mode', 60)->default('normal');
-            $table->string('status', 60)->default('draft');
+            $table->unsignedTinyInteger('request_type');
+            $table->unsignedTinyInteger('mode')->default(RecruitmentRequestMode::Normal);
+            $table->unsignedTinyInteger('status')->default(RecruitmentRequestStatus::Draft);
             $table->foreignId('scope_city_id')->nullable();
             $table->foreignId('target_position_id')->nullable();
             $table->unsignedBigInteger('target_vacancy_id')->nullable();
@@ -138,7 +142,7 @@ return new class extends Migration
             $table->foreignId('request_id');
             $table->foreignId('request_version_id')->nullable();
             $table->foreignId('user_id');
-            $table->string('comment_type', 60);
+            $table->unsignedTinyInteger('comment_type')->default(RecruitmentCommentType::General);
             $table->text('body');
             $table->timestamp('created_at')->useCurrent();
 
@@ -157,14 +161,15 @@ return new class extends Migration
         Schema::create('recruitment_request_external_confirmations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('recruitment_request_id');
-            $table->string('step_key', 60)->nullable();
+            $table->unsignedTinyInteger('step_key')->nullable();
             $table->boolean('is_generated')->default(false);
             $table->string('confirmer_name', 191)->nullable();
             $table->foreignId('confirmer_user_id')->nullable();
             $table->foreignId('confirmer_position_id')->nullable();
-            $table->string('decision', 60)->nullable();
-            $table->string('method', 60)->nullable();
+            $table->unsignedTinyInteger('decision')->nullable();
+            $table->unsignedTinyInteger('method')->nullable();
             $table->dateTime('confirmed_at')->nullable();
+            $table->text('not_applicable_reason')->nullable();
             $table->text('notes')->nullable();
             $table->foreignId('recorded_by_user_id');
             $table->timestamps();
@@ -195,7 +200,7 @@ return new class extends Migration
         Schema::create('recruitment_workflow_definitions', function (Blueprint $table) {
             $table->id();
             $table->string('name', 191);
-            $table->string('request_type', 60);
+            $table->unsignedTinyInteger('request_type');
             $table->boolean('is_active')->default(false);
             $table->foreignId('created_by_user_id');
             $table->timestamps();
@@ -228,9 +233,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('definition_version_id');
             $table->unsignedInteger('step_order');
-            $table->string('step_key', 60);
+            $table->unsignedTinyInteger('step_key');
             $table->string('role_key', 60);
-            $table->string('scope_rule', 60);
+            $table->unsignedTinyInteger('scope_rule');
             $table->json('required_condition_json')->nullable();
             $table->timestamps();
 
@@ -246,7 +251,7 @@ return new class extends Migration
             $table->foreignId('request_id');
             $table->foreignId('request_version_id');
             $table->foreignId('definition_version_id');
-            $table->string('status', 60)->default('in_progress');
+            $table->unsignedTinyInteger('status')->default(WorkflowInstanceStatus::Running);
             $table->unsignedInteger('current_step_order')->default(1);
             $table->dateTime('started_at');
             $table->dateTime('completed_at')->nullable();
@@ -270,11 +275,11 @@ return new class extends Migration
             $table->foreignId('workflow_instance_id');
             $table->foreignId('workflow_step_id');
             $table->string('assigned_role', 60);
-            $table->string('assigned_scope_type', 60)->nullable();
+            $table->unsignedTinyInteger('assigned_scope_type')->nullable();
             $table->unsignedBigInteger('assigned_scope_id')->nullable();
             $table->foreignId('assigned_user_id')->nullable();
             $table->foreignId('acted_by_user_id')->nullable();
-            $table->string('decision', 60)->nullable();
+            $table->unsignedTinyInteger('decision')->nullable();
             $table->text('decision_reason')->nullable();
             $table->dateTime('acted_at')->nullable();
             $table->timestamps();
@@ -304,15 +309,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('recruitment_request_id');
             $table->foreignId('request_version_id')->nullable();
-            $table->string('event_type', 60);
+            $table->unsignedTinyInteger('event_type');
             $table->foreignId('workflow_instance_id')->nullable();
             $table->foreignId('workflow_step_id')->nullable();
-            $table->string('from_status', 60)->nullable();
-            $table->string('to_status', 60)->nullable();
-            $table->string('decision', 60)->nullable();
+            $table->unsignedTinyInteger('from_status')->nullable();
+            $table->unsignedTinyInteger('to_status')->nullable();
+            $table->unsignedTinyInteger('decision')->nullable();
             $table->foreignId('actor_user_id')->nullable();
             $table->string('actor_role', 60);
-            $table->string('scope_type', 60)->nullable();
+            $table->unsignedTinyInteger('scope_type')->nullable();
             $table->unsignedBigInteger('scope_id')->nullable();
             $table->text('comment')->nullable();
             $table->json('meta')->nullable();

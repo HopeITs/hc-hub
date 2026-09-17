@@ -13,12 +13,12 @@ class HiringCampaignPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasActivePermission('recruitment.campaigns.view');
+        return $user->hasActivePermission('recruitment-campaigns.view');
     }
 
     public function view(User $user, HiringCampaign $campaign): bool
     {
-        return $user->hasActivePermission('recruitment.campaigns.view') && $this->inScope($user, $campaign);
+        return $user->hasActivePermission('recruitment-campaigns.view') && $this->inScope($user, $campaign);
     }
 
     public function create(User $user, Vacancy $vacancy): bool
@@ -26,13 +26,13 @@ class HiringCampaignPolicy
         $request = $vacancy->createdFromRequest()->first();
 
         return $request !== null
-            && $user->hasActivePermission('recruitment.campaigns.manage')
+            && $user->hasActivePermission('recruitment-campaigns.manage')
             && $this->scopes->canAccessRequest($user, $request);
     }
 
     public function manage(User $user, HiringCampaign $campaign): bool
     {
-        return $user->hasActivePermission('recruitment.campaigns.manage') && $this->inScope($user, $campaign);
+        return $user->hasActivePermission('recruitment-campaigns.manage') && $this->inScope($user, $campaign);
     }
 
     public function update(User $user, HiringCampaign $campaign): bool
@@ -47,12 +47,12 @@ class HiringCampaignPolicy
 
     public function publish(User $user, HiringCampaign $campaign): bool
     {
-        return $user->hasActivePermission('recruitment.campaigns.publish') && $this->inScope($user, $campaign);
+        return $user->hasActivePermission('recruitment-campaigns.manage') && $this->inScope($user, $campaign);
     }
 
     public function close(User $user, HiringCampaign $campaign): bool
     {
-        return $user->hasActivePermission('recruitment.campaigns.close') && $this->inScope($user, $campaign);
+        return $user->hasActivePermission('recruitment-campaigns.manage') && $this->inScope($user, $campaign);
     }
 
     private function inScope(User $user, HiringCampaign $campaign): bool

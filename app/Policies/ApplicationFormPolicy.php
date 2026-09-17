@@ -13,12 +13,12 @@ class ApplicationFormPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasActivePermission('recruitment.forms.view');
+        return $user->hasActivePermission('recruitment-forms.view');
     }
 
     public function view(User $user, ApplicationForm $form): bool
     {
-        return $user->hasActivePermission('recruitment.forms.view') && $this->inScope($user, $form);
+        return $user->hasActivePermission('recruitment-forms.view') && $this->inScope($user, $form);
     }
 
     public function create(User $user, HiringCampaign $campaign): bool
@@ -26,13 +26,13 @@ class ApplicationFormPolicy
         $request = $campaign->vacancy()->with('createdFromRequest')->first()?->createdFromRequest;
 
         return $request !== null
-            && $user->hasActivePermission('recruitment.forms.manage')
+            && $user->hasActivePermission('recruitment-forms.manage')
             && $this->scopes->canAccessRequest($user, $request);
     }
 
     public function manage(User $user, ApplicationForm $form): bool
     {
-        return $user->hasActivePermission('recruitment.forms.manage') && $this->inScope($user, $form);
+        return $user->hasActivePermission('recruitment-forms.manage') && $this->inScope($user, $form);
     }
 
     public function update(User $user, ApplicationForm $form): bool
@@ -47,7 +47,7 @@ class ApplicationFormPolicy
 
     public function publish(User $user, ApplicationForm $form): bool
     {
-        return $user->hasActivePermission('recruitment.forms.publish') && $this->inScope($user, $form);
+        return $user->hasActivePermission('recruitment-forms.manage') && $this->inScope($user, $form);
     }
 
     private function inScope(User $user, ApplicationForm $form): bool

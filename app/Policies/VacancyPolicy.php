@@ -12,23 +12,23 @@ class VacancyPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasActivePermission('recruitment.vacancies.view');
+        return $user->hasActivePermission('recruitment-vacancies.view');
     }
 
     public function view(User $user, Vacancy $vacancy): bool
     {
-        return $user->hasActivePermission('recruitment.vacancies.view') && $this->inScope($user, $vacancy);
+        return $user->hasActivePermission('recruitment-vacancies.view') && $this->inScope($user, $vacancy);
     }
 
     public function create(User $user, \App\Models\RecruitmentRequest $request): bool
     {
-        return $user->hasActivePermission('recruitment.vacancies.manage')
+        return $user->hasActivePermission('recruitment-vacancies.manage')
             && $this->scopes->canAccessRequest($user, $request);
     }
 
     public function manage(User $user, Vacancy $vacancy): bool
     {
-        return $user->hasActivePermission('recruitment.vacancies.manage') && $this->inScope($user, $vacancy);
+        return $user->hasActivePermission('recruitment-vacancies.manage') && $this->inScope($user, $vacancy);
     }
 
     public function update(User $user, Vacancy $vacancy): bool
@@ -43,7 +43,7 @@ class VacancyPolicy
 
     public function close(User $user, Vacancy $vacancy): bool
     {
-        return $user->hasActivePermission('recruitment.vacancies.close') && $this->inScope($user, $vacancy);
+        return $user->hasActivePermission('recruitment-vacancies.manage') && $this->inScope($user, $vacancy);
     }
 
     private function inScope(User $user, Vacancy $vacancy): bool

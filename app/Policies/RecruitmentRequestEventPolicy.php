@@ -12,7 +12,7 @@ class RecruitmentRequestEventPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasActivePermission('recruitment.audit.view');
+        return $user->hasActivePermission('recruitment-requests.view');
     }
 
     public function view(User $user, RecruitmentRequestEvent $event): bool
@@ -20,7 +20,7 @@ class RecruitmentRequestEventPolicy
         $request = $event->request()->first();
 
         return $request !== null
-            && $user->hasActivePermission('recruitment.audit.view')
+            && $user->hasActivePermission('recruitment-requests.view')
             && $this->scopes->canAccessRequest($user, $request);
     }
 
@@ -29,7 +29,7 @@ class RecruitmentRequestEventPolicy
         $request = $event->request()->first();
 
         return $request !== null
-            && $user->hasActivePermission('recruitment.audit.export')
+            && $user->hasActivePermission('recruitment-requests.export')
             && $this->scopes->canAccessRequest($user, $request);
     }
 }

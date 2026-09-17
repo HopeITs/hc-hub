@@ -2,6 +2,14 @@
 
 namespace Tests\Feature\Recruitment;
 
+use App\Enums\HiringCampaignStatus;
+use App\Enums\RecruitmentEventType;
+use App\Enums\RecruitmentRequestMode;
+use App\Enums\RecruitmentRequestStatus;
+use App\Enums\RecruitmentRequestType;
+use App\Enums\RecruitmentScopeType;
+use App\Enums\WorkflowInstanceStatus;
+use App\Enums\WorkflowStepKey;
 use App\Models\ApplicationForm;
 use App\Models\City;
 use App\Models\Contract;
@@ -22,6 +30,7 @@ use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Services\RecruitmentScopeResolver;
 use App\Support\AccessPermissionCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -45,240 +54,402 @@ class RecruitmentAuthorizationTest extends TestCase
             ->get('/_test/recruitment/requests/{recruitmentRequest}', fn (RecruitmentRequest $recruitmentRequest): string => (string) $recruitmentRequest->getKey());
     }
 
+    /**
+     * The catalog exists and every role holds exactly its agreed baseline
+     * (D33) — with the two person-level permissions attached to no role at
+     * all, which is the whole point of them (D27).
+     */
     public function test_the_recruitment_permission_catalog_is_seeded_with_role_baselines(): void
     {
-        $expected = [
-            'recruitment.requests.view',
-            'recruitment.requests.create',
-            'recruitment.requests.edit',
-            'recruitment.requests.submit',
-            'recruitment.requests.review',
-            'recruitment.requests.approve',
-            'recruitment.requests.reject',
-            'recruitment.requests.request_changes',
-            'recruitment.requests.export',
-            'recruitment.vacancies.view',
-            'recruitment.vacancies.manage',
-            'recruitment.vacancies.close',
-            'recruitment.campaigns.view',
-            'recruitment.campaigns.manage',
-            'recruitment.campaigns.publish',
-            'recruitment.campaigns.close',
-            'recruitment.job_posts.view',
-            'recruitment.job_posts.manage',
-            'recruitment.job_posts.publish',
-            'recruitment.forms.view',
-            'recruitment.forms.manage',
-            'recruitment.forms.publish',
-            'recruitment.public_links.manage',
-            'recruitment.audit.view',
-            'recruitment.audit.export',
-        ];
+        $recruitment = collect(AccessPermissionCatalog::names())
+            ->filter(fn (string $name): bool => str_starts_with($name, 'recruitment-'));
 
-        $this->assertEqualsCanonicalizing(
-            $expected,
-            collect(AccessPermissionCatalog::names())
-                ->filter(fn (string $name): bool => str_starts_with($name, 'recruitment.'))
+        $this->assertCount(21, $recruitment);
+        $this->assertSame(
+            $recruitment->sort()->values()->all(),
+            Permission::query()
+                ->where('name', 'like', 'recruitment-%')
+                ->pluck('name')
+                ->sort()
                 ->values()
                 ->all(),
         );
-        $this->assertSame(count($expected), Permission::query()->whereIn('name', $expected)->count());
 
-        $this->assertFalse(Role::findByName('employee')->hasPermissionTo('recruitment.requests.create'));
-        $this->assertFalse(Role::findByName('employee')->hasPermissionTo('recruitment.requests.approve'));
-        $this->assertFalse(Role::findByName('manager')->hasPermissionTo('recruitment.requests.create'));
-        $this->assertTrue(Role::findByName('program-manager')->hasPermissionTo('recruitment.requests.create'));
-        $this->assertTrue(Role::findByName('project-manager')->hasPermissionTo('recruitment.requests.create'));
-        $this->assertTrue(Role::findByName('general-manager')->hasPermissionTo('recruitment.requests.create'));
-        $this->assertTrue(Role::findByName('finance')->hasPermissionTo('recruitment.requests.approve'));
-        $this->assertFalse(Role::findByName('finance')->hasPermissionTo('recruitment.requests.create'));
+        $counts = [
+            'super-admin' => 19,
+            'HR-SYR' => 19,
+            'general-manager' => 13,
+            'manager' => 8,
+            'employee' => 0,
+        ];
+
+        foreach ($counts as $roleName => $expected) {
+            $this->assertSame(
+                $expected,
+                Role::findByName($roleName)->permissions()->where('name', 'like', 'recruitment-%')->count(),
+                "Role {$roleName} should hold {$expected} recruitment permissions.",
+            );
+        }
     }
 
-    public function test_only_allowed_creator_roles_can_open_requests(): void
+    /**
+     * approve-finance and submit-without-manager identify a person, so a role
+     * must never carry either: every holder of that role would become the
+     * organization's financial approver, or skip manager approval (D27).
+     */
+    public function test_person_level_permissions_are_attached_to_no_role(): void
     {
-        $city = $this->makeCity('ALP', '001');
-        $allowed = ['program-manager', 'project-manager', 'HR-SYR', 'HR-ALP', 'general-manager', 'hr-director'];
-        $denied = ['employee', 'manager', 'finance', 'custom-requester', 'HR-XXX'];
-
-        foreach ($allowed as $role) {
-            $user = $this->makeUser($city, $role, ['recruitment.requests.create']);
-
-            $this->assertTrue(
-                Gate::forUser($user)->allows('create', [RecruitmentRequest::class, $city->id]),
-                "Role [{$role}] should be allowed to create recruitment requests.",
-            );
-        }
-
-        foreach ($denied as $role) {
-            $user = $this->makeUser($city, $role, ['recruitment.requests.create']);
-
-            $this->assertFalse(
-                Gate::forUser($user)->allows('create', [RecruitmentRequest::class, $city->id]),
-                "Role [{$role}] should not be allowed to create recruitment requests.",
+        foreach (['recruitment-requests.approve-finance', 'recruitment-requests.submit-without-manager'] as $name) {
+            $this->assertSame(
+                0,
+                Permission::findByName($name)->roles()->count(),
+                "{$name} must not be granted through any role.",
             );
         }
     }
 
-    public function test_regional_hr_only_lists_and_opens_requests_in_the_active_city(): void
+    /**
+     * A role created after the catalog gained the recruitment permissions must
+     * not pick the person-level two up on the way in.
+     *
+     * App\Models\Role hands every catalog permission to a new administrator or
+     * HR role automatically. Reading names() there instead of
+     * roleGrantableNames() silently made every governorate HR the
+     * organization's financial approver — and only on a *fresh* database,
+     * which is to say on deployment day and nowhere else.
+     */
+    public function test_a_newly_created_hr_role_does_not_pick_up_person_level_permissions(): void
+    {
+        $role = Role::findOrCreate('HR-TAR', 'web');
+
+        $this->assertSame(19, $role->permissions()->where('name', 'like', 'recruitment-%')->count());
+        $this->assertFalse($role->hasPermissionTo('recruitment-requests.approve-finance'));
+        $this->assertFalse($role->hasPermissionTo('recruitment-requests.submit-without-manager'));
+
+        $administrator = Role::findOrCreate('super-admin-clone', 'web');
+        $this->assertFalse($administrator->hasPermissionTo('recruitment-requests.approve-finance'));
+    }
+
+    /**
+     * ...and they are read from the direct grant, never from a role that
+     * happens to carry one. This is the failure the previous assertion guards
+     * against, verified from the other side.
+     */
+    public function test_person_level_permissions_are_read_from_direct_grants_only(): void
+    {
+        $city = $this->makeCity('lat-'.uniqid(), (string) random_int(100, 999));
+        $resolver = app(RecruitmentScopeResolver::class);
+
+        $throughRole = $this->makeUser($city, 'finance-lookalike-'.uniqid(), [
+            'recruitment-requests.approve-finance',
+        ]);
+        $this->assertNotContains($throughRole->id, $resolver->financeApproverUserIds());
+
+        $directly = $this->makeUser($city, 'manager');
+        $directly->givePermissionTo('recruitment-requests.approve-finance');
+        $this->assertContains($directly->id, $resolver->financeApproverUserIds());
+    }
+
+    /**
+     * Eligibility is the grade of the position held, never a role (D26). A
+     * promotion qualifies someone the same day; moving off a management
+     * position withdraws it.
+     */
+    public function test_eligibility_comes_from_the_job_level_not_the_role(): void
+    {
+        $city = $this->makeCity('elig-'.uniqid(), (string) random_int(100, 999));
+        [$department, , $contractType] = $this->positionPrerequisites();
+        $program = $this->makeProgram('elig');
+        $resolver = app(RecruitmentScopeResolver::class);
+
+        foreach ([1 => true, 3 => true, 5 => true, 2 => false, 4 => false, 8 => false] as $grade => $expected) {
+            $user = $this->makeUser($city, 'manager');
+            $level = JobLevel::query()->forceCreate([
+                'name_en' => 'Grade '.$grade,
+                'name_ar' => 'درجة '.$grade,
+                'grade' => $grade,
+            ]);
+            $this->assignPosition($user, $city, $program, $department, $level, $contractType);
+
+            $this->assertSame(
+                $expected,
+                $resolver->isEligibleRequester($user->fresh()),
+                "Grade {$grade} eligibility should be ".var_export($expected, true),
+            );
+        }
+    }
+
+    /**
+     * A technical account holds no position, so it has no grade and no manager
+     * to approve it. It sees everything and raises nothing (D41).
+     */
+    public function test_super_admin_holds_every_permission_but_cannot_raise_a_request(): void
+    {
+        $city = $this->makeCity('sa-'.uniqid(), (string) random_int(100, 999));
+        $admin = $this->makeUser($city, 'super-admin');
+
+        $this->assertTrue($admin->hasActivePermission('recruitment-requests.manage'));
+        $this->assertFalse(app(RecruitmentScopeResolver::class)->isEligibleRequester($admin));
+        $this->assertFalse(Gate::forUser($admin)->allows('create', RecruitmentRequest::class));
+    }
+
+    /**
+     * A governorate HR is confined to its own governorate (D47) — no "reporting
+     * visibility" wider than the scope.
+     */
+    public function test_governorate_hr_is_confined_to_its_own_city(): void
     {
         $aleppo = $this->makeCity('ALP', '001');
         $homs = $this->makeCity('HMS', '002');
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['recruitment.requests.view']);
-        $local = $this->makeRequest($this->makeUser($aleppo, 'employee'), $aleppo);
-        $remote = $this->makeRequest($this->makeUser($homs, 'employee'), $homs);
 
-        $this->assertSame([$local->id], RecruitmentRequest::query()->visibleTo($hr)->pluck('id')->all());
+        $hr = $this->recruiter($homs, 'HR-HMS');
+        $local = $this->makeRequest($this->makeUser($homs, 'employee'), $homs);
+        $remote = $this->makeRequest($this->makeUser($aleppo, 'employee'), $aleppo);
+
         $this->assertTrue(Gate::forUser($hr)->allows('view', $local));
         $this->assertFalse(Gate::forUser($hr)->allows('view', $remote));
-
-        // An attacker can replace the id in the URL, but the route-level policy
-        // still rejects the record before its controller/component is reached.
-        $this->actingAs($hr)
-            ->get("/_test/recruitment/requests/{$remote->id}")
-            ->assertForbidden();
+        $this->assertFalse(RecruitmentRequest::query()->visibleTo($hr)->whereKey($remote)->exists());
     }
 
+    /**
+     * ...except for the governorates assigned to it. Tartous is reviewed by HR
+     * Latakia, so Tartous is inside its scope and not merely named on its step
+     * (D21 and D42). Reading the map in one direction only was a real bug.
+     */
+    public function test_governorate_hr_also_reaches_the_cities_assigned_to_it(): void
+    {
+        $latakia = $this->makeCity('LAT', '005');
+        $tartous = $this->makeCity('TAR', '006');
+        $homs = $this->makeCity('HMS', '002');
+
+        config()->set('recruitment.governorate_hr.map', ['TAR' => 'HR-LAT']);
+
+        $hr = $this->recruiter($latakia, 'HR-LAT');
+        $assigned = $this->makeRequest($this->makeUser($tartous, 'employee'), $tartous);
+        $unrelated = $this->makeRequest($this->makeUser($homs, 'employee'), $homs);
+
+        $this->assertContains($tartous->id, app(RecruitmentScopeResolver::class)->governorateCityIds($hr));
+        $this->assertTrue(Gate::forUser($hr)->allows('view', $assigned));
+        $this->assertFalse(Gate::forUser($hr)->allows('view', $unrelated));
+    }
+
+    /**
+     * Every city resolves to a reviewer. A request is never stranded because
+     * its governorate has no HR of its own (D21).
+     */
+    public function test_every_city_resolves_to_a_reviewing_hr_role(): void
+    {
+        $aleppo = $this->makeCity('ALP', '001');
+        $homs = $this->makeCity('HMS', '002');
+        $resolver = app(RecruitmentScopeResolver::class);
+
+        config()->set('recruitment.governorate_hr.map', ['ALP' => 'HR-SYR']);
+        $this->makeUser($homs, 'HR-HMS');
+
+        $this->assertSame('HR-SYR', $resolver->governorateHrRole($aleppo->id));
+        $this->assertSame('HR-HMS', $resolver->governorateHrRole($homs->id));
+        $this->assertSame('HR-SYR', $resolver->governorateHrRole(null));
+    }
+
+    /**
+     * HR Syria and the general management watch the whole organization without
+     * being a step in any workflow (D13).
+     */
     public function test_headquarters_scope_remains_organization_wide(): void
     {
-        $syria = $this->makeCity('SYR', '000');
+        $aleppo = $this->makeCity('ALP', '001');
         $homs = $this->makeCity('HMS', '002');
-        $hq = $this->makeUser($syria, 'HR-SYR');
+
+        $hq = $this->recruiter($aleppo, 'HR-SYR');
         $remote = $this->makeRequest($this->makeUser($homs, 'employee'), $homs);
 
         $this->assertTrue(Gate::forUser($hq)->allows('view', $remote));
         $this->assertTrue(RecruitmentRequest::query()->visibleTo($hq)->whereKey($remote)->exists());
     }
 
-    public function test_program_manager_scope_comes_from_the_active_contract(): void
+    /**
+     * A manager sees his own requests and those of the people reporting to
+     * him — one level, no deeper (D30). He is answerable for exactly that.
+     */
+    public function test_a_manager_sees_own_requests_and_direct_reports_only(): void
     {
-        $city = $this->makeCity('ALP', '001');
+        $city = $this->makeCity('mgr-'.uniqid(), (string) random_int(100, 999));
         [$department, $jobLevel, $contractType] = $this->positionPrerequisites();
-        $managedProgram = $this->makeProgram('managed');
-        $otherProgram = $this->makeProgram('other');
-        $manager = $this->makeUser($city, 'program-manager');
-        $this->assignPosition($manager, $city, $managedProgram, $department, $jobLevel, $contractType);
+        $program = $this->makeProgram('mgr');
 
-        $inside = $this->makeRequest(
-            $this->makeUser($city, 'employee'),
-            $city,
-            program: $managedProgram,
-            department: $department,
-        );
-        $outside = $this->makeRequest(
-            $this->makeUser($city, 'employee'),
-            $city,
-            program: $otherProgram,
-            department: $department,
-        );
+        $manager = $this->recruiter($city, 'manager');
+        $managerPosition = $this->assignPosition($manager, $city, $program, $department, $jobLevel, $contractType);
 
-        $this->assertTrue(Gate::forUser($manager)->allows('review', $inside));
-        $this->assertFalse(Gate::forUser($manager)->allows('review', $outside));
-        $this->assertEqualsCanonicalizing(
-            [$inside->id],
-            RecruitmentRequest::query()->visibleTo($manager)->pluck('id')->all(),
-        );
+        $report = $this->makeUser($city, 'manager');
+        $reportPosition = $this->assignPosition($report, $city, $program, $department, $jobLevel, $contractType);
+        $reportPosition->forceFill(['direct_manager_id' => $managerPosition->id])->save();
+
+        $stranger = $this->makeUser($city, 'manager');
+        $this->assignPosition($stranger, $city, $program, $department, $jobLevel, $contractType);
+
+        $own = $this->makeRequest($manager, $city);
+        $reports = $this->makeRequest($report, $city);
+        $foreign = $this->makeRequest($stranger, $city);
+
+        $manager = $manager->fresh();
+
+        $this->assertTrue(Gate::forUser($manager)->allows('view', $own));
+        $this->assertTrue(Gate::forUser($manager)->allows('view', $reports));
+        $this->assertFalse(Gate::forUser($manager)->allows('view', $foreign));
     }
 
-    public function test_a_permission_without_a_recognized_scope_only_exposes_own_requests(): void
+    /**
+     * The resolver fails closed. A user it cannot place gets None, and None is
+     * an empty result — not an unscoped one (D31).
+     */
+    public function test_a_user_without_a_recognized_scope_sees_nothing(): void
     {
-        $city = $this->makeCity('ALP', '001');
-        $reviewer = $this->makeUser($city, 'custom-reviewer', ['recruitment.requests.view']);
-        $own = $this->makeRequest($reviewer, $city);
+        $city = $this->makeCity('none-'.uniqid(), (string) random_int(100, 999));
+
+        // A role carrying the permission, but no position and so no scope.
+        $orphan = User::factory()->create(['employee_id' => null]);
+        $role = Role::findOrCreate('manager', 'web');
+        $orphan->assignRole($role);
+        $orphan->roles()->updateExistingPivot($role->id, ['is_active' => true]);
+        $orphan = $orphan->fresh();
+
         $foreign = $this->makeRequest($this->makeUser($city, 'employee'), $city);
 
-        $this->assertSame([$own->id], RecruitmentRequest::query()->visibleTo($reviewer)->pluck('id')->all());
-        $this->assertTrue(Gate::forUser($reviewer)->allows('view', $own));
-        $this->assertFalse(Gate::forUser($reviewer)->allows('view', $foreign));
+        $this->assertSame(RecruitmentScopeType::None, app(RecruitmentScopeResolver::class)->scopeType($orphan));
+        $this->assertFalse(Gate::forUser($orphan)->allows('view', $foreign));
+        $this->assertSame(0, RecruitmentRequest::query()->visibleTo($orphan)->count());
     }
 
-    public function test_approval_requires_permission_active_role_assignee_and_matching_scope(): void
+    /**
+     * Holding the permission is the first of four questions, and the only one
+     * an administrator role bypasses (D10). HR Syria holds every permission in
+     * the system and still cannot decide a step that is somebody else's.
+     */
+    public function test_deciding_a_step_requires_being_the_assignee_and_holding_the_scope(): void
     {
-        $city = $this->makeCity('ALP', '001');
-        [$department, $jobLevel, $contractType] = $this->positionPrerequisites();
-        $program = $this->makeProgram('finance-program');
-        $finance = $this->makeUser($city, 'finance');
-        $otherFinance = $this->makeUser($city, 'finance');
-        $this->assignPosition($finance, $city, $program, $department, $jobLevel, $contractType);
-        $this->assignPosition($otherFinance, $city, $program, $department, $jobLevel, $contractType);
-        $request = $this->makeRequest($this->makeUser($city, 'employee'), $city, $program, $department);
-        $step = $this->makeWorkflowStep($request, $finance, 'finance', 'department', $department->id);
-
-        $this->assertTrue(Gate::forUser($finance)->allows('approve', $step));
-        $this->assertFalse(Gate::forUser($otherFinance)->allows('approve', $step));
-
-        $financeRole = Role::findByName('finance');
-        $employeeRole = Role::findByName('employee');
-        $finance->assignRole($employeeRole);
-        $finance->roles()->updateExistingPivot($employeeRole->id, ['is_active' => false]);
-        $finance->setActiveRole($employeeRole->id);
-        $finance->unsetRelation('roles');
-
-        $this->assertFalse(Gate::forUser($finance->fresh())->allows('approve', $step));
-
-        $finance->setActiveRole($financeRole->id);
-        $financeRole->revokePermissionTo('recruitment.requests.approve');
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-        $finance->unsetRelation('roles');
-
-        $this->assertFalse(Gate::forUser($finance->fresh())->allows('approve', $step));
-    }
-
-    public function test_missing_or_unknown_scope_data_fails_closed(): void
-    {
-        $aleppo = $this->makeCity('ALP', '001');
         $homs = $this->makeCity('HMS', '002');
-        $unknownRegionalHr = $this->makeUser($aleppo, 'HR-XXX', [
-            'recruitment.requests.view',
-            'recruitment.requests.approve',
-        ]);
-        $remote = $this->makeRequest($this->makeUser($homs, 'employee'), $homs);
-        $step = $this->makeWorkflowStep($remote, $unknownRegionalHr, 'HR-XXX', null, null);
+        $aleppo = $this->makeCity('ALP', '001');
+        config()->set('recruitment.governorate_hr.map', []);
 
-        $this->assertFalse(Gate::forUser($unknownRegionalHr)->allows('view', $remote));
-        $this->assertFalse(Gate::forUser($unknownRegionalHr)->allows('approve', $step));
+        $assignee = $this->recruiter($homs, 'HR-HMS');
+        $other = $this->recruiter($homs, 'HR-HMS');
+        $headquarters = $this->recruiter($homs, 'HR-SYR');
+
+        $request = $this->makeRequest($this->makeUser($homs, 'employee'), $homs);
+        $step = $this->makeWorkflowStep(
+            $request,
+            $assignee,
+            'HR-HMS',
+            RecruitmentScopeType::City,
+            $homs->id,
+        );
+
+        $resolver = app(RecruitmentScopeResolver::class);
+
+        // The assignee, in scope, on an open step.
+        $this->assertTrue($resolver->canActOnStep($assignee, $step));
+
+        // Same role, same scope, but not the assignee.
+        $this->assertFalse($resolver->canActOnStep($other, $step));
+
+        // Holds every permission in the system; still not the assignee.
+        $this->assertFalse($resolver->canActOnStep($headquarters, $step));
+
+        // The assignee, but the step is already decided. Each scenario needs a
+        // request of its own: a workflow instance is unique per request version.
+        $decided = $this->makeWorkflowStep(
+            $this->makeRequest($this->makeUser($homs, 'employee'), $homs),
+            $assignee,
+            'HR-HMS',
+            RecruitmentScopeType::City,
+            $homs->id,
+        );
+        $decided->forceFill(['decision' => 'approved'])->save();
+        $this->assertFalse($resolver->canActOnStep($assignee, $decided));
+
+        // The assignee, open step, but a scope they do not hold.
+        $outOfScope = $this->makeWorkflowStep(
+            $this->makeRequest($this->makeUser($aleppo, 'employee'), $aleppo),
+            $assignee,
+            'HR-HMS',
+            RecruitmentScopeType::City,
+            $aleppo->id,
+        );
+        $this->assertFalse($resolver->canActOnStep($assignee, $outOfScope));
+
+        // An unrecognized scope is a no. Absence is not a complete scope.
+        $unknown = $this->makeWorkflowStep(
+            $this->makeRequest($this->makeUser($homs, 'employee'), $homs),
+            $assignee,
+            'HR-HMS',
+            null,
+            null,
+        );
+        $this->assertFalse($resolver->canActOnStep($assignee, $unknown));
     }
 
-    public function test_vacancy_publishing_and_audit_policies_inherit_request_scope(): void
+    /**
+     * Requests are the root of visibility and everything downstream inherits
+     * it, so the two answers cannot drift apart.
+     */
+    public function test_publishing_entities_inherit_the_request_scope(): void
     {
-        $aleppo = $this->makeCity('ALP', '001');
         $homs = $this->makeCity('HMS', '002');
-        $hr = $this->makeUser($aleppo, 'HR-ALP', [
-            'recruitment.requests.view',
-            'recruitment.vacancies.view',
-            'recruitment.vacancies.close',
-            'recruitment.campaigns.view',
-            'recruitment.campaigns.publish',
-            'recruitment.job_posts.view',
-            'recruitment.job_posts.publish',
-            'recruitment.forms.view',
-            'recruitment.forms.manage',
-            'recruitment.public_links.manage',
-            'recruitment.audit.view',
-        ]);
-        [$department, $jobLevel, $contractType] = $this->positionPrerequisites();
-        $program = $this->makeProgram('publishing');
-        $localPosition = $this->makePosition($aleppo, $program, $department, $jobLevel, 'local');
-        $remotePosition = $this->makePosition($homs, $program, $department, $jobLevel, 'remote');
-        $localRequest = $this->makeRequest($this->makeUser($aleppo, 'employee'), $aleppo, $program, $department);
-        $remoteRequest = $this->makeRequest($this->makeUser($homs, 'employee'), $homs, $program, $department);
-        $local = $this->publishingChain($localRequest, $localPosition, $hr);
-        $remote = $this->publishingChain($remoteRequest, $remotePosition, $hr);
+        $aleppo = $this->makeCity('ALP', '001');
+        config()->set('recruitment.governorate_hr.map', []);
 
-        $this->assertTrue(Gate::forUser($hr)->allows('close', $local['vacancy']));
-        $this->assertTrue(Gate::forUser($hr)->allows('publish', $local['campaign']));
-        $this->assertTrue(Gate::forUser($hr)->allows('publish', $local['jobPost']));
+        [$department, $jobLevel, $contractType] = $this->positionPrerequisites();
+        $program = $this->makeProgram('pub');
+        $localPosition = $this->makePosition($homs, $program, $department, $jobLevel, 'local');
+        $remotePosition = $this->makePosition($aleppo, $program, $department, $jobLevel, 'remote');
+
+        $hr = $this->recruiter($homs, 'HR-HMS');
+        $local = $this->publishingChain($this->makeRequest($this->makeUser($homs, 'employee'), $homs), $localPosition, $hr);
+        $remote = $this->publishingChain($this->makeRequest($this->makeUser($aleppo, 'employee'), $aleppo), $remotePosition, $hr);
+
+        $this->assertTrue(Gate::forUser($hr)->allows('view', $local['vacancy']));
+        $this->assertTrue(Gate::forUser($hr)->allows('manage', $local['campaign']));
+        $this->assertTrue(Gate::forUser($hr)->allows('manage', $local['jobPost']));
         $this->assertTrue(Gate::forUser($hr)->allows('manage', $local['form']));
         $this->assertTrue(Gate::forUser($hr)->allows('manage', $local['link']));
-        $this->assertTrue(Gate::forUser($hr)->allows('view', $local['event']));
 
-        $this->assertFalse(Gate::forUser($hr)->allows('close', $remote['vacancy']));
-        $this->assertFalse(Gate::forUser($hr)->allows('publish', $remote['campaign']));
-        $this->assertFalse(Gate::forUser($hr)->allows('publish', $remote['jobPost']));
+        $this->assertFalse(Gate::forUser($hr)->allows('view', $remote['vacancy']));
+        $this->assertFalse(Gate::forUser($hr)->allows('manage', $remote['campaign']));
+        $this->assertFalse(Gate::forUser($hr)->allows('manage', $remote['jobPost']));
         $this->assertFalse(Gate::forUser($hr)->allows('manage', $remote['form']));
         $this->assertFalse(Gate::forUser($hr)->allows('manage', $remote['link']));
-        $this->assertFalse(Gate::forUser($hr)->allows('view', $remote['event']));
+    }
 
-        $this->assertSame([$local['vacancy']->id], Vacancy::query()->visibleTo($hr)->pluck('id')->all());
+    /**
+     * The detail screen is the classic place scope gets forgotten, so the
+     * route is exercised as a route rather than through the Gate alone.
+     */
+    public function test_the_detail_route_applies_the_same_boundary_as_the_list(): void
+    {
+        $homs = $this->makeCity('HMS', '002');
+        $aleppo = $this->makeCity('ALP', '001');
+        config()->set('recruitment.governorate_hr.map', []);
+
+        $hr = $this->recruiter($homs, 'HR-HMS');
+        $local = $this->makeRequest($this->makeUser($homs, 'employee'), $homs);
+        $remote = $this->makeRequest($this->makeUser($aleppo, 'employee'), $aleppo);
+
+        $this->actingAs($hr)->get('/_test/recruitment/requests/'.$local->getKey())->assertOk();
+        $this->actingAs($hr)->get('/_test/recruitment/requests/'.$remote->getKey())->assertForbidden();
+    }
+
+    /**
+     * A user whose active role holds the recruitment permissions a role may
+     * legitimately hold.
+     *
+     * CreatesHrFixtures builds roles through Spatie's Role class, which does
+     * not run App\Models\Role's automatic grant, so the baseline is applied
+     * here explicitly. That separation is deliberate: these tests are about
+     * scope, and the granting path has its own test above.
+     */
+    private function recruiter(City $city, string $roleName): User
+    {
+        return $this->makeUser($city, $roleName, AccessPermissionCatalog::roleGrantableNames());
     }
 
     private function makeRequest(
@@ -290,9 +461,9 @@ class RecruitmentAuthorizationTest extends TestCase
         $request = RecruitmentRequest::query()->forceCreate([
             'request_number' => 'REQ-'.strtoupper(uniqid()),
             'requester_user_id' => $requester->id,
-            'request_type' => 'new_position',
-            'mode' => 'normal',
-            'status' => 'submitted',
+            'request_type' => RecruitmentRequestType::CreatePosition,
+            'mode' => RecruitmentRequestMode::Normal,
+            'status' => RecruitmentRequestStatus::Submitted,
             'scope_city_id' => $city->id,
             'submitted_at' => now(),
         ]);
@@ -389,7 +560,7 @@ class RecruitmentAuthorizationTest extends TestCase
         RecruitmentRequest $request,
         User $assignee,
         string $role,
-        ?string $scopeType,
+        ?int $scopeType,
         ?int $scopeId,
     ): RecruitmentWorkflowInstanceStep {
         $requestVersion = $request->versions()->first() ?? RecruitmentRequestVersion::query()->forceCreate([
@@ -402,7 +573,7 @@ class RecruitmentAuthorizationTest extends TestCase
         $now = now();
         $definitionId = DB::table('recruitment_workflow_definitions')->insertGetId([
             'name' => 'Workflow '.uniqid(),
-            'request_type' => 'new_position',
+            'request_type' => RecruitmentRequestType::CreatePosition,
             'is_active' => true,
             'created_by_user_id' => $request->requester_user_id,
             'created_at' => $now,
@@ -420,9 +591,9 @@ class RecruitmentAuthorizationTest extends TestCase
         $workflowStepId = DB::table('recruitment_workflow_steps')->insertGetId([
             'definition_version_id' => $definitionVersionId,
             'step_order' => 1,
-            'step_key' => 'approval',
+            'step_key' => WorkflowStepKey::ManagerApproval,
             'role_key' => $role,
-            'scope_rule' => $scopeType ?? 'missing',
+            'scope_rule' => $scopeType ?? RecruitmentScopeType::None,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -430,7 +601,7 @@ class RecruitmentAuthorizationTest extends TestCase
             'request_id' => $request->id,
             'request_version_id' => $requestVersion->id,
             'definition_version_id' => $definitionVersionId,
-            'status' => 'in_progress',
+            'status' => WorkflowInstanceStatus::Running,
             'current_step_order' => 1,
             'started_at' => $now,
             'created_at' => $now,
@@ -460,7 +631,7 @@ class RecruitmentAuthorizationTest extends TestCase
         ]);
         $campaign = HiringCampaign::query()->forceCreate([
             'vacancy_id' => $vacancy->id,
-            'status' => 'draft',
+            'status' => HiringCampaignStatus::Draft,
             'link_mode' => 'public_open',
             'created_by_user_id' => $actor->id,
         ]);
@@ -503,7 +674,7 @@ class RecruitmentAuthorizationTest extends TestCase
         ]);
         $event = RecruitmentRequestEvent::query()->forceCreate([
             'recruitment_request_id' => $request->id,
-            'event_type' => 'submitted',
+            'event_type' => RecruitmentEventType::RequestSubmitted,
             'actor_user_id' => $request->requester_user_id,
             'actor_role' => 'employee',
         ]);

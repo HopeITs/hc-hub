@@ -2,18 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "hc-hr (composer dev)",
-      "runtimeExecutable": "composer",
-      "runtimeArgs": ["dev"],
-      "port": 8000,
-      "autoPort": false
-    },
-    {
-      "name": "hc-hr (artisan serve)",
+      "name": "hope-hr",
       "runtimeExecutable": "php",
-      "runtimeArgs": ["artisan", "serve", "--port=8299"],
-      "port": 8299,
-      "autoPort": false
+      "runtimeArgs": ["-S", "127.0.0.1:8000", "-t", "public", "server.php"],
+      "port": 8000
     }
   ]
 }

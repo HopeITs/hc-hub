@@ -1,40 +1,90 @@
 <?php
 
 return [
+
     /*
-    | Roles that legitimately span the complete organization. HR-SYR is the
-    | existing headquarters/HR-director role; hr-director is retained as an
-    | explicit alias for installations that use the plan's role name.
+    |--------------------------------------------------------------------------
+    | Who may raise a recruitment request
+    |--------------------------------------------------------------------------
+    |
+    | Eligibility comes from where someone sits in the org chart, not from a
+    | role an administrator hands out: a promotion qualifies them the same day,
+    | and moving off a management position withdraws it. These are job_levels
+    | grades — 1 Program Manager, 3 Project Manager, 5 Department Manager. The
+    | CEO sits at grade 1, so he is already covered and is not listed again.
+    |
+    | Eligibility is only half the check. The user still needs
+    | recruitment-requests.submit from their role.
+    |
     */
-    'organization_roles' => [
-        'super-admin',
-        'general-manager',
-        'HR-SYR',
-        'hr-director',
+
+    'requester_job_level_grades' => [1, 3, 5],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Which HR role reviews a governorate's requests
+    |--------------------------------------------------------------------------
+    |
+    | Governorate HR approval is the last mandatory step, so every city needs an
+    | answer here — HR-ALP and HR-TAR exist as roles but nobody holds them, and
+    | Aleppo alone carries 46 positions. Keys are city slugs; a city that is not
+    | listed falls back to 'default'. A request is never left without a
+    | reviewer because its governorate has no HR of its own.
+    |
+    */
+
+    'governorate_hr' => [
+        'map' => [
+            'ALP' => 'HR-SYR',
+            'TAR' => 'HR-LAT',
+        ],
+
+        'default' => 'HR-SYR',
     ],
 
     /*
-    | Only these roles may open a recruitment request. Regional HR roles are
-    | handled dynamically below when their HR-* suffix resolves to a city.
+    |--------------------------------------------------------------------------
+    | Permissions that belong to a person, never to a role
+    |--------------------------------------------------------------------------
+    |
+    | Both of these answer "is this specific human the one?", so attaching
+    | either to a role would be a security hole rather than a convenience:
+    | every holder of that role would become the financial approver, or would
+    | be able to skip manager approval entirely.
+    |
+    | They are resolved from direct grants only (model_has_permissions), so a
+    | role that somehow carries one of them still grants nobody anything.
+    | Access Management is where they are handed out.
+    |
     */
-    'request_creator_roles' => [
-        'super-admin',
-        'general-manager',
-        'HR-SYR',
-        'hr-director',
-        'program-manager',
-        'project-manager',
+
+    'user_level_permissions' => [
+        // The organization's single financial approver — today the holder of
+        // the Senior Financial Manager position.
+        'finance_approver' => 'recruitment-requests.approve-finance',
+
+        // The top of the org chart: people with no manager above them, whose
+        // requests therefore skip the manager approval step. Finance and HR
+        // approval still apply to them.
+        'top_level_requester' => 'recruitment-requests.submit-without-manager',
     ],
 
     /*
-    | Structural scope is derived only for these roles. A direct permission
-    | grant to an arbitrary role never silently expands access to the user's
-    | whole city/program/department.
+    |--------------------------------------------------------------------------
+    | Roles that see every request in the organization
+    |--------------------------------------------------------------------------
+    |
+    | HR Syria and the general management are not steps in the workflow; they
+    | watch it. They see every request, its state and its timeline, and only
+    | act when they happen to hold an organizational role in that particular
+    | request — as the requester's manager, say.
+    |
     */
-    'structural_role_scopes' => [
-        'program-manager' => ['program', 'project'],
-        'project-manager' => ['project', 'program'],
-        'manager' => ['program', 'project', 'department', 'position'],
-        'finance' => ['program', 'project', 'department', 'city'],
+
+    'organization_wide_roles' => [
+        'super-admin',
+        'HR-SYR',
+        'general-manager',
     ],
+
 ];

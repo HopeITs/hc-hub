@@ -13,12 +13,12 @@ class PublicRecruitmentLinkPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasActivePermission('recruitment.public_links.manage');
+        return $user->hasActivePermission('recruitment-links.manage');
     }
 
     public function manage(User $user, PublicRecruitmentLink $link): bool
     {
-        if (! $user->hasActivePermission('recruitment.public_links.manage')) {
+        if (! $user->hasActivePermission('recruitment-links.manage')) {
             return false;
         }
 
@@ -32,7 +32,7 @@ class PublicRecruitmentLinkPolicy
         $request = $campaign->vacancy()->with('createdFromRequest')->first()?->createdFromRequest;
 
         return $request !== null
-            && $user->hasActivePermission('recruitment.public_links.manage')
+            && $user->hasActivePermission('recruitment-links.manage')
             && $this->scopes->canAccessRequest($user, $request);
     }
 

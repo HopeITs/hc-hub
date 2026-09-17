@@ -29,6 +29,8 @@ class RecruitmentWorkflowDefinition extends Model
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean'];
+        return [
+            'request_type' => 'integer',
+            'is_active' => 'boolean'];
     }
 }

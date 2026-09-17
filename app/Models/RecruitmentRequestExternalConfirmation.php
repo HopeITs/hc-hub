@@ -32,6 +32,10 @@ class RecruitmentRequestExternalConfirmation extends Model
     protected function casts(): array
     {
         return [
+            'step_key' => 'integer',
+            'decision' => 'integer',
+            'method' => 'integer',
+
             'is_generated' => 'boolean',
             'confirmed_at' => 'datetime',
         ];

@@ -32,6 +32,9 @@ class RecruitmentWorkflowInstanceStep extends Model
     protected function casts(): array
     {
         return [
+            'assigned_scope_type' => 'integer',
+            'decision' => 'integer',
+
             'assigned_scope_id' => 'integer',
             'acted_at' => 'datetime',
         ];

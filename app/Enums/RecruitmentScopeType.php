@@ -2,33 +2,41 @@
 
 namespace App\Enums;
 
-enum RecruitmentScopeType: string
+use BenSampo\Enum\Enum;
+
+/**
+ * How wide a user's reach into recruitment data is.
+ *
+ * Scope answers "where", separately from the role that answers "what" and the
+ * job level that answers "may they raise a request at all". All three are
+ * checked; holding a permission without the scope to match it grants nothing.
+ */
+final class RecruitmentScopeType extends Enum
 {
-    case Organization = 'organization';
-    case City = 'city';
-    case Governorate = 'governorate';
-    case Program = 'program';
-    case Project = 'project';
-    case Department = 'department';
-    case Center = 'center';
-    case Position = 'position';
-    case User = 'user';
+    /** Sees nothing. The default for anyone the resolver cannot place. */
+    const None = 0;
 
-    public static function normalize(?string $value): ?self
+    /** Own requests plus those of direct reports, via positions.direct_manager_id. */
+    const DirectReports = 1;
+
+    /** One governorate, resolved through Position::scopeInCity. */
+    const City = 2;
+
+    /** Every request in the organization. */
+    const Organization = 3;
+
+    public static function getLocalizedName(int $value): array
     {
-        $value = strtolower(trim((string) $value));
-
-        return match ($value) {
-            'organization', 'organization-wide', 'organisation', 'all' => self::Organization,
-            'city', 'area', 'region' => self::City,
-            'governorate' => self::Governorate,
-            'program' => self::Program,
-            'project' => self::Project,
-            'department' => self::Department,
-            'center', 'centre' => self::Center,
-            'position' => self::Position,
-            'user' => self::User,
-            default => null,
+        $val = match ($value) {
+            self::DirectReports => ['text' => ['en' => 'Direct reports', 'ar' => 'المرؤوسون المباشرون'], 'color' => 'secondary-light'],
+            self::City => ['text' => ['en' => 'Governorate', 'ar' => 'المحافظة'], 'color' => 'primary'],
+            self::Organization => ['text' => ['en' => 'Organization', 'ar' => 'المنظمة'], 'color' => 'secondary-medium'],
+            default => ['text' => ['en' => 'No access', 'ar' => 'لا وصول'], 'color' => 'secondary-light'],
         };
+
+        return [
+            'value' => $val['text'][app()->getLocale()],
+            'color' => $val['color'],
+        ];
     }
 }

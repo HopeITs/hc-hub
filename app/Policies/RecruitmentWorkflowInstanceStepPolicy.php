@@ -15,23 +15,23 @@ class RecruitmentWorkflowInstanceStepPolicy
         $request = $step->workflowInstance()->with('request')->first()?->request;
 
         return $request !== null
-            && $user->hasActivePermission('recruitment.requests.view')
+            && $user->hasActivePermission('recruitment-requests.view')
             && $this->scopes->canAccessRequest($user, $request);
     }
 
     public function approve(User $user, RecruitmentWorkflowInstanceStep $step): bool
     {
-        return $this->canDecide($user, $step, 'recruitment.requests.approve');
+        return $this->canDecide($user, $step, 'recruitment-requests.approve');
     }
 
     public function reject(User $user, RecruitmentWorkflowInstanceStep $step): bool
     {
-        return $this->canDecide($user, $step, 'recruitment.requests.reject');
+        return $this->canDecide($user, $step, 'recruitment-requests.reject');
     }
 
     public function requestChanges(User $user, RecruitmentWorkflowInstanceStep $step): bool
     {
-        return $this->canDecide($user, $step, 'recruitment.requests.request_changes');
+        return $this->canDecide($user, $step, 'recruitment-requests.request-changes');
     }
 
     private function canDecide(User $user, RecruitmentWorkflowInstanceStep $step, string $permission): bool

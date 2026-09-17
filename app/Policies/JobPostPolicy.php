@@ -13,12 +13,12 @@ class JobPostPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasActivePermission('recruitment.job_posts.view');
+        return $user->hasActivePermission('recruitment-job-posts.view');
     }
 
     public function view(User $user, JobPost $post): bool
     {
-        return $user->hasActivePermission('recruitment.job_posts.view') && $this->inScope($user, $post);
+        return $user->hasActivePermission('recruitment-job-posts.view') && $this->inScope($user, $post);
     }
 
     public function create(User $user, HiringCampaign $campaign): bool
@@ -26,13 +26,13 @@ class JobPostPolicy
         $request = $campaign->vacancy()->with('createdFromRequest')->first()?->createdFromRequest;
 
         return $request !== null
-            && $user->hasActivePermission('recruitment.job_posts.manage')
+            && $user->hasActivePermission('recruitment-job-posts.manage')
             && $this->scopes->canAccessRequest($user, $request);
     }
 
     public function manage(User $user, JobPost $post): bool
     {
-        return $user->hasActivePermission('recruitment.job_posts.manage') && $this->inScope($user, $post);
+        return $user->hasActivePermission('recruitment-job-posts.manage') && $this->inScope($user, $post);
     }
 
     public function update(User $user, JobPost $post): bool
@@ -47,7 +47,7 @@ class JobPostPolicy
 
     public function publish(User $user, JobPost $post): bool
     {
-        return $user->hasActivePermission('recruitment.job_posts.publish') && $this->inScope($user, $post);
+        return $user->hasActivePermission('recruitment-job-posts.manage') && $this->inScope($user, $post);
     }
 
     private function inScope(User $user, JobPost $post): bool
