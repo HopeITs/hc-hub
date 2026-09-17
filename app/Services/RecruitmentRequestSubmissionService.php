@@ -1,0 +1,361 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\RecruitmentEventType;
+use App\Enums\RecruitmentRequestStatus as Status;
+use App\Enums\RecruitmentRequestType as Type;
+use App\Enums\RecruitmentScopeType;
+use App\Models\HiringCampaign;
+use App\Models\Position;
+use App\Models\RecruitmentRequest;
+use App\Models\RecruitmentRequestVersion;
+use App\Models\User;
+use App\Models\Vacancy;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
+use Throwable;
+
+/**
+ * Turns a draft into a submitted request, and freezes what was submitted.
+ *
+ * A draft is allowed to be half-finished — that is the point of a draft. Every
+ * rule the request type carries is therefore enforced here, at the moment the
+ * request stops being the requester's private working copy and becomes
+ * something other people are asked to decide on.
+ */
+class RecruitmentRequestSubmissionService
+{
+    /** Statuses that are still being worked on, so they hold the slot (T3). */
+    private const ACTIVE = [Status::Submitted, Status::UnderReview, Status::ChangesRequested, Status::Resubmitted];
+
+    /** The requester may still edit in these. */
+    private const EDITABLE = [Status::Draft, Status::ChangesRequested];
+
+    public function __construct(private readonly RecruitmentScopeResolver $scopes) {}
+
+    /**
+     * Submit (T3) or resubmit (T11).
+     *
+     * Idempotent by design and without a stored key: the row is locked, then
+     * the status is read again inside the lock. A second click, a retry after a
+     * timeout, or two concurrent requests all find the status already moved on
+     * and get the same request back rather than a second version. The unique
+     * index on (request_id, version_no) is the last net under that.
+     */
+    public function submit(User $actor, RecruitmentRequest $request): RecruitmentRequest
+    {
+        return DB::transaction(function () use ($actor, $request) {
+            $fresh = RecruitmentRequest::query()->whereKey($request->getKey())->lockForUpdate()->firstOrFail();
+
+            if ((int) $fresh->requester_user_id !== (int) $actor->getKey()) {
+                throw ValidationException::withMessages(['request' => __('recruitment.not_your_request')]);
+            }
+
+            // The retry path, checked before the policy runs: once the status has
+            // moved on, the submit policy denies — correctly, since the request is
+            // no longer editable — and a retry would surface that denial as a
+            // failure when the work had in fact succeeded. The requester gets his
+            // own request back instead.
+            if (! in_array((int) $fresh->status, self::EDITABLE, true)) {
+                return $fresh;
+            }
+
+            Gate::forUser($actor)->authorize('submit', $fresh);
+
+            $wasDraft = (int) $fresh->status === Status::Draft;
+            $payload = (array) ($fresh->draft_payload_json ?? []);
+
+            $this->assertComplete($fresh, $payload);
+            $this->assertTypeRules($fresh, $payload);
+            $this->assertNoActiveDuplicate($fresh);
+
+            $version = $this->freezeVersion($fresh, $actor, $payload);
+
+            $fresh->forceFill([
+                'status' => $wasDraft ? Status::Submitted : Status::Resubmitted,
+                'submitted_at' => now(),
+            ])->save();
+
+            $this->record($fresh, $actor, [
+                'event_type' => $wasDraft ? RecruitmentEventType::RequestSubmitted : RecruitmentEventType::VersionCreated,
+                'request_version_id' => $version->getKey(),
+                'from_status' => $wasDraft ? Status::Draft : Status::ChangesRequested,
+                'to_status' => (int) $fresh->status,
+            ]);
+
+            return $fresh;
+        });
+    }
+
+    /** Cancel a request the requester still owns (T12 · T14 · T15). */
+    public function cancel(User $actor, RecruitmentRequest $request, ?string $reason = null): RecruitmentRequest
+    {
+        return DB::transaction(function () use ($actor, $request, $reason) {
+            $fresh = RecruitmentRequest::query()->whereKey($request->getKey())->lockForUpdate()->firstOrFail();
+
+            if ((int) $fresh->requester_user_id !== (int) $actor->getKey()) {
+                throw ValidationException::withMessages(['request' => __('recruitment.not_your_request')]);
+            }
+
+            // Cancelling twice is the same retry shape as submitting twice.
+            if ((int) $fresh->status === Status::Cancelled) {
+                return $fresh;
+            }
+
+            Gate::forUser($actor)->authorize('cancel', $fresh);
+
+            // Cancelling is the requester's alone, and only before the final
+            // approval — an approved request is applied, not withdrawn.
+            if (! in_array((int) $fresh->status, [Status::Draft, Status::ChangesRequested, Status::UnderReview], true)) {
+                throw ValidationException::withMessages(['request' => __('recruitment.cannot_cancel')]);
+            }
+
+            $from = (int) $fresh->status;
+            $fresh->forceFill(['status' => Status::Cancelled])->save();
+
+            $this->record($fresh, $actor, [
+                'event_type' => RecruitmentEventType::RequestCancelled,
+                'from_status' => $from,
+                'to_status' => Status::Cancelled,
+                'comment' => $reason,
+            ]);
+
+            return $fresh;
+        });
+    }
+
+    /**
+     * Every field the request type calls mandatory must be present.
+     *
+     * The lists come straight from the request type matrix. A draft may be
+     * missing any of them; a submission may not.
+     */
+    private function assertComplete(RecruitmentRequest $request, array $payload): void
+    {
+        $missing = [];
+
+        foreach ($this->requiredFields((int) $request->request_type) as $field) {
+            $value = $payload[$field] ?? null;
+
+            // finance_consulted is an attestation: false is not an answer.
+            if ($field === 'finance_consulted' ? ! $value : ($value === null || $value === '')) {
+                $missing['data.'.$field] = __('recruitment.required_on_submit', ['field' => __('recruitment.'.$field)]);
+            }
+        }
+
+        if ($missing !== []) {
+            throw ValidationException::withMessages($missing);
+        }
+    }
+
+    /** @return array<int, string> */
+    private function requiredFields(int $type): array
+    {
+        $money = ['salary_amount', 'currency', 'salary_per', 'contract_type_id', 'finance_consulted'];
+
+        return match ($type) {
+            Type::FillVacancy => array_merge(['justification', 'needed_by_date'], $money),
+            Type::IncreaseHeadcount => array_merge(['additional_count', 'justification', 'needed_by_date'], $money),
+            Type::DecreaseHeadcount => ['reduce_by', 'reason', 'effective_date'],
+            Type::CreatePosition => array_merge([
+                'program_id', 'city_id', 'department_id', 'job_level_id',
+                'title_en', 'title_ar', 'qualifications', 'responsibilities',
+                'max_emp', 'direct_manager_id',
+            ], $money),
+            Type::ClosePosition => ['reason', 'effective_date'],
+            Type::CloseVacancy => ['reason'],
+            default => [],
+        };
+    }
+
+    /**
+     * The checks that read live data rather than the form.
+     *
+     * These are re-run before the final approval too (RV-2 to RV-5), because
+     * the world moves while a request is being reviewed.
+     */
+    private function assertTypeRules(RecruitmentRequest $request, array $payload): void
+    {
+        $type = (int) $request->request_type;
+
+        if ($type === Type::CreatePosition) {
+            return;
+        }
+
+        $position = $request->target_position_id === null ? null
+            : Position::query()->whereKey($request->target_position_id)->lockForUpdate()->first();
+
+        if ($position !== null && ! $position->is_active) {
+            throw ValidationException::withMessages(['data.position_id' => __('recruitment.position_inactive')]);
+        }
+
+        if ($type === Type::FillVacancy && $position !== null && (int) $position->exist_emp >= (int) $position->max_emp) {
+            throw ValidationException::withMessages(['data.position_id' => __('recruitment.no_headcount_room')]);
+        }
+
+        // The new establishment may not fall below the people already in it.
+        if ($type === Type::DecreaseHeadcount && $position !== null) {
+            $remaining = (int) $position->max_emp - (int) ($payload['reduce_by'] ?? 0);
+
+            if ($remaining < (int) $position->exist_emp) {
+                throw ValidationException::withMessages(['data.reduce_by' => __('recruitment.below_existing_employees')]);
+            }
+        }
+
+        if ($type === Type::ClosePosition && $position !== null && (int) $position->exist_emp > 0) {
+            throw ValidationException::withMessages(['data.position_id' => __('recruitment.position_has_contracts')]);
+        }
+
+        // D40: an open campaign is people mid-application. Closing the vacancy
+        // under them is a human decision, never a side effect of this approval.
+        if ($type === Type::CloseVacancy && $request->target_vacancy_id !== null) {
+            $active = HiringCampaign::query()
+                ->where('vacancy_id', $request->target_vacancy_id)
+                ->whereIn('status', [\App\Enums\HiringCampaignStatus::Published, \App\Enums\HiringCampaignStatus::Open])
+                ->exists();
+
+            if ($active) {
+                throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.campaign_still_active')]);
+            }
+        }
+    }
+
+    /**
+     * One active request per subject per type.
+     *
+     * The subject is the vacancy for the two vacancy types and the position for
+     * the rest, so a manager may legitimately have a fill-vacancy and an
+     * increase-headcount open on the same position at once. Filling a vacancy
+     * and closing it, however, are contradictory intentions and are refused
+     * against each other.
+     *
+     * Rejected and cancelled requests are final and release the subject at once,
+     * which is why they are not in self::ACTIVE.
+     */
+    private function assertNoActiveDuplicate(RecruitmentRequest $request): void
+    {
+        $type = (int) $request->request_type;
+        $vacancyScoped = in_array($type, [Type::FillVacancy, Type::CloseVacancy], true);
+
+        $base = RecruitmentRequest::query()
+            ->whereKeyNot($request->getKey())
+            ->whereIn('status', self::ACTIVE);
+
+        if ($vacancyScoped && $request->target_vacancy_id !== null) {
+            // Same intention twice, or the opposite intention, on one vacancy.
+            $clash = (clone $base)
+                ->where('target_vacancy_id', $request->target_vacancy_id)
+                ->whereIn('request_type', [Type::FillVacancy, Type::CloseVacancy])
+                ->exists();
+
+            if ($clash) {
+                throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.duplicate_vacancy_request')]);
+            }
+
+            return;
+        }
+
+        if ($request->target_position_id === null) {
+            return;
+        }
+
+        $clash = $base
+            ->where('target_position_id', $request->target_position_id)
+            ->where('request_type', $type)
+            ->exists();
+
+        if ($clash) {
+            throw ValidationException::withMessages(['data.position_id' => __('recruitment.duplicate_position_request')]);
+        }
+    }
+
+    /**
+     * Freeze the payload as version N+1 with its position details.
+     *
+     * Approvals attach to a version, so the version is what must not move. The
+     * details row carries the column names RV-1 compares field by field, which
+     * is why the draft's own field names are mapped here rather than stored
+     * loosely: a field that never lands in a column is a change that silently
+     * invalidates nothing.
+     */
+    private function freezeVersion(RecruitmentRequest $request, User $actor, array $payload): RecruitmentRequestVersion
+    {
+        $next = (int) $request->versions()->max('version_no') + 1;
+
+        $version = $request->versions()->create([
+            'version_no' => $next,
+            'snapshot_json' => $payload,
+            'created_by_user_id' => $actor->getKey(),
+            'submitted_at' => now(),
+        ]);
+
+        $version->positionDetail()->create($this->positionDetails($request, $payload));
+
+        return $version;
+    }
+
+    /**
+     * Map the draft's field names onto the detail columns.
+     *
+     * Three draft fields have no column of their own. justification and
+     * effective_date are folded into the nearest column that means the same
+     * thing, and tech_manager_id is dropped: D16 took it out of the approval
+     * path, so carrying it would be an unclassified field under RV-1.
+     *
+     * @return array<string, mixed>
+     */
+    private function positionDetails(RecruitmentRequest $request, array $payload): array
+    {
+        $current = $request->target_position_id === null ? null
+            : (int) Position::query()->whereKey($request->target_position_id)->value('max_emp');
+
+        $requested = match ((int) $request->request_type) {
+            Type::IncreaseHeadcount => $current + (int) ($payload['additional_count'] ?? 0),
+            Type::DecreaseHeadcount => $current - (int) ($payload['reduce_by'] ?? 0),
+            Type::CreatePosition => (int) ($payload['max_emp'] ?? 1),
+            default => $current,
+        };
+
+        return [
+            'position_id' => $request->target_position_id,
+            'program_id' => $payload['program_id'] ?? null,
+            'center_id' => $payload['center_id'] ?? null,
+            'department_id' => $payload['department_id'] ?? null,
+            'job_level_id' => $payload['job_level_id'] ?? null,
+            'contract_type_id' => $payload['contract_type_id'] ?? null,
+            'direct_supervisor_position_id' => $payload['direct_manager_id'] ?? null,
+            'current_headcount' => $current,
+            'requested_headcount' => $requested,
+            'recruitment_reason' => $payload['justification'] ?? null,
+            'role_title_en' => $payload['title_en'] ?? null,
+            'role_title_ar' => $payload['title_ar'] ?? null,
+            'expected_start_date' => $payload['needed_by_date'] ?? $payload['effective_date'] ?? null,
+            'salary_amount' => $payload['salary_amount'] ?? null,
+            'currency' => $payload['currency'] ?? null,
+            'salary_per' => $payload['salary_per'] ?? null,
+            'main_duties' => $payload['responsibilities'] ?? null,
+            'required_qualifications' => $payload['qualifications'] ?? null,
+            'detailed_explanation' => $payload['detailed_explanation'] ?? null,
+            'finance_consulted' => (bool) ($payload['finance_consulted'] ?? false),
+            'reason' => $payload['reason'] ?? null,
+        ];
+    }
+
+    /** D8: the timeline must not be able to roll back the thing it describes. */
+    private function record(RecruitmentRequest $request, User $actor, array $attributes): void
+    {
+        try {
+            DB::transaction(fn () => $request->events()->create(array_merge([
+                'actor_user_id' => $actor->getKey(),
+                'actor_role' => $actor->myRole(),
+                'scope_type' => $this->scopes->scopeType($actor),
+                'scope_id' => $this->scopes->scopeType($actor) === RecruitmentScopeType::DirectReports
+                    ? $this->scopes->position($actor)?->getKey() : null,
+            ], $attributes)));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
+    }
+}

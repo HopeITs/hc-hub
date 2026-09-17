@@ -88,10 +88,21 @@ class RecruitmentRequestPolicy
             && $this->scopes->canAccessRequest($user, $request);
     }
 
+    /**
+     * Withdrawing is the requester's own act, and only before the final
+     * approval (T12 · T14 · T15) — an approved request gets applied, not
+     * withdrawn, and a rejected one is already closed.
+     */
     public function cancel(User $user, RecruitmentRequest $request): bool
     {
         return $user->hasActivePermission('recruitment-requests.cancel')
-            && $this->scopes->canAccessRequest($user, $request);
+            && $this->scopes->canAccessRequest($user, $request)
+            && (int) $request->requester_user_id === (int) $user->getKey()
+            && in_array((int) $request->status, [
+                RecruitmentRequestStatus::Draft,
+                RecruitmentRequestStatus::ChangesRequested,
+                RecruitmentRequestStatus::UnderReview,
+            ], true);
     }
 
     /**

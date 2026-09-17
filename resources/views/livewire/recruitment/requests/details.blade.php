@@ -10,8 +10,27 @@
             <p class="text-secondary-medium">{{ __('recruitment.details') }}</p>
             <h1 class="text-h2 font-semibold text-neutral-900" dir="auto">{{ $request->request_number }}</h1>
         </div>
-        <span class="rounded-full bg-neutral-100 px-4 py-2 text-sm font-semibold">{{ \App\Enums\RecruitmentRequestStatus::getLocalizedName($request->status)['value'] }}</span>
+        <div class="flex flex-wrap items-center gap-3">
+            <span class="rounded-full bg-neutral-100 px-4 py-2 text-sm font-semibold">{{ \App\Enums\RecruitmentRequestStatus::getLocalizedName($request->status)['value'] }}</span>
+            @can('update', $request)
+                <a class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" href="{{ route('recruitment.requests.edit', ['requestId' => $request->id]) }}">{{ __('recruitment.edit') }}</a>
+            @endcan
+            @can('cancel', $request)
+                <button type="button" class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" wire:click="cancelRequest" wire:confirm="{{ __('recruitment.confirm_cancel') }}" wire:loading.attr="disabled" wire:target="cancelRequest">{{ __('recruitment.cancel_request') }}</button>
+            @endcan
+            @can('submit', $request)
+                {{-- Disabled while in flight so a double click cannot fire twice; the
+                     service is idempotent regardless, which is what actually protects it. --}}
+                <x-primary-button type="button" wire:click="submit" wire:loading.attr="disabled" wire:target="submit">{{ __('recruitment.submit') }}</x-primary-button>
+            @endcan
+        </div>
     </header>
+    @if ($errors->any())
+        <div role="alert" class="rounded-control border border-red-200 bg-red-50 p-4 text-red-800">
+            <p class="font-semibold">{{ __('recruitment.cannot_submit') }}</p>
+            <ul class="mt-2 list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+        </div>
+    @endif
     <section class="rounded-surface border border-neutral-200 bg-white p-6" aria-label="{{ __('recruitment.details') }}">
         <dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ([

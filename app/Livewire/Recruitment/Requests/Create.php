@@ -23,7 +23,7 @@ class Create extends Component
 
     public function boot(): void
     {
-        Gate::authorize('create', RecruitmentRequest::class);
+        $this->authorizeScreen();
     }
 
     public function updatedDataRequestType(): void
@@ -68,7 +68,7 @@ class Create extends Component
      */
     public function render()
     {
-        Gate::authorize('create', RecruitmentRequest::class);
+        $this->authorizeScreen();
 
         $user = auth()->user();
         $scopes = app(RecruitmentScopeResolver::class);
@@ -112,6 +112,12 @@ class Create extends Component
                 ->orderBy('grade')->get(),
             'contractTypes' => ContractType::query()->orderBy(transColumn('name'))->get(),
         ]);
+    }
+
+    /** Overridden by Edit, which authorizes against an existing request. */
+    protected function authorizeScreen(): void
+    {
+        Gate::authorize('create', RecruitmentRequest::class);
     }
 
     /**

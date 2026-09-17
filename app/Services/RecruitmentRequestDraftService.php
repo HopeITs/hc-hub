@@ -37,42 +37,7 @@ class RecruitmentRequestDraftService
 
         return DB::transaction(function () use ($actor, $data) {
             $isNewPosition = $data['request_type'] === Type::CreatePosition;
-            $targetId = $isNewPosition ? $data['direct_manager_id'] : $data['position_id'];
-            $target = $this->scopes->scopeManageablePositions(Position::query(), $actor, $isNewPosition)
-                ->whereKey($targetId)->lockForUpdate()->first();
-            if (! $target) {
-                throw ValidationException::withMessages([
-                    'data.'.($isNewPosition ? 'direct_manager_id' : 'position_id') => __('recruitment.outside_tree'),
-                ]);
-            }
-            Gate::forUser($actor)->authorize($isNewPosition ? 'createUnderPosition' : 'createForPosition', [RecruitmentRequest::class, $target]);
-
-            $cityId = $isNewPosition ? $data['city_id'] : ($target->city_id ?? $target->center?->city_id);
-            if (! $cityId) {
-                throw ValidationException::withMessages(['data.position_id' => __('recruitment.missing_city')]);
-            }
-
-            if ($isNewPosition) {
-                // The pickers are narrowed in the UI; this re-derives the same
-                // sets so a hand-edited request gains nothing by it.
-                $this->assertWithinCreationScope($actor, $data);
-
-                if (! empty($data['center_id'])) {
-                    $center = Center::query()->findOrFail($data['center_id']);
-                    if (! City::isNational((int) $cityId) && $center->city_id !== null && (int) $center->city_id !== (int) $cityId) {
-                        throw ValidationException::withMessages(['data.center_id' => __('recruitment.center_city_mismatch')]);
-                    }
-                }
-            }
-
-            if (! empty($data['vacancy_id'])) {
-                // Vacancy visibility is still D30/D42, independent of D49's position selector.
-                $vacancy = Vacancy::query()->visibleTo($actor)->where('position_id', $target->id)
-                    ->whereKey($data['vacancy_id'])->lockForUpdate()->first();
-                if (! $vacancy) {
-                    throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.invalid_vacancy')]);
-                }
-            }
+            [$target, $cityId] = $this->resolveTarget($actor, $data);
 
             $request = RecruitmentRequest::query()->create([
                 'request_number' => 'RR-'.Str::ulid(),
@@ -86,24 +51,136 @@ class RecruitmentRequestDraftService
                 'draft_payload_json' => $data,
             ]);
 
-            // D8: audit failure is reported, and must not roll back the draft.
-            // A nested transaction/savepoint also keeps the outer transaction usable.
-            try {
-                DB::transaction(fn () => $request->events()->create([
-                    'event_type' => RecruitmentEventType::RequestCreated,
-                    'to_status' => RecruitmentRequestStatus::Draft,
-                    'actor_user_id' => $actor->id,
-                    'actor_role' => $actor->myRole(),
-                    'scope_type' => $this->scopes->scopeType($actor),
-                    'scope_id' => $this->scopes->scopeType($actor) === RecruitmentScopeType::DirectReports
-                        ? $this->scopes->position($actor)?->id : null,
-                ]));
-            } catch (Throwable $exception) {
-                report($exception);
-            }
+            $this->recordEvent($request, $actor, [
+                'event_type' => RecruitmentEventType::RequestCreated,
+                'to_status' => RecruitmentRequestStatus::Draft,
+            ]);
 
             return $request;
         });
+    }
+
+    /**
+     * Edit a draft (T2) or a request sent back for changes (T10).
+     *
+     * The same validation and the same scope checks as creation, because the
+     * target may be swapped for one the requester was never allowed to touch.
+     * Ownership and status are re-read under a lock so an edit cannot land on a
+     * request that has meanwhile been submitted or decided.
+     */
+    public function update(User $actor, RecruitmentRequest $request, array $input): RecruitmentRequest
+    {
+        $actor = $actor->fresh();
+        Gate::forUser($actor)->authorize('update', $request);
+        $data = $this->validate($input);
+
+        return DB::transaction(function () use ($actor, $request, $data) {
+            $fresh = RecruitmentRequest::query()->whereKey($request->getKey())->lockForUpdate()->firstOrFail();
+
+            if (! in_array((int) $fresh->status, [RecruitmentRequestStatus::Draft, RecruitmentRequestStatus::ChangesRequested], true)) {
+                throw ValidationException::withMessages(['request' => __('recruitment.not_editable')]);
+            }
+
+            if ((int) $fresh->requester_user_id !== (int) $actor->getKey()) {
+                throw ValidationException::withMessages(['request' => __('recruitment.not_your_request')]);
+            }
+
+            // The type is fixed once the request exists: changing it would make
+            // the draft's own fields meaningless.
+            if ((int) $data['request_type'] !== (int) $fresh->request_type) {
+                throw ValidationException::withMessages(['data.request_type' => __('recruitment.type_is_fixed')]);
+            }
+
+            [$target, $cityId] = $this->resolveTarget($actor, $data);
+
+            $fresh->forceFill([
+                'scope_city_id' => $cityId,
+                'target_position_id' => $data['request_type'] === Type::CreatePosition ? null : $target->getKey(),
+                'target_vacancy_id' => $data['vacancy_id'] ?? null,
+                'draft_payload_json' => $data,
+            ])->save();
+
+            $this->recordEvent($fresh, $actor, [
+                'event_type' => RecruitmentEventType::RequestEdited,
+                'to_status' => (int) $fresh->status,
+            ]);
+
+            return $fresh;
+        });
+    }
+
+    /**
+     * Resolve and lock the position this request is about, and its governorate.
+     *
+     * Shared by create and update because an edit can swap the target for one
+     * the requester never had: the tree is re-checked every time, not once.
+     *
+     * @return array{0: Position, 1: int}
+     */
+    private function resolveTarget(User $actor, array $data): array
+    {
+        $isNewPosition = $data['request_type'] === Type::CreatePosition;
+        $targetId = $isNewPosition ? $data['direct_manager_id'] : $data['position_id'];
+
+        $target = $this->scopes->scopeManageablePositions(Position::query(), $actor, $isNewPosition)
+            ->whereKey($targetId)->lockForUpdate()->first();
+
+        if (! $target) {
+            throw ValidationException::withMessages([
+                'data.'.($isNewPosition ? 'direct_manager_id' : 'position_id') => __('recruitment.outside_tree'),
+            ]);
+        }
+
+        Gate::forUser($actor)->authorize(
+            $isNewPosition ? 'createUnderPosition' : 'createForPosition',
+            [RecruitmentRequest::class, $target],
+        );
+
+        $cityId = $isNewPosition ? $data['city_id'] : ($target->city_id ?? $target->center?->city_id);
+
+        if (! $cityId) {
+            throw ValidationException::withMessages(['data.position_id' => __('recruitment.missing_city')]);
+        }
+
+        if ($isNewPosition) {
+            $this->assertWithinCreationScope($actor, $data);
+
+            if (! empty($data['center_id'])) {
+                $center = Center::query()->findOrFail($data['center_id']);
+                if (! City::isNational((int) $cityId) && $center->city_id !== null && (int) $center->city_id !== (int) $cityId) {
+                    throw ValidationException::withMessages(['data.center_id' => __('recruitment.center_city_mismatch')]);
+                }
+            }
+        }
+
+        if (! empty($data['vacancy_id'])) {
+            // Vacancy visibility is still D30/D42, independent of D49's position selector.
+            $vacancy = Vacancy::query()->visibleTo($actor)->where('position_id', $target->id)
+                ->whereKey($data['vacancy_id'])->lockForUpdate()->first();
+
+            if (! $vacancy) {
+                throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.invalid_vacancy')]);
+            }
+        }
+
+        return [$target, (int) $cityId];
+    }
+
+    /** D8: a failed audit write is reported and must not roll back the request. */
+    private function recordEvent(RecruitmentRequest $request, User $actor, array $attributes): void
+    {
+        // A nested transaction/savepoint also keeps the outer transaction usable.
+        try {
+            DB::transaction(fn () => $request->events()->create(array_merge([
+                'actor_user_id' => $actor->id,
+                'actor_role' => $actor->myRole(),
+                'scope_type' => $this->scopes->scopeType($actor),
+                'scope_id' => $this->scopes->scopeType($actor) === RecruitmentScopeType::DirectReports
+                    ? $this->scopes->position($actor)?->id : null,
+            ], $attributes)));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 
     /**
@@ -149,7 +226,6 @@ class RecruitmentRequestDraftService
                 'center_id' => ['nullable', 'integer', 'exists:centers,id'],
                 'department_id' => ['nullable', 'integer', 'exists:departments,id'],
                 'job_level_id' => ['nullable', 'integer', 'exists:job_levels,id'],
-                'tech_manager_id' => ['nullable', 'integer', 'exists:positions,id'],
                 'title_en' => ['nullable', 'string', 'max:255'],
                 'title_ar' => ['nullable', 'string', 'max:255'],
                 'qualifications' => ['nullable', 'string'],

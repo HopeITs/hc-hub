@@ -10,6 +10,7 @@ use App\Models\JobLevel;
 use App\Models\Position;
 use App\Models\Program;
 use App\Models\RecruitmentRequest;
+use App\Services\RecruitmentRequestSubmissionService;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -24,6 +25,34 @@ class Details extends Component
     public function mount(int $requestId): void
     {
         $this->requestId = $requestId;
+    }
+
+    /**
+     * Submit (T3) or resubmit (T11).
+     *
+     * The service owns every rule; this only hands it the request and reports
+     * what came back. Re-resolving through the visibility boundary first means
+     * a stale page cannot act on a request the user has since lost.
+     */
+    public function submit(RecruitmentRequestSubmissionService $submissions): void
+    {
+        $request = $this->resolve();
+        $before = (int) $request->status;
+
+        $request = $submissions->submit(auth()->user(), $request);
+
+        // A second click finds the work already done and says so plainly.
+        session()->flash('recruitment_saved', __(
+            $before === (int) $request->status ? 'recruitment.already_submitted' : 'recruitment.submitted',
+        ));
+    }
+
+    /** Cancel while the request is still the requester's to withdraw. */
+    public function cancelRequest(RecruitmentRequestSubmissionService $submissions): void
+    {
+        $submissions->cancel(auth()->user(), $this->resolve());
+
+        session()->flash('recruitment_saved', __('recruitment.cancelled'));
     }
 
     public function render()
@@ -62,5 +91,13 @@ class Details extends Component
         }
 
         return view('livewire.recruitment.requests.details', compact('request', 'version', 'draftContext'));
+    }
+
+    private function resolve(): RecruitmentRequest
+    {
+        $request = RecruitmentRequest::query()->visibleTo(auth()->user())->findOrFail($this->requestId);
+        Gate::authorize('view', $request);
+
+        return $request;
     }
 }
