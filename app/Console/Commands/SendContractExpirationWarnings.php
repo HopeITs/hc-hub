@@ -11,9 +11,19 @@ use Illuminate\Support\Collection;
 
 class SendContractExpirationWarnings extends Command
 {
+    /**
+     * Exact reminder anchors, in days before the contract ends.
+     *
+     * The command runs daily, so matching exact dates gives each contract at
+     * most one reminder per anchor without adding a separate notification log.
+     *
+     * @var array<int, int>
+     */
+    private const REMINDER_DAYS = [30, 7];
+
     protected $signature = 'contracts:send-expiration-warnings';
 
-    protected $description = 'Send direct managers warnings for auto-renewable contracts expiring within seven days';
+    protected $description = 'Send direct managers scheduled warnings for auto-renewable contracts nearing expiration';
 
     public function handle(): int
     {
@@ -21,8 +31,11 @@ class SendContractExpirationWarnings extends Command
         $sent = 0;
 
         $contracts
-            ->groupBy(fn (Contract $contract): ?int => $this->directManagerUser($contract)?->id)
-            ->filter(fn (Collection $group, mixed $userId): bool => $userId !== null)
+            ->groupBy(fn (Contract $contract): string => implode(':', [
+                $this->directManagerUser($contract)?->id ?? 'none',
+                $contract->end_date ? today()->diffInDays($contract->end_date) : 0,
+            ]))
+            ->filter(fn (Collection $group): bool => $this->directManagerUser($group->first()) !== null)
             ->each(function (Collection $group) use (&$sent): void {
                 $manager = $this->directManagerUser($group->first());
 
@@ -33,6 +46,7 @@ class SendContractExpirationWarnings extends Command
                 $manager->notify(new ContractsExpiringAutoRenewWarning(
                     $group,
                     $this->hrEmailsForContracts($group),
+                    (int) today()->diffInDays($group->first()->end_date),
                 ));
 
                 $sent++;
@@ -52,6 +66,9 @@ class SendContractExpirationWarnings extends Command
             ->filter(fn (string $category): bool => in_array($category, ['annual', 'service'], true))
             ->keys()
             ->all();
+        $reminderDates = collect(self::REMINDER_DAYS)
+            ->map(fn (int $days): string => today()->addDays($days)->toDateString())
+            ->all();
 
         return Contract::query()
             ->with([
@@ -61,8 +78,11 @@ class SendContractExpirationWarnings extends Command
             ->where('auto_renew', true)
             ->where('is_active', true)
             ->whereIn('contract_type_id', $renewableTypeIds)
-            ->whereDate('end_date', '>=', today()->toDateString())
-            ->whereDate('end_date', '<=', today()->addDays(7)->toDateString())
+            ->where(function (Builder $query) use ($reminderDates): void {
+                foreach ($reminderDates as $date) {
+                    $query->orWhereDate('end_date', $date);
+                }
+            })
             ->orderBy('end_date')
             ->orderBy('id')
             ->get();

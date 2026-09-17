@@ -14,7 +14,7 @@ class ProcessContractAutoRenewals extends Command
 {
     protected $signature = 'contracts:process-auto-renewals';
 
-    protected $description = 'Deactivate expired auto-renewable contracts and create their successors';
+    protected $description = 'Create successor contracts for expired inactive auto-renewable contracts';
 
     public function handle(ContractAutoRenewalService $renewals): int
     {
@@ -32,8 +32,12 @@ class ProcessContractAutoRenewals extends Command
      */
     private function notifyGovernorateHr(Collection $contracts): void
     {
+        if ($contracts->isEmpty()) {
+            return;
+        }
+
         $contracts
-            ->loadMissing('employee.city')
+            ->each(fn (Contract $contract): Contract => $contract->loadMissing('employee.city'))
             ->groupBy(fn (Contract $contract): ?int => $contract->employee?->city_id)
             ->filter(fn (Collection $group, mixed $cityId): bool => $cityId !== null && $group->isNotEmpty())
             ->each(function (Collection $group): void {

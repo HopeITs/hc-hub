@@ -39,7 +39,7 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         $position = $this->makePosition($fixtures, 'Single Report', $manager['position']->id);
 
         $contract = $this->makeContract($fixtures, $employee, $position, [
-            'end_date' => '2026-09-20',
+            'end_date' => '2026-09-23',
             'auto_renew' => true,
         ]);
 
@@ -70,21 +70,25 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         $manager = $this->makeManagerWithPosition($fixtures);
         $first = $this->makeEmployee($fixtures['city'], 'batch-expiring-one', [
             'first_name_en' => 'Batch',
+            'first_name_ar' => 'Batch',
             'last_name_en' => 'Expiring One',
+            'last_name_ar' => 'Expiring One',
         ]);
         $second = $this->makeEmployee($fixtures['city'], 'batch-expiring-two', [
             'first_name_en' => 'Batch',
+            'first_name_ar' => 'Batch',
             'last_name_en' => 'Expiring Two',
+            'last_name_ar' => 'Expiring Two',
         ]);
         $firstPosition = $this->makePosition($fixtures, 'First Report', $manager['position']->id);
         $secondPosition = $this->makePosition($fixtures, 'Second Report', $manager['position']->id);
 
         $this->makeContract($fixtures, $first, $firstPosition, [
-            'end_date' => '2026-09-21',
+            'end_date' => '2026-09-23',
             'auto_renew' => true,
         ]);
         $this->makeContract($fixtures, $second, $secondPosition, [
-            'end_date' => '2026-09-22',
+            'end_date' => '2026-09-23',
             'auto_renew' => true,
         ]);
 
@@ -105,6 +109,26 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         );
     }
 
+    public function test_warning_command_does_not_send_on_non_reminder_days(): void
+    {
+        $this->travelTo('2026-09-16 09:00:00');
+        Notification::fake();
+
+        $fixtures = $this->makeFixtures();
+        $manager = $this->makeManagerWithPosition($fixtures);
+        $employee = $this->makeEmployee($fixtures['city'], 'not-reminded');
+        $position = $this->makePosition($fixtures, 'Not Reminded Report', $manager['position']->id);
+
+        $this->makeContract($fixtures, $employee, $position, [
+            'end_date' => '2026-09-24',
+            'auto_renew' => true,
+        ]);
+
+        Artisan::call(SendContractExpirationWarnings::class);
+
+        Notification::assertNothingSent();
+    }
+
     public function test_process_auto_renewals_duplicates_only_auto_renewable_expired_contracts(): void
     {
         $this->travelTo('2026-09-16 09:00:00');
@@ -120,13 +144,26 @@ class ContractAutoRenewalWorkflowTest extends TestCase
             'start_date' => '2026-01-01',
             'end_date' => '2026-09-15',
             'salary' => 1200,
+            'is_active' => false,
             'auto_renew' => true,
         ]);
         $skipped = $this->makeContract($fixtures, $skippedEmployee, $skippedPosition, [
             'start_date' => '2026-01-01',
             'end_date' => '2026-09-15',
+            'is_active' => false,
             'auto_renew' => false,
         ]);
+        $activeExpired = $this->makeContract(
+            $fixtures,
+            $this->makeEmployee($fixtures['city'], 'active-expired'),
+            $this->makePosition($fixtures, 'Active Expired Position'),
+            [
+                'start_date' => '2026-01-01',
+                'end_date' => '2026-09-15',
+                'is_active' => true,
+                'auto_renew' => true,
+            ],
+        );
 
         Artisan::call(ProcessContractAutoRenewals::class);
 
@@ -143,8 +180,9 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         $this->assertSame($source->position_id, $renewal->position_id);
         $this->assertSame('1200.00', $renewal->salary);
 
-        $this->assertTrue($skipped->fresh()->is_active);
+        $this->assertFalse($skipped->fresh()->is_active);
         $this->assertSame(1, Contract::query()->where('employee_id', $skippedEmployee->id)->count());
+        $this->assertSame(1, Contract::query()->where('employee_id', $activeExpired->employee_id)->count());
 
         Notification::assertSentTo($fixtures['hr'], ContractsAutoRenewedSummary::class);
     }
@@ -189,7 +227,12 @@ class ContractAutoRenewalWorkflowTest extends TestCase
 
         $this->assertFalse($contract->fresh()->auto_renew);
 
-        $contract->update(['auto_renew' => true]);
+        Contract::query()
+            ->whereKey($contract)
+            ->update(['auto_renew' => true]);
+
+        $contract = $contract->fresh();
+        $payload = $this->composerPayload($fixtures, $contract, ['autoRenew' => false]);
         $manager = $this->makeUser($fixtures['city'], 'manager', ['contracts.update', 'contracts.view']);
 
         Livewire::actingAs($manager)

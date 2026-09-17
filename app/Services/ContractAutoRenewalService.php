@@ -20,6 +20,7 @@ class ContractAutoRenewalService
         Contract::query()
             ->with(['position', 'payTiers'])
             ->where('auto_renew', true)
+            ->where('is_active', false)
             ->whereDate('end_date', '<', $asOf->toDateString())
             ->orderBy('id')
             ->chunkById(100, function ($contracts) use ($renewed, $asOf): void {
@@ -44,7 +45,13 @@ class ContractAutoRenewalService
                 ->lockForUpdate()
                 ->first();
 
-            if (! $source || ! $source->auto_renew || ! $source->end_date || $source->end_date->gte($asOf)) {
+            if (
+                ! $source
+                || ! $source->auto_renew
+                || $source->is_active
+                || ! $source->end_date
+                || $source->end_date->gte($asOf)
+            ) {
                 return null;
             }
 
@@ -52,11 +59,6 @@ class ContractAutoRenewalService
 
             if ($this->successorExists($source, $start->toDateString())) {
                 return null;
-            }
-
-            if ($source->is_active) {
-                $source->update(['is_active' => false]);
-                $source->position?->dec();
             }
 
             $renewal = $source->replicate([
