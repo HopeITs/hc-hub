@@ -46,6 +46,12 @@ class RecruitmentRequestEvent extends Model
     protected function casts(): array
     {
         return [
+            'event_type' => 'integer',
+            'from_status' => 'integer',
+            'to_status' => 'integer',
+            'decision' => 'integer',
+            'scope_type' => 'integer',
+
             'scope_id' => 'integer',
             'meta' => 'array',
         ];

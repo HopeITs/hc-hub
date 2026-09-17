@@ -17,31 +17,6 @@ use Spatie\Permission\PermissionRegistrar;
  */
 return new class extends Migration
 {
-    /**
-     * @return array<int, string>
-     */
-    private function recruitmentPermissionNames(): array
-    {
-        $groups = collect(config('access-control.groups', []))
-            ->filter(fn (array $actions, string $group): bool => str_starts_with($group, 'recruitment-'));
-
-        return $groups
-            ->flatMap(fn (array $actions, string $group): array => array_map(
-                fn (string $action): string => "{$group}.{$action}",
-                $actions,
-            ))
-            ->values()
-            ->all();
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function userLevelPermissionNames(): array
-    {
-        return array_values(array_filter(config('recruitment.user_level_permissions', [])));
-    }
-
     public function up(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
@@ -95,5 +70,30 @@ return new class extends Migration
     {
         Permission::query()->whereIn('name', $this->recruitmentPermissionNames())->delete();
         app(PermissionRegistrar::class)->forgetCachedPermissions();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function recruitmentPermissionNames(): array
+    {
+        $groups = collect(config('access-control.groups', []))
+            ->filter(fn (array $actions, string $group): bool => str_starts_with($group, 'recruitment-'));
+
+        return $groups
+            ->flatMap(fn (array $actions, string $group): array => array_map(
+                fn (string $action): string => "{$group}.{$action}",
+                $actions,
+            ))
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function userLevelPermissionNames(): array
+    {
+        return array_values(array_filter(config('recruitment.user_level_permissions', [])));
     }
 };

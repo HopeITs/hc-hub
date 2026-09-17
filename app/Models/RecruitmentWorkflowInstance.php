@@ -38,6 +38,8 @@ class RecruitmentWorkflowInstance extends Model
     protected function casts(): array
     {
         return [
+            'status' => 'integer',
+
             'current_step_order' => 'integer',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',

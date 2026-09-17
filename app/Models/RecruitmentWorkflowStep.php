@@ -28,6 +28,9 @@ class RecruitmentWorkflowStep extends Model
     protected function casts(): array
     {
         return [
+            'step_key' => 'integer',
+            'scope_rule' => 'integer',
+
             'step_order' => 'integer',
             'required_condition_json' => 'array',
         ];

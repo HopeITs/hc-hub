@@ -87,6 +87,10 @@ class RecruitmentRequest extends Model
     protected function casts(): array
     {
         return [
+            'status' => 'integer',
+            'request_type' => 'integer',
+            'mode' => 'integer',
+
             'draft_payload_json' => 'array',
             'direct_opened_at' => 'datetime',
             'submitted_at' => 'datetime',

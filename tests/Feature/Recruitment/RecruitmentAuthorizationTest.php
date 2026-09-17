@@ -2,7 +2,14 @@
 
 namespace Tests\Feature\Recruitment;
 
+use App\Enums\HiringCampaignStatus;
+use App\Enums\RecruitmentEventType;
+use App\Enums\RecruitmentRequestMode;
+use App\Enums\RecruitmentRequestStatus;
+use App\Enums\RecruitmentRequestType;
 use App\Enums\RecruitmentScopeType;
+use App\Enums\WorkflowInstanceStatus;
+use App\Enums\WorkflowStepKey;
 use App\Models\ApplicationForm;
 use App\Models\City;
 use App\Models\Contract;
@@ -333,7 +340,7 @@ class RecruitmentAuthorizationTest extends TestCase
             $request,
             $assignee,
             'HR-HMS',
-            (string) RecruitmentScopeType::City,
+            RecruitmentScopeType::City,
             $homs->id,
         );
 
@@ -354,7 +361,7 @@ class RecruitmentAuthorizationTest extends TestCase
             $this->makeRequest($this->makeUser($homs, 'employee'), $homs),
             $assignee,
             'HR-HMS',
-            (string) RecruitmentScopeType::City,
+            RecruitmentScopeType::City,
             $homs->id,
         );
         $decided->forceFill(['decision' => 'approved'])->save();
@@ -365,7 +372,7 @@ class RecruitmentAuthorizationTest extends TestCase
             $this->makeRequest($this->makeUser($aleppo, 'employee'), $aleppo),
             $assignee,
             'HR-HMS',
-            (string) RecruitmentScopeType::City,
+            RecruitmentScopeType::City,
             $aleppo->id,
         );
         $this->assertFalse($resolver->canActOnStep($assignee, $outOfScope));
@@ -454,9 +461,9 @@ class RecruitmentAuthorizationTest extends TestCase
         $request = RecruitmentRequest::query()->forceCreate([
             'request_number' => 'REQ-'.strtoupper(uniqid()),
             'requester_user_id' => $requester->id,
-            'request_type' => 'new_position',
-            'mode' => 'normal',
-            'status' => 'submitted',
+            'request_type' => RecruitmentRequestType::CreatePosition,
+            'mode' => RecruitmentRequestMode::Normal,
+            'status' => RecruitmentRequestStatus::Submitted,
             'scope_city_id' => $city->id,
             'submitted_at' => now(),
         ]);
@@ -553,7 +560,7 @@ class RecruitmentAuthorizationTest extends TestCase
         RecruitmentRequest $request,
         User $assignee,
         string $role,
-        ?string $scopeType,
+        ?int $scopeType,
         ?int $scopeId,
     ): RecruitmentWorkflowInstanceStep {
         $requestVersion = $request->versions()->first() ?? RecruitmentRequestVersion::query()->forceCreate([
@@ -566,7 +573,7 @@ class RecruitmentAuthorizationTest extends TestCase
         $now = now();
         $definitionId = DB::table('recruitment_workflow_definitions')->insertGetId([
             'name' => 'Workflow '.uniqid(),
-            'request_type' => 'new_position',
+            'request_type' => RecruitmentRequestType::CreatePosition,
             'is_active' => true,
             'created_by_user_id' => $request->requester_user_id,
             'created_at' => $now,
@@ -584,9 +591,9 @@ class RecruitmentAuthorizationTest extends TestCase
         $workflowStepId = DB::table('recruitment_workflow_steps')->insertGetId([
             'definition_version_id' => $definitionVersionId,
             'step_order' => 1,
-            'step_key' => 'approval',
+            'step_key' => WorkflowStepKey::ManagerApproval,
             'role_key' => $role,
-            'scope_rule' => $scopeType ?? 'missing',
+            'scope_rule' => $scopeType ?? RecruitmentScopeType::None,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
@@ -594,7 +601,7 @@ class RecruitmentAuthorizationTest extends TestCase
             'request_id' => $request->id,
             'request_version_id' => $requestVersion->id,
             'definition_version_id' => $definitionVersionId,
-            'status' => 'in_progress',
+            'status' => WorkflowInstanceStatus::Running,
             'current_step_order' => 1,
             'started_at' => $now,
             'created_at' => $now,
@@ -624,7 +631,7 @@ class RecruitmentAuthorizationTest extends TestCase
         ]);
         $campaign = HiringCampaign::query()->forceCreate([
             'vacancy_id' => $vacancy->id,
-            'status' => 'draft',
+            'status' => HiringCampaignStatus::Draft,
             'link_mode' => 'public_open',
             'created_by_user_id' => $actor->id,
         ]);
@@ -667,7 +674,7 @@ class RecruitmentAuthorizationTest extends TestCase
         ]);
         $event = RecruitmentRequestEvent::query()->forceCreate([
             'recruitment_request_id' => $request->id,
-            'event_type' => 'submitted',
+            'event_type' => RecruitmentEventType::RequestSubmitted,
             'actor_user_id' => $request->requester_user_id,
             'actor_role' => 'employee',
         ]);

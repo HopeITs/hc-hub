@@ -8,7 +8,16 @@
 
 ## 1. الـ Enums
 
-النمط: `bensampo/laravel-enum` بقيَم `int`، على غرار `App\Enums\LeaveRequestStatus` و `ContractPlace` (القرار `D6`). تُخزَّن كـ `unsignedTinyInteger`.
+النمط: `bensampo/laravel-enum` بقيَم `int`، على غرار `App\Enums\LeaveRequestStatus` و `ContractPlace` (القرار `D6`). تُخزَّن كـ `unsignedTinyInteger`، ويُضاف `'العمود' => 'integer'` إلى `casts()` في الموديل — نفس ما يفعله `LeaveRequest` بالضبط، بلا Cast class.
+
+> **حالة التنفيذ.** الـ enums أدناه موجودة في `app/Enums/` وأعمدتها محوَّلة فعلاً في migrations المرحلة الأولى.
+>
+> **أعمدة لم تُحوَّل بعد** — لأن قيَمها لم تُجمَّد في هذه الوثيقة، وتحويلها يقتضي اختراع قيَم:
+> `vacancies.status` · `job_posts.status` · `job_post_versions.status` · `application_forms.status` · `application_form_versions.status` · `public_recruitment_links.status` · `recruitment_campaign_invites.status` · `hiring_campaigns.link_mode` · `recruitment_request_position_details.priority` و `volunteer_type`، وكل أعمدة جداول المرحلة الثانية.
+>
+> تبقى `string(60)` حتى تُجمَّد قيَمها هنا. **تحويلها قبل تشغيل الـ migrations يكلّف سطراً؛ بعده يكلّف migration تحويل بيانات.**
+>
+> وتبقى نصوصاً بطبيعتها لأنها ليست enums: `request_number` · `phone_normalized` · `color` · `assigned_role` (اسم دور Spatie) · `role_key`.
 
 > القيَم **مجمّدة** — تدخل قاعدة البيانات ولا يجوز تغييرها بعد أول migration. ترتيبها لا يحمل معنى منطقياً؛ لا تُبنى عليه أي مقارنة `>` أو `<`.
 
@@ -118,6 +127,15 @@
 | 1 | `Approved` |
 | 2 | `NotApplicable` |
 
+### `RecruitmentCommentType` — جديد
+
+| القيمة | الثابت | الوصف |
+|---|---|---|
+| 1 | `General` | تعليق عادي على الطلب |
+| 2 | `DecisionReason` | سبب قرار موافقة أو رفض أو طلب تعديل |
+
+> أُضيف عند تنفيذ `D6` على `recruitment_request_comments.comment_type`، الذي كان نصاً بلا قيَم محدّدة. كل التعليقات مرئية لمن يرى الطلب (`D19`) — التمييز للعرض لا للحجب.
+
 ### `ExternalConfirmationMethod`
 
 | القيمة | الثابت |
@@ -127,14 +145,21 @@
 | 3 | `Meeting` |
 | 4 | `Other` |
 
-### `ScopeType`
+### `RecruitmentScopeType` — كان اسمه `ScopeType`
 
-| القيمة | الثابت |
-|---|---|
-| 1 | `Program` |
-| 2 | `Center` |
-| 3 | `City` |
-| 4 | `Organization` |
+| القيمة | الثابت | المعنى |
+|---|---|---|
+| 0 | `None` | لا وصول — الافتراضي لمن لا يستطيع الـ Resolver تحديد نطاقه |
+| 1 | `DirectReports` | طلباته + مرؤوسوه المباشرون عبر `positions.direct_manager_id` |
+| 2 | `City` | محافظة واحدة عبر `Position::scopeInCity` وخريطة الإسناد |
+| 3 | `Organization` | كل طلبات المنظمة |
+
+> **مُراجَع.** كانت القيم `1 Program · 2 Center · 3 City · 4 Organization`، وهي تسبق `D30` و `D42`. المعتمد الآن ما ينفّذه `App\Enums\RecruitmentScopeType` فعلاً:
+>
+> - **`Program` و `Center` سقطتا** — `D30` جعل نطاق المدير «طلباته ومرؤوسوه المباشرون، مستوى واحد» لا برنامجه أو مركزه. المدير يرى ما يحاسَب عليه بالضبط.
+> - **`None = 0` أُضيفت** — `D31` يفرض الفشل المغلق، ولائحة بلا قيمة «لا وصول» تجعل العمود الفارغ يساوي `Program`.
+>
+> تُستخدم في `workflow_instance_steps.assigned_scope_type` و `workflow_steps.scope_rule` و `request_events.scope_type`.
 
 ### `RecruitmentEventType`
 
