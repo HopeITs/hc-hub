@@ -18,11 +18,28 @@ class ContractsAutoRenewedSummary extends Notification
     public array $contractIds;
 
     /**
+     * @var array<int, array{en: string, ar: string}>
+     */
+    public array $employeeNames;
+
+    /**
      * @param  Collection<int, Contract>  $contracts
      */
     public function __construct(Collection $contracts)
     {
         $this->contractIds = $contracts->pluck('id')->values()->all();
+
+        $this->employeeNames = $contracts
+            ->map(function (Contract $contract): array {
+                $employee = $contract->employee;
+
+                return [
+                    'en' => trim("{$employee?->first_name_en} {$employee?->last_name_en}"),
+                    'ar' => trim("{$employee?->first_name_ar} {$employee?->last_name_ar}"),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     public function via(object $notifiable): array
@@ -34,10 +51,15 @@ class ContractsAutoRenewedSummary extends Notification
     {
         $data = $this->toArray($notifiable);
 
-        return (new MailMessage)
+        $message = (new MailMessage)
             ->subject($data['title']['ar'])
-            ->line($data['body']['ar'])
-            ->action('عرض العقود الجديدة', $data['url']);
+            ->line($data['body']['ar']);
+
+        foreach ($data['employee_names'] as $name) {
+            $message->line('- '.($name['ar'] ?: $name['en']));
+        }
+
+        return $message;
     }
 
     /**
@@ -46,6 +68,8 @@ class ContractsAutoRenewedSummary extends Notification
     public function toArray(object $notifiable): array
     {
         $count = count($this->contractIds);
+        $namesEn = implode(', ', array_column($this->employeeNames, 'en'));
+        $namesAr = implode('، ', array_column($this->employeeNames, 'ar'));
 
         return [
             'title' => [
@@ -53,13 +77,11 @@ class ContractsAutoRenewedSummary extends Notification
                 'ar' => 'تم تجديد العقود',
             ],
             'body' => [
-                'en' => "{$count} contract(s) were renewed successfully today. Click here to view the new contracts.",
-                'ar' => "تم تجديد {$count} عقد بنجاح اليوم. اضغط هنا لعرض العقود الجديدة.",
+                'en' => "{$count} contract(s) were renewed successfully today: {$namesEn}.",
+                'ar' => "تم تجديد {$count} عقد بنجاح اليوم: {$namesAr}.",
             ],
-            'url' => route('contracts.index', [
-                'renewed_contracts' => implode(',', $this->contractIds),
-            ]),
             'contract_ids' => $this->contractIds,
+            'employee_names' => $this->employeeNames,
         ];
     }
 }

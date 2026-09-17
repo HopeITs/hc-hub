@@ -25,8 +25,6 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ContractsTable extends LivewireTable
 {
-    public ?string $renewedContracts = null;
-
     protected string $model = Contract::class;
 
     protected $listeners = [
@@ -45,11 +43,6 @@ class ContractsTable extends LivewireTable
             ->onConfirm('delete', ['id' => $id])
             ->withCancelButton(__('general.cancel'))
             ->show();
-    }
-
-    public function mount(): void
-    {
-        $this->renewedContracts = request()->query('renewed_contracts');
     }
 
     public function delete(array $payload): void
@@ -142,10 +135,6 @@ class ContractsTable extends LivewireTable
             ->when(
                 auth()->user()->activeCityId(),
                 fn (Builder $q, int $cityId) => $q->whereHas('employee', fn (Builder $e) => $e->where('city_id', $cityId)),
-            )
-            ->when(
-                $this->renewedContractIds(),
-                fn (Builder $q, array $ids) => $q->whereIn('id', $ids),
             );
     }
 
@@ -285,19 +274,5 @@ class ContractsTable extends LivewireTable
                 return '<div class="flex items-center justify-center gap-2">'.$autoRenew.$view.$edit.$renew.$delete.'</div>';
             })->asHtml()->clickable(false),
         ];
-    }
-
-    private function renewedContractIds(): array
-    {
-        if (! is_string($this->renewedContracts) || $this->renewedContracts === '') {
-            return [];
-        }
-
-        return collect(explode(',', $this->renewedContracts))
-            ->map(fn (string $id): int => (int) trim($id))
-            ->filter(fn (int $id): bool => $id > 0)
-            ->unique()
-            ->values()
-            ->all();
     }
 }
