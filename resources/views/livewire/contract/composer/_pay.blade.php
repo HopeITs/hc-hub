@@ -46,116 +46,126 @@
     :title="__('general.composer.pay')"
     summary="paySummary"
 >
-    {{-- Shared by both modes: one flat figure or a list of tiered ones, always
-         in the same currency. --}}
-    <div class="mt-4 max-w-48">
-        <x-forms.input-label for="composer_currency" required>@lang('general.currency')</x-forms.input-label>
-        <x-forms.select id="composer_currency" :options="$currencyOptions" x-model="currency" />
-        <x-error-span>{{ $errors->first('form.currency') }}</x-error-span>
-    </div>
-
-    <div class="mt-5">
-        <x-forms.input-label required>@lang('general.composer.pay-mode')</x-forms.input-label>
-        <x-forms.segmented-control
-            name="composer_pay_mode"
-            model="payMode"
-            :options="$payModeOptions"
-            :aria-label="__('general.composer.pay-mode')"
-        />
-        <x-error-span>{{ $errors->first('form.pay_mode') }}</x-error-span>
-    </div>
-
-    {{-- ───────────────────────── Fixed ───────────────────────── --}}
-    <div x-cloak x-show="payMode === '1'" class="mt-5 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
-        <div>
-            <x-forms.input-label for="composer_salary" required>@lang('general.salary')</x-forms.input-label>
-
-            {{-- `min="0"` only governs the browser's own validation, which
-                 nothing here triggers: Alpine reads the box directly and the
-                 form is sent by script. The border colour therefore has no
-                 default in the static class list — x-bind below owns it
-                 outright, so the invalid state cannot lose to a stale one. --}}
-            <input
-                id="composer_salary"
-                type="number"
-                step="0.01"
-                min="0"
-                inputmode="decimal"
-                placeholder="0.00"
-                x-model="salary"
-                x-bind:aria-invalid="salaryError ? 'true' : null"
-                x-bind:aria-describedby="salaryError ? 'composer_salary-error' : null"
-                x-bind:class="salaryError ? 'border-primary' : 'border-neutral-300'"
-                class="w-full min-w-0 rounded-control border
-                       bg-white px-3 py-2 text-end font-mono text-body tabular-nums text-neutral-900
-                       shadow-e1 transition placeholder:text-neutral-400
-                       focus:border-primary focus:outline-none focus:ring-2 focus:ring-neutral-300"
-            />
-
-            {{-- Echoed back formatted, and annualised when paid monthly. Goes
-                 quiet on a figure the form will not take, so the slot below can
-                 say why instead of this one confirming a number that is wrong. --}}
-            <p x-cloak x-show="salaryEcho"
-               class="mt-2 rounded-control border border-neutral-200 bg-neutral-50 px-3 py-1.5
-                      text-small font-medium text-neutral-800"
-               x-text="salaryEcho"></p>
-
-            {{-- The client-side twin of <x-forms.input-error>: same id
-                 convention, same role, same red, but driven by Alpine because
-                 this value never reaches the server until submit — and submit
-                 is the thing being blocked. --}}
-            <p x-cloak x-show="salaryError"
-               id="composer_salary-error"
-               role="alert"
-               class="mt-1 text-body text-primary">
-                <span class="sr-only">@lang('general.a11y.error-prefix')</span>
-                <span x-text="salaryError"></span>
-            </p>
-
-            <x-error-span>{{ $errors->first('form.salary') }}</x-error-span>
+    {{-- Currency and pay mode are the two shared, top-level decisions —
+         paired in one row so neither sits alone in an otherwise-empty strip. --}}
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <div class="max-w-40">
+            <x-forms.input-label for="composer_currency" required>@lang('general.currency')</x-forms.input-label>
+            <x-forms.select id="composer_currency" :options="$currencyOptions" x-model="currency" />
+            <x-error-span>{{ $errors->first('form.currency') }}</x-error-span>
         </div>
 
         <div>
-            <x-forms.input-label required>@lang('general.salary-per')</x-forms.input-label>
+            <x-forms.input-label required>@lang('general.composer.pay-mode')</x-forms.input-label>
+            <x-forms.segmented-control
+                name="composer_pay_mode"
+                model="payMode"
+                :options="$payModeOptions"
+                :aria-label="__('general.composer.pay-mode')"
+            />
+            <x-error-span>{{ $errors->first('form.pay_mode') }}</x-error-span>
+        </div>
+    </div>
 
-            <div class="mt-1 grid grid-cols-3 gap-2" role="radiogroup" aria-label="@lang('general.salary-per')">
-                @foreach($perOptions as $value => $option)
-                    <label class="cursor-pointer">
-                        <input type="radio" class="peer sr-only" name="composer_salary_per"
-                               value="{{ $value }}" x-model="salaryPer"/>
-                        <span class="flex min-h-10.5 items-center justify-center gap-1.5 rounded-control
-                                     border-2 border-neutral-200 bg-white px-2 py-2 text-body text-neutral-800
-                                     shadow-e1 transition
-                                     hover:border-neutral-400
-                                     peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
-                                     peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2
-                                     peer-focus-visible:outline-primary">
-                            <svg class="size-4 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor"
-                                 stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                {!! $option['path'] !!}
-                            </svg>
-                            <span class="truncate font-semibold">{{ $option['label'] }}</span>
-                        </span>
-                    </label>
-                @endforeach
-            </div>
+    {{-- ───────────────────────── Fixed ───────────────────────── --}}
+    {{-- Boxed as one card rather than two loose columns: Session Duration
+         used to nest under "Salary Per" alone, so it stretched that column
+         taller than "Salary" and left a lopsided gap underneath it. Now it
+         spans the full card below both, so the card's height always tracks
+         its content instead of whichever column happens to be tallest. --}}
+    <div x-cloak x-show="payMode === '1'" class="mt-5 rounded-control border border-neutral-200 bg-neutral-50/60 p-4">
+        <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+                <x-forms.input-label for="composer_salary" required>@lang('general.salary')</x-forms.input-label>
 
-            <x-error-span>{{ $errors->first('form.salary_per') }}</x-error-span>
-
-            {{-- Only "Session" implies a length — the other two units are
-                 self-explanatory without one. --}}
-            <div x-cloak x-show="salaryPer === '3'" x-transition class="mt-4">
-                <x-forms.input-label for="composer_session_duration" required>
-                    @lang('general.session-duration')
-                </x-forms.input-label>
-                <x-forms.select
-                    id="composer_session_duration"
-                    :options="$sessionDurationOptions"
-                    x-model="sessionDuration"
-                    :placeholder="__('general.select')"
+                {{-- `min="0"` only governs the browser's own validation, which
+                     nothing here triggers: Alpine reads the box directly and the
+                     form is sent by script. The border colour therefore has no
+                     default in the static class list — x-bind below owns it
+                     outright, so the invalid state cannot lose to a stale one. --}}
+                <input
+                    id="composer_salary"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    inputmode="decimal"
+                    placeholder="0.00"
+                    x-model="salary"
+                    x-bind:aria-invalid="salaryError ? 'true' : null"
+                    x-bind:aria-describedby="salaryError ? 'composer_salary-error' : null"
+                    x-bind:class="salaryError ? 'border-primary' : 'border-neutral-300'"
+                    class="w-full min-w-0 rounded-control border
+                           bg-white px-3 py-2 text-end font-mono text-body tabular-nums text-neutral-900
+                           shadow-e1 transition placeholder:text-neutral-400
+                           focus:border-primary focus:outline-none focus:ring-2 focus:ring-neutral-300"
                 />
-                <x-error-span>{{ $errors->first('form.session_duration') }}</x-error-span>
+
+                {{-- Echoed back formatted, and annualised when paid monthly. Goes
+                     quiet on a figure the form will not take, so the slot below can
+                     say why instead of this one confirming a number that is wrong. --}}
+                <p x-cloak x-show="salaryEcho"
+                   class="mt-2 rounded-control border border-neutral-200 bg-white px-3 py-1.5
+                          text-small font-medium text-neutral-800"
+                   x-text="salaryEcho"></p>
+
+                {{-- The client-side twin of <x-forms.input-error>: same id
+                     convention, same role, same red, but driven by Alpine because
+                     this value never reaches the server until submit — and submit
+                     is the thing being blocked. --}}
+                <p x-cloak x-show="salaryError"
+                   id="composer_salary-error"
+                   role="alert"
+                   class="mt-1 text-body text-primary">
+                    <span class="sr-only">@lang('general.a11y.error-prefix')</span>
+                    <span x-text="salaryError"></span>
+                </p>
+
+                <x-error-span>{{ $errors->first('form.salary') }}</x-error-span>
             </div>
+
+            <div>
+                <x-forms.input-label required>@lang('general.salary-per')</x-forms.input-label>
+
+                <div class="mt-1 grid grid-cols-3 gap-2" role="radiogroup" aria-label="@lang('general.salary-per')">
+                    @foreach($perOptions as $value => $option)
+                        <label class="cursor-pointer">
+                            <input type="radio" class="peer sr-only" name="composer_salary_per"
+                                   value="{{ $value }}" x-model="salaryPer"/>
+                            <span class="flex min-h-10.5 items-center justify-center gap-1.5 rounded-control
+                                         border-2 border-neutral-200 bg-white px-2 py-2 text-body text-neutral-800
+                                         shadow-e1 transition
+                                         hover:border-neutral-400
+                                         peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white
+                                         peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2
+                                         peer-focus-visible:outline-primary">
+                                <svg class="size-4 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                                     stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    {!! $option['path'] !!}
+                                </svg>
+                                <span class="truncate font-semibold">{{ $option['label'] }}</span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
+
+                <x-error-span>{{ $errors->first('form.salary_per') }}</x-error-span>
+            </div>
+        </div>
+
+        {{-- Only "Session" implies a length — the other two units are
+             self-explanatory without one. Full-width so it never re-creates
+             the column-height mismatch the card above was built to avoid. --}}
+        <div x-cloak x-show="salaryPer === '3'" x-transition class="mt-4 max-w-64">
+            <x-forms.input-label for="composer_session_duration" required>
+                @lang('general.session-duration')
+            </x-forms.input-label>
+            <x-forms.select
+                id="composer_session_duration"
+                :options="$sessionDurationOptions"
+                x-model="sessionDuration"
+                :placeholder="__('general.select')"
+            />
+            <x-error-span>{{ $errors->first('form.session_duration') }}</x-error-span>
         </div>
     </div>
 
