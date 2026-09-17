@@ -70,6 +70,11 @@
         <div>
             <x-forms.input-label for="composer_salary" required>@lang('general.salary')</x-forms.input-label>
 
+            {{-- `min="0"` only governs the browser's own validation, which
+                 nothing here triggers: Alpine reads the box directly and the
+                 form is sent by script. The border colour therefore has no
+                 default in the static class list — x-bind below owns it
+                 outright, so the invalid state cannot lose to a stale one. --}}
             <input
                 id="composer_salary"
                 type="number"
@@ -78,17 +83,34 @@
                 inputmode="decimal"
                 placeholder="0.00"
                 x-model="salary"
-                class="w-full min-w-0 rounded-control border border-neutral-300
+                x-bind:aria-invalid="salaryError ? 'true' : null"
+                x-bind:aria-describedby="salaryError ? 'composer_salary-error' : null"
+                x-bind:class="salaryError ? 'border-primary' : 'border-neutral-300'"
+                class="w-full min-w-0 rounded-control border
                        bg-white px-3 py-2 text-end font-mono text-body tabular-nums text-neutral-900
                        shadow-e1 transition placeholder:text-neutral-400
                        focus:border-primary focus:outline-none focus:ring-2 focus:ring-neutral-300"
             />
 
-            {{-- Echoed back formatted, and annualised when paid monthly. --}}
+            {{-- Echoed back formatted, and annualised when paid monthly. Goes
+                 quiet on a figure the form will not take, so the slot below can
+                 say why instead of this one confirming a number that is wrong. --}}
             <p x-cloak x-show="salaryEcho"
                class="mt-2 rounded-control border border-neutral-200 bg-neutral-50 px-3 py-1.5
                       text-small font-medium text-neutral-800"
                x-text="salaryEcho"></p>
+
+            {{-- The client-side twin of <x-forms.input-error>: same id
+                 convention, same role, same red, but driven by Alpine because
+                 this value never reaches the server until submit — and submit
+                 is the thing being blocked. --}}
+            <p x-cloak x-show="salaryError"
+               id="composer_salary-error"
+               role="alert"
+               class="mt-1 text-body text-primary">
+                <span class="sr-only">@lang('general.a11y.error-prefix')</span>
+                <span x-text="salaryError"></span>
+            </p>
 
             <x-error-span>{{ $errors->first('form.salary') }}</x-error-span>
         </div>
@@ -172,8 +194,18 @@
 
                 <div class="max-w-40">
                     <x-forms.input-label x-bind:for="'composer_pay_tier_' + index + '_amount'">@lang('general.amount')</x-forms.input-label>
+                    {{-- No border swap here, unlike the fixed-mode salary box:
+                         x-forms.input bakes border-neutral-300 into its own
+                         class list, and an Alpine binding adds to that list
+                         rather than replacing it, so the two reds would race.
+                         The message below carries the state instead. --}}
                     <x-forms.input type="number" step="0.01" min="0" x-model="tier.amount"
-                                   x-bind:id="'composer_pay_tier_' + index + '_amount'" />
+                                   x-bind:id="'composer_pay_tier_' + index + '_amount'"
+                                   x-bind:aria-invalid="tierAmountError(tier) ? 'true' : null" />
+                    <p x-cloak x-show="tierAmountError(tier)" role="alert" class="mt-1 text-body text-primary">
+                        <span class="sr-only">@lang('general.a11y.error-prefix')</span>
+                        <span x-text="tierAmountError(tier)"></span>
+                    </p>
                 </div>
             </div>
         </template>
@@ -184,4 +216,10 @@
 
         <x-error-span>{{ $errors->first('form.pay_tiers') }}</x-error-span>
     </div>
+
+    {{-- Every other section withholds its Continue button until it is valid,
+         which is itself the signal. Pay is last: there is no button here to
+         withhold, only the Create button in the action bar, so this line is the
+         only thing that can say why it is grey. --}}
+    <p x-cloak x-show="payBlockedHint" class="mt-4 font-medium text-small text-primary" x-text="payBlockedHint"></p>
 </x-contract.section>

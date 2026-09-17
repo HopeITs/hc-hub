@@ -62,7 +62,6 @@
         // or an edit — so Alpine can fill every field from it instead of blank.
         'seed' => $seed,
         'labels' => [
-            'allCenters' => __('general.composer.all-centers'),
             'cityLevel' => __('general.composer.city-level'),
             'lockedBecause' => __('general.composer.locked-because'),
             'notTerminated' => __('general.composer.not-terminated'),
@@ -90,6 +89,13 @@
             'scheduleHintDayRange' => __('general.composer.schedule-hint-day-range'),
             'scheduleHintSecondShift' => __('general.composer.schedule-hint-second-shift'),
             'scheduleHintWeeklyHours' => __('general.composer.schedule-hint-weekly-hours'),
+            'payHintSalaryRequired' => __('general.composer.pay-hint-salary-required'),
+            'payHintSalaryNegative' => __('general.composer.pay-hint-salary-negative'),
+            'payHintSalaryNumber' => __('general.composer.pay-hint-salary-number'),
+            'payHintSessionDuration' => __('general.composer.pay-hint-session-duration'),
+            'payHintNoTiers' => __('general.composer.pay-hint-no-tiers'),
+            'payHintTiersIncomplete' => __('general.composer.pay-hint-tiers-incomplete'),
+            'payHintAmountNegative' => __('general.composer.pay-hint-amount-negative'),
             // Lowercase units, because these are read inside a phrase
             // ("3 months") rather than as standalone labels.
             'month' => __('general.composer.duration-month'),

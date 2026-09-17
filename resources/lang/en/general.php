@@ -819,6 +819,13 @@ return [
 
         'pay-mode' => 'Pay',
         'pay-flexible-hint' => 'A tiered stipend, e.g. one amount if teaching 60 hours a month, another if 70.',
+        'pay-hint-salary-required' => 'Enter the salary to continue.',
+        'pay-hint-salary-negative' => 'Salary cannot be negative. Enter an amount of zero or more.',
+        'pay-hint-salary-number' => 'Enter the salary as a plain number, without letters or symbols.',
+        'pay-hint-session-duration' => 'Choose a session duration to continue.',
+        'pay-hint-no-tiers' => 'Add at least one condition to continue.',
+        'pay-hint-tiers-incomplete' => 'Every condition needs both languages filled in and an amount of zero or more.',
+        'pay-hint-amount-negative' => 'Amount cannot be negative. Enter zero or more.',
         'add-condition' => 'Add a condition',
         'remove-condition' => 'Remove',
         'condition' => 'Condition',

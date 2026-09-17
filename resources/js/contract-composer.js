@@ -11,7 +11,6 @@
  * that a contract which does not exist yet cannot have.
  */
 
-const ALL_CENTERS = '__all__';
 const CITY_LEVEL = '';
 
 // Sunday(0)..Saturday(6) — hardcoded rather than read from the server's own
@@ -234,7 +233,6 @@ document.addEventListener('alpine:init', () => {
             city: str(config.cityId),
             employee: str(config.seed?.employeeId),
             program: str(config.seed?.programId),
-            center: config.seed?.centerId != null ? str(config.seed.centerId) : ALL_CENTERS,
             position: str(config.seed?.positionId),
             contractType: str(config.seed?.contractTypeId),
         },
@@ -343,7 +341,6 @@ document.addEventListener('alpine:init', () => {
         initialize() {
             this.$watch('selected.city', () => this.syncing || this.loadCityOptions(true));
             this.$watch('selected.program', () => this.syncing || this.onProgramChange());
-            this.$watch('selected.center', () => this.syncing || this.onCenterChange());
             this.$watch('selected.employee', () => this.syncing || this.onEmployeeChange());
             this.$watch('leaveInputs', () => this.scheduleLeavePreview());
             this.$watch('flexCustomOn', (on) => {
@@ -454,6 +451,63 @@ document.addEventListener('alpine:init', () => {
             const sessionValid = this.salaryPer !== '3' || this.sessionDuration !== '';
 
             return this.salary !== '' && Number(this.salary) >= 0 && Number.isFinite(Number(this.salary)) && sessionValid;
+        },
+
+        /**
+         * What is wrong with the salary box itself, in one short sentence.
+         * Mirrors payValid's own numeric rule on purpose: when the two disagree,
+         * Create goes dead with nothing marked, which is the exact failure this
+         * exists to prevent. An empty box is not an error — nothing has been
+         * typed yet, and payBlockedHint speaks for that case instead.
+         */
+        get salaryError() {
+            if (this.salary === '') {
+                return '';
+            }
+
+            if (!Number.isFinite(Number(this.salary))) {
+                return this.labels.payHintSalaryNumber;
+            }
+
+            return Number(this.salary) < 0 ? this.labels.payHintSalaryNegative : '';
+        },
+
+        /** The same rule, for one flexible-mode tier's amount. */
+        tierAmountError(tier) {
+            if (tier.amount === '') {
+                return '';
+            }
+
+            return Number.isFinite(Number(tier.amount)) && Number(tier.amount) >= 0
+                ? ''
+                : this.labels.payHintAmountNegative;
+        },
+
+        /**
+         * Why the section is not valid yet — the counterpart to
+         * scheduleBlockedHint, and the load-bearing one: pay is the last
+         * required section, so there is no Continue button beneath it to
+         * withhold. Without this, an unfinished pay section shows up only as a
+         * greyed-out Create button on the far side of the screen.
+         */
+        get payBlockedHint() {
+            if (this.payValid) {
+                return '';
+            }
+
+            if (this.payMode === '2') {
+                return this.payTiers.length === 0
+                    ? this.labels.payHintNoTiers
+                    : this.labels.payHintTiersIncomplete;
+            }
+
+            if (this.salary === '') {
+                return this.labels.payHintSalaryRequired;
+            }
+
+            // A bad figure already marks and explains itself at the box. Saying
+            // it again down here would print one sentence twice, inches apart.
+            return this.salaryError ? '' : this.labels.payHintSessionDuration;
         },
 
         addPayTier() {
@@ -596,15 +650,14 @@ document.addEventListener('alpine:init', () => {
          * became employee-first, city is derived FROM the employee, not the
          * other way around — a manual city override (e.g. switching to the
          * nationwide/headquarters scope, which accepts an employee from any
-         * city) must not discard an already-made employee choice. Program,
-         * center, and position genuinely are city-scoped lists with no such
+         * city) must not discard an already-made employee choice. Program
+         * and position genuinely are city-scoped lists with no such
          * exemption, so those still reset up front; dropUnavailableSelections()
          * below is what decides the employee's fate once the new city's real
          * employee list has actually loaded.
          */
         resetDownstream() {
             this.selected.program = '';
-            this.selected.center = ALL_CENTERS;
             this.selected.position = '';
         },
 
@@ -617,14 +670,9 @@ document.addEventListener('alpine:init', () => {
 
             if (!has(this.options.programs, this.selected.program)) {
                 this.selected.program = '';
-                this.selected.center = ALL_CENTERS;
                 this.selected.position = '';
 
                 return;
-            }
-
-            if (!has(this.centerOptions, this.selected.center)) {
-                this.selected.center = ALL_CENTERS;
             }
 
             if (!has(this.positionOptions, this.selected.position)) {
@@ -724,27 +772,11 @@ document.addEventListener('alpine:init', () => {
 
             await this.withSync(() => {
                 this.selected.program = str(draft.programId ?? '');
-                this.selected.center = draft.centerId != null ? str(draft.centerId) : CITY_LEVEL;
                 this.selected.position = str(draft.positionId ?? '');
             });
         },
 
         onProgramChange() {
-            // Study Zone positions are city-level by data, not by a center
-            // choice someone forgot to make — there is nothing to pick, so
-            // land on "city-level" directly instead of "all centers".
-            this.selected.center = this.isStudyZoneProgram ? CITY_LEVEL : ALL_CENTERS;
-            this.selected.position = '';
-        },
-
-        /** Whether the selected program is Study Zone (slug 'SZ') — the one program whose positions never sit under a center. */
-        get isStudyZoneProgram() {
-            const program = this.options.programs.find((p) => str(p.value) === this.selected.program);
-
-            return program?.slug === 'SZ';
-        },
-
-        onCenterChange() {
             this.selected.position = '';
         },
 
@@ -757,41 +789,11 @@ document.addEventListener('alpine:init', () => {
                 .filter((position) => str(position.programId) === this.selected.program);
         },
 
-        /**
-         * "All centers" is the default, and it shows every position in the
-         * program. The old screen filtered to centre-less positions whenever
-         * the centre box was blank, which hid most positions behind a control
-         * that was not even marked as required.
-         */
-        get centerOptions() {
-            if (!this.selected.program) {
-                return [];
-            }
-
-            const inProgram = this.options.centers.filter((center) =>
-                (center.programIds ?? []).map(str).includes(this.selected.program));
-
-            const options = [{ value: ALL_CENTERS, label: this.labels.allCenters }];
-
-            if (this.programPositions.some((position) => str(position.centerId) === '')) {
-                options.push({ value: CITY_LEVEL, label: this.labels.cityLevel });
-            }
-
-            return options.concat(inProgram);
-        },
-
         get positionOptions() {
             const centerName = (id) => this.options.centers
                 .find((center) => str(center.value) === str(id))?.label ?? '';
 
             return this.programPositions
-                .filter((position) => {
-                    if (this.selected.center === ALL_CENTERS) {
-                        return true;
-                    }
-
-                    return str(position.centerId) === this.selected.center;
-                })
                 .map((position) => ({
                     ...position,
                     centerLabel: str(position.centerId) === ''
@@ -1166,7 +1168,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         get salaryEcho() {
-            if (this.salary === '' || !Number.isFinite(Number(this.salary))) {
+            // A figure the form will not accept is never echoed back formatted,
+            // and never annualised: "-500 · -6,000 per year" reads as a real
+            // salary that was understood, when it is the thing blocking submit.
+            if (this.salary === '' || this.salaryError) {
                 return '';
             }
 
@@ -1482,7 +1487,7 @@ document.addEventListener('alpine:init', () => {
                     : this.labels.empty;
             }
 
-            return this.salary === ''
+            return this.salary === '' || this.salaryError
                 ? this.labels.empty
                 : `${this.formatNumber(this.salary)} ${this.currencyLabel} ${this.salaryPerLabel}`;
         },
@@ -1544,7 +1549,6 @@ document.addEventListener('alpine:init', () => {
                     cityId: this.selected.city,
                     employeeId: this.selected.employee,
                     programId: this.selected.program,
-                    centerId: this.selected.center === ALL_CENTERS ? '' : this.selected.center,
                     positionId: this.selected.position,
                     draftContractId: this.draftContractId,
                     contractTypeId: this.selected.contractType,

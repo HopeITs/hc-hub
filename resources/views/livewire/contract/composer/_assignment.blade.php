@@ -103,37 +103,17 @@
             </p>
         </template>
 
-        {{-- Program / Center: their own row, kept separate from Position /
-             Capacity below so hiding Center for a Study Zone program (a
-             `display:none` grid item) cannot pull Position into Center's
-             column — CSS Grid auto-flow reclaims a hidden item's slot, which
-             used to silently pair Position with Program and strand Capacity
-             alone on the row after it. --}}
-        <div class="grid gap-x-6 gap-y-4 md:grid-cols-2">
-            {{-- Program --}}
-            <div x-bind:class="isStudyZoneProgram && 'md:col-span-2'">
-                {{-- Required in fact as well as in name: no program, no positions. --}}
-                <x-forms.input-label for="composer_program" required>{{ trans_choice('general.program', 1) }}</x-forms.input-label>
-                <x-forms.combobox
-                    id="composer_program"
-                    required
-                    options="options.programs"
-                    model="selected.program"
-                    disabled="loading || !selected.city"
-                />
-            </div>
-
-            {{-- Center — Study Zone positions are city-level by data, not by a
-                 choice anyone makes, so there is nothing to pick here for it. --}}
-            <div x-show="!isStudyZoneProgram" x-cloak>
-                <x-forms.input-label for="composer_center">{{ trans_choice('general.centers', 1) }}</x-forms.input-label>
-                <x-forms.combobox
-                    id="composer_center"
-                    options="centerOptions"
-                    model="selected.center"
-                    disabled="loading || !selected.program"
-                />
-            </div>
+        {{-- Program --}}
+        <div>
+            {{-- Required in fact as well as in name: no program, no positions. --}}
+            <x-forms.input-label for="composer_program" required>{{ trans_choice('general.program', 1) }}</x-forms.input-label>
+            <x-forms.combobox
+                id="composer_program"
+                required
+                options="options.programs"
+                model="selected.program"
+                disabled="loading || !selected.city"
+            />
         </div>
 
         <div class="grid gap-x-6 gap-y-4 md:grid-cols-2">

@@ -819,6 +819,13 @@ return [
 
         'pay-mode' => 'الأجر',
         'pay-flexible-hint' => 'مكافأة متدرّجة، مثلاً مبلغ عند تدريس 60 ساعة شهريًا، ومبلغ آخر عند 70.',
+        'pay-hint-salary-required' => 'أدخل الراتب للمتابعة.',
+        'pay-hint-salary-negative' => 'لا يمكن أن يكون الراتب بالسالب. أدخل مبلغًا يساوي صفرًا أو أكثر.',
+        'pay-hint-salary-number' => 'أدخل الراتب كرقم فقط، دون حروف أو رموز.',
+        'pay-hint-session-duration' => 'اختر مدة الجلسة للمتابعة.',
+        'pay-hint-no-tiers' => 'أضف شرطًا واحدًا على الأقل للمتابعة.',
+        'pay-hint-tiers-incomplete' => 'كل شرط يحتاج إلى نصّه باللغتين ومبلغ يساوي صفرًا أو أكثر.',
+        'pay-hint-amount-negative' => 'لا يمكن أن يكون المبلغ بالسالب. أدخل صفرًا أو أكثر.',
         'add-condition' => 'إضافة شرط',
         'remove-condition' => 'إزالة',
         'condition' => 'الشرط',
