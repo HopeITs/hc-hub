@@ -4,8 +4,12 @@ namespace App\Services;
 
 use App\Enums\RecruitmentScopeType;
 use App\Models\City;
+use App\Models\Contract;
 use App\Models\Position;
+use App\Models\RecruitmentRequest;
+use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -25,10 +29,14 @@ use Illuminate\Support\Str;
  * reach the same day without an administrator touching anything.
  *
  * The resolver deliberately fails closed: a user it cannot place gets
- * RecruitmentScopeType::None, never "everything".
+ * RecruitmentScopeType::None, and a query it cannot place returns nothing.
  */
 class RecruitmentScopeResolver
 {
+    // --------------------------------------------
+    // Breadth of access
+    // --------------------------------------------
+
     /**
      * The breadth of this user's access.
      *
@@ -135,7 +143,139 @@ class RecruitmentScopeResolver
         return Position::query()
             ->where('direct_manager_id', $position->getKey())
             ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
             ->all();
+    }
+
+    // --------------------------------------------
+    // Visibility
+    // --------------------------------------------
+
+    /**
+     * The visibility boundary for requests — the single source of truth for
+     * lists, exports, selectors and record lookup alike.
+     *
+     * Every caller goes through this. Applying scope to the list and forgetting
+     * it on the detail screen is the classic way this kind of module leaks, so
+     * canAccessRequest() below is this same query with a key on it rather than
+     * a second set of rules that can drift.
+     */
+    public function scopeRequests(Builder $query, User $user): Builder
+    {
+        return match ($this->scopeType($user)) {
+            RecruitmentScopeType::Organization => $query,
+
+            // A governorate HR sees every request raised for the cities it
+            // reviews, whoever raised them.
+            RecruitmentScopeType::City => $query->whereIn(
+                'scope_city_id',
+                $this->governorateCityIds($user),
+            ),
+
+            // A manager sees his own requests and those of the people who
+            // report to him — nothing wider, because nothing wider is his to
+            // decide.
+            RecruitmentScopeType::DirectReports => $query->whereIn(
+                'requester_user_id',
+                $this->visibleRequesterUserIds($user),
+            ),
+
+            // Fail closed. A user the resolver cannot place sees nothing, and
+            // whereRaw('0 = 1') keeps that an empty result rather than an
+            // unscoped one.
+            default => $query->whereRaw('0 = 1'),
+        };
+    }
+
+    public function canAccessRequest(User $user, RecruitmentRequest $request): bool
+    {
+        return $this->scopeRequests(RecruitmentRequest::query(), $user)
+            ->whereKey($request->getKey())
+            ->exists();
+    }
+
+    /**
+     * Requests are the root of visibility; everything downstream inherits it.
+     *
+     * A vacancy exists because a request was approved, and a campaign exists
+     * because of a vacancy. Re-deriving scope at each level would let the two
+     * answers drift apart, so each one reaches back to the request instead.
+     */
+    public function scopeVacancies(Builder $query, User $user): Builder
+    {
+        return $query->whereHas(
+            'createdFromRequest',
+            fn (Builder $requests): Builder => $this->scopeRequests($requests, $user),
+        );
+    }
+
+    public function scopeCampaigns(Builder $query, User $user): Builder
+    {
+        return $query->whereHas(
+            'vacancy.createdFromRequest',
+            fn (Builder $requests): Builder => $this->scopeRequests($requests, $user),
+        );
+    }
+
+    public function scopeJobPosts(Builder $query, User $user): Builder
+    {
+        return $query->whereHas(
+            'campaign.vacancy.createdFromRequest',
+            fn (Builder $requests): Builder => $this->scopeRequests($requests, $user),
+        );
+    }
+
+    public function scopeApplicationForms(Builder $query, User $user): Builder
+    {
+        return $query->whereHas(
+            'campaign.vacancy.createdFromRequest',
+            fn (Builder $requests): Builder => $this->scopeRequests($requests, $user),
+        );
+    }
+
+    public function scopePublicLinks(Builder $query, User $user): Builder
+    {
+        return $query->whereHas(
+            'campaign.vacancy.createdFromRequest',
+            fn (Builder $requests): Builder => $this->scopeRequests($requests, $user),
+        );
+    }
+
+    public function scopeRequestEvents(Builder $query, User $user): Builder
+    {
+        return $query->whereHas(
+            'request',
+            fn (Builder $requests): Builder => $this->scopeRequests($requests, $user),
+        );
+    }
+
+    /**
+     * This user plus whoever currently occupies a position reporting to them.
+     *
+     * Occupancy is read live rather than stored on the request, so someone who
+     * transfers away takes their requests out of their old manager's list on
+     * the day they move — the same rule that governs every other scope here.
+     *
+     * @return array<int, int>
+     */
+    public function visibleRequesterUserIds(User $user): array
+    {
+        $ids = [(int) $user->getKey()];
+
+        $positionIds = $this->directReportPositionIds($user);
+
+        if ($positionIds !== []) {
+            $ids = array_merge($ids, User::query()
+                ->whereIn('employee_id', Contract::query()
+                    ->activeNow()
+                    ->whereIn('position_id', $positionIds)
+                    ->select('employee_id'))
+                ->pluck('id')
+                ->map(fn ($id): int => (int) $id)
+                ->all());
+        }
+
+        return array_values(array_unique($ids));
     }
 
     // --------------------------------------------
@@ -191,7 +331,7 @@ class RecruitmentScopeResolver
     }
 
     // --------------------------------------------
-    // Resolving approvers
+    // Resolving and checking approvers
     // --------------------------------------------
 
     /**
@@ -241,6 +381,61 @@ class RecruitmentScopeResolver
         $own = "HR-{$slug}";
 
         return $this->roleHasHolders($own) ? $own : $default;
+    }
+
+    /**
+     * May this user decide this step, right now?
+     *
+     * Holding the permission is only the first of four questions, and it is
+     * the only one an administrator role bypasses (D10). The other three are
+     * asked of everyone, which is what stops HR Syria — who holds every
+     * permission in the system — from deciding a step that is somebody else's,
+     * or approving a request they raised themselves.
+     *
+     * The permission itself is checked by the policy, not here.
+     */
+    public function canActOnStep(User $user, RecruitmentWorkflowInstanceStep $step): bool
+    {
+        // 2. Is the step still open?
+        if ($step->decision !== null || $step->assigned_user_id === null) {
+            return false;
+        }
+
+        // 3. Is this the assigned approver?
+        if ((int) $step->assigned_user_id !== (int) $user->getKey()) {
+            return false;
+        }
+
+        // 4. Do they still hold the scope they were assigned under? Someone who
+        //    transferred out of a governorate stops being able to decide its
+        //    requests, even though the step still carries their name.
+        return $this->holdsScope(
+            $user,
+            $step->assigned_scope_type === null ? null : (int) $step->assigned_scope_type,
+            $step->assigned_scope_id === null ? null : (int) $step->assigned_scope_id,
+        );
+    }
+
+    /**
+     * Does this user still sit inside the scope a step was assigned under?
+     *
+     * Unknown or missing scope is a no. The absence of a scope is not a
+     * complete one.
+     */
+    public function holdsScope(User $user, ?int $scopeType, ?int $scopeId): bool
+    {
+        return match ($scopeType) {
+            RecruitmentScopeType::Organization => $this->isOrganizationWide($user),
+
+            RecruitmentScopeType::City => $scopeId !== null
+                && in_array($scopeId, $this->governorateCityIds($user), true),
+
+            // The scope of a manager step is the manager's own position.
+            RecruitmentScopeType::DirectReports => $scopeId !== null
+                && (int) ($this->position($user)?->getKey() ?? 0) === $scopeId,
+
+            default => false,
+        };
     }
 
     // --------------------------------------------

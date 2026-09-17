@@ -3,6 +3,28 @@
 return [
     'administrator_roles' => ['super-admin', 'HR-SYR'],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Permissions no role may ever hold
+    |--------------------------------------------------------------------------
+    |
+    | These identify a specific person rather than a job, so a role carrying
+    | one would hand that person's authority to everybody who holds the role.
+    | They are created and displayed like any other permission and granted per
+    | user from Access Management.
+    |
+    | Every bulk grant reads AccessPermissionCatalog::roleGrantableNames(),
+    | which subtracts this list — the automatic grant for new administrator and
+    | HR roles in App\Models\Role included. See config/recruitment.php for what
+    | each one means.
+    |
+    */
+
+    'never_granted_to_roles' => [
+        'recruitment-requests.approve-finance',
+        'recruitment-requests.submit-without-manager',
+    ],
+
     'system_roles' => [
         'super-admin',
         'general-manager',
