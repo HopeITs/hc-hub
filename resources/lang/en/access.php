@@ -75,6 +75,12 @@ return [
         'archives' => 'Archived files',
         'checklists' => 'Checklist items',
         'activity-log' => 'Activity log',
+        'recruitment-requests' => 'Recruitment requests',
+        'recruitment-vacancies' => 'Vacancies',
+        'recruitment-campaigns' => 'Hiring campaigns',
+        'recruitment-job-posts' => 'Job posts',
+        'recruitment-forms' => 'Application forms',
+        'recruitment-links' => 'Application links',
     ],
     'actions' => [
         'view' => 'View', 'view-own' => 'View own', 'view-all' => 'View all',
@@ -84,5 +90,9 @@ return [
         'manage-employees' => 'Manage employee access', 'manage-roles' => 'Manage roles',
         'manage-permissions' => 'Manage permissions', 'share' => 'Share',
         'download' => 'Download', 'deliver' => 'Confirm delivery', 'receive' => 'Confirm return',
+        'submit' => 'Submit for approval', 'cancel' => 'Cancel',
+        'approve' => 'Approve', 'reject' => 'Reject',
+        'request-changes' => 'Request changes', 'direct-open' => 'Open a vacancy directly',
+        'approve-finance' => 'Financial approval', 'submit-without-manager' => 'Submit without manager approval',
     ],
 ];

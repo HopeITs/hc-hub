@@ -54,6 +54,12 @@ return [
         'project-basics' => 'أساسيات المشروع', 'news' => 'الأخبار', 'badges' => 'الشارات',
         'archives' => 'الملفات المؤرشفة', 'checklists' => 'عناصر قائمة التسليم',
         'activity-log' => 'سجل النشاط',
+        'recruitment-requests' => 'طلبات التوظيف',
+        'recruitment-vacancies' => 'الشواغر',
+        'recruitment-campaigns' => 'حملات التوظيف',
+        'recruitment-job-posts' => 'إعلانات الوظائف',
+        'recruitment-forms' => 'نماذج التقديم',
+        'recruitment-links' => 'روابط التقديم',
     ],
     'actions' => [
         'view' => 'عرض', 'view-own' => 'عرض الخاص', 'view-all' => 'عرض الكل',
@@ -63,5 +69,9 @@ return [
         'manage-roles' => 'إدارة الأدوار', 'manage-permissions' => 'إدارة الصلاحيات',
         'share' => 'مشاركة', 'download' => 'تنزيل', 'deliver' => 'تأكيد التسليم',
         'receive' => 'تأكيد الإرجاع',
+        'submit' => 'إرسال للموافقة', 'cancel' => 'إلغاء',
+        'approve' => 'موافقة', 'reject' => 'رفض',
+        'request-changes' => 'طلب تعديل', 'direct-open' => 'فتح شاغر مباشرة',
+        'approve-finance' => 'الموافقة المالية', 'submit-without-manager' => 'إرسال بلا موافقة مدير',
     ],
 ];

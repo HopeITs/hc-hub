@@ -24,11 +24,29 @@ return [
             'positions.view', 'leaves.view-own', 'leaves.view-all', 'leaves.create',
             'leaves.update', 'leaves.decide', 'news.view', 'checklists.view-own',
             'checklists.manage', 'project-basics.view',
+            // Recruitment: the CEO and his deputy hold this role, so they both
+            // raise requests and approve their direct reports' requests.
+            'recruitment-requests.view', 'recruitment-requests.manage',
+            'recruitment-requests.submit', 'recruitment-requests.cancel',
+            'recruitment-requests.approve', 'recruitment-requests.reject',
+            'recruitment-requests.request-changes', 'recruitment-requests.export',
+            'recruitment-vacancies.view', 'recruitment-campaigns.view',
+            'recruitment-job-posts.view', 'recruitment-forms.view',
+            'recruitment-links.view',
         ],
         'manager' => [
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
             'leaves.view-all', 'leaves.create', 'leaves.update', 'leaves.decide',
             'news.view', 'checklists.view-own', 'project-basics.view',
+            // Recruitment: the same role covers both sides of the first step —
+            // a manager raises his own requests and approves his direct
+            // reports'. Holding 'approve' is never sufficient on its own; the
+            // workflow still checks that this user is the assigned approver for
+            // that step.
+            'recruitment-requests.view', 'recruitment-requests.manage',
+            'recruitment-requests.submit', 'recruitment-requests.cancel',
+            'recruitment-requests.approve', 'recruitment-requests.reject',
+            'recruitment-requests.request-changes', 'recruitment-requests.export',
         ],
         'employee' => [
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
@@ -53,6 +71,28 @@ return [
         'archives' => ['view', 'create', 'update', 'delete', 'share', 'download'],
         'checklists' => ['view-own', 'view-all', 'manage', 'deliver', 'receive'],
         'activity-log' => ['view'],
+
+        /*
+         * Recruitment module. Two of these are never attached to a role:
+         * 'approve-finance' identifies the single organization-wide financial
+         * approver, and 'submit-without-manager' marks the handful of people at
+         * the top of the org chart who have no manager to approve their own
+         * requests. Both are granted per user from Access Management — granting
+         * either to a role would silently turn every holder of that role into a
+         * financial approver, or let anyone skip manager approval. See
+         * config/recruitment.php:user_level_permissions.
+         */
+        'recruitment-requests' => [
+            'view', 'manage', 'submit', 'cancel',
+            'approve', 'reject', 'request-changes',
+            'direct-open', 'export',
+            'approve-finance', 'submit-without-manager',
+        ],
+        'recruitment-vacancies' => ['view', 'manage'],
+        'recruitment-campaigns' => ['view', 'manage'],
+        'recruitment-job-posts' => ['view', 'manage'],
+        'recruitment-forms' => ['view', 'manage'],
+        'recruitment-links' => ['view', 'manage'],
     ],
 
     /*

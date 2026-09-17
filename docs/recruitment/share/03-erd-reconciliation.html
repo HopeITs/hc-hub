@@ -104,7 +104,7 @@ footer{padding-top:26px;font-size:12.5px;color:var(--muted);text-align:center}
       <tr><td><code>recruitment_request_id</code></td><td>FK &middot; <code>onDelete('restrict')</code> &mdash; لا يُحذف التاريخ</td></tr>
       <tr><td><code>request_version_id</code></td><td>النسخة التي وقع عليها الحدث</td></tr>
       <tr><td><code>event_type</code></td><td>نوع الحدث: إنشاء &middot; تعديل &middot; إرسال &middot; موافقة &middot; رفض &middot; طلب تعديل &middot; تطبيق &middot; فشل تطبيق &middot; تغيير حملة &middot; نشر إعلان…</td></tr>
-      <tr><td><code>workflow_instance_id</code> · <code>workflow_step_id</code></td><td>nullable</td></tr>
+      <tr><td><code>workflow_instance_id</code> · <code>workflow_instance_step_id</code></td><td>nullable &mdash; الأسماء حرفياً كما في العقد التقني</td></tr>
       <tr><td><code>from_status</code> · <code>to_status</code></td><td>انتقال الحالة &mdash; جوهر الخط الزمني</td></tr>
       <tr><td><code>decision</code></td><td>القرار عند خطوات الموافقة</td></tr>
       <tr><td><code>actor_user_id</code> · <code>actor_role</code></td><td>الدور يُكتب كنص ثابت وقت الحدث ولا يُشتق لاحقاً</td></tr>
@@ -114,7 +114,7 @@ footer{padding-top:26px;font-size:12.5px;color:var(--muted);text-align:center}
     </tbody>
   </table></div>
   <ul>
-    <li>الفهارس: <code>(request_id, created_at)</code> للخط الزمني &middot; <code>(event_type)</code> &middot; <code>(scope_type, scope_id)</code> &middot; <code>(actor_user_id)</code></li>
+    <li>الفهارس: <code>(recruitment_request_id, created_at)</code> للخط الزمني &middot; <code>(event_type)</code> &middot; <code>(scope_type, scope_id)</code> &middot; <code>(actor_user_id)</code></li>
     <li>لا <code>update</code> ولا <code>delete</code> على هذا الجدول إطلاقاً</li>
     <li>فشل كتابة الحدث <strong>لا يُفشل</strong> العملية الأصلية &mdash; يُسجَّل في لوج الأخطاء</li>
   </ul>
