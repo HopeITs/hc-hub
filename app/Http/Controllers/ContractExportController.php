@@ -6,6 +6,7 @@ use App\Models\Contract;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Spatie\Browsershot\Browsershot;
 
 class ContractExportController extends Controller
@@ -82,10 +83,25 @@ class ContractExportController extends Controller
             $profile = $this->makeProfileDir();
 
             try {
-                return $this->browsershot($html, $profile)->pdf();
+                $pdf = $this->browsershot($html, $profile)->pdf();
             } finally {
                 File::deleteDirectory($profile);
             }
+
+            // Browsershot parses node's entire stdout as JSON and json_decode()
+            // failing is not an error to it: pdf() then base64-decodes null and
+            // returns an empty string. One stray line on stdout is enough. Sent
+            // as a 200 that becomes a file the browser can't open, so treat
+            // anything that isn't a PDF as a failed attempt worth retrying.
+            if (! str_starts_with($pdf, '%PDF-')) {
+                throw new RuntimeException(sprintf(
+                    'Browsershot returned %d bytes that are not a PDF: %s',
+                    strlen($pdf),
+                    Str::limit(addcslashes(substr($pdf, 0, 200), "\0..\37"), 200),
+                ));
+            }
+
+            return $pdf;
         }, 500);
 
         $category = $contract->contractType?->category ?? 'annual';
