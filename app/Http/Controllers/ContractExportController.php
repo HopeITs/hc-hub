@@ -81,6 +81,17 @@ class ContractExportController extends Controller
                 'disable-gpu',
                 'disable-software-rasterizer',
                 'disable-features=site-per-process,IsolateOrigins',
+                'disable-background-networking',
+                'disable-background-timer-throttling',
+                'disable-backgrounding-occluded-windows',
+                'disable-renderer-backgrounding',
+                'disable-default-apps',
+                'disable-extensions',
+                'disable-sync',
+                'metrics-recording-only',
+                'mute-audio',
+                'no-first-run',
+                'js-flags=--max-old-space-size=256',
             ])
             ->showBackground()
             ->setOption('preferCSSPageSize', true)
@@ -103,7 +114,10 @@ class ContractExportController extends Controller
             ]);
         }
 
-        $pdf = $browsershot->pdf();
+        // On resource-constrained shared hosting, headless Chrome can be
+        // killed intermittently by the account's process/memory limits.
+        // Retry a couple of times before giving up.
+        $pdf = retry(3, fn () => $browsershot->pdf(), 500);
 
         $category = $contract->contractType?->category ?? 'annual';
 
