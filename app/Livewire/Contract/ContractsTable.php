@@ -166,10 +166,6 @@ class ContractsTable extends LivewireTable
         // to check — which is done inline below, without touching the database.
         $canCreate = auth()->user()?->hasActivePermission('contracts.create') ?? false;
         $canExport = auth()->user()?->hasActivePermission('contracts.export') ?? false;
-        // Local-only: the export-preview route (skips the export Gate/city
-        // check) is only registered when app()->isLocal(), see
-        // routes/employees-management.php.
-        $canPreview = app()->isLocal();
 
         return [
             Column::make(trans_choice('general.employee', 1), 'employee')
@@ -256,7 +252,7 @@ class ContractsTable extends LivewireTable
 
             BooleanColumn::make(__('general.auto-renew'), 'auto_renew')->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete, $canCreate, $canExport, $canPreview, $canManageAutoRenew): string {
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete, $canCreate, $canExport, $canManageAutoRenew): string {
                 $view = Blade::render('<x-table.show-btn :href="route(\'contracts.show\', $id)" />', ['id' => $m->getKey()]);
                 $edit = $canUpdate
                     ? Blade::render('<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />', ['id' => $m->getKey()])
@@ -275,14 +271,11 @@ class ContractsTable extends LivewireTable
                 $export = $canExport
                     ? Blade::render('<x-table.export-btn :href="route(\'contracts.export\', $id)" />', ['id' => $m->getKey()])
                     : '';
-                $preview = $canPreview
-                    ? Blade::render('<x-table.preview-btn :href="route(\'contracts.export-preview\', $id)" />', ['id' => $m->getKey()])
-                    : '';
                 $delete = $canDelete
                     ? Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $m->getKey()])
                     : '';
 
-                return '<div class="flex items-center justify-center gap-2">'.$autoRenew.$view.$edit.$renew.$export.$preview.$delete.'</div>';
+                return '<div class="flex items-center justify-center gap-2">'.$autoRenew.$view.$edit.$renew.$export.$delete.'</div>';
             })->asHtml()->clickable(false),
         ];
     }
