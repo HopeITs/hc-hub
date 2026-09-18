@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contract;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Spatie\Browsershot\Browsershot;
@@ -73,27 +74,19 @@ class ContractExportController extends Controller
         // asset() URLs back through the app's own web server.
         $html = $this->view($contract, inlineAssets: true)->render();
 
-        $browsershot = Browsershot::html($html)
-            ->setChromePath(config('browsershot.chrome_path'))
-            ->timeout(config('browsershot.timeout'))
-            ->noSandbox()
-            ->addChromiumArguments($this->chromiumArguments())
-            ->showBackground()
-            ->setOption('preferCSSPageSize', true)
-            ->waitUntilNetworkIdle();
+        // Each attempt gets its own throwaway profile directory. A Chrome that
+        // was killed mid-render leaves a SingletonLock behind, and every later
+        // launch pointed at that same profile dies during startup — so retrying
+        // into a shared profile just reproduces the original failure.
+        $pdf = retry(3, function () use ($html) {
+            $profile = $this->makeProfileDir();
 
-        if ($nodeBinary = config('browsershot.node_binary')) {
-            $browsershot->setNodeBinary($nodeBinary);
-        }
-
-        if ($tempPath = config('browsershot.temp_path')) {
-            $browsershot->setCustomTempPath($tempPath);
-        }
-
-        // On resource-constrained shared hosting, headless Chrome can be
-        // killed intermittently by the account's process/memory limits.
-        // Retry a couple of times before giving up.
-        $pdf = retry(3, fn () => $browsershot->pdf(), 500);
+            try {
+                return $this->browsershot($html, $profile)->pdf();
+            } finally {
+                File::deleteDirectory($profile);
+            }
+        }, 500);
 
         $category = $contract->contractType?->category ?? 'annual';
 
@@ -103,10 +96,52 @@ class ContractExportController extends Controller
         ]);
     }
 
+    private function browsershot(string $html, string $profile): Browsershot
+    {
+        $timeout = (int) config('browsershot.timeout');
+
+        $browsershot = Browsershot::html($html)
+            ->setChromePath(config('browsershot.chrome_path'))
+            ->timeout($timeout)
+            // Without this, Browsershot asks puppeteer for the legacy headless
+            // shell, which modern Chrome builds no longer contain — the launch
+            // then dies before the first page can be created.
+            ->newHeadless()
+            // browser.cjs otherwise caps every CDP call at 30s regardless of
+            // the timeout above, which a large contract can exceed.
+            ->protocolTimeout($timeout)
+            ->noSandbox()
+            ->addChromiumArguments($this->chromiumArguments($profile))
+            ->showBackground()
+            ->setOption('preferCSSPageSize', true)
+            ->waitUntilNetworkIdle();
+
+        if ($nodeBinary = config('browsershot.node_binary')) {
+            $browsershot->setNodeBinary($nodeBinary);
+        }
+
+        $browsershot->setCustomTempPath($profile.'/tmp');
+
+        return $browsershot;
+    }
+
+    /**
+     * A private, writable Chrome profile/cache directory for a single render.
+     */
+    private function makeProfileDir(): string
+    {
+        $base = config('browsershot.user_data_dir') ?: sys_get_temp_dir().'/hc-hr-chrome';
+        $dir = rtrim(strtr($base, DIRECTORY_SEPARATOR, '/'), '/').'/'.Str::random(16);
+
+        File::ensureDirectoryExists($dir.'/tmp', 0755, true);
+
+        return $dir;
+    }
+
     /**
      * @return array<int, string>
      */
-    private function chromiumArguments(): array
+    private function chromiumArguments(string $profile): array
     {
         $args = [
             'disable-dev-shm-usage',
@@ -123,17 +158,17 @@ class ContractExportController extends Controller
             'metrics-recording-only',
             'mute-audio',
             'no-first-run',
-            'no-zygote',
+            'user-data-dir='.$profile,
+            'crash-dumps-dir='.$profile,
+            'disk-cache-dir='.$profile.'/cache',
         ];
 
+        // --no-zygote only makes sense alongside --single-process: on its own
+        // it leaves Chrome unable to spawn a renderer, which surfaces as
+        // "Target.createTarget: Target closed" the moment a page is opened.
         if (config('browsershot.single_process')) {
             $args[] = 'single-process';
-        }
-
-        if ($userDataDir = config('browsershot.user_data_dir')) {
-            $args[] = 'user-data-dir='.$userDataDir;
-            $args[] = 'crash-dumps-dir='.$userDataDir;
-            $args[] = 'disk-cache-dir='.$userDataDir.'/cache';
+            $args[] = 'no-zygote';
         }
 
         return array_merge($args, config('browsershot.extra_args', []));

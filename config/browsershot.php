@@ -10,21 +10,24 @@ return [
     // BROWSERSHOT_NODE_BINARY if Node isn't on the web server's PATH.
     'node_binary' => env('BROWSERSHOT_NODE_BINARY', null),
 
-    // Seconds to allow for the whole node/Chrome render.
+    // Seconds to allow for the whole node/Chrome render. Also used as the CDP
+    // protocol timeout, which otherwise defaults to 30s inside browser.cjs.
     'timeout' => (int) env('BROWSERSHOT_TIMEOUT', 120),
 
-    // Shared hosting / constrained VPS accounts often cap the number of
-    // processes (CloudLinux LVE nproc) an account may spawn. Chrome's normal
-    // multi-process model trips that cap and the browser is killed the moment
-    // it starts, which surfaces as "Target closed" during launch. Running it
-    // single-process keeps it to one PID.
+    // Last resort for hosts that cap the number of processes an account may
+    // spawn (CloudLinux LVE nproc). It keeps Chrome to one PID, but modern
+    // Chrome supports --single-process poorly and it can itself cause crashes
+    // during rendering — only turn it on if the default multi-process launch
+    // is demonstrably being killed by the process cap.
     'single_process' => filter_var(env('BROWSERSHOT_SINGLE_PROCESS', false), FILTER_VALIDATE_BOOL),
 
-    // Chrome needs a writable profile/cache dir. When $HOME isn't writable by
-    // the web user (common on cPanel-style hosts) it dies at startup. Point
-    // these at a directory the web user definitely owns.
+    // Parent directory for the throwaway Chrome profile each render gets (the
+    // profile itself, its cache, crash dumps and the temp HTML all live in a
+    // random subdirectory that is deleted afterwards). Chrome dies at startup
+    // if it has nowhere writable to put a profile, so on cPanel-style hosts
+    // where $HOME isn't writable by the web user, point this at a directory
+    // that user definitely owns. Defaults to the system temp directory.
     'user_data_dir' => env('BROWSERSHOT_USER_DATA_DIR', null),
-    'temp_path' => env('BROWSERSHOT_TEMP_PATH', null),
 
     // Comma-separated extra chromium flags (without the leading --), for
     // host-specific tweaking without a code deploy.
