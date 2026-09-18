@@ -225,6 +225,14 @@ return [
             'reloadLatest' => 'recruitment-job-posts.manage',
             'resetFromApprovedRequest' => 'recruitment-job-posts.manage',
         ],
+        'recruitment.application-forms.editor' => [
+            'addField' => 'recruitment-forms.manage',
+            'removeField' => 'recruitment-forms.manage',
+            'moveField' => 'recruitment-forms.manage',
+            'saveDraft' => 'recruitment-forms.manage',
+            'publish' => 'recruitment-forms.manage',
+            'reloadLatest' => 'recruitment-forms.manage',
+        ],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
             'create' => 'leaves.create', 'delete' => 'leaves.delete',
