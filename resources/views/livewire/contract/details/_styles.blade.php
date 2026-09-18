@@ -47,7 +47,7 @@
         font-weight: 700;
         font-size: 16pt;
     }
-    
+
     .contract-body{
         margin-top: 2mm;
 
@@ -90,39 +90,51 @@
 
 
 {{-- WAS GOOD --}}
+@php
+    // Browsershot's headless Chrome renders the HTML string in isolation and
+    // doesn't reliably round-trip asset() URLs back through the app's own
+    // web server, so @font-face src's silently fail to load and the PDF
+    // falls back to a system font. Inlining the font bytes as data URIs
+    // sidesteps that network hop entirely. Only done for the PDF path
+    // ($inlineFonts) — on-screen pages keep using cheap asset() URLs.
+    $inlineFonts ??= false;
+    $fontSrc = fn (string $path) => $inlineFonts
+        ? 'data:font/truetype;charset=utf-8;base64,'.base64_encode(file_get_contents(public_path($path)))
+        : asset($path);
+@endphp
  <style>
     /* ==========================================
        FONTS
     ========================================== */
 @font-face {
     font-family: 'somar-regular';
-    src: url('{{ asset("fonts/SomarSans/SomarSans-Regular.ttf") }}') format('truetype');
+    src: url('{{ $fontSrc("fonts/SomarSans/SomarSans-Regular.ttf") }}') format('truetype');
      font-weight:400; font-style:normal;
 }
 
 @font-face {
     font-family: 'somar-bold';
-    src: url('{{ asset("fonts/SomarSans/SOMARSANS-BOLD.ttf") }}') format('truetype');
+    src: url('{{ $fontSrc("fonts/SomarSans/SOMARSANS-BOLD.ttf") }}') format('truetype');
                 font-weight: 700;
             font-style: normal;
 }
 
 @font-face {
     font-family: 'somar-black';
-    src: url('{{ asset("fonts/SomarSans/SOMARSANS-BLACK.ttf") }}') format('truetype');
+    src: url('{{ $fontSrc("fonts/SomarSans/SOMARSANS-BLACK.ttf") }}') format('truetype');
                 font-weight: 900;
             font-style: normal;
 }
         @font-face {
             font-family: 'NotoNaskhArabic';
-            src: url('{{ asset("fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf") }}') format('truetype');
+            src: url('{{ $fontSrc("fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf") }}') format('truetype');
             font-weight: 400;
             font-style: normal;
         }
 
         @font-face {
             font-family: 'NotoNaskhArabic';
-            src: url('{{ asset("fonts/NotoNaskh/NotoNaskhArabic-Bold.ttf") }}') format('truetype');
+            src: url('{{ $fontSrc("fonts/NotoNaskh/NotoNaskhArabic-Bold.ttf") }}') format('truetype');
             font-weight: 700;
             font-style: normal;
         }
@@ -137,10 +149,16 @@
         height:300mm;
         max-width:100%;
         margin:0 auto;
-        background:#fff url('{{ asset("assets/img/Header.svg") }}') no-repeat top center;
-        background-size:93%;
-        background-position:center 8mm;
-        padding: 35mm 10mm 10mm 10mm; 
+        /* border-box: padding must stay inside height, otherwise the box
+           grows past one physical page and the tail (footer/page number)
+           spills onto a blank following page when printed. */
+        box-sizing:border-box;
+        background-color:#fff;
+        background-image:url('{{ asset("assets/img/Header.svg") }}'), url('{{ asset("assets/img/Footer.png") }}');
+        background-repeat:no-repeat, no-repeat;
+        background-position:center 18mm, center calc(100% - 18mm);
+        background-size:93% auto, 93% auto;
+        padding: 45mm 10mm 22mm 10mm;
         box-shadow:0 8px 24px rgba(0,0,0,.06);
         border-radius:16px;
         position:relative;
@@ -153,12 +171,12 @@
         margin-top:2mm;
         flex:1;
         overflow:hidden;
-    } 
+    }
 
     .contract-footer{
         position:absolute;
         right:18mm;
-        bottom:10mm;
+        bottom:30mm;
         font-family:'Somar Sans';
         font-weight:700;
         font-size:7pt;
@@ -175,7 +193,7 @@
     left: 0;
     right: 0;
     text-align: center;
-    bottom: 12mm;
+    bottom: 30mm;
     font-family: 'somar-bold';
     font-weight: 700;
     font-size: 7pt;
@@ -190,8 +208,8 @@
     .contract-title-center{
         width:100%;
         text-align:center;
-        margin-top:4px;
-        margin-bottom:20px;
+        margin-top:15px;
+        margin-bottom:30px;
     }
 
     .contract-title-center .dual-row{
