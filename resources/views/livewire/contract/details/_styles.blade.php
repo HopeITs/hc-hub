@@ -156,7 +156,7 @@
         background-color:#fff;
         background-image:url('{{ asset("assets/img/Header.svg") }}'), url('{{ asset("assets/img/Footer.png") }}');
         background-repeat:no-repeat, no-repeat;
-        background-position:center 18mm, center calc(100% - 18mm);
+        background-position:center 16mm, center calc(100% - 16mm);
         background-size:93% auto, 93% auto;
         padding: 45mm 10mm 22mm 10mm;
         box-shadow:0 8px 24px rgba(0,0,0,.06);
@@ -171,6 +171,11 @@
         margin-top:2mm;
         flex:1;
         overflow:hidden;
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden;
+    flex-direction: column;
+    padding-bottom: 120px;
     }
 
     .contract-footer{
@@ -208,7 +213,7 @@
     .contract-title-center{
         width:100%;
         text-align:center;
-        margin-top:15px;
+        margin-top:5px;
         margin-bottom:30px;
     }
 
