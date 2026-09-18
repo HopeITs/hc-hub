@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Enums\RecruitmentScopeType;
+use App\Enums\WorkflowInstanceStatus;
+use App\Enums\WorkflowStepKey;
 use App\Models\City;
 use App\Models\Contract;
 use App\Models\Position;
@@ -40,12 +42,17 @@ class RecruitmentScopeResolver
     /**
      * The breadth of this user's access.
      *
-     * Order matters: organization-wide roles win outright, then a governorate
-     * HR role, then the org chart. Anyone left over sees nothing.
+     * Order matters: organization-wide roles and the person appointed as the
+     * central finance approver win outright, then a governorate HR role, then
+     * the org chart. Anyone left over sees nothing.
      */
     public function scopeType(User $user): int
     {
-        if ($this->isOrganizationWide($user)) {
+        if ($this->isOrganizationWide($user)
+            || $this->hasDirectPermission(
+                $user,
+                config('recruitment.user_level_permissions.finance_approver'),
+            )) {
             return RecruitmentScopeType::Organization;
         }
 
@@ -396,14 +403,28 @@ class RecruitmentScopeResolver
      */
     public function canActOnStep(User $user, RecruitmentWorkflowInstanceStep $step): bool
     {
+        $step->loadMissing(['workflowInstance', 'workflowStep']);
+
         // 2. Is the step still open?
         if ($step->decision !== null || $step->assigned_user_id === null) {
+            return false;
+        }
+
+        if ((int) $step->workflowInstance?->status !== WorkflowInstanceStatus::Running
+            || (int) $step->workflowStep?->step_order !== (int) $step->workflowInstance?->current_step_order) {
             return false;
         }
 
         // 3. Is this the assigned approver?
         if ((int) $step->assigned_user_id !== (int) $user->getKey()) {
             return false;
+        }
+
+        // The finance approver is a directly granted person, not an
+        // organization-wide role. Re-resolve the direct grant at action time
+        // so losing it immediately removes the ability to decide.
+        if ((int) $step->workflowStep?->step_key === WorkflowStepKey::FinanceApproval) {
+            return in_array((int) $user->getKey(), $this->financeApproverUserIds(), true);
         }
 
         // 4. Do they still hold the scope they were assigned under? Someone who
@@ -428,7 +449,8 @@ class RecruitmentScopeResolver
             RecruitmentScopeType::Organization => $this->isOrganizationWide($user),
 
             RecruitmentScopeType::City => $scopeId !== null
-                && in_array($scopeId, $this->governorateCityIds($user), true),
+                && ($this->isOrganizationWide($user)
+                    || in_array($scopeId, $this->governorateCityIds($user), true)),
 
             // The scope of a manager step is the manager's own position.
             RecruitmentScopeType::DirectReports => $scopeId !== null
