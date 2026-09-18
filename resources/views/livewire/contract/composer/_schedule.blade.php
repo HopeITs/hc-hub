@@ -43,13 +43,21 @@
         <div class="grid gap-4 sm:grid-cols-2">
             <div>
                 <x-forms.input-label for="composer_work_hours_from">@lang('general.work-hours-from')</x-forms.input-label>
-                <x-forms.date-input id="composer_work_hours_from" type="time" x-model="workHoursFrom" />
+                <x-forms.time-picker
+                    id="composer_work_hours_from"
+                    alpine-model="workHoursFrom"
+                    format="HH:mm"
+                />
                 <x-error-span>{{ $errors->first('form.work_hours_from') }}</x-error-span>
             </div>
 
             <div>
                 <x-forms.input-label for="composer_work_hours_to">@lang('general.work-hours-to')</x-forms.input-label>
-                <x-forms.date-input id="composer_work_hours_to" type="time" x-model="workHoursTo" />
+                <x-forms.time-picker
+                    id="composer_work_hours_to"
+                    alpine-model="workHoursTo"
+                    format="HH:mm"
+                />
                 <x-error-span>{{ $errors->first('form.work_hours_to') }}</x-error-span>
             </div>
         </div>
@@ -74,13 +82,21 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <x-forms.input-label for="composer_work_hours_2_from">@lang('general.work-hours-from')</x-forms.input-label>
-                        <x-forms.date-input id="composer_work_hours_2_from" type="time" x-model="workHours2From" />
+                        <x-forms.time-picker
+                            id="composer_work_hours_2_from"
+                            alpine-model="workHours2From"
+                            format="HH:mm"
+                        />
                         <x-error-span>{{ $errors->first('form.work_hours_2_from') }}</x-error-span>
                     </div>
 
                     <div>
                         <x-forms.input-label for="composer_work_hours_2_to">@lang('general.work-hours-to')</x-forms.input-label>
-                        <x-forms.date-input id="composer_work_hours_2_to" type="time" x-model="workHours2To" />
+                        <x-forms.time-picker
+                            id="composer_work_hours_2_to"
+                            alpine-model="workHours2To"
+                            format="HH:mm"
+                        />
                         <x-error-span>{{ $errors->first('form.work_hours_2_to') }}</x-error-span>
                     </div>
                 </div>
