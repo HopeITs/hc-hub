@@ -7,8 +7,8 @@
     $annualLeaveDays = $contract->leaveBalances->first()?->int_total ?? '—';
   $Digits = fn($s) => $forPdf ? ar_digits((string) $s) : (string) $s;
     $asList = function(array $lines) {
-        return '<div style="margin:0; padding:0;">'
-            . implode('', array_map(fn($l) => '<div style="margin-top:2px;">'.$l.'</div>', $lines))
+        return '<div class="list-plain">'
+            . implode('', array_map(fn($l) => '<div>'.$l.'</div>', $lines))
             . '</div>';
     };
 @endphp

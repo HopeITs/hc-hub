@@ -121,7 +121,7 @@
 
 <div class="avoid-break mt-4">
     <x-contract.dual rowClass="fw-bold" :en="'Preamble:'" :ar="$Glyphs('مقدمة العقد:')" />
-    <x-contract.dual style="margin-top:-3px" :en="'Since the first party oversees the implementation of programs in Syria and the nature of the program requires a volunteer in the capacity of <strong>' .
+    <x-contract.dual rowClass="mt-tight-neg" :en="'Since the first party oversees the implementation of programs in Syria and the nature of the program requires a volunteer in the capacity of <strong>' .
         $esc($positionEN) .
         '</strong>'"
         :ar="$Glyphs('لما كان الفريق الأول يشرف على تنفيذ البرامج في سوريا، وطبيعة البرنامج تحتاج إلى متطوع بصفة ').

@@ -360,6 +360,61 @@
         page-break-inside:avoid;
     }
 
+    .mt-tight-neg{
+        margin-top:-3px;
+    }
+
+    .list-plain{
+        margin:0;
+        padding:0;
+    }
+
+    .list-plain > div{
+        margin-top:2px;
+    }
+
+    /* ==========================================
+       SIGNATURE SECTION
+       Last page of every contract type
+    ========================================== */
+    .contract-signature{
+        position:relative;
+        margin-top:45px;
+        min-height:220px;
+        padding-bottom:40px;
+    }
+
+    .signature-party{
+        position:absolute;
+        text-align:center;
+        width:48%;
+    }
+
+    .signature-party-second{
+        left:0;
+    }
+
+    .signature-party-first{
+        right:0;
+    }
+
+    .signature-role{
+        margin-bottom:12px;
+    }
+
+    .signature-caption{
+        margin-bottom:15px;
+    }
+
+    .signature-name{
+        line-height:1.6;
+        margin-bottom:25px;
+    }
+
+    .signature-date{
+        font-size:14px;
+    }
+
     /* ==========================================
        PRINT
     ========================================== */
