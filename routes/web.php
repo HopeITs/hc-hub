@@ -74,6 +74,8 @@ Route::group(
 
             require __DIR__.'/employees-management.php';
 
+            require __DIR__.'/recruitment-publishing.php';
+
             Route::prefix('leaves')
                 ->name('leaves.')
                 ->group(function () {

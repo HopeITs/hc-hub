@@ -216,6 +216,13 @@ return [
             'renewWithEdit' => 'contracts.create',
         ],
         'contract.contracts-table' => ['delete' => 'contracts.delete', 'exportExcel' => 'contracts.export'],
+        // The permission map is the coarse HTTP boundary. Each action also
+        // runs JobPostPolicy so governorate HR remains inside its city scope.
+        'recruitment.job-posts.editor' => [
+            'saveDraft' => 'recruitment-job-posts.manage',
+            'publish' => 'recruitment-job-posts.manage',
+            'resetFromApprovedRequest' => 'recruitment-job-posts.manage',
+        ],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
             'create' => 'leaves.create', 'delete' => 'leaves.delete',
