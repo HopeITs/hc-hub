@@ -79,8 +79,8 @@ class ContractExportController extends Controller
             ->addChromiumArguments([
                 'disable-dev-shm-usage',
                 'disable-gpu',
-                'single-process',
-                'no-zygote',
+                'disable-software-rasterizer',
+                'disable-features=site-per-process,IsolateOrigins',
             ])
             ->showBackground()
             ->setOption('preferCSSPageSize', true)
