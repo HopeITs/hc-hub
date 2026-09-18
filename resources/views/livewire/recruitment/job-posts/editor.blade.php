@@ -25,6 +25,9 @@
                 {{ __('recruitment.job_post.approved_request') }}:
                 <span class="font-semibold text-neutral-800">{{ $campaign->vacancy->createdFromRequest->request_number }}</span>
             </p>
+            <a href="{{ route('recruitment.campaigns.publishing', $campaign) }}" wire:navigate class="mt-2 inline-flex text-small font-semibold text-primary hover:underline">
+                {{ __('recruitment.publishing.back') }}
+            </a>
         </div>
 
         <div class="flex flex-wrap gap-2 text-small">

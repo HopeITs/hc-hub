@@ -13,6 +13,9 @@
         <div>
             <p class="text-body text-secondary-medium">{{ __('recruitment.application_form.subtitle') }}</p>
             <p class="mt-1 text-small text-neutral-500">{{ __('recruitment.job_post.approved_request') }}: <span class="font-semibold text-neutral-800">{{ $campaign->vacancy->createdFromRequest->request_number }}</span></p>
+            <a href="{{ route('recruitment.campaigns.publishing', $campaign) }}" wire:navigate class="mt-2 inline-flex text-small font-semibold text-primary hover:underline">
+                {{ __('recruitment.publishing.back') }}
+            </a>
         </div>
         <div class="flex gap-2 text-small">
             <span class="rounded-full bg-neutral-100 px-3 py-1 font-semibold text-neutral-700">{{ __('recruitment.job_post.version') }} #{{ $versionNumber }}</span>

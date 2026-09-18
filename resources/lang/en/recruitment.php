@@ -64,4 +64,17 @@ return [
         'reloaded' => 'The latest form version was loaded.',
         'safety_note' => 'Public forms are generated from a fixed field whitelist. Internal IDs and recruitment data are never added to the public schema.',
     ],
+    'publishing' => [
+        'title' => 'Campaign publishing',
+        'help' => 'Prepare and publish both assets below. The public link can be activated after a published job post and application form are available.',
+        'job_post' => 'Job post and social graphics',
+        'job_post_help' => 'Generate bilingual content and download the post and story graphics.',
+        'application_form' => 'Application form',
+        'application_form_help' => 'Choose applicant fields and publish a versioned, public-safe form.',
+        'create_job_post' => 'Create job post',
+        'edit_job_post' => 'Open job post',
+        'create_application_form' => 'Create application form',
+        'edit_application_form' => 'Open application form',
+        'back' => 'Back to campaign publishing',
+    ],
 ];
