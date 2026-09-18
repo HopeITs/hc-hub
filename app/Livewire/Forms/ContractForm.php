@@ -47,6 +47,8 @@ class ContractForm extends Form
 
     public bool $is_active = true;
 
+    public ?bool $auto_renew = null;
+
     // ── Terms
     public ?string $start_date = null;
 
@@ -184,6 +186,7 @@ class ContractForm extends Form
         $this->terminated_at = null;
         $this->termination_reason_id = null;
         $this->reason_of_termination = null;
+        $this->auto_renew = null;
 
         $this->schedule_mode = ScheduleMode::Fixed;
         $this->work_hours_2_from = null;
@@ -250,6 +253,7 @@ class ContractForm extends Form
         $this->type = (int) $contract->type;
         $this->place = (int) $contract->place;
         $this->is_active = (bool) $contract->is_active;
+        $this->auto_renew = (bool) $contract->auto_renew;
 
         $this->start_date = $contract->start_date?->toDateString();
         $this->end_date = $contract->end_date?->toDateString();
@@ -550,7 +554,7 @@ class ContractForm extends Form
         $isFixed = $this->schedule_mode === ScheduleMode::Fixed;
         $isFixedPay = $this->pay_mode === PayMode::Fixed;
 
-        return [
+        $payload = [
             'employee_id' => $this->employee_id,
             'position_id' => $this->position_id,
             'contract_type_id' => $this->contract_type_id,
@@ -601,6 +605,31 @@ class ContractForm extends Form
                 ? $this->session_duration
                 : null,
         ];
+
+        if ($this->canPersistAutoRenew()) {
+            $payload['auto_renew'] = (bool) $this->auto_renew;
+        }
+
+        return $payload;
+    }
+
+    private function canPersistAutoRenew(): bool
+    {
+        if (! auth()->check()) {
+            return false;
+        }
+
+        if ($this->contract) {
+            return auth()->user()->can('manageAutoRenew', $this->contract);
+        }
+
+        if (! $this->renewal_source_id) {
+            return false;
+        }
+
+        $source = Contract::query()->find($this->renewal_source_id);
+
+        return $source !== null && auth()->user()->can('manageAutoRenew', $source);
     }
 
     private function timeForInput(mixed $value, ?string $fallback = null): ?string

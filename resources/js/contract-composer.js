@@ -218,6 +218,7 @@ document.addEventListener('alpine:init', () => {
         locale: config.locale,
         cities: config.cities ?? [],
         terminationReasons: config.terminationReasons ?? [],
+        canManageAutoRenew: Boolean(config.canManageAutoRenew),
         // Create renders four sections; edit adds `termination` on the end.
         sections: config.sections ?? ['assignment', 'contract', 'schedule', 'pay'],
         // Sunday(0)..Saturday(6), localized — built from the day range picker's
@@ -319,6 +320,7 @@ document.addEventListener('alpine:init', () => {
         terminatedAt: config.seed?.terminatedAt ?? '',
         terminationReasonId: str(config.seed?.terminationReasonId ?? ''),
         reasonOfTermination: config.seed?.reasonOfTermination ?? '',
+        autoRenew: Boolean(config.seed?.autoRenew),
 
         // ---- ui
         // An edit opens with every section collapsed and summarised: there is
@@ -1545,7 +1547,7 @@ document.addEventListener('alpine:init', () => {
             this.submitting = true;
 
             try {
-                await this.$wire.submit({
+                const payload = {
                     cityId: this.selected.city,
                     employeeId: this.selected.employee,
                     programId: this.selected.program,
@@ -1586,7 +1588,13 @@ document.addEventListener('alpine:init', () => {
                     terminatedAt: this.terminatedAt,
                     terminationReasonId: this.terminationReasonId,
                     reasonOfTermination: this.reasonOfTermination,
-                });
+                };
+
+                if (this.canManageAutoRenew) {
+                    payload.autoRenew = this.autoRenew;
+                }
+
+                await this.$wire.submit(payload);
             } finally {
                 this.submitting = false;
             }

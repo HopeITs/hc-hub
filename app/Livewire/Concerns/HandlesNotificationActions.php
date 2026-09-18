@@ -19,7 +19,7 @@ trait HandlesNotificationActions
 
         $url = $this->safeNotificationUrl($notification->data['url'] ?? null);
 
-        if ($url !== null) {
+        if ($url !== null && ! str_starts_with($url, 'mailto:')) {
             // Navigation starts only after the read state is persisted, avoiding
             // the race caused by wire:click and wire:navigate firing together.
             // This application still includes global page scripts that are not
@@ -67,6 +67,10 @@ trait HandlesNotificationActions
 
         if (str_starts_with($url, '/')) {
             return str_starts_with($url, '//') ? null : $url;
+        }
+
+        if (preg_match('/^mailto:[^?\s@]+@[^?\s@]+(?:,[^?\s@]+@[^?\s@]+)*(?:\?[^\\s]*)?$/i', $url) === 1) {
+            return $url;
         }
 
         $parts = parse_url($url);
