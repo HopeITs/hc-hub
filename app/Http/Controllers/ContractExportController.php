@@ -75,25 +75,9 @@ class ContractExportController extends Controller
 
         $browsershot = Browsershot::html($html)
             ->setChromePath(config('browsershot.chrome_path'))
-          ->timeout(120)
+            ->timeout(config('browsershot.timeout'))
             ->noSandbox()
-            ->addChromiumArguments([
-                'disable-dev-shm-usage',
-                'disable-gpu',
-                'disable-software-rasterizer',
-                'disable-features=site-per-process,IsolateOrigins',
-                'disable-background-networking',
-                'disable-background-timer-throttling',
-                'disable-backgrounding-occluded-windows',
-                'disable-renderer-backgrounding',
-                'disable-default-apps',
-                'disable-extensions',
-                'disable-sync',
-                'metrics-recording-only',
-                'mute-audio',
-                'no-first-run',
-                'js-flags=--max-old-space-size=256',
-            ])
+            ->addChromiumArguments($this->chromiumArguments())
             ->showBackground()
             ->setOption('preferCSSPageSize', true)
             ->waitUntilNetworkIdle();
@@ -102,7 +86,9 @@ class ContractExportController extends Controller
             $browsershot->setNodeBinary($nodeBinary);
         }
 
-   
+        if ($tempPath = config('browsershot.temp_path')) {
+            $browsershot->setCustomTempPath($tempPath);
+        }
 
         // On resource-constrained shared hosting, headless Chrome can be
         // killed intermittently by the account's process/memory limits.
@@ -115,5 +101,41 @@ class ContractExportController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$this->fileName($contract, $category).'"',
         ]);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function chromiumArguments(): array
+    {
+        $args = [
+            'disable-dev-shm-usage',
+            'disable-gpu',
+            'disable-software-rasterizer',
+            'disable-features=site-per-process,IsolateOrigins',
+            'disable-background-networking',
+            'disable-background-timer-throttling',
+            'disable-backgrounding-occluded-windows',
+            'disable-renderer-backgrounding',
+            'disable-default-apps',
+            'disable-extensions',
+            'disable-sync',
+            'metrics-recording-only',
+            'mute-audio',
+            'no-first-run',
+            'no-zygote',
+        ];
+
+        if (config('browsershot.single_process')) {
+            $args[] = 'single-process';
+        }
+
+        if ($userDataDir = config('browsershot.user_data_dir')) {
+            $args[] = 'user-data-dir='.$userDataDir;
+            $args[] = 'crash-dumps-dir='.$userDataDir;
+            $args[] = 'disk-cache-dir='.$userDataDir.'/cache';
+        }
+
+        return array_merge($args, config('browsershot.extra_args', []));
     }
 }
