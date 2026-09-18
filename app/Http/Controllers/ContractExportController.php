@@ -31,7 +31,7 @@ class ContractExportController extends Controller
         return $this->view($contract);
     }
 
-    private function view(Contract $contract, bool $inlineFonts = false)
+    private function view(Contract $contract, bool $inlineAssets = false)
     {
         $contract->loadMissing([
             'employee', 'employee.city',
@@ -52,7 +52,7 @@ class ContractExportController extends Controller
             'locale' => $locale,
             'dir' => $dir,
             'fileTitle' => $this->fileName($contract, $category),
-            'inlineFonts' => $inlineFonts,
+            'inlineAssets' => $inlineAssets,
         ]);
     }
 
@@ -68,10 +68,10 @@ class ContractExportController extends Controller
 
     private function render(Contract $contract)
     {
-        // Browsershot's headless Chrome doesn't reliably fetch the
-        // @font-face asset() URLs back through the app's own web server, so
-        // fonts are inlined as data URIs for this path only.
-        $html = $this->view($contract, inlineFonts: true)->render();
+        // Fonts and images are inlined as data URIs for this path only: the
+        // headless browser renders from a file:// temp dir and can't fetch
+        // asset() URLs back through the app's own web server.
+        $html = $this->view($contract, inlineAssets: true)->render();
 
         $browsershot = Browsershot::html($html)
             ->setChromePath(config('browsershot.chrome_path'))

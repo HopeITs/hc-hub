@@ -91,16 +91,31 @@
 
 {{-- WAS GOOD --}}
 @php
-    // Browsershot's headless Chrome renders the HTML string in isolation and
-    // doesn't reliably round-trip asset() URLs back through the app's own
-    // web server, so @font-face src's silently fail to load and the PDF
-    // falls back to a system font. Inlining the font bytes as data URIs
-    // sidesteps that network hop entirely. Only done for the PDF path
-    // ($inlineFonts) — on-screen pages keep using cheap asset() URLs.
-    $inlineFonts ??= false;
-    $fontSrc = fn (string $path) => $inlineFonts
-        ? 'data:font/truetype;charset=utf-8;base64,'.base64_encode(file_get_contents(public_path($path)))
-        : asset($path);
+    // Browsershot renders this HTML from a file:// temp path, so every asset()
+    // URL below becomes a real HTTP request back to this app's own web server.
+    // Locally that's instant; on the production host the loopback to our own
+    // domain never completes, so Chrome never reaches networkidle0 and the
+    // render dies on Puppeteer's navigation timeout. Inlining the bytes as
+    // data URIs removes the network hop entirely.
+    // Only done for the PDF path ($inlineAssets) — on-screen pages keep using
+    // cheap asset() URLs so the browser can cache them normally.
+    $inlineAssets ??= false;
+
+    $dataUri = function (string $path, string $mime) use ($inlineAssets) {
+        // Fall back to the URL if the file is missing, so a stray asset
+        // degrades to a broken image instead of a 500 on the whole export.
+        if (! $inlineAssets || ! is_file(public_path($path))) {
+            return asset($path);
+        }
+
+        return 'data:'.$mime.';base64,'.base64_encode(file_get_contents(public_path($path)));
+    };
+
+    $fontSrc = fn (string $path) => $dataUri($path, 'font/truetype;charset=utf-8');
+    $imgSrc = fn (string $path) => $dataUri(
+        $path,
+        str_ends_with(strtolower($path), '.svg') ? 'image/svg+xml' : 'image/png',
+    );
 @endphp
  <style>
     /* ==========================================
@@ -154,7 +169,7 @@
            spills onto a blank following page when printed. */
         box-sizing:border-box;
         background-color:#fff;
-        background-image:url('{{ asset("assets/img/Header.svg") }}'), url('{{ asset("assets/img/Footer.png") }}');
+        background-image:url('{{ $imgSrc("assets/img/Header.svg") }}'), url('{{ $imgSrc("assets/img/Footer.png") }}');
         background-repeat:no-repeat, no-repeat;
         background-position:center 16mm, center calc(100% - 16mm);
         background-size:93% auto, 93% auto;

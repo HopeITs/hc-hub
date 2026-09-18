@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <title>{{ $fileTitle }}</title>
-    @include('livewire.contract.details._styles', ['inlineFonts' => $inlineFonts ?? false])
+    @include('livewire.contract.details._styles', ['inlineAssets' => $inlineAssets ?? false])
     <style>
         html, body {
             margin: 0;
