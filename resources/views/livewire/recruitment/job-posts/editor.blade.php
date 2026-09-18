@@ -100,6 +100,30 @@
                     />
                     <x-error-span>{{ $errors->first('jobTitle') }}</x-error-span>
                 </div>
+
+                <div class="border-t border-neutral-200 pt-4">
+                    <x-forms.input-label for="job-post-title-en" required>{{ __('recruitment.job_post.title_en') }}</x-forms.input-label>
+                    <x-forms.input id="job-post-title-en" model="titleEn" update="live.debounce.250ms" dir="ltr" required />
+                    <x-error-span>{{ $errors->first('titleEn') }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="job-post-title-ar" required>{{ __('recruitment.job_post.title_ar') }}</x-forms.input-label>
+                    <x-forms.input id="job-post-title-ar" model="titleAr" update="live.debounce.250ms" dir="rtl" required />
+                    <x-error-span>{{ $errors->first('titleAr') }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="job-post-body-en">{{ __('recruitment.job_post.body_en') }}</x-forms.input-label>
+                    <textarea id="job-post-body-en" wire:model="bodyEn" dir="ltr" rows="6" class="w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary"></textarea>
+                    <x-error-span>{{ $errors->first('bodyEn') }}</x-error-span>
+                </div>
+
+                <div>
+                    <x-forms.input-label for="job-post-body-ar">{{ __('recruitment.job_post.body_ar') }}</x-forms.input-label>
+                    <textarea id="job-post-body-ar" wire:model="bodyAr" dir="rtl" rows="6" class="w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary"></textarea>
+                    <x-error-span>{{ $errors->first('bodyAr') }}</x-error-span>
+                </div>
             </div>
 
             <button
@@ -145,6 +169,18 @@
                     {{ __('recruitment.job_post.publish') }}
                 </x-primary-button>
 
+                @if ($publishedVersionId)
+                    <button
+                        type="button"
+                        wire:click="unpublish"
+                        wire:target="unpublish"
+                        wire:confirm="{{ __('recruitment.job_post.unpublish_confirm') }}"
+                        class="flex w-full items-center justify-center rounded-control border border-amber-500 bg-white px-4 py-2 text-body font-semibold text-amber-700 transition hover:bg-amber-50"
+                    >
+                        {{ __('recruitment.job_post.unpublish') }}
+                    </button>
+                @endif
+
                 <button
                     type="button"
                     x-bind:disabled="downloading"
@@ -170,12 +206,17 @@
 
             @if ($notice)
                 <p
-                    class="mt-4 rounded-control px-3 py-2 text-small {{ $noticeType === 'info' ? 'bg-blue-50 text-blue-800' : 'bg-green-50 text-green-800' }}"
+                    class="mt-4 rounded-control px-3 py-2 text-small {{ $noticeType === 'error' ? 'bg-red-50 text-red-800' : ($noticeType === 'info' ? 'bg-blue-50 text-blue-800' : 'bg-green-50 text-green-800') }}"
                     role="status"
                     aria-live="polite"
                 >
                     {{ $notice }}
                 </p>
+                @if ($hasConflict)
+                    <button type="button" wire:click="reloadLatest" class="mt-2 text-small font-semibold text-primary underline">
+                        {{ __('recruitment.job_post.reload_latest') }}
+                    </button>
+                @endif
             @endif
 
             <p x-show="downloadMessage" x-text="downloadMessage" class="mt-3 text-small text-secondary-medium" role="status" aria-live="polite"></p>

@@ -221,6 +221,8 @@ return [
         'recruitment.job-posts.editor' => [
             'saveDraft' => 'recruitment-job-posts.manage',
             'publish' => 'recruitment-job-posts.manage',
+            'unpublish' => 'recruitment-job-posts.manage',
+            'reloadLatest' => 'recruitment-job-posts.manage',
             'resetFromApprovedRequest' => 'recruitment-job-posts.manage',
         ],
         'news.news-table' => ['delete' => 'news.delete'],

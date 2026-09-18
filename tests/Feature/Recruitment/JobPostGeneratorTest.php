@@ -7,6 +7,7 @@ use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
+use App\Exceptions\StaleRecruitmentDraftException;
 use App\Livewire\Recruitment\JobPosts\Editor;
 use App\Models\Department;
 use App\Models\HiringCampaign;
@@ -41,7 +42,9 @@ class JobPostGeneratorTest extends TestCase
             'city' => 'HOMS',
             'program' => 'DISC',
             'job_title' => 'IT Specialist',
-        ], $state['values']);
+        ], array_intersect_key($state['values'], array_flip(['city', 'program', 'job_title'])));
+        $this->assertSame("We're Hiring — IT Specialist", $state['values']['title_en']);
+        $this->assertSame('مطلوب متطوع — اختصاصي تقنية معلومات', $state['values']['title_ar']);
         $this->assertSame(RecruitmentJobPostService::TEMPLATE, $payload['template']);
         $this->assertSame(2160, $payload['outputs']['story']['width']);
         $this->assertSame(3840, $payload['outputs']['story']['height']);
@@ -136,6 +139,46 @@ class JobPostGeneratorTest extends TestCase
         $this->expectException(DomainException::class);
 
         app(RecruitmentJobPostService::class)->openEditor($campaign, $hr);
+    }
+
+    public function test_it_rejects_a_stale_hr_editor_and_exposes_only_a_safe_public_snapshot(): void
+    {
+        [$campaign, $hr] = $this->makeCampaign();
+        $service = app(RecruitmentJobPostService::class);
+        $firstEditor = $service->openEditor($campaign, $hr);
+        $secondEditor = $service->openEditor($campaign, $hr);
+        $values = $firstEditor['values'];
+        $values['job_title'] = 'Updated title';
+
+        $service->saveDraft($firstEditor['job_post'], $values, $firstEditor['version']->id, $firstEditor['fingerprint']);
+
+        $this->expectException(StaleRecruitmentDraftException::class);
+        $service->saveDraft($secondEditor['job_post'], $secondEditor['values'], $secondEditor['version']->id, $secondEditor['fingerprint']);
+    }
+
+    public function test_unpublishing_preserves_the_published_snapshot_and_creates_an_editable_draft(): void
+    {
+        [$campaign, $hr] = $this->makeCampaign();
+        $service = app(RecruitmentJobPostService::class);
+        $state = $service->openEditor($campaign, $hr);
+        $published = $service->publish(
+            $state['job_post'],
+            $state['values'],
+            $hr,
+            $state['version']->id,
+            $state['fingerprint'],
+        );
+
+        $snapshot = $service->publicSnapshot($campaign->fresh());
+        $this->assertSame(['en', 'ar'], array_keys($snapshot['title']));
+        $this->assertArrayNotHasKey('request_id', $snapshot);
+
+        $draft = $service->unpublish($state['job_post'], $hr, $published->id);
+
+        $this->assertSame('published', $published->fresh()->status);
+        $this->assertSame('draft', $draft->status);
+        $this->assertSame('unpublished', $state['job_post']->fresh()->status);
+        $this->assertNull($state['job_post']->fresh()->current_version_id);
     }
 
     /** @return array{HiringCampaign, User, RecruitmentRequest, RecruitmentRequestPositionDetail} */
