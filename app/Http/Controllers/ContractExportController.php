@@ -75,6 +75,7 @@ class ContractExportController extends Controller
 
         $browsershot = Browsershot::html($html)
             ->setChromePath(config('browsershot.chrome_path'))
+          ->timeout(120)
             ->noSandbox()
             ->addChromiumArguments([
                 'disable-dev-shm-usage',
@@ -101,18 +102,7 @@ class ContractExportController extends Controller
             $browsershot->setNodeBinary($nodeBinary);
         }
 
-        // Chrome writes a profile/config dir on first launch. On shared
-        // hosting the process's real $HOME may not be writable (or may not
-        // match the account's actual home), which crashes the renderer mid
-        // navigation. Force Chrome's XDG dirs into the same tmp location
-        // Browsershot already writes its scratch HTML to.
-        if (! app()->isLocal()) {
-            $chromeHome = sys_get_temp_dir().'/google-chrome-for-testing';
-            $browsershot->setEnvironmentOptions([
-                'XDG_CONFIG_HOME' => $chromeHome,
-                'XDG_CACHE_HOME' => $chromeHome,
-            ]);
-        }
+   
 
         // On resource-constrained shared hosting, headless Chrome can be
         // killed intermittently by the account's process/memory limits.
