@@ -91,8 +91,19 @@ class ArabicText
                 continue;
             }
 
-            // 2. Split the line into HTML tags and plain text segments
-            $parts = preg_split('/(<[^>]+>)/u', $line, -1, PREG_SPLIT_DELIM_CAPTURE);
+            // 2. Split the line into HTML tags and plain text segments.
+            // Self-contained `dir="ltr"` spans (e.g. "<span dir="ltr">9:00
+            // AM</span>") are matched whole, as a single atomic token, so
+            // their English/Latin content never enters the Arabic plain-text
+            // run below — mixing Latin digits/AM-PM into that run has them
+            // reversed and re-sliced along with the surrounding Arabic text,
+            // producing garbled output like "AM 00:9" instead of "9:00 AM".
+            $parts = preg_split(
+                '/(<span[^>]*\bdir=["\']ltr["\'][^>]*>.*?<\/span>|<[^>]+>)/us',
+                $line,
+                -1,
+                PREG_SPLIT_DELIM_CAPTURE
+            );
 
             $textSegments = [];
             foreach ($parts as $index => $part) {
@@ -143,6 +154,15 @@ class ArabicText
             $pairs = [];
             foreach ($parts as $index => $token) {
                 if (strpos($token, '<') === 0) {
+                    // Self-contained tokens (the whole ltr span matched
+                    // above, open+content+close in one piece) carry their
+                    // own closing tag already — they're not an unmatched
+                    // opener, so skip the stack/pairing entirely and let
+                    // array_reverse() below simply relocate them as-is.
+                    if (preg_match('/^<([a-zA-Z0-9]+)\b[^>]*>.*<\/\1>$/us', $token) === 1) {
+                        continue;
+                    }
+
                     if (strpos($token, '</') === 0) {
                         if (! empty($openTagsStack)) {
                             $openIndex = array_pop($openTagsStack);
