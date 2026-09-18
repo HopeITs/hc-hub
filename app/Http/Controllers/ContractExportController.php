@@ -76,7 +76,12 @@ class ContractExportController extends Controller
         $browsershot = Browsershot::html($html)
             ->setChromePath(config('browsershot.chrome_path'))
             ->noSandbox()
-            ->addChromiumArguments(['disable-dev-shm-usage'])
+            ->addChromiumArguments([
+                'disable-dev-shm-usage',
+                'disable-gpu',
+                'single-process',
+                'no-zygote',
+            ])
             ->showBackground()
             ->setOption('preferCSSPageSize', true)
             ->waitUntilNetworkIdle();
