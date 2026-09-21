@@ -111,7 +111,7 @@ class PurgeSensitiveActivityLog extends Command
                 'mother_name_en', 'mother_name_ar', 'children', 'marital_status',
                 'digital_id_token',
             ],
-            Contract::class => ['salary', 'attending_notes_en', 'attending_notes_ar'],
+            Contract::class => ['salary'],
             Badge::class => ['current_salary', 'new_salary', 'reason', 'notes'],
             Relative::class => ['name', 'phone'],
             EmployeeNote::class => ['content'],

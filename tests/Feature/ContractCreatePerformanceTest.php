@@ -85,15 +85,15 @@ class ContractCreatePerformanceTest extends TestCase
             ->assertSet('form.end_date', null);
     }
 
-    public function test_the_composer_renders_all_four_sections_and_locks_the_single_city(): void
+    public function test_the_composer_renders_all_three_sections_and_locks_the_single_city(): void
     {
         $fixtures = $this->makeFixtures();
 
         Livewire::actingAs($fixtures['hr'])
             ->test(ContractCreate::class)
-            // The four sections and their chrome.
+            // The three sections and their chrome — Assignment now also
+            // carries what used to be its own separate Contract section.
             ->assertSeeHtml('composer-section-assignment')
-            ->assertSeeHtml('composer-section-contract')
             ->assertSeeHtml('composer-section-schedule')
             ->assertSeeHtml('composer-section-pay')
             // All five cascade fields, laid out two per row.
@@ -106,9 +106,6 @@ class ContractCreatePerformanceTest extends TestCase
             // A city-scoped role gets a locked chip, never a dropdown of one.
             ->assertSee(__('general.composer.locked-city'))
             ->assertDontSeeHtml('id="composer_city"')
-            // Work days are a plain text field in each language, not a picker.
-            ->assertSeeHtml('id="composer_work_days_en"')
-            ->assertSeeHtml('id="composer_work_days_ar"')
             // Termination has no place on a contract that does not exist yet.
             // The properties still ride along in the Livewire snapshot as nulls;
             // what must be gone is the whole section and every control in it.
@@ -172,21 +169,6 @@ class ContractCreatePerformanceTest extends TestCase
             ->test(ContractCreate::class)
             ->call('submit', $this->payload($fixtures))
             ->assertHasErrors('form.position_id');
-
-        $this->assertDatabaseCount('contracts', 0);
-    }
-
-    public function test_work_days_are_required_on_create(): void
-    {
-        $fixtures = $this->makeFixtures();
-
-        Livewire::actingAs($fixtures['hr'])
-            ->test(ContractCreate::class)
-            ->call('submit', $this->payload($fixtures, [
-                'workDaysEn' => '',
-                'workDaysAr' => '',
-            ]))
-            ->assertHasErrors(['form.work_days_en', 'form.work_days_ar']);
 
         $this->assertDatabaseCount('contracts', 0);
     }
@@ -316,9 +298,8 @@ class ContractCreatePerformanceTest extends TestCase
 
         Livewire::actingAs($fixtures['hr'])
             ->test(ContractEdit::class, ['contract' => $contract])
-            // The four sections the create screen has, unchanged...
+            // The three sections the create screen has, unchanged...
             ->assertSeeHtml('composer-section-assignment')
-            ->assertSeeHtml('composer-section-contract')
             ->assertSeeHtml('composer-section-schedule')
             ->assertSeeHtml('composer-section-pay')
             ->assertSeeHtml('id="composer_employee"')
@@ -328,9 +309,6 @@ class ContractCreatePerformanceTest extends TestCase
             ->assertSeeHtml('composer-section-termination')
             ->assertSeeHtml('id="composer_terminated_at"')
             ->assertSeeHtml('id="composer_reason_of_termination"')
-            // Work days are a plain text field again, never a day picker.
-            ->assertSeeHtml('id="composer_work_days_en"')
-            ->assertSeeHtml('id="composer_work_days_ar"')
             // Whose contract this is, and the term it runs for, are stated once
             // — in the card — rather than repeated in a banner above the form.
             ->assertSeeHtml(sprintf(
@@ -353,8 +331,6 @@ class ContractCreatePerformanceTest extends TestCase
             ->test(ContractEdit::class, ['contract' => $contract])
             ->call('submit', $this->payload($fixtures, [
                 'salary' => 750,
-                'workDaysEn' => 'Monday to Friday',
-                'workDaysAr' => 'الإثنين إلى الجمعة',
                 'startDate' => $contract->start_date->toDateString(),
                 'endDate' => $contract->end_date->toDateString(),
             ]))
@@ -364,7 +340,6 @@ class ContractCreatePerformanceTest extends TestCase
         $this->assertDatabaseHas('contracts', [
             'id' => $contract->id,
             'salary' => 750,
-            'work_days_en' => 'Monday to Friday',
             'is_active' => true,
             'terminated_at' => null,
         ]);
@@ -396,30 +371,6 @@ class ContractCreatePerformanceTest extends TestCase
         ]);
     }
 
-    /**
-     * Editing must not be blocked on work days: contracts imported from Excel
-     * before the field existed have none, and an unrelated salary change would
-     * otherwise be impossible to save.
-     */
-    public function test_work_days_are_not_required_on_edit(): void
-    {
-        $fixtures = $this->makeFixtures();
-        $contract = $this->makeExistingContract($fixtures);
-
-        $this->mock(LeaveBalanceService::class)->shouldReceive('create')->once();
-
-        Livewire::actingAs($fixtures['hr'])
-            ->test(ContractEdit::class, ['contract' => $contract])
-            ->call('submit', $this->payload($fixtures, [
-                'startDate' => $contract->start_date->toDateString(),
-                'endDate' => $contract->end_date->toDateString(),
-                'workDaysEn' => '',
-                'workDaysAr' => '',
-            ]))
-            ->assertHasNoErrors()
-            ->assertRedirect();
-    }
-
     public function test_the_composer_creates_the_complete_contract_in_one_request(): void
     {
         $fixtures = $this->makeFixtures();
@@ -442,7 +393,6 @@ class ContractCreatePerformanceTest extends TestCase
             'contract_type_id' => $fixtures['trialType']->id,
             'salary' => 500,
             'weekly_hours' => 40,
-            'work_days_en' => 'Sunday, Monday',
             'is_active' => true,
             // Never set on create, whatever the client sends.
             'terminated_at' => null,
@@ -487,10 +437,6 @@ class ContractCreatePerformanceTest extends TestCase
             'workHoursFrom' => '09:00',
             'workHoursTo' => '17:00',
             'weeklyHours' => 40,
-            'workDaysEn' => 'Sunday, Monday',
-            'workDaysAr' => 'الأحد، الاثنين',
-            'attendingNotesEn' => null,
-            'attendingNotesAr' => null,
             'salary' => 500,
             'currency' => 1,
             'salaryPer' => 1,

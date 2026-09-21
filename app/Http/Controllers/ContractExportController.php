@@ -3,56 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contract;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\ContractPdfRenderer;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 
 class ContractExportController extends Controller
 {
+    public function __construct(private readonly ContractPdfRenderer $renderer) {}
+
     public function pdf(Contract $contract)
     {
         Gate::authorize('export', $contract);
-
-        $contract->loadMissing([
-            'employee', 'employee.city',
-            'position.center', 'position.department', 'position.jobLevel', 'position.program',
-            'contractType',
-        ]);
 
         $cityId = auth()->user()->activeCityId();
         if ($cityId && $contract->employee?->city_id !== $cityId) {
             abort(403);
         }
 
-        $category = $contract->contractType?->category ?? 'annual';
-        $pagesMap = ['annual' => 5, 'trial' => 4, 'service' => 4];
-        $totalPages = $pagesMap[$category] ?? 1;
-        $locale = app()->getLocale();
-        $dir = $locale === 'ar' ? 'rtl' : 'ltr';
+        return response($this->renderer->render($contract), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$this->renderer->fileName($contract).'"',
+        ]);
+    }
 
-        $viewData = [
-            'contract' => $contract,
-            'category' => $category,
-            'totalPages' => $totalPages,
-            'locale' => $locale,
-            'dir' => $dir,
-            'forPdf' => true,
-        ];
+    // Local-only: renders the export for any contract without the auth/city
+    // gates above, as plain HTML (not through Browsershot), so the print
+    // layout can be iterated on quickly in the browser's own devtools.
+    public function preview(Contract $contract)
+    {
+        abort_unless(app()->isLocal(), 404);
 
-        $pdf = Pdf::loadView('livewire.contract.export.print-dompdf', $viewData)
-            ->setPaper('a4', 'portrait')
-            ->set_option('isHtml5ParserEnabled', true)
-            ->set_option('isRemoteEnabled', false)
-            ->set_option('isFontSubsettingEnabled', true)
-            ->setWarnings(false);
-
-        $file = sprintf(
-            '%s-%s-%s.pdf',
-            Str::slug($contract->employee?->name ?? 'contract'),
-            $category,
-            now()->format('Ymd'),
-        );
-
-        return $pdf->stream($file);
+        return $this->renderer->view($contract);
     }
 }

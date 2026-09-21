@@ -5,6 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 HC-HR is an HR management system for "Christian Hope Center" (multi-city Syrian NGO).
 Stack: Laravel 12, Livewire 3 (+ Volt + Flux), Tailwind CSS 4, MySQL. Bilingual EN/AR with RTL.
 
+## Role
+
+Act as an expert senior TALL stack (Tailwind, Alpine.js, Laravel, Livewire) developer on this codebase: idiomatic Livewire/Volt/Flux patterns, clean Laravel architecture, and Tailwind-first styling consistent with the conventions documented below.
+
 ## Commands
 
 ```bash
@@ -48,6 +52,12 @@ No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are config
 ### Media / avatars
 `Employee implements HasMedia` (Spatie MediaLibrary). Avatars live in the singleFile `avatar` collection with a fallback to `public/images/default-avatar.png`. Read with `getFirstMediaUrl('avatar')`.
 - **Never re-encode stored PNGs in place** (e.g. GD `imagesavealpha` on images without an alpha channel) — this turned photo backgrounds black. If thumbnails are ever needed, generate conversions from the source without touching the stored original.
+
+### Contract PDF export
+`ContractPdfRenderer` (in `app/Services/`) renders `resources/views/pdf/contract.blade.php` through Browsershot; the controller only authorizes and sets headers. Host-specific settings all live in `config/browsershot.php` so a server can be corrected from `.env` alone.
+- **Nothing large may travel on node's stdout.** Browsershot parses that stdout as JSON and treats a parse failure as *success* — `$output['result'] ?? ''`, base64-decoded, is an empty string returned with exit code 0. `savePdf()` (not `pdf()`) plus `disableCaptureURLS()` keeps stdout at a few hundred bytes; with `pdf()` and URL capture it was ~635 KB per contract (the PDF as base64, plus every inlined font/image data URI echoed back), and whatever truncated it on the server surfaced as a 0-byte "PDF".
+- When a render fails, surface `Browsershot::getOutput()` (node's exception, page errors, console, failed requests). Without it the only symptom is a byte count, which is never enough to act on.
+- `php artisan contracts:export-doctor [contract]` runs the same pipeline on a host and reports Chrome, node, puppeteer resolution, directory permissions and the raw stdout/stderr/exit code. Run it on the server before changing anything.
 
 ### Livewire conventions
 - Components in `app/Livewire/<Domain>/`; reusable form objects in `app/Livewire/Forms/` (Livewire `Form` classes). Extracted domain logic lives in `app/Services/` (e.g. `LeaveBalanceService`).

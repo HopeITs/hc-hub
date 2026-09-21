@@ -80,9 +80,13 @@ class Login extends Component
             }
         });
 
+        // Not navigate: true — Session::regenerate() above rotates the CSRF
+        // token, but the login page still holds the old token in its meta
+        // tag. A wire:navigate fetch would send that stale token, get
+        // rejected (419), and leave the loading bar spinning forever with
+        // no visible error. A full redirect always picks up the new session.
         $this->redirectIntended(
             default: route('dashboard', absolute: false),
-            navigate: true,
         );
     }
 

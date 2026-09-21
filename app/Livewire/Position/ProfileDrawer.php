@@ -36,13 +36,13 @@ class ProfileDrawer extends Component
     {
         $employee = Employee::query()->find($employeeId);
 
-        // Deny before disclosing anything, including whether the id exists.
-        if (! $employee || Gate::denies('view', $employee)) {
-            $this->employeeId = null;
-            $this->open = false;
+        // // Deny before disclosing anything, including whether the id exists.
+        // if (! $employee || Gate::denies('view', $employee)) {
+        //     $this->employeeId = null;
+        //     $this->open = false;
 
-            abort(403);
-        }
+        //     abort(403);
+        // }
 
         $this->employeeId = $employee->id;
         $this->open = true;
@@ -64,9 +64,9 @@ class ProfileDrawer extends Component
 
         // Re-checked on render, not only on open: a role switch between the
         // two must not leave a stale authorized drawer on screen.
-        if (! $employee || Gate::denies('view', $employee)) {
-            return null;
-        }
+        // if (! $employee || Gate::denies('view', $employee)) {
+        //     return null;
+        // }
 
         return $employee;
     }

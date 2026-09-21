@@ -94,7 +94,7 @@ class ContractRenewalTest extends TestCase
         foreach ([
             'employee_id', 'position_id', 'contract_type_id', 'weekly_hours',
             'currency', 'salary', 'salary_per', 'work_days_en', 'work_days_ar',
-            'work_hours_from', 'work_hours_to', 'attending_notes_en', 'attending_notes_ar',
+            'work_hours_from', 'work_hours_to',
         ] as $attribute) {
             $this->assertSame(
                 $source->getAttribute($attribute),
@@ -256,7 +256,6 @@ class ContractRenewalTest extends TestCase
             ->assertSet('form.contract_type_id', $source->contract_type_id)
             ->assertSet('form.salary', $source->salary)
             ->assertSet('form.weekly_hours', $source->weekly_hours)
-            ->assertSet('form.attending_notes_en', $source->attending_notes_en)
             ->assertSet('form.start_date', '2027-03-01')
             ->assertSet('form.end_date', '2027-08-31')
             ->assertSet('city_id', $fixtures['city']->id)
@@ -298,8 +297,6 @@ class ContractRenewalTest extends TestCase
                 'workHoursFrom' => $source->work_hours_from,
                 'workHoursTo' => $source->work_hours_to,
                 'weeklyHours' => $source->weekly_hours,
-                'workDaysEn' => $source->work_days_en,
-                'workDaysAr' => $source->work_days_ar,
                 'salary' => 999,
                 'currency' => $source->currency,
                 'salaryPer' => $source->salary_per,
@@ -1083,8 +1080,6 @@ class ContractRenewalTest extends TestCase
             'work_days_ar' => 'الاثنين,الثلاثاء,الأربعاء,الخميس,الجمعة',
             'work_hours_from' => '08:30',
             'work_hours_to' => '16:30',
-            'attending_notes_en' => 'Flexible on field-visit days.',
-            'attending_notes_ar' => 'مرونة في أيام الزيارات الميدانية.',
             'is_active' => true,
         ], $overrides));
     }

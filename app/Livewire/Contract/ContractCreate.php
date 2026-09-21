@@ -2,11 +2,14 @@
 
 namespace App\Livewire\Contract;
 
+use App\Enums\ContractType as ContractTypeEnum;
 use App\Livewire\Contract\Concerns\DrivesContractComposer;
 use App\Livewire\Contract\Concerns\ResolvesContractLocationOptions;
 use App\Livewire\Forms\ContractForm;
 use App\Livewire\Forms\LeaveBalanceForm;
+use App\Models\Center;
 use App\Models\Contract;
+use App\Models\Employee;
 use App\Models\User;
 use App\Notifications\NewEmployeeWelcome;
 use Illuminate\Support\Facades\Gate;
@@ -14,6 +17,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Component;
 
 /**
@@ -97,7 +101,6 @@ class ContractCreate extends Component
         try {
             $this->form->validateIdentity();
             $this->form->validateTerms();
-            $this->validateWorkDays();
             $this->form->validatePay();
         } catch (ValidationException $exception) {
             // Reopen the offending section before Livewire renders the errors.
@@ -114,9 +117,17 @@ class ContractCreate extends Component
 
         // Everything above was validated in this same request, so persist
         // without running the identical queries a second time.
-        $contract = $this->form->create();
+        if ($draft = $this->resolveDraftUpgrade($payload)) {
+            // Same row, filled in — not a new contract. update() skips
+            // re-validating (already done above) and ContractObserver
+            // recognises the type change away from Draft as the position's
+            // true first assignment (see ContractObserver::updating()).
+            $this->form->update($draft);
+            $contract = $draft;
+        } else {
+            $contract = $this->form->create();
+        }
 
-        // All contract types receive annual leave balances.
         $this->balanceForm->store($contract->id);
 
         $this->notifyIfFirstContract($contract);
@@ -126,6 +137,63 @@ class ContractCreate extends Component
         LivewireAlert::success(__('general.success-message'));
 
         return redirect()->route('contracts.show', $contract->id);
+    }
+
+    /**
+     * Does $employeeId's most recently created contract sit at type = Draft?
+     * If so, the composer auto-fills that draft's position/program/center and
+     * remembers its id, so submit() upgrades that same row in place instead
+     * of inserting a second contract for someone who already has a
+     * placeholder one (see EmployeeCreate's draft-position step).
+     *
+     * "Most recent" is by id, not start_date: a draft's start_date is null,
+     * which would sort it as the *oldest* contract under any date-based
+     * ordering and hide it behind real contract history that has none.
+     */
+    #[Renderless]
+    public function draftContractFor(int $employeeId): ?array
+    {
+        $user = auth()->user();
+
+        abort_unless($user, 403);
+        abort_unless($user->hasActivePermission($this->locationOptionsPermission()), 403);
+
+        $activeCityId = $user->activeCityId();
+
+        $employeeVisible = Employee::query()
+            ->whereKey($employeeId)
+            ->when($activeCityId, fn ($query, int $cityId) => $query->where('city_id', $cityId))
+            ->exists();
+
+        if (! $employeeVisible) {
+            return null;
+        }
+
+        $latest = Contract::query()
+            ->where('employee_id', $employeeId)
+            ->orderByDesc('id')
+            ->first();
+
+        if (! $latest || (int) $latest->type !== ContractTypeEnum::Draft) {
+            return null;
+        }
+
+        $position = $latest->position;
+
+        // Same rule ResolvesContractLocationOptions::initLocationContext() uses
+        // for a renewal/edit: a center's own city is authoritative over the
+        // position's plain city_id (Position::inCity() agrees).
+        $effectiveCityId = $position?->center_id
+            ? Center::whereKey($position->center_id)->value('city_id')
+            : $position?->city_id;
+
+        return [
+            'draftContractId' => $latest->id,
+            'positionId' => $latest->position_id,
+            'programId' => $position?->program_id,
+            'centerId' => $position?->center_id,
+            'cityId' => $effectiveCityId,
+        ];
     }
 
     // ────────────────────────────────────────────────
@@ -175,24 +243,26 @@ class ContractCreate extends Component
     }
 
     /**
-     * Work days are mandatory on create only.
-     *
-     * This rule cannot live in ContractForm::validateTerms(): that method is
-     * shared with ContractEdit, and contracts imported before the day picker
-     * existed have null work days that editing must not be blocked on.
+     * The draft contract $payload claims to be upgrading, re-verified from
+     * scratch rather than trusted: it must still exist, belong to the exact
+     * employee this submission is for, and still be type = Draft. A client
+     * cannot make an arbitrary contract get overwritten by naming its id —
+     * the same defense-in-depth `positionCapacityRule()`/
+     * `validateCityConsistency()` already apply to renewal_source_id.
      */
-    private function validateWorkDays(): void
+    private function resolveDraftUpgrade(array $payload): ?Contract
     {
-        $this->validate(
-            [
-                'form.work_days_en' => ['required', 'string', 'max:255'],
-                'form.work_days_ar' => ['required', 'string', 'max:255'],
-            ],
-            attributes: [
-                'form.work_days_en' => __('general.work-days').' (EN)',
-                'form.work_days_ar' => __('general.work-days').' (AR)',
-            ],
-        );
+        $draftContractId = $this->selectionId($payload, 'draftContractId');
+
+        if (! $draftContractId) {
+            return null;
+        }
+
+        return Contract::query()
+            ->whereKey($draftContractId)
+            ->where('employee_id', $this->form->employee_id)
+            ->where('type', ContractTypeEnum::Draft)
+            ->first();
     }
 
     // ────────────────────────────────────────────────

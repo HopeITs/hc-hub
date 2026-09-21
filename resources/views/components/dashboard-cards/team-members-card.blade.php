@@ -22,6 +22,7 @@
 
     <!-- Team List -->
     <div
+        data-csb-exclude
         class="relative px-6 pt-2 space-y-3 overflow-y-auto flex-grow
                 scrollbar-thin scrollbar-thumb-[var(--color-neutral-300)] scrollbar-track-transparent
                 hover:scrollbar-thumb-[var(--color-secondary-medium)] max-h-[440px]">

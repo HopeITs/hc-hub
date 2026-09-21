@@ -17,6 +17,13 @@ class ContractPolicy
         return $user->hasActivePermission('contracts.update') && $this->isInActiveCity($user, $contract);
     }
 
+    public function manageAutoRenew(User $user, Contract $contract): bool
+    {
+        return $user->activeRoleIs('HR')
+            && $user->hasActivePermission('contracts.update')
+            && $this->isInActiveCity($user, $contract);
+    }
+
     /**
      * A renewal creates a contract, so it is gated on `contracts.create` rather
      * than on update. A terminated or already-deactivated contract has no term

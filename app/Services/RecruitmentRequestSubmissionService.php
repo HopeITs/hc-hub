@@ -36,6 +36,7 @@ class RecruitmentRequestSubmissionService
         private readonly RecruitmentScopeResolver $scopes,
         private readonly RecruitmentRequestStateMachine $states,
         private readonly RecruitmentRequestRevalidator $revalidator,
+        private readonly RecruitmentWorkflowInstanceService $workflows,
     ) {}
 
     /**
@@ -89,6 +90,11 @@ class RecruitmentRequestSubmissionService
                 'from_status' => $wasDraft ? Status::Draft : Status::ChangesRequested,
                 'to_status' => (int) $fresh->status,
             ]);
+
+            // Freeze and start the approval workflow from this exact submitted
+            // version before the transaction commits. This keeps submission,
+            // versioning, status, and approvals atomic and retry-safe.
+            $this->workflows->start($fresh->fresh(), $version);
 
             return $fresh;
         });

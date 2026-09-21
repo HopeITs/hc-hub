@@ -4,6 +4,7 @@ use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
 use App\Livewire\Recruitment\Requests\Edit;
 use App\Livewire\Recruitment\Requests\Index;
+use App\Livewire\Recruitment\Approvals\Pending;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('recruitment/requests')->name('recruitment.requests.')
@@ -14,3 +15,7 @@ Route::prefix('recruitment/requests')->name('recruitment.requests.')
         Route::get('/{requestId}/edit', Edit::class)->whereNumber('requestId')->middleware('active_permission:recruitment-requests.manage')->name('edit');
         Route::get('/{requestId}', Details::class)->whereNumber('requestId')->name('show');
     });
+
+Route::get('recruitment/approvals', Pending::class)
+    ->middleware(['active_permission:recruitment-requests.approve'])
+    ->name('recruitment.approvals.pending');
