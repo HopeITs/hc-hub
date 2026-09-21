@@ -42,6 +42,14 @@ class Vacancy extends Model
         return app(RecruitmentScopeResolver::class)->scopeVacancies($query, $user);
     }
 
+    public function scopeAvailable(Builder $query): Builder
+    {
+        return $query->where('status', 'open')
+            ->whereNull('closed_at')
+            ->where('open_at', '<=', now())
+            ->whereColumn('filled_count', '<', 'needed_count');
+    }
+
     protected function casts(): array
     {
         return [

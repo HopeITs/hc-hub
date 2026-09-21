@@ -86,6 +86,13 @@
                     </li>
 
                     {{-- 2. Project Basics --}}
+                    @activepermission('recruitment-requests.view')
+                        <x-layouts.app.sidebar.single-item :href="route('recruitment.requests.index')" :active="request()->routeIs('recruitment.requests.*')">
+                            <x-slot name="icon"><x-icons.clipboard-list class="size-5" /></x-slot>
+                            {{ __('recruitment.requests') }}
+                        </x-layouts.app.sidebar.single-item>
+                    @endactivepermission
+
                     @activepermission('project-basics.view')
                     <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('cities.*') ||
                         request()->routeIs('contract-types.*') ||

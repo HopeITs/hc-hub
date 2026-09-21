@@ -482,7 +482,6 @@ class RecruitmentAuthorizationTest extends TestCase
                 'program_id' => $program?->id,
                 'department_id' => $department?->id,
                 'role_description_ready' => false,
-                'finance_consulted' => false,
                 'org_chart_updated' => false,
             ]);
         }

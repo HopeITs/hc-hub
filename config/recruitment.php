@@ -13,12 +13,18 @@ return [
     | grades — 1 Program Manager, 3 Project Manager, 5 Department Manager. The
     | CEO sits at grade 1, so he is already covered and is not listed again.
     |
-    | Eligibility is only half the check. The user still needs
-    | recruitment-requests.submit from their role.
+    | Grade eligibility alone does not authorize a normal request. D50 restricts
+    | that path to active manager/general-manager roles; HR uses Direct Opening
+    | only. D49 limits creation to descendants (plus self for a new parent),
+    | independently of the one-level visibility scope below.
     |
     */
 
     'requester_job_level_grades' => [1, 3, 5],
+
+    // D1: Project is Program; these are job-level grades, not role names.
+    'program_scoped_creation_grades' => [1, 3],
+    'department_manager_grade' => 5,
 
     /*
     |--------------------------------------------------------------------------
@@ -85,6 +91,57 @@ return [
         'super-admin',
         'HR-SYR',
         'general-manager',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Fixed answers on the request form
+    |--------------------------------------------------------------------------
+    |
+    | The paper form offers these as tick boxes, so the screen offers exactly
+    | the same choices rather than a free-text field that nobody can report on.
+    |
+    | They live here as slugs rather than as numeric enums because their
+    | columns — recruitment_reason, priority, volunteer_type — are already text
+    | in the recruitment migrations, and changing that would mean a migration.
+    | The slug is what is stored; the label is translated at display time, so
+    | the database never holds a sentence in one language.
+    |
+    */
+
+    'request_form' => [
+
+        // Why this person is being recruited. 'other' reveals a free-text
+        // field that is stored in the other_reason column beside it.
+        'recruitment_reasons' => [
+            'operational_need',
+            'new_position',
+            'replacement',
+            'other',
+        ],
+
+        'priorities' => [
+            'urgent',
+            'high',
+            'normal',
+        ],
+
+        // Where the work is done.
+        'volunteer_types' => [
+            'onsite',
+            'remote',
+        ],
+
+        /*
+        | A new position must name the centre it sits in, with two exceptions.
+        |
+        | Remote work has no centre to name. And these programmes are run
+        | across many centres rather than out of one, so pinning a position to
+        | a single centre would be a fiction. Matched on programs.slug.
+        */
+        'centerless_program_slugs' => [
+            'SZ',
+        ],
     ],
 
 ];

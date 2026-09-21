@@ -123,6 +123,7 @@ return [
      * inside the component because the required permission depends on state.
      */
     'livewire' => [
+        'recruitment.requests.create' => ['save' => 'recruitment-requests.manage'],
         'access-management.index' => [
             'saveEmployeeAccess' => 'access-management.manage-employees',
             'saveRolePermissions' => 'access-management.manage-permissions',
@@ -306,6 +307,8 @@ return [
     */
 
     'livewire_exempt' => [
+        // Form-only resets. Persistence rechecks role, grade and subtree in the draft service.
+        'recruitment.requests.create' => ['updatedDataRequestType', 'updatedDataPositionId', 'updatedDataCityId'],
 
         // --- Authentication -------------------------------------------------
         // Reached before a session exists, or acting only on the caller's own
