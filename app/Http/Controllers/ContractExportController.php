@@ -136,13 +136,13 @@ class ContractExportController extends Controller
             // user's home is not writable: the browser then dies during
             // startup, surfacing as "Target.setAutoAttach: Target closed"
             // from the web server while the same command works over SSH.
-            // Point every home/cache/temp variable at the throwaway profile.
+            // TMPDIR deliberately points somewhere else — see makeSocketDir().
             ->setNodeEnv([
                 'HOME' => $profile,
                 'XDG_CONFIG_HOME' => $profile.'/config',
                 'XDG_CACHE_HOME' => $profile.'/cache',
                 'XDG_DATA_HOME' => $profile.'/data',
-                'TMPDIR' => $profile.'/tmp',
+                'TMPDIR' => $this->makeSocketDir(),
             ]);
 
         if ($nodeBinary = config('browsershot.node_binary')) {
@@ -165,6 +165,27 @@ class ContractExportController extends Controller
         foreach (['tmp', 'cache', 'config', 'data'] as $sub) {
             File::ensureDirectoryExists($dir.'/'.$sub, 0755, true);
         }
+
+        return $dir;
+    }
+
+    /**
+     * A short, writable TMPDIR for Chrome's process-singleton socket.
+     *
+     * The socket is a unix socket, so its whole path must fit in sun_path
+     * (~108 bytes). Chrome appends about 45 characters to TMPDIR for it, and
+     * the per-render profile directory is normally far too deep — pointing
+     * TMPDIR at the profile aborts the launch with "Socket path too long".
+     */
+    private function makeSocketDir(): string
+    {
+        $dir = rtrim(strtr(
+            config('browsershot.tmp_dir') ?: sys_get_temp_dir(),
+            DIRECTORY_SEPARATOR,
+            '/',
+        ), '/');
+
+        File::ensureDirectoryExists($dir, 0755, true);
 
         return $dir;
     }

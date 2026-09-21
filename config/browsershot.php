@@ -29,6 +29,14 @@ return [
     // that user definitely owns. Defaults to the system temp directory.
     'user_data_dir' => env('BROWSERSHOT_USER_DATA_DIR', null),
 
+    // Chrome creates its process-singleton unix socket under TMPDIR, and a
+    // unix socket path cannot exceed ~108 bytes: with the ~45-byte suffix
+    // Chrome appends, anything longer than about 60 characters aborts the
+    // launch with "Socket path too long". The per-render profile directory is
+    // usually too deep for that, so the socket gets its own short directory,
+    // separate from the profile. Must be writable by the web user.
+    'tmp_dir' => env('BROWSERSHOT_TMP_DIR', null),
+
     // Comma-separated extra chromium flags (without the leading --), for
     // host-specific tweaking without a code deploy.
     'extra_args' => array_values(array_filter(array_map(
