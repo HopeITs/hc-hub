@@ -33,3 +33,10 @@ Route::prefix('contracts')
         Route::get('/{contract}/export', [ContractExportController::class, 'pdf'])->middleware('active_permission:contracts.export')->name('export');
         Route::get('/{contract}', ContractDetails::class)->middleware('active_permission:contracts.view')->name('show');
     });
+
+if (app()->isLocal()) {
+    // Bypasses the export Gate/city checks so the print layout can be
+    // previewed without needing an exact-match logged-in user.
+    Route::get('contracts/{contract}/export-preview', [ContractExportController::class, 'preview'])
+        ->name('contracts.export-preview');
+}

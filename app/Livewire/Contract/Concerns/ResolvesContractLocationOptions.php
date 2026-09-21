@@ -58,7 +58,7 @@ trait ResolvesContractLocationOptions
         $positions = Position::query()
             ->inCity($cityId)
             ->with([
-                'program:id,name',
+                'program:id,name,slug',
                 'center' => fn ($query) => $query->select('id', 'city_id', $centerNameColumn),
             ])
             ->select('id', 'program_id', 'center_id', 'city_id', 'max_emp', 'exist_emp', $positionTitleColumn)
@@ -93,6 +93,9 @@ trait ResolvesContractLocationOptions
                 ->map(fn (Position $position) => [
                     'value' => $position->program_id,
                     'label' => $position->program->name,
+                    // 'SZ' is the Study Zone program's actual data — see
+                    // contract-composer.js::isStudyZoneProgram.
+                    'slug' => $position->program->slug,
                 ])
                 ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
                 ->values()
@@ -128,6 +131,54 @@ trait ResolvesContractLocationOptions
                 ->values()
                 ->all(),
         ];
+    }
+
+    /**
+     * The full employee list this user may assign a contract to, with no city
+     * chosen yet — lets the Assignment step open employee-first: picking
+     * someone derives their city (see contract-composer.js::onEmployeeChange()),
+     * instead of requiring a city choice before anyone even appears.
+     *
+     * Scoped by the same rule as locationOptions() itself (activeCityId()), so
+     * this opens no wider a door than a nationwide user already has by picking
+     * the "Syria" headquarters scope in the city dropdown — a city-scoped role
+     * still sees only its own employees here.
+     */
+    #[Renderless]
+    public function employeeSearchOptions(): array
+    {
+        $user = auth()->user();
+
+        abort_unless($user, 403);
+        $user->loadMissing(['profile:id,city_id', 'roles']);
+
+        abort_unless($user->hasActivePermission($this->locationOptionsPermission()), 403);
+
+        $locale = app()->getLocale();
+        $activeCityId = $user->activeCityId();
+
+        $employees = Employee::query()
+            ->select('id', 'city_id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar')
+            ->with(['media' => fn ($query) => $query->where('collection_name', 'avatar')])
+            ->where('is_active', true)
+            ->when($activeCityId, fn ($query, int $cityId) => $query->where('city_id', $cityId))
+            ->orderBy("first_name_{$locale}")
+            ->orderBy("last_name_{$locale}")
+            ->get();
+
+        $activeContractEnds = $this->activeContractEndDates($employees->modelKeys());
+
+        return $employees
+            ->map(fn (Employee $employee) => [
+                'value' => $employee->id,
+                'label' => $employee->nameForLocale($locale),
+                'avatar' => $employee->avatar_url,
+                'cityId' => $employee->city_id,
+                'activeContractEndsAt' => $activeContractEnds[$employee->id] ?? null,
+            ])
+            ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values()
+            ->all();
     }
 
     /**
@@ -201,9 +252,7 @@ trait ResolvesContractLocationOptions
 
     private function getContractTypes(string $col): Collection
     {
-        // `type` and `place` are already stored on every row but were never
-        // displayed; the create screen surfaces them as badges on the type cards.
-        return ContractType::select('id', 'type', 'place', $col)
+        return ContractType::select('id', $col)
             ->orderBy($col)
             ->get()
             ->each(fn (ContractType $t) => $t->name = $t->{$col});
@@ -255,6 +304,10 @@ trait ResolvesContractLocationOptions
                 'label' => $employee->nameForLocale($locale),
                 // Additive keys, consumed only by the create composer.
                 'avatar' => $employee->avatar_url,
+                // Lets the composer auto-select a city once this employee is
+                // chosen from employeeSearchOptions()'s wider, city-less list —
+                // see contract-composer.js::onEmployeeChange().
+                'cityId' => $employee->city_id,
                 'activeContractEndsAt' => $activeContractEnds[$employee->id] ?? null,
             ])
             ->all();

@@ -12,7 +12,7 @@ class ContractTypeSeeder extends Seeder
         $types = config('samples.sampleData.ContractType');
 
         foreach ($types as $type) {
-            ContractType::create($type);
+            ContractType::query()->forceCreate($type);
         }
     }
 }

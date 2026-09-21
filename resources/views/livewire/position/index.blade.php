@@ -10,7 +10,7 @@
         }
     @endphp
 
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex items-center justify-between mb-6">
         <livewire:layout.breadcrumbs
             :title="__('general.positions')"
             :crumbs="array_filter([
@@ -20,6 +20,7 @@
             ])"
             :showButton="true"
         />
+           @activerole('HR' , 'super-admin' ,'general-manager')
         <div class="flex items-center gap-2">
             <x-excel-export-button wire:click="$dispatchTo('position.position-table', 'exportExcel')" />
 
@@ -27,6 +28,7 @@
                 @lang('general.add-new')
             </x-primary-button>
         </div>
+        @endactiverole
     </div>
 
     <livewire:position.position-table

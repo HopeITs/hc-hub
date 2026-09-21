@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Basics;
 
-use App\Enums\ContractPlace;
-use App\Enums\ContractType as ContractTypeEnum;
 use App\Exports\ContractTypeExport;
 use App\Models\ContractType;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,7 +10,6 @@ use Illuminate\Support\Facades\Blade;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\Column;
-use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -92,7 +89,7 @@ class ContractTypeTable extends LivewireTable
 
     protected function globalSearchColumns(): array
     {
-        return ['id', 'name_ar', 'name_en', 'place', 'type'];
+        return ['id', 'name_ar', 'name_en'];
     }
 
     protected function columns(): array
@@ -109,33 +106,6 @@ class ContractTypeTable extends LivewireTable
                 ->searchable(),
 
             Column::make(__('general.name').' (EN)', 'name_en')
-                ->sortable()
-                ->searchable(),
-
-            SelectColumn::make(__('general.place'), 'place')
-                ->options([
-                    ContractPlace::Onsite => ContractPlace::getLocalizedName(ContractPlace::Onsite)['value'],
-                    ContractPlace::Online => ContractPlace::getLocalizedName(ContractPlace::Online)['value'],
-                ])
-                ->displayUsing(function ($value) {
-                    $place = ContractPlace::getLocalizedName($value);
-
-                    return $place['value'];
-                })
-                ->sortable()
-                ->searchable(),
-
-            SelectColumn::make(__('general.type'), 'type')
-                ->options([
-                    ContractTypeEnum::FullTime => ContractTypeEnum::getLocalizedName(ContractTypeEnum::FullTime)['value'],
-                    ContractTypeEnum::PartTime => ContractTypeEnum::getLocalizedName(ContractTypeEnum::PartTime)['value'],
-                    ContractTypeEnum::Freelance => ContractTypeEnum::getLocalizedName(ContractTypeEnum::Freelance)['value'],
-                ])
-                ->displayUsing(function ($value) {
-                    $type = ContractTypeEnum::getLocalizedName($value);
-
-                    return $type['value'];
-                })
                 ->sortable()
                 ->searchable(),
 

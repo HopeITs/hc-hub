@@ -23,6 +23,7 @@
             @php
                 $isUnread = is_null($notification->read_at);
                 $safeUrl = $this->safeNotificationUrl($notification->data['url'] ?? null);
+                $isMailto = is_string($safeUrl) && str_starts_with($safeUrl, 'mailto:');
             @endphp
 
             <a
@@ -30,7 +31,11 @@
                 x-data="{ clicked: false }"
                 @if($safeUrl)
                     href="{{ $safeUrl }}"
-                    wire:click.prevent="openNotification('{{ $notification->id }}')"
+                    @if($isMailto)
+                        wire:click="markAsRead('{{ $notification->id }}')"
+                    @else
+                        wire:click.prevent="openNotification('{{ $notification->id }}')"
+                    @endif
                 @elseif($isUnread)
                     role="button"
                     tabindex="0"

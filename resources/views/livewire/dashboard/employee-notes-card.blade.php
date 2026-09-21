@@ -20,16 +20,16 @@
                 </x-slot:actions>
             </x-dashboard-cards.card-header>
 
-            <div class="mx-6 mt-[11px] mb-4 pe-2 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
+            <div data-csb-exclude class="mx-6 mt-[11px] mb-4 pe-2 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
                 <div class="pt-1">
 
                     <table class="w-full text-body text-neutral-800 ">
                         <thead>
                         <tr class="border-b border-b-secondary-light text-secondary-medium">
-                            <th class="sticky top-0 z-20 bg-white py-1 w-10 text-center font-medium"></th>
-                            <th class="sticky top-0 z-20 bg-white py-1 font-medium text-left"></th>
-                            <th class="sticky top-0 z-20 bg-white py-1 px-3 ltr:text-right rtl:text-left font-medium">@lang('general.actions')</th>
-                            <th class="sticky top-0 z-20 bg-white py-1 text-center font-medium w-16">@lang('general.done')!</th>
+                            <th class="sticky top-0 z-10 bg-white py-1 w-10 text-center font-medium"></th>
+                            <th class="sticky top-0 z-10 bg-white py-1 font-medium text-left"></th>
+                            <th class="sticky top-0 z-10 bg-white py-1 px-3 ltr:text-right rtl:text-left font-medium">@lang('general.actions')</th>
+                            <th class="sticky top-0 z-10 bg-white py-1 text-center font-medium w-16">@lang('general.done')!</th>
                         </tr>
                         </thead>
 
