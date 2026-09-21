@@ -10,6 +10,13 @@ return [
     // BROWSERSHOT_NODE_BINARY if Node isn't on the web server's PATH.
     'node_binary' => env('BROWSERSHOT_NODE_BINARY', null),
 
+    // Directory Node should resolve `puppeteer` from. Left unset, Browsershot
+    // asks `npm root -g` — which yields nothing on a host with no global npm,
+    // leaving browser.cjs unable to require puppeteer at all. Point this at the
+    // project's own node_modules (e.g. /home/user/app/node_modules) on any host
+    // where `npm` isn't on the web user's PATH.
+    'node_module_path' => env('BROWSERSHOT_NODE_MODULE_PATH', null),
+
     // Seconds to allow for the whole node/Chrome render. Also used as the CDP
     // protocol timeout, which otherwise defaults to 30s inside browser.cjs.
     'timeout' => (int) env('BROWSERSHOT_TIMEOUT', 120),
