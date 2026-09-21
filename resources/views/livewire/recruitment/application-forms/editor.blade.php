@@ -336,7 +336,11 @@
                 </div>
             </div>
 
-            <div class="max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain rounded-card border border-neutral-200 bg-[#f3f3f3] p-3 shadow-inner [scrollbar-color:#9ca3af_transparent] [scrollbar-width:thin] sm:p-5">
+            <div
+                id="application-form-preview-scroll"
+                data-csb-exclude
+                class="max-h-[calc(100vh-8rem)] touch-pan-y overflow-y-auto overscroll-contain rounded-card border border-neutral-200 bg-[#f3f3f3] p-3 shadow-inner [scrollbar-color:#9ca3af_transparent] [scrollbar-width:thin] sm:p-5"
+            >
                 <x-recruitment.application-form-preview
                     :campaign="$campaign"
                     :fields="$fields"

@@ -39,21 +39,20 @@
         @endforeach
     </div>
 
-    <div dir="ltr" class="relative aspect-[1355/349] overflow-hidden rounded-[16px] border border-neutral-300 bg-primary shadow-e2">
-        <img src="{{ asset('assets/recruitment/hope-center/logo.svg') }}" alt="Hope Christian Hope Center" class="absolute start-[9.2%] top-1/2 z-10 w-[24%] -translate-y-[58%] object-contain">
-        <img src="{{ asset('assets/recruitment/hope-center/hiring.svg') }}" alt="We're hiring" class="absolute end-[8.5%] top-[28%] z-10 w-[20%] object-contain">
+    <div id="application-form-preview-banner" dir="ltr" class="relative aspect-[4/1] overflow-hidden rounded-[16px] border border-neutral-300 bg-primary shadow-e2">
+        <img src="{{ asset('assets/recruitment/hope-center/logo.svg') }}" alt="Hope Christian Hope Center" class="absolute start-[9.5%] top-1/2 z-10 w-[21%] -translate-y-[55%] object-contain">
+        <img src="{{ asset('assets/recruitment/hope-center/hiring.svg') }}" alt="We're hiring" class="absolute end-[8.5%] top-[25%] z-10 w-[18%] object-contain">
 
-        <img src="{{ asset('assets/recruitment/hope-center/arrow2.svg') }}" alt="" class="pointer-events-none absolute end-[1.2%] top-[43%] w-[9%] opacity-25" aria-hidden="true">
+        <img src="{{ asset('assets/recruitment/hope-center/arrow2.svg') }}" alt="" class="pointer-events-none absolute end-0 top-[43%] w-[8%] opacity-25" aria-hidden="true">
         <img src="{{ asset('assets/recruitment/hope-center/arrow2.svg') }}" alt="" class="pointer-events-none absolute end-[6.8%] -top-[9%] w-[4.5%] opacity-70" aria-hidden="true">
-        <img src="{{ asset('assets/recruitment/hope-center/arrow2.svg') }}" alt="" class="pointer-events-none absolute end-[14%] top-[19%] w-[3.4%] opacity-50" aria-hidden="true">
+        <img src="{{ asset('assets/recruitment/hope-center/arrow2.svg') }}" alt="" class="pointer-events-none absolute end-[28%] top-[19%] w-[3.4%] opacity-50" aria-hidden="true">
         <img src="{{ asset('assets/recruitment/hope-center/arrow2.svg') }}" alt="" class="pointer-events-none absolute end-[20.5%] top-[4%] w-[2.3%] opacity-55" aria-hidden="true">
-        <img src="{{ asset('assets/recruitment/hope-center/arrow2.svg') }}" alt="" class="pointer-events-none absolute end-[10.5%] top-[55%] w-[2.6%] opacity-45" aria-hidden="true">
+        <img src="{{ asset('assets/recruitment/hope-center/arrow2.svg') }}" alt="" class="pointer-events-none absolute end-[27%] top-[55%] w-[2.6%] opacity-45" aria-hidden="true">
 
         <span class="pointer-events-none absolute inset-x-0 bottom-[11%] h-[2.2%] bg-white" aria-hidden="true"></span>
-        <span class="pointer-events-none absolute inset-x-0 bottom-0 h-[1%] bg-white" aria-hidden="true"></span>
     </div>
 
-    <section class="mt-0 overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-e1">
+    <section class="mt-3 overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-e1">
         <div class="border-t-[7px] border-primary px-6 py-5 sm:px-7">
             <h2 class="text-[1.65rem] font-medium leading-tight text-neutral-900">{{ $title }} - {{ __('recruitment.application_form.vacancy_announcement') }}</h2>
 
