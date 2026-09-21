@@ -15,5 +15,5 @@
 
 <div {{ $attributes->merge(['class' => $rowClasses]) }}>
     <div class="{{ $enClasses }}" dir="ltr" lang="en">{!! $en !!}</div>
-    <div class="{{ $arClasses }}" style="direction: rtl" dir="rtl" lang="ar">{!! $ar !!}</div>
+    <div class="{{ $arClasses }}" dir="rtl" lang="ar">{!! $ar !!}</div>
 </div>

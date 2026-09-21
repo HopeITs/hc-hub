@@ -126,9 +126,15 @@
 
 
 
-
 <script nonce="{{ Vite::cspNonce() }}">
-    window.CustomScrollbarConfig = { trackWidth: 8, offset: 5, padY: 10, padBottom: 16, headerSelector: '#app-navbar' };
+    window.CustomScrollbarConfig = {
+        trackWidth: 8,
+        offset: 5,
+        padY: 10,
+        padBottom: 16,
+        headerSelector: '#app-navbar',
+        exclude: ['[data-csb-exclude]'],
+    };
 </script>
 <script src="{{ asset('js/custom-scrollbar.js') }}" defer></script>
 </body>

@@ -20,6 +20,7 @@
         @php
             $isUnread = is_null($note->read_at);
             $safeUrl = $this->safeNotificationUrl($note->data['url'] ?? null);
+            $isMailto = is_string($safeUrl) && str_starts_with($safeUrl, 'mailto:');
         @endphp
 
         <a
@@ -27,7 +28,11 @@
             x-data="{ clicked: false }"
             @if($safeUrl)
                 href="{{ $safeUrl }}"
-                wire:click.prevent="openNotification('{{ $note->id }}')"
+                @if($isMailto)
+                    wire:click="markAsRead('{{ $note->id }}')"
+                @else
+                    wire:click.prevent="openNotification('{{ $note->id }}')"
+                @endif
             @elseif($isUnread)
                 role="button"
                 tabindex="0"

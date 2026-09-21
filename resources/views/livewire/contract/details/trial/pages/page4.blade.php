@@ -44,38 +44,38 @@
         :ar="$Glyphs('أفيد بأنني قرأت وفهمت شروط العمل المنصوص عليها أعلاه وكافة المستندات المرفقة وأقر بموافقتي على كل ما ورد، وعليه أوقّع.')" />
 </div>
 
-<div class="avoid-break" style="position: relative; margin-top: 45px; min-height: 220px;">
-    
-    <div style="position: absolute; left: 0; text-align: center; width: 48%;">
-        <div style="margin-bottom: 12px;">
+<div class="avoid-break contract-signature">
+
+    <div class="signature-party signature-party-second">
+        <div class="signature-role">
             {!! $LB('Second Party') !!} / {!! $LB($Glyphs('الفريق الثاني')) !!}
         </div>
-        <div style="margin-bottom: 15px;">
+        <div class="signature-caption">
             Name and Signature / {{ $Glyphs('الاسم والتوقيع') }}
         </div>
-        <div style="line-height: 1.6; margin-bottom: 25px;">
+        <div class="signature-name">
             <strong>{{ $esc($nameEn) }}</strong>
             <br>
             <strong>{{ $escAr($nameAr) }}</strong>
         </div>
-        <div style="font-size: 14px;">
+        <div class="signature-date">
             Date / {{ $Glyphs('التاريخ') }}
         </div>
     </div>
 
-    <div style="position: absolute; right: 0; text-align: center; width: 48%;">
-        <div style="margin-bottom: 12px;">
+    <div class="signature-party signature-party-first">
+        <div class="signature-role">
             {!! $LB('First Party') !!} / {!! $LB($Glyphs('الفريق الأول')) !!}
         </div>
-        <div style="margin-bottom: 15px;">
+        <div class="signature-caption">
             Name and Signature / {{ $Glyphs('الاسم والتوقيع') }}
         </div>
-        <div style="line-height: 1.6; margin-bottom: 25px;">
+        <div class="signature-name">
             <strong>Fredy Georges Youssef</strong>
             <br>
             <strong>{{ $Glyphs('فريدي جرجس يوسف') }}</strong>
         </div>
-        <div style="font-size: 14px;">
+        <div class="signature-date">
             Date / {{ $Glyphs('التاريخ') }}
         </div>
     </div>

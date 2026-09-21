@@ -68,6 +68,7 @@ class ContractEdit extends Component
     public function submit(array $payload): mixed
     {
         Gate::authorize('update', $this->contract);
+        $this->guardAutoRenewPayload($payload);
 
         $this->applyComposerPayload($payload);
 
@@ -122,6 +123,7 @@ class ContractEdit extends Component
                 ->orderBy("title_{$locale}")
                 ->get(),
             'seed' => $this->composerSeed(),
+            'canManageAutoRenew' => auth()->user()->can('manageAutoRenew', $this->contract),
         ]);
     }
 
@@ -156,6 +158,10 @@ class ContractEdit extends Component
      */
     protected function applyComposerTermination(array $payload): void
     {
+        if (auth()->user()->can('manageAutoRenew', $this->contract)) {
+            $this->form->auto_renew = (bool) ($payload['autoRenew'] ?? false);
+        }
+
         $this->form->terminated_at = $this->dateOrNull($payload['terminatedAt'] ?? null);
         $this->form->termination_reason_id = $this->selectionId($payload, 'terminationReasonId');
         $this->form->reason_of_termination = $this->textOrNull($payload['reasonOfTermination'] ?? null);
@@ -172,6 +178,7 @@ class ContractEdit extends Component
             'terminated_at' => 'termination',
             'termination_reason_id' => 'termination',
             'reason_of_termination' => 'termination',
+            'auto_renew' => 'termination',
         ]);
     }
 
@@ -184,5 +191,14 @@ class ContractEdit extends Component
     protected function contractTermAnchor(): ?string
     {
         return $this->form->start_date;
+    }
+
+    private function guardAutoRenewPayload(array $payload): void
+    {
+        if (! array_key_exists('autoRenew', $payload)) {
+            return;
+        }
+
+        abort_unless(auth()->user()->can('manageAutoRenew', $this->contract), 403);
     }
 }

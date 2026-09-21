@@ -29,6 +29,7 @@ class ContractsTable extends LivewireTable
 
     protected $listeners = [
         'delete',
+        'toggleAutoRenewConfirmed',
         'refreshContractsTable' => '$refresh',
         'exportExcel' => 'exportExcel',
     ];
@@ -52,6 +53,33 @@ class ContractsTable extends LivewireTable
         DB::transaction(fn () => $contract->delete());
 
         LivewireAlert::title(__('general.success-message'))
+            ->success()->toast()->position('top-start')->show();
+
+        $this->dispatch('refreshContractsTable');
+    }
+
+    public function confirmToggleAutoRenew(int $id): void
+    {
+        $contract = Contract::findOrFail($id);
+        Gate::authorize('manageAutoRenew', $contract);
+
+        LivewireAlert::title(__('general.toggle-auto-renew'))
+            ->text(__('general.confirm-auto-renew-change'))
+            ->question()
+            ->withConfirmButton(__('general.save'))
+            ->onConfirm('toggleAutoRenewConfirmed', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function toggleAutoRenewConfirmed(array $payload): void
+    {
+        $contract = Contract::findOrFail($payload['id']);
+        Gate::authorize('manageAutoRenew', $contract);
+
+        $contract->update(['auto_renew' => ! $contract->auto_renew]);
+
+        LivewireAlert::title(__('general.item-updated'))
             ->success()->toast()->position('top-start')->show();
 
         $this->dispatch('refreshContractsTable');
@@ -130,12 +158,14 @@ class ContractsTable extends LivewireTable
         $title = $loc === 'ar' ? 'title_ar' : 'title_en';
         $canUpdate = auth()->user()?->hasActivePermission('contracts.update') ?? false;
         $canDelete = auth()->user()?->hasActivePermission('contracts.delete') ?? false;
+        $canManageAutoRenew = auth()->user()?->activeRoleIs('HR') && $canUpdate;
         // Resolved once, like the flags above. Calling Gate::allows('renew')
         // per row would re-run ContractPolicy::renew's city-scope query for
         // every contract on the page; query() has already restricted the whole
         // result set to the active city, so only the row's own state is left
         // to check — which is done inline below, without touching the database.
         $canCreate = auth()->user()?->hasActivePermission('contracts.create') ?? false;
+        $canExport = auth()->user()?->hasActivePermission('contracts.export') ?? false;
 
         return [
             Column::make(trans_choice('general.employee', 1), 'employee')
@@ -220,10 +250,17 @@ class ContractsTable extends LivewireTable
 
             BooleanColumn::make(__('general.status'), 'is_active')->searchable(),
 
-            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete, $canCreate): string {
+            BooleanColumn::make(__('general.auto-renew'), 'auto_renew')->searchable(),
+
+            Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete, $canCreate, $canExport, $canManageAutoRenew): string {
                 $view = Blade::render('<x-table.show-btn :href="route(\'contracts.show\', $id)" />', ['id' => $m->getKey()]);
                 $edit = $canUpdate
                     ? Blade::render('<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />', ['id' => $m->getKey()])
+                    : '';
+                $autoRenew = $canManageAutoRenew
+                    ? Blade::render(
+                        '<x-forms.toggle-input class="p-2 text-xl" active="'.($m->auto_renew ? 1 : 0).'" :model-id="'.$m->getKey().'" wire-event="confirmToggleAutoRenew" title="'.e(__('general.auto-renew')).'" />',
+                    )
                     : '';
                 // Mirrors ContractPolicy::renew: permission (hoisted), city
                 // scope (guaranteed by query()), and the contract's own state.
@@ -231,11 +268,14 @@ class ContractsTable extends LivewireTable
                 $renew = $isRenewable
                     ? Blade::render('<x-table.renew-btn :modelId="$id" />', ['id' => $m->getKey()])
                     : '';
+                $export = $canExport
+                    ? Blade::render('<x-table.export-btn :href="route(\'contracts.export\', $id)" />', ['id' => $m->getKey()])
+                    : '';
                 $delete = $canDelete
                     ? Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $m->getKey()])
                     : '';
 
-                return '<div class="flex items-center justify-center gap-2">'.$view.$edit.$renew.$delete.'</div>';
+                return '<div class="flex items-center justify-center gap-2">'.$autoRenew.$view.$edit.$renew.$export.$delete.'</div>';
             })->asHtml()->clickable(false),
         ];
     }

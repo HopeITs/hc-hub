@@ -44,8 +44,11 @@ return [
             'contracts.view', 'contracts.create', 'contracts.update', 'contracts.export',
             'programs.view', 'programs.create', 'programs.update', 'centers.view',
             'positions.view', 'leaves.view-own', 'leaves.view-all', 'leaves.create',
-            'leaves.update', 'leaves.decide', 'news.view', 'checklists.view-own',
-            'checklists.manage', 'project-basics.view',
+            'leaves.update', 'leaves.decide', 'news.view', 'news.create', 'news.update',
+            'checklists.view-own',
+            'checklists.manage', 'project-basics.view', 'archives.view',
+            'archives.create', 'archives.update', 'archives.delete', 'archives.share',
+            'archives.download',
             // Recruitment: the CEO and his deputy hold this role, so they both
             // raise requests and approve their direct reports' requests.
             'recruitment-requests.view', 'recruitment-requests.manage',
@@ -59,7 +62,10 @@ return [
         'manager' => [
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
             'leaves.view-all', 'leaves.create', 'leaves.update', 'leaves.decide',
-            'news.view', 'checklists.view-own', 'project-basics.view',
+            'news.view', 'news.create', 'news.update',
+            'checklists.view-own', 'project-basics.view', 'archives.view',
+            'archives.create', 'archives.update', 'archives.delete', 'archives.share',
+            'archives.download',
             // Recruitment: the same role covers both sides of the first step —
             // a manager raises his own requests and approves his direct
             // reports'. Holding 'approve' is never sufficient on its own; the
@@ -72,7 +78,7 @@ return [
         ],
         'employee' => [
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
-            'leaves.create', 'leaves.update', 'news.view', 'archives.view',
+            'leaves.create', 'leaves.update', 'archives.view',
             'archives.create', 'archives.update', 'archives.delete', 'archives.share',
             'archives.download', 'checklists.view-own', 'project-basics.view',
         ],
@@ -123,6 +129,7 @@ return [
      * inside the component because the required permission depends on state.
      */
     'livewire' => [
+        'recruitment.requests.create' => ['save' => 'recruitment-requests.manage'],
         'access-management.index' => [
             'saveEmployeeAccess' => 'access-management.manage-employees',
             'saveRolePermissions' => 'access-management.manage-permissions',
@@ -168,7 +175,14 @@ return [
             'toggleItemStatusConfirmed' => 'positions.update',
             'exportExcel' => 'positions.export',
         ],
-        'employee.employee-create' => ['saveInformation' => 'employees.create'],
+        'employee.employee-create' => [
+            'saveInformation' => 'employees.create',
+            'createDraftAndContinue' => 'employees.create',
+            'positionOptionsForDraft' => 'employees.create',
+            'programOptionsForDraft' => 'employees.create',
+            'citiesForDraft' => 'employees.create',
+            'canPickAnyDraftCity' => 'employees.create',
+        ],
         'employee.employee-edit' => [
             'saveChecklist' => 'employees.update',
             'saveInformation' => 'employees.update',
@@ -193,17 +207,21 @@ return [
             'toggleItemStatusConfirmed' => 'employees.update',
             'exportExcel' => 'employees.export',
         ],
-        // The composer exposes exactly three actions: one option load, one
-        // entitlement preview, and the save itself. Both screens are the same
-        // component; only the permission each one demands differs.
+        // The composer exposes one option load, one entitlement preview, and
+        // the save itself on both screens; create additionally exposes the
+        // draft-contract lookup that only makes sense when creating a new
+        // contract (see ContractCreate::draftContractFor()).
         'contract.contract-create' => [
             'submit' => 'contracts.create',
             'locationOptions' => 'contracts.create',
+            'employeeSearchOptions' => 'contracts.create',
             'leavePreview' => 'contracts.create',
+            'draftContractFor' => 'contracts.create',
         ],
         'contract.contract-edit' => [
             'submit' => 'contracts.update',
             'locationOptions' => 'contracts.update',
+            'employeeSearchOptions' => 'contracts.update',
             'leavePreview' => 'contracts.update',
         ],
         // A renewal creates a contract. The permission here is the coarse
@@ -331,6 +349,8 @@ return [
     */
 
     'livewire_exempt' => [
+        // Form-only resets. Persistence rechecks role, grade and subtree in the draft service.
+        'recruitment.requests.create' => ['updatedDataRequestType', 'updatedDataPositionId', 'updatedDataCityId'],
 
         // --- Authentication -------------------------------------------------
         // Reached before a session exists, or acting only on the caller's own
@@ -446,7 +466,13 @@ return [
         // actions that do write are mapped to contracts.create above.
         'contract.contract-renew-modal' => ['close'],
         'dashboard.calendar-card' => ['next', 'prev'],
-        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember'],
+        // skipDraft is pure navigation (a redirect, no data read or write) and
+        // updatedDraftCityId/updatedDraftProgramId only reset the draft
+        // cascade's own in-memory selections — the same class as
+        // setActiveTab, not the mapped createDraftAndContinue/
+        // positionOptionsForDraft/programOptionsForDraft/citiesForDraft/
+        // canPickAnyDraftCity above.
+        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember', 'skipDraft', 'updatedDraftCityId', 'updatedDraftProgramId'],
         // The add*/openInitiateReturnModal methods stage rows in the in-memory
         // form object; nothing is written until the mapped save* action runs,
         // and mount() has already authorized 'update' on this employee.

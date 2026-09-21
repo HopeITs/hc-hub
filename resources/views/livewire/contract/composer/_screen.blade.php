@@ -14,28 +14,37 @@
     $mode ??= 'create';
     $seed ??= null;
     $terminationReasons ??= collect();
+    $canManageAutoRenew ??= false;
     $cancelUrl ??= route('contracts.index');
     $currentPeriod ??= null;
 
     $isEdit = $mode === 'edit';
 
     // Editing adds the one section a contract that does not exist cannot have.
-    $sections = ['assignment', 'contract', 'schedule', 'pay'];
+    $sections = ['assignment', 'schedule', 'pay'];
 
     if ($isEdit) {
         $sections[] = 'termination';
     }
 
-    // Create demands work days; edit does not, because contracts imported from
-    // Excel before the field existed have none and must still be editable.
-    $requireWorkDays = ! $isEdit;
+    // work_day_from/to store Carbon's own day-of-week numbering (0 = Sunday
+    // ... 6 = Saturday); shared by the day-range picker's options and the
+    // JS-side "Sunday to Thursday" summary so both agree on day names.
+    $dayNames = collect(range(0, 6))->mapWithKeys(
+        fn (int $day) => [$day => \Carbon\Carbon::now()->startOfWeek(\Carbon\Carbon::SUNDAY)->addDays($day)->translatedFormat('l')],
+    );
 
     $composerConfig = [
         'locale' => app()->getLocale(),
+        // Draft-upgrade detection (see checkForDraftContract() in
+        // contract-composer.js) calls a method that exists only on the
+        // create screen's component — an edit is always about a contract
+        // that already exists, so there is no "latest contract" to check.
+        'allowDraftUpgrade' => ! $isEdit,
         'cityId' => $lockedCity?->id ?? ($seed['cityId'] ?? null),
         'cities' => $cities->map(fn ($city) => ['value' => $city->id, 'label' => $city->name])->values(),
         'sections' => $sections,
-        'requireWorkDays' => $requireWorkDays,
+        'dayNames' => $dayNames,
         // An edit opens with everything collapsed and summarised: there is
         // nothing to fill in, only something to change.
         'initialSection' => $isEdit ? '' : 'assignment',
@@ -44,22 +53,22 @@
                 'name' => $type->name,
                 'start' => $type->startDate,
                 'end' => $type->endDate,
+                'category' => $type->category,
             ],
         ]),
         'terminationReasons' => $terminationReasons
             ->map(fn ($reason) => ['value' => $reason->id, 'label' => $reason->title])
             ->values(),
+        'canManageAutoRenew' => $canManageAutoRenew,
         // Present whenever this page opened on an existing contract — a renewal
         // or an edit — so Alpine can fill every field from it instead of blank.
         'seed' => $seed,
         'labels' => [
-            'allCenters' => __('general.composer.all-centers'),
             'cityLevel' => __('general.composer.city-level'),
             'lockedBecause' => __('general.composer.locked-because'),
             'notTerminated' => __('general.composer.not-terminated'),
             'sections' => [
                 'assignment' => __('general.composer.assignment'),
-                'contract' => __('general.composer.contract'),
                 'schedule' => __('general.composer.schedule'),
                 'pay' => __('general.composer.pay'),
                 'termination' => __('general.composer.termination'),
@@ -70,6 +79,25 @@
             'seatsLeft' => __('general.composer.seats-left'),
             'noSeatsLeft' => __('general.composer.no-seats-left'),
             'duplicate' => __('general.composer.duplicate-contract'),
+            'draftFound' => __('general.composer.draft-found'),
+            // :count substituted client-side, same as the duration labels below.
+            'daysPerWeek' => __('general.composer.days-per-week'),
+            'hoursPerWeek' => __('general.composer.hours-per-week'),
+            'hoursPerDay' => __('general.composer.hours-per-day'),
+            'showDayRange' => __('general.composer.show-day-range'),
+            'weeklyHoursValue' => __('general.composer.weekly-hours-value'),
+            'dayRange' => __('general.composer.day-range'),
+            'flexible' => __('general.composer.schedule-flexible'),
+            'scheduleHintDayRange' => __('general.composer.schedule-hint-day-range'),
+            'scheduleHintSecondShift' => __('general.composer.schedule-hint-second-shift'),
+            'scheduleHintWeeklyHours' => __('general.composer.schedule-hint-weekly-hours'),
+            'payHintSalaryRequired' => __('general.composer.pay-hint-salary-required'),
+            'payHintSalaryNegative' => __('general.composer.pay-hint-salary-negative'),
+            'payHintSalaryNumber' => __('general.composer.pay-hint-salary-number'),
+            'payHintSessionDuration' => __('general.composer.pay-hint-session-duration'),
+            'payHintNoTiers' => __('general.composer.pay-hint-no-tiers'),
+            'payHintTiersIncomplete' => __('general.composer.pay-hint-tiers-incomplete'),
+            'payHintAmountNegative' => __('general.composer.pay-hint-amount-negative'),
             // Lowercase units, because these are read inside a phrase
             // ("3 months") rather than as standalone labels.
             'month' => __('general.composer.duration-month'),
@@ -82,6 +110,7 @@
             'perHour' => __('general.composer.per-hour'),
             'perSession' => __('general.composer.per-session'),
             'perYear' => __('general.composer.per-year'),
+            'tiersCount' => __('general.composer.tiers-count'),
             'empty' => '—',
         ],
     ];
@@ -100,8 +129,7 @@
     <div class="grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_18rem] xl:gap-5">
         <div class="flex min-w-0 flex-col gap-2.5">
             @include('livewire.contract.composer._assignment')
-            @include('livewire.contract.composer._contract')
-            @include('livewire.contract.composer._schedule', ['requireWorkDays' => $requireWorkDays])
+            @include('livewire.contract.composer._schedule', ['dayNames' => $dayNames])
 
             @include('livewire.contract.composer._pay')
 

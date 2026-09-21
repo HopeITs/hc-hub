@@ -1,5 +1,5 @@
 <div>
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex items-center justify-between mb-6">
         <livewire:layout.breadcrumbs
             :title="__('general.positions')"
             :crumbs="[
@@ -9,11 +9,13 @@
             ]"
             :showButton="true"
         />
+        @activerole('HR' , 'super-admin' ,'general-manager')
         <div class="flex items-center gap-2">
             <x-primary-button wire:click="create">
-                @lang('general.add-new')
+                @lang('general.add-new') 
             </x-primary-button>
         </div>
+        @endactiverole
     </div>
 
     <x-table>
@@ -55,12 +57,12 @@
                     </x-table.cell>
 
                     {{-- Required Position name --}}
-                    <x-table.cell class="max-w-64 truncate" title="{{ $row->requiredPosition->title ?? '-' }}">
+                    <x-table.cell class="truncate max-w-64" title="{{ $row->requiredPosition->title ?? '-' }}">
                         {{ $row->requiredPosition->title ?? '-' }}
                     </x-table.cell>
 
                     {{-- Center name --}}
-                    <x-table.cell class="max-w-64 truncate" title="{{ optional($row->center)->name }}">
+                    <x-table.cell class="truncate max-w-64" title="{{ optional($row->center)->name }}">
                         {{ optional($row->center)->name ?? '-' }}
                     </x-table.cell>
 

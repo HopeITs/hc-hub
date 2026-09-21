@@ -60,6 +60,8 @@ footer{padding-top:26px;font-size:12.5px;color:var(--muted);text-align:center}
 </style>
 </head>
 <body>
+<p dir="rtl"><strong>تحديث 18 أيلول 2026 — D52–D55:</strong> Fill Vacancy يحتاج شاغراً متاحاً قائماً؛ الواحد يختار تلقائياً والمتعدد باختيار المستخدم. أب CreatePosition إداري أو لديه فريق نشط ضمن الشجرة. مدير المشروع/البرنامج مقيّد ببرنامج منصبه ومواقعه ومراكزه، ولا ينشئ Department Manager. تخصص هذه القرارات وصف D49/D51 السابق، ولا تغير نطاق الأدوار الأعلى أو منع HR من Normal Request.</p>
+
 <div class="wrap">
 
 <header>
@@ -79,7 +81,7 @@ footer{padding-top:26px;font-size:12.5px;color:var(--muted);text-align:center}
       <tr><td><strong>النطاق</strong></td><td>المنصب &mdash; البرنامج والمركز والمدينة</td><td>أي الطلبات يراها ويتصرف بها؟</td></tr>
     </tbody>
   </table></div>
-  <p>الثلاثة تُفحص معاً. <strong>امتلاك الصلاحية بلا أهلية لا يكفي لإنشاء طلب.</strong></p>
+  <p>تُفحص معاً. <strong>امتلاك الصلاحية بلا أهلية لا يكفي لإنشاء طلب.</strong> D50: HR للفتح المباشر فقط، حتى بدرجة مؤهلة. D49: نطاق إنشاء المدير غير HR هو شجرته الإدارية بكل الأعماق، لا المحافظة أو البرنامج. المنصب القائم descendant فقط؛ الأب المقترح هو منصبه أو descendant. D30 يبقى للرؤية بمستوى واحد.</p>
 </section>
 
 <section>
@@ -100,7 +102,7 @@ footer{padding-top:26px;font-size:12.5px;color:var(--muted);text-align:center}
     <thead><tr><th>الصلاحية</th><th>السبب</th></tr></thead>
     <tbody>
       <tr><td><code>view</code> مقابل <code>manage</code></td><td>HR المحافظة يرى طلبات المحافظات الأخرى في التقارير دون أن يديرها</td></tr>
-      <tr><td><code>approve</code> <code>reject</code> <code>request-changes</code></td><td>الموافقون فئة مختلفة تماماً عمن يُنشئ الطلبات &mdash; المدير المالي لا يُنشئ طلبات أصلاً</td></tr>
+      <tr><td><code>approve</code> <code>reject</code> <code>request-changes</code></td><td>أفعال المراجعة مستقلة عن الإنشاء. المدير المالي المؤهل يستطيع إنشاء طلب عادي ضمن شجرته؛ صفته كموافق مالي لا توسع نطاق الإنشاء.</td></tr>
       <tr><td><code>cancel</code></td><td>فعل نهائي لا رجعة فيه، وقد يُمنح لمُقدِّم الطلب وحده</td></tr>
       <tr><td><code>direct-open</code></td><td><strong>يتجاوز الـ Workflow كله.</strong> أخطر صلاحية في الموديول ولا يجوز أن تأتي ضمناً مع <code>manage</code></td></tr>
       <tr><td><code>export</code></td><td>إخراج بيانات خارج النظام &mdash; بوابة وتدقيق مستقلان</td></tr>

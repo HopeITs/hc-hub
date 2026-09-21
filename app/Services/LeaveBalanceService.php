@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ContractType as ContractTypeEnum;
 use App\Enums\Gender;
 use App\Enums\LeaveType as LeaveTypeEnum;
 use App\Enums\LeaveTypeCases;
@@ -28,6 +29,15 @@ class LeaveBalanceService
     public function create(Contract $contract): void
     {
         $contract->load(['employee', 'contractType']);
+
+        // A draft has no schedule/pay yet, so there is nothing to price an
+        // entitlement from; a service contract carries no leave clause at
+        // all in any real contract on file. Neither gets any balance, not
+        // even annual.
+        if ($this->isExemptFromLeave($contract)) {
+            return;
+        }
+
         $employee = $contract->employee->load('contracts', 'allContracts');
         $leaveRule = $this->getAnnualLeaveRule($employee);
         $leaveTypes = LeaveType::whereNot('base_days', 12)->get();
@@ -45,7 +55,7 @@ class LeaveBalanceService
         ]);
 
         // Skip if in trial period
-        if (in_array($contract->contract_type_id, [3, 4])) {
+        if ($contract->contractType->category === 'trial') {
             return;
         }
 
@@ -109,6 +119,11 @@ class LeaveBalanceService
     public function update(Contract $contract): void
     {
         $contract->load(['employee', 'contractType', 'leaveBalances']);
+
+        if ($this->isExemptFromLeave($contract)) {
+            return;
+        }
+
         $employee = $contract->employee;
         $leaveRule = $this->getAnnualLeaveRule($employee);
         $leaveTypes = LeaveType::whereNot('base_days', 12)->get();
@@ -122,7 +137,7 @@ class LeaveBalanceService
         $contract->leaveBalances->where('type_id', LeaveTypeCases::Annual)->first()?->update(['deserved' => $yearly]);
 
         // Skip if in trial period
-        if (in_array($contract->contract_type_id, [3, 4])) {
+        if ($contract->contractType->category === 'trial') {
             return;
         }
 
@@ -131,6 +146,17 @@ class LeaveBalanceService
 
         // Gender and marital-specific leaves
         $this->updateSpecificLeaves($employee, $contract, $leaveTypes, $dailyWorkHours);
+    }
+
+    /**
+     * A draft has no schedule/pay to price a leave entitlement from yet, and
+     * a service contract carries no leave clause in any real contract on
+     * file — both are fully exempt, not even annual leave.
+     */
+    private function isExemptFromLeave(Contract $contract): bool
+    {
+        return (int) $contract->type === ContractTypeEnum::Draft
+            || $contract->contractType->category === 'service';
     }
 
     /** ------------------------------------------------------------
@@ -163,11 +189,14 @@ class LeaveBalanceService
             $prevContract = $employee->allContracts()
                 ->whereNot('id', $contract->id)
                 ->where('end_date', '<=', $contract->start_date)
-                ->with(['leaveBalances' => fn ($q) => $q->where('type_id', LeaveTypeCases::Annual)])
+                ->with([
+                    'leaveBalances' => fn ($q) => $q->where('type_id', LeaveTypeCases::Annual),
+                    'contractType',
+                ])
                 ->orderBy('end_date', 'desc')
                 ->first();
 
-            if (! $prevContract || ! in_array($prevContract->contract_type_id, [3, 4])) {
+            if (! $prevContract || $prevContract->contractType->category !== 'trial') {
                 return $extra;
             }
 

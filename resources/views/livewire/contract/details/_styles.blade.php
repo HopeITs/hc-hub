@@ -47,7 +47,7 @@
         font-weight: 700;
         font-size: 16pt;
     }
-    
+
     .contract-body{
         margin-top: 2mm;
 
@@ -90,39 +90,66 @@
 
 
 {{-- WAS GOOD --}}
+@php
+    // Browsershot renders this HTML from a file:// temp path, so every asset()
+    // URL below becomes a real HTTP request back to this app's own web server.
+    // Locally that's instant; on the production host the loopback to our own
+    // domain never completes, so Chrome never reaches networkidle0 and the
+    // render dies on Puppeteer's navigation timeout. Inlining the bytes as
+    // data URIs removes the network hop entirely.
+    // Only done for the PDF path ($inlineAssets) — on-screen pages keep using
+    // cheap asset() URLs so the browser can cache them normally.
+    $inlineAssets ??= false;
+
+    $dataUri = function (string $path, string $mime) use ($inlineAssets) {
+        // Fall back to the URL if the file is missing, so a stray asset
+        // degrades to a broken image instead of a 500 on the whole export.
+        if (! $inlineAssets || ! is_file(public_path($path))) {
+            return asset($path);
+        }
+
+        return 'data:'.$mime.';base64,'.base64_encode(file_get_contents(public_path($path)));
+    };
+
+    $fontSrc = fn (string $path) => $dataUri($path, 'font/truetype;charset=utf-8');
+    $imgSrc = fn (string $path) => $dataUri(
+        $path,
+        str_ends_with(strtolower($path), '.svg') ? 'image/svg+xml' : 'image/png',
+    );
+@endphp
  <style>
     /* ==========================================
        FONTS
     ========================================== */
 @font-face {
     font-family: 'somar-regular';
-    src: url('{{ asset("fonts/SomarSans/SomarSans-Regular.ttf") }}') format('truetype');
+    src: url('{{ $fontSrc("fonts/SomarSans/SomarSans-Regular.ttf") }}') format('truetype');
      font-weight:400; font-style:normal;
 }
 
 @font-face {
     font-family: 'somar-bold';
-    src: url('{{ asset("fonts/SomarSans/SOMARSANS-BOLD.ttf") }}') format('truetype');
+    src: url('{{ $fontSrc("fonts/SomarSans/SOMARSANS-BOLD.ttf") }}') format('truetype');
                 font-weight: 700;
             font-style: normal;
 }
 
 @font-face {
     font-family: 'somar-black';
-    src: url('{{ asset("fonts/SomarSans/SOMARSANS-BLACK.ttf") }}') format('truetype');
+    src: url('{{ $fontSrc("fonts/SomarSans/SOMARSANS-BLACK.ttf") }}') format('truetype');
                 font-weight: 900;
             font-style: normal;
 }
         @font-face {
             font-family: 'NotoNaskhArabic';
-            src: url('{{ asset("fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf") }}') format('truetype');
+            src: url('{{ $fontSrc("fonts/NotoNaskh/NotoNaskhArabic-Regular.ttf") }}') format('truetype');
             font-weight: 400;
             font-style: normal;
         }
 
         @font-face {
             font-family: 'NotoNaskhArabic';
-            src: url('{{ asset("fonts/NotoNaskh/NotoNaskhArabic-Bold.ttf") }}') format('truetype');
+            src: url('{{ $fontSrc("fonts/NotoNaskh/NotoNaskhArabic-Bold.ttf") }}') format('truetype');
             font-weight: 700;
             font-style: normal;
         }
@@ -137,10 +164,16 @@
         height:300mm;
         max-width:100%;
         margin:0 auto;
-        background:#fff url('{{ asset("assets/img/Header.svg") }}') no-repeat top center;
-        background-size:93%;
-        background-position:center 8mm;
-        padding: 35mm 10mm 10mm 10mm; 
+        /* border-box: padding must stay inside height, otherwise the box
+           grows past one physical page and the tail (footer/page number)
+           spills onto a blank following page when printed. */
+        box-sizing:border-box;
+        background-color:#fff;
+        background-image:url('{{ $imgSrc("assets/img/Header.svg") }}'), url('{{ $imgSrc("assets/img/Footer.png") }}');
+        background-repeat:no-repeat, no-repeat;
+        background-position:center 16mm, center calc(100% - 16mm);
+        background-size:93% auto, 93% auto;
+        padding: 45mm 10mm 22mm 10mm;
         box-shadow:0 8px 24px rgba(0,0,0,.06);
         border-radius:16px;
         position:relative;
@@ -153,12 +186,17 @@
         margin-top:2mm;
         flex:1;
         overflow:hidden;
-    } 
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden;
+    flex-direction: column;
+    padding-bottom: 120px;
+    }
 
     .contract-footer{
         position:absolute;
         right:18mm;
-        bottom:10mm;
+        bottom:30mm;
         font-family:'Somar Sans';
         font-weight:700;
         font-size:7pt;
@@ -175,7 +213,7 @@
     left: 0;
     right: 0;
     text-align: center;
-    bottom: 12mm;
+    bottom: 30mm;
     font-family: 'somar-bold';
     font-weight: 700;
     font-size: 7pt;
@@ -190,8 +228,8 @@
     .contract-title-center{
         width:100%;
         text-align:center;
-        margin-top:4px;
-        margin-bottom:20px;
+        margin-top:5px;
+        margin-bottom:30px;
     }
 
     .contract-title-center .dual-row{
@@ -335,6 +373,61 @@
 
     .avoid-break{
         page-break-inside:avoid;
+    }
+
+    .mt-tight-neg{
+        margin-top:-3px;
+    }
+
+    .list-plain{
+        margin:0;
+        padding:0;
+    }
+
+    .list-plain > div{
+        margin-top:2px;
+    }
+
+    /* ==========================================
+       SIGNATURE SECTION
+       Last page of every contract type
+    ========================================== */
+    .contract-signature{
+        position:relative;
+        margin-top:45px;
+        min-height:220px;
+        padding-bottom:40px;
+    }
+
+    .signature-party{
+        position:absolute;
+        text-align:center;
+        width:48%;
+    }
+
+    .signature-party-second{
+        left:0;
+    }
+
+    .signature-party-first{
+        right:0;
+    }
+
+    .signature-role{
+        margin-bottom:12px;
+    }
+
+    .signature-caption{
+        margin-bottom:15px;
+    }
+
+    .signature-name{
+        line-height:1.6;
+        margin-bottom:25px;
+    }
+
+    .signature-date{
+        font-size:14px;
     }
 
     /* ==========================================

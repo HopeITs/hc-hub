@@ -1,6 +1,7 @@
 @props([
     'id',
-    'wireModel',
+    'wireModel' => null,
+    'alpineModel' => null,
     'format' => 'HH:mm',
     'disabled' => false,
     'min' => null,
@@ -12,10 +13,21 @@
 <input
     id="{{ $id }}"
     type="hidden"
-    wire:model.defer="{{ $wireModel }}"
+    @if($wireModel) wire:model.defer="{{ $wireModel }}" @endif
+    @if($alpineModel) x-model="{{ $alpineModel }}" @endif
 />
 
-<div class="relative w-full" wire:ignore>
+<div
+    class="relative w-full"
+    wire:ignore
+    @if($alpineModel)
+        x-effect="$nextTick(() => {
+            const picker = document.getElementById('{{ $pickerId }}');
+            const value = {{ $alpineModel }} || '';
+            if (picker && picker.value !== value) picker.value = value;
+        })"
+    @endif
+>
     <clock-timepicker
         id="{{ $pickerId }}"
         data-bind-target="{{ $id }}"

@@ -130,8 +130,6 @@ class ContractTypeExport implements FromCollection, WithHeadings, WithMapping, S
 
 namespace App\Exports;
 
-use App\Enums\ContractPlace;
-use App\Enums\ContractType as ContractTypeEnum;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -177,8 +175,6 @@ class ContractTypeExport implements FromCollection, ShouldAutoSize, WithHeadings
                 'id' => 'ID',
                 'name_ar' => __('general.name', [], 'en').' (AR)',
                 'name_en' => __('general.name', [], 'en').' (EN)',
-                'place' => __('general.place', [], 'en'),
-                'type' => __('general.type', [], 'en'),
                 default => $code,
             };
         }
@@ -198,8 +194,6 @@ class ContractTypeExport implements FromCollection, ShouldAutoSize, WithHeadings
                 'id' => $row->id,
                 'name_ar' => $row->name_ar,
                 'name_en' => $row->name_en,
-                'place' => ContractPlace::getLocalizedName($row->place)['value'] ?? '',
-                'type' => ContractTypeEnum::getLocalizedName($row->type)['value'] ?? '',
                 default => '',
             };
         }

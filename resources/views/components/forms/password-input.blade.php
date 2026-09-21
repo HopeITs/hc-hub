@@ -61,6 +61,6 @@
 
     {{-- Error --}}
     @if ($hasModel)
-        <x-forms.input-error :field="$attributes->wire('model')" :input-id="$inputId" />
+        <x-forms.input-error :field="$errorField" :input-id="$inputId" />
     @endif
 </div>
