@@ -168,19 +168,25 @@ class RecruitmentRequestDraftService
         }
 
         if ($data['request_type'] === Type::FillVacancy) {
+            // Room in the establishment is what makes the request legitimate.
+            // A vacancies row is not required: nothing creates one until a
+            // request is approved and applied, so requiring one first would
+            // make filling a genuinely empty seat impossible.
             if (! $target->is_active || ! $target->canAssign()) {
-                throw ValidationException::withMessages(['data.position_id' => __('recruitment.no_available_vacancy')]);
+                throw ValidationException::withMessages(['data.position_id' => __('recruitment.no_headcount_room')]);
             }
+
             $available = $target->vacancies()->available()->orderBy('id')->lockForUpdate()->get();
-            if ($available->isEmpty()) {
-                throw ValidationException::withMessages(['data.position_id' => __('recruitment.no_available_vacancy')]);
-            }
+
             if (! empty($data['vacancy_id']) && ! $available->contains('id', (int) $data['vacancy_id'])) {
                 throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.invalid_vacancy')]);
             }
+
+            // One open vacancy is picked for the requester; several mean he has
+            // to say which; none at all is fine, and one is opened on approval.
             if ($available->count() === 1) {
                 $data['vacancy_id'] = $available->first()->id;
-            } elseif (empty($data['vacancy_id'])) {
+            } elseif ($available->count() > 1 && empty($data['vacancy_id'])) {
                 throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.choose_available_vacancy')]);
             }
         } elseif (! empty($data['vacancy_id'])) {

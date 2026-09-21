@@ -277,7 +277,7 @@ class RecruitmentSubmissionTest extends TestCase
             $this->submit($request);
             $this->fail('Availability must be checked again on submit.');
         } catch (ValidationException $exception) {
-            $this->assertArrayHasKey('data.position_id', $exception->errors());
+            $this->assertArrayHasKey('data.vacancy_id', $exception->errors());
         }
         $this->assertSame(0, $request->versions()->count());
         $this->assertSame(Status::Draft, $request->fresh()->status);

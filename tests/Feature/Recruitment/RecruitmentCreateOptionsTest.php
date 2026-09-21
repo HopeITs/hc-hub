@@ -57,8 +57,10 @@ class RecruitmentCreateOptionsTest extends TestCase
             $target = $this->child($this->child($this->root), ['title_en' => 'Available '.$grade]);
             $empty = $this->child($this->root, ['title_en' => 'No vacancy '.$grade]);
             $vacancy = $this->vacancy($target);
+            // A seat with no vacancies row yet is still a seat to fill: nothing
+            // opens one until a request is approved and applied.
             $screen = Livewire::actingAs($this->manager)->test(Create::class)
-                ->assertSee($target->title_en)->assertDontSee($empty->title_en)
+                ->assertSee($target->title_en)->assertSee($empty->title_en)
                 ->set('data.position_id', $target->id)
                 ->assertSet('data.vacancy_id', $vacancy->id)
                 ->assertDontSee('id="vacancy_id"', false)
@@ -66,6 +68,41 @@ class RecruitmentCreateOptionsTest extends TestCase
             $saved = RecruitmentRequest::where('status', RecruitmentRequestStatus::Draft)->latest('id')->firstOrFail();
             $this->assertEquals($vacancy->id, $saved->target_vacancy_id);
         }
+    }
+
+    /**
+     * An empty seat with no vacancies row is fillable.
+     *
+     * Nothing opens a vacancies row until a request is approved and applied, so
+     * requiring one before a request may be raised would make the very first
+     * fill-vacancy request impossible on a live position.
+     */
+    public function test_a_position_with_room_but_no_vacancy_row_can_still_be_filled(): void
+    {
+        $target = $this->child($this->root, ['title_en' => 'Never advertised']);
+
+        $this->assertSame(0, $target->vacancies()->count());
+
+        Livewire::actingAs($this->manager)->test(Create::class)
+            ->assertSee($target->title_en)
+            ->set('data.position_id', $target->id)
+            ->assertSet('data.vacancy_id', null)
+            ->call('save')->assertHasNoErrors();
+
+        $saved = RecruitmentRequest::where('status', RecruitmentRequestStatus::Draft)->sole();
+        $this->assertSame($target->id, (int) $saved->target_position_id);
+        $this->assertNull($saved->target_vacancy_id);
+    }
+
+    /** A position whose establishment is full has no seat to fill. */
+    public function test_a_full_position_is_still_refused(): void
+    {
+        $full = $this->child($this->root, ['title_en' => 'Fully staffed', 'max_emp' => 1, 'exist_emp' => 1]);
+
+        Livewire::actingAs($this->manager)->test(Create::class)
+            ->assertDontSee($full->title_en)
+            ->set('data.position_id', $full->id)
+            ->call('save')->assertHasErrors('data.position_id');
     }
 
     public function test_multiple_vacancies_require_an_explicit_choice_and_keep_it(): void
@@ -93,9 +130,11 @@ class RecruitmentCreateOptionsTest extends TestCase
             ['closed_at' => now()], ['open_at' => now()->addDay()]] as $index => $attributes) {
             $target = $this->child($this->root, ['title_en' => 'Unavailable '.$index]);
             $vacancy = $this->vacancy($target, $attributes);
-            Livewire::actingAs($this->manager)->test(Create::class)->assertDontSee($target->title_en)
+            // The position has room so it is offered; naming a vacancy that is
+            // closed, full, cancelled or not yet open is what gets refused.
+            Livewire::actingAs($this->manager)->test(Create::class)->assertSee($target->title_en)
                 ->set('data.position_id', $target->id)->set('data.vacancy_id', $vacancy->id)
-                ->call('save')->assertHasErrors('data.position_id');
+                ->call('save')->assertHasErrors('data.vacancy_id');
         }
         $target = $this->child($this->root);
         $this->vacancy($target);
@@ -115,7 +154,7 @@ class RecruitmentCreateOptionsTest extends TestCase
             'request_type' => RecruitmentRequestType::FillVacancy, 'position_id' => $target->id,
         ]);
         $vacancy->update(['filled_count' => 2]);
-        $screen->call('save')->assertHasErrors('data.position_id');
+        $screen->call('save')->assertHasErrors('data.vacancy_id');
         $this->expectException(\Illuminate\Validation\ValidationException::class);
         app(RecruitmentRequestDraftService::class)->update($this->manager, $draft, $draft->draft_payload_json);
     }

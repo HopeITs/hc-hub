@@ -87,8 +87,10 @@ class Create extends Component
             : $scopes->scopeManageablePositions(Position::query(), $user);
         $isFill = (int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::FillVacancy;
         if ($isFill) {
-            $positions->where('is_active', true)->whereColumn('exist_emp', '<', 'max_emp')
-                ->whereHas('vacancies', fn ($vacancies) => $vacancies->available());
+            // Room in the establishment, not an existing vacancies row: until a
+            // request is approved and applied nothing opens one, so requiring it
+            // would leave every genuinely empty seat unfillable.
+            $positions->where('is_active', true)->whereColumn('exist_emp', '<', 'max_emp');
         }
         $positions = $positions->with(['city', 'program'])->orderBy(transColumn('title'))->get();
 
@@ -139,6 +141,8 @@ class Create extends Component
             ->scopeManageablePositions(Position::query(), auth()->user())
             ->where('is_active', true)->whereColumn('exist_emp', '<', 'max_emp');
 
+        // May legitimately be empty; the vacancy picker only appears when more
+        // than one is open and the requester has to choose between them.
         return Vacancy::query()->available()
             ->whereIn('position_id', $positions->select('id'))
             ->where('position_id', $this->data['position_id'] ?? 0);
