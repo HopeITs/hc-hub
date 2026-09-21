@@ -24,8 +24,8 @@
 | # | المطلوب | لماذا |
 |---|---|---|
 | 1 | `startFor(RecruitmentRequest, RecruitmentRequestVersion): RecruitmentWorkflowInstance` | تُستدعى من داخل معاملة الإرسال؛ تُنشئ الـ Instance وخطواته وتحلّ موافقيها |
-| 2 | من يكتب `T4` (`submitted → under_review`) | إما هو داخل `startFor` أو أنا بعد استدعائها — **يجب ألا يكتبها الاثنان** |
-| 3 | من يكتب حدث `WorkflowStarted` | نفس السبب: حدث واحد لا اثنان |
+| 2 | من يكتب `T4` (`submitted → under_review`) | **يُحسم عند مراجعة كوده** — يجب ألا يكتبها الاثنان |
+| 3 | من يكتب حدث `WorkflowStarted` | **يُحسم عند مراجعة كوده** — حدث واحد لا اثنان |
 | 4 | `restartFrom(RecruitmentRequest, RecruitmentRequestVersion, int $stepOrder)` | لإعادة البدء بعد `resubmit` من النقطة التي يحددها `RV-1` |
 
 **وتنبيه له:** القرار `D56` يجعل `CloseVacancy` و`ClosePosition` **خطوتين لا ثلاثاً** — تعريف الـ Workflow لهذين النوعين يجب ألا يحوي خطوة مالية.
@@ -128,6 +128,8 @@ DB::transaction:
 | غير المخوَّل ممنوع | `test_another_user_cannot_decide_someone_elses_step` |
 | `reject` بلا سبب يُرفض | `test_rejecting_requires_a_reason` |
 | `request_changes` يُرجع للمُقدِّم | `test_requesting_changes_returns_it_to_the_requester` |
+| تعليق `request_changes` إلزامي وغير فارغ (`D60`) | `test_requesting_changes_requires_the_changes_to_be_stated` |
+| السوابق المرفوضة تظهر للموافِق (`D61`) | `test_a_previous_rejection_on_the_position_is_shown` |
 | منع التكرار | `test_deciding_a_decided_step_is_refused` |
 | منع القديم | `test_a_decision_on_a_stale_version_is_refused` |
 | الموافقة النهائية تُكمل وتُجهّز | `test_the_final_approval_completes_the_workflow` |
@@ -200,10 +202,16 @@ app/Services/Recruitment/Handlers/{FillVacancy,IncreaseHeadcount,DecreaseHeadcou
 
 ## 9. ما زال مفتوحاً
 
-| # | السؤال | الأثر |
+**لا يوجد سؤال إداري.** أُغلق `Q17` و`Q18` و`Q10`، فلم يبقَ لهذه المهام حاجز من جهة القرار.
+
+**يبقى قرار تقني واحد، مؤجَّل بقصد:**
+
+| # | القرار | لماذا مؤجَّل |
 |---|---|---|
-| `Q18` | عند رفض المدير: يُغلق نهائياً، أم يعود للتعديل، أم يختار الموافِق؟ | **الوثيقة تعرض الفعلين منفصلين** — أي أن الموافِق يختار. يحتاج تثبيتاً لا أكثر |
-| `Q10` | إعادة التقديم بعد الرفض — وهل يُعرض للموافق أن طلباً سابقاً رُفض؟ | الشطر الأول حُسم (`D54`: الرفض يحرّر فوراً). الشطر الثاني — **إظهار السابق للموافق** — غير مبنيّ |
+| 1 | من يكتب `T4` (`submitted → under_review`) — `startFor` أم المستدعي؟ | زميلي **أنهى المهمة 7 فعلاً**. نراجع تنفيذه أولاً ونرى ما تتولاه `startFor` بالفعل، ثم نقرر على أساس الموجود لا على أساس التخطيط — تفادياً لتعديل شغل منجز أو تكراره |
+| 2 | من يكتب حدث `WorkflowStarted` | نفس السبب |
+
+> الخطر الذي يعالجه هذا التأجيل: لو كتبها الاثنان صار الانتقال مزدوجاً والحدث مكرراً في الخط الزمني. **يُحسم بالمراجعة لا بالافتراض.**
 
 ---
 
@@ -215,5 +223,7 @@ app/Services/Recruitment/Handlers/{FillVacancy,IncreaseHeadcount,DecreaseHeadcou
 | `D57` | الخطوة المتجاوَزة تُميَّز بعلامة في `decision_reason` — بلا migration |
 | `D58` | Instance جديد لكل نسخة؛ القائم يُختم `Cancelled` عند `request_changes` |
 | `D59` | التطبيق يُشغَّل فوراً بعد commit الموافقة، لا عبر queue |
+| `D60` | `reject` و`request_changes` فعلان مستقلان؛ تعليق طلب التعديل يحدد **ما المطلوب تعديله** |
+| `D61` | الطلبات المرفوضة السابقة على نفس المنصب تُعرض للموافِق — **عرض لا منع** |
 
 </div>
