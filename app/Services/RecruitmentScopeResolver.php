@@ -326,20 +326,21 @@ class RecruitmentScopeResolver
         }
 
         $rootId = (int) $this->position($user)->getKey();
-        $children = Position::query()->get(['id', 'direct_manager_id'])->groupBy('direct_manager_id');
         $seen = [$rootId => true];
-        $queue = [$rootId];
+        $frontier = [$rootId];
         $ids = $includeSelf ? [$rootId] : [];
 
-        for ($index = 0; $index < count($queue); $index++) {
-            foreach ($children->get($queue[$index], []) as $child) {
-                $id = (int) $child->getKey();
+        while ($frontier !== []) {
+            $children = Position::query()->whereIn('direct_manager_id', $frontier)->pluck('id');
+            $frontier = [];
+            foreach ($children as $childId) {
+                $id = (int) $childId;
                 if (isset($seen[$id])) {
                     continue;
                 }
 
                 $seen[$id] = true;
-                $queue[] = $id;
+                $frontier[] = $id;
                 $ids[] = $id;
             }
         }
@@ -352,40 +353,64 @@ class RecruitmentScopeResolver
         return $query->whereIn($query->qualifyColumn('id'), $this->manageablePositionIds($user, $includeSelf));
     }
 
-    /**
-     * The organizational values a requester may put on a new position.
-     *
-     * D49 settled that authorization for creation is the management tree and
-     * that city and program are organizational data rather than a second
-     * permission boundary. That is still true: nothing here grants reach into
-     * another manager's tree. What it does is narrow the pickers to the part
-     * of the organization this manager actually sits in, so a project manager
-     * in Homs is not asked to choose between every governorate in Syria.
-     *
-     * The values are read off his own position and the tree beneath it, which
-     * is the same source D49 authorizes from — not a new concept.
-     *
-     * @return array{cities: array<int, int>, programs: array<int, int>, centers: array<int, int>}
-     */
-    public function creatableOrganizationIds(User $user): array
+    public function scopeProposedManagers(Builder $query, User $user): Builder
     {
-        $empty = ['cities' => [], 'programs' => [], 'centers' => []];
+        return $this->scopeManageablePositions($query, $user, true)
+            ->visible()
+            ->when($this->hasProgramCreationScope($user), fn (Builder $positions) => $positions
+                ->where('program_id', $this->position($user)?->program_id ?? 0))
+            ->where(fn (Builder $positions) => $positions
+                ->whereHas('jobLevel', fn (Builder $levels) => $levels
+                    ->whereIn('grade', config('recruitment.requester_job_level_grades')))
+                ->orWhereHas('directTeam', fn (Builder $team) => $team->where('is_active', true)));
+    }
 
-        $own = $this->position($user);
+    public function hasProgramCreationScope(User $user): bool
+    {
+        return ! $this->isOrganizationWide($user)
+            && in_array((int) $this->position($user)?->jobLevel?->grade,
+                config('recruitment.program_scoped_creation_grades'), true);
+    }
 
-        if ($own === null || ! $this->canRaiseNormalRequest($user)) {
-            return $empty;
+    public function scopeCreatablePrograms(Builder $query, User $user): Builder
+    {
+        return $query->where('is_active', true)
+            ->when($this->hasProgramCreationScope($user), fn (Builder $programs) => $programs
+                ->whereKey($this->position($user)?->program_id ?? 0));
+    }
+
+    public function scopeCreatableCities(Builder $query, User $user): Builder
+    {
+        $query->where('is_active', true);
+        if (! $this->hasProgramCreationScope($user)) {
+            return $query;
         }
 
-        $positions = Position::query()
-            ->whereIn('id', array_merge([$own->getKey()], $this->manageablePositionIds($user)))
-            ->get(['id', 'city_id', 'program_id', 'center_id']);
+        $positions = Position::query()->visible()
+            ->where('program_id', $this->position($user)?->program_id ?? 0);
 
-        return [
-            'cities' => $this->distinctIds($positions, 'city_id'),
-            'programs' => $this->distinctIds($positions, 'program_id'),
-            'centers' => $this->distinctIds($positions, 'center_id'),
-        ];
+        return $query->where(fn (Builder $cities) => $cities
+            ->whereIn('id', (clone $positions)->select('city_id'))
+            ->orWhereIn('id', \App\Models\Center::query()->where('is_active', true)
+                ->whereIn('id', (clone $positions)->select('center_id'))->select('city_id')));
+    }
+
+    public function scopeCreatableCenters(Builder $query, User $user, ?int $cityId, ?int $programId): Builder
+    {
+        $query->where('is_active', true)
+            ->when(! City::isNational($cityId), fn (Builder $centers) => $centers
+                ->where(fn (Builder $locations) => $locations->where('city_id', $cityId)->orWhereNull('city_id')));
+
+        if ($this->hasProgramCreationScope($user)) {
+            $ownProgram = (int) $this->position($user)?->program_id;
+            $query->whereHas('positions', fn (Builder $positions) => $positions->visible()
+                ->where('program_id', $ownProgram ?: 0));
+            if ($programId !== null && $programId !== $ownProgram) {
+                $query->whereRaw('1 = 0');
+            }
+        }
+
+        return $query;
     }
 
     /**
@@ -410,6 +435,8 @@ class RecruitmentScopeResolver
 
         return JobLevel::query()
             ->where('grade', '>', (int) $grade)
+            ->when($this->hasProgramCreationScope($user), fn (Builder $levels) => $levels
+                ->where('grade', '!=', config('recruitment.department_manager_grade')))
             ->pluck('id')
             ->map(fn ($id): int => (int) $id)
             ->all();
@@ -549,21 +576,6 @@ class RecruitmentScopeResolver
 
             default => false,
         };
-    }
-
-    /**
-     * @param  \Illuminate\Support\Collection<int, Position>  $positions
-     * @return array<int, int>
-     */
-    private function distinctIds($positions, string $column): array
-    {
-        return $positions
-            ->pluck($column)
-            ->filter()
-            ->map(fn ($id): int => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
     }
 
     // --------------------------------------------

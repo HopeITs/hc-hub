@@ -1,0 +1,234 @@
+<?php
+
+namespace Tests\Feature\Recruitment;
+
+use App\Enums\RecruitmentRequestStatus;
+use App\Enums\RecruitmentRequestType;
+use App\Livewire\Recruitment\Requests\Create;
+use App\Models\Contract;
+use App\Models\ContractType;
+use App\Models\Department;
+use App\Models\JobLevel;
+use App\Models\Position;
+use App\Models\Program;
+use App\Models\RecruitmentRequest;
+use App\Models\User;
+use App\Services\RecruitmentRequestDraftService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
+use Tests\Concerns\CreatesHrFixtures;
+use Tests\TestCase;
+
+class RecruitmentCreateOptionsTest extends TestCase
+{
+    use CreatesHrFixtures, RefreshDatabase;
+
+    private User $manager;
+
+    private Position $root;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        app()->setLocale('en');
+        $national = $this->makeCity('SYR', '000');
+        $this->manager = $this->makeUser($national, 'manager');
+        $this->root = Position::query()->create([
+            'city_id' => $national->id,
+            'program_id' => Program::query()->create(['name' => 'Finance', 'code' => 'FIN', 'slug' => 'finance', 'start_date' => now(), 'is_active' => true])->id,
+            'department_id' => Department::query()->create(['name' => 'Finance', 'code' => 'FIN'])->id,
+            'job_level_id' => JobLevel::query()->create(['name_en' => 'Manager', 'name_ar' => 'مدير', 'grade' => 5])->id,
+            'title_en' => 'National manager', 'title_ar' => 'مدير وطني',
+            'is_active' => true, 'max_emp' => 5, 'exist_emp' => 0,
+        ]);
+        Contract::query()->create([
+            'employee_id' => $this->manager->employee_id, 'position_id' => $this->root->id,
+            'contract_type_id' => ContractType::query()->create(['name_en' => 'Annual', 'name_ar' => 'سنوي'])->id,
+            'start_date' => now()->subMonth(), 'end_date' => now()->addYear(),
+            'currency' => 2, 'salary_per' => 1, 'weekly_hours' => 40, 'is_active' => true,
+        ]);
+    }
+
+    public function test_fill_filters_unavailable_positions_and_auto_selects_the_only_vacancy(): void
+    {
+        foreach ([1, 3] as $grade) {
+            $this->root->jobLevel->update(['grade' => $grade]);
+            $this->manager = $this->manager->fresh();
+            $target = $this->child($this->child($this->root), ['title_en' => 'Available '.$grade]);
+            $empty = $this->child($this->root, ['title_en' => 'No vacancy '.$grade]);
+            $vacancy = $this->vacancy($target);
+            $screen = Livewire::actingAs($this->manager)->test(Create::class)
+                ->assertSee($target->title_en)->assertDontSee($empty->title_en)
+                ->set('data.position_id', $target->id)
+                ->assertSet('data.vacancy_id', $vacancy->id)
+                ->assertDontSee('id="vacancy_id"', false)
+                ->call('save')->assertHasNoErrors();
+            $saved = RecruitmentRequest::where('status', RecruitmentRequestStatus::Draft)->latest('id')->firstOrFail();
+            $this->assertEquals($vacancy->id, $saved->target_vacancy_id);
+        }
+    }
+
+    public function test_multiple_vacancies_require_an_explicit_choice_and_keep_it(): void
+    {
+        $target = $this->child($this->root);
+        $one = $this->vacancy($target);
+        $two = $this->vacancy($target);
+        $screen = Livewire::actingAs($this->manager)->test(Create::class)
+            ->set('data.position_id', $target->id)
+            ->assertSee('id="vacancy_id"', false)
+            ->call('save')->assertHasErrors('data.vacancy_id')
+            ->set('data.vacancy_id', $two->id)->call('save')->assertHasNoErrors();
+        $saved = RecruitmentRequest::where('status', RecruitmentRequestStatus::Draft)->sole();
+        $this->assertEquals($two->id, $saved->target_vacancy_id);
+        $this->assertEquals($two->id, $saved->draft_payload_json['vacancy_id']);
+        $other = $this->child($this->root);
+        $third = $this->vacancy($other);
+        $screen->set('data.position_id', $other->id)->assertSet('data.vacancy_id', $third->id);
+        $screen->set('data.position_id', $target->id)->assertSet('data.vacancy_id', null);
+    }
+
+    public function test_closed_filled_cancelled_future_and_foreign_vacancies_are_rejected(): void
+    {
+        foreach ([['status' => 'closed'], ['status' => 'cancelled'], ['filled_count' => 2],
+            ['closed_at' => now()], ['open_at' => now()->addDay()]] as $index => $attributes) {
+            $target = $this->child($this->root, ['title_en' => 'Unavailable '.$index]);
+            $vacancy = $this->vacancy($target, $attributes);
+            Livewire::actingAs($this->manager)->test(Create::class)->assertDontSee($target->title_en)
+                ->set('data.position_id', $target->id)->set('data.vacancy_id', $vacancy->id)
+                ->call('save')->assertHasErrors('data.position_id');
+        }
+        $target = $this->child($this->root);
+        $this->vacancy($target);
+        $outside = $this->child($this->root, ['direct_manager_id' => null]);
+        $foreign = $this->vacancy($outside);
+        Livewire::actingAs($this->manager)->test(Create::class)
+            ->set('data.position_id', $target->id)->set('data.vacancy_id', $foreign->id)
+            ->call('save')->assertHasErrors('data.vacancy_id');
+    }
+
+    public function test_availability_is_rechecked_on_save_and_edit(): void
+    {
+        $target = $this->child($this->root);
+        $vacancy = $this->vacancy($target);
+        $screen = Livewire::actingAs($this->manager)->test(Create::class)->set('data.position_id', $target->id);
+        $draft = app(RecruitmentRequestDraftService::class)->create($this->manager, [
+            'request_type' => RecruitmentRequestType::FillVacancy, 'position_id' => $target->id,
+        ]);
+        $vacancy->update(['filled_count' => 2]);
+        $screen->call('save')->assertHasErrors('data.position_id');
+        $this->expectException(\Illuminate\Validation\ValidationException::class);
+        app(RecruitmentRequestDraftService::class)->update($this->manager, $draft, $draft->draft_payload_json);
+    }
+
+    public function test_proposed_managers_are_only_qualified_descendants_and_self(): void
+    {
+        $workerLevel = JobLevel::create(['name_en' => 'Worker', 'name_ar' => 'عامل', 'grade' => 9]);
+        $worker = $this->child($this->root, ['job_level_id' => $workerLevel->id, 'title_en' => 'Center Keeper']);
+        $teamLeader = $this->child($this->root, ['job_level_id' => $workerLevel->id, 'title_en' => 'Actual team leader']);
+        $this->child($teamLeader, ['job_level_id' => $workerLevel->id]);
+        $manager = $this->child($this->root, ['title_en' => 'Child manager']);
+        $higher = $this->child($this->root, ['direct_manager_id' => null, 'title_en' => 'Higher manager']);
+        $this->root->update(['direct_manager_id' => $higher->id]);
+        foreach ([1, 3] as $grade) {
+            $this->root->jobLevel->update(['grade' => $grade]);
+            $this->manager = $this->manager->fresh();
+            $screen = Livewire::actingAs($this->manager)->test(Create::class)
+                ->set('data.request_type', RecruitmentRequestType::CreatePosition)
+                ->assertSee($this->root->title_en)->assertSee($manager->title_en)
+                ->assertSee($teamLeader->title_en)->assertDontSee('Center Keeper')->assertDontSee('Higher manager')
+                ->set('data.city_id', $this->root->city_id);
+            foreach ([$worker, $higher] as $forbidden) {
+                $screen->set('data.direct_manager_id', $forbidden->id)->call('save')->assertHasErrors('data.direct_manager_id');
+            }
+            $screen->set('data.direct_manager_id', $teamLeader->id)->call('save')->assertHasNoErrors();
+        }
+    }
+
+    public function test_program_and_project_managers_use_program_locations_centers_and_job_levels(): void
+    {
+        $local = $this->makeCity('HMS', '002');
+        $remote = $this->makeCity('ALP', '001');
+        $otherProgram = Program::create(['name' => 'Other program', 'code' => 'OTH', 'slug' => 'other', 'start_date' => now(), 'is_active' => true]);
+        $center = \App\Models\Center::create(['name_en' => 'Allowed center', 'name_ar' => 'مركز', 'city_id' => $local->id, 'is_active' => true]);
+        $foreign = \App\Models\Center::create(['name_en' => 'Foreign center', 'name_ar' => 'آخر', 'city_id' => $local->id, 'is_active' => true]);
+        $this->child($this->root, ['center_id' => $center->id, 'city_id' => $this->root->city_id]);
+        $this->child($this->root, ['center_id' => $foreign->id, 'city_id' => $remote->id, 'program_id' => $otherProgram->id]);
+        $departmentManager = JobLevel::create(['name_en' => 'Department Manager', 'name_ar' => 'مدير قسم', 'grade' => 5]);
+        $junior = JobLevel::create(['name_en' => 'Officer', 'name_ar' => 'موظف', 'grade' => 9]);
+        foreach ([1, 3] as $grade) {
+            $this->root->jobLevel->update(['grade' => $grade]);
+            $this->manager = $this->manager->fresh();
+            $screen = Livewire::actingAs($this->manager)->test(Create::class)
+                ->set('data.request_type', RecruitmentRequestType::CreatePosition)
+                ->assertSet('data.program_id', $this->root->program_id)
+                ->assertDontSee('Department Manager')->assertDontSee('Other program')
+                ->set('data.direct_manager_id', $this->root->id)->set('data.city_id', $local->id)
+                ->assertSee('Allowed center')->assertDontSee('Foreign center')
+                ->assertViewHas('cities', fn ($cities) => $cities->contains('id', $local->id) && ! $cities->contains('id', $remote->id));
+            $base = ['request_type' => RecruitmentRequestType::CreatePosition,
+                'direct_manager_id' => $this->root->id, 'program_id' => $this->root->program_id,
+                'city_id' => $local->id, 'center_id' => $center->id, 'job_level_id' => $junior->id];
+            foreach (['city_id' => $remote->id, 'program_id' => $otherProgram->id,
+                'center_id' => $foreign->id, 'job_level_id' => $departmentManager->id] as $field => $value) {
+                try {
+                    app(RecruitmentRequestDraftService::class)->create($this->manager, array_replace($base, [$field => $value]));
+                    $this->fail('Forged '.$field.' should be rejected.');
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    $this->assertArrayHasKey('data.'.$field, $e->errors());
+                }
+            }
+            $screen->set('data.center_id', $center->id)->set('data.job_level_id', $junior->id)
+                ->call('save')->assertHasNoErrors();
+            $screen->set('data.city_id', $this->root->city_id)->assertSet('data.center_id', null);
+            $screen->set('data.center_id', $center->id)->set('data.program_id', $otherProgram->id)->assertSet('data.center_id', null);
+        }
+    }
+
+    public function test_full_or_inactive_positions_cannot_be_used_even_with_open_vacancies(): void
+    {
+        foreach ([['exist_emp' => 5], ['is_active' => false]] as $attributes) {
+            $target = $this->child($this->root, $attributes);
+            $this->vacancy($target);
+            Livewire::actingAs($this->manager)->test(Create::class)->assertDontSee($target->title_en)
+                ->set('data.position_id', $target->id)->call('save')->assertHasErrors('data.position_id');
+        }
+    }
+
+    public function test_general_management_retains_its_existing_organization_options(): void
+    {
+        $this->root->jobLevel->update(['grade' => 1]);
+        $this->manager->syncRoles('general-manager');
+        $this->manager->roles()->updateExistingPivot($this->manager->roles()->first()->id, ['is_active' => true]);
+        $this->manager = $this->manager->fresh();
+        $city = $this->makeCity('ALP', '001');
+        $program = Program::create(['name' => 'Unrelated program', 'code' => 'UNK', 'slug' => 'unknown', 'start_date' => now(), 'is_active' => true]);
+        Livewire::actingAs($this->manager)->test(Create::class)
+            ->set('data.request_type', RecruitmentRequestType::CreatePosition)
+            ->assertSee('Unrelated program')->set('data.direct_manager_id', $this->root->id)
+            ->set('data.city_id', $city->id)->set('data.program_id', $program->id)
+            ->call('save')->assertHasNoErrors();
+    }
+
+    private function vacancy(Position $position, array $attributes = []): \App\Models\Vacancy
+    {
+        $origin = RecruitmentRequest::create([
+            'request_number' => 'ORIGIN-'.uniqid(), 'requester_user_id' => $this->manager->id,
+            'request_type' => RecruitmentRequestType::IncreaseHeadcount, 'status' => RecruitmentRequestStatus::Applied,
+            'target_position_id' => $position->id, 'scope_city_id' => $this->root->city_id,
+        ]);
+
+        return $position->vacancies()->create(array_merge([
+            'created_from_request_id' => $origin->id, 'status' => 'open', 'needed_count' => 2,
+            'filled_count' => 0, 'open_at' => now()->subDay(),
+        ], $attributes));
+    }
+
+    private function child(Position $parent, array $attributes = []): Position
+    {
+        $child = $this->root->replicate();
+        $child->fill(array_merge(['direct_manager_id' => $parent->id, 'title_en' => 'Child '.uniqid(), 'exist_emp' => 0], $attributes));
+        $child->save();
+
+        return $child;
+    }
+}

@@ -29,12 +29,19 @@ class Create extends Component
     public function updatedDataRequestType(): void
     {
         $this->data = ['request_type' => (int) $this->data['request_type']];
+        $this->selectOnlyProgram();
         $this->resetValidation();
     }
 
     public function updatedDataPositionId(): void
     {
         unset($this->data['vacancy_id']);
+        if ((int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::FillVacancy) {
+            $vacancies = $this->availableVacancies()->limit(2)->get();
+            if ($vacancies->count() === 1) {
+                $this->data['vacancy_id'] = $vacancies->first()->id;
+            }
+        }
     }
 
     public function updatedDataCityId(): void
@@ -53,6 +60,7 @@ class Create extends Component
 
     public function save(RecruitmentRequestDraftService $drafts)
     {
+        $this->resetValidation();
         $request = $drafts->create(auth()->user(), $this->data);
         session()->flash('recruitment_saved', __('recruitment.draft_saved'));
 
@@ -74,36 +82,29 @@ class Create extends Component
         $scopes = app(RecruitmentScopeResolver::class);
         $isNewPosition = (int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::CreatePosition;
 
-        $positions = $scopes->scopeManageablePositions(Position::query(), $user, $isNewPosition)
-            ->with(['city', 'program'])->orderBy(transColumn('title'))->get();
+        $positions = $isNewPosition
+            ? $scopes->scopeProposedManagers(Position::query(), $user)
+            : $scopes->scopeManageablePositions(Position::query(), $user);
+        $isFill = (int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::FillVacancy;
+        if ($isFill) {
+            $positions->where('is_active', true)->whereColumn('exist_emp', '<', 'max_emp')
+                ->whereHas('vacancies', fn ($vacancies) => $vacancies->available());
+        }
+        $positions = $positions->with(['city', 'program'])->orderBy(transColumn('title'))->get();
 
         $cityId = filter_var($this->data['city_id'] ?? null, FILTER_VALIDATE_INT) ?: null;
 
-        $centers = Center::query()
-            ->where('is_active', true)
-            ->when(! City::isNational($cityId), fn ($query) => $query
-                ->where(fn ($query) => $query->where('city_id', $cityId)->orWhereNull('city_id')))
+        $programId = filter_var($this->data['program_id'] ?? null, FILTER_VALIDATE_INT) ?: null;
+        $centers = $scopes->scopeCreatableCenters(Center::query(), $user, $cityId, $programId)
             ->orderBy(transColumn('name'))->get();
-
-        $vacancies = Vacancy::query()->visibleTo($user)
-            ->where('position_id', $this->data['position_id'] ?? 0)->get();
-
-        // City and program list the whole organization: D49 keeps them
-        // organizational data, so a manager may open the first position in a
-        // governorate he has nobody in yet. The ones his tree already touches
-        // sort first, which is a convenience and not a restriction.
-        $organization = $scopes->creatableOrganizationIds($user);
+        $vacancies = $isFill ? $this->availableVacancies()->orderBy('id')->get()
+            : Vacancy::query()->visibleTo($user)->where('position_id', $this->data['position_id'] ?? 0)->get();
 
         return view('livewire.recruitment.requests.create', [
             'positions' => $positions, 'centers' => $centers, 'vacancies' => $vacancies,
-            'cities' => $this->ownFirst(
-                City::query()->where('is_active', true)->orderBy(transColumn('name'))->get(),
-                $organization['cities'],
-            ),
-            'programs' => $this->ownFirst(
-                Program::query()->where('is_active', true)->orderBy('name')->get(),
-                $organization['programs'],
-            ),
+            'cities' => $scopes->scopeCreatableCities(City::query(), $user)->orderBy(transColumn('name'))->get(),
+            'programs' => $scopes->scopeCreatablePrograms(Program::query(), $user)->orderBy('name')->get(),
+            'programRequired' => $isNewPosition && $scopes->hasProgramCreationScope($user),
             'departments' => Department::query()->orderBy('name')->get(),
             // Strictly junior to the requester's own grade — nobody creates a
             // peer or a superior for himself. Enforced again on save.
@@ -120,13 +121,26 @@ class Create extends Component
         Gate::authorize('create', RecruitmentRequest::class);
     }
 
-    /**
-     * @param  \Illuminate\Support\Collection<int, object>  $all
-     * @param  array<int, int>  $preferred
-     * @return \Illuminate\Support\Collection<int, object>
-     */
-    private function ownFirst($all, array $preferred)
+    private function selectOnlyProgram(): void
     {
-        return $all->sortBy(fn ($item): int => in_array((int) $item->getKey(), $preferred, true) ? 0 : 1)->values();
+        if ((int) ($this->data['request_type'] ?? 0) !== RecruitmentRequestType::CreatePosition) {
+            return;
+        }
+        $programs = app(RecruitmentScopeResolver::class)
+            ->scopeCreatablePrograms(Program::query(), auth()->user())->limit(2)->pluck('id');
+        if ($programs->count() === 1) {
+            $this->data['program_id'] = $programs->first();
+        }
+    }
+
+    private function availableVacancies()
+    {
+        $positions = app(RecruitmentScopeResolver::class)
+            ->scopeManageablePositions(Position::query(), auth()->user())
+            ->where('is_active', true)->whereColumn('exist_emp', '<', 'max_emp');
+
+        return Vacancy::query()->available()
+            ->whereIn('position_id', $positions->select('id'))
+            ->where('position_id', $this->data['position_id'] ?? 0);
     }
 }

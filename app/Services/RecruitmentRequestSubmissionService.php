@@ -68,6 +68,9 @@ class RecruitmentRequestSubmissionService
             $payload = (array) ($fresh->draft_payload_json ?? []);
 
             $this->assertComplete($fresh, $payload);
+            if ((int) $fresh->mode === \App\Enums\RecruitmentRequestMode::Normal) {
+                app(RecruitmentRequestDraftService::class)->assertCurrentScope($actor, $fresh);
+            }
             $this->assertTypeRules($fresh, $payload);
             $this->assertNoActiveDuplicate($fresh);
 
@@ -145,6 +148,11 @@ class RecruitmentRequestSubmissionService
             }
         }
 
+        // Picking "other" without saying what it is answers nothing.
+        if (($payload['recruitment_reason'] ?? null) === 'other' && blank($payload['other_reason'] ?? null)) {
+            $missing['data.other_reason'] = __('recruitment.required_on_submit', ['field' => __('recruitment.other_reason')]);
+        }
+
         if ($missing !== []) {
             throw ValidationException::withMessages($missing);
         }
@@ -155,15 +163,21 @@ class RecruitmentRequestSubmissionService
     {
         $money = ['salary_amount', 'currency', 'salary_per', 'contract_type_id', 'finance_consulted'];
 
+        // Everything the paper form marks with a star for a recruiting request.
+        $recruiting = array_merge([
+            'recruitment_reason', 'priority', 'volunteer_type',
+            'weekly_hours', 'needed_by_date',
+        ], $money);
+
         return match ($type) {
-            Type::FillVacancy => array_merge(['justification', 'needed_by_date'], $money),
-            Type::IncreaseHeadcount => array_merge(['additional_count', 'justification', 'needed_by_date'], $money),
+            Type::FillVacancy => $recruiting,
+            Type::IncreaseHeadcount => array_merge(['additional_count'], $recruiting),
             Type::DecreaseHeadcount => ['reduce_by', 'reason', 'effective_date'],
             Type::CreatePosition => array_merge([
                 'program_id', 'city_id', 'department_id', 'job_level_id',
                 'title_en', 'title_ar', 'qualifications', 'responsibilities',
                 'max_emp', 'direct_manager_id',
-            ], $money),
+            ], $recruiting),
             Type::ClosePosition => ['reason', 'effective_date'],
             Type::CloseVacancy => ['reason'],
             default => [],
@@ -299,10 +313,10 @@ class RecruitmentRequestSubmissionService
     /**
      * Map the draft's field names onto the detail columns.
      *
-     * Three draft fields have no column of their own. justification and
-     * effective_date are folded into the nearest column that means the same
-     * thing, and tech_manager_id is dropped: D16 took it out of the approval
-     * path, so carrying it would be an unclassified field under RV-1.
+     * effective_date folds into expected_start_date, the two never being asked
+     * for by the same request type. tech_manager_id is dropped: D16 took it out
+     * of the approval path, so carrying it would be an unclassified field under
+     * RV-1.
      *
      * @return array<string, mixed>
      */
@@ -328,7 +342,13 @@ class RecruitmentRequestSubmissionService
             'direct_supervisor_position_id' => $payload['direct_manager_id'] ?? null,
             'current_headcount' => $current,
             'requested_headcount' => $requested,
-            'recruitment_reason' => $payload['justification'] ?? null,
+            'recruitment_reason' => $payload['recruitment_reason'] ?? null,
+            'other_reason' => $payload['other_reason'] ?? null,
+            'priority' => $payload['priority'] ?? null,
+            'volunteer_type' => $payload['volunteer_type'] ?? null,
+            'weekly_hours' => $payload['weekly_hours'] ?? null,
+            'volunteer_period_start_date' => $payload['volunteer_period_start_date'] ?? null,
+            'volunteer_period_end_date' => $payload['volunteer_period_end_date'] ?? null,
             'role_title_en' => $payload['title_en'] ?? null,
             'role_title_ar' => $payload['title_ar'] ?? null,
             'expected_start_date' => $payload['needed_by_date'] ?? $payload['effective_date'] ?? null,

@@ -62,6 +62,15 @@ class RecruitmentSubmissionTest extends TestCase
 
         $this->target = $this->root->replicate();
         $this->target->fill(['direct_manager_id' => $this->root->id, 'title_en' => 'Analyst', 'exist_emp' => 0])->save();
+        $origin = RecruitmentRequest::create([
+            'request_number' => 'ORIGIN', 'requester_user_id' => $this->manager->id,
+            'request_type' => Type::IncreaseHeadcount, 'status' => Status::Applied,
+            'target_position_id' => $this->target->id, 'scope_city_id' => $city->id,
+        ]);
+        Vacancy::create([
+            'position_id' => $this->target->id, 'created_from_request_id' => $origin->id,
+            'status' => 'open', 'needed_count' => 2, 'filled_count' => 0, 'open_at' => now()->subDay(),
+        ]);
     }
 
     /** A draft may be half-finished; a submission may not. */
@@ -73,7 +82,7 @@ class RecruitmentSubmissionTest extends TestCase
             $this->submit($request);
             $this->fail('An incomplete draft should not submit.');
         } catch (ValidationException $exception) {
-            foreach (['justification', 'needed_by_date', 'salary_amount', 'currency', 'salary_per', 'contract_type_id', 'finance_consulted'] as $field) {
+            foreach (['recruitment_reason', 'priority', 'volunteer_type', 'weekly_hours', 'needed_by_date', 'salary_amount', 'currency', 'salary_per', 'contract_type_id', 'finance_consulted'] as $field) {
                 $this->assertArrayHasKey('data.'.$field, $exception->errors(), "{$field} should be reported as missing.");
             }
         }
@@ -109,7 +118,10 @@ class RecruitmentSubmissionTest extends TestCase
         // The details row carries the column names RV-1 compares, not the
         // draft's own field names.
         $detail = $version->positionDetail;
-        $this->assertSame('Because we need one', $detail->recruitment_reason);
+        $this->assertSame('operational_need', $detail->recruitment_reason);
+        $this->assertSame('normal', $detail->priority);
+        $this->assertSame('onsite', $detail->volunteer_type);
+        $this->assertSame(40, (int) $detail->weekly_hours);
         $this->assertSame('2026-12-01', $detail->expected_start_date->format('Y-m-d'));
         $this->assertSame($this->target->id, (int) $detail->position_id);
         $this->assertSame(5, (int) $detail->current_headcount);
@@ -142,7 +154,7 @@ class RecruitmentSubmissionTest extends TestCase
             $this->submit($second);
             $this->fail('A duplicate active request should be refused.');
         } catch (ValidationException $exception) {
-            $this->assertArrayHasKey('data.position_id', $exception->errors());
+            $this->assertArrayHasKey('data.vacancy_id', $exception->errors());
         }
     }
 
@@ -170,11 +182,7 @@ class RecruitmentSubmissionTest extends TestCase
     /** Filling a vacancy and closing it are contradictory intentions. */
     public function test_fill_and_close_cannot_both_be_active_on_one_vacancy(): void
     {
-        $vacancy = Vacancy::query()->create([
-            'position_id' => $this->target->id,
-            'created_from_request_id' => $this->draft($this->complete())->id,
-            'status' => 'open', 'needed_count' => 1, 'filled_count' => 0, 'open_at' => now(),
-        ]);
+        $vacancy = Vacancy::query()->sole();
 
         $fill = $this->draft(array_merge($this->complete(), ['vacancy_id' => $vacancy->id]));
         $this->submit($fill);
@@ -212,10 +220,10 @@ class RecruitmentSubmissionTest extends TestCase
         app(RecruitmentRequestDraftService::class)->update(
             $this->manager,
             $request,
-            $this->payload(['justification' => 'A better reason']),
+            $this->payload(['detailed_explanation' => 'A better reason']),
         );
 
-        $this->assertSame('A better reason', $request->fresh()->draft_payload_json['justification']);
+        $this->assertSame('A better reason', $request->fresh()->draft_payload_json['detailed_explanation']);
         $this->assertSame(0, $request->versions()->count());
     }
 
@@ -238,14 +246,14 @@ class RecruitmentSubmissionTest extends TestCase
         app(RecruitmentRequestDraftService::class)->update(
             $this->manager,
             $request,
-            $this->payload(['justification' => 'Revised']),
+            $this->payload(['detailed_explanation' => 'Revised']),
         );
 
         $resubmitted = $this->submit($request);
 
         $this->assertSame(Status::Resubmitted, (int) $resubmitted->status);
         $this->assertSame([1, 2], $request->versions()->orderBy('version_no')->pluck('version_no')->map(fn ($n) => (int) $n)->all());
-        $this->assertSame('Revised', $request->versions()->where('version_no', 2)->sole()->positionDetail->recruitment_reason);
+        $this->assertSame('Revised', $request->versions()->where('version_no', 2)->sole()->positionDetail->detailed_explanation);
     }
 
     public function test_a_draft_can_be_cancelled_and_cancelling_twice_is_harmless(): void
@@ -261,10 +269,102 @@ class RecruitmentSubmissionTest extends TestCase
     }
 
     /** @return array<string, mixed> */
+    public function test_different_open_vacancies_on_the_same_position_can_have_separate_requests(): void
+    {
+        $firstVacancy = Vacancy::sole();
+        $secondVacancy = Vacancy::create([
+            'position_id' => $this->target->id,
+            'created_from_request_id' => $this->draft(['additional_count' => 1], Type::IncreaseHeadcount)->id,
+            'status' => 'open', 'needed_count' => 1, 'filled_count' => 0, 'open_at' => now(),
+        ]);
+        foreach ([$firstVacancy, $secondVacancy] as $vacancy) {
+            $request = $this->draft(array_merge($this->complete(), ['vacancy_id' => $vacancy->id]));
+            $this->assertSame(Status::Submitted, $this->submit($request)->status);
+        }
+    }
+
+    public function test_a_vacancy_filled_after_draft_creation_cannot_be_submitted(): void
+    {
+        $request = $this->draft($this->complete());
+        Vacancy::sole()->update(['filled_count' => 2]);
+        try {
+            $this->submit($request);
+            $this->fail('Availability must be checked again on submit.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('data.position_id', $exception->errors());
+        }
+        $this->assertSame(0, $request->versions()->count());
+        $this->assertSame(Status::Draft, $request->fresh()->status);
+    }
+
+    /**
+     * The three fixed lists accept their own values and nothing else.
+     *
+     * They are stored as slugs in the existing text columns rather than as
+     * numeric enums, so the guard is the validation rule, not the column type.
+     */
+    public function test_the_fixed_lists_reject_a_value_that_is_not_on_them(): void
+    {
+        foreach ([
+            'recruitment_reason' => 'made_up_reason',
+            'priority' => 'whenever',
+            'volunteer_type' => 'hybrid',
+        ] as $field => $value) {
+            try {
+                $this->draft([$field => $value]);
+                $this->fail("{$field} should only accept its configured values.");
+            } catch (ValidationException $exception) {
+                $this->assertArrayHasKey('data.'.$field, $exception->errors());
+            }
+        }
+    }
+
+    /** Choosing "other" without saying what it is answers nothing. */
+    public function test_other_as_a_reason_must_say_what_it_is(): void
+    {
+        $request = $this->draft(array_merge($this->complete(), ['recruitment_reason' => 'other']));
+
+        try {
+            $this->submit($request);
+            $this->fail('"Other" with no text should not submit.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('data.other_reason', $exception->errors());
+        }
+
+        app(RecruitmentRequestDraftService::class)->update($this->manager, $request, $this->payload([
+            'recruitment_reason' => 'other',
+            'other_reason' => 'A reason the list does not cover',
+        ]));
+
+        $submitted = $this->submit($request->fresh());
+        $detail = $submitted->versions()->sole()->positionDetail;
+
+        $this->assertSame('other', $detail->recruitment_reason);
+        $this->assertSame('A reason the list does not cover', $detail->other_reason);
+    }
+
+    /** The agreement period lands in the columns the migrations already have. */
+    public function test_the_agreement_period_is_stored_on_the_version(): void
+    {
+        $request = $this->draft(array_merge($this->complete(), [
+            'volunteer_period_start_date' => '2026-12-01',
+            'volunteer_period_end_date' => '2027-06-01',
+        ]));
+
+        $detail = $this->submit($request)->versions()->sole()->positionDetail;
+
+        $this->assertSame('2026-12-01', $detail->volunteer_period_start_date->format('Y-m-d'));
+        $this->assertSame('2027-06-01', $detail->volunteer_period_end_date->format('Y-m-d'));
+    }
+
+    /** @return array<string, mixed> */
     private function complete(): array
     {
         return [
-            'justification' => 'Because we need one',
+            'recruitment_reason' => 'operational_need',
+            'priority' => 'normal',
+            'volunteer_type' => 'onsite',
+            'weekly_hours' => 40,
             'needed_by_date' => '2026-12-01',
             'salary_amount' => 500,
             'currency' => 2,

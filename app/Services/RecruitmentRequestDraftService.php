@@ -27,6 +27,17 @@ class RecruitmentRequestDraftService
 {
     public function __construct(private readonly RecruitmentScopeResolver $scopes) {}
 
+    /** Recheck mutable organizational assignments and vacancy availability at submit time. */
+    public function assertCurrentScope(User $actor, RecruitmentRequest $request): void
+    {
+        $data = $this->validate((array) $request->draft_payload_json);
+        [$target] = $this->resolveTarget($actor->fresh(), $data);
+        if (($data['request_type'] !== Type::CreatePosition && (int) $target->id !== (int) $request->target_position_id)
+            || (int) ($data['vacancy_id'] ?? 0) !== (int) $request->target_vacancy_id) {
+            throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.invalid_vacancy')]);
+        }
+    }
+
     /** Only normal draft creation; no HR master data or submitted version is written. */
     public function create(User $actor, array $input): RecruitmentRequest
     {
@@ -117,12 +128,15 @@ class RecruitmentRequestDraftService
      *
      * @return array{0: Position, 1: int}
      */
-    private function resolveTarget(User $actor, array $data): array
+    private function resolveTarget(User $actor, array &$data): array
     {
         $isNewPosition = $data['request_type'] === Type::CreatePosition;
         $targetId = $isNewPosition ? $data['direct_manager_id'] : $data['position_id'];
 
-        $target = $this->scopes->scopeManageablePositions(Position::query(), $actor, $isNewPosition)
+        $targets = $isNewPosition
+            ? $this->scopes->scopeProposedManagers(Position::query(), $actor)
+            : $this->scopes->scopeManageablePositions(Position::query(), $actor);
+        $target = $targets
             ->whereKey($targetId)->lockForUpdate()->first();
 
         if (! $target) {
@@ -153,7 +167,23 @@ class RecruitmentRequestDraftService
             }
         }
 
-        if (! empty($data['vacancy_id'])) {
+        if ($data['request_type'] === Type::FillVacancy) {
+            if (! $target->is_active || ! $target->canAssign()) {
+                throw ValidationException::withMessages(['data.position_id' => __('recruitment.no_available_vacancy')]);
+            }
+            $available = $target->vacancies()->available()->orderBy('id')->lockForUpdate()->get();
+            if ($available->isEmpty()) {
+                throw ValidationException::withMessages(['data.position_id' => __('recruitment.no_available_vacancy')]);
+            }
+            if (! empty($data['vacancy_id']) && ! $available->contains('id', (int) $data['vacancy_id'])) {
+                throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.invalid_vacancy')]);
+            }
+            if ($available->count() === 1) {
+                $data['vacancy_id'] = $available->first()->id;
+            } elseif (empty($data['vacancy_id'])) {
+                throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.choose_available_vacancy')]);
+            }
+        } elseif (! empty($data['vacancy_id'])) {
             // Vacancy visibility is still D30/D42, independent of D49's position selector.
             $vacancy = Vacancy::query()->visibleTo($actor)->where('position_id', $target->id)
                 ->whereKey($data['vacancy_id'])->lockForUpdate()->first();
@@ -183,19 +213,26 @@ class RecruitmentRequestDraftService
         }
     }
 
-    /**
-     * A new position must sit at a grade junior to the requester's own.
-     *
-     * City and program are deliberately not checked here. D49 settled that the
-     * management tree is what authorizes creation and that those two stay
-     * organizational data — a national manager opening the first position in a
-     * governorate he has no one in yet is ordinary growth, not an escape.
-     *
-     * The grade is different: it is a statement about the new position's place
-     * in the hierarchy, and nobody creates a peer or a superior for himself.
-     */
+    /** Organizational consistency supplements, and never widens, the tree. */
     private function assertWithinCreationScope(User $actor, array $data): void
     {
+        $cityId = (int) $data['city_id'];
+        $programId = empty($data['program_id']) ? null : (int) $data['program_id'];
+        $checks = [
+            'city_id' => $this->scopes->scopeCreatableCities(City::query(), $actor)->whereKey($cityId)->exists(),
+            'program_id' => $programId === null
+                ? ! $this->scopes->hasProgramCreationScope($actor)
+                : $this->scopes->scopeCreatablePrograms(\App\Models\Program::query(), $actor)->whereKey($programId)->exists(),
+            'center_id' => empty($data['center_id']) || $this->scopes
+                ->scopeCreatableCenters(Center::query(), $actor, $cityId, $programId)
+                ->whereKey($data['center_id'])->exists(),
+        ];
+        foreach ($checks as $field => $valid) {
+            if (! $valid) {
+                throw ValidationException::withMessages(['data.'.$field => __('recruitment.outside_organization')]);
+            }
+        }
+
         if (empty($data['job_level_id'])) {
             return;
         }
@@ -234,8 +271,20 @@ class RecruitmentRequestDraftService
             ];
         }
 
+        // The three types that end in somebody being hired share the form the
+        // paper request asks for: why, when, how long, how often and how paid.
         if (in_array($type, [Type::FillVacancy, Type::IncreaseHeadcount, Type::CreatePosition], true)) {
+            $form = config('recruitment.request_form');
+
             $rules += [
+                'recruitment_reason' => ['nullable', 'string', Rule::in($form['recruitment_reasons'])],
+                'other_reason' => ['nullable', 'string', 'max:1000'],
+                'priority' => ['nullable', 'string', Rule::in($form['priorities'])],
+                'volunteer_type' => ['nullable', 'string', Rule::in($form['volunteer_types'])],
+                'weekly_hours' => ['nullable', 'integer', 'min:1', 'max:168'],
+                'volunteer_period_start_date' => ['nullable', 'date_format:Y-m-d'],
+                'volunteer_period_end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:data.volunteer_period_start_date'],
+                'needed_by_date' => ['nullable', 'date_format:Y-m-d'],
                 'salary_amount' => ['nullable', 'integer', 'min:0'],
                 'currency' => ['nullable', 'integer', Rule::in([Currency::SYP, Currency::USD, Currency::EUR])],
                 'salary_per' => ['nullable', 'integer', Rule::in([SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session])],
@@ -243,9 +292,6 @@ class RecruitmentRequestDraftService
                 'finance_consulted' => ['nullable', 'boolean'],
                 'detailed_explanation' => ['nullable', 'string'],
             ];
-        }
-        if (in_array($type, [Type::FillVacancy, Type::IncreaseHeadcount], true)) {
-            $rules += ['justification' => ['nullable', 'string'], 'needed_by_date' => ['nullable', 'date_format:Y-m-d']];
         }
         if (in_array($type, [Type::FillVacancy, Type::CloseVacancy], true)) {
             $rules['vacancy_id'] = [$type === Type::CloseVacancy ? 'required' : 'nullable', 'integer'];

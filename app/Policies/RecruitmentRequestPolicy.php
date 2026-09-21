@@ -41,7 +41,7 @@ class RecruitmentRequestPolicy
     public function createUnderPosition(User $user, Position $parent): bool
     {
         return $this->create($user)
-            && $this->scopes->scopeManageablePositions(Position::query(), $user, includeSelf: true)
+            && $this->scopes->scopeProposedManagers(Position::query(), $user)
                 ->whereKey($parent->getKey())->exists();
     }
 

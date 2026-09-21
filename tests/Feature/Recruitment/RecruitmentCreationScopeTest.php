@@ -161,8 +161,9 @@ class RecruitmentCreationScopeTest extends TestCase
         $before = Position::count();
 
         Livewire::actingAs($this->manager)->test(Create::class)
+            ->set('data.request_type', RecruitmentRequestType::IncreaseHeadcount)
             ->assertSee('Allowed remote position')->assertDontSee('Unrelated private position')
-            ->set('data.position_id', $child->id)->set('data.justification', 'Recruitment need')
+            ->set('data.position_id', $child->id)->set('data.recruitment_reason', 'operational_need')
             ->set('data.status', RecruitmentRequestStatus::Approved)->set('data.mode', RecruitmentRequestMode::DirectHr)
             ->call('save')->assertHasNoErrors()->assertRedirect();
 
@@ -174,7 +175,7 @@ class RecruitmentCreationScopeTest extends TestCase
         $this->assertSame(0, $request->versions()->count());
         $this->assertSame(1, $request->events()->count());
         $this->assertArrayNotHasKey('status', $request->draft_payload_json);
-        Livewire::test(Details::class, ['requestId' => $request->id])->assertSee('Recruitment need');
+        Livewire::test(Details::class, ['requestId' => $request->id])->assertSee('Operational need / increased workload');
     }
 
     public function test_forged_target_and_reparenting_after_loading_are_rejected_on_save(): void
@@ -228,7 +229,7 @@ class RecruitmentCreationScopeTest extends TestCase
     {
         $child = $this->child($this->root);
         $request = app(RecruitmentRequestDraftService::class)->create($this->manager, [
-            'request_type' => RecruitmentRequestType::FillVacancy, 'position_id' => $child->id,
+            'request_type' => RecruitmentRequestType::IncreaseHeadcount, 'position_id' => $child->id,
         ]);
         $hr = $this->makeUser($this->root->city, 'HR-SYR');
         $this->assertFalse(RecruitmentRequest::visibleTo($hr)->whereKey($request->id)->exists());
@@ -236,27 +237,10 @@ class RecruitmentCreationScopeTest extends TestCase
         $this->assertTrue(RecruitmentRequest::visibleTo($hr)->whereKey($request->id)->exists());
     }
 
-    /**
-     * The governorates and programs a manager's tree already touches, used to
-     * sort his pickers — never to restrict them.
-     *
-     * D49 keeps city and program organizational data, so opening the first
-     * position in a new governorate stays possible. This only records which
-     * ones are his, and the test below proves the other ones still save.
-     */
-    public function test_own_organization_is_reported_for_sorting_without_restricting(): void
+    /** Department managers retain the previous D49 organizational options. */
+    public function test_department_manager_can_create_in_a_new_governorate(): void
     {
-        $homs = $this->makeCity('HMS', '002');
         $aleppo = $this->makeCity('ALP', '001');
-        $mine = Program::query()->create(['name' => 'Mine', 'code' => 'MIN', 'slug' => 'mine', 'start_date' => now(), 'is_active' => true]);
-
-        $this->child($this->root, ['city_id' => $homs->id, 'program_id' => $mine->id]);
-
-        $organization = app(RecruitmentScopeResolver::class)->creatableOrganizationIds($this->manager);
-
-        $this->assertContains($homs->id, $organization['cities']);
-        $this->assertContains($mine->id, $organization['programs']);
-        $this->assertNotContains($aleppo->id, $organization['cities']);
 
         // ...and a governorate outside that set is still accepted on save (D49).
         app(RecruitmentRequestDraftService::class)->create($this->manager, [

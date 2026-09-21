@@ -50,10 +50,19 @@
         <section class="rounded-surface border border-neutral-200 bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.draft_content') }}</h2>
             <dl class="mt-4 grid gap-6 sm:grid-cols-2">
+                @php
+                    // Stored as slugs; shown by their label, in either language.
+                    $draftSlugs = ['recruitment_reason' => 'reason_', 'priority' => 'priority_', 'volunteer_type' => 'volunteer_type_'];
+                @endphp
+                @foreach ($draftSlugs as $field => $prefix)
+                    @if (! empty($request->draft_payload_json[$field]))
+                        <div><dt class="text-sm text-secondary-medium">{{ __('recruitment.'.$field) }}</dt><dd class="mt-1 break-words" dir="auto">{{ __('recruitment.'.$prefix.$request->draft_payload_json[$field]) }}</dd></div>
+                    @endif
+                @endforeach
                 @foreach ($draftContext as $label => $value)
                     <div><dt class="text-sm text-secondary-medium">{{ __('recruitment.'.$label) }}</dt><dd class="mt-1 break-words" dir="auto">{{ $value }}</dd></div>
                 @endforeach
-                @foreach (['title_en', 'title_ar', 'max_emp', 'qualifications', 'responsibilities', 'justification', 'reason', 'needed_by_date', 'additional_count', 'reduce_by', 'effective_date', 'salary_amount', 'detailed_explanation'] as $field)
+                @foreach (['title_en', 'title_ar', 'max_emp', 'qualifications', 'responsibilities', 'other_reason', 'reason', 'weekly_hours', 'needed_by_date', 'volunteer_period_start_date', 'volunteer_period_end_date', 'additional_count', 'reduce_by', 'effective_date', 'salary_amount', 'detailed_explanation'] as $field)
                     @if (isset($request->draft_payload_json[$field]) && is_scalar($request->draft_payload_json[$field]))
                         <div><dt class="text-sm text-secondary-medium">{{ __('recruitment.'.$field) }}</dt><dd class="mt-1 whitespace-pre-wrap break-words" dir="auto">{{ $request->draft_payload_json[$field] }}@if ($field === 'salary_amount') {{ \App\Enums\Currency::getLocalizedName((int) ($request->draft_payload_json['currency'] ?? 0))[app()->getLocale()] }} / {{ \App\Enums\SalaryPer::getLocalizedName((int) ($request->draft_payload_json['salary_per'] ?? 0))['value'] }}@endif</dd></div>
                     @endif
@@ -65,11 +74,16 @@
         <section class="rounded-surface border border-neutral-200 bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.version', ['number' => $version->version_no]) }}</h2>
             <dl class="mt-4 grid gap-6 sm:grid-cols-2">
-                @foreach (['role_title_en', 'role_title_ar', 'current_headcount', 'requested_headcount', 'salary_amount', 'recruitment_reason', 'reason', 'main_duties', 'required_qualifications', 'detailed_explanation'] as $field)
+                @php
+                    // The three fixed lists are stored as slugs, so they are
+                    // translated here rather than shown raw.
+                    $slugLabels = ['recruitment_reason' => 'reason_', 'priority' => 'priority_', 'volunteer_type' => 'volunteer_type_'];
+                @endphp
+                @foreach (['role_title_en', 'role_title_ar', 'current_headcount', 'requested_headcount', 'salary_amount', 'recruitment_reason', 'other_reason', 'priority', 'volunteer_type', 'weekly_hours', 'expected_start_date', 'volunteer_period_start_date', 'volunteer_period_end_date', 'reason', 'main_duties', 'required_qualifications', 'detailed_explanation'] as $field)
                     @if ($version->positionDetail->{$field} !== null && $version->positionDetail->{$field} !== '')
                         <div>
                             <dt class="text-sm text-secondary-medium">{{ __('recruitment.'.$field) }}</dt>
-                            <dd class="mt-1 whitespace-pre-wrap break-words" dir="auto">{{ $version->positionDetail->{$field} }}@if ($field === 'salary_amount') {{ \App\Enums\Currency::getLocalizedName((int) $version->positionDetail->currency)[app()->getLocale()] }} / {{ \App\Enums\SalaryPer::getLocalizedName((int) $version->positionDetail->salary_per)['value'] }}@endif</dd>
+                            <dd class="mt-1 whitespace-pre-wrap break-words" dir="auto">@isset($slugLabels[$field]){{ __('recruitment.'.$slugLabels[$field].$version->positionDetail->{$field}) }}@else{{ $version->positionDetail->{$field} }}@endisset@if ($field === 'salary_amount') {{ \App\Enums\Currency::getLocalizedName((int) $version->positionDetail->currency)[app()->getLocale()] }} / {{ \App\Enums\SalaryPer::getLocalizedName((int) $version->positionDetail->salary_per)['value'] }}@endif</dd>
                         </div>
                     @endif
                 @endforeach

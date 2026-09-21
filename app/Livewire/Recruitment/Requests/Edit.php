@@ -42,6 +42,7 @@ class Edit extends Create
 
     public function save(RecruitmentRequestDraftService $drafts)
     {
+        $this->resetValidation();
         $drafts->update(auth()->user(), $this->request(), $this->data);
         session()->flash('recruitment_saved', __('recruitment.saved'));
 

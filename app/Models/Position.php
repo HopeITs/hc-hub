@@ -32,6 +32,11 @@ class Position extends Model
         return $this->hasMany(Contract::class, 'position_id');
     }
 
+    public function vacancies(): HasMany
+    {
+        return $this->hasMany(Vacancy::class);
+    }
+
     /**
      * Active contracts on this position. Employees may hold multiple positions
      * simultaneously; each position lists every active contract here. For the
