@@ -142,8 +142,7 @@ class RecruitmentRequestSubmissionService
         foreach ($this->requiredFields((int) $request->request_type) as $field) {
             $value = $payload[$field] ?? null;
 
-            // finance_consulted is an attestation: false is not an answer.
-            if ($field === 'finance_consulted' ? ! $value : ($value === null || $value === '')) {
+            if ($value === null || $value === '') {
                 $missing['data.'.$field] = __('recruitment.required_on_submit', ['field' => __('recruitment.'.$field)]);
             }
         }
@@ -161,7 +160,7 @@ class RecruitmentRequestSubmissionService
     /** @return array<int, string> */
     private function requiredFields(int $type): array
     {
-        $money = ['salary_amount', 'currency', 'salary_per', 'contract_type_id', 'finance_consulted'];
+        $money = ['salary_amount', 'currency', 'salary_per', 'contract_type_id'];
 
         // Everything the paper form marks with a star for a recruiting request.
         $recruiting = array_merge([
@@ -358,7 +357,6 @@ class RecruitmentRequestSubmissionService
             'main_duties' => $payload['responsibilities'] ?? null,
             'required_qualifications' => $payload['qualifications'] ?? null,
             'detailed_explanation' => $payload['detailed_explanation'] ?? null,
-            'finance_consulted' => (bool) ($payload['finance_consulted'] ?? false),
             'reason' => $payload['reason'] ?? null,
         ];
     }

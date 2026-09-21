@@ -289,7 +289,6 @@ class RecruitmentRequestDraftService
                 'currency' => ['nullable', 'integer', Rule::in([Currency::SYP, Currency::USD, Currency::EUR])],
                 'salary_per' => ['nullable', 'integer', Rule::in([SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session])],
                 'contract_type_id' => ['nullable', 'integer', 'exists:contract_types,id'],
-                'finance_consulted' => ['nullable', 'boolean'],
                 'detailed_explanation' => ['nullable', 'string'],
             ];
         }

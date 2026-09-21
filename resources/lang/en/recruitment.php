@@ -36,7 +36,6 @@ return [
     'currency' => 'Currency',
     'salary_per' => 'Salary period',
     'contract_type' => 'Contract type',
-    'finance_consulted' => 'Finance has been consulted',
     'outside_tree' => 'The selected position is outside your allowed administrative tree.',
     'missing_city' => 'The target position has no governorate. Its assignment must be corrected.',
     'center_city_mismatch' => 'The center must match the position governorate.',

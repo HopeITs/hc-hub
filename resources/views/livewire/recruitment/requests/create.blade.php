@@ -87,7 +87,6 @@
                     @include('livewire.recruitment.requests.partials.select', ['field' => 'salary_per', 'label' => 'salary_per', 'options' => collect([1, 2, 3])->mapWithKeys(fn ($value) => [$value => \App\Enums\SalaryPer::getLocalizedName($value)['value']])->all(), 'required' => false])
                     @include('livewire.recruitment.requests.partials.select', ['field' => 'contract_type_id', 'label' => 'contract_type', 'options' => $contractTypes->pluck('name', 'id')->all(), 'required' => false])
                 </div>
-                <x-forms.input type="checkbox" model="data.finance_consulted" id="finance_consulted">{{ __('recruitment.finance_consulted') }}</x-forms.input>
                 @include('livewire.recruitment.requests.partials.textarea', ['field' => 'detailed_explanation'])
             @endif
         </section>

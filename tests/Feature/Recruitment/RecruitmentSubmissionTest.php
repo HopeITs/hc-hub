@@ -82,26 +82,13 @@ class RecruitmentSubmissionTest extends TestCase
             $this->submit($request);
             $this->fail('An incomplete draft should not submit.');
         } catch (ValidationException $exception) {
-            foreach (['recruitment_reason', 'priority', 'volunteer_type', 'weekly_hours', 'needed_by_date', 'salary_amount', 'currency', 'salary_per', 'contract_type_id', 'finance_consulted'] as $field) {
+            foreach (['recruitment_reason', 'priority', 'volunteer_type', 'weekly_hours', 'needed_by_date', 'salary_amount', 'currency', 'salary_per', 'contract_type_id'] as $field) {
                 $this->assertArrayHasKey('data.'.$field, $exception->errors(), "{$field} should be reported as missing.");
             }
         }
 
         $this->assertSame(Status::Draft, (int) $request->fresh()->status);
         $this->assertSame(0, $request->versions()->count());
-    }
-
-    /** finance_consulted is an attestation: leaving it unticked is not an answer. */
-    public function test_an_unticked_finance_attestation_is_missing_not_false(): void
-    {
-        $request = $this->draft(['finance_consulted' => false]);
-
-        try {
-            $this->submit($request);
-            $this->fail('An unticked attestation should not submit.');
-        } catch (ValidationException $exception) {
-            $this->assertArrayHasKey('data.finance_consulted', $exception->errors());
-        }
     }
 
     public function test_a_complete_draft_submits_and_freezes_version_one(): void
@@ -125,7 +112,6 @@ class RecruitmentSubmissionTest extends TestCase
         $this->assertSame('2026-12-01', $detail->expected_start_date->format('Y-m-d'));
         $this->assertSame($this->target->id, (int) $detail->position_id);
         $this->assertSame(5, (int) $detail->current_headcount);
-        $this->assertTrue((bool) $detail->finance_consulted);
     }
 
     /**
@@ -370,7 +356,6 @@ class RecruitmentSubmissionTest extends TestCase
             'currency' => 2,
             'salary_per' => 1,
             'contract_type_id' => $this->contractType->id,
-            'finance_consulted' => true,
         ];
     }
 

@@ -39,7 +39,6 @@
 | `needed_by_date` | نعم | التاريخ المطلوب لشغل المنصب |
 | `salary_amount` / `currency` / `salary_per` | نعم | **لا يوجد راتب على `positions`** — راجع `D5` و `D22` |
 | `contract_type_id` | نعم | من جدول `contract_types` الحالي |
-| `finance_consulted` | نعم | إقرار بأن التنسيق مع المالية تم |
 
 **قواعد التحقق عند الإرسال:**
 - `positions.is_active = true`
@@ -62,7 +61,6 @@
 | `recruitment_reason` · `priority` · `volunteer_type` · `weekly_hours` | نعم | كما في «ملء شاغر» أعلاه (`D52`) |
 | `salary_amount` / `currency` / `salary_per` | نعم | |
 | `contract_type_id` | نعم | |
-| `finance_consulted` | نعم | إقرار بأن التنسيق مع المالية تم |
 | `needed_by_date` | نعم | |
 
 **قواعد التحقق:** `positions.is_active = true`، و `additional_count >= 1`.
@@ -110,7 +108,6 @@
 | `tech_manager_id` | لا | `positions.id` — لا يُستخدم في مسار الموافقات (`D16`) |
 | `salary_amount` / `currency` / `salary_per` | نعم | |
 | `contract_type_id` | نعم | |
-| `finance_consulted` | نعم | إقرار بأن التنسيق مع المالية تم |
 
 **قواعد التحقق:** الأب الإداري ضمن الشجرة المعتمدة في `D49`. `city_id` متوافق مع `center_id` إن وُجد وفق قواعد `PositionForm`، بما فيها المركز بلا محافظة واستثناء `SYR` الوطني. اختلاف المحافظة أو البرنامج عن الأب لا يمنع الطلب ولا يمنح صلاحية خارج الشجرة.
 
@@ -163,7 +160,9 @@
 
 > `currency` و `salary_per` أُضيفا بالقرار `D22`. في البيانات: 265 عقداً بالدولار و2 بالليرة — رقم بلا عملة لا يستطيع المدير المالي مراجعته.
 >
-> `funding_source` لا يُضاف؛ الحقل `finance_consulted` الموجود يكفي، ومصدر التمويل يُذكر في `detailed_explanation`.
+> `funding_source` لا يُضاف؛ مصدر التمويل يُذكر في `detailed_explanation`.
+>
+> **إقرار `finance_consulted` أُسقط من الشاشة (`D53`)** — المراجعة المالية خطوة إلزامية في المسار، فمطالبة المُقدِّم بأن يُقرّ مسبقاً بالتنسيق معها تكرار لما سيحدث على أي حال. العمود يبقى في الـ migrations بلا استخدام.
 
 ---
 
