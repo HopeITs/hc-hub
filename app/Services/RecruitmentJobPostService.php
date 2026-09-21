@@ -34,6 +34,8 @@ class RecruitmentJobPostService
 
             if (! $version) {
                 $version = $jobPost->versions()->create($this->versionAttributes(1, $this->sourceValues($campaign), 'draft'));
+            } else {
+                $version = $this->stripMovedRoleDetails($version, $campaign);
             }
 
             return [
@@ -303,6 +305,43 @@ class RecruitmentJobPostService
     }
 
     private function generatedBody(mixed $detail, string $locale): string
+    {
+        $labels = $locale === 'ar'
+            ? ['required_skills' => 'المهارات المطلوبة', 'experience' => 'الخبرة المطلوبة']
+            : ['required_skills' => 'Required skills', 'experience' => 'Required experience'];
+        $sections = [];
+        foreach (['required_skills'] as $field) {
+            if (filled($detail?->{$field})) {
+                $sections[] = $labels[$field]."\n".trim((string) $detail->{$field});
+            }
+        }
+        if ($detail?->required_experience_years !== null) {
+            $suffix = $locale === 'ar' ? ' سنوات' : ' years';
+            $sections[] = $labels['experience']."\n".$detail->required_experience_years.$suffix;
+        }
+
+        return implode("\n\n", $sections);
+    }
+
+    private function stripMovedRoleDetails(JobPostVersion $version, HiringCampaign $campaign): JobPostVersion
+    {
+        if ($version->status !== 'draft') {
+            return $version;
+        }
+
+        $detail = $campaign->vacancy?->createdFromRequest?->latestVersion?->positionDetail;
+        $legacyEnglish = $this->legacyGeneratedBody($detail, 'en');
+        $legacyArabic = $this->legacyGeneratedBody($detail, 'ar');
+        if (trim((string) $version->body_en) !== trim($legacyEnglish) || trim((string) $version->body_ar) !== trim($legacyArabic)) {
+            return $version;
+        }
+
+        $version->forceFill(['body_en' => '', 'body_ar' => ''])->save();
+
+        return $version->fresh();
+    }
+
+    private function legacyGeneratedBody(mixed $detail, string $locale): string
     {
         $labels = $locale === 'ar'
             ? ['main_duties' => 'المهام الرئيسية', 'required_qualifications' => 'المؤهلات المطلوبة', 'required_skills' => 'المهارات المطلوبة', 'experience' => 'الخبرة المطلوبة']

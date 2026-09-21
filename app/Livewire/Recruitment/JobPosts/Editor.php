@@ -3,9 +3,11 @@
 namespace App\Livewire\Recruitment\JobPosts;
 
 use App\Exceptions\StaleRecruitmentDraftException;
+use App\Models\City;
 use App\Models\HiringCampaign;
 use App\Models\JobPost;
 use App\Models\JobPostVersion;
+use App\Models\Program;
 use App\Services\RecruitmentJobPostService;
 use DomainException;
 use Illuminate\Support\Facades\Gate;
@@ -20,6 +22,12 @@ class Editor extends Component
     public string $city = '';
 
     public string $program = '';
+
+    /** @var array<int, string> */
+    public array $cityOptions = [];
+
+    /** @var array<int, string> */
+    public array $programOptions = [];
 
     public string $jobTitle = '';
 
@@ -60,6 +68,12 @@ class Editor extends Component
             abort(409, $exception->getMessage());
         }
         $this->campaign = $campaign;
+        $this->cityOptions = City::query()->where('is_active', true)->orderBy('name_en')->pluck('name_en')
+            ->map(fn ($name) => mb_strtoupper(trim((string) $name)))->filter()->unique()->values()->all();
+        $this->programOptions = Program::query()->where('is_active', true)->orderBy('name')->pluck('name')
+            ->map(fn ($name) => mb_strtoupper(trim((string) $name)))->filter()->unique()->values()->all();
+        $this->cityOptions = collect([$this->city, ...$this->cityOptions])->filter()->unique()->values()->all();
+        $this->programOptions = collect([$this->program, ...$this->programOptions])->filter()->unique()->values()->all();
     }
 
     public function saveDraft(RecruitmentJobPostService $service): void

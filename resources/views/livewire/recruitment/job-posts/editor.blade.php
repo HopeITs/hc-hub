@@ -1,6 +1,7 @@
 <x-slot:title>{{ __('recruitment.job_post.title') }}</x-slot:title>
 
-<div
+    <div
+        data-job-post-editor
     x-data="{ format: 'story', downloading: false, downloadMessage: '' }"
     data-job-title="{{ $jobTitle }}"
     data-font-regular="{{ asset('fonts/SomarSans/SomarSans-Regular.otf') }}"
@@ -25,7 +26,7 @@
                 {{ __('recruitment.job_post.approved_request') }}:
                 <span class="font-semibold text-neutral-800">{{ $campaign->vacancy->createdFromRequest->request_number }}</span>
             </p>
-            <a href="{{ route('recruitment.campaigns.publishing', $campaign) }}" wire:navigate class="mt-2 inline-flex text-small font-semibold text-primary hover:underline">
+            <a href="{{ route('recruitment.campaigns.publishing', $campaign) }}" wire:navigate class="mt-2 inline-flex cursor-pointer text-small font-semibold text-primary hover:underline">
                 {{ __('recruitment.publishing.back') }}
             </a>
         </div>
@@ -47,48 +48,24 @@
 
     <div class="grid overflow-hidden rounded-card border border-neutral-200 bg-white shadow-e1 xl:grid-cols-[360px_minmax(0,1fr)]">
         <section class="border-b border-neutral-200 p-5 xl:border-b-0 xl:border-e" aria-label="{{ __('recruitment.job_post.title') }}">
-            <p class="mb-5 rounded-control bg-primary/5 p-3 text-small leading-6 text-secondary-medium">
-                {{ __('recruitment.job_post.source_hint') }}
-            </p>
-
             <div class="space-y-4">
                 <div>
                     <x-forms.input-label for="job-post-city" required>{{ __('recruitment.job_post.city') }}</x-forms.input-label>
-                    <x-forms.input
-                        id="job-post-city"
-                        model="city"
-                        update="live.debounce.250ms"
-                        list="job-post-city-options"
-                        dir="ltr"
-                        required
-                    />
-                    <datalist id="job-post-city-options">
-                        <option value="ALEPPO"></option>
-                        <option value="HOMS"></option>
-                        <option value="DAMASCUS"></option>
-                        <option value="LATAKIA"></option>
-                        <option value="TARTUS"></option>
-                    </datalist>
+                    <select id="job-post-city" wire:model.live="city" class="w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary" required>
+                        @foreach ($cityOptions as $option)
+                            <option value="{{ $option }}">{{ $option }}</option>
+                        @endforeach
+                    </select>
                     <x-error-span>{{ $errors->first('city') }}</x-error-span>
                 </div>
 
                 <div>
                     <x-forms.input-label for="job-post-program" required>{{ __('recruitment.job_post.project') }}</x-forms.input-label>
-                    <x-forms.input
-                        id="job-post-program"
-                        model="program"
-                        update="live.debounce.250ms"
-                        list="job-post-program-options"
-                        dir="ltr"
-                        required
-                    />
-                    <datalist id="job-post-program-options">
-                        <option value="CHRISTIAN HOPE CENTER"></option>
-                        <option value="STUDY ZONE"></option>
-                        <option value="DISC"></option>
-                        <option value="CHILDREN UNIVERSITY"></option>
-                        <option value="LEAP"></option>
-                    </datalist>
+                    <select id="job-post-program" wire:model.live="program" class="w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary" required>
+                        @foreach ($programOptions as $option)
+                            <option value="{{ $option }}">{{ $option }}</option>
+                        @endforeach
+                    </select>
                     <x-error-span>{{ $errors->first('program') }}</x-error-span>
                 </div>
 
@@ -116,23 +93,12 @@
                     <x-error-span>{{ $errors->first('titleAr') }}</x-error-span>
                 </div>
 
-                <div>
-                    <x-forms.input-label for="job-post-body-en">{{ __('recruitment.job_post.body_en') }}</x-forms.input-label>
-                    <textarea id="job-post-body-en" wire:model="bodyEn" dir="ltr" rows="6" class="w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary"></textarea>
-                    <x-error-span>{{ $errors->first('bodyEn') }}</x-error-span>
-                </div>
-
-                <div>
-                    <x-forms.input-label for="job-post-body-ar">{{ __('recruitment.job_post.body_ar') }}</x-forms.input-label>
-                    <textarea id="job-post-body-ar" wire:model="bodyAr" dir="rtl" rows="6" class="w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary"></textarea>
-                    <x-error-span>{{ $errors->first('bodyAr') }}</x-error-span>
-                </div>
             </div>
 
             <button
                 type="button"
                 wire:click="resetFromApprovedRequest"
-                class="mt-2 text-small font-semibold text-primary underline-offset-4 hover:underline"
+                class="mt-2 cursor-pointer text-small font-semibold text-primary underline-offset-4 hover:underline"
             >
                 {{ __('recruitment.job_post.reset') }}
             </button>
@@ -142,7 +108,7 @@
                     type="button"
                     x-on:click="format = 'story'"
                     x-bind:class="format === 'story' ? 'border-primary bg-primary text-white' : 'border-neutral-300 bg-white text-neutral-500'"
-                    class="rounded-control border px-3 py-2 text-body font-semibold transition"
+                class="cursor-pointer rounded-control border px-3 py-2 text-body font-semibold transition"
                 >
                     {{ __('recruitment.job_post.story') }}
                 </button>
@@ -150,7 +116,7 @@
                     type="button"
                     x-on:click="format = 'post'"
                     x-bind:class="format === 'post' ? 'border-primary bg-primary text-white' : 'border-neutral-300 bg-white text-neutral-500'"
-                    class="rounded-control border px-3 py-2 text-body font-semibold transition"
+                    class="cursor-pointer rounded-control border px-3 py-2 text-body font-semibold transition"
                 >
                     {{ __('recruitment.job_post.post') }}
                 </button>
@@ -178,7 +144,7 @@
                         wire:click="unpublish"
                         wire:target="unpublish"
                         wire:confirm="{{ __('recruitment.job_post.unpublish_confirm') }}"
-                        class="flex w-full items-center justify-center rounded-control border border-amber-500 bg-white px-4 py-2 text-body font-semibold text-amber-700 transition hover:bg-amber-50"
+                        class="flex w-full cursor-pointer items-center justify-center rounded-control border border-amber-500 bg-white px-4 py-2 text-body font-semibold text-amber-700 transition hover:bg-amber-50"
                     >
                         {{ __('recruitment.job_post.unpublish') }}
                     </button>
@@ -195,7 +161,7 @@
                             .catch(() => downloadMessage = $root.dataset.exportFailed)
                             .finally(() => downloading = false);
                     "
-                    class="flex w-full items-center justify-center rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary transition hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-60"
+                    class="flex w-full cursor-pointer items-center justify-center rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary transition hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     <svg x-show="downloading" class="me-2 size-4 animate-spin" viewBox="0 0 24 24" aria-hidden="true">
                         <circle class="opacity-25" cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="4"></circle>
@@ -216,7 +182,7 @@
                     {{ $notice }}
                 </p>
                 @if ($hasConflict)
-                    <button type="button" wire:click="reloadLatest" class="mt-2 text-small font-semibold text-primary underline">
+                    <button type="button" wire:click="reloadLatest" class="mt-2 cursor-pointer text-small font-semibold text-primary underline">
                         {{ __('recruitment.job_post.reload_latest') }}
                     </button>
                 @endif

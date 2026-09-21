@@ -20,6 +20,7 @@ use App\Models\RecruitmentRequestPositionDetail;
 use App\Models\RecruitmentRequestVersion;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Services\RecruitmentApplicationFormService;
 use App\Services\RecruitmentJobPostService;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -45,6 +46,13 @@ class JobPostGeneratorTest extends TestCase
         ], array_intersect_key($state['values'], array_flip(['city', 'program', 'job_title'])));
         $this->assertSame("We're Hiring — IT Specialist", $state['values']['title_en']);
         $this->assertSame('مطلوب متطوع — اختصاصي تقنية معلومات', $state['values']['title_ar']);
+        $this->assertStringNotContainsString('Lead IT operations', $state['values']['body_en']);
+        $this->assertStringNotContainsString('Degree in information technology', $state['values']['body_en']);
+        $context = app(RecruitmentApplicationFormService::class)->formContext($campaign);
+        $this->assertSame('Lead IT operations, support users, and maintain systems and infrastructure.', $context['responsibilities']['en']);
+        $this->assertSame('المهام: تشغيل أنظمة تقنية المعلومات ودعم المستخدمين.', $context['responsibilities']['ar']);
+        $this->assertSame('Degree in information technology or a related field.', $context['qualifications']['en']);
+        $this->assertSame('شهادة في تكنولوجيا المعلومات أو مجال ذي صلة.', $context['qualifications']['ar']);
         $this->assertSame(RecruitmentJobPostService::TEMPLATE, $payload['template']);
         $this->assertSame(2160, $payload['outputs']['story']['width']);
         $this->assertSame(3840, $payload['outputs']['story']['height']);
@@ -238,6 +246,14 @@ class JobPostGeneratorTest extends TestCase
             'role_title_en' => 'IT Specialist',
             'role_title_ar' => 'اختصاصي تقنية معلومات',
             'requested_headcount' => 1,
+            'main_duties' => json_encode([
+                'en' => 'Lead IT operations, support users, and maintain systems and infrastructure.',
+                'ar' => 'المهام: تشغيل أنظمة تقنية المعلومات ودعم المستخدمين.',
+            ], JSON_UNESCAPED_UNICODE),
+            'required_qualifications' => json_encode([
+                'en' => 'Degree in information technology or a related field.',
+                'ar' => 'شهادة في تكنولوجيا المعلومات أو مجال ذي صلة.',
+            ], JSON_UNESCAPED_UNICODE),
         ]);
         $vacancy = Vacancy::query()->forceCreate([
             'position_id' => $position->id,
