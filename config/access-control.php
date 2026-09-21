@@ -3,6 +3,28 @@
 return [
     'administrator_roles' => ['super-admin', 'HR-SYR'],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Permissions no role may ever hold
+    |--------------------------------------------------------------------------
+    |
+    | These identify a specific person rather than a job, so a role carrying
+    | one would hand that person's authority to everybody who holds the role.
+    | They are created and displayed like any other permission and granted per
+    | user from Access Management.
+    |
+    | Every bulk grant reads AccessPermissionCatalog::roleGrantableNames(),
+    | which subtracts this list — the automatic grant for new administrator and
+    | HR roles in App\Models\Role included. See config/recruitment.php for what
+    | each one means.
+    |
+    */
+
+    'never_granted_to_roles' => [
+        'recruitment-requests.approve-finance',
+        'recruitment-requests.submit-without-manager',
+    ],
+
     'system_roles' => [
         'super-admin',
         'general-manager',
@@ -27,6 +49,15 @@ return [
             'checklists.manage', 'project-basics.view', 'archives.view',
             'archives.create', 'archives.update', 'archives.delete', 'archives.share',
             'archives.download',
+            // Recruitment: the CEO and his deputy hold this role, so they both
+            // raise requests and approve their direct reports' requests.
+            'recruitment-requests.view', 'recruitment-requests.manage',
+            'recruitment-requests.submit', 'recruitment-requests.cancel',
+            'recruitment-requests.approve', 'recruitment-requests.reject',
+            'recruitment-requests.request-changes', 'recruitment-requests.export',
+            'recruitment-vacancies.view', 'recruitment-campaigns.view',
+            'recruitment-job-posts.view', 'recruitment-forms.view',
+            'recruitment-links.view',
         ],
         'manager' => [
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
@@ -35,6 +66,15 @@ return [
             'checklists.view-own', 'project-basics.view', 'archives.view',
             'archives.create', 'archives.update', 'archives.delete', 'archives.share',
             'archives.download',
+            // Recruitment: the same role covers both sides of the first step —
+            // a manager raises his own requests and approves his direct
+            // reports'. Holding 'approve' is never sufficient on its own; the
+            // workflow still checks that this user is the assigned approver for
+            // that step.
+            'recruitment-requests.view', 'recruitment-requests.manage',
+            'recruitment-requests.submit', 'recruitment-requests.cancel',
+            'recruitment-requests.approve', 'recruitment-requests.reject',
+            'recruitment-requests.request-changes', 'recruitment-requests.export',
         ],
         'employee' => [
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
@@ -59,6 +99,28 @@ return [
         'archives' => ['view', 'create', 'update', 'delete', 'share', 'download'],
         'checklists' => ['view-own', 'view-all', 'manage', 'deliver', 'receive'],
         'activity-log' => ['view'],
+
+        /*
+         * Recruitment module. Two of these are never attached to a role:
+         * 'approve-finance' identifies the single organization-wide financial
+         * approver, and 'submit-without-manager' marks the handful of people at
+         * the top of the org chart who have no manager to approve their own
+         * requests. Both are granted per user from Access Management — granting
+         * either to a role would silently turn every holder of that role into a
+         * financial approver, or let anyone skip manager approval. See
+         * config/recruitment.php:user_level_permissions.
+         */
+        'recruitment-requests' => [
+            'view', 'manage', 'submit', 'cancel',
+            'approve', 'reject', 'request-changes',
+            'direct-open', 'export',
+            'approve-finance', 'submit-without-manager',
+        ],
+        'recruitment-vacancies' => ['view', 'manage'],
+        'recruitment-campaigns' => ['view', 'manage'],
+        'recruitment-job-posts' => ['view', 'manage'],
+        'recruitment-forms' => ['view', 'manage'],
+        'recruitment-links' => ['view', 'manage'],
     ],
 
     /*
@@ -67,6 +129,7 @@ return [
      * inside the component because the required permission depends on state.
      */
     'livewire' => [
+        'recruitment.requests.create' => ['save' => 'recruitment-requests.manage'],
         'access-management.index' => [
             'saveEmployeeAccess' => 'access-management.manage-employees',
             'saveRolePermissions' => 'access-management.manage-permissions',
@@ -261,6 +324,8 @@ return [
     */
 
     'livewire_exempt' => [
+        // Form-only resets. Persistence rechecks role, grade and subtree in the draft service.
+        'recruitment.requests.create' => ['updatedDataRequestType', 'updatedDataPositionId', 'updatedDataCityId'],
 
         // --- Authentication -------------------------------------------------
         // Reached before a session exists, or acting only on the caller's own
