@@ -396,32 +396,19 @@ class RecruitmentScopeResolver
     }
 
     /**
-     * Centres in the chosen governorate that the chosen programme operates in.
+     * Centres in the chosen governorate.
      *
-     * Both conditions, deliberately. The governorate comes off the centre
-     * itself; the programme cannot, because `centers` carries no program_id —
-     * the only link between the two in this schema is a position that sits in
-     * both. So "a centre of this programme" means "a centre with a position in
-     * it from this programme", and a centre the programme has not staffed yet
-     * is correctly absent rather than offered.
-     *
-     * Narrowing follows the form: the programme picked in the screen above,
-     * not the requester's own, so a manager placing a position in another of
-     * his programmes sees that programme's centres.
+     * The governorate is the only filter. Narrowing by programme as well was
+     * tried and withdrawn: `centers` carries no program_id, so the only link
+     * to a programme is a position sitting in both, and a centre the programme
+     * had not staffed yet vanished from the list — which is exactly the centre
+     * someone opening the first position there needs to pick.
      */
-    public function scopeCreatableCenters(Builder $query, User $user, ?int $cityId, ?int $programId): Builder
+    public function scopeCreatableCenters(Builder $query, User $user, ?int $cityId): Builder
     {
-        $query->where('is_active', true)
+        return $query->where('is_active', true)
             ->when(! City::isNational($cityId), fn (Builder $centers) => $centers
                 ->where(fn (Builder $locations) => $locations->where('city_id', $cityId)->orWhereNull('city_id')));
-
-        // Until a programme is chosen there is nothing to narrow by.
-        if ($programId !== null) {
-            $query->whereHas('positions', fn (Builder $positions) => $positions->visible()
-                ->where('program_id', $programId));
-        }
-
-        return $query;
     }
 
     /**

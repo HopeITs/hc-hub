@@ -12,6 +12,7 @@ use App\Enums\SalaryPer;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\Position;
+use App\Models\Program;
 use App\Models\RecruitmentRequest;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -202,6 +203,26 @@ class RecruitmentRequestDraftService
         return [$target, (int) $cityId];
     }
 
+    /**
+     * Whether a new position has to name the centre it sits in.
+     *
+     * Two cases have none to name: remote work, which sits in no centre at
+     * all, and the programmes that run across many centres rather than out of
+     * one, where pinning the position to a single centre would be a fiction.
+     */
+    private function centerRule(array $input): string
+    {
+        if (($input['volunteer_type'] ?? null) === 'remote') {
+            return 'nullable';
+        }
+
+        $exempt = config('recruitment.request_form.centerless_program_slugs', []);
+        $slug = empty($input['program_id']) ? null
+            : Program::query()->whereKey($input['program_id'])->value('slug');
+
+        return $slug !== null && in_array($slug, $exempt, true) ? 'nullable' : 'required';
+    }
+
     /** D8: a failed audit write is reported and must not roll back the request. */
     private function recordEvent(RecruitmentRequest $request, User $actor, array $attributes): void
     {
@@ -228,7 +249,7 @@ class RecruitmentRequestDraftService
             'city_id' => $this->scopes->scopeCreatableCities(City::query(), $actor)->whereKey($cityId)->exists(),
             'program_id' => $programId === null
                 ? ! $this->scopes->hasProgramCreationScope($actor)
-                : $this->scopes->scopeCreatablePrograms(\App\Models\Program::query(), $actor)->whereKey($programId)->exists(),
+                : $this->scopes->scopeCreatablePrograms(Program::query(), $actor)->whereKey($programId)->exists(),
             'center_id' => empty($data['center_id']) || $this->scopes
                 ->scopeCreatableCenters(Center::query(), $actor, $cityId, $programId)
                 ->whereKey($data['center_id'])->exists(),
@@ -265,15 +286,15 @@ class RecruitmentRequestDraftService
             $rules += [
                 'direct_manager_id' => ['required', 'integer'],
                 'city_id' => ['required', 'integer', 'exists:cities,id'],
-                'program_id' => ['nullable', 'integer', 'exists:programs,id'],
-                'center_id' => ['nullable', 'integer', 'exists:centers,id'],
-                'department_id' => ['nullable', 'integer', 'exists:departments,id'],
-                'job_level_id' => ['nullable', 'integer', 'exists:job_levels,id'],
-                'title_en' => ['nullable', 'string', 'max:255'],
-                'title_ar' => ['nullable', 'string', 'max:255'],
-                'qualifications' => ['nullable', 'string'],
-                'responsibilities' => ['nullable', 'string'],
-                'max_emp' => ['nullable', 'integer', 'min:1'],
+                'program_id' => ['required', 'integer', 'exists:programs,id'],
+                'center_id' => [$this->centerRule($input), 'integer', 'exists:centers,id'],
+                'department_id' => ['required', 'integer', 'exists:departments,id'],
+                'job_level_id' => ['required', 'integer', 'exists:job_levels,id'],
+                'title_en' => ['required', 'string', 'max:255'],
+                'title_ar' => ['required', 'string', 'max:255'],
+                'qualifications' => ['required', 'string'],
+                'responsibilities' => ['required', 'string'],
+                'max_emp' => ['required', 'integer', 'min:1'],
             ];
         }
 
@@ -283,35 +304,36 @@ class RecruitmentRequestDraftService
             $form = config('recruitment.request_form');
 
             $rules += [
-                'recruitment_reason' => ['nullable', 'string', Rule::in($form['recruitment_reasons'])],
-                'other_reason' => ['nullable', 'string', 'max:1000'],
-                'priority' => ['nullable', 'string', Rule::in($form['priorities'])],
-                'volunteer_type' => ['nullable', 'string', Rule::in($form['volunteer_types'])],
-                'weekly_hours' => ['nullable', 'integer', 'min:1', 'max:168'],
-                'volunteer_period_start_date' => ['nullable', 'date_format:Y-m-d'],
-                'volunteer_period_end_date' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:data.volunteer_period_start_date'],
-                'needed_by_date' => ['nullable', 'date_format:Y-m-d'],
-                'salary_amount' => ['nullable', 'integer', 'min:0'],
-                'currency' => ['nullable', 'integer', Rule::in([Currency::SYP, Currency::USD, Currency::EUR])],
-                'salary_per' => ['nullable', 'integer', Rule::in([SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session])],
-                'contract_type_id' => ['nullable', 'integer', 'exists:contract_types,id'],
-                'detailed_explanation' => ['nullable', 'string'],
+                'recruitment_reason' => ['required', 'string', Rule::in($form['recruitment_reasons'])],
+                // Only meaningful when the list itself has no answer for it.
+                'other_reason' => ['required_if:data.recruitment_reason,other', 'nullable', 'string', 'max:1000'],
+                'priority' => ['required', 'string', Rule::in($form['priorities'])],
+                'volunteer_type' => ['required', 'string', Rule::in($form['volunteer_types'])],
+                'weekly_hours' => ['required', 'integer', 'min:1', 'max:168'],
+                'volunteer_period_start_date' => ['required', 'date_format:Y-m-d'],
+                'volunteer_period_end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:data.volunteer_period_start_date'],
+                'needed_by_date' => ['required', 'date_format:Y-m-d'],
+                'salary_amount' => ['required', 'integer', 'min:0'],
+                'currency' => ['required', 'integer', Rule::in([Currency::SYP, Currency::USD, Currency::EUR])],
+                'salary_per' => ['required', 'integer', Rule::in([SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session])],
+                'contract_type_id' => ['required', 'integer', 'exists:contract_types,id'],
+                'detailed_explanation' => ['required', 'string'],
             ];
         }
         if (in_array($type, [Type::FillVacancy, Type::CloseVacancy], true)) {
             $rules['vacancy_id'] = [$type === Type::CloseVacancy ? 'required' : 'nullable', 'integer'];
         }
         if ($type === Type::IncreaseHeadcount) {
-            $rules['additional_count'] = ['nullable', 'integer', 'min:1'];
+            $rules['additional_count'] = ['required', 'integer', 'min:1'];
         }
         if ($type === Type::DecreaseHeadcount) {
-            $rules['reduce_by'] = ['nullable', 'integer', 'min:1'];
+            $rules['reduce_by'] = ['required', 'integer', 'min:1'];
         }
         if (in_array($type, [Type::DecreaseHeadcount, Type::ClosePosition, Type::CloseVacancy], true)) {
-            $rules['reason'] = ['nullable', 'string'];
+            $rules['reason'] = ['required', 'string'];
         }
         if (in_array($type, [Type::DecreaseHeadcount, Type::ClosePosition], true)) {
-            $rules['effective_date'] = ['nullable', 'date_format:Y-m-d'];
+            $rules['effective_date'] = ['required', 'date_format:Y-m-d'];
         }
 
         // Strip fields for other request types and all caller-supplied internal state.

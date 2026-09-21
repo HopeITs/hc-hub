@@ -49,15 +49,6 @@ class Create extends Component
         unset($this->data['center_id']);
     }
 
-    /**
-     * Program narrows what is left, so a stale center or city from the previous
-     * program cannot survive the change and reach the server.
-     */
-    public function updatedDataProgramId(): void
-    {
-        unset($this->data['center_id']);
-    }
-
     public function save(RecruitmentRequestDraftService $drafts)
     {
         $this->resetValidation();
@@ -96,8 +87,7 @@ class Create extends Component
 
         $cityId = filter_var($this->data['city_id'] ?? null, FILTER_VALIDATE_INT) ?: null;
 
-        $programId = filter_var($this->data['program_id'] ?? null, FILTER_VALIDATE_INT) ?: null;
-        $centers = $scopes->scopeCreatableCenters(Center::query(), $user, $cityId, $programId)
+        $centers = $scopes->scopeCreatableCenters(Center::query(), $user, $cityId)
             ->orderBy(transColumn('name'))->get();
         $vacancies = $isFill ? $this->availableVacancies()->orderBy('id')->get()
             : Vacancy::query()->visibleTo($user)->where('position_id', $this->data['position_id'] ?? 0)->get();
@@ -106,7 +96,9 @@ class Create extends Component
             'positions' => $positions, 'centers' => $centers, 'vacancies' => $vacancies,
             'cities' => $scopes->scopeCreatableCities(City::query(), $user)->orderBy(transColumn('name'))->get(),
             'programs' => $scopes->scopeCreatablePrograms(Program::query(), $user)->orderBy('name')->get(),
-            'programRequired' => $isNewPosition && $scopes->hasProgramCreationScope($user),
+            // A centre is named unless the work is remote or the programme runs
+            // across many centres rather than out of one.
+            'centerRequired' => $this->centerIsRequired(),
             'departments' => Department::query()->orderBy('name')->get(),
             // Strictly junior to the requester's own grade — nobody creates a
             // peer or a superior for himself. Enforced again on save.
@@ -133,6 +125,20 @@ class Create extends Component
         if ($programs->count() === 1) {
             $this->data['program_id'] = $programs->first();
         }
+    }
+
+    /** Mirrors the rule the draft service enforces on save. */
+    private function centerIsRequired(): bool
+    {
+        if (($this->data['volunteer_type'] ?? null) === 'remote') {
+            return false;
+        }
+
+        $exempt = config('recruitment.request_form.centerless_program_slugs', []);
+        $slug = empty($this->data['program_id']) ? null
+            : Program::query()->whereKey($this->data['program_id'])->value('slug');
+
+        return $slug === null || ! in_array($slug, $exempt, true);
     }
 
     private function availableVacancies()

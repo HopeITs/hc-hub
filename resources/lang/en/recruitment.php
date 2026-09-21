@@ -113,4 +113,5 @@ return [
     'volunteer_type_onsite' => 'On site',
     'volunteer_type_remote' => 'Remote',
     'period_help' => 'The proposed agreement period. Leave empty if open ended.',
+    'center_optional_help' => 'The centre is optional here: remote work, or a programme spanning several centres.',
 ];

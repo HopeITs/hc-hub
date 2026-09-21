@@ -21,12 +21,13 @@ use App\Services\RecruitmentScopeResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
+use Tests\Concerns\BuildsRecruitmentRequests;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 
 class RecruitmentCreationScopeTest extends TestCase
 {
-    use CreatesHrFixtures, RefreshDatabase;
+    use BuildsRecruitmentRequests, CreatesHrFixtures, RefreshDatabase;
 
     private User $manager;
 
@@ -160,8 +161,7 @@ class RecruitmentCreationScopeTest extends TestCase
         $this->child($this->root, ['direct_manager_id' => null, 'title_en' => 'Unrelated private position']);
         $before = Position::count();
 
-        Livewire::actingAs($this->manager)->test(Create::class)
-            ->set('data.request_type', RecruitmentRequestType::IncreaseHeadcount)
+        $this->screen(RecruitmentRequestType::IncreaseHeadcount)
             ->assertSee('Allowed remote position')->assertDontSee('Unrelated private position')
             ->set('data.position_id', $child->id)->set('data.recruitment_reason', 'operational_need')
             ->set('data.status', RecruitmentRequestStatus::Approved)->set('data.mode', RecruitmentRequestMode::DirectHr)
@@ -181,7 +181,7 @@ class RecruitmentCreationScopeTest extends TestCase
     public function test_forged_target_and_reparenting_after_loading_are_rejected_on_save(): void
     {
         $child = $this->child($this->root);
-        $screen = Livewire::actingAs($this->manager)->test(Create::class)->set('data.position_id', $child->id);
+        $screen = $this->screen()->set('data.position_id', $child->id);
         $child->update(['direct_manager_id' => null]);
         $screen->call('save')->assertHasErrors('data.position_id');
         $this->assertSame(0, RecruitmentRequest::count());
@@ -191,10 +191,10 @@ class RecruitmentCreationScopeTest extends TestCase
     {
         $city = $this->makeCity('HMS', '002');
         $program = Program::create(['name' => 'Other', 'code' => 'OTH', 'slug' => 'other', 'start_date' => now(), 'is_active' => true]);
-        Livewire::actingAs($this->manager)->test(Create::class)
-            ->set('data.request_type', RecruitmentRequestType::CreatePosition)
+        $this->screen(RecruitmentRequestType::CreatePosition)
             ->set('data.direct_manager_id', $this->root->id)->set('data.city_id', $city->id)
             ->set('data.program_id', $program->id)->set('data.title_ar', 'منصب مقترح')
+            ->set('data.center_id', $this->centerIn($city->id))
             ->call('save')->assertHasNoErrors()->assertRedirect();
 
         $request = RecruitmentRequest::sole();
@@ -209,8 +209,7 @@ class RecruitmentCreationScopeTest extends TestCase
         $city = $this->makeCity('HMS', '002');
         $otherCity = $this->makeCity('DMS', '003');
         $center = \App\Models\Center::create(['name_en' => 'Other center', 'name_ar' => 'مركز آخر', 'city_id' => $otherCity->id, 'is_active' => true]);
-        Livewire::actingAs($this->manager)->test(Create::class)
-            ->set('data.request_type', RecruitmentRequestType::CreatePosition)
+        $this->screen(RecruitmentRequestType::CreatePosition)
             ->set('data.direct_manager_id', $this->root->id)->set('data.city_id', $city->id)
             ->set('data.center_id', $center->id)->call('save')->assertHasErrors('data.center_id');
         $this->assertSame(0, RecruitmentRequest::count());
@@ -228,9 +227,12 @@ class RecruitmentCreationScopeTest extends TestCase
     public function test_request_visibility_does_not_expose_someone_elses_draft(): void
     {
         $child = $this->child($this->root);
-        $request = app(RecruitmentRequestDraftService::class)->create($this->manager, [
-            'request_type' => RecruitmentRequestType::IncreaseHeadcount, 'position_id' => $child->id,
-        ]);
+        $request = app(RecruitmentRequestDraftService::class)->create($this->manager, array_merge(
+            $this->recruitmentFormDefaults(RecruitmentRequestType::IncreaseHeadcount, [
+                'contract_type_id' => $this->recruitmentContractTypeId(),
+            ]),
+            ['request_type' => RecruitmentRequestType::IncreaseHeadcount, 'position_id' => $child->id],
+        ));
         $hr = $this->makeUser($this->root->city, 'HR-SYR');
         $this->assertFalse(RecruitmentRequest::visibleTo($hr)->whereKey($request->id)->exists());
         $request->update(['status' => RecruitmentRequestStatus::UnderReview]);
@@ -243,12 +245,10 @@ class RecruitmentCreationScopeTest extends TestCase
         $aleppo = $this->makeCity('ALP', '001');
 
         // ...and a governorate outside that set is still accepted on save (D49).
-        app(RecruitmentRequestDraftService::class)->create($this->manager, [
-            'request_type' => RecruitmentRequestType::CreatePosition,
-            'direct_manager_id' => $this->root->id,
+        app(RecruitmentRequestDraftService::class)->create($this->manager, $this->newPositionPayload([
             'city_id' => $aleppo->id,
             'title_en' => 'First position in a new governorate',
-        ]);
+        ]));
 
         $this->assertSame($aleppo->id, RecruitmentRequest::sole()->scope_city_id);
     }
@@ -281,12 +281,7 @@ class RecruitmentCreationScopeTest extends TestCase
         $peer = JobLevel::query()->where('grade', 5)->sole();
         $drafts = app(RecruitmentRequestDraftService::class);
 
-        $base = [
-            'request_type' => RecruitmentRequestType::CreatePosition,
-            'direct_manager_id' => $this->root->id,
-            'city_id' => $this->root->city_id,
-            'title_en' => 'New position',
-        ];
+        $base = $this->newPositionPayload(['title_en' => 'New position']);
 
         foreach ([$senior->id, $peer->id] as $levelId) {
             try {
@@ -296,6 +291,134 @@ class RecruitmentCreationScopeTest extends TestCase
                 $this->assertArrayHasKey('data.job_level_id', $exception->errors());
             }
         }
+    }
+
+    /**
+     * A centre is required, except where there is none to name.
+     *
+     * Remote work sits in no centre, and the programmes that run across many
+     * centres rather than out of one would be misrepresented by naming a
+     * single one. Both are read from the form on the way in.
+     */
+    public function test_the_centre_is_required_except_for_remote_work_and_spanning_programmes(): void
+    {
+        $drafts = app(RecruitmentRequestDraftService::class);
+        $payload = $this->newPositionPayload();
+        unset($payload['center_id']);
+
+        try {
+            $drafts->create($this->manager, $payload);
+            $this->fail('A new position normally has to name its centre.');
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $this->assertArrayHasKey('data.center_id', $exception->errors());
+        }
+
+        // Remote work has no centre to name.
+        $remote = $drafts->create($this->manager, array_merge($payload, ['volunteer_type' => 'remote']));
+        $this->assertNull($remote->draft_payload_json['center_id'] ?? null);
+
+        // ...and neither does a programme that spans several centres.
+        $spanning = Program::query()->create([
+            'name' => 'Study Zone', 'code' => 'SZ-1',
+            'slug' => config('recruitment.request_form.centerless_program_slugs')[0],
+            'start_date' => now(), 'is_active' => true,
+        ]);
+
+        $across = $drafts->create($this->manager, array_merge($payload, ['program_id' => $spanning->id]));
+        $this->assertNull($across->draft_payload_json['center_id'] ?? null);
+    }
+
+    /**
+     * A complete new-position payload.
+     *
+     * Every field on the form is required before a draft saves, so the parts a
+     * test is not about are answered here. The grade is junior to the
+     * requester's own, which D51 requires.
+     *
+     * @return array<string, mixed>
+     */
+    private function newPositionPayload(array $overrides = []): array
+    {
+        $junior = JobLevel::query()->firstOrCreate(
+            ['grade' => 7],
+            ['name_en' => 'Junior', 'name_ar' => 'أدنى'],
+        );
+
+        $values = $this->recruitmentFormDefaults(RecruitmentRequestType::CreatePosition, array_merge([
+            'request_type' => RecruitmentRequestType::CreatePosition,
+            'direct_manager_id' => $this->root->id,
+            'city_id' => $this->root->city_id,
+            'program_id' => $this->root->program_id,
+            'department_id' => $this->root->department_id,
+            'job_level_id' => $junior->id,
+            'contract_type_id' => $this->recruitmentContractTypeId(),
+        ], $overrides));
+
+        // A centre is required unless the work is remote, and it has to sit in
+        // the governorate the position is being created in.
+        $values['center_id'] ??= \App\Models\Center::query()->firstOrCreate(
+            ['city_id' => $values['city_id']],
+            ['name_en' => 'Centre '.$values['city_id'], 'name_ar' => 'مركز', 'is_active' => true],
+        )->id;
+
+        return $values;
+    }
+
+    /** Changing the governorate clears the centre, so tests name a new one. */
+    private function centerIn(int $cityId): int
+    {
+        return (int) \App\Models\Center::query()->firstOrCreate(
+            ['city_id' => $cityId],
+            ['name_en' => 'Centre '.$cityId, 'name_ar' => 'مركز', 'is_active' => true],
+        )->id;
+    }
+
+    /**
+     * A screen with every required field already answered.
+     *
+     * The form refuses to save a draft with anything missing, so a test about
+     * scope or availability fills the rest once here and overrides only what
+     * it is actually exercising.
+     */
+    private function screen(int $type = RecruitmentRequestType::FillVacancy, array $overrides = [])
+    {
+        $screen = Livewire::actingAs($this->manager)->test(Create::class);
+
+        if ($type !== RecruitmentRequestType::FillVacancy) {
+            $screen->set('data.request_type', $type);
+        }
+
+        // A new position also has to say where in the organization it sits.
+        if ($type === RecruitmentRequestType::CreatePosition) {
+            $overrides += $this->newPositionOrganization();
+        }
+
+        return $this->fillRecruitmentForm($screen, $type, $overrides);
+    }
+
+    /**
+     * The organizational answers a new position needs, none of which these
+     * tests are about. The grade is junior to the requester's own (D51).
+     *
+     * @return array<string, mixed>
+     */
+    private function newPositionOrganization(): array
+    {
+        return [
+            'direct_manager_id' => $this->root->id,
+            'city_id' => $this->root->city_id,
+            'program_id' => $this->root->program_id,
+            'department_id' => $this->root->department_id,
+            'job_level_id' => JobLevel::query()->firstOrCreate(
+                ['grade' => 9],
+                ['name_en' => 'Junior', 'name_ar' => 'أدنى'],
+            )->id,
+            'center_id' => \App\Models\Center::query()->firstOrCreate(
+                ['city_id' => $this->root->city_id],
+                ['name_en' => 'Centre', 'name_ar' => 'مركز', 'is_active' => true],
+            )->id,
+            'contract_type_id' => $this->recruitmentContractTypeId(),
+        ];
     }
 
     private function child(Position $parent, array $attributes = []): Position

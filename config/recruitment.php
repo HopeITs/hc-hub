@@ -131,6 +131,17 @@ return [
             'onsite',
             'remote',
         ],
+
+        /*
+        | A new position must name the centre it sits in, with two exceptions.
+        |
+        | Remote work has no centre to name. And these programmes are run
+        | across many centres rather than out of one, so pinning a position to
+        | a single centre would be a fiction. Matched on programs.slug.
+        */
+        'centerless_program_slugs' => [
+            'SZ',
+        ],
     ],
 
 ];

@@ -17,6 +17,7 @@ use App\Services\RecruitmentRequestDraftService;
 use App\Services\RecruitmentRequestSubmissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
+use Tests\Concerns\BuildsRecruitmentRequests;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 
@@ -25,7 +26,7 @@ use Tests\TestCase;
  */
 class RecruitmentSubmissionTest extends TestCase
 {
-    use CreatesHrFixtures, RefreshDatabase;
+    use BuildsRecruitmentRequests, CreatesHrFixtures, RefreshDatabase;
 
     private User $manager;
 
@@ -73,22 +74,27 @@ class RecruitmentSubmissionTest extends TestCase
         ]);
     }
 
-    /** A draft may be half-finished; a submission may not. */
-    public function test_submitting_an_incomplete_draft_names_every_missing_field(): void
+    /**
+     * Every field on the form is answered before anything is saved.
+     *
+     * A draft used to be allowed to be half-finished. It is not any more, so
+     * the completeness check now fires on the way in rather than on the way
+     * out, and names everything that is missing at once.
+     */
+    public function test_an_incomplete_draft_names_every_missing_field(): void
     {
-        $request = $this->draft([]);
-
         try {
-            $this->submit($request);
-            $this->fail('An incomplete draft should not submit.');
+            $this->draft([]);
+            $this->fail('An incomplete draft should not save.');
         } catch (ValidationException $exception) {
-            foreach (['recruitment_reason', 'priority', 'volunteer_type', 'weekly_hours', 'needed_by_date', 'salary_amount', 'currency', 'salary_per', 'contract_type_id'] as $field) {
+            foreach (['recruitment_reason', 'priority', 'volunteer_type', 'weekly_hours', 'needed_by_date',
+                'salary_amount', 'currency', 'salary_per', 'contract_type_id'] as $field) {
                 $this->assertArrayHasKey('data.'.$field, $exception->errors(), "{$field} should be reported as missing.");
             }
         }
 
-        $this->assertSame(Status::Draft, (int) $request->fresh()->status);
-        $this->assertSame(0, $request->versions()->count());
+        // setUp seeds one applied request to hang the vacancy off; nothing new was written.
+        $this->assertSame(0, RecruitmentRequest::query()->where('status', Status::Draft)->count());
     }
 
     public function test_a_complete_draft_submits_and_freezes_version_one(): void
@@ -260,7 +266,7 @@ class RecruitmentSubmissionTest extends TestCase
         $firstVacancy = Vacancy::sole();
         $secondVacancy = Vacancy::create([
             'position_id' => $this->target->id,
-            'created_from_request_id' => $this->draft(['additional_count' => 1], Type::IncreaseHeadcount)->id,
+            'created_from_request_id' => $this->draft($this->complete(Type::IncreaseHeadcount), Type::IncreaseHeadcount)->id,
             'status' => 'open', 'needed_count' => 1, 'filled_count' => 0, 'open_at' => now(),
         ]);
         foreach ([$firstVacancy, $secondVacancy] as $vacancy) {
@@ -308,21 +314,19 @@ class RecruitmentSubmissionTest extends TestCase
     /** Choosing "other" without saying what it is answers nothing. */
     public function test_other_as_a_reason_must_say_what_it_is(): void
     {
-        $request = $this->draft(array_merge($this->complete(), ['recruitment_reason' => 'other']));
-
         try {
-            $this->submit($request);
-            $this->fail('"Other" with no text should not submit.');
+            $this->draft(array_merge($this->complete(), ['recruitment_reason' => 'other']));
+            $this->fail('"Other" with no text should not save.');
         } catch (ValidationException $exception) {
             $this->assertArrayHasKey('data.other_reason', $exception->errors());
         }
 
-        app(RecruitmentRequestDraftService::class)->update($this->manager, $request, $this->payload([
+        $request = $this->draft(array_merge($this->complete(), [
             'recruitment_reason' => 'other',
             'other_reason' => 'A reason the list does not cover',
         ]));
 
-        $submitted = $this->submit($request->fresh());
+        $submitted = $this->submit($request);
         $detail = $submitted->versions()->sole()->positionDetail;
 
         $this->assertSame('other', $detail->recruitment_reason);
@@ -344,21 +348,12 @@ class RecruitmentSubmissionTest extends TestCase
     }
 
     /** @return array<string, mixed> */
-    private function complete(): array
+    private function complete(int $type = Type::FillVacancy): array
     {
-        return [
-            'recruitment_reason' => 'operational_need',
-            'priority' => 'normal',
-            'volunteer_type' => 'onsite',
-            'weekly_hours' => 40,
-            'needed_by_date' => '2026-12-01',
-            'salary_amount' => 500,
-            'currency' => 2,
-            'salary_per' => 1,
-            'contract_type_id' => $this->contractType->id,
-        ];
+        return $this->recruitmentFormDefaults($type, ['contract_type_id' => $this->contractType->id]);
     }
 
+    /** Exactly what is passed, so a test can deliberately leave fields out. */
     /** Exactly what is passed, so a test can deliberately leave fields out. */
     private function draft(array $payload, int $type = Type::FillVacancy): RecruitmentRequest
     {
@@ -374,7 +369,7 @@ class RecruitmentSubmissionTest extends TestCase
         return array_merge([
             'request_type' => $type,
             'position_id' => $this->target->id,
-        ], $this->complete(), $overrides);
+        ], $this->complete($type), $overrides);
     }
 
     private function submit(RecruitmentRequest $request): RecruitmentRequest

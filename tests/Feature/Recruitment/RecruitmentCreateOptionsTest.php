@@ -16,12 +16,13 @@ use App\Models\User;
 use App\Services\RecruitmentRequestDraftService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Tests\Concerns\BuildsRecruitmentRequests;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 
 class RecruitmentCreateOptionsTest extends TestCase
 {
-    use CreatesHrFixtures, RefreshDatabase;
+    use BuildsRecruitmentRequests, CreatesHrFixtures, RefreshDatabase;
 
     private User $manager;
 
@@ -59,7 +60,7 @@ class RecruitmentCreateOptionsTest extends TestCase
             $vacancy = $this->vacancy($target);
             // A seat with no vacancies row yet is still a seat to fill: nothing
             // opens one until a request is approved and applied.
-            $screen = Livewire::actingAs($this->manager)->test(Create::class)
+            $screen = $this->screen()
                 ->assertSee($target->title_en)->assertSee($empty->title_en)
                 ->set('data.position_id', $target->id)
                 ->assertSet('data.vacancy_id', $vacancy->id)
@@ -83,7 +84,7 @@ class RecruitmentCreateOptionsTest extends TestCase
 
         $this->assertSame(0, $target->vacancies()->count());
 
-        Livewire::actingAs($this->manager)->test(Create::class)
+        $this->screen()
             ->assertSee($target->title_en)
             ->set('data.position_id', $target->id)
             ->assertSet('data.vacancy_id', null)
@@ -99,7 +100,7 @@ class RecruitmentCreateOptionsTest extends TestCase
     {
         $full = $this->child($this->root, ['title_en' => 'Fully staffed', 'max_emp' => 1, 'exist_emp' => 1]);
 
-        Livewire::actingAs($this->manager)->test(Create::class)
+        $this->screen()
             ->assertDontSee($full->title_en)
             ->set('data.position_id', $full->id)
             ->call('save')->assertHasErrors('data.position_id');
@@ -110,7 +111,7 @@ class RecruitmentCreateOptionsTest extends TestCase
         $target = $this->child($this->root);
         $one = $this->vacancy($target);
         $two = $this->vacancy($target);
-        $screen = Livewire::actingAs($this->manager)->test(Create::class)
+        $screen = $this->screen()
             ->set('data.position_id', $target->id)
             ->assertSee('id="vacancy_id"', false)
             ->call('save')->assertHasErrors('data.vacancy_id')
@@ -132,7 +133,7 @@ class RecruitmentCreateOptionsTest extends TestCase
             $vacancy = $this->vacancy($target, $attributes);
             // The position has room so it is offered; naming a vacancy that is
             // closed, full, cancelled or not yet open is what gets refused.
-            Livewire::actingAs($this->manager)->test(Create::class)->assertSee($target->title_en)
+            $this->screen()->assertSee($target->title_en)
                 ->set('data.position_id', $target->id)->set('data.vacancy_id', $vacancy->id)
                 ->call('save')->assertHasErrors('data.vacancy_id');
         }
@@ -140,7 +141,7 @@ class RecruitmentCreateOptionsTest extends TestCase
         $this->vacancy($target);
         $outside = $this->child($this->root, ['direct_manager_id' => null]);
         $foreign = $this->vacancy($outside);
-        Livewire::actingAs($this->manager)->test(Create::class)
+        $this->screen()
             ->set('data.position_id', $target->id)->set('data.vacancy_id', $foreign->id)
             ->call('save')->assertHasErrors('data.vacancy_id');
     }
@@ -149,10 +150,13 @@ class RecruitmentCreateOptionsTest extends TestCase
     {
         $target = $this->child($this->root);
         $vacancy = $this->vacancy($target);
-        $screen = Livewire::actingAs($this->manager)->test(Create::class)->set('data.position_id', $target->id);
-        $draft = app(RecruitmentRequestDraftService::class)->create($this->manager, [
-            'request_type' => RecruitmentRequestType::FillVacancy, 'position_id' => $target->id,
-        ]);
+        $screen = $this->screen()->set('data.position_id', $target->id);
+        $draft = app(RecruitmentRequestDraftService::class)->create($this->manager, array_merge(
+            $this->recruitmentFormDefaults(RecruitmentRequestType::FillVacancy, [
+                'contract_type_id' => $this->recruitmentContractTypeId(),
+            ]),
+            ['request_type' => RecruitmentRequestType::FillVacancy, 'position_id' => $target->id],
+        ));
         $vacancy->update(['filled_count' => 2]);
         $screen->call('save')->assertHasErrors('data.vacancy_id');
         $this->expectException(\Illuminate\Validation\ValidationException::class);
@@ -171,11 +175,9 @@ class RecruitmentCreateOptionsTest extends TestCase
         foreach ([1, 3] as $grade) {
             $this->root->jobLevel->update(['grade' => $grade]);
             $this->manager = $this->manager->fresh();
-            $screen = Livewire::actingAs($this->manager)->test(Create::class)
-                ->set('data.request_type', RecruitmentRequestType::CreatePosition)
+            $screen = $this->screen(RecruitmentRequestType::CreatePosition)
                 ->assertSee($this->root->title_en)->assertSee($manager->title_en)
-                ->assertSee($teamLeader->title_en)->assertDontSee('Center Keeper')->assertDontSee('Higher manager')
-                ->set('data.city_id', $this->root->city_id);
+                ->assertSee($teamLeader->title_en)->assertDontSee('Center Keeper')->assertDontSee('Higher manager');
             foreach ([$worker, $higher] as $forbidden) {
                 $screen->set('data.direct_manager_id', $forbidden->id)->call('save')->assertHasErrors('data.direct_manager_id');
             }
@@ -190,6 +192,7 @@ class RecruitmentCreateOptionsTest extends TestCase
         $otherProgram = Program::create(['name' => 'Other program', 'code' => 'OTH', 'slug' => 'other', 'start_date' => now(), 'is_active' => true]);
         $center = \App\Models\Center::create(['name_en' => 'Allowed center', 'name_ar' => 'مركز', 'city_id' => $local->id, 'is_active' => true]);
         $foreign = \App\Models\Center::create(['name_en' => 'Foreign center', 'name_ar' => 'آخر', 'city_id' => $local->id, 'is_active' => true]);
+        $elsewhere = \App\Models\Center::create(['name_en' => 'Centre elsewhere', 'name_ar' => 'مركز بعيد', 'city_id' => $remote->id, 'is_active' => true]);
         $this->child($this->root, ['center_id' => $center->id, 'city_id' => $this->root->city_id]);
         $this->child($this->root, ['center_id' => $foreign->id, 'city_id' => $remote->id, 'program_id' => $otherProgram->id]);
         $departmentManager = JobLevel::create(['name_en' => 'Department Manager', 'name_ar' => 'مدير قسم', 'grade' => 5]);
@@ -197,18 +200,23 @@ class RecruitmentCreateOptionsTest extends TestCase
         foreach ([1, 3] as $grade) {
             $this->root->jobLevel->update(['grade' => $grade]);
             $this->manager = $this->manager->fresh();
-            $screen = Livewire::actingAs($this->manager)->test(Create::class)
-                ->set('data.request_type', RecruitmentRequestType::CreatePosition)
+            $screen = $this->screen(RecruitmentRequestType::CreatePosition)
                 ->assertSet('data.program_id', $this->root->program_id)
                 ->assertDontSee('Department Manager')->assertDontSee('Other program')
                 ->set('data.direct_manager_id', $this->root->id)->set('data.city_id', $local->id)
-                ->assertSee('Allowed center')->assertDontSee('Foreign center')
+                // Both centres sit in the chosen governorate, and the programme
+                // no longer narrows the list — only the governorate does.
+                ->assertSee('Allowed center')->assertSee('Foreign center')
                 ->assertViewHas('cities', fn ($cities) => $cities->contains('id', $local->id) && ! $cities->contains('id', $remote->id));
-            $base = ['request_type' => RecruitmentRequestType::CreatePosition,
+            $base = $this->recruitmentFormDefaults(RecruitmentRequestType::CreatePosition, [
+                'request_type' => RecruitmentRequestType::CreatePosition,
                 'direct_manager_id' => $this->root->id, 'program_id' => $this->root->program_id,
-                'city_id' => $local->id, 'center_id' => $center->id, 'job_level_id' => $junior->id];
+                'city_id' => $local->id, 'center_id' => $center->id, 'job_level_id' => $junior->id,
+                'department_id' => $this->root->department_id,
+                'contract_type_id' => $this->recruitmentContractTypeId(),
+            ]);
             foreach (['city_id' => $remote->id, 'program_id' => $otherProgram->id,
-                'center_id' => $foreign->id, 'job_level_id' => $departmentManager->id] as $field => $value) {
+                'center_id' => $elsewhere->id, 'job_level_id' => $departmentManager->id] as $field => $value) {
                 try {
                     app(RecruitmentRequestDraftService::class)->create($this->manager, array_replace($base, [$field => $value]));
                     $this->fail('Forged '.$field.' should be rejected.');
@@ -218,8 +226,11 @@ class RecruitmentCreateOptionsTest extends TestCase
             }
             $screen->set('data.center_id', $center->id)->set('data.job_level_id', $junior->id)
                 ->call('save')->assertHasNoErrors();
+            // The governorate still clears the centre, because a centre belongs
+            // to one. The programme does not: it no longer narrows the list.
             $screen->set('data.city_id', $this->root->city_id)->assertSet('data.center_id', null);
-            $screen->set('data.center_id', $center->id)->set('data.program_id', $otherProgram->id)->assertSet('data.center_id', null);
+            $screen->set('data.center_id', $center->id)->set('data.program_id', $otherProgram->id)
+                ->assertSet('data.center_id', $center->id);
         }
     }
 
@@ -228,7 +239,7 @@ class RecruitmentCreateOptionsTest extends TestCase
         foreach ([['exist_emp' => 5], ['is_active' => false]] as $attributes) {
             $target = $this->child($this->root, $attributes);
             $this->vacancy($target);
-            Livewire::actingAs($this->manager)->test(Create::class)->assertDontSee($target->title_en)
+            $this->screen()->assertDontSee($target->title_en)
                 ->set('data.position_id', $target->id)->call('save')->assertHasErrors('data.position_id');
         }
     }
@@ -241,11 +252,68 @@ class RecruitmentCreateOptionsTest extends TestCase
         $this->manager = $this->manager->fresh();
         $city = $this->makeCity('ALP', '001');
         $program = Program::create(['name' => 'Unrelated program', 'code' => 'UNK', 'slug' => 'unknown', 'start_date' => now(), 'is_active' => true]);
-        Livewire::actingAs($this->manager)->test(Create::class)
-            ->set('data.request_type', RecruitmentRequestType::CreatePosition)
+        $this->screen(RecruitmentRequestType::CreatePosition)
             ->assertSee('Unrelated program')->set('data.direct_manager_id', $this->root->id)
             ->set('data.city_id', $city->id)->set('data.program_id', $program->id)
+            ->set('data.center_id', $this->centerIn($city->id))
             ->call('save')->assertHasNoErrors();
+    }
+
+    /** Changing the governorate clears the centre, so tests name a new one. */
+    private function centerIn(int $cityId): int
+    {
+        return (int) \App\Models\Center::query()->firstOrCreate(
+            ['city_id' => $cityId],
+            ['name_en' => 'Centre '.$cityId, 'name_ar' => 'مركز', 'is_active' => true],
+        )->id;
+    }
+
+    /**
+     * A screen with every required field already answered.
+     *
+     * The form refuses to save a draft with anything missing, so a test about
+     * scope or availability fills the rest once here and overrides only what
+     * it is actually exercising.
+     */
+    private function screen(int $type = RecruitmentRequestType::FillVacancy, array $overrides = [])
+    {
+        $screen = Livewire::actingAs($this->manager)->test(Create::class);
+
+        if ($type !== RecruitmentRequestType::FillVacancy) {
+            $screen->set('data.request_type', $type);
+        }
+
+        // A new position also has to say where in the organization it sits.
+        if ($type === RecruitmentRequestType::CreatePosition) {
+            $overrides += $this->newPositionOrganization();
+        }
+
+        return $this->fillRecruitmentForm($screen, $type, $overrides);
+    }
+
+    /**
+     * The organizational answers a new position needs, none of which these
+     * tests are about. The grade is junior to the requester's own (D51).
+     *
+     * @return array<string, mixed>
+     */
+    private function newPositionOrganization(): array
+    {
+        return [
+            'direct_manager_id' => $this->root->id,
+            'city_id' => $this->root->city_id,
+            'program_id' => $this->root->program_id,
+            'department_id' => $this->root->department_id,
+            'job_level_id' => JobLevel::query()->firstOrCreate(
+                ['grade' => 9],
+                ['name_en' => 'Junior', 'name_ar' => 'أدنى'],
+            )->id,
+            'center_id' => \App\Models\Center::query()->firstOrCreate(
+                ['city_id' => $this->root->city_id],
+                ['name_en' => 'Centre', 'name_ar' => 'مركز', 'is_active' => true],
+            )->id,
+            'contract_type_id' => $this->recruitmentContractTypeId(),
+        ];
     }
 
     private function vacancy(Position $position, array $attributes = []): \App\Models\Vacancy

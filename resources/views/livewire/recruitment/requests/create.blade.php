@@ -34,10 +34,11 @@
                 <h2 class="text-h4 font-semibold">{{ __('recruitment.proposed_position') }}</h2>
                 <div class="grid gap-5 sm:grid-cols-2">
                     @include('livewire.recruitment.requests.partials.select', ['field' => 'city_id', 'label' => 'city', 'options' => $cities->pluck('name', 'id')->all(), 'required' => true])
-                    @include('livewire.recruitment.requests.partials.select', ['field' => 'program_id', 'label' => 'program', 'options' => $programs->pluck('name', 'id')->all(), 'required' => $programRequired])
-                    @include('livewire.recruitment.requests.partials.select', ['field' => 'center_id', 'label' => 'center', 'options' => $centers->pluck('name', 'id')->all(), 'required' => false])
-                    @include('livewire.recruitment.requests.partials.select', ['field' => 'department_id', 'label' => 'department', 'options' => $departments->pluck('name', 'id')->all(), 'required' => false])
-                    @include('livewire.recruitment.requests.partials.select', ['field' => 'job_level_id', 'label' => 'job_level', 'options' => $jobLevels->pluck('name', 'id')->all(), 'required' => false])
+                    @include('livewire.recruitment.requests.partials.select', ['field' => 'program_id', 'label' => 'program', 'options' => $programs->pluck('name', 'id')->all(), 'required' => true])
+                    @include('livewire.recruitment.requests.partials.select', ['field' => 'center_id', 'label' => 'center', 'options' => $centers->pluck('name', 'id')->all(), 'required' => $centerRequired])
+                    @unless ($centerRequired)<p class="text-sm text-secondary-medium sm:col-span-2">{{ __('recruitment.center_optional_help') }}</p>@endunless
+                    @include('livewire.recruitment.requests.partials.select', ['field' => 'department_id', 'label' => 'department', 'options' => $departments->pluck('name', 'id')->all(), 'required' => true])
+                    @include('livewire.recruitment.requests.partials.select', ['field' => 'job_level_id', 'label' => 'job_level', 'options' => $jobLevels->pluck('name', 'id')->all(), 'required' => true])
                     @foreach (['title_en' => 'text', 'title_ar' => 'text', 'max_emp' => 'number'] as $field => $inputType)
                         @include('livewire.recruitment.requests.partials.input')
                     @endforeach
@@ -67,7 +68,6 @@
                     @include('livewire.recruitment.requests.partials.input', ['field' => 'volunteer_period_start_date', 'inputType' => 'date'])
                     @include('livewire.recruitment.requests.partials.input', ['field' => 'volunteer_period_end_date', 'inputType' => 'date'])
                 </div>
-                <p class="text-sm text-secondary-medium">{{ __('recruitment.period_help') }}</p>
             @endif
             @if ($type === 2)
                 @include('livewire.recruitment.requests.partials.input', ['field' => 'additional_count', 'inputType' => 'number'])
@@ -83,9 +83,9 @@
             @if (in_array($type, [1, 2, 4], true))
                 <div class="grid gap-5 sm:grid-cols-2">
                     @include('livewire.recruitment.requests.partials.input', ['field' => 'salary_amount', 'inputType' => 'number'])
-                    @include('livewire.recruitment.requests.partials.select', ['field' => 'currency', 'label' => 'currency', 'options' => collect([1, 2, 3])->mapWithKeys(fn ($value) => [$value => \App\Enums\Currency::getLocalizedName($value)[app()->getLocale()]])->all(), 'required' => false])
-                    @include('livewire.recruitment.requests.partials.select', ['field' => 'salary_per', 'label' => 'salary_per', 'options' => collect([1, 2, 3])->mapWithKeys(fn ($value) => [$value => \App\Enums\SalaryPer::getLocalizedName($value)['value']])->all(), 'required' => false])
-                    @include('livewire.recruitment.requests.partials.select', ['field' => 'contract_type_id', 'label' => 'contract_type', 'options' => $contractTypes->pluck('name', 'id')->all(), 'required' => false])
+                    @include('livewire.recruitment.requests.partials.select', ['field' => 'currency', 'label' => 'currency', 'options' => collect([1, 2, 3])->mapWithKeys(fn ($value) => [$value => \App\Enums\Currency::getLocalizedName($value)[app()->getLocale()]])->all(), 'required' => true])
+                    @include('livewire.recruitment.requests.partials.select', ['field' => 'salary_per', 'label' => 'salary_per', 'options' => collect([1, 2, 3])->mapWithKeys(fn ($value) => [$value => \App\Enums\SalaryPer::getLocalizedName($value)['value']])->all(), 'required' => true])
+                    @include('livewire.recruitment.requests.partials.select', ['field' => 'contract_type_id', 'label' => 'contract_type', 'options' => $contractTypes->pluck('name', 'id')->all(), 'required' => true])
                 </div>
                 @include('livewire.recruitment.requests.partials.textarea', ['field' => 'detailed_explanation'])
             @endif
