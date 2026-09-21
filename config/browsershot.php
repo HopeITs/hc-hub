@@ -17,6 +17,15 @@ return [
     // where `npm` isn't on the web user's PATH.
     'node_module_path' => env('BROWSERSHOT_NODE_MODULE_PATH', null),
 
+    // Extra directories to resolve Chrome's shared libraries from, prepended to
+    // LD_LIBRARY_PATH for the render. Chrome loads most of its libraries lazily,
+    // so `chrome --version` succeeds on hosts that are missing them and the
+    // browser only dies once puppeteer asks it for a page ("Target.setAutoAttach:
+    // Target closed"). On a shared host where the libraries cannot be installed
+    // system-wide, unpack them somewhere the web user owns and point this there.
+    // `contracts:export-doctor` names any library that is missing.
+    'ld_library_path' => env('BROWSERSHOT_LD_LIBRARY_PATH', null),
+
     // Seconds to allow for the whole node/Chrome render. Also used as the CDP
     // protocol timeout, which otherwise defaults to 30s inside browser.cjs.
     'timeout' => (int) env('BROWSERSHOT_TIMEOUT', 120),

@@ -158,13 +158,17 @@ class ContractPdfRenderer
             // startup, surfacing as "Target.setAutoAttach: Target closed"
             // from the web server while the same command works over SSH.
             // TMPDIR deliberately points somewhere else — see makeSocketDir().
-            ->setNodeEnv([
+            ->setNodeEnv(array_filter([
                 'HOME' => $profile,
                 'XDG_CONFIG_HOME' => $profile.'/config',
                 'XDG_CACHE_HOME' => $profile.'/cache',
                 'XDG_DATA_HOME' => $profile.'/data',
                 'TMPDIR' => $this->makeSocketDir(),
-            ]);
+                // Chrome resolves most of its libraries only once it opens a
+                // page, so a host missing them still passes `chrome --version`
+                // and then dies with "Target.setAutoAttach: Target closed".
+                'LD_LIBRARY_PATH' => $this->libraryPath(),
+            ]));
 
         if ($nodeBinary = config('browsershot.node_binary')) {
             $browsershot->setNodeBinary($nodeBinary);
@@ -193,6 +197,26 @@ class ContractPdfRenderer
         }
 
         return $dir;
+    }
+
+    /**
+     * LD_LIBRARY_PATH for the render, or null to leave the host's own alone.
+     *
+     * Configured directories go first so a user-owned copy of a library wins
+     * over a missing system one, with whatever the host already exports kept
+     * behind it.
+     */
+    public function libraryPath(): ?string
+    {
+        $configured = trim((string) config('browsershot.ld_library_path'), ': ');
+
+        if ($configured === '') {
+            return null;
+        }
+
+        $inherited = trim((string) getenv('LD_LIBRARY_PATH'), ': ');
+
+        return $inherited === '' ? $configured : $configured.':'.$inherited;
     }
 
     public function profileBaseDir(): string

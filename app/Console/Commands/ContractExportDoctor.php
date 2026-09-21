@@ -54,8 +54,17 @@ class ContractExportDoctor extends Command
         $this->section('Chrome');
         $chrome = (string) config('browsershot.chrome_path');
         if ($this->check('chrome_path exists', $chrome !== '' && is_file($chrome), "Not a file: {$chrome}. Set BROWSERSHOT_CHROME_PATH to the Chrome/Chromium binary on this host.")) {
-            $this->check('chrome_path executable', is_executable($chrome), "chmod +x {$chrome}, or the web user cannot run it.");
+            $this->check('chrome_path executable', is_executable($chrome), 'chmod +x '.$chrome.', or the web user cannot run it.');
             $this->probe([$chrome, '--version'], 'chrome --version');
+            $this->sharedLibraries($chrome);
+            $this->launchesAlone($chrome);
+        }
+
+        if (PHP_OS_FAMILY !== 'Windows') {
+            $this->section('Host limits');
+            $this->probe(['sh', '-c', 'ulimit -u'], 'max user processes (ulimit -u)');
+            $this->probe(['sh', '-c', 'df -h /dev/shm | tail -1'], '/dev/shm');
+            $this->probe(['sh', '-c', "grep -E '^Mem(Total|Available)' /proc/meminfo | tr -s ' ' | tr '\\n' ' '"], 'memory');
         }
 
         $this->section('Node');
@@ -122,6 +131,36 @@ class ContractExportDoctor extends Command
         $this->line('  source         '.($contract ? 'contract #'.$contract->getKey() : 'trivial page')
             .' ('.number_format(strlen($html) / 1024, 1).' KB of HTML)');
 
+        if ($this->renderOnce($renderer, $html)) {
+            return ! $this->failed;
+        }
+
+        // A Chrome that dies during startup while `chrome --version` works is
+        // usually a host refusing it the processes it wants: the zygote and its
+        // helpers never come up and puppeteer only sees the target close. One
+        // process is a poor way to run Chrome, but it is worth knowing whether
+        // it is the difference here, because that answer is a one-line .env fix.
+        if (! config('browsershot.single_process')) {
+            $this->newLine();
+            $this->line('<fg=cyan;options=bold>Render, retried with --single-process</>');
+            config(['browsershot.single_process' => true]);
+
+            if ($this->renderOnce($renderer, $html)) {
+                $this->line('       <fg=green>→ Set BROWSERSHOT_SINGLE_PROCESS=true in .env. '
+                    .'This host caps the processes Chrome may spawn.</>');
+
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Run the exact node command the export would run, keeping every byte of it.
+     */
+    private function renderOnce(ContractPdfRenderer $renderer, string $html): bool
+    {
         $profile = $renderer->makeProfileDir();
         $target = $profile.'/contract.pdf';
 
@@ -166,7 +205,7 @@ class ContractExportDoctor extends Command
                 $this->line('  saved          '.$kept);
             }
 
-            return $ok && ! $this->failed;
+            return $ok;
         } catch (Throwable $e) {
             $this->check('render completed', false, class_basename($e).': '.$e->getMessage());
 
@@ -181,27 +220,133 @@ class ContractExportDoctor extends Command
     }
 
     /**
+     * Every library Chrome will need, and whether this host has it.
+     *
+     * Chrome loads most of them lazily: `--version` prints its string and exits
+     * long before the GPU, X11 and NSS stacks are touched, so it happily
+     * succeeds on a host that cannot actually open a browser. ldd asks the
+     * question that `--version` does not.
+     */
+    private function sharedLibraries(string $chrome): void
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            return;
+        }
+
+        $ldd = $this->capture(['sh', '-c', 'ldd '.escapeshellarg($chrome).' 2>&1']);
+
+        if (! str_contains($ldd['out'], '=>')) {
+            $this->warnIf(true, 'ldd unavailable here, skipping the shared-library check.');
+
+            return;
+        }
+
+        $missing = [];
+
+        foreach (explode("\n", $ldd['out']) as $line) {
+            if (str_contains($line, 'not found')) {
+                $missing[] = strtok(trim($line), ' ');
+            }
+        }
+
+        $missing = array_values(array_unique(array_filter($missing)));
+
+        $this->check(
+            'shared libraries resolvable'.($missing === [] ? '' : ' ('.count($missing).' missing)'),
+            $missing === [],
+            'Chrome cannot load: '.implode(' ', $missing).'. Install them, or put a copy somewhere you own '
+            .'and set BROWSERSHOT_LD_LIBRARY_PATH to that directory.',
+        );
+
+        foreach ($missing as $lib) {
+            $this->line('       <fg=yellow>· '.$lib.'</>');
+        }
+    }
+
+    /**
+     * Start Chrome with nothing between it and us.
+     *
+     * "Target closed" is only puppeteer reporting that the process went away;
+     * Chrome itself normally says why, on its own stderr, and that message
+     * never reaches Browsershot.
+     */
+    private function launchesAlone(string $chrome): void
+    {
+        $profile = rtrim(strtr(sys_get_temp_dir(), DIRECTORY_SEPARATOR, '/'), '/').'/hc-hr-probe-'.getmypid();
+        File::ensureDirectoryExists($profile, 0755, true);
+
+        $result = $this->capture([
+            $chrome,
+            '--headless=new',
+            '--no-sandbox',
+            '--disable-gpu',
+            '--disable-dev-shm-usage',
+            '--no-first-run',
+            '--user-data-dir='.$profile,
+            '--crash-dumps-dir='.$profile,
+            '--enable-logging=stderr',
+            '--virtual-time-budget=2000',
+            '--dump-dom',
+            'about:blank',
+        ], env: array_filter([
+            // The same environment the render gives it — Chrome writes to $HOME
+            // even when handed a --user-data-dir.
+            'HOME' => $profile,
+            'XDG_CONFIG_HOME' => $profile.'/config',
+            'XDG_CACHE_HOME' => $profile.'/cache',
+            'XDG_DATA_HOME' => $profile.'/data',
+            'LD_LIBRARY_PATH' => config('browsershot.ld_library_path'),
+        ]));
+
+        File::deleteDirectory($profile);
+
+        $ok = $result['ok'] && str_contains($result['out'], '<body');
+
+        $this->check('chrome opens a page on its own', $ok,
+            'Chrome cannot start a browser on this host at all — puppeteer is not the problem. Its own output follows.');
+
+        if (! $ok) {
+            $this->line('       <fg=yellow>'.$this->snippet($result['out'], 1200).'</>');
+        }
+    }
+
+    /**
      * @param  array<int, string>  $command
      * @param  array<string, string>  $env
      * @return array{ok: bool, out: string}
      */
     private function probe(array $command, string $label, ?string $cwd = null, array $env = []): array
     {
+        $result = $this->capture($command, $cwd, $env);
+
+        $this->line(sprintf(
+            '  %s %s %s',
+            $result['ok'] ? '<fg=green>OK  </>' : '<fg=red>FAIL</>',
+            $label,
+            $this->snippet($result['out']),
+        ));
+
+        return $result;
+    }
+
+    /**
+     * @param  array<int, string>  $command
+     * @param  array<string, string>  $env
+     * @return array{ok: bool, out: string}
+     */
+    private function capture(array $command, ?string $cwd = null, array $env = []): array
+    {
         try {
             $process = new Process($command, $cwd, $env === [] ? null : $env);
-            $process->setTimeout(30);
+            $process->setTimeout(60);
             $process->run();
 
-            $out = trim($process->getOutput().' '.$process->getErrorOutput());
-            $ok = $process->isSuccessful();
-
-            $this->line(sprintf('  %s %s %s', $ok ? '<fg=green>OK  </>' : '<fg=red>FAIL</>', $label, $this->snippet($out)));
-
-            return ['ok' => $ok, 'out' => $out];
+            return [
+                'ok' => $process->isSuccessful(),
+                'out' => trim($process->getOutput().' '.$process->getErrorOutput()),
+            ];
         } catch (Throwable $e) {
-            $this->line(sprintf('  <fg=red>FAIL</> %s %s', $label, $e->getMessage()));
-
-            return ['ok' => false, 'out' => ''];
+            return ['ok' => false, 'out' => $e->getMessage()];
         }
     }
 
@@ -235,9 +380,9 @@ class ContractExportDoctor extends Command
         }
     }
 
-    private function snippet(string $value): string
+    private function snippet(string $value, int $limit = 300): string
     {
-        return Str::limit(addcslashes(trim(substr($value, 0, 400)), "\0..\37"), 300);
+        return Str::limit(addcslashes(trim(substr($value, 0, $limit + 100)), "\0..\37"), $limit);
     }
 
     private function section(string $title): void
