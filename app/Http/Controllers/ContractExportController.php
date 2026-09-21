@@ -130,7 +130,20 @@ class ContractExportController extends Controller
             ->addChromiumArguments($this->chromiumArguments($profile))
             ->showBackground()
             ->setOption('preferCSSPageSize', true)
-            ->waitUntilNetworkIdle();
+            ->waitUntilNetworkIdle()
+            // Chrome still writes to $HOME (crashpad, the NSS db) even when it
+            // is given a --user-data-dir, and on cPanel-style hosts the web
+            // user's home is not writable: the browser then dies during
+            // startup, surfacing as "Target.setAutoAttach: Target closed"
+            // from the web server while the same command works over SSH.
+            // Point every home/cache/temp variable at the throwaway profile.
+            ->setNodeEnv([
+                'HOME' => $profile,
+                'XDG_CONFIG_HOME' => $profile.'/config',
+                'XDG_CACHE_HOME' => $profile.'/cache',
+                'XDG_DATA_HOME' => $profile.'/data',
+                'TMPDIR' => $profile.'/tmp',
+            ]);
 
         if ($nodeBinary = config('browsershot.node_binary')) {
             $browsershot->setNodeBinary($nodeBinary);
@@ -149,7 +162,9 @@ class ContractExportController extends Controller
         $base = config('browsershot.user_data_dir') ?: sys_get_temp_dir().'/hc-hr-chrome';
         $dir = rtrim(strtr($base, DIRECTORY_SEPARATOR, '/'), '/').'/'.Str::random(16);
 
-        File::ensureDirectoryExists($dir.'/tmp', 0755, true);
+        foreach (['tmp', 'cache', 'config', 'data'] as $sub) {
+            File::ensureDirectoryExists($dir.'/'.$sub, 0755, true);
+        }
 
         return $dir;
     }
