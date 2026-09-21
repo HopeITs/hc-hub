@@ -114,4 +114,8 @@ return [
     'volunteer_type_remote' => 'Remote',
     'period_help' => 'The proposed agreement period. Leave empty if open ended.',
     'center_optional_help' => 'The centre is optional here: remote work, or a programme spanning several centres.',
+    'unknown_transition' => 'Unknown transition: :trigger',
+    'transition_not_allowed' => 'The current state of the request does not allow this.',
+    'request_is_final' => 'The request is in a final state and cannot change.',
+    'not_for_direct_opening' => 'This does not apply to a direct opening.',
 ];
