@@ -22,12 +22,14 @@ use App\Models\RecruitmentWorkflowDefinition;
 use App\Models\RecruitmentWorkflowDefinitionVersion;
 use App\Models\RecruitmentWorkflowInstance;
 use App\Models\User;
+use App\Notifications\MissingRecruitmentApprover;
 use App\Policies\RecruitmentWorkflowInstanceStepPolicy;
 use App\Services\RecruitmentPendingApprovalQuery;
 use App\Services\RecruitmentScopeResolver;
 use App\Services\RecruitmentWorkflowInstanceService;
 use Database\Seeders\RecruitmentWorkflowSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\Concerns\CreatesHrFixtures;
@@ -140,6 +142,7 @@ class RecruitmentWorkflowInstanceTest extends TestCase
 
     public function test_missing_finance_approver_keeps_the_mandatory_step_unassigned_without_blocked_state(): void
     {
+        Notification::fake();
         $fixtures = $this->normalWorkflowFixtures(withFinance: false);
 
         $instance = app(RecruitmentWorkflowInstanceService::class)->start(
@@ -154,6 +157,8 @@ class RecruitmentWorkflowInstanceTest extends TestCase
         $this->assertNull($financeStep->assigned_user_id);
         $this->assertSame(RecruitmentRequestStatus::UnderReview, (int) $fixtures['request']->fresh()->status);
         $this->assertSame(\App\Enums\WorkflowInstanceStatus::Running, (int) $instance?->status);
+        Notification::assertSentTo($fixtures['hr'], MissingRecruitmentApprover::class);
+        Notification::assertNotSentTo($fixtures['requester'], MissingRecruitmentApprover::class);
     }
 
     public function test_multiple_finance_candidates_are_not_resolved_arbitrarily(): void

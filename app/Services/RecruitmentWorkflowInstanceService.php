@@ -17,6 +17,7 @@ use App\Models\RecruitmentWorkflowInstance;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\RecruitmentWorkflowStep;
 use App\Models\User;
+use App\Notifications\MissingRecruitmentApprover;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -124,6 +125,7 @@ class RecruitmentWorkflowInstanceService
             ]);
 
             $resolutionMeta = [];
+            $missingApprovals = [];
 
             foreach ($steps as $step) {
                 if ($skipManager && (int) $step->step_key === WorkflowStepKey::ManagerApproval) {
@@ -148,6 +150,9 @@ class RecruitmentWorkflowInstanceService
                     'assigned_user_id' => $assignment->userId,
                     'assigned_role' => $assignment->role,
                 ], $assignment->meta);
+                if (! $assignment->isAssigned() && isset($assignment->meta['reason'])) {
+                    $missingApprovals[] = WorkflowStepKey::getLocalizedName((int) $step->step_key)['value'] ?? (string) $step->step_key;
+                }
             }
 
             $from = (int) $request->status;
@@ -166,6 +171,10 @@ class RecruitmentWorkflowInstanceService
                 'meta' => ['approver_resolution' => $resolutionMeta],
             ]);
 
+            if ($missingApprovals !== []) {
+                $this->notifyHrOfMissingApprovers($request, $missingApprovals);
+            }
+
             return $instance->load(['definitionVersion', 'steps.workflowStep', 'steps.assignedUser']);
         });
     }
@@ -177,6 +186,16 @@ class RecruitmentWorkflowInstanceService
                 ->where('step_order', $instance->current_step_order))
             ->with(['workflowStep', 'assignedUser'])
             ->first();
+    }
+
+    /** @param array<int, string> $steps */
+    private function notifyHrOfMissingApprovers(RecruitmentRequest $request, array $steps): void
+    {
+        User::broadcastRecipientsQuery()
+            ->get()
+            ->filter(fn (User $user): bool => $user->activeRoleIs('HR')
+                && $user->hasActivePermission('recruitment-requests.manage'))
+            ->each(fn (User $user) => $user->notify(new MissingRecruitmentApprover($request, $steps)));
     }
 
     private function activeDefinitionVersion(int $requestType): RecruitmentWorkflowDefinitionVersion

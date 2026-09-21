@@ -86,6 +86,20 @@
                     </li>
 
                     {{-- 2. Project Basics --}}
+                    @activepermission('recruitment-requests.view')
+                        <x-layouts.app.sidebar.single-item :href="route('recruitment.requests.index')" :active="request()->routeIs('recruitment.requests.*')">
+                            <x-slot name="icon"><x-icons.clipboard-list class="size-5" /></x-slot>
+                            {{ __('recruitment.requests') }}
+                        </x-layouts.app.sidebar.single-item>
+                    @endactivepermission
+
+                    @activepermission('recruitment-requests.approve')
+                        <x-layouts.app.sidebar.single-item :href="route('recruitment.approvals.pending')" :active="request()->routeIs('recruitment.approvals.*')">
+                            <x-slot name="icon"><x-icons.check class="size-5" /></x-slot>
+                            {{ __('recruitment-workflow.pending_approvals') }}
+                        </x-layouts.app.sidebar.single-item>
+                    @endactivepermission
+
                     @activepermission('project-basics.view')
                     <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('cities.*') ||
                         request()->routeIs('contract-types.*') ||

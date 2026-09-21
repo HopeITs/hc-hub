@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentScopeType;
-use App\Enums\WorkflowInstanceStatus;
-use App\Enums\WorkflowStepKey;
 use App\Models\City;
 use App\Models\Contract;
+use App\Models\JobLevel;
 use App\Models\Position;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowInstanceStep;
@@ -42,17 +42,12 @@ class RecruitmentScopeResolver
     /**
      * The breadth of this user's access.
      *
-     * Order matters: organization-wide roles and the person appointed as the
-     * central finance approver win outright, then a governorate HR role, then
-     * the org chart. Anyone left over sees nothing.
+     * Order matters: organization-wide roles win outright, then a governorate
+     * HR role, then the org chart. Anyone left over sees nothing.
      */
     public function scopeType(User $user): int
     {
-        if ($this->isOrganizationWide($user)
-            || $this->hasDirectPermission(
-                $user,
-                config('recruitment.user_level_permissions.finance_approver'),
-            )) {
+        if ($this->isOrganizationWide($user)) {
             return RecruitmentScopeType::Organization;
         }
 
@@ -73,7 +68,8 @@ class RecruitmentScopeResolver
      */
     public function isOrganizationWide(User $user): bool
     {
-        return $user->activeRoleIs(...config('recruitment.organization_wide_roles', []));
+        return $user->activeRoleIs(...config('recruitment.organization_wide_roles', []))
+            || $user->hasActivePermission(config('recruitment.user_level_permissions.finance_approver'));
     }
 
     /**
@@ -169,6 +165,11 @@ class RecruitmentScopeResolver
      */
     public function scopeRequests(Builder $query, User $user): Builder
     {
+        // The state-machine contract makes drafts private to their requester.
+        $query->where(fn (Builder $drafts) => $drafts
+            ->where($query->qualifyColumn('status'), '!=', RecruitmentRequestStatus::Draft)
+            ->orWhere($query->qualifyColumn('requester_user_id'), $user->getKey()));
+
         return match ($this->scopeType($user)) {
             RecruitmentScopeType::Organization => $query,
 
@@ -289,13 +290,7 @@ class RecruitmentScopeResolver
     // Raising a request
     // --------------------------------------------
 
-    /**
-     * May this user raise a recruitment request?
-     *
-     * Eligibility is the job level of the position they hold, never a role.
-     * This is separate from the recruitment-requests.submit permission, and
-     * both are required.
-     */
+    /** Grade eligibility alone; normal-request role permission is separate (D50). */
     public function isEligibleRequester(User $user): bool
     {
         $position = $this->position($user);
@@ -307,6 +302,143 @@ class RecruitmentScopeResolver
         $grades = config('recruitment.requester_job_level_grades', []);
 
         return in_array((int) $position->jobLevel?->grade, $grades, true);
+    }
+
+    /** HR uses Direct Opening only, including HR with an eligible grade. */
+    public function canRaiseNormalRequest(User $user): bool
+    {
+        return ! $user->activeRoleIs('HR')
+            && $user->activeRoleIs('manager', 'general-manager')
+            && $this->isEligibleRequester($user);
+    }
+
+    /**
+     * Creation scope (D49), distinct from D30's one-level request visibility.
+     * Traverse direct_manager_id only; city/program/technical manager grant no
+     * access. A visited set terminates malformed cycles and excludes the root
+     * from existing-position targets even if it is encountered again.
+     *
+     * @return array<int, int>
+     */
+    public function manageablePositionIds(User $user, bool $includeSelf = false): array
+    {
+        if (! $this->canRaiseNormalRequest($user)) {
+            return [];
+        }
+
+        $rootId = (int) $this->position($user)->getKey();
+        $seen = [$rootId => true];
+        $frontier = [$rootId];
+        $ids = $includeSelf ? [$rootId] : [];
+
+        while ($frontier !== []) {
+            $children = Position::query()->whereIn('direct_manager_id', $frontier)->pluck('id');
+            $frontier = [];
+            foreach ($children as $childId) {
+                $id = (int) $childId;
+                if (isset($seen[$id])) {
+                    continue;
+                }
+
+                $seen[$id] = true;
+                $frontier[] = $id;
+                $ids[] = $id;
+            }
+        }
+
+        return $ids;
+    }
+
+    public function scopeManageablePositions(Builder $query, User $user, bool $includeSelf = false): Builder
+    {
+        return $query->whereIn($query->qualifyColumn('id'), $this->manageablePositionIds($user, $includeSelf));
+    }
+
+    public function scopeProposedManagers(Builder $query, User $user): Builder
+    {
+        return $this->scopeManageablePositions($query, $user, true)
+            ->visible()
+            ->when($this->hasProgramCreationScope($user), fn (Builder $positions) => $positions
+                ->where('program_id', $this->position($user)?->program_id ?? 0))
+            ->where(fn (Builder $positions) => $positions
+                ->whereHas('jobLevel', fn (Builder $levels) => $levels
+                    ->whereIn('grade', config('recruitment.requester_job_level_grades')))
+                ->orWhereHas('directTeam', fn (Builder $team) => $team->where('is_active', true)));
+    }
+
+    public function hasProgramCreationScope(User $user): bool
+    {
+        return ! $this->isOrganizationWide($user)
+            && in_array((int) $this->position($user)?->jobLevel?->grade,
+                config('recruitment.program_scoped_creation_grades'), true);
+    }
+
+    public function scopeCreatablePrograms(Builder $query, User $user): Builder
+    {
+        return $query->where('is_active', true)
+            ->when($this->hasProgramCreationScope($user), fn (Builder $programs) => $programs
+                ->whereKey($this->position($user)?->program_id ?? 0));
+    }
+
+    public function scopeCreatableCities(Builder $query, User $user): Builder
+    {
+        $query->where('is_active', true);
+        if (! $this->hasProgramCreationScope($user)) {
+            return $query;
+        }
+
+        $positions = Position::query()->visible()
+            ->where('program_id', $this->position($user)?->program_id ?? 0);
+
+        return $query->where(fn (Builder $cities) => $cities
+            ->whereIn('id', (clone $positions)->select('city_id'))
+            ->orWhereIn('id', \App\Models\Center::query()->where('is_active', true)
+                ->whereIn('id', (clone $positions)->select('center_id'))->select('city_id')));
+    }
+
+    /**
+     * Centres in the chosen governorate.
+     *
+     * The governorate is the only filter. Narrowing by programme as well was
+     * tried and withdrawn: `centers` carries no program_id, so the only link
+     * to a programme is a position sitting in both, and a centre the programme
+     * had not staffed yet vanished from the list — which is exactly the centre
+     * someone opening the first position there needs to pick.
+     */
+    public function scopeCreatableCenters(Builder $query, User $user, ?int $cityId): Builder
+    {
+        return $query->where('is_active', true)
+            ->when(! City::isNational($cityId), fn (Builder $centers) => $centers
+                ->where(fn (Builder $locations) => $locations->where('city_id', $cityId)->orWhereNull('city_id')));
+    }
+
+    /**
+     * Job levels a requester may create a position at — strictly below his own.
+     *
+     * The direction is read from the data rather than assumed: across the 153
+     * manager/report pairs on record, the report carries the larger grade
+     * number in 89% of them, so a smaller number is the more senior rank and
+     * "below me" means a grade greater than mine.
+     *
+     * A requester with no grade gets nothing, which fails closed.
+     *
+     * @return array<int, int>
+     */
+    public function creatableJobLevelIds(User $user): array
+    {
+        $grade = $this->position($user)?->jobLevel?->grade;
+
+        if ($grade === null || ! $this->canRaiseNormalRequest($user)) {
+            return [];
+        }
+
+        return JobLevel::query()
+            ->where('grade', '>', (int) $grade)
+            ->when($this->hasProgramCreationScope($user), fn (Builder $levels) => $levels
+                ->where('grade', '!=', config('recruitment.department_manager_grade')))
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
     }
 
     /**
@@ -403,14 +535,13 @@ class RecruitmentScopeResolver
      */
     public function canActOnStep(User $user, RecruitmentWorkflowInstanceStep $step): bool
     {
-        $step->loadMissing(['workflowInstance', 'workflowStep']);
-
         // 2. Is the step still open?
         if ($step->decision !== null || $step->assigned_user_id === null) {
             return false;
         }
 
-        if ((int) $step->workflowInstance?->status !== WorkflowInstanceStatus::Running
+        $step->loadMissing(['workflowInstance', 'workflowStep']);
+        if ((int) $step->workflowInstance?->status !== \App\Enums\WorkflowInstanceStatus::Running
             || (int) $step->workflowStep?->step_order !== (int) $step->workflowInstance?->current_step_order) {
             return false;
         }
@@ -418,13 +549,6 @@ class RecruitmentScopeResolver
         // 3. Is this the assigned approver?
         if ((int) $step->assigned_user_id !== (int) $user->getKey()) {
             return false;
-        }
-
-        // The finance approver is a directly granted person, not an
-        // organization-wide role. Re-resolve the direct grant at action time
-        // so losing it immediately removes the ability to decide.
-        if ((int) $step->workflowStep?->step_key === WorkflowStepKey::FinanceApproval) {
-            return in_array((int) $user->getKey(), $this->financeApproverUserIds(), true);
         }
 
         // 4. Do they still hold the scope they were assigned under? Someone who
@@ -449,8 +573,7 @@ class RecruitmentScopeResolver
             RecruitmentScopeType::Organization => $this->isOrganizationWide($user),
 
             RecruitmentScopeType::City => $scopeId !== null
-                && ($this->isOrganizationWide($user)
-                    || in_array($scopeId, $this->governorateCityIds($user), true)),
+                && in_array($scopeId, $this->governorateCityIds($user), true),
 
             // The scope of a manager step is the manager's own position.
             RecruitmentScopeType::DirectReports => $scopeId !== null
