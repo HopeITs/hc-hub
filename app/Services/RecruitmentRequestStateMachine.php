@@ -59,9 +59,12 @@ class RecruitmentRequestStateMachine
         'apply_succeeded' => [[Status::Approved, Status::FailedApplication], Status::Applied],
         'apply_failed' => [[Status::Approved], Status::FailedApplication],
 
-        // T19 · T20 — a direct opening skips draft entirely (D15).
-        'direct_open' => [[], Status::Approved],
-        'direct_open_pending' => [[], Status::UnderReview],
+        // T19 · T20 — a direct opening skips draft, not submission. The
+        // document draws both as coming from nowhere; in practice the request
+        // is written submitted and the workflow service then decides which of
+        // the two paths it takes, so Submitted is where they start from.
+        'direct_open' => [[Status::Submitted], Status::Approved],
+        'direct_open_pending' => [[Status::Submitted], Status::UnderReview],
 
         // T21 — HR Syria decides a governorate's direct opening.
         'direct_open_approved' => [[Status::UnderReview], Status::Approved],
@@ -138,17 +141,6 @@ class RecruitmentRequestStateMachine
 
         [$from, $target] = self::TRANSITIONS[$trigger];
         $current = (int) $request->status;
-
-        // A request that has been created cannot be created again: the two
-        // direct-opening triggers only apply to a request that has no status
-        // history, which in practice means one being written for the first time.
-        if ($from === []) {
-            if ($request->exists && $current !== 0) {
-                throw $this->refuse('recruitment.transition_not_allowed');
-            }
-
-            return $target;
-        }
 
         if (in_array($current, self::FINAL, true)) {
             throw $this->refuse('recruitment.request_is_final');

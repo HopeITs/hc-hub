@@ -173,21 +173,6 @@ class ContractObserver
         }
     }
 
-    /** Is $contract's pending write the transition from Draft to a real type? */
-    private function isUpgradingFromDraft(Contract $contract): bool
-    {
-        return (int) $contract->getOriginal('type') === ContractTypeEnum::Draft
-            && (int) $contract->type !== ContractTypeEnum::Draft;
-    }
-
-    /** Did the write that just completed transition $contract from Draft to a real type? */
-    private function wasUpgradedFromDraft(Contract $contract): bool
-    {
-        return $contract->wasChanged('type')
-            && (int) $contract->getOriginal('type') === ContractTypeEnum::Draft
-            && (int) $contract->type !== ContractTypeEnum::Draft;
-    }
-
     public function deleted(Contract $contract): void
     {
         DB::transaction(function () use ($contract) {
@@ -216,5 +201,20 @@ class ContractObserver
     public function saved(Contract $contract): void
     {
         StatisticsCache::flush();
+    }
+
+    /** Is $contract's pending write the transition from Draft to a real type? */
+    private function isUpgradingFromDraft(Contract $contract): bool
+    {
+        return (int) $contract->getOriginal('type') === ContractTypeEnum::Draft
+            && (int) $contract->type !== ContractTypeEnum::Draft;
+    }
+
+    /** Did the write that just completed transition $contract from Draft to a real type? */
+    private function wasUpgradedFromDraft(Contract $contract): bool
+    {
+        return $contract->wasChanged('type')
+            && (int) $contract->getOriginal('type') === ContractTypeEnum::Draft
+            && (int) $contract->type !== ContractTypeEnum::Draft;
     }
 }

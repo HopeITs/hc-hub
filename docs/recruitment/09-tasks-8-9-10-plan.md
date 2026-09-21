@@ -69,7 +69,7 @@
 | # | الفجوة | الحل المعتمد |
 |---|---|---|
 | 1 | لا عمود `status` على `recruitment_workflow_instance_steps` | «الخطوة النشطة» تُشتقّ من `instances.current_step_order` مقابل `workflow_steps.step_order`، مع `decision IS NULL` |
-| 2 | لا طريقة لتمييز خطوة متجاوَزة — `ApprovalDecision` بلا قيمة Skipped | `decision` يبقى `null` ويُكتب `decision_reason = 'skipped:<reason>'` + حدث `StepSkipped` (**`D57`**) |
+| 2 | لا طريقة لتمييز خطوة متجاوَزة — `ApprovalDecision` بلا قيمة Skipped | `decision` يبقى `null` ويُكتب `decision_reason = 'skip:<reason>'` + حدث `StepSkipped` (**`D57`**) |
 | 3 | لا عمود لسبب التجاوز `WorkflowSkipReason` | نفس الحل أعلاه |
 | 4 | `events.workflow_step_id` يشير إلى **خطوة التعريف** لا خطوة التنفيذ | خطوة التنفيذ تُستنتج من (`workflow_instance_id` + `workflow_step_id`) معاً |
 
