@@ -46,7 +46,7 @@
                     </x-table.cell>
                 </tr>
             @empty
-                <x-table.no-data />
+                <x-table.no-data :colspan="7" />
             @endforelse
         </x-slot>
 
