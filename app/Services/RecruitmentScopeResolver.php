@@ -68,7 +68,8 @@ class RecruitmentScopeResolver
      */
     public function isOrganizationWide(User $user): bool
     {
-        return $user->activeRoleIs(...config('recruitment.organization_wide_roles', []));
+        return $user->activeRoleIs(...config('recruitment.organization_wide_roles', []))
+            || $user->hasActivePermission(config('recruitment.user_level_permissions.finance_approver'));
     }
 
     /**
@@ -536,6 +537,12 @@ class RecruitmentScopeResolver
     {
         // 2. Is the step still open?
         if ($step->decision !== null || $step->assigned_user_id === null) {
+            return false;
+        }
+
+        $step->loadMissing(['workflowInstance', 'workflowStep']);
+        if ((int) $step->workflowInstance?->status !== \App\Enums\WorkflowInstanceStatus::Running
+            || (int) $step->workflowStep?->step_order !== (int) $step->workflowInstance?->current_step_order) {
             return false;
         }
 

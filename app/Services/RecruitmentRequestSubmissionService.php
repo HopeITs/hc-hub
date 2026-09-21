@@ -33,7 +33,10 @@ class RecruitmentRequestSubmissionService
     /** The requester may still edit in these. */
     private const EDITABLE = [Status::Draft, Status::ChangesRequested];
 
-    public function __construct(private readonly RecruitmentScopeResolver $scopes) {}
+    public function __construct(
+        private readonly RecruitmentScopeResolver $scopes,
+        private readonly RecruitmentWorkflowInstanceService $workflows,
+    ) {}
 
     /**
      * Submit (T3) or resubmit (T11).
@@ -87,6 +90,11 @@ class RecruitmentRequestSubmissionService
                 'from_status' => $wasDraft ? Status::Draft : Status::ChangesRequested,
                 'to_status' => (int) $fresh->status,
             ]);
+
+            // Freeze and start the approval workflow from this exact submitted
+            // version before the transaction commits. This keeps submission,
+            // versioning, status, and approvals atomic and retry-safe.
+            $this->workflows->start($fresh->fresh(), $version);
 
             return $fresh;
         });
