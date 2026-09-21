@@ -138,38 +138,38 @@
 
                         <div class="h-px bg-gradient-to-r from-transparent via-neutral-200 to-transparent"></div>
 
-                        {{--                        @if ($user->hasMultipleRoles()) --}}
-                        {{--                            <div class="px-4 py-4"> --}}
-                        {{--                                <div class="flex items-center justify-between mb-2"> --}}
-                        {{--                                    <div class="text-caption font-semibold text-secondary-light uppercase tracking-wide"> --}}
-                        {{--                                        {{ __('Switch role') }} --}}
-                        {{--                                    </div> --}}
+                                               @if ($user->hasMultipleRoles()) 
+                                                   <div class="px-4 py-4"> 
+                                                       <div class="flex items-center justify-between mb-2"> 
+                                                           <div class="text-caption font-semibold text-secondary-light uppercase tracking-wide"> 
+                                                               {{ __('Switch role') }} 
+                                                           </div> 
 
-                        {{--                                    <button @click="rolesOpen = !rolesOpen" --}}
-                        {{--                                            class="inline-flex items-center gap-2 rounded-surface border border-neutral-200 --}}
-                        {{--                                                   px-3 py-2 text-small font-medium hover:border-secondary-medium --}}
-                        {{--                                                   hover:bg-secondary-soft transition"> --}}
-                        {{--                                        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" --}}
-                        {{--                                             stroke-width="1.8"> --}}
-                        {{--                                            <path d="M16 3h5v5"/> --}}
-                        {{--                                            <path d="M4 20l16-16"/> --}}
-                        {{--                                            <path d="M21 16v5h-5"/> --}}
-                        {{--                                            <path d="M15 15l6 6"/> --}}
-                        {{--                                            <path d="M3 3l6 6"/> --}}
-                        {{--                                        </svg> --}}
-                        {{--                                        {{ __('Switch') }} --}}
-                        {{--                                    </button> --}}
-                        {{--                                </div> --}}
+                                                           <button @click="rolesOpen = !rolesOpen" 
+                                                                   class="inline-flex items-center gap-2 rounded-surface border border-neutral-200 
+                                                                          px-3 py-2 text-small font-medium hover:border-secondary-medium 
+                                                                          hover:bg-secondary-soft transition"> 
+                                                               <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                                                                    stroke-width="1.8"> 
+                                                                   <path d="M16 3h5v5"/> 
+                                                                   <path d="M4 20l16-16"/> 
+                                                                   <path d="M21 16v5h-5"/> 
+                                                                   <path d="M15 15l6 6"/> 
+                                                                   <path d="M3 3l6 6"/> 
+                                                               </svg> 
+                                                               {{ __('Switch') }} 
+                                                           </button> 
+                                                       </div> 
 
-                        {{--                                <div x-show="rolesOpen" x-transition.origin.top> --}}
-                        {{--                                    <livewire:auth.role-switcher :onlySwitchables="true" :wire:key="'role-switcher-pill'"/> --}}
-                        {{--                                </div> --}}
+                                                       <div x-show="rolesOpen" x-transition.origin.top> 
+                                                           <livewire:auth.role-switcher :onlySwitchables="true" :wire:key="'role-switcher-pill'"/> 
+                                                       </div> 
 
-                        {{--                                <p class="mt-2 text-caption text-secondary-medium">{{ __('Choose a role to make it active instantly.') }}</p> --}}
-                        {{--                            </div> --}}
+                                                       <p class="mt-2 text-caption text-secondary-medium">{{ __('Choose a role to make it active instantly.') }}</p> 
+                                                   </div> 
 
-                        {{--                            <div class="h-px bg-neutral-100"></div> --}}
-                        {{--                        @endif --}}
+                                                   <div class="h-px bg-neutral-100"></div> 
+                                               @endif 
 
                         <div class="px-2 py-2">
                             <form method="POST" action="{{ route('logout') }}">
