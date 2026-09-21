@@ -118,4 +118,8 @@ return [
     'transition_not_allowed' => 'لا يسمح وضع الطلب الحالي بهذا الإجراء.',
     'request_is_final' => 'الطلب في حالة نهائية ولا يقبل أي تغيير.',
     'not_for_direct_opening' => 'هذا الإجراء لا ينطبق على طلب الفتح المباشر.',
+    'previous_rejections' => 'طلبات سابقة مرفوضة على هذا المنصب',
+    'previous_rejections_help' => 'للاطلاع قبل اتخاذ القرار. لا تمنع هذا الطلب.',
+    'rejected_by' => 'رفضه',
+    'no_reason_recorded' => 'لم يُسجَّل سبب.',
 ];

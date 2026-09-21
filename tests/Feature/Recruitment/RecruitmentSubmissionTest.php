@@ -347,6 +347,43 @@ class RecruitmentSubmissionTest extends TestCase
         $this->assertSame('2027-06-01', $detail->volunteer_period_end_date->format('Y-m-d'));
     }
 
+    /**
+     * The approver is told when the same position was refused before (D61).
+     *
+     * Rejection releases the position at once, so the same ask can come back
+     * with nobody the wiser. Shown, not blocked.
+     */
+    public function test_a_previous_rejection_on_the_position_is_shown(): void
+    {
+        $earlier = $this->submit($this->draft($this->complete()));
+        $earlier->forceFill(['status' => Status::Rejected])->save();
+        $earlier->events()->create([
+            'event_type' => \App\Enums\RecruitmentEventType::StepRejected,
+            'actor_user_id' => $this->manager->id,
+            'actor_role' => $this->manager->myRole(),
+            'from_status' => Status::UnderReview,
+            'to_status' => Status::Rejected,
+            'comment' => 'The budget for this does not exist yet.',
+        ]);
+
+        $current = $this->draft($this->complete());
+
+        \Livewire\Livewire::actingAs($this->manager)
+            ->test(\App\Livewire\Recruitment\Requests\Details::class, ['requestId' => $current->id])
+            ->assertSee($earlier->request_number)
+            ->assertSee('The budget for this does not exist yet.');
+    }
+
+    /** A first request on a position has no history to show. */
+    public function test_a_position_with_no_history_shows_no_panel(): void
+    {
+        $request = $this->draft($this->complete());
+
+        \Livewire\Livewire::actingAs($this->manager)
+            ->test(\App\Livewire\Recruitment\Requests\Details::class, ['requestId' => $request->id])
+            ->assertDontSee(__('recruitment.previous_rejections'));
+    }
+
     /** @return array<string, mixed> */
     private function complete(int $type = Type::FillVacancy): array
     {

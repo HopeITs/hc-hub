@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Recruitment\Requests;
 
+use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestStatus;
 use App\Models\Center;
 use App\Models\ContractType;
@@ -90,7 +91,44 @@ class Details extends Component
             }
         }
 
-        return view('livewire.recruitment.requests.details', compact('request', 'version', 'draftContext'));
+        $previousRejections = $this->previousRejections($request);
+
+        return view('livewire.recruitment.requests.details',
+            compact('request', 'version', 'draftContext', 'previousRejections'));
+    }
+
+    /**
+     * Requests on this same position that were rejected before (D61).
+     *
+     * Rejection and cancellation release the position at once (D54), so the
+     * same ask can come back a week later with nobody the wiser. The approver
+     * is shown what happened last time, with its reason and its author — shown,
+     * not blocked: he reads the history and decides.
+     *
+     * Read through the visibility boundary like everything else, so it cannot
+     * become a window onto requests the viewer may not see.
+     *
+     * @return \Illuminate\Support\Collection<int, RecruitmentRequest>
+     */
+    private function previousRejections(RecruitmentRequest $request)
+    {
+        if ($request->target_position_id === null) {
+            return collect();
+        }
+
+        return RecruitmentRequest::query()
+            ->visibleTo(auth()->user())
+            ->whereKeyNot($request->getKey())
+            ->where('target_position_id', $request->target_position_id)
+            ->where('status', RecruitmentRequestStatus::Rejected)
+            ->with(['requester.profile', 'events' => fn ($events) => $events
+                ->where('event_type', RecruitmentEventType::StepRejected)
+                ->with('actor.profile')
+                ->latest('created_at')
+                ->limit(1)])
+            ->latest('updated_at')
+            ->limit(5)
+            ->get();
     }
 
     private function resolve(): RecruitmentRequest

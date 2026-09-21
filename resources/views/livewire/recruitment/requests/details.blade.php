@@ -31,6 +31,35 @@
             <ul class="mt-2 list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
         </div>
     @endif
+    @if ($previousRejections->isNotEmpty())
+        {{-- D61: context for whoever reads the request, never a reason to hide it. --}}
+        <section role="note" class="rounded-surface border border-amber-200 bg-amber-50 p-6" aria-label="{{ __('recruitment.previous_rejections') }}">
+            <h2 class="text-h4 font-semibold text-amber-900">{{ __('recruitment.previous_rejections') }}</h2>
+            <p class="mt-1 text-sm text-amber-800">{{ __('recruitment.previous_rejections_help') }}</p>
+            <ul class="mt-4 space-y-3">
+                @foreach ($previousRejections as $rejected)
+                    @php $decision = $rejected->events->first(); @endphp
+                    <li class="rounded-control border border-amber-200 bg-white p-4" wire:key="rejection-{{ $rejected->id }}">
+                        <div class="flex flex-wrap items-baseline justify-between gap-2">
+                            <span class="font-semibold" dir="auto">{{ $rejected->request_number }}</span>
+                            <time class="text-sm text-secondary-medium" datetime="{{ ($decision?->created_at ?? $rejected->updated_at)?->toIso8601String() }}">{{ ($decision?->created_at ?? $rejected->updated_at)?->format('Y-m-d') }}</time>
+                        </div>
+                        <p class="mt-1 text-sm text-secondary-medium">
+                            {{ __('recruitment.requester') }}: {{ $rejected->requester?->profile?->name ?? $rejected->requester?->name ?? '-' }}
+                            @if ($decision?->actor)
+                                &middot; {{ __('recruitment.rejected_by') }}: {{ $decision->actor->profile?->name ?? $decision->actor->name }}
+                            @endif
+                        </p>
+                        @if (filled($decision?->comment))
+                            <p class="mt-2 whitespace-pre-wrap break-words" dir="auto">{{ $decision->comment }}</p>
+                        @else
+                            <p class="mt-2 text-sm text-secondary-medium">{{ __('recruitment.no_reason_recorded') }}</p>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
     <section class="rounded-surface border border-neutral-200 bg-white p-6" aria-label="{{ __('recruitment.details') }}">
         <dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ([

@@ -118,4 +118,8 @@ return [
     'transition_not_allowed' => 'The current state of the request does not allow this.',
     'request_is_final' => 'The request is in a final state and cannot change.',
     'not_for_direct_opening' => 'This does not apply to a direct opening.',
+    'previous_rejections' => 'Earlier requests rejected on this position',
+    'previous_rejections_help' => 'Context before deciding. They do not block this request.',
+    'rejected_by' => 'Rejected by',
+    'no_reason_recorded' => 'No reason was recorded.',
 ];
