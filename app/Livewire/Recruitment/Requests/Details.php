@@ -11,8 +11,12 @@ use App\Models\JobLevel;
 use App\Models\Position;
 use App\Models\Program;
 use App\Models\RecruitmentRequest;
+use App\Models\RecruitmentWorkflowInstanceStep;
+use App\Services\RecruitmentApprovalService;
+use App\Services\RecruitmentPendingApprovalQuery;
 use App\Services\RecruitmentRequestSubmissionService;
 use Illuminate\Support\Facades\Gate;
+use InvalidArgumentException;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -22,6 +26,9 @@ class Details extends Component
     public int $requestId;
 
     public ?int $versionId = null;
+
+    /** The reason, or what needs changing — mandatory for both (D60). */
+    public string $decisionComment = '';
 
     public function mount(int $requestId): void
     {
@@ -92,9 +99,44 @@ class Details extends Component
         }
 
         $previousRejections = $this->previousRejections($request);
+        // Present only when this user is the one the request is waiting on.
+        $pendingStep = $this->pendingStep($request);
 
         return view('livewire.recruitment.requests.details',
-            compact('request', 'version', 'draftContext', 'previousRejections'));
+            compact('request', 'version', 'draftContext', 'previousRejections', 'pendingStep'));
+    }
+
+    /**
+     * Decide the step this user is being waited on for.
+     *
+     * The step is resolved here rather than taken from the page, so a stale or
+     * edited screen cannot aim a decision at a step that is no longer the one
+     * in front of this user. The version number does come from the page, on
+     * purpose: it is what check 6 compares against.
+     */
+    public function decide(string $action, RecruitmentApprovalService $approvals): void
+    {
+        $request = $this->resolve();
+        $step = $this->pendingStep($request);
+
+        if ($step === null) {
+            $this->addError('step', __('recruitment.step_is_not_current'));
+
+            return;
+        }
+
+        $versionNo = (int) $step->workflowInstance?->requestVersion?->version_no;
+        $comment = trim($this->decisionComment);
+
+        match ($action) {
+            'approve' => $approvals->approve(auth()->user(), $step, $versionNo, $comment ?: null),
+            'reject' => $approvals->reject(auth()->user(), $step, $versionNo, $comment),
+            'request_changes' => $approvals->requestChanges(auth()->user(), $step, $versionNo, $comment),
+            default => throw new InvalidArgumentException('Unknown decision.'),
+        };
+
+        $this->decisionComment = '';
+        session()->flash('recruitment_saved', __('recruitment.decided'));
     }
 
     /**
@@ -129,6 +171,18 @@ class Details extends Component
             ->latest('updated_at')
             ->limit(5)
             ->get();
+    }
+
+    /**
+     * The step this user is the assigned approver of, if the request is
+     * waiting on one. Null means there is nothing here for them to decide.
+     */
+    private function pendingStep(RecruitmentRequest $request): ?RecruitmentWorkflowInstanceStep
+    {
+        return app(RecruitmentPendingApprovalQuery::class)
+            ->forUser(auth()->user())
+            ->where('pending_requests.id', $request->getKey())
+            ->first();
     }
 
     private function resolve(): RecruitmentRequest

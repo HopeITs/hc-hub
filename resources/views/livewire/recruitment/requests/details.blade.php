@@ -31,6 +31,24 @@
             <ul class="mt-2 list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
         </div>
     @endif
+    @if ($pendingStep)
+        {{-- Shown only to the approver this step is waiting on. The service asks
+             the same six questions again, so this is convenience, not a guard. --}}
+        <section class="rounded-surface border border-primary/30 bg-primary/5 p-6" aria-label="{{ __('recruitment.your_decision') }}">
+            <h2 class="text-h4 font-semibold">{{ __('recruitment.your_decision') }}</h2>
+            <p class="mt-1 text-sm text-secondary-medium">{{ \App\Enums\WorkflowStepKey::getLocalizedName((int) $pendingStep->workflowStep?->step_key)['value'] }}</p>
+            <div class="mt-4">
+                <x-forms.input-label for="decisionComment">{{ __('recruitment.decision_comment') }}</x-forms.input-label>
+                <textarea id="decisionComment" rows="3" wire:model="decisionComment" class="mt-1 w-full rounded-control border-neutral-300"></textarea>
+                <p class="mt-1 text-sm text-red-600">@error('comment'){{ $message }}@enderror @error('step'){{ $message }}@enderror @error('version'){{ $message }}@enderror @error('request'){{ $message }}@enderror</p>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-3">
+                <x-primary-button type="button" wire:click="decide('approve')" wire:loading.attr="disabled" wire:target="decide">{{ __('recruitment.approve') }}</x-primary-button>
+                <button type="button" class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" wire:click="decide('request_changes')" wire:loading.attr="disabled" wire:target="decide">{{ __('recruitment.request_changes') }}</button>
+                <button type="button" class="rounded-control border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50" wire:click="decide('reject')" wire:confirm="{{ __('recruitment.confirm_reject') }}" wire:loading.attr="disabled" wire:target="decide">{{ __('recruitment.reject_action') }}</button>
+            </div>
+        </section>
+    @endif
     @if ($previousRejections->isNotEmpty())
         {{-- D61: context for whoever reads the request, never a reason to hide it. --}}
         <section role="note" class="rounded-surface border border-amber-200 bg-amber-50 p-6" aria-label="{{ __('recruitment.previous_rejections') }}">
