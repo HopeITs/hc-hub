@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\ApplyDueRecruitmentRequests;
 use App\Console\Commands\DeactivateContract;
 use App\Console\Commands\DeactivateEmployee;
 use App\Console\Commands\ProcessContractAutoRenewals;
@@ -17,6 +18,9 @@ Schedule::command(DeactivateContract::class)->dailyAt('21:30');
 Schedule::command(SendContractExpirationWarnings::class)->dailyAt('08:00');
 Schedule::command(ProcessContractAutoRenewals::class)->dailyAt('21:35');
 Schedule::command(DeactivateEmployee::class)->weekly();
+// Early, so a reduction effective today is carried out before the contract
+// sweeps that read `exist_emp` run in the evening.
+Schedule::command(ApplyDueRecruitmentRequests::class)->dailyAt('00:30');
 Schedule::call(function () {
     Log::info('الكرون جوب يعمل بنجاح!');
 })->daily();

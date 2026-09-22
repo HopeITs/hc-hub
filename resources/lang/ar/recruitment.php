@@ -138,4 +138,21 @@ return [
     'decided' => 'سُجّل قرارك.',
     'your_decision' => 'قرارك مطلوب',
     'confirm_reject' => 'هل تريد رفض هذا الطلب؟ الرفض نهائي.',
+
+    // تطبيق الأثر (المهمة 9).
+    'vacancy_not_available' => 'هذا الشاغر لم يعد مفتوحاً.',
+    'multiple_vacancies_available' => 'على هذا المنصب أكثر من شاغر مفتوح؛ اختر أيّها تريد ملأه.',
+    'headcount_below_staff' => 'لا يجوز أن ينزل الملاك تحت عدد الموظفين الموجودين في المنصب.',
+    'position_has_active_contracts' => 'على هذا المنصب عقود فعّالة، فلا يمكن إغلاقه.',
+    'headcount_reduced' => 'خُفّض الملاك.',
+    'position_closed' => 'أُغلق المنصب.',
+    'vacancy_closed' => 'أُغلق الشاغر.',
+    'awaiting_execution' => 'معتمد — بانتظار التنفيذ',
+    'effective_on' => 'يُنفّذ بتاريخ :date',
+    'execute_now' => 'نفّذ الآن',
+    'confirm_execute_now' => 'هل تريد تنفيذ هذا الطلب الآن قبل تاريخ نفاذه؟',
+    'executed' => 'نُفّذ الطلب.',
+    'execution_failed' => 'تعذّر تنفيذ الطلب. الموافقة قائمة ويمكن إعادة المحاولة.',
+    'applied_on' => 'نُفّذ بتاريخ :date',
+    'application_failed' => 'فشل التنفيذ',
 ];

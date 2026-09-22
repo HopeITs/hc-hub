@@ -89,6 +89,20 @@ class RecruitmentRequestPolicy
     }
 
     /**
+     * Carrying out an approved request before the date it was given.
+     *
+     * Not an approval — the decision is already made — but an administrative
+     * act on it, so it sits with the permission that runs the module rather
+     * than with the one that decides. Bringing a closure forward is HR's call,
+     * never the approver's.
+     */
+    public function execute(User $user, RecruitmentRequest $request): bool
+    {
+        return $user->hasActivePermission('recruitment-requests.manage')
+            && $this->scopes->canAccessRequest($user, $request);
+    }
+
+    /**
      * Withdrawing is the requester's own act, and only before the final
      * approval (T12 · T14 · T15) — an approved request gets applied, not
      * withdrawn, and a rejected one is already closed.

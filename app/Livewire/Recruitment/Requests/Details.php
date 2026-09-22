@@ -14,6 +14,7 @@ use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Services\RecruitmentApprovalService;
 use App\Services\RecruitmentPendingApprovalQuery;
+use App\Services\RecruitmentRequestApplicationService;
 use App\Services\RecruitmentRequestSubmissionService;
 use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
@@ -102,8 +103,39 @@ class Details extends Component
         // Present only when this user is the one the request is waiting on.
         $pendingStep = $this->pendingStep($request);
 
-        return view('livewire.recruitment.requests.details',
-            compact('request', 'version', 'draftContext', 'previousRejections', 'pendingStep'));
+        // Approved is not the same as carried out. A reduction or a closure
+        // dated ahead waits, and HR may bring it forward.
+        $applications = app(RecruitmentRequestApplicationService::class);
+        $awaitingExecution = $applications->isAwaitingEffectiveDate($request);
+        $effectiveDate = $applications->effectiveDate($request);
+        $mayExecuteNow = $awaitingExecution
+            && auth()->user()?->hasActivePermission('recruitment-requests.manage');
+
+        return view('livewire.recruitment.requests.details', compact(
+            'request', 'version', 'draftContext', 'previousRejections', 'pendingStep',
+            'awaitingExecution', 'effectiveDate', 'mayExecuteNow',
+        ));
+    }
+
+    /**
+     * Carry out an approved request before its effective date.
+     *
+     * HR's own decision, recorded as theirs: the event carries who brought it
+     * forward and when, because a closure happening early is something a
+     * person chose and not something the schedule did.
+     */
+    public function executeNow(RecruitmentRequestApplicationService $applications): void
+    {
+        $request = $this->resolve();
+        Gate::authorize('execute', $request);
+
+        $request = $applications->apply($request, auth()->user(), force: true);
+
+        session()->flash('recruitment_saved', __(
+            (int) $request->status === RecruitmentRequestStatus::Applied
+                ? 'recruitment.executed'
+                : 'recruitment.execution_failed',
+        ));
     }
 
     /**

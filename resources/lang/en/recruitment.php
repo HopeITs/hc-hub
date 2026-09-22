@@ -138,4 +138,21 @@ return [
     'decided' => 'Your decision was recorded.',
     'your_decision' => 'Your decision is needed',
     'confirm_reject' => 'Reject this request? Rejection is final.',
+
+    // Applying the effect (task 9).
+    'vacancy_not_available' => 'That vacancy is no longer open.',
+    'multiple_vacancies_available' => 'This position has more than one open vacancy; choose which one to fill.',
+    'headcount_below_staff' => 'The establishment cannot fall below the number of people already in the post.',
+    'position_has_active_contracts' => 'This position still has active contracts and cannot be closed.',
+    'headcount_reduced' => 'The establishment was reduced.',
+    'position_closed' => 'The position was closed.',
+    'vacancy_closed' => 'The vacancy was closed.',
+    'awaiting_execution' => 'Approved — awaiting execution',
+    'effective_on' => 'Takes effect on :date',
+    'execute_now' => 'Execute now',
+    'confirm_execute_now' => 'Carry out this request now, before its effective date?',
+    'executed' => 'The request was carried out.',
+    'execution_failed' => 'The request could not be carried out. The approval stands and it can be retried.',
+    'applied_on' => 'Carried out on :date',
+    'application_failed' => 'Execution failed',
 ];

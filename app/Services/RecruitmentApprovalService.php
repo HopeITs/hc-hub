@@ -5,13 +5,16 @@ namespace App\Services;
 use App\Enums\ApprovalDecision;
 use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode as Mode;
+use App\Enums\RecruitmentRequestStatus;
 use App\Enums\WorkflowInstanceStatus;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowInstance;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\User;
+use App\Notifications\RecruitmentRequestAwaitingExecution;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -40,6 +43,7 @@ class RecruitmentApprovalService
         private readonly RecruitmentRequestStateMachine $states,
         private readonly RecruitmentRequestRevalidator $revalidator,
         private readonly RecruitmentWorkflowInstanceService $workflows,
+        private readonly RecruitmentRequestApplicationService $applications,
     ) {}
 
     /**
@@ -71,6 +75,33 @@ class RecruitmentApprovalService
     public function requestChanges(User $actor, RecruitmentWorkflowInstanceStep $step, int $versionNo, string $comment): RecruitmentRequest
     {
         return $this->decide($actor, $step, $versionNo, ApprovalDecision::RequestChanges, $comment, 'requestChanges');
+    }
+
+    /**
+     * Tell HR the decision is made and the effect is still to come.
+     *
+     * Without this the request would look finished on the approver's screen
+     * while the post is still open, and nobody would know a date was pending.
+     * Failing to notify never undoes an approval that has already committed.
+     */
+    private function notifyHrOfPendingExecution(RecruitmentRequest $request): void
+    {
+        try {
+            $date = $this->applications->effectiveDate($request);
+
+            User::broadcastRecipientsQuery()
+                ->get()
+                ->filter(fn (User $user): bool => $user->activeRoleIs('HR')
+                    && $user->hasActivePermission('recruitment-requests.manage'))
+                ->each(fn (User $user) => $user->notify(
+                    new RecruitmentRequestAwaitingExecution($request, $date),
+                ));
+        } catch (Throwable $exception) {
+            Log::warning('Notifying HR of a pending recruitment execution failed.', [
+                'request_id' => $request->getKey(),
+                'exception' => $exception->getMessage(),
+            ]);
+        }
     }
 
     private function decide(
@@ -138,7 +169,20 @@ class RecruitmentApprovalService
 
         // D44 and D59: the effect is applied in a second transaction, after the
         // approval is committed, so a failure there cannot roll the approval
-        // back and ask the approver to decide again. Task 9 owns that step.
+        // back and ask the approver to decide again.
+        //
+        // The service decides for itself whether the effect is due. A reduction
+        // or a closure dated in the future stays approved and waits, and HR is
+        // told it is waiting; everything else takes effect now.
+        if ((int) $applied->status === RecruitmentRequestStatus::Approved) {
+            $before = (int) $applied->status;
+            $applied = $this->applications->apply($applied, $actor);
+
+            if ((int) $applied->status === $before && $this->applications->isAwaitingEffectiveDate($applied)) {
+                $this->notifyHrOfPendingExecution($applied);
+            }
+        }
+
         return $applied;
     }
 

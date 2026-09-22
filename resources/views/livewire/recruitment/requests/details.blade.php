@@ -49,6 +49,27 @@
             </div>
         </section>
     @endif
+    @if ($awaitingExecution)
+        {{-- The decision is made; the change has not happened. A reduction or a
+             closure dated ahead waits for that date, and until then the post is
+             still open. Saying so here is the only place anyone would learn it. --}}
+        <section class="rounded-surface border border-blue-200 bg-blue-50 p-6" aria-label="{{ __('recruitment.awaiting_execution') }}">
+            <h2 class="text-h4 font-semibold text-blue-900">{{ __('recruitment.awaiting_execution') }}</h2>
+            @if ($effectiveDate)
+                <p class="mt-1 text-sm text-blue-800">{{ __('recruitment.effective_on', ['date' => $effectiveDate->toDateString()]) }}</p>
+            @endif
+            @if ($mayExecuteNow)
+                <div class="mt-4">
+                    <button type="button"
+                        class="rounded-control border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-100"
+                        wire:click="executeNow"
+                        wire:confirm="{{ __('recruitment.confirm_execute_now') }}"
+                        wire:loading.attr="disabled"
+                        wire:target="executeNow">{{ __('recruitment.execute_now') }}</button>
+                </div>
+            @endif
+        </section>
+    @endif
     @if ($previousRejections->isNotEmpty())
         {{-- D61: context for whoever reads the request, never a reason to hide it. --}}
         <section role="note" class="rounded-surface border border-amber-200 bg-amber-50 p-6" aria-label="{{ __('recruitment.previous_rejections') }}">

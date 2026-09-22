@@ -58,7 +58,14 @@ class RecruitmentApprovalTest extends TestCase
         ]);
     }
 
-    /** The last approval finishes the run and readies the request to be applied. */
+    /**
+     * The last approval finishes the run and the effect follows immediately.
+     *
+     * This type carries no effective date, so there is nothing to wait for:
+     * the approval commits and the application runs in its own transaction
+     * straight after (D44 · D59), taking the request past `approved` to
+     * `applied`. A type that is dated would stop at `approved` instead.
+     */
     public function test_the_final_approval_completes_the_workflow(): void
     {
         ['instance' => $instance, 'manager' => $manager, 'finance' => $finance, 'hr' => $hr] = $this->workflow();
@@ -67,7 +74,8 @@ class RecruitmentApprovalTest extends TestCase
         $this->approvals->approve($finance, $this->stepAt($instance, 2), 1);
         $request = $this->approvals->approve($hr, $this->stepAt($instance, 3), 1);
 
-        $this->assertSame(Status::Approved, (int) $request->status);
+        $this->assertSame(Status::Applied, (int) $request->status);
+        $this->assertNotNull($request->applied_at);
         $this->assertSame(WorkflowInstanceStatus::Completed, (int) $instance->fresh()->status);
         $this->assertNotNull($instance->fresh()->completed_at);
     }

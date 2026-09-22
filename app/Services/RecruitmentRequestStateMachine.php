@@ -56,8 +56,11 @@ class RecruitmentRequestStateMachine
         'cancel' => [[Status::Draft, Status::ChangesRequested, Status::UnderReview], Status::Cancelled],
 
         // T16 · T17 · T18 — applying the effect, and retrying a failure.
+        // A retry that fails again stays failed rather than refusing the move:
+        // the second failure is the same event as the first, and a request
+        // that cannot record it would look like one that never failed.
         'apply_succeeded' => [[Status::Approved, Status::FailedApplication], Status::Applied],
-        'apply_failed' => [[Status::Approved], Status::FailedApplication],
+        'apply_failed' => [[Status::Approved, Status::FailedApplication], Status::FailedApplication],
 
         // T19 · T20 — a direct opening skips draft, not submission. The
         // document draws both as coming from nowhere; in practice the request
