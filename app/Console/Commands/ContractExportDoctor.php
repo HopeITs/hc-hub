@@ -28,6 +28,9 @@ class ContractExportDoctor extends Command
 
     private bool $failed = false;
 
+    /** Extra Chrome flags the standalone launch needed, if any. */
+    private array $workingFlags = [];
+
     public function handle(ContractPdfRenderer $renderer): int
     {
         $this->section('PHP');
@@ -55,7 +58,7 @@ class ContractExportDoctor extends Command
         $chrome = (string) config('browsershot.chrome_path');
         if ($this->check('chrome_path exists', $chrome !== '' && is_file($chrome), "Not a file: {$chrome}. Set BROWSERSHOT_CHROME_PATH to the Chrome/Chromium binary on this host.")) {
             $this->check('chrome_path executable', is_executable($chrome), 'chmod +x '.$chrome.', or the web user cannot run it.');
-            $this->probe([$chrome, '--version'], 'chrome --version');
+            $this->probe([$chrome, '--version'], 'chrome --version', timeout: 15);
             $this->sharedLibraries($chrome);
             $this->launchesAlone($chrome);
         }
@@ -63,7 +66,14 @@ class ContractExportDoctor extends Command
         if (PHP_OS_FAMILY !== 'Windows') {
             $this->section('Host limits');
             $this->probe(['sh', '-c', 'ulimit -u'], 'max user processes (ulimit -u)');
-            $this->probe(['sh', '-c', 'df -h /dev/shm | tail -1'], '/dev/shm');
+            // Asked in PHP rather than through df, which CageFS-style hosts
+            // refuse to run at all.
+            $shm = is_dir('/dev/shm')
+                ? (is_writable('/dev/shm')
+                    ? 'writable, '.number_format((float) @disk_free_space('/dev/shm') / 1048576, 0).' MB free'
+                    : 'present but not writable')
+                : 'absent';
+            $this->line('  <fg=green>OK  </> /dev/shm '.$shm);
             $this->probe(['sh', '-c', "grep -E '^Mem(Total|Available)' /proc/meminfo | tr -s ' ' | tr '\\n' ' '"], 'memory');
         }
 
@@ -135,11 +145,32 @@ class ContractExportDoctor extends Command
             return ! $this->failed;
         }
 
-        // A Chrome that dies during startup while `chrome --version` works is
-        // usually a host refusing it the processes it wants: the zygote and its
-        // helpers never come up and puppeteer only sees the target close. One
-        // process is a poor way to run Chrome, but it is worth knowing whether
-        // it is the difference here, because that answer is a one-line .env fix.
+        // If the standalone launch above needed extra flags to come up, the
+        // render deserves the same ones before anyone concludes it is broken —
+        // and if that is all it took, the answer is one line of .env.
+        if ($this->workingFlags !== []) {
+            $flags = array_values(array_unique(array_map(
+                fn (string $flag) => ltrim($flag, '-'),
+                $this->workingFlags,
+            )));
+
+            $this->newLine();
+            $this->line('<fg=cyan;options=bold>Render, retried with the flags Chrome needed above</>');
+            config(['browsershot.extra_args' => array_values(array_unique(
+                array_merge(config('browsershot.extra_args', []), $flags),
+            ))]);
+
+            if ($this->renderOnce($renderer, $html)) {
+                $this->line('       <fg=green>→ Put this in .env and the export works:</>');
+                $this->line('       <fg=green>BROWSERSHOT_CHROMIUM_ARGS='.implode(',', $flags).'</>');
+            }
+
+            return false;
+        }
+
+        // Chrome came up on its own but not under node. A host capping the
+        // processes an account may spawn is the usual difference: the zygote and
+        // its helpers never appear and puppeteer only sees the target close.
         if (! config('browsershot.single_process')) {
             $this->newLine();
             $this->line('<fg=cyan;options=bold>Render, retried with --single-process</>');
@@ -148,8 +179,6 @@ class ContractExportDoctor extends Command
             if ($this->renderOnce($renderer, $html)) {
                 $this->line('       <fg=green>→ Set BROWSERSHOT_SINGLE_PROCESS=true in .env. '
                     .'This host caps the processes Chrome may spawn.</>');
-
-                return false;
             }
         }
 
@@ -196,7 +225,15 @@ class ContractExportDoctor extends Command
             }
 
             $ok = str_starts_with($pdf, '%PDF-');
-            $this->check('PDF produced', $ok, 'Chrome did not write a usable PDF — the stderr above is the reason.');
+            $this->check('PDF produced', $ok, 'Chrome did not write a usable PDF. Its full output follows.');
+
+            // The snippets above keep the summary readable; when it actually
+            // failed, the line that explains why is usually past the cut.
+            if (! $ok && $stderr !== '') {
+                foreach (explode("\n", trim($stderr)) as $line) {
+                    $this->line('       <fg=gray>'.addcslashes($line, "\0..\10\13..\37").'</>');
+                }
+            }
 
             if ($ok && $this->option('keep')) {
                 $kept = storage_path('app/export-doctor.pdf');
@@ -272,41 +309,107 @@ class ContractExportDoctor extends Command
      */
     private function launchesAlone(string $chrome): void
     {
-        $profile = rtrim(strtr(sys_get_temp_dir(), DIRECTORY_SEPARATOR, '/'), '/').'/hc-hr-probe-'.getmypid();
+        // Tried in order, each adding to the one before, stopping at the first
+        // that opens a page. A host that refuses the plain launch usually
+        // objects to something specific — the keyring Chrome reaches for over
+        // D-Bus, the crash handler it forks, the zygote it clones — and naming
+        // which of them it was turns a dead end into a BROWSERSHOT_CHROMIUM_ARGS
+        // line.
+        $ladder = [
+            'as configured' => [],
+            'without the keyring and crash handler' => [
+                '--password-store=basic',
+                '--use-mock-keychain',
+                '--disable-breakpad',
+                '--disable-crash-reporter',
+                '--disable-component-update',
+                '--disable-client-side-phishing-detection',
+            ],
+            'also without out-of-process services' => [
+                '--disable-features=AudioServiceOutOfProcess,DialMediaRouteProvider,MediaRouter,NetworkService',
+                '--disable-audio-output',
+            ],
+            'also as a single process' => ['--single-process', '--no-zygote'],
+        ];
+
+        $extra = [];
+        $lastOutput = '';
+
+        foreach ($ladder as $label => $flags) {
+            $extra = array_merge($extra, $flags);
+            $result = $this->launch($chrome, $extra);
+            $lastOutput = $result['out'];
+
+            if ($result['ok']) {
+                $this->check('chrome opens a page on its own ('.$label.')', true);
+
+                if ($extra !== []) {
+                    $this->failed = true;
+                    $this->workingFlags = $extra;
+                    $this->line('       <fg=yellow>→ The plain launch fails here. Put these in BROWSERSHOT_CHROMIUM_ARGS '
+                        .'(comma separated, no leading --):</>');
+                    $this->line('       <fg=green>'.implode(',', array_map(
+                        fn (string $flag) => ltrim($flag, '-'),
+                        $extra,
+                    )).'</>');
+                }
+
+                return;
+            }
+
+            $this->line(sprintf('  <fg=red>FAIL</> chrome opens a page on its own (%s)', $label));
+        }
+
+        $this->failed = true;
+        $this->line('       <fg=yellow>→ Chrome will not start on this host under any of the flag sets tried. '
+            .'Its own output from the last attempt follows in full.</>');
+
+        // Printed whole, not trimmed: the line that explains an abort is
+        // routinely the last one, and a snippet always cuts it off.
+        foreach (explode("\n", trim($lastOutput)) as $line) {
+            $this->line('       <fg=gray>'.addcslashes($line, "\0..\10\13..\37").'</>');
+        }
+    }
+
+    /**
+     * @param  array<int, string>  $extraFlags
+     * @return array{ok: bool, out: string}
+     */
+    private function launch(string $chrome, array $extraFlags): array
+    {
+        $profile = rtrim(strtr(sys_get_temp_dir(), DIRECTORY_SEPARATOR, '/'), '/')
+            .'/hc-hr-probe-'.getmypid().'-'.count($extraFlags);
+
         File::ensureDirectoryExists($profile, 0755, true);
 
-        $result = $this->capture([
-            $chrome,
-            '--headless=new',
-            '--no-sandbox',
-            '--disable-gpu',
-            '--disable-dev-shm-usage',
-            '--no-first-run',
-            '--user-data-dir='.$profile,
-            '--crash-dumps-dir='.$profile,
-            '--enable-logging=stderr',
-            '--virtual-time-budget=2000',
-            '--dump-dom',
-            'about:blank',
-        ], env: array_filter([
-            // The same environment the render gives it — Chrome writes to $HOME
-            // even when handed a --user-data-dir.
-            'HOME' => $profile,
-            'XDG_CONFIG_HOME' => $profile.'/config',
-            'XDG_CACHE_HOME' => $profile.'/cache',
-            'XDG_DATA_HOME' => $profile.'/data',
-            'LD_LIBRARY_PATH' => config('browsershot.ld_library_path'),
-        ]));
+        try {
+            $result = $this->capture(array_merge([
+                $chrome,
+                '--headless=new',
+                '--no-sandbox',
+                '--disable-gpu',
+                '--disable-dev-shm-usage',
+                '--no-first-run',
+                '--user-data-dir='.$profile,
+                '--crash-dumps-dir='.$profile,
+                '--enable-logging=stderr',
+                '--virtual-time-budget=2000',
+            ], $extraFlags, ['--dump-dom', 'about:blank']), env: array_filter([
+                // The same environment the render gives it — Chrome writes to
+                // $HOME even when handed a --user-data-dir.
+                'HOME' => $profile,
+                'XDG_CONFIG_HOME' => $profile.'/config',
+                'XDG_CACHE_HOME' => $profile.'/cache',
+                'XDG_DATA_HOME' => $profile.'/data',
+                'LD_LIBRARY_PATH' => config('browsershot.ld_library_path'),
+            ]), timeout: 60);
 
-        File::deleteDirectory($profile);
-
-        $ok = $result['ok'] && str_contains($result['out'], '<body');
-
-        $this->check('chrome opens a page on its own', $ok,
-            'Chrome cannot start a browser on this host at all — puppeteer is not the problem. Its own output follows.');
-
-        if (! $ok) {
-            $this->line('       <fg=yellow>'.$this->snippet($result['out'], 1200).'</>');
+            return [
+                'ok' => str_contains($result['out'], '<body'),
+                'out' => $result['out'],
+            ];
+        } finally {
+            File::deleteDirectory($profile);
         }
     }
 
@@ -315,9 +418,9 @@ class ContractExportDoctor extends Command
      * @param  array<string, string>  $env
      * @return array{ok: bool, out: string}
      */
-    private function probe(array $command, string $label, ?string $cwd = null, array $env = []): array
+    private function probe(array $command, string $label, ?string $cwd = null, array $env = [], int $timeout = 30): array
     {
-        $result = $this->capture($command, $cwd, $env);
+        $result = $this->capture($command, $cwd, $env, $timeout);
 
         $this->line(sprintf(
             '  %s %s %s',
@@ -334,20 +437,38 @@ class ContractExportDoctor extends Command
      * @param  array<string, string>  $env
      * @return array{ok: bool, out: string}
      */
-    private function capture(array $command, ?string $cwd = null, array $env = []): array
+    private function capture(array $command, ?string $cwd = null, array $env = [], int $timeout = 30): array
     {
         try {
             $process = new Process($command, $cwd, $env === [] ? null : $env);
-            $process->setTimeout(60);
-            $process->run();
-
-            return [
-                'ok' => $process->isSuccessful(),
-                'out' => trim($process->getOutput().' '.$process->getErrorOutput()),
-            ];
         } catch (Throwable $e) {
             return ['ok' => false, 'out' => $e->getMessage()];
         }
+
+        $process->setTimeout($timeout);
+        $thrown = null;
+
+        try {
+            $process->run();
+        } catch (Throwable $e) {
+            // A process killed by a signal — Chrome aborting is signal 6 — makes
+            // run() throw, and everything it printed before dying is still on
+            // the process object. Reading it anyway is the whole point of this
+            // command; letting the exception replace it was how the first run
+            // reported "signaled with signal 6" and nothing else.
+            $thrown = $e;
+        }
+
+        $out = trim($process->getOutput()."\n".$process->getErrorOutput());
+
+        if ($thrown) {
+            $out = trim($thrown->getMessage()."\n".$out);
+        }
+
+        return [
+            'ok' => $thrown === null && $process->isSuccessful(),
+            'out' => $out,
+        ];
     }
 
     private function writable(string $label, string $dir): void
