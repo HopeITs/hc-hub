@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\Vacancy;
 use App\Services\RecruitmentRequestDraftService;
 use App\Services\RecruitmentRequestSubmissionService;
+use Database\Seeders\RecruitmentWorkflowSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\Concerns\BuildsRecruitmentRequests;
@@ -43,6 +44,11 @@ class RecruitmentSubmissionTest extends TestCase
 
         $city = $this->makeCity('SYR', '000');
         $this->manager = $this->makeUser($city, 'manager');
+        $this->manager->givePermissionTo(\Spatie\Permission\Models\Permission::findOrCreate(
+            'recruitment-requests.submit-without-manager',
+            'web',
+        ));
+        $this->seed(RecruitmentWorkflowSeeder::class);
         $this->contractType = ContractType::query()->create(['name_en' => 'Annual', 'name_ar' => 'سنوي']);
 
         $this->root = Position::query()->create([
@@ -133,7 +139,7 @@ class RecruitmentSubmissionTest extends TestCase
 
         $this->assertSame($first->id, $second->id);
         $this->assertSame(1, $request->versions()->count());
-        $this->assertSame(Status::Submitted, (int) $second->status);
+        $this->assertSame(Status::UnderReview, (int) $second->status);
     }
 
     /** Same position, same type, while the first is still being processed. */
