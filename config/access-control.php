@@ -259,6 +259,12 @@ return [
             'publish' => 'recruitment-forms.manage',
             'reloadLatest' => 'recruitment-forms.manage',
         ],
+        'recruitment.public-links.manager' => [
+            'generate' => 'recruitment-links.manage',
+            'disable' => 'recruitment-links.manage',
+            'addInvite' => 'recruitment-links.manage',
+            'cancelInvite' => 'recruitment-links.manage',
+        ],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
             'create' => 'leaves.create', 'delete' => 'leaves.delete',

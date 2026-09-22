@@ -160,9 +160,11 @@ class RecruitmentJobPostService
     }
 
     /** @return array<string, mixed> */
-    public function publicSnapshot(HiringCampaign $campaign): array
+    public function publicSnapshot(HiringCampaign $campaign, ?int $versionId = null): array
     {
-        $version = $campaign->jobPost?->currentVersion;
+        $version = $versionId
+            ? $campaign->jobPost?->versions()->whereKey($versionId)->where('status', 'published')->first()
+            : $campaign->jobPost?->currentVersion;
         if (! $version || $version->status !== 'published') {
             throw new DomainException('This campaign does not have a published job post.');
         }

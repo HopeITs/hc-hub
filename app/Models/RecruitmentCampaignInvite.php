@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class RecruitmentCampaignInvite extends Model
 {
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_SENT = 'sent';
+
+    public const STATUS_USED = 'used';
+
+    public const STATUS_CANCELLED = 'cancelled';
+
     protected $guarded = ['id'];
 
     public function campaign(): BelongsTo

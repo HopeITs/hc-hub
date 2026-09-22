@@ -25,4 +25,8 @@
     </div>
 
     <x-recruitment.campaign-publishing-actions :campaign="$campaign" />
+
+    @if (auth()->user()?->hasActivePermission('recruitment-links.view') || auth()->user()?->hasActivePermission('recruitment-links.manage'))
+        <livewire:recruitment.public-links.manager :campaign="$campaign" />
+    @endif
 </div>

@@ -36,10 +36,13 @@ use App\Policies\RecruitmentRequestPolicy;
 use App\Policies\RecruitmentWorkflowInstanceStepPolicy;
 use App\Policies\VacancyPolicy;
 use App\Services\ActivityLogger;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -57,6 +60,13 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        RateLimiter::for('careers-view', fn (Request $request) => Limit::perMinute(60)
+            ->by($request->ip()));
+        RateLimiter::for('careers-submit', fn (Request $request) => [
+            Limit::perMinute(5)->by($request->ip().'|'.hash('sha256', (string) $request->route('token'))),
+            Limit::perHour(30)->by($request->ip()),
+        ]);
+
         // Applies wherever Rules\Password::defaults() is used (registration,
         // reset, and the settings screen).
         //
