@@ -1,10 +1,11 @@
 <?php
 
+use App\Http\Controllers\RecruitmentApplicantFileController;
+use App\Livewire\Recruitment\Approvals\Pending;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
 use App\Livewire\Recruitment\Requests\Edit;
 use App\Livewire\Recruitment\Requests\Index;
-use App\Livewire\Recruitment\Approvals\Pending;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('recruitment/requests')->name('recruitment.requests.')
@@ -19,3 +20,7 @@ Route::prefix('recruitment/requests')->name('recruitment.requests.')
 Route::get('recruitment/approvals', Pending::class)
     ->middleware(['active_permission:recruitment-requests.approve'])
     ->name('recruitment.approvals.pending');
+
+Route::get('recruitment/applicant-files/{file}/download', [RecruitmentApplicantFileController::class, 'download'])
+    ->middleware(['active_permission:recruitment-campaigns.manage', 'throttle:60,1'])
+    ->name('recruitment.applicant-files.download');
