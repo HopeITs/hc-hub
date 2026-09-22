@@ -130,6 +130,15 @@ return [
      */
     'livewire' => [
         'recruitment.requests.create' => ['save' => 'recruitment-requests.manage'],
+        'recruitment.campaigns.index' => [
+            'create' => 'recruitment-campaigns.manage',
+            'beginScheduleEdit' => 'recruitment-campaigns.manage',
+            'updateSchedule' => 'recruitment-campaigns.manage',
+            'openCampaign' => 'recruitment-campaigns.manage',
+            'closeCampaign' => 'recruitment-campaigns.manage',
+            'beginDisable' => 'recruitment-campaigns.manage',
+            'disableCampaign' => 'recruitment-campaigns.manage',
+        ],
         'access-management.index' => [
             'saveEmployeeAccess' => 'access-management.manage-employees',
             'saveRolePermissions' => 'access-management.manage-permissions',

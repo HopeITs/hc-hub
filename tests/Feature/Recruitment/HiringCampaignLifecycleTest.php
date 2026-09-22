@@ -8,6 +8,7 @@ use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
+use App\Livewire\Recruitment\Campaigns\Index as CampaignIndex;
 use App\Models\ApplicationForm;
 use App\Models\Department;
 use App\Models\HiringCampaign;
@@ -25,6 +26,7 @@ use App\Services\PublicRecruitmentLinkService;
 use DomainException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 
@@ -194,6 +196,119 @@ class HiringCampaignLifecycleTest extends TestCase
             now()->addDays(3),
             RecruitmentCampaignLinkMode::PublicOpen,
         );
+    }
+
+    public function test_campaign_screen_lists_only_scoped_campaigns_and_available_vacancies(): void
+    {
+        [$localVacancy, $localHr] = $this->makeVacancy();
+        [$remoteVacancy, $remoteHr] = $this->makeVacancy('ALP', '001');
+        $service = app(HiringCampaignService::class);
+
+        $localCampaign = $service->create($localHr, $localVacancy, [
+            'starts_at' => now(),
+            'ends_at' => now()->addWeek(),
+        ]);
+        $service->create($remoteHr, $remoteVacancy, [
+            'starts_at' => now(),
+            'ends_at' => now()->addWeek(),
+        ]);
+        [$otherLocalVacancy] = $this->makeVacancy('HMS-OTHER', '102');
+        $otherLocalVacancy->createdFromRequest->forceFill([
+            'scope_city_id' => $localVacancy->createdFromRequest->scope_city_id,
+        ])->save();
+        $otherLocalVacancy->position->forceFill([
+            'city_id' => $localVacancy->position->city_id,
+        ])->save();
+
+        Livewire::actingAs($localHr)
+            ->test(CampaignIndex::class)
+            ->assertSee($localCampaign->vacancy->createdFromRequest->request_number)
+            ->assertDontSee($remoteVacancy->createdFromRequest->request_number)
+            ->assertSee('value="'.$otherLocalVacancy->id.'"', false)
+            ->assertDontSee('value="'.$localVacancy->id.'"', false);
+    }
+
+    public function test_campaign_screen_creates_campaign_and_redirects_to_publishing(): void
+    {
+        [$vacancy, $hr] = $this->makeVacancy();
+
+        $screen = Livewire::actingAs($hr)
+            ->test(CampaignIndex::class)
+            ->set('vacancyId', $vacancy->id)
+            ->set('startsAt', now()->addHour()->format('Y-m-d\TH:i'))
+            ->set('endsAt', now()->addWeek()->format('Y-m-d\TH:i'))
+            ->call('create')
+            ->assertHasNoErrors();
+
+        $campaign = HiringCampaign::query()->sole();
+        $screen->assertRedirect(route('recruitment.campaigns.publishing', $campaign));
+
+        Livewire::actingAs($hr)
+            ->test(CampaignIndex::class)
+            ->set('vacancyId', $vacancy->id)
+            ->set('startsAt', now()->addHour()->format('Y-m-d\TH:i'))
+            ->set('endsAt', now()->addWeek()->format('Y-m-d\TH:i'))
+            ->call('create')
+            ->assertHasErrors('campaign');
+
+        $this->assertDatabaseCount('hiring_campaigns', 1);
+        $this->assertSame(HiringCampaignStatus::Draft, $campaign->status);
+    }
+
+    public function test_campaign_screen_runs_open_close_and_disable_actions(): void
+    {
+        [$vacancy, $hr] = $this->makeVacancy();
+        $service = app(HiringCampaignService::class);
+        $campaign = $service->create($hr, $vacancy, [
+            'starts_at' => now()->subMinute(),
+            'ends_at' => now()->addWeek(),
+        ]);
+        $campaign->forceFill(['status' => HiringCampaignStatus::Published])->save();
+        [$campaign] = $this->attachPublishedAssetsAndLink($campaign, $hr);
+
+        Livewire::actingAs($hr)
+            ->test(CampaignIndex::class)
+            ->call('openCampaign', $campaign->id)
+            ->assertHasNoErrors()
+            ->call('closeCampaign', $campaign->id)
+            ->assertHasNoErrors();
+
+        $this->assertSame(HiringCampaignStatus::Closed, $campaign->fresh()->status);
+
+        [$secondVacancy, $secondHr] = $this->makeVacancy('DMS', '003');
+        $second = $service->create($secondHr, $secondVacancy, [
+            'starts_at' => now(),
+            'ends_at' => now()->addWeek(),
+        ]);
+
+        Livewire::actingAs($secondHr)
+            ->test(CampaignIndex::class)
+            ->call('beginDisable', $second->id)
+            ->set('disableReason', 'Vacancy was withdrawn by HR.')
+            ->call('disableCampaign')
+            ->assertHasNoErrors();
+
+        $this->assertSame(HiringCampaignStatus::Disabled, $second->fresh()->status);
+    }
+
+    public function test_view_only_hr_can_browse_but_cannot_manage_campaigns(): void
+    {
+        [$vacancy, $hr] = $this->makeVacancy();
+        $campaign = app(HiringCampaignService::class)->create($hr, $vacancy, [
+            'starts_at' => now(),
+            'ends_at' => now()->addWeek(),
+        ]);
+        $hr->roles()->first()->revokePermissionTo('recruitment-campaigns.manage');
+        $viewer = $this->makeUser($vacancy->createdFromRequest->scopeCity, 'HR-HMS', [
+            'recruitment-campaigns.view',
+        ]);
+
+        Livewire::actingAs($viewer)
+            ->test(CampaignIndex::class)
+            ->assertSee($campaign->vacancy->createdFromRequest->request_number)
+            ->assertDontSee(__('recruitment.campaign.create'))
+            ->call('beginScheduleEdit', $campaign->id)
+            ->assertForbidden();
     }
 
     /** @return array{Vacancy, User, RecruitmentRequest} */

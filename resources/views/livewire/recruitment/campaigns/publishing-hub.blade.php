@@ -4,10 +4,15 @@
     <livewire:layout.breadcrumbs
         :title="__('recruitment.publishing.title')"
         :crumbs="[
+            ['label' => __('recruitment.campaign.title'), 'href' => route('recruitment.campaigns.index')],
             ['label' => __('recruitment.job_post.campaign').' #'.$campaign->id],
             ['label' => __('recruitment.publishing.title')],
         ]"
     />
+
+    @if (session('campaign_notice'))
+        <div class="mb-5 rounded-control border border-green-200 bg-green-50 p-4 text-body text-green-800" role="status">{{ session('campaign_notice') }}</div>
+    @endif
 
     <section class="mb-5 rounded-card border border-neutral-200 bg-white p-5 shadow-e1">
         <div class="flex flex-wrap items-start justify-between gap-4">

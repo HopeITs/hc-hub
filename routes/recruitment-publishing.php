@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Recruitment\ApplicationForms\Editor as ApplicationFormEditor;
+use App\Livewire\Recruitment\Campaigns\Index as CampaignIndex;
 use App\Livewire\Recruitment\Campaigns\PublishingHub;
 use App\Livewire\Recruitment\JobPosts\Editor as JobPostEditor;
 use Illuminate\Support\Facades\Route;
@@ -8,6 +9,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('recruitment/campaigns')
     ->name('recruitment.campaigns.')
     ->group(function () {
+        Route::get('/', CampaignIndex::class)
+            ->middleware('active_permission:recruitment-campaigns.view')
+            ->name('index');
+
         Route::get('/{campaign}/publishing', PublishingHub::class)
             ->middleware('active_permission:recruitment-campaigns.view')
             ->name('publishing');
