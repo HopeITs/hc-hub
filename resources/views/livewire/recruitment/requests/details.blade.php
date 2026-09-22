@@ -176,10 +176,49 @@
             <h2 class="text-h4 font-semibold">{{ __('recruitment.timeline') }}</h2>
             <ol class="mt-4 space-y-4">
                 @forelse ($request->events as $event)
+                    {{-- The role and the scope are read from the row, never looked
+                         up from the actor today: reading a year-old decision through
+                         this week's roles would misstate who decided it. --}}
                     <li class="border-s-2 border-primary/20 ps-4" wire:key="event-{{ $event->id }}">
-                        <p class="font-medium">{{ \App\Enums\RecruitmentEventType::getLocalizedName($event->event_type)['value'] }}</p>
-                        <p class="text-sm text-secondary-medium">{{ $event->actor?->profile?->name ?? $event->actor?->name ?? __('recruitment.system') }} · {{ $event->created_at?->format('Y-m-d H:i') }}</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <p class="font-medium">{{ \App\Enums\RecruitmentEventType::getLocalizedName($event->event_type)['value'] }}</p>
+                            @if ($event->decision !== null)
+                                <span class="rounded-control bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">{{ \App\Enums\ApprovalDecision::getLocalizedName((int) $event->decision)['value'] }}</span>
+                            @endif
+                            @if ($event->requestVersion)
+                                <span class="text-xs text-secondary-medium">{{ __('recruitment.version_no', ['no' => $event->requestVersion->version_no]) }}</span>
+                            @endif
+                        </div>
+                        <p class="text-sm text-secondary-medium">
+                            {{ $event->actor?->profile?->name ?? $event->actor?->name ?? __('recruitment.system') }}
+                            @if ($event->actor_role)<span class="text-xs">({{ $event->actor_role }})</span>@endif
+                            · {{ $event->created_at?->format('Y-m-d H:i') }}
+                        </p>
+                        @if ($event->to_status !== null && (int) $event->from_status !== (int) $event->to_status)
+                            <p class="mt-1 text-sm text-secondary-medium">
+                                @if ($event->from_status !== null){{ \App\Enums\RecruitmentRequestStatus::getLocalizedName((int) $event->from_status)['value'] }} &rarr; @endif
+                                <span class="font-medium">{{ \App\Enums\RecruitmentRequestStatus::getLocalizedName((int) $event->to_status)['value'] }}</span>
+                            </p>
+                        @endif
                         @if ($event->comment)<p class="mt-2 whitespace-pre-wrap break-words" dir="auto">{{ $event->comment }}</p>@endif
+                        @php $changes = $event->meta['changes'] ?? null; @endphp
+                        @if ($changes)
+                            {{-- RV-1b: naming the fields is the point. "Edited" alone
+                                 tells the approver nothing about whether their own
+                                 approval still stands. --}}
+                            <ul class="mt-2 space-y-1 text-sm">
+                                @foreach ($changes as $field => $change)
+                                    <li dir="auto">
+                                        <span class="font-medium">{{ __('recruitment.fields.'.$field) }}</span>
+                                        <span class="text-secondary-medium">{{ \Illuminate\Support\Str::limit((string) ($change['from'] ?? '—'), 60) }} &rarr; {{ \Illuminate\Support\Str::limit((string) ($change['to'] ?? '—'), 60) }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                        @php $extra = collect($event->meta ?? [])->except('changes'); @endphp
+                        @if ($extra->isNotEmpty())
+                            <p class="mt-1 text-xs text-secondary-medium" dir="auto">{{ $extra->map(fn ($value, $key) => $key.': '.(is_scalar($value) ? $value : json_encode($value, JSON_UNESCAPED_UNICODE)))->implode(' · ') }}</p>
+                        @endif
                     </li>
                 @empty
                     <li class="text-secondary-medium">{{ __('recruitment.no_events') }}</li>

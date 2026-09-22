@@ -105,6 +105,12 @@ class RecruitmentRequestDraftService
 
             [$target, $cityId] = $this->resolveTarget($actor, $data);
 
+            // Read before the write, so the event can say what moved. RV-1b:
+            // "the request was edited" without naming the fields is explicitly
+            // not enough for the approver who has to decide whether their own
+            // approval still stands.
+            $before = (array) ($fresh->draft_payload_json ?? []);
+
             $fresh->forceFill([
                 'scope_city_id' => $cityId,
                 'target_position_id' => $data['request_type'] === Type::CreatePosition ? null : $target->getKey(),
@@ -112,9 +118,12 @@ class RecruitmentRequestDraftService
                 'draft_payload_json' => $data,
             ])->save();
 
+            $changes = app(RecruitmentRequestChangeClassifier::class)->payloadChanges($before, $data);
+
             $this->recordEvent($fresh, $actor, [
                 'event_type' => RecruitmentEventType::RequestEdited,
                 'to_status' => (int) $fresh->status,
+                'meta' => $changes === [] ? null : ['changes' => $changes],
             ]);
 
             return $fresh;

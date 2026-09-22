@@ -70,6 +70,74 @@ class RecruitmentRequestChangeClassifier
     private const SNAPSHOT_FIELDS = ['request_type', 'city_id', 'vacancy_id'];
 
     /**
+     * The draft payload's own keys, by category.
+     *
+     * A separate table from DETAIL_FIELDS on purpose: the draft names its
+     * fields as the form does (`title_en`, `qualifications`, `responsibilities`)
+     * while the details row names them as the records do (`role_title_en`,
+     * `required_qualifications`, `main_duties`). Mapping one onto the other
+     * would put a translation table between an edit and the record of it, and
+     * a key falling through that map would silently stop being reported.
+     *
+     * `effective_date` is treated as substantive: since D64 it decides *when*
+     * the organisation actually changes, so moving it is not a rewording.
+     * Worth confirming, like direct_supervisor_position_id above.
+     *
+     * @var array<int, array<int, string>>
+     */
+    private const PAYLOAD_FIELDS = [
+        self::SUBSTANTIVE => [
+            'request_type', 'position_id', 'vacancy_id', 'city_id', 'program_id',
+            'center_id', 'department_id', 'job_level_id', 'direct_manager_id',
+            'max_emp', 'additional_count', 'reduce_by', 'effective_date',
+        ],
+        self::FINANCIAL => [
+            'salary_amount', 'currency', 'salary_per', 'contract_type_id',
+        ],
+        self::DESCRIPTIVE => [
+            'recruitment_reason', 'other_reason', 'priority', 'volunteer_type',
+            'weekly_hours', 'volunteer_period_start_date', 'volunteer_period_end_date',
+            'needed_by_date', 'detailed_explanation', 'title_en', 'title_ar',
+            'qualifications', 'responsibilities', 'reason',
+        ],
+    ];
+
+    /**
+     * Every draft field that changed, with its old and new value (RV-1b).
+     *
+     * The edit screen writes the whole payload back whether or not anything
+     * moved, so "the request was edited" on its own tells a reader nothing.
+     * This is what turns that line into a record of what actually changed.
+     *
+     * @param  array<string, mixed>  $before
+     * @param  array<string, mixed>  $after
+     * @return array<string, array{category: int, from: mixed, to: mixed}>
+     */
+    public function payloadChanges(array $before, array $after): array
+    {
+        $changes = [];
+
+        foreach (self::PAYLOAD_FIELDS as $category => $fields) {
+            foreach ($fields as $field) {
+                $from = $before[$field] ?? null;
+                $to = $after[$field] ?? null;
+
+                if (! $this->same($from, $to)) {
+                    $changes[$field] = ['category' => $category, 'from' => $from, 'to' => $to];
+                }
+            }
+        }
+
+        return $changes;
+    }
+
+    /** The severest category among a payload comparison, or NOTHING. */
+    public function classifyPayload(array $before, array $after): int
+    {
+        return (int) max([self::NOTHING, ...array_column($this->payloadChanges($before, $after), 'category')]);
+    }
+
+    /**
      * The severest category of anything that changed.
      *
      * Severest, because a single edit can touch more than one category and the

@@ -226,4 +226,38 @@ app/Services/Recruitment/Handlers/{FillVacancy,IncreaseHeadcount,DecreaseHeadcou
 | `D60` | `reject` و`request_changes` فعلان مستقلان؛ تعليق طلب التعديل يحدد **ما المطلوب تعديله** |
 | `D61` | الطلبات المرفوضة السابقة على نفس المنصب تُعرض للموافِق — **عرض لا منع** |
 
+---
+
+## 11. ما نُفّذ فعلاً — 22 أيلول 2026
+
+المهام **8 و 9 و 10 مكتملة**. الاختبارات: **132 تنجح · 789 تأكيداً**.
+
+### ما خالف الخطة، ولماذا
+
+| # | الخطة قالت | المنفّذ | السبب |
+|---|---|---|---|
+| 1 | `increase_headcount` ينتج **شاغراً لكل وحدة**، و`create_position` ينتج **شواغر بعدد `max_emp`** | شاغر واحد بـ `needed_count` يساوي العدد | `vacancies.created_from_request_id` عليه **قيد فريد** (`vac_request_uq`) — عدة شواغر للطلب الواحد مستحيلة في قاعدة البيانات. انظر `D63`. |
+| 2 | `D59`: الأثر يُطبّق **فوراً** بعد الموافقة | فوراً لأربعة أنواع؛ والنوعان ذوا `effective_date` ينتظران تاريخهما | قرار صاحب المنتج: `approved` ≠ `executed`. انظر `D64`. |
+| 3 | المهمة 9 **مسؤولية زميلي** | نفّذتُها | بطلب صريح منه ومؤكّد مرتين. |
+
+### الملفات
+
+```
+app/Services/RecruitmentApprovalService.php                  المهمة 8
+app/Services/RecruitmentRequestStateMachine.php              المهمة 8
+app/Services/RecruitmentRequestRevalidator.php               المهمة 8
+app/Services/RecruitmentRequestChangeClassifier.php          8 + 10
+app/Services/RecruitmentRequestApplicationService.php        المهمة 9
+app/Services/Recruitment/Handlers/*.php                      المهمة 9 — ستة معالجات + trait
+app/Console/Commands/ApplyDueRecruitmentRequests.php         المهمة 9 — مجدول يومياً 00:30
+app/Notifications/RecruitmentRequestAwaitingExecution.php    المهمة 9
+```
+
+### ما زال يحتاج تأكيداً
+
+| الحقل | صُنّف | لماذا يحتاج تأكيداً |
+|---|---|---|
+| `direct_supervisor_position_id` | جوهري | جدول `RV-1` لا يسمّيه، لكنه يحدد موقع المنصب في الهيكل |
+| `effective_date` | جوهري | بعد `D64` صار يحدد متى يتغيّر الهيكل فعلاً |
+
 </div>

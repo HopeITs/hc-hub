@@ -71,7 +71,7 @@ class Details extends Component
         $request = RecruitmentRequest::query()->visibleTo(auth()->user())
             ->with(['requester.profile', 'scopeCity', 'targetPosition',
                 'versions' => fn ($query) => $query->orderByDesc('version_no'),
-                'events' => fn ($query) => $query->with('actor.profile')->orderBy('created_at')->orderBy('id'),
+                'events' => fn ($query) => $query->with(['actor.profile', 'requestVersion'])->orderBy('created_at')->orderBy('id'),
                 'comments' => fn ($query) => $query->with('user.profile')->orderBy('created_at')->orderBy('id'),
                 'externalConfirmations.recordedBy.profile'])
             ->findOrFail($this->requestId);
