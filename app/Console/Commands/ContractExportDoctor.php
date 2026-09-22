@@ -94,19 +94,22 @@ class ContractExportDoctor extends Command
         File::ensureDirectoryExists($profile, 0755, true);
 
         try {
-            $result = $this->capture([
+            $result = $this->capture(array_merge([
                 $chrome,
                 '--headless=new',
                 '--no-sandbox',
-                '--disable-gpu',
-                '--disable-dev-shm-usage',
                 '--no-first-run',
                 '--user-data-dir='.$profile,
                 '--enable-logging=stderr',
                 '--virtual-time-budget=2000',
+            ], array_map(
+                // The same switches the render uses, so the two agree.
+                fn (string $flag) => '--'.$flag,
+                $renderer->chromiumArguments(),
+            ), [
                 '--dump-dom',
                 'about:blank',
-            ], env: [
+            ]), env: [
                 'HOME' => $profile,
                 'CHROME_CONFIG_HOME' => $renderer->workDir().'/.config',
             ], timeout: 60);

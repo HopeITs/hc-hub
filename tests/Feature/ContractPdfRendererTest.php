@@ -53,6 +53,23 @@ class ContractPdfRendererTest extends TestCase
         $this->assertTrue($options['preferCSSPageSize'] ?? false);
     }
 
+    public function test_chrome_is_told_not_to_run_a_separate_gpu_process(): void
+    {
+        $args = app(ContractPdfRenderer::class)
+            ->browsershot('<h1>x</h1>')
+            ->createPdfCommand()['options']['args'] ?? [];
+
+        // A host that hides /sys/bus/pci kills the GPU process every time it
+        // tries to identify the card, and Chrome aborts the whole browser after
+        // six deaths: "GPU process isn't usable. Goodbye."
+        $this->assertContains('--in-process-gpu', $args);
+        $this->assertContains('--disable-gpu', $args);
+
+        // This one would remove the SwiftShader fallback that makes running
+        // without a GPU possible at all, so it must stay out.
+        $this->assertNotContains('--disable-software-rasterizer', $args);
+    }
+
     public function test_a_render_that_produces_no_pdf_throws(): void
     {
         config(['browsershot.chrome_path' => __DIR__.'/no-such-chrome']);

@@ -113,6 +113,7 @@ class ContractPdfRenderer
             // refuses to launch at all.
             ->newHeadless()
             ->noSandbox()
+            ->addChromiumArguments($this->chromiumArguments())
             ->waitUntilNetworkIdle()
             ->ignoreHttpsErrors()
             // node otherwise echoes the URL of every request the page made back
@@ -137,6 +138,34 @@ class ContractPdfRenderer
         }
 
         return $browsershot;
+    }
+
+    /**
+     * The three switches a locked-down server needs, and no more.
+     *
+     * Each answers a line the host puts in Chrome's own log:
+     *
+     *   pcilib: Cannot open /sys/bus/pci/devices/…: Permission denied
+     *   GPU process exited unexpectedly: exit_code=256   (six times)
+     *   FATAL: GPU process isn't usable. Goodbye.
+     *
+     * The GPU process identifies the card through libpci, and a host that hides
+     * /sys/bus/pci kills it every time; after six deaths Chrome aborts the whole
+     * browser. --in-process-gpu leaves no separate process to count. Deliberately
+     * absent: --disable-software-rasterizer, which would take away the SwiftShader
+     * fallback that makes running without a GPU work at all.
+     *
+     * @return array<int, string>
+     */
+    public function chromiumArguments(): array
+    {
+        return [
+            'disable-gpu',
+            'in-process-gpu',
+            // /dev/shm is commonly present but read-only on these hosts; this
+            // sends Chrome's shared memory to /tmp instead.
+            'disable-dev-shm-usage',
+        ];
     }
 
     /**
