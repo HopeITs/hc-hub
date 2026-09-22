@@ -16,6 +16,7 @@ use App\Models\Position;
 use App\Models\PublicRecruitmentLink;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplication;
+use App\Models\RecruitmentCampaignInvite;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentRequestEvent;
 use App\Models\RecruitmentWorkflowInstanceStep;
@@ -35,6 +36,7 @@ use App\Policies\PositionPolicy;
 use App\Policies\PublicRecruitmentLinkPolicy;
 use App\Policies\RecruitmentApplicantPolicy;
 use App\Policies\RecruitmentApplicationPolicy;
+use App\Policies\RecruitmentCampaignInvitePolicy;
 use App\Policies\RecruitmentRequestEventPolicy;
 use App\Policies\RecruitmentRequestPolicy;
 use App\Policies\RecruitmentWorkflowInstanceStepPolicy;
@@ -91,6 +93,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(RecruitmentRequestEvent::class, RecruitmentRequestEventPolicy::class);
         Gate::policy(RecruitmentApplicant::class, RecruitmentApplicantPolicy::class);
         Gate::policy(RecruitmentApplication::class, RecruitmentApplicationPolicy::class);
+        Gate::policy(RecruitmentCampaignInvite::class, RecruitmentCampaignInvitePolicy::class);
 
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle)

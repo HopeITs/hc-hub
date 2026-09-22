@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Recruitment\Campaigns\Invites;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
 use App\Livewire\Recruitment\Requests\Edit;
@@ -19,3 +20,8 @@ Route::prefix('recruitment/requests')->name('recruitment.requests.')
 Route::get('recruitment/approvals', Pending::class)
     ->middleware(['active_permission:recruitment-requests.approve'])
     ->name('recruitment.approvals.pending');
+
+Route::get('recruitment/campaigns/{campaignId}/invites', Invites::class)
+    ->whereNumber('campaignId')
+    ->middleware('active_permission:recruitment-applicants.manage')
+    ->name('recruitment.campaigns.invites');
