@@ -164,6 +164,19 @@ return [
     'fields_you_may_edit_hint' => 'The rest of the request stays as it was approved.',
     'request_is_locked' => 'This request is locked. It can only be edited after an approver asks for changes.',
 
+    // Mail bodies. Deliberately thin: a number, what happened and a link.
+    // Salary, reasons and anything about a person stay inside the system.
+    'notify' => [
+        'awaiting_subject' => 'Recruitment request :number needs your approval',
+        'awaiting_line' => 'Request :number is waiting on your decision.',
+        'decided_subject' => 'A decision was made on request :number',
+        'decided_line' => 'Request :number has been decided.',
+        'approved_subject' => 'Recruitment request :number was approved',
+        'approved_line' => 'Request :number completed its approvals.',
+        'open_in_system' => 'Open the request',
+        'decide_inside' => 'Decisions are made in the system, never from this message.',
+    ],
+
     // Field names for the edit list in the timeline (RV-1b).
     'fields' => [
         'request_type' => 'Request type',

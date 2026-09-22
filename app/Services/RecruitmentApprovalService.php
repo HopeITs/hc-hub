@@ -44,6 +44,7 @@ class RecruitmentApprovalService
         private readonly RecruitmentRequestRevalidator $revalidator,
         private readonly RecruitmentWorkflowInstanceService $workflows,
         private readonly RecruitmentRequestApplicationService $applications,
+        private readonly RecruitmentNotifier $notifier,
     ) {}
 
     /**
@@ -211,6 +212,16 @@ class RecruitmentApprovalService
                 $this->notifyHrOfPendingExecution($applied);
             }
         }
+
+        // Last, and outside everything. The request is committed and its effect
+        // is settled, so what the notices describe is already true — and a mail
+        // server that is down cannot undo any of it.
+        $this->notifier->decided(
+            $applied,
+            RecruitmentWorkflowInstance::query()->find($step->workflow_instance_id) ?? $step->workflowInstance,
+            $decision,
+            $comment,
+        );
 
         return $applied;
     }

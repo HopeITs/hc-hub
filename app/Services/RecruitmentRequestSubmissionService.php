@@ -50,6 +50,54 @@ class RecruitmentRequestSubmissionService
      */
     public function submit(User $actor, RecruitmentRequest $request): RecruitmentRequest
     {
+        $submitted = $this->submitWithin($actor, $request);
+
+        // Only now, with the request and its workflow committed, is there
+        // anything true to tell anybody. Sending from inside the transaction
+        // would mean a rollback leaving somebody holding a notice about a
+        // request that does not exist.
+        app(RecruitmentNotifier::class)->workflowStarted(
+            $submitted,
+            $submitted->workflowInstances()->latest('id')->first(),
+        );
+
+        return $submitted;
+    }
+
+    /** Cancel a request the requester still owns (T12 · T14 · T15). */
+    public function cancel(User $actor, RecruitmentRequest $request, ?string $reason = null): RecruitmentRequest
+    {
+        return DB::transaction(function () use ($actor, $request, $reason) {
+            $fresh = RecruitmentRequest::query()->whereKey($request->getKey())->lockForUpdate()->firstOrFail();
+
+            if ((int) $fresh->requester_user_id !== (int) $actor->getKey()) {
+                throw ValidationException::withMessages(['request' => __('recruitment.not_your_request')]);
+            }
+
+            // Cancelling twice is the same retry shape as submitting twice.
+            if ((int) $fresh->status === Status::Cancelled) {
+                return $fresh;
+            }
+
+            Gate::forUser($actor)->authorize('cancel', $fresh);
+
+            $from = (int) $fresh->status;
+            // T12 · T14 · T15 — the table decides which of the three applies.
+            $this->states->apply($fresh, 'cancel');
+
+            $this->record($fresh, $actor, [
+                'event_type' => RecruitmentEventType::RequestCancelled,
+                'from_status' => $from,
+                'to_status' => Status::Cancelled,
+                'comment' => $reason,
+            ]);
+
+            return $fresh;
+        });
+    }
+
+    private function submitWithin(User $actor, RecruitmentRequest $request): RecruitmentRequest
+    {
         return DB::transaction(function () use ($actor, $request) {
             $fresh = RecruitmentRequest::query()->whereKey($request->getKey())->lockForUpdate()->firstOrFail();
 
@@ -95,38 +143,6 @@ class RecruitmentRequestSubmissionService
             // version before the transaction commits. This keeps submission,
             // versioning, status, and approvals atomic and retry-safe.
             $this->workflows->start($fresh->fresh(), $version);
-
-            return $fresh;
-        });
-    }
-
-    /** Cancel a request the requester still owns (T12 · T14 · T15). */
-    public function cancel(User $actor, RecruitmentRequest $request, ?string $reason = null): RecruitmentRequest
-    {
-        return DB::transaction(function () use ($actor, $request, $reason) {
-            $fresh = RecruitmentRequest::query()->whereKey($request->getKey())->lockForUpdate()->firstOrFail();
-
-            if ((int) $fresh->requester_user_id !== (int) $actor->getKey()) {
-                throw ValidationException::withMessages(['request' => __('recruitment.not_your_request')]);
-            }
-
-            // Cancelling twice is the same retry shape as submitting twice.
-            if ((int) $fresh->status === Status::Cancelled) {
-                return $fresh;
-            }
-
-            Gate::forUser($actor)->authorize('cancel', $fresh);
-
-            $from = (int) $fresh->status;
-            // T12 · T14 · T15 — the table decides which of the three applies.
-            $this->states->apply($fresh, 'cancel');
-
-            $this->record($fresh, $actor, [
-                'event_type' => RecruitmentEventType::RequestCancelled,
-                'from_status' => $from,
-                'to_status' => Status::Cancelled,
-                'comment' => $reason,
-            ]);
 
             return $fresh;
         });
