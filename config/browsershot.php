@@ -2,76 +2,18 @@
 
 return [
     // Path to the Chrome/Chromium executable Browsershot should drive.
-    // Override via BROWSERSHOT_CHROME_PATH when the binary lives elsewhere
-    // (e.g. a different install path, or a Linux/production host).
     //
-    // On a locked-down server, prefer Chrome's headless shell over full Chrome:
-    //   npx @puppeteer/browsers install chrome-headless-shell@<same version>
-    // It is the same Chromium without the desktop half, so it never reaches for
-    // D-Bus, a keyring or the PCI bus — all of which such a host denies, and any
-    // of which makes full Chrome exit during startup with nothing but those
-    // errors to show for it. A path whose name contains "headless-shell" is
-    // detected automatically and the --headless switch is then left off.
+    // On a Linux server prefer the distribution's own build — /usr/bin/chromium
+    // or /usr/bin/chromium-browser — because the package manager installs the
+    // libraries and system integration it expects alongside it. A Chrome
+    // unpacked by hand into a home directory usually has neither, and then dies
+    // during startup with nothing on stderr but D-Bus and PCI complaints.
     'chrome_path' => env('BROWSERSHOT_CHROME_PATH', 'C:\Program Files\Google\Chrome\Application\chrome.exe'),
 
     // Path to the Node.js binary Browsershot shells out to. Override via
     // BROWSERSHOT_NODE_BINARY if Node isn't on the web server's PATH.
     'node_binary' => env('BROWSERSHOT_NODE_BINARY', null),
 
-    // Directory Node should resolve `puppeteer` from. Left unset, Browsershot
-    // asks `npm root -g` — which yields nothing on a host with no global npm,
-    // leaving browser.cjs unable to require puppeteer at all. Point this at the
-    // project's own node_modules (e.g. /home/user/app/node_modules) on any host
-    // where `npm` isn't on the web user's PATH.
-    'node_module_path' => env('BROWSERSHOT_NODE_MODULE_PATH', null),
-
-    // Extra directories to resolve Chrome's shared libraries from, prepended to
-    // LD_LIBRARY_PATH for the render. Chrome loads most of its libraries lazily,
-    // so `chrome --version` succeeds on hosts that are missing them and the
-    // browser only dies once puppeteer asks it for a page ("Target.setAutoAttach:
-    // Target closed"). On a shared host where the libraries cannot be installed
-    // system-wide, unpack them somewhere the web user owns and point this there.
-    // `contracts:export-doctor` names any library that is missing.
-    'ld_library_path' => env('BROWSERSHOT_LD_LIBRARY_PATH', null),
-
-    // Seconds to allow for the whole node/Chrome render. Also used as the CDP
-    // protocol timeout, which otherwise defaults to 30s inside browser.cjs.
+    // Seconds to allow for the whole node/Chrome render.
     'timeout' => (int) env('BROWSERSHOT_TIMEOUT', 120),
-
-    // Last resort for hosts that cap the number of processes an account may
-    // spawn (CloudLinux LVE nproc). It keeps Chrome to one PID, but modern
-    // Chrome supports --single-process poorly and it can itself cause crashes
-    // during rendering — only turn it on if the default multi-process launch
-    // is demonstrably being killed by the process cap.
-    'single_process' => filter_var(env('BROWSERSHOT_SINGLE_PROCESS', false), FILTER_VALIDATE_BOOL),
-
-    // Parent directory for the throwaway Chrome profile each render gets (the
-    // profile itself, its cache, crash dumps and the temp HTML all live in a
-    // random subdirectory that is deleted afterwards). Chrome dies at startup
-    // if it has nowhere writable to put a profile, so on cPanel-style hosts
-    // where $HOME isn't writable by the web user, point this at a directory
-    // that user definitely owns. Defaults to the system temp directory.
-    'user_data_dir' => env('BROWSERSHOT_USER_DATA_DIR', null),
-
-    // Chrome creates its process-singleton unix socket under TMPDIR, and a
-    // unix socket path cannot exceed ~108 bytes: with the ~45-byte suffix
-    // Chrome appends, anything longer than about 60 characters aborts the
-    // launch with "Socket path too long". The per-render profile directory is
-    // usually too deep for that, so the socket gets its own short directory,
-    // separate from the profile. Must be writable by the web user.
-    'tmp_dir' => env('BROWSERSHOT_TMP_DIR', null),
-
-    // Comma-separated extra chromium flags (without the leading --), for
-    // host-specific tweaking without a code deploy.
-    //
-    // Anything that is not switch-shaped is dropped rather than passed on:
-    // Browsershot prefixes each entry with "--" and hands it to Chrome, and a
-    // stray character copied in from documentation (an ellipsis, a quote) then
-    // becomes a real argument. Chrome's reaction to one is to exit during
-    // startup printing nothing at all, which is indistinguishable from the host
-    // refusing to run it.
-    'extra_args' => array_values(array_filter(
-        array_map('trim', explode(',', (string) env('BROWSERSHOT_CHROMIUM_ARGS', ''))),
-        fn (string $arg) => preg_match('/^[A-Za-z][A-Za-z0-9-]*(=.*)?$/', $arg) === 1,
-    )),
 ];
