@@ -37,22 +37,26 @@ class RecruitmentRequestChangeClassifier
     /**
      * Columns on recruitment_request_position_details, by category.
      *
-     * direct_supervisor_position_id is treated as substantive although RV-1's
-     * table does not name it: it decides where the position sits in the org
-     * chart, exactly as programme, centre and department do, and leaving it out
-     * is the unclassified-field problem RV-1 warns about. Worth confirming.
+     * direct_supervisor_position_id is descriptive, not substantive, and that
+     * is worth saying plainly because it looks structural. It names the parent
+     * proposed *for the new post*. It does not route the request: the manager
+     * who approves is found from the requester's own chair
+     * (`position($user)->directManager`), never from this field. So changing it
+     * invalidates nobody's approval, and restarting the workflow over it would
+     * send three people round again for a decision none of them made.
      *
      * @var array<int, array<int, string>>
      */
     private const DETAIL_FIELDS = [
         self::SUBSTANTIVE => [
             'position_id', 'program_id', 'center_id', 'department_id', 'job_level_id',
-            'current_headcount', 'requested_headcount', 'direct_supervisor_position_id',
+            'current_headcount', 'requested_headcount',
         ],
         self::FINANCIAL => [
             'salary_amount', 'currency', 'salary_per', 'contract_type_id',
         ],
         self::DESCRIPTIVE => [
+            'direct_supervisor_position_id',
             'recruitment_reason', 'other_reason', 'main_duties', 'required_qualifications',
             'required_experience_years', 'required_skills', 'detailed_explanation',
             'expected_start_date', 'volunteer_period_start_date', 'volunteer_period_end_date',
@@ -81,20 +85,24 @@ class RecruitmentRequestChangeClassifier
      *
      * `effective_date` is treated as substantive: since D64 it decides *when*
      * the organisation actually changes, so moving it is not a rewording.
-     * Worth confirming, like direct_supervisor_position_id above.
+     * Still worth confirming.
+     *
+     * `direct_manager_id` is descriptive for the reason given on DETAIL_FIELDS:
+     * it proposes a parent for the new post and routes nothing.
      *
      * @var array<int, array<int, string>>
      */
     private const PAYLOAD_FIELDS = [
         self::SUBSTANTIVE => [
             'request_type', 'position_id', 'vacancy_id', 'city_id', 'program_id',
-            'center_id', 'department_id', 'job_level_id', 'direct_manager_id',
+            'center_id', 'department_id', 'job_level_id',
             'max_emp', 'additional_count', 'reduce_by', 'effective_date',
         ],
         self::FINANCIAL => [
             'salary_amount', 'currency', 'salary_per', 'contract_type_id',
         ],
         self::DESCRIPTIVE => [
+            'direct_manager_id',
             'recruitment_reason', 'other_reason', 'priority', 'volunteer_type',
             'weekly_hours', 'volunteer_period_start_date', 'volunteer_period_end_date',
             'needed_by_date', 'detailed_explanation', 'title_en', 'title_ar',

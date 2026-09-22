@@ -241,6 +241,18 @@ class RecruitmentSubmissionTest extends TestCase
         $request = $this->submit($this->draft($this->complete()));
         $request->forceFill(['status' => Status::ChangesRequested])->save();
 
+        // A request is locked once submitted, so the edit below is only
+        // possible because an approver asked for this field by name.
+        $request->events()->create([
+            'event_type' => \App\Enums\RecruitmentEventType::ChangesRequested,
+            'from_status' => Status::UnderReview,
+            'to_status' => Status::ChangesRequested,
+            'actor_user_id' => $this->manager->id,
+            'actor_role' => $this->manager->myRole(),
+            'comment' => 'Explain it better.',
+            'meta' => ['requested_fields' => ['detailed_explanation']],
+        ]);
+
         app(RecruitmentRequestDraftService::class)->update(
             $this->manager,
             $request,

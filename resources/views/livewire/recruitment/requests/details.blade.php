@@ -37,6 +37,24 @@
         <section class="rounded-surface border border-primary/30 bg-primary/5 p-6" aria-label="{{ __('recruitment.your_decision') }}">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.your_decision') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">{{ \App\Enums\WorkflowStepKey::getLocalizedName((int) $pendingStep->workflowStep?->step_key)['value'] }}</p>
+            @if ($selectableFields)
+                {{-- Asking for changes means naming them. The request has been
+                     locked since it was submitted, so whatever is not ticked
+                     here stays locked when it goes back. --}}
+                <fieldset class="mt-4">
+                    <legend class="text-sm font-semibold">{{ __('recruitment.fields_to_unlock') }}</legend>
+                    <p class="text-sm text-secondary-medium">{{ __('recruitment.fields_to_unlock_hint') }}</p>
+                    <div class="mt-2 grid gap-2 sm:grid-cols-2">
+                        @foreach ($selectableFields as $field)
+                            <label class="flex items-center gap-2 text-sm" wire:key="unlock-{{ $field }}">
+                                <input type="checkbox" value="{{ $field }}" wire:model="requestedFields" class="rounded border-neutral-300 text-primary">
+                                <span>{{ __('recruitment.fields.'.$field) }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <p class="mt-1 text-sm text-red-600">@error('fields'){{ $message }}@enderror</p>
+                </fieldset>
+            @endif
             <div class="mt-4">
                 <x-forms.input-label for="decisionComment">{{ __('recruitment.decision_comment') }}</x-forms.input-label>
                 <textarea id="decisionComment" rows="3" wire:model="decisionComment" class="mt-1 w-full rounded-control border-neutral-300"></textarea>
@@ -47,6 +65,19 @@
                 <button type="button" class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" wire:click="decide('request_changes')" wire:loading.attr="disabled" wire:target="decide">{{ __('recruitment.request_changes') }}</button>
                 <button type="button" class="rounded-control border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50" wire:click="decide('reject')" wire:confirm="{{ __('recruitment.confirm_reject') }}" wire:loading.attr="disabled" wire:target="decide">{{ __('recruitment.reject_action') }}</button>
             </div>
+        </section>
+    @endif
+    @if ($unlockedFields && (int) $request->status === \App\Enums\RecruitmentRequestStatus::ChangesRequested)
+        {{-- The requester's side of the same ask: everything else on the
+             request stays locked, and the server refuses it either way. --}}
+        <section class="rounded-surface border border-amber-200 bg-amber-50 p-6" aria-label="{{ __('recruitment.fields_you_may_edit') }}">
+            <h2 class="text-h4 font-semibold text-amber-900">{{ __('recruitment.fields_you_may_edit') }}</h2>
+            <p class="mt-1 text-sm text-amber-800">{{ __('recruitment.fields_you_may_edit_hint') }}</p>
+            <ul class="mt-2 flex flex-wrap gap-2">
+                @foreach ($unlockedFields as $field)
+                    <li class="rounded-control bg-white px-2 py-1 text-sm font-medium text-amber-900">{{ __('recruitment.fields.'.$field) }}</li>
+                @endforeach
+            </ul>
         </section>
     @endif
     @if ($awaitingExecution)

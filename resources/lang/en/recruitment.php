@@ -156,6 +156,13 @@ return [
     'applied_on' => 'Carried out on :date',
     'application_failed' => 'Execution failed',
     'version_no' => 'Version :no',
+    'field_is_locked' => 'The field :field is locked. Only the fields an approver asked you to change may be edited.',
+    'changes_need_fields' => 'Say which fields the requester may change.',
+    'fields_to_unlock' => 'Fields the requester may change',
+    'fields_to_unlock_hint' => 'Everything you do not tick stays locked.',
+    'fields_you_may_edit' => 'What you may change',
+    'fields_you_may_edit_hint' => 'The rest of the request stays as it was approved.',
+    'request_is_locked' => 'This request is locked. It can only be edited after an approver asks for changes.',
 
     // Field names for the edit list in the timeline (RV-1b).
     'fields' => [

@@ -13,6 +13,7 @@ use App\Models\Program;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Services\RecruitmentApprovalService;
+use App\Services\RecruitmentEditableFields;
 use App\Services\RecruitmentPendingApprovalQuery;
 use App\Services\RecruitmentRequestApplicationService;
 use App\Services\RecruitmentRequestSubmissionService;
@@ -30,6 +31,16 @@ class Details extends Component
 
     /** The reason, or what needs changing — mandatory for both (D60). */
     public string $decisionComment = '';
+
+    /**
+     * The fields a request for changes unlocks.
+     *
+     * The request has been locked since it was submitted, so this is not a
+     * hint: it is the whole of what the requester will be able to touch.
+     *
+     * @var array<int, string>
+     */
+    public array $requestedFields = [];
 
     public function mount(int $requestId): void
     {
@@ -111,9 +122,16 @@ class Details extends Component
         $mayExecuteNow = $awaitingExecution
             && auth()->user()?->hasActivePermission('recruitment-requests.manage');
 
+        // What the approver may unlock, and what the requester currently may
+        // touch. Both come from the same authority the write path uses.
+        $editable = app(RecruitmentEditableFields::class);
+        $selectableFields = $pendingStep ? $editable->selectable($request) : [];
+        $unlockedFields = $editable->requestedByApprover($request);
+
         return view('livewire.recruitment.requests.details', compact(
             'request', 'version', 'draftContext', 'previousRejections', 'pendingStep',
             'awaitingExecution', 'effectiveDate', 'mayExecuteNow',
+            'selectableFields', 'unlockedFields',
         ));
     }
 
@@ -163,11 +181,14 @@ class Details extends Component
         match ($action) {
             'approve' => $approvals->approve(auth()->user(), $step, $versionNo, $comment ?: null),
             'reject' => $approvals->reject(auth()->user(), $step, $versionNo, $comment),
-            'request_changes' => $approvals->requestChanges(auth()->user(), $step, $versionNo, $comment),
+            'request_changes' => $approvals->requestChanges(
+                auth()->user(), $step, $versionNo, $comment, $this->requestedFields,
+            ),
             default => throw new InvalidArgumentException('Unknown decision.'),
         };
 
         $this->decisionComment = '';
+        $this->requestedFields = [];
         session()->flash('recruitment_saved', __('recruitment.decided'));
     }
 

@@ -111,6 +111,8 @@ class RecruitmentRequestDraftService
             // approval still stands.
             $before = (array) ($fresh->draft_payload_json ?? []);
 
+            $this->assertOnlyPermittedFieldsChanged($fresh, $before, $data);
+
             $fresh->forceFill([
                 'scope_city_id' => $cityId,
                 'target_position_id' => $data['request_type'] === Type::CreatePosition ? null : $target->getKey(),
@@ -233,6 +235,44 @@ class RecruitmentRequestDraftService
     }
 
     /** D8: a failed audit write is reported and must not roll back the request. */
+    /**
+     * Refuse any change the approver did not ask for.
+     *
+     * Once a request has been submitted it is a fixed document, and the only
+     * way back in is an approver naming the fields they want changed. Enforced
+     * here rather than only by disabling inputs, because a disabled input is a
+     * courtesy to the person using the screen and no obstacle at all to a
+     * request sent straight at the endpoint.
+     *
+     * Every field that was touched without permission is named at once, so the
+     * requester is not sent round the loop discovering them one at a time.
+     *
+     * @param  array<string, mixed>  $before
+     * @param  array<string, mixed>  $after
+     */
+    private function assertOnlyPermittedFieldsChanged(RecruitmentRequest $request, array $before, array $after): void
+    {
+        $permitted = app(RecruitmentEditableFields::class)->for($request);
+
+        if ($permitted === RecruitmentEditableFields::ALL) {
+            return;
+        }
+
+        $refused = [];
+
+        foreach (app(RecruitmentRequestChangeClassifier::class)->payloadChanges($before, $after) as $field => $ignored) {
+            if (! in_array($field, $permitted, true)) {
+                $refused['data.'.$field] = __('recruitment.field_is_locked', [
+                    'field' => __('recruitment.fields.'.$field),
+                ]);
+            }
+        }
+
+        if ($refused !== []) {
+            throw ValidationException::withMessages($refused);
+        }
+    }
+
     private function recordEvent(RecruitmentRequest $request, User $actor, array $attributes): void
     {
         // A nested transaction/savepoint also keeps the outer transaction usable.

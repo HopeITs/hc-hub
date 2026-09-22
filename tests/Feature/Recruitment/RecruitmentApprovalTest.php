@@ -170,7 +170,7 @@ class RecruitmentApprovalTest extends TestCase
         $step = $this->stepAt($instance, 1);
 
         try {
-            $this->approvals->requestChanges($manager, $step, 1, '');
+            $this->approvals->requestChanges($manager, $step, 1, '', ['weekly_hours']);
             $this->fail('A request for changes with no comment should be refused.');
         } catch (ValidationException $exception) {
             $this->assertArrayHasKey('comment', $exception->errors());
@@ -182,7 +182,7 @@ class RecruitmentApprovalTest extends TestCase
         ['instance' => $instance, 'manager' => $manager] = $this->workflow();
         $step = $this->stepAt($instance, 1);
 
-        $request = $this->approvals->requestChanges($manager, $step, 1, 'State the weekly hours.');
+        $request = $this->approvals->requestChanges($manager, $step, 1, 'State the weekly hours.', ['weekly_hours']);
 
         $this->assertSame(Status::ChangesRequested, (int) $request->status);
         $this->assertSame(WorkflowInstanceStatus::Cancelled, (int) $instance->fresh()->status);

@@ -66,15 +66,30 @@ class RecruitmentApprovalService
     }
 
     /**
-     * Hand it back to the requester (T9).
+     * Hand it back to the requester (T9), naming what they may change.
      *
-     * The comment has to say what needs changing (D60): the requester resubmits
-     * on the strength of it, and one that names no problem sends the request
-     * round again for nothing.
+     * Two things are mandatory, and for the same reason. The comment has to say
+     * what is wrong (D60), and `$fields` has to say which fields the requester
+     * may touch — because the request has been locked since it was submitted
+     * and this ask is the only thing that unlocks any part of it. An ask with
+     * no fields would hand back a document the requester cannot change.
+     *
+     * @param  array<int, string>  $fields  payload keys the requester may edit
      */
-    public function requestChanges(User $actor, RecruitmentWorkflowInstanceStep $step, int $versionNo, string $comment): RecruitmentRequest
-    {
-        return $this->decide($actor, $step, $versionNo, ApprovalDecision::RequestChanges, $comment, 'requestChanges');
+    public function requestChanges(
+        User $actor,
+        RecruitmentWorkflowInstanceStep $step,
+        int $versionNo,
+        string $comment,
+        array $fields = [],
+    ): RecruitmentRequest {
+        return $this->decide(
+            $actor, $step, $versionNo, ApprovalDecision::RequestChanges, $comment, 'requestChanges',
+            array_values(array_unique(array_filter(
+                $fields,
+                fn ($field): bool => is_string($field) && trim($field) !== '',
+            ))),
+        );
     }
 
     /**
@@ -104,6 +119,7 @@ class RecruitmentApprovalService
         }
     }
 
+    /** @param array<int, string> $fields the fields a request for changes unlocks */
     private function decide(
         User $actor,
         RecruitmentWorkflowInstanceStep $step,
@@ -111,6 +127,7 @@ class RecruitmentApprovalService
         int $decision,
         ?string $comment,
         string $ability,
+        array $fields = [],
     ): RecruitmentRequest {
         if ($decision !== ApprovalDecision::Approve && blank($comment)) {
             throw ValidationException::withMessages([
@@ -120,7 +137,16 @@ class RecruitmentApprovalService
             ]);
         }
 
-        $applied = DB::transaction(function () use ($actor, $step, $versionNo, $decision, $comment, $ability) {
+        // Asked after the comment, because saying what is wrong comes before
+        // saying which fields it lives in, and an approver who has said
+        // neither should be told about the first one first.
+        if ($decision === ApprovalDecision::RequestChanges && $fields === []) {
+            throw ValidationException::withMessages([
+                'fields' => __('recruitment.changes_need_fields'),
+            ]);
+        }
+
+        $applied = DB::transaction(function () use ($actor, $step, $versionNo, $decision, $comment, $ability, $fields) {
             // Locked first, so everything read after it is read under the lock.
             $locked = RecruitmentWorkflowInstanceStep::query()
                 ->whereKey($step->getKey())
@@ -158,6 +184,9 @@ class RecruitmentApprovalService
                 'decision' => $decision,
                 'from_status' => (int) $request->status,
                 'comment' => $comment,
+                // The fields live on the decision that asked for them, so the
+                // audit trail and the lock can never disagree about the ask.
+                'meta' => $fields === [] ? null : ['requested_fields' => $fields],
             ]);
 
             return match ($decision) {
