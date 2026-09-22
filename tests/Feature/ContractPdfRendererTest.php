@@ -55,6 +55,41 @@ class ContractPdfRendererTest extends TestCase
         );
     }
 
+    public function test_chrome_is_given_a_writable_config_home(): void
+    {
+        $renderer = app(ContractPdfRenderer::class);
+
+        $options = $renderer->browsershot('<h1>x</h1>', sys_get_temp_dir().'/probe')
+            ->createPdfCommand()['options'];
+
+        // Chrome reads CHROME_CONFIG_HOME before XDG_CONFIG_HOME and exits at
+        // startup when it cannot write there, so the directory must exist by the
+        // time the command is built, not merely be named.
+        $configHome = $options['env']['CHROME_CONFIG_HOME'] ?? null;
+
+        $this->assertSame($renderer->profileBaseDir().'/.config', $configHome);
+        $this->assertDirectoryIsWritable((string) $configHome);
+    }
+
+    public function test_junk_in_the_chromium_args_env_var_never_reaches_chrome(): void
+    {
+        // Browsershot prefixes every entry with "--", so a stray character
+        // copied in alongside real switches becomes a real argument, and
+        // Chrome's answer to one is to exit during startup printing nothing —
+        // which reads exactly like the host refusing to run it.
+        putenv('BROWSERSHOT_CHROMIUM_ARGS=password-store=basic,…,use-mock-keychain, ,--already-dashed');
+
+        try {
+            $config = require config_path('browsershot.php');
+        } finally {
+            putenv('BROWSERSHOT_CHROMIUM_ARGS');
+        }
+
+        // "--already-dashed" goes too: the value is documented as switches
+        // without the leading dashes, so keeping it would yield "----".
+        $this->assertSame(['password-store=basic', 'use-mock-keychain'], $config['extra_args']);
+    }
+
     public function test_a_failed_render_reports_the_cause_and_not_just_a_byte_count(): void
     {
         config(['browsershot.chrome_path' => __DIR__.'/no-such-chrome']);

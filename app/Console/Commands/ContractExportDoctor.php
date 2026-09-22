@@ -60,7 +60,7 @@ class ContractExportDoctor extends Command
             $this->check('chrome_path executable', is_executable($chrome), 'chmod +x '.$chrome.', or the web user cannot run it.');
             $this->probe([$chrome, '--version'], 'chrome --version', timeout: 15);
             $this->sharedLibraries($chrome);
-            $this->launchesAlone($chrome);
+            $this->launchesAlone($chrome, ! $renderer->usesHeadlessShell());
         }
 
         if (PHP_OS_FAMILY !== 'Windows') {
@@ -312,7 +312,7 @@ class ContractExportDoctor extends Command
      * Chrome itself normally says why, on its own stderr, and that message
      * never reaches Browsershot.
      */
-    private function launchesAlone(string $chrome): void
+    private function launchesAlone(string $chrome, bool $headlessFlag = true): void
     {
         // Tried in order, each adding to the one before, stopping at the first
         // that opens a page. A host that refuses the plain launch usually
@@ -342,7 +342,7 @@ class ContractExportDoctor extends Command
 
         foreach ($ladder as $label => $flags) {
             $extra = array_merge($extra, $flags);
-            $result = $this->launch($chrome, $extra);
+            $result = $this->launch($chrome, $extra, $headlessFlag);
             $lastOutput = $result['out'];
 
             if ($result['ok']) {
@@ -452,6 +452,8 @@ class ContractExportDoctor extends Command
                 'XDG_CONFIG_HOME' => $profile.'/config',
                 'XDG_CACHE_HOME' => $profile.'/cache',
                 'XDG_DATA_HOME' => $profile.'/data',
+                // Consulted ahead of XDG_CONFIG_HOME, so the render sets it too.
+                'CHROME_CONFIG_HOME' => $profile.'/config',
                 'LD_LIBRARY_PATH' => config('browsershot.ld_library_path'),
             ]), timeout: 60);
 

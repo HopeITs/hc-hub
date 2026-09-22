@@ -148,6 +148,14 @@ class ContractPdfRenderer
             // reads the list, and a smaller stdout is a stdout that survives.
             ->disableCaptureURLS()
             ->waitUntilNetworkIdle()
+            // Chrome consults CHROME_CONFIG_HOME ahead of XDG_CONFIG_HOME when
+            // deciding where its configuration lives, and dies at startup if
+            // that place cannot be written. These go into the environment
+            // browser.cjs launches Chrome with; node's own environment wins the
+            // merge, so this only works for a name setNodeEnv does not also set.
+            ->setEnvironmentOptions([
+                'CHROME_CONFIG_HOME' => $this->chromeConfigDir(),
+            ])
             // Chrome still writes to $HOME (crashpad, the NSS db) even when it
             // is given a --user-data-dir, and on cPanel-style hosts the web
             // user's home is not writable: the browser then dies during
@@ -234,6 +242,22 @@ class ContractPdfRenderer
         $inherited = trim((string) getenv('LD_LIBRARY_PATH'), ': ');
 
         return $inherited === '' ? $configured : $configured.':'.$inherited;
+    }
+
+    /**
+     * A writable home for Chrome's own configuration, shared across renders.
+     *
+     * It hangs off the configured profile base rather than storage_path() so it
+     * follows BROWSERSHOT_USER_DATA_DIR — a host where $HOME is read-only is
+     * exactly the host where that variable has been pointed somewhere else.
+     */
+    public function chromeConfigDir(): string
+    {
+        $dir = $this->profileBaseDir().'/.config';
+
+        File::ensureDirectoryExists($dir, 0755, true);
+
+        return $dir;
     }
 
     public function profileBaseDir(): string

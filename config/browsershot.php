@@ -63,8 +63,15 @@ return [
 
     // Comma-separated extra chromium flags (without the leading --), for
     // host-specific tweaking without a code deploy.
-    'extra_args' => array_values(array_filter(array_map(
-        'trim',
-        explode(',', (string) env('BROWSERSHOT_CHROMIUM_ARGS', '')),
-    ))),
+    //
+    // Anything that is not switch-shaped is dropped rather than passed on:
+    // Browsershot prefixes each entry with "--" and hands it to Chrome, and a
+    // stray character copied in from documentation (an ellipsis, a quote) then
+    // becomes a real argument. Chrome's reaction to one is to exit during
+    // startup printing nothing at all, which is indistinguishable from the host
+    // refusing to run it.
+    'extra_args' => array_values(array_filter(
+        array_map('trim', explode(',', (string) env('BROWSERSHOT_CHROMIUM_ARGS', ''))),
+        fn (string $arg) => preg_match('/^[A-Za-z][A-Za-z0-9-]*(=.*)?$/', $arg) === 1,
+    )),
 ];
