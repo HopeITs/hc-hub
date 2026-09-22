@@ -106,6 +106,7 @@ class ContractPdfRenderer
     public function browsershot(string $html): InspectableBrowsershot
     {
         $browsershot = InspectableBrowsershot::html($html)
+        ->setBrowserWSEndpoint('wss://chrome.browserless.io?token=2VJ1USXCdNLtLvgf1e3abe75651f22d0b213f525d41f26729')
             ->setChromePath(config('browsershot.chrome_path'))
             ->timeout((int) config('browsershot.timeout'))
             // Without this Browsershot asks puppeteer for the old headless mode,
