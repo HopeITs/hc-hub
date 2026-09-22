@@ -84,12 +84,10 @@ class ContractPdfRenderer
         $pdf = '';
 
         try {
-            // Chrome writes the PDF to disk itself. pdf() would instead have it
-            // base64-ed back through node's stdout, and Browsershot treats a
-            // stdout it cannot parse as a success — it decodes null and returns
-            // an empty string, which is how a broken render used to reach the
-            // browser as a 200 with a 0-byte body.
-            $this->browsershot($html)->savePdf($target);
+            // Encode the raw HTML to send directly to the remote browser
+            $dataUri = 'data:text/html;base64,'.base64_encode($html);
+
+            $this->browsershot($dataUri)->savePdf($target);
 
             $pdf = is_file($target) ? (string) file_get_contents($target) : '';
         } finally {
@@ -102,9 +100,11 @@ class ContractPdfRenderer
 
         return $pdf;
     }
-public function browsershot(string $html): InspectableBrowsershot
+
+    public function browsershot(string $url): InspectableBrowsershot
     {
-        $browsershot = InspectableBrowsershot::html($html)
+        // Use url() instead of html()
+        $browsershot = InspectableBrowsershot::url($url)
             ->setWSEndpoint('wss://chrome.browserless.io?token=2VJ1USXCdNLtLvgf1e3abe75651f22d0b213f525d41f26729')
             ->timeout((int) config('browsershot.timeout'))
             ->waitUntilNetworkIdle()
@@ -113,53 +113,10 @@ public function browsershot(string $html): InspectableBrowsershot
             ->showBackground()
             ->setOption('preferCSSPageSize', true);
 
-        // Optional: You can also safely remove setNodeBinary
-        // since the remote WebSocket handles the heavy lifting,
-        // but keeping it won't break anything.
         if ($nodeBinary = config('browsershot.node_binary')) {
             $browsershot->setNodeBinary($nodeBinary);
         }
 
         return $browsershot;
-    }
-
-    /**
-     * The three switches a locked-down server needs, and no more.
-     *
-     * Each answers a line the host puts in Chrome's own log:
-     *
-     *   pcilib: Cannot open /sys/bus/pci/devices/…: Permission denied
-     *   GPU process exited unexpectedly: exit_code=256   (six times)
-     *   FATAL: GPU process isn't usable. Goodbye.
-     *
-     * The GPU process identifies the card through libpci, and a host that hides
-     * /sys/bus/pci kills it every time; after six deaths Chrome aborts the whole
-     * browser. --in-process-gpu leaves no separate process to count. Deliberately
-     * absent: --disable-software-rasterizer, which would take away the SwiftShader
-     * fallback that makes running without a GPU work at all.
-     *
-     * @return array<int, string>
-     */
-    public function chromiumArguments(): array
-    {
-        return [
-            'disable-gpu',
-            'in-process-gpu',
-            // /dev/shm is commonly present but read-only on these hosts; this
-            // sends Chrome's shared memory to /tmp instead.
-            'disable-dev-shm-usage',
-        ];
-    }
-
-    /**
-     * A directory the web user owns, for Chrome's config and the rendered file.
-     */
-    public function workDir(): string
-    {
-        $dir = storage_path('app/chrome');
-
-        File::ensureDirectoryExists($dir.'/.config', 0755, true);
-
-        return $dir;
     }
 }
