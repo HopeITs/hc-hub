@@ -124,4 +124,13 @@ return [
     'invitation_required' => 'This campaign is invitation-only and this email address was not found on the invitation list.',
     'already_applied' => 'An application already exists for this email address on this campaign.',
     'missing_required_field' => 'The :field field is required.',
+    'public_apply_title' => 'Apply for this position',
+    'public_apply_full_name' => 'Full name',
+    'public_apply_email' => 'Email address',
+    'public_apply_phone' => 'Phone number',
+    'public_apply_city' => 'City',
+    'public_apply_privacy_consent' => 'I agree that my information will be used to process this application.',
+    'public_apply_submit' => 'Submit application',
+    'public_apply_thanks_title' => 'Application received',
+    'public_apply_thanks_body' => 'Thank you for applying. Our recruitment team will review your application and contact you if you are shortlisted.',
 ];

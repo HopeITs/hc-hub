@@ -124,4 +124,13 @@ return [
     'invitation_required' => 'هذه الحملة مخصصة للمدعوين فقط، ولم يتم العثور على هذا البريد الإلكتروني ضمن قائمة الدعوات.',
     'already_applied' => 'يوجد طلب تقديم مسبق لهذا البريد الإلكتروني على هذه الحملة.',
     'missing_required_field' => 'حقل :field مطلوب.',
+    'public_apply_title' => 'التقديم على هذه الوظيفة',
+    'public_apply_full_name' => 'الاسم الكامل',
+    'public_apply_email' => 'البريد الإلكتروني',
+    'public_apply_phone' => 'رقم الهاتف',
+    'public_apply_city' => 'المدينة',
+    'public_apply_privacy_consent' => 'أوافق على استخدام بياناتي لمعالجة هذا الطلب.',
+    'public_apply_submit' => 'إرسال الطلب',
+    'public_apply_thanks_title' => 'تم استلام طلبك',
+    'public_apply_thanks_body' => 'شكراً لتقديمك. سيقوم فريق التوظيف بمراجعة طلبك والتواصل معك في حال تم ترشيحك.',
 ];
