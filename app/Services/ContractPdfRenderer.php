@@ -102,38 +102,20 @@ class ContractPdfRenderer
 
         return $pdf;
     }
-
-    public function browsershot(string $html): InspectableBrowsershot
+public function browsershot(string $html): InspectableBrowsershot
     {
         $browsershot = InspectableBrowsershot::html($html)
-        ->setBrowserWSEndpoint('wss://chrome.browserless.io?token=2VJ1USXCdNLtLvgf1e3abe75651f22d0b213f525d41f26729')
-            ->setChromePath(config('browsershot.chrome_path'))
+            ->setWSEndpoint('wss://chrome.browserless.io?token=2VJ1USXCdNLtLvgf1e3abe75651f22d0b213f525d41f26729')
             ->timeout((int) config('browsershot.timeout'))
-            // Without this Browsershot asks puppeteer for the old headless mode,
-            // which Chromium removed in M132 — a current /usr/bin/chromium then
-            // refuses to launch at all.
-            ->newHeadless()
-            ->noSandbox()
-            ->addChromiumArguments($this->chromiumArguments())
             ->waitUntilNetworkIdle()
             ->ignoreHttpsErrors()
-            // node otherwise echoes the URL of every request the page made back
-            // on stdout — and since the fonts and images are inlined as data
-            // URIs, that is the whole document again, ~350 KB of it per render.
-            // Nothing reads the list.
             ->disableCaptureURLS()
-            // Both of these shape the printed page, not the launch: without
-            // them the brand-red headers print white and the @page size in the
-            // stylesheet is ignored.
             ->showBackground()
-            ->setOption('preferCSSPageSize', true)
-            // Chrome reads this before XDG_CONFIG_HOME and exits at startup if
-            // it cannot write there, which is the usual fate on a host whose
-            // web user has no writable home.
-            ->setEnvironmentOptions([
-                'CHROME_CONFIG_HOME' => $this->workDir().'/.config',
-            ]);
+            ->setOption('preferCSSPageSize', true);
 
+        // Optional: You can also safely remove setNodeBinary
+        // since the remote WebSocket handles the heavy lifting,
+        // but keeping it won't break anything.
         if ($nodeBinary = config('browsershot.node_binary')) {
             $browsershot->setNodeBinary($nodeBinary);
         }
