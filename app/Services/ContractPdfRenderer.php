@@ -76,8 +76,22 @@ class ContractPdfRenderer
     }
 
     /**
-     * @throws RuntimeException
+     * @th
+     *
+     * rows RuntimeException
      */
+
+    /**
+ * A directory the web user owns, for Chrome's config and the rendered file.
+ */
+    public function workDir(): string
+    {
+        $dir = storage_path('app/chrome');
+
+        File::ensureDirectoryExists($dir.'/.config', 0755, true);
+
+        return $dir;
+    }
     public function renderHtml(string $html): string
     {
         $target = $this->workDir().'/'.Str::random(16).'.pdf';
