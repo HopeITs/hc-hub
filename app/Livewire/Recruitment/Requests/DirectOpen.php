@@ -100,16 +100,18 @@ class DirectOpen extends Component
         $vacancies = $this->vacanciesFor($type);
 
         return view('livewire.recruitment.requests.direct-open', [
-            'positions' => $positions->with(['program', 'city'])->orderBy('id')->get(),
+            'positions' => $positions->with(['program', 'city'])->orderBy(transColumn('title'))->get(),
             'vacancies' => $vacancies,
-            'cities' => City::query()->orderBy('name')->get(),
+            // cities, centres and contract types name themselves per locale;
+            // programmes and departments have one name column between them.
+            'cities' => City::query()->orderBy(transColumn('name'))->get(),
             'programs' => Program::query()->where('is_active', true)->orderBy('name')->get(),
             'centers' => Center::query()
                 ->when(! empty($this->data['city_id']), fn ($query) => $query->where('city_id', $this->data['city_id']))
-                ->orderBy('name')->get(),
+                ->orderBy(transColumn('name'))->get(),
             'departments' => Department::query()->orderBy('name')->get(),
             'jobLevels' => JobLevel::query()->orderBy('grade')->get(),
-            'contractTypes' => ContractType::query()->orderBy('id')->get(),
+            'contractTypes' => ContractType::query()->orderBy(transColumn('name'))->get(),
             'centerRequired' => ! $newPosition || $this->centerIsRequired(),
             'steps' => app(RecruitmentDirectOpenService::class)->confirmableSteps(),
             'decisions' => [ExternalConfirmationDecision::Approved, ExternalConfirmationDecision::NotApplicable],
