@@ -63,19 +63,17 @@
     @if ($submissionError)
         <div class="mt-4 rounded-control border border-red-200 bg-red-50 p-4 text-body text-red-800" role="alert">{{ $submissionError }}</div>
     @endif
-    @if ($submissionShellAccepted)
-        <div class="mt-4 rounded-control border border-blue-200 bg-blue-50 p-4 text-body text-blue-900" role="status">{{ __('careers.shell_accepted') }}</div>
-    @endif
-
     <form
         method="POST"
         action="{{ route('careers.submit', ['token' => request()->route('token')]) }}"
+        enctype="multipart/form-data"
         class="mt-4 space-y-4"
         data-recruitment-wizard
         novalidate
     >
         @csrf
         <input type="hidden" name="locale" value="{{ $locale }}">
+        <input type="hidden" name="submission_key" value="{{ $submissionKey }}">
         <div class="absolute -start-[10000px] top-auto size-px overflow-hidden" aria-hidden="true">
             <label for="website">Website</label>
             <input id="website" type="text" name="website" tabindex="-1" autocomplete="off">
@@ -111,12 +109,6 @@
                         <p class="mt-1 text-small text-white/80">{{ $description }}</p>
                     @endif
                 </header>
-
-                @if ($sectionKey === 'files')
-                    <p class="border-b border-amber-200 bg-amber-50 px-6 py-3 text-small text-amber-900 sm:px-9">
-                        {{ __('careers.upload_pending') }}
-                    </p>
-                @endif
 
                 <div class="divide-y divide-neutral-100">
                     @foreach ($sectionFields as $field)
@@ -160,18 +152,23 @@
                                     </label>
                                     @break
                                 @case('file')
-                                    <button
+                                    <input
                                         id="field-{{ $key }}"
-                                        type="button"
-                                        disabled
-                                        aria-disabled="true"
-                                        class="mt-3 inline-flex cursor-not-allowed items-center gap-2 rounded-control border border-neutral-300 bg-white px-4 py-2.5 text-body font-semibold text-blue-700 opacity-70"
+                                        type="file"
+                                        name="answers[{{ $key }}]{{ $field['multiple'] ? '[]' : '' }}"
+                                        accept="{{ collect($field['accept'])->map(fn ($extension) => '.'.$extension)->implode(',') }}"
+                                        @if ($field['multiple']) multiple @endif
+                                        @if ($field['required']) required @endif
+                                        class="sr-only"
+                                        data-file-input
                                     >
+                                    <label for="field-{{ $key }}" class="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-control border border-neutral-300 bg-white px-4 py-2.5 text-body font-semibold text-blue-700 hover:bg-neutral-50 focus-within:ring-2 focus-within:ring-primary">
                                         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
                                         </svg>
                                         {{ __('careers.add_file') }}
-                                    </button>
+                                    </label>
+                                    <p class="mt-2 text-small text-neutral-500" data-file-name>{{ __('careers.no_file_selected') }}</p>
                                     @break
                                 @default
                                     <input id="field-{{ $key }}" type="{{ in_array($field['type'], ['email', 'tel', 'number', 'date', 'url'], true) ? $field['type'] : 'text' }}" name="answers[{{ $key }}]" class="mt-3 w-full rounded-control border border-neutral-300 px-3 py-2 text-body sm:max-w-xl" @if ($field['type'] === 'email') dir="ltr" @endif @if ($field['required']) required @endif>
@@ -195,7 +192,7 @@
                         </button>
                     @else
                         <button type="submit" @disabled(! $accepting_applications) class="cursor-pointer rounded-control bg-primary px-6 py-2.5 font-semibold text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-neutral-300">
-                            {{ $accepting_applications ? __('careers.check_application') : __('careers.not_accepting') }}
+                            {{ $accepting_applications ? __('careers.submit_application') : __('careers.not_accepting') }}
                         </button>
                     @endif
                 </footer>
@@ -255,6 +252,15 @@
 
         form.querySelectorAll('[data-wizard-previous]').forEach((button) => {
             button.addEventListener('click', () => showStep(activeStep - 1));
+        });
+
+        form.querySelectorAll('[data-file-input]').forEach((input) => {
+            input.addEventListener('change', () => {
+                const output = input.parentElement?.querySelector('[data-file-name]');
+                if (!output) return;
+                const names = Array.from(input.files ?? []).map((file) => file.name);
+                output.textContent = names.length ? names.join(', ') : @json(__('careers.no_file_selected'));
+            });
         });
 
         form.addEventListener('submit', (event) => {

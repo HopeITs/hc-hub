@@ -289,6 +289,34 @@ class PublicRecruitmentLinkService
         return $this->pagePayload($link);
     }
 
+    /**
+     * Resolve the immutable public link boundary used by the real applicant
+     * intake service. The intake service repeats this check after locking the
+     * campaign so a close, expiry, or link rotation cannot race a submission.
+     */
+    public function submissionLink(string $token): PublicRecruitmentLink
+    {
+        $link = $this->resolve($token);
+        $this->assertSubmissionLink($link);
+
+        return $link;
+    }
+
+    public function assertSubmissionLink(PublicRecruitmentLink $link): void
+    {
+        if ($link->status !== PublicRecruitmentLink::STATUS_ACTIVE
+            || ! $link->expires_at
+            || $link->expires_at->isPast()) {
+            throw new PublicRecruitmentSubmissionException;
+        }
+
+        $this->assertFrozenVersions($link);
+
+        if (! $this->acceptingApplications($link->campaign)) {
+            throw new PublicRecruitmentSubmissionException;
+        }
+    }
+
     public function normalizeEmail(string $email): string
     {
         return Str::lower(trim($email));

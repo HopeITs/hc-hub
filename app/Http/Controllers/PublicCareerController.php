@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Exceptions\PublicRecruitmentUnavailableException;
+use App\Services\PublicRecruitmentApplicationService;
 use App\Services\PublicRecruitmentLinkService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 
 class PublicCareerController extends Controller
 {
@@ -24,38 +26,47 @@ class PublicCareerController extends Controller
             ...$page,
             'locale' => $locale,
             'submissionError' => null,
-            'submissionShellAccepted' => false,
+            'submissionKey' => bin2hex(random_bytes(32)),
         ]);
     }
 
-    public function store(Request $request, string $token, PublicRecruitmentLinkService $service): Response
-    {
+    public function store(
+        Request $request,
+        string $token,
+        PublicRecruitmentLinkService $links,
+        PublicRecruitmentApplicationService $applications,
+    ): Response {
         $locale = $this->setLocale($request);
 
         try {
-            $page = $service->validateSubmissionShell($token, $request->all());
-        } catch (PublicRecruitmentUnavailableException) {
-            return $this->unavailable();
-        } catch (PublicRecruitmentSubmissionException) {
+            $result = $applications->submit(
+                $token,
+                $request->all(),
+                $request->ip(),
+                $request->userAgent(),
+            );
+        } catch (PublicRecruitmentUnavailableException|PublicRecruitmentSubmissionException) {
             try {
-                $page = $service->publicPage($token);
+                $page = $links->publicPage($token);
             } catch (PublicRecruitmentUnavailableException) {
-                return $this->unavailable();
+                return response()->view('recruitment.careers.submission-error', [
+                    'locale' => $locale,
+                ], 422);
             }
 
             return response()->view('recruitment.careers.show', [
                 ...$page,
                 'locale' => $locale,
                 'submissionError' => __('careers.generic_submission_error'),
-                'submissionShellAccepted' => false,
+                'submissionKey' => preg_match('/^[a-f0-9]{64}$/', (string) $request->input('submission_key')) === 1
+                    ? Str::lower((string) $request->input('submission_key'))
+                    : bin2hex(random_bytes(32)),
             ], 422);
         }
 
-        return response()->view('recruitment.careers.show', [
-            ...$page,
+        return response()->view('recruitment.careers.submitted', [
             'locale' => $locale,
-            'submissionError' => null,
-            'submissionShellAccepted' => true,
+            'idempotent' => $result['idempotent'],
         ], 202);
     }
 

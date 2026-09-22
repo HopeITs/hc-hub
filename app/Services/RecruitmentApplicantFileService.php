@@ -31,8 +31,9 @@ class RecruitmentApplicantFileService
         RecruitmentApplication $application,
         UploadedFile $upload,
         string $fileType,
+        ?array $fieldRules = null,
     ): RecruitmentApplicantFile {
-        $rules = $this->rulesFor($fileType);
+        $rules = $this->rulesFor($fileType, $fieldRules);
         $inspection = $this->inspect($upload, $rules);
         $processedImage = null;
         $media = null;
@@ -353,14 +354,31 @@ class RecruitmentApplicantFileService
     }
 
     /** @return array{extensions: array<int, string>, max_files: int} */
-    private function rulesFor(string $fileType): array
+    private function rulesFor(string $fileType, ?array $fieldRules = null): array
     {
-        $rules = config("recruitment-uploads.types.{$fileType}");
+        $rules = $fieldRules ?? config("recruitment-uploads.types.{$fileType}");
         if (! is_array($rules)) {
             throw UnsafeRecruitmentFileException::make('unsupported');
         }
 
-        return $rules;
+        $allowedExtensions = collect(config('recruitment-uploads.types', []))
+            ->flatMap(fn (array $configured): array => $configured['extensions'] ?? [])
+            ->map(fn (string $extension): string => Str::lower($extension))
+            ->unique()
+            ->all();
+        $extensions = collect($rules['extensions'] ?? [])
+            ->map(fn ($extension): string => Str::lower(trim((string) $extension)))
+            ->filter(fn (string $extension): bool => in_array($extension, $allowedExtensions, true))
+            ->unique()
+            ->values()
+            ->all();
+        $maxFiles = min(5, max(1, (int) ($rules['max_files'] ?? 1)));
+
+        if ($extensions === []) {
+            throw UnsafeRecruitmentFileException::make('unsupported');
+        }
+
+        return ['extensions' => $extensions, 'max_files' => $maxFiles];
     }
 
     private function setFailedScanState(

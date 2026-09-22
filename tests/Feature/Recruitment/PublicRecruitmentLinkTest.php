@@ -17,6 +17,7 @@ use App\Models\JobPost;
 use App\Models\Position;
 use App\Models\Program;
 use App\Models\PublicRecruitmentLink;
+use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentRequestVersion;
@@ -24,6 +25,8 @@ use App\Models\User;
 use App\Models\Vacancy;
 use App\Services\PublicRecruitmentLinkService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
 use Tests\Concerns\CreatesHrFixtures;
@@ -32,6 +35,18 @@ use Tests\TestCase;
 class PublicRecruitmentLinkTest extends TestCase
 {
     use CreatesHrFixtures, RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake('recruitment-quarantine');
+        Storage::fake('recruitment-files');
+        config([
+            'recruitment-uploads.quarantine_disk' => 'recruitment-quarantine',
+            'recruitment-uploads.clean_disk' => 'recruitment-files',
+        ]);
+    }
 
     public function test_hr_generates_a_hashed_frozen_link_and_regeneration_disables_the_old_link(): void
     {
@@ -171,9 +186,12 @@ class PublicRecruitmentLinkTest extends TestCase
             ->assertSee('data-wizard-step', false)
             ->assertSee('data-wizard-next', false)
             ->assertSee('name="answers[full_name]"', false)
+            ->assertSee('name="answers[cv]"', false)
+            ->assertSee('name="submission_key"', false)
+            ->assertSee('enctype="multipart/form-data"', false)
             ->assertSee('required', false)
             ->assertSee(__('careers.add_file'))
-            ->assertDontSee(__('careers.phase_one_notice'));
+            ->assertDontSee('Secure file uploads will be enabled');
     }
 
     public function test_invalid_disabled_expired_and_draft_campaign_links_share_a_generic_response(): void
@@ -204,7 +222,7 @@ class PublicRecruitmentLinkTest extends TestCase
             ->assertSee(__('careers.unavailable_title'));
     }
 
-    public function test_public_submission_shell_rejects_internal_fields_and_never_creates_an_application(): void
+    public function test_public_submission_creates_records_and_rejects_internal_fields(): void
     {
         [$campaign, $hr] = $this->makePublishedCampaign();
         $result = app(PublicRecruitmentLinkService::class)->generate(
@@ -214,28 +232,82 @@ class PublicRecruitmentLinkTest extends TestCase
             RecruitmentCampaignLinkMode::PublicOpen,
         );
 
-        $safe = [
-            'locale' => 'en',
-            'answers' => ['email' => 'applicant@example.com', 'full_name' => 'Applicant Name'],
-        ];
+        $safe = $this->validSubmission('applicant@example.com', 'Applicant Name');
 
         $this->post(route('careers.submit', $result['token']), $safe)
             ->assertStatus(202)
-            ->assertSee(__('careers.shell_accepted'));
-        $this->assertSame(0, RecruitmentApplication::query()->count());
+            ->assertSee(__('careers.submitted_title'));
+        $this->assertSame(1, RecruitmentApplicant::query()->count());
+        $this->assertSame(1, RecruitmentApplication::query()->count());
+        $this->assertDatabaseHas('recruitment_application_answers', ['field_key' => 'full_name']);
+        $this->assertDatabaseHas('recruitment_applicant_files', ['file_type' => 'cv']);
 
         foreach ([
-            [...$safe, 'campaign_id' => $campaign->id],
-            [...$safe, 'status' => 'selected'],
-            ['locale' => 'en', 'answers' => [...$safe['answers'], 'score' => 100]],
-            [...$safe, 'website' => 'https://bot.example'],
+            [...$this->validSubmission('other1@example.com'), 'campaign_id' => $campaign->id],
+            [...$this->validSubmission('other2@example.com'), 'status' => 'selected'],
+            [...$this->validSubmission('other3@example.com'), 'answers' => [...$this->validSubmission('other3@example.com')['answers'], 'score' => 100]],
+            [...$this->validSubmission('other4@example.com'), 'website' => 'https://bot.example'],
         ] as $payload) {
             $this->post(route('careers.submit', $result['token']), $payload)
                 ->assertUnprocessable()
                 ->assertSee(__('careers.generic_submission_error'));
         }
 
-        $this->assertSame(0, RecruitmentApplication::query()->count());
+        $this->assertSame(1, RecruitmentApplication::query()->count());
+    }
+
+    public function test_same_email_cannot_submit_twice_with_a_different_idempotency_key(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+
+        $this->post(
+            route('careers.submit', $result['token']),
+            $this->validSubmission('applicant@example.com'),
+        )->assertStatus(202);
+        $this->post(
+            route('careers.submit', $result['token']),
+            $this->validSubmission(' APPLICANT@example.com ', 'Duplicate Applicant'),
+        )->assertUnprocessable()->assertSee(__('careers.generic_submission_error'));
+
+        $this->assertDatabaseCount('recruitment_applicants', 1);
+        $this->assertDatabaseCount('recruitment_applications', 1);
+    }
+
+    public function test_failed_secure_upload_rolls_back_the_complete_application(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+        config(['recruitment-uploads.quarantine_disk' => 'missing-recruitment-disk']);
+
+        $this->post(
+            route('careers.submit', $result['token']),
+            $this->validSubmission('applicant@example.com'),
+        )->assertUnprocessable()->assertSee(__('careers.generic_submission_error'));
+
+        $this->assertDatabaseCount('recruitment_applicants', 0);
+        $this->assertDatabaseCount('recruitment_applications', 0);
+        $this->assertDatabaseCount('recruitment_application_answers', 0);
+        $this->assertDatabaseCount('recruitment_applicant_files', 0);
+    }
+
+    public function test_unknown_submission_tokens_use_the_same_generic_error_boundary(): void
+    {
+        $this->post('/careers/'.str_repeat('f', 64).'/applications', [
+            'locale' => 'en',
+            'submission_key' => bin2hex(random_bytes(32)),
+            'answers' => [],
+        ])->assertUnprocessable()->assertSee(__('careers.generic_submission_error'));
     }
 
     public function test_invitation_only_mode_normalizes_email_without_exposing_the_invite_list(): void
@@ -260,17 +332,19 @@ class PublicRecruitmentLinkTest extends TestCase
             ->assertDontSee('invited@example.com')
             ->assertDontSee('Invited Person');
 
-        $this->post(route('careers.submit', $result['token']), [
-            'locale' => 'en',
-            'answers' => ['email' => '  INVITED@example.com ', 'full_name' => 'Invited Person'],
-        ])->assertStatus(202);
+        $this->post(
+            route('careers.submit', $result['token']),
+            $this->validSubmission('  INVITED@example.com ', 'Invited Person'),
+        )->assertStatus(202);
 
-        $this->post(route('careers.submit', $result['token']), [
-            'locale' => 'en',
-            'answers' => ['email' => 'unknown@example.com', 'full_name' => 'Unknown'],
-        ])->assertUnprocessable()->assertSee(__('careers.generic_submission_error'));
+        $this->post(
+            route('careers.submit', $result['token']),
+            $this->validSubmission('unknown@example.com', 'Unknown'),
+        )->assertUnprocessable()->assertSee(__('careers.generic_submission_error'));
 
-        $this->assertSame(0, RecruitmentApplication::query()->count());
+        $this->assertSame(1, RecruitmentApplication::query()->count());
+        $this->assertSame('used', $invite->fresh()->status);
+        $this->assertSame($invite->id, RecruitmentApplication::query()->sole()->campaign_invite_id);
     }
 
     public function test_closed_campaign_blocks_the_submission_boundary(): void
@@ -284,10 +358,10 @@ class PublicRecruitmentLinkTest extends TestCase
         );
         $campaign->forceFill(['status' => HiringCampaignStatus::Closed])->save();
 
-        $this->post(route('careers.submit', $result['token']), [
-            'locale' => 'en',
-            'answers' => ['email' => 'applicant@example.com', 'full_name' => 'Applicant'],
-        ])->assertUnprocessable()->assertSee(__('careers.generic_submission_error'));
+        $this->post(
+            route('careers.submit', $result['token']),
+            $this->validSubmission('applicant@example.com'),
+        )->assertUnprocessable()->assertSee(__('careers.generic_submission_error'));
 
         $this->assertSame(0, RecruitmentApplication::query()->count());
     }
@@ -301,17 +375,20 @@ class PublicRecruitmentLinkTest extends TestCase
             now()->addDays(10),
             RecruitmentCampaignLinkMode::PublicOpen,
         );
-        $payload = [
-            'locale' => 'en',
-            'answers' => ['email' => 'applicant@example.com', 'full_name' => 'Applicant'],
-        ];
+        $submissionKey = bin2hex(random_bytes(32));
 
         foreach (range(1, 5) as $attempt) {
-            $this->post(route('careers.submit', $result['token']), $payload)->assertStatus(202);
+            $this->post(
+                route('careers.submit', $result['token']),
+                $this->validSubmission('applicant@example.com', submissionKey: $submissionKey),
+            )->assertStatus(202);
         }
 
-        $this->post(route('careers.submit', $result['token']), $payload)->assertTooManyRequests();
-        $this->assertSame(0, RecruitmentApplication::query()->count());
+        $this->post(
+            route('careers.submit', $result['token']),
+            $this->validSubmission('applicant@example.com', submissionKey: $submissionKey),
+        )->assertTooManyRequests();
+        $this->assertSame(1, RecruitmentApplication::query()->count());
     }
 
     public function test_scoped_hr_can_manage_the_link_and_invites_from_the_publishing_hub_component(): void
@@ -437,5 +514,27 @@ class PublicRecruitmentLinkTest extends TestCase
         $form->forceFill(['current_version_id' => $formVersion->id])->save();
 
         return [$campaign, $hr, $request, $jobPost, $form];
+    }
+
+    /** @return array<string, mixed> */
+    private function validSubmission(
+        string $email,
+        string $fullName = 'Applicant Name',
+        ?string $submissionKey = null,
+    ): array {
+        return [
+            'locale' => 'en',
+            'submission_key' => $submissionKey ?? bin2hex(random_bytes(32)),
+            'answers' => [
+                'full_name' => $fullName,
+                'email' => $email,
+                'phone' => '+963 999 123 456',
+                'cv' => UploadedFile::fake()->createWithContent(
+                    'cv.pdf',
+                    "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<<>>\n%%EOF\n",
+                ),
+                'privacy_consent' => '1',
+            ],
+        ];
     }
 }
