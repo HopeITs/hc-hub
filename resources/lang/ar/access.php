@@ -60,6 +60,8 @@ return [
         'recruitment-job-posts' => 'إعلانات الوظائف',
         'recruitment-forms' => 'نماذج التقديم',
         'recruitment-links' => 'روابط التقديم',
+        'recruitment-applicants' => 'المتقدمون',
+        'recruitment-applications' => 'طلبات التقديم',
     ],
     'actions' => [
         'view' => 'عرض', 'view-own' => 'عرض الخاص', 'view-all' => 'عرض الكل',

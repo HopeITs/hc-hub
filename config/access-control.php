@@ -121,6 +121,8 @@ return [
         'recruitment-job-posts' => ['view', 'manage'],
         'recruitment-forms' => ['view', 'manage'],
         'recruitment-links' => ['view', 'manage'],
+        'recruitment-applicants' => ['view', 'manage'],
+        'recruitment-applications' => ['view', 'manage', 'decide'],
     ],
 
     /*

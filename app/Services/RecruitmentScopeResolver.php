@@ -258,6 +258,46 @@ class RecruitmentScopeResolver
     }
 
     /**
+     * Applications inherit visibility from their campaign, same as every
+     * other Phase 2 record — an applicant's PII is only as visible as the
+     * request that opened the seat they applied for.
+     */
+    public function scopeApplications(Builder $query, User $user): Builder
+    {
+        return $query->whereHas(
+            'campaign.vacancy.createdFromRequest',
+            fn (Builder $requests): Builder => $this->scopeRequests($requests, $user),
+        );
+    }
+
+    public function canAccessApplication(User $user, \App\Models\RecruitmentApplication $application): bool
+    {
+        return $this->scopeApplications(\App\Models\RecruitmentApplication::query(), $user)
+            ->whereKey($application->getKey())
+            ->exists();
+    }
+
+    /**
+     * An applicant is visible only through at least one application the user
+     * can already see. A candidate who applied to a campaign the user cannot
+     * reach must not surface merely because they also applied elsewhere.
+     */
+    public function scopeApplicants(Builder $query, User $user): Builder
+    {
+        return $query->whereHas(
+            'applications',
+            fn (Builder $applications): Builder => $this->scopeApplications($applications, $user),
+        );
+    }
+
+    public function canAccessApplicant(User $user, \App\Models\RecruitmentApplicant $applicant): bool
+    {
+        return $this->scopeApplicants(\App\Models\RecruitmentApplicant::query(), $user)
+            ->whereKey($applicant->getKey())
+            ->exists();
+    }
+
+    /**
      * This user plus whoever currently occupies a position reporting to them.
      *
      * Occupancy is read live rather than stored on the request, so someone who

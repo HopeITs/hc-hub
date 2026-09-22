@@ -117,4 +117,11 @@ return [
     'volunteer_type_remote' => 'Remote',
     'period_help' => 'The proposed agreement period. Leave empty if open ended.',
     'center_optional_help' => 'The centre is optional here: remote work, or a programme spanning several centres.',
+
+    // Phase 2 — public application submission.
+    'invalid_or_expired_link' => 'This application link is invalid or has expired.',
+    'campaign_not_accepting' => 'This campaign is not currently accepting applications.',
+    'invitation_required' => 'This campaign is invitation-only and this email address was not found on the invitation list.',
+    'already_applied' => 'An application already exists for this email address on this campaign.',
+    'missing_required_field' => 'The :field field is required.',
 ];

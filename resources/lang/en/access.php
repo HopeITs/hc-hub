@@ -81,6 +81,8 @@ return [
         'recruitment-job-posts' => 'Job posts',
         'recruitment-forms' => 'Application forms',
         'recruitment-links' => 'Application links',
+        'recruitment-applicants' => 'Applicants',
+        'recruitment-applications' => 'Applications',
     ],
     'actions' => [
         'view' => 'View', 'view-own' => 'View own', 'view-all' => 'View all',
