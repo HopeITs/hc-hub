@@ -36,6 +36,25 @@ class ContractPdfRendererTest extends TestCase
             'Capturing URLs echoes every inlined data URI back on stdout, hundreds of KB of it.');
     }
 
+    public function test_the_headless_switch_follows_which_chrome_binary_is_configured(): void
+    {
+        $renderer = app(ContractPdfRenderer::class);
+        $profile = sys_get_temp_dir().'/probe';
+
+        config(['browsershot.chrome_path' => '/opt/chrome/chrome']);
+        $this->assertTrue(
+            $renderer->browsershot('<h1>x</h1>', $profile)->createPdfCommand()['options']['newHeadless'] ?? false,
+            'Full Chrome needs --headless=new: the legacy mode it asks for otherwise was removed in M132.',
+        );
+
+        // The shell is headless by construction and takes no such switch.
+        config(['browsershot.chrome_path' => '/opt/chrome-headless-shell/chrome-headless-shell']);
+        $this->assertArrayNotHasKey(
+            'newHeadless',
+            $renderer->browsershot('<h1>x</h1>', $profile)->createPdfCommand()['options'],
+        );
+    }
+
     public function test_a_failed_render_reports_the_cause_and_not_just_a_byte_count(): void
     {
         config(['browsershot.chrome_path' => __DIR__.'/no-such-chrome']);

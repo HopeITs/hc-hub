@@ -132,10 +132,6 @@ class ContractPdfRenderer
         $browsershot = InspectableBrowsershot::html($html)
             ->setChromePath(config('browsershot.chrome_path'))
             ->timeout($timeout)
-            // Without this, Browsershot asks puppeteer for the legacy headless
-            // shell, which modern Chrome builds no longer contain — the launch
-            // then dies before the first page can be created.
-            ->newHeadless()
             // browser.cjs otherwise caps every CDP call at 30s regardless of
             // the timeout above, which a large contract can exceed.
             ->protocolTimeout($timeout)
@@ -170,6 +166,14 @@ class ContractPdfRenderer
                 'LD_LIBRARY_PATH' => $this->libraryPath(),
             ]));
 
+        // `chrome-headless-shell` is headless by construction and rejects the
+        // switch; the full Chrome binary needs it, because the legacy headless
+        // mode it would otherwise ask for was removed from Chrome in M132 and
+        // the launch dies before the first page can be created.
+        if (! $this->usesHeadlessShell()) {
+            $browsershot->newHeadless();
+        }
+
         if ($nodeBinary = config('browsershot.node_binary')) {
             $browsershot->setNodeBinary($nodeBinary);
         }
@@ -197,6 +201,19 @@ class ContractPdfRenderer
         }
 
         return $dir;
+    }
+
+    /**
+     * Whether the configured binary is Chrome's headless shell.
+     *
+     * The shell is the build meant for servers: no desktop integration, so it
+     * does not reach for D-Bus, a keyring or the PCI bus, none of which a
+     * locked-down shared host lets it have. Full Chrome exits during startup
+     * on such a host even in headless mode.
+     */
+    public function usesHeadlessShell(): bool
+    {
+        return str_contains(basename((string) config('browsershot.chrome_path')), 'headless-shell');
     }
 
     /**

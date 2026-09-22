@@ -4,6 +4,14 @@ return [
     // Path to the Chrome/Chromium executable Browsershot should drive.
     // Override via BROWSERSHOT_CHROME_PATH when the binary lives elsewhere
     // (e.g. a different install path, or a Linux/production host).
+    //
+    // On a locked-down server, prefer Chrome's headless shell over full Chrome:
+    //   npx @puppeteer/browsers install chrome-headless-shell@<same version>
+    // It is the same Chromium without the desktop half, so it never reaches for
+    // D-Bus, a keyring or the PCI bus — all of which such a host denies, and any
+    // of which makes full Chrome exit during startup with nothing but those
+    // errors to show for it. A path whose name contains "headless-shell" is
+    // detected automatically and the --headless switch is then left off.
     'chrome_path' => env('BROWSERSHOT_CHROME_PATH', 'C:\Program Files\Google\Chrome\Application\chrome.exe'),
 
     // Path to the Node.js binary Browsershot shells out to. Override via

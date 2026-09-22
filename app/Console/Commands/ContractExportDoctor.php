@@ -68,12 +68,17 @@ class ContractExportDoctor extends Command
             $this->probe(['sh', '-c', 'ulimit -u'], 'max user processes (ulimit -u)');
             // Asked in PHP rather than through df, which CageFS-style hosts
             // refuse to run at all.
-            $shm = is_dir('/dev/shm')
-                ? (is_writable('/dev/shm')
-                    ? 'writable, '.number_format((float) @disk_free_space('/dev/shm') / 1048576, 0).' MB free'
-                    : 'present but not writable')
-                : 'absent';
-            $this->line('  <fg=green>OK  </> /dev/shm '.$shm);
+            $shmUsable = is_dir('/dev/shm') && is_writable('/dev/shm');
+            $this->check(
+                '/dev/shm '.(is_dir('/dev/shm')
+                    ? ($shmUsable
+                        ? 'writable, '.number_format((float) @disk_free_space('/dev/shm') / 1048576, 0).' MB free'
+                        : 'present but not writable')
+                    : 'absent'),
+                $shmUsable,
+                'Chrome keeps its shared memory here. --disable-dev-shm-usage sends most of it to /tmp instead, '
+                .'which is why this is not fatal on its own, but it is one more thing this host denies the browser.',
+            );
             $this->probe(['sh', '-c', "grep -E '^Mem(Total|Available)' /proc/meminfo | tr -s ' ' | tr '\\n' ' '"], 'memory');
         }
 
@@ -361,6 +366,8 @@ class ContractExportDoctor extends Command
         }
 
         $this->failed = true;
+        $this->headlessShell($chrome);
+
         $this->line('       <fg=yellow>→ Chrome will not start on this host under any of the flag sets tried. '
             .'Its own output from the last attempt follows in full.</>');
 
@@ -372,10 +379,54 @@ class ContractExportDoctor extends Command
     }
 
     /**
+     * Try Chrome's headless shell instead, and say how to get it if it is absent.
+     *
+     * The shell is the same Chromium without the desktop half: it never reaches
+     * for D-Bus, a keyring or the PCI bus. On a host that denies all three — the
+     * errors full Chrome prints on its way out — it is usually the difference
+     * between no browser and a working one.
+     */
+    private function headlessShell(string $chrome): void
+    {
+        $path = strtr($chrome, '\\', '/');
+
+        if (! str_contains($path, '/puppeteer/chrome/')) {
+            return;
+        }
+
+        $shell = preg_replace(
+            '#/chrome-([a-z0-9]+)/chrome$#',
+            '/chrome-headless-shell-$1/chrome-headless-shell',
+            str_replace('/puppeteer/chrome/', '/puppeteer/chrome-headless-shell/', $path),
+        );
+
+        preg_match('#/puppeteer/chrome/[a-z]+-([0-9.]+)/#', $path, $version);
+        $install = 'npx @puppeteer/browsers install chrome-headless-shell@'.($version[1] ?? 'latest');
+
+        if (! is_file((string) $shell)) {
+            $this->line('       <fg=yellow>→ Chrome\'s headless shell is not installed. It asks the host for far less '
+                .'than full Chrome does. Install it and run this command again:</>');
+            $this->line('       <fg=green>'.$install.'</>');
+
+            return;
+        }
+
+        // It is headless by construction, so it takes no --headless switch.
+        $result = $this->launch((string) $shell, [], headlessFlag: false);
+
+        $this->check('chrome-headless-shell opens a page', $result['ok']);
+
+        if ($result['ok']) {
+            $this->line('       <fg=yellow>→ The headless shell works where full Chrome does not. Point .env at it:</>');
+            $this->line('       <fg=green>BROWSERSHOT_CHROME_PATH='.$shell.'</>');
+        }
+    }
+
+    /**
      * @param  array<int, string>  $extraFlags
      * @return array{ok: bool, out: string}
      */
-    private function launch(string $chrome, array $extraFlags): array
+    private function launch(string $chrome, array $extraFlags, bool $headlessFlag = true): array
     {
         $profile = rtrim(strtr(sys_get_temp_dir(), DIRECTORY_SEPARATOR, '/'), '/')
             .'/hc-hr-probe-'.getmypid().'-'.count($extraFlags);
@@ -385,7 +436,7 @@ class ContractExportDoctor extends Command
         try {
             $result = $this->capture(array_merge([
                 $chrome,
-                '--headless=new',
+            ], $headlessFlag ? ['--headless=new'] : [], [
                 '--no-sandbox',
                 '--disable-gpu',
                 '--disable-dev-shm-usage',
