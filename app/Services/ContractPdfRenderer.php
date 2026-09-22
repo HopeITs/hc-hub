@@ -92,28 +92,40 @@ class ContractPdfRenderer
 
         return $dir;
     }
-    public function renderHtml(string $html): string
-    {
-        $target = $this->workDir().'/'.Str::random(16).'.pdf';
-        $pdf = '';
+ public function renderHtml(string $html): string
+{
+    $target = $this->workDir().'/'.Str::random(16).'.pdf';
 
-        try {
-            // Encode the raw HTML to send directly to the remote browser
-            $dataUri = 'data:text/html;base64,'.base64_encode($html);
+    // Use a 40-character random string to make the URL unguessable
+    $tempHtmlName = Str::random(40) . '.html';
+    $tempHtmlPath = public_path('temp/' . $tempHtmlName);
 
-            $this->browsershot($dataUri)->savePdf($target);
+    // Ensure the public/temp directory exists
+    File::ensureDirectoryExists(public_path('temp'));
+    File::put($tempHtmlPath, $html);
 
-            $pdf = is_file($target) ? (string) file_get_contents($target) : '';
-        } finally {
-            File::delete($target);
-        }
+    $pdf = '';
 
-        if (! str_starts_with($pdf, '%PDF-')) {
-            throw new RuntimeException('Chrome did not write a PDF.');
-        }
+    try {
+        // Generate a real HTTP URL that Browserless can access
+        // e.g. https://hr.hcsyria-apps.org/temp/a1b2c3...html
+        $publicUrl = url('temp/' . $tempHtmlName);
 
-        return $pdf;
+        $this->browsershot($publicUrl)->savePdf($target);
+
+        $pdf = is_file($target) ? (string) file_get_contents($target) : '';
+    } finally {
+        // Always clean up both files immediately
+        File::delete($target);
+        File::delete($tempHtmlPath);
     }
+
+    if (! str_starts_with($pdf, '%PDF-')) {
+        throw new RuntimeException('Chrome did not write a PDF.');
+    }
+
+    return $pdf;
+}
 
     public function browsershot(string $url): InspectableBrowsershot
     {
