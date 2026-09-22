@@ -49,6 +49,14 @@ No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are config
 ### Contracts & position capacity
 `ContractObserver` (registered in `AppServiceProvider`) keeps each `Position.exist_emp` counter in sync using `lockForUpdate`, and enforces capacity via `Position::canAssign()`. It **skips the capacity check when `runningInConsole()`** so bulk Excel/CLI imports don't fail.
 
+### Pay figures (security-critical)
+`contracts.salary` and `contract_pay_tiers.amount` are **encrypted at rest under their own key**, not under `APP_KEY` — a database copy usually travels with a developer `.env`, and `APP_KEY` with it. The key is `SALARY_ENCRYPTION_KEY` (`php artisan salary:key:generate`), set on production only; `config/salary.php` falls back to `APP_KEY` so local databases and the suite keep working.
+- `App\Services\SalaryCipher` returns **null instead of throwing** for a value it cannot decrypt — a copy without the key must stay usable. `App\Casts\EncryptedSalary` then **refuses to overwrite a figure it could not read**, so working on such a copy cannot destroy the originals. Its `compare()` decrypts before diffing; without it every save would look like a pay change (fresh IV each time).
+- Decryption failure is silent by design, so a misconfigured host looks exactly like a working one. `php artisan salary:key:check` is what tells them apart — run it after any deploy or key change.
+- The migration widens the columns to `text` **except on SQLite**, where `change()` rebuilds the table and dropping `contracts` fires `contract_pay_tiers`' `ON DELETE CASCADE`, wiping every flexible contract's pay schedule. SQLite type affinity keeps the envelope verbatim anyway.
+- **`User::canViewSalary()` is the single source of truth for who may see a figure**, and `super-admin` is refused by name in `config('salary.blind_roles')` — it holds every permission automatically, so a `salaries.view` permission would be granted to the one role that must not have it. Callers add their own city scope, the same way they already do for every other HR-only view.
+- Roles that may not see figures get them **withheld on load and preserved on save** (`ContractForm::preserveHiddenPay`, `BadgeForm::save`) — never disabled inputs, because the values are never sent to that browser at all. The PDF export is refused outright: the document *is* the pay clause.
+
 ### Media / avatars
 `Employee implements HasMedia` (Spatie MediaLibrary). Avatars live in the singleFile `avatar` collection with a fallback to `public/images/default-avatar.png`. Read with `getFirstMediaUrl('avatar')`.
 - **Never re-encode stored PNGs in place** (e.g. GD `imagesavealpha` on images without an alpha channel) — this turned photo backgrounds black. If thumbnails are ever needed, generate conversions from the source without touching the stored original.

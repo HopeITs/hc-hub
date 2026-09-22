@@ -136,6 +136,10 @@ return [
             'required_unless_service' => 'Weekly hours must be an explicit number for this contract category — complete the day/hour range, or the flexible "hours/week" box.',
         ],
 
+        'salary' => [
+            'hidden_from_role' => 'Your role cannot see or set pay figures, so it cannot create a contract from scratch. Ask HR to create it, or renew an existing contract instead.',
+        ],
+
         'required-fields' => 'Please fill in the required fields first.',
         'adult' => 'You must be at least 16 years old.',
         'password_rule' => 'The password must be at least 8 characters and contain letters, numbers, and special characters.',

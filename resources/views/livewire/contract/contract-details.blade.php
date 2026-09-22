@@ -21,6 +21,7 @@
         />
 
         <div class="shrink-0 flex items-center gap-2">
+            @can('export', $contract)
             <a href="{{ route('contracts.export', $contract) }}"
                class="inline-flex items-center rounded-control bg-primary px-4 py-2 text-white text-body font-medium shadow hover:bg-primary">
                 <svg class="h-4 w-4 ms-2 me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -30,6 +31,7 @@
                 </svg>
                 @lang('general.export-pdf')
             </a>
+            @endcan
             @can('renew', $contract)
                 {{-- Tailwind 4 puts the important modifier at the end (mb-0!),
                      not at the front; the v3 "!mb-0" form is inert here. --}}

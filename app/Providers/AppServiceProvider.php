@@ -20,6 +20,7 @@ use App\Policies\EmployeePolicy;
 use App\Policies\LeaveRequestPolicy;
 use App\Policies\PositionPolicy;
 use App\Services\ActivityLogger;
+use App\Services\SalaryCipher;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
@@ -37,6 +38,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ActivityLogger::class, function ($app) {
             return new ActivityLogger;
         });
+
+        // Singleton so the Encrypter - and the "this host cannot read the
+        // figures" warning that goes with it - is built once per request
+        // rather than once per contract row rendered.
+        $this->app->singleton(SalaryCipher::class);
     }
 
     public function boot(): void

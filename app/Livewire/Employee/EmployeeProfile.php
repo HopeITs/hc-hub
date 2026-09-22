@@ -45,7 +45,11 @@ class EmployeeProfile extends Component
             && ($activeCityId === null || $this->employee->city_id === $activeCityId);
 
         $this->canViewPrivate = $this->isSelf || $isHrInScope;
-        $this->canViewFinancial = $isHrInScope;
+
+        // Narrower than $isHrInScope on purpose: $isHr above counts
+        // super-admin as HR so a developer can open any profile, and pay is
+        // the one thing that must not come with that. See User::canViewSalary.
+        $this->canViewFinancial = $isHrInScope && $user->canViewSalary();
         $this->canEdit = $isHrInScope || $isManagement;
         $this->canViewBadges = $this->isSelf || $isHrInScope;
     }

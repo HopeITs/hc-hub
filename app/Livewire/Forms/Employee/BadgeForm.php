@@ -24,6 +24,13 @@ class BadgeForm extends Form
     public function setEmployee(Employee $employee): void
     {
         $this->employee = $employee;
+
+        // A salary-increase badge states the old and the new figure outright,
+        // which makes it the same secret as contracts.salary - and the badges
+        // tab is reachable by every role that can edit an employee. Withheld
+        // on load, preserved on save; see salaryIsHidden().
+        $salaryHidden = $this->salaryIsHidden();
+
         $this->badges = $this->employee
             ->badges()
             ->select(
@@ -54,8 +61,8 @@ class BadgeForm extends Form
                     'amount' => $this->amountForForm($badge),
                     'new_position' => $badge->new_position,
                     'leave_unit' => $badge->leave_unit,
-                    'current_salary' => $badge->current_salary,
-                    'new_salary' => $badge->new_salary,
+                    'current_salary' => $salaryHidden ? null : $badge->current_salary,
+                    'new_salary' => $salaryHidden ? null : $badge->new_salary,
                     'notes' => $badge->notes,
                 ],
             )
@@ -184,6 +191,14 @@ class BadgeForm extends Form
             $badges->each(function (array $badge): void {
                 $values = Arr::only($badge, $this->badgeDataFields());
 
+                if ($this->salaryIsHidden()) {
+                    // The boxes were blank because this role was not shown
+                    // them. Writing those blanks back would erase the figures
+                    // on every salary badge the employee has - so the keys are
+                    // dropped and the stored values are left untouched.
+                    unset($values['current_salary'], $values['new_salary']);
+                }
+
                 if (empty($badge['id'])) {
                     $this->employee->badges()->create($values);
 
@@ -199,6 +214,14 @@ class BadgeForm extends Form
         });
 
         $this->setEmployee($this->employee->fresh());
+    }
+
+    /** @see \App\Models\User::canViewSalary() */
+    public function salaryIsHidden(): bool
+    {
+        $user = auth()->user();
+
+        return $user !== null && ! $user->canViewSalary();
     }
 
     private function authorizeCreate(): void

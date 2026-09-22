@@ -264,14 +264,21 @@ class ContractForm extends Form
 
         $this->pay_mode = (int) ($contract->pay_mode ?? PayMode::Fixed);
         $this->currency = (int) $contract->currency;
-        $this->salary = $contract->salary;
+        // The figures themselves are withheld from a role that may not see
+        // them; the mode, currency and period stay so the screen can still
+        // explain what kind of pay clause this contract has. The withheld
+        // values are never sent to the browser, and preserveHiddenPay() below
+        // is what stops the resulting blanks being saved back over them.
+        $payHidden = $this->payIsHidden();
+
+        $this->salary = $payHidden ? null : $contract->salary;
         $this->salary_per = $contract->salary_per;
         $this->session_duration = $contract->session_duration;
         $this->pay_tiers = $contract->payTiers
             ->map(fn (ContractPayTier $tier): array => [
                 'condition_en' => $tier->condition_en,
                 'condition_ar' => $tier->condition_ar,
-                'amount' => $tier->amount,
+                'amount' => $payHidden ? null : $tier->amount,
             ])
             ->all();
         $this->work_days_ar = $contract->work_days_ar;
@@ -359,6 +366,15 @@ class ContractForm extends Form
 
     public function validatePay(): array
     {
+        if ($this->payIsHidden()) {
+            // Nothing on this step is writable for such a role - see
+            // preserveHiddenPay() - so the blanks the browser sent are not
+            // worth validating; enforcing the ordinary rules on them would
+            // reject the save over fields nobody was allowed to fill. What is
+            // still worth checking is that there is a stored clause to keep.
+            return $this->validate(['salary' => [$this->hiddenPayRule()]]);
+        }
+
         $isFixed = $this->pay_mode === PayMode::Fixed;
 
         return $this->validate([
@@ -381,6 +397,22 @@ class ContractForm extends Form
             'pay_tiers.*.condition_ar' => ['required_with:pay_tiers', 'string', 'max:255'],
             'pay_tiers.*.amount' => ['required_with:pay_tiers', 'numeric', 'min:0'],
         ]);
+    }
+
+    /**
+     * Is the current user barred from pay figures?
+     *
+     * Read from the request rather than held in a property: a Livewire form
+     * object round-trips its public state through the browser, and a flag
+     * saying "this user may not see salaries" is the last thing that should
+     * make that trip. auth() is authoritative on every request and cannot be
+     * tampered with between them.
+     */
+    public function payIsHidden(): bool
+    {
+        $user = auth()->user();
+
+        return $user !== null && ! $user->canViewSalary();
     }
 
     // ────────────────────────────────────────────────
@@ -480,11 +512,38 @@ class ContractForm extends Form
     {
         $this->validatePay();
 
+        // Nothing on this step is editable without sight of the figures -
+        // see preserveHiddenPay().
+        if ($this->payIsHidden()) {
+            return;
+        }
+
         $this->contract?->update([
             'currency' => (int) $this->currency,
             'salary' => $this->salary,
             'salary_per' => (string) $this->salary_per,
         ]);
+    }
+
+    /**
+     * The only pay rule a hidden role gets: there has to be a stored figure to
+     * carry forward.
+     *
+     * Editing an existing contract or renewing one both have a figure already
+     * on file, and preserveHiddenPay() moves it across without it ever being
+     * visible. A contract created from nothing has no such figure, and saving
+     * one would quietly produce a contract with no pay clause at all - so that
+     * is the single combination this refuses.
+     */
+    private function hiddenPayRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            if ($this->contract !== null || $this->renewal_source_id !== null) {
+                return;
+            }
+
+            $fail(__('validation.custom.salary.hidden_from_role'));
+        };
     }
 
     /**
@@ -533,6 +592,12 @@ class ContractForm extends Form
      */
     private function syncPayTiers(Contract $contract): void
     {
+        if ($this->payIsHidden()) {
+            $this->carryForwardHiddenPayTiers($contract);
+
+            return;
+        }
+
         $contract->payTiers()->delete();
 
         if ($this->pay_mode !== PayMode::Flexible) {
@@ -545,6 +610,30 @@ class ContractForm extends Form
                 'condition_ar' => trim((string) ($tier['condition_ar'] ?? '')),
                 'amount' => $tier['amount'] ?? 0,
                 'sort_order' => $index,
+            ]);
+        }
+    }
+
+    /**
+     * A hidden role's repeater holds blank amounts, because fillFromModel()
+     * withheld them - writing it back would delete a flexible contract's whole
+     * pay schedule. So: an existing contract keeps the tiers it has, and a
+     * renewal is given a copy of its source's.
+     */
+    private function carryForwardHiddenPayTiers(Contract $contract): void
+    {
+        if ($this->renewal_source_id === null || $contract->payTiers()->exists()) {
+            return;
+        }
+
+        $source = Contract::query()->with('payTiers')->find($this->renewal_source_id);
+
+        foreach ($source?->payTiers ?? [] as $tier) {
+            $contract->payTiers()->create([
+                'condition_en' => $tier->condition_en,
+                'condition_ar' => $tier->condition_ar,
+                'amount' => $tier->amount,
+                'sort_order' => $tier->sort_order,
             ]);
         }
     }
@@ -608,6 +697,47 @@ class ContractForm extends Form
 
         if ($this->canPersistAutoRenew()) {
             $payload['auto_renew'] = (bool) $this->auto_renew;
+        }
+
+        return $this->payIsHidden() ? $this->preserveHiddenPay($payload) : $payload;
+    }
+
+    /**
+     * Strip the pay clause out of a payload built by someone who could not see
+     * it, and put back what is already on file.
+     *
+     * The whole clause moves together, not just the figure: a role that cannot
+     * enter an amount must not be able to switch a contract from fixed to
+     * flexible pay either, because the result would be a contract whose pay
+     * mode says one thing and whose (untouched) figures say another.
+     *
+     * On an edit the keys are simply dropped, so update() never names those
+     * columns and the stored ciphertext survives byte for byte. On a renewal
+     * the source contract's clause is read here, server-side, and carried
+     * forward - the same values the renewal copies anyway, without them ever
+     * reaching the browser. A contract created from nothing has no clause to
+     * carry, which is what hiddenPayRule() refuses up front.
+     */
+    private function preserveHiddenPay(array $payload): array
+    {
+        $payKeys = ['pay_mode', 'currency', 'salary', 'salary_per', 'session_duration'];
+
+        foreach ($payKeys as $key) {
+            unset($payload[$key]);
+        }
+
+        if ($this->contract !== null || $this->renewal_source_id === null) {
+            return $payload;
+        }
+
+        $source = Contract::query()->find($this->renewal_source_id);
+
+        if ($source === null) {
+            return $payload;
+        }
+
+        foreach ($payKeys as $key) {
+            $payload[$key] = $source->{$key};
         }
 
         return $payload;

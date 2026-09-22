@@ -165,7 +165,11 @@ class ContractsTable extends LivewireTable
         // result set to the active city, so only the row's own state is left
         // to check — which is done inline below, without touching the database.
         $canCreate = auth()->user()?->hasActivePermission('contracts.create') ?? false;
-        $canExport = auth()->user()?->hasActivePermission('contracts.export') ?? false;
+        // Mirrors ContractPolicy::export, which also refuses a role that may
+        // not see pay figures - the PDF carries the stipend clause. Hoisted
+        // here so the button is absent rather than present and 403-ing.
+        $canExport = (auth()->user()?->hasActivePermission('contracts.export') ?? false)
+            && (auth()->user()?->canViewSalary() ?? false);
 
         return [
             Column::make(trans_choice('general.employee', 1), 'employee')

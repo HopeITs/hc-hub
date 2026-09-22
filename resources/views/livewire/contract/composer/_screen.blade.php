@@ -20,6 +20,12 @@
 
     $isEdit = $mode === 'edit';
 
+    // Mirrors ContractForm::payIsHidden(). The pay figures are already absent
+    // from $seed for such a role (ContractForm::fillFromModel withholds them);
+    // this flag is what turns the section itself into a read-only notice
+    // instead of an empty box the Save button waits forever on.
+    $payHidden = auth()->check() && ! auth()->user()->canViewSalary();
+
     // Editing adds the one section a contract that does not exist cannot have.
     $sections = ['assignment', 'schedule', 'pay'];
 
@@ -60,6 +66,7 @@
             ->map(fn ($reason) => ['value' => $reason->id, 'label' => $reason->title])
             ->values(),
         'canManageAutoRenew' => $canManageAutoRenew,
+        'payHidden' => $payHidden,
         // Present whenever this page opened on an existing contract — a renewal
         // or an edit — so Alpine can fill every field from it instead of blank.
         'seed' => $seed,
@@ -111,6 +118,7 @@
             'perSession' => __('general.composer.per-session'),
             'perYear' => __('general.composer.per-year'),
             'tiersCount' => __('general.composer.tiers-count'),
+            'salaryHidden' => __('general.salary-hidden'),
             'empty' => '—',
         ],
     ];
@@ -131,7 +139,7 @@
             @include('livewire.contract.composer._assignment')
             @include('livewire.contract.composer._schedule', ['dayNames' => $dayNames])
 
-            @include('livewire.contract.composer._pay')
+            @include('livewire.contract.composer._pay', ['payHidden' => $payHidden])
 
             @if($isEdit)
                 @include('livewire.contract.composer._termination')

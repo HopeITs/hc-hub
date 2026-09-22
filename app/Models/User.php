@@ -157,6 +157,34 @@ class User extends Authenticatable
     }
 
     /**
+     * May the role this user is currently operating under see pay figures?
+     *
+     * Two separate refusals, and both matter:
+     *
+     * - config('salary.blind_roles') names the roles that are refused outright
+     *   however many permissions they hold. super-admin is there because it is
+     *   the developers' role: it exists to debug the system, including on
+     *   copies of production data, and confidentiality of pay does not survive
+     *   a role that both sees everything and is handed out to whoever is
+     *   working on the code this month.
+     *
+     * - Everyone else has to be HR. Pay is HR's file; general-manager and
+     *   manager can edit an employee without it, and an employee's own salary
+     *   reaches them on their contract, not through this application.
+     *
+     * Answers only the role question. City scope is the caller's to add, the
+     * same way it already does for every other HR-only view.
+     */
+    public function canViewSalary(): bool
+    {
+        if ($this->activeRoleIs(...config('salary.blind_roles', []))) {
+            return false;
+        }
+
+        return $this->activeRoleIs('HR');
+    }
+
+    /**
      * Check direct grants plus the currently active role only.
      *
      * Spatie's default check combines every assigned role, which is unsafe for

@@ -2,6 +2,10 @@
     use App\Enums\PayMode;
     use App\Enums\SessionDuration;
 
+    // Normally handed down by _screen.blade.php; defaulted here so this
+    // partial cannot leak figures if it is ever included from somewhere else.
+    $payHidden ??= auth()->check() && ! auth()->user()->canViewSalary();
+
     /*
      * Inlined rather than pulled from x-icons.*, because those components bake a
      * colour utility into their own class list (icons.calendar carries
@@ -46,6 +50,25 @@
     :title="__('general.composer.pay')"
     summary="paySummary"
 >
+@if($payHidden)
+    {{-- A role without access to pay figures gets the section as a notice
+         rather than as disabled inputs: there is nothing to disable, because
+         the figures were never sent to this browser in the first place
+         (ContractForm::fillFromModel). Saying so plainly is also the only way
+         the screen can explain why the rest of the form saves fine while the
+         pay clause stays exactly as it was — see preserveHiddenPay(). --}}
+    <div class="mt-4 flex items-start gap-3 rounded-control border border-neutral-200 bg-neutral-50 p-4">
+        <svg class="mt-0.5 size-5 shrink-0 text-secondary-medium" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M10 2a3.5 3.5 0 00-3.5 3.5V8H6a1.5 1.5 0 00-1.5 1.5v6A1.5 1.5 0 006 17h8a1.5 1.5 0 001.5-1.5v-6A1.5 1.5 0 0014 8h-.5V5.5A3.5 3.5 0 0010 2zm2 6H8V5.5a2 2 0 114 0V8z"/>
+        </svg>
+
+        <div class="min-w-0">
+            <p class="font-semibold text-body text-neutral-900">@lang('general.salary-hidden-title')</p>
+            <p class="mt-1 text-small text-secondary-medium">@lang('general.salary-hidden-body')</p>
+            <x-error-span>{{ $errors->first('form.salary') }}</x-error-span>
+        </div>
+    </div>
+@else
     {{-- Currency and pay mode are the two shared, top-level decisions —
          paired in one row so neither sits alone in an otherwise-empty strip. --}}
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
@@ -232,4 +255,5 @@
          withhold, only the Create button in the action bar, so this line is the
          only thing that can say why it is grey. --}}
     <p x-cloak x-show="payBlockedHint" class="mt-4 font-medium text-small text-primary" x-text="payBlockedHint"></p>
+@endif
 </x-contract.section>

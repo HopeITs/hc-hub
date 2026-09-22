@@ -144,6 +144,16 @@
 
                 {{-- Show salary and currency inputs only if type == Salary_Increase --}}
                 @if(($badgeForm->badges[$index]['type'] ?? null) == \App\Enums\BadgeType::Salary_Increase)
+                    @if($badgeForm->salaryIsHidden())
+                    {{-- The figures were never loaded into the form for this
+                         role (BadgeForm::setEmployee), and save() leaves the
+                         stored ones alone - so there is nothing to render here
+                         but the reason why. --}}
+                    <div class="md:col-span-3 rounded-control border border-neutral-200 bg-neutral-50 px-4 py-3">
+                        <p class="font-semibold text-body text-neutral-900">@lang('general.salary-hidden-title')</p>
+                        <p class="mt-1 text-small text-secondary-medium">@lang('general.salary-hidden-body')</p>
+                    </div>
+                    @else
                     <div>
                         <x-forms.input-label
                             for="current_salary_{{ $index }}">@lang('general.current_salary')</x-forms.input-label>
@@ -172,6 +182,7 @@
                         </x-forms.select2-input>
                         <x-error-span>{{ $errors->first("badgeForm.badges.$index.currency") }}</x-error-span>
                     </div>
+                    @endif
                 @endif
 
 
