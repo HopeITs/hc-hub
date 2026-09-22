@@ -83,9 +83,11 @@ class RecruitmentRequestChangeClassifier
      * would put a translation table between an edit and the record of it, and
      * a key falling through that map would silently stop being reported.
      *
-     * `effective_date` is treated as substantive: since D64 it decides *when*
-     * the organisation actually changes, so moving it is not a rewording.
-     * Still worth confirming.
+     * `effective_date` is descriptive. It decides *when* the change takes
+     * effect, never whether it should, so an approver who agreed to close a
+     * post still agrees to close it a month later. Moving the date invalidates
+     * nobody's judgement, and sending the request round all three approvers
+     * again over a date would cost more than it protects.
      *
      * `direct_manager_id` is descriptive for the reason given on DETAIL_FIELDS:
      * it proposes a parent for the new post and routes nothing.
@@ -96,13 +98,13 @@ class RecruitmentRequestChangeClassifier
         self::SUBSTANTIVE => [
             'request_type', 'position_id', 'vacancy_id', 'city_id', 'program_id',
             'center_id', 'department_id', 'job_level_id',
-            'max_emp', 'additional_count', 'reduce_by', 'effective_date',
+            'max_emp', 'additional_count', 'reduce_by',
         ],
         self::FINANCIAL => [
             'salary_amount', 'currency', 'salary_per', 'contract_type_id',
         ],
         self::DESCRIPTIVE => [
-            'direct_manager_id',
+            'direct_manager_id', 'effective_date',
             'recruitment_reason', 'other_reason', 'priority', 'volunteer_type',
             'weekly_hours', 'volunteer_period_start_date', 'volunteer_period_end_date',
             'needed_by_date', 'detailed_explanation', 'title_en', 'title_ar',

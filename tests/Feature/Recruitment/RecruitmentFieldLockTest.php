@@ -195,6 +195,26 @@ class RecruitmentFieldLockTest extends TestCase
         $this->assertNull($classifier->restartsFrom($category), 'Descriptive changes resume where they stopped.');
     }
 
+    /**
+     * Moving the effective date does not send the workflow back either.
+     *
+     * It decides when the change takes effect, never whether it should. An
+     * approver who agreed to close a post still agrees to close it a month
+     * later, so nobody's judgement is invalidated by the date moving.
+     */
+    public function test_moving_the_effective_date_does_not_restart_the_workflow(): void
+    {
+        $classifier = app(Classifier::class);
+
+        $category = $classifier->classifyPayload(
+            ['effective_date' => '2026-10-01'],
+            ['effective_date' => '2026-12-01'],
+        );
+
+        $this->assertSame(Classifier::DESCRIPTIVE, $category);
+        $this->assertNull($classifier->restartsFrom($category));
+    }
+
     /** The picker offers the request's own fields, never the type fixed at creation. */
     public function test_the_selectable_fields_come_from_the_request_and_exclude_its_type(): void
     {
