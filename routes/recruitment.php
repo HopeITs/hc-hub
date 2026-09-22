@@ -1,6 +1,9 @@
 <?php
 
 use App\Livewire\Recruitment\Approvals\Pending;
+use App\Livewire\Recruitment\Campaigns\Create as CampaignCreate;
+use App\Livewire\Recruitment\Campaigns\Index as CampaignIndex;
+use App\Livewire\Recruitment\Campaigns\Show as CampaignShow;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
 use App\Livewire\Recruitment\Requests\Edit;
@@ -19,3 +22,12 @@ Route::prefix('recruitment/requests')->name('recruitment.requests.')
 Route::get('recruitment/approvals', Pending::class)
     ->middleware(['active_permission:recruitment-requests.approve'])
     ->name('recruitment.approvals.pending');
+
+Route::prefix('recruitment/campaigns')->name('recruitment.campaigns.')
+    ->middleware('active_permission:recruitment-campaigns.view')
+    ->group(function () {
+        Route::get('/', CampaignIndex::class)->name('index');
+        Route::get('/create', CampaignCreate::class)
+            ->middleware('active_permission:recruitment-campaigns.manage')->name('create');
+        Route::get('/{campaignId}', CampaignShow::class)->whereNumber('campaignId')->name('show');
+    });

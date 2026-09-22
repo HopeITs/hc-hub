@@ -58,11 +58,16 @@ class HiringCampaignService
             }
 
             [$startsAt, $endsAt] = $this->window($attributes);
+            $linkMode = $attributes['link_mode'] ?? HiringCampaign::PUBLIC_OPEN;
+
+            if (! in_array($linkMode, HiringCampaign::LINK_MODES, true)) {
+                throw $this->refuse('link_mode', 'recruitment-campaign.unknown_link_mode');
+            }
 
             $campaign = HiringCampaign::query()->create([
                 'vacancy_id' => $locked->getKey(),
                 'status' => Status::Draft,
-                'link_mode' => $attributes['link_mode'] ?? 'public_open',
+                'link_mode' => $linkMode,
                 'starts_at' => $startsAt,
                 'ends_at' => $endsAt,
                 'created_by_user_id' => $actor->getKey(),

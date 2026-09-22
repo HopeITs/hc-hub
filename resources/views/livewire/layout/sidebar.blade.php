@@ -99,6 +99,13 @@
                                 {{ __('recruitment.navigation_pending_approvals') }}
                             </x-layouts.app.sidebar.single-item>
                         @endactivepermission
+
+                        @activepermission('recruitment-campaigns.view')
+                            <x-layouts.app.sidebar.single-item :href="route('recruitment.campaigns.index')" :active="request()->routeIs('recruitment.campaigns.*')">
+                                <x-slot name="icon"><x-icons.newspaper class="size-5" /></x-slot>
+                                {{ __('recruitment-campaign.campaigns') }}
+                            </x-layouts.app.sidebar.single-item>
+                        @endactivepermission
                     @endif
 
                     {{-- Group: Management --}}
