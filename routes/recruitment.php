@@ -1,10 +1,10 @@
 <?php
 
+use App\Livewire\Recruitment\Approvals\Pending;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
 use App\Livewire\Recruitment\Requests\Edit;
 use App\Livewire\Recruitment\Requests\Index;
-use App\Livewire\Recruitment\Approvals\Pending;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('recruitment/requests')->name('recruitment.requests.')

@@ -3,6 +3,7 @@
 use App\Console\Commands\ApplyDueRecruitmentRequests;
 use App\Console\Commands\DeactivateContract;
 use App\Console\Commands\DeactivateEmployee;
+use App\Console\Commands\ExpireDueHiringCampaigns;
 use App\Console\Commands\ProcessContractAutoRenewals;
 use App\Console\Commands\SendContractExpirationWarnings;
 use Illuminate\Foundation\Inspiring;
@@ -21,6 +22,10 @@ Schedule::command(DeactivateEmployee::class)->weekly();
 // Early, so a reduction effective today is carried out before the contract
 // sweeps that read `exist_emp` run in the evening.
 Schedule::command(ApplyDueRecruitmentRequests::class)->dailyAt('00:30');
+// Tidying, not a gate: every campaign check already measures the window
+// against the clock, so a campaign that ends at noon stops accepting
+// applications at noon rather than at the next sweep.
+Schedule::command(ExpireDueHiringCampaigns::class)->dailyAt('00:35');
 Schedule::call(function () {
     Log::info('الكرون جوب يعمل بنجاح!');
 })->daily();
