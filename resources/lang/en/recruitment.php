@@ -1,6 +1,21 @@
 <?php
 
 return [
+    'campaign' => [
+        'errors' => [
+            'active_exists' => 'This vacancy already has an active recruitment campaign.',
+            'vacancy_unavailable' => 'The vacancy is no longer available for recruitment.',
+            'future_end' => 'The campaign end date must be in the future.',
+            'terminal_schedule' => 'The schedule of a completed or disabled campaign cannot be changed.',
+            'open_window' => 'The campaign can only open during its configured application window.',
+            'not_published' => 'Publish the campaign link before opening applications.',
+            'assets_not_ready' => 'Publish the job post and application form before opening applications.',
+            'link_not_ready' => 'Generate an active public recruitment link before opening applications.',
+            'terminal_transition' => 'This campaign can no longer change to the requested state.',
+            'disable_reason' => 'Enter a reason for disabling the campaign.',
+            'terminal_link' => 'A closed, expired, or disabled campaign cannot generate a new link.',
+        ],
+    ],
     'job_post' => [
         'title' => 'Job post generator',
         'subtitle' => 'Generated from the approved recruitment request. HR edits affect the post only.',

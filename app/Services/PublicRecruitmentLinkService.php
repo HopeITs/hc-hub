@@ -59,6 +59,14 @@ class PublicRecruitmentLinkService
             $jobVersion = $lockedCampaign->jobPost?->currentVersion;
             $formVersion = $lockedCampaign->applicationForm?->currentVersion;
 
+            if (! in_array((int) $lockedCampaign->status, [
+                HiringCampaignStatus::Draft,
+                HiringCampaignStatus::Published,
+                HiringCampaignStatus::Open,
+            ], true)) {
+                throw new DomainException(__('recruitment.campaign.errors.terminal_link'));
+            }
+
             if (! $jobVersion || $jobVersion->status !== 'published') {
                 throw new DomainException(__('recruitment.public_link.errors.publish_job_post'));
             }
