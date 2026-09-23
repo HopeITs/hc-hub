@@ -19,24 +19,24 @@
     $escAr = fn ($v) => e((string)($v === '' || $v === null ? '—' : $Glyphs($v)));
 @endphp
 
-<div class="avoid-break mt-4">
-    <x-contract.dual 
+<div class="mt-4 avoid-break">
+    <x-contract.dual
         :en="$LB('15. This contract') . ' is a voluntary contract and is <strong>not subject to Labor Law No. /17/ of 2010</strong> or any amendments to the law or any new law, and it is also <strong>not subject to social security Law No. 92 of 1959 and its amendments</strong>. The second team has no right to claim any end-of-service compensation upon the expiration or termination of the second party contract.'"
         :ar="$LB($Glyphs('15. إن هذا العقد')) . $Glyphs(' هو عقد تطوّعي ') . '<strong>' . $Glyphs('لا يخضع لقانون العمل رقم /17/ لعام 2010') . '</strong>' . $Glyphs(' أو أي تعديل للقانون أو أي قانون جديد، وكذلك ') . '<strong>' . $Glyphs('لا يخضع لقانون التأمينات الاجتماعية رقم 92 لعام 1959 وتعديلاته') . '</strong>' . $Glyphs('، ولا يحق للفريق الثاني المطالبة بأي تعويض نهاية خدمة عند انتهاء عقد التطوّع أو إنهائه.')" />
 </div>
-<div class="avoid-break mt-4">
-    <x-contract.dual 
+<div class="mt-4 avoid-break">
+    <x-contract.dual
         :en="$LB('16. The contract is issued') . ' in Arabic and translated into English.'"
         :ar="$LB($Glyphs('16. صدر هذا العقد')) . $Glyphs(' باللغة العربية وتُرجم إلى اللغة الإنكليزية.')" />
 </div>
 
-<div class="avoid-break mt-4">
-    <x-contract.dual 
+<div class="mt-4 avoid-break">
+    <x-contract.dual
         :en="$LB('17. This contract was issued') . ' on 5 pages and contains 17 clauses, printed in a single copy preserved at the Head Office in Aleppo.'"
         :ar="$LB($Glyphs('17. صدر هذا العقد')) . $Glyphs(' على 5 صفحات وعلى سبعة عشر بنداً، مطبوعاً على نسخة واحدة محفوظة لدى الإدارة العامة في حلب.')" />
 </div>
 
-<div class="avoid-break mt-6">
+<div class="mt-6 avoid-break">
     <x-contract.dual
         :en="'I hereby certify having read and understood the conditions stipulated above and all the attached documents and confirm that I accept them all.'"
         :ar="$Glyphs('أفيد بأنني قرأت وفهمت شروط العمل المنصوص عليها أعلاه وكافة المستندات المرفقة وأقر بموافقتي على كل ما ورد، وعليه أوقّع.')" />

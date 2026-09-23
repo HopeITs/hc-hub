@@ -419,6 +419,8 @@
 
     .signature-caption{
         margin-bottom:15px;
+        font-family: 'somar-regular';
+        font-size: 14px;
     }
 
     .signature-name{
@@ -428,6 +430,8 @@
 
     .signature-date{
         font-size:14px;
+        font-family: 'somar-regular';
+        margin-top: 25%;
     }
 
     /* ==========================================
