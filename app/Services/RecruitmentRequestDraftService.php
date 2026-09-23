@@ -19,7 +19,6 @@ use App\Models\Vacancy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -51,8 +50,13 @@ class RecruitmentRequestDraftService
             $isNewPosition = $data['request_type'] === Type::CreatePosition;
             [$target, $cityId] = $this->resolveTarget($actor, $data);
 
+            $numbers = app(RecruitmentRequestNumber::class);
+
             $request = RecruitmentRequest::query()->create([
-                'request_number' => 'RR-'.Str::ulid(),
+                'request_number' => $numbers->next(
+                    $cityId,
+                    $numbers->programIdFor($data, $isNewPosition ? null : $target->id),
+                ),
                 'requester_user_id' => $actor->id,
                 'request_type' => $data['request_type'],
                 'mode' => RecruitmentRequestMode::Normal,
@@ -157,8 +161,11 @@ class RecruitmentRequestDraftService
                 'center_id' => [$this->centerRule($input), 'integer', 'exists:centers,id'],
                 'department_id' => ['required', 'integer', 'exists:departments,id'],
                 'job_level_id' => ['required', 'integer', 'exists:job_levels,id'],
-                'title_en' => ['required', 'string', 'max:255'],
-                'title_ar' => ['required', 'string', 'max:255'],
+                // One alphabet each. The Unicode ranges are named rather
+                // than \p{Arabic}, which also matches Persian and Urdu letters
+                // nobody would be typing here.
+                'title_en' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s]+$/u'],
+                'title_ar' => ['required', 'string', 'max:255', 'regex:/^[\x{0621}-\x{064A}\s]+$/u'],
                 'qualifications' => ['required', 'string'],
                 'responsibilities' => ['required', 'string'],
                 'max_emp' => ['required', 'integer', 'min:1'],
@@ -177,9 +184,11 @@ class RecruitmentRequestDraftService
                 'priority' => ['required', 'string', Rule::in($form['priorities'])],
                 'volunteer_type' => ['required', 'string', Rule::in($form['volunteer_types'])],
                 'weekly_hours' => ['required', 'integer', 'min:1', 'max:168'],
-                'volunteer_period_start_date' => ['required', 'date_format:Y-m-d'],
+                // Strictly future: a post needed by yesterday is a post
+                // nobody can still be recruited for.
+                'needed_by_date' => ['required', 'date_format:Y-m-d', 'after:today'],
+                'volunteer_period_start_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:data.needed_by_date'],
                 'volunteer_period_end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:data.volunteer_period_start_date'],
-                'needed_by_date' => ['required', 'date_format:Y-m-d'],
                 'salary_amount' => ['required', 'integer', 'min:0'],
                 'currency' => ['required', 'integer', Rule::in([Currency::SYP, Currency::USD, Currency::EUR])],
                 'salary_per' => ['required', 'integer', Rule::in([SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session])],

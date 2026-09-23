@@ -15,7 +15,6 @@ use App\Models\RecruitmentRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -79,13 +78,19 @@ class RecruitmentDirectOpenService
         $request = DB::transaction(function () use ($actor, $data, $documentation): RecruitmentRequest {
             $position = $this->targetWithinScope($actor, $data);
 
+            $numbers = app(RecruitmentRequestNumber::class);
+            $cityId = $this->cityOf($position, $data);
+
             $request = RecruitmentRequest::query()->create([
-                'request_number' => 'RR-'.Str::ulid(),
+                'request_number' => $numbers->next(
+                    $cityId,
+                    $numbers->programIdFor($data, $position->getKey()),
+                ),
                 'requester_user_id' => $actor->getKey(),
                 'request_type' => $data['request_type'],
                 'mode' => RecruitmentRequestMode::DirectHr,
                 'status' => Status::Submitted,
-                'scope_city_id' => $this->cityOf($position, $data),
+                'scope_city_id' => $cityId,
                 'target_position_id' => $data['request_type'] === Type::CreatePosition ? null : $position->getKey(),
                 'target_vacancy_id' => $data['vacancy_id'] ?? null,
                 'draft_payload_json' => $data,

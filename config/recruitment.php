@@ -43,6 +43,9 @@ return [
         'map' => [
             'ALP' => 'HR-SYR',
             'TAR' => 'HR-LAT',
+            // Homs Rural is reviewed by the Homs governorate HR: it is the
+            // countryside of that governorate, not a governorate of its own.
+            'RHO' => 'HR-HMS',
         ],
 
         'default' => 'HR-SYR',
