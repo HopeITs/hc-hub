@@ -80,7 +80,7 @@
                         </x-layouts.app.sidebar.single-item>
                     @endactivepermission
 
-                    @if(auth()->user()?->hasActivePermission('recruitment-requests.view') || auth()->user()?->hasActivePermission('recruitment-requests.approve'))
+                    @if(auth()->user()?->hasActivePermission('recruitment-requests.view') || auth()->user()?->hasActivePermission('recruitment-requests.approve') || auth()->user()?->hasActivePermission('recruitment-campaigns.view'))
                         {{-- Group: Recruitment --}}
                         <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
                             <span class="text-caption font-semibold uppercase tracking-wider text-secondary-light">{{ __('recruitment.navigation_section') }}</span>
@@ -103,7 +103,7 @@
                         @activepermission('recruitment-campaigns.view')
                             <x-layouts.app.sidebar.single-item :href="route('recruitment.campaigns.index')" :active="request()->routeIs('recruitment.campaigns.*')">
                                 <x-slot name="icon"><x-icons.newspaper class="size-5" /></x-slot>
-                                {{ __('recruitment-campaign.campaigns') }}
+                                {{ __('recruitment.navigation_campaigns') }}
                             </x-layouts.app.sidebar.single-item>
                         @endactivepermission
                     @endif

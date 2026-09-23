@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RecruitmentApplicantFileController;
 use App\Livewire\Recruitment\Approvals\Pending;
 use App\Livewire\Recruitment\Campaigns\Create as CampaignCreate;
 use App\Livewire\Recruitment\Campaigns\Index as CampaignIndex;
@@ -35,3 +36,7 @@ Route::prefix('recruitment/campaigns')->name('recruitment.campaigns.')
             ->middleware('active_permission:recruitment-campaigns.manage')->name('create');
         Route::get('/{campaignId}', CampaignShow::class)->whereNumber('campaignId')->name('show');
     });
+
+Route::get('recruitment/applicant-files/{file}/download', [RecruitmentApplicantFileController::class, 'download'])
+    ->middleware(['active_permission:recruitment-campaigns.manage', 'throttle:60,1'])
+    ->name('recruitment.applicant-files.download');

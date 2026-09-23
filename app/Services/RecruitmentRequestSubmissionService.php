@@ -96,6 +96,31 @@ class RecruitmentRequestSubmissionService
         });
     }
 
+    /**
+     * Freeze the payload as version N+1 with its position details.
+     *
+     * Approvals attach to a version, so the version is what must not move. The
+     * details row carries the column names RV-1 compares field by field, which
+     * is why the draft's own field names are mapped here rather than stored
+     * loosely: a field that never lands in a column is a change that silently
+     * invalidates nothing.
+     */
+    public function freezeVersion(RecruitmentRequest $request, User $actor, array $payload): RecruitmentRequestVersion
+    {
+        $next = (int) $request->versions()->max('version_no') + 1;
+
+        $version = $request->versions()->create([
+            'version_no' => $next,
+            'snapshot_json' => $payload,
+            'created_by_user_id' => $actor->getKey(),
+            'submitted_at' => now(),
+        ]);
+
+        $version->positionDetail()->create($this->positionDetails($request, $payload));
+
+        return $version;
+    }
+
     private function submitWithin(User $actor, RecruitmentRequest $request): RecruitmentRequest
     {
         return DB::transaction(function () use ($actor, $request) {
@@ -249,31 +274,6 @@ class RecruitmentRequestSubmissionService
         if ($clash) {
             throw ValidationException::withMessages(['data.position_id' => __('recruitment.duplicate_position_request')]);
         }
-    }
-
-    /**
-     * Freeze the payload as version N+1 with its position details.
-     *
-     * Approvals attach to a version, so the version is what must not move. The
-     * details row carries the column names RV-1 compares field by field, which
-     * is why the draft's own field names are mapped here rather than stored
-     * loosely: a field that never lands in a column is a change that silently
-     * invalidates nothing.
-     */
-    private function freezeVersion(RecruitmentRequest $request, User $actor, array $payload): RecruitmentRequestVersion
-    {
-        $next = (int) $request->versions()->max('version_no') + 1;
-
-        $version = $request->versions()->create([
-            'version_no' => $next,
-            'snapshot_json' => $payload,
-            'created_by_user_id' => $actor->getKey(),
-            'submitted_at' => now(),
-        ]);
-
-        $version->positionDetail()->create($this->positionDetails($request, $payload));
-
-        return $version;
     }
 
     /**

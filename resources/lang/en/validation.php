@@ -206,4 +206,13 @@ return [
         'too_many_pixels' => 'The image resolution is too high. Please resize it before uploading.',
         'aspect_ratio' => 'The image is too elongated. Its longest side may be at most :ratio times the shortest.',
     ],
+
+    'recruitment_file' => [
+        'unsupported' => 'This file type is not allowed for this field.',
+        'unreadable' => 'The file could not be read. Please upload it again.',
+        'too_large' => 'The file must not be larger than 10 MB.',
+        'too_many' => 'The maximum number of files for this field has been reached.',
+        'executable' => 'Executable or scripted files are not allowed.',
+        'content_mismatch' => 'The file contents do not match its extension.',
+    ],
 ];

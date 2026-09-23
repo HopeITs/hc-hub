@@ -19,10 +19,16 @@
                     {{ $campaign->creator?->profile?->name ?? $campaign->creator?->name ?? '—' }}
                 </p>
             </div>
-            @php $badge = \App\Enums\HiringCampaignStatus::getLocalizedName($effective); @endphp
-            <span class="rounded-control bg-{{ $badge['color'] }}/10 px-3 py-1 text-sm font-semibold text-{{ $badge['color'] }}">
-                {{ $badge['value'] }}
-            </span>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('recruitment.campaigns.publishing', $campaign) }}" wire:navigate
+                    class="cursor-pointer rounded-control bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600">
+                    {{ __('recruitment.campaign.manage_publishing') }}
+                </a>
+                @php $badge = \App\Enums\HiringCampaignStatus::getLocalizedName($effective); @endphp
+                <span class="rounded-control bg-{{ $badge['color'] }}/10 px-3 py-1 text-sm font-semibold text-{{ $badge['color'] }}">
+                    {{ $badge['value'] }}
+                </span>
+            </div>
         </div>
 
         {{-- Both read from the clock, not the column: a campaign whose window

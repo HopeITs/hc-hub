@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\HiringCampaignStatus as Status;
 use App\Enums\RecruitmentEventType;
 use App\Models\HiringCampaign;
+use App\Models\PublicRecruitmentLink;
 use App\Models\RecruitmentRequestEvent;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -137,6 +138,8 @@ class HiringCampaignService
                 throw $this->refuse('campaign', 'recruitment-campaign.window_has_ended');
             }
 
+            $this->assertReadyToOpen($locked);
+
             return $this->transition($locked, $actor, 'open', 'opened');
         });
     }
@@ -180,6 +183,10 @@ class HiringCampaignService
     {
         return $this->act($actor, $campaign, 'manage', function (HiringCampaign $locked) use ($actor, $reason) {
             $previous = (int) $locked->status;
+
+            $locked->publicLinks()
+                ->where('status', PublicRecruitmentLink::STATUS_ACTIVE)
+                ->update(['status' => PublicRecruitmentLink::STATUS_DISABLED]);
 
             return $this->transition($locked, $actor, 'disable', 'disabled', [
                 'reason' => $reason,
@@ -270,6 +277,53 @@ class HiringCampaignService
     }
 
     /**
+     * Reflect scheduled starts and ends in the stored status.
+     *
+     * The public boundary still checks the effective state against the clock,
+     * so this scheduler is a consistency aid rather than the security gate.
+     *
+     * @return array{opened: int, expired: int}
+     */
+    public function syncScheduledStates(): array
+    {
+        $opened = 0;
+
+        HiringCampaign::query()
+            ->where('status', Status::Published)
+            ->whereNotNull('starts_at')
+            ->where('starts_at', '<=', now())
+            ->where(function ($query): void {
+                $query->whereNull('ends_at')->orWhere('ends_at', '>', now());
+            })
+            ->pluck('id')
+            ->each(function ($campaignId) use (&$opened): void {
+                DB::transaction(function () use ($campaignId, &$opened): void {
+                    $campaign = HiringCampaign::query()->whereKey($campaignId)->lockForUpdate()->first();
+
+                    if ($campaign === null
+                        || ! $this->states->can($campaign, 'open')
+                        || ! $this->states->hasStarted($campaign)
+                        || $this->states->hasEnded($campaign)) {
+                        return;
+                    }
+
+                    try {
+                        $this->assertReadyToOpen($campaign);
+                    } catch (ValidationException) {
+                        // A scheduled campaign remains published until its
+                        // frozen post, form and active link are all ready.
+                        return;
+                    }
+
+                    $this->transition($campaign, null, 'open', 'opened_by_schedule');
+                    $opened++;
+                });
+            });
+
+        return ['opened' => $opened, 'expired' => $this->expireDue()];
+    }
+
+    /**
      * The shape every action shares: authorize, lock, re-read, act.
      *
      * The lock is taken before anything is read, so two people acting at the
@@ -319,6 +373,21 @@ class HiringCampaignService
 
         if (! $hasPost || ! $hasForm) {
             throw $this->refuse('campaign', 'recruitment-campaign.needs_post_and_form');
+        }
+    }
+
+    /** Opening applications requires both frozen assets and a usable link. */
+    private function assertReadyToOpen(HiringCampaign $campaign): void
+    {
+        $this->assertPublishable($campaign);
+
+        $hasActiveLink = $campaign->publicLinks()
+            ->where('status', PublicRecruitmentLink::STATUS_ACTIVE)
+            ->where('expires_at', '>', now())
+            ->exists();
+
+        if (! $hasActiveLink) {
+            throw $this->refuse('campaign', 'recruitment.campaign.errors.link_not_ready');
         }
     }
 

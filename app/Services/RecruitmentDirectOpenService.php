@@ -50,9 +50,11 @@ class RecruitmentDirectOpenService
 
     public function __construct(
         private readonly RecruitmentRequestDraftService $drafts,
+        private readonly RecruitmentRequestSubmissionService $submissions,
         private readonly RecruitmentRequestRevalidator $revalidator,
         private readonly RecruitmentWorkflowInstanceService $workflows,
         private readonly RecruitmentRequestStateMachine $states,
+        private readonly RecruitmentRequestApplicationService $applications,
         private readonly RecruitmentScopeResolver $scopes,
     ) {}
 
@@ -107,12 +109,10 @@ class RecruitmentDirectOpenService
             // shorten the approvals, never the facts.
             $this->revalidator->assert($request, $data);
 
-            $version = $request->versions()->create([
-                'version_no' => 1,
-                'snapshot_json' => $data,
-                'created_by_user_id' => $actor->getKey(),
-                'submitted_at' => now(),
-            ]);
+            // Freeze the same structured version used by normal submissions.
+            // Job-post and application-form defaults read positionDetail, so a
+            // direct opening must not create a snapshot-only version.
+            $version = $this->submissions->freezeVersion($request, $actor, $data);
 
             $this->recordConfirmations($actor, $request, $documentation['confirmations'] ?? []);
 
@@ -122,6 +122,13 @@ class RecruitmentDirectOpenService
 
             return $request->fresh();
         });
+
+        // HR Syria has no electronic step, so its opening reaches Approved in
+        // the transaction above. Apply the business effect afterwards: a
+        // failed vacancy/position write must not erase the approval trail.
+        if ((int) $request->status === Status::Approved) {
+            return $this->applications->apply($request, $actor);
+        }
 
         return $request;
     }

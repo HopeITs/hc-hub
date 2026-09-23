@@ -15,6 +15,7 @@ use App\Services\HiringCampaignStateMachine;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
+use Tests\Concerns\BuildsPublishedCampaignAssets;
 use Tests\Concerns\BuildsWorkflowFixtures;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
@@ -30,7 +31,7 @@ use Tests\TestCase;
  */
 class HiringCampaignTest extends TestCase
 {
-    use BuildsWorkflowFixtures, CreatesHrFixtures, RefreshDatabase;
+    use BuildsPublishedCampaignAssets, BuildsWorkflowFixtures, CreatesHrFixtures, RefreshDatabase;
 
     private HiringCampaignService $campaigns;
 
@@ -331,8 +332,9 @@ class HiringCampaignTest extends TestCase
         ]);
 
         // Published without the post and form, which task 13 and 14 will make
-        // reachable; the precondition itself is tested on its own above.
+        // reachable; prepare the frozen public assets before applications open.
         $campaign->forceFill(['status' => Status::Published])->save();
+        $campaign = $this->prepareCampaignForOpening($campaign->fresh(), $hr);
 
         return [$hr, $this->campaigns->open($hr, $campaign->fresh())];
     }

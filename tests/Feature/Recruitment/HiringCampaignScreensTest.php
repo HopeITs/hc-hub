@@ -16,6 +16,7 @@ use App\Services\HiringCampaignService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\PermissionRegistrar;
+use Tests\Concerns\BuildsPublishedCampaignAssets;
 use Tests\Concerns\BuildsWorkflowFixtures;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
@@ -30,7 +31,7 @@ use Tests\TestCase;
  */
 class HiringCampaignScreensTest extends TestCase
 {
-    use BuildsWorkflowFixtures, CreatesHrFixtures, RefreshDatabase;
+    use BuildsPublishedCampaignAssets, BuildsWorkflowFixtures, CreatesHrFixtures, RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -201,6 +202,7 @@ class HiringCampaignScreensTest extends TestCase
 
         $campaign = $campaigns->create($hr, $vacancy, ['ends_at' => now()->addMonth()->toDateTimeString()]);
         $campaign->forceFill(['status' => Status::Published])->save();
+        $campaign = $this->prepareCampaignForOpening($campaign->fresh(), $hr);
 
         return [$hr, $campaigns->open($hr, $campaign->fresh())];
     }
