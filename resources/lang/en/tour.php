@@ -108,6 +108,49 @@ return [
         ],
     ],
 
+    'org-chart' => [
+        'stats' => [
+            'title' => 'The organisation at a glance',
+            'body' => 'Total positions, how many are filled, how many are vacant, and the number of top-level managers.',
+        ],
+        'views' => [
+            'title' => 'Chart or directory',
+            'body' => 'Switch between the visual chart and a searchable list of everyone.',
+        ],
+        'search' => [
+            'title' => 'Find someone',
+            'body' => 'Type a name or a position title. The chart switches to a list of matching cards.',
+        ],
+        'filters' => [
+            'title' => 'Filters',
+            'body' => 'Narrow the chart to one city, program, center, department or job level, or to a single manager\'s team.',
+        ],
+        'reporting-line' => [
+            'title' => 'Reporting line',
+            'body' => 'Show who reports to whom as a direct manager, or as a technical manager. Technical lines are drawn dashed.',
+        ],
+        'vacancies' => [
+            'title' => 'Vacant positions',
+            'body' => 'Show or hide empty positions. The button turns red while vacancies are hidden, so you always know the chart is incomplete.',
+        ],
+        'canvas' => [
+            'title' => 'Move around the chart',
+            'body' => 'Drag to move the chart, scroll to pan, and hold Ctrl while scrolling to zoom.',
+        ],
+        'node' => [
+            'title' => 'People and positions',
+            'body' => 'Click a person\'s card to open their profile. Use the button under a manager to show or hide their team.',
+        ],
+        'controls' => [
+            'title' => 'View controls',
+            'body' => 'Zoom in and out, fit the whole chart on screen, or expand and collapse every team at once.',
+        ],
+        'export' => [
+            'title' => 'Export',
+            'body' => 'Download the chart, as it looks now, as a PNG image or a PDF.',
+        ],
+    ],
+
     'leaves' => [
         'balances' => [
             'title' => 'Your balances',

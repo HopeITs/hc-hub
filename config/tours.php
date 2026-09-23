@@ -62,6 +62,24 @@ return [
         ],
     ],
 
+    // The toolbar steps only exist in the chart view; in the directory view
+    // they are skipped and the tour covers the header and view switcher.
+    'org-chart' => [
+        'routes' => ['org.chart'],
+        'steps' => [
+            'stats' => ['target' => 'org.stats', 'placement' => 'bottom'],
+            'views' => ['target' => 'org.views', 'placement' => 'bottom'],
+            'search' => ['target' => 'org.search', 'placement' => 'bottom'],
+            'filters' => ['target' => 'org.filters', 'placement' => 'bottom'],
+            'reporting-line' => ['target' => 'org.reporting-line', 'placement' => 'bottom'],
+            'vacancies' => ['target' => 'org.vacancies', 'placement' => 'bottom'],
+            'canvas' => ['target' => 'org.canvas', 'placement' => 'top'],
+            'node' => ['target' => 'org.node', 'placement' => 'bottom'],
+            'controls' => ['target' => 'org.controls', 'placement' => 'bottom'],
+            'export' => ['target' => 'org.export', 'placement' => 'bottom'],
+        ],
+    ],
+
     'leaves' => [
         'routes' => ['leaves.index'],
         'steps' => [

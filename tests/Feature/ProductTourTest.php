@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Position\OrgChart;
 use App\Models\User;
 use App\Support\ProductTour;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class ProductTourTest extends TestCase
@@ -70,6 +72,18 @@ class ProductTourTest extends TestCase
         $request->setRouteResolver(fn () => Route::getRoutes()->getByName('settings.password'));
 
         $this->assertNull(ProductTour::forRequest($request));
+    }
+
+    public function test_the_org_chart_renders_its_tour_targets(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(OrgChart::class)
+            ->assertSeeHtml('data-tour="org.stats"')
+            ->assertSeeHtml('data-tour="org.search"')
+            ->assertSeeHtml('data-tour="org.filters"')
+            ->assertSeeHtml('data-tour="org.canvas"')
+            ->assertSeeHtml('data-tour="org.export"');
     }
 
     public function test_the_dashboard_renders_the_tour_and_its_targets(): void

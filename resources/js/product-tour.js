@@ -43,8 +43,38 @@ function writeSeen(key) {
     }
 }
 
+// Several elements may share one anchor (every person card on the org chart
+// is `org.node`); the step then highlights the first one actually on show.
 function findTarget(target) {
-    return target ? document.querySelector(`[data-tour="${CSS.escape(target)}"]`) : null;
+    if (!target) return null;
+    const matches = [...document.querySelectorAll(`[data-tour="${CSS.escape(target)}"]`)];
+    return matches.find(isVisible) ?? matches[0] ?? null;
+}
+
+// The element's box cut down by every ancestor that clips its overflow, so a
+// card panned out of the org chart canvas reads as off-screen. Ancestors that
+// scroll (auto/scroll) are left alone: scrollIntoView can bring those into view.
+function clippedRect(el) {
+    let { left, top, right, bottom } = el.getBoundingClientRect();
+
+    for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+        const style = window.getComputedStyle(node);
+        const clipsX = style.overflowX === 'hidden' || style.overflowX === 'clip';
+        const clipsY = style.overflowY === 'hidden' || style.overflowY === 'clip';
+        if (!clipsX && !clipsY) continue;
+
+        const box = node.getBoundingClientRect();
+        if (clipsX) {
+            left = Math.max(left, box.left);
+            right = Math.min(right, box.right);
+        }
+        if (clipsY) {
+            top = Math.max(top, box.top);
+            bottom = Math.min(bottom, box.bottom);
+        }
+    }
+
+    return { left, top, right, bottom, width: right - left, height: bottom - top };
 }
 
 function isVisible(el) {
@@ -55,8 +85,8 @@ function isVisible(el) {
 
     // Off-canvas counts as hidden: on phones the sidebar is translated off
     // the side of the screen until it is opened.
-    const r = el.getBoundingClientRect();
-    return r.right > 0 && r.left < window.innerWidth;
+    const r = clippedRect(el);
+    return r.width > 0 && r.height > 0 && r.right > 0 && r.left < window.innerWidth;
 }
 
 // Nearest ancestor that scrolls on its own, e.g. the sidebar's nav list.
@@ -302,7 +332,7 @@ document.addEventListener('alpine:init', () => {
             const el = findTarget(this.step?.target);
 
             if (el && isVisible(el)) {
-                const r = el.getBoundingClientRect();
+                const r = clippedRect(el);
                 this.rect = {
                     x: r.left - PAD,
                     y: r.top - PAD,

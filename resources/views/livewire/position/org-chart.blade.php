@@ -57,7 +57,7 @@
                     <p class="max-w-2xl mt-2 text-body leading-relaxed text-white/75">@lang('general.org-chart-subtitle')</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div data-tour="org.stats" class="grid grid-cols-2 gap-2 sm:grid-cols-4">
                     @foreach([
                         ['value' => $stats['positions'], 'label' => __('general.total-positions'), 'accent' => false],
                         ['value' => $stats['employees'], 'label' => __('general.filled-positions'), 'accent' => false],
@@ -79,7 +79,7 @@
         </div>
 
         {{-- ---------- View switcher ---------- --}}
-        <div class="flex items-center gap-1 px-4 pt-3 bg-white border-b border-neutral-200">
+        <div data-tour="org.views" class="flex items-center gap-1 px-4 pt-3 bg-white border-b border-neutral-200">
             <button type="button" wire:click="$set('view', 'chart')"
                     class="flex items-center gap-2 rounded-t-xl border-b-2 px-4 py-2 text-body font-semibold transition {{ $view === 'chart' ? 'border-primary text-primary' : 'border-transparent text-secondary-light hover:text-secondary-dark' }}">
                 <x-icons.code-fork class="size-4" />
@@ -98,7 +98,7 @@
         {{-- ---------- Slim sticky toolbar ---------- --}}
         <div class="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 bg-white/95 px-4 py-2 backdrop-blur">
             <div class="flex flex-wrap items-center gap-2">
-                <div class="relative">
+                <div class="relative" data-tour="org.search">
                     <span class="pointer-events-none absolute inset-y-0 start-2.5 flex items-center text-secondary-light">
                         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="m20 20-3-3"/>
@@ -117,7 +117,7 @@
                     @endif
                 </div>
 
-                <button type="button" x-on:click="filtersOpen = true"
+                <button type="button" x-on:click="filtersOpen = true" data-tour="org.filters"
                         class="relative flex items-center gap-2 px-3 py-2 text-small font-semibold text-white transition rounded-surface bg-secondary-dark hover:bg-secondary-medium">
                     <x-icons.cog class="size-4" />
                     @lang('general.filters')
@@ -129,7 +129,7 @@
                 </button>
 
                 {{-- Reporting line quick switch --}}
-                <div class="flex items-center overflow-hidden text-small font-semibold border border-neutral-200 rounded-surface bg-neutral-50">
+                <div data-tour="org.reporting-line" class="flex items-center overflow-hidden text-small font-semibold border border-neutral-200 rounded-surface bg-neutral-50">
                     <button type="button" wire:click="$set('manager_type', 'direct')"
                             class="px-3 py-2 transition {{ ! $isTech ? 'bg-primary text-white' : 'text-secondary-medium hover:bg-white' }}">
                         @lang('general.direct-manager')
@@ -148,7 +148,7 @@
 
                 {{-- Goes solid red once vacancies are hidden, so the chart never
                      silently omits cards without the toolbar saying so. --}}
-                <button type="button" wire:click="toggleVacancies"
+                <button type="button" wire:click="toggleVacancies" data-tour="org.vacancies"
                         aria-pressed="{{ $showVacancies ? 'false' : 'true' }}"
                         @unless($showVacancies) title="{{ __('general.vacancies-kept-help') }}" @endunless
                         class="flex items-center gap-2 rounded-surface border px-3 py-2 text-small font-semibold transition {{ $showVacancies ? 'border-neutral-200 bg-white text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary' : 'border-primary bg-primary text-white hover:opacity-90' }}">
@@ -164,7 +164,7 @@
                 </button>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2" data-tour="org.controls">
                 <div class="flex items-center overflow-hidden border border-neutral-200 rounded-surface bg-neutral-50">
                     <button type="button" wire:click="zoomOut" title="{{ __('general.zoom-out') }}"
                             class="flex items-center justify-center transition size-8 text-secondary-medium hover:bg-white hover:text-primary">
@@ -192,7 +192,7 @@
                 </button>
 
                 {{-- Export menu --}}
-                <div class="relative" x-data="{ menu: false }" x-on:click.outside="menu = false">
+                <div class="relative" x-data="{ menu: false }" x-on:click.outside="menu = false" data-tour="org.export">
                     <button type="button" x-on:click="menu = !menu" :disabled="exporting"
                             class="flex items-center gap-2 rounded-surface border border-neutral-200 bg-white px-3 py-2 text-small font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary disabled:opacity-60">
                         <svg x-show="!exporting" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
@@ -269,6 +269,7 @@
             @else
             <div
                 x-ref="viewport"
+                data-tour="org.canvas"
                 x-data="{
                     scale: @entangle('scale').live,
                     translateX: 0,

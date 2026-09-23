@@ -28,6 +28,7 @@
 @endphp
 
 <button type="button" wire:click="$dispatch('open-profile', { employeeId: {{ $employee->id }} })"
+    data-tour="org.node"
     aria-label="{{ __('general.view-profile-of', ['name' => $employee->name]) }}"
     {{ $attributes->merge(['class' => $modifiers]) }}>
 
