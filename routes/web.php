@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
-Route::get('/ID/{token}', ShowDigitalId::class)
+Route::get('/ID/{username}', ShowDigitalId::class)
     ->where('token', '[A-Za-z0-9]{64}')
     ->middleware('throttle:30,1')
     ->name('digital-id.show');
