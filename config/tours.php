@@ -106,6 +106,98 @@ return [
         ],
     ],
 
+    /*
+    | Employee management. List pages share the table anchors from the
+    | published livewire-table views (table.search, table.row, ...), plus
+    | list.add / list.export on the page header; the copy stays per page.
+    */
+
+    'employees' => [
+        'routes' => ['employees.index'],
+        'steps' => [
+            'add' => ['target' => 'list.add', 'placement' => 'bottom'],
+            'export' => ['target' => 'list.export', 'placement' => 'bottom'],
+            'search' => ['target' => 'table.search', 'placement' => 'bottom'],
+            'column-search' => ['target' => 'table.column-search', 'placement' => 'bottom'],
+            'row' => ['target' => 'table.row', 'placement' => 'bottom'],
+            'columns' => ['target' => 'table.columns', 'placement' => 'bottom'],
+            'per-page' => ['target' => 'table.per-page', 'placement' => 'bottom'],
+        ],
+    ],
+
+    // Create and edit share one form. The draft step only shows right after a
+    // new employee's information is saved; the back button only when editing.
+    'employee-form' => [
+        'routes' => ['employees.create', 'employees.edit'],
+        'steps' => [
+            'tabs' => ['target' => 'employee.tabs', 'placement' => 'end'],
+            'draft' => ['target' => 'employee.draft', 'placement' => 'bottom'],
+            'photo' => ['target' => 'employee.photo', 'placement' => 'bottom'],
+            'save' => ['target' => 'employee.save', 'placement' => 'top'],
+            'back' => ['target' => 'employee.back', 'placement' => 'bottom'],
+        ],
+    ],
+
+    'employee-profile' => [
+        'routes' => ['employees.show', 'my-profile'],
+        'steps' => [
+            'header' => ['target' => 'profile.header', 'placement' => 'bottom'],
+            'actions' => ['target' => 'profile.actions', 'placement' => 'bottom'],
+            'summary' => ['target' => 'profile.summary', 'placement' => 'bottom'],
+            'overview' => ['target' => 'profile.overview', 'placement' => 'end'],
+            'career' => ['target' => 'profile.career', 'placement' => 'end'],
+            'private' => ['target' => 'profile.private', 'placement' => 'start'],
+        ],
+    ],
+
+    'default-deliverables' => [
+        'routes' => ['default-deliverables.index'],
+        'steps' => [
+            'intro' => [],
+            'add' => ['target' => 'list.add', 'placement' => 'bottom'],
+            'export' => ['target' => 'list.export', 'placement' => 'bottom'],
+            'search' => ['target' => 'table.search', 'placement' => 'bottom'],
+            'row' => ['target' => 'table.row', 'placement' => 'bottom'],
+        ],
+    ],
+
+    'contracts' => [
+        'routes' => ['contracts.index'],
+        'steps' => [
+            'add' => ['target' => 'list.add', 'placement' => 'bottom'],
+            'export' => ['target' => 'list.export', 'placement' => 'bottom'],
+            'search' => ['target' => 'table.search', 'placement' => 'bottom'],
+            'column-search' => ['target' => 'table.column-search', 'placement' => 'bottom'],
+            'row' => ['target' => 'table.row', 'placement' => 'bottom'],
+            'columns' => ['target' => 'table.columns', 'placement' => 'bottom'],
+        ],
+    ],
+
+    // Create, renew and edit share the composer. Termination exists only when
+    // editing; the live contract card only on wide screens.
+    'contract-form' => [
+        'routes' => ['contracts.create', 'contracts.renew', 'contracts.edit'],
+        'steps' => [
+            'assignment' => ['target' => 'contract.assignment', 'placement' => 'bottom'],
+            'schedule' => ['target' => 'contract.schedule', 'placement' => 'bottom'],
+            'pay' => ['target' => 'contract.pay', 'placement' => 'bottom'],
+            'termination' => ['target' => 'contract.termination', 'placement' => 'bottom'],
+            'card' => ['target' => 'contract.card', 'placement' => 'start'],
+            'save' => ['target' => 'contract.save', 'placement' => 'top'],
+        ],
+    ],
+
+    'contract-details' => [
+        'routes' => ['contracts.show'],
+        'steps' => [
+            'document' => ['target' => 'contract-details.document', 'placement' => 'top'],
+            'pager' => ['target' => 'contract-details.pager', 'placement' => 'top'],
+            'edit' => ['target' => 'contract-details.edit', 'placement' => 'bottom'],
+            'renew' => ['target' => 'contract-details.renew', 'placement' => 'bottom'],
+            'export' => ['target' => 'contract-details.export', 'placement' => 'bottom'],
+        ],
+    ],
+
     'leaves' => [
         'routes' => ['leaves.index'],
         'steps' => [

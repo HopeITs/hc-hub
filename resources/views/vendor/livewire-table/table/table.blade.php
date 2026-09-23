@@ -15,7 +15,7 @@
             </th>
         @endforeach
     </tr>
-    <tr class="group">
+    <tr class="group" data-tour="table.column-search">
         @if($this->canSelect())
             <th class="p-0 text-left text-black bg-neutral-50 dark:text-white dark:bg-neutral-800"></th>
         @endif
@@ -40,7 +40,7 @@
         </tr>
     @else
         @forelse($paginator->items() as $item)
-            <tr class="group"
+            <tr class="group" data-tour="table.row"
                 x-data="{ item: '{{ $item->getKey() }}' }"
                 wire:key="row-{{ $item->getKey() }}"
 

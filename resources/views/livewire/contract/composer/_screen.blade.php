@@ -151,7 +151,7 @@
             ])
         </div>
 
-        <aside class="hidden lg:block">
+        <aside class="hidden lg:block" data-tour="contract.card">
             @include('livewire.contract.composer._contract-card')
         </aside>
     </div>

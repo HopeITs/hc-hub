@@ -5,6 +5,7 @@
     compressed version of the contract card with it.
 --}}
 <div
+    data-tour="contract.save"
     class="rounded-surface border border-neutral-200 bg-white shadow-e1 lg:mt-auto
            max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-20 max-lg:rounded-b-none
            max-lg:border-x-0 max-lg:border-b-0 max-lg:shadow-e3"

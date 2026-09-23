@@ -10,8 +10,8 @@
         ]" :showButton="true" />
         @activerole('HR', 'super-admin')
         <div class="flex items-center gap-2">
-            <x-excel-export-button wire:click="$dispatchTo('employee.employee-table', 'exportExcel')" />
-            <x-primary-button :href="route('employees.create')">
+            <x-excel-export-button data-tour="list.export" wire:click="$dispatchTo('employee.employee-table', 'exportExcel')" />
+            <x-primary-button data-tour="list.add" :href="route('employees.create')">
                 @lang('general.add-new')
             </x-primary-button>
 

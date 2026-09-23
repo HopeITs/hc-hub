@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Employee\EmployeeTable;
 use App\Livewire\Position\OrgChart;
 use App\Livewire\Statistics\ContractStatistics;
 use App\Livewire\Statistics\GeneralStatistics;
@@ -9,6 +10,7 @@ use App\Models\User;
 use App\Support\ProductTour;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
@@ -100,6 +102,28 @@ class ProductTourTest extends TestCase
         Livewire::test(ContractStatistics::class)
             ->assertSeeHtml('data-tour="contract-stats.filters"')
             ->assertSeeHtml('data-tour="contract-stats.reset"');
+    }
+
+    public function test_tables_expose_the_shared_tour_targets(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        // Every LivewireTable renders the published vendor views, so one table
+        // stands in for all of them.
+        Livewire::test(EmployeeTable::class)
+            ->assertSeeHtml('data-tour="table.search"')
+            ->assertSeeHtml('data-tour="table.column-search"')
+            ->assertSeeHtml('data-tour="table.columns"')
+            ->assertSeeHtml('data-tour="table.per-page"');
+    }
+
+    public function test_the_contract_composer_sections_are_tour_targets(): void
+    {
+        $html = Blade::render(
+            '<div x-data><x-contract.section name="pay" index="3" title="Pay" summary="x">body</x-contract.section></div>',
+        );
+
+        $this->assertStringContainsString('data-tour="contract.pay"', $html);
     }
 
     public function test_the_dashboard_renders_the_tour_and_its_targets(): void

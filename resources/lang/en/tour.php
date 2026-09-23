@@ -205,6 +205,187 @@ return [
         ],
     ],
 
+    'employees' => [
+        'add' => [
+            'title' => 'Add an employee',
+            'body' => 'Open a blank employee file. After saving it you can reserve a position; the full contract is written on the Contracts page.',
+        ],
+        'export' => [
+            'title' => 'Export to Excel',
+            'body' => 'Download the list as a spreadsheet. It uses the columns currently shown and the current search.',
+        ],
+        'search' => [
+            'title' => 'Search by name',
+            'body' => 'Type part of a name to narrow the list. To search other details, use the boxes under each column.',
+        ],
+        'column-search' => [
+            'title' => 'Search one column',
+            'body' => 'Each box under a column heading filters that column only. Combine several to narrow further.',
+        ],
+        'row' => [
+            'title' => 'An employee',
+            'body' => 'Click a row to edit the employee. The buttons at the far end of the row (scroll the table sideways to reach them) activate or deactivate them, open their profile, edit, or delete.',
+        ],
+        'columns' => [
+            'title' => 'Choose columns',
+            'body' => 'Show or hide columns. The Excel export follows the same choice.',
+        ],
+        'per-page' => [
+            'title' => 'Rows per page',
+            'body' => 'How many employees to show on each page.',
+        ],
+    ],
+
+    'employee-form' => [
+        'tabs' => [
+            'title' => 'The employee file',
+            'body' => 'The file is split into sections: information, contact, education, courses, experience, relatives, checklist, attachments and items. For a new employee they unlock once the information is saved.',
+        ],
+        'draft' => [
+            'title' => 'Reserve a position',
+            'body' => 'Optionally hold a position for this employee now and finish their contract later, or skip this step.',
+        ],
+        'photo' => [
+            'title' => 'Photo',
+            'body' => 'Upload a photo for the profile and ID card.',
+        ],
+        'save' => [
+            'title' => 'Save',
+            'body' => 'Fields marked with a red star are required. When editing, the button becomes active once something has changed.',
+        ],
+        'back' => [
+            'title' => 'Back to the list',
+            'body' => 'Saving keeps you on this page, so use this button to return to the employees list.',
+        ],
+    ],
+
+    'employee-profile' => [
+        'header' => [
+            'title' => 'The profile',
+            'body' => 'Name, status, and the current department, program and city.',
+        ],
+        'actions' => [
+            'title' => 'Quick actions',
+            'body' => 'Edit the file, or write and call using the work email and phone.',
+        ],
+        'summary' => [
+            'title' => 'At a glance',
+            'body' => 'Years of service, department, center, and whether there is an active contract.',
+        ],
+        'overview' => [
+            'title' => 'Employment overview',
+            'body' => 'Position, job level, direct and technical managers, program and city.',
+        ],
+        'career' => [
+            'title' => 'Career history',
+            'body' => 'Every contract, newest first, with its type, period and status.',
+        ],
+        'private' => [
+            'title' => 'Private information',
+            'body' => 'Sections outlined in red are private. Only people with permission to see them can.',
+        ],
+    ],
+
+    'default-deliverables' => [
+        'intro' => [
+            'title' => 'Default deliverers',
+            'body' => 'Choose who hands over each item in each city. When a new employee joins, their checklist is filled in with these people automatically.',
+        ],
+        'add' => [
+            'title' => 'Add a deliverer',
+            'body' => 'Pick the employee, the city and the item they are responsible for.',
+        ],
+        'export' => [
+            'title' => 'Export to Excel',
+            'body' => 'Download the list as a spreadsheet.',
+        ],
+        'search' => [
+            'title' => 'Search',
+            'body' => 'Find a deliverer by employee, city or item.',
+        ],
+        'row' => [
+            'title' => 'One assignment',
+            'body' => 'Use the buttons at the end of the row to edit or delete it.',
+        ],
+    ],
+
+    'contracts' => [
+        'add' => [
+            'title' => 'New contract',
+            'body' => 'Open the contract form to assign an employee to a position.',
+        ],
+        'export' => [
+            'title' => 'Export to Excel',
+            'body' => 'Download the list as a spreadsheet, using the columns currently shown.',
+        ],
+        'search' => [
+            'title' => 'Search everything',
+            'body' => 'Type an employee, position or contract type to narrow the list.',
+        ],
+        'column-search' => [
+            'title' => 'Search one column',
+            'body' => 'Filter by a single column, such as status, auto-renew or pay type.',
+        ],
+        'row' => [
+            'title' => 'A contract',
+            'body' => 'Click a row to edit it. The buttons at the far end of the row (scroll the table sideways to reach them) switch auto-renew, view, edit, renew, download the PDF, or delete.',
+        ],
+        'columns' => [
+            'title' => 'Choose columns',
+            'body' => 'The table is wide: hide the columns you do not need. The employee and position stay pinned while you scroll sideways.',
+        ],
+    ],
+
+    'contract-form' => [
+        'assignment' => [
+            'title' => 'Assignment & contract',
+            'body' => 'Choose the employee, city, program and position, then the contract type and its dates. The number of free seats in the position is shown as you go.',
+        ],
+        'schedule' => [
+            'title' => 'Schedule',
+            'body' => 'Set fixed working days and hours, with an optional second shift, or mark the schedule as flexible.',
+        ],
+        'pay' => [
+            'title' => 'Pay',
+            'body' => 'Enter a fixed salary, or a tiered amount that depends on conditions such as hours taught.',
+        ],
+        'termination' => [
+            'title' => 'Termination',
+            'body' => 'Optional. Recording a termination date or reason deactivates the contract.',
+        ],
+        'card' => [
+            'title' => 'The contract so far',
+            'body' => 'A live summary that fills in as you complete each section.',
+        ],
+        'save' => [
+            'title' => 'Save',
+            'body' => 'The bars show which required sections are complete. Saving becomes possible once they all are.',
+        ],
+    ],
+
+    'contract-details' => [
+        'document' => [
+            'title' => 'The contract',
+            'body' => 'The contract exactly as it will be printed.',
+        ],
+        'pager' => [
+            'title' => 'Pages',
+            'body' => 'Move between the pages of the contract.',
+        ],
+        'edit' => [
+            'title' => 'Edit',
+            'body' => 'Change any part of the contract, or record a termination.',
+        ],
+        'renew' => [
+            'title' => 'Renew',
+            'body' => 'Create the next contract for a new period, either identical to this one or with changes.',
+        ],
+        'export' => [
+            'title' => 'Download PDF',
+            'body' => 'Download the contract as a PDF, ready to print and sign.',
+        ],
+    ],
+
     'leaves' => [
         'balances' => [
             'title' => 'Your balances',

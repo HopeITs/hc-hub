@@ -53,14 +53,20 @@ function findTarget(target) {
 
 // The element's box cut down by every ancestor that clips its overflow, so a
 // card panned out of the org chart canvas reads as off-screen. Ancestors that
-// scroll (auto/scroll) are left alone: scrollIntoView can bring those into view.
-function clippedRect(el) {
+// scroll (auto/scroll) only count when `includeScrollers` is set: deciding
+// whether a step exists must ignore them (scrollIntoView can bring the target
+// into view), but the spotlight should stop at a scroller's edge, e.g. a
+// table row wider than its sideways-scrolling table.
+function clippedRect(el, includeScrollers = false) {
+    const clips = (overflow) => overflow === 'hidden' || overflow === 'clip'
+        || (includeScrollers && (overflow === 'auto' || overflow === 'scroll'));
+
     let { left, top, right, bottom } = el.getBoundingClientRect();
 
     for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
         const style = window.getComputedStyle(node);
-        const clipsX = style.overflowX === 'hidden' || style.overflowX === 'clip';
-        const clipsY = style.overflowY === 'hidden' || style.overflowY === 'clip';
+        const clipsX = clips(style.overflowX);
+        const clipsY = clips(style.overflowY);
         if (!clipsX && !clipsY) continue;
 
         const box = node.getBoundingClientRect();
@@ -332,7 +338,7 @@ document.addEventListener('alpine:init', () => {
             const el = findTarget(this.step?.target);
 
             if (el && isVisible(el)) {
-                const r = clippedRect(el);
+                const r = clippedRect(el, true);
                 this.rect = {
                     x: r.left - PAD,
                     y: r.top - PAD,

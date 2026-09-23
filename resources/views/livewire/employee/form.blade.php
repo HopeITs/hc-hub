@@ -15,7 +15,7 @@
             so this button is the single way back to the employees table.
         --}}
         <div class="flex justify-end mb-4">
-            <x-secondary-button :href="route('employees.index')" wire:navigate class="!w-auto">
+            <x-secondary-button :href="route('employees.index')" wire:navigate class="!w-auto" data-tour="employee.back">
                 @lang('general.back_to_employees')
             </x-secondary-button>
         </div>
@@ -29,7 +29,7 @@
     <x-forms.errors-validation-list />
 
     <x-tab.form activeTab="information">
-        <x-tab.list>
+        <x-tab.list data-tour="employee.tabs">
             <x-tab.item :title="__('general.information')" activeTab="information" :active="$activeTab === 'information'">
                 <x-icons.user />
             </x-tab.item>

@@ -1,7 +1,7 @@
 @php($columns = $this->resolveColumns())
 
 @if($columns->isNotEmpty())
-    <x-livewire-table::dropdown label="{{ __('Columns') }}">
+    <x-livewire-table::dropdown label="{{ __('Columns') }}" data-tour="table.columns">
         <x-slot name="icon">
             <!-- Icon "view-columns" (outline) from https://heroicons.com -->
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
