@@ -43,6 +43,8 @@ class BadgesModule extends Component
 
         Gate::authorize('view', $b);
 
+        $canSeeSalary = auth()->user()?->canViewSalary() ?? false;
+
         $this->badge = [
             'id' => $b->id,
             'employee' => $b->employee?->name,
@@ -56,8 +58,11 @@ class BadgesModule extends Component
             'leave_unit' => $this->leaveUnitLabel($b->leave_unit),
             'leave_amount_label' => $this->leaveAmountLabel($b->leave_unit),
             'currency' => $this->currencyLabel($b->currency),
-            'current_salary' => $b->current_salary,
-            'new_salary' => $b->new_salary,
+            // Withheld from roles barred from pay figures - a salary-increase
+            // badge spells out the contract's salary before and after.
+            // @see \App\Models\User::canViewSalary()
+            'current_salary' => $canSeeSalary ? $b->current_salary : null,
+            'new_salary' => $canSeeSalary ? $b->new_salary : null,
             'notes' => $b->notes,
             'program' => $b->employee?->latestActiveContract()?->position?->program?->name,
             'department' => $b->employee?->latestActiveContract()?->position?->department?->name,

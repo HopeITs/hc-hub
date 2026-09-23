@@ -4,6 +4,7 @@ namespace Tests\Feature\Security;
 
 use App\Livewire\ActivityLog\ActivityLogTable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
@@ -31,9 +32,7 @@ class ActivityLogRenderingTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider payloads
-     */
+    #[DataProvider('payloads')]
     public function test_markup_in_a_logged_value_is_escaped(string $payload): void
     {
         $rendered = $this->summarise(['first_name_en' => $payload]);

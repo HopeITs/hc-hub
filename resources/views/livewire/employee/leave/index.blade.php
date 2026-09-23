@@ -18,7 +18,7 @@ use App\Enums\LeaveRequestStatus;
         />
 
         <div>
-            <x-primary-button wire:click="create">
+            <x-primary-button wire:click="create" data-tour="leaves.request">
                 @lang('general.add-new')
             </x-primary-button>
         </div>
@@ -26,7 +26,7 @@ use App\Enums\LeaveRequestStatus;
     </div>
 
     @isset($availableLeaves)
-        <div class="grid
+        <div data-tour="leaves.balances" class="grid
             grid-cols-1
             sm:grid-cols-2
             lg:grid-cols-3
@@ -54,7 +54,7 @@ use App\Enums\LeaveRequestStatus;
 
     @endisset
 
-    <x-tabs-list>
+    <x-tabs-list data-tour="leaves.filters">
         <x-tabs-list-item
             :active="$statusFilter === 'all'" active-tab="all">
             {{ __('general.all') . ' ('. $counts['all'] ?? 0 }})
@@ -81,7 +81,7 @@ use App\Enums\LeaveRequestStatus;
     </x-tabs-list>
 
     {{-- Table --}}
-    <div class="mt-4">
+    <div class="mt-4" data-tour="leaves.table">
         <livewire:employee.leave.my-leave-request-table :statusFilter="$statusFilter" key="table-{{ $statusFilter }}"/>
     </div>
 

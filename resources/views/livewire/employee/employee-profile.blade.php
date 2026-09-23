@@ -10,12 +10,11 @@
     $positionName = $currentPosition?->title ?? $notSpecified;
     $workEmail = $employee->account?->email;
     $directManagerName = $directManager?->name;
-    $techManagerName = $techManager?->name;
 @endphp
 
 <div class="min-h-screen bg-neutral-50 px-3 py-3 text-secondary-dark sm:px-6 sm:py-4 lg:px-8">
     <div class="mx-auto max-w-7xl space-y-3 sm:space-y-4">
-        <section
+        <section data-tour="profile.header"
             class="relative overflow-hidden rounded-surface border border-neutral-200 bg-white shadow-e1 sm:rounded-surface">
             <div class="absolute inset-x-0 top-0 h-1 bg-primary sm:h-1.5"></div>
 
@@ -62,7 +61,7 @@
                         @endif
                     </div>
 
-                    <div class="mt-4 flex min-w-0 flex-row flex-wrap gap-2 sm:gap-3">
+                    <div class="mt-4 flex min-w-0 flex-row flex-wrap gap-2 sm:gap-3" data-tour="profile.actions">
                         @if ($canEdit)
                             <a href="{{ route('employees.edit', $employee) }}" title="{{ __('general.edit') }}"
                                 class="inline-flex h-9 w-9 max-w-full items-center justify-center gap-2 rounded-surface bg-primary p-0 text-body font-bold text-white shadow-e1 transition hover:brightness-90 min-[701px]:h-auto min-[701px]:w-auto min-[701px]:rounded-surface min-[701px]:px-3 min-[701px]:py-2 min-[900px]:px-4 min-[900px]:py-2">
@@ -87,7 +86,7 @@
             </div>
         </section>
 
-        <section class="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+        <section data-tour="profile.summary" class="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
             @foreach ([[__('general.years-of-service'), $employee->years_of_service_formatted, 'icons.clock'], [trans_choice('general.department', 1), $currentPosition?->department?->name ?? $notSpecified, 'icons.homepage'], [trans_choice('general.center', 1), $currentPosition?->center?->name ?? $notSpecified, 'icons.map-pin'], [__('general.contract-status'), $currentContract ? __('general.active') : __('general.inactive'), 'icons.contracts']] as [$label, $value, $icon])
                 <div class="rounded-surface border border-neutral-200 bg-white p-3 shadow-e1 sm:rounded-surface sm:p-4">
                     <div
@@ -104,9 +103,9 @@
 
         <div class="grid gap-4 xl:grid-cols-3">
             <main class="space-y-4 xl:col-span-2">
-                <x-profile-section :title="__('general.employment-overview')" :subtitle="__('general.professional-information')" icon="icons.user">
+                <x-profile-section data-tour="profile.overview" :title="__('general.employment-overview')" :subtitle="__('general.professional-information')" icon="icons.user">
                     <dl class="grid gap-4 sm:grid-cols-2">
-                        @foreach ([[__('general.position'), $positionName], [trans_choice('general.job-level', 1), $currentPosition?->jobLevel?->name ?? $notSpecified], [__('general.direct-manager'), $directManagerName ?? $notSpecified], [__('general.tech-manager'), $techManagerName ?? $notSpecified], [trans_choice('general.program', 1), $currentPosition?->program?->name ?? $notSpecified], [trans_choice('general.city', 1), $currentPosition?->city?->name ?? $notSpecified]] as [$label, $value])
+                        @foreach ([[__('general.position'), $positionName], [trans_choice('general.job-level', 1), $currentPosition?->jobLevel?->name ?? $notSpecified], [__('general.direct-manager'), $directManagerName ?? $notSpecified], [trans_choice('general.program', 1), $currentPosition?->program?->name ?? $notSpecified], [trans_choice('general.city', 1), $currentPosition?->city?->name ?? $notSpecified]] as [$label, $value])
                             <div class="rounded-surface bg-neutral-50 p-4">
                                 <dt class="text-small font-semibold text-secondary-light">{{ $label }}</dt>
                                 <dd class="mt-1 text-body font-bold text-secondary-dark">{{ $value }}</dd>
@@ -115,7 +114,7 @@
                     </dl>
                 </x-profile-section>
 
-                <x-profile-section :title="__('general.career-history')" :subtitle="__('general.contract-details')" icon="icons.contracts">
+                <x-profile-section data-tour="profile.career" :title="__('general.career-history')" :subtitle="__('general.contract-details')" icon="icons.contracts">
                     <div class="space-y-4">
                         @forelse($contracts as $contract)
                             <article class="relative rounded-surface border border-neutral-200 p-4 ps-6">
@@ -199,7 +198,7 @@
                 </div>
 
                 @if ($canViewPrivate)
-                    <x-profile-section :title="__('general.personal-information')" :subtitle="__('general.private-information')" icon="icons.contact" private>
+                    <x-profile-section data-tour="profile.private" :title="__('general.personal-information')" :subtitle="__('general.private-information')" icon="icons.contact" private>
                         <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             @foreach ([[__('general.national-id'), $employee->national_number ?? $notSpecified], [__('general.birthday'), $formatDate($employee->actual_dob)], [__('general.birth-place'), $employee->{'pob_' . app()->getLocale()} ?? $notSpecified], [__('general.nationality'), $employee->nationality !== null ? \App\Enums\Nationality::getLocalizedName((int) $employee->nationality) : $notSpecified], [__('general.marital-status'), $employee->marital_status !== null ? \App\Enums\MaritalStatus::getLocalizedName((int) $employee->marital_status)['value'] : $notSpecified], [__('general.children'), $employee->children ?? 0], [__('general.civil-registry-office'), $employee->civil_registry_office ?? $notSpecified], [__('general.civil-registry-number'), $employee->civil_registry_number ?? $notSpecified], [__('general.address'), $employee->address ?? $notSpecified]] as [$label, $value])
                                 <div class="rounded-surface bg-neutral-50 p-4">

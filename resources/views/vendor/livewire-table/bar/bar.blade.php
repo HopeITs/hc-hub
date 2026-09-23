@@ -13,7 +13,7 @@
             @include('livewire-table::bar.dropdowns.filters')
             @include('livewire-table::bar.dropdowns.actions')
             @include('livewire-table::bar.dropdowns.trashed')
-            <div class="perpage-select-box w-24">
+            <div class="perpage-select-box w-24" data-tour="table.per-page">
                 <x-forms.select2-input wire:model.live="perPage" :hideSearch="true">
                     @foreach($perPageOptions as $perPage)
                         <option wire:key="{{ $perPage }}" value="{{ $perPage }}">{{ $perPage }}</option>

@@ -11,6 +11,7 @@ use App\Models\Program;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class OrgChart extends Component
@@ -82,7 +83,11 @@ class OrgChart extends Component
     /** Free-text search across employee name and position title. */
     public string $search = '';
 
-    /** Active structural reporting line: "direct" (solid) or "tech" (dashed). */
+    /**
+     * Active structural reporting line. Locked to "direct": the technical-manager
+     * line is retired from the UI, but the tree code still supports "tech".
+     */
+    #[Locked]
     public string $manager_type = 'direct';
 
     /**

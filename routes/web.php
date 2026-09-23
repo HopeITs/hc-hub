@@ -38,7 +38,7 @@ Route::post('/careers/{token}/applications', [PublicCareerController::class, 'st
     ->middleware('throttle:careers-submit')
     ->name('careers.submit');
 
-Route::get('/ID/{token}', ShowDigitalId::class)
+Route::get('/ID/{username}', ShowDigitalId::class)
     ->where('token', '[A-Za-z0-9]{64}')
     ->middleware('throttle:30,1')
     ->name('digital-id.show');

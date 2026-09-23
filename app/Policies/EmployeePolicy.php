@@ -13,6 +13,18 @@ class EmployeePolicy
             || ($user->hasActivePermission('employees.view') && $this->isInActiveCity($user, $employee));
     }
 
+    /**
+     * The photo itself is not sensitive like the rest of an employee record —
+     * every signed-in user may see every colleague's face. Only the HR-city
+     * boundary still applies (an HR-ALP user still can't pull a Homs photo);
+     * roles with no city scope (employee, manager, general-manager, ...) see
+     * everyone.
+     */
+    public function viewAvatar(User $user, Employee $employee): bool
+    {
+        return $this->isSelf($user, $employee) || $this->isInActiveCity($user, $employee);
+    }
+
     public function create(User $user, int $cityId): bool
     {
         return $user->hasActivePermission('employees.create')

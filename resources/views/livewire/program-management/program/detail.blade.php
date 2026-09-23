@@ -88,7 +88,7 @@
                     <div>
                         <p class="text-body font-semibold text-neutral-500">@lang('general.total-employees')</p>
                         <p class="text-h3 font-bold text-secondary-dark">
-                            {{ $employees->count() }}
+                            {{ $employees->total() }}
                         </p>
                     </div>
 
@@ -223,6 +223,10 @@
                             </div>
                         @endforeach
 
+                    </div>
+
+                    <div class="mt-6">
+                        {{ $employees->onEachSide(1)->links() }}
                     </div>
 
                 @else

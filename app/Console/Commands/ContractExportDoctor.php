@@ -13,18 +13,18 @@ use Throwable;
 /**
  * Reports what the host actually does when asked to render a contract PDF.
  *
- * Browsershot hides raw stdout, stderr and the exit code whenever node exits 0,
- * so a render that "works" while producing nothing leaves no evidence behind.
- * This command runs the very same node command itself, with all three captured,
- * after checking each thing the render depends on.
+ * Browsershot keeps raw stdout, stderr and the exit code to itself whenever the
+ * node process exits 0 — which is the case that fails silently — so this command
+ * runs the very same node command itself with all three captured, after checking
+ * each thing the render depends on.
  */
 class ContractExportDoctor extends Command
 {
     protected $signature = 'contracts:export-doctor
                             {contract? : Render this contract instead of a trivial page}
-                            {--keep : Leave the temp profile directory in place}';
+                            {--keep : Save the rendered PDF to storage/app/export-doctor.pdf}';
 
-    protected $description = 'Diagnose contract PDF export on this host (node, Chrome, permissions, raw render output)';
+    protected $description = 'Diagnose contract PDF export on this host (Chrome, node, permissions, raw render output)';
 
     private bool $failed = false;
 
@@ -33,67 +33,48 @@ class ContractExportDoctor extends Command
         $this->section('PHP');
         $this->line('  version        '.PHP_VERSION.'  (sapi: '.PHP_SAPI.')');
         $this->line('  memory_limit   '.ini_get('memory_limit'));
-        $this->line('  max_exec_time  '.ini_get('max_execution_time'));
         $this->check('proc_open available', function_exists('proc_open'),
             'Symfony Process cannot spawn node without it — remove it from disable_functions.');
-        if ($disabled = trim((string) ini_get('disable_functions'))) {
-            $this->line('  disabled fns   '.Str::limit($disabled, 200));
-        }
         $this->warnIf(
             (bool) config('app.debug') && app()->environment('production'),
-            'APP_DEBUG is on in production: the export failure page is exposing your stack traces. Turn it off once this is fixed.',
+            'APP_DEBUG is on in production: a failed export is exposing your stack traces.',
         );
 
         $this->section('Configuration (config/browsershot.php)');
-        foreach (['chrome_path', 'node_binary', 'node_module_path', 'timeout', 'single_process', 'user_data_dir', 'tmp_dir'] as $key) {
+        foreach (['chrome_path', 'node_binary', 'timeout'] as $key) {
             $value = config("browsershot.$key");
-            $this->line(sprintf('  %-16s %s', $key, $value === null || $value === '' ? '(unset)' : var_export($value, true)));
+            $this->line(sprintf('  %-12s %s', $key, $value === null || $value === '' ? '(unset)' : var_export($value, true)));
         }
-        $this->line('  extra_args       '.(json_encode(config('browsershot.extra_args')) ?: '[]'));
 
         $this->section('Chrome');
         $chrome = (string) config('browsershot.chrome_path');
-        if ($this->check('chrome_path exists', $chrome !== '' && is_file($chrome), "Not a file: {$chrome}. Set BROWSERSHOT_CHROME_PATH to the Chrome/Chromium binary on this host.")) {
-            $this->check('chrome_path executable', is_executable($chrome), "chmod +x {$chrome}, or the web user cannot run it.");
-            $this->probe([$chrome, '--version'], 'chrome --version');
+        if ($this->check('chrome_path exists', $chrome !== '' && is_file($chrome), 'Not a file: '.$chrome.'. On Linux this is usually /usr/bin/chromium — install it with the package manager rather than unpacking one by hand.')) {
+            $this->check('chrome_path executable', is_executable($chrome), 'chmod +x '.$chrome.', or the web user cannot run it.');
+            $this->probe([$chrome, '--version'], 'chrome --version', timeout: 15);
+            $this->launchesAlone($chrome, $renderer);
         }
 
         $this->section('Node');
         $node = (string) (config('browsershot.node_binary') ?: 'node');
         $this->probe([$node, '--version'], 'node --version');
         $browserCjs = base_path('vendor/spatie/browsershot/bin/browser.cjs');
-        $this->check('browser.cjs present', is_file($browserCjs), "Missing {$browserCjs} — run composer install on this host.");
+        $this->check('browser.cjs present', is_file($browserCjs), 'Missing '.$browserCjs.' — run composer install on this host.');
 
         // browser.cjs does require('puppeteer'), resolved from its own directory
-        // upwards plus NODE_PATH. Asking node the same question from the same
-        // place is the only answer that means anything.
+        // upwards. Asking node the same question from the same place is the only
+        // answer that means anything.
         $resolve = $this->probe(
             [$node, '-e', "console.log(require.resolve('puppeteer'))"],
             "node require.resolve('puppeteer')",
             cwd: dirname($browserCjs),
-            env: array_filter(['NODE_PATH' => config('browsershot.node_module_path')]),
         );
         $this->check('puppeteer resolvable from browser.cjs', $resolve['ok'],
-            'browser.cjs cannot require puppeteer. Run `npm install --omit=dev` on the server, or set '
-            .'BROWSERSHOT_NODE_MODULE_PATH to the node_modules directory that has it.');
+            'Run `npm install --omit=dev` on the server.');
 
         $this->section('Writable directories');
-        $profileBase = $renderer->profileBaseDir();
-        $this->writable('profile base (BROWSERSHOT_USER_DATA_DIR)', $profileBase);
-
-        try {
-            $socketDir = $renderer->makeSocketDir();
-            $this->writable('socket dir (BROWSERSHOT_TMP_DIR)', $socketDir);
-            // Chrome's process-singleton socket is a unix socket: TMPDIR plus the
-            // ~45 characters Chrome appends must stay inside sun_path (~108).
-            $this->check(
-                'socket dir short enough ('.strlen($socketDir).' chars)',
-                strlen($socketDir) <= 60,
-                'Chrome will abort with "Socket path too long". Point BROWSERSHOT_TMP_DIR at something short, e.g. /tmp/hc.',
-            );
-        } catch (Throwable $e) {
-            $this->check('socket dir creatable', false, $e->getMessage());
-        }
+        $workDir = $renderer->workDir();
+        $this->check('work dir writable ('.$workDir.')', is_dir($workDir) && is_writable($workDir),
+            'Chrome needs somewhere to put its config and the rendered file.');
 
         $this->section('Render');
 
@@ -101,8 +82,51 @@ class ContractExportDoctor extends Command
     }
 
     /**
-     * Run the exact node command the export would run, keeping every byte of it.
+     * Start Chrome with nothing between it and us.
+     *
+     * "Target closed" is only puppeteer reporting that the process went away;
+     * Chrome itself normally says why on its own stderr, and that message never
+     * reaches Browsershot.
      */
+    private function launchesAlone(string $chrome, ContractPdfRenderer $renderer): void
+    {
+        $profile = $renderer->workDir().'/probe-'.getmypid();
+        File::ensureDirectoryExists($profile, 0755, true);
+
+        try {
+            $result = $this->capture(array_merge([
+                $chrome,
+                '--headless=new',
+                '--no-sandbox',
+                '--no-first-run',
+                '--user-data-dir='.$profile,
+                '--enable-logging=stderr',
+                '--virtual-time-budget=2000',
+            ], array_map(
+                // The same switches the render uses, so the two agree.
+                fn (string $flag) => '--'.$flag,
+                $renderer->chromiumArguments(),
+            ), [
+                '--dump-dom',
+                'about:blank',
+            ]), env: [
+                'HOME' => $profile,
+                'CHROME_CONFIG_HOME' => $renderer->workDir().'/.config',
+            ], timeout: 60);
+        } finally {
+            File::deleteDirectory($profile);
+        }
+
+        $ok = str_contains($result['out'], '<body');
+
+        $this->check('chrome opens a page on its own', $ok,
+            'Chrome cannot start a browser on this host — puppeteer is not the problem. Its own output follows.');
+
+        if (! $ok) {
+            $this->dump($result['out']);
+        }
+    }
+
     private function attemptRender(ContractPdfRenderer $renderer): bool
     {
         $contract = null;
@@ -122,11 +146,10 @@ class ContractExportDoctor extends Command
         $this->line('  source         '.($contract ? 'contract #'.$contract->getKey() : 'trivial page')
             .' ('.number_format(strlen($html) / 1024, 1).' KB of HTML)');
 
-        $profile = $renderer->makeProfileDir();
-        $target = $profile.'/contract.pdf';
+        $target = $renderer->workDir().'/export-doctor.pdf';
 
         try {
-            $browsershot = $renderer->browsershot($html, $profile);
+            $browsershot = $renderer->browsershot($html);
             $command = $browsershot->nodeCommand($target);
 
             $process = is_array($command)
@@ -137,33 +160,28 @@ class ContractExportDoctor extends Command
 
             $started = microtime(true);
             $process->run();
-            $elapsed = round(microtime(true) - $started, 1);
 
             $stdout = $process->getOutput();
             $stderr = $process->getErrorOutput();
             $pdf = is_file($target) ? (string) file_get_contents($target) : '';
 
-            $this->line('  exit code      '.var_export($process->getExitCode(), true).'  ('.$elapsed.'s)');
+            $this->line('  exit code      '.var_export($process->getExitCode(), true)
+                .'  ('.round(microtime(true) - $started, 1).'s)');
             $this->line('  stdout         '.strlen($stdout).' bytes'.($stdout === '' ? '' : ': '.$this->snippet($stdout)));
-            $this->line('  stderr         '.strlen($stderr).' bytes'.($stderr === '' ? '' : ': '.$this->snippet($stderr)));
+            $this->line('  stderr         '.strlen($stderr).' bytes');
             $this->line('  pdf file       '.strlen($pdf).' bytes');
 
-            // Non-JSON on stdout is exactly what makes pdf() hand back an empty
-            // string while reporting success — worth naming even though the
-            // export no longer routes the document through it.
-            if ($stdout !== '' && json_decode(rtrim($stdout), true) === null) {
-                $this->warnIf(true, 'stdout is not valid JSON. Something on this host writes to node\'s stdout; '
-                    .'that is what broke the old base64 transport.');
+            $ok = str_starts_with($pdf, '%PDF-');
+            $this->check('PDF produced', $ok, 'Chrome did not write a usable PDF. Its full output follows.');
+
+            if (! $ok) {
+                // Printed whole: the line that explains a failed launch is
+                // routinely the last one, and a snippet always cuts it off.
+                $this->dump($stderr);
             }
 
-            $ok = str_starts_with($pdf, '%PDF-');
-            $this->check('PDF produced', $ok, 'Chrome did not write a usable PDF — the stderr above is the reason.');
-
             if ($ok && $this->option('keep')) {
-                $kept = storage_path('app/export-doctor.pdf');
-                File::ensureDirectoryExists(dirname($kept));
-                File::copy($target, $kept);
-                $this->line('  saved          '.$kept);
+                $this->line('  saved          '.$target);
             }
 
             return $ok && ! $this->failed;
@@ -172,10 +190,8 @@ class ContractExportDoctor extends Command
 
             return false;
         } finally {
-            if (! $this->option('keep')) {
-                File::deleteDirectory($profile);
-            } else {
-                $this->line('  profile kept   '.$profile);
+            if (! ($this->option('keep') && is_file($target))) {
+                File::delete($target);
             }
         }
     }
@@ -185,32 +201,58 @@ class ContractExportDoctor extends Command
      * @param  array<string, string>  $env
      * @return array{ok: bool, out: string}
      */
-    private function probe(array $command, string $label, ?string $cwd = null, array $env = []): array
+    private function probe(array $command, string $label, ?string $cwd = null, array $env = [], int $timeout = 30): array
+    {
+        $result = $this->capture($command, $cwd, $env, $timeout);
+
+        $this->line(sprintf(
+            '  %s %s %s',
+            $result['ok'] ? '<fg=green>OK  </>' : '<fg=red>FAIL</>',
+            $label,
+            $this->snippet($result['out']),
+        ));
+
+        return $result;
+    }
+
+    /**
+     * @param  array<int, string>  $command
+     * @param  array<string, string>  $env
+     * @return array{ok: bool, out: string}
+     */
+    private function capture(array $command, ?string $cwd = null, array $env = [], int $timeout = 30): array
     {
         try {
             $process = new Process($command, $cwd, $env === [] ? null : $env);
-            $process->setTimeout(30);
-            $process->run();
-
-            $out = trim($process->getOutput().' '.$process->getErrorOutput());
-            $ok = $process->isSuccessful();
-
-            $this->line(sprintf('  %s %s %s', $ok ? '<fg=green>OK  </>' : '<fg=red>FAIL</>', $label, $this->snippet($out)));
-
-            return ['ok' => $ok, 'out' => $out];
         } catch (Throwable $e) {
-            $this->line(sprintf('  <fg=red>FAIL</> %s %s', $label, $e->getMessage()));
-
-            return ['ok' => false, 'out' => ''];
+            return ['ok' => false, 'out' => $e->getMessage()];
         }
+
+        $process->setTimeout($timeout);
+        $thrown = null;
+
+        try {
+            $process->run();
+        } catch (Throwable $e) {
+            // A process killed by a signal — Chrome aborting is signal 6 — makes
+            // run() throw, and everything it printed before dying is still on the
+            // process object. Reading it anyway is the whole point of this command.
+            $thrown = $e;
+        }
+
+        $out = trim($process->getOutput()."\n".$process->getErrorOutput());
+
+        return [
+            'ok' => $thrown === null && $process->isSuccessful(),
+            'out' => $thrown ? trim($thrown->getMessage()."\n".$out) : $out,
+        ];
     }
 
-    private function writable(string $label, string $dir): void
+    private function dump(string $output): void
     {
-        File::ensureDirectoryExists($dir, 0755, true);
-
-        $this->check($label.' writable ('.$dir.')', is_dir($dir) && is_writable($dir),
-            "The web user cannot write to {$dir}. Chrome dies at startup without a writable profile.");
+        foreach (explode("\n", trim($output)) as $line) {
+            $this->line('       <fg=gray>'.addcslashes($line, "\0..\10\13..\37").'</>');
+        }
     }
 
     private function check(string $label, bool $ok, string $remedy = ''): bool
@@ -235,9 +277,9 @@ class ContractExportDoctor extends Command
         }
     }
 
-    private function snippet(string $value): string
+    private function snippet(string $value, int $limit = 300): string
     {
-        return Str::limit(addcslashes(trim(substr($value, 0, 400)), "\0..\37"), 300);
+        return Str::limit(addcslashes(trim(substr($value, 0, $limit + 100)), "\0..\37"), $limit);
     }
 
     private function section(string $title): void

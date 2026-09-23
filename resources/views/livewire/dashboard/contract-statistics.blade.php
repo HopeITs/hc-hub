@@ -10,7 +10,7 @@
         </h1>
 
 
-        <div class="filter-select-box grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-end">
+        <div data-tour="contract-stats.filters" class="filter-select-box grid gap-8 sm:grid-cols-2 lg:grid-cols-3 items-end">
 
         <div class="flex flex-col gap-2">
             <label class="text-small font-semibold text-secondary-dark uppercase tracking-wide">
@@ -44,7 +44,7 @@
            rounded-surface bg-white hover:shadow-e1 cursor-pointer transition w-full sm:w-auto
            flex items-center justify-center"> --}}
 
-              <button wire:click="resetFilters"
+              <button wire:click="resetFilters" data-tour="contract-stats.reset"
                         class="px-4 h-[38px] text-body text-secondary-dark font-semibold border border-secondary-soft
            rounded-surface bg-white hover:shadow-e1 cursor-pointer transition w-full sm:w-auto
            flex items-center justify-center gap-2">
@@ -81,7 +81,7 @@
 
         @forelse ($cards as $card)
 
-            <article class="border border-secondary-soft rounded-surface bg-white
+            <article data-tour="contract-stats.card" class="border border-secondary-soft rounded-surface bg-white
                             shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] hover:shadow-e2 transition-all duration-200
                             hover:-translate-y-1 flex flex-col">
 
@@ -116,7 +116,7 @@
                 </div>
 
 
-                <div class="grid grid-cols-3 gap-3 p-4">
+                <div data-tour="contract-stats.breakdown" class="grid grid-cols-3 gap-3 p-4">
 
                     @foreach ([
                         'annual'  => __('general.annual'),
@@ -184,6 +184,7 @@
                                 : ($cardType === 'center'
                                     ? route('centers.show', $card['center_id'])
                                     : '#') }}"
+                       data-tour="contract-stats.show-more"
                        class="text-small flex justify-end  text-primary hover:underline">
                         @lang('general.show-more') →
                     </a>

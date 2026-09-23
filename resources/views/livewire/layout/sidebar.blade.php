@@ -2,7 +2,7 @@
     rtl: {{ app()->getLocale() === 'ar' ? 'true' : 'false' }},
     open: @entangle('open').live
 }" x-cloak>
-    <aside x-cloak @click.outside="open = false"
+    <aside x-cloak data-tour="nav" @click.outside="open = false"
         class="sidebar-material fixed top-0 z-40 h-full pt-4 border-e border-black/[0.06] shadow-e3 transition-[width,transform] duration-[400ms] ease-fluid md:translate-x-0"
         :class="[
             sidebarCollapsed ? 'md:w-20' : 'md:w-64',
@@ -43,7 +43,7 @@
                     </li>
 
                     {{-- 1. Employee Dashboard (Seen by all) --}}
-                    <x-layouts.app.sidebar.single-item :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('employee.dashboard')">
+                    <x-layouts.app.sidebar.single-item data-tour="nav.dashboard" :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('employee.dashboard')">
                         <x-slot name="icon">
                             <x-icons.dashboard class="size-4" />
                         </x-slot>
@@ -52,7 +52,7 @@
 
                     {{-- Statistics (HR + super-admin only - kept as per logic) --}}
                     @activepermission('statistics.view')
-                        <x-layouts.app.sidebar.dropdown-nav-list id="statistics" title="{{ __('general.statistics') }}"
+                        <x-layouts.app.sidebar.dropdown-nav-list data-tour="nav.statistics" id="statistics" title="{{ __('general.statistics') }}"
                             :active="request()->routeIs('statistics.general') ||
                                 request()->routeIs('statistics.contract')">
                             <x-slot name="icon">
@@ -72,7 +72,7 @@
                     @endactivepermission
 
                     @activepermission('positions.view')
-                        <x-layouts.app.sidebar.single-item :href="route('org.chart')" :active="request()->routeIs('org.chart')">
+                        <x-layouts.app.sidebar.single-item data-tour="nav.org-chart" :href="route('org.chart')" :active="request()->routeIs('org.chart')">
                             <x-slot name="icon">
                                 <x-icons.code-fork class="size-5" />
                             </x-slot>
@@ -116,7 +116,7 @@
                     {{-- 2. Project Basics --}}
 
                     @activepermission('project-basics.view')
-                    <x-layouts.app.sidebar.dropdown-nav-list id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('cities.*') ||
+                    <x-layouts.app.sidebar.dropdown-nav-list data-tour="nav.project-basics" id="basic-program" :title="__('general.project-basics')" :active="request()->routeIs('cities.*') ||
                         request()->routeIs('contract-types.*') ||
                         request()->routeIs('leave-types.*') ||
                         request()->routeIs('annual-leave-rules.*') ||
@@ -171,7 +171,7 @@
                     {{-- 3. Program Management --}}
                     {{-- Dropdown visible to HR & super-admin --}}
                     @if ($user->hasActivePermission('programs.view') || $user->hasActivePermission('positions.view'))
-                        <x-layouts.app.sidebar.dropdown-nav-list id="program-management" :title="__('general.programs-management')"
+                        <x-layouts.app.sidebar.dropdown-nav-list data-tour="nav.programs" id="program-management" :title="__('general.programs-management')"
                             :active="request()->routeIs('programs.*') ||
                                 request()->routeIs('positions.*') ||
                                 request()->routeIs('centers.*')">
@@ -203,7 +203,7 @@
 
                     {{-- Centers for everyone else (Single item) --}}
                     @if ($user->hasActivePermission('centers.view') && ! $user->hasActivePermission('programs.view') && ! $user->hasActivePermission('positions.view'))
-                        <x-layouts.app.sidebar.single-item :href="route('centers.index')" :active="request()->routeIs('centers.*')">
+                        <x-layouts.app.sidebar.single-item data-tour="nav.centers" :href="route('centers.index')" :active="request()->routeIs('centers.*')">
                             <x-slot name="icon">
                                 <x-icons.layers class="size-5" />
                             </x-slot>
@@ -213,7 +213,7 @@
 
                     {{-- 4. Employee Management (super-admin + HR) --}}
                     @if ($user->hasActivePermission('employees.view') || $user->hasActivePermission('contracts.view') || $user->hasActivePermission('checklists.manage'))
-                        <x-layouts.app.sidebar.dropdown-nav-list id="employees-management" :title="trans_choice('general.employee-management', 2)"
+                        <x-layouts.app.sidebar.dropdown-nav-list data-tour="nav.employees" id="employees-management" :title="trans_choice('general.employee-management', 2)"
                             :active="request()->routeIs('employees.*') ||
                                 request()->routeIs('contracts.*') ||
                                 request()->routeIs('default-deliverables.*')">
@@ -250,7 +250,7 @@
                     {{-- 5. Leave Management (Holidays and leaves) --}}
                     {{-- Visible to: HR, super-admin, AND Managers --}}
                     @if ($user->hasActivePermission('leaves.view-all') || $user->hasActivePermission('leaves.manage-balances'))
-                        <x-layouts.app.sidebar.dropdown-nav-list id="leaves-management"
+                        <x-layouts.app.sidebar.dropdown-nav-list data-tour="nav.leaves-management" id="leaves-management"
                             title="{{ __('general.leaves-management') }}" :active="request()->routeIs('leaves.all') || request()->routeIs('leaves.balance')">
                             <x-slot name="icon">
                                 <x-icons.calendar />
@@ -275,7 +275,7 @@
 
                     {{-- My Leaves: Single Item OUTSIDE for ALL --}}
                     @activepermission('leaves.view-own')
-                    <x-layouts.app.sidebar.single-item :href="route('leaves.index')" :active="request()->routeIs('leaves.index')">
+                    <x-layouts.app.sidebar.single-item data-tour="nav.my-leaves" :href="route('leaves.index')" :active="request()->routeIs('leaves.index')">
                         <x-slot name="icon">
                             <x-icons.my-leaves />
 
@@ -291,7 +291,7 @@
 
                     {{-- 6. Archived Files (All) --}}
                     @activepermission('archives.view')
-                    <x-layouts.app.sidebar.dropdown-nav-list id="archived-files" :title="__('general.archived-files')" :active="request()->routeIs('my-folders.*') || request()->routeIs('shared-folders.*')">
+                    <x-layouts.app.sidebar.dropdown-nav-list data-tour="nav.archives" id="archived-files" :title="__('general.archived-files')" :active="request()->routeIs('my-folders.*') || request()->routeIs('shared-folders.*')">
                         <x-slot name="icon">
                             <x-icons.archived />
                         </x-slot>
@@ -312,7 +312,7 @@
 
 
                     @if ($isDeliverResponsible && ($user->hasActivePermission('checklists.deliver') || $user->hasActivePermission('checklists.receive') || $user->hasActivePermission('checklists.manage')))
-                        <x-layouts.app.sidebar.dropdown-nav-list id="checklist-items" :title="__('general.checklist_items')"
+                        <x-layouts.app.sidebar.dropdown-nav-list data-tour="nav.checklists" id="checklist-items" :title="__('general.checklist_items')"
                             :active="request()->routeIs('checklist-items.*')">
                             <x-slot name="icon">
                                 <x-icons.clipboard-list class="size-4" />
@@ -348,7 +348,7 @@
 
                     {{-- 7. Checklist Items -> My items (All, Single) --}}
                     @activepermission('checklists.view-own')
-                    <x-layouts.app.sidebar.single-item :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
+                    <x-layouts.app.sidebar.single-item data-tour="nav.my-items" :href="route('checklist-items.index')" :active="request()->routeIs('checklist-items.index')">
                         <x-slot name="icon">
                             <x-icons.clipboard-list class="size-4" />
                         </x-slot>
@@ -365,7 +365,7 @@
 
                     {{-- 8. News Management (super-admin, Managers, HRs) --}}
                     @activepermission('news.view')
-                        <x-layouts.app.sidebar.single-item :href="route('news.index')" :active="request()->routeIs('news.*')">
+                        <x-layouts.app.sidebar.single-item data-tour="nav.news" :href="route('news.index')" :active="request()->routeIs('news.*')">
                             <x-slot name="icon">
                                 <x-icons.newspaper class="size-4" />
                             </x-slot>
@@ -375,7 +375,7 @@
 
 
                     @activepermission('badges.view')
-                        <x-layouts.app.sidebar.single-item :href="route('badges.index')" :active="request()->routeIs('badges.*')">
+                        <x-layouts.app.sidebar.single-item data-tour="nav.badges" :href="route('badges.index')" :active="request()->routeIs('badges.*')">
                             <x-slot name="icon" class="text-secondary-light">
                                 <x-icons.badges class="size-4" />
                             </x-slot>
@@ -384,7 +384,7 @@
                     @endactivepermission
 
                     @activepermission('activity-log.view')
-                        <x-layouts.app.sidebar.single-item :href="route('activity-log.index')" :active="request()->routeIs('activity-log.*')">
+                        <x-layouts.app.sidebar.single-item data-tour="nav.activity-log" :href="route('activity-log.index')" :active="request()->routeIs('activity-log.*')">
                             <x-slot name="icon">
                                 <x-icons.activity-log class="size-4" />
                             </x-slot>
@@ -393,7 +393,7 @@
                     @endactivepermission
 
                     @activepermission('access-management.view')
-                        <x-layouts.app.sidebar.single-item :href="route('access-management.index')" :active="request()->routeIs('access-management.*')">
+                        <x-layouts.app.sidebar.single-item data-tour="nav.access" :href="route('access-management.index')" :active="request()->routeIs('access-management.*')">
                             <x-slot name="icon">
                                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.1a7.5 7.5 0 0 1 15 0M18 8.25h3m-1.5-1.5v3"/>
