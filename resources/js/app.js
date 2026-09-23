@@ -86,14 +86,24 @@ document.addEventListener('DOMContentLoaded', () => initClockTimepickers());
 
 // Flowbite binds its behaviour on load, but Livewire replaces DOM afterwards,
 // so any swapped-in dropdown/modal/tooltip has to be re-initialised.
-Livewire.hook('commit', ({ succeed }) => {
-    succeed(() => {
-        queueMicrotask(() => {
-            initFlowbite();
-            initClockTimepickers();
+const registerLivewireHooks = () => {
+    if (!window.Livewire) return;
+
+    window.Livewire.hook('commit', ({ succeed }) => {
+        succeed(() => {
+            queueMicrotask(() => {
+                initFlowbite();
+                initClockTimepickers();
+            });
         });
     });
-});
+};
+
+if (window.Livewire) {
+    registerLivewireHooks();
+} else {
+    document.addEventListener('livewire:init', registerLivewireHooks, { once: true });
+}
 
 document.addEventListener('livewire:navigated', () => {
     initFlowbite();

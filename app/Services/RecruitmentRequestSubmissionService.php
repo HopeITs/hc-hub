@@ -6,7 +6,6 @@ use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestStatus as Status;
 use App\Enums\RecruitmentRequestType as Type;
 use App\Enums\RecruitmentScopeType;
-use App\Models\HiringCampaign;
 use App\Models\Position;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentRequestVersion;
@@ -35,6 +34,8 @@ class RecruitmentRequestSubmissionService
 
     public function __construct(
         private readonly RecruitmentScopeResolver $scopes,
+        private readonly RecruitmentRequestStateMachine $states,
+        private readonly RecruitmentRequestRevalidator $revalidator,
         private readonly RecruitmentWorkflowInstanceService $workflows,
     ) {}
 
@@ -48,6 +49,79 @@ class RecruitmentRequestSubmissionService
      * index on (request_id, version_no) is the last net under that.
      */
     public function submit(User $actor, RecruitmentRequest $request): RecruitmentRequest
+    {
+        $submitted = $this->submitWithin($actor, $request);
+
+        // Only now, with the request and its workflow committed, is there
+        // anything true to tell anybody. Sending from inside the transaction
+        // would mean a rollback leaving somebody holding a notice about a
+        // request that does not exist.
+        app(RecruitmentNotifier::class)->workflowStarted(
+            $submitted,
+            $submitted->workflowInstances()->latest('id')->first(),
+        );
+
+        return $submitted;
+    }
+
+    /** Cancel a request the requester still owns (T12 · T14 · T15). */
+    public function cancel(User $actor, RecruitmentRequest $request, ?string $reason = null): RecruitmentRequest
+    {
+        return DB::transaction(function () use ($actor, $request, $reason) {
+            $fresh = RecruitmentRequest::query()->whereKey($request->getKey())->lockForUpdate()->firstOrFail();
+
+            if ((int) $fresh->requester_user_id !== (int) $actor->getKey()) {
+                throw ValidationException::withMessages(['request' => __('recruitment.not_your_request')]);
+            }
+
+            // Cancelling twice is the same retry shape as submitting twice.
+            if ((int) $fresh->status === Status::Cancelled) {
+                return $fresh;
+            }
+
+            Gate::forUser($actor)->authorize('cancel', $fresh);
+
+            $from = (int) $fresh->status;
+            // T12 · T14 · T15 — the table decides which of the three applies.
+            $this->states->apply($fresh, 'cancel');
+
+            $this->record($fresh, $actor, [
+                'event_type' => RecruitmentEventType::RequestCancelled,
+                'from_status' => $from,
+                'to_status' => Status::Cancelled,
+                'comment' => $reason,
+            ]);
+
+            return $fresh;
+        });
+    }
+
+    /**
+     * Freeze the payload as version N+1 with its position details.
+     *
+     * Approvals attach to a version, so the version is what must not move. The
+     * details row carries the column names RV-1 compares field by field, which
+     * is why the draft's own field names are mapped here rather than stored
+     * loosely: a field that never lands in a column is a change that silently
+     * invalidates nothing.
+     */
+    public function freezeVersion(RecruitmentRequest $request, User $actor, array $payload): RecruitmentRequestVersion
+    {
+        $next = (int) $request->versions()->max('version_no') + 1;
+
+        $version = $request->versions()->create([
+            'version_no' => $next,
+            'snapshot_json' => $payload,
+            'created_by_user_id' => $actor->getKey(),
+            'submitted_at' => now(),
+        ]);
+
+        $version->positionDetail()->create($this->positionDetails($request, $payload));
+
+        return $version;
+    }
+
+    private function submitWithin(User $actor, RecruitmentRequest $request): RecruitmentRequest
     {
         return DB::transaction(function () use ($actor, $request) {
             $fresh = RecruitmentRequest::query()->whereKey($request->getKey())->lockForUpdate()->firstOrFail();
@@ -74,15 +148,14 @@ class RecruitmentRequestSubmissionService
             if ((int) $fresh->mode === \App\Enums\RecruitmentRequestMode::Normal) {
                 app(RecruitmentRequestDraftService::class)->assertCurrentScope($actor, $fresh);
             }
-            $this->assertTypeRules($fresh, $payload);
+            $this->revalidator->assert($fresh, $payload);
             $this->assertNoActiveDuplicate($fresh);
 
             $version = $this->freezeVersion($fresh, $actor, $payload);
 
-            $fresh->forceFill([
-                'status' => $wasDraft ? Status::Submitted : Status::Resubmitted,
-                'submitted_at' => now(),
-            ])->save();
+            // T3 and T11 go through the table like every other move.
+            $this->states->apply($fresh, $wasDraft ? 'submit' : 'resubmit');
+            $fresh->forceFill(['submitted_at' => now()])->save();
 
             $this->record($fresh, $actor, [
                 'event_type' => $wasDraft ? RecruitmentEventType::RequestSubmitted : RecruitmentEventType::VersionCreated,
@@ -95,43 +168,6 @@ class RecruitmentRequestSubmissionService
             // version before the transaction commits. This keeps submission,
             // versioning, status, and approvals atomic and retry-safe.
             $this->workflows->start($fresh->fresh(), $version);
-
-            return $fresh;
-        });
-    }
-
-    /** Cancel a request the requester still owns (T12 · T14 · T15). */
-    public function cancel(User $actor, RecruitmentRequest $request, ?string $reason = null): RecruitmentRequest
-    {
-        return DB::transaction(function () use ($actor, $request, $reason) {
-            $fresh = RecruitmentRequest::query()->whereKey($request->getKey())->lockForUpdate()->firstOrFail();
-
-            if ((int) $fresh->requester_user_id !== (int) $actor->getKey()) {
-                throw ValidationException::withMessages(['request' => __('recruitment.not_your_request')]);
-            }
-
-            // Cancelling twice is the same retry shape as submitting twice.
-            if ((int) $fresh->status === Status::Cancelled) {
-                return $fresh;
-            }
-
-            Gate::forUser($actor)->authorize('cancel', $fresh);
-
-            // Cancelling is the requester's alone, and only before the final
-            // approval — an approved request is applied, not withdrawn.
-            if (! in_array((int) $fresh->status, [Status::Draft, Status::ChangesRequested, Status::UnderReview], true)) {
-                throw ValidationException::withMessages(['request' => __('recruitment.cannot_cancel')]);
-            }
-
-            $from = (int) $fresh->status;
-            $fresh->forceFill(['status' => Status::Cancelled])->save();
-
-            $this->record($fresh, $actor, [
-                'event_type' => RecruitmentEventType::RequestCancelled,
-                'from_status' => $from,
-                'to_status' => Status::Cancelled,
-                'comment' => $reason,
-            ]);
 
             return $fresh;
         });
@@ -192,58 +228,6 @@ class RecruitmentRequestSubmissionService
     }
 
     /**
-     * The checks that read live data rather than the form.
-     *
-     * These are re-run before the final approval too (RV-2 to RV-5), because
-     * the world moves while a request is being reviewed.
-     */
-    private function assertTypeRules(RecruitmentRequest $request, array $payload): void
-    {
-        $type = (int) $request->request_type;
-
-        if ($type === Type::CreatePosition) {
-            return;
-        }
-
-        $position = $request->target_position_id === null ? null
-            : Position::query()->whereKey($request->target_position_id)->lockForUpdate()->first();
-
-        if ($position !== null && ! $position->is_active) {
-            throw ValidationException::withMessages(['data.position_id' => __('recruitment.position_inactive')]);
-        }
-
-        if ($type === Type::FillVacancy && $position !== null && (int) $position->exist_emp >= (int) $position->max_emp) {
-            throw ValidationException::withMessages(['data.position_id' => __('recruitment.no_headcount_room')]);
-        }
-
-        // The new establishment may not fall below the people already in it.
-        if ($type === Type::DecreaseHeadcount && $position !== null) {
-            $remaining = (int) $position->max_emp - (int) ($payload['reduce_by'] ?? 0);
-
-            if ($remaining < (int) $position->exist_emp) {
-                throw ValidationException::withMessages(['data.reduce_by' => __('recruitment.below_existing_employees')]);
-            }
-        }
-
-        if ($type === Type::ClosePosition && $position !== null && (int) $position->exist_emp > 0) {
-            throw ValidationException::withMessages(['data.position_id' => __('recruitment.position_has_contracts')]);
-        }
-
-        // D40: an open campaign is people mid-application. Closing the vacancy
-        // under them is a human decision, never a side effect of this approval.
-        if ($type === Type::CloseVacancy && $request->target_vacancy_id !== null) {
-            $active = HiringCampaign::query()
-                ->where('vacancy_id', $request->target_vacancy_id)
-                ->whereIn('status', [\App\Enums\HiringCampaignStatus::Published, \App\Enums\HiringCampaignStatus::Open])
-                ->exists();
-
-            if ($active) {
-                throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.campaign_still_active')]);
-            }
-        }
-    }
-
-    /**
      * One active request per subject per type.
      *
      * The subject is the vacancy for the two vacancy types and the position for
@@ -290,31 +274,6 @@ class RecruitmentRequestSubmissionService
         if ($clash) {
             throw ValidationException::withMessages(['data.position_id' => __('recruitment.duplicate_position_request')]);
         }
-    }
-
-    /**
-     * Freeze the payload as version N+1 with its position details.
-     *
-     * Approvals attach to a version, so the version is what must not move. The
-     * details row carries the column names RV-1 compares field by field, which
-     * is why the draft's own field names are mapped here rather than stored
-     * loosely: a field that never lands in a column is a change that silently
-     * invalidates nothing.
-     */
-    private function freezeVersion(RecruitmentRequest $request, User $actor, array $payload): RecruitmentRequestVersion
-    {
-        $next = (int) $request->versions()->max('version_no') + 1;
-
-        $version = $request->versions()->create([
-            'version_no' => $next,
-            'snapshot_json' => $payload,
-            'created_by_user_id' => $actor->getKey(),
-            'submitted_at' => now(),
-        ]);
-
-        $version->positionDetail()->create($this->positionDetails($request, $payload));
-
-        return $version;
     }
 
     /**

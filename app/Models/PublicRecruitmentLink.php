@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PublicRecruitmentLink extends Model
 {
+    public const STATUS_ACTIVE = 'active';
+
+    public const STATUS_DISABLED = 'disabled';
+
     protected $guarded = ['id'];
 
     protected $hidden = ['token_hash'];

@@ -296,6 +296,60 @@ class RecruitmentWorkflowInstanceTest extends TestCase
     }
 
     /** @return array{request: RecruitmentRequest, version: RecruitmentRequestVersion, requester: User, manager: ?User, finance: ?User, hr: User} */
+    /**
+     * Closing a vacancy or a position skips financial review (D56).
+     *
+     * Neither spends money — both save it — so neither waits on the single
+     * financial approver for the whole organization. They run on two steps.
+     */
+    public function test_closing_a_vacancy_or_a_position_skips_financial_review(): void
+    {
+        $city = $this->makeCity('HMS', (string) random_int(900, 989));
+        $this->makeUser($city, 'super-admin');
+        $this->seed(RecruitmentWorkflowSeeder::class);
+
+        foreach ([
+            RecruitmentRequestType::ClosePosition => 2,
+            RecruitmentRequestType::CloseVacancy => 2,
+            RecruitmentRequestType::FillVacancy => 3,
+            RecruitmentRequestType::IncreaseHeadcount => 3,
+            RecruitmentRequestType::DecreaseHeadcount => 3,
+            RecruitmentRequestType::CreatePosition => 3,
+        ] as $requestType => $expected) {
+            $version = RecruitmentWorkflowDefinition::query()
+                ->where('request_type', $requestType)
+                ->firstOrFail()
+                ->versions()
+                ->where('is_active', true)
+                ->firstOrFail();
+
+            $steps = $version->steps()
+                ->get()
+                ->filter(fn ($step) => in_array(
+                    RecruitmentRequestMode::Normal,
+                    array_map('intval', $step->required_condition_json['modes'] ?? []),
+                    true,
+                ))
+                ->reject(fn ($step) => in_array(
+                    $requestType,
+                    array_map('intval', $step->required_condition_json['except_types'] ?? []),
+                    true,
+                ));
+
+            $this->assertCount(
+                $expected,
+                $steps,
+                "Request type {$requestType} should walk {$expected} steps.",
+            );
+
+            $this->assertSame(
+                $expected === 3,
+                $steps->contains(fn ($step) => (int) $step->step_key === WorkflowStepKey::FinanceApproval),
+                "Financial review on request type {$requestType} is wrong.",
+            );
+        }
+    }
+
     private function normalWorkflowFixtures(bool $topLevel = false, bool $withFinance = true): array
     {
         $city = $this->makeCity('ALP', (string) random_int(100, 899));

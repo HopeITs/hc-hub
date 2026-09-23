@@ -13,7 +13,8 @@ class PublicRecruitmentLinkPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->hasActivePermission('recruitment-links.manage');
+        return $user->hasActivePermission('recruitment-links.view')
+            || $user->hasActivePermission('recruitment-links.manage');
     }
 
     public function manage(User $user, PublicRecruitmentLink $link): bool

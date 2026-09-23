@@ -46,6 +46,14 @@ class RecruitmentWorkflowSeeder extends Seeder
                 $normal = ['modes' => [RecruitmentRequestMode::Normal]];
                 $direct = ['modes' => [RecruitmentRequestMode::DirectHr]];
 
+                // D56: closing a vacancy or a position spends nothing — it
+                // saves — so neither waits on the organization's single
+                // financial approver. Those two run on two steps, not three.
+                $financial = $normal + ['except_types' => [
+                    RecruitmentRequestType::ClosePosition,
+                    RecruitmentRequestType::CloseVacancy,
+                ]];
+
                 $version->steps()->createMany([
                     [
                         'step_order' => 1,
@@ -59,7 +67,7 @@ class RecruitmentWorkflowSeeder extends Seeder
                         'step_key' => WorkflowStepKey::FinanceApproval,
                         'role_key' => 'finance-approver',
                         'scope_rule' => RecruitmentScopeType::Organization,
-                        'required_condition_json' => $normal,
+                        'required_condition_json' => $financial,
                     ],
                     [
                         'step_order' => 3,

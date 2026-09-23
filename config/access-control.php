@@ -130,6 +130,15 @@ return [
      */
     'livewire' => [
         'recruitment.requests.create' => ['save' => 'recruitment-requests.manage'],
+        'recruitment.campaigns.index' => [
+            'create' => 'recruitment-campaigns.manage',
+            'beginScheduleEdit' => 'recruitment-campaigns.manage',
+            'updateSchedule' => 'recruitment-campaigns.manage',
+            'openCampaign' => 'recruitment-campaigns.manage',
+            'closeCampaign' => 'recruitment-campaigns.manage',
+            'beginDisable' => 'recruitment-campaigns.manage',
+            'disableCampaign' => 'recruitment-campaigns.manage',
+        ],
         'access-management.index' => [
             'saveEmployeeAccess' => 'access-management.manage-employees',
             'saveRolePermissions' => 'access-management.manage-permissions',
@@ -234,6 +243,37 @@ return [
             'renewWithEdit' => 'contracts.create',
         ],
         'contract.contracts-table' => ['delete' => 'contracts.delete', 'exportExcel' => 'contracts.export'],
+        // The permission map is the coarse HTTP boundary. Each action also
+        // runs JobPostPolicy so governorate HR remains inside its city scope.
+        'recruitment.job-posts.editor' => [
+            'saveDraft' => 'recruitment-job-posts.manage',
+            'publish' => 'recruitment-job-posts.manage',
+            'unpublish' => 'recruitment-job-posts.manage',
+            'reloadLatest' => 'recruitment-job-posts.manage',
+            'resetFromApprovedRequest' => 'recruitment-job-posts.manage',
+        ],
+        'recruitment.application-forms.editor' => [
+            'addField' => 'recruitment-forms.manage',
+            'addCustomField' => 'recruitment-forms.manage',
+            'applyReferenceTemplate' => 'recruitment-forms.manage',
+            'applyPublishedTemplate' => 'recruitment-forms.manage',
+            'removeField' => 'recruitment-forms.manage',
+            'moveField' => 'recruitment-forms.manage',
+            'addOption' => 'recruitment-forms.manage',
+            'removeOption' => 'recruitment-forms.manage',
+            'setPreviewSection' => 'recruitment-forms.manage',
+            'toggleSection' => 'recruitment-forms.manage',
+            'setPreviewLocale' => 'recruitment-forms.manage',
+            'saveDraft' => 'recruitment-forms.manage',
+            'publish' => 'recruitment-forms.manage',
+            'reloadLatest' => 'recruitment-forms.manage',
+        ],
+        'recruitment.public-links.manager' => [
+            'generate' => 'recruitment-links.manage',
+            'disable' => 'recruitment-links.manage',
+            'addInvite' => 'recruitment-links.manage',
+            'cancelInvite' => 'recruitment-links.manage',
+        ],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
             'create' => 'leaves.create', 'delete' => 'leaves.delete',
