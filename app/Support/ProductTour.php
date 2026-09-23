@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 class ProductTour
 {
     /**
-     * @return array{id: string, steps: list<array{target: ?string, placement: string, title: string, body: string}>}|null
+     * @return array{id: string, autostart: bool, steps: list<array{target: ?string, placement: string, title: string, body: string}>}|null
      */
     public static function forRequest(Request $request): ?array
     {
@@ -35,7 +35,11 @@ class ProductTour
                 ];
             }
 
-            return $steps === [] ? null : ['id' => $id, 'steps' => $steps];
+            return $steps === [] ? null : [
+                'id' => $id,
+                'autostart' => (bool) ($tour['autostart'] ?? false),
+                'steps' => $steps,
+            ];
         }
 
         return null;

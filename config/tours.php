@@ -19,12 +19,18 @@
 |
 | A step whose target is missing or hidden when the tour starts is skipped,
 | so steps may point at cards that only some roles or some data states render.
+| The sidebar steps rely on this: each role only sees the entries its
+| permissions render, so each role gets a walkthrough of exactly its pages.
+|
+| `autostart` opens the tour by itself the first time a user lands on the
+| page (tracked per user, per browser). The button replays it at any time.
 |
 */
 
 return [
     'dashboard' => [
         'routes' => ['dashboard'],
+        'autostart' => true,
         'steps' => [
             'welcome' => [],
             'my-leaves' => ['target' => 'dashboard.my-leaves', 'placement' => 'bottom'],
@@ -33,6 +39,25 @@ return [
             'news' => ['target' => 'dashboard.news', 'placement' => 'end'],
             'upcoming-leaves' => ['target' => 'dashboard.upcoming-leaves', 'placement' => 'top'],
             'pending-requests' => ['target' => 'dashboard.pending-requests', 'placement' => 'top'],
+
+            // Sidebar: one step per page the user can reach.
+            'nav-intro' => ['target' => 'nav', 'placement' => 'end'],
+            'nav-statistics' => ['target' => 'nav.statistics', 'placement' => 'end'],
+            'nav-org-chart' => ['target' => 'nav.org-chart', 'placement' => 'end'],
+            'nav-project-basics' => ['target' => 'nav.project-basics', 'placement' => 'end'],
+            'nav-programs' => ['target' => 'nav.programs', 'placement' => 'end'],
+            'nav-centers' => ['target' => 'nav.centers', 'placement' => 'end'],
+            'nav-employees' => ['target' => 'nav.employees', 'placement' => 'end'],
+            'nav-leaves-management' => ['target' => 'nav.leaves-management', 'placement' => 'end'],
+            'nav-my-leaves' => ['target' => 'nav.my-leaves', 'placement' => 'end'],
+            'nav-archives' => ['target' => 'nav.archives', 'placement' => 'end'],
+            'nav-checklists' => ['target' => 'nav.checklists', 'placement' => 'end'],
+            'nav-my-items' => ['target' => 'nav.my-items', 'placement' => 'end'],
+            'nav-news' => ['target' => 'nav.news', 'placement' => 'end'],
+            'nav-badges' => ['target' => 'nav.badges', 'placement' => 'end'],
+            'nav-activity-log' => ['target' => 'nav.activity-log', 'placement' => 'end'],
+            'nav-access' => ['target' => 'nav.access', 'placement' => 'end'],
+
             'replay' => ['target' => 'tour.button', 'placement' => 'bottom'],
         ],
     ],

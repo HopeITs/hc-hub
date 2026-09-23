@@ -7,7 +7,7 @@
     $tour = \App\Support\ProductTour::forRequest(request());
 @endphp
 
-<div x-data="productTour(@js($tour))"
+<div x-data="productTour(@js($tour), @js((string) auth()->id()))"
      x-on:tour-start.window="start()"
      x-on:tour-reflow.window="scheduleMeasure()"
      x-on:keydown.window="onKeydown($event)">
@@ -62,16 +62,20 @@
                 <h2 id="tour-step-title" class="relative mt-1 text-h4 font-bold text-neutral-900" x-text="step?.title"></h2>
                 <p id="tour-step-body" class="relative mt-1.5 text-body leading-relaxed text-secondary-medium" x-text="step?.body"></p>
 
-                <div class="relative mt-5 flex items-center justify-between gap-3">
-                    {{-- One dot per step; the current one stretches into a pill. --}}
-                    <div class="flex items-center gap-1.5" aria-hidden="true">
-                        <template x-for="(s, i) in steps" :key="i">
-                            <span class="h-1.5 rounded-full transition-all duration-300 motion-reduce:transition-none"
-                                  :class="i === index ? 'w-5 bg-primary' : (i < index ? 'w-1.5 bg-neutral-400' : 'w-1.5 bg-neutral-200')"></span>
-                        </template>
-                    </div>
+                {{-- A bar rather than one dot per step: the dashboard tour grows with
+                     the sidebar and can run past twenty steps for an admin. --}}
+                <div class="relative mt-4 h-1 overflow-hidden rounded-full bg-neutral-100" aria-hidden="true">
+                    <div class="absolute inset-y-0 start-0 rounded-full bg-primary transition-[width] duration-300 ease-fluid motion-reduce:transition-none"
+                         :style="`width: ${progress}%`"></div>
+                </div>
 
-                    <div class="flex items-center gap-2">
+                <div class="relative mt-4 flex items-center justify-between gap-3">
+                    <button type="button" x-show="!isLast" x-on:click="close()"
+                            class="-ms-2 rounded-control px-2 py-1.5 text-small font-semibold text-secondary-light transition hover:text-secondary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                        {{ __('tour.skip') }}
+                    </button>
+
+                    <div class="ms-auto flex items-center gap-2">
                         <button type="button" x-show="!isFirst" x-on:click="previous()"
                                 class="rounded-control px-3 py-1.5 text-body font-semibold text-secondary-dark transition hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                             {{ __('tour.previous') }}

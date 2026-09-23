@@ -24,18 +24,20 @@ const MARGIN = 12; // minimum distance between the card and the viewport edge
 const SEEN_PREFIX = 'hc-tour-seen:';
 
 // localStorage can throw (private windows, blocked site data). The tour must
-// still work without it — it only drives the "new" dot on the button.
-function readSeen(id) {
+// still work without it. Reading "seen" on failure is the safe answer: the
+// worst case is a tour that does not open by itself, never one that opens
+// on every visit.
+function readSeen(key) {
     try {
-        return window.localStorage.getItem(SEEN_PREFIX + id) === '1';
+        return window.localStorage.getItem(SEEN_PREFIX + key) === '1';
     } catch {
         return true;
     }
 }
 
-function writeSeen(id) {
+function writeSeen(key) {
     try {
-        window.localStorage.setItem(SEEN_PREFIX + id, '1');
+        window.localStorage.setItem(SEEN_PREFIX + key, '1');
     } catch {
         // Nothing to do: the dot simply shows again next time.
     }
@@ -47,8 +49,39 @@ function findTarget(target) {
 
 function isVisible(el) {
     if (!el || el.getClientRects().length === 0) return false;
+
     const style = window.getComputedStyle(el);
-    return style.visibility !== 'hidden' && style.display !== 'none';
+    if (style.visibility === 'hidden' || style.display === 'none') return false;
+
+    // Off-canvas counts as hidden: on phones the sidebar is translated off
+    // the side of the screen until it is opened.
+    const r = el.getBoundingClientRect();
+    return r.right > 0 && r.left < window.innerWidth;
+}
+
+// Nearest ancestor that scrolls on its own, e.g. the sidebar's nav list.
+function scrollParent(el) {
+    for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+        const overflow = window.getComputedStyle(node).overflowY;
+        if ((overflow === 'auto' || overflow === 'scroll') && node.scrollHeight > node.clientHeight) return node;
+    }
+    return null;
+}
+
+// Scrolling the window cannot move anything inside a fixed container
+// (sidebar, navbar), so those targets skip the window scroll entirely.
+function insideFixed(el) {
+    for (let node = el; node && node !== document.body; node = node.parentElement) {
+        if (window.getComputedStyle(node).position === 'fixed') return true;
+    }
+    return false;
+}
+
+// The app layout shows a full-screen loading animation above everything
+// (z-index 9999) for at least 1.5s on each page load and wire:navigate.
+function preloaderGone() {
+    const overlay = document.getElementById('page-gif-overlay');
+    return !overlay || overlay.style.display === 'none' || overlay.style.opacity === '0';
 }
 
 function prefersReducedMotion() {
@@ -61,7 +94,9 @@ document.addEventListener('alpine:init', () => {
         seen: true,
     });
 
-    window.Alpine.data('productTour', (tour) => ({
+    // `userId` scopes "seen" to the person, so a shared office computer still
+    // opens the tour for each new colleague who signs in on it.
+    window.Alpine.data('productTour', (tour, userId) => ({
         open: false,
         steps: [],
         index: 0,
@@ -71,19 +106,42 @@ document.addEventListener('alpine:init', () => {
         returnFocus: null,
         frame: null,
         settled: false, // false until the card's first position is known, so it does not fly in from 0,0
+        destroyed: false,
 
         init() {
             // Always rendered (with a null tour when the page has none), so a
             // wire:navigate to a page without a tour resets the button too.
             const store = window.Alpine.store('tour');
             store.available = Boolean(tour && tour.steps.length);
-            store.seen = !tour || readSeen(tour.id);
+            store.seen = !tour || readSeen(this.seenKey);
 
             this.onViewportChange = () => this.scheduleMeasure();
+
+            if (tour?.autostart && !store.seen) this.autostart();
         },
 
         destroy() {
+            this.destroyed = true;
             this.unbind();
+        },
+
+        get seenKey() {
+            return `${tour?.id}:${userId ?? 'guest'}`;
+        },
+
+        // Waits for the loading animation to clear (it sits above the tour),
+        // then opens the tour. Gives up quietly if the user leaves the page
+        // first, or if the page takes unusually long to settle.
+        autostart() {
+            const startedAt = performance.now();
+
+            const attempt = () => {
+                if (this.destroyed || this.open) return;
+                if (preloaderGone()) return setTimeout(() => this.destroyed || this.start(), 300);
+                if (performance.now() - startedAt < 6000) setTimeout(attempt, 100);
+            };
+
+            attempt();
         },
 
         // Looked up rather than read from $refs: the card lives inside an
@@ -121,7 +179,7 @@ document.addEventListener('alpine:init', () => {
             this.settled = false;
             this.open = true;
 
-            writeSeen(tour.id);
+            writeSeen(this.seenKey);
             window.Alpine.store('tour').seen = true;
 
             window.addEventListener('resize', this.onViewportChange);
@@ -136,7 +194,11 @@ document.addEventListener('alpine:init', () => {
             this.open = false;
             this.unbind();
 
-            const focusBack = this.returnFocus;
+            // An autostarted tour has nothing to hand focus back to; the replay
+            // button is the natural place to land instead of <body>.
+            const focusBack = this.returnFocus && this.returnFocus !== document.body
+                ? this.returnFocus
+                : findTarget('tour.button');
             this.returnFocus = null;
             if (focusBack && document.contains(focusBack)) focusBack.focus({ preventScroll: true });
         },
@@ -178,6 +240,20 @@ document.addEventListener('alpine:init', () => {
         // Targets too tall for that are aligned to the top, so their start
         // (usually the heading) stays visible and the card overlaps the rest.
         scrollIntoView(el) {
+            const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
+
+            // First centre it inside its own scroll box, if it has one.
+            const parent = scrollParent(el);
+            if (parent) {
+                const box = parent.getBoundingClientRect();
+                const own = el.getBoundingClientRect();
+                if (own.top < box.top || own.bottom > box.bottom) {
+                    parent.scrollBy({ top: own.top - box.top - (box.height - own.height) / 2, behavior });
+                }
+            }
+
+            if (insideFixed(el)) return;
+
             const r = el.getBoundingClientRect();
             const header = document.getElementById('app-navbar')?.offsetHeight ?? 0;
             const top = header + MARGIN;
@@ -208,7 +284,7 @@ document.addEventListener('alpine:init', () => {
                     : r.top - top - (available - r.height) / 2;
             }
 
-            window.scrollBy({ top: delta, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+            window.scrollBy({ top: delta, behavior });
         },
 
         scheduleMeasure() {
@@ -335,6 +411,10 @@ document.addEventListener('alpine:init', () => {
             // step grows the ring out of the middle instead of a corner.
             const { x, y, w, h } = this.rect ?? { x: window.innerWidth / 2, y: window.innerHeight / 2, w: 0, h: 0 };
             return `top:${y}px;left:${x}px;width:${w}px;height:${h}px;border-radius:${RADIUS}px;opacity:${this.rect ? 1 : 0}`;
+        },
+
+        get progress() {
+            return this.steps.length ? ((this.index + 1) / this.steps.length) * 100 : 0;
         },
 
         get cardStyle() {

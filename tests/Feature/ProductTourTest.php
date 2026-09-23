@@ -51,6 +51,19 @@ class ProductTourTest extends TestCase
         $this->assertSame(__('tour.leaves.balances.title'), $tour['steps'][0]['title']);
     }
 
+    public function test_only_the_dashboard_tour_opens_by_itself(): void
+    {
+        $resolve = function (string $route) {
+            $request = Request::create('/');
+            $request->setRouteResolver(fn () => Route::getRoutes()->getByName($route));
+
+            return ProductTour::forRequest($request);
+        };
+
+        $this->assertTrue($resolve('dashboard')['autostart']);
+        $this->assertFalse($resolve('leaves.index')['autostart']);
+    }
+
     public function test_pages_without_a_tour_resolve_to_null(): void
     {
         $request = Request::create('/');
@@ -68,6 +81,8 @@ class ProductTourTest extends TestCase
             ->assertSee('productTour(', false)
             ->assertSee(__('tour.dashboard.welcome.title'), false)
             ->assertSee('data-tour="tour.button"', false)
-            ->assertSee('data-tour="dashboard.notes"', false);
+            ->assertSee('data-tour="dashboard.notes"', false)
+            ->assertSee('data-tour="nav"', false)
+            ->assertSee('data-tour="nav.dashboard"', false);
     }
 }
