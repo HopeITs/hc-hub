@@ -6,7 +6,6 @@ use App\Livewire\AccessManagement\Index;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Concerns\CreatesHrFixtures;
@@ -152,11 +151,10 @@ class PrivilegeEscalationTest extends TestCase
 
         // The account is resolved through the city-scoped query, so an id from
         // another city is simply not found.
-        $this->expectException(ModelNotFoundException::class);
-
         Livewire::actingAs($regional)
             ->test(Index::class)
-            ->call('selectUser', $outsider->id);
+            ->call('selectUser', $outsider->id)
+            ->assertNotFound();
     }
 
     private function victim(string $city = 'HMS'): User
