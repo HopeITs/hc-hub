@@ -143,6 +143,7 @@ return [
     'invite_used_at' => 'تاريخ التقديم',
     'invite_cancel' => 'إلغاء',
     'invite_cancel_confirm' => 'إلغاء هذه الدعوة؟ لن يتمكن الشخص من التقديم بعد الآن.',
+    'invite_cancelled' => 'تم إلغاء الدعوة.',
     'invite_status_pending' => 'قيد الانتظار',
     'invite_status_sent' => 'أُرسلت',
     'invite_status_used' => 'تم التقديم',

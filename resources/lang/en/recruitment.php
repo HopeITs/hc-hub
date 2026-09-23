@@ -143,6 +143,7 @@ return [
     'invite_used_at' => 'Applied at',
     'invite_cancel' => 'Cancel',
     'invite_cancel_confirm' => 'Cancel this invitation? The person will no longer be able to apply.',
+    'invite_cancelled' => 'Invitation cancelled.',
     'invite_status_pending' => 'Pending',
     'invite_status_sent' => 'Sent',
     'invite_status_used' => 'Applied',

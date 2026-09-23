@@ -67,14 +67,14 @@
                         </div>
                     </div>
 
-                    <div>
+                    <div wire:key="public-apply-city">
                         <x-forms.input-label for="city_id" :value="__('recruitment.public_apply_city')" />
-                        <select id="city_id" wire:model="city_id" class="w-full py-2 px-3 text-body text-neutral-900 rounded-control border border-neutral-300 bg-white shadow-e1 focus:outline-none focus:ring-2 focus:ring-secondary-light focus:border-primary transition">
+                        <x-forms.select2-input wire:model="city_id" id="city_id">
                             <option value="">{{ __('recruitment.choose') }}</option>
                             @foreach ($cities as $city)
                                 <option value="{{ $city->id }}">{{ $city->{transColumn('name')} }}</option>
                             @endforeach
-                        </select>
+                        </x-forms.select2-input>
                     </div>
 
                     @foreach ($fields as $field)
@@ -87,18 +87,18 @@
                             $required = ! empty($field['required']);
                         @endphp
                         @if ($key)
-                            <div>
+                            <div wire:key="public-apply-answer-{{ $key }}">
                                 <x-forms.input-label :for="$key" :required="$required" :value="$label" />
 
                                 @if ($type === 'textarea')
                                     <x-forms.textarea :id="$key" wire:model="answers.{{ $key }}" />
                                 @elseif ($type === 'select' && ! empty($field['options']))
-                                    <select id="{{ $key }}" wire:model="answers.{{ $key }}" class="w-full py-2 px-3 text-body text-neutral-900 rounded-control border border-neutral-300 bg-white shadow-e1 focus:outline-none focus:ring-2 focus:ring-secondary-light focus:border-primary transition">
+                                    <x-forms.select2-input wire:model="answers.{{ $key }}" :id="$key">
                                         <option value="">{{ __('recruitment.choose') }}</option>
                                         @foreach ($field['options'] as $option)
                                             <option value="{{ $option }}">{{ $option }}</option>
                                         @endforeach
-                                    </select>
+                                    </x-forms.select2-input>
                                 @else
                                     <x-forms.input :id="$key" :type="$type === 'email' || $type === 'tel' ? $type : 'text'" wire:model="answers.{{ $key }}" />
                                 @endif

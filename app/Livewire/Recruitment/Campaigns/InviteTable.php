@@ -1,0 +1,123 @@
+<?php
+
+namespace App\Livewire\Recruitment\Campaigns;
+
+use App\Models\HiringCampaign;
+use App\Models\RecruitmentCampaignInvite;
+use App\Services\RecruitmentCampaignInviteService;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
+use RamonRietdijk\LivewireTables\Columns\Column;
+use RamonRietdijk\LivewireTables\Filters\SelectFilter;
+use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
+
+/**
+ * The invite list for one campaign: filterable by status, globally
+ * searchable by name/email, with a per-row Cancel action.
+ *
+ * The Cancel button is a plain computed column with a real wire:click method
+ * (ContractTypeTable's pattern), not the package's Action/ActionColumn
+ * bulk-select mechanism — that dropdown relies on an `item` Alpine binding
+ * that never resolved correctly here, and it would also have added a
+ * row-selection checkbox column nobody asked for. Dropping actions()
+ * entirely also removes those checkboxes, since HasSelection::canSelect()
+ * only enables them when a non-standalone action exists.
+ */
+class InviteTable extends LivewireTable
+{
+    public int $campaignId;
+
+    protected string $model = RecruitmentCampaignInvite::class;
+
+    public function mount(int $campaignId): void
+    {
+        $this->campaignId = $campaignId;
+        $this->authorizeScreen();
+    }
+
+    public function confirmCancel(int $id): void
+    {
+        LivewireAlert::title(__('recruitment.invite_cancel'))
+            ->text(__('recruitment.invite_cancel_confirm'))
+            ->question()
+            ->withConfirmButton(__('recruitment.invite_cancel'))
+            ->onConfirm('cancelInvite', ['id' => $id])
+            ->withCancelButton(__('general.cancel'))
+            ->show();
+    }
+
+    public function cancelInvite(array $payload): void
+    {
+        $invite = RecruitmentCampaignInvite::query()
+            ->where('campaign_id', $this->campaignId)
+            ->findOrFail($payload['id']);
+
+        try {
+            app(RecruitmentCampaignInviteService::class)->cancel(auth()->user(), $invite);
+
+            LivewireAlert::title(__('recruitment.invite_cancelled'))
+                ->success()->toast()->position('top-start')->show();
+        } catch (ValidationException $exception) {
+            // A used invite can't be cancelled — surfaced as an alert rather
+            // than a fatal error.
+            LivewireAlert::title(collect($exception->errors())->collapse()->first())
+                ->error()->toast()->position('top-start')->show();
+        }
+    }
+
+    protected function query(): Builder
+    {
+        $this->authorizeScreen();
+
+        // Scoping to this campaign is what makes cancelInvite() safe against
+        // a tampered id: findOrFail() on this query can never resolve a row
+        // belonging to a different campaign.
+        return RecruitmentCampaignInvite::query()->where('campaign_id', $this->campaignId);
+    }
+
+    protected function columns(): array
+    {
+        return [
+            Column::make(__('recruitment.invite_full_name'), 'full_name')->sortable()->searchable(),
+            Column::make(__('recruitment.invite_email'), 'email_normalized')->sortable()->searchable(),
+            Column::make(__('recruitment.invite_status'), 'status')
+                ->displayUsing(fn ($value) => __('recruitment.invite_status_'.$value))
+                ->sortable(),
+            Column::make(__('recruitment.invite_used_at'), 'used_at')
+                ->displayUsing(fn ($value) => $value?->format('d-m-Y H:i') ?? '—')
+                ->sortable(),
+            Column::make(__('general.actions'), function (Model $invite): string {
+                if (in_array($invite->status, ['cancelled', 'used'], true)) {
+                    return '';
+                }
+
+                return Blade::render(
+                    '<button type="button" wire:click="confirmCancel('.$invite->getKey().')" class="text-primary hover:underline text-body">{{ __(\'recruitment.invite_cancel\') }}</button>'
+                );
+            })->asHtml()->clickable(false),
+        ];
+    }
+
+    protected function filters(): array
+    {
+        return [
+            SelectFilter::make(__('recruitment.invite_status'), 'status')->options([
+                'pending' => __('recruitment.invite_status_pending'),
+                'sent' => __('recruitment.invite_status_sent'),
+                'used' => __('recruitment.invite_status_used'),
+                'cancelled' => __('recruitment.invite_status_cancelled'),
+            ]),
+        ];
+    }
+
+    private function authorizeScreen(): void
+    {
+        $campaign = HiringCampaign::query()->findOrFail($this->campaignId);
+
+        Gate::authorize('manageForCampaign', [RecruitmentCampaignInvite::class, $campaign]);
+    }
+}

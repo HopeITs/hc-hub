@@ -101,6 +101,7 @@ class RecruitmentApplication extends Model
     protected function casts(): array
     {
         return [
+            'status' => 'integer',
             'consent_payload_json' => 'array',
             'privacy_accepted_at' => 'datetime',
             'submitted_at' => 'datetime',

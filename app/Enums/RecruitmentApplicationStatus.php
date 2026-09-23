@@ -7,40 +7,42 @@ use BenSampo\Enum\Enum;
 /**
  * The lifecycle of a single applicant's submission to one campaign.
  *
- * Values are frozen strings, matching the `status` column default
- * ('submitted') set in the recruitment_applications migration. Transitions
- * between them belong to a decision service, not to this class: an enum only
- * names the states, it never enforces which move to which.
+ * Integer-backed to match every other Recruitment status enum
+ * (RecruitmentRequestStatus, HiringCampaignStatus, ...) rather than the
+ * string values this started as — the column itself was converted to match
+ * in database/migrations/2026_09_23_000001_convert_recruitment_application_status_to_integer.php.
+ * Submitted = 0 mirrors the same "default/first state = 0" convention used
+ * throughout the module.
  */
 final class RecruitmentApplicationStatus extends Enum
 {
-    const Submitted = 'submitted';
+    const Submitted = 0;
 
-    const UnderReview = 'under_review';
+    const UnderReview = 1;
 
-    const Shortlisted = 'shortlisted';
+    const Shortlisted = 2;
 
-    const Rejected = 'rejected';
+    const Rejected = 3;
 
-    const InterviewScheduled = 'interview_scheduled';
+    const InterviewScheduled = 4;
 
-    const Interviewed = 'interviewed';
+    const Interviewed = 5;
 
-    const Selected = 'selected';
+    const Selected = 6;
 
-    const OfferSent = 'offer_sent';
+    const OfferSent = 7;
 
-    const OfferAccepted = 'offer_accepted';
+    const OfferAccepted = 8;
 
-    const OfferRejected = 'offer_rejected';
+    const OfferRejected = 9;
 
-    const Hired = 'hired';
+    const Hired = 10;
 
-    const Withdrawn = 'withdrawn';
+    const Withdrawn = 11;
 
-    const Archived = 'archived';
+    const Archived = 12;
 
-    public static function getLocalizedName(?string $value): array
+    public static function getLocalizedName(int $value): array
     {
         $val = match ($value) {
             self::UnderReview => ['text' => ['en' => 'Under review', 'ar' => 'قيد المراجعة'], 'color' => 'primary'],

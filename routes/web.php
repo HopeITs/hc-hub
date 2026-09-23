@@ -23,7 +23,6 @@ use App\Livewire\EmployeeCards\ShowDigitalId;
 use App\Livewire\News\NewsCreate;
 use App\Livewire\News\NewsModule;
 use App\Livewire\Notifications\Index;
-use App\Livewire\Recruitment\PublicSite\Apply as PublicRecruitmentApply;
 use App\Livewire\Settings\Password;
 use App\Livewire\Statistics\ContractStatistics;
 use App\Livewire\Statistics\GeneralStatistics;
@@ -44,15 +43,9 @@ Route::get('/ID/{employee}/photo', [EmployeeAvatarController::class, 'digitalId'
     ->middleware(['signed', 'throttle:60,1'])
     ->name('digital-id.avatar');
 
-// Public job application page. Outside the locale group and outside 'auth'
-// for the same reason as the digital ID card above: it is unauthenticated by
-// design, resolved from an opaque bearer token rather than a session.
-// Throttled against scraping/spam per Phase 1 Task 15's anti-abuse
-// requirement — a CAPTCHA or a stronger bot check is a follow-up, not done
-// here.
-Route::get('/careers/{token}', PublicRecruitmentApply::class)
-    ->middleware('throttle:20,1')
-    ->name('careers.apply');
+// Public (unauthenticated) recruitment routes — see the file itself for why
+// this can't simply live in routes/recruitment.php.
+require __DIR__.'/recruitment-public.php';
 
 Route::group(
     [
