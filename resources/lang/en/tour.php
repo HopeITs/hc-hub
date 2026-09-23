@@ -274,7 +274,7 @@ return [
         ],
         'overview' => [
             'title' => 'Employment overview',
-            'body' => 'Position, job level, direct and technical managers, program and city.',
+            'body' => 'Position, job level, direct manager, program and city.',
         ],
         'career' => [
             'title' => 'Career history',

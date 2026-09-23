@@ -123,7 +123,7 @@ class PositionTable extends LivewireTable
 
     protected function query(): Builder
     {
-        $query = $this->model()::query()->with(['city', 'program', 'center', 'jobLevel', 'department', 'directManager', 'techManager']);
+        $query = $this->model()::query()->with(['city', 'program', 'center', 'jobLevel', 'department', 'directManager']);
 
         $query->when(
             auth()->user()?->activeCityId(),
@@ -164,9 +164,6 @@ class PositionTable extends LivewireTable
                 ->options(JobLevel::query()->orderBy('grade')->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
                 ->sortable()->searchable(),
             SelectColumn::make(__('general.direct-manager'), 'directManager.'.transColumn('title'))
-                ->options(Position::query()->orderby(transColumn('title'))->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
-                ->sortable()->searchable(),
-            SelectColumn::make(__('general.tech-manager'), 'techManager.'.transColumn('title'))
                 ->options(Position::query()->orderby(transColumn('title'))->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
                 ->sortable()->searchable(),
 

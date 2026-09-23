@@ -71,7 +71,6 @@ return [
             'views' => ['target' => 'org.views', 'placement' => 'bottom'],
             'search' => ['target' => 'org.search', 'placement' => 'bottom'],
             'filters' => ['target' => 'org.filters', 'placement' => 'bottom'],
-            'reporting-line' => ['target' => 'org.reporting-line', 'placement' => 'bottom'],
             'vacancies' => ['target' => 'org.vacancies', 'placement' => 'bottom'],
             'canvas' => ['target' => 'org.canvas', 'placement' => 'top'],
             'node' => ['target' => 'org.node', 'placement' => 'bottom'],

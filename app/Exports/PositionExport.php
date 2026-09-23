@@ -51,7 +51,6 @@ class PositionExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
                 'department_name' => trans_choice('general.department', 1, [], 'en'),
                 'jobLevel_name_en', 'jobLevel_name_ar' => trans_choice('general.job-level', 1, [], 'en'),
                 'directManager_title_en', 'directManager_title_ar' => __('general.direct-manager', [], 'en'),
-                'techManager_title_en', 'techManager_title_ar' => __('general.tech-manager', [], 'en'),
                 'is_active' => __('general.is-active', [], 'en'),
                 default => $code,
             };
@@ -76,7 +75,6 @@ class PositionExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
                 'city_name_en', 'city_name_ar' => $row->city?->name_en ?? '',
                 'jobLevel_name_en', 'jobLevel_name_ar' => $row->jobLevel?->name_en ?? '',
                 'directManager_title_en', 'directManager_title_ar' => $row->directManager?->title_en ?? '',
-                'techManager_title_en', 'techManager_title_ar' => $row->techManager?->title_en ?? '',
 
                 'is_active' => $row->is_active ? 'Yes' : 'No',
                 default => '',

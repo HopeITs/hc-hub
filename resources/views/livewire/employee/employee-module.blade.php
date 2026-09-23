@@ -18,7 +18,6 @@
             <x-table.heading>@lang('general.photo')</x-table.heading>
             <x-table.heading>@lang('general.years-of-service')</x-table.heading>
             <x-table.heading>@lang('general.direct-manager')</x-table.heading>
-            <x-table.heading>@lang('general.tech-manager')</x-table.heading>
             <x-table.heading>@lang('general.actual-job')</x-table.heading>
             <x-table.heading>@lang('general.work-email')</x-table.heading>
             <x-table.heading>@lang('general.status')</x-table.heading>
@@ -36,7 +35,6 @@
                     </x-table.cell>
                     <x-table.cell>{{ $item->years_of_service }}</x-table.cell>
                     <x-table.cell>{{ $item->directManager?->{'name_' . app()->getLocale()} ?? '-' }}</x-table.cell>
-                    <x-table.cell>{{ $item->techManager?->{'name_' . app()->getLocale()} ?? '-' }}</x-table.cell>
                     <x-table.cell>{{ $item->actual_dob }}</x-table.cell>
                     <x-table.cell>{{ $item->account?->email }}</x-table.cell>
                     <x-table.cell>

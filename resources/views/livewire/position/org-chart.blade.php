@@ -128,18 +128,6 @@
                     @endif
                 </button>
 
-                {{-- Reporting line quick switch --}}
-                <div data-tour="org.reporting-line" class="flex items-center overflow-hidden text-small font-semibold border border-neutral-200 rounded-surface bg-neutral-50">
-                    <button type="button" wire:click="$set('manager_type', 'direct')"
-                            class="px-3 py-2 transition {{ ! $isTech ? 'bg-primary text-white' : 'text-secondary-medium hover:bg-white' }}">
-                        @lang('general.direct-manager')
-                    </button>
-                    <button type="button" wire:click="$set('manager_type', 'tech')"
-                            class="px-3 py-2 transition {{ $isTech ? 'bg-primary text-white' : 'text-secondary-medium hover:bg-white' }}">
-                        @lang('general.tech-manager')
-                    </button>
-                </div>
-
                 <button type="button" wire:click="toggleDensity"
                         class="flex items-center gap-2 rounded-surface border border-neutral-200 bg-white px-3 py-2 text-small font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
                     <x-icons.code-fork class="size-3.5" />
@@ -559,7 +547,7 @@
 
                 <label class="block space-y-1">
                     <span class="text-small font-semibold text-secondary-medium">
-                        {{ $isTech ? __('general.tech-manager') : __('general.direct-manager') }}
+                        @lang('general.direct-manager')
                     </span>
                     <x-forms.select-input wire:model.live="focus_manager_id">
                         <option value="">@lang('general.all-managers')</option>
@@ -591,14 +579,6 @@
                     </x-forms.select-input>
                 </label>
 
-                <label class="block space-y-1">
-                    <span class="text-small font-semibold text-secondary-medium">@lang('general.reporting-line')</span>
-                    <x-forms.select-input wire:model.live="manager_type">
-                        <option value="direct">@lang('general.direct-manager')</option>
-                        <option value="tech">@lang('general.tech-manager')</option>
-                    </x-forms.select-input>
-                    <span class="block pt-1 text-caption leading-relaxed text-secondary-light">@lang('general.reporting-line-help')</span>
-                </label>
             </div>
 
             <div class="flex items-center gap-2 px-4 py-4 border-t border-neutral-200">
