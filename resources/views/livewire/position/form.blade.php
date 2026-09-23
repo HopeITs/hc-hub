@@ -76,20 +76,6 @@
             </div>
 
             <div class="md:col-span-1">
-                <x-forms.input-label for="tech-manager">{{__('general.tech-manager')}}</x-forms.input-label>
-                <x-forms.select2-input wire:model="form.tech_manager_id" id="tech-manager">
-                    <option value="">Select Any..</option>
-                    @foreach($positions as $position)
-                        @php
-                            $centerName = isset($position->center) ? $position->center->name . ' - ' .$position->center->city->name : __('general.flexible');
-                            $programName = isset($position->program) ? $position->program->name : '_'
-                        @endphp
-                        <option value="{{$position->id}}">{{$position->title . " ( ".$programName .' - '.$centerName." ) "}}</option>
-                    @endforeach
-                </x-forms.select2-input>
-                <x-error-span>{{ $errors->first('form.tech_manager_id') }}</x-error-span>
-            </div>
-            <div class="md:col-span-1">
                 <x-forms.input-label for="direct-manager">{{__('general.direct-manager')}}</x-forms.input-label>
                 <x-forms.select2-input wire:model="form.direct_manager_id" id="direct-manager">
                     <option value="">Select Any..</option>

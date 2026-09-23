@@ -10,7 +10,6 @@
     $positionName = $currentPosition?->title ?? $notSpecified;
     $workEmail = $employee->account?->email;
     $directManagerName = $directManager?->name;
-    $techManagerName = $techManager?->name;
 @endphp
 
 <div class="min-h-screen bg-neutral-50 px-3 py-3 text-secondary-dark sm:px-6 sm:py-4 lg:px-8">
@@ -106,7 +105,7 @@
             <main class="space-y-4 xl:col-span-2">
                 <x-profile-section data-tour="profile.overview" :title="__('general.employment-overview')" :subtitle="__('general.professional-information')" icon="icons.user">
                     <dl class="grid gap-4 sm:grid-cols-2">
-                        @foreach ([[__('general.position'), $positionName], [trans_choice('general.job-level', 1), $currentPosition?->jobLevel?->name ?? $notSpecified], [__('general.direct-manager'), $directManagerName ?? $notSpecified], [__('general.tech-manager'), $techManagerName ?? $notSpecified], [trans_choice('general.program', 1), $currentPosition?->program?->name ?? $notSpecified], [trans_choice('general.city', 1), $currentPosition?->city?->name ?? $notSpecified]] as [$label, $value])
+                        @foreach ([[__('general.position'), $positionName], [trans_choice('general.job-level', 1), $currentPosition?->jobLevel?->name ?? $notSpecified], [__('general.direct-manager'), $directManagerName ?? $notSpecified], [trans_choice('general.program', 1), $currentPosition?->program?->name ?? $notSpecified], [trans_choice('general.city', 1), $currentPosition?->city?->name ?? $notSpecified]] as [$label, $value])
                             <div class="rounded-surface bg-neutral-50 p-4">
                                 <dt class="text-small font-semibold text-secondary-light">{{ $label }}</dt>
                                 <dd class="mt-1 text-body font-bold text-secondary-dark">{{ $value }}</dd>

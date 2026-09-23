@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 HC-HR is an HR management system for "Christian Hope Center" (multi-city Syrian NGO).
-Stack: Laravel 12, Livewire 3 (+ Volt + Flux), Tailwind CSS 4, MySQL. Bilingual EN/AR with RTL.
+Stack: PHP 8.5, Laravel 13, Livewire 4 (+ Volt + Flux), Tailwind CSS 4, Vite 8, MySQL. Bilingual EN/AR with RTL.
 
 ## Role
 
@@ -27,12 +27,14 @@ Custom artisan commands (in `app/Console/Commands`):
 - contract / employee deactivation commands
 
 ### Environment gotchas (Laragon on Windows)
-- The **web server runs PHP 8.4.21** while the **CLI runs PHP 8.3.21** — they use different `php.ini` files. A change that affects uploads/config must be applied to the web PHP's ini, not just the CLI's. `upload_tmp_dir` is set to `C:/laragon/tmp` in both.
+- The app requires **PHP 8.5** (`C:/laragon/bin/php/php-8.5`), for both the web server (Laragon → PHP menu) and the CLI. Older PHP installs are still in `C:/laragon/bin/php`, and each version has its own `php.ini`, so a change that affects uploads/config must go into 8.5's. `upload_tmp_dir` is `C:/laragon/tmp`.
+- Livewire 4 tests: a `ModelNotFoundException` inside a component call becomes a 404 response instead of being thrown. Assert it with `->assertNotFound()`, not `expectException`.
+- Vite 8 bundles with Rolldown: `manualChunks` must be a function, not an object.
 - Tests run on sqlite `:memory:` (see `phpunit.xml`); dev/prod use MySQL.
 
 ## Architecture
 
-### Laravel 12 layout
+### Laravel 13 layout
 No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are configured in `bootstrap/app.php`. Service wiring (observer registration, Blade directives, query macros) lives in `app/Providers/AppServiceProvider.php`.
 
 ### Localization & translatable columns
