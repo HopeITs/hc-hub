@@ -20,6 +20,9 @@ select2();
 // The single-page composer behind both creating and editing a contract.
 import './contract-composer.js';
 
+// Context-aware "Take a tour" walkthrough; steps live in config/tours.php.
+import './product-tour.js';
+
 import '../css/app.css';
 import { initFlowbite } from 'flowbite';
 import 'flowbite';
