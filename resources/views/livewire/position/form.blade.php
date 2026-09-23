@@ -81,7 +81,7 @@
                     <option value="">Select Any..</option>
                     @foreach($positions as $position)
                         @php
-                            $centerName = isset($position->center) ? $position->center->name . ' - ' .$position->center->city->name : 'Online';
+                            $centerName = isset($position->center) ? $position->center->name . ' - ' .$position->center->city->name : __('general.flexible');
                             $programName = isset($position->program) ? $position->program->name : '_'
                         @endphp
                         <option value="{{$position->id}}">{{$position->title . " ( ".$programName .' - '.$centerName." ) "}}</option>
@@ -95,7 +95,7 @@
                     <option value="">Select Any..</option>
                     @foreach($positions as $position)
                         @php
-                        $centerName = isset($position->center) ? $position->center->name . ' - ' .$position->center->city->name : 'Online';
+                        $centerName = isset($position->center) ? $position->center->name . ' - ' .$position->center->city->name : __('general.flexible');
                         $programName = isset($position->program) ? $position->program->name : '-'
                         @endphp
                         <option value="{{$position->id}}">{{$position->title . " ( ".$programName.' - '.$centerName ." ) "}}</option>
@@ -106,7 +106,7 @@
             <div class="md:col-span-1" wire:key="center-field-{{ $form->city_id ?: 'all' }}">
                 <x-forms.input-label for="center">{{trans_choice('general.center',1)}}</x-forms.input-label>
                 <x-forms.select2-input wire:model="form.center_id" id="center">
-                    <option value="">@lang('general.online')</option>
+                    <option value="">@lang('general.flexible')</option>
                     @foreach($centers as $center)
                         <option value="{{$center->id}}">
                             {{ $center->city ? $center->name .' - ' . $center->city->name : $center->name }}

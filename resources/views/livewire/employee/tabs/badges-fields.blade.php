@@ -187,7 +187,9 @@
 
 
                 <div class="md:col-span-3">
-                    <x-forms.input-label for="badge_reason_{{ $index }}">@lang('general.reason')</x-forms.input-label>
+                    <x-forms.input-label
+                        for="badge_reason_{{ $index }}"
+                        :required="$badgeSubtype === \App\Enums\BadgeSubtype::WarningLeaveDeduction">@lang('general.reason')</x-forms.input-label>
                     <x-forms.textarea id="badge_reason_{{ $index }}"
                                       wire:model.defer="badgeForm.badges.{{ $index }}.reason"
                                       rows="1"></x-forms.textarea>

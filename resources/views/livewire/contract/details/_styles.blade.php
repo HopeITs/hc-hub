@@ -196,7 +196,7 @@
     .contract-footer{
         position:absolute;
         right:18mm;
-        bottom:30mm;
+        bottom:20mm;
         font-family:'Somar Sans';
         font-weight:700;
         font-size:7pt;

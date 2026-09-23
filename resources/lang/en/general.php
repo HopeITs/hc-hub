@@ -560,6 +560,7 @@ return [
     'trial' => 'Trial',
     'total' => 'Total',
     'online' => 'Online',
+    'flexible' => 'Flexible',
     'reset' => 'Reset',
     'statistics' => 'Statistics',
     'leaves-management' => 'Leaves Management',

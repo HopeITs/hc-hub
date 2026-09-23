@@ -330,6 +330,15 @@ class BadgeForm extends Form
                     ]);
                 }
             }
+
+            // A leave deduction with no stated reason shows up on the
+            // employee's dashboard as a penalty with an empty explanation —
+            // require it here rather than leaving it to be noticed later.
+            if ($subtype === BadgeSubtype::WarningLeaveDeduction && blank($badge['reason'] ?? null)) {
+                $errors["badgeForm.badges.$index.reason"] = __('validation.required', [
+                    'attribute' => __('general.reason'),
+                ]);
+            }
         }
 
         if ($errors !== []) {

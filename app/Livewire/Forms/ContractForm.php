@@ -154,8 +154,8 @@ class ContractForm extends Form
 
         $this->start_date = $start->toDateString();
 
-        // Contract types 3 & 4 are trial contracts (3-month duration)
-        if (in_array((int) $value, [3, 4])) {
+        // Contract type 3 is the trial contract (3-month duration)
+        if ((int) $value === 3) {
             $this->end_date = $start->copy()->addMonthsNoOverflow(3)->toDateString();
 
             return;

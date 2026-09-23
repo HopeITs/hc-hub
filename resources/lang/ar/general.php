@@ -553,6 +553,7 @@ return [
     'service' => 'خدمة',
     'trial' => 'تجريبي',
     'online' => 'عبر الإنترنت',
+    'flexible' => 'مرن',
     'total' => 'المجموع',
 
     'accept' => 'قبول',
