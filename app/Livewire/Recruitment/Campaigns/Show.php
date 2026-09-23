@@ -40,7 +40,17 @@ class Show extends Component
     public function act(string $action, HiringCampaignService $campaigns): void
     {
         $campaign = $this->resolve();
+        Gate::authorize('manage', $campaign);
+
         $reason = trim($this->reason) ?: null;
+
+        $this->resetErrorBag('reason');
+
+        if (in_array($action, ['close', 'disable'], true) && $reason === null) {
+            $this->addError('reason', __('recruitment-campaign.reason_required'));
+
+            return;
+        }
 
         try {
             match ($action) {
@@ -93,6 +103,12 @@ class Show extends Component
 
         $effective = $states->effective($campaign);
         $mayManage = Gate::allows('manage', $campaign);
+        $publishReady = $campaign->jobPost?->status === 'published'
+            && $campaign->jobPost?->currentVersion?->status === 'published'
+            && $campaign->jobPost?->currentVersion?->published_at !== null
+            && $campaign->applicationForm?->status === 'published'
+            && $campaign->applicationForm?->currentVersion?->status === 'published'
+            && $campaign->applicationForm?->currentVersion?->published_at !== null;
 
         return view('livewire.recruitment.campaigns.show', [
             'campaign' => $campaign,
@@ -110,6 +126,7 @@ class Show extends Component
             'acceptsSubmissions' => $service->acceptsSubmissions($campaign),
             'publiclyVisible' => $service->isPubliclyVisible($campaign),
             'mayManage' => $mayManage,
+            'publishReady' => $publishReady,
         ]);
     }
 
@@ -117,7 +134,13 @@ class Show extends Component
     private function resolve(): HiringCampaign
     {
         $campaign = HiringCampaign::query()->visibleTo(auth()->user())
-            ->with(['vacancy.position', 'creator.profile', 'closedBy.profile'])
+            ->with([
+                'vacancy.position',
+                'creator.profile',
+                'closedBy.profile',
+                'jobPost.currentVersion',
+                'applicationForm.currentVersion',
+            ])
             ->findOrFail($this->campaignId);
 
         Gate::authorize('view', $campaign);

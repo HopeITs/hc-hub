@@ -285,6 +285,7 @@ class HiringCampaignLifecycleTest extends TestCase
             ->test(CampaignShow::class, ['campaignId' => $campaign->id])
             ->call('act', 'open')
             ->assertHasNoErrors()
+            ->set('reason', 'The campaign has received enough applications.')
             ->call('act', 'close')
             ->assertHasNoErrors();
 

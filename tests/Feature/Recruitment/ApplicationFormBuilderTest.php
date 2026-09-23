@@ -116,7 +116,11 @@ class ApplicationFormBuilderTest extends TestCase
             $this->assertTrue(true);
         }
 
-        Livewire::actingAs($hr)->test(Editor::class, ['campaign' => $campaign])->assertSet('versionNumber', 1);
+        Livewire::actingAs($hr)
+            ->test(Editor::class, ['campaign' => $campaign])
+            ->assertSet('versionNumber', 1)
+            ->assertSee('data-recruitment-confirmation-modal="application-form-editor"', false)
+            ->assertDontSee('wire:confirm', false);
         $otherCity = $this->makeCity('ALP', '001');
         $otherHr = $this->makeUser($otherCity, 'HR-ALP', ['recruitment-forms.manage']);
         Livewire::actingAs($otherHr)->test(Editor::class, ['campaign' => $campaign])->assertForbidden();

@@ -16,7 +16,7 @@
                 <a class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" href="{{ route('recruitment.requests.edit', ['requestId' => $request->id]) }}">{{ __('recruitment.edit') }}</a>
             @endcan
             @can('cancel', $request)
-                <button type="button" class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" wire:click="cancelRequest" wire:confirm="{{ __('recruitment.confirm_cancel') }}" wire:loading.attr="disabled" wire:target="cancelRequest">{{ __('recruitment.cancel_request') }}</button>
+                <button type="button" class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'cancelRequest', message: @js(__('recruitment.confirm_cancel')), confirmLabel: @js(__('recruitment.cancel_request')), tone: 'danger' })">{{ __('recruitment.cancel_request') }}</button>
             @endcan
             @can('submit', $request)
                 {{-- Disabled while in flight so a double click cannot fire twice; the
@@ -63,7 +63,7 @@
             <div class="mt-4 flex flex-wrap gap-3">
                 <x-primary-button type="button" wire:click="decide('approve')" wire:loading.attr="disabled" wire:target="decide">{{ __('recruitment.approve') }}</x-primary-button>
                 <button type="button" class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" wire:click="decide('request_changes')" wire:loading.attr="disabled" wire:target="decide">{{ __('recruitment.request_changes') }}</button>
-                <button type="button" class="rounded-control border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50" wire:click="decide('reject')" wire:confirm="{{ __('recruitment.confirm_reject') }}" wire:loading.attr="disabled" wire:target="decide">{{ __('recruitment.reject_action') }}</button>
+                <button type="button" class="cursor-pointer rounded-control border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'decide', args: ['reject'], message: @js(__('recruitment.confirm_reject')), confirmLabel: @js(__('recruitment.reject_action')), tone: 'danger' })">{{ __('recruitment.reject_action') }}</button>
             </div>
         </section>
     @endif
@@ -93,10 +93,7 @@
                 <div class="mt-4">
                     <button type="button"
                         class="rounded-control border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-100"
-                        wire:click="executeNow"
-                        wire:confirm="{{ __('recruitment.confirm_execute_now') }}"
-                        wire:loading.attr="disabled"
-                        wire:target="executeNow">{{ __('recruitment.execute_now') }}</button>
+                        x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'executeNow', message: @js(__('recruitment.confirm_execute_now')), confirmLabel: @js(__('recruitment.execute_now')) })">{{ __('recruitment.execute_now') }}</button>
                 </div>
             @endif
         </section>
@@ -292,4 +289,5 @@
             </ul>
         </section>
     @endif
+    <x-recruitment.confirmation-modal scope="request-details" />
 </div>

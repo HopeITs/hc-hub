@@ -129,7 +129,10 @@ class JobPostGeneratorTest extends TestCase
             ->assertSet('city', 'HOMS')
             ->assertSet('program', 'DISC')
             ->assertSet('jobTitle', 'IT Specialist')
-            ->assertSee('2160 × 3840');
+            ->assertSee('2160 × 3840')
+            ->assertSee('data-recruitment-confirmation-modal="job-post-editor"', false)
+            ->assertDontSee('wire:confirm', false)
+            ->assertDontSee('@js(', false);
 
         $otherCity = $this->makeCity('ALP', '001');
         $otherHr = $this->makeUser($otherCity, 'HR-ALP', ['recruitment-job-posts.manage']);

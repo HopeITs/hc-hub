@@ -38,7 +38,7 @@
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
                 {{ __('recruitment.application_form.add_question') }}
             </button>
-            <button type="button" wire:click="applyReferenceTemplate" wire:confirm="{{ __('recruitment.application_form.template_confirm') }}" class="rounded-control border border-neutral-300 bg-white px-4 py-2 text-body font-semibold text-neutral-700 hover:bg-neutral-50">
+            <button type="button" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'application-form-editor', action: 'applyReferenceTemplate', message: @js(__('recruitment.application_form.template_confirm')), confirmLabel: @js(__('recruitment.application_form.use_pdf_template')) })" class="cursor-pointer rounded-control border border-neutral-300 bg-white px-4 py-2 text-body font-semibold text-neutral-700 hover:bg-neutral-50">
                 {{ __('recruitment.application_form.use_pdf_template') }}
             </button>
         </div>
@@ -47,7 +47,7 @@
             <button type="button" wire:click="saveDraft" wire:target="saveDraft" class="rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary hover:bg-primary/5">
                 {{ __('recruitment.job_post.save_draft') }}
             </button>
-            <button type="button" wire:click="publish" wire:target="publish" wire:confirm="{{ __('recruitment.application_form.publish_confirm') }}" class="rounded-control bg-neutral-900 px-4 py-2 text-body font-semibold text-white hover:bg-neutral-700">
+            <button type="button" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'application-form-editor', action: 'publish', message: @js(__('recruitment.application_form.publish_confirm')), confirmLabel: @js(__('recruitment.job_post.publish')) })" class="cursor-pointer rounded-control bg-neutral-900 px-4 py-2 text-body font-semibold text-white hover:bg-neutral-700">
                 {{ __('recruitment.job_post.publish') }}
             </button>
         </div>
@@ -88,10 +88,7 @@
                 </div>
                 <button
                     type="button"
-                    wire:click="applyPublishedTemplate"
-                    wire:target="applyPublishedTemplate"
-                    wire:loading.attr="disabled"
-                    wire:confirm="{{ __('recruitment.application_form.reuse_confirm') }}"
+                    x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'application-form-editor', action: 'applyPublishedTemplate', message: @js(__('recruitment.application_form.reuse_confirm')), confirmLabel: @js(__('recruitment.application_form.use_template')) })"
                     class="rounded-control bg-neutral-900 px-4 py-2.5 text-body font-semibold text-white hover:bg-neutral-700 disabled:cursor-wait disabled:opacity-50"
                 >{{ __('recruitment.application_form.use_template') }}</button>
             @else
@@ -244,7 +241,7 @@
                                             <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 17a.75.75 0 0 1-.53-.22l-4-4a.75.75 0 1 1 1.06-1.06l2.72 2.72V4a.75.75 0 0 1 1.5 0v10.44l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4A.75.75 0 0 1 10 17Z" clip-rule="evenodd"/></svg>
                                         </button>
                                         @unless ($field['locked'])
-                                            <button type="button" wire:click="removeField({{ $index }})" wire:confirm="{{ __('recruitment.application_form.remove_confirm') }}" class="rounded p-2 text-neutral-500 hover:bg-red-50 hover:text-red-700" aria-label="{{ __('recruitment.application_form.remove') }}">
+                                            <button type="button" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'application-form-editor', action: 'removeField', args: [{{ $index }}], message: @js(__('recruitment.application_form.remove_confirm')), confirmLabel: @js(__('recruitment.application_form.remove')), tone: 'danger' })" class="cursor-pointer rounded p-2 text-neutral-500 hover:bg-red-50 hover:text-red-700" aria-label="{{ __('recruitment.application_form.remove') }}">
                                                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5"/></svg>
                                             </button>
                                         @endunless
@@ -356,4 +353,5 @@
             </div>
         </aside>
     </div>
+    <x-recruitment.confirmation-modal scope="application-form-editor" />
 </div>

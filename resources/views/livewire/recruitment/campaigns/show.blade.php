@@ -83,28 +83,48 @@
             <h2 class="text-h4 font-semibold">{{ __('recruitment-campaign.actions') }}</h2>
 
             @if ($available)
-                <div class="mt-4">
-                    <x-forms.input-label for="reason">{{ __('recruitment-campaign.reason') }}</x-forms.input-label>
-                    <textarea id="reason" rows="2" wire:model="reason" class="mt-1 w-full rounded-control border-neutral-300"></textarea>
-                    <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-campaign.reason_hint') }}</p>
-                </div>
-
                 {{-- Which buttons appear is asked of the state machine, so the
                      screen cannot offer a move the server would refuse. --}}
-                <div class="mt-4 flex flex-wrap gap-3">
+                <div class="mt-4 flex flex-wrap items-start gap-3">
                     @foreach ($available as $action)
-                        <button type="button" wire:key="action-{{ $action }}"
-                            wire:click="act('{{ $action }}')"
-                            @if (in_array($action, ['close', 'disable'], true))
-                                wire:confirm="{{ __('recruitment-campaign.confirm.'.$action) }}"
-                            @endif
-                            wire:loading.attr="disabled" wire:target="act"
-                            class="rounded-control border px-4 py-2 text-sm font-semibold
-                                {{ in_array($action, ['close', 'disable'], true)
-                                    ? 'border-red-300 text-red-700 hover:bg-red-50'
-                                    : 'border-neutral-300 hover:bg-neutral-50' }}">
-                            {{ __('recruitment-campaign.act.'.$action) }}
-                        </button>
+                        @if ($action === 'publish' && ! $publishReady)
+                            <div class="max-w-md" wire:key="action-{{ $action }}">
+                                <button type="button" data-campaign-action="publish" disabled
+                                    aria-describedby="publish-campaign-requirements"
+                                    class="cursor-not-allowed rounded-control border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-400">
+                                    {{ __('recruitment-campaign.act.publish') }}
+                                </button>
+                                <p id="publish-campaign-requirements" class="mt-2 text-sm font-medium text-amber-700">
+                                    {{ __('recruitment-campaign.publish_blocked') }}
+                                </p>
+                            </div>
+                        @else
+                            <button type="button" wire:key="action-{{ $action }}"
+                                @if (in_array($action, ['close', 'disable'], true))
+                                    x-on:click="$dispatch('open-recruitment-confirmation', {
+                                        scope: 'campaign-actions',
+                                        action: 'act',
+                                        args: [@js($action)],
+                                        title: @js(__('recruitment-campaign.act.'.$action)),
+                                        message: @js(__('recruitment-campaign.confirm.'.$action)),
+                                        confirmLabel: @js(__('recruitment-campaign.act.'.$action)),
+                                        tone: 'danger',
+                                        requireReason: true,
+                                        reasonLabel: @js(__('recruitment-campaign.reason')),
+                                        reasonHint: @js(__('recruitment-campaign.reason_hint')),
+                                        reasonRequiredMessage: @js(__('recruitment-campaign.reason_required')),
+                                    })"
+                                @else
+                                    wire:click="act('{{ $action }}')"
+                                @endif
+                                wire:loading.attr="disabled" wire:target="act"
+                                class="cursor-pointer rounded-control border px-4 py-2 text-sm font-semibold
+                                    {{ in_array($action, ['close', 'disable'], true)
+                                        ? 'border-red-300 text-red-700 hover:bg-red-50'
+                                        : 'border-neutral-300 hover:bg-neutral-50' }}">
+                                {{ __('recruitment-campaign.act.'.$action) }}
+                            </button>
+                        @endif
                     @endforeach
                 </div>
             @else
@@ -112,4 +132,5 @@
             @endif
         </section>
     @endif
+    <x-recruitment.confirmation-modal scope="campaign-actions" />
 </div>

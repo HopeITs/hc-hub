@@ -127,23 +127,29 @@
                     {{ __('recruitment.job_post.save_draft') }}
                 </x-primary-button>
 
-                <x-primary-button
+                <button
                     type="button"
-                    full
-                    wire:click="publish"
-                    wire:target="publish"
-                    wire:confirm="{{ __('recruitment.job_post.publish_confirm') }}"
-                    class="!bg-neutral-800 hover:!bg-neutral-700"
+                    x-on:click="$dispatch('open-recruitment-confirmation', {
+                        scope: 'job-post-editor',
+                        action: 'publish',
+                        message: @js(__('recruitment.job_post.publish_confirm')),
+                        confirmLabel: @js(__('recruitment.job_post.publish')),
+                    })"
+                    class="flex w-full cursor-pointer items-center justify-center rounded-control bg-neutral-800 px-4 py-2 text-body font-semibold text-white shadow-e1 transition hover:bg-neutral-700"
                 >
                     {{ __('recruitment.job_post.publish') }}
-                </x-primary-button>
+                </button>
 
                 @if ($publishedVersionId)
                     <button
                         type="button"
-                        wire:click="unpublish"
-                        wire:target="unpublish"
-                        wire:confirm="{{ __('recruitment.job_post.unpublish_confirm') }}"
+                        x-on:click="$dispatch('open-recruitment-confirmation', {
+                            scope: 'job-post-editor',
+                            action: 'unpublish',
+                            message: @js(__('recruitment.job_post.unpublish_confirm')),
+                            confirmLabel: @js(__('recruitment.job_post.unpublish')),
+                            tone: 'danger',
+                        })"
                         class="flex w-full cursor-pointer items-center justify-center rounded-control border border-amber-500 bg-white px-4 py-2 text-body font-semibold text-amber-700 transition hover:bg-amber-50"
                     >
                         {{ __('recruitment.job_post.unpublish') }}
@@ -225,6 +231,7 @@
             </div>
         </section>
     </div>
+    <x-recruitment.confirmation-modal scope="job-post-editor" />
 </div>
 
 @script

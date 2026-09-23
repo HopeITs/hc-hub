@@ -42,7 +42,7 @@
             {{ $activeLink ? __('recruitment.public_link.regenerate') : __('recruitment.public_link.generate') }}
         </button>
         @if ($activeLink)
-            <button type="button" wire:click="disable({{ $activeLink->id }})" wire:confirm="{{ __('recruitment.public_link.disable_confirm') }}" class="cursor-pointer rounded-control border border-red-300 bg-white px-4 py-2.5 text-body font-semibold text-red-700 hover:bg-red-50">
+            <button type="button" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'public-link-manager', action: 'disable', args: [{{ $activeLink->id }}], message: @js(__('recruitment.public_link.disable_confirm')), confirmLabel: @js(__('recruitment.public_link.disable')), tone: 'danger' })" class="cursor-pointer rounded-control border border-red-300 bg-white px-4 py-2.5 text-body font-semibold text-red-700 hover:bg-red-50">
                 {{ __('recruitment.public_link.disable') }}
             </button>
         @endif
@@ -119,4 +119,5 @@
             </div>
         </div>
     @endif
+    <x-recruitment.confirmation-modal scope="public-link-manager" />
 </section>

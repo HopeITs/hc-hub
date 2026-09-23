@@ -93,10 +93,47 @@ class HiringCampaignScreensTest extends TestCase
 
         Livewire::actingAs($hr)
             ->test(Show::class, ['campaignId' => $campaign->getKey()])
+            ->assertSee(__('recruitment-campaign.actions'))
             ->assertSee(__('recruitment-campaign.act.publish'))
+            ->assertSee(__('recruitment-campaign.publish_blocked'))
+            ->assertSee('data-campaign-action="publish" disabled', false)
             ->assertSee(__('recruitment-campaign.act.disable'))
+            ->assertSee('data-recruitment-confirmation-modal="campaign-actions"', false)
+            ->assertSee('requireReason: true', false)
+            ->assertDontSee('wire:confirm', false)
             ->assertDontSee(__('recruitment-campaign.act.close'))
             ->assertDontSee(__('recruitment-campaign.act.reopen'));
+    }
+
+    public function test_publish_action_is_enabled_once_both_assets_are_published(): void
+    {
+        [$hr, $vacancy] = $this->seat();
+        $campaign = app(HiringCampaignService::class)->create($hr, $vacancy);
+        $this->prepareCampaignForOpening($campaign, $hr);
+
+        Livewire::actingAs($hr)
+            ->test(Show::class, ['campaignId' => $campaign->getKey()])
+            ->assertDontSee(__('recruitment-campaign.publish_blocked'))
+            ->assertSee('wire:click="act(\'publish\')"', false);
+    }
+
+    public function test_close_and_disable_require_a_reason_from_the_screen(): void
+    {
+        [$hr, $campaign] = $this->openCampaign();
+
+        Livewire::actingAs($hr)
+            ->test(Show::class, ['campaignId' => $campaign->getKey()])
+            ->call('act', 'close')
+            ->assertHasErrors('reason');
+
+        $this->assertSame(Status::Open, (int) $campaign->fresh()->status);
+
+        Livewire::actingAs($hr)
+            ->test(Show::class, ['campaignId' => $campaign->getKey()])
+            ->call('act', 'disable')
+            ->assertHasErrors('reason');
+
+        $this->assertSame(Status::Open, (int) $campaign->fresh()->status);
     }
 
     public function test_closing_from_the_screen_stops_submissions(): void
