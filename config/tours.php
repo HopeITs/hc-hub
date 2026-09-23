@@ -80,6 +80,32 @@ return [
         ],
     ],
 
+    'employee-statistics' => [
+        'routes' => ['statistics.general'],
+        'steps' => [
+            'departments' => ['target' => 'stats.departments', 'placement' => 'bottom'],
+            'payment-type' => ['target' => 'stats.payment-type', 'placement' => 'start'],
+            'personnel' => ['target' => 'stats.personnel', 'placement' => 'end'],
+            'job-levels' => ['target' => 'stats.job-levels', 'placement' => 'top'],
+            'expiring' => ['target' => 'stats.expiring', 'placement' => 'end'],
+            'no-leaves' => ['target' => 'stats.no-leaves', 'placement' => 'top'],
+            'contract-types' => ['target' => 'stats.contract-types', 'placement' => 'start'],
+        ],
+    ],
+
+    // Cards repeat per program (or per center); the card steps highlight the
+    // first one, and are skipped when the filters leave no cards at all.
+    'contract-statistics' => [
+        'routes' => ['statistics.contract'],
+        'steps' => [
+            'filters' => ['target' => 'contract-stats.filters', 'placement' => 'bottom'],
+            'reset' => ['target' => 'contract-stats.reset', 'placement' => 'bottom'],
+            'card' => ['target' => 'contract-stats.card', 'placement' => 'end'],
+            'breakdown' => ['target' => 'contract-stats.breakdown', 'placement' => 'bottom'],
+            'show-more' => ['target' => 'contract-stats.show-more', 'placement' => 'bottom'],
+        ],
+    ],
+
     'leaves' => [
         'routes' => ['leaves.index'],
         'steps' => [

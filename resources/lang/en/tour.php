@@ -151,6 +151,60 @@ return [
         ],
     ],
 
+    'employee-statistics' => [
+        'departments' => [
+            'title' => 'Employees by department',
+            'body' => 'How many employees work in each department.',
+        ],
+        'payment-type' => [
+            'title' => 'Payment type',
+            'body' => 'How employees are split by the way they are paid.',
+        ],
+        'personnel' => [
+            'title' => 'Personnel movement',
+            'body' => 'New, ended and terminated employees over time. Pick monthly, quarterly or yearly, and click a legend item to hide that line.',
+        ],
+        'job-levels' => [
+            'title' => 'Employees by job level',
+            'body' => 'How many employees hold each job level.',
+        ],
+        'expiring' => [
+            'title' => 'Contracts ending soon',
+            'body' => 'Active contracts that end within the next 30 days, so you can renew them in time.',
+        ],
+        'no-leaves' => [
+            'title' => 'Employees with no leave',
+            'body' => 'Employees who have not taken any leave. Worth a reminder before balances pile up.',
+        ],
+        'contract-types' => [
+            'title' => 'Contract types',
+            'body' => 'How many employees are on each type of contract.',
+        ],
+    ],
+
+    'contract-statistics' => [
+        'filters' => [
+            'title' => 'Filter by city and program',
+            'body' => 'Pick a city, a program, or both. Choosing a program switches the cards from one per program to one per center.',
+        ],
+        'reset' => [
+            'title' => 'Reset filters',
+            'body' => 'Go back to the figures for the whole organisation.',
+        ],
+        'card' => [
+            'title' => 'Program and center cards',
+            'body' => 'Each card shows how many employees it has, and how many centers when it is a program.',
+        ],
+        'breakdown' => [
+            'title' => 'Contracts by type',
+            'body' => 'Annual and trial contracts split into full-time and part-time; service contracts split into online and onsite.',
+        ],
+        'show-more' => [
+            'title' => 'See the details',
+            'body' => 'Open the program or center page for the full picture.',
+        ],
+    ],
+
     'leaves' => [
         'balances' => [
             'title' => 'Your balances',

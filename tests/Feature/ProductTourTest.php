@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Livewire\Position\OrgChart;
+use App\Livewire\Statistics\ContractStatistics;
+use App\Livewire\Statistics\GeneralStatistics;
 use App\Models\User;
 use App\Support\ProductTour;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -84,6 +86,20 @@ class ProductTourTest extends TestCase
             ->assertSeeHtml('data-tour="org.filters"')
             ->assertSeeHtml('data-tour="org.canvas"')
             ->assertSeeHtml('data-tour="org.export"');
+    }
+
+    public function test_the_statistics_pages_render_their_tour_targets(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(GeneralStatistics::class)
+            ->assertSeeHtml('data-tour="stats.departments"')
+            ->assertSeeHtml('data-tour="stats.personnel"')
+            ->assertSeeHtml('data-tour="stats.contract-types"');
+
+        Livewire::test(ContractStatistics::class)
+            ->assertSeeHtml('data-tour="contract-stats.filters"')
+            ->assertSeeHtml('data-tour="contract-stats.reset"');
     }
 
     public function test_the_dashboard_renders_the_tour_and_its_targets(): void
