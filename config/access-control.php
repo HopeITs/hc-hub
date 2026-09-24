@@ -121,6 +121,15 @@ return [
         'recruitment-job-posts' => ['view', 'manage'],
         'recruitment-forms' => ['view', 'manage'],
         'recruitment-links' => ['view', 'manage'],
+
+        /*
+         * Applicant records. Each sensitive act is its own permission rather
+         * than riding on 'view': seeing a list must never imply reading a CV,
+         * and writing a note must never imply moving an application.
+         */
+        'recruitment-applicants' => [
+            'view', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status',
+        ],
     ],
 
     /*
@@ -339,6 +348,20 @@ return [
         ],
         // Streams the whole org directory to CSV; had no check of its own.
         'position.directory' => ['exportCsv' => 'positions.export'],
+
+        // Each method re-resolves its record through the applicant scope and
+        // asks the policy again; the permission here is only the outer wall.
+        'recruitment.applicants.show' => [
+            'beginStatusChange' => 'recruitment-applicants.change-status',
+            'changeStatus' => 'recruitment-applicants.change-status',
+            'beginArchive' => 'recruitment-applicants.archive-cv',
+            'archiveCv' => 'recruitment-applicants.archive-cv',
+        ],
+        'recruitment.applicants.notes' => [
+            'addNote' => 'recruitment-applicants.add-notes',
+            'confirmDelete' => 'recruitment-applicants.delete-notes',
+            'deleteNote' => 'recruitment-applicants.delete-notes',
+        ],
     ],
 
     /*
@@ -366,6 +389,10 @@ return [
     'livewire_exempt' => [
         // Form-only resets. Persistence rechecks role, grade and subtree in the draft service.
         'recruitment.requests.create' => ['updatedDataRequestType', 'updatedDataPositionId', 'updatedDataCityId'],
+        // Close an open panel; they clear component state and touch no record.
+        'recruitment.applicants.show' => ['cancelStatusChange', 'cancelArchive'],
+        // refreshNotes only re-renders, through the same scoped query as the first render.
+        'recruitment.applicants.notes' => ['cancelDelete', 'refreshNotes'],
 
         // --- Authentication -------------------------------------------------
         // Reached before a session exists, or acting only on the caller's own

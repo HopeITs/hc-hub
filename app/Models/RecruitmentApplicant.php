@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\RecruitmentScopeResolver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -35,6 +37,23 @@ class RecruitmentApplicant extends Model
     public function hiringConversions(): HasMany
     {
         return $this->hasMany(RecruitmentHiringConversion::class, 'applicant_id');
+    }
+
+    /** Known sources are translated; anything else is shown as stored, made readable. */
+    public static function sourceLabel(?string $source): string
+    {
+        if (blank($source)) {
+            return '—';
+        }
+
+        $key = 'recruitment-applicant.sources.'.$source;
+
+        return __($key) === $key ? str($source)->headline()->toString() : __($key);
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return app(RecruitmentScopeResolver::class)->scopeApplicants($query, $user);
     }
 
     protected function casts(): array

@@ -12,6 +12,8 @@ class RecruitmentApplicantFile extends Model implements HasMedia
 {
     use InteractsWithMedia;
 
+    public const TYPE_CV = 'cv';
+
     protected $guarded = ['id'];
 
     public function applicant(): BelongsTo
@@ -22,6 +24,16 @@ class RecruitmentApplicantFile extends Model implements HasMedia
     public function application(): BelongsTo
     {
         return $this->belongsTo(RecruitmentApplication::class);
+    }
+
+    public function archivedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'archived_by_user_id');
+    }
+
+    public function archiveNote(): BelongsTo
+    {
+        return $this->belongsTo(RecruitmentApplicantNote::class, 'archive_note_id')->withTrashed();
     }
 
     public function registerMediaCollections(): void
@@ -36,8 +48,21 @@ class RecruitmentApplicantFile extends Model implements HasMedia
         return $this->scan_status === RecruitmentFileScanStatus::Clean;
     }
 
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
+    }
+
+    public function isCv(): bool
+    {
+        return $this->file_type === self::TYPE_CV;
+    }
+
     protected function casts(): array
     {
-        return ['uploaded_at' => 'datetime'];
+        return [
+            'uploaded_at' => 'datetime',
+            'archived_at' => 'datetime',
+        ];
     }
 }

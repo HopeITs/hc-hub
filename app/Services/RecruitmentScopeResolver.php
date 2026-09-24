@@ -8,6 +8,8 @@ use App\Models\City;
 use App\Models\Contract;
 use App\Models\JobLevel;
 use App\Models\Position;
+use App\Models\RecruitmentApplicant;
+use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\User;
@@ -255,6 +257,112 @@ class RecruitmentScopeResolver
             'request',
             fn (Builder $requests): Builder => $this->scopeRequests($requests, $user),
         );
+    }
+
+    /** An application belongs to its campaign's request, like everything else. */
+    public function scopeApplications(Builder $query, User $user): Builder
+    {
+        return $query->whereHas(
+            'campaign.vacancy.createdFromRequest',
+            fn (Builder $requests): Builder => $this->scopeRequests($requests, $user),
+        );
+    }
+
+    /**
+     * An applicant is visible through an application in scope, or — only when
+     * they have no application at all — through their own city.
+     *
+     * The city branch exists for talent-pool records with nothing to inherit
+     * scope from. It deliberately stops once any application exists: a Homs
+     * applicant who applied to a Damascus campaign is Damascus's to see.
+     */
+    public function scopeApplicants(Builder $query, User $user): Builder
+    {
+        $type = $this->scopeType($user);
+
+        if ($type === RecruitmentScopeType::Organization) {
+            return $query;
+        }
+
+        if ($type === RecruitmentScopeType::None) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        return $query->where(function (Builder $applicants) use ($user, $type): void {
+            $applicants->whereHas(
+                'applications',
+                fn (Builder $applications): Builder => $this->scopeApplications($applications, $user),
+            );
+
+            if ($type === RecruitmentScopeType::City) {
+                $applicants->orWhere(fn (Builder $pool) => $pool
+                    ->whereIn($pool->qualifyColumn('city_id'), $this->governorateCityIds($user))
+                    ->whereDoesntHave('applications'));
+            }
+        });
+    }
+
+    /**
+     * Notes are scoped by what they are attached to, never by the applicant.
+     *
+     * An applicant can be visible to two governorates through two campaigns;
+     * each sees only the notes on its own application. A note on the applicant
+     * alone belongs to the applicant's own record (see ownsApplicantRecord()).
+     */
+    public function scopeApplicantNotes(Builder $query, User $user): Builder
+    {
+        $type = $this->scopeType($user);
+
+        if ($type === RecruitmentScopeType::Organization) {
+            return $query;
+        }
+
+        if ($type === RecruitmentScopeType::None) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        return $query->where(function (Builder $notes) use ($user, $type): void {
+            $notes->where(fn (Builder $attached) => $attached
+                ->whereNotNull($attached->qualifyColumn('application_id'))
+                ->whereHas('application', fn (Builder $applications): Builder => $this->scopeApplications($applications, $user)));
+
+            if ($type === RecruitmentScopeType::City) {
+                $notes->orWhere(fn (Builder $own) => $own
+                    ->whereNull($own->qualifyColumn('application_id'))
+                    ->whereHas('applicant', fn (Builder $applicants) => $applicants
+                        ->whereIn('city_id', $this->governorateCityIds($user))));
+            }
+        });
+    }
+
+    public function canAccessApplicant(User $user, RecruitmentApplicant $applicant): bool
+    {
+        return $this->scopeApplicants(RecruitmentApplicant::query(), $user)
+            ->whereKey($applicant->getKey())
+            ->exists();
+    }
+
+    public function canAccessApplication(User $user, RecruitmentApplication $application): bool
+    {
+        return $this->scopeApplications(RecruitmentApplication::query(), $user)
+            ->whereKey($application->getKey())
+            ->exists();
+    }
+
+    /**
+     * Records hanging off the applicant with no application to inherit scope
+     * from — an orphaned CV, a note on a talent-pool record. Organization-wide
+     * users reach them all; a governorate HR only its own cities'; a manager
+     * never, because nothing makes such a record his.
+     */
+    public function ownsApplicantRecord(User $user, RecruitmentApplicant $applicant): bool
+    {
+        return match ($this->scopeType($user)) {
+            RecruitmentScopeType::Organization => true,
+            RecruitmentScopeType::City => $applicant->city_id !== null
+                && in_array((int) $applicant->city_id, $this->governorateCityIds($user), true),
+            default => false,
+        };
     }
 
     /**

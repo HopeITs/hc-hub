@@ -283,6 +283,7 @@ return [
     'navigation_requests' => 'Requests',
     'navigation_pending_approvals' => 'Pending approvals',
     'navigation_campaigns' => 'Campaigns',
+    'navigation_applicants' => 'Applicants',
     'list_description' => 'Track recruitment and headcount requests within your authorized scope.',
     'details' => 'Request details',
     'back' => 'Back to requests',

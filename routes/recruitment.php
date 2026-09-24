@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\RecruitmentApplicantFileController;
+use App\Livewire\Recruitment\Applicants\Index as ApplicantIndex;
+use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
 use App\Livewire\Recruitment\Approvals\Pending;
 use App\Livewire\Recruitment\Campaigns\Create as CampaignCreate;
 use App\Livewire\Recruitment\Campaigns\Index as CampaignIndex;
@@ -35,6 +37,15 @@ Route::prefix('recruitment/campaigns')->name('recruitment.campaigns.')
         Route::get('/create', CampaignCreate::class)
             ->middleware('active_permission:recruitment-campaigns.manage')->name('create');
         Route::get('/{campaignId}', CampaignShow::class)->whereNumber('campaignId')->name('show');
+    });
+
+// The permission is the outer wall; each applicant is re-resolved through the
+// recruitment scope inside the component, so a guessed id is a 404.
+Route::prefix('recruitment/applicants')->name('recruitment.applicants.')
+    ->middleware('active_permission:recruitment-applicants.view')
+    ->group(function () {
+        Route::get('/', ApplicantIndex::class)->name('index');
+        Route::get('/{applicantId}', ApplicantShow::class)->whereNumber('applicantId')->name('show');
     });
 
 // No permission middleware on purpose: the policy enforces it, so a refused

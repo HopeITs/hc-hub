@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\RecruitmentScopeResolver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -54,6 +56,11 @@ class RecruitmentApplication extends Model
         return $this->hasMany(RecruitmentApplicantFile::class, 'application_id');
     }
 
+    public function cvFiles(): HasMany
+    {
+        return $this->files()->where('file_type', RecruitmentApplicantFile::TYPE_CV);
+    }
+
     public function tagAssignments(): HasMany
     {
         return $this->hasMany(RecruitmentApplicationTag::class, 'application_id');
@@ -89,6 +96,11 @@ class RecruitmentApplication extends Model
     public function jobOffer(): HasOne
     {
         return $this->hasOne(RecruitmentJobOffer::class, 'application_id');
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return app(RecruitmentScopeResolver::class)->scopeApplications($query, $user);
     }
 
     protected function casts(): array

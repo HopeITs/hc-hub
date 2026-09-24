@@ -164,7 +164,7 @@ class RecruitmentApplicantFileSecurityTest extends TestCase
         $this->assertStringContainsString('no-store', (string) $download->headers->get('cache-control'));
 
         $otherCity = $this->makeCity('ALP', '001');
-        $otherHr = $this->makeUser($otherCity, 'HR-ALP', ['recruitment-campaigns.manage']);
+        $otherHr = $this->makeUser($otherCity, 'HR-ALP', ['recruitment-applicants.download-cv']);
 
         $this->actingAs($otherHr)
             ->get(route('recruitment.applicant-files.download', $clean))
@@ -270,7 +270,7 @@ class RecruitmentApplicantFileSecurityTest extends TestCase
             ->assertHeader('content-type', 'application/pdf')
             ->assertDownload('Samer CV.pdf');
 
-        $otherHr = $this->makeUser($this->makeCity('ALP', '001'), 'HR-ALP', ['recruitment-campaigns.manage']);
+        $otherHr = $this->makeUser($this->makeCity('ALP', '001'), 'HR-ALP', ['recruitment-applicants.download-cv']);
         $this->actingAs($otherHr)->get(route('recruitment.applicant-files.download', $file))->assertForbidden();
 
         $employee = $this->makeUser($this->makeCity('LAT', '004'), 'employee');
@@ -360,7 +360,7 @@ class RecruitmentApplicantFileSecurityTest extends TestCase
             'filled_count' => 0,
             'open_at' => now(),
         ]);
-        $hr = $this->makeUser($city, 'HR-HMS', ['recruitment-campaigns.manage']);
+        $hr = $this->makeUser($city, 'HR-HMS', ['recruitment-applicants.download-cv']);
         $campaign = HiringCampaign::query()->forceCreate([
             'vacancy_id' => $vacancy->id,
             'status' => HiringCampaignStatus::Open,
