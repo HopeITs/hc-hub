@@ -36,12 +36,16 @@ class ChecklistAssigned extends Notification
 
             $bodyEn = "Please deliver {$item} to {$employee?->name_en}";
             $bodyAr = "يرجى تسليم {$item} إلى {$employee?->name_ar}";
+
+            $url = route('checklist-items.pending-delivers');
         } else {
             $titleEn = 'Receive Item';
             $titleAr = 'استلام عنصر';
 
             $bodyEn = "Please receive {$item} from {$employee?->name_en}";
             $bodyAr = "يرجى استلام {$item} من {$employee?->name_ar}";
+
+            $url = route('checklist-items.pending-returns');
         }
 
         return [
@@ -54,7 +58,7 @@ class ChecklistAssigned extends Notification
                 'en' => $bodyEn,
                 'ar' => $bodyAr,
             ],
-            'url' => route('checklist-items.pending-delivers'),
+            'url' => $url,
         ];
     }
 }

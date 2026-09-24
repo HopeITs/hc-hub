@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedSalary;
 use App\Traits\HasTranslation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +20,9 @@ class ContractPayTier extends Model
     ];
 
     protected $casts = [
-        'amount' => 'decimal:2',
+        // A flexible contract's pay lives here instead of in contracts.salary;
+        // it is the same secret and is protected the same way.
+        'amount' => EncryptedSalary::class,
         'sort_order' => 'integer',
     ];
 

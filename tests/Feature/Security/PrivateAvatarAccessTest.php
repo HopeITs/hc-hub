@@ -66,6 +66,17 @@ class PrivateAvatarAccessTest extends TestCase
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
     }
 
+    public function test_an_employee_role_user_without_employees_view_can_still_see_a_colleagues_photo(): void
+    {
+        $aleppo = $this->makeCity('ALP', '001');
+        $subject = $this->withPhoto($this->makeEmployee($aleppo, 'aleppo-subject'));
+        $viewer = $this->makeUser($aleppo, 'employee', []);
+
+        $this->actingAs($viewer)
+            ->get(route('employees.avatar', $subject))
+            ->assertOk();
+    }
+
     public function test_the_digital_id_photo_requires_a_valid_signature(): void
     {
         $city = $this->makeCity('DIG', '998');

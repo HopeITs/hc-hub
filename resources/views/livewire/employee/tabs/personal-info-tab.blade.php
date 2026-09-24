@@ -4,7 +4,7 @@
 @endphp
 
 @if ($isCreateMode && $showDraftPrompt)
-    <div class="flex flex-col space-y-6">
+    <div class="flex flex-col space-y-6" data-tour="employee.draft">
         <x-heading-label>@lang('general.assign-position-draft')</x-heading-label>
         <p class="text-sm text-neutral-500">@lang('general.assign-position-draft-description')</p>
 
@@ -67,7 +67,7 @@
     </div>
 @else
 <form wire:submit.prevent="saveInformation" class="flex flex-col space-y-6">
-    <div class="">
+    <div class="" data-tour="employee.photo">
         <x-forms.input-label for="photo">@lang('general.photo')</x-forms.input-label>
         <x-forms.file-input wire:model.live="infoForm.photo" id="photo" name="infoForm.photo" preview-type="avatar"
             accept="image/*" :old-file="$infoForm->photo" />
@@ -294,7 +294,7 @@
             FAILED — which hid this tab, and with it every error message
             belonging to its fields. In edit mode the save simply stays put.
         --}}
-        <x-primary-button type="button" wire:click="saveInformation"
+        <x-primary-button type="button" wire:click="saveInformation" data-tour="employee.save"
             class="!w-auto" x-bind:disabled="! dirty">
             @lang($isCreateMode ? 'general.next' : 'general.save')
         </x-primary-button>

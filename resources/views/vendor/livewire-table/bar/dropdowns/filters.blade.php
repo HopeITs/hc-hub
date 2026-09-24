@@ -1,7 +1,7 @@
 @php($filters = $this->resolveFilters())
 
 @if($filters->isNotEmpty())
-    <x-livewire-table::dropdown label="{{ __('Filters') }}" :active="count($this->filters) > 0">
+    <x-livewire-table::dropdown label="{{ __('Filters') }}" :active="count($this->filters) > 0" data-tour="table.filters">
         <x-slot name="icon">
             <!-- Icon "adjustments-horizontal" (outline) from https://heroicons.com -->
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">

@@ -19,10 +19,10 @@ class ShowDigitalId extends Component
         App::setLocale('en');
     }
 
-    public function mount(string $token): void
+    public function mount(string $username): void
     {
         $this->employee = Employee::query()
-            ->where('digital_id_token', $token)
+            ->where('username', $username)
             ->where('is_active', true)
             // A deactivated employee's card, and a card that has been
             // explicitly disabled after being lost, both stop resolving here.

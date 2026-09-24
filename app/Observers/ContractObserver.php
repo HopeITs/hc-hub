@@ -6,6 +6,7 @@ use App\Enums\ContractType as ContractTypeEnum;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Position;
+use App\Services\ChecklistWorkflow;
 use App\Support\StatisticsCache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -130,6 +131,16 @@ class ContractObserver
 
     public function updated(Contract $contract): void
     {
+        // HR just switched this contract off auto-renew: the volunteer's
+        // time here is now finite, so start collecting back whatever
+        // equipment is still checked out to them instead of leaving it for
+        // whoever notices on the last day.
+        if ($contract->wasChanged('auto_renew')
+            && (bool) $contract->getOriginal('auto_renew')
+            && ! $contract->auto_renew) {
+            app(ChecklistWorkflow::class)->requestBelongingsReturn($contract->employee);
+        }
+
         if ($this->wasUpgradedFromDraft($contract)) {
             $pos = Position::query()
                 ->whereKey($contract->position_id)

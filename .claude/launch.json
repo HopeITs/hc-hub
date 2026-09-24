@@ -2,10 +2,25 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "hope-hr",
+      "name": "hc-hr (composer dev)",
+      "runtimeExecutable": "composer",
+      "runtimeArgs": ["dev"],
+      "port": 8000,
+      "autoPort": false
+    },
+    {
+      "name": "hc-hr (artisan serve)",
       "runtimeExecutable": "php",
-      "runtimeArgs": ["-S", "127.0.0.1:8000", "-t", "public", "server.php"],
-      "port": 8000
+      "runtimeArgs": ["artisan", "serve", "--port=8299"],
+      "port": 8299,
+      "autoPort": false
+    },
+    {
+      "name": "hc-hr (php 8.5 serve)",
+      "runtimeExecutable": "C:/laragon/bin/php/php-8.5/php.exe",
+      "runtimeArgs": ["artisan", "serve", "--port=8385"],
+      "port": 8385,
+      "autoPort": false
     }
   ]
 }

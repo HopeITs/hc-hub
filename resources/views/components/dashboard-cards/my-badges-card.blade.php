@@ -40,7 +40,7 @@
                  wire:key="badge-{{ $badge->id }}">
 
                 <p class="text-[13px] font-bold uppercase {{ $colorClass }}">
-                    {{ $badge->reason ?? __('No reason provided') }}
+                    {{ $badge->reason ?: \App\Enums\BadgeSubtype::getLocalizedName($badge->subtype) }}
                 </p>
 
                 <span class="text-[11px] text-[#888]">

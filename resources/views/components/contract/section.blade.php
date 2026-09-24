@@ -8,6 +8,7 @@
 @php($state = "stateOf('{$name}')")
 
 <section
+    data-tour="contract.{{ $name }}"
     {{-- No overflow-hidden: the comboboxes inside render an absolutely
          positioned listbox that must be free to escape this card. --}}
     class="rounded-surface border transition-colors"

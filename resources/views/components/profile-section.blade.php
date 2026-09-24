@@ -58,6 +58,7 @@
 
 <section
     x-data="{ open: false }"
+    {{ $attributes->only('data-tour') }}
     class="rounded-surface border {{ $private ? 'border-primary' : 'border-neutral-200' }} bg-white p-4 shadow-e1 sm:rounded-surface sm:p-9"
 >
     <button

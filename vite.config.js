@@ -30,10 +30,10 @@ export default defineConfig({
                  * resources/js/charts/lazy-charts.js, and naming it here would
                  * pull it back into a chunk that loads eagerly.
                  */
-                manualChunks: {
-                    vendor: ['jquery', 'select2', 'flowbite'],
-                    charts: ['chart.js'],
-                    alerts: ['sweetalert2'],
+                manualChunks(id) {
+                    if (/node_modules[\\/](jquery|select2|flowbite)[\\/]/.test(id)) return 'vendor';
+                    if (/node_modules[\\/]chart\.js[\\/]/.test(id)) return 'charts';
+                    if (/node_modules[\\/]sweetalert2[\\/]/.test(id)) return 'alerts';
                 },
             },
         },

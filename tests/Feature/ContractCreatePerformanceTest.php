@@ -339,10 +339,13 @@ class ContractCreatePerformanceTest extends TestCase
 
         $this->assertDatabaseHas('contracts', [
             'id' => $contract->id,
-            'salary' => 750,
             'is_active' => true,
             'terminated_at' => null,
         ]);
+
+        // Read through the model, not the column: salary is stored encrypted,
+        // so the row holds a ciphertext envelope rather than the figure.
+        $this->assertSame('750.00', $contract->fresh()->salary);
     }
 
     public function test_recording_a_termination_on_edit_deactivates_the_contract(): void
@@ -391,13 +394,15 @@ class ContractCreatePerformanceTest extends TestCase
             'employee_id' => $fixtures['employee']->id,
             'position_id' => $fixtures['position']->id,
             'contract_type_id' => $fixtures['trialType']->id,
-            'salary' => 500,
             'weekly_hours' => 40,
             'is_active' => true,
             // Never set on create, whatever the client sends.
             'terminated_at' => null,
             'termination_reason_id' => null,
         ]);
+
+        // Encrypted at rest — see the edit test above.
+        $this->assertSame('500.00', Contract::latest('id')->first()->salary);
     }
 
     private function makeExistingContract(array $fixtures): Contract

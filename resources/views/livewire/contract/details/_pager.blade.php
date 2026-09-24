@@ -1,4 +1,4 @@
-<div class="no-print mx-auto w-[210mm] rounded-xl sticky bottom-0 mt-8 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur
+<div data-tour="contract-details.pager" class="no-print mx-auto w-[210mm] rounded-xl sticky bottom-0 mt-8 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur
             border-t border-gray-200 dark:border-gray-700">
     <div class="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between gap-3">
         <div class="text-sm opacity-70">Page {{ $pageNo }} of {{ $totalPages }}</div>

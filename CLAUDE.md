@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 HC-HR is an HR management system for "Christian Hope Center" (multi-city Syrian NGO).
-Stack: Laravel 12, Livewire 3 (+ Volt + Flux), Tailwind CSS 4, MySQL. Bilingual EN/AR with RTL.
+Stack: PHP 8.5, Laravel 13, Livewire 4 (+ Volt + Flux), Tailwind CSS 4, Vite 8, MySQL. Bilingual EN/AR with RTL.
 
 ## Role
 
@@ -27,12 +27,14 @@ Custom artisan commands (in `app/Console/Commands`):
 - contract / employee deactivation commands
 
 ### Environment gotchas (Laragon on Windows)
-- The **web server runs PHP 8.4.21** while the **CLI runs PHP 8.3.21** — they use different `php.ini` files. A change that affects uploads/config must be applied to the web PHP's ini, not just the CLI's. `upload_tmp_dir` is set to `C:/laragon/tmp` in both.
+- The app requires **PHP 8.5** (`C:/laragon/bin/php/php-8.5`), for both the web server (Laragon → PHP menu) and the CLI. Older PHP installs are still in `C:/laragon/bin/php`, and each version has its own `php.ini`, so a change that affects uploads/config must go into 8.5's. `upload_tmp_dir` is `C:/laragon/tmp`.
+- Livewire 4 tests: a `ModelNotFoundException` inside a component call becomes a 404 response instead of being thrown. Assert it with `->assertNotFound()`, not `expectException`.
+- Vite 8 bundles with Rolldown: `manualChunks` must be a function, not an object.
 - Tests run on sqlite `:memory:` (see `phpunit.xml`); dev/prod use MySQL.
 
 ## Architecture
 
-### Laravel 12 layout
+### Laravel 13 layout
 No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are configured in `bootstrap/app.php`. Service wiring (observer registration, Blade directives, query macros) lives in `app/Providers/AppServiceProvider.php`.
 
 ### Localization & translatable columns
@@ -49,15 +51,23 @@ No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are config
 ### Contracts & position capacity
 `ContractObserver` (registered in `AppServiceProvider`) keeps each `Position.exist_emp` counter in sync using `lockForUpdate`, and enforces capacity via `Position::canAssign()`. It **skips the capacity check when `runningInConsole()`** so bulk Excel/CLI imports don't fail.
 
+### Pay figures (security-critical)
+`contracts.salary` and `contract_pay_tiers.amount` are **encrypted at rest under their own key**, not under `APP_KEY` — a database copy usually travels with a developer `.env`, and `APP_KEY` with it. The key is `SALARY_ENCRYPTION_KEY` (`php artisan salary:key:generate`), set on production only; `config/salary.php` falls back to `APP_KEY` so local databases and the suite keep working.
+- `App\Services\SalaryCipher` returns **null instead of throwing** for a value it cannot decrypt — a copy without the key must stay usable. `App\Casts\EncryptedSalary` then **refuses to overwrite a figure it could not read**, so working on such a copy cannot destroy the originals. Its `compare()` decrypts before diffing; without it every save would look like a pay change (fresh IV each time).
+- Decryption failure is silent by design, so a misconfigured host looks exactly like a working one. `php artisan salary:key:check` is what tells them apart — run it after any deploy or key change.
+- The migration widens the columns to `text` **except on SQLite**, where `change()` rebuilds the table and dropping `contracts` fires `contract_pay_tiers`' `ON DELETE CASCADE`, wiping every flexible contract's pay schedule. SQLite type affinity keeps the envelope verbatim anyway.
+- **`User::canViewSalary()` is the single source of truth for who may see a figure**, and `super-admin` is refused by name in `config('salary.blind_roles')` — it holds every permission automatically, so a `salaries.view` permission would be granted to the one role that must not have it. Callers add their own city scope, the same way they already do for every other HR-only view.
+- Roles that may not see figures get them **withheld on load and preserved on save** (`ContractForm::preserveHiddenPay`, `BadgeForm::save`) — never disabled inputs, because the values are never sent to that browser at all. The PDF export is refused outright: the document *is* the pay clause.
+
 ### Media / avatars
 `Employee implements HasMedia` (Spatie MediaLibrary). Avatars live in the singleFile `avatar` collection with a fallback to `public/images/default-avatar.png`. Read with `getFirstMediaUrl('avatar')`.
 - **Never re-encode stored PNGs in place** (e.g. GD `imagesavealpha` on images without an alpha channel) — this turned photo backgrounds black. If thumbnails are ever needed, generate conversions from the source without touching the stored original.
 
 ### Contract PDF export
-`ContractPdfRenderer` (in `app/Services/`) renders `resources/views/pdf/contract.blade.php` through Browsershot; the controller only authorizes and sets headers. Host-specific settings all live in `config/browsershot.php` so a server can be corrected from `.env` alone.
-- **Nothing large may travel on node's stdout.** Browsershot parses that stdout as JSON and treats a parse failure as *success* — `$output['result'] ?? ''`, base64-decoded, is an empty string returned with exit code 0. `savePdf()` (not `pdf()`) plus `disableCaptureURLS()` keeps stdout at a few hundred bytes; with `pdf()` and URL capture it was ~635 KB per contract (the PDF as base64, plus every inlined font/image data URI echoed back), and whatever truncated it on the server surfaced as a 0-byte "PDF".
-- When a render fails, surface `Browsershot::getOutput()` (node's exception, page errors, console, failed requests). Without it the only symptom is a byte count, which is never enough to act on.
-- `php artisan contracts:export-doctor [contract]` runs the same pipeline on a host and reports Chrome, node, puppeteer resolution, directory permissions and the raw stdout/stderr/exit code. Run it on the server before changing anything.
+`ContractPdfRenderer` (in `app/Services/`) renders `resources/views/pdf/contract.blade.php` through Browsershot; the controller only authorizes and sets headers. Only three settings are host-specific — `BROWSERSHOT_CHROME_PATH`, `BROWSERSHOT_NODE_BINARY`, `BROWSERSHOT_TIMEOUT`.
+- **On a Linux server point `BROWSERSHOT_CHROME_PATH` at the distribution's own Chromium** (`/usr/bin/chromium`). A Chrome unpacked by hand into a home directory brings none of the system integration it expects and dies during startup with nothing on stderr but D-Bus and PCI complaints.
+- **Nothing large may travel on node's stdout.** Browsershot parses that stdout as JSON and treats a parse failure as *success* — `$output['result'] ?? ''`, base64-decoded, is an empty string returned with exit code 0. `savePdf()` (not `pdf()`) plus `disableCaptureURLS()` keeps stdout small; with `pdf()` and URL capture it was ~635 KB per contract and whatever truncated it on the server surfaced as a 0-byte "PDF".
+- `php artisan contracts:export-doctor [contract]` runs the same pipeline on a host and reports Chrome, node, puppeteer resolution, directory permissions and the raw stdout/stderr/exit code, printing Chrome's own output in full when a launch fails. Run it on the server before changing anything.
 
 ### Livewire conventions
 - Components in `app/Livewire/<Domain>/`; reusable form objects in `app/Livewire/Forms/` (Livewire `Form` classes). Extracted domain logic lives in `app/Services/` (e.g. `LeaveBalanceService`).

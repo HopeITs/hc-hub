@@ -109,7 +109,6 @@ class EmployeeTable extends LivewireTable
         return $this->model()::query()
             ->with([
                 'contracts.position.directManager.activeContracts',
-                'contracts.position.techManager.activeContracts',
                 'account',
                 'media',
             ])
@@ -206,23 +205,6 @@ class EmployeeTable extends LivewireTable
                     });
                 }),
 
-            SelectColumn::make(trans('general.tech_manager'), 'tech_manager')
-                ->displayUsing(function ($v, Model $model) {
-                    return $model->latestActiveContract()?->position->techManager?->employee()?->name ?? '—';
-                })
-                ->options($this->managerOptions())
-                ->sortable()
-                ->searchable(function (Builder $builder, mixed $search, SearchScope $scope): void {
-                    $builder->whereHas('positions', function (Builder $builder) use ($search) {
-                        $builder->whereHas('techManager', function (Builder $builder) use ($search) {
-                            $builder->whereHas('contracts', function (Builder $builder) use ($search) {
-                                $builder->whereHas('employee', function (Builder $builder) use ($search) {
-                                    $builder->where('id', $search);
-                                });
-                            });
-                        });
-                    });
-                }),
             SelectColumn::make(trans('general.position'), 'contracts.position.'.transColumn('title'))
                 ->options(Position::query()->orderby(transColumn('title'), 'asc')->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
                 ->sortable()->searchable(),

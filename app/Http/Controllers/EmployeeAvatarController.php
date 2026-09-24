@@ -30,7 +30,10 @@ class EmployeeAvatarController extends Controller
 {
     public function internal(Employee $employee): BinaryFileResponse|StreamedResponse
     {
-        Gate::authorize('view', $employee);
+        // A face photo isn't as sensitive as the rest of an employee record,
+        // so this checks the lighter 'viewAvatar' ability (any signed-in
+        // user, still bounded by HR city scope) rather than 'view'.
+        Gate::authorize('viewAvatar', $employee);
 
         return $this->stream($employee, 'private, max-age=300, must-revalidate');
     }
