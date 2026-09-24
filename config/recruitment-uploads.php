@@ -7,6 +7,8 @@ return [
 
     'max_bytes' => 10 * 1024 * 1024,
     'inspection_bytes' => 512 * 1024,
+    // Total inflated size allowed while searching a PDF's streams for active content.
+    'pdf_max_inflated_bytes' => 50 * 1024 * 1024,
 
     'docx' => [
         'max_entries' => 1000,

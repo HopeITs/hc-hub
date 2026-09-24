@@ -9,6 +9,7 @@ use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
 use App\Exceptions\UnsafeRecruitmentFileException;
+use App\Http\Controllers\RecruitmentApplicantFileController;
 use App\Models\ApplicationForm;
 use App\Models\Department;
 use App\Models\HiringCampaign;
@@ -29,6 +30,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter;
 use Mcamara\LaravelLocalization\Middleware\LocaleSessionRedirect;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\DiskDoesNotExist;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
@@ -182,6 +184,121 @@ class RecruitmentApplicantFileSecurityTest extends TestCase
         $this->actingAs($hr)
             ->get(route('recruitment.applicant-files.download', $failed))
             ->assertForbidden();
+    }
+
+    public function test_file_metadata_comes_from_the_stored_bytes_and_a_sanitized_name(): void
+    {
+        [$application] = $this->makeApplication();
+        $upload = $this->pdf("..\\../etc/Samer\x07 CV:final.PDF");
+
+        $file = app(RecruitmentApplicantFileService::class)->store($application, $upload, 'cv');
+        $media = $file->getFirstMedia('document');
+
+        // All metadata lives on the Spatie media row; no extra columns or tables.
+        $this->assertSame('Samer CVfinal.pdf', $media->name);
+        $this->assertStringNotContainsString('Samer', $media->file_name);
+        $this->assertSame('application/pdf', $media->getCustomProperty('detected_mime'));
+        $this->assertSame(Storage::disk('recruitment-quarantine')->size($media->getPathRelativeToRoot()), (int) $media->size);
+        $this->assertSame(RecruitmentFileScanStatus::Pending, $file->scan_status);
+    }
+
+    public function test_pdfs_carrying_active_content_are_rejected(): void
+    {
+        [$application] = $this->makeApplication();
+        $service = app(RecruitmentApplicantFileService::class);
+        $hidden = gzcompress('<< /Type /Action /S /Launch /F (cmd.exe) >>');
+
+        foreach ([
+            "%PDF-1.4\n1 0 obj\n<< /OpenAction << /S /JavaScript /JS (app.alert(1)) >> >>\nendobj\n%%EOF\n",
+            "%PDF-1.4\n1 0 obj\n<< /S /J#61vaScript >>\nendobj\n%%EOF\n",
+            "%PDF-1.4\n1 0 obj\n<< /Names << /EmbeddedFiles 2 0 R >> >>\nendobj\n%%EOF\n",
+            "%PDF-1.5\n1 0 obj\n<< /Type /ObjStm /Filter /FlateDecode >>\nstream\n{$hidden}\nendstream\nendobj\n%%EOF\n",
+        ] as $index => $content) {
+            try {
+                $service->store($application, UploadedFile::fake()->createWithContent('cv.pdf', $content), 'cv');
+                $this->fail("Active PDF #{$index} was accepted.");
+            } catch (UnsafeRecruitmentFileException) {
+                // Expected.
+            }
+        }
+
+        $this->assertDatabaseCount('recruitment_applicant_files', 0);
+
+        // A compressed stream with ordinary page content is still accepted.
+        $page = gzcompress('BT /F1 12 Tf 72 712 Td (Curriculum Vitae) Tj ET');
+        $service->store($application, UploadedFile::fake()->createWithContent(
+            'cv.pdf',
+            "%PDF-1.4\n1 0 obj\n<< /Length 50 /Filter /FlateDecode >>\nstream\n{$page}\nendstream\nendobj\n%%EOF\n",
+        ), 'cv');
+        $this->assertDatabaseCount('recruitment_applicant_files', 1);
+    }
+
+    public function test_pdf_stream_inspection_accepts_sync_flushed_streams_and_caps_inflation(): void
+    {
+        [$application] = $this->makeApplication();
+        $service = app(RecruitmentApplicantFileService::class);
+        $wrap = fn (string $stream): string => "%PDF-1.5\n1 0 obj\n<< /Filter /FlateDecode >>\nstream\n{$stream}\nendstream\nendobj\n%%EOF\n";
+
+        // Real writers end xref streams with a sync flush and no final block.
+        $deflate = deflate_init(ZLIB_ENCODING_DEFLATE);
+        $syncFlushed = deflate_add($deflate, '<< /Type /XRef /W [1 2 1] >>', ZLIB_SYNC_FLUSH);
+        $service->store($application, UploadedFile::fake()->createWithContent('cv.pdf', $wrap($syncFlushed)), 'cv');
+        $this->assertDatabaseCount('recruitment_applicant_files', 1);
+
+        config(['recruitment-uploads.pdf_max_inflated_bytes' => 64 * 1024]);
+        $this->expectException(UnsafeRecruitmentFileException::class);
+        $service->store(
+            $application,
+            UploadedFile::fake()->createWithContent('bomb.pdf', $wrap(gzcompress(str_repeat("\0", 1024 * 1024)))),
+            'portfolio',
+        );
+    }
+
+    public function test_every_download_attempt_is_audited_with_its_outcome(): void
+    {
+        [$application, $hr] = $this->makeApplication();
+        $service = app(RecruitmentApplicantFileService::class);
+        $file = $service->store($application, $this->pdf('Samer CV.pdf'), 'cv');
+
+        $this->actingAs($hr)->get(route('recruitment.applicant-files.download', 999999))->assertNotFound();
+        $this->actingAs($hr)->get(route('recruitment.applicant-files.download', $file))->assertForbidden();
+
+        $service->markClean($file);
+
+        $this->actingAs($hr)->get(route('recruitment.applicant-files.download', $file))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertDownload('Samer CV.pdf');
+
+        $otherHr = $this->makeUser($this->makeCity('ALP', '001'), 'HR-ALP', ['recruitment-campaigns.manage']);
+        $this->actingAs($otherHr)->get(route('recruitment.applicant-files.download', $file))->assertForbidden();
+
+        $employee = $this->makeUser($this->makeCity('LAT', '004'), 'employee');
+        $this->actingAs($employee)->get(route('recruitment.applicant-files.download', $file))->assertForbidden();
+
+        $events = Activity::query()
+            ->where('log_name', RecruitmentApplicantFileController::AUDIT_LOG)
+            ->orderBy('id')
+            ->get();
+        $this->assertSame(
+            [
+                [999999, $hr->id, 'not_found', 'no_record'],
+                [$file->id, $hr->id, 'denied', 'scan_pending'],
+                [$file->id, $hr->id, 'success', null],
+                [$file->id, $otherHr->id, 'denied', 'out_of_scope'],
+                [$file->id, $employee->id, 'denied', 'missing_permission'],
+            ],
+            $events->map(fn (Activity $event): array => [
+                (int) $event->getExtraProperty('file_id'),
+                (int) $event->causer_id,
+                $event->getExtraProperty('outcome'),
+                $event->getExtraProperty('reason'),
+            ])->all(),
+        );
+        $this->assertNull($events[0]->subject_id);
+        $this->assertSame($file->id, (int) $events[2]->subject_id);
+        $this->assertSame('HR-HMS', $events[2]->getExtraProperty('role'));
+        $this->assertNotNull($events[2]->getExtraProperty('ip_address'));
     }
 
     private function pdf(string $name): UploadedFile

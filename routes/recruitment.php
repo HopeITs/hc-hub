@@ -37,6 +37,9 @@ Route::prefix('recruitment/campaigns')->name('recruitment.campaigns.')
         Route::get('/{campaignId}', CampaignShow::class)->whereNumber('campaignId')->name('show');
     });
 
+// No permission middleware on purpose: the policy enforces it, so a refused
+// attempt still reaches the controller and lands in the download audit.
 Route::get('recruitment/applicant-files/{file}/download', [RecruitmentApplicantFileController::class, 'download'])
-    ->middleware(['active_permission:recruitment-campaigns.manage', 'throttle:60,1'])
+    ->whereNumber('file')
+    ->middleware('throttle:60,1')
     ->name('recruitment.applicant-files.download');

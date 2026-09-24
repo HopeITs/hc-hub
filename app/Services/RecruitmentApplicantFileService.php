@@ -64,6 +64,8 @@ class RecruitmentApplicantFileService
                 throw UnsafeRecruitmentFileException::make('unreadable');
             }
 
+            $originalName = $this->displayName($upload->getClientOriginalName(), $storedExtension);
+
             $storedName = Str::uuid()->toString().'.'.$storedExtension;
             $record = DB::transaction(function () use (
                 $application,
@@ -73,6 +75,7 @@ class RecruitmentApplicantFileService
                 $storedName,
                 $detectedMime,
                 $sha256,
+                $originalName,
                 &$media,
             ): RecruitmentApplicantFile {
                 RecruitmentApplication::query()
@@ -97,8 +100,11 @@ class RecruitmentApplicantFileService
                     'uploaded_at' => now(),
                 ]);
 
+                // The media row is the file's metadata: name holds the sanitized
+                // original name (display only), file_name the generated storage
+                // name, plus size and the MIME type detected from the bytes.
                 $media = $file->addMedia($sourcePath)
-                    ->usingName($fileType)
+                    ->usingName($originalName)
                     ->usingFileName($storedName)
                     ->withCustomProperties([
                         'detected_mime' => $detectedMime,
@@ -252,6 +258,8 @@ class RecruitmentApplicantFileService
             throw UnsafeRecruitmentFileException::make('content_mismatch');
         }
 
+        $this->assertNoActiveContent($path, $detected['extension']);
+
         if ($detected['extension'] === 'jpg' && $extension === 'jpeg') {
             $extension = 'jpg';
         }
@@ -304,6 +312,112 @@ class RecruitmentApplicantFileService
         }
 
         throw UnsafeRecruitmentFileException::make('content_mismatch');
+    }
+
+    /**
+     * The signature proves what a file is, not that it is inert. PDFs can carry
+     * scripts, launch actions and embedded files; legacy .doc files can carry
+     * VBA macros. None of these belong in a CV, so they are refused outright.
+     * (.docx macros are refused in isWordDocument(); images are re-encoded.)
+     */
+    private function assertNoActiveContent(string $path, string $extension): void
+    {
+        if (! in_array($extension, ['pdf', 'doc'], true)) {
+            return;
+        }
+
+        $contents = file_get_contents($path);
+        if (! is_string($contents)) {
+            throw UnsafeRecruitmentFileException::make('unreadable');
+        }
+
+        if ($extension === 'doc') {
+            // Every VBA project stores a stream with this UTF-16LE name.
+            if (str_contains($contents, mb_convert_encoding('_VBA_PROJECT', 'UTF-16LE', 'ASCII'))) {
+                throw UnsafeRecruitmentFileException::make('executable');
+            }
+
+            return;
+        }
+
+        // Object streams can hide dictionaries inside compressed data, so the
+        // inflated streams are searched too — capped, so a zip bomb costs nothing.
+        $budget = (int) config('recruitment-uploads.pdf_max_inflated_bytes');
+        $haystacks = [$contents];
+        if (preg_match_all('/stream\r?\n(.*?)endstream/s', $contents, $streams) > 0) {
+            foreach ($streams[1] as $stream) {
+                if ($budget <= 0) {
+                    throw UnsafeRecruitmentFileException::make('too_large');
+                }
+                // Images and other non-Flate streams are skipped; a Flate stream
+                // that cannot be read within the budget is refused, not skipped.
+                if (preg_match('/^\x78[\x01\x5E\x9C\xDA]/', $stream) !== 1) {
+                    continue;
+                }
+                $inflated = $this->inflatePdfStream($stream, $budget);
+                $budget -= strlen($inflated);
+                $haystacks[] = $inflated;
+            }
+        }
+
+        foreach ($haystacks as $haystack) {
+            // PDF names may hex-escape any character (/J#61vaScript), so decode first.
+            $decoded = preg_replace_callback(
+                '/#([0-9A-Fa-f]{2})/',
+                fn (array $match): string => chr((int) hexdec($match[1])),
+                $haystack,
+            ) ?? $haystack;
+
+            // Every script action names /S /JavaScript, so the bare /JS key (too
+            // short to search binary data for) never needs matching on its own.
+            if (preg_match('#/(?:JavaScript|Launch|EmbeddedFiles?|RichMedia|XFA|SubmitForm|ImportData)(?![A-Za-z0-9])#', $decoded) === 1) {
+                throw UnsafeRecruitmentFileException::make('executable');
+            }
+        }
+    }
+
+    /**
+     * Incremental rather than zlib_decode(): writers commonly end PDF streams
+     * with a sync flush and no final block, which readers accept but
+     * zlib_decode() rejects. Feeding small chunks bounds each step's output,
+     * so the budget is enforced before a bomb can expand in memory.
+     */
+    private function inflatePdfStream(string $stream, int $budget): string
+    {
+        $context = inflate_init(ZLIB_ENCODING_DEFLATE);
+        if ($context === false) {
+            throw UnsafeRecruitmentFileException::make('unreadable');
+        }
+
+        $output = '';
+        foreach (str_split($stream, 1024) as $chunk) {
+            $piece = @inflate_add($context, $chunk, ZLIB_SYNC_FLUSH);
+            if (! is_string($piece)) {
+                throw UnsafeRecruitmentFileException::make('content_mismatch');
+            }
+
+            $output .= $piece;
+            if (strlen($output) > $budget) {
+                throw UnsafeRecruitmentFileException::make('too_large');
+            }
+
+            if (inflate_get_status($context) === ZLIB_STREAM_END) {
+                break;
+            }
+        }
+
+        return $output;
+    }
+
+    /** A safe display name: no path, no control characters, and the detected extension. */
+    private function displayName(string $clientName, string $extension): string
+    {
+        $name = str_replace(['\\', '/'], '_', $clientName);
+        $name = preg_replace('/[\x00-\x1F\x7F"<>|:*?]+/u', '', $name) ?? '';
+        $stem = trim(pathinfo($name, PATHINFO_FILENAME), " .\t");
+        $stem = Str::limit($stem === '' ? 'file' : $stem, 200, '');
+
+        return "{$stem}.{$extension}";
     }
 
     private function isWordDocument(string $path): bool
