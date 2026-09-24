@@ -19,6 +19,7 @@ use App\Services\RecruitmentDirectOpenService;
 use App\Services\RecruitmentScopeResolver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 /**
@@ -82,7 +83,7 @@ class DirectOpen extends Component
             return null;
         }
 
-        session()->flash('recruitment_saved', __('recruitment.direct_open.opened'));
+        $this->toast(__('recruitment.direct_open.opened'));
 
         return $this->redirectRoute('recruitment.requests.show', ['requestId' => $request->id]);
     }
@@ -171,5 +172,22 @@ class DirectOpen extends Component
     private function authorizeScreen(): void
     {
         Gate::authorize('directOpen', RecruitmentRequest::class);
+    }
+
+    /**
+     * Say what happened, the way the rest of the application says it.
+     *
+     * A toast rather than a coloured panel: the panel pushed the page down on
+     * every save, and a red or green block across a form reads as part of the
+     * form rather than as a remark about it.
+     */
+    private function toast(string $message, bool $success = true): void
+    {
+        $alert = LivewireAlert::title($message);
+
+        ($success ? $alert->success() : $alert->error())
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 }

@@ -19,5 +19,25 @@
             @endcan
         </div>
     </div>
-    <livewire:recruitment.requests.request-table />
+    {{-- A filter over one list, not several lists: every tab narrows the same
+         scoped query, so nothing appears here that "all" would hide. --}}
+    <x-tabs-list>
+        <x-tabs-list-item :active="$statusFilter === 'all'" active-tab="all">
+            {{ __('general.all') }} ({{ $counts['all'] ?? 0 }})
+        </x-tabs-list-item>
+
+        @foreach ($tabs as $status)
+            <x-tabs-list-item
+                :active="$statusFilter === (string) $status"
+                :active-tab="$status"
+                wire:key="status-tab-{{ $status }}">
+                {{ \App\Enums\RecruitmentRequestStatus::getLocalizedName($status)['value'] }}
+                ({{ $counts[(string) $status] ?? 0 }})
+            </x-tabs-list-item>
+        @endforeach
+    </x-tabs-list>
+
+    <livewire:recruitment.requests.request-table
+        :statusFilter="$statusFilter"
+        :key="'requests-'.$statusFilter" />
 </div>

@@ -8,12 +8,6 @@
     </header>
 
     <form wire:submit="save" class="space-y-6">
-        @if ($errors->any())
-            <div role="alert" class="rounded-control border border-red-200 bg-red-50 p-4 text-red-800">
-                <ul class="list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
-            </div>
-        @endif
-
         {{-- The same request form a manager fills in: a direct opening shortens
              the approvals, never the facts. --}}
         @include('livewire.recruitment.requests.partials.request-fields')

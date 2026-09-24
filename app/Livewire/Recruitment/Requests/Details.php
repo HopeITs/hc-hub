@@ -19,6 +19,7 @@ use App\Services\RecruitmentRequestApplicationService;
 use App\Services\RecruitmentRequestSubmissionService;
 use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -62,7 +63,7 @@ class Details extends Component
         $request = $submissions->submit(auth()->user(), $request);
 
         // A second click finds the work already done and says so plainly.
-        session()->flash('recruitment_saved', __(
+        $this->toast(__(
             $before === (int) $request->status ? 'recruitment.already_submitted' : 'recruitment.submitted',
         ));
     }
@@ -72,7 +73,7 @@ class Details extends Component
     {
         $submissions->cancel(auth()->user(), $this->resolve());
 
-        session()->flash('recruitment_saved', __('recruitment.cancelled'));
+        $this->toast(__('recruitment.cancelled'));
     }
 
     public function render()
@@ -149,11 +150,12 @@ class Details extends Component
 
         $request = $applications->apply($request, auth()->user(), force: true);
 
-        session()->flash('recruitment_saved', __(
-            (int) $request->status === RecruitmentRequestStatus::Applied
-                ? 'recruitment.executed'
-                : 'recruitment.execution_failed',
-        ));
+        $applied = (int) $request->status === RecruitmentRequestStatus::Applied;
+
+        $this->toast(
+            __($applied ? 'recruitment.executed' : 'recruitment.execution_failed'),
+            success: $applied,
+        );
     }
 
     /**
@@ -189,7 +191,7 @@ class Details extends Component
 
         $this->decisionComment = '';
         $this->requestedFields = [];
-        session()->flash('recruitment_saved', __('recruitment.decided'));
+        $this->toast(__('recruitment.decided'));
     }
 
     /**
@@ -244,5 +246,22 @@ class Details extends Component
         Gate::authorize('view', $request);
 
         return $request;
+    }
+
+    /**
+     * Say what happened, the way the rest of the application says it.
+     *
+     * A toast rather than a coloured panel: the panel pushed the page down on
+     * every save, and a red or green block across a form reads as part of the
+     * form rather than as a remark about it.
+     */
+    private function toast(string $message, bool $success = true): void
+    {
+        $alert = LivewireAlert::title($message);
+
+        ($success ? $alert->success() : $alert->error())
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 }

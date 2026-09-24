@@ -1,9 +1,6 @@
 <x-slot:title>{{ __('recruitment.details') }} · {{ $request->request_number }}</x-slot:title>
 
 <div class="space-y-6">
-    @if (session('recruitment_saved'))
-        <p role="status" class="rounded-control border border-green-200 bg-green-50 p-4 text-green-800">{{ session('recruitment_saved') }}</p>
-    @endif
     <a class="text-primary hover:underline" href="{{ route('recruitment.requests.index') }}">{{ __('recruitment.back') }}</a>
     <header class="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -25,12 +22,6 @@
             @endcan
         </div>
     </header>
-    @if ($errors->any())
-        <div role="alert" class="rounded-control border border-red-200 bg-red-50 p-4 text-red-800">
-            <p class="font-semibold">{{ __('recruitment.cannot_submit') }}</p>
-            <ul class="mt-2 list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
-        </div>
-    @endif
     @if ($pendingStep)
         {{-- Shown only to the approver this step is waiting on. The service asks
              the same six questions again, so this is convenience, not a guard. --}}

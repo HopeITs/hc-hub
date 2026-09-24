@@ -1,5 +1,8 @@
+{{-- Every field on this form is required to save a draft (D55); the
+     centre is the one exception and passes its own flag. So the star
+     defaults to on, and a field that is genuinely optional says so. --}}
 <div wire:key="field-{{ $field }}">
-    <x-forms.input-label :for="$field" :required="$required">{{ __('recruitment.'.$label) }}</x-forms.input-label>
+    <x-forms.input-label :for="$field" :required="$required ?? true">{{ __('recruitment.'.$label) }}</x-forms.input-label>
     <select id="{{ $field }}" wire:model.live="data.{{ $field }}" @required($required)
         aria-invalid="{{ $errors->has('data.'.$field) ? 'true' : 'false' }}" aria-describedby="{{ $field }}-error"
         class="w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-neutral-900 focus:border-primary focus:ring-primary">

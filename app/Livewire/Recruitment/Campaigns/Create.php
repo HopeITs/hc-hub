@@ -7,6 +7,7 @@ use App\Models\Vacancy;
 use App\Services\HiringCampaignService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 /**
@@ -64,7 +65,7 @@ class Create extends Component
             return null;
         }
 
-        session()->flash('recruitment_saved', __('recruitment-campaign.created'));
+        $this->toast(__('recruitment-campaign.created'));
 
         return $this->redirectRoute('recruitment.campaigns.show',
             ['campaignId' => $campaign->getKey()], navigate: true);
@@ -96,5 +97,22 @@ class Create extends Component
             ->visibleTo(auth()->user())
             ->whereKey($this->vacancyId)
             ->first();
+    }
+
+    /**
+     * Say what happened, the way the rest of the application says it.
+     *
+     * A toast rather than a coloured panel: the panel pushed the page down on
+     * every save, and a red or green block across a form reads as part of the
+     * form rather than as a remark about it.
+     */
+    private function toast(string $message, bool $success = true): void
+    {
+        $alert = LivewireAlert::title($message);
+
+        ($success ? $alert->success() : $alert->error())
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 }

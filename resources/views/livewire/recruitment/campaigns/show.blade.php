@@ -1,14 +1,4 @@
 <div class="space-y-6 p-6">
-    @if (session('recruitment_saved'))
-        <p role="status" class="rounded-control border border-green-200 bg-green-50 p-4 text-green-800">{{ session('recruitment_saved') }}</p>
-    @endif
-
-    @if ($errors->any())
-        <div role="alert" class="rounded-control border border-red-200 bg-red-50 p-4 text-red-800">
-            <ul class="list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
-        </div>
-    @endif
-
     <section class="rounded-surface border border-neutral-200 bg-white p-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>

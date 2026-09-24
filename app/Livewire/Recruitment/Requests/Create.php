@@ -15,6 +15,7 @@ use App\Models\Vacancy;
 use App\Services\RecruitmentRequestDraftService;
 use App\Services\RecruitmentScopeResolver;
 use Illuminate\Support\Facades\Gate;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 class Create extends Component
@@ -53,7 +54,7 @@ class Create extends Component
     {
         $this->resetValidation();
         $request = $drafts->create(auth()->user(), $this->data);
-        session()->flash('recruitment_saved', __('recruitment.draft_saved'));
+        $this->toast(__('recruitment.draft_saved'));
 
         return $this->redirectRoute('recruitment.requests.show', ['requestId' => $request->id]);
     }
@@ -152,5 +153,21 @@ class Create extends Component
         return Vacancy::query()->available()
             ->whereIn('position_id', $positions->select('id'))
             ->where('position_id', $this->data['position_id'] ?? 0);
+    }
+
+    /**
+     * Say what happened, the way the rest of the application says it.
+     *
+     * A toast rather than a coloured panel: a red or green block across a form
+     * reads as part of the form rather than as a remark about it.
+     */
+    private function toast(string $message, bool $success = true): void
+    {
+        $alert = LivewireAlert::title($message);
+
+        ($success ? $alert->success() : $alert->error())
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 }

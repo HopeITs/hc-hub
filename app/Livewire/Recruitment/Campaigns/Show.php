@@ -9,6 +9,7 @@ use App\Services\HiringCampaignStateMachine;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -71,7 +72,7 @@ class Show extends Component
         }
 
         $this->reason = '';
-        session()->flash('recruitment_saved', __('recruitment-campaign.done'));
+        $this->toast(__('recruitment-campaign.done'));
     }
 
     public function saveWindow(HiringCampaignService $campaigns): void
@@ -89,7 +90,7 @@ class Show extends Component
             return;
         }
 
-        session()->flash('recruitment_saved', __('recruitment-campaign.window_saved'));
+        $this->toast(__('recruitment-campaign.window_saved'));
     }
 
     public function render()
@@ -146,5 +147,22 @@ class Show extends Component
         Gate::authorize('view', $campaign);
 
         return $campaign;
+    }
+
+    /**
+     * Say what happened, the way the rest of the application says it.
+     *
+     * A toast rather than a coloured panel: the panel pushed the page down on
+     * every save, and a red or green block across a form reads as part of the
+     * form rather than as a remark about it.
+     */
+    private function toast(string $message, bool $success = true): void
+    {
+        $alert = LivewireAlert::title($message);
+
+        ($success ? $alert->success() : $alert->error())
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 }

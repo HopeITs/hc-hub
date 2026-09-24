@@ -1,8 +1,4 @@
 <div class="space-y-6 p-6">
-    @if (session('recruitment_saved'))
-        <p role="status" class="rounded-control border border-green-200 bg-green-50 p-4 text-green-800">{{ session('recruitment_saved') }}</p>
-    @endif
-
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
             <h1 class="text-h3 font-semibold">{{ __('recruitment-campaign.campaigns') }}</h1>

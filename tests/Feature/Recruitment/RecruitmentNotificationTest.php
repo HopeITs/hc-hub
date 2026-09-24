@@ -178,14 +178,22 @@ class RecruitmentNotificationTest extends TestCase
         Notification::assertNothingSent();
     }
 
-    /** Queued, so a slow or dead transport never holds up the decision. */
-    public function test_the_notifications_are_queued(): void
+    /**
+     * Delivered as they happen, because nothing here processes a queue.
+     *
+     * A queued notification is written only when a worker runs. There is no
+     * worker on this deployment, so queueing these meant nobody ever received
+     * one — the jobs table simply grew. Failure is already contained by the
+     * notifier, which catches rather than raises, so synchronous delivery
+     * cannot cost an approval either.
+     */
+    public function test_the_notifications_are_delivered_without_a_worker(): void
     {
         foreach ([RecruitmentApprovalAwaiting::class, RecruitmentRequestDecided::class,
             RecruitmentRequestApprovedForHr::class] as $class) {
-            $this->assertTrue(
+            $this->assertFalse(
                 is_subclass_of($class, ShouldQueue::class),
-                "{$class} should be queued.",
+                "{$class} must not be queued: nothing processes the queue here.",
             );
         }
     }

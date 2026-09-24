@@ -5,6 +5,7 @@ namespace App\Livewire\Recruitment\Requests;
 use App\Models\RecruitmentRequest;
 use App\Services\RecruitmentRequestDraftService;
 use Illuminate\Support\Facades\Gate;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\Locked;
 
 /**
@@ -44,7 +45,7 @@ class Edit extends Create
     {
         $this->resetValidation();
         $drafts->update(auth()->user(), $this->request(), $this->data);
-        session()->flash('recruitment_saved', __('recruitment.saved'));
+        $this->toast(__('recruitment.saved'));
 
         return $this->redirectRoute('recruitment.requests.show', ['requestId' => $this->requestId]);
     }
@@ -73,5 +74,21 @@ class Edit extends Create
         Gate::authorize('update', $request);
 
         return $request;
+    }
+
+    /**
+     * Say what happened, the way the rest of the application says it.
+     *
+     * A toast rather than a coloured panel: a red or green block across a form
+     * reads as part of the form rather than as a remark about it.
+     */
+    private function toast(string $message, bool $success = true): void
+    {
+        $alert = LivewireAlert::title($message);
+
+        ($success ? $alert->success() : $alert->error())
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 }

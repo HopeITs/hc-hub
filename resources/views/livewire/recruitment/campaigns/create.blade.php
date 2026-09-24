@@ -4,12 +4,6 @@
         <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-campaign.new_campaign_hint') }}</p>
     </div>
 
-    @if ($errors->any())
-        <div role="alert" class="rounded-control border border-red-200 bg-red-50 p-4 text-red-800">
-            <ul class="list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
-        </div>
-    @endif
-
     <form wire:submit="save" class="space-y-6 rounded-surface border border-neutral-200 bg-white p-6">
         <div>
             <x-forms.input-label for="vacancyId" required>{{ __('recruitment-campaign.vacancy') }}</x-forms.input-label>
