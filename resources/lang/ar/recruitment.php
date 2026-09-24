@@ -362,6 +362,8 @@ return [
     'approve' => 'موافقة',
     'reject_action' => 'رفض',
     'request_changes' => 'طلب تعديل',
+    'send_change_request' => 'أرسل طلب التعديل',
+    'back_to_decisions' => 'رجوع',
     'decision_comment' => 'السبب أو التعديل المطلوب',
     'decided' => 'سُجّل قرارك.',
     'your_decision' => 'قرارك مطلوب',

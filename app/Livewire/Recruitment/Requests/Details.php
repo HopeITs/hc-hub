@@ -43,6 +43,16 @@ class Details extends Component
      */
     public array $requestedFields = [];
 
+    /**
+     * Whether the approver is part-way through asking for changes.
+     *
+     * Approving and rejecting are one click; asking for changes is a sentence
+     * and a list of fields. Keeping those out of sight until the approver has
+     * chosen that path stops the panel from asking for things three of its
+     * buttons will never read.
+     */
+    public bool $askingForChanges = false;
+
     public function mount(int $requestId): void
     {
         $this->requestId = $requestId;
@@ -158,6 +168,22 @@ class Details extends Component
         );
     }
 
+    /** Open the second step: which fields, and why. */
+    public function askForChanges(): void
+    {
+        $this->resetErrorBag();
+        $this->askingForChanges = true;
+    }
+
+    /** Step back to the three decisions, keeping nothing half-typed. */
+    public function cancelChangeRequest(): void
+    {
+        $this->resetErrorBag();
+        $this->askingForChanges = false;
+        $this->requestedFields = [];
+        $this->decisionComment = '';
+    }
+
     /**
      * Decide the step this user is being waited on for.
      *
@@ -191,6 +217,7 @@ class Details extends Component
 
         $this->decisionComment = '';
         $this->requestedFields = [];
+        $this->askingForChanges = false;
         $this->toast(__('recruitment.decided'));
     }
 

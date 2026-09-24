@@ -28,34 +28,69 @@
         <section class="rounded-surface border border-primary/30 bg-primary/5 p-6" aria-label="{{ __('recruitment.your_decision') }}">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.your_decision') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">{{ \App\Enums\WorkflowStepKey::getLocalizedName((int) $pendingStep->workflowStep?->step_key)['value'] }}</p>
-            @if ($selectableFields)
-                {{-- Asking for changes means naming them. The request has been
-                     locked since it was submitted, so whatever is not ticked
-                     here stays locked when it goes back. --}}
+
+            @if (! $askingForChanges)
+                {{-- The three decisions, and nothing else. Asking for changes is
+                     a longer conversation than approving or rejecting, so its
+                     fields appear once it is chosen rather than sitting open
+                     beside decisions that do not use them. --}}
+                <div class="mt-4 flex flex-wrap gap-3">
+                    <x-primary-button type="button" wire:click="decide('approve')"
+                        wire:loading.attr="disabled" wire:target="decide">
+                        {{ __('recruitment.approve') }}
+                    </x-primary-button>
+
+                    <button type="button"
+                        class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50"
+                        wire:click="askForChanges">
+                        {{ __('recruitment.request_changes') }}
+                    </button>
+
+                    <button type="button"
+                        class="cursor-pointer rounded-control border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"
+                        x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'decide', args: ['reject'], message: @js(__('recruitment.confirm_reject')), confirmLabel: @js(__('recruitment.reject_action')), tone: 'danger' })">
+                        {{ __('recruitment.reject_action') }}
+                    </button>
+                </div>
+
+                <p class="mt-2 text-sm text-red-600">@error('step'){{ $message }}@enderror @error('version'){{ $message }}@enderror @error('request'){{ $message }}@enderror @error('comment'){{ $message }}@enderror</p>
+            @else
+                {{-- Step two: name the fields, say why, send it back. --}}
                 <fieldset class="mt-4">
                     <legend class="text-sm font-semibold">{{ __('recruitment.fields_to_unlock') }}</legend>
                     <p class="text-sm text-secondary-medium">{{ __('recruitment.fields_to_unlock_hint') }}</p>
                     <div class="mt-2 grid gap-2 sm:grid-cols-2">
                         @foreach ($selectableFields as $field)
                             <label class="flex items-center gap-2 text-sm" wire:key="unlock-{{ $field }}">
-                                <input type="checkbox" value="{{ $field }}" wire:model="requestedFields" class="rounded border-neutral-300 text-primary">
+                                <input type="checkbox" value="{{ $field }}" wire:model="requestedFields"
+                                    class="rounded border-neutral-300 text-primary">
                                 <span>{{ __('recruitment.fields.'.$field) }}</span>
                             </label>
                         @endforeach
                     </div>
                     <p class="mt-1 text-sm text-red-600">@error('fields'){{ $message }}@enderror</p>
                 </fieldset>
+
+                <div class="mt-4">
+                    <x-forms.input-label for="decisionComment" required>{{ __('recruitment.decision_comment') }}</x-forms.input-label>
+                    <textarea id="decisionComment" rows="3" wire:model="decisionComment"
+                        class="mt-1 w-full rounded-control border-neutral-300" dir="auto"></textarea>
+                    <p class="mt-1 text-sm text-red-600">@error('comment'){{ $message }}@enderror @error('step'){{ $message }}@enderror @error('version'){{ $message }}@enderror @error('request'){{ $message }}@enderror</p>
+                </div>
+
+                <div class="mt-4 flex flex-wrap gap-3">
+                    <x-primary-button type="button" wire:click="decide('request_changes')"
+                        wire:loading.attr="disabled" wire:target="decide">
+                        {{ __('recruitment.send_change_request') }}
+                    </x-primary-button>
+
+                    <button type="button"
+                        class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50"
+                        wire:click="cancelChangeRequest">
+                        {{ __('recruitment.back_to_decisions') }}
+                    </button>
+                </div>
             @endif
-            <div class="mt-4">
-                <x-forms.input-label for="decisionComment">{{ __('recruitment.decision_comment') }}</x-forms.input-label>
-                <textarea id="decisionComment" rows="3" wire:model="decisionComment" class="mt-1 w-full rounded-control border-neutral-300"></textarea>
-                <p class="mt-1 text-sm text-red-600">@error('comment'){{ $message }}@enderror @error('step'){{ $message }}@enderror @error('version'){{ $message }}@enderror @error('request'){{ $message }}@enderror</p>
-            </div>
-            <div class="mt-4 flex flex-wrap gap-3">
-                <x-primary-button type="button" wire:click="decide('approve')" wire:loading.attr="disabled" wire:target="decide">{{ __('recruitment.approve') }}</x-primary-button>
-                <button type="button" class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" wire:click="decide('request_changes')" wire:loading.attr="disabled" wire:target="decide">{{ __('recruitment.request_changes') }}</button>
-                <button type="button" class="cursor-pointer rounded-control border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'decide', args: ['reject'], message: @js(__('recruitment.confirm_reject')), confirmLabel: @js(__('recruitment.reject_action')), tone: 'danger' })">{{ __('recruitment.reject_action') }}</button>
-            </div>
         </section>
     @endif
     @if ($unlockedFields && (int) $request->status === \App\Enums\RecruitmentRequestStatus::ChangesRequested)
@@ -193,12 +228,38 @@
         </section>
         <section class="rounded-surface border border-neutral-200 bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.timeline') }}</h2>
-            <ol class="mt-4 space-y-4">
+            {{-- One line down the page with a circle at every stage. The line is
+                 a border on the list and each circle sits on it, so the thread
+                 stays unbroken however tall an entry grows. `start` rather than
+                 `left` keeps it on the correct side in Arabic. --}}
+            <ol class="relative mt-4 space-y-6 border-s-2 border-neutral-200 ps-8">
                 @forelse ($request->events as $event)
                     {{-- The role and the scope are read from the row, never looked
                          up from the actor today: reading a year-old decision through
                          this week's roles would misstate who decided it. --}}
-                    <li class="border-s-2 border-primary/20 ps-4" wire:key="event-{{ $event->id }}">
+                    <li class="relative" wire:key="event-{{ $event->id }}">
+                        @php
+                            // The circle takes the colour the status already has,
+                            // so the thread reads at a glance without inventing a
+                            // second vocabulary of states.
+                            //
+                            // Written out rather than interpolated: Tailwind reads
+                            // class names as literal text, so "bg-{$colour}" would
+                            // generate nothing and every circle would come out
+                            // transparent.
+                            $dot = match ($event->to_status !== null
+                                ? \App\Enums\RecruitmentRequestStatus::getLocalizedName((int) $event->to_status)['color']
+                                : 'secondary-light') {
+                                'primary' => 'bg-primary ring-primary/30',
+                                'success' => 'bg-green-600 ring-green-600/30',
+                                'danger' => 'bg-red-600 ring-red-600/30',
+                                'warning' => 'bg-amber-500 ring-amber-500/30',
+                                'secondary-medium' => 'bg-secondary-medium ring-secondary-medium/30',
+                                default => 'bg-secondary-light ring-secondary-light/30',
+                            };
+                        @endphp
+                        <span aria-hidden="true"
+                            class="absolute -start-[2.3rem] top-1 size-4 rounded-full border-2 border-white ring-2 {{ $dot }}"></span>
                         <div class="flex flex-wrap items-center gap-2">
                             <p class="font-medium">{{ \App\Enums\RecruitmentEventType::getLocalizedName($event->event_type)['value'] }}</p>
                             @if ($event->decision !== null)

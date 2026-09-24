@@ -362,6 +362,8 @@ return [
     'approve' => 'Approve',
     'reject_action' => 'Reject',
     'request_changes' => 'Request changes',
+    'send_change_request' => 'Send the change request',
+    'back_to_decisions' => 'Back',
     'decision_comment' => 'Reason, or what needs changing',
     'decided' => 'Your decision was recorded.',
     'your_decision' => 'Your decision is needed',
