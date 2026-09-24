@@ -124,7 +124,7 @@ class CentersTable extends LivewireTable
         // filters, and exportExcel() (which builds on appliedQuery()) at once.
         return $this->scopeToAuthorizedCity(
             $this->model()::query()
-                ->with(['city'])
+                ->with(['city', 'managerContracts.employee'])
                 ->withCount('positions'),
         );
     }
@@ -175,6 +175,13 @@ class CentersTable extends LivewireTable
 
             Column::make(__('general.center-name'), transColumn('name'))
                 ->sortable()->searchable(),
+            Column::make(__('general.center-manager'), fn (Model $m): string => $m->managerNames(), 'center_manager')
+                ->searchable(function (Builder $query, $value): void {
+                    $query->whereHas('managerContracts.employee', fn (Builder $employee) => $employee->whereLikeAny([
+                        'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar',
+                    ], (string) $value));
+                }),
+
             Column::make(__('general.working-hours'), 'open_at')
                 ->displayUsing(fn ($v, Model $m) => __('general.from-hour-to-hour', [
                     'from' => $m->open_at_formatted,
