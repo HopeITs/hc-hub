@@ -150,7 +150,11 @@ class RecruitmentApplicationFilters
     /** A flag, never a decision: this narrows a list, it rejects nobody. */
     public function previousApplicant(Builder $query, mixed $value): Builder
     {
-        $flag = filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+        // filter_var() reads null and '' as false, which would silently turn
+        // "no filter" into "first applications only".
+        $flag = is_bool($value) || (is_scalar($value) && $value !== '')
+            ? filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE)
+            : null;
 
         return match ($flag) {
             true => $query->whereExists($this->earlierApplication($query)),
@@ -181,13 +185,15 @@ class RecruitmentApplicationFilters
             return $query;
         }
 
-        $like = '%'.addcslashes(mb_strtolower($term), '\\%_').'%';
+        // An explicit ESCAPE character: MySQL defaults to backslash, SQLite
+        // has no default, and '!' needs no quoting in either.
+        $like = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($term)).'%';
 
         return $query->whereIn($query->qualifyColumn('applicant_id'), RecruitmentApplicant::query()
             ->select('id')
             ->where(fn (Builder $applicants) => $applicants
-                ->whereRaw('LOWER(full_name) LIKE ?', [$like])
-                ->orWhereRaw('LOWER(email_normalized) LIKE ?', [$like])));
+                ->whereRaw("LOWER(full_name) LIKE ? ESCAPE '!'", [$like])
+                ->orWhereRaw("LOWER(email_normalized) LIKE ? ESCAPE '!'", [$like])));
     }
 
     // --------------------------------------------
@@ -320,9 +326,12 @@ class RecruitmentApplicationFilters
         }
 
         try {
-            return CarbonImmutable::createFromFormat('!Y-m-d', $value) ?: null;
+            $date = CarbonImmutable::createFromFormat('!Y-m-d', $value);
         } catch (Throwable) {
             return null;
         }
+
+        // createFromFormat() rolls 2026-13-45 over into 2027; refuse it instead.
+        return $date !== false && $date->format('Y-m-d') === $value ? $date : null;
     }
 }

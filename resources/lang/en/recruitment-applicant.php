@@ -127,8 +127,8 @@ return [
         'city' => 'Vacancy city',
         'cv_available' => 'Has a usable CV',
         'cv_none' => 'No CV uploaded',
-        'previous_yes' => 'Applied before',
-        'previous_no' => 'First application',
+        'previous_yes' => 'Returning applicants',
+        'previous_no' => 'First-time applicants',
     ],
 
     'tags' => [

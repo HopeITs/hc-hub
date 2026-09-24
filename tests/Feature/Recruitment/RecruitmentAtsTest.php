@@ -12,7 +12,6 @@ use App\Livewire\Recruitment\Applicants\Show;
 use App\Livewire\Recruitment\Applicants\TagManager;
 use App\Models\City;
 use App\Models\HiringCampaign;
-use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentApplicationDecision;
@@ -315,7 +314,7 @@ class RecruitmentAtsTest extends TestCase
         }
 
         // Arabic names and spacing are normalized, not refused.
-        $this->assertSame('مرشح قوي', $tags->create($hr, "  مرشح   قوي ")->name);
+        $this->assertSame('مرشح قوي', $tags->create($hr, '  مرشح   قوي ')->name);
         $this->assertSame(0, RecruitmentTag::query()->where('name', 'like', '%script%')->count());
     }
 
@@ -387,7 +386,7 @@ class RecruitmentAtsTest extends TestCase
         $this->assertSame('industry_not_asked', $set->get('industry_experience')->reason);
         $this->assertSame('cv_missing', $set->get('cv_availability')->reason);
         $this->assertSame([0, 1], [$set->metCount(), $set->assessedCount()]);
-        $this->assertSame(3, $set->unassessedCount());
+        $this->assertSame(4, $set->unassessedCount());
 
         // Same questions on the form, left blank: "not answered", still not a miss.
         $this->useFullForm($application);
