@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Recruitment;
 
-use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
 use App\Livewire\Recruitment\Requests\Details;
@@ -77,13 +76,12 @@ class RecruitmentRequestScreensTest extends TestCase
         $city = $this->makeCity('HMS', '002');
         $user = $this->makeUser($city, 'HR-SYR');
         $request = $this->request($city, $user, 'RR-HISTORY');
-        $request->events()->create([
-            'event_type' => RecruitmentEventType::RequestCreated,
-            'actor_user_id' => $user->id,
-            'actor_role' => 'HR-SYR',
-            'comment' => '<script>alert(1)</script>',
-        ]);
         $request->comments()->create(['user_id' => $user->id, 'body' => 'Visible comment']);
+
+        // Free text written by one user and read by another is the whole of the
+        // attack surface on this page, so it is checked on text the page really
+        // renders rather than on a field it happens to hold.
+        $request->comments()->create(['user_id' => $user->id, 'body' => '<script>alert(1)</script>']);
 
         Livewire::actingAs($user)->test(Details::class, ['requestId' => $request->id])
             ->assertSee('Visible comment')

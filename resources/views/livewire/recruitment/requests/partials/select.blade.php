@@ -13,8 +13,18 @@
     asks for changes, only what they named may be edited, and a field that
     silently vanished would leave the requester wondering what happened to it.
 --}}
-@php $isLocked = in_array($field, $lockedFields ?? [], true); @endphp
-<div wire:key="field-{{ $field }}">
+@php
+    $isLocked = in_array($field, $lockedFields ?? [], true);
+
+    // The searchable select keeps its own DOM under wire:ignore, so Livewire
+    // never rewrites the options inside it. Lists that depend on another
+    // answer — centres on the chosen city, vacancies on the chosen post —
+    // would go on offering the old ones for ever. Folding the options into the
+    // key makes Livewire replace the whole control when they change, which
+    // re-initialises the select against the new list.
+    $optionsKey = md5(json_encode(array_keys($options)));
+@endphp
+<div wire:key="field-{{ $field }}-{{ $optionsKey }}">
     <x-forms.input-label :for="$field" :required="$required ?? true">{{ __('recruitment.'.$label) }}</x-forms.input-label>
 
     <x-forms.select2-input

@@ -372,6 +372,9 @@ return [
         'submitted' => 'Submitted',
         'approved' => 'Approved',
         'applied' => 'Carried out',
+        'draft' => 'Draft',
+        'changes_requested' => 'Sent back for changes',
+        'superseded' => 'Replaced by a later version',
         'rejected' => 'Rejected',
         'cancelled' => 'Withdrawn',
         'states' => [

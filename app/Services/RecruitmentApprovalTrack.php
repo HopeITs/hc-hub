@@ -6,26 +6,29 @@ use App\Enums\ApprovalDecision;
 use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus as Status;
+use App\Enums\WorkflowInstanceStatus;
 use App\Enums\WorkflowSkipReason;
 use App\Enums\WorkflowStepKey;
 use App\Models\RecruitmentRequest;
+use App\Models\RecruitmentRequestVersion;
 
 /**
- * The road this particular request travels, and how far along it is.
+ * A request's history, told one version at a time.
  *
- * Not every request takes the same road, which is the whole point of building
- * this from the workflow instance rather than from a fixed list of three. A
- * requester at the top of the chart has no manager to approve them, so that
- * stop is not on their map at all. A direct opening was settled outside the
- * system and has one stop or none. Drawing three circles and greying two of
- * them would describe a journey nobody is making.
+ * A request sent back for changes does not carry on where it left off — it
+ * becomes a new version and takes the road again from the start (D58). Its
+ * history is therefore not one long line but several short ones, and telling
+ * it as a single stream leaves the reader working out for themselves which
+ * approval belonged to which draft.
  *
- * Each stop reports its own state so the screen only has to draw it:
+ * So each version gets its own track: the stops it passed, who decided each
+ * one, what the requester changed in it, and how it ended. A version that
+ * ended in a request for changes says who asked, why, and which fields they
+ * opened — which is exactly the reason the next version exists.
  *
- *   done     decided, and the request moved past it
- *   current  where the request is waiting now
- *   skipped  on the definition, but not on this request's road
- *   pending  still ahead
+ * The stops come from the workflow that actually ran, so a requester with
+ * nobody above them has no manager stop and a direct opening has one. The
+ * shortening is in the data rather than in a style that greys something out.
  */
 class RecruitmentApprovalTrack
 {
@@ -38,36 +41,302 @@ class RecruitmentApprovalTrack
     public const PENDING = 'pending';
 
     /**
-     * The stops on this request's road, in order, with the end state.
+     * Every version of this request, newest first, each with its own road.
      *
-     * The first and last are not approval steps: a request begins by being
-     * submitted and ends by taking effect, and a track that started at the
-     * first approver would not show the requester their own submission.
+     * Newest first because that is the one being worked on. The older ones
+     * answer "what did they ask for last time", which is a question asked
+     * after the current state rather than before it.
      *
-     * @return array<int, array{key: string, label: string, state: string, at: ?string, by: ?string}>
+     * @return array<int, array<string, mixed>>
      */
     public function for(RecruitmentRequest $request): array
     {
-        $status = (int) $request->status;
+        $request->loadMissing([
+            'versions', 'requester.profile',
+            'workflowInstances.steps.workflowStep', 'workflowInstances.steps.actedBy.profile',
+        ]);
 
-        $track = [$this->submission($request)];
+        $versions = $request->versions->sortByDesc('version_no')->values();
 
-        foreach ($this->steps($request) as $step) {
-            $track[] = $step;
+        // A draft has no version yet, but it still has a road ahead of it and
+        // a reader who wants to see what they are about to submit into.
+        if ($versions->isEmpty()) {
+            return [$this->round($request, null)];
         }
 
-        $track[] = $this->outcome($request, $status);
+        return $versions
+            ->map(fn (RecruitmentRequestVersion $version): array => $this->round($request, $version))
+            ->all();
+    }
 
-        return $track;
+    /**
+     * One version, and everything that happened to it.
+     *
+     * @return array<string, mixed>
+     */
+    private function round(RecruitmentRequest $request, ?RecruitmentRequestVersion $version): array
+    {
+        $instance = $version === null
+            ? null
+            : $request->workflowInstances->firstWhere('request_version_id', $version->getKey());
+
+        return [
+            'version' => $version?->version_no,
+            'created' => ($version?->submitted_at ?? $version?->created_at)?->format('Y-m-d H:i'),
+            'author' => $request->requester?->profile?->name ?? $request->requester?->name,
+            'stops' => $this->stops($request, $instance),
+            'edits' => $version === null ? [] : $this->edits($request, $version),
+            'outcome' => $this->outcome($request, $version, $instance),
+        ];
+    }
+
+    /**
+     * The approval stops this version passed, in order.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function stops(RecruitmentRequest $request, $instance): array
+    {
+        if ($instance === null) {
+            return $this->expectedStops($request);
+        }
+
+        $current = (int) $instance->current_step_order;
+        $running = (int) $instance->status === WorkflowInstanceStatus::Running;
+
+        // Which version this run belonged to. Steps are rows of a shared
+        // workflow definition, so the same step id appears in every version's
+        // run; without the version, every round would show the newest round's
+        // decision.
+        $versionId = $instance->request_version_id === null ? null : (int) $instance->request_version_id;
+
+        return $instance->steps
+            ->sortBy(fn ($step) => (int) $step->workflowStep?->step_order)
+            ->map(function ($step) use ($current, $running, $request, $versionId): array {
+                $decision = $step->decision === null ? null : (int) $step->decision;
+                $state = $this->stepState($step, $decision, (int) $step->workflowStep?->step_order, $current, $running);
+
+                $event = $this->decisionEvent($request, $step, $decision, $versionId);
+
+                return [
+                    'label' => WorkflowStepKey::getLocalizedName((int) $step->workflowStep?->step_key)['value'],
+                    'state' => $state,
+                    'decision' => $decision,
+                    'at' => $step->acted_at?->format('Y-m-d H:i'),
+                    'by' => $step->actedBy?->profile?->name ?? $step->actedBy?->name,
+                    // The role as it was recorded, never looked up from the
+                    // person today: reading an old decision through this
+                    // week's roles would misstate who made it.
+                    'role' => $event?->actor_role,
+                    'comment' => $state === self::SKIPPED ? $this->skipNote($step) : $step->decision_reason,
+                    'fields' => $this->fieldsFrom($event, $decision),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Where a stop stands.
+     *
+     * A step with no decision is only "waiting" while its workflow is still
+     * running. Once the run was cancelled or rejected, the steps it never
+     * reached are simply steps it never reached.
+     */
+    private function stepState($step, ?int $decision, int $order, int $current, bool $running): string
+    {
+        if ($decision === null && str_starts_with((string) $step->decision_reason, 'skip:')) {
+            return self::SKIPPED;
+        }
+
+        if ($decision !== null) {
+            return self::DONE;
+        }
+
+        return $running && $order === $current ? self::CURRENT : self::PENDING;
+    }
+
+    /**
+     * The road a draft is about to take, before any workflow exists.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function expectedStops(RecruitmentRequest $request): array
+    {
+        $keys = (int) $request->mode === RecruitmentRequestMode::DirectHr
+            ? [WorkflowStepKey::HrSyriaDirectOpenApproval]
+            : [WorkflowStepKey::ManagerApproval, WorkflowStepKey::FinanceApproval, WorkflowStepKey::GovernorateHrApproval];
+
+        $scopes = app(RecruitmentScopeResolver::class);
+        $requester = $request->requester;
+
+        $skips = $requester === null ? [] : array_values(array_filter([
+            $scopes->mayRequestWithoutManagerApproval($requester) ? WorkflowStepKey::ManagerApproval : null,
+            $scopes->isFinanceApprover($requester) ? WorkflowStepKey::FinanceApproval : null,
+        ], fn (?int $key): bool => $key !== null));
+
+        return collect($keys)
+            ->reject(fn (int $key): bool => in_array($key, $skips, true))
+            ->map(fn (int $key): array => [
+                'label' => WorkflowStepKey::getLocalizedName($key)['value'],
+                'state' => self::PENDING,
+                'decision' => null,
+                'at' => null,
+                'by' => null,
+                'role' => null,
+                'comment' => null,
+                'fields' => [],
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * What the requester changed to arrive at this version.
+     *
+     * Edit events carry no version of their own — an edit happens while the
+     * next version is still being written — so they are placed by time: an
+     * edit belongs to the first version frozen after it, and anything edited
+     * since the last version belongs to that one, because that is the draft
+     * being worked on.
+     *
+     * RV-1b: "the request was edited" without naming the fields tells an
+     * approver nothing about whether their own approval still stands.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function edits(RecruitmentRequest $request, RecruitmentRequestVersion $version): array
+    {
+        $previous = $request->versions
+            ->where('version_no', '<', $version->version_no)
+            ->max('created_at');
+
+        $isLatest = (int) $version->version_no === (int) $request->versions->max('version_no');
+
+        return $request->events()
+            ->where('event_type', RecruitmentEventType::RequestEdited)
+            ->when($previous !== null, fn ($query) => $query->where('created_at', '>', $previous))
+            // The newest version keeps collecting: a request sent back is
+            // being edited now, and those edits have no later version yet.
+            ->when(! $isLatest, fn ($query) => $query->where('created_at', '<=', $version->created_at))
+            ->orderBy('id')
+            ->get()
+            ->flatMap(function ($event): array {
+                $changes = $event->meta['changes'] ?? [];
+
+                return collect(is_array($changes) ? $changes : [])
+                    ->map(fn (array $change, string $field): array => [
+                        'field' => $field,
+                        'from' => $change['from'] ?? null,
+                        'to' => $change['to'] ?? null,
+                    ])
+                    ->values()
+                    ->all();
+            })
+            ->all();
+    }
+
+    /**
+     * How this version ended, which is where the next one began.
+     *
+     * The interesting case is a version sent back for changes: it names who
+     * asked, why, and what they opened — and the version after it exists
+     * because of that answer.
+     *
+     * @return array<string, mixed>
+     */
+    private function outcome(RecruitmentRequest $request, ?RecruitmentRequestVersion $version, $instance): array
+    {
+        $latest = (int) $request->versions->max('version_no');
+        $isLatest = $version === null || (int) $version->version_no === $latest;
+
+        // Only the current version can still be in flight; an older one ended
+        // when it was superseded, usually by being sent back.
+        if (! $isLatest) {
+            return $this->changeRequest($request, $version) ?? $this->plainOutcome(
+                __('recruitment.track.superseded'), self::DONE,
+            );
+        }
+
+        $status = (int) $request->status;
+
+        if ($status === Status::ChangesRequested) {
+            $sentBack = $this->changeRequest($request, $version);
+
+            if ($sentBack !== null) {
+                return $sentBack;
+            }
+        }
+
+        [$label, $state] = match ($status) {
+            Status::Applied => [__('recruitment.track.applied'), self::DONE],
+            Status::Approved, Status::FailedApplication => [__('recruitment.track.approved'), self::CURRENT],
+            Status::Rejected => [__('recruitment.track.rejected'), self::DONE],
+            Status::Cancelled => [__('recruitment.track.cancelled'), self::DONE],
+            Status::ChangesRequested => [__('recruitment.track.changes_requested'), self::CURRENT],
+            Status::Draft => [__('recruitment.track.draft'), self::PENDING],
+            default => [__('recruitment.track.applied'), self::PENDING],
+        };
+
+        return $this->plainOutcome($label, $state, $request->applied_at?->format('Y-m-d H:i'));
+    }
+
+    /** @return array<string, mixed> */
+    private function plainOutcome(string $label, string $state, ?string $at = null): array
+    {
+        return [
+            'label' => $label,
+            'state' => $state,
+            'at' => $at,
+            'by' => null,
+            'role' => null,
+            'comment' => null,
+            'fields' => [],
+        ];
+    }
+
+    /**
+     * The moment this version was sent back, if it was.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function changeRequest(RecruitmentRequest $request, ?RecruitmentRequestVersion $version): ?array
+    {
+        if ($version === null) {
+            return null;
+        }
+
+        $event = $request->events()
+            ->where('event_type', RecruitmentEventType::ChangesRequested)
+            ->where('request_version_id', $version->getKey())
+            ->with('actor.profile')
+            ->latest('id')
+            ->first();
+
+        if ($event === null) {
+            return null;
+        }
+
+        $fields = $event->meta['requested_fields'] ?? [];
+
+        return [
+            'label' => __('recruitment.track.changes_requested'),
+            'state' => self::DONE,
+            'at' => $event->created_at?->format('Y-m-d H:i'),
+            'by' => $event->actor?->profile?->name ?? $event->actor?->name,
+            'role' => $event->actor_role,
+            'comment' => $event->comment,
+            'fields' => is_array($fields) ? array_values($fields) : [],
+        ];
     }
 
     /**
      * Why a step was skipped, in words rather than a code.
      *
-     * D57 keeps the reason in `decision_reason` as `skip:<n>`, since there is
+     * D57 keeps the reason in `decision_reason` as `skip:<n>` because there is
      * no column for it. A reader of the page should not have to know that.
      */
-    private function skipNote($step): ?string
+    private function skipNote($step): string
     {
         $reason = (int) str_replace('skip:', '', (string) $step->decision_reason);
 
@@ -80,180 +349,50 @@ class RecruitmentApprovalTrack
     }
 
     /**
-     * The fields an approver asked to have changed at this stop.
+     * The event that recorded this step's decision.
      *
-     * Read from the event rather than the step, because that is where the ask
-     * was recorded and the two must not be able to disagree (D69).
+     * The step says who acted and when; the event says what role they held at
+     * the time and which fields they opened. Both halves of a decision live in
+     * different tables, so the one that carries the audit detail is read here.
+     */
+    private function decisionEvent(RecruitmentRequest $request, $step, ?int $decision, ?int $versionId)
+    {
+        if ($decision === null) {
+            return null;
+        }
+
+        return $request->events()
+            ->whereIn('event_type', [
+                RecruitmentEventType::StepApproved,
+                RecruitmentEventType::StepRejected,
+                RecruitmentEventType::ChangesRequested,
+            ])
+            ->where('workflow_step_id', $step->workflow_step_id)
+            // Scoped to this version's run: the step id is the definition's,
+            // shared by every version, so without this each round would read
+            // the newest round's decision.
+            ->when($versionId !== null, fn ($query) => $query->where('request_version_id', $versionId))
+            ->with('actor.profile')
+            ->latest('id')
+            ->first();
+    }
+
+    /**
+     * The fields an approver opened when they sent a request back.
+     *
+     * Read from the event rather than the step: that is where the ask was
+     * recorded, and the two must not be able to disagree (D69).
      *
      * @return array<int, string>
      */
-    private function requestedFields(RecruitmentRequest $request, $step): array
+    private function fieldsFrom($event, ?int $decision): array
     {
-        if ((int) ($step->decision ?? 0) !== ApprovalDecision::RequestChanges) {
+        if ($decision !== ApprovalDecision::RequestChanges || $event === null) {
             return [];
         }
 
-        $event = $request->events()
-            ->where('event_type', RecruitmentEventType::ChangesRequested)
-            ->where('workflow_step_id', $step->workflow_step_id)
-            ->latest('id')
-            ->first();
-
-        $fields = $event?->meta['requested_fields'] ?? [];
+        $fields = $event->meta['requested_fields'] ?? [];
 
         return is_array($fields) ? array_values($fields) : [];
-    }
-
-    /** Submitting is a stop too: it is where the requester's part ends. */
-    private function submission(RecruitmentRequest $request): array
-    {
-        return [
-            'key' => 'submitted',
-            'label' => __('recruitment.track.submitted'),
-            'state' => $request->submitted_at === null ? self::CURRENT : self::DONE,
-            'at' => $request->submitted_at?->format('Y-m-d H:i'),
-            'by' => $request->requester?->profile?->name ?? $request->requester?->name,
-            'comment' => null,
-            'note' => null,
-            'requested_fields' => [],
-        ];
-    }
-
-    /**
-     * The approval stops, taken from the instance actually running.
-     *
-     * A request that has not been submitted has no instance yet, so the road
-     * ahead is read from the workflow definition instead — otherwise a draft
-     * would show a submission and an outcome with nothing in between.
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    private function steps(RecruitmentRequest $request): array
-    {
-        $instance = $request->workflowInstances()->latest('id')->first();
-
-        if ($instance === null) {
-            return $this->expectedSteps($request);
-        }
-
-        $instance->load(['steps.workflowStep', 'steps.actedBy.profile']);
-        $current = (int) $instance->current_step_order;
-
-        return $instance->steps
-            ->sortBy(fn ($step) => (int) $step->workflowStep?->step_order)
-            ->map(function ($step) use ($current, $request): array {
-                $order = (int) $step->workflowStep?->step_order;
-                $decision = $step->decision === null ? null : (int) $step->decision;
-                $state = $this->stepState($step, $decision, $order, $current);
-                $skipped = $state === self::SKIPPED;
-
-                return [
-                    'key' => 'step-'.$step->getKey(),
-                    'label' => WorkflowStepKey::getLocalizedName((int) $step->workflowStep?->step_key)['value'],
-                    'state' => $state,
-                    'at' => $step->acted_at?->format('Y-m-d H:i'),
-                    'by' => $step->actedBy?->profile?->name ?? $step->actedBy?->name,
-                    // What was actually said here, and what it asked for. The
-                    // detail belongs beside the stop it happened at rather
-                    // than in a separate list further down the page.
-                    'comment' => $skipped ? null : $step->decision_reason,
-                    'note' => $skipped ? $this->skipNote($step) : null,
-                    'requested_fields' => $this->requestedFields($request, $step),
-                ];
-            })
-            ->values()
-            ->all();
-    }
-
-    /**
-     * A skipped step says so rather than pretending to be pending.
-     *
-     * D57: a skip is marked in `decision_reason` because there is no column
-     * for it, so that is what is read here.
-     */
-    private function stepState($step, ?int $decision, int $order, int $current): string
-    {
-        if ($decision === null && str_starts_with((string) $step->decision_reason, 'skip:')) {
-            return self::SKIPPED;
-        }
-
-        if ($decision !== null) {
-            return $decision === ApprovalDecision::Approve ? self::DONE : self::DONE;
-        }
-
-        return $order === $current ? self::CURRENT : self::PENDING;
-    }
-
-    /**
-     * The road a draft is about to take, before any instance exists.
-     *
-     * Shown so a requester can see what they are submitting into. A direct
-     * opening shows its single stop; everything else shows the definition's,
-     * with the manager left out when this requester has nobody above them.
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    private function expectedSteps(RecruitmentRequest $request): array
-    {
-        if ((int) $request->mode === RecruitmentRequestMode::DirectHr) {
-            return [$this->pendingStop(WorkflowStepKey::HrSyriaDirectOpenApproval)];
-        }
-
-        $keys = [WorkflowStepKey::ManagerApproval, WorkflowStepKey::FinanceApproval, WorkflowStepKey::GovernorateHrApproval];
-
-        $requester = $request->requester;
-        $skipsManager = $requester !== null
-            && app(RecruitmentScopeResolver::class)->mayRequestWithoutManagerApproval($requester);
-
-        return collect($keys)
-            ->reject(fn (int $key): bool => $skipsManager && $key === WorkflowStepKey::ManagerApproval)
-            ->map(fn (int $key): array => $this->pendingStop($key))
-            ->values()
-            ->all();
-    }
-
-    /** @return array<string, mixed> */
-    private function pendingStop(int $stepKey): array
-    {
-        return [
-            'key' => 'expected-'.$stepKey,
-            'label' => WorkflowStepKey::getLocalizedName($stepKey)['value'],
-            'state' => self::PENDING,
-            'at' => null,
-            'by' => null,
-            'comment' => null,
-            'note' => null,
-            'requested_fields' => [],
-        ];
-    }
-
-    /**
-     * Where the road ends, which is not always approval.
-     *
-     * A rejected or cancelled request still has an end, and showing it as a
-     * pending "applied" would be a road that never finishes.
-     *
-     * @return array<string, mixed>
-     */
-    private function outcome(RecruitmentRequest $request, int $status): array
-    {
-        [$label, $state] = match ($status) {
-            Status::Applied => [__('recruitment.track.applied'), self::DONE],
-            Status::Approved, Status::FailedApplication => [__('recruitment.track.approved'), self::CURRENT],
-            Status::Rejected => [__('recruitment.track.rejected'), self::DONE],
-            Status::Cancelled => [__('recruitment.track.cancelled'), self::DONE],
-            default => [__('recruitment.track.applied'), self::PENDING],
-        };
-
-        return [
-            'key' => 'outcome',
-            'label' => $label,
-            'state' => $state,
-            'at' => $request->applied_at?->format('Y-m-d H:i'),
-            'by' => null,
-            'comment' => null,
-            'note' => null,
-            'requested_fields' => [],
-        ];
     }
 }

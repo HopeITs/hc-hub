@@ -372,6 +372,9 @@ return [
         'submitted' => 'أُرسِل',
         'approved' => 'اعتُمد',
         'applied' => 'نُفّذ',
+        'draft' => 'مسودة',
+        'changes_requested' => 'أُعيد للتعديل',
+        'superseded' => 'حلّت محلّه نسخة أحدث',
         'rejected' => 'رُفض',
         'cancelled' => 'سُحِب',
         'states' => [
