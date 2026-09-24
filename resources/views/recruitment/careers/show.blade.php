@@ -61,7 +61,16 @@
     @endif
 
     @if ($submissionError)
-        <div class="mt-4 rounded-control border border-red-200 bg-red-50 p-4 text-body text-red-800" role="alert">{{ $submissionError }}</div>
+        <div class="mt-4 rounded-control border border-red-200 bg-red-50 p-4 text-body text-red-800" role="alert">
+            <p class="font-semibold">{{ $submissionError }}</p>
+            @if ($submissionErrors ?? [])
+                <ul class="mt-2 list-disc space-y-1 ps-5">
+                    @foreach ($submissionErrors as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            @endif
+        </div>
     @endif
     <form
         method="POST"

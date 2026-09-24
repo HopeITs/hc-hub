@@ -430,9 +430,12 @@ class RecruitmentApplicationFormService
         $fields = $this->normalizeFields($version->fields_json);
         $keys = array_column($fields, 'key');
         $rules = ['answers' => ['required', 'array:'.implode(',', $keys)]];
+        $attributes = [];
 
         foreach ($fields as $field) {
             $path = 'answers.'.$field['key'];
+            $label = $field['label'][app()->getLocale()] ?? '';
+            $attributes[$path] = $attributes[$path.'.*'] = $label !== '' ? $label : $field['label']['en'];
             $presence = $field['required'] ? ['required'] : ['nullable'];
             $options = array_column($field['options'], 'value');
 
@@ -466,7 +469,7 @@ class RecruitmentApplicationFormService
             };
         }
 
-        return Validator::make(['answers' => $answers], $rules)->validate()['answers'];
+        return Validator::make(['answers' => $answers], $rules, [], $attributes)->validate()['answers'];
     }
 
     /** @return array<int, array<string, mixed>> */

@@ -6,6 +6,7 @@ use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentApplicationTag;
 use App\Models\RecruitmentTag;
 use App\Services\RecruitmentTagService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -61,10 +62,12 @@ class ApplicationTags extends Component
         Gate::authorize('tag', $application);
         Gate::authorize('create', RecruitmentTag::class);
 
-        $done = $this->run(function () use ($tags, $application): void {
+        // One transaction: a tag is never left on the list without the
+        // assignment it was created for.
+        $done = $this->run(fn () => DB::transaction(function () use ($tags, $application): void {
             $tag = $tags->create(auth()->user(), $this->newTagName, $this->newTagColor);
             $tags->attach(auth()->user(), $application, $tag->getKey());
-        });
+        }));
 
         if ($done) {
             $this->reset('newTagName', 'newTagColor');
