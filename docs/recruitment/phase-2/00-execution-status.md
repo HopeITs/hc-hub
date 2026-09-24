@@ -52,7 +52,7 @@ HR ← /recruitment/campaigns/{id}/invites  (صفحة الفريق 2 المست�
 
 | الاختبار | النتيجة |
 |---|---|
-| `tests/Feature/Recruitment/Phase2ApplicantIntakeTest.php` (PHPUnit، **23 اختباراً**) | ✅ كلها تنجح |
+| `tests/Feature/Recruitment/Phase2ApplicantIntakeTest.php` (PHPUnit، **32 اختباراً / 118 تحققاً**) | ✅ كلها تنجح — دليل الاختبار: [02-testing-guide.md](02-testing-guide.md) |
 | `docs/recruitment/phase-2/phase2-integration-check.php` (MySQL حقيقية، 46 فحصاً، rollback) | ✅ كلها تنجح |
 | اختبارات التوظيف الكاملة (259) | 7 لا تنجح، **كلها خارج ملفاتنا** (القسم 5) |
 

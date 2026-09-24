@@ -427,6 +427,127 @@ class Phase2ApplicantIntakeTest extends TestCase
     }
 
     // ------------------------------------------------------------------
+    // Remaining plan items (added for the full Task 1/2 audit)
+    // ------------------------------------------------------------------
+
+    /** Task 1 acceptance: relationships work Applicant → Applications and Application → Campaign. */
+    public function test_relationships_work_in_both_directions(): void
+    {
+        [$campaign, $hr, $token] = $this->campaignWithLink(RecruitmentCampaignLinkMode::InvitationOnly);
+        $invite = app(PublicRecruitmentLinkService::class)->addInvite($campaign->fresh(), $hr, 'Rel', 'rel@example.com');
+        $this->submit($token, $this->answers('rel@example.com'))->assertStatus(202);
+
+        $applicant = RecruitmentApplicant::query()->sole();
+        $application = $applicant->applications()->sole();
+
+        $this->assertSame($campaign->id, $application->campaign->id);
+        $this->assertSame($campaign->vacancy_id, $application->vacancy->id);
+        $this->assertSame((int) $campaign->applicationForm->current_version_id, $application->formVersion->id);
+        $this->assertSame($invite->id, $application->campaignInvite->id);
+        $this->assertSame($application->id, $campaign->applications()->sole()->id);
+    }
+
+    /** Task 1: status is a controlled value, never free text. */
+    public function test_the_stored_status_is_one_of_the_controlled_values(): void
+    {
+        [, , $token] = $this->campaignWithLink();
+        $this->submit($token, $this->answers('status@example.com'))->assertStatus(202);
+
+        $this->assertContains(RecruitmentApplication::query()->sole()->status, RecruitmentApplicationStatus::values());
+    }
+
+    /** Task 2 rules: a disabled campaign refuses, like closed and expired ones. */
+    public function test_a_disabled_campaign_refuses_submissions(): void
+    {
+        [$campaign, , $token] = $this->campaignWithLink();
+        $campaign->forceFill(['status' => HiringCampaignStatus::Disabled])->save();
+
+        $this->submit($token, $this->answers('disabled@example.com'))->assertUnprocessable();
+        $this->assertSame(0, RecruitmentApplication::query()->count());
+    }
+
+    /** Task 2: a disabled or expired link refuses, with the same generic answer. */
+    public function test_a_disabled_or_expired_link_refuses_submissions(): void
+    {
+        [$campaign, , $token] = $this->campaignWithLink();
+        $link = $campaign->publicLinks()->sole();
+
+        $link->forceFill(['expires_at' => now()->subMinute()])->save();
+        $this->submit($token, $this->answers('expired@example.com'))->assertUnprocessable();
+
+        $link->forceFill(['expires_at' => now()->addDay(), 'status' => 'disabled'])->save();
+        $this->submit($token, $this->answers('disabled-link@example.com'))->assertUnprocessable();
+
+        $this->assertSame(0, RecruitmentApplication::query()->count());
+    }
+
+    /** Task 2 edge case: an oversized payload is refused, not truncated into the database. */
+    public function test_an_oversized_answer_is_refused(): void
+    {
+        [, , $token] = $this->campaignWithLink();
+
+        $this->submit($token, $this->answers('big@example.com', str_repeat('x', 300)))->assertUnprocessable();
+        $this->assertSame(0, RecruitmentApplication::query()->count());
+    }
+
+    /** Task 1 security: applicant PII only for authorised internal users inside their scope. */
+    public function test_applicant_data_is_visible_only_inside_the_hr_scope(): void
+    {
+        [, , $token] = $this->campaignWithLink();
+        $this->submit($token, $this->answers('pii@example.com'))->assertStatus(202);
+        $application = RecruitmentApplication::query()->sole();
+
+        $sameCity = $this->makeUser($this->city, 'HR-HMS', ['recruitment-applicants.view', 'recruitment-applications.view']);
+        $otherCity = $this->makeUser($this->makeCity('ALP', '001'), 'HR-ALP', ['recruitment-applicants.view', 'recruitment-applications.view']);
+
+        $this->assertTrue(Gate::forUser($sameCity)->allows('view', $application));
+        $this->assertTrue(Gate::forUser($sameCity)->allows('view', $application->applicant));
+        $this->assertFalse(Gate::forUser($otherCity)->allows('view', $application), 'HR of another governorate');
+        $this->assertFalse(Gate::forUser($otherCity)->allows('view', $application->applicant));
+        $this->assertSame(0, RecruitmentApplication::query()->visibleTo($otherCity)->count());
+    }
+
+    /** Task 1 security: the invite list is internal — the public page never shows it. */
+    public function test_the_public_page_never_shows_the_invite_list(): void
+    {
+        [$campaign, $hr, $token] = $this->campaignWithLink(RecruitmentCampaignLinkMode::InvitationOnly);
+        app(PublicRecruitmentLinkService::class)->addInvite($campaign->fresh(), $hr, 'Secret Person', 'secret.person@example.com');
+
+        $this->get(route('careers.show', $token))
+            ->assertOk()
+            ->assertDontSee('secret.person@example.com')
+            ->assertDontSee('Secret Person');
+    }
+
+    /** Task 1 edge case: HR added a wrong email — cancel it, add the right one. */
+    public function test_hr_can_correct_a_wrong_invite_email(): void
+    {
+        [$campaign, $hr, $token] = $this->campaignWithLink(RecruitmentCampaignLinkMode::InvitationOnly);
+        $links = app(PublicRecruitmentLinkService::class);
+        $wrong = $links->addInvite($campaign->fresh(), $hr, 'Person', 'persn@example.com');
+        $links->cancelInvite($wrong, $hr);
+        $links->addInvite($campaign->fresh(), $hr, 'Person', 'person@example.com');
+
+        $this->submit($token, $this->answers('persn@example.com'))->assertUnprocessable();
+        $this->submit($token, $this->answers('person@example.com'))->assertStatus(202);
+    }
+
+    /** Task 1 data integrity: answers cannot exist without an application. */
+    public function test_answers_cannot_be_stored_without_an_application(): void
+    {
+        [$campaign] = $this->campaignWithLink();
+
+        $this->assertThrows(fn () => DB::table('recruitment_application_answers')->insert([
+            'application_id' => 999999,
+            'form_version_id' => $campaign->applicationForm->current_version_id,
+            'field_key' => 'full_name',
+            'answer_json' => json_encode(['value' => 'x']),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]), \Illuminate\Database\QueryException::class);
+    }
+
+    // ------------------------------------------------------------------
     // Fixtures (same shape as PublicRecruitmentLinkTest's)
     // ------------------------------------------------------------------
 
