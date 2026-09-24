@@ -3,6 +3,7 @@
 namespace App\Livewire\Recruitment\Requests;
 
 use App\Models\RecruitmentRequest;
+use App\Services\RecruitmentEditableFields;
 use App\Services\RecruitmentRequestDraftService;
 use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -65,6 +66,31 @@ class Edit extends Create
         if (isset($this->requestId)) {
             $this->request();
         }
+    }
+
+    /**
+     * Everything the approver did not ask about.
+     *
+     * The service refuses these on save either way, but a form that accepts
+     * typing and then rejects it teaches people to distrust the form. Shown
+     * greyed and unusable, the request reads as what it is: a document with
+     * two fields open in it.
+     *
+     * @return array<int, string>
+     */
+    protected function lockedFields(): array
+    {
+        $editable = app(RecruitmentEditableFields::class);
+        $permitted = $editable->for($this->request());
+
+        if ($permitted === RecruitmentEditableFields::ALL) {
+            return [];
+        }
+
+        return array_values(array_diff(
+            array_keys((array) ($this->request()->draft_payload_json ?? [])),
+            $permitted,
+        ));
     }
 
     /** Resolved through the visibility boundary on every request, never cached. */

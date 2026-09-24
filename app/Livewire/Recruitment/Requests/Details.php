@@ -13,6 +13,7 @@ use App\Models\Program;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Services\RecruitmentApprovalService;
+use App\Services\RecruitmentApprovalTrack;
 use App\Services\RecruitmentEditableFields;
 use App\Services\RecruitmentPendingApprovalQuery;
 use App\Services\RecruitmentRequestApplicationService;
@@ -136,13 +137,19 @@ class Details extends Component
         // What the approver may unlock, and what the requester currently may
         // touch. Both come from the same authority the write path uses.
         $editable = app(RecruitmentEditableFields::class);
-        $selectableFields = $pendingStep ? $editable->selectable($request) : [];
+        $selectableFields = $pendingStep
+            ? $editable->selectable($request, (int) $pendingStep->workflowStep?->step_key)
+            : [];
         $unlockedFields = $editable->requestedByApprover($request);
+
+        // The road this request travels, shortened by whatever its own
+        // workflow actually skips rather than by a style.
+        $track = app(RecruitmentApprovalTrack::class)->for($request);
 
         return view('livewire.recruitment.requests.details', compact(
             'request', 'version', 'draftContext', 'previousRejections', 'pendingStep',
             'awaitingExecution', 'effectiveDate', 'mayExecuteNow',
-            'selectableFields', 'unlockedFields',
+            'selectableFields', 'unlockedFields', 'track',
         ));
     }
 

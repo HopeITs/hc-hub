@@ -107,6 +107,9 @@ class Create extends Component
                 ->whereIn('id', $scopes->creatableJobLevelIds($user))
                 ->orderBy('grade')->get(),
             'contractTypes' => ContractType::query()->orderBy(transColumn('name'))->get(),
+            // Nothing is locked while a request is being written; Edit says
+            // otherwise once an approver has named what may change.
+            'lockedFields' => $this->lockedFields(),
         ]);
     }
 
@@ -114,6 +117,21 @@ class Create extends Component
     protected function authorizeScreen(): void
     {
         Gate::authorize('create', RecruitmentRequest::class);
+    }
+
+    /**
+     * Fields this screen must show but refuse to let anybody type into.
+     *
+     * None, on a new request. Edit overrides this once the request has been
+     * submitted, because from then on only what an approver asked for may
+     * change — and a field that will be refused on save should look refused
+     * before anybody types into it.
+     *
+     * @return array<int, string>
+     */
+    protected function lockedFields(): array
+    {
+        return [];
     }
 
     private function selectOnlyProgram(): void

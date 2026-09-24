@@ -12,10 +12,10 @@
              the approvals, never the facts. --}}
         @include('livewire.recruitment.requests.partials.request-fields')
 
-        <section class="space-y-5 rounded-surface border border-amber-200 bg-amber-50 p-6">
+        <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
             <div>
-                <h2 class="text-h4 font-semibold text-amber-900">{{ __('recruitment.direct_open.title') }}</h2>
-                <p class="mt-1 text-sm text-amber-800">{{ __('recruitment.direct_open.hint') }}</p>
+                <h2 class="text-h4 font-semibold">{{ __('recruitment.direct_open.title') }}</h2>
+                <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.direct_open.hint') }}</p>
             </div>
 
             <div class="grid gap-5 sm:grid-cols-2">

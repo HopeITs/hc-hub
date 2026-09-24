@@ -87,28 +87,29 @@ class RecruitmentRequestListTest extends TestCase
     }
 
     /**
-     * Every column but the date offers a filter.
+     * Every column but the date carries its own control under its heading.
      *
-     * The date is deliberately absent: a dropdown of every timestamp is one
+     * The date is deliberately left out: a dropdown of every timestamp is one
      * entry per row, which sorts well and filters not at all.
      */
     public function test_every_column_but_the_date_can_be_filtered(): void
     {
         [$hr] = $this->seeded();
-
-        $table = new RequestTable;
         $this->actingAs($hr);
 
-        $names = collect((fn () => $this->filters())->call($table))
-            ->map(fn ($filter) => $filter->code())
+        $table = new RequestTable;
+
+        $searchable = collect((fn () => $this->columns())->call($table))
+            ->filter(fn ($column): bool => $column->isSearchable())
+            ->map(fn ($column): string => $column->code())
             ->all();
 
-        foreach (['request_type', 'status', 'mode', 'request_number',
+        foreach (['request_number', 'request_type', 'status', 'mode',
             'requester_user_id', 'scope_city_id', 'target_position_id'] as $column) {
-            $this->assertContains($column, $names, "{$column} should be filterable.");
+            $this->assertContains($column, $searchable, "{$column} should be filterable.");
         }
 
-        $this->assertNotContains('created_at', $names);
+        $this->assertNotContains('created_at', $searchable);
     }
 
     /** The list orders by columns that exist — sqlite would not say otherwise. */

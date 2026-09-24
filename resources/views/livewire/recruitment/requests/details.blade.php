@@ -22,10 +22,12 @@
             @endcan
         </div>
     </header>
+    @include('livewire.recruitment.requests.partials.approval-track')
+
     @if ($pendingStep)
         {{-- Shown only to the approver this step is waiting on. The service asks
              the same six questions again, so this is convenience, not a guard. --}}
-        <section class="rounded-surface border border-primary/30 bg-primary/5 p-6" aria-label="{{ __('recruitment.your_decision') }}">
+        <section class="rounded-surface border border-neutral-200 bg-white p-6" aria-label="{{ __('recruitment.your_decision') }}">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.your_decision') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">{{ \App\Enums\WorkflowStepKey::getLocalizedName((int) $pendingStep->workflowStep?->step_key)['value'] }}</p>
 
@@ -96,12 +98,12 @@
     @if ($unlockedFields && (int) $request->status === \App\Enums\RecruitmentRequestStatus::ChangesRequested)
         {{-- The requester's side of the same ask: everything else on the
              request stays locked, and the server refuses it either way. --}}
-        <section class="rounded-surface border border-amber-200 bg-amber-50 p-6" aria-label="{{ __('recruitment.fields_you_may_edit') }}">
-            <h2 class="text-h4 font-semibold text-amber-900">{{ __('recruitment.fields_you_may_edit') }}</h2>
-            <p class="mt-1 text-sm text-amber-800">{{ __('recruitment.fields_you_may_edit_hint') }}</p>
+        <section class="rounded-surface border border-neutral-200 bg-white p-6" aria-label="{{ __('recruitment.fields_you_may_edit') }}">
+            <h2 class="text-h4 font-semibold">{{ __('recruitment.fields_you_may_edit') }}</h2>
+            <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.fields_you_may_edit_hint') }}</p>
             <ul class="mt-2 flex flex-wrap gap-2">
                 @foreach ($unlockedFields as $field)
-                    <li class="rounded-control bg-white px-2 py-1 text-sm font-medium text-amber-900">{{ __('recruitment.fields.'.$field) }}</li>
+                    <li class="rounded-control border border-neutral-200 px-2 py-1 text-sm font-medium">{{ __('recruitment.fields.'.$field) }}</li>
                 @endforeach
             </ul>
         </section>
@@ -126,7 +128,7 @@
     @endif
     @if ($previousRejections->isNotEmpty())
         {{-- D61: context for whoever reads the request, never a reason to hide it. --}}
-        <section role="note" class="rounded-surface border border-amber-200 bg-amber-50 p-6" aria-label="{{ __('recruitment.previous_rejections') }}">
+        <section role="note" class="rounded-surface border border-neutral-200 bg-white p-6" aria-label="{{ __('recruitment.previous_rejections') }}">
             <h2 class="text-h4 font-semibold text-amber-900">{{ __('recruitment.previous_rejections') }}</h2>
             <p class="mt-1 text-sm text-amber-800">{{ __('recruitment.previous_rejections_help') }}</p>
             <ul class="mt-4 space-y-3">
@@ -228,38 +230,16 @@
         </section>
         <section class="rounded-surface border border-neutral-200 bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.timeline') }}</h2>
-            {{-- One line down the page with a circle at every stage. The line is
-                 a border on the list and each circle sits on it, so the thread
-                 stays unbroken however tall an entry grows. `start` rather than
-                 `left` keeps it on the correct side in Arabic. --}}
-            <ol class="relative mt-4 space-y-6 border-s-2 border-neutral-200 ps-8">
+            {{-- Plain, deliberately: the shape of the journey is drawn once at
+                 the top of the page, and a second set of circles here competed
+                 with it instead of adding anything. This is the record — who,
+                 when, what changed — and it reads as a list. --}}
+            <ol class="mt-4 divide-y divide-neutral-100">
                 @forelse ($request->events as $event)
                     {{-- The role and the scope are read from the row, never looked
                          up from the actor today: reading a year-old decision through
                          this week's roles would misstate who decided it. --}}
-                    <li class="relative" wire:key="event-{{ $event->id }}">
-                        @php
-                            // The circle takes the colour the status already has,
-                            // so the thread reads at a glance without inventing a
-                            // second vocabulary of states.
-                            //
-                            // Written out rather than interpolated: Tailwind reads
-                            // class names as literal text, so "bg-{$colour}" would
-                            // generate nothing and every circle would come out
-                            // transparent.
-                            $dot = match ($event->to_status !== null
-                                ? \App\Enums\RecruitmentRequestStatus::getLocalizedName((int) $event->to_status)['color']
-                                : 'secondary-light') {
-                                'primary' => 'bg-primary ring-primary/30',
-                                'success' => 'bg-green-600 ring-green-600/30',
-                                'danger' => 'bg-red-600 ring-red-600/30',
-                                'warning' => 'bg-amber-500 ring-amber-500/30',
-                                'secondary-medium' => 'bg-secondary-medium ring-secondary-medium/30',
-                                default => 'bg-secondary-light ring-secondary-light/30',
-                            };
-                        @endphp
-                        <span aria-hidden="true"
-                            class="absolute -start-[2.3rem] top-1 size-4 rounded-full border-2 border-white ring-2 {{ $dot }}"></span>
+                    <li class="py-4" wire:key="event-{{ $event->id }}">
                         <div class="flex flex-wrap items-center gap-2">
                             <p class="font-medium">{{ \App\Enums\RecruitmentEventType::getLocalizedName($event->event_type)['value'] }}</p>
                             @if ($event->decision !== null)

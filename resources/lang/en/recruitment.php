@@ -364,6 +364,23 @@ return [
     'request_changes' => 'Request changes',
     'send_change_request' => 'Send the change request',
     'back_to_decisions' => 'Back',
+
+    // The horizontal road a request travels, drawn from the workflow that is
+    // actually running rather than from a fixed list of three.
+    'track' => [
+        'title' => 'Progress',
+        'submitted' => 'Submitted',
+        'approved' => 'Approved',
+        'applied' => 'Carried out',
+        'rejected' => 'Rejected',
+        'cancelled' => 'Withdrawn',
+        'states' => [
+            'done' => 'Done',
+            'current' => 'Waiting here',
+            'skipped' => 'Not required',
+            'pending' => 'Still ahead',
+        ],
+    ],
     'decision_comment' => 'Reason, or what needs changing',
     'decided' => 'Your decision was recorded.',
     'your_decision' => 'Your decision is needed',
@@ -429,6 +446,7 @@ return [
     'fields_to_unlock_hint' => 'Everything you do not tick stays locked.',
     'fields_you_may_edit' => 'What you may change',
     'fields_you_may_edit_hint' => 'The rest of the request stays as it was approved.',
+    'field_locked_here' => 'Locked — the approver did not ask for this one.',
     'request_is_locked' => 'This request is locked. It can only be edited after an approver asks for changes.',
 
     // Mail bodies. Deliberately thin: a number, what happened and a link.
