@@ -437,6 +437,15 @@ class RecruitmentApplicationFormService
             $options = array_column($field['options'], 'value');
 
             if ($field['type'] === 'file' && $field['multiple']) {
+                // An untouched `name="x[]"` file input still posts one empty
+                // part, which arrives as [null]; that means "no files".
+                if (is_array($answers[$field['key']] ?? null)) {
+                    $answers[$field['key']] = array_values(array_filter(
+                        $answers[$field['key']],
+                        fn (mixed $upload): bool => $upload !== null,
+                    )) ?: null;
+                }
+
                 $rules[$path] = [...$presence, 'array', 'max:'.$field['max_files']];
                 $rules[$path.'.*'] = ['file', 'mimes:'.implode(',', $field['accept']), 'max:10240'];
 

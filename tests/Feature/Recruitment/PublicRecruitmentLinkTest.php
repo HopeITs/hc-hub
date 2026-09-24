@@ -256,6 +256,30 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->assertSame(1, RecruitmentApplication::query()->count());
     }
 
+    public function test_an_empty_optional_multi_file_field_does_not_reject_the_application(): void
+    {
+        [$campaign, $hr, , , $form] = $this->makePublishedCampaign();
+        $form->currentVersion->forceFill(['fields_json' => [
+            ['key' => 'full_name'],
+            ['key' => 'email'],
+            ['key' => 'recommendations'],
+        ]])->save();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+
+        // A browser posts an untouched `answers[recommendations][]` input as
+        // one empty file part, which reaches the request as [null].
+        $payload = $this->validSubmission('applicant@example.com');
+        $payload['answers']['recommendations'] = [null];
+
+        $this->post(route('careers.submit', $result['token']), $payload)->assertStatus(202);
+        $this->assertDatabaseCount('recruitment_applicant_files', 1);
+    }
+
     public function test_same_email_cannot_submit_twice_with_a_different_idempotency_key(): void
     {
         [$campaign, $hr] = $this->makePublishedCampaign();
