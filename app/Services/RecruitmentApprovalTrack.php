@@ -61,7 +61,6 @@ class RecruitmentApprovalTrack
         return $track;
     }
 
-
     /**
      * Why a step was skipped, in words rather than a code.
      *
