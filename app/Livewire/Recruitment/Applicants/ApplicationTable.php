@@ -3,17 +3,22 @@
 namespace App\Livewire\Recruitment\Applicants;
 
 use App\Enums\HiringCampaignStatus;
-use App\Enums\RecruitmentApplicationStatus;
 use App\Enums\RecruitmentCvAvailability;
-use App\Models\HiringCampaign;
+use App\Enums\RecruitmentIndicatorOutcome;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplication;
+use App\Models\RecruitmentTag;
 use App\Services\HiringCampaignStateMachine;
+use App\Services\RecruitmentApplicationFilters;
+use App\Services\RecruitmentMatchingIndicators;
+use App\Support\Recruitment\MatchingIndicator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
+use RamonRietdijk\LivewireTables\Actions\Action;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Filters\DateFilter;
 use RamonRietdijk\LivewireTables\Filters\SelectFilter;
@@ -24,35 +29,118 @@ use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
  * match a single submission rather than any of an applicant's several.
  *
  * Every row comes through RecruitmentApplication::visibleTo(), and so does
- * every filter option; a campaign id typed into the query string only
- * narrows a result that is already scoped.
+ * every filter option; each filter goes through RecruitmentApplicationFilters,
+ * which only narrows. A campaign or city id typed into the query string can
+ * shrink an already scoped result, never widen it.
+ *
+ * The indicator column is a summary for the reviewer, computed for the rows
+ * on the page only. It is not sortable or filterable on purpose: a list
+ * ranked by it would be a decision made by the tool.
  */
 class ApplicationTable extends LivewireTable
 {
+    public const BULK_TAG = 'bulk_tag';
+
     public string $sortColumn = 'submitted_at';
 
     public string $sortDirection = 'desc';
 
     protected string $model = RecruitmentApplication::class;
 
+    /** @var array<int, \App\Support\Recruitment\MatchingIndicatorSet> for the current page */
+    protected array $indicatorSets = [];
+
     public function boot(): void
     {
         Gate::authorize('viewAny', RecruitmentApplicant::class);
+    }
+
+    /**
+     * Bulk tagging hands the selected ids to the tagging panel without
+     * loading a model for each; the panel's service re-scopes every id.
+     */
+    public function executeAction(string $code): mixed
+    {
+        if ($code !== self::BULK_TAG) {
+            return parent::executeAction($code);
+        }
+
+        Gate::authorize('bulkTag', RecruitmentApplication::class);
+
+        $this->dispatch('recruitment-bulk-tag', applicationIds: array_values($this->selected))->to(BulkTags::class);
+
+        return null;
+    }
+
+    /**
+     * Selecting the whole filtered table reads ids only. The package default
+     * hydrates every row with its relations, which on a large result set is
+     * the slowest thing the page can do.
+     */
+    public function selectTable(bool $select): void
+    {
+        if (! $this->canSelect()) {
+            return;
+        }
+
+        $table = $this->appliedQuery()
+            ->setEagerLoads([])
+            ->limit(app(\App\Services\RecruitmentTagService::class)->bulkLimit())
+            ->pluck('recruitment_applications.id')
+            ->map(fn ($id): string => (string) $id);
+
+        $selected = collect($this->selected);
+
+        $this->selected = ($select
+            ? $selected->merge($table)->unique()
+            : $selected->diff($table))->values()->all();
+        $this->selectedPage = false;
+
+        $this->updateSession();
+    }
+
+    #[On('recruitment-tags-changed')]
+    public function refreshTags(): void
+    {
+        $this->clearSelection();
     }
 
     protected function query(): Builder
     {
         Gate::authorize('viewAny', RecruitmentApplicant::class);
 
+        $filters = app(RecruitmentApplicationFilters::class);
+
         return RecruitmentApplication::query()
             ->visibleTo(auth()->user())
-            ->addSelect(['has_previous_application' => $this->earlierApplication()])
-            ->with(['applicant', 'campaign.vacancy.position', 'cvFiles']);
+            ->addSelect(['has_previous_application' => $filters->earlierApplication(RecruitmentApplication::query())])
+            ->with(['applicant', 'campaign.vacancy.position', 'cvFiles', 'tags']);
+    }
+
+    /** Indicators for the rows on this page, in one pass. */
+    protected function paginate(): LengthAwarePaginator
+    {
+        $paginator = parent::paginate();
+
+        $this->indicatorSets = app(RecruitmentMatchingIndicators::class)
+            ->evaluateMany(new Collection($paginator->items()));
+
+        return $paginator;
     }
 
     protected function link(Model $model): ?string
     {
         return route('recruitment.applicants.show', ['applicantId' => $model->applicant_id]);
+    }
+
+    /** @return array<int, Action> */
+    protected function actions(): array
+    {
+        return [
+            Action::make(__('recruitment-applicant.tags.bulk_action'), fn () => null, self::BULK_TAG)
+                ->canSee(Gate::allows('bulkTag', RecruitmentApplication::class))
+                ->keepSelection(),
+        ];
     }
 
     /** @return array<int, Column> */
@@ -106,6 +194,17 @@ class ApplicationTable extends LivewireTable
                         .e(__('recruitment-applicant.previous_applicant_flag')).'</span>'
                     : '';
             })->asHtml(),
+
+            Column::make(__('recruitment-applicant.tags.title'), function (RecruitmentApplication $application): string {
+                return $application->tags
+                    ->map(fn (RecruitmentTag $tag): string => '<span class="me-1 inline-block rounded-control px-2 py-0.5 text-xs font-semibold '
+                        .$tag->classes().'">'.e($tag->name).'</span>')
+                    ->implode('');
+            })->asHtml(),
+
+            Column::make(__('recruitment-applicant.indicators.column'), function (RecruitmentApplication $application): string {
+                return $this->indicatorSummary($application);
+            })->asHtml(),
         ];
     }
 
@@ -113,53 +212,55 @@ class ApplicationTable extends LivewireTable
     protected function filters(): array
     {
         $user = auth()->user();
+        $filters = app(RecruitmentApplicationFilters::class);
 
         return [
-            SelectFilter::make(__('recruitment-applicant.campaign'), 'campaign_id')
-                ->options(HiringCampaign::query()
-                    ->visibleTo($user)
-                    ->with('vacancy.position')
-                    ->latest('id')
-                    ->get()
-                    ->mapWithKeys(fn (HiringCampaign $campaign): array => [
-                        $campaign->getKey() => ($campaign->vacancy?->position?->title ?? '—')
-                            .($campaign->starts_at ? ' · '.$campaign->starts_at->format('Y-m-d') : ''),
-                    ])
-                    ->all()),
+            SelectFilter::make(__('recruitment-applicant.campaign'), fn (Builder $query, $value) => $filters->campaign($query, $value), 'campaign_id')
+                ->options($filters->campaignOptions($user)),
 
-            SelectFilter::make(__('recruitment-applicant.status'), 'status')
-                ->options(collect(RecruitmentApplicationStatus::values())
-                    ->mapWithKeys(fn (string $status): array => [$status => __('recruitment-applicant.statuses.'.$status)])
-                    ->all()),
+            SelectFilter::make(__('recruitment-applicant.status'), fn (Builder $query, $value) => $filters->status($query, $value), 'status')
+                ->options($filters->statusOptions()),
+
+            SelectFilter::make(__('recruitment-applicant.filters.city'), fn (Builder $query, $value) => $filters->city($query, $value), 'city')
+                ->options($filters->cityOptions($user)),
 
             DateFilter::make(__('recruitment-applicant.applied_at'), 'submitted_at'),
 
-            SelectFilter::make(__('recruitment-applicant.source'), 'applicant.source')
-                ->options(RecruitmentApplicant::query()
-                    ->visibleTo($user)
-                    ->distinct()
-                    ->orderBy('source')
-                    ->pluck('source')
-                    ->mapWithKeys(fn (string $source): array => [$source => RecruitmentApplicant::sourceLabel($source)])
-                    ->all()),
+            SelectFilter::make(__('recruitment-applicant.source'), fn (Builder $query, $value) => $filters->source($query, $value), 'applicant_source')
+                ->options($filters->sourceOptions($user)),
+
+            SelectFilter::make(__('recruitment-applicant.tags.title'), fn (Builder $query, $value) => $filters->tag($query, $value), 'tag')
+                ->options($filters->tagOptions()),
+
+            SelectFilter::make(__('recruitment-applicant.cv'), fn (Builder $query, $value) => $filters->cv($query, $value), 'cv')
+                ->options($filters->cvOptions()),
+
+            SelectFilter::make(__('recruitment-applicant.previous_applicant'), fn (Builder $query, $value) => $filters->previousApplicant($query, $value), 'previous')
+                ->options($filters->previousOptions()),
         ];
     }
 
     /**
-     * Did this applicant apply to anything before this application — in any
-     * campaign, in scope or not? Only the yes/no leaves this query; which
-     * campaign it was stays behind the scope.
+     * "n of m met", with every indicator named in the tooltip — the count
+     * alone is never shown without what it counts.
      */
-    private function earlierApplication(): QueryBuilder
+    private function indicatorSummary(RecruitmentApplication $application): string
     {
-        return DB::table('recruitment_applications as prior')
-            ->selectRaw('1')
-            ->whereColumn('prior.applicant_id', 'recruitment_applications.applicant_id')
-            ->where(fn ($earlier) => $earlier
-                ->whereColumn('prior.submitted_at', '<', 'recruitment_applications.submitted_at')
-                ->orWhere(fn ($tie) => $tie
-                    ->whereColumn('prior.submitted_at', '=', 'recruitment_applications.submitted_at')
-                    ->whereColumn('prior.id', '<', 'recruitment_applications.id')))
-            ->limit(1);
+        $set = $this->indicatorSets[$application->getKey()] ?? null;
+
+        if ($set === null) {
+            return '';
+        }
+
+        $details = collect($set->indicators)
+            ->map(fn (MatchingIndicator $indicator): string => $indicator->label().': '.__('recruitment-applicant.indicators.outcomes.'.$indicator->outcome))
+            ->implode("\n");
+
+        $summary = $set->assessedCount() === 0
+            ? __('recruitment-applicant.indicators.none_assessed')
+            : __('recruitment-applicant.indicators.summary', ['met' => $set->metCount(), 'assessed' => $set->assessedCount()]);
+
+        return '<span title="'.e($details).'" class="cursor-help rounded-control px-2 py-0.5 text-xs font-semibold '
+            .RecruitmentIndicatorOutcome::classes(RecruitmentIndicatorOutcome::Unknown).'">'.e($summary).'</span>';
     }
 }

@@ -22,4 +22,22 @@ class RecruitmentApplicationPolicy
         return $user->hasActivePermission('recruitment-applicants.change-status')
             && $this->view($user, $application);
     }
+
+    /** Tagging one application: its own permission, and the application must be in scope. */
+    public function tag(User $user, RecruitmentApplication $application): bool
+    {
+        return $user->hasActivePermission('recruitment-applicants.tag')
+            && $this->view($user, $application);
+    }
+
+    /**
+     * Tagging many at once. A separate grant because one click reaches every
+     * selected record; the records themselves are re-scoped one by one in
+     * RecruitmentTagService, so this answers only "may they bulk-tag at all".
+     */
+    public function bulkTag(User $user): bool
+    {
+        return $user->hasActivePermission('recruitment-applicants.view')
+            && $user->hasActivePermission('recruitment-applicants.bulk-tag');
+    }
 }

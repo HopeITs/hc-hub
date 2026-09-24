@@ -100,5 +100,8 @@ return [
         'delete-notes' => 'Delete internal notes',
         'archive-cv' => 'Archive CVs',
         'change-status' => 'Change application status',
+        'tag' => 'Tag applications',
+        'bulk-tag' => 'Bulk-tag applications',
+        'manage-tags' => 'Manage the tag list',
     ],
 ];

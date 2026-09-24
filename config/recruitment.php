@@ -144,4 +144,95 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Applicant tags
+    |--------------------------------------------------------------------------
+    |
+    | Tags are internal labels for HR, never shown to an applicant. The
+    | palette is a closed list so a colour is a choice, not free input, and
+    | Tailwind can see every class. bulk_limit caps one bulk operation; a
+    | larger set is narrowed with filters first.
+    |
+    */
+
+    'tags' => [
+        'scope_key' => 'organization',
+        'min_length' => 2,
+        'max_length' => 40,
+        'bulk_limit' => 500,
+        'palette' => [
+            'neutral' => 'bg-neutral-100 text-neutral-800',
+            'red' => 'bg-red-50 text-red-800',
+            'amber' => 'bg-amber-50 text-amber-800',
+            'green' => 'bg-green-50 text-green-800',
+            'blue' => 'bg-blue-50 text-blue-800',
+            'purple' => 'bg-purple-50 text-purple-800',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Matching indicators
+    |--------------------------------------------------------------------------
+    |
+    | The criteria RecruitmentMatchingIndicators reads. Every indicator is a
+    | rule written here, not a learned weight, so the screen can say exactly
+    | why it shows what it shows. Changing anything below changes the
+    | criteria version (a hash of this array), and saved snapshots keep the
+    | version they were computed under.
+    |
+    | Answers are read by form field key. A form version that does not ask a
+    | question produces "not assessed", never a miss.
+    |
+    */
+
+    'indicators' => [
+        'fields' => [
+            'preferred_city' => 'vacancy_city',
+            'residence' => 'city',
+            'experience_years' => 'experience_years',
+            'education_level' => 'education_level',
+            'experience_field' => 'experience_field',
+            'experience_text' => 'experience',
+        ],
+
+        // vacancy_city option value => cities.slug
+        'city_answers' => [
+            'aleppo' => 'ALP',
+            'homs' => 'HMS',
+            'damascus' => 'DMS',
+            'latakia' => 'LAT',
+            'tartus' => 'TAR',
+        ],
+
+        // experience_years option value => [min, max] years; null max is open-ended.
+        'experience_ranges' => [
+            'less_than_1' => [0, 0],
+            '1_3' => [1, 3],
+            '3_5' => [3, 5],
+            '5_plus' => [5, null],
+        ],
+
+        // education_level option value => rank; higher is more advanced.
+        'education_ranks' => [
+            'institute' => 1,
+            'university' => 2,
+            'master' => 3,
+            'doctorate' => 4,
+        ],
+
+        // Words in a request's free-text required_qualifications that name a
+        // level. The lowest level mentioned is taken as the minimum.
+        'qualification_keywords' => [
+            'institute' => ['institute', 'diploma', 'معهد', 'دبلوم'],
+            'university' => ['university', 'bachelor', 'degree', 'graduate', 'جامعة', 'جامعي', 'إجازة', 'بكالوريوس'],
+            'master' => ['master', 'ماجستير'],
+            'doctorate' => ['doctorate', 'phd', 'ph.d', 'دكتوراه'],
+        ],
+
+        // experience_field answers that mean "no experience in the field".
+        'no_experience_answers' => ['none', 'no'],
+    ],
+
 ];

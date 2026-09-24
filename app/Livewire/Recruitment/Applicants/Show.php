@@ -7,6 +7,7 @@ use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Services\RecruitmentApplicationStatusService;
 use App\Services\RecruitmentCvArchiveService;
+use App\Services\RecruitmentMatchingIndicators;
 use App\Services\RecruitmentScopeResolver;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
@@ -129,8 +130,12 @@ class Show extends Component
         $this->resetErrorBag('archiveReason');
     }
 
-    public function render(RecruitmentScopeResolver $scopes, RecruitmentApplicationStatusService $statuses, RecruitmentCvArchiveService $archive)
-    {
+    public function render(
+        RecruitmentScopeResolver $scopes,
+        RecruitmentApplicationStatusService $statuses,
+        RecruitmentCvArchiveService $archive,
+        RecruitmentMatchingIndicators $indicators,
+    ) {
         $user = auth()->user();
         $applicant = $this->resolveApplicant();
 
@@ -142,6 +147,7 @@ class Show extends Component
                 'files.archiveNote',
                 'decisions' => fn ($decisions) => $decisions->latest('decided_at')->latest('id'),
                 'decisions.decidedBy.profile',
+                'indicatorSnapshot',
             ])
             ->latest('submitted_at')
             ->latest('id')
@@ -169,6 +175,8 @@ class Show extends Component
                 && $statuses->requiresReason($this->statusFrom, $this->statusTarget),
             'archiveFile' => $archiveFile,
             'archiveNeedsReason' => $archiveFile !== null && $archive->requiresReason($archiveFile),
+            // Read-only: evaluating indicators never touches the application.
+            'indicatorSets' => $indicators->evaluateMany($applications),
         ]);
     }
 

@@ -105,6 +105,15 @@
                     <p class="mt-4 text-sm text-secondary-medium">{{ __('recruitment-applicant.cv_availability.missing') }}</p>
                 @endif
 
+                @if (isset($indicatorSets[$application->id]))
+                    @include('livewire.recruitment.applicants.partials.indicators', [
+                        'set' => $indicatorSets[$application->id],
+                        'snapshot' => $application->indicatorSnapshot,
+                    ])
+                @endif
+
+                <livewire:recruitment.applicants.application-tags :application-id="$application->id" :key="'tags-'.$application->id" />
+
                 {{-- Status change: its own action, its own permission, confirmed. --}}
                 @if (! empty($statusTargets[$application->id] ?? []))
                     @if ($statusApplicationId === $application->id)

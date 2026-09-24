@@ -125,10 +125,13 @@ return [
         /*
          * Applicant records. Each sensitive act is its own permission rather
          * than riding on 'view': seeing a list must never imply reading a CV,
-         * and writing a note must never imply moving an application.
+         * and writing a note must never imply moving an application. Tagging
+         * one record, tagging many at once, and editing the tag list itself
+         * are separate for the same reason.
          */
         'recruitment-applicants' => [
             'view', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status',
+            'tag', 'bulk-tag', 'manage-tags',
         ],
     ],
 
@@ -357,6 +360,28 @@ return [
             'beginArchive' => 'recruitment-applicants.archive-cv',
             'archiveCv' => 'recruitment-applicants.archive-cv',
         ],
+        // The table's only action is bulk tagging; the selection is re-scoped
+        // in RecruitmentTagService before anything is written.
+        'recruitment.applicants.application-table' => [
+            'executeAction' => 'recruitment-applicants.bulk-tag',
+            'executeItemAction' => 'recruitment-applicants.bulk-tag',
+        ],
+        'recruitment.applicants.bulk-tags' => [
+            'open' => 'recruitment-applicants.bulk-tag',
+            'apply' => 'recruitment-applicants.bulk-tag',
+        ],
+        'recruitment.applicants.application-tags' => [
+            'attach' => 'recruitment-applicants.tag',
+            'detach' => 'recruitment-applicants.tag',
+            'createAndAttach' => 'recruitment-applicants.manage-tags',
+        ],
+        'recruitment.applicants.tag-manager' => [
+            'create' => 'recruitment-applicants.manage-tags',
+            'beginRename' => 'recruitment-applicants.manage-tags',
+            'rename' => 'recruitment-applicants.manage-tags',
+            'delete' => 'recruitment-applicants.manage-tags',
+            'restore' => 'recruitment-applicants.manage-tags',
+        ],
         'recruitment.applicants.notes' => [
             'addNote' => 'recruitment-applicants.add-notes',
             'confirmDelete' => 'recruitment-applicants.delete-notes',
@@ -393,6 +418,12 @@ return [
         'recruitment.applicants.show' => ['cancelStatusChange', 'cancelArchive'],
         // refreshNotes only re-renders, through the same scoped query as the first render.
         'recruitment.applicants.notes' => ['cancelDelete', 'refreshNotes'],
+        // Re-render through the same scoped query; they write nothing.
+        // selectTable() reads ids through the same scoped, filtered query.
+        'recruitment.applicants.application-table' => ['refreshTags', 'selectTable'],
+        'recruitment.applicants.bulk-tags' => ['cancel'],
+        'recruitment.applicants.application-tags' => ['refreshTags'],
+        'recruitment.applicants.tag-manager' => ['cancelRename'],
 
         // --- Authentication -------------------------------------------------
         // Reached before a session exists, or acting only on the caller's own

@@ -78,6 +78,11 @@ class RecruitmentApplication extends Model
             ->withTimestamps();
     }
 
+    public function indicatorSnapshot(): HasOne
+    {
+        return $this->hasOne(RecruitmentApplicationIndicatorSnapshot::class, 'application_id');
+    }
+
     public function notes(): HasMany
     {
         return $this->hasMany(RecruitmentApplicantNote::class, 'application_id');
