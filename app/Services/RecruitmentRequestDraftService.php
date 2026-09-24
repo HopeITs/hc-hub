@@ -105,6 +105,14 @@ class RecruitmentRequestDraftService
 
             [$target, $cityId] = $this->resolveTarget($actor, $data);
 
+            // Read before the write, so the event can say what moved. RV-1b:
+            // "the request was edited" without naming the fields is explicitly
+            // not enough for the approver who has to decide whether their own
+            // approval still stands.
+            $before = (array) ($fresh->draft_payload_json ?? []);
+
+            $this->assertOnlyPermittedFieldsChanged($fresh, $before, $data);
+
             $fresh->forceFill([
                 'scope_city_id' => $cityId,
                 'target_position_id' => $data['request_type'] === Type::CreatePosition ? null : $target->getKey(),
@@ -112,13 +120,100 @@ class RecruitmentRequestDraftService
                 'draft_payload_json' => $data,
             ])->save();
 
+            $changes = app(RecruitmentRequestChangeClassifier::class)->payloadChanges($before, $data);
+
             $this->recordEvent($fresh, $actor, [
                 'event_type' => RecruitmentEventType::RequestEdited,
                 'to_status' => (int) $fresh->status,
+                'meta' => $changes === [] ? null : ['changes' => $changes],
             ]);
 
             return $fresh;
         });
+    }
+
+    /** Drafts may be incomplete, but scope/IDs and any supplied data must be valid. */
+    /**
+     * The request form's own rules, without any question of who may raise it.
+     *
+     * Public because the direct-open path needs exactly this and nothing else
+     * around it: a direct opening may shorten the approvals, never the facts.
+     */
+    public function validate(array $input): array
+    {
+        $type = Validator::make(['data' => $input], [
+            'data.request_type' => ['required', 'integer', Rule::in(array_values(array_diff(Type::getValues(), [Type::Unknown])))],
+        ])->validate()['data']['request_type'];
+        $type = (int) $type;
+        $rules = ['request_type' => ['required', 'integer']];
+        $rules['position_id'] = ['required', 'integer'];
+
+        if ($type === Type::CreatePosition) {
+            unset($rules['position_id']);
+            $rules += [
+                'direct_manager_id' => ['required', 'integer'],
+                'city_id' => ['required', 'integer', 'exists:cities,id'],
+                'program_id' => ['required', 'integer', 'exists:programs,id'],
+                'center_id' => [$this->centerRule($input), 'integer', 'exists:centers,id'],
+                'department_id' => ['required', 'integer', 'exists:departments,id'],
+                'job_level_id' => ['required', 'integer', 'exists:job_levels,id'],
+                'title_en' => ['required', 'string', 'max:255'],
+                'title_ar' => ['required', 'string', 'max:255'],
+                'qualifications' => ['required', 'string'],
+                'responsibilities' => ['required', 'string'],
+                'max_emp' => ['required', 'integer', 'min:1'],
+            ];
+        }
+
+        // The three types that end in somebody being hired share the form the
+        // paper request asks for: why, when, how long, how often and how paid.
+        if (in_array($type, [Type::FillVacancy, Type::IncreaseHeadcount, Type::CreatePosition], true)) {
+            $form = config('recruitment.request_form');
+
+            $rules += [
+                'recruitment_reason' => ['required', 'string', Rule::in($form['recruitment_reasons'])],
+                // Only meaningful when the list itself has no answer for it.
+                'other_reason' => ['required_if:data.recruitment_reason,other', 'nullable', 'string', 'max:1000'],
+                'priority' => ['required', 'string', Rule::in($form['priorities'])],
+                'volunteer_type' => ['required', 'string', Rule::in($form['volunteer_types'])],
+                'weekly_hours' => ['required', 'integer', 'min:1', 'max:168'],
+                'volunteer_period_start_date' => ['required', 'date_format:Y-m-d'],
+                'volunteer_period_end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:data.volunteer_period_start_date'],
+                'needed_by_date' => ['required', 'date_format:Y-m-d'],
+                'salary_amount' => ['required', 'integer', 'min:0'],
+                'currency' => ['required', 'integer', Rule::in([Currency::SYP, Currency::USD, Currency::EUR])],
+                'salary_per' => ['required', 'integer', Rule::in([SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session])],
+                'contract_type_id' => ['required', 'integer', 'exists:contract_types,id'],
+                'detailed_explanation' => ['required', 'string'],
+            ];
+        }
+        if (in_array($type, [Type::FillVacancy, Type::CloseVacancy], true)) {
+            $rules['vacancy_id'] = [$type === Type::CloseVacancy ? 'required' : 'nullable', 'integer'];
+        }
+        if ($type === Type::IncreaseHeadcount) {
+            $rules['additional_count'] = ['required', 'integer', 'min:1'];
+        }
+        if ($type === Type::DecreaseHeadcount) {
+            $rules['reduce_by'] = ['required', 'integer', 'min:1'];
+        }
+        if (in_array($type, [Type::DecreaseHeadcount, Type::ClosePosition, Type::CloseVacancy], true)) {
+            $rules['reason'] = ['required', 'string'];
+        }
+        if (in_array($type, [Type::DecreaseHeadcount, Type::ClosePosition], true)) {
+            $rules['effective_date'] = ['required', 'date_format:Y-m-d'];
+        }
+
+        // Strip fields for other request types and all caller-supplied internal state.
+        $input = array_intersect_key($input, $rules);
+        $input = array_map(fn ($value) => $value === '' ? null : $value, $input);
+        $prefixed = [];
+        foreach ($rules as $field => $rule) {
+            $prefixed['data.'.$field] = $rule;
+        }
+        $data = Validator::make(['data' => $input], $prefixed)->validate()['data'];
+        $data['request_type'] = $type;
+
+        return $data;
     }
 
     /**
@@ -224,6 +319,44 @@ class RecruitmentRequestDraftService
     }
 
     /** D8: a failed audit write is reported and must not roll back the request. */
+    /**
+     * Refuse any change the approver did not ask for.
+     *
+     * Once a request has been submitted it is a fixed document, and the only
+     * way back in is an approver naming the fields they want changed. Enforced
+     * here rather than only by disabling inputs, because a disabled input is a
+     * courtesy to the person using the screen and no obstacle at all to a
+     * request sent straight at the endpoint.
+     *
+     * Every field that was touched without permission is named at once, so the
+     * requester is not sent round the loop discovering them one at a time.
+     *
+     * @param  array<string, mixed>  $before
+     * @param  array<string, mixed>  $after
+     */
+    private function assertOnlyPermittedFieldsChanged(RecruitmentRequest $request, array $before, array $after): void
+    {
+        $permitted = app(RecruitmentEditableFields::class)->for($request);
+
+        if ($permitted === RecruitmentEditableFields::ALL) {
+            return;
+        }
+
+        $refused = [];
+
+        foreach (app(RecruitmentRequestChangeClassifier::class)->payloadChanges($before, $after) as $field => $ignored) {
+            if (! in_array($field, $permitted, true)) {
+                $refused['data.'.$field] = __('recruitment.field_is_locked', [
+                    'field' => __('recruitment.fields.'.$field),
+                ]);
+            }
+        }
+
+        if ($refused !== []) {
+            throw ValidationException::withMessages($refused);
+        }
+    }
+
     private function recordEvent(RecruitmentRequest $request, User $actor, array $attributes): void
     {
         // A nested transaction/savepoint also keeps the outer transaction usable.
@@ -269,83 +402,5 @@ class RecruitmentRequestDraftService
                 'data.job_level_id' => __('recruitment.job_level_not_junior'),
             ]);
         }
-    }
-
-    /** Drafts may be incomplete, but scope/IDs and any supplied data must be valid. */
-    private function validate(array $input): array
-    {
-        $type = Validator::make(['data' => $input], [
-            'data.request_type' => ['required', 'integer', Rule::in(array_values(array_diff(Type::getValues(), [Type::Unknown])))],
-        ])->validate()['data']['request_type'];
-        $type = (int) $type;
-        $rules = ['request_type' => ['required', 'integer']];
-        $rules['position_id'] = ['required', 'integer'];
-
-        if ($type === Type::CreatePosition) {
-            unset($rules['position_id']);
-            $rules += [
-                'direct_manager_id' => ['required', 'integer'],
-                'city_id' => ['required', 'integer', 'exists:cities,id'],
-                'program_id' => ['required', 'integer', 'exists:programs,id'],
-                'center_id' => [$this->centerRule($input), 'integer', 'exists:centers,id'],
-                'department_id' => ['required', 'integer', 'exists:departments,id'],
-                'job_level_id' => ['required', 'integer', 'exists:job_levels,id'],
-                'title_en' => ['required', 'string', 'max:255'],
-                'title_ar' => ['required', 'string', 'max:255'],
-                'qualifications' => ['required', 'string'],
-                'responsibilities' => ['required', 'string'],
-                'max_emp' => ['required', 'integer', 'min:1'],
-            ];
-        }
-
-        // The three types that end in somebody being hired share the form the
-        // paper request asks for: why, when, how long, how often and how paid.
-        if (in_array($type, [Type::FillVacancy, Type::IncreaseHeadcount, Type::CreatePosition], true)) {
-            $form = config('recruitment.request_form');
-
-            $rules += [
-                'recruitment_reason' => ['required', 'string', Rule::in($form['recruitment_reasons'])],
-                // Only meaningful when the list itself has no answer for it.
-                'other_reason' => ['required_if:data.recruitment_reason,other', 'nullable', 'string', 'max:1000'],
-                'priority' => ['required', 'string', Rule::in($form['priorities'])],
-                'volunteer_type' => ['required', 'string', Rule::in($form['volunteer_types'])],
-                'weekly_hours' => ['required', 'integer', 'min:1', 'max:168'],
-                'volunteer_period_start_date' => ['required', 'date_format:Y-m-d'],
-                'volunteer_period_end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:data.volunteer_period_start_date'],
-                'needed_by_date' => ['required', 'date_format:Y-m-d'],
-                'salary_amount' => ['required', 'integer', 'min:0'],
-                'currency' => ['required', 'integer', Rule::in([Currency::SYP, Currency::USD, Currency::EUR])],
-                'salary_per' => ['required', 'integer', Rule::in([SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session])],
-                'contract_type_id' => ['required', 'integer', 'exists:contract_types,id'],
-                'detailed_explanation' => ['required', 'string'],
-            ];
-        }
-        if (in_array($type, [Type::FillVacancy, Type::CloseVacancy], true)) {
-            $rules['vacancy_id'] = [$type === Type::CloseVacancy ? 'required' : 'nullable', 'integer'];
-        }
-        if ($type === Type::IncreaseHeadcount) {
-            $rules['additional_count'] = ['required', 'integer', 'min:1'];
-        }
-        if ($type === Type::DecreaseHeadcount) {
-            $rules['reduce_by'] = ['required', 'integer', 'min:1'];
-        }
-        if (in_array($type, [Type::DecreaseHeadcount, Type::ClosePosition, Type::CloseVacancy], true)) {
-            $rules['reason'] = ['required', 'string'];
-        }
-        if (in_array($type, [Type::DecreaseHeadcount, Type::ClosePosition], true)) {
-            $rules['effective_date'] = ['required', 'date_format:Y-m-d'];
-        }
-
-        // Strip fields for other request types and all caller-supplied internal state.
-        $input = array_intersect_key($input, $rules);
-        $input = array_map(fn ($value) => $value === '' ? null : $value, $input);
-        $prefixed = [];
-        foreach ($rules as $field => $rule) {
-            $prefixed['data.'.$field] = $rule;
-        }
-        $data = Validator::make(['data' => $input], $prefixed)->validate()['data'];
-        $data['request_type'] = $type;
-
-        return $data;
     }
 }

@@ -77,6 +77,8 @@
     <x-layouts.app.footer class="bg-app-surface"/>
 </div>
 
+<x-tour.overlay/>
+
 @include('partials.scripts')
 @stack('scripts')
 <script nonce="{{ Vite::cspNonce() }}">
@@ -126,8 +128,7 @@
 
 
 
-
-<script>
+<script nonce="{{ Vite::cspNonce() }}">
     window.CustomScrollbarConfig = {
         trackWidth: 8,
         offset: 5,

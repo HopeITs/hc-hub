@@ -15,6 +15,7 @@ use App\Models\LeaveRequest;
 use App\Models\Position;
 use App\Models\PublicRecruitmentLink;
 use App\Models\RecruitmentApplicant;
+use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
 use App\Models\RecruitmentRequest;
@@ -23,6 +24,9 @@ use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\Vacancy;
 use App\Observers\ContractObserver;
 use App\Observers\EmployeeObserver;
+use App\Observers\RecruitmentApplicantObserver;
+use App\Observers\RecruitmentApplicationObserver;
+use App\Observers\RecruitmentCampaignInviteObserver;
 use App\Policies\ApplicationFormPolicy;
 use App\Policies\BadgePolicy;
 use App\Policies\CenterPolicy;
@@ -34,6 +38,7 @@ use App\Policies\JobPostPolicy;
 use App\Policies\LeaveRequestPolicy;
 use App\Policies\PositionPolicy;
 use App\Policies\PublicRecruitmentLinkPolicy;
+use App\Policies\RecruitmentApplicantFilePolicy;
 use App\Policies\RecruitmentApplicantPolicy;
 use App\Policies\RecruitmentApplicationPolicy;
 use App\Policies\RecruitmentCampaignInvitePolicy;
@@ -42,10 +47,14 @@ use App\Policies\RecruitmentRequestPolicy;
 use App\Policies\RecruitmentWorkflowInstanceStepPolicy;
 use App\Policies\VacancyPolicy;
 use App\Services\ActivityLogger;
+use App\Services\SalaryCipher;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -59,10 +68,22 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ActivityLogger::class, function ($app) {
             return new ActivityLogger;
         });
+
+        // Singleton so the Encrypter - and the "this host cannot read the
+        // figures" warning that goes with it - is built once per request
+        // rather than once per contract row rendered.
+        $this->app->singleton(SalaryCipher::class);
     }
 
     public function boot(): void
     {
+        RateLimiter::for('careers-view', fn (Request $request) => Limit::perMinute(60)
+            ->by($request->ip()));
+        RateLimiter::for('careers-submit', fn (Request $request) => [
+            Limit::perMinute(5)->by($request->ip().'|'.hash('sha256', (string) $request->route('token'))),
+            Limit::perHour(30)->by($request->ip()),
+        ]);
+
         // Applies wherever Rules\Password::defaults() is used (registration,
         // reset, and the settings screen).
         //
@@ -84,6 +105,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(LeaveRequest::class, LeaveRequestPolicy::class);
         Gate::policy(Position::class, PositionPolicy::class);
         Gate::policy(RecruitmentRequest::class, RecruitmentRequestPolicy::class);
+        Gate::policy(RecruitmentApplicantFile::class, RecruitmentApplicantFilePolicy::class);
         Gate::policy(RecruitmentWorkflowInstanceStep::class, RecruitmentWorkflowInstanceStepPolicy::class);
         Gate::policy(Vacancy::class, VacancyPolicy::class);
         Gate::policy(HiringCampaign::class, HiringCampaignPolicy::class);
@@ -165,5 +187,13 @@ class AppServiceProvider extends ServiceProvider
 
         Contract::observe(ContractObserver::class);
         Employee::observe(EmployeeObserver::class);
+
+        // Team 2 (Phase 2): rules that must hold for every path that writes
+        // these records — Team 1's public form included — without that code
+        // being modified. Phone-duplicate hint; submission audit; a used
+        // invite is final.
+        RecruitmentApplicant::observe(RecruitmentApplicantObserver::class);
+        RecruitmentApplication::observe(RecruitmentApplicationObserver::class);
+        RecruitmentCampaignInvite::observe(RecruitmentCampaignInviteObserver::class);
     }
 }

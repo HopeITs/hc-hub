@@ -38,7 +38,7 @@
     padBottom:   null,      // empty margin at the BOTTOM (px) — null = same as padY (bottom safety)
     thumbGap:    2,         // gap between the thumb and each track end (px)
     minThumb:    24,        // minimum thumb length (px)
-    zIndex:      2000,      // overlay stacking
+    zIndex:      "auto",    // overlay stacking — "auto" derives it from the container (see overlayZ), a number pins it
     headerSelector: null,   // CSS selector of a fixed/sticky page header the overlay must not paint over
     exclude:     []         // extra CSS selectors to skip, e.g. [".my-popup", "#chat"]
   };
@@ -61,6 +61,38 @@
     var hr = h.getBoundingClientRect();
     return (hr.width > 0 && hr.height > 0) ? hr.bottom : 0;
   }
+
+  /* z-index at which `node` competes in the root stacking context — the one
+     the overlay lives in, being a fixed child of <body>. That is the z-index of
+     its outermost stacking-context ancestor (0 when that one is z:auto). */
+  function stackLevel(node) {
+    var level = 0;
+    for (var n = node; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+      var cs = getComputedStyle(n), z = cs.zIndex, pos = cs.position;
+      var pd = n.parentElement ? getComputedStyle(n.parentElement).display : "";
+      var flexItem = pd.indexOf("flex") > -1 || pd.indexOf("grid") > -1;
+      var zSet = z !== "auto" && (pos !== "static" || flexItem);
+      if (zSet || pos === "fixed" || pos === "sticky" || parseFloat(cs.opacity) < 1 ||
+          cs.transform !== "none" || cs.filter !== "none" || cs.isolation === "isolate") {
+        level = zSet ? (parseInt(z, 10) || 0) : 0;
+      }
+    }
+    return level;
+  }
+
+  /* Overlay z-index: just above its own container, so it paints over the
+     container (and over a modal/sidebar it lives in), but never over layers
+     that sit above that container — navbar menus, page dropdowns, the tour.
+     Page-level containers are lifted to just under the header, which keeps
+     the bar above in-page sticky headers (z-10/z-20) while menus hanging
+     from the header still cover it. */
+  function overlayZ(el) {
+    if (C.zIndex !== "auto") return C.zIndex;
+    var z = stackLevel(el) + 1;
+    var h = HEADER_SEL && document.querySelector(HEADER_SEL);
+    if (h) { var hz = stackLevel(h); if (z < hz) z = Math.max(z, hz - 1); }
+    return z;
+  }
   var attached = new WeakSet(), seen = new WeakSet(), instances = [];
 
   /* ---------- Inject CSS (colours via CSS vars so the host can re-theme in plain CSS) ---------- */
@@ -69,7 +101,7 @@
     var css =
       ".has-csb{scrollbar-width:none;}" +
       ".has-csb::-webkit-scrollbar{width:0;height:0;display:none;}" +
-      ".csb{position:fixed;width:" + TRACKW + "px;pointer-events:none;z-index:" + C.zIndex + ";opacity:0;transition:opacity .18s;}" +
+      ".csb{position:fixed;width:" + TRACKW + "px;pointer-events:none;opacity:0;transition:opacity .18s;}" +
       ".csb.on{opacity:1;}" +
       ".csb-track{position:absolute;inset:0;border:" + C.trackBorder + "px solid var(--csb-color," + C.color + ");border-radius:" + C.trackRadius + "px;box-sizing:border-box;pointer-events:auto;}" +
       ".csb-thumb{position:absolute;left:50%;transform:translateX(-50%);width:" + C.thumbWidth + "px;background:var(--csb-color," + C.color + ");border-radius:" + C.thumbRadius + "px;pointer-events:auto;}" +
@@ -105,6 +137,7 @@
       var trackH = Math.max(0, ch - PAD - PADB);   // empty PAD at top, PADB at bottom
       var innerH = Math.max(0, trackH - 2 * TPAD); // thumb travel band inside the track
       var overlayTop = r.top + el.clientTop + PAD;
+      wrap.style.zIndex = overlayZ(el);
       wrap.style.left = left + "px";
       wrap.style.top = overlayTop + "px";
       wrap.style.height = trackH + "px";

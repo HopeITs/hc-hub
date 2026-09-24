@@ -10,6 +10,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Vacancy extends Model
 {
+    /**
+     * The only three values `status` may hold.
+     *
+     * The column is a plain string with nothing behind it, so without a single
+     * spelling to refer to, one writer ends up saying `'close'` and the row
+     * silently drops out of every query that filters on the other.
+     */
+    public const OPEN = 'open';
+
+    public const CLOSED = 'closed';
+
+    public const FILLED = 'filled';
+
     protected $guarded = ['id'];
 
     public function position(): BelongsTo

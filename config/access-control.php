@@ -132,6 +132,15 @@ return [
      */
     'livewire' => [
         'recruitment.requests.create' => ['save' => 'recruitment-requests.manage'],
+        'recruitment.campaigns.index' => [
+            'create' => 'recruitment-campaigns.manage',
+            'beginScheduleEdit' => 'recruitment-campaigns.manage',
+            'updateSchedule' => 'recruitment-campaigns.manage',
+            'openCampaign' => 'recruitment-campaigns.manage',
+            'closeCampaign' => 'recruitment-campaigns.manage',
+            'beginDisable' => 'recruitment-campaigns.manage',
+            'disableCampaign' => 'recruitment-campaigns.manage',
+        ],
         'access-management.index' => [
             'saveEmployeeAccess' => 'access-management.manage-employees',
             'saveRolePermissions' => 'access-management.manage-permissions',
@@ -236,6 +245,41 @@ return [
             'renewWithEdit' => 'contracts.create',
         ],
         'contract.contracts-table' => ['delete' => 'contracts.delete', 'exportExcel' => 'contracts.export'],
+        // The permission map is the coarse HTTP boundary. Each action also
+        // runs JobPostPolicy so governorate HR remains inside its city scope.
+        'recruitment.job-posts.editor' => [
+            'saveDraft' => 'recruitment-job-posts.manage',
+            'publish' => 'recruitment-job-posts.manage',
+            'unpublish' => 'recruitment-job-posts.manage',
+            'reloadLatest' => 'recruitment-job-posts.manage',
+            'resetFromApprovedRequest' => 'recruitment-job-posts.manage',
+        ],
+        'recruitment.application-forms.editor' => [
+            'addField' => 'recruitment-forms.manage',
+            'addCustomField' => 'recruitment-forms.manage',
+            'applyReferenceTemplate' => 'recruitment-forms.manage',
+            'applyPublishedTemplate' => 'recruitment-forms.manage',
+            'removeField' => 'recruitment-forms.manage',
+            'moveField' => 'recruitment-forms.manage',
+            'addOption' => 'recruitment-forms.manage',
+            'removeOption' => 'recruitment-forms.manage',
+            'setPreviewSection' => 'recruitment-forms.manage',
+            'toggleSection' => 'recruitment-forms.manage',
+            'setPreviewLocale' => 'recruitment-forms.manage',
+            'saveDraft' => 'recruitment-forms.manage',
+            'publish' => 'recruitment-forms.manage',
+            'reloadLatest' => 'recruitment-forms.manage',
+        ],
+        'recruitment.public-links.manager' => [
+            'generate' => 'recruitment-links.manage',
+            'disable' => 'recruitment-links.manage',
+            'addInvite' => 'recruitment-links.manage',
+            'cancelInvite' => 'recruitment-links.manage',
+        ],
+        // Team 2's invite screen (also embedded in the publishing page). Each
+        // action also runs RecruitmentCampaignInvitePolicy (campaign scope).
+        'recruitment.campaigns.invites' => ['add' => 'recruitment-applicants.manage'],
+        'recruitment.campaigns.invite-table' => ['cancelInvite' => 'recruitment-applicants.manage'],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
             'create' => 'leaves.create', 'delete' => 'leaves.delete',
@@ -344,11 +388,19 @@ return [
         'auth.role-switcher' => ['switchTo', 'refreshRoles'],
         'settings.password' => ['updatePassword'],
 
+        // --- Public recruitment (Team 2 test form, non-production only) -----
+        // The applicant has no account, so there is no role to check. The
+        // opaque link token is the credential; the submission service
+        // re-checks link, campaign state and window, and invitation, under a
+        // lock. The route is throttled and not registered in production.
+        'recruitment.public-site.apply' => ['submit'],
+
         // --- Confirmation dialogs -------------------------------------------
         // These only render a "are you sure?" prompt. The action it confirms
         // is the mapped one (delete / toggleItemStatusConfirmed), and that is
         // where the permission and the policy check live.
         'badges.badges-table' => ['confirmDelete'],
+        'recruitment.campaigns.invite-table' => ['confirmCancel'],
         'basics.annual-leave-rule-table' => ['confirmDelete'],
         'basics.checklist-item-table' => ['confirmDelete'],
         'basics.city-table' => ['confirmToggleItemStatus'],

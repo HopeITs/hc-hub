@@ -18,7 +18,6 @@ use App\Models\Position;
 use App\Models\Program;
 use App\Models\TerminationReason;
 use App\Services\LeaveBalanceService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -674,13 +673,9 @@ class ContractRenewalTest extends TestCase
         // database on every request, so a deleted source fails at hydration
         // (404) before submit() runs. Either way the guarantee is the same:
         // a contract that no longer exists cannot produce a successor.
-        $this->expectException(ModelNotFoundException::class);
+        $component->call('submit', [])->assertNotFound();
 
-        try {
-            $component->call('submit', []);
-        } finally {
-            $this->assertSame(0, Contract::query()->count());
-        }
+        $this->assertSame(0, Contract::query()->count());
     }
 
     // ────────────────────────────────────────────────

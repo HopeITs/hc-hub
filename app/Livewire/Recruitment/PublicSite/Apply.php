@@ -2,16 +2,18 @@
 
 namespace App\Livewire\Recruitment\PublicSite;
 
-use App\Enums\HiringCampaignStatus;
 use App\Models\City;
 use App\Models\PublicRecruitmentLink;
+use App\Services\RecruitmentApplicationFormService;
 use App\Services\RecruitmentApplicationSubmissionService;
 use Illuminate\Support\Facades\App;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 /**
- * The public `/careers/{token}` page: shows the published job post and takes
+ * TEMPORARY Team 2 test form at `/careers-test/{token}` (non-production only;
+ * Team 1's `/careers/{token}` wizard is the real applicant form). It shows the
+ * published job post and takes
  * the application form submission (recruitment-execution-plan-ar.md, Phase 1
  * Task 15 + Phase 2 Task 1).
  *
@@ -63,8 +65,8 @@ class Apply extends Component
             $link !== null
                 && $link->status === 'active'
                 && ! $link->expires_at?->isPast()
-                && (int) $link->campaign?->status === HiringCampaignStatus::Open,
-            404
+                && app(RecruitmentApplicationSubmissionService::class)->isAcceptingSubmissions($link->campaign),
+            404,
         );
 
         $this->link = $link;
@@ -104,10 +106,14 @@ class Apply extends Component
     {
         return view('livewire.recruitment.public-site.apply', [
             'jobPostVersion' => $this->link->jobPostVersion,
-            // TODO (Business Rule): field shape assumed as
-            // {key, label_en, label_ar, type, required, options?} — see the
-            // matching TODO in RecruitmentApplicationSubmissionService.
-            'fields' => (array) ($this->link->formVersion?->fields_json ?? []),
+            // Team 1's reader, so the page shows exactly the form their
+            // builder published. The identity fields are the static inputs
+            // above and are not repeated.
+            'fields' => array_values(array_filter(
+                app(RecruitmentApplicationFormService::class)
+                    ->normalizeFields((array) ($this->link->formVersion?->fields_json ?? [])),
+                fn (array $field) => ! in_array($field['key'], ['full_name', 'email', 'phone', 'privacy_consent'], true),
+            )),
             'cities' => City::query()->where('is_active', true)->orderBy(transColumn('name'))->get(),
         ]);
     }

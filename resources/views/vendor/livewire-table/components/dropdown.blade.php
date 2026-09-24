@@ -1,6 +1,6 @@
 @props(['icon', 'label', 'size' => 'md', 'active' => false])
 
-<div class="md:relative" x-data="{ show: false }">
+<div class="md:relative" x-data="{ show: false }" {{ $attributes->only('data-tour') }}>
     <x-livewire-table::button
         :title="$label"
         :aria-label="$label"

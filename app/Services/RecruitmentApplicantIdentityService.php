@@ -43,9 +43,15 @@ class RecruitmentApplicantIdentityService
         return $digits === '' ? null : $digits;
     }
 
+    /**
+     * Keyed with app.key, exactly as Team 1's PublicRecruitmentApplicationService
+     * does, so an applicant created through either submission path resolves
+     * to the same row. A bare sha256 of an email is reversible by dictionary;
+     * an HMAC is not without the key.
+     */
     public function identityKeyHash(string $emailNormalized): string
     {
-        return hash('sha256', $emailNormalized);
+        return hash_hmac('sha256', $emailNormalized, (string) config('app.key'));
     }
 
     /**

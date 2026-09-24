@@ -4,18 +4,19 @@ use App\Livewire\Recruitment\PublicSite\Apply;
 use Illuminate\Support\Facades\Route;
 
 /**
- * Unauthenticated recruitment routes only. This file is intentionally
- * separate from routes/recruitment.php, which is require()'d inside web.php's
- * 'auth' middleware group — merging this route into it would put the public
- * application page behind a login redirect. Required from web.php outside
- * both the locale group and the 'auth' group, the same way the digital-id
- * card routes are.
+ * Unauthenticated recruitment routes owned by Team 2. Separate from
+ * routes/recruitment.php, which is require()'d inside web.php's 'auth'
+ * group — a public page there would redirect to login.
+ *
+ * TEMPORARY: this is Team 2's test form for exercising
+ * RecruitmentApplicationSubmissionService. The real applicant form is Team
+ * 1's `GET /careers/{token}` (careers.show, PublicCareerController) on
+ * rms-main — the CV/document wizard. This one lives on its own URI so the two
+ * never collide, and is not registered in production at all. Remove it once
+ * Team 1's form is merged and adopted (see docs/recruitment/phase-2/).
  */
-
-// Public job application page, resolved from an opaque bearer token rather
-// than a session. Throttled against scraping/spam per Phase 1 Task 15's
-// anti-abuse requirement — a CAPTCHA or a stronger bot check is a follow-up,
-// not done here.
-Route::get('/careers/{token}', Apply::class)
-    ->middleware('throttle:20,1')
-    ->name('careers.apply');
+if (! app()->isProduction()) {
+    Route::get('/careers-test/{token}', Apply::class)
+        ->middleware('throttle:20,1')
+        ->name('careers.test-apply');
+}

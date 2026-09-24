@@ -39,6 +39,17 @@ class RecruitmentApplicant extends Model
         return $this->hasMany(RecruitmentHiringConversion::class, 'applicant_id');
     }
 
+    /** The earlier applicant sharing this phone under another email — a hint, never a merge. */
+    public function possibleDuplicateOf(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'possible_duplicate_of_applicant_id');
+    }
+
+    public function possibleDuplicates(): HasMany
+    {
+        return $this->hasMany(self::class, 'possible_duplicate_of_applicant_id');
+    }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         return app(RecruitmentScopeResolver::class)->scopeApplicants($query, $user);

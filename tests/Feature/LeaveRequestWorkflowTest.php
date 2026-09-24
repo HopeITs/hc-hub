@@ -13,7 +13,6 @@ use App\Notifications\ActionLeaveRequest;
 use App\Notifications\HRSawLeaveRequest;
 use App\Notifications\NewLeaveRequest;
 use App\Services\LeaveNotificationService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -58,11 +57,10 @@ class LeaveRequestWorkflowTest extends TestCase
             'other-employee',
         );
 
-        $this->expectException(ModelNotFoundException::class);
-
         Livewire::actingAs($otherUser)
             ->test(MyLeaveRequestModule::class)
-            ->call('openDetails', $leaveRequest->id);
+            ->call('openDetails', $leaveRequest->id)
+            ->assertNotFound();
     }
 
     public function test_hr_details_show_rejection_reason_status_and_decision_time(): void

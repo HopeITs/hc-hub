@@ -10,7 +10,6 @@ use App\Models\Employee;
 use App\Models\EmployeeNote;
 use App\Models\User;
 use App\Services\ChecklistWorkflow;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
@@ -106,15 +105,10 @@ class AuthorizationRegressionTest extends TestCase
 
         // findOrFail runs on the owner-scoped query, so a foreign id is simply
         // not found — Laravel renders this as a 404.
-        try {
-            Livewire::actingAs($user)
-                ->test(EmployeeNotesCard::class)
-                ->call('delete', $victimNote->id);
-
-            $this->fail('Expected the foreign note id to be rejected.');
-        } catch (ModelNotFoundException) {
-            // expected
-        }
+        Livewire::actingAs($user)
+            ->test(EmployeeNotesCard::class)
+            ->call('delete', $victimNote->id)
+            ->assertNotFound();
 
         $this->assertDatabaseHas('employee_notes', ['id' => $victimNote->id]);
     }

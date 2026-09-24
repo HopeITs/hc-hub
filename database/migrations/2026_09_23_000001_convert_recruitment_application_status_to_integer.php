@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\RecruitmentApplicationStatus as Status;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
@@ -21,25 +20,42 @@ use Illuminate\Support\Facades\DB;
  */
 return new class extends Migration
 {
-    /** @var array<string, int> */
+    /**
+     * Literal values, not enum constants: RecruitmentApplicationStatus is
+     * string-backed again (Team 1's enum, adopted at the rms-main merge), so
+     * reading it here would map every string onto itself. This migration is
+     * superseded by 2026_09_25_000001, which converts the column back.
+     *
+     * @var array<string, int>
+     */
     private const MAP = [
-        'submitted' => Status::Submitted,
-        'under_review' => Status::UnderReview,
-        'shortlisted' => Status::Shortlisted,
-        'rejected' => Status::Rejected,
-        'interview_scheduled' => Status::InterviewScheduled,
-        'interviewed' => Status::Interviewed,
-        'selected' => Status::Selected,
-        'offer_sent' => Status::OfferSent,
-        'offer_accepted' => Status::OfferAccepted,
-        'offer_rejected' => Status::OfferRejected,
-        'hired' => Status::Hired,
-        'withdrawn' => Status::Withdrawn,
-        'archived' => Status::Archived,
+        'submitted' => 0,
+        'under_review' => 1,
+        'shortlisted' => 2,
+        'rejected' => 3,
+        'interview_scheduled' => 4,
+        'interviewed' => 5,
+        'selected' => 6,
+        'offer_sent' => 7,
+        'offer_accepted' => 8,
+        'offer_rejected' => 9,
+        'hired' => 10,
+        'withdrawn' => 11,
+        'archived' => 12,
     ];
 
     public function up(): void
     {
+        // MySQL only. `ALTER TABLE … MODIFY` does not exist in SQLite, and
+        // the test suite runs on SQLite :memory:, so this broke every test's
+        // migrate:fresh. Skipping here is safe because 2026_09_25_000001 (its
+        // reversal) skips on the same condition: on SQLite the column simply
+        // stays the VARCHAR it was created as, the same end state MySQL
+        // reaches after both run.
+        if (! $this->isMySql()) {
+            return;
+        }
+
         foreach (self::MAP as $string => $int) {
             DB::table('recruitment_applications')->where('status', $string)->update(['status' => (string) $int]);
         }
@@ -52,7 +68,11 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE ".$this->table()." MODIFY status VARCHAR(60) NOT NULL DEFAULT 'submitted'");
+        if (! $this->isMySql()) {
+            return;
+        }
+
+        DB::statement('ALTER TABLE '.$this->table()." MODIFY status VARCHAR(60) NOT NULL DEFAULT 'submitted'");
 
         foreach (self::MAP as $string => $int) {
             DB::table('recruitment_applications')->where('status', (string) $int)->update(['status' => $string]);
@@ -62,5 +82,10 @@ return new class extends Migration
     private function table(): string
     {
         return DB::connection()->getTablePrefix().'recruitment_applications';
+    }
+
+    private function isMySql(): bool
+    {
+        return in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true);
     }
 };

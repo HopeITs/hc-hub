@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Enums\HiringCampaignStatus;
 use App\Enums\RecruitmentApplicationStatus;
+use App\Enums\RecruitmentCampaignLinkMode;
 use App\Models\ApplicationFormVersion;
 use App\Models\HiringCampaign;
 use App\Models\PublicRecruitmentLink;
@@ -25,15 +25,11 @@ use Illuminate\Validation\ValidationException;
  */
 class RecruitmentApplicationSubmissionService
 {
-    // TODO (Business Rule): the exact link_mode string for an invitation-only
-    // campaign has never been decided or written anywhere else in the
-    // codebase — 'public_open' is the only value Team 1's migration sets as a
-    // default. Treating anything else as invitation-only is a safe default
-    // (fails toward requiring an invite) but must be confirmed once Team 1 or
-    // the business team names the real values.
-    private const OPEN_LINK_MODE = 'public_open';
-
-    public function __construct(private readonly RecruitmentApplicantIdentityService $identity) {}
+    public function __construct(
+        private readonly RecruitmentApplicantIdentityService $identity,
+        private readonly HiringCampaignService $campaigns,
+        private readonly RecruitmentApplicationFormService $forms,
+    ) {}
 
     /**
      * @param  array{
@@ -99,10 +95,22 @@ class RecruitmentApplicationSubmissionService
                 ->exists();
 
             if ($duplicate) {
-                throw ValidationException::withMessages(['email' => __('recruitment.already_applied')]);
+                throw ValidationException::withMessages(['email' => __('recruitment-applicants.already_applied')]);
             }
 
-            $answers = $this->whitelistAnswers($link->formVersion, (array) ($input['answers'] ?? []));
+            // The identity inputs are also form fields in Team 1's catalog
+            // (full_name / email / phone, locked and required); they are
+            // answered from the same values so the stored answers match what
+            // Team 1's real form stores.
+            $answers = $this->whitelistAnswers($link->formVersion, array_merge(
+                (array) ($input['answers'] ?? []),
+                array_filter([
+                    'full_name' => $input['full_name'] ?? null,
+                    'email' => $input['email'] ?? null,
+                    'phone' => $input['phone'] ?? null,
+                    'privacy_consent' => ($input['privacy_accepted_at'] ?? false) ? true : null,
+                ], fn ($value) => $value !== null && $value !== ''),
+            ));
 
             try {
                 $application = RecruitmentApplication::query()->create([
@@ -126,39 +134,51 @@ class RecruitmentApplicationSubmissionService
                 // Two submits racing past the exists() check above land here;
                 // the unique indexes on (applicant_id, campaign_id) and
                 // (campaign_id, email_normalized) are the actual guarantee.
-                throw ValidationException::withMessages(['email' => __('recruitment.already_applied')]);
+                throw ValidationException::withMessages(['email' => __('recruitment-applicants.already_applied')]);
             }
 
             foreach ($answers as $fieldKey => $value) {
                 $application->answers()->create([
                     'form_version_id' => $link->form_version_id,
                     'field_key' => $fieldKey,
-                    'answer_json' => $value,
+                    // Same envelope as Team 1's PublicRecruitmentApplicationService,
+                    // so every reader of answers sees one shape.
+                    'answer_json' => ['value' => $value],
                 ]);
             }
 
             if ($invite !== null && $invite->used_at === null) {
-                $invite->forceFill(['status' => 'used', 'used_at' => now()])->save();
+                $invite->forceFill(['status' => RecruitmentCampaignInvite::STATUS_USED, 'used_at' => now()])->save();
             }
 
             return $application;
         });
     }
 
+    /**
+     * One rule with Team 1's real form: HiringCampaignService::acceptsSubmissions
+     * checks the effective state (D3: Open, not merely Published) and the
+     * campaign's start/end window on the clock, independent of the
+     * SyncRecruitmentCampaignStates scheduler having run.
+     */
+    public function isAcceptingSubmissions(?HiringCampaign $campaign): bool
+    {
+        return $campaign !== null && $this->campaigns->acceptsSubmissions($campaign);
+    }
+
     private function assertLinkUsable(PublicRecruitmentLink $link): void
     {
-        if ($link->status !== 'active' || $link->expires_at?->isPast()) {
+        if ($link->status !== PublicRecruitmentLink::STATUS_ACTIVE || $link->expires_at?->isPast()) {
             // Generic on purpose: an expired, disabled, and never-existed
             // token must all look the same from the outside (Phase 1 Task 15).
-            throw ValidationException::withMessages(['token' => __('recruitment.invalid_or_expired_link')]);
+            throw ValidationException::withMessages(['token' => __('recruitment-applicants.invalid_or_expired_link')]);
         }
     }
 
-    /** D3: Published only advertises; Open is what accepts submissions. */
     private function assertCampaignAccepting(?HiringCampaign $campaign): void
     {
-        if ((int) $campaign?->status !== HiringCampaignStatus::Open) {
-            throw ValidationException::withMessages(['token' => __('recruitment.campaign_not_accepting')]);
+        if (! $this->isAcceptingSubmissions($campaign)) {
+            throw ValidationException::withMessages(['token' => __('recruitment-applicants.campaign_not_accepting')]);
         }
     }
 
@@ -168,7 +188,7 @@ class RecruitmentApplicationSubmissionService
      */
     private function resolveInvite(HiringCampaign $campaign, string $emailNormalized): ?RecruitmentCampaignInvite
     {
-        if ($campaign->link_mode === self::OPEN_LINK_MODE) {
+        if ($campaign->link_mode !== RecruitmentCampaignLinkMode::InvitationOnly) {
             return null;
         }
 
@@ -181,8 +201,8 @@ class RecruitmentApplicationSubmissionService
         // Same message whether the email was never invited or the invite was
         // cancelled — the plan is explicit that the invited list must not be
         // discoverable by trying emails against this endpoint.
-        if ($invite === null || $invite->status === 'cancelled') {
-            throw ValidationException::withMessages(['email' => __('recruitment.invitation_required')]);
+        if ($invite === null || $invite->status === RecruitmentCampaignInvite::STATUS_CANCELLED) {
+            throw ValidationException::withMessages(['email' => __('recruitment-applicants.invitation_required')]);
         }
 
         return $invite;
@@ -191,35 +211,46 @@ class RecruitmentApplicationSubmissionService
     /**
      * Keep only answers the published form version actually asked for.
      *
-     * TODO (Business Rule): the shape of a field definition in fields_json
-     * has not been fixed anywhere else in the codebase yet — this assumes
-     * each entry carries at least a 'key' and an optional 'required' flag.
-     * Update this once Team 1 (or whoever builds the form editor) settles the
-     * real schema.
+     * The schema is read through Team 1's RecruitmentApplicationFormService::
+     * normalizeFields() — the same reader their real form uses — so keys,
+     * required flags (including the catalog's locked fields) and labels mean
+     * exactly what the form builder meant.
+     *
+     * File fields are not handled here: this test path has no upload, and CV
+     * storage is Team 1's RecruitmentApplicantFileService (Task 3). A form
+     * that *requires* a file is refused with a pointer to the real form
+     * rather than accepted without it.
      *
      * @return array<string, mixed>
      */
     private function whitelistAnswers(?ApplicationFormVersion $formVersion, array $submitted): array
     {
-        $fields = (array) ($formVersion?->fields_json ?? []);
+        $fields = $this->forms->normalizeFields((array) ($formVersion?->fields_json ?? []));
         $missing = [];
         $answers = [];
 
         foreach ($fields as $field) {
-            $key = $field['key'] ?? null;
+            $key = $field['key'];
+            $label = $field['label'][app()->getLocale()] ?: ($field['label']['en'] ?: $key);
 
-            if ($key === null) {
+            if ($field['type'] === 'file') {
+                if ($field['required']) {
+                    $missing['answers.'.$key] = __('recruitment-applicants.file_requires_real_form', ['field' => $label]);
+                }
+
                 continue;
             }
 
-            if (array_key_exists($key, $submitted) && $submitted[$key] !== null && $submitted[$key] !== '') {
+            // false counts as unanswered: an unticked required checkbox
+            // (privacy_consent) must not pass as consent given.
+            if (array_key_exists($key, $submitted) && ! in_array($submitted[$key], [null, '', false], true)) {
                 $answers[$key] = $submitted[$key];
 
                 continue;
             }
 
-            if (! empty($field['required'])) {
-                $missing['answers.'.$key] = __('recruitment.missing_required_field', ['field' => $field['label'] ?? $key]);
+            if ($field['required']) {
+                $missing['answers.'.$key] = __('recruitment-applicants.missing_required_field', ['field' => $label]);
             }
         }
 

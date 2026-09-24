@@ -9,7 +9,7 @@
     $ariaExpanded = $active ? 'true' : 'false';
 @endphp
 
-<li class="w-full">
+<li class="w-full" {{ $attributes->only('data-tour') }}>
     <button
         type="button"
         aria-controls="{{ $id }}"

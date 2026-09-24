@@ -2,67 +2,51 @@
 
 namespace App\Enums;
 
-use BenSampo\Enum\Enum;
-
-/**
- * The lifecycle of a single applicant's submission to one campaign.
- *
- * Integer-backed to match every other Recruitment status enum
- * (RecruitmentRequestStatus, HiringCampaignStatus, ...) rather than the
- * string values this started as — the column itself was converted to match
- * in database/migrations/2026_09_23_000001_convert_recruitment_application_status_to_integer.php.
- * Submitted = 0 mirrors the same "default/first state = 0" convention used
- * throughout the module.
- */
-final class RecruitmentApplicationStatus extends Enum
+final class RecruitmentApplicationStatus
 {
-    const Submitted = 0;
+    public const Submitted = 'submitted';
 
-    const UnderReview = 1;
+    public const UnderReview = 'under_review';
 
-    const Shortlisted = 2;
+    public const Shortlisted = 'shortlisted';
 
-    const Rejected = 3;
+    public const Rejected = 'rejected';
 
-    const InterviewScheduled = 4;
+    public const InterviewScheduled = 'interview_scheduled';
 
-    const Interviewed = 5;
+    public const Interviewed = 'interviewed';
 
-    const Selected = 6;
+    public const Selected = 'selected';
 
-    const OfferSent = 7;
+    public const OfferSent = 'offer_sent';
 
-    const OfferAccepted = 8;
+    public const OfferAccepted = 'offer_accepted';
 
-    const OfferRejected = 9;
+    public const OfferRejected = 'offer_rejected';
 
-    const Hired = 10;
+    public const Hired = 'hired';
 
-    const Withdrawn = 11;
+    public const Withdrawn = 'withdrawn';
 
-    const Archived = 12;
+    public const Archived = 'archived';
 
-    public static function getLocalizedName(int $value): array
+    /** @return array<int, string> */
+    public static function values(): array
     {
-        $val = match ($value) {
-            self::UnderReview => ['text' => ['en' => 'Under review', 'ar' => 'قيد المراجعة'], 'color' => 'primary'],
-            self::Shortlisted => ['text' => ['en' => 'Shortlisted', 'ar' => 'ضمن القائمة المختصرة'], 'color' => 'primary'],
-            self::Rejected => ['text' => ['en' => 'Rejected', 'ar' => 'مرفوض'], 'color' => 'secondary-medium'],
-            self::InterviewScheduled => ['text' => ['en' => 'Interview scheduled', 'ar' => 'مقابلة مجدولة'], 'color' => 'primary'],
-            self::Interviewed => ['text' => ['en' => 'Interviewed', 'ar' => 'تمت المقابلة'], 'color' => 'primary'],
-            self::Selected => ['text' => ['en' => 'Selected', 'ar' => 'مُختار'], 'color' => 'primary'],
-            self::OfferSent => ['text' => ['en' => 'Offer sent', 'ar' => 'أُرسل العرض'], 'color' => 'primary'],
-            self::OfferAccepted => ['text' => ['en' => 'Offer accepted', 'ar' => 'قُبل العرض'], 'color' => 'primary'],
-            self::OfferRejected => ['text' => ['en' => 'Offer rejected', 'ar' => 'رُفض العرض'], 'color' => 'secondary-medium'],
-            self::Hired => ['text' => ['en' => 'Hired', 'ar' => 'تم التوظيف'], 'color' => 'primary'],
-            self::Withdrawn => ['text' => ['en' => 'Withdrawn', 'ar' => 'انسحب المتقدم'], 'color' => 'secondary-light'],
-            self::Archived => ['text' => ['en' => 'Archived', 'ar' => 'مؤرشف'], 'color' => 'secondary-light'],
-            default => ['text' => ['en' => 'Submitted', 'ar' => 'مُرسَل'], 'color' => 'secondary-medium'],
-        };
-
         return [
-            'value' => $val['text'][app()->getLocale()],
-            'color' => $val['color'],
+            self::Submitted,
+            self::UnderReview,
+            self::Shortlisted,
+            self::Rejected,
+            self::InterviewScheduled,
+            self::Interviewed,
+            self::Selected,
+            self::OfferSent,
+            self::OfferAccepted,
+            self::OfferRejected,
+            self::Hired,
+            self::Withdrawn,
+            self::Archived,
         ];
     }
 }

@@ -32,7 +32,6 @@ class InviteTable extends LivewireTable
     public int $campaignId;
 
     protected string $model = RecruitmentCampaignInvite::class;
-
     public function mount(int $campaignId): void
     {
         $this->campaignId = $campaignId;
@@ -41,10 +40,10 @@ class InviteTable extends LivewireTable
 
     public function confirmCancel(int $id): void
     {
-        LivewireAlert::title(__('recruitment.invite_cancel'))
-            ->text(__('recruitment.invite_cancel_confirm'))
+        LivewireAlert::title(__('recruitment-applicants.invite_cancel'))
+            ->text(__('recruitment-applicants.invite_cancel_confirm'))
             ->question()
-            ->withConfirmButton(__('recruitment.invite_cancel'))
+            ->withConfirmButton(__('recruitment-applicants.invite_cancel'))
             ->onConfirm('cancelInvite', ['id' => $id])
             ->withCancelButton(__('general.cancel'))
             ->show();
@@ -59,7 +58,7 @@ class InviteTable extends LivewireTable
         try {
             app(RecruitmentCampaignInviteService::class)->cancel(auth()->user(), $invite);
 
-            LivewireAlert::title(__('recruitment.invite_cancelled'))
+            LivewireAlert::title(__('recruitment-applicants.invite_cancelled'))
                 ->success()->toast()->position('top-start')->show();
         } catch (ValidationException $exception) {
             // A used invite can't be cancelled — surfaced as an alert rather
@@ -82,21 +81,21 @@ class InviteTable extends LivewireTable
     protected function columns(): array
     {
         return [
-            Column::make(__('recruitment.invite_full_name'), 'full_name')->sortable()->searchable(),
-            Column::make(__('recruitment.invite_email'), 'email_normalized')->sortable()->searchable(),
-            Column::make(__('recruitment.invite_status'), 'status')
-                ->displayUsing(fn ($value) => __('recruitment.invite_status_'.$value))
+            Column::make(__('recruitment-applicants.invite_full_name'), 'full_name')->sortable()->searchable(),
+            Column::make(__('recruitment-applicants.invite_email'), 'email_normalized')->sortable()->searchable(),
+            Column::make(__('recruitment-applicants.invite_status'), 'status')
+                ->displayUsing(fn ($value) => __('recruitment-applicants.invite_status_'.$value))
                 ->sortable(),
-            Column::make(__('recruitment.invite_used_at'), 'used_at')
+            Column::make(__('recruitment-applicants.invite_used_at'), 'used_at')
                 ->displayUsing(fn ($value) => $value?->format('d-m-Y H:i') ?? '—')
                 ->sortable(),
             Column::make(__('general.actions'), function (Model $invite): string {
-                if (in_array($invite->status, ['cancelled', 'used'], true)) {
+                if (in_array($invite->status, [RecruitmentCampaignInvite::STATUS_CANCELLED, RecruitmentCampaignInvite::STATUS_USED], true)) {
                     return '';
                 }
 
                 return Blade::render(
-                    '<button type="button" wire:click="confirmCancel('.$invite->getKey().')" class="text-primary hover:underline text-body">{{ __(\'recruitment.invite_cancel\') }}</button>'
+                    '<button type="button" wire:click="confirmCancel('.$invite->getKey().')" class="text-primary hover:underline text-body">{{ __(\'recruitment-applicants.invite_cancel\') }}</button>',
                 );
             })->asHtml()->clickable(false),
         ];
@@ -105,11 +104,11 @@ class InviteTable extends LivewireTable
     protected function filters(): array
     {
         return [
-            SelectFilter::make(__('recruitment.invite_status'), 'status')->options([
-                'pending' => __('recruitment.invite_status_pending'),
-                'sent' => __('recruitment.invite_status_sent'),
-                'used' => __('recruitment.invite_status_used'),
-                'cancelled' => __('recruitment.invite_status_cancelled'),
+            SelectFilter::make(__('recruitment-applicants.invite_status'), 'status')->options([
+                RecruitmentCampaignInvite::STATUS_PENDING => __('recruitment-applicants.invite_status_pending'),
+                RecruitmentCampaignInvite::STATUS_SENT => __('recruitment-applicants.invite_status_sent'),
+                RecruitmentCampaignInvite::STATUS_USED => __('recruitment-applicants.invite_status_used'),
+                RecruitmentCampaignInvite::STATUS_CANCELLED => __('recruitment-applicants.invite_status_cancelled'),
             ]),
         ];
     }

@@ -34,6 +34,7 @@ class RecruitmentWorkflowInstanceService
     public function __construct(
         private readonly RecruitmentApproverResolver $approvers,
         private readonly RecruitmentScopeResolver $scopes,
+        private readonly RecruitmentRequestStateMachine $states,
     ) {}
 
     public function start(
@@ -75,7 +76,9 @@ class RecruitmentWorkflowInstanceService
                 }
 
                 $from = (int) $request->status;
-                $request->forceFill(['status' => RecruitmentRequestStatus::Approved])->save();
+                // T19 through the table, so a request that is no longer open
+                // cannot be approved by a stray second call.
+                $this->states->apply($request, 'direct_open');
 
                 $request->events()->create([
                     'request_version_id' => $requestVersion->getKey(),
@@ -91,7 +94,7 @@ class RecruitmentWorkflowInstanceService
             }
 
             $definitionVersion = $this->activeDefinitionVersion((int) $request->request_type);
-            $steps = $this->applicableSteps($definitionVersion, (int) $request->mode);
+            $steps = $this->applicableSteps($definitionVersion, (int) $request->mode, (int) $request->request_type);
 
             if ($steps->isEmpty()) {
                 throw new RecruitmentWorkflowConfigurationException('The active workflow contains no steps for this request mode.');
@@ -156,7 +159,13 @@ class RecruitmentWorkflowInstanceService
             }
 
             $from = (int) $request->status;
-            $request->forceFill(['status' => RecruitmentRequestStatus::UnderReview])->save();
+            // T4 for a first submission, T13 for a resubmission — through the
+            // table rather than straight onto the column, so a rejected or
+            // cancelled request cannot be revived by starting a workflow over it.
+            $this->states->apply(
+                $request,
+                $from === RecruitmentRequestStatus::Resubmitted ? 'workflow_restarted' : 'workflow_started',
+            );
 
             $request->events()->create([
                 'request_version_id' => $requestVersion->getKey(),
@@ -226,17 +235,33 @@ class RecruitmentWorkflowInstanceService
         return $versions->first();
     }
 
-    /** @return Collection<int, RecruitmentWorkflowStep> */
+    /**
+     * The steps this particular request actually walks.
+     *
+     * A step names the modes it belongs to, and may name request types it does
+     * not apply to. Closing a vacancy or a position spends no money, so neither
+     * is held up waiting on financial review (D56).
+     *
+     * @return Collection<int, RecruitmentWorkflowStep>
+     */
     private function applicableSteps(
         RecruitmentWorkflowDefinitionVersion $version,
         int $mode,
+        int $requestType,
     ): Collection {
         return $version->steps()
             ->get()
-            ->filter(function (RecruitmentWorkflowStep $step) use ($mode): bool {
-                $modes = $step->required_condition_json['modes'] ?? null;
+            ->filter(function (RecruitmentWorkflowStep $step) use ($mode, $requestType): bool {
+                $condition = $step->required_condition_json ?? [];
 
-                return $modes === null || in_array($mode, array_map('intval', $modes), true);
+                $modes = $condition['modes'] ?? null;
+                if ($modes !== null && ! in_array($mode, array_map('intval', $modes), true)) {
+                    return false;
+                }
+
+                $except = $condition['except_types'] ?? null;
+
+                return $except === null || ! in_array($requestType, array_map('intval', $except), true);
             })
             ->values();
     }

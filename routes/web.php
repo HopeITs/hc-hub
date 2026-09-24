@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArchiveFileController;
 use App\Http\Controllers\EmployeeAvatarController;
 use App\Http\Controllers\EmployeeDocumentController;
+use App\Http\Controllers\PublicCareerController;
 use App\Http\Middleware\ActiveLivewirePermissionMiddleware;
 use App\Livewire\AccessManagement\Index as AccessManagementIndex;
 use App\Livewire\ActivityLog\ActivityLogModule;
@@ -30,7 +31,14 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
-Route::get('/ID/{token}', ShowDigitalId::class)
+Route::get('/careers/{token}', [PublicCareerController::class, 'show'])
+    ->middleware('throttle:careers-view')
+    ->name('careers.show');
+Route::post('/careers/{token}/applications', [PublicCareerController::class, 'store'])
+    ->middleware('throttle:careers-submit')
+    ->name('careers.submit');
+
+Route::get('/ID/{username}', ShowDigitalId::class)
     ->where('token', '[A-Za-z0-9]{64}')
     ->middleware('throttle:30,1')
     ->name('digital-id.show');
@@ -78,6 +86,7 @@ Route::group(
 
             require __DIR__.'/employees-management.php';
 
+            require __DIR__.'/recruitment-publishing.php';
             require __DIR__.'/recruitment.php';
 
             Route::prefix('leaves')

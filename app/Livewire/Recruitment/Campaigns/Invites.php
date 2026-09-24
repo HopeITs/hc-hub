@@ -42,7 +42,7 @@ class Invites extends Component
         $invites->add(auth()->user(), $this->campaign, $this->full_name, $this->email);
 
         $this->reset(['full_name', 'email']);
-        session()->flash('recruitment_invite_added', __('recruitment.invite_added'));
+        session()->flash('recruitment_invite_added', __('recruitment-applicants.invite_added'));
 
         // The list lives in a separate nested component (InviteTable); this
         // is the same refresh signal the package's own actions use to update

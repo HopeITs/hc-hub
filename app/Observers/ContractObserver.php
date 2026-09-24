@@ -6,6 +6,7 @@ use App\Enums\ContractType as ContractTypeEnum;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Position;
+use App\Services\ChecklistWorkflow;
 use App\Support\StatisticsCache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -130,6 +131,16 @@ class ContractObserver
 
     public function updated(Contract $contract): void
     {
+        // HR just switched this contract off auto-renew: the volunteer's
+        // time here is now finite, so start collecting back whatever
+        // equipment is still checked out to them instead of leaving it for
+        // whoever notices on the last day.
+        if ($contract->wasChanged('auto_renew')
+            && (bool) $contract->getOriginal('auto_renew')
+            && ! $contract->auto_renew) {
+            app(ChecklistWorkflow::class)->requestBelongingsReturn($contract->employee);
+        }
+
         if ($this->wasUpgradedFromDraft($contract)) {
             $pos = Position::query()
                 ->whereKey($contract->position_id)
@@ -173,21 +184,6 @@ class ContractObserver
         }
     }
 
-    /** Is $contract's pending write the transition from Draft to a real type? */
-    private function isUpgradingFromDraft(Contract $contract): bool
-    {
-        return (int) $contract->getOriginal('type') === ContractTypeEnum::Draft
-            && (int) $contract->type !== ContractTypeEnum::Draft;
-    }
-
-    /** Did the write that just completed transition $contract from Draft to a real type? */
-    private function wasUpgradedFromDraft(Contract $contract): bool
-    {
-        return $contract->wasChanged('type')
-            && (int) $contract->getOriginal('type') === ContractTypeEnum::Draft
-            && (int) $contract->type !== ContractTypeEnum::Draft;
-    }
-
     public function deleted(Contract $contract): void
     {
         DB::transaction(function () use ($contract) {
@@ -216,5 +212,20 @@ class ContractObserver
     public function saved(Contract $contract): void
     {
         StatisticsCache::flush();
+    }
+
+    /** Is $contract's pending write the transition from Draft to a real type? */
+    private function isUpgradingFromDraft(Contract $contract): bool
+    {
+        return (int) $contract->getOriginal('type') === ContractTypeEnum::Draft
+            && (int) $contract->type !== ContractTypeEnum::Draft;
+    }
+
+    /** Did the write that just completed transition $contract from Draft to a real type? */
+    private function wasUpgradedFromDraft(Contract $contract): bool
+    {
+        return $contract->wasChanged('type')
+            && (int) $contract->getOriginal('type') === ContractTypeEnum::Draft
+            && (int) $contract->type !== ContractTypeEnum::Draft;
     }
 }

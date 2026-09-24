@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\HiringCampaignStatus;
+use App\Enums\RecruitmentCampaignLinkMode;
 use App\Models\ApplicationForm;
 use App\Models\ApplicationFormVersion;
 use App\Models\HiringCampaign;
@@ -14,15 +15,16 @@ use App\Models\RecruitmentCampaignInvite;
 use App\Models\RecruitmentRequest;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Services\RecruitmentApplicationFormService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Dev-only: builds one open campaign end to end and prints a working
- * /careers/{token} URL, so Phase 2 Task 1 can be clicked through in a browser
- * without the Phase 1 Task 12–15 screens (campaign/job post/form/link
- * management UI) existing yet.
+ * Dev-only: builds one open campaign end to end and prints its link on both
+ * Team 1's real form (/careers/{token}) and Team 2's test form
+ * (/careers-test/{token}), for clicking through Phase 2 intake in a browser
+ * without preparing a campaign through the management screens first.
  *
  * Not for production use — it fabricates a RecruitmentRequest/Vacancy chain
  * rather than going through the real approval workflow.
@@ -33,7 +35,7 @@ class SeedRecruitmentDemoApplicationLink extends Command
         {--invite-only : Create an invitation-only campaign instead of an open one}
         {--invite-email= : Email to pre-invite when --invite-only is used (defaults to demo-applicant@example.test)}';
 
-    protected $description = 'Seed a demo open campaign + published job post/form + public link, and print its /careers/{token} URL';
+    protected $description = 'Seed a demo open campaign + published job post/form + public link, and print its /careers-test/{token} test-form URL';
 
     public function handle(): int
     {
@@ -46,7 +48,8 @@ class SeedRecruitmentDemoApplicationLink extends Command
             return self::FAILURE;
         }
 
-        $token = Str::random(48);
+        // 64 hex characters: the only token shape Team 1's /careers/{token} accepts.
+        $token = bin2hex(random_bytes(32));
 
         DB::transaction(function () use ($user, $position, $token) {
             $request = RecruitmentRequest::query()->create([
@@ -69,7 +72,7 @@ class SeedRecruitmentDemoApplicationLink extends Command
             $campaign = HiringCampaign::query()->create([
                 'vacancy_id' => $vacancy->id,
                 'status' => HiringCampaignStatus::Open,
-                'link_mode' => $this->option('invite-only') ? 'invitation_only' : 'public_open',
+                'link_mode' => $this->option('invite-only') ? RecruitmentCampaignLinkMode::InvitationOnly : RecruitmentCampaignLinkMode::PublicOpen,
                 'created_by_user_id' => $user->id,
             ]);
 
@@ -101,10 +104,11 @@ class SeedRecruitmentDemoApplicationLink extends Command
             $formVersion = ApplicationFormVersion::query()->create([
                 'application_form_id' => $form->id,
                 'version_no' => 1,
-                'fields_json' => [
-                    ['key' => 'cover_letter', 'label_en' => 'Cover letter', 'label_ar' => 'رسالة تعريفية', 'type' => 'textarea', 'required' => false],
-                    ['key' => 'years_experience', 'label_en' => 'Years of experience', 'label_ar' => 'سنوات الخبرة', 'type' => 'text', 'required' => true],
-                ],
+                // Team 1's standard field set, in their builder's shape. The
+                // CV is locked and required on every form (normalizeFields()
+                // re-adds it), so submitting needs the real form's upload;
+                // the Team 2 test form can only preview this campaign.
+                'fields_json' => app(RecruitmentApplicationFormService::class)->defaultFields(),
                 'status' => 'published',
                 'published_at' => now(),
             ]);
@@ -115,7 +119,7 @@ class SeedRecruitmentDemoApplicationLink extends Command
                 'job_post_version_id' => $jobPostVersion->id,
                 'form_version_id' => $formVersion->id,
                 'token_hash' => hash('sha256', $token),
-                'status' => 'active',
+                'status' => PublicRecruitmentLink::STATUS_ACTIVE,
                 'expires_at' => now()->addDays(30),
                 'created_by_user_id' => $user->id,
             ]);
@@ -127,7 +131,7 @@ class SeedRecruitmentDemoApplicationLink extends Command
                     'campaign_id' => $campaign->id,
                     'full_name' => 'Demo Applicant',
                     'email_normalized' => strtolower(trim($inviteEmail)),
-                    'status' => 'pending',
+                    'status' => RecruitmentCampaignInvite::STATUS_PENDING,
                     'sent_at' => now(),
                     'created_by_user_id' => $user->id,
                 ]);
@@ -139,8 +143,11 @@ class SeedRecruitmentDemoApplicationLink extends Command
         });
 
         $this->newLine();
-        $this->info('Open this URL to test the public application form:');
-        $this->line(rtrim(config('app.url'), '/')."/careers/{$token}");
+        $base = rtrim(config('app.url'), '/');
+        $this->info('Real application form (Team 1):');
+        $this->line("{$base}/careers/{$token}");
+        $this->info('Team 2 test form (non-production only):');
+        $this->line("{$base}/careers-test/{$token}");
 
         return self::SUCCESS;
     }
