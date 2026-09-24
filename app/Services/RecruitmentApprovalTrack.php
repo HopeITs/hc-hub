@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Enums\ApprovalDecision;
+use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus as Status;
+use App\Enums\WorkflowSkipReason;
 use App\Enums\WorkflowStepKey;
 use App\Models\RecruitmentRequest;
 
@@ -59,6 +61,50 @@ class RecruitmentApprovalTrack
         return $track;
     }
 
+
+    /**
+     * Why a step was skipped, in words rather than a code.
+     *
+     * D57 keeps the reason in `decision_reason` as `skip:<n>`, since there is
+     * no column for it. A reader of the page should not have to know that.
+     */
+    private function skipNote($step): ?string
+    {
+        $reason = (int) str_replace('skip:', '', (string) $step->decision_reason);
+
+        return match ($reason) {
+            WorkflowSkipReason::TopLevelRequester => __('recruitment-workflow.top_level_manager_skipped'),
+            WorkflowSkipReason::RequesterIsApprover => __('recruitment-workflow.requester_is_approver_skipped'),
+            WorkflowSkipReason::SelfApprovalEscalated => __('recruitment-workflow.self_approval_escalated'),
+            default => __('recruitment.track.states.skipped'),
+        };
+    }
+
+    /**
+     * The fields an approver asked to have changed at this stop.
+     *
+     * Read from the event rather than the step, because that is where the ask
+     * was recorded and the two must not be able to disagree (D69).
+     *
+     * @return array<int, string>
+     */
+    private function requestedFields(RecruitmentRequest $request, $step): array
+    {
+        if ((int) ($step->decision ?? 0) !== ApprovalDecision::RequestChanges) {
+            return [];
+        }
+
+        $event = $request->events()
+            ->where('event_type', RecruitmentEventType::ChangesRequested)
+            ->where('workflow_step_id', $step->workflow_step_id)
+            ->latest('id')
+            ->first();
+
+        $fields = $event?->meta['requested_fields'] ?? [];
+
+        return is_array($fields) ? array_values($fields) : [];
+    }
+
     /** Submitting is a stop too: it is where the requester's part ends. */
     private function submission(RecruitmentRequest $request): array
     {
@@ -68,6 +114,9 @@ class RecruitmentApprovalTrack
             'state' => $request->submitted_at === null ? self::CURRENT : self::DONE,
             'at' => $request->submitted_at?->format('Y-m-d H:i'),
             'by' => $request->requester?->profile?->name ?? $request->requester?->name,
+            'comment' => null,
+            'note' => null,
+            'requested_fields' => [],
         ];
     }
 
@@ -93,16 +142,24 @@ class RecruitmentApprovalTrack
 
         return $instance->steps
             ->sortBy(fn ($step) => (int) $step->workflowStep?->step_order)
-            ->map(function ($step) use ($current): array {
+            ->map(function ($step) use ($current, $request): array {
                 $order = (int) $step->workflowStep?->step_order;
                 $decision = $step->decision === null ? null : (int) $step->decision;
+                $state = $this->stepState($step, $decision, $order, $current);
+                $skipped = $state === self::SKIPPED;
 
                 return [
                     'key' => 'step-'.$step->getKey(),
                     'label' => WorkflowStepKey::getLocalizedName((int) $step->workflowStep?->step_key)['value'],
-                    'state' => $this->stepState($step, $decision, $order, $current),
+                    'state' => $state,
                     'at' => $step->acted_at?->format('Y-m-d H:i'),
                     'by' => $step->actedBy?->profile?->name ?? $step->actedBy?->name,
+                    // What was actually said here, and what it asked for. The
+                    // detail belongs beside the stop it happened at rather
+                    // than in a separate list further down the page.
+                    'comment' => $skipped ? null : $step->decision_reason,
+                    'note' => $skipped ? $this->skipNote($step) : null,
+                    'requested_fields' => $this->requestedFields($request, $step),
                 ];
             })
             ->values()
@@ -165,6 +222,9 @@ class RecruitmentApprovalTrack
             'state' => self::PENDING,
             'at' => null,
             'by' => null,
+            'comment' => null,
+            'note' => null,
+            'requested_fields' => [],
         ];
     }
 
@@ -192,6 +252,9 @@ class RecruitmentApprovalTrack
             'state' => $state,
             'at' => $request->applied_at?->format('Y-m-d H:i'),
             'by' => null,
+            'comment' => null,
+            'note' => null,
+            'requested_fields' => [],
         ];
     }
 }

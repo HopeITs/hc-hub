@@ -102,10 +102,10 @@ class RecruitmentLockedFieldsScreenTest extends TestCase
         $fields = app(RecruitmentEditableFields::class)
             ->selectable($request->fresh(), WorkflowStepKey::FinanceApproval);
 
-        $this->assertEqualsCanonicalizing(
-            ['salary_amount', 'currency', 'salary_per', 'contract_type_id'],
-            $fields,
-        );
+        // The contract type is HR's, not theirs: what a post costs is a
+        // financial question; which contract somebody is on is not.
+        $this->assertEqualsCanonicalizing(['salary_amount', 'currency', 'salary_per'], $fields);
+        $this->assertNotContains('contract_type_id', $fields);
     }
 
     /** HR reviews everything except the money. */
@@ -124,9 +124,12 @@ class RecruitmentLockedFieldsScreenTest extends TestCase
         $this->assertContains('weekly_hours', $fields);
         $this->assertContains('position_id', $fields);
 
-        foreach (['salary_amount', 'currency', 'salary_per', 'contract_type_id'] as $money) {
+        foreach (['salary_amount', 'currency', 'salary_per'] as $money) {
             $this->assertNotContains($money, $fields, "HR should not be querying {$money}.");
         }
+
+        // The contract type is theirs.
+        $this->assertContains('contract_type_id', $fields);
     }
 
     /** The manager approves the request as a whole and may query any of it. */

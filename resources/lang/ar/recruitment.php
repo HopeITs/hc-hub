@@ -458,6 +458,8 @@ return [
         'decided_line' => 'صدر قرار على الطلب :number.',
         'approved_subject' => 'اعتُمد طلب التوظيف :number',
         'approved_line' => 'استكمل الطلب :number موافقاته.',
+        'unwound_subject' => 'الطلب :number يُعاد تعديله',
+        'unwound_line' => 'طلب وافقت عليه أُعيد للتعديل.',
         'open_in_system' => 'افتح الطلب',
         'decide_inside' => 'القرارات تُتخذ داخل النظام، لا من هذه الرسالة.',
     ],

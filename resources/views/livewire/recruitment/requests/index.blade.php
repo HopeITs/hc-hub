@@ -13,7 +13,7 @@
             {{-- Its own permission, never implied by managing requests (D15). --}}
             @can('directOpen', \App\Models\RecruitmentRequest::class)
                 <a href="{{ route('recruitment.requests.direct-open') }}" wire:navigate
-                    class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                    class="rounded-control bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600">
                     {{ __('recruitment.direct_open.title') }}
                 </a>
             @endcan

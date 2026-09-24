@@ -458,6 +458,8 @@ return [
         'decided_line' => 'Request :number has been decided.',
         'approved_subject' => 'Recruitment request :number was approved',
         'approved_line' => 'Request :number completed its approvals.',
+        'unwound_subject' => 'Request :number is being revised',
+        'unwound_line' => 'A request you approved has been sent back for changes.',
         'open_in_system' => 'Open the request',
         'decide_inside' => 'Decisions are made in the system, never from this message.',
     ],

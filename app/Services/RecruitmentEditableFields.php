@@ -137,6 +137,16 @@ class RecruitmentEditableFields
     {
         $classifier = app(RecruitmentRequestChangeClassifier::class);
 
+        // The contract type is financial for the purpose of invalidating an
+        // approval — changing it changes what the post costs — but it is not
+        // the financial approver's to query. Which contract somebody is on is
+        // an HR matter, so it is carved out here rather than reclassified,
+        // leaving RV-1 saying what it has always said.
+        $theirs = array_values(array_diff(
+            $classifier->fieldsInCategory(RecruitmentRequestChangeClassifier::FINANCIAL),
+            ['contract_type_id'],
+        ));
+
         $financial = $classifier->fieldsInCategory(RecruitmentRequestChangeClassifier::FINANCIAL);
         $everything = array_merge(
             $classifier->fieldsInCategory(RecruitmentRequestChangeClassifier::SUBSTANTIVE),
@@ -145,8 +155,8 @@ class RecruitmentEditableFields
         );
 
         return match ($stepKey) {
-            WorkflowStepKey::FinanceApproval => $financial,
-            WorkflowStepKey::GovernorateHrApproval => array_values(array_diff($everything, $financial)),
+            WorkflowStepKey::FinanceApproval => $theirs,
+            WorkflowStepKey::GovernorateHrApproval => array_values(array_diff($everything, $theirs)),
             // The manager, HR Syria on a direct opening, and anything not named
             // here: the whole request. Narrowing a step nobody has thought about
             // would hide fields without anybody deciding to.

@@ -483,6 +483,19 @@ class RecruitmentScopeResolver
      *
      * @return array<int, int>
      */
+    /**
+     * Is this person the financial approver themselves?
+     *
+     * The organisation has one, and when they raise a request there is nobody
+     * else to ask. Sending it to their own step would either stall until they
+     * approved their own request or force a self-approval the module refuses
+     * on principle, so the step is skipped and recorded as skipped.
+     */
+    public function isFinanceApprover(User $user): bool
+    {
+        return in_array((int) $user->getKey(), array_map('intval', $this->financeApproverUserIds()), true);
+    }
+
     public function financeApproverUserIds(): array
     {
         return $this->userIdsWithDirectPermission(

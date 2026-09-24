@@ -9,6 +9,7 @@ use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowInstance;
 use App\Models\User;
 use App\Notifications\RecruitmentApprovalAwaiting;
+use App\Notifications\RecruitmentApprovalUnwound;
 use App\Notifications\RecruitmentRequestApprovedForHr;
 use App\Notifications\RecruitmentRequestDecided;
 use Illuminate\Support\Facades\Log;
@@ -66,6 +67,7 @@ class RecruitmentNotifier
         RecruitmentWorkflowInstance $instance,
         int $decision,
         ?string $comment = null,
+        ?User $decidedBy = null,
     ): void {
         $status = (int) $request->status;
 
@@ -79,8 +81,55 @@ class RecruitmentNotifier
         // one of those the requester is the person waiting to hear.
         $this->send($request->requester, new RecruitmentRequestDecided($request, $decision, $comment));
 
+        if ($decision === ApprovalDecision::RequestChanges) {
+            $this->notifyEarlierApprovers($request, $instance, $decidedBy);
+        }
+
         if (in_array($status, [Status::Approved, Status::Applied, Status::FailedApplication], true)) {
             $this->notifyHr($request, $status === Status::Applied);
+        }
+    }
+
+    /**
+     * Tell everybody who already approved that the document is changing.
+     *
+     * They approved what the request said at the time, and somebody further
+     * down has sent it back to be rewritten. Nothing is being asked of them
+     * yet — it goes to its author and comes round again — but a record that
+     * moves underneath an approval without the approver hearing of it is a
+     * record they cannot rely on.
+     *
+     * Only the people who actually decided: a skipped step had no decider,
+     * and the approver who asked for the changes already knows.
+     */
+    private function notifyEarlierApprovers(
+        RecruitmentRequest $request,
+        RecruitmentWorkflowInstance $instance,
+        ?User $decidedBy,
+    ): void {
+        try {
+            $instance->steps()
+                ->whereNotNull('decision')
+                ->whereNotNull('acted_by_user_id')
+                // The person who asked is excluded by who they are rather than
+                // by being the most recent: two decisions can share a second,
+                // and "latest" would then be a coin toss.
+                ->when($decidedBy !== null,
+                    fn ($query) => $query->where('acted_by_user_id', '!=', $decidedBy->getKey()))
+                ->with('actedBy.profile')
+                ->get()
+                ->pluck('actedBy')
+                ->filter()
+                ->unique('id')
+                ->each(fn (User $approver) => $this->send(
+                    $approver,
+                    new RecruitmentApprovalUnwound(
+                        $request,
+                        $decidedBy?->profile?->name ?? $decidedBy?->name,
+                    ),
+                ));
+        } catch (Throwable $exception) {
+            $this->swallow($request, $exception);
         }
     }
 
