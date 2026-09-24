@@ -52,8 +52,8 @@ HR ← /recruitment/campaigns/{id}/invites  (صفحة الفريق 2 المست�
 
 | الاختبار | النتيجة |
 |---|---|
-| `tests/Feature/Recruitment/Phase2ApplicantIntakeTest.php` (PHPUnit، **32 اختباراً / 118 تحققاً**) | ✅ كلها تنجح — دليل الاختبار: [02-testing-guide.md](02-testing-guide.md) |
-| `docs/recruitment/phase-2/phase2-integration-check.php` (MySQL حقيقية، 46 فحصاً، rollback) | ✅ كلها تنجح |
+| `tests/Feature/Recruitment/Phase2ApplicantIntakeTest.php` (PHPUnit، **34 اختباراً / 132 تحققاً**) | ✅ كلها تنجح — دليل الاختبار: [02-testing-guide.md](02-testing-guide.md) |
+| `docs/recruitment/phase-2/phase2-integration-check.php` (MySQL حقيقية، 47 فحصاً، rollback) | ✅ كلها تنجح |
 | اختبارات التوظيف الكاملة (259) | 7 لا تنجح، **كلها خارج ملفاتنا** (القسم 5) |
 
 ```bash
@@ -129,7 +129,7 @@ php artisan tinker --execute="require 'docs/recruitment/phase-2/phase2-integrati
 
 **معدّلة (ملفاتنا):**
 - `RecruitmentCampaignInviteService`، و`RecruitmentApplicationSubmissionService`، و`RecruitmentApplicantIdentityService`
-- `InviteTable` (polling)، و`Apply` (نموذج الاختبار على `/careers-test/{token}`، ولا يعمل في الإنتاج)
+- `InviteTable` (polling)، و`Apply` (نموذج الاختبار على `/careers-test/{token}`، ولا يعمل في الإنتاج؛ يرفع الـ CV عبر `RecruitmentApplicantFileService` الخاص بالفريق 1)
 - Migration `2026_09_23` (تعمل على MySQL فقط)
 
 **مشتركة (إضافات فقط):**

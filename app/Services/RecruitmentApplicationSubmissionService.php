@@ -4,14 +4,17 @@ namespace App\Services;
 
 use App\Enums\RecruitmentApplicationStatus;
 use App\Enums\RecruitmentCampaignLinkMode;
+use App\Exceptions\UnsafeRecruitmentFileException;
 use App\Models\ApplicationFormVersion;
 use App\Models\HiringCampaign;
 use App\Models\PublicRecruitmentLink;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 /**
  * Turns a public form submission into a Candidate/Application pair.
@@ -29,6 +32,7 @@ class RecruitmentApplicationSubmissionService
         private readonly RecruitmentApplicantIdentityService $identity,
         private readonly HiringCampaignService $campaigns,
         private readonly RecruitmentApplicationFormService $forms,
+        private readonly RecruitmentApplicantFileService $files,
     ) {}
 
     /**
@@ -41,6 +45,7 @@ class RecruitmentApplicationSubmissionService
      *     privacy_accepted_at?: bool,
      *     consent_payload_json?: ?array,
      *     answers: array<string, mixed>,
+     *     files?: array<string, UploadedFile|array<int, UploadedFile>|null>,
      * }  $input
      * @param  array{ip_address?: ?string, user_agent?: ?string}  $meta
      */
@@ -102,7 +107,7 @@ class RecruitmentApplicationSubmissionService
             // (full_name / email / phone, locked and required); they are
             // answered from the same values so the stored answers match what
             // Team 1's real form stores.
-            $answers = $this->whitelistAnswers($link->formVersion, array_merge(
+            [$answers, $uploads] = $this->whitelistAnswers($link->formVersion, array_merge(
                 (array) ($input['answers'] ?? []),
                 array_filter([
                     'full_name' => $input['full_name'] ?? null,
@@ -110,7 +115,7 @@ class RecruitmentApplicationSubmissionService
                     'phone' => $input['phone'] ?? null,
                     'privacy_consent' => ($input['privacy_accepted_at'] ?? false) ? true : null,
                 ], fn ($value) => $value !== null && $value !== ''),
-            ));
+            ), (array) ($input['files'] ?? []));
 
             try {
                 $application = RecruitmentApplication::query()->create([
@@ -146,6 +151,8 @@ class RecruitmentApplicationSubmissionService
                     'answer_json' => ['value' => $value],
                 ]);
             }
+
+            $this->storeUploads($application, $uploads);
 
             if ($invite !== null && $invite->used_at === null) {
                 $invite->forceFill(['status' => RecruitmentCampaignInvite::STATUS_USED, 'used_at' => now()])->save();
@@ -216,27 +223,42 @@ class RecruitmentApplicationSubmissionService
      * required flags (including the catalog's locked fields) and labels mean
      * exactly what the form builder meant.
      *
-     * File fields are not handled here: this test path has no upload, and CV
-     * storage is Team 1's RecruitmentApplicantFileService (Task 3). A form
-     * that *requires* a file is refused with a pointer to the real form
-     * rather than accepted without it.
+     * File fields are matched the same way against $files; only uploads for
+     * a file field the form declares are kept, never more than its max_files.
+     * Storing them is left to storeUploads(), once the application exists.
      *
-     * @return array<string, mixed>
+     * @param  array<string, mixed>  $files
+     * @return array{array<string, mixed>, array<string, array{rules: array, uploads: array<int, UploadedFile>}>}
      */
-    private function whitelistAnswers(?ApplicationFormVersion $formVersion, array $submitted): array
+    private function whitelistAnswers(?ApplicationFormVersion $formVersion, array $submitted, array $files = []): array
     {
         $fields = $this->forms->normalizeFields((array) ($formVersion?->fields_json ?? []));
         $missing = [];
         $answers = [];
+        $uploads = [];
 
         foreach ($fields as $field) {
             $key = $field['key'];
             $label = $field['label'][app()->getLocale()] ?: ($field['label']['en'] ?: $key);
 
             if ($field['type'] === 'file') {
-                if ($field['required']) {
-                    $missing['answers.'.$key] = __('recruitment-applicants.file_requires_real_form', ['field' => $label]);
+                $fieldUploads = array_values(array_filter(
+                    is_array($files[$key] ?? null) ? $files[$key] : [$files[$key] ?? null],
+                    fn ($upload) => $upload instanceof UploadedFile,
+                ));
+
+                if ($fieldUploads === []) {
+                    if ($field['required']) {
+                        $missing['answers.'.$key] = __('recruitment-applicants.missing_required_field', ['field' => $label]);
+                    }
+
+                    continue;
                 }
+
+                $uploads[$key] = [
+                    'rules' => ['extensions' => $field['accept'], 'max_files' => $field['max_files']],
+                    'uploads' => array_slice($fieldUploads, 0, $field['max_files']),
+                ];
 
                 continue;
             }
@@ -258,6 +280,38 @@ class RecruitmentApplicationSubmissionService
             throw ValidationException::withMessages($missing);
         }
 
-        return $answers;
+        return [$answers, $uploads];
+    }
+
+    /**
+     * Files go through Team 1's RecruitmentApplicantFileService — the same
+     * content inspection and quarantine as their real form, not a second
+     * implementation. A rejected file rolls the whole submission back; the
+     * files already written to disk are removed by hand, because the
+     * transaction only undoes the rows.
+     *
+     * @param  array<string, array{rules: array, uploads: array<int, UploadedFile>}>  $uploads
+     */
+    private function storeUploads(RecruitmentApplication $application, array $uploads): void
+    {
+        $stored = [];
+
+        try {
+            foreach ($uploads as $key => $field) {
+                foreach ($field['uploads'] as $upload) {
+                    try {
+                        $stored[] = $this->files->store($application, $upload, $key, $field['rules']);
+                    } catch (UnsafeRecruitmentFileException $exception) {
+                        throw ValidationException::withMessages(['answers.'.$key => $exception->getMessage()]);
+                    }
+                }
+            }
+        } catch (Throwable $exception) {
+            foreach ($stored as $file) {
+                $file->delete();
+            }
+
+            throw $exception;
+        }
     }
 }

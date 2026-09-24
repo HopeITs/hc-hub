@@ -12,6 +12,7 @@ use App\Http\Controllers\PublicCareerController;
 use App\Livewire\Recruitment\Campaigns\InviteTable;
 use App\Livewire\Recruitment\Campaigns\PublishingHub;
 use App\Livewire\Recruitment\PublicLinks\Manager;
+use App\Livewire\Recruitment\PublicSite\Apply;
 use App\Models\ApplicationForm;
 use App\Models\City;
 use App\Models\Department;
@@ -21,6 +22,7 @@ use App\Models\JobPost;
 use App\Models\Position;
 use App\Models\Program;
 use App\Models\RecruitmentApplicant;
+use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
 use App\Models\RecruitmentRequest;
@@ -545,6 +547,48 @@ class Phase2ApplicantIntakeTest extends TestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]), \Illuminate\Database\QueryException::class);
+    }
+
+    // ------------------------------------------------------------------
+    // Team 2 test form (/careers-test/{token})
+    // ------------------------------------------------------------------
+
+    public function test_the_test_form_submits_with_a_cv_through_team1s_file_service(): void
+    {
+        [$campaign, , $token] = $this->campaignWithLink();
+
+        Livewire::test(Apply::class, ['token' => $token])
+            ->set('full_name', 'Test Person')
+            // A trailing space from a phone keyboard must not fail email:rfc.
+            ->set('email', ' Test.Person@Example.com ')
+            ->set('phone', '0944123456')
+            ->set('privacy_accepted', true)
+            ->set('uploads.cv', UploadedFile::fake()->createWithContent('cv.pdf', "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<<>>\n%%EOF\n"))
+            ->call('submit')
+            ->assertHasNoErrors()
+            ->assertSet('submitted', true);
+
+        $application = RecruitmentApplication::query()->where('campaign_id', $campaign->id)->sole();
+        $this->assertSame('test.person@example.com', $application->email_normalized);
+        $this->assertSame(1, RecruitmentApplicantFile::query()->where('application_id', $application->id)->where('file_type', 'cv')->count());
+    }
+
+    public function test_the_test_form_refuses_a_missing_or_wrong_type_cv(): void
+    {
+        [$campaign, , $token] = $this->campaignWithLink();
+
+        $form = fn () => Livewire::test(Apply::class, ['token' => $token])
+            ->set('full_name', 'Test Person')
+            ->set('email', 'person@example.com')
+            ->set('phone', '0944123456')
+            ->set('privacy_accepted', true);
+
+        $form()->call('submit')->assertHasErrors('answers.cv')->assertSet('submitted', false);
+        $form()->set('uploads.cv', UploadedFile::fake()->create('cv.exe', 10))
+            ->call('submit')->assertHasErrors('uploads.cv')->assertSet('submitted', false);
+
+        $this->assertSame(0, RecruitmentApplication::query()->where('campaign_id', $campaign->id)->count());
+        $this->assertSame(0, RecruitmentApplicantFile::query()->count());
     }
 
     // ------------------------------------------------------------------

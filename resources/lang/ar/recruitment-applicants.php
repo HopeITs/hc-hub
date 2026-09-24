@@ -11,7 +11,9 @@ return [
     'invitation_required' => 'هذه الحملة مخصصة للمدعوين فقط، ولم يتم العثور على هذا البريد الإلكتروني ضمن قائمة الدعوات.',
     'already_applied' => 'يوجد طلب تقديم مسبق لهذا البريد الإلكتروني على هذه الحملة.',
     'missing_required_field' => 'حقل :field مطلوب.',
-    'file_requires_real_form' => 'الحقل ":field" يتطلب رفع ملف، ونموذج الاختبار هذا لا يدعم رفع الملفات. استخدم رابط التقديم الحقيقي (/careers/{token}).',
+    'public_apply_fix_errors' => 'تعذّر إرسال الطلب. يرجى تصحيح الحقول المعلَّمة أدناه.',
+    'public_apply_uploading' => 'جارٍ رفع الملف...',
+    'public_apply_privacy_required' => 'يجب الموافقة على إشعار الخصوصية لإرسال الطلب.',
 
     'public_apply_title' => 'التقديم على هذه الوظيفة',
     'public_apply_full_name' => 'الاسم الكامل',

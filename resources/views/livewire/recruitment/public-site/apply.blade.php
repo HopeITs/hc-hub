@@ -35,6 +35,13 @@
                     <p class="text-body text-secondary-medium">{{ __('recruitment-applicants.public_apply_thanks_body') }}</p>
                 </div>
             @else
+                @if ($errors->any())
+                    {{-- Most of the form sits below the fold; without this a
+                         failed submit looks like nothing happened. --}}
+                    <p role="alert" class="rounded-control border border-primary bg-primary/5 p-3 text-primary text-body">
+                        {{ __('recruitment-applicants.public_apply_fix_errors') }}
+                    </p>
+                @endif
                 @error('token')
                     <p role="alert" class="text-primary text-body">{{ $message }}</p>
                 @enderror
@@ -90,7 +97,22 @@
                             <x-forms.input-label :for="$key" :required="$field['required']" :value="$label" />
 
                             @if ($type === 'file')
-                                <p class="text-body text-secondary-medium">{{ __('recruitment-applicants.file_requires_real_form', ['field' => $label]) }}</p>
+                                <input
+                                    type="file"
+                                    id="{{ $key }}"
+                                    wire:model="uploads.{{ $key }}"
+                                    accept="{{ collect($field['accept'])->map(fn ($extension) => '.'.$extension)->implode(',') }}"
+                                    @if ($field['multiple']) multiple @endif
+                                    class="block w-full text-body text-neutral-900 file:me-3 file:rounded-control file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white"
+                                />
+                                @if ($field['help'][$locale] ?? '')
+                                    <p class="mt-1 text-body text-secondary-medium">{{ $field['help'][$locale] }}</p>
+                                @endif
+                                <div wire:loading wire:target="uploads.{{ $key }}" class="mt-1 text-body text-secondary-medium">{{ __('recruitment-applicants.public_apply_uploading') }}</div>
+                                <x-forms.input-error :field="'uploads.'.$key" :input-id="$key" />
+                                @foreach ($errors->get('uploads.'.$key.'.*') as $messages)
+                                    <p class="text-primary text-body">{{ $messages[0] }}</p>
+                                @endforeach
                             @elseif ($type === 'checkbox')
                                 <x-forms.checkbox-input type="checkbox" :id="$key" wire:model="answers.{{ $key }}" />
                             @elseif ($type === 'textarea')
@@ -117,7 +139,7 @@
                         <x-forms.input-error field="privacy_accepted" input-id="privacy_accepted" />
                     </div>
 
-                    <x-primary-button class="w-full" type="submit">
+                    <x-primary-button class="w-full" type="submit" wire:loading.attr="disabled">
                         {{ __('recruitment-applicants.public_apply_submit') }}
                     </x-primary-button>
                 </form>

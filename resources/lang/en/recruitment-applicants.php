@@ -12,7 +12,9 @@ return [
     'invitation_required' => 'This campaign is invitation-only and this email address was not found on the invitation list.',
     'already_applied' => 'An application already exists for this email address on this campaign.',
     'missing_required_field' => 'The :field field is required.',
-    'file_requires_real_form' => '":field" needs a file upload, which this test form does not support. Use the real application link (/careers/{token}).',
+    'public_apply_fix_errors' => 'Your application could not be sent. Please correct the highlighted fields below.',
+    'public_apply_uploading' => 'Uploading...',
+    'public_apply_privacy_required' => 'You must accept the privacy notice to apply.',
 
     // Test application form (/careers-test/{token}).
     'public_apply_title' => 'Apply for this position',

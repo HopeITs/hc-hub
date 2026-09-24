@@ -35,7 +35,7 @@ php85 -d extension=pdo_sqlite -d extension=sqlite3 vendor/bin/phpunit tests/Feat
 php85 -d extension=pdo_sqlite -d extension=sqlite3 vendor/bin/phpunit --filter test_a_shared_phone_under_another_email_is_flagged_not_merged tests/Feature/Recruitment/Phase2ApplicantIntakeTest.php
 ```
 
-**النتيجة المتوقعة:** `OK (32 tests …)` لاختباراتنا. اختبارات الفريق 1 المعروف فشلها موثّقة في [00-execution-status.md](00-execution-status.md).
+**النتيجة المتوقعة:** `OK (34 tests …)` لاختباراتنا. اختبارات الفريق 1 المعروف فشلها موثّقة في [00-execution-status.md](00-execution-status.md).
 
 ---
 
@@ -47,7 +47,7 @@ php85 -d extension=pdo_sqlite -d extension=sqlite3 vendor/bin/phpunit --filter t
 php85 artisan tinker --execute="require 'docs/recruitment/phase-2/phase2-integration-check.php';"
 ```
 
-**المتوقع:** `RESULT: 46 passed, 0 failed` و`Cleaned 3 uploaded test file(s).`
+**المتوقع:** `RESULT: 47 passed, 0 failed` و`Cleaned 4 uploaded test file(s).`
 
 ---
 
@@ -69,7 +69,7 @@ php85 artisan recruitment:demo-application-link --invite-only --invite-email=me@
 
 يطبع:
 - `http://hc-hr.test/careers/{token}`: **النموذج الحقيقي (الفريق 1)**، استخدمه.
-- `http://hc-hr.test/careers-test/{token}`: نموذجنا التجريبي، للمعاينة فقط (لا يرفع CV).
+- `http://hc-hr.test/careers-test/{token}`: نموذجنا التجريبي (غير متاح في الإنتاج). يرفع الـ CV والملفات عبر خدمة الملفات نفسها عند الفريق 1 (`RecruitmentApplicantFileService`).
 
 **الطريقة 2، الواجهة الحقيقية (الحملة 5):**
 1. افتح `https://hc-hr.test/en/recruitment/campaigns/5/publishing`.

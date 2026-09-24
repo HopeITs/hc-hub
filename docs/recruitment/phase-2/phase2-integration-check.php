@@ -199,10 +199,12 @@ try {
     );
     $errorsOf = function (callable $fn): array { try { $fn(); return []; } catch (ValidationException $e) { return $e->errors(); } };
     $errs = $errorsOf(fn () => $svc->submit($fl, ['full_name' => 'T', 'email' => 'tf@example.com', 'privacy_accepted_at' => true, 'answers' => $answers]));
-    $check('F-1 test form refuses: CV required, points to real form', isset($errs['answers.cv']) && str_contains($errs['answers.cv'][0], '/careers/'));
+    $check('F-1 test form without a CV: refused under answers.cv', isset($errs['answers.cv']));
     $check('F-1 ...and no application was created', ! RecruitmentApplication::where('email_normalized', 'tf@example.com')->exists());
     $errs = $errorsOf(fn () => $svc->submit($fl, ['full_name' => 'T', 'email' => 'tf3@example.com', 'privacy_accepted_at' => false, 'answers' => $answers]));
     $check('F-2 unticked consent is not taken as consent', isset($errs['answers.privacy_consent']));
+    $tfApp = $svc->submit($fl, ['full_name' => 'T', 'email' => 'tf4@example.com', 'phone' => '0944000444', 'privacy_accepted_at' => true, 'answers' => $answers, 'files' => ['cv' => $pdf()]]);
+    $check('F-3 test form with a CV: accepted, CV stored by Team 1 file service', App\Models\RecruitmentApplicantFile::where('application_id', $tfApp->id)->where('file_type', 'cv')->count() === 1);
 } finally {
     DB::rollBack();
     $leftovers = array_diff($listFiles(), $filesBefore);
