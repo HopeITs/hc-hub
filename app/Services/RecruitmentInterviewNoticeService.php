@@ -96,7 +96,26 @@ class RecruitmentInterviewNoticeService
     }
 
     /**
-     * Call after commit. Returns how many could not be queued; those are
+     * Queues the jobs once the outermost transaction commits — not merely the
+     * scheduling service's own, which is only a savepoint when a caller wraps
+     * it in a transaction of its own. A rollback anywhere above discards the
+     * callback, so no job ever exists for a notice that was never committed.
+     * Outside any transaction it runs at once.
+     *
+     * @param  array<int, Notice|null>  $notices
+     */
+    public function dispatchAfterCommit(array $notices): void
+    {
+        $notices = array_values(array_filter($notices));
+
+        if ($notices !== []) {
+            DB::afterCommit(fn () => $this->dispatch($notices));
+        }
+    }
+
+    /**
+     * Queues now. Call only once the rows are committed (see
+     * dispatchAfterCommit). Returns how many could not be queued; those are
      * marked failed.
      *
      * @param  iterable<Notice|null>  $notices
@@ -191,9 +210,9 @@ class RecruitmentInterviewNoticeService
             }));
         }
 
-        $failed = $this->dispatch($notices);
+        $this->dispatchAfterCommit($notices);
 
-        return count($notices) - $failed;
+        return count($notices);
     }
 
     /**
@@ -213,7 +232,10 @@ class RecruitmentInterviewNoticeService
 
         Notice::query()->whereKey($stale->modelKeys())->update(['queued_at' => $now]);
 
-        return $stale->count() - $this->dispatch($stale);
+        // These rows were committed long ago; the update above is the only write.
+        $this->dispatchAfterCommit($stale->all());
+
+        return $stale->count();
     }
 
     /**

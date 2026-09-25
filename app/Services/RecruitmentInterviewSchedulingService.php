@@ -47,8 +47,11 @@ use Throwable;
  *   emails for it are dropped, so no reminder goes out for it.
  * - Candidate emails are rows written in the transaction and queued after
  *   commit (RecruitmentInterviewNoticeService); participant notifications are
- *   sent after commit (RecruitmentInterviewNotifier). Neither can undo the
- *   interview, and neither ever carries a note, a reason or an evaluation.
+ *   sent after commit (RecruitmentInterviewNotifier). "After commit" is the
+ *   outermost commit (DB::afterCommit), so a caller that wraps these methods
+ *   in its own transaction and rolls back leaves no job and no notification.
+ *   Neither can undo the interview, and neither ever carries a note, a
+ *   reason or an evaluation.
  * - The application's status follows its interviews through
  *   RecruitmentApplicationStatusService::applyInterviewTransition(): the first
  *   open interview makes it InterviewScheduled; when the last one closes it
@@ -166,8 +169,8 @@ class RecruitmentInterviewSchedulingService
             return $interview;
         });
 
-        $this->notices->dispatch($notices);
-        $this->notifier->notify($interview, array_keys($participants), ParticipantNotice::SCHEDULED);
+        $this->notices->dispatchAfterCommit($notices);
+        DB::afterCommit(fn () => $this->notifier->notify($interview, array_keys($participants), ParticipantNotice::SCHEDULED));
 
         return $interview;
     }
@@ -324,10 +327,12 @@ class RecruitmentInterviewSchedulingService
             return $locked;
         });
 
-        $this->notices->dispatch($notices);
-        foreach ($notify as $kind => $userIds) {
-            $this->notifier->notify($interview, $userIds, $kind);
-        }
+        $this->notices->dispatchAfterCommit($notices);
+        DB::afterCommit(function () use ($interview, $notify): void {
+            foreach ($notify as $kind => $userIds) {
+                $this->notifier->notify($interview, $userIds, $kind);
+            }
+        });
 
         return $interview;
     }
@@ -399,8 +404,8 @@ class RecruitmentInterviewSchedulingService
             return $locked;
         });
 
-        $this->notices->dispatch($notices);
-        $this->notifier->notify($interview, $participantIds, ParticipantNotice::CANCELLED);
+        $this->notices->dispatchAfterCommit($notices);
+        DB::afterCommit(fn () => $this->notifier->notify($interview, $participantIds, ParticipantNotice::CANCELLED));
 
         return $interview;
     }
