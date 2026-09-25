@@ -8,6 +8,9 @@ use App\Livewire\Recruitment\Campaigns\Create as CampaignCreate;
 use App\Livewire\Recruitment\Campaigns\Index as CampaignIndex;
 use App\Livewire\Recruitment\Campaigns\Invites;
 use App\Livewire\Recruitment\Campaigns\Show as CampaignShow;
+use App\Livewire\Recruitment\Interviews\Form as InterviewForm;
+use App\Livewire\Recruitment\Interviews\Index as InterviewIndex;
+use App\Livewire\Recruitment\Interviews\Show as InterviewShow;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
 use App\Livewire\Recruitment\Requests\DirectOpen;
@@ -48,6 +51,24 @@ Route::prefix('recruitment/applicants')->name('recruitment.applicants.')
         Route::get('/', ApplicantIndex::class)->name('index');
         Route::get('/{applicantId}', ApplicantShow::class)->whereNumber('applicantId')->name('show');
     });
+
+// Phase 2 Task 7 (Team 2): interviews. The list, calendar and a single
+// interview have no permission middleware on purpose: participants see the
+// interviews they are on without holding any applicant permission, and the
+// components resolve every interview through RecruitmentInterview::visibleTo()
+// and the policy (out of reach is a 404). Scheduling and editing are HR's.
+Route::prefix('recruitment/interviews')->name('recruitment.interviews.')
+    ->group(function () {
+        Route::get('/', InterviewIndex::class)->name('index');
+        Route::get('/{interviewId}', InterviewShow::class)->whereNumber('interviewId')->name('show');
+        Route::get('/{interviewId}/edit', InterviewForm::class)->whereNumber('interviewId')
+            ->middleware('active_permission:recruitment-applicants.schedule-interviews')->name('edit');
+    });
+
+Route::get('recruitment/applications/{applicationId}/interviews/create', InterviewForm::class)
+    ->whereNumber('applicationId')
+    ->middleware('active_permission:recruitment-applicants.schedule-interviews')
+    ->name('recruitment.interviews.create');
 
 // No permission middleware on purpose: the policy enforces it, so a refused
 // attempt still reaches the controller and lands in the download audit.

@@ -190,6 +190,48 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Interviews (Phase 2 Task 7)
+    |--------------------------------------------------------------------------
+    |
+    | reminder_offsets_minutes: how long before the interview each candidate
+    | reminder goes out. One entry per reminder — add 120 for a second one two
+    | hours before, no code change needed. A slot fixed after a reminder's
+    | window opened gets no reminder for that offset: the scheduling email was
+    | just sent.
+    |
+    | Candidate emails and reminders go through the same queue as the
+    | rejection email and, like it, never undo what they describe.
+    |
+    | cancellation_reasons: labels live in
+    | recruitment-applicant.interviews.cancellation_reasons.{code}. They are
+    | internal and never reach the candidate. 'application_closed' is used by
+    | the system when the application is rejected, withdrawn or archived
+    | while an interview is still open; HR cannot pick it.
+    |
+    */
+
+    'interviews' => [
+        'reminder_offsets_minutes' => [1440],
+        'notice_queue' => env('RECRUITMENT_NOTICE_QUEUE', 'default'),
+        // A queued email still unsent after this long is dispatched again by
+        // the reminder sweep (a queue that was down when it was written).
+        'redispatch_after_minutes' => 15,
+        'min_duration_minutes' => 15,
+        'max_duration_minutes' => 480,
+        'default_duration_minutes' => 60,
+        'max_participants' => 15,
+        'cancellation_reasons' => [
+            'candidate_declined',
+            'candidate_unavailable',
+            'interviewer_unavailable',
+            'position_on_hold',
+            'scheduled_in_error',
+            'other',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | CV analysis
     |--------------------------------------------------------------------------
     |

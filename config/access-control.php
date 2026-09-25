@@ -135,6 +135,9 @@ return [
         'recruitment-applicants' => [
             'view', 'manage', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status',
             'tag', 'bulk-tag', 'manage-tags', 'accept', 'bulk-reject',
+            // Phase 2 Task 7: create / edit / reschedule / cancel interviews
+            // and record their outcome. Participants need no permission.
+            'schedule-interviews',
         ],
     ],
 
@@ -394,6 +397,16 @@ return [
             'confirmDelete' => 'recruitment-applicants.delete-notes',
             'deleteNote' => 'recruitment-applicants.delete-notes',
         ],
+        // Phase 2 Task 7. Each method re-resolves the interview through
+        // RecruitmentInterview::visibleTo() and asks the policy (manage /
+        // schedule, scope included) again; the service authorizes a third time.
+        'recruitment.interviews.form' => ['save' => 'recruitment-applicants.schedule-interviews'],
+        'recruitment.interviews.show' => [
+            'beginCancel' => 'recruitment-applicants.schedule-interviews',
+            'cancelInterview' => 'recruitment-applicants.schedule-interviews',
+            'beginOutcome' => 'recruitment-applicants.schedule-interviews',
+            'recordOutcome' => 'recruitment-applicants.schedule-interviews',
+        ],
     ],
 
     /*
@@ -437,6 +450,13 @@ return [
         'recruitment.applicants.bulk-reject' => ['cancel'],
         'recruitment.applicants.application-tags' => ['refreshTags'],
         'recruitment.applicants.tag-manager' => ['cancelRename'],
+        // Phase 2 Task 7. Form-only state: the participant list is validated
+        // user by user (exists, active) by the scheduling service on save,
+        // which is the mapped action. closePanel clears component state only.
+        'recruitment.interviews.form' => ['addParticipant', 'removeParticipant'],
+        'recruitment.interviews.show' => ['closePanel'],
+        // Month navigation; re-renders through the same visibleTo() query.
+        'recruitment.interviews.calendar' => ['previousMonth', 'nextMonth', 'thisMonth'],
 
         // --- Authentication -------------------------------------------------
         // Reached before a session exists, or acting only on the caller's own

@@ -1,0 +1,173 @@
+<?php
+
+namespace App\Livewire\Recruitment\Interviews;
+
+use App\Enums\RecruitmentInterviewStatus;
+use App\Models\RecruitmentInterview;
+use App\Services\RecruitmentInterviewSchedulingService;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
+use Livewire\Component;
+
+/**
+ * Phase 2 Task 7: one interview.
+ *
+ * Seen by its participants and by HR in scope. The meeting link is rendered
+ * only through the viewMeetingLink ability; it is never a public property,
+ * so it never reaches the browser of anyone else.
+ *
+ * HR with schedule-interviews can cancel it (the candidate declined, someone
+ * is unavailable, a mistake) or record how it went (held / no-show) once it
+ * has started. Each action has an open / confirm pair; the status and time
+ * the user saw are locked when the panel opens and checked by the service.
+ */
+class Show extends Component
+{
+    #[Locked]
+    public int $interviewId;
+
+    /** 'cancel' | 'completed' | 'no_show' | null */
+    #[Locked]
+    public ?string $panel = null;
+
+    #[Locked]
+    public ?string $expectedStatus = null;
+
+    #[Locked]
+    public ?string $expectedStartsAt = null;
+
+    public string $cancelReason = '';
+
+    /** Internal: kept on the interview, never sent to the candidate. */
+    public string $cancelNote = '';
+
+    public bool $notifyCandidate = true;
+
+    /** Internal note on the outcome. */
+    public string $outcomeNote = '';
+
+    public function mount(int $interviewId): void
+    {
+        $this->interviewId = $interviewId;
+        $this->resolveInterview();
+    }
+
+    public function beginCancel(): void
+    {
+        $this->openPanel('cancel');
+    }
+
+    public function beginOutcome(string $outcome): void
+    {
+        abort_unless(in_array($outcome, [RecruitmentInterviewStatus::Completed, RecruitmentInterviewStatus::NoShow], true), 403);
+
+        $this->openPanel($outcome);
+    }
+
+    public function closePanel(): void
+    {
+        $this->reset('panel', 'expectedStatus', 'expectedStartsAt', 'cancelReason', 'cancelNote', 'notifyCandidate', 'outcomeNote');
+        $this->resetErrorBag();
+    }
+
+    public function cancelInterview(RecruitmentInterviewSchedulingService $scheduling): void
+    {
+        abort_unless($this->panel === 'cancel', 404);
+
+        $interview = $this->resolveInterview();
+        Gate::authorize('manage', $interview);
+
+        $this->attempt(fn () => $scheduling->cancel(
+            auth()->user(),
+            $interview,
+            (string) $this->expectedStatus,
+            (string) $this->expectedStartsAt,
+            $this->cancelReason,
+            $this->cancelNote,
+            $this->notifyCandidate,
+        ), __('recruitment-applicant.interviews.cancelled'));
+    }
+
+    public function recordOutcome(RecruitmentInterviewSchedulingService $scheduling): void
+    {
+        abort_unless(in_array($this->panel, [RecruitmentInterviewStatus::Completed, RecruitmentInterviewStatus::NoShow], true), 404);
+
+        $interview = $this->resolveInterview();
+        Gate::authorize('manage', $interview);
+
+        $this->attempt(fn () => $scheduling->recordOutcome(
+            auth()->user(),
+            $interview,
+            (string) $this->expectedStatus,
+            (string) $this->expectedStartsAt,
+            (string) $this->panel,
+            $this->outcomeNote,
+        ), __('recruitment-applicant.interviews.outcome_recorded'));
+    }
+
+    public function render(RecruitmentInterviewSchedulingService $scheduling)
+    {
+        $interview = $this->resolveInterview()->load([
+            'application.applicant',
+            'application.campaign.vacancy.position',
+            'participants' => fn ($participants) => $participants->orderByRaw('removed_at is not null')->orderBy('id'),
+            'participants.user.profile',
+            'creator.profile',
+            'cancelledBy.profile',
+            'outcomeRecordedBy.profile',
+            'reschedules' => fn ($history) => $history->latest('rescheduled_at')->latest('id'),
+            'reschedules.rescheduledBy.profile',
+        ]);
+
+        $canManage = Gate::allows('manage', $interview);
+
+        return view('livewire.recruitment.interviews.show', [
+            'interview' => $interview,
+            'canManage' => $canManage,
+            'canSeeApplicant' => Gate::allows('view', $interview->application),
+            // Rendered only when allowed; never stored on the component.
+            'meetingUrl' => Gate::allows('viewMeetingLink', $interview) ? $interview->meeting_url : null,
+            'notices' => $canManage ? $interview->notices()->latest('id')->get() : collect(),
+            'cancellationReasons' => $scheduling->cancellationReasons(),
+            'hasStarted' => ! $interview->scheduled_at->isFuture(),
+        ]);
+    }
+
+    private function openPanel(string $panel): void
+    {
+        $interview = $this->resolveInterview();
+        Gate::authorize('manage', $interview);
+        abort_unless($interview->isOpen(), 403);
+
+        $this->closePanel();
+        $this->panel = $panel;
+        $this->expectedStatus = $interview->status;
+        $this->expectedStartsAt = $interview->scheduled_at->toIso8601String();
+    }
+
+    private function attempt(callable $action, string $message): void
+    {
+        try {
+            $action();
+        } catch (ValidationException $exception) {
+            foreach ($exception->errors() as $field => $messages) {
+                $this->addError($field, $messages[0]);
+            }
+
+            return;
+        }
+
+        $this->closePanel();
+        session()->flash('recruitment_saved', $message);
+    }
+
+    /** Out of reach is a 404, not a 403: guessing ids reveals nothing. */
+    private function resolveInterview(): RecruitmentInterview
+    {
+        $interview = RecruitmentInterview::query()->visibleTo(auth()->user())->findOrFail($this->interviewId);
+        Gate::authorize('view', $interview);
+
+        return $interview;
+    }
+}
