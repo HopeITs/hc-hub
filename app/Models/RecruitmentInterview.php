@@ -120,6 +120,36 @@ class RecruitmentInterview extends Model
             ->exists();
     }
 
+    /**
+     * The deleting event in booted() does not fire for a query-level delete
+     * (RecruitmentInterview::query()->where(...)->delete()), so the Eloquent
+     * builder refuses that too. Only a raw DB::table() call bypasses both, and
+     * the restrict foreign keys from the reschedule and notice history stop it
+     * for any interview that was ever moved or emailed about.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     */
+    public function newEloquentBuilder($query): Builder
+    {
+        return new class($query) extends Builder
+        {
+            public function delete()
+            {
+                throw new LogicException('Interviews are never deleted; cancel them through RecruitmentInterviewSchedulingService.');
+            }
+
+            public function forceDelete()
+            {
+                $this->delete();
+            }
+
+            public function truncate(): void
+            {
+                $this->delete();
+            }
+        };
+    }
+
     protected static function booted(): void
     {
         // "Do not delete an interview instead of cancelling it" — enforced
