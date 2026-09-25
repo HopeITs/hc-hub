@@ -1,16 +1,23 @@
 {
     "agents": [
-        "claude_code"
+        "claude_code",
+        "codex"
     ],
-    "cloud": true,
+    "cloud": false,
+    "guidelines": true,
+    "packages": [
+        "maatwebsite/excel",
+        "spatie/laravel-medialibrary"
+    ],
     "skills": [
         "infer-conventions",
-        "deploying-to-cloud",
         "laravel-best-practices",
         "testing-best-practices",
         "fluxui-development",
         "livewire-development",
         "volt-development",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "laravel-excel",
+        "medialibrary-development"
     ]
 }
