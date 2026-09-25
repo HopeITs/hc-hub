@@ -303,6 +303,15 @@ class RecruitmentJobOfferTest extends TestCase
         $this->assertSame(Version::STATUS_CANCELLED, $draft->currentVersion->status);
         $this->assertValidationError(fn () => $this->send($draft), 'offer', 'not_sendable');
 
+        // A cancelled offer can normally be revised — but not once its
+        // candidate is rejected: no button that could only fail, no form.
+        $this->assertFalse($this->service()->canRevise($draft));
+        $this->assertValidationError(fn () => $this->revise($draft), 'offer', 'not_selected');
+        $this->actingAs($this->hr);
+        Livewire::test(Show::class, ['offerId' => $draft->id])
+            ->assertDontSee(route('recruitment.offers.revise', ['offerId' => $draft->id]));
+        Livewire::test(Form::class, ['offerId' => $draft->id, 'mode' => 'revise'])->assertNotFound();
+
         $backToShortlist = $this->selected('Back To Shortlist');
         $second = $this->create($backToShortlist);
         $statuses->change($this->hr, $backToShortlist->fresh(), AppStatus::Selected, AppStatus::Shortlisted, 'Wait for the second round.');

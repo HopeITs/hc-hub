@@ -80,6 +80,7 @@ class Form extends Component
         Gate::authorize('manage', $offer);
         $this->mode = $mode === 'revise' ? 'revise' : 'edit';
         abort_if($this->mode === 'edit' && ! $offer->isEditable(), 404);
+        abort_if($this->mode === 'revise' && ! app(RecruitmentJobOfferService::class)->canRevise($offer), 404);
 
         $version = $offer->currentVersion()->firstOrFail();
         $this->offerId = $offer->getKey();

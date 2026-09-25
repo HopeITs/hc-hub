@@ -96,7 +96,7 @@
                     <button type="button" wire:click="beginResponse('{{ Status::Accepted }}')" class="rounded-control border border-green-600 px-3 py-1.5 text-sm font-semibold text-green-700 hover:bg-green-50">{{ __('recruitment-applicant.offers.actions.accepted') }}</button>
                     <button type="button" wire:click="beginResponse('{{ Status::Rejected }}')" class="rounded-control border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50">{{ __('recruitment-applicant.offers.actions.rejected') }}</button>
                 @endif
-                @if (Status::canMove($offer->status, Status::Revised))
+                @if ($canRevise)
                     <a href="{{ route('recruitment.offers.revise', ['offerId' => $offer->id]) }}" wire:navigate class="rounded-control border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50">{{ __('recruitment-applicant.offers.actions.revise') }}</a>
                 @endif
                 @if (Status::canMove($offer->status, Status::Cancelled))

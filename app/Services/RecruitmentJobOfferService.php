@@ -68,6 +68,17 @@ class RecruitmentJobOfferService
         private readonly RecruitmentApplicationStatusService $statuses,
     ) {}
 
+    /**
+     * Whether the offer can go out again as a new version right now: its own
+     * state allows a revision, and its application is still in the offer
+     * stage. A candidate rejected in the meantime cannot be offered again.
+     */
+    public function canRevise(Offer $offer): bool
+    {
+        return Status::canMove($offer->status, Status::Revised)
+            && in_array($offer->application?->status, self::SENDABLE_FROM, true);
+    }
+
     /** @return array<int, string> the reasons HR can pick */
     public function cancellationReasons(): array
     {

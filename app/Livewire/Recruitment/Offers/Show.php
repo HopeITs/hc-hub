@@ -122,6 +122,7 @@ class Show extends Component
             'canSeeSalary' => Gate::allows('viewSalary', $offer),
             'canSeeApplicant' => Gate::allows('view', $offer->application),
             'seatsLeft' => $offer->vacancy ? $offers->seatsLeft($offer->vacancy, $offer) : 0,
+            'canRevise' => $offers->canRevise($offer),
             'cancellationReasons' => $offers->cancellationReasons(),
         ]);
     }
