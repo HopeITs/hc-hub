@@ -119,6 +119,9 @@ class Form extends Component
 
     public function save(RecruitmentInterviewSchedulingService $scheduling): void
     {
+        // Errors from a previous attempt must not outlive the fix.
+        $this->resetErrorBag();
+
         $input = [
             'type' => $this->type,
             'startsAt' => $this->startsAt,

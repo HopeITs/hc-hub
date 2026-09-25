@@ -35,6 +35,16 @@
                     <span class="rounded-control px-2 py-0.5 text-xs font-semibold {{ RecruitmentInterviewStatus::classes($interview->status) }}">
                         {{ __('recruitment-applicant.interviews.statuses.'.$interview->status) }}
                     </span>
+                    @if (isset($tallies[$interview->id]) && $tallies[$interview->id]['total'] > 0)
+                        <div class="flex w-full flex-wrap items-center gap-1 text-xs">
+                            <span class="text-secondary-medium">{{ trans_choice('recruitment-applicant.evaluations.count', $tallies[$interview->id]['total'], ['count' => $tallies[$interview->id]['total']]) }}:</span>
+                            @foreach ($tallies[$interview->id]['counts'] as $value => $count)
+                                @if ($count > 0)
+                                    <span class="rounded-control px-1.5 py-0.5 font-semibold {{ \App\Enums\RecruitmentEvaluationRecommendation::classes($value) }}">{{ __('recruitment-applicant.evaluations.recommendations.'.$value) }} {{ $count }}</span>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
                 </li>
             @endforeach
         </ul>

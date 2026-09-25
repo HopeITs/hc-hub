@@ -235,6 +235,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Interview evaluations (Phase 2 Task 8)
+    |--------------------------------------------------------------------------
+    |
+    | reviewer_roles: which participant roles may write an evaluation. Being
+    | on the interview is the grant — no permission is involved.
+    |
+    | Evaluation opens at the interview's start time and is refused for a
+    | cancelled or no-show interview. After completion HR can close it; with
+    | auto_close_days set it also closes that many days after the outcome was
+    | recorded (null: only HR closes it). Once closed, reviewers can no
+    | longer edit; HR with correct-evaluations still can, with a reason.
+    |
+    */
+
+    'evaluations' => [
+        'reviewer_roles' => ['interviewer', 'observer'],
+        'auto_close_days' => null,
+        'max_text_length' => 5000,
+        'min_reason_length' => 10,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | CV analysis
     |--------------------------------------------------------------------------
     |

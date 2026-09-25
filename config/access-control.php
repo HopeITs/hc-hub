@@ -138,6 +138,11 @@ return [
             // Phase 2 Task 7: create / edit / reschedule / cancel interviews
             // and record their outcome. Participants need no permission.
             'schedule-interviews',
+            // Phase 2 Task 8: the aggregated view of every reviewer's
+            // evaluation, and correcting / withdrawing someone else's.
+            // Writing one's own evaluation needs none: it comes from being on
+            // the interview.
+            'view-evaluations', 'correct-evaluations',
         ],
     ],
 
@@ -407,6 +412,16 @@ return [
             'beginOutcome' => 'recruitment-applicants.schedule-interviews',
             'recordOutcome' => 'recruitment-applicants.schedule-interviews',
         ],
+        // Phase 2 Task 8. Each method re-resolves the interview and the
+        // evaluation through the scoped query and asks the policy again; the
+        // service authorizes a third time.
+        'recruitment.interviews.evaluation-summary' => [
+            'beginCorrect' => 'recruitment-applicants.correct-evaluations',
+            'saveCorrection' => 'recruitment-applicants.correct-evaluations',
+            'beginWithdraw' => 'recruitment-applicants.correct-evaluations',
+            'withdraw' => 'recruitment-applicants.correct-evaluations',
+            'closeEvaluations' => 'recruitment-applicants.schedule-interviews',
+        ],
     ],
 
     /*
@@ -457,6 +472,15 @@ return [
         'recruitment.interviews.show' => ['closePanel'],
         // Month navigation; re-renders through the same visibleTo() query.
         'recruitment.interviews.calendar' => ['previousMonth', 'nextMonth', 'thisMonth'],
+        // Phase 2 Task 8. save() writes the caller's OWN evaluation, which
+        // needs no permission — the grant is being a current participant in a
+        // reviewer role, checked by the evaluate policy in the component and
+        // again, under a row lock, in RecruitmentInterviewEvaluationService.
+        // reload() only re-reads the caller's own row.
+        'recruitment.interviews.evaluation-form' => ['save', 'reload'],
+        // Clears panel state; refreshEvaluations re-renders through the same
+        // scoped query and writes nothing.
+        'recruitment.interviews.evaluation-summary' => ['cancelPanel', 'refreshEvaluations'],
 
         // --- Authentication -------------------------------------------------
         // Reached before a session exists, or acting only on the caller's own

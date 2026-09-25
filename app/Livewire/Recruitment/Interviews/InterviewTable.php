@@ -101,6 +101,26 @@ class InterviewTable extends LivewireTable
                     $query->whereHas('currentParticipants', fn (Builder $participants) => $participants->where('user_id', auth()->id()));
                 }
             }, 'mine')->options(['mine' => __('recruitment-applicant.interviews.mine')]),
+            // Task 8: the interviews waiting on this user's own evaluation.
+            SelectFilter::make(__('recruitment-applicant.evaluations.my_filter'), function (Builder $query, $value): void {
+                $mine = fn (Builder $evaluations) => $evaluations->where('reviewer_user_id', auth()->id());
+
+                if ($value === 'pending') {
+                    $query->whereHas('currentParticipants', fn (Builder $participants) => $participants
+                        ->where('user_id', auth()->id())
+                        ->whereIn('role', (array) config('recruitment.evaluations.reviewer_roles', [])))
+                        // Qualified: the table joins other tables for its relation columns.
+                        ->whereNotIn($query->qualifyColumn('status'), [RecruitmentInterviewStatus::Cancelled, RecruitmentInterviewStatus::NoShow])
+                        ->whereNull($query->qualifyColumn('evaluations_closed_at'))
+                        ->where($query->qualifyColumn('scheduled_at'), '<=', now())
+                        ->whereDoesntHave('evaluations', $mine);
+                } elseif ($value === 'submitted') {
+                    $query->whereHas('evaluations', $mine);
+                }
+            }, 'my_evaluation')->options([
+                'pending' => __('recruitment-applicant.evaluations.my_pending'),
+                'submitted' => __('recruitment-applicant.evaluations.my_submitted'),
+            ]),
         ];
     }
 }

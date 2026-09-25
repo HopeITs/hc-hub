@@ -897,6 +897,92 @@ class RecruitmentInterviewTest extends TestCase
     }
 
     // ------------------------------------------------------------------
+    // The UI actions themselves (the service is covered above)
+    // ------------------------------------------------------------------
+
+    /** [9] [18] Cancel and record the outcome through the interview page's own panels. */
+    public function test_hr_cancels_and_records_outcomes_from_the_interview_page(): void
+    {
+        $application = $this->shortlisted();
+        $toCancel = $this->schedule($application);
+        $toClose = $this->schedule($application->fresh(), ['startsAt' => '2026-10-06T10:00']);
+        $this->actingAs($this->hr);
+
+        Livewire::test(Show::class, ['interviewId' => $toCancel->id])
+            ->call('beginCancel')
+            ->set('cancelReason', 'candidate_declined')
+            ->set('cancelNote', self::SECRET_CANCEL_NOTE)
+            ->call('cancelInterview')
+            ->assertHasNoErrors()
+            ->assertSet('panel', null)
+            ->assertSee(__('recruitment-applicant.interviews.cancellation_reasons.candidate_declined'))
+            ->assertSee(self::SECRET_CANCEL_NOTE);
+        $this->assertSame(Status::Cancelled, $toCancel->fresh()->status);
+
+        // The outcome buttons appear only once the interview has started.
+        Livewire::test(Show::class, ['interviewId' => $toClose->id])
+            ->assertDontSee(__('recruitment-applicant.interviews.actions.completed'));
+        $this->travelTo(Carbon::parse('2026-10-06 11:00:00'));
+        Livewire::test(Show::class, ['interviewId' => $toClose->id])
+            ->assertSee(__('recruitment-applicant.interviews.actions.completed'))
+            ->call('beginOutcome', Status::Completed)
+            ->set('outcomeNote', 'Held as planned')
+            ->call('recordOutcome')
+            ->assertHasNoErrors();
+        $this->assertSame(Status::Completed, $toClose->fresh()->status);
+        $this->assertSame(AppStatus::Interviewed, $application->fresh()->status);
+
+        // An outcome code that is not one is refused before any panel opens.
+        Livewire::test(Show::class, ['interviewId' => $toClose->id])->call('beginOutcome', Status::Cancelled)->assertForbidden();
+    }
+
+    /** [9] [21] Rescheduling through the edit form keeps history; a missing reason is shown under the field. */
+    public function test_hr_reschedules_from_the_edit_form(): void
+    {
+        $interview = $this->schedule($this->shortlisted());
+        $this->actingAs($this->hr);
+
+        Livewire::test(Form::class, ['interviewId' => $interview->id])
+            ->assertSet('meetingUrl', self::MEETING_URL)
+            ->set('startsAt', '2026-10-09T15:00')
+            ->call('save')
+            ->assertHasErrors(['reason'])
+            ->set('reason', 'Panel member travelling that day')
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('recruitment.interviews.show', ['interviewId' => $interview->id]));
+
+        $interview->refresh();
+        $this->assertSame(Status::Rescheduled, $interview->status);
+        $this->assertSame('2026-10-09 15:00', $interview->scheduled_at->format('Y-m-d H:i'));
+        $this->assertSame('Panel member travelling that day', $interview->reschedules()->sole()->reason);
+
+        // A closed interview cannot be opened for editing at all.
+        $this->cancel($interview, 'scheduled_in_error');
+        Livewire::test(Form::class, ['interviewId' => $interview->id])->assertNotFound();
+    }
+
+    /** [3] [22] An email whose job never reached the queue is dispatched again by the sweep. */
+    public function test_a_stalled_candidate_email_is_dispatched_again(): void
+    {
+        $interview = $this->schedule($this->shortlisted(), ['startsAt' => '2026-10-20T10:00']);
+        $stalled = Notice::query()->forceCreate([
+            'interview_id' => $interview->id, 'kind' => Notice::KIND_SCHEDULED, 'scheduled_for' => $interview->scheduled_at,
+            'recipient_email' => 'candidate@example.test', 'status' => Notice::STATUS_QUEUED, 'queued_at' => now()->subHour(),
+        ]);
+        $fresh = Notice::query()->forceCreate([
+            'interview_id' => $interview->id, 'kind' => Notice::KIND_RESCHEDULED, 'scheduled_for' => $interview->scheduled_at,
+            'recipient_email' => 'candidate@example.test', 'status' => Notice::STATUS_QUEUED, 'queued_at' => now(),
+        ]);
+        Queue::fake();
+
+        $this->artisan('recruitment:interview-reminders')->assertSuccessful();
+
+        Queue::assertPushed(SendRecruitmentInterviewNotice::class, fn (SendRecruitmentInterviewNotice $job) => $job->noticeId === $stalled->id);
+        Queue::assertNotPushed(SendRecruitmentInterviewNotice::class, fn (SendRecruitmentInterviewNotice $job) => $job->noticeId === $fresh->id);
+    }
+
+    // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
 

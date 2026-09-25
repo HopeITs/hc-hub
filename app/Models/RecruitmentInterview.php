@@ -84,6 +84,31 @@ class RecruitmentInterview extends Model
         return $this->currentParticipants()->where('user_id', $user->getKey())->exists();
     }
 
+    public function evaluationsClosedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'evaluations_closed_by_user_id');
+    }
+
+    /**
+     * Task 8: closed by HR after completion, or — when the policy sets
+     * recruitment.evaluations.auto_close_days — that many days after the
+     * outcome was recorded. Once closed, reviewers can no longer edit; HR can
+     * still correct.
+     */
+    public function evaluationsClosed(): bool
+    {
+        if ($this->evaluations_closed_at !== null) {
+            return true;
+        }
+
+        $days = config('recruitment.evaluations.auto_close_days');
+
+        return $days !== null
+            && $this->status === RecruitmentInterviewStatus::Completed
+            && $this->outcome_recorded_at !== null
+            && $this->outcome_recorded_at->copy()->addDays((int) $days)->isPast();
+    }
+
     /**
      * What a user may see: interviews they are currently on, plus — for
      * anyone who can read applicants — every interview of an application in
@@ -167,6 +192,7 @@ class RecruitmentInterview extends Model
             'slot_set_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'outcome_recorded_at' => 'datetime',
+            'evaluations_closed_at' => 'datetime',
             'reschedule_count' => 'integer',
         ];
     }

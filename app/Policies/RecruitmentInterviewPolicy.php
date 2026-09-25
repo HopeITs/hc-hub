@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentInterview;
 use App\Models\User;
+use App\Services\RecruitmentInterviewSchedulingService;
 use App\Services\RecruitmentScopeResolver;
 
 /**
@@ -59,6 +60,35 @@ class RecruitmentInterviewPolicy
     public function viewMeetingLink(User $user, RecruitmentInterview $interview): bool
     {
         return $this->manage($user, $interview) || $interview->isParticipant($user);
+    }
+
+    /**
+     * Task 8: may this user write their own evaluation of this interview?
+     * Only as a current participant, in a reviewer role, on an active
+     * account. Whether evaluation is open right now (start time, cancelled,
+     * no-show, closed) is the service's call, so it can say why not.
+     */
+    public function evaluate(User $user, RecruitmentInterview $interview): bool
+    {
+        return RecruitmentInterviewSchedulingService::isActiveUser($user)
+            && $interview->currentParticipants()
+                ->where('user_id', $user->getKey())
+                ->whereIn('role', (array) config('recruitment.evaluations.reviewer_roles', []))
+                ->exists();
+    }
+
+    /** Task 8: the aggregated view of every reviewer's evaluation — HR in scope only. */
+    public function viewEvaluations(User $user, RecruitmentInterview $interview): bool
+    {
+        return $user->hasActivePermission('recruitment-applicants.view-evaluations')
+            && $user->hasActivePermission('recruitment-applicants.view')
+            && $this->inScope($user, $interview);
+    }
+
+    /** Task 8: closing evaluation after completion is part of managing the interview. */
+    public function closeEvaluations(User $user, RecruitmentInterview $interview): bool
+    {
+        return $this->manage($user, $interview);
     }
 
     private function inScope(User $user, RecruitmentInterview $interview): bool
