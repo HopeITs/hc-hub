@@ -304,10 +304,28 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         Livewire::test(ApplicantShow::class, ['applicantId' => $this->application->applicant_id])
             ->assertDontSee(trans_choice('recruitment-applicant.evaluations.count', 2, ['count' => 2]));
 
-        // Never serialized with the model.
-        foreach (['pros', 'cons', 'notes', 'recommendation'] as $field) {
+        // Who evaluated, and when, is itself evaluation data: another
+        // participant cannot tell whether B has evaluated at all.
+        $this->actingAs($this->reviewerA);
+        Livewire::test(Show::class, ['interviewId' => $this->interview->id])
+            ->assertDontSee(self::NOTES_B)
+            ->assertDontSee(trans_choice('recruitment-applicant.evaluations.count', 2, ['count' => 2]))
+            ->assertDontSee(__('recruitment-applicant.evaluations.submitted_on', ['date' => '2026-10-06 11:00']));
+
+        // Never serialized with the model — content, recommendation and the
+        // reasons HR gave (withdrawal, correction) alike.
+        Role::findByName($this->hr->myRole(), 'web')->givePermissionTo('recruitment-applicants.view-evaluations');
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $this->hr = $this->hr->fresh();
+        $this->service()->correct($this->hr, $evaluationB, 1, ['recommendation' => Recommendation::No, 'notes' => self::NOTES_B], 'CORRECTION-REASON secret');
+        $this->service()->withdraw($this->hr, $evaluationB, 2, 'WITHDRAWAL-REASON secret');
+        $serialized = json_encode($evaluationB->fresh()->toArray()).json_encode($evaluationB->revisions()->get()->toArray());
+        foreach (['pros', 'cons', 'notes', 'recommendation', 'withdrawal_reason', 'reason'] as $field) {
             $this->assertArrayNotHasKey($field, $evaluationB->fresh()->toArray());
             $this->assertArrayNotHasKey($field, $evaluationB->revisions()->first()->toArray());
+        }
+        foreach ([self::NOTES_B, 'CORRECTION-REASON', 'WITHDRAWAL-REASON'] as $secret) {
+            $this->assertStringNotContainsString($secret, $serialized);
         }
     }
 
@@ -472,8 +490,22 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         $this->assertSame(__('recruitment-applicant.evaluations.errors.closed'), $errors['evaluation'][0]);
         $this->assertValidationError(fn () => $this->evaluate($this->reviewerB), 'evaluation');
 
+        $closeAudit = Activity::query()->where('description', 'recruitment_interview.evaluations_closed')->sole();
+        $this->assertSame($this->interview->id, $closeAudit->subject_id);
+        $this->assertSame($this->hr->id, $closeAudit->causer_id);
+
+        // HR corrects after closing: saved, in the history, audited without the content.
         $this->service()->correct($this->hr, $evaluation, 1, ['recommendation' => Recommendation::Maybe], 'Typo in the recommendation');
-        $this->assertSame(Recommendation::Maybe, $evaluation->fresh()->recommendation);
+        $evaluation->refresh();
+        $this->assertSame(Recommendation::Maybe, $evaluation->recommendation);
+        $this->assertSame(2, $evaluation->version);
+        $correction = $evaluation->revisions()->where('version', 2)->sole();
+        $this->assertSame([Evaluation::ACTION_CORRECTED, 'Typo in the recommendation', $this->hr->id], [$correction->action, $correction->reason, $correction->changed_by_user_id]);
+        $audit = Activity::query()->where('description', 'recruitment_interview_evaluation.corrected')->where('subject_id', $evaluation->id)->sole();
+        $this->assertSame(['recommendation'], $audit->properties['changed_fields']);
+        $this->assertStringNotContainsString('Typo in the recommendation', json_encode($audit->properties));
+        $this->assertStringNotContainsString(Recommendation::Maybe, json_encode($audit->properties));
+        $this->assertTrue($this->interview->fresh()->evaluationsClosed(), 'Correcting does not reopen evaluation.');
     }
 
     /** rules: the optional policy — evaluation closes itself N days after completion. */
