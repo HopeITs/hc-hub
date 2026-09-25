@@ -7,6 +7,8 @@ use App\Enums\WorkflowInstanceStatus;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\DB;
 
 class RecruitmentPendingApprovalQuery
 {
@@ -50,5 +52,26 @@ class RecruitmentPendingApprovalQuery
             ])
             ->orderBy('pending_instances.started_at')
             ->orderBy('recruitment_workflow_instance_steps.id');
+    }
+
+    /**
+     * When the pending step became the current one: the moment the step
+     * before it was decided, or the start of the workflow for the first.
+     * A subquery against forUser()'s aliases, for addSelect() or min().
+     */
+    public function waitingSince(): QueryBuilder
+    {
+        // Wrapped by the grammar so a configured table prefix reaches the
+        // raw expression too, exactly as it does the rest of the query.
+        $grammar = DB::connection()->getQueryGrammar();
+
+        return DB::table('recruitment_workflow_instance_steps as previous_steps')
+            ->selectRaw(sprintf(
+                'COALESCE(MAX(%s), %s)',
+                $grammar->wrap('previous_steps.acted_at'),
+                $grammar->wrap('pending_instances.started_at'),
+            ))
+            ->whereColumn('previous_steps.workflow_instance_id', 'pending_instances.id')
+            ->whereNotNull('previous_steps.acted_at');
     }
 }
