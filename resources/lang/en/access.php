@@ -103,5 +103,7 @@ return [
         'tag' => 'Tag applications',
         'bulk-tag' => 'Bulk-tag applications',
         'manage-tags' => 'Manage the tag list',
+        'accept' => 'Accept candidates',
+        'bulk-reject' => 'Bulk-reject applications and email candidates',
     ],
 ];

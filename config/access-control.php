@@ -127,11 +127,13 @@ return [
          * than riding on 'view': seeing a list must never imply reading a CV,
          * and writing a note must never imply moving an application. Tagging
          * one record, tagging many at once, and editing the tag list itself
-         * are separate for the same reason.
+         * are separate for the same reason. Accepting is a hiring decision
+         * layered on top of change-status, and rejecting many at once (which
+         * emails every one of them) is a grant of its own.
          */
         'recruitment-applicants' => [
             'view', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status',
-            'tag', 'bulk-tag', 'manage-tags',
+            'tag', 'bulk-tag', 'manage-tags', 'accept', 'bulk-reject',
         ],
     ],
 
@@ -360,15 +362,15 @@ return [
             'beginArchive' => 'recruitment-applicants.archive-cv',
             'archiveCv' => 'recruitment-applicants.archive-cv',
         ],
-        // The table's only action is bulk tagging; the selection is re-scoped
-        // in RecruitmentTagService before anything is written.
-        'recruitment.applicants.application-table' => [
-            'executeAction' => 'recruitment-applicants.bulk-tag',
-            'executeItemAction' => 'recruitment-applicants.bulk-tag',
-        ],
         'recruitment.applicants.bulk-tags' => [
             'open' => 'recruitment-applicants.bulk-tag',
             'apply' => 'recruitment-applicants.bulk-tag',
+        ],
+        // The selection is re-scoped in RecruitmentApplicationStatusService,
+        // which also asks the bulkReject policy itself.
+        'recruitment.applicants.bulk-reject' => [
+            'open' => 'recruitment-applicants.bulk-reject',
+            'apply' => 'recruitment-applicants.bulk-reject',
         ],
         'recruitment.applicants.application-tags' => [
             'attach' => 'recruitment-applicants.tag',
@@ -420,8 +422,14 @@ return [
         'recruitment.applicants.notes' => ['cancelDelete', 'refreshNotes'],
         // Re-render through the same scoped query; they write nothing.
         // selectTable() reads ids through the same scoped, filtered query.
-        'recruitment.applicants.application-table' => ['refreshTags', 'selectTable'],
+        // executeAction/executeItemAction carry two actions (bulk tag, bulk
+        // reject) with different permissions, so one name here would be wrong
+        // for one of them; each authorizes its own action code by policy.
+        'recruitment.applicants.application-table' => [
+            'refreshTags', 'refreshDecisions', 'selectTable', 'executeAction', 'executeItemAction',
+        ],
         'recruitment.applicants.bulk-tags' => ['cancel'],
+        'recruitment.applicants.bulk-reject' => ['cancel'],
         'recruitment.applicants.application-tags' => ['refreshTags'],
         'recruitment.applicants.tag-manager' => ['cancelRename'],
 

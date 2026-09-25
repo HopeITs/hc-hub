@@ -156,6 +156,38 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Screening decisions
+    |--------------------------------------------------------------------------
+    |
+    | A rejection must name one of these reasons. The code is stored on the
+    | decision and shown to staff in the history; it never reaches the
+    | candidate, and neither does the free-text note. Labels live in
+    | recruitment-applicant.decisions.rejection_reasons.{code}. 'other' is the
+    | only code that also demands a written note.
+    |
+    | The rejection email is a notification of a decision already saved, so a
+    | queue that is down or a mail server that refuses it never undoes the
+    | decision. One email per application, ever.
+    |
+    */
+
+    'decisions' => [
+        'rejection_reasons' => [
+            'qualifications_mismatch',
+            'insufficient_experience',
+            'language_requirement',
+            'location_mismatch',
+            'incomplete_application',
+            'stronger_candidates',
+            'position_filled',
+            'other',
+        ],
+        'bulk_limit' => 500,
+        'notice_queue' => env('RECRUITMENT_NOTICE_QUEUE', 'default'),
+    ],
+
     'tags' => [
         'scope_key' => 'organization',
         'min_length' => 2,

@@ -24,8 +24,10 @@ use Livewire\Component;
  * request, and constrained to this applicant. A record outside that scope is
  * a 404, not a 403, so guessing ids does not reveal which ones exist.
  *
- * Status changes and CV archiving live here, each behind its own open /
- * confirm pair. The notes panel is a separate component with no status
+ * Decisions (shortlist, accept, reject, send back to review) and CV
+ * archiving live here, each behind its own open / confirm pair. A decision
+ * button only fixes the target; the service validates the transition, the
+ * reason and the permission again. The notes panel is a separate component with no status
  * field at all, so writing a note can never move an application.
  */
 class Show extends Component
@@ -40,9 +42,17 @@ class Show extends Component
     #[Locked]
     public ?string $statusFrom = null;
 
+    /** Fixed by the button that opened the panel. */
+    #[Locked]
     public string $statusTarget = '';
 
+    public string $statusReasonCode = '';
+
+    /** Internal: kept in the decision history, never sent to the candidate. */
     public string $statusReason = '';
+
+    /** Rejections only: queue the apology email after the decision is saved. */
+    public bool $statusNotify = true;
 
     #[Locked]
     public ?int $archiveFileId = null;
@@ -55,17 +65,20 @@ class Show extends Component
         $this->resolveApplicant();
     }
 
-    public function beginStatusChange(int $applicationId): void
+    public function beginStatusChange(int $applicationId, string $target, RecruitmentApplicationStatusService $statuses): void
     {
         $application = $this->resolveApplication($applicationId);
         Gate::authorize('changeStatus', $application);
+        abort_unless(in_array($target, $statuses->targetsFor(auth()->user(), $application), true), 403);
 
         $this->cancelArchive();
         $this->resetErrorBag();
         $this->statusApplicationId = $application->getKey();
         $this->statusFrom = (string) $application->status;
-        $this->statusTarget = '';
+        $this->statusTarget = $target;
+        $this->statusReasonCode = '';
         $this->statusReason = '';
+        $this->statusNotify = true;
     }
 
     public function changeStatus(RecruitmentApplicationStatusService $statuses): void
@@ -76,7 +89,15 @@ class Show extends Component
         Gate::authorize('changeStatus', $application);
 
         try {
-            $statuses->change(auth()->user(), $application, $this->statusFrom, $this->statusTarget, $this->statusReason);
+            $statuses->change(
+                auth()->user(),
+                $application,
+                $this->statusFrom,
+                $this->statusTarget,
+                $this->statusReason,
+                $this->statusReasonCode,
+                $this->statusNotify,
+            );
         } catch (ValidationException $exception) {
             $this->addErrors($exception);
 
@@ -89,8 +110,8 @@ class Show extends Component
 
     public function cancelStatusChange(): void
     {
-        $this->reset('statusApplicationId', 'statusFrom', 'statusTarget', 'statusReason');
-        $this->resetErrorBag(['statusTarget', 'statusReason']);
+        $this->reset('statusApplicationId', 'statusFrom', 'statusTarget', 'statusReasonCode', 'statusReason', 'statusNotify');
+        $this->resetErrorBag(['statusTarget', 'statusReasonCode', 'statusReason']);
     }
 
     public function beginArchive(int $fileId): void
@@ -148,6 +169,7 @@ class Show extends Component
                 'decisions' => fn ($decisions) => $decisions->latest('decided_at')->latest('id'),
                 'decisions.decidedBy.profile',
                 'indicatorSnapshot',
+                'rejectionNotice',
             ])
             ->latest('submitted_at')
             ->latest('id')
@@ -172,7 +194,8 @@ class Show extends Component
             'orphanFiles' => $orphanFiles,
             'statusTargets' => $this->statusTargets($applications, $statuses),
             'statusNeedsReason' => $this->statusFrom !== null && $this->statusTarget !== ''
-                && $statuses->requiresReason($this->statusFrom, $this->statusTarget),
+                && $statuses->requiresReason($this->statusFrom, $this->statusTarget, $this->statusReasonCode ?: null),
+            'rejectionReasons' => $statuses->rejectionReasons(),
             'archiveFile' => $archiveFile,
             'archiveNeedsReason' => $archiveFile !== null && $archive->requiresReason($archiveFile),
             // Read-only: evaluating indicators never touches the application.
@@ -184,9 +207,8 @@ class Show extends Component
     private function statusTargets(Collection $applications, RecruitmentApplicationStatusService $statuses): array
     {
         return $applications
-            ->filter(fn (RecruitmentApplication $application): bool => Gate::allows('changeStatus', $application))
             ->mapWithKeys(fn (RecruitmentApplication $application): array => [
-                $application->getKey() => $statuses->targets($application),
+                $application->getKey() => $statuses->targetsFor(auth()->user(), $application),
             ])
             ->all();
     }

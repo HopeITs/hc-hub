@@ -41,6 +41,8 @@ class ApplicationTable extends LivewireTable
 {
     public const BULK_TAG = 'bulk_tag';
 
+    public const BULK_REJECT = 'bulk_reject';
+
     public string $sortColumn = 'submitted_at';
 
     public string $sortDirection = 'desc';
@@ -56,20 +58,30 @@ class ApplicationTable extends LivewireTable
     }
 
     /**
-     * Bulk tagging hands the selected ids to the tagging panel without
-     * loading a model for each; the panel's service re-scopes every id.
+     * Each bulk action hands the selected ids to its own panel without
+     * loading a model for each; the panel's service re-scopes every id. The
+     * two actions need different permissions, so each is authorized here by
+     * its own policy ability, and an unknown code is refused.
      */
     public function executeAction(string $code): mixed
     {
-        if ($code !== self::BULK_TAG) {
-            return parent::executeAction($code);
-        }
+        [$ability, $event, $panel] = match ($code) {
+            self::BULK_TAG => ['bulkTag', 'recruitment-bulk-tag', BulkTags::class],
+            self::BULK_REJECT => ['bulkReject', 'recruitment-bulk-reject', BulkReject::class],
+            default => abort(403),
+        };
 
-        Gate::authorize('bulkTag', RecruitmentApplication::class);
+        Gate::authorize($ability, RecruitmentApplication::class);
 
-        $this->dispatch('recruitment-bulk-tag', applicationIds: array_values($this->selected))->to(BulkTags::class);
+        $this->dispatch($event, applicationIds: array_values($this->selected))->to($panel);
 
         return null;
+    }
+
+    /** No per-row actions exist; the call is refused rather than routed. */
+    public function executeItemAction(string $code, string $key): mixed
+    {
+        abort(403);
     }
 
     /**
@@ -101,6 +113,12 @@ class ApplicationTable extends LivewireTable
 
     #[On('recruitment-tags-changed')]
     public function refreshTags(): void
+    {
+        $this->clearSelection();
+    }
+
+    #[On('recruitment-decisions-changed')]
+    public function refreshDecisions(): void
     {
         $this->clearSelection();
     }
@@ -139,6 +157,9 @@ class ApplicationTable extends LivewireTable
         return [
             Action::make(__('recruitment-applicant.tags.bulk_action'), fn () => null, self::BULK_TAG)
                 ->canSee(Gate::allows('bulkTag', RecruitmentApplication::class))
+                ->keepSelection(),
+            Action::make(__('recruitment-applicant.decisions.bulk_action'), fn () => null, self::BULK_REJECT)
+                ->canSee(Gate::allows('bulkReject', RecruitmentApplication::class))
                 ->keepSelection(),
         ];
     }

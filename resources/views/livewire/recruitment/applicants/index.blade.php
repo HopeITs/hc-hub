@@ -6,6 +6,8 @@
 
     <livewire:recruitment.applicants.bulk-tags />
 
+    <livewire:recruitment.applicants.bulk-reject />
+
     <livewire:recruitment.applicants.application-table />
 
     <livewire:recruitment.applicants.tag-manager />

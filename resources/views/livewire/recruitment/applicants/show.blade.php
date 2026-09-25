@@ -1,5 +1,7 @@
 @php
     use App\Enums\HiringCampaignStatus;
+    use App\Enums\RecruitmentApplicationStatus as ApplicationStatus;
+    use Illuminate\Support\Facades\Lang;
     use App\Enums\RecruitmentCvAvailability;
     use App\Models\RecruitmentApplicant;
 
@@ -114,32 +116,59 @@
 
                 <livewire:recruitment.applicants.application-tags :application-id="$application->id" :key="'tags-'.$application->id" />
 
-                {{-- Status change: its own action, its own permission, confirmed. --}}
-                @if (! empty($statusTargets[$application->id] ?? []))
+                {{-- Decisions: one button per move this user may make. The button
+                     only picks the target; the service checks it all again. --}}
+                @php $targets = $statusTargets[$application->id] ?? []; @endphp
+                @if (! empty($targets))
                     @if ($statusApplicationId === $application->id)
-                        <div class="mt-4 rounded-control border border-primary/30 bg-primary/5 p-4">
-                            <h4 class="font-semibold">{{ __('recruitment-applicant.status_change.change_title') }}</h4>
+                        <div class="mt-4 rounded-control border p-4 {{ $statusTarget === ApplicationStatus::Rejected ? 'border-red-200 bg-red-50/50' : 'border-primary/30 bg-primary/5' }}">
+                            <h4 class="font-semibold">
+                                {{ __('recruitment-applicant.decisions.titles.'.$statusTarget) }}
+                                <span class="font-normal text-secondary-medium">
+                                    &middot; {{ __('recruitment-applicant.statuses.'.$statusFrom) }} &rarr; {{ __('recruitment-applicant.statuses.'.$statusTarget) }}
+                                </span>
+                            </h4>
+                            @error('statusTarget') <p class="mt-2 text-sm text-red-700">{{ $message }}</p> @enderror
+
                             <div class="mt-3 grid gap-4 sm:grid-cols-2">
-                                <div>
-                                    <x-forms.input-label for="statusTarget" required>{{ __('recruitment-applicant.status_change.new_status') }}</x-forms.input-label>
-                                    <select id="statusTarget" wire:model.live="statusTarget" class="mt-1 w-full rounded-control border-neutral-300">
-                                        <option value="">—</option>
-                                        @foreach ($statusTargets[$application->id] as $target)
-                                            <option value="{{ $target }}">{{ __('recruitment-applicant.statuses.'.$target) }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('statusTarget') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-                                </div>
+                                @if ($statusTarget === ApplicationStatus::Rejected)
+                                    <div>
+                                        <x-forms.input-label for="statusReasonCode" required>{{ __('recruitment-applicant.decisions.reason_code') }}</x-forms.input-label>
+                                        <select id="statusReasonCode" wire:model.live="statusReasonCode" class="mt-1 w-full rounded-control border-neutral-300">
+                                            <option value="">—</option>
+                                            @foreach ($rejectionReasons as $code)
+                                                <option value="{{ $code }}">{{ __('recruitment-applicant.decisions.rejection_reasons.'.$code) }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('statusReasonCode') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+                                    </div>
+                                @endif
                                 <div class="sm:col-span-2">
-                                    <x-forms.input-label for="statusReason" :required="$statusNeedsReason">{{ __('recruitment-applicant.status_change.reason') }}</x-forms.input-label>
+                                    <x-forms.input-label for="statusReason" :required="$statusNeedsReason">{{ __('recruitment-applicant.decisions.internal_note') }}</x-forms.input-label>
                                     <textarea id="statusReason" wire:model="statusReason" rows="3" class="mt-1 w-full rounded-control border-neutral-300"></textarea>
+                                    <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.decisions.internal_note_hint') }}</p>
                                     @error('statusReason') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
                                 </div>
+                                @if ($statusTarget === ApplicationStatus::Rejected)
+                                    <div class="sm:col-span-2">
+                                        @if ($application->rejectionNotice?->isSettled())
+                                            <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.decisions.already_notified') }}</p>
+                                        @else
+                                            <label class="flex items-start gap-2 text-sm">
+                                                <input type="checkbox" wire:model="statusNotify" class="mt-0.5 rounded border-neutral-300">
+                                                <span>
+                                                    {{ __('recruitment-applicant.decisions.notify') }}
+                                                    <span class="block text-xs text-secondary-medium">{{ __('recruitment-applicant.decisions.notify_hint') }}</span>
+                                                </span>
+                                            </label>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                             <div class="mt-4 flex flex-wrap gap-3">
                                 <x-primary-button type="button" wire:click="changeStatus" wire:loading.attr="disabled" wire:target="changeStatus"
                                     wire:confirm="{{ __('recruitment-applicant.status_change.confirm') }}">
-                                    {{ __('recruitment-applicant.status_change.confirm_button') }}
+                                    {{ __('recruitment-applicant.decisions.confirm.'.$statusTarget) }}
                                 </x-primary-button>
                                 <button type="button" wire:click="cancelStatusChange" class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
                                     {{ __('recruitment-applicant.cancel') }}
@@ -147,16 +176,41 @@
                             </div>
                         </div>
                     @else
-                        <button type="button" wire:click="beginStatusChange({{ $application->id }})"
-                            class="mt-4 cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
-                            {{ __('recruitment-applicant.status_change.change') }}
-                        </button>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            @foreach ($targets as $target)
+                                @php
+                                    $style = match ($target) {
+                                        ApplicationStatus::Rejected => 'border-red-300 text-red-700 hover:bg-red-50',
+                                        ApplicationStatus::Selected => 'border-green-300 text-green-800 hover:bg-green-50',
+                                        ApplicationStatus::Shortlisted => 'border-primary/40 text-primary hover:bg-primary/5',
+                                        default => 'border-neutral-300 hover:bg-neutral-50',
+                                    };
+                                    $label = $application->status === ApplicationStatus::Rejected
+                                        ? __('recruitment-applicant.decisions.actions.reopen')
+                                        : __('recruitment-applicant.decisions.actions.'.$target);
+                                @endphp
+                                <button type="button" wire:key="decide-{{ $application->id }}-{{ $target }}" wire:click="beginStatusChange({{ $application->id }}, '{{ $target }}')"
+                                    class="cursor-pointer rounded-control border px-4 py-2 text-sm font-semibold {{ $style }}">
+                                    {{ $label }}
+                                </button>
+                            @endforeach
+                        </div>
                     @endif
                 @endif
 
+                @if ($application->rejectionNotice)
+                    @php $notice = $application->rejectionNotice; @endphp
+                    <p class="mt-3 text-sm text-secondary-medium">
+                        {{ __('recruitment-applicant.decisions.notice_status.'.$notice->status, [
+                            'date' => ($notice->sent_at ?? $notice->failed_at ?? $notice->queued_at)?->format('Y-m-d H:i'),
+                        ]) }}
+                    </p>
+                @endif
+
+                {{-- Decision history: who, when, from/to and why. Staff only. --}}
                 @if ($application->decisions->isNotEmpty())
                     <details class="mt-4 text-sm">
-                        <summary class="cursor-pointer font-medium">{{ __('recruitment-applicant.status_change.history') }}</summary>
+                        <summary class="cursor-pointer font-medium">{{ __('recruitment-applicant.status_change.history') }} ({{ $application->decisions->count() }})</summary>
                         <ol class="mt-2 space-y-2">
                             @foreach ($application->decisions as $decision)
                                 <li class="border-s-2 border-neutral-200 ps-3">
@@ -165,6 +219,10 @@
                                         &middot; {{ $decision->decidedBy?->profile?->name ?? $decision->decidedBy?->name ?? '—' }}
                                         &middot; {{ $decision->decided_at?->format('Y-m-d H:i') }}
                                     </span>
+                                    @if ($decision->to_status === ApplicationStatus::Rejected && $decision->reason_code)
+                                        @php $reasonKey = 'recruitment-applicant.decisions.rejection_reasons.'.$decision->reason_code; @endphp
+                                        <p class="mt-1">{{ __('recruitment-applicant.decisions.reason_code') }}: {{ Lang::has($reasonKey) ? __($reasonKey) : $decision->reason_code }}</p>
+                                    @endif
                                     @if ($decision->reason_text)
                                         <p class="mt-1 whitespace-pre-line text-secondary-medium">{{ $decision->reason_text }}</p>
                                     @endif

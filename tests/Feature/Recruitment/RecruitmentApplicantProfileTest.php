@@ -18,6 +18,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\RecruitmentApplicantNoteService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use LogicException;
@@ -280,8 +281,10 @@ class RecruitmentApplicantProfileTest extends TestCase
         $this->actingAs($hr);
 
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
-            ->call('beginStatusChange', $application->id)
-            ->set('statusTarget', Status::Rejected)
+            ->call('beginStatusChange', $application->id, Status::Rejected)
+            ->call('changeStatus')
+            ->assertHasErrors('statusReasonCode')
+            ->set('statusReasonCode', 'other')
             ->call('changeStatus')
             ->assertHasErrors('statusReason')
             ->set('statusReason', 'Does not meet the language requirement')
@@ -302,11 +305,10 @@ class RecruitmentApplicantProfileTest extends TestCase
         $this->actingAs($this->hr($this->homs));
 
         $screen = Livewire::test(Show::class, ['applicantId' => $applicant->id])
-            ->call('beginStatusChange', $application->id)
-            ->set('statusTarget', Status::Shortlisted);
+            ->call('beginStatusChange', $application->id, Status::Shortlisted);
 
         // Someone else moved it while this screen was open.
-        $application->forceFill(['status' => Status::Hired])->save();
+        DB::table('recruitment_applications')->where('id', $application->id)->update(['status' => Status::Hired]);
 
         $screen->call('changeStatus')->assertHasErrors('statusTarget');
         $this->assertSame(Status::Hired, $application->fresh()->status);
@@ -319,7 +321,7 @@ class RecruitmentApplicantProfileTest extends TestCase
         $this->actingAs($this->without($this->hr($this->homs), ['recruitment-applicants.change-status']));
 
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
-            ->call('beginStatusChange', $application->id)
+            ->call('beginStatusChange', $application->id, Status::Shortlisted)
             ->assertForbidden();
     }
 
