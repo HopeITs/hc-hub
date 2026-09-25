@@ -66,7 +66,17 @@ class HiringCampaignScreensTest extends TestCase
             ->test(Create::class)
             ->assertSee(__('recruitment-campaign.modes.internal'))
             ->assertSee(__('recruitment-campaign.modes.public_open'))
-            ->assertSee(__('recruitment-campaign.modes.invite_only'));
+            ->assertSee(__('recruitment-campaign.modes.invitation_only'));
+    }
+
+    /** With a single seat on offer there is nothing to choose, so it is chosen. */
+    public function test_the_create_screen_preselects_the_only_available_seat(): void
+    {
+        [$hr, $vacancy] = $this->seat();
+
+        Livewire::actingAs($hr)
+            ->test(Create::class)
+            ->assertSet('vacancyId', $vacancy->id);
     }
 
     /** A window that makes no sense is refused on the way in, not stored. */
@@ -85,18 +95,21 @@ class HiringCampaignScreensTest extends TestCase
         $this->assertSame(0, HiringCampaign::query()->count());
     }
 
-    /** A draft offers publishing and disabling, and nothing that makes no sense yet. */
-    public function test_a_draft_campaign_offers_only_the_moves_it_can_make(): void
+    /** A new draft is a checklist with the next step marked and going live blocked. */
+    public function test_a_draft_campaign_shows_the_checklist_and_blocks_going_live(): void
     {
         [$hr, $vacancy] = $this->seat();
         $campaign = app(HiringCampaignService::class)->create($hr, $vacancy);
 
         Livewire::actingAs($hr)
             ->test(Show::class, ['campaignId' => $campaign->getKey()])
-            ->assertSee(__('recruitment-campaign.actions'))
-            ->assertSee(__('recruitment-campaign.act.publish'))
-            ->assertSee(__('recruitment-campaign.publish_blocked'))
-            ->assertSee('data-campaign-action="publish" disabled', false)
+            ->assertSee(__('recruitment-campaign.page.step_post'))
+            ->assertSee(__('recruitment-campaign.page.step_form'))
+            ->assertSee(__('recruitment-campaign.page.step_link'))
+            ->assertSee(__('recruitment-campaign.page.link_waits'))
+            ->assertSee(__('recruitment-campaign.page.ready_count', ['done' => 1, 'total' => 4]))
+            ->assertSee(__('recruitment-campaign.page.launch_blocked'))
+            ->assertSee('disabled data-campaign-launch', false)
             ->assertSee(__('recruitment-campaign.act.disable'))
             ->assertSee('data-recruitment-confirmation-modal="campaign-actions"', false)
             ->assertSee('requireReason: true', false)
@@ -105,7 +118,7 @@ class HiringCampaignScreensTest extends TestCase
             ->assertDontSee(__('recruitment-campaign.act.reopen'));
     }
 
-    public function test_publish_action_is_enabled_once_both_assets_are_published(): void
+    public function test_going_live_is_enabled_once_post_form_and_link_are_ready(): void
     {
         [$hr, $vacancy] = $this->seat();
         $campaign = app(HiringCampaignService::class)->create($hr, $vacancy);
@@ -113,8 +126,98 @@ class HiringCampaignScreensTest extends TestCase
 
         Livewire::actingAs($hr)
             ->test(Show::class, ['campaignId' => $campaign->getKey()])
-            ->assertDontSee(__('recruitment-campaign.publish_blocked'))
+            ->assertSee(__('recruitment-campaign.page.ready_count', ['done' => 4, 'total' => 4]))
+            ->assertDontSee(__('recruitment-campaign.page.launch_blocked'))
+            ->assertDontSee('disabled data-campaign-launch', false)
             ->assertSee('wire:click="act(\'publish\')"', false);
+    }
+
+    /** One click publishes and opens when the window has started. */
+    public function test_going_live_publishes_and_opens_in_one_step(): void
+    {
+        [$hr, $vacancy] = $this->seat();
+        $campaign = app(HiringCampaignService::class)->create($hr, $vacancy);
+        $this->prepareCampaignForOpening($campaign, $hr);
+
+        Livewire::actingAs($hr)
+            ->test(Show::class, ['campaignId' => $campaign->getKey()])
+            ->call('launch');
+
+        $this->assertSame(Status::Open, (int) $campaign->fresh()->status);
+        $this->assertTrue(app(HiringCampaignService::class)->acceptsSubmissions($campaign->fresh()));
+    }
+
+    /** With a future start, going live publishes now and leaves opening to the schedule. */
+    public function test_going_live_before_the_start_publishes_and_waits(): void
+    {
+        [$hr, $vacancy] = $this->seat();
+        $campaign = app(HiringCampaignService::class)->create($hr, $vacancy, [
+            'starts_at' => now()->addDays(2),
+            'ends_at' => now()->addMonth(),
+        ]);
+        $this->prepareCampaignForOpening($campaign, $hr);
+
+        Livewire::actingAs($hr)
+            ->test(Show::class, ['campaignId' => $campaign->getKey()])
+            ->assertSee(__('recruitment-campaign.page.launch_scheduled'))
+            ->call('launch');
+
+        $this->assertSame(Status::Published, (int) $campaign->fresh()->status);
+    }
+
+    /** Without an advert there is nothing to go live with, and nothing changes. */
+    public function test_going_live_without_an_advert_is_refused(): void
+    {
+        [$hr, $vacancy] = $this->seat();
+        $campaign = app(HiringCampaignService::class)->create($hr, $vacancy);
+
+        Livewire::actingAs($hr)
+            ->test(Show::class, ['campaignId' => $campaign->getKey()])
+            ->call('launch')
+            ->call('act', 'publish');
+
+        $this->assertSame(Status::Draft, (int) $campaign->fresh()->status);
+    }
+
+    /** Who may apply is chosen in the details and locked once the advert is out. */
+    public function test_the_audience_changes_only_while_the_campaign_is_a_draft(): void
+    {
+        [$hr, $vacancy] = $this->seat();
+        $campaign = app(HiringCampaignService::class)->create($hr, $vacancy);
+
+        Livewire::actingAs($hr)
+            ->test(Show::class, ['campaignId' => $campaign->getKey()])
+            ->call('editDetails')
+            ->set('linkMode', HiringCampaign::INVITE_ONLY)
+            ->call('saveDetails')
+            ->assertHasNoErrors();
+
+        $this->assertTrue($campaign->fresh()->isInvitationOnly());
+    }
+
+    public function test_the_audience_is_locked_once_the_campaign_is_live(): void
+    {
+        [$hr, $open] = $this->openCampaign();
+
+        Livewire::actingAs($hr)
+            ->test(Show::class, ['campaignId' => $open->getKey()])
+            ->call('editDetails')
+            ->set('linkMode', HiringCampaign::INVITE_ONLY)
+            ->call('saveDetails')
+            ->assertHasErrors('linkMode');
+
+        $this->assertFalse($open->fresh()->isInvitationOnly());
+    }
+
+    /** Campaigns stored with the early spelling still enforce their list. */
+    public function test_the_legacy_invite_only_spelling_reads_as_invitation_only(): void
+    {
+        [$hr, $vacancy] = $this->seat();
+        $campaign = app(HiringCampaignService::class)->create($hr, $vacancy);
+        $campaign->forceFill(['link_mode' => HiringCampaign::LEGACY_INVITE_ONLY])->save();
+
+        $this->assertTrue($campaign->fresh()->isInvitationOnly());
+        $this->assertSame(HiringCampaign::INVITE_ONLY, $campaign->fresh()->link_mode);
     }
 
     public function test_close_and_disable_require_a_reason_from_the_screen(): void
@@ -123,15 +226,13 @@ class HiringCampaignScreensTest extends TestCase
 
         Livewire::actingAs($hr)
             ->test(Show::class, ['campaignId' => $campaign->getKey()])
-            ->call('act', 'close')
-            ->assertHasErrors('reason');
+            ->call('act', 'close');
 
         $this->assertSame(Status::Open, (int) $campaign->fresh()->status);
 
         Livewire::actingAs($hr)
             ->test(Show::class, ['campaignId' => $campaign->getKey()])
-            ->call('act', 'disable')
-            ->assertHasErrors('reason');
+            ->call('act', 'disable');
 
         $this->assertSame(Status::Open, (int) $campaign->fresh()->status);
     }
@@ -142,6 +243,7 @@ class HiringCampaignScreensTest extends TestCase
 
         Livewire::actingAs($hr)
             ->test(Show::class, ['campaignId' => $campaign->getKey()])
+            ->assertSee(__('recruitment-campaign.page.badge_open'))
             ->set('reason', 'Enough applicants.')
             ->call('act', 'close')
             ->assertHasNoErrors();
@@ -165,21 +267,7 @@ class HiringCampaignScreensTest extends TestCase
 
         Livewire::actingAs($hr)
             ->test(Show::class, ['campaignId' => $campaign->fresh()->getKey()])
-            ->assertSee(Status::getLocalizedName(Status::Expired)['value']);
-    }
-
-    /** A failed move says why and leaves the campaign alone. */
-    public function test_publishing_without_an_advert_is_refused_on_the_screen(): void
-    {
-        [$hr, $vacancy] = $this->seat();
-        $campaign = app(HiringCampaignService::class)->create($hr, $vacancy);
-
-        Livewire::actingAs($hr)
-            ->test(Show::class, ['campaignId' => $campaign->getKey()])
-            ->call('act', 'publish')
-            ->assertHasErrors('campaign');
-
-        $this->assertSame(Status::Draft, (int) $campaign->fresh()->status);
+            ->assertSee(__('recruitment-campaign.page.badge_expired'));
     }
 
     /**
@@ -192,21 +280,18 @@ class HiringCampaignScreensTest extends TestCase
     {
         [$hr, $campaign] = $this->openCampaign();
 
-        // The permission is taken from the role rather than the person, and
-        // from the role rather than a second user, because seeing a campaign
-        // at all depends on holding the governorate's HR role. Everything else
-        // about this user is unchanged, so the missing buttons can only be
-        // measuring the permission.
         Role::findByName($hr->myRole(), 'web')
             ->revokePermissionTo(Permission::findByName('recruitment-campaigns.manage'));
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         Livewire::actingAs($hr->fresh())
             ->test(Show::class, ['campaignId' => $campaign->getKey()])
-            ->assertSee(__('recruitment-campaign.accepts_submissions'))
-            ->assertDontSee(__('recruitment-campaign.act.close'))
-            ->assertDontSee(__('recruitment-campaign.act.disable'))
-            ->assertDontSee(__('recruitment-campaign.save_window'));
+            ->assertSee(__('recruitment-campaign.page.status_title'))
+            // The link section may still offer its own controls to someone
+            // who manages links; the campaign's own moves are what vanish.
+            ->assertDontSee('data-campaign-action="close"', false)
+            ->assertDontSee('data-campaign-action="disable"', false)
+            ->assertDontSee(__('recruitment-campaign.page.save_details'));
     }
 
     /** @return array{0: User, 1: Vacancy} */

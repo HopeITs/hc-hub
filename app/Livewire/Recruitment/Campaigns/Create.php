@@ -36,7 +36,13 @@ class Create extends Component
 
     public function mount(?int $vacancyId = null): void
     {
-        $this->vacancyId = $vacancyId;
+        $this->vacancyId = $vacancyId ?? request()->integer('vacancyId') ?: null;
+
+        // With only one seat to choose from there is nothing to choose.
+        if ($this->vacancyId === null) {
+            $only = $this->availableVacancies()->take(2)->get();
+            $this->vacancyId = $only->count() === 1 ? $only->first()->getKey() : null;
+        }
     }
 
     public function save(HiringCampaignService $campaigns)
@@ -64,7 +70,8 @@ class Create extends Component
             return null;
         }
 
-        session()->flash('recruitment_saved', __('recruitment-campaign.created'));
+        // Shown by the campaign page after the redirect, as a toast.
+        session()->flash('recruitment_toast', __('recruitment-campaign.created'));
 
         return $this->redirectRoute('recruitment.campaigns.show',
             ['campaignId' => $campaign->getKey()], navigate: true);
@@ -77,13 +84,18 @@ class Create extends Component
         return view('livewire.recruitment.campaigns.create', [
             // Only seats that are actually being recruited for, and only the
             // ones this user is allowed to see.
-            'vacancies' => Vacancy::query()->available()
-                ->visibleTo(auth()->user())
-                ->with('position')
-                ->orderByDesc('id')
-                ->get(),
+            'vacancies' => $this->availableVacancies()->get(),
             'linkModes' => HiringCampaign::LINK_MODES,
         ]);
+    }
+
+    private function availableVacancies()
+    {
+        return Vacancy::query()->available()
+            ->visibleTo(auth()->user())
+            ->with(['position.city', 'position.program', 'createdFromRequest'])
+            ->withCount('campaigns')
+            ->orderByDesc('id');
     }
 
     private function vacancy(): ?Vacancy

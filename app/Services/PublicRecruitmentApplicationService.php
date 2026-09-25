@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\RecruitmentApplicationStatus;
-use App\Enums\RecruitmentCampaignLinkMode;
 use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Exceptions\UnsafeRecruitmentFileException;
 use App\Models\HiringCampaign;
@@ -12,6 +11,8 @@ use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
+use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -24,9 +25,14 @@ class PublicRecruitmentApplicationService
         private readonly PublicRecruitmentLinkService $links,
         private readonly RecruitmentApplicationFormService $forms,
         private readonly RecruitmentApplicantFileService $files,
+        private readonly InternalRecruitmentApplicantService $internal,
     ) {}
 
     /**
+     * `$actor` is whoever is signed in. It only matters for an internal
+     * campaign, which accepts staff alone and files the application under
+     * their work account whatever email was posted.
+     *
      * @param  array<string, mixed>  $input
      * @return array{application: RecruitmentApplication, idempotent: bool}
      */
@@ -35,6 +41,7 @@ class PublicRecruitmentApplicationService
         array $input,
         ?string $ipAddress = null,
         ?string $userAgent = null,
+        ?User $actor = null,
     ): array {
         $this->assertAllowedEnvelope($input);
 
@@ -61,6 +68,16 @@ class PublicRecruitmentApplicationService
         $answers = $input['answers'] ?? null;
         if (! is_array($answers)) {
             throw PublicRecruitmentSubmissionException::because('invalid_request');
+        }
+
+        $employee = null;
+        if ($resolvedLink->campaign->isInternal()) {
+            $employee = $this->internal->employeeFor($actor);
+            if (! $employee) {
+                throw new PublicRecruitmentSubmissionException;
+            }
+
+            $answers['email'] = $this->internal->email($actor);
         }
 
         try {
@@ -98,6 +115,7 @@ class PublicRecruitmentApplicationService
                 $input,
                 $ipAddress,
                 $userAgent,
+                $employee,
             ): array {
                 $campaign = HiringCampaign::query()
                     ->lockForUpdate()
@@ -149,7 +167,7 @@ class PublicRecruitmentApplicationService
                     'email_normalized' => $email,
                     'phone_normalized' => $phone,
                     'identity_key_hash' => $identityHash,
-                    'source' => 'public_link',
+                    'source' => $employee ? 'internal' : 'public_link',
                     'last_seen_at' => now(),
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -163,6 +181,11 @@ class PublicRecruitmentApplicationService
                     'email_normalized' => $email,
                     'phone_normalized' => $phone,
                     'last_seen_at' => now(),
+                    // Signing in proved who they are; keep the link to their record.
+                    ...($employee ? [
+                        'employee_id' => $employee->getKey(),
+                        'identity_verified_at' => $applicant->identity_verified_at ?? now(),
+                    ] : []),
                 ])->save();
 
                 $application = RecruitmentApplication::query()->create([
@@ -262,7 +285,7 @@ class PublicRecruitmentApplicationService
 
     private function resolveInvite(HiringCampaign $campaign, string $email): ?RecruitmentCampaignInvite
     {
-        if ($campaign->link_mode !== RecruitmentCampaignLinkMode::InvitationOnly) {
+        if (! $campaign->isInvitationOnly()) {
             return null;
         }
 

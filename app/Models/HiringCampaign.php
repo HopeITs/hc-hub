@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Services\RecruitmentScopeResolver;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,7 +28,15 @@ class HiringCampaign extends Model
 
     public const PUBLIC_OPEN = 'public_open';
 
-    public const INVITE_ONLY = 'invite_only';
+    /**
+     * Spelled as the public-link boundary has always spelled it. Early drafts
+     * stored `invite_only`; the accessor below reads that as this value, so a
+     * campaign created before the two vocabularies were unified still enforces
+     * its invitation list.
+     */
+    public const INVITE_ONLY = 'invitation_only';
+
+    public const LEGACY_INVITE_ONLY = 'invite_only';
 
     /** @var array<int, string> */
     public const LINK_MODES = [self::INTERNAL, self::PUBLIC_OPEN, self::INVITE_ONLY];
@@ -77,6 +86,26 @@ class HiringCampaign extends Model
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         return app(RecruitmentScopeResolver::class)->scopeCampaigns($query, $user);
+    }
+
+    /** Reads the legacy spelling as the canonical one; see INVITE_ONLY. */
+    protected function linkMode(): Attribute
+    {
+        return Attribute::get(fn (?string $value): ?string => $value === self::LEGACY_INVITE_ONLY
+            ? self::INVITE_ONLY
+            : $value);
+    }
+
+    /** Only a named list may apply; everybody else is turned away. */
+    public function isInvitationOnly(): bool
+    {
+        return $this->link_mode === self::INVITE_ONLY;
+    }
+
+    /** Staff only: applicants sign in to HC-HR and apply as themselves. */
+    public function isInternal(): bool
+    {
+        return $this->link_mode === self::INTERNAL;
     }
 
     protected function casts(): array

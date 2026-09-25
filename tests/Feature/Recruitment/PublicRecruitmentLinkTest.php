@@ -23,6 +23,7 @@ use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentRequestVersion;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Services\HiringCampaignService;
 use App\Services\PublicRecruitmentLinkService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -72,46 +73,44 @@ class PublicRecruitmentLinkTest extends TestCase
         ]);
     }
 
-    public function test_generating_the_first_link_publishes_a_valid_draft_campaign(): void
+    public function test_generating_the_first_link_keeps_a_valid_draft_campaign_private(): void
     {
         [$campaign, $hr, $request] = $this->makePublishedCampaign();
         $campaign->forceFill(['status' => HiringCampaignStatus::Draft])->save();
-        $hr->roles()->wherePivot('is_active', true)->firstOrFail()
-            ->givePermissionTo(Permission::findOrCreate('recruitment-campaigns.manage', 'web'));
-
         $component = Livewire::actingAs($hr)
             ->test(Manager::class, ['campaign' => $campaign])
+            ->set('customExpiry', true)
             ->set('expiresAt', now()->addDays(5)->format('Y-m-d\TH:i'))
             ->call('generate')
-            ->assertSet('notice', __('recruitment.public_link.generated_and_published'))
+            ->assertSet('notice', __('recruitment.public_link.generated'))
             ->assertSet('generatedUrl', fn ($url) => str_contains($url, '/careers/'));
 
-        $this->assertSame(HiringCampaignStatus::Published, $campaign->fresh()->status);
-        $this->assertDatabaseHas('recruitment_request_events', [
-            'recruitment_request_id' => $request->id,
-            'event_type' => RecruitmentEventType::CampaignStateChanged,
-            'actor_user_id' => $hr->id,
-        ]);
+        $this->assertSame(HiringCampaignStatus::Draft, $campaign->fresh()->status);
 
         $link = $campaign->publicLinks()->where('status', PublicRecruitmentLink::STATUS_ACTIVE)->firstOrFail();
         $token = basename((string) parse_url($component->get('generatedUrl'), PHP_URL_PATH));
+        $this->get(route('careers.show', ['token' => $token]))->assertNotFound();
+        $hr->roles()->wherePivot('is_active', true)->firstOrFail()
+            ->givePermissionTo(Permission::findOrCreate('recruitment-campaigns.manage', 'web'));
+        app(HiringCampaignService::class)->publish($hr, $campaign->fresh());
         $this->get(route('careers.show', ['token' => $token]))->assertOk();
         $this->assertSame(PublicRecruitmentLink::STATUS_ACTIVE, $link->status);
     }
 
-    public function test_link_permission_alone_cannot_publish_a_draft_campaign(): void
+    public function test_link_permission_can_prepare_a_link_without_publishing_a_draft_campaign(): void
     {
         [$campaign, $hr] = $this->makePublishedCampaign();
         $campaign->forceFill(['status' => HiringCampaignStatus::Draft])->save();
 
         Livewire::actingAs($hr)
             ->test(Manager::class, ['campaign' => $campaign])
+            ->set('customExpiry', true)
             ->set('expiresAt', now()->addDays(5)->format('Y-m-d\TH:i'))
             ->call('generate')
-            ->assertForbidden();
+            ->assertSet('notice', __('recruitment.public_link.generated'));
 
         $this->assertSame(HiringCampaignStatus::Draft, $campaign->fresh()->status);
-        $this->assertSame(0, $campaign->publicLinks()->count());
+        $this->assertSame(1, $campaign->publicLinks()->count());
     }
 
     public function test_public_page_uses_the_frozen_versions_and_exposes_no_internal_ids(): void
@@ -440,11 +439,14 @@ class PublicRecruitmentLinkTest extends TestCase
     public function test_scoped_hr_can_manage_the_link_and_invites_from_the_publishing_hub_component(): void
     {
         [$campaign, $hr] = $this->makePublishedCampaign();
+        // Who may apply is the campaign's setting; the link follows it.
+        $campaign->forceFill(['link_mode' => RecruitmentCampaignLinkMode::InvitationOnly])->save();
 
         Livewire::actingAs($hr)
             ->test(Manager::class, ['campaign' => $campaign])
+            ->set('customExpiry', true)
+            ->set('customExpiry', true)
             ->set('expiresAt', now()->addDays(5)->format('Y-m-d\TH:i'))
-            ->set('linkMode', RecruitmentCampaignLinkMode::InvitationOnly)
             ->call('generate')
             ->assertSet('notice', __('recruitment.public_link.generated'))
             ->assertSet('generatedUrl', fn ($url) => str_contains($url, '/careers/'))
@@ -460,7 +462,237 @@ class PublicRecruitmentLinkTest extends TestCase
         ]);
     }
 
+    /** The link takes the audience and the end date from the campaign itself. */
+    public function test_a_generated_link_follows_the_campaign_audience_and_window(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $end = now()->addDays(9)->startOfMinute();
+        $campaign->forceFill([
+            'link_mode' => HiringCampaign::INVITE_ONLY,
+            'ends_at' => $end,
+        ])->save();
+
+        Livewire::actingAs($hr)
+            ->test(Manager::class, ['campaign' => $campaign])
+            ->call('generate')
+            ->assertSet('generatedUrl', fn ($url) => str_contains($url, '/careers/'))
+            ->assertSee(__('recruitment.public_link.invites'));
+
+        $link = $campaign->publicLinks()->where('status', PublicRecruitmentLink::STATUS_ACTIVE)->sole();
+        $this->assertTrue($link->expires_at->equalTo($end));
+        $this->assertTrue($campaign->fresh()->isInvitationOnly());
+    }
+
+    /** Coming back to the page, the person who made the link can still copy it. */
+    public function test_the_creator_can_copy_the_link_again_in_the_same_session(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+
+        $url = Livewire::actingAs($hr)
+            ->test(Manager::class, ['campaign' => $campaign])
+            ->call('generate')
+            ->get('generatedUrl');
+
+        Livewire::actingAs($hr)
+            ->test(Manager::class, ['campaign' => $campaign->fresh()])
+            ->assertSee($url)
+            ->assertDontSee(__('recruitment.public_link.hash_only_notice'));
+
+        session()->flush();
+
+        Livewire::actingAs($hr)
+            ->test(Manager::class, ['campaign' => $campaign->fresh()])
+            ->assertDontSee($url)
+            ->assertSee(__('recruitment.public_link.hash_only_notice'));
+    }
+
+    /** A corrected advert reaches the shared link without changing its address. */
+    public function test_refreshing_a_stale_link_keeps_its_address(): void
+    {
+        [$campaign, $hr, , $jobPost] = $this->makePublishedCampaign();
+        $service = app(PublicRecruitmentLinkService::class);
+        $result = $service->generate($campaign, $hr, now()->addDays(5));
+        $link = $result['link'];
+
+        $newer = $jobPost->versions()->create([
+            'version_no' => 2,
+            'title_en' => "We're Hiring — IT Specialist",
+            'title_ar' => 'مطلوب متطوع — اختصاصي تقنية معلومات',
+            'body_en' => 'Corrected content',
+            'body_ar' => 'محتوى مصحح',
+            'public_payload_json' => [
+                'template' => 'hope_center_hiring_v1',
+                'city' => 'HOMS',
+                'program' => 'DISC',
+                'job_title' => 'IT Specialist',
+                'outputs' => [],
+            ],
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+        $jobPost->forceFill(['current_version_id' => $newer->id])->save();
+
+        Livewire::actingAs($hr)
+            ->test(Manager::class, ['campaign' => $campaign->fresh()])
+            ->assertSee(__('recruitment.public_link.stale'))
+            ->call('refreshVersions')
+            ->assertSet('notice', __('recruitment.public_link.refreshed'))
+            ->assertDontSee(__('recruitment.public_link.stale'));
+
+        $fresh = $link->fresh();
+        $this->assertSame($link->token_hash, $fresh->token_hash);
+        $this->assertSame($newer->id, (int) $fresh->job_post_version_id);
+        $this->get(route('careers.show', ['token' => $result['token']]))->assertOk();
+    }
+
     /** @return array{HiringCampaign, User, RecruitmentRequest, JobPost, ApplicationForm} */
+    public function test_an_internal_campaign_asks_visitors_to_sign_in_before_showing_the_form(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::Internal,
+        );
+
+        $this->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee(__('careers.internal.badge'))
+            ->assertSee(__('careers.internal.sign_in_title'))
+            ->assertSee('data-internal-sign-in', false)
+            ->assertDontSee('name="submission_key"', false);
+
+        $back = route('careers.show', ['token' => $result['token'], 'lang' => 'ar']);
+        $response = $this->get(route('careers.sign-in', ['token' => $result['token'], 'lang' => 'ar']));
+        $response->assertRedirect();
+        $this->assertStringContainsString('login', (string) $response->headers->get('Location'));
+        $this->assertSame($back, session('url.intended'));
+
+        // Signed in already: straight back to the vacancy.
+        $this->actingAs($hr)
+            ->get(route('careers.sign-in', ['token' => $result['token'], 'lang' => 'ar']))
+            ->assertRedirect($back);
+    }
+
+    public function test_signed_in_staff_find_their_details_already_filled_in(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::Internal,
+        );
+        $staff = $this->staffMember();
+
+        $this->actingAs($staff)
+            ->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee('data-internal-state="ready"', false)
+            ->assertSee(__('careers.internal.applying_as'))
+            ->assertSee('Rami Haddad')
+            ->assertSee('data-recruitment-wizard', false)
+            ->assertSee('value="Rami Haddad"', false)
+            ->assertSee('value="rami.haddad@hopecenter.test"', false)
+            ->assertSee('value="+963 944 000 111"', false)
+            ->assertSee('readonly', false)
+            ->assertSee(__('careers.internal.work_email_note'));
+    }
+
+    public function test_a_staff_application_is_filed_under_the_work_account_and_linked_to_the_employee(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::Internal,
+        );
+        $staff = $this->staffMember();
+
+        // Whatever address is posted, the application belongs to the account.
+        $this->actingAs($staff)
+            ->post(route('careers.submit', $result['token']), $this->validSubmission('someone.else@example.com', 'Rami H.'))
+            ->assertStatus(202);
+
+        $application = RecruitmentApplication::query()->sole();
+        $applicant = $application->applicant;
+        $this->assertSame('rami.haddad@hopecenter.test', $application->email_normalized);
+        $this->assertSame($staff->employee_id, (int) $applicant->employee_id);
+        $this->assertSame('internal', $applicant->source);
+        $this->assertNotNull($applicant->identity_verified_at);
+        // Edits made on the form stay on the application, not the record.
+        $this->assertSame('Rami H.', $applicant->full_name);
+        $this->assertSame('Rami', $staff->profile->fresh()->first_name_en);
+
+        $this->actingAs($staff)
+            ->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee('data-internal-state="applied"', false)
+            ->assertDontSee('name="submission_key"', false);
+    }
+
+    public function test_an_internal_campaign_refuses_applications_from_anyone_not_signed_in(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::Internal,
+        );
+
+        $this->post(route('careers.submit', $result['token']), $this->validSubmission('outsider@example.com'))
+            ->assertUnprocessable()
+            ->assertSee(__('careers.generic_submission_error'));
+
+        $this->assertDatabaseCount('recruitment_applications', 0);
+    }
+
+    public function test_signing_in_changes_nothing_for_a_public_campaign(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+        $staff = $this->staffMember();
+
+        $this->actingAs($staff)
+            ->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertDontSee('data-internal-state', false)
+            ->assertDontSee('rami.haddad@hopecenter.test');
+
+        $this->actingAs($staff)
+            ->post(route('careers.submit', $result['token']), $this->validSubmission('personal@example.com'))
+            ->assertStatus(202);
+
+        $applicant = RecruitmentApplication::query()->sole()->applicant;
+        $this->assertSame('personal@example.com', $applicant->email_normalized);
+        $this->assertNull($applicant->employee_id);
+        $this->assertSame('public_link', $applicant->source);
+    }
+
+    private function staffMember(): User
+    {
+        $city = $this->makeCity('ALP', '001');
+        $employee = $this->makeEmployee($city, 'rami-'.uniqid(), [
+            'first_name_en' => 'Rami',
+            'last_name_en' => 'Haddad',
+            'personal_phone' => '+963 944 000 111',
+            'dob' => '1994-05-12',
+        ]);
+
+        $user = $this->makeUser($city, 'employee', [], $employee);
+        $user->forceFill(['email' => 'rami.haddad@hopecenter.test'])->save();
+
+        return $user->fresh();
+    }
+
     private function makePublishedCampaign(): array
     {
         $city = $this->makeCity('HMS', '002');

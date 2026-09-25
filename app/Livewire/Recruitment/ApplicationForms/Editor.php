@@ -7,6 +7,7 @@ use App\Models\ApplicationForm;
 use App\Models\ApplicationFormVersion;
 use App\Models\HiringCampaign;
 use App\Services\RecruitmentApplicationFormService;
+use App\Traits\WithAlerts;
 use DomainException;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -14,6 +15,8 @@ use Livewire\Component;
 
 class Editor extends Component
 {
+    use WithAlerts;
+
     public HiringCampaign $campaign;
 
     public ApplicationForm $applicationForm;
@@ -64,6 +67,9 @@ class Editor extends Component
     public string $noticeType = 'success';
 
     public bool $hasConflict = false;
+
+    /** Set by a successful publish, so the page can point at what comes next. */
+    public bool $justPublished = false;
 
     public function mount(HiringCampaign $campaign, RecruitmentApplicationFormService $service): void
     {
@@ -139,6 +145,7 @@ class Editor extends Component
         $this->notice = __('recruitment.application_form.template_applied');
         $this->noticeType = 'info';
         $this->hasConflict = false;
+        $this->infoToast($this->notice);
     }
 
     public function applyPublishedTemplate(RecruitmentApplicationFormService $service): void
@@ -158,10 +165,12 @@ class Editor extends Component
             $this->notice = __('recruitment.application_form.reused_success');
             $this->noticeType = 'info';
             $this->hasConflict = false;
+            $this->infoToast($this->notice);
         } catch (DomainException $exception) {
             $this->notice = __('recruitment.application_form.reuse_unavailable');
             $this->noticeType = 'error';
             $this->hasConflict = false;
+            $this->errorToast($this->notice);
         }
     }
 
@@ -268,6 +277,14 @@ class Editor extends Component
         }
     }
 
+    public function updating(string $name): void
+    {
+        // Editing the questions makes the "published" prompt out of date.
+        if (str_starts_with($name, 'fields') || $name === 'privacyNoticeVersion') {
+            $this->justPublished = false;
+        }
+    }
+
     public function publish(RecruitmentApplicationFormService $service): void
     {
         Gate::authorize('publish', $this->applicationForm);
@@ -278,6 +295,7 @@ class Editor extends Component
             );
             $this->syncVersion($version, $service);
             $this->success(__('recruitment.application_form.published', ['version' => $version->version_no]));
+            $this->justPublished = true;
         } catch (StaleRecruitmentDraftException) {
             $this->conflict();
         }
@@ -292,6 +310,7 @@ class Editor extends Component
         $this->hasConflict = false;
         $this->notice = __('recruitment.application_form.reloaded');
         $this->noticeType = 'info';
+        $this->infoToast($this->notice);
     }
 
     public function render(RecruitmentApplicationFormService $service)
@@ -300,6 +319,11 @@ class Editor extends Component
         $sections = RecruitmentApplicationFormService::SECTION_CATALOG;
 
         return view('livewire.recruitment.application-forms.editor', [
+            'nextStep' => $this->justPublished ? [
+                'message' => __('recruitment.publishing.next_after_form'),
+                'label' => __('recruitment.publishing.back'),
+                'url' => route('recruitment.campaigns.show', ['campaignId' => $this->campaign->id]).'#step-link',
+            ] : null,
             'availableFields' => collect(RecruitmentApplicationFormService::FIELD_CATALOG)->except($used),
             'sections' => $sections,
             'types' => RecruitmentApplicationFormService::TYPE_CATALOG,
@@ -414,6 +438,7 @@ class Editor extends Component
         $this->notice = $message;
         $this->noticeType = 'success';
         $this->hasConflict = false;
+        $this->successToast($message);
     }
 
     private function conflict(): void
@@ -421,5 +446,6 @@ class Editor extends Component
         $this->notice = __('recruitment.application_form.conflict');
         $this->noticeType = 'error';
         $this->hasConflict = true;
+        $this->errorToast($this->notice);
     }
 }

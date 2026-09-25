@@ -60,6 +60,7 @@ class HiringCampaignService
 
             [$startsAt, $endsAt] = $this->window($attributes);
             $linkMode = $attributes['link_mode'] ?? HiringCampaign::PUBLIC_OPEN;
+            $linkMode = $linkMode === HiringCampaign::LEGACY_INVITE_ONLY ? HiringCampaign::INVITE_ONLY : $linkMode;
 
             if (! in_array($linkMode, HiringCampaign::LINK_MODES, true)) {
                 throw $this->refuse('link_mode', 'recruitment-campaign.unknown_link_mode');
@@ -96,13 +97,51 @@ class HiringCampaignService
             }
 
             [$startsAt, $endsAt] = $this->window($attributes, $locked);
+            $linkMode = $this->audience($attributes, $locked);
 
-            $locked->forceFill(['starts_at' => $startsAt, 'ends_at' => $endsAt])->save();
+            $locked->forceFill([
+                'starts_at' => $startsAt,
+                'ends_at' => $endsAt,
+                'link_mode' => $linkMode,
+            ])->save();
 
             $this->record($locked, $actor, null, (int) $locked->status, 'window_changed', [
                 'starts_at' => $startsAt?->toDateTimeString(),
                 'ends_at' => $endsAt?->toDateTimeString(),
+                'link_mode' => $linkMode,
             ]);
+
+            return $locked;
+        });
+    }
+
+    /**
+     * Take a prepared campaign live in one step.
+     *
+     * HR thinks of "go live" as one decision, while the model keeps two
+     * states on purpose (D3): Published is the advert, Open is the window.
+     * This walks both transitions in one locked transaction and records each
+     * one, so the timeline still says exactly what happened. When the window
+     * has not started yet the campaign is published now and the scheduler
+     * opens it on `starts_at`; that is only safe because everything the
+     * scheduler will need — post, form and an active link — is checked here.
+     */
+    public function launch(User $actor, HiringCampaign $campaign): HiringCampaign
+    {
+        return $this->act($actor, $campaign, 'publish', function (HiringCampaign $locked) use ($actor) {
+            if ($this->states->hasEnded($locked)) {
+                throw $this->refuse('campaign', 'recruitment-campaign.window_has_ended');
+            }
+
+            $this->assertReadyToOpen($locked);
+
+            if ((int) $locked->status === Status::Draft) {
+                $this->transition($locked, $actor, 'publish', 'published');
+            }
+
+            if ((int) $locked->status === Status::Published && $this->states->hasStarted($locked)) {
+                $this->transition($locked, $actor, 'open', 'opened');
+            }
 
             return $locked;
         });
@@ -436,6 +475,37 @@ class HiringCampaignService
         }
 
         return [$startsAt, $endsAt];
+    }
+
+    /**
+     * Who may apply, which is only the campaign's to change while it is a
+     * private draft. Once the advert is out, switching an open campaign to a
+     * named list would turn away people already holding the link, and the
+     * reverse would open a list to strangers.
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    private function audience(array $attributes, HiringCampaign $campaign): string
+    {
+        $current = $campaign->link_mode ?: HiringCampaign::PUBLIC_OPEN;
+
+        if (! array_key_exists('link_mode', $attributes) || blank($attributes['link_mode'])) {
+            return $current;
+        }
+
+        $requested = $attributes['link_mode'] === HiringCampaign::LEGACY_INVITE_ONLY
+            ? HiringCampaign::INVITE_ONLY
+            : (string) $attributes['link_mode'];
+
+        if (! in_array($requested, HiringCampaign::LINK_MODES, true)) {
+            throw $this->refuse('link_mode', 'recruitment-campaign.unknown_link_mode');
+        }
+
+        if ($requested !== $current && (int) $campaign->status !== Status::Draft) {
+            throw $this->refuse('link_mode', 'recruitment-campaign.audience_locked');
+        }
+
+        return $requested;
     }
 
     private function toDate(mixed $value): ?Carbon

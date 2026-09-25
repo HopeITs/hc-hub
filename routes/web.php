@@ -34,6 +34,9 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 Route::get('/careers/{token}', [PublicCareerController::class, 'show'])
     ->middleware('throttle:careers-view')
     ->name('careers.show');
+Route::get('/careers/{token}/sign-in', [PublicCareerController::class, 'signIn'])
+    ->middleware('throttle:careers-view')
+    ->name('careers.sign-in');
 Route::post('/careers/{token}/applications', [PublicCareerController::class, 'store'])
     ->middleware('throttle:careers-submit')
     ->name('careers.submit');

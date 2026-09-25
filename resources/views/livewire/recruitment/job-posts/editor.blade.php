@@ -14,37 +14,21 @@
     <livewire:layout.breadcrumbs
         :title="__('recruitment.job_post.title')"
         :crumbs="[
-            ['label' => __('recruitment.job_post.campaign').' #'.$campaign->id],
+            ['label' => __('recruitment-campaign.campaigns'), 'url' => route('recruitment.campaigns.index')],
+            ['label' => __('recruitment-campaign.page.campaign_number', ['id' => $campaign->id]), 'url' => route('recruitment.campaigns.show', ['campaignId' => $campaign->id])],
             ['label' => __('recruitment.job_post.title')],
         ]"
     />
 
-    <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div>
-            <p class="text-body text-secondary-medium">{{ __('recruitment.job_post.subtitle') }}</p>
-            <p class="mt-1 text-small text-neutral-500">
-                {{ __('recruitment.job_post.approved_request') }}:
-                <span class="font-semibold text-neutral-800">{{ $campaign->vacancy->createdFromRequest->request_number }}</span>
-            </p>
-            <a href="{{ route('recruitment.campaigns.publishing', $campaign) }}" wire:navigate class="mt-2 inline-flex cursor-pointer text-small font-semibold text-primary hover:underline">
-                {{ __('recruitment.publishing.back') }}
-            </a>
-        </div>
-
-        <div class="flex flex-wrap gap-2 text-small">
-            <span class="rounded-full bg-neutral-100 px-3 py-1 font-semibold text-neutral-700">
-                {{ __('recruitment.job_post.version') }} #{{ $versionNumber }}
-            </span>
-            <span class="rounded-full px-3 py-1 font-semibold {{ $versionStatus === 'published' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
-                {{ $versionStatus === 'published' ? __('recruitment.job_post.status_published') : __('recruitment.job_post.status_draft') }}
-            </span>
-            @if ($publishedVersionNumber)
-                <span class="rounded-full bg-primary/10 px-3 py-1 font-semibold text-primary">
-                    {{ __('recruitment.job_post.published_version') }} #{{ $publishedVersionNumber }}
-                </span>
-            @endif
-        </div>
-    </div>
+    <x-recruitment.editor-context
+        :campaign="$campaign"
+        :subtitle="__('recruitment.job_post.subtitle')"
+        :version-number="$versionNumber"
+        :version-status="$versionStatus"
+        :published-version-number="$publishedVersionNumber"
+        :just-published="$justPublished"
+        :next="$nextStep"
+    />
 
     <div class="grid overflow-hidden rounded-card border border-neutral-200 bg-white shadow-e1 xl:grid-cols-[360px_minmax(0,1fr)]">
         <section class="border-b border-neutral-200 p-5 xl:border-b-0 xl:border-e" aria-label="{{ __('recruitment.job_post.title') }}">
@@ -79,18 +63,6 @@
                         required
                     />
                     <x-error-span>{{ $errors->first('jobTitle') }}</x-error-span>
-                </div>
-
-                <div class="border-t border-neutral-200 pt-4">
-                    <x-forms.input-label for="job-post-title-en" required>{{ __('recruitment.job_post.title_en') }}</x-forms.input-label>
-                    <x-forms.input id="job-post-title-en" model="titleEn" update="live.debounce.250ms" dir="ltr" required />
-                    <x-error-span>{{ $errors->first('titleEn') }}</x-error-span>
-                </div>
-
-                <div>
-                    <x-forms.input-label for="job-post-title-ar" required>{{ __('recruitment.job_post.title_ar') }}</x-forms.input-label>
-                    <x-forms.input id="job-post-title-ar" model="titleAr" update="live.debounce.250ms" dir="rtl" required />
-                    <x-error-span>{{ $errors->first('titleAr') }}</x-error-span>
                 </div>
 
             </div>
@@ -150,7 +122,7 @@
                             confirmLabel: @js(__('recruitment.job_post.unpublish')),
                             tone: 'danger',
                         })"
-                        class="flex w-full cursor-pointer items-center justify-center rounded-control border border-amber-500 bg-white px-4 py-2 text-body font-semibold text-amber-700 transition hover:bg-amber-50"
+                    class="flex w-full cursor-pointer items-center justify-center rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary transition hover:bg-neutral-50"
                     >
                         {{ __('recruitment.job_post.unpublish') }}
                     </button>
@@ -179,25 +151,16 @@
 
             <p class="mt-3 text-small text-neutral-500">{{ __('recruitment.job_post.download_help') }}</p>
 
-            @if ($notice)
-                <p
-                    class="mt-4 rounded-control px-3 py-2 text-small {{ $noticeType === 'error' ? 'bg-red-50 text-red-800' : ($noticeType === 'info' ? 'bg-blue-50 text-blue-800' : 'bg-green-50 text-green-800') }}"
-                    role="status"
-                    aria-live="polite"
-                >
-                    {{ $notice }}
-                </p>
-                @if ($hasConflict)
-                    <button type="button" wire:click="reloadLatest" class="mt-2 cursor-pointer text-small font-semibold text-primary underline">
-                        {{ __('recruitment.job_post.reload_latest') }}
-                    </button>
-                @endif
+            @if ($hasConflict)
+                <button type="button" wire:click="reloadLatest" class="mt-4 cursor-pointer text-small font-semibold text-primary underline">
+                    {{ __('recruitment.job_post.reload_latest') }}
+                </button>
             @endif
 
             <p x-show="downloadMessage" x-text="downloadMessage" class="mt-3 text-small text-secondary-medium" role="status" aria-live="polite"></p>
         </section>
 
-        <section class="flex min-h-[640px] flex-col bg-[#ededee] p-4 sm:p-6" aria-label="{{ __('recruitment.job_post.preview') }}">
+        <section class="flex min-h-[640px] flex-col bg-neutral-100 p-4 sm:p-6" aria-label="{{ __('recruitment.job_post.preview') }}">
             <div class="mb-3 flex items-center justify-between gap-3">
                 <div>
                     <h2 class="text-subtitle font-bold text-neutral-900">{{ __('recruitment.job_post.preview') }}</h2>

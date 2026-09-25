@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\HiringCampaignStatus;
-use App\Enums\RecruitmentCampaignLinkMode;
 use App\Enums\RecruitmentEventType;
 use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Exceptions\PublicRecruitmentUnavailableException;
@@ -24,7 +23,6 @@ class PublicRecruitmentLinkService
     public function __construct(
         private readonly RecruitmentJobPostService $jobPosts,
         private readonly RecruitmentApplicationFormService $applicationForms,
-        private readonly HiringCampaignStateMachine $campaignStates,
         private readonly HiringCampaignService $campaigns,
         private readonly ActivityLogger $activityLogger,
     ) {}
@@ -33,18 +31,28 @@ class PublicRecruitmentLinkService
     public function generate(
         HiringCampaign $campaign,
         User $actor,
-        CarbonInterface|string $expiresAt,
-        string $linkMode,
+        CarbonInterface|string|null $expiresAt = null,
+        ?string $linkMode = null,
     ): array {
-        $expiresAt = $expiresAt instanceof CarbonInterface
-            ? CarbonImmutable::instance($expiresAt)
-            : CarbonImmutable::parse($expiresAt);
+        // The audience is chosen once, on the campaign. A caller may still name
+        // it explicitly, but by default the link simply follows the campaign.
+        $linkMode ??= $campaign->link_mode ?: HiringCampaign::PUBLIC_OPEN;
+        $linkMode = $linkMode === HiringCampaign::LEGACY_INVITE_ONLY ? HiringCampaign::INVITE_ONLY : $linkMode;
+
+        // Without an explicit expiry the link lives exactly as long as the
+        // campaign window, which is what HR means almost every time.
+        $expiresAt = match (true) {
+            $expiresAt instanceof CarbonInterface => CarbonImmutable::instance($expiresAt),
+            filled($expiresAt) => CarbonImmutable::parse($expiresAt),
+            $campaign->ends_at !== null && $campaign->ends_at->isFuture() => CarbonImmutable::instance($campaign->ends_at),
+            default => CarbonImmutable::now()->addDays((int) config('recruitment.public_link_default_days', 30)),
+        };
 
         if ($expiresAt->lessThanOrEqualTo(now())) {
             throw new DomainException(__('recruitment.public_link.errors.future_expiry'));
         }
 
-        if (! in_array($linkMode, [RecruitmentCampaignLinkMode::PublicOpen, RecruitmentCampaignLinkMode::InvitationOnly], true)) {
+        if (! in_array($linkMode, HiringCampaign::LINK_MODES, true)) {
             throw new DomainException(__('recruitment.public_link.errors.invalid_mode'));
         }
 
@@ -99,31 +107,7 @@ class PublicRecruitmentLinkService
                 'expires_at' => $effectiveExpiry,
                 'created_by_user_id' => $actor->getKey(),
             ]);
-            $campaignPublished = (int) $lockedCampaign->status === HiringCampaignStatus::Draft;
             $lockedCampaign->forceFill(['link_mode' => $linkMode])->save();
-
-            if ($campaignPublished) {
-                // The link may publish a fully prepared draft, but the status
-                // transition still goes through the campaign state machine.
-                $this->campaignStates->apply($lockedCampaign, 'publish');
-            }
-
-            if ($campaignPublished) {
-                $this->recordEvent(
-                    $lockedCampaign,
-                    $actor,
-                    RecruitmentEventType::CampaignStateChanged,
-                    'Hiring campaign published when its public link was activated.',
-                    [
-                        'from_status' => HiringCampaignStatus::Draft,
-                        'to_status' => HiringCampaignStatus::Published,
-                    ],
-                );
-                $this->activityLogger->log('recruitment_campaign_published', $lockedCampaign, $actor, [
-                    'from_status' => HiringCampaignStatus::Draft,
-                    'to_status' => HiringCampaignStatus::Published,
-                ], 'recruitment');
-            }
 
             $this->recordEvent($lockedCampaign, $actor, RecruitmentEventType::PublicLinkChanged, 'Public recruitment link generated.', [
                 'public_link_id' => $link->getKey(),
@@ -142,9 +126,76 @@ class PublicRecruitmentLinkService
                 'link' => $link->fresh(),
                 'token' => $token,
                 'url' => route('careers.show', ['token' => $token]),
-                'campaign_published' => $campaignPublished,
+                // A link is preparation, not publication. The campaign page
+                // records publication as its own deliberate action.
+                'campaign_published' => false,
             ];
         });
+    }
+
+    /**
+     * Point the active link at the versions published since it was made.
+     *
+     * The URL is what HR has already shared, so replacing it to pick up a
+     * corrected advert would break every copy in circulation. The versions
+     * are what the link freezes; moving them forward keeps the address and
+     * still gives applicants exactly one published snapshot. Applications
+     * already received stay tied to the form version they were made on.
+     */
+    public function refreshVersions(PublicRecruitmentLink $link, User $actor): PublicRecruitmentLink
+    {
+        return DB::transaction(function () use ($link, $actor): PublicRecruitmentLink {
+            $lockedLink = PublicRecruitmentLink::query()->lockForUpdate()->findOrFail($link->getKey());
+            $campaign = HiringCampaign::query()
+                ->with(['jobPost.currentVersion', 'applicationForm.currentVersion', 'vacancy.createdFromRequest.latestVersion'])
+                ->findOrFail($lockedLink->campaign_id);
+
+            if ($lockedLink->status !== PublicRecruitmentLink::STATUS_ACTIVE) {
+                throw new DomainException(__('recruitment.public_link.errors.link_not_active'));
+            }
+
+            $jobVersion = $campaign->jobPost?->currentVersion;
+            $formVersion = $campaign->applicationForm?->currentVersion;
+
+            if (! $jobVersion || $jobVersion->status !== 'published') {
+                throw new DomainException(__('recruitment.public_link.errors.publish_job_post'));
+            }
+
+            if (! $formVersion || $formVersion->status !== 'published') {
+                throw new DomainException(__('recruitment.public_link.errors.publish_form'));
+            }
+
+            $from = [
+                'job_post_version_id' => $lockedLink->job_post_version_id,
+                'form_version_id' => $lockedLink->form_version_id,
+            ];
+
+            $lockedLink->forceFill([
+                'job_post_version_id' => $jobVersion->getKey(),
+                'form_version_id' => $formVersion->getKey(),
+            ])->save();
+
+            $this->recordEvent($campaign, $actor, RecruitmentEventType::PublicLinkChanged, 'Public recruitment link moved to the latest published versions.', [
+                'public_link_id' => $lockedLink->getKey(),
+                'job_post_version' => $jobVersion->version_no,
+                'form_version' => $formVersion->version_no,
+            ]);
+            $this->activityLogger->log('public_recruitment_link_refreshed', $lockedLink, $actor, $from + [
+                'campaign_id' => $campaign->getKey(),
+            ], 'recruitment');
+
+            return $lockedLink->fresh();
+        });
+    }
+
+    /** Does the active link still show the newest published advert and form? */
+    public function isCurrent(PublicRecruitmentLink $link, HiringCampaign $campaign): bool
+    {
+        $jobVersion = $campaign->jobPost?->currentVersion;
+        $formVersion = $campaign->applicationForm?->currentVersion;
+
+        return (! $jobVersion || $jobVersion->status !== 'published' || (int) $link->job_post_version_id === (int) $jobVersion->getKey())
+            && (! $formVersion || $formVersion->status !== 'published' || (int) $link->form_version_id === (int) $formVersion->getKey());
     }
 
     public function disable(PublicRecruitmentLink $link, User $actor): PublicRecruitmentLink
@@ -186,7 +237,7 @@ class PublicRecruitmentLinkService
                 ->lockForUpdate()
                 ->findOrFail($campaign->getKey());
 
-            if ($lockedCampaign->link_mode !== RecruitmentCampaignLinkMode::InvitationOnly) {
+            if (! $lockedCampaign->isInvitationOnly()) {
                 throw new DomainException(__('recruitment.public_link.errors.invitation_mode_required'));
             }
 
@@ -270,7 +321,7 @@ class PublicRecruitmentLinkService
             throw new PublicRecruitmentSubmissionException;
         }
 
-        if ($campaign->link_mode === RecruitmentCampaignLinkMode::InvitationOnly) {
+        if ($campaign->isInvitationOnly()) {
             $emailField = collect($fields)->firstWhere('type', 'email');
             $email = $this->normalizeEmail((string) ($answers[$emailField['key'] ?? 'email'] ?? ''));
             $inviteExists = filter_var($email, FILTER_VALIDATE_EMAIL)
@@ -292,6 +343,12 @@ class PublicRecruitmentLinkService
      * intake service. The intake service repeats this check after locking the
      * campaign so a close, expiry, or link rotation cannot race a submission.
      */
+    /** The campaign behind a public page, for server-side decisions only. */
+    public function campaignForPage(string $token): HiringCampaign
+    {
+        return $this->resolve($token)->campaign;
+    }
+
     public function submissionLink(string $token): PublicRecruitmentLink
     {
         $link = $this->resolve($token);

@@ -2,33 +2,51 @@
 
 namespace App\Livewire\Recruitment\PublicLinks;
 
-use App\Enums\RecruitmentCampaignLinkMode;
 use App\Models\HiringCampaign;
 use App\Models\PublicRecruitmentLink;
 use App\Models\RecruitmentCampaignInvite;
 use App\Services\PublicRecruitmentLinkService;
+use App\Traits\WithAlerts;
 use DomainException;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
+/**
+ * The shareable link, and the invitation list when the campaign has one.
+ *
+ * Who may apply is the campaign's setting, chosen once in its details; the
+ * link follows it rather than asking again. The expiry follows the campaign
+ * window unless HR deliberately sets another.
+ *
+ * Only a hash of the token is stored, so the address cannot be rebuilt from
+ * the database. It is kept, encrypted, in the generating user's own session so
+ * they can copy it again while they work, instead of having to regenerate —
+ * which would break every copy already shared.
+ */
 class Manager extends Component
 {
+    use WithAlerts;
+
     public HiringCampaign $campaign;
 
-    public string $linkMode = RecruitmentCampaignLinkMode::PublicOpen;
+    public bool $customExpiry = false;
 
     public string $expiresAt = '';
-
-    public string $generatedUrl = '';
 
     public string $inviteName = '';
 
     public string $inviteEmail = '';
 
+    /** Kept for callers and tests that read the last outcome. */
     public ?string $notice = null;
 
     public string $noticeType = 'success';
+
+    /** The URL just generated; also recoverable from the session. */
+    public string $generatedUrl = '';
 
     public function mount(HiringCampaign $campaign): void
     {
@@ -40,45 +58,63 @@ class Manager extends Component
         );
 
         $this->campaign = $campaign;
-        $this->linkMode = in_array($campaign->link_mode, [
-            RecruitmentCampaignLinkMode::PublicOpen,
-            RecruitmentCampaignLinkMode::InvitationOnly,
-        ], true) ? $campaign->link_mode : RecruitmentCampaignLinkMode::PublicOpen;
-        $expiry = $campaign->ends_at?->isFuture() ? $campaign->ends_at : now()->addDays(30);
-        $this->expiresAt = $expiry->format('Y-m-d\TH:i');
+        $this->resetExpiry();
+    }
+
+    #[On('campaign-details-changed')]
+    public function refreshCampaign(): void
+    {
+        $this->campaign->refresh();
+
+        if (! $this->customExpiry) {
+            $this->resetExpiry();
+        }
     }
 
     public function generate(PublicRecruitmentLinkService $service): void
     {
         Gate::authorize('create', [PublicRecruitmentLink::class, $this->campaign]);
-        if ((int) $this->campaign->status === \App\Enums\HiringCampaignStatus::Draft) {
-            Gate::authorize('publish', $this->campaign);
-        }
 
-        $validated = $this->validate([
-            'linkMode' => ['required', Rule::in([
-                RecruitmentCampaignLinkMode::PublicOpen,
-                RecruitmentCampaignLinkMode::InvitationOnly,
-            ])],
-            'expiresAt' => ['required', 'date', 'after:now'],
-        ]);
+        if ($this->customExpiry) {
+            $this->validate(['expiresAt' => ['required', 'date', 'after:now']]);
+        }
 
         try {
             $result = $service->generate(
-                $this->campaign,
+                $this->campaign->fresh(),
                 auth()->user(),
-                $validated['expiresAt'],
-                $validated['linkMode'],
+                $this->customExpiry ? $this->expiresAt : null,
             );
-            $this->campaign->refresh();
-            $this->generatedUrl = $result['url'];
-            $this->success(__($result['campaign_published']
-                ? 'recruitment.public_link.generated_and_published'
-                : 'recruitment.public_link.generated'));
-            $this->dispatch('campaign-status-changed');
         } catch (DomainException $exception) {
             $this->error($exception->getMessage());
+
+            return;
         }
+
+        $this->campaign->refresh();
+        $this->generatedUrl = $result['url'];
+        $this->rememberUrl($result['link'], $result['url']);
+        $this->success(__('recruitment.public_link.generated'));
+        $this->dispatch('campaign-status-changed');
+    }
+
+    /** Point the existing address at the newest published post and form. */
+    public function refreshVersions(PublicRecruitmentLinkService $service): void
+    {
+        $link = $this->activeLink();
+        abort_if($link === null, 404);
+        Gate::authorize('update', $link);
+
+        try {
+            $service->refreshVersions($link, auth()->user());
+        } catch (DomainException $exception) {
+            $this->error($exception->getMessage());
+
+            return;
+        }
+
+        $this->success(__('recruitment.public_link.refreshed'));
+        $this->dispatch('campaign-status-changed');
     }
 
     public function disable(int $linkId, PublicRecruitmentLinkService $service): void
@@ -86,8 +122,10 @@ class Manager extends Component
         $link = $this->campaign->publicLinks()->findOrFail($linkId);
         Gate::authorize('update', $link);
         $service->disable($link, auth()->user());
+        session()->forget($this->sessionKey($link));
         $this->generatedUrl = '';
         $this->success(__('recruitment.public_link.disabled'));
+        $this->dispatch('campaign-status-changed');
     }
 
     public function addInvite(PublicRecruitmentLinkService $service): void
@@ -120,23 +158,73 @@ class Manager extends Component
         $this->success(__('recruitment.public_link.invite_cancelled'));
     }
 
-    public function updatedLinkMode(): void
+    public function useCampaignExpiry(): void
     {
-        $this->notice = null;
+        $this->customExpiry = false;
+        $this->resetValidation('expiresAt');
+        $this->resetExpiry();
     }
 
-    public function render()
+    public function render(PublicRecruitmentLinkService $service)
     {
+        $this->campaign->loadMissing(['jobPost.currentVersion', 'applicationForm.currentVersion']);
+        $activeLink = $this->activeLink();
+
         return view('livewire.recruitment.public-links.manager', [
-            'activeLink' => $this->campaign->publicLinks()
-                ->where('status', PublicRecruitmentLink::STATUS_ACTIVE)
-                ->latest('id')
-                ->first(),
-            'invites' => $this->campaign->invites()
-                ->where('status', '!=', RecruitmentCampaignInvite::STATUS_CANCELLED)
-                ->latest('id')
-                ->get(),
+            'activeLink' => $activeLink,
+            'shareUrl' => $this->generatedUrl ?: ($activeLink ? $this->recalledUrl($activeLink) : ''),
+            'linkCurrent' => $activeLink === null || $service->isCurrent($activeLink, $this->campaign),
+            'mayManage' => $activeLink
+                ? Gate::allows('update', $activeLink)
+                : Gate::allows('create', [PublicRecruitmentLink::class, $this->campaign]),
+            'isInvitationOnly' => $this->campaign->isInvitationOnly(),
+            'invites' => $this->campaign->isInvitationOnly()
+                ? $this->campaign->invites()
+                    ->where('status', '!=', RecruitmentCampaignInvite::STATUS_CANCELLED)
+                    ->latest('id')
+                    ->get()
+                : collect(),
         ]);
+    }
+
+    private function activeLink(): ?PublicRecruitmentLink
+    {
+        return $this->campaign->publicLinks()
+            ->where('status', PublicRecruitmentLink::STATUS_ACTIVE)
+            ->where('expires_at', '>', now())
+            ->latest('id')
+            ->first();
+    }
+
+    private function resetExpiry(): void
+    {
+        $expiry = $this->campaign->ends_at?->isFuture() ? $this->campaign->ends_at : now()->addDays(30);
+        $this->expiresAt = $expiry->format('Y-m-d\TH:i');
+    }
+
+    private function sessionKey(PublicRecruitmentLink $link): string
+    {
+        return 'recruitment.public_link_url.'.$link->getKey();
+    }
+
+    private function rememberUrl(PublicRecruitmentLink $link, string $url): void
+    {
+        session()->put($this->sessionKey($link), Crypt::encryptString($url));
+    }
+
+    private function recalledUrl(PublicRecruitmentLink $link): string
+    {
+        $stored = session()->get($this->sessionKey($link));
+
+        if (! is_string($stored)) {
+            return '';
+        }
+
+        try {
+            return Crypt::decryptString($stored);
+        } catch (DecryptException) {
+            return '';
+        }
     }
 
     private function success(string $message): void
@@ -144,11 +232,13 @@ class Manager extends Component
         $this->notice = $message;
         $this->noticeType = 'success';
         $this->resetValidation();
+        $this->successToast($message);
     }
 
     private function error(string $message): void
     {
         $this->notice = $message;
         $this->noticeType = 'error';
+        $this->errorToast($message);
     }
 }

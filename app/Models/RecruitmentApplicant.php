@@ -19,6 +19,17 @@ class RecruitmentApplicant extends Model
         return $this->belongsTo(City::class);
     }
 
+    /** Set only when the applicant signed in as staff to apply. */
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function isInternal(): bool
+    {
+        return $this->employee_id !== null;
+    }
+
     public function applications(): HasMany
     {
         return $this->hasMany(RecruitmentApplication::class, 'applicant_id');
