@@ -242,6 +242,9 @@
 
                 {{-- Task 7 (Team 2): this application's interviews. Keyed on the status so a decision re-renders it. --}}
                 <livewire:recruitment.applicants.application-interviews :application-id="$application->id" :key="'interviews-'.$application->id.'-'.$application->status" />
+
+                {{-- Task 9 (Team 2): this application's job offer (view-offers only). --}}
+                <livewire:recruitment.applicants.application-offer :application-id="$application->id" :key="'offer-'.$application->id.'-'.$application->status" />
             </article>
         @empty
             <p class="mt-4 text-sm text-secondary-medium">{{ __('recruitment-applicant.no_applications') }}</p>

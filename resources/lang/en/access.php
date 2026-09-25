@@ -108,5 +108,7 @@ return [
         'schedule-interviews' => 'Schedule and manage interviews',
         'view-evaluations' => 'View all interview evaluations',
         'correct-evaluations' => 'Correct or withdraw interview evaluations',
+        'view-offers' => 'View job offers',
+        'manage-offers' => 'Create and manage job offers',
     ],
 ];

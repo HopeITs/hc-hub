@@ -258,6 +258,36 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Job offers (Phase 2 Task 9)
+    |--------------------------------------------------------------------------
+    |
+    | validity_days: the default time a sent offer stays open before it
+    | expires (HR can pick another date when sending). The expiry sweep runs
+    | every fifteen minutes; recording an answer also re-checks the clock.
+    |
+    | cancellation_reasons: internal, never shown to the candidate.
+    | 'application_closed' is the system's own, used when the application is
+    | moved back or rejected while a draft offer is still open.
+    |
+    */
+
+    'offers' => [
+        'validity_days' => 7,
+        'max_validity_days' => 60,
+        'max_probation_days' => 180,
+        'max_weekly_hours' => 60,
+        'max_salary' => 100000000,
+        'cancellation_reasons' => [
+            'candidate_withdrew',
+            'position_on_hold',
+            'another_candidate_chosen',
+            'created_in_error',
+            'other',
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | CV analysis
     |--------------------------------------------------------------------------
     |

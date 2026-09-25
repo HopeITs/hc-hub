@@ -2,9 +2,11 @@
 
 namespace App\Observers;
 
+use App\Enums\RecruitmentApplicationStatus as ApplicationStatus;
 use App\Models\RecruitmentApplication;
 use App\Services\ActivityLogger;
 use App\Services\RecruitmentInterviewSchedulingService;
+use App\Services\RecruitmentJobOfferService;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -26,6 +28,12 @@ use Throwable;
  */
 class RecruitmentApplicationObserver
 {
+    /** Statuses in which an application can hold a live job offer. */
+    private const OFFER_STAGE = [
+        ApplicationStatus::Selected, ApplicationStatus::OfferSent,
+        ApplicationStatus::OfferAccepted, ApplicationStatus::OfferRejected, ApplicationStatus::Hired,
+    ];
+
     public function __construct(private readonly ActivityLogger $activityLogger) {}
 
     public function created(RecruitmentApplication $application): void
@@ -56,9 +64,19 @@ class RecruitmentApplicationObserver
      */
     public function updated(RecruitmentApplication $application): void
     {
-        if ($application->wasChanged('status')
-            && in_array($application->status, RecruitmentInterviewSchedulingService::CLOSING, true)) {
+        if (! $application->wasChanged('status')) {
+            return;
+        }
+
+        if (in_array($application->status, RecruitmentInterviewSchedulingService::CLOSING, true)) {
             app(RecruitmentInterviewSchedulingService::class)->closeForApplication($application);
+        }
+
+        // Phase 2 Task 9: "selected, then rejected before the offer was
+        // sent" — a draft offer does not survive its application leaving the
+        // offer stage (rejected, sent back to review, withdrawn, archived).
+        if (! in_array($application->status, self::OFFER_STAGE, true)) {
+            app(RecruitmentJobOfferService::class)->closeForApplication($application);
         }
     }
 }

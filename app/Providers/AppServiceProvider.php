@@ -21,6 +21,7 @@ use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
 use App\Models\RecruitmentInterview;
 use App\Models\RecruitmentInterviewEvaluation;
+use App\Models\RecruitmentJobOffer;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentRequestEvent;
 use App\Models\RecruitmentTag;
@@ -49,6 +50,7 @@ use App\Policies\RecruitmentApplicationPolicy;
 use App\Policies\RecruitmentCampaignInvitePolicy;
 use App\Policies\RecruitmentInterviewEvaluationPolicy;
 use App\Policies\RecruitmentInterviewPolicy;
+use App\Policies\RecruitmentJobOfferPolicy;
 use App\Policies\RecruitmentRequestEventPolicy;
 use App\Policies\RecruitmentRequestPolicy;
 use App\Policies\RecruitmentTagPolicy;
@@ -139,6 +141,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(RecruitmentInterview::class, RecruitmentInterviewPolicy::class);
         // Team 2 (Phase 2 Task 8)
         Gate::policy(RecruitmentInterviewEvaluation::class, RecruitmentInterviewEvaluationPolicy::class);
+        // Team 2 (Phase 2 Task 9)
+        Gate::policy(RecruitmentJobOffer::class, RecruitmentJobOfferPolicy::class);
 
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle)

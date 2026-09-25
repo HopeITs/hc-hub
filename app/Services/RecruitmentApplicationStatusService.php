@@ -59,6 +59,20 @@ class RecruitmentApplicationStatusService
 
     public const REASON_INTERVIEW = 'interview_scheduling';
 
+    /*
+    |--------------------------------------------------------------------------
+    | Task 9 (job offers) — added by Team 2, to review with Rita
+    |--------------------------------------------------------------------------
+    |
+    | Same rule as INTERVIEW_DRIVEN: each of these moves mirrors the job offer
+    | (RecruitmentJobOfferService, through applyOfferTransition()), so the
+    | decision panel never offers them. An application is "offer sent" exactly
+    | while its offer is with the candidate.
+    |
+    */
+
+    public const REASON_OFFER = 'job_offer';
+
     /** @var array<string, array<int, string>> */
     private const TRANSITIONS = [
         Status::Submitted => [Status::UnderReview, Status::Shortlisted, Status::Rejected],
@@ -71,7 +85,13 @@ class RecruitmentApplicationStatusService
         Status::InterviewScheduled => [Status::Interviewed, Status::Rejected, Status::Shortlisted],
         // Task 7: + InterviewScheduled (an additional interview).
         Status::Interviewed => [Status::Selected, Status::Rejected, Status::InterviewScheduled],
-        Status::Selected => [Status::Shortlisted, Status::Rejected],
+        // Task 9: + OfferSent (the offer went to the candidate).
+        Status::Selected => [Status::Shortlisted, Status::Rejected, Status::OfferSent],
+        // Task 9: the offer statuses had no way in or out before. All three
+        // moves out of OfferSent follow the offer; from OfferRejected a
+        // revised offer can be sent, or HR rejects the candidate by hand.
+        Status::OfferSent => [Status::OfferAccepted, Status::OfferRejected, Status::Selected],
+        Status::OfferRejected => [Status::OfferSent, Status::Rejected],
         Status::Rejected => [Status::UnderReview],
     ];
 
@@ -81,6 +101,15 @@ class RecruitmentApplicationStatusService
         [Status::Interviewed, Status::InterviewScheduled],
         [Status::InterviewScheduled, Status::Interviewed],
         [Status::InterviewScheduled, Status::Shortlisted],
+    ];
+
+    /** @var array<int, array{0: string, 1: string}> [from, to] */
+    private const OFFER_DRIVEN = [
+        [Status::Selected, Status::OfferSent],       // the offer was sent
+        [Status::OfferSent, Status::OfferAccepted],  // the candidate accepted
+        [Status::OfferSent, Status::OfferRejected],  // the candidate refused
+        [Status::OfferSent, Status::Selected],       // the offer expired or was cancelled
+        [Status::OfferRejected, Status::OfferSent],  // a revised offer after a refusal
     ];
 
     public function __construct(
@@ -105,13 +134,17 @@ class RecruitmentApplicationStatusService
      */
     public function applyInterviewTransition(User $actor, RecruitmentApplication $locked, string $to): RecruitmentApplicationDecision
     {
-        $from = (string) $locked->status;
+        return $this->applySystemTransition($actor, $locked, $to, self::INTERVIEW_DRIVEN, self::REASON_INTERVIEW);
+    }
 
-        if (! $this->isInterviewDriven($from, $to) || ! in_array($to, self::TRANSITIONS[$from] ?? [], true)) {
-            throw ValidationException::withMessages(['statusTarget' => __('recruitment-applicant.status_change.not_allowed')]);
-        }
-
-        return $this->record($actor, $locked, $from, $to, null, null, systemReasonCode: self::REASON_INTERVIEW);
+    /**
+     * Task 9: the status move that mirrors the job offer being sent,
+     * accepted, refused, expired or cancelled. For RecruitmentJobOfferService
+     * only, on the same terms as applyInterviewTransition().
+     */
+    public function applyOfferTransition(User $actor, RecruitmentApplication $locked, string $to): RecruitmentApplicationDecision
+    {
+        return $this->applySystemTransition($actor, $locked, $to, self::OFFER_DRIVEN, self::REASON_OFFER);
     }
 
     /** @return array<int, string> the moves this user may make from here */
@@ -187,7 +220,7 @@ class RecruitmentApplicationStatusService
                 throw ValidationException::withMessages(['statusTarget' => __('recruitment-applicant.status_change.stale')]);
             }
 
-            // Task 7: manual moves only; interview-driven ones are refused here.
+            // Tasks 7 and 9: manual moves only; interview- and offer-driven ones are refused here.
             if (! in_array($to, $this->manualTargetsFrom($from), true)) {
                 throw ValidationException::withMessages(['statusTarget' => __('recruitment-applicant.status_change.not_allowed')]);
             }
@@ -317,7 +350,21 @@ class RecruitmentApplicationStatusService
     }
 
     /**
-     * Task 7: TRANSITIONS minus the interview-driven moves.
+     * @param  array<int, array{0: string, 1: string}>  $allowed  the moves this caller owns
+     */
+    private function applySystemTransition(User $actor, RecruitmentApplication $locked, string $to, array $allowed, string $reasonCode): RecruitmentApplicationDecision
+    {
+        $from = (string) $locked->status;
+
+        if (! in_array([$from, $to], $allowed, true) || ! in_array($to, self::TRANSITIONS[$from] ?? [], true)) {
+            throw ValidationException::withMessages(['statusTarget' => __('recruitment-applicant.status_change.not_allowed')]);
+        }
+
+        return $this->record($actor, $locked, $from, $to, null, null, systemReasonCode: $reasonCode);
+    }
+
+    /**
+     * Tasks 7 and 9: TRANSITIONS minus the interview- and offer-driven moves.
      *
      * @return array<int, string>
      */
@@ -325,13 +372,15 @@ class RecruitmentApplicationStatusService
     {
         return array_values(array_filter(
             self::TRANSITIONS[$from] ?? [],
-            fn (string $to): bool => ! $this->isInterviewDriven($from, $to),
+            fn (string $to): bool => ! $this->isSystemDriven($from, $to),
         ));
     }
 
-    private function isInterviewDriven(string $from, string $to): bool
+    /** Tasks 7 and 9: moves only the interview or offer services make. */
+    private function isSystemDriven(string $from, string $to): bool
     {
-        return in_array([$from, $to], self::INTERVIEW_DRIVEN, true);
+        return in_array([$from, $to], self::INTERVIEW_DRIVEN, true)
+            || in_array([$from, $to], self::OFFER_DRIVEN, true);
     }
 
     /**
@@ -376,7 +425,7 @@ class RecruitmentApplicationStatusService
         ?string $reasonCode,
         ?string $reason,
         bool $bulk = false,
-        ?string $systemReasonCode = null, // Task 7: set by applyInterviewTransition()
+        ?string $systemReasonCode = null, // Tasks 7 and 9: set by applySystemTransition()
     ): RecruitmentApplicationDecision {
         RecruitmentApplication::applyDecision($locked, $to);
 

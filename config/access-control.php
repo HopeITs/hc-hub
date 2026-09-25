@@ -143,6 +143,9 @@ return [
             // Writing one's own evaluation needs none: it comes from being on
             // the interview.
             'view-evaluations', 'correct-evaluations',
+            // Phase 2 Task 9: follow job offers / write them. Writing also
+            // needs User::canViewSalary(), checked by the policy.
+            'view-offers', 'manage-offers',
         ],
     ],
 
@@ -422,6 +425,18 @@ return [
             'withdraw' => 'recruitment-applicants.correct-evaluations',
             'closeEvaluations' => 'recruitment-applicants.schedule-interviews',
         ],
+        // Phase 2 Task 9. Each method re-resolves the offer through the scoped
+        // query and asks the policy (manage: permission + scope +
+        // canViewSalary) again; the service authorizes a third time.
+        'recruitment.offers.form' => ['save' => 'recruitment-applicants.manage-offers'],
+        'recruitment.offers.show' => [
+            'beginSend' => 'recruitment-applicants.manage-offers',
+            'send' => 'recruitment-applicants.manage-offers',
+            'beginResponse' => 'recruitment-applicants.manage-offers',
+            'recordResponse' => 'recruitment-applicants.manage-offers',
+            'beginCancel' => 'recruitment-applicants.manage-offers',
+            'cancelOffer' => 'recruitment-applicants.manage-offers',
+        ],
     ],
 
     /*
@@ -481,6 +496,8 @@ return [
         // Clears panel state; refreshEvaluations re-renders through the same
         // scoped query and writes nothing.
         'recruitment.interviews.evaluation-summary' => ['cancelPanel', 'refreshEvaluations'],
+        // Phase 2 Task 9. Clears panel state only.
+        'recruitment.offers.show' => ['closePanel'],
 
         // --- Authentication -------------------------------------------------
         // Reached before a session exists, or acting only on the caller's own
