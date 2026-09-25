@@ -203,6 +203,14 @@
         @endif
     </section>
 
+    {{-- Task 8: the viewer's own evaluation (renders nothing unless they may evaluate) --}}
+    <livewire:recruitment.interviews.evaluation-form :interview-id="$interview->id" :key="'evaluation-form-'.$interview->id.'-'.$interview->status" />
+
+    {{-- Task 8: every reviewer's evaluation — HR with view-evaluations in scope only --}}
+    @can('viewEvaluations', $interview)
+        <livewire:recruitment.interviews.evaluation-summary :interview-id="$interview->id" :key="'evaluation-summary-'.$interview->id.'-'.$interview->status" />
+    @endcan
+
     {{-- Reschedule history --}}
     @if ($interview->reschedules->isNotEmpty())
         <section class="rounded-surface border border-neutral-200 bg-white p-6">
