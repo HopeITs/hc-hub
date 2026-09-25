@@ -19,7 +19,7 @@
     <link rel="preload" href="{{ asset('fonts/SomarSans/SOMARSANS-MEDIUM.OTF') }}" as="font" type="font/otf" crossorigin>
     @vite(['resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-[#f3f3f3] font-SomarSans text-neutral-900 antialiased">
+<body class="min-h-screen bg-neutral-50 font-SomarSans text-neutral-900 antialiased">
     @yield('content')
     @stack('scripts')
 </body>

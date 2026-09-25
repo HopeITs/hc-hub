@@ -1,68 +1,108 @@
-<div class="space-y-6 p-6">
-    <div>
-        <h1 class="text-h3 font-semibold">{{ __('recruitment-campaign.new_campaign') }}</h1>
-        <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-campaign.new_campaign_hint') }}</p>
-    </div>
+<x-slot:title>{{ __('recruitment-campaign.new_campaign') }}</x-slot:title>
 
-    @if ($errors->any())
-        <div role="alert" class="rounded-control border border-red-200 bg-red-50 p-4 text-red-800">
-            <ul class="list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
-        </div>
-    @endif
+<div class="space-y-6">
+    <livewire:layout.breadcrumbs
+        :title="__('recruitment-campaign.new_campaign')"
+        :crumbs="[
+            ['label' => __('recruitment-campaign.campaigns'), 'url' => route('recruitment.campaigns.index')],
+            ['label' => __('recruitment-campaign.new_campaign')],
+        ]"
+    />
 
-    <form wire:submit="save" class="space-y-6 rounded-surface border border-neutral-200 bg-white p-6">
-        <div>
-            <x-forms.input-label for="vacancyId" required>{{ __('recruitment-campaign.vacancy') }}</x-forms.input-label>
-            <select id="vacancyId" wire:model="vacancyId" class="mt-1 w-full rounded-control border-neutral-300">
-                <option value="">{{ __('recruitment-campaign.choose_a_vacancy') }}</option>
-                @foreach ($vacancies as $vacancy)
-                    <option value="{{ $vacancy->id }}">
-                        {{ $vacancy->position?->title ?? '—' }}
-                        ({{ __('recruitment-campaign.seats', ['open' => $vacancy->needed_count - $vacancy->filled_count]) }})
-                    </option>
-                @endforeach
-            </select>
+    <form wire:submit="save" class="mx-auto max-w-3xl space-y-6">
+        <p class="text-body text-secondary-medium">{{ __('recruitment-campaign.new_campaign_hint') }}</p>
+
+        {{-- 1. The seat --}}
+        <section class="rounded-surface border border-neutral-200 bg-white p-5 shadow-e1 sm:p-6" aria-labelledby="create-vacancy-heading">
+            <h2 id="create-vacancy-heading" class="text-subtitle font-bold text-neutral-800">
+                {{ __('recruitment-campaign.vacancy') }} <span class="text-primary" aria-hidden="true">*</span>
+            </h2>
+
             @if ($vacancies->isEmpty())
-                <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-campaign.no_open_vacancies') }}</p>
+                <div class="mt-4 flex items-start gap-3 rounded-control border border-neutral-200 bg-neutral-50 p-4 text-body text-neutral-700">
+                    <svg class="mt-0.5 size-5 shrink-0 text-secondary-medium" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v5m0 3h.01"/></svg>
+                    <p>{{ __('recruitment-campaign.no_open_vacancies') }}</p>
+                </div>
+            @else
+                <div class="mt-4 grid gap-3" role="radiogroup" aria-labelledby="create-vacancy-heading">
+                    @foreach ($vacancies as $vacancy)
+                        <label wire:key="vacancy-{{ $vacancy->id }}"
+                            class="flex cursor-pointer items-start gap-3 rounded-control border border-neutral-300 p-4 transition hover:bg-neutral-50 has-[:checked]:border-primary has-[:checked]:bg-neutral-50">
+                            <input type="radio" name="vacancyId" value="{{ $vacancy->id }}" wire:model="vacancyId"
+                                class="mt-1 border-neutral-400 text-primary focus:ring-primary">
+                            <span class="min-w-0 flex-1">
+                                <span class="block text-body font-bold text-neutral-800">{{ $vacancy->position?->title ?? '—' }}</span>
+                                <span class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-small text-secondary-medium">
+                                    @if ($vacancy->position?->city)
+                                        <span>{{ $vacancy->position->city->name }}</span>
+                                    @endif
+                                    @if ($vacancy->position?->program)
+                                        <span>{{ $vacancy->position->program->name ?? '' }}</span>
+                                    @endif
+                                    @if ($vacancy->createdFromRequest)
+                                        <bdi>{{ $vacancy->createdFromRequest->request_number }}</bdi>
+                                    @endif
+                                    <span>{{ __('recruitment-campaign.seats', ['open' => $vacancy->needed_count - $vacancy->filled_count]) }}</span>
+                                    @if ($vacancy->campaigns_count > 0)
+                                        <span>{{ trans_choice('recruitment-campaign.existing_campaigns', $vacancy->campaigns_count, ['count' => $vacancy->campaigns_count]) }}</span>
+                                    @endif
+                                </span>
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
+                <x-error-span>{{ $errors->first('vacancyId') ?: $errors->first('vacancy') }}</x-error-span>
             @endif
-        </div>
+        </section>
 
-        <fieldset>
-            <legend class="text-sm font-semibold">{{ __('recruitment-campaign.link_mode') }}</legend>
-            <p class="text-sm text-secondary-medium">{{ __('recruitment-campaign.link_mode_hint') }}</p>
-            <div class="mt-2 space-y-2">
+        {{-- 2. Who may apply --}}
+        <section class="rounded-surface border border-neutral-200 bg-white p-5 shadow-e1 sm:p-6" aria-labelledby="create-mode-heading">
+            <h2 id="create-mode-heading" class="text-subtitle font-bold text-neutral-800">{{ __('recruitment-campaign.link_mode') }}</h2>
+            <p class="mt-1 text-body text-secondary-medium">{{ __('recruitment-campaign.link_mode_hint') }}</p>
+            <div class="mt-4 grid gap-3 sm:grid-cols-3" role="radiogroup" aria-labelledby="create-mode-heading">
                 @foreach ($linkModes as $mode)
-                    <label class="flex items-start gap-2 text-sm" wire:key="mode-{{ $mode }}">
-                        <input type="radio" value="{{ $mode }}" wire:model="linkMode" class="mt-1 border-neutral-300 text-primary">
+                    <label wire:key="mode-{{ $mode }}"
+                        class="flex cursor-pointer items-start gap-3 rounded-control border border-neutral-300 p-4 transition hover:bg-neutral-50 has-[:checked]:border-primary has-[:checked]:bg-neutral-50">
+                        <input type="radio" value="{{ $mode }}" wire:model="linkMode" class="mt-1 border-neutral-400 text-primary focus:ring-primary">
                         <span>
-                            <span class="font-medium">{{ __('recruitment-campaign.modes.'.$mode) }}</span>
-                            <span class="block text-secondary-medium">{{ __('recruitment-campaign.mode_hints.'.$mode) }}</span>
+                            <span class="block text-body font-bold text-neutral-800">{{ __('recruitment-campaign.modes.'.$mode) }}</span>
+                            <span class="mt-1 block text-small text-secondary-medium">{{ __('recruitment-campaign.mode_hints.'.$mode) }}</span>
                         </span>
                     </label>
                 @endforeach
             </div>
-        </fieldset>
+            <x-error-span>{{ $errors->first('link_mode') }}</x-error-span>
+        </section>
 
-        <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-                <x-forms.input-label for="startsAt">{{ __('recruitment-campaign.starts_at') }}</x-forms.input-label>
-                <input id="startsAt" type="datetime-local" wire:model="startsAt" class="mt-1 w-full rounded-control border-neutral-300">
+        {{-- 3. When --}}
+        <section class="rounded-surface border border-neutral-200 bg-white p-5 shadow-e1 sm:p-6" aria-labelledby="create-window-heading">
+            <h2 id="create-window-heading" class="text-subtitle font-bold text-neutral-800">{{ __('recruitment-campaign.window') }}</h2>
+            <p class="mt-1 text-body text-secondary-medium">{{ __('recruitment-campaign.window_hint') }}</p>
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                    <x-forms.input-label for="startsAt">{{ __('recruitment-campaign.starts_at') }}</x-forms.input-label>
+                    <input id="startsAt" type="datetime-local" wire:model="startsAt"
+                        class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
+                    <x-error-span>{{ $errors->first('starts_at') }}</x-error-span>
+                </div>
+                <div>
+                    <x-forms.input-label for="endsAt">{{ __('recruitment-campaign.ends_at') }}</x-forms.input-label>
+                    <input id="endsAt" type="datetime-local" wire:model="endsAt"
+                        class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
+                    <x-error-span>{{ $errors->first('ends_at') }}</x-error-span>
+                </div>
             </div>
-            <div>
-                <x-forms.input-label for="endsAt">{{ __('recruitment-campaign.ends_at') }}</x-forms.input-label>
-                <input id="endsAt" type="datetime-local" wire:model="endsAt" class="mt-1 w-full rounded-control border-neutral-300">
-            </div>
-        </div>
-        <p class="text-sm text-secondary-medium">{{ __('recruitment-campaign.window_hint') }}</p>
+        </section>
 
-        <div class="flex flex-wrap gap-3">
-            <x-primary-button type="submit" wire:loading.attr="disabled" wire:target="save">
-                {{ __('recruitment-campaign.create') }}
-            </x-primary-button>
+        <div class="flex flex-wrap items-center justify-end gap-3">
             <a href="{{ route('recruitment.campaigns.index') }}" wire:navigate
-                class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                class="cursor-pointer rounded-control border border-neutral-300 bg-white px-4 py-2 text-body font-semibold text-neutral-700 transition hover:bg-neutral-50">
                 {{ __('recruitment-campaign.cancel') }}
             </a>
+            <x-primary-button type="submit" wire:loading.attr="disabled" wire:target="save" :disabled="$vacancies->isEmpty()">
+                {{ __('recruitment-campaign.create') }}
+            </x-primary-button>
         </div>
+        <p class="text-end text-small text-secondary-medium">{{ __('recruitment-campaign.create_next_hint') }}</p>
     </form>
 </div>

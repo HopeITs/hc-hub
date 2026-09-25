@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\RecruitmentApplicationStatus;
-use App\Enums\RecruitmentCampaignLinkMode;
 use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Exceptions\UnsafeRecruitmentFileException;
 use App\Models\HiringCampaign;
@@ -253,7 +252,7 @@ class PublicRecruitmentApplicationService
 
     private function resolveInvite(HiringCampaign $campaign, string $email): ?RecruitmentCampaignInvite
     {
-        if ($campaign->link_mode !== RecruitmentCampaignLinkMode::InvitationOnly) {
+        if (! $campaign->isInvitationOnly()) {
             return null;
         }
 

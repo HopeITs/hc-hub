@@ -30,7 +30,7 @@
                     <h1 class="mt-2 text-title font-bold leading-tight text-neutral-900">{{ $title }}</h1>
                 </div>
                 @if ($link_mode === 'invitation_only')
-                    <span class="rounded-full bg-amber-100 px-3 py-1 text-small font-semibold text-amber-900">{{ __('careers.invitation_only') }}</span>
+                    <span class="rounded-full border border-primary bg-white px-3 py-1 text-small font-semibold text-primary">{{ __('careers.invitation_only') }}</span>
                 @endif
             </div>
 
@@ -61,7 +61,7 @@
     @endif
 
     @if ($submissionError)
-        <div class="mt-4 rounded-control border border-red-200 bg-red-50 p-4 text-body text-red-800" role="alert">{{ $submissionError }}</div>
+        <div class="mt-4 rounded-control border border-primary bg-white p-4 text-body font-semibold text-primary" role="alert">{{ $submissionError }}</div>
     @endif
     <form
         method="POST"
@@ -162,7 +162,7 @@
                                         class="sr-only"
                                         data-file-input
                                     >
-                                    <label for="field-{{ $key }}" class="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-control border border-neutral-300 bg-white px-4 py-2.5 text-body font-semibold text-blue-700 hover:bg-neutral-50 focus-within:ring-2 focus-within:ring-primary">
+                                    <label for="field-{{ $key }}" class="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-control border border-neutral-300 bg-white px-4 py-2.5 text-body font-semibold text-primary hover:bg-neutral-50 focus-within:ring-2 focus-within:ring-primary">
                                         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
                                         </svg>

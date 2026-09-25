@@ -95,13 +95,19 @@
                 class="relative w-full max-w-md overflow-hidden rounded-surface border border-neutral-200 bg-white shadow-e3"
             >
                 <div class="flex items-start gap-4 p-5 sm:p-6">
+                    {{-- Brand red in both tones: a destructive action is told
+                         apart by its warning icon and outlined button, never by
+                         a second hue. --}}
                     <div
-                        class="flex size-11 shrink-0 items-center justify-center rounded-full"
-                        x-bind:class="tone === 'danger' ? 'bg-red-100 text-red-700' : 'bg-primary/10 text-primary'"
+                        class="flex size-11 shrink-0 items-center justify-center rounded-full border border-primary bg-white text-primary"
                         aria-hidden="true"
                     >
-                        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg x-show="tone === 'danger'" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.9 2.7 17.1A2 2 0 0 0 4.4 20h15.2a2 2 0 0 0 1.7-2.9L13.7 3.9a2 2 0 0 0-3.4 0Z"/>
+                        </svg>
+                        <svg x-show="tone !== 'danger'" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14m0 3h.01"/>
                         </svg>
                     </div>
 
@@ -125,7 +131,7 @@
                                 class="mt-2 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary"
                             ></textarea>
                             <p class="mt-1 text-small text-neutral-500" x-text="reasonHint"></p>
-                            <p x-cloak x-show="reasonError" role="alert" class="mt-1 text-small font-medium text-red-700" x-text="reasonError"></p>
+                            <p x-cloak x-show="reasonError" role="alert" class="mt-1 text-small font-medium text-primary" x-text="reasonError"></p>
                         </div>
                     </div>
                 </div>
@@ -144,7 +150,10 @@
                         type="button"
                         x-on:click="confirm()"
                         x-bind:disabled="busy"
-                        class="cursor-pointer rounded-control bg-primary px-4 py-2 text-body font-semibold text-white transition hover:bg-primary-hover disabled:cursor-wait disabled:opacity-60"
+                        x-bind:class="tone === 'danger'
+                            ? 'border border-primary bg-white text-primary hover:bg-neutral-50'
+                            : 'bg-primary text-white hover:bg-primary-hover'"
+                        class="cursor-pointer rounded-control px-4 py-2 text-body font-semibold transition disabled:cursor-wait disabled:opacity-60"
                     >
                         <span x-show="!busy" x-text="confirmLabel"></span>
                         <span x-cloak x-show="busy">{{ __('general.loading') }}…</span>

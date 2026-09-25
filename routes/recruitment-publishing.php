@@ -1,14 +1,19 @@
 <?php
 
 use App\Livewire\Recruitment\ApplicationForms\Editor as ApplicationFormEditor;
-use App\Livewire\Recruitment\Campaigns\PublishingHub;
 use App\Livewire\Recruitment\JobPosts\Editor as JobPostEditor;
+use App\Models\HiringCampaign;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('recruitment/campaigns')
     ->name('recruitment.campaigns.')
     ->group(function () {
-        Route::get('/{campaign}/publishing', PublishingHub::class)
+        // Preserve existing links from the editors, while keeping all
+        // campaign preparation on one page.
+        Route::get('/{campaign}/publishing', function (HiringCampaign $campaign) {
+            return to_route('recruitment.campaigns.show', ['campaignId' => $campaign->getKey()])
+                ->withFragment('campaign-publishing');
+        })
             ->middleware('active_permission:recruitment-campaigns.view')
             ->name('publishing');
 
