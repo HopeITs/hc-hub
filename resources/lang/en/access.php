@@ -105,5 +105,6 @@ return [
         'manage-tags' => 'Manage the tag list',
         'accept' => 'Accept candidates',
         'bulk-reject' => 'Bulk-reject applications and email candidates',
+        'schedule-interviews' => 'Schedule and manage interviews',
     ],
 ];

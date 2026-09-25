@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\RecruitmentApplication;
 use App\Services\ActivityLogger;
+use App\Services\RecruitmentInterviewSchedulingService;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -38,6 +39,26 @@ class RecruitmentApplicationObserver
             ], 'recruitment'));
         } catch (Throwable $exception) {
             report($exception);
+        }
+    }
+
+    /**
+     * Phase 2 Task 7: an application that is rejected, withdrawn or archived
+     * while it still has open interviews takes them down with it — they are
+     * cancelled (never deleted), so no reminder goes out and nobody turns up
+     * to interview a candidate who is no longer in the process.
+     *
+     * A status only changes inside RecruitmentApplicationStatusService's
+     * transaction, on a locked row, so this runs there too: the decision and
+     * the cancellations commit or roll back together. Unlike the audit entry
+     * above, a failure here is not swallowed — a rejection that left a live
+     * interview behind would be worse than one that did not save.
+     */
+    public function updated(RecruitmentApplication $application): void
+    {
+        if ($application->wasChanged('status')
+            && in_array($application->status, RecruitmentInterviewSchedulingService::CLOSING, true)) {
+            app(RecruitmentInterviewSchedulingService::class)->closeForApplication($application);
         }
     }
 }

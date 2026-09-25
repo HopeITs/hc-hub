@@ -80,7 +80,11 @@
                         </x-layouts.app.sidebar.single-item>
                     @endactivepermission
 
-                    @if(auth()->user()?->hasActivePermission('recruitment-requests.view') || $canSeeRecruitmentApprovals || auth()->user()?->hasActivePermission('recruitment-campaigns.view') || auth()->user()?->hasActivePermission('recruitment-applicants.view'))
+                    @php
+                        // Task 7 (Team 2): participants see their interviews without any recruitment permission.
+                        $seesInterviews = auth()->user() && (auth()->user()->hasActivePermission('recruitment-applicants.view') || \App\Models\RecruitmentInterview::hasAnyFor(auth()->user()));
+                    @endphp
+                    @if(auth()->user()?->hasActivePermission('recruitment-requests.view') || $canSeeRecruitmentApprovals || auth()->user()?->hasActivePermission('recruitment-campaigns.view') || auth()->user()?->hasActivePermission('recruitment-applicants.view') || $seesInterviews)
                         {{-- Group: Recruitment --}}
                         <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
                             <span class="text-caption font-semibold uppercase tracking-wider text-secondary-light">{{ __('recruitment.navigation_section') }}</span>
@@ -113,6 +117,13 @@
                                 {{ __('recruitment.navigation_applicants') }}
                             </x-layouts.app.sidebar.single-item>
                         @endactivepermission
+
+                        @if ($seesInterviews)
+                            <x-layouts.app.sidebar.single-item :href="route('recruitment.interviews.index')" :active="request()->routeIs('recruitment.interviews.*')">
+                                <x-slot name="icon"><x-icons.calendar class="size-5" /></x-slot>
+                                {{ __('recruitment-applicant.interviews.title') }}
+                            </x-layouts.app.sidebar.single-item>
+                        @endif
                     @endif
 
                     {{-- Group: Management --}}

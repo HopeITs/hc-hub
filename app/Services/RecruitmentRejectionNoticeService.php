@@ -8,6 +8,7 @@ use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentApplicationDecision;
 use App\Models\RecruitmentRejectionNotice;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -102,6 +103,39 @@ class RecruitmentRejectionNoticeService
         }
 
         return $failed;
+    }
+
+    /**
+     * Safety net for a notice committed as queued whose job never reached the
+     * queue — the process died between commit and dispatch, or the payload was
+     * lost. Such a row counts as settled, so without this nothing would ever
+     * send it. claim() makes a duplicate dispatch harmless.
+     *
+     * Returns how many were queued again.
+     */
+    public function redispatchStale(?Carbon $now = null): int
+    {
+        $now ??= now();
+        $cutoff = $now->copy()->subMinutes(max(1, (int) config('recruitment.decisions.redispatch_after_minutes', 15)));
+
+        $stale = RecruitmentRejectionNotice::query()
+            ->where('status', RecruitmentRejectionNotice::STATUS_QUEUED)
+            ->where('queued_at', '<', $cutoff)
+            ->orderBy('id')
+            ->limit(200)
+            ->get();
+
+        if ($stale->isEmpty()) {
+            return 0;
+        }
+
+        // Pushed forward first, so a slow queue is not flooded every sweep.
+        RecruitmentRejectionNotice::query()
+            ->whereKey($stale->modelKeys())
+            ->where('status', RecruitmentRejectionNotice::STATUS_QUEUED)
+            ->update(['queued_at' => $now]);
+
+        return $stale->count() - $this->dispatch($stale);
     }
 
     /**

@@ -4,6 +4,7 @@
         "codex"
     ],
     "cloud": false,
+    "guidelines": true,
     "packages": [
         "maatwebsite/excel",
         "spatie/laravel-medialibrary"

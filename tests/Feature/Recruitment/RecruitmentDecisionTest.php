@@ -273,6 +273,42 @@ class RecruitmentDecisionTest extends TestCase
         $this->assertSame(1, $result['already_notified']);
     }
 
+    public function test_a_queued_notice_whose_job_never_ran_is_dispatched_again(): void
+    {
+        Queue::fake();
+        Mail::fake();
+        $application = $this->applyTo($this->makeCampaignIn($this->homs), $this->makeApplicant());
+        $hr = $this->hr($this->homs);
+        $statuses = app(RecruitmentApplicationStatusService::class);
+
+        $statuses->change($hr, $application, Status::Submitted, Status::Rejected, null, 'position_filled', notify: true);
+        Queue::fake(); // the job is lost: committed as queued, never on the queue
+
+        // Counted as settled, so a retry from the bulk action cannot reach it.
+        $result = $statuses->bulkReject($hr, [$application->id], 'position_filled', null, notify: true);
+        $this->assertSame(1, $result['already_notified']);
+
+        // Too recent to be called stalled: it may still be waiting in the queue.
+        $this->artisan('recruitment:rejection-notices')->assertSuccessful();
+        Queue::assertNothingPushed();
+
+        $this->travel(20)->minutes();
+        $this->artisan('recruitment:rejection-notices')->assertSuccessful();
+        Queue::assertPushed(SendRecruitmentRejectionNotice::class, 1);
+
+        // The next sweep leaves it alone: its clock was pushed forward.
+        $this->artisan('recruitment:rejection-notices')->assertSuccessful();
+        Queue::assertPushed(SendRecruitmentRejectionNotice::class, 1);
+
+        app()->call([new SendRecruitmentRejectionNotice($application->rejectionNotice->id), 'handle']);
+        Mail::assertSent(RecruitmentRejectionMail::class, 1);
+        $this->assertSame(RecruitmentRejectionNotice::STATUS_SENT, $application->rejectionNotice()->sole()->status);
+
+        $this->travel(20)->minutes();
+        $this->artisan('recruitment:rejection-notices')->assertSuccessful();
+        Queue::assertPushed(SendRecruitmentRejectionNotice::class, 1);
+    }
+
     // ------------------------------------------------------------------
     // Bulk rejection
     // ------------------------------------------------------------------

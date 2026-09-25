@@ -43,14 +43,44 @@ class RecruitmentApplicationStatusService
      */
     public const BULK_REJECTABLE = [Status::Submitted, Status::UnderReview, Status::Shortlisted];
 
+    /*
+    |--------------------------------------------------------------------------
+    | Task 7 (interview scheduling) — added by Team 2, to review with Rita
+    |--------------------------------------------------------------------------
+    |
+    | INTERVIEW_DRIVEN lists moves that exist in TRANSITIONS but are made only
+    | by RecruitmentInterviewSchedulingService, through
+    | applyInterviewTransition(), because each one mirrors an interview record: an application is
+    | "interview scheduled" exactly when it has an open interview. Offering
+    | them as buttons in the decision panel would let the status and the
+    | interviews disagree, so targets() and change() leave them out.
+    |
+    */
+
+    public const REASON_INTERVIEW = 'interview_scheduling';
+
     /** @var array<string, array<int, string>> */
     private const TRANSITIONS = [
         Status::Submitted => [Status::UnderReview, Status::Shortlisted, Status::Rejected],
         Status::UnderReview => [Status::Shortlisted, Status::Rejected],
-        Status::Shortlisted => [Status::UnderReview, Status::Selected, Status::Rejected],
-        Status::Interviewed => [Status::Selected, Status::Rejected],
+        // Task 7: + InterviewScheduled (first interview scheduled).
+        Status::Shortlisted => [Status::UnderReview, Status::Selected, Status::Rejected, Status::InterviewScheduled],
+        // Task 7: this state had no way out before. Interviewed / Shortlisted
+        // are set by the interview service when the last open interview ends
+        // or is cancelled; Rejected stays a manual screening decision.
+        Status::InterviewScheduled => [Status::Interviewed, Status::Rejected, Status::Shortlisted],
+        // Task 7: + InterviewScheduled (an additional interview).
+        Status::Interviewed => [Status::Selected, Status::Rejected, Status::InterviewScheduled],
         Status::Selected => [Status::Shortlisted, Status::Rejected],
         Status::Rejected => [Status::UnderReview],
+    ];
+
+    /** @var array<int, array{0: string, 1: string}> [from, to] */
+    private const INTERVIEW_DRIVEN = [
+        [Status::Shortlisted, Status::InterviewScheduled],
+        [Status::Interviewed, Status::InterviewScheduled],
+        [Status::InterviewScheduled, Status::Interviewed],
+        [Status::InterviewScheduled, Status::Shortlisted],
     ];
 
     public function __construct(
@@ -58,10 +88,30 @@ class RecruitmentApplicationStatusService
         private readonly RecruitmentRejectionNoticeService $notices,
     ) {}
 
-    /** @return array<int, string> */
+    /** @return array<int, string> the manual moves from here */
     public function targets(RecruitmentApplication $application): array
     {
-        return self::TRANSITIONS[$application->status] ?? [];
+        return $this->manualTargetsFrom((string) $application->status);
+    }
+
+    /**
+     * Task 7: the status move that mirrors an interview being scheduled,
+     * completed or cancelled. For RecruitmentInterviewSchedulingService only:
+     * call it inside that service's transaction, on the application row it
+     * already locked, after it has authorized the interview action itself.
+     *
+     * Recorded like every other move — a decision row with actor, date and
+     * from/to, and an activity entry — so the history never has a gap.
+     */
+    public function applyInterviewTransition(User $actor, RecruitmentApplication $locked, string $to): RecruitmentApplicationDecision
+    {
+        $from = (string) $locked->status;
+
+        if (! $this->isInterviewDriven($from, $to) || ! in_array($to, self::TRANSITIONS[$from] ?? [], true)) {
+            throw ValidationException::withMessages(['statusTarget' => __('recruitment-applicant.status_change.not_allowed')]);
+        }
+
+        return $this->record($actor, $locked, $from, $to, null, null, systemReasonCode: self::REASON_INTERVIEW);
     }
 
     /** @return array<int, string> the moves this user may make from here */
@@ -137,7 +187,8 @@ class RecruitmentApplicationStatusService
                 throw ValidationException::withMessages(['statusTarget' => __('recruitment-applicant.status_change.stale')]);
             }
 
-            if (! in_array($to, self::TRANSITIONS[$from] ?? [], true)) {
+            // Task 7: manual moves only; interview-driven ones are refused here.
+            if (! in_array($to, $this->manualTargetsFrom($from), true)) {
                 throw ValidationException::withMessages(['statusTarget' => __('recruitment-applicant.status_change.not_allowed')]);
             }
 
@@ -266,6 +317,24 @@ class RecruitmentApplicationStatusService
     }
 
     /**
+     * Task 7: TRANSITIONS minus the interview-driven moves.
+     *
+     * @return array<int, string>
+     */
+    private function manualTargetsFrom(string $from): array
+    {
+        return array_values(array_filter(
+            self::TRANSITIONS[$from] ?? [],
+            fn (string $to): bool => ! $this->isInterviewDriven($from, $to),
+        ));
+    }
+
+    private function isInterviewDriven(string $from, string $to): bool
+    {
+        return in_array([$from, $to], self::INTERVIEW_DRIVEN, true);
+    }
+
+    /**
      * The applicant (for anonymization) and any existing notice (locked), in
      * two queries for the whole batch instead of two per application.
      */
@@ -307,6 +376,7 @@ class RecruitmentApplicationStatusService
         ?string $reasonCode,
         ?string $reason,
         bool $bulk = false,
+        ?string $systemReasonCode = null, // Task 7: set by applyInterviewTransition()
     ): RecruitmentApplicationDecision {
         RecruitmentApplication::applyDecision($locked, $to);
 
@@ -314,7 +384,7 @@ class RecruitmentApplicationStatusService
             'application_id' => $locked->getKey(),
             'from_status' => $from,
             'to_status' => $to,
-            'reason_code' => $to === Status::Rejected ? $reasonCode : self::REASON_CODE,
+            'reason_code' => $systemReasonCode ?? ($to === Status::Rejected ? $reasonCode : self::REASON_CODE),
             'reason_text' => $reason,
             'decided_by_user_id' => $actor->getKey(),
             'decided_at' => now(),
