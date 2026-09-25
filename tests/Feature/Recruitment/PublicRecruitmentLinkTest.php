@@ -500,6 +500,153 @@ class PublicRecruitmentLinkTest extends TestCase
     }
 
     /** @return array{HiringCampaign, User, RecruitmentRequest, JobPost, ApplicationForm} */
+    public function test_an_internal_campaign_asks_visitors_to_sign_in_before_showing_the_form(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::Internal,
+        );
+
+        $this->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee(__('careers.internal.badge'))
+            ->assertSee(__('careers.internal.sign_in_title'))
+            ->assertSee('data-internal-sign-in', false)
+            ->assertDontSee('name="submission_key"', false);
+
+        $back = route('careers.show', ['token' => $result['token'], 'lang' => 'ar']);
+        $response = $this->get(route('careers.sign-in', ['token' => $result['token'], 'lang' => 'ar']));
+        $response->assertRedirect();
+        $this->assertStringContainsString('login', (string) $response->headers->get('Location'));
+        $this->assertSame($back, session('url.intended'));
+
+        // Signed in already: straight back to the vacancy.
+        $this->actingAs($hr)
+            ->get(route('careers.sign-in', ['token' => $result['token'], 'lang' => 'ar']))
+            ->assertRedirect($back);
+    }
+
+    public function test_signed_in_staff_find_their_details_already_filled_in(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::Internal,
+        );
+        $staff = $this->staffMember();
+
+        $this->actingAs($staff)
+            ->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee('data-internal-state="ready"', false)
+            ->assertSee(__('careers.internal.applying_as'))
+            ->assertSee('Rami Haddad')
+            ->assertSee('data-recruitment-wizard', false)
+            ->assertSee('value="Rami Haddad"', false)
+            ->assertSee('value="rami.haddad@hopecenter.test"', false)
+            ->assertSee('value="+963 944 000 111"', false)
+            ->assertSee('readonly', false)
+            ->assertSee(__('careers.internal.work_email_note'));
+    }
+
+    public function test_a_staff_application_is_filed_under_the_work_account_and_linked_to_the_employee(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::Internal,
+        );
+        $staff = $this->staffMember();
+
+        // Whatever address is posted, the application belongs to the account.
+        $this->actingAs($staff)
+            ->post(route('careers.submit', $result['token']), $this->validSubmission('someone.else@example.com', 'Rami H.'))
+            ->assertStatus(202);
+
+        $application = RecruitmentApplication::query()->sole();
+        $applicant = $application->applicant;
+        $this->assertSame('rami.haddad@hopecenter.test', $application->email_normalized);
+        $this->assertSame($staff->employee_id, (int) $applicant->employee_id);
+        $this->assertSame('internal', $applicant->source);
+        $this->assertNotNull($applicant->identity_verified_at);
+        // Edits made on the form stay on the application, not the record.
+        $this->assertSame('Rami H.', $applicant->full_name);
+        $this->assertSame('Rami', $staff->profile->fresh()->first_name_en);
+
+        $this->actingAs($staff)
+            ->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee('data-internal-state="applied"', false)
+            ->assertDontSee('name="submission_key"', false);
+    }
+
+    public function test_an_internal_campaign_refuses_applications_from_anyone_not_signed_in(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::Internal,
+        );
+
+        $this->post(route('careers.submit', $result['token']), $this->validSubmission('outsider@example.com'))
+            ->assertUnprocessable()
+            ->assertSee(__('careers.generic_submission_error'));
+
+        $this->assertDatabaseCount('recruitment_applications', 0);
+    }
+
+    public function test_signing_in_changes_nothing_for_a_public_campaign(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+        $staff = $this->staffMember();
+
+        $this->actingAs($staff)
+            ->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertDontSee('data-internal-state', false)
+            ->assertDontSee('rami.haddad@hopecenter.test');
+
+        $this->actingAs($staff)
+            ->post(route('careers.submit', $result['token']), $this->validSubmission('personal@example.com'))
+            ->assertStatus(202);
+
+        $applicant = RecruitmentApplication::query()->sole()->applicant;
+        $this->assertSame('personal@example.com', $applicant->email_normalized);
+        $this->assertNull($applicant->employee_id);
+        $this->assertSame('public_link', $applicant->source);
+    }
+
+    private function staffMember(): User
+    {
+        $city = $this->makeCity('ALP', '001');
+        $employee = $this->makeEmployee($city, 'rami-'.uniqid(), [
+            'first_name_en' => 'Rami',
+            'last_name_en' => 'Haddad',
+            'personal_phone' => '+963 944 000 111',
+            'dob' => '1994-05-12',
+        ]);
+
+        $user = $this->makeUser($city, 'employee', [], $employee);
+        $user->forceFill(['email' => 'rami.haddad@hopecenter.test'])->save();
+
+        return $user->fresh();
+    }
+
     private function makePublishedCampaign(): array
     {
         $city = $this->makeCity('HMS', '002');

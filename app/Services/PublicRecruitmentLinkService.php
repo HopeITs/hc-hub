@@ -343,6 +343,12 @@ class PublicRecruitmentLinkService
      * intake service. The intake service repeats this check after locking the
      * campaign so a close, expiry, or link rotation cannot race a submission.
      */
+    /** The campaign behind a public page, for server-side decisions only. */
+    public function campaignForPage(string $token): HiringCampaign
+    {
+        return $this->resolve($token)->campaign;
+    }
+
     public function submissionLink(string $token): PublicRecruitmentLink
     {
         $link = $this->resolve($token);

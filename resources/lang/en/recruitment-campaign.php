@@ -25,12 +25,12 @@ return [
     'link_mode' => 'Open to',
     'link_mode_hint' => 'Who is allowed to apply through this campaign.',
     'modes' => [
-        'internal' => 'Inside the organisation',
+        'internal' => 'Staff only',
         'public_open' => 'Anyone',
         'invitation_only' => 'A named list only',
     ],
     'mode_hints' => [
-        'internal' => 'Staff and volunteers already with us. Share the link internally.',
+        'internal' => 'Current staff sign in with their HC-HR account to apply. Their details are filled in for them.',
         'public_open' => 'Open to the public through a shared link.',
         'invitation_only' => 'Only people whose name and email are added in advance.',
     ],

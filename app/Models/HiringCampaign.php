@@ -102,6 +102,12 @@ class HiringCampaign extends Model
         return $this->link_mode === self::INVITE_ONLY;
     }
 
+    /** Staff only: applicants sign in to HC-HR and apply as themselves. */
+    public function isInternal(): bool
+    {
+        return $this->link_mode === self::INTERNAL;
+    }
+
     protected function casts(): array
     {
         return [

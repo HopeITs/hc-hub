@@ -12,6 +12,9 @@
     $sections = collect($form['sections'])->keyBy('key');
     $fieldsBySection = collect($form['fields'])->groupBy('section');
     $stepCount = $fieldsBySection->count();
+    $internal ??= null;
+    $showForm = $internal === null || $internal['state'] === 'ready';
+    $prefill = $internal['prefill'] ?? [];
 @endphp
 
 <main dir="{{ $direction }}" class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
@@ -31,6 +34,8 @@
                 </div>
                 @if ($link_mode === 'invitation_only')
                     <span class="rounded-full border border-primary bg-white px-3 py-1 text-small font-semibold text-primary">{{ __('careers.invitation_only') }}</span>
+                @elseif ($internal)
+                    <span class="rounded-full border border-primary bg-white px-3 py-1 text-small font-semibold text-primary">{{ __('careers.internal.badge') }}</span>
                 @endif
             </div>
 
@@ -60,9 +65,14 @@
         </section>
     @endif
 
+    @if ($internal)
+        <x-recruitment.internal-applicant-card :internal="$internal" />
+    @endif
+
     @if ($submissionError)
         <div class="mt-4 rounded-control border border-primary bg-white p-4 text-body font-semibold text-primary" role="alert">{{ $submissionError }}</div>
     @endif
+    @if ($showForm)
     <form
         method="POST"
         action="{{ route('careers.submit', ['token' => request()->route('token')]) }}"
@@ -171,7 +181,22 @@
                                     <p class="mt-2 text-small text-neutral-500" data-file-name>{{ __('careers.no_file_selected') }}</p>
                                     @break
                                 @default
-                                    <input id="field-{{ $key }}" type="{{ in_array($field['type'], ['email', 'tel', 'number', 'date', 'url'], true) ? $field['type'] : 'text' }}" name="answers[{{ $key }}]" class="mt-3 w-full rounded-control border border-neutral-300 px-3 py-2 text-body sm:max-w-xl" @if ($field['type'] === 'email') dir="ltr" @endif @if ($field['required']) required @endif>
+                                    @php $workEmail = $internal && $key === 'email'; @endphp
+                                    <input
+                                        id="field-{{ $key }}"
+                                        type="{{ in_array($field['type'], ['email', 'tel', 'number', 'date', 'url'], true) ? $field['type'] : 'text' }}"
+                                        name="answers[{{ $key }}]"
+                                        value="{{ $prefill[$key] ?? '' }}"
+                                        class="mt-3 w-full rounded-control border border-neutral-300 px-3 py-2 text-body sm:max-w-xl {{ $workEmail ? 'cursor-not-allowed bg-neutral-50 text-neutral-600' : '' }}"
+                                        @if ($field['type'] === 'email' || $field['type'] === 'tel') dir="ltr" @endif
+                                        @if ($workEmail) readonly aria-describedby="field-{{ $key }}-note" @endif
+                                        @if ($field['required']) required @endif
+                                    >
+                                    @if ($workEmail)
+                                        <p id="field-{{ $key }}-note" class="mt-2 text-small text-neutral-500">{{ __('careers.internal.work_email_note') }}</p>
+                                    @elseif (isset($prefill[$key]))
+                                        <p class="mt-2 text-small text-neutral-500">{{ __('careers.internal.from_record') }}</p>
+                                    @endif
                             @endswitch
                         </div>
                     @endforeach
@@ -199,6 +224,7 @@
             </section>
         @endforeach
     </form>
+    @endif
 
     <footer class="py-8 text-center text-small text-neutral-500">© {{ now()->year }} Christian Hope Center</footer>
 </main>

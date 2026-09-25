@@ -6,7 +6,7 @@ use BenSampo\Enum\Enum;
 
 final class RecruitmentCampaignLinkMode extends Enum
 {
-    /** The link is shared inside the organisation only; nobody is turned away. */
+    /** Staff only: applicants sign in to HC-HR and apply as themselves. */
     const Internal = 'internal';
 
     const PublicOpen = 'public_open';
@@ -17,7 +17,7 @@ final class RecruitmentCampaignLinkMode extends Enum
     {
         $label = match ($value) {
             self::InvitationOnly => ['en' => 'Invitation only', 'ar' => 'للمدعوين فقط'],
-            self::Internal => ['en' => 'Inside the organisation', 'ar' => 'داخل المنظمة'],
+            self::Internal => ['en' => 'Staff only', 'ar' => 'للموظفين فقط'],
             default => ['en' => 'Public link', 'ar' => 'رابط عام'],
         };
 
