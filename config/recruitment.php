@@ -186,6 +186,9 @@ return [
         ],
         'bulk_limit' => 500,
         'notice_queue' => env('RECRUITMENT_NOTICE_QUEUE', 'default'),
+        // A rejection email still unsent after this long is dispatched again
+        // by recruitment:rejection-notices (a job that never reached the queue).
+        'redispatch_after_minutes' => 15,
     ],
 
     /*

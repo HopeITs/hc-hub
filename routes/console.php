@@ -4,6 +4,7 @@ use App\Console\Commands\ApplyDueRecruitmentRequests;
 use App\Console\Commands\DeactivateContract;
 use App\Console\Commands\DeactivateEmployee;
 use App\Console\Commands\ProcessContractAutoRenewals;
+use App\Console\Commands\RedispatchRecruitmentRejectionNotices;
 use App\Console\Commands\ScanRecruitmentFiles;
 use App\Console\Commands\SendContractExpirationWarnings;
 use App\Console\Commands\SendRecruitmentInterviewReminders;
@@ -33,6 +34,8 @@ Schedule::command(ScanRecruitmentFiles::class)->everyFifteenMinutes()->withoutOv
 // Phase 2 Task 7: candidate interview reminders (offsets in
 // config/recruitment.php), plus a retry for interview emails a down queue held.
 Schedule::command(SendRecruitmentInterviewReminders::class)->everyFiveMinutes()->withoutOverlapping();
+// Rejection emails committed as queued whose job never reached the queue.
+Schedule::command(RedispatchRecruitmentRejectionNotices::class)->everyFiveMinutes()->withoutOverlapping();
 Schedule::call(function () {
     Log::info('الكرون جوب يعمل بنجاح!');
 })->daily();
