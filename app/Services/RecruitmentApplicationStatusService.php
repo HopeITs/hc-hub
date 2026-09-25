@@ -1,0 +1,372 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\RecruitmentApplicationStatus as Status;
+use App\Models\RecruitmentApplication;
+use App\Models\RecruitmentApplicationDecision;
+use App\Models\RecruitmentRejectionNotice;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
+
+/**
+ * The decision action service: every application status change goes through
+ * here, each one recorded as a decision with its actor, date, reason and
+ * from/to status. RecruitmentApplication refuses any other status write.
+ *
+ * Screening (review, shortlist, reject) and the accept decision are manual
+ * moves made from the UI. Interview, offer and hiring statuses belong to the
+ * steps that produce them, so those states offer only the moves listed here.
+ *
+ * Authorization is asked here as well as in the component: the component's
+ * check guards the screen, this one guards the decision, whoever calls it.
+ *
+ * A closed or expired campaign does not block screening: reviewing what came
+ * in is exactly what happens after the window shuts.
+ */
+class RecruitmentApplicationStatusService
+{
+    public const AUDIT_LOG = 'recruitment-application-status';
+
+    public const REASON_CODE = 'manual_review';
+
+    public const REASON_OTHER = 'other';
+
+    public const MIN_REASON = 10;
+
+    /**
+     * What a bulk rejection may move. Anyone past screening deserves a
+     * decision taken on its own screen, not as one row of a batch.
+     */
+    public const BULK_REJECTABLE = [Status::Submitted, Status::UnderReview, Status::Shortlisted];
+
+    /** @var array<string, array<int, string>> */
+    private const TRANSITIONS = [
+        Status::Submitted => [Status::UnderReview, Status::Shortlisted, Status::Rejected],
+        Status::UnderReview => [Status::Shortlisted, Status::Rejected],
+        Status::Shortlisted => [Status::UnderReview, Status::Selected, Status::Rejected],
+        Status::Interviewed => [Status::Selected, Status::Rejected],
+        Status::Selected => [Status::Shortlisted, Status::Rejected],
+        Status::Rejected => [Status::UnderReview],
+    ];
+
+    public function __construct(
+        private readonly ActivityLogger $activity,
+        private readonly RecruitmentRejectionNoticeService $notices,
+    ) {}
+
+    /** @return array<int, string> */
+    public function targets(RecruitmentApplication $application): array
+    {
+        return self::TRANSITIONS[$application->status] ?? [];
+    }
+
+    /** @return array<int, string> the moves this user may make from here */
+    public function targetsFor(User $actor, RecruitmentApplication $application): array
+    {
+        return array_values(array_filter(
+            $this->targets($application),
+            fn (string $to): bool => Gate::forUser($actor)->allows($this->ability($to), $application),
+        ));
+    }
+
+    /** Accepting needs its own grant; every other move is a screening one. */
+    public function ability(string $to): string
+    {
+        return $to === Status::Selected ? 'accept' : 'changeStatus';
+    }
+
+    /** @return array<int, string> */
+    public function rejectionReasons(): array
+    {
+        return array_values(config('recruitment.decisions.rejection_reasons', []));
+    }
+
+    public function requiresReasonCode(string $to): bool
+    {
+        return $to === Status::Rejected;
+    }
+
+    /**
+     * A written reason: to take back a rejection or an acceptance, or when
+     * the rejection reason is "other".
+     */
+    public function requiresReason(string $from, string $to, ?string $reasonCode = null): bool
+    {
+        return $from === Status::Rejected
+            || $from === Status::Selected
+            || ($to === Status::Rejected && $reasonCode === self::REASON_OTHER);
+    }
+
+    public function bulkLimit(): int
+    {
+        return max(1, (int) config('recruitment.decisions.bulk_limit', 500));
+    }
+
+    /**
+     * $expectedFrom is the status the reviewer was looking at. If someone else
+     * moved the application in the meantime, this refuses rather than
+     * overwriting a decision the reviewer never saw.
+     *
+     * $notify applies to rejections only. The decision is committed first;
+     * the email is queued afterwards and can fail without touching it.
+     */
+    public function change(
+        User $actor,
+        RecruitmentApplication $application,
+        string $expectedFrom,
+        string $to,
+        ?string $reason,
+        ?string $reasonCode = null,
+        bool $notify = false,
+    ): RecruitmentApplicationDecision {
+        Gate::forUser($actor)->authorize($this->ability($to), $application);
+
+        $reason = trim((string) $reason) ?: null;
+        $reasonCode = trim((string) $reasonCode) ?: null;
+        $notices = [];
+
+        $decision = DB::transaction(function () use ($actor, $application, $expectedFrom, $to, $reason, $reasonCode, $notify, &$notices): RecruitmentApplicationDecision {
+            $locked = RecruitmentApplication::query()->whereKey($application->getKey())->lockForUpdate()->firstOrFail();
+            $from = (string) $locked->status;
+
+            if ($from !== $expectedFrom) {
+                throw ValidationException::withMessages(['statusTarget' => __('recruitment-applicant.status_change.stale')]);
+            }
+
+            if (! in_array($to, self::TRANSITIONS[$from] ?? [], true)) {
+                throw ValidationException::withMessages(['statusTarget' => __('recruitment-applicant.status_change.not_allowed')]);
+            }
+
+            $this->validateReason($from, $to, $reasonCode, $reason, 'statusReasonCode', 'statusReason');
+
+            $decision = $this->record($actor, $locked, $from, $to, $reasonCode, $reason);
+
+            if ($notify && $to === Status::Rejected) {
+                [$outcome, $notice] = $this->notices->prepare($actor, $locked, $decision);
+                if ($notice !== null) {
+                    $notices[] = $notice;
+                }
+            }
+
+            return $decision;
+        });
+
+        $this->notices->dispatch($notices);
+
+        return $decision;
+    }
+
+    /**
+     * Rejects every selected application still in screening, and — when
+     * $notify — queues one apology email per candidate.
+     *
+     * The ids come from the browser. Any the actor cannot see are dropped and
+     * counted, never named. Already-rejected applications keep their original
+     * decision; with $notify they get the email only if they never had one.
+     * Applications past screening are left alone.
+     *
+     * The decisions are one transaction: all are saved or none are. Emails are
+     * queued only after it commits, and a failure there is recorded on the
+     * notice, never rolled back into the decisions.
+     *
+     * @param  iterable<mixed>  $applicationIds
+     * @return array{rejected: int, already_rejected: int, ineligible: int, out_of_scope: int, queued: int, already_notified: int, no_recipient: int, queue_failed: int}
+     */
+    public function bulkReject(User $actor, iterable $applicationIds, mixed $reasonCode, mixed $reason, bool $notify): array
+    {
+        Gate::forUser($actor)->authorize('bulkReject', RecruitmentApplication::class);
+
+        $ids = $this->normalizeIds($applicationIds);
+        $reasonCode = is_string($reasonCode) ? trim($reasonCode) : null;
+        $reason = is_string($reason) ? (trim($reason) ?: null) : null;
+
+        // Validated before any row is touched, with no status to lean on.
+        $this->validateReason(Status::Submitted, Status::Rejected, $reasonCode, $reason, 'reasonCode', 'reason');
+
+        $outcome = [
+            'rejected' => [], 'already_rejected' => [], 'ineligible' => [],
+            'queued' => [], 'already_notified' => [], 'no_recipient' => [],
+        ];
+        $notices = [];
+
+        DB::transaction(function () use ($actor, $ids, $reasonCode, $reason, $notify, &$outcome, &$notices): void {
+            $applications = RecruitmentApplication::query()
+                ->visibleTo($actor)
+                ->whereKey($ids)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+
+            if ($notify) {
+                $this->preloadForNotices($applications);
+            }
+
+            foreach ($applications as $application) {
+                $from = (string) $application->status;
+                $decision = null;
+
+                if ($from === Status::Rejected) {
+                    $outcome['already_rejected'][] = $application->getKey();
+                } elseif (in_array($from, self::BULK_REJECTABLE, true)) {
+                    $decision = $this->record($actor, $application, $from, Status::Rejected, $reasonCode, $reason, bulk: true);
+                    $outcome['rejected'][] = $application->getKey();
+                } else {
+                    $outcome['ineligible'][] = $application->getKey();
+
+                    continue;
+                }
+
+                if ($notify) {
+                    [$result, $notice] = $this->notices->prepare($actor, $application, $decision);
+                    $outcome[$result][] = $application->getKey();
+                    if ($notice !== null) {
+                        $notices[] = $notice;
+                    }
+                }
+            }
+
+            $outcome['out_of_scope'] = count($ids) - $applications->count();
+
+            // One entry describing the whole batch, alongside the per-application
+            // entries record() writes. Out-of-scope ids are counted, not listed.
+            $this->activity->log(
+                'recruitment_application.bulk_rejected',
+                causer: $actor,
+                properties: [
+                    'reason_code' => $reasonCode,
+                    'notify' => $notify,
+                    'requested' => count($ids),
+                    'rejected_ids' => $outcome['rejected'],
+                    'already_rejected_ids' => $outcome['already_rejected'],
+                    'ineligible_ids' => $outcome['ineligible'],
+                    'notice_queued_ids' => $outcome['queued'],
+                    'out_of_scope_count' => $outcome['out_of_scope'],
+                    'role' => $actor->myRole(),
+                ],
+                logName: self::AUDIT_LOG,
+            );
+        });
+
+        $queueFailed = $this->notices->dispatch($notices);
+
+        return [
+            'rejected' => count($outcome['rejected']),
+            'already_rejected' => count($outcome['already_rejected']),
+            'ineligible' => count($outcome['ineligible']),
+            'out_of_scope' => $outcome['out_of_scope'],
+            'queued' => count($outcome['queued']) - $queueFailed,
+            'already_notified' => count($outcome['already_notified']),
+            'no_recipient' => count($outcome['no_recipient']),
+            'queue_failed' => $queueFailed,
+        ];
+    }
+
+    /**
+     * The applicant (for anonymization) and any existing notice (locked), in
+     * two queries for the whole batch instead of two per application.
+     */
+    private function preloadForNotices(EloquentCollection $applications): void
+    {
+        $applications->load('applicant:id,anonymized_at');
+
+        $notices = RecruitmentRejectionNotice::query()
+            ->whereIn('application_id', $applications->modelKeys())
+            ->lockForUpdate()
+            ->get()
+            ->keyBy('application_id');
+
+        $applications->each(fn (RecruitmentApplication $application) => $application->setRelation(
+            'rejectionNotice',
+            $notices->get($application->getKey()),
+        ));
+    }
+
+    private function validateReason(string $from, string $to, ?string $reasonCode, ?string $reason, string $codeField, string $reasonField): void
+    {
+        if ($this->requiresReasonCode($to) && ! in_array($reasonCode, $this->rejectionReasons(), true)) {
+            throw ValidationException::withMessages([$codeField => __('recruitment-applicant.decisions.reason_code_required')]);
+        }
+
+        if ($this->requiresReason($from, $to, $reasonCode) && ($reason === null || mb_strlen($reason) < self::MIN_REASON)) {
+            throw ValidationException::withMessages([
+                $reasonField => __('recruitment-applicant.status_change.reason_required', ['min' => self::MIN_REASON]),
+            ]);
+        }
+    }
+
+    /** Call inside a transaction, on a row already locked and validated. */
+    private function record(
+        User $actor,
+        RecruitmentApplication $locked,
+        string $from,
+        string $to,
+        ?string $reasonCode,
+        ?string $reason,
+        bool $bulk = false,
+    ): RecruitmentApplicationDecision {
+        RecruitmentApplication::applyDecision($locked, $to);
+
+        $decision = RecruitmentApplicationDecision::query()->forceCreate([
+            'application_id' => $locked->getKey(),
+            'from_status' => $from,
+            'to_status' => $to,
+            'reason_code' => $to === Status::Rejected ? $reasonCode : self::REASON_CODE,
+            'reason_text' => $reason,
+            'decided_by_user_id' => $actor->getKey(),
+            'decided_at' => now(),
+        ]);
+
+        // A reopened application's queued apology must not go out.
+        if ($from === Status::Rejected) {
+            RecruitmentRejectionNotice::query()
+                ->where('application_id', $locked->getKey())
+                ->where('status', RecruitmentRejectionNotice::STATUS_QUEUED)
+                ->update(['status' => RecruitmentRejectionNotice::STATUS_CANCELLED]);
+        }
+
+        $this->activity->log(
+            'recruitment_application.status_changed',
+            subject: $locked,
+            causer: $actor,
+            properties: [
+                'from' => $from,
+                'to' => $to,
+                'decision_id' => $decision->getKey(),
+                'reason_code' => $decision->reason_code,
+                'bulk' => $bulk,
+                'role' => $actor->myRole(),
+            ],
+            logName: self::AUDIT_LOG,
+        );
+
+        return $decision;
+    }
+
+    /**
+     * @param  iterable<mixed>  $applicationIds
+     * @return array<int, int>
+     */
+    private function normalizeIds(iterable $applicationIds): array
+    {
+        $ids = [];
+        foreach ($applicationIds as $id) {
+            if (is_scalar($id) && ($int = filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]])) !== false) {
+                $ids[$int] = $int;
+            }
+        }
+
+        if ($ids === []) {
+            throw ValidationException::withMessages(['applicationIds' => __('recruitment-applicant.decisions.bulk_empty')]);
+        }
+
+        if (count($ids) > $this->bulkLimit()) {
+            throw ValidationException::withMessages(['applicationIds' => __('recruitment-applicant.decisions.bulk_too_many', ['max' => $this->bulkLimit()])]);
+        }
+
+        return array_values($ids);
+    }
+}

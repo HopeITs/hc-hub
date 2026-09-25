@@ -41,4 +41,18 @@ return [
         'from_record' => 'From your employee record. You can change it.',
         'work_email_note' => 'Your work email. The recruitment team will reply here.',
     ],
+    'errors' => [
+        'generic' => 'We could not accept this application. Check the information and try again while the campaign is open.',
+        'invalid_request' => 'The form was not sent correctly. Reload the page and submit the application again. If your browser fills forms automatically, check that it did not fill a hidden field.',
+        'validation' => 'Some answers need to be corrected:',
+        'missing_name' => 'Enter your full name.',
+        'invalid_email' => 'Enter a valid email address.',
+        'invalid_phone' => 'Enter a valid mobile number containing digits.',
+        'link_expired' => 'This application link has expired or was replaced. Ask the recruitment team for the current link.',
+        'link_changed' => 'This application link was replaced while you were filling in the form. Ask the recruitment team for the current link.',
+        'campaign_closed' => 'This vacancy is no longer accepting applications.',
+        'invalid_file' => 'One of the uploaded files was not received correctly. Choose the file again and resubmit.',
+        'file_rejected' => 'One of the uploaded files was refused:',
+        'server_error' => 'Something went wrong on our side while saving your application. Please try again in a few minutes.',
+    ],
 ];

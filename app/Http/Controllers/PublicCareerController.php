@@ -30,6 +30,7 @@ class PublicCareerController extends Controller
             'locale' => $locale,
             'internal' => $this->internalState($request, $token, $service, $locale),
             'submissionError' => null,
+            'submissionErrors' => [],
             'submissionKey' => bin2hex(random_bytes(32)),
         ]);
     }
@@ -74,12 +75,16 @@ class PublicCareerController extends Controller
                 $request->userAgent(),
                 $request->user(),
             );
-        } catch (PublicRecruitmentUnavailableException|PublicRecruitmentSubmissionException) {
+        } catch (PublicRecruitmentUnavailableException|PublicRecruitmentSubmissionException $exception) {
+            $reason = $exception instanceof PublicRecruitmentSubmissionException ? $exception->reason : 'link_expired';
+            $message = __("careers.errors.{$reason}");
+
             try {
                 $page = $links->publicPage($token);
             } catch (PublicRecruitmentUnavailableException) {
                 return response()->view('recruitment.careers.submission-error', [
                     'locale' => $locale,
+                    'submissionError' => $message,
                 ], 422);
             }
 
@@ -87,7 +92,10 @@ class PublicCareerController extends Controller
                 ...$page,
                 'locale' => $locale,
                 'internal' => $this->internalState($request, $token, $links, $locale),
-                'submissionError' => __('careers.generic_submission_error'),
+                'submissionError' => $message,
+                'submissionErrors' => $exception instanceof PublicRecruitmentSubmissionException
+                    ? collect($exception->errors)->flatten()->unique()->values()->all()
+                    : [],
                 'submissionKey' => preg_match('/^[a-f0-9]{64}$/', (string) $request->input('submission_key')) === 1
                     ? Str::lower((string) $request->input('submission_key'))
                     : bin2hex(random_bytes(32)),

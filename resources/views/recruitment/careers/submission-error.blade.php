@@ -9,7 +9,7 @@
     <section class="w-full rounded-[16px] border border-neutral-200 bg-white p-8 text-center shadow-e1 sm:p-12">
         <x-recruitment.public-brand-banner />
         <h1 class="mt-8 text-title font-bold text-neutral-900">{{ __('careers.submission_error_title') }}</h1>
-        <p class="mx-auto mt-3 max-w-xl text-body leading-7 text-neutral-600">{{ __('careers.generic_submission_error') }}</p>
+        <p class="mx-auto mt-3 max-w-xl text-body leading-7 text-neutral-600">{{ $submissionError ?? __('careers.generic_submission_error') }}</p>
     </section>
 </main>
 @endsection

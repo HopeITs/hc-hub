@@ -4,6 +4,7 @@ use App\Console\Commands\ApplyDueRecruitmentRequests;
 use App\Console\Commands\DeactivateContract;
 use App\Console\Commands\DeactivateEmployee;
 use App\Console\Commands\ProcessContractAutoRenewals;
+use App\Console\Commands\ScanRecruitmentFiles;
 use App\Console\Commands\SendContractExpirationWarnings;
 use App\Console\Commands\SyncRecruitmentCampaignStates;
 use Illuminate\Foundation\Inspiring;
@@ -25,6 +26,9 @@ Schedule::command(ApplyDueRecruitmentRequests::class)->dailyAt('00:30');
 // Keep scheduled starts and ends reflected in the stored campaign status.
 // Public access still rechecks the clock on every request.
 Schedule::command(SyncRecruitmentCampaignStates::class)->everyMinute()->withoutOverlapping();
+// Safety net for the antivirus: anything still in quarantine (a queue that
+// was down, clamd unreachable through every retry) is queued again.
+Schedule::command(ScanRecruitmentFiles::class)->everyFifteenMinutes()->withoutOverlapping();
 Schedule::call(function () {
     Log::info('الكرون جوب يعمل بنجاح!');
 })->daily();

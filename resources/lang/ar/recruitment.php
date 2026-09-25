@@ -298,6 +298,7 @@ return [
     'navigation_requests' => 'الطلبات',
     'navigation_pending_approvals' => 'الموافقات المعلّقة',
     'navigation_campaigns' => 'الحملات',
+    'navigation_applicants' => 'المتقدمون',
     'list_description' => 'متابعة طلبات التوظيف وتعديل الملاك ضمن نطاق صلاحياتك.',
     'details' => 'تفاصيل الطلب',
     'back' => 'العودة إلى الطلبات',

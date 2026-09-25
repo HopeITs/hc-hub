@@ -54,6 +54,10 @@ Route::get('/ID/{employee}/photo', [EmployeeAvatarController::class, 'digitalId'
     ->middleware(['signed', 'throttle:60,1'])
     ->name('digital-id.avatar');
 
+// Public (unauthenticated) recruitment routes — see the file itself for why
+// this can't simply live in routes/recruitment.php.
+require __DIR__.'/recruitment-public.php';
+
 Route::group(
     [
         'prefix' => LaravelLocalization::setLocale(),

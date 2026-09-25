@@ -15,6 +15,14 @@ use Mcamara\LaravelLocalization\Middleware\LocaleSessionRedirect;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
+// Threaded Apache (mod_php on Windows) shares putenv()/getenv() across every
+// request in the process, while $_ENV/$_SERVER are per request. Concurrent
+// requests then see each other's half-loaded environment and boot without
+// .env at all (no APP_KEY, env('APP_URL') null). Keep .env in the superglobals.
+if (PHP_SAPI === 'apache2handler' && PHP_ZTS) {
+    Illuminate\Support\Env::disablePutenv();
+}
+
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',

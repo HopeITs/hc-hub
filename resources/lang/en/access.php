@@ -81,6 +81,7 @@ return [
         'recruitment-job-posts' => 'Job posts',
         'recruitment-forms' => 'Application forms',
         'recruitment-links' => 'Application links',
+        'recruitment-applicants' => 'Applicants',
     ],
     'actions' => [
         'view' => 'View', 'view-own' => 'View own', 'view-all' => 'View all',
@@ -94,5 +95,15 @@ return [
         'approve' => 'Approve', 'reject' => 'Reject',
         'request-changes' => 'Request changes', 'direct-open' => 'Open a vacancy directly',
         'approve-finance' => 'Financial approval', 'submit-without-manager' => 'Submit without manager approval',
+        'download-cv' => 'Download CVs',
+        'add-notes' => 'Add internal notes',
+        'delete-notes' => 'Delete internal notes',
+        'archive-cv' => 'Archive CVs',
+        'change-status' => 'Change application status',
+        'tag' => 'Tag applications',
+        'bulk-tag' => 'Bulk-tag applications',
+        'manage-tags' => 'Manage the tag list',
+        'accept' => 'Accept candidates',
+        'bulk-reject' => 'Bulk-reject applications and email candidates',
     ],
 ];

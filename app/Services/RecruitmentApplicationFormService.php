@@ -430,13 +430,25 @@ class RecruitmentApplicationFormService
         $fields = $this->normalizeFields($version->fields_json);
         $keys = array_column($fields, 'key');
         $rules = ['answers' => ['required', 'array:'.implode(',', $keys)]];
+        $attributes = [];
 
         foreach ($fields as $field) {
             $path = 'answers.'.$field['key'];
+            $label = $field['label'][app()->getLocale()] ?? '';
+            $attributes[$path] = $attributes[$path.'.*'] = $label !== '' ? $label : $field['label']['en'];
             $presence = $field['required'] ? ['required'] : ['nullable'];
             $options = array_column($field['options'], 'value');
 
             if ($field['type'] === 'file' && $field['multiple']) {
+                // An untouched `name="x[]"` file input still posts one empty
+                // part, which arrives as [null]; that means "no files".
+                if (is_array($answers[$field['key']] ?? null)) {
+                    $answers[$field['key']] = array_values(array_filter(
+                        $answers[$field['key']],
+                        fn (mixed $upload): bool => $upload !== null,
+                    )) ?: null;
+                }
+
                 $rules[$path] = [...$presence, 'array', 'max:'.$field['max_files']];
                 $rules[$path.'.*'] = ['file', 'mimes:'.implode(',', $field['accept']), 'max:10240'];
 
@@ -457,7 +469,7 @@ class RecruitmentApplicationFormService
             };
         }
 
-        return Validator::make(['answers' => $answers], $rules)->validate()['answers'];
+        return Validator::make(['answers' => $answers], $rules, [], $attributes)->validate()['answers'];
     }
 
     /** @return array<int, array<string, mixed>> */

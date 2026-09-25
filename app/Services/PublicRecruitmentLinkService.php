@@ -362,13 +362,13 @@ class PublicRecruitmentLinkService
         if ($link->status !== PublicRecruitmentLink::STATUS_ACTIVE
             || ! $link->expires_at
             || $link->expires_at->isPast()) {
-            throw new PublicRecruitmentSubmissionException;
+            throw PublicRecruitmentSubmissionException::because('link_expired');
         }
 
         $this->assertFrozenVersions($link);
 
         if (! $this->acceptingApplications($link->campaign)) {
-            throw new PublicRecruitmentSubmissionException;
+            throw PublicRecruitmentSubmissionException::because('campaign_closed');
         }
     }
 
