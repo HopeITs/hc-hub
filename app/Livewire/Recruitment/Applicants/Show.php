@@ -166,6 +166,7 @@ class Show extends Component
                 'campaign.vacancy.position',
                 'files.archivedBy.profile',
                 'files.archiveNote',
+                'files.cvAnalysis',
                 'decisions' => fn ($decisions) => $decisions->latest('decided_at')->latest('id'),
                 'decisions.decidedBy.profile',
                 'indicatorSnapshot',

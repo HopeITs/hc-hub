@@ -5,10 +5,12 @@ namespace App\Services;
 use App\Enums\RecruitmentFileScanStatus;
 use App\Exceptions\UnsafeImageException;
 use App\Exceptions\UnsafeRecruitmentFileException;
+use App\Jobs\ScanRecruitmentApplicantFile;
 use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use finfo;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -23,7 +25,8 @@ class RecruitmentApplicantFileService
 
     /**
      * Inspect and quarantine an applicant file. A pending file is deliberately
-     * unavailable for download until an antivirus worker calls markClean().
+     * unavailable for download until ScanRecruitmentApplicantFile (ClamAV)
+     * clears it through markClean().
      *
      * @throws UnsafeRecruitmentFileException
      */
@@ -118,6 +121,16 @@ class RecruitmentApplicantFileService
 
                 return $file->fresh();
             }, 3);
+
+            // Queued once the submission's outer transaction commits (and
+            // dropped if it rolls back). A queue that is down must not fail
+            // the applicant's submission: the scheduled sweep scans anything
+            // left pending.
+            $fileId = $record->getKey();
+            DB::afterCommit(fn () => rescue(
+                fn () => Bus::dispatch(new ScanRecruitmentApplicantFile($fileId)),
+                report: true,
+            ));
 
             return $record;
         } catch (Throwable $exception) {

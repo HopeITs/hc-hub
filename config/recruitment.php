@@ -188,6 +188,90 @@ return [
         'notice_queue' => env('RECRUITMENT_NOTICE_QUEUE', 'default'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | CV analysis
+    |--------------------------------------------------------------------------
+    |
+    | Runs on a CV only after the antivirus has cleared it, entirely on this
+    | server with free tools: pdftotext (poppler-utils) for PDFs, tesseract
+    | for scanned PDFs, ZipArchive for DOCX and antiword for old .doc files.
+    | Nothing leaves the server and nothing is paid for.
+    |
+    |   apt install poppler-utils tesseract-ocr tesseract-ocr-ara antiword
+    |
+    | What it produces is a reading aid, like the matching indicators: the
+    | skills, education, languages and experience it found, set against what
+    | the recruitment request asked for, with the evidence for each. It never
+    | ranks, filters or decides. Only the extracted facts are stored, never
+    | the CV's text.
+    |
+    */
+
+    'cv_analysis' => [
+        'enabled' => env('RECRUITMENT_CV_ANALYSIS', true),
+        'binaries' => [
+            'pdftotext' => env('PDFTOTEXT_BINARY', 'pdftotext'),
+            'pdftoppm' => env('PDFTOPPM_BINARY', 'pdftoppm'),
+            'tesseract' => env('TESSERACT_BINARY', 'tesseract'),
+            'antiword' => env('ANTIWORD_BINARY', 'antiword'),
+        ],
+        'timeout' => 60,
+        // A PDF yielding less text than this is treated as a scan and OCR'd.
+        'min_text_chars' => 80,
+        'ocr' => [
+            'enabled' => env('RECRUITMENT_CV_OCR', true),
+            'languages' => 'ara+eng',
+            'max_pages' => 3,
+            'dpi' => 200,
+        ],
+        'max_text_chars' => 200000,
+
+        // Bridges between how a request and a CV may name the same skill,
+        // across Arabic and English. Every term in a group matches the others.
+        'skill_synonyms' => [
+            ['excel', 'ms excel', 'microsoft excel', 'إكسل', 'اكسل', 'اكسيل'],
+            ['word', 'ms word', 'microsoft word', 'وورد'],
+            ['ms office', 'microsoft office', 'office', 'أوفيس', 'اوفيس', 'مايكروسوفت أوفيس'],
+            ['powerpoint', 'power point', 'باوربوينت', 'بوربوينت'],
+            ['accounting', 'accountant', 'محاسبة', 'محاسب'],
+            ['communication', 'communication skills', 'تواصل', 'مهارات التواصل', 'اتصال'],
+            ['teamwork', 'team work', 'عمل جماعي', 'العمل ضمن فريق', 'روح الفريق'],
+            ['leadership', 'قيادة', 'القيادة'],
+            ['report writing', 'reporting', 'كتابة التقارير', 'إعداد التقارير', 'تقارير'],
+            ['data entry', 'إدخال البيانات', 'ادخال البيانات'],
+            ['project management', 'إدارة المشاريع', 'ادارة المشاريع'],
+            ['psychosocial support', 'pss', 'الدعم النفسي', 'دعم نفسي اجتماعي'],
+            ['case management', 'إدارة الحالة', 'ادارة الحالات'],
+            ['teaching', 'teacher', 'تدريس', 'مدرس', 'معلم'],
+            ['driving', 'driving license', 'driver', 'قيادة سيارة', 'شهادة سوق', 'سائق'],
+            ['translation', 'translator', 'ترجمة', 'مترجم'],
+            ['networking', 'networks', 'شبكات'],
+            ['programming', 'software development', 'برمجة'],
+            ['first aid', 'الإسعافات الأولية', 'اسعافات اولية'],
+            ['procurement', 'purchasing', 'مشتريات', 'المشتريات'],
+            ['logistics', 'لوجستيات', 'اللوجستيات'],
+            ['monitoring and evaluation', 'm&e', 'meal', 'المراقبة والتقييم', 'الرصد والتقييم'],
+        ],
+
+        // language key => words that name it in a CV
+        'languages' => [
+            'arabic' => ['arabic', 'العربية', 'عربي'],
+            'english' => ['english', 'الإنجليزية', 'الانكليزية', 'الإنكليزية', 'انجليزي', 'انكليزي'],
+            'french' => ['french', 'الفرنسية', 'فرنسي'],
+            'german' => ['german', 'الألمانية', 'ألماني'],
+            'turkish' => ['turkish', 'التركية', 'تركي'],
+            'kurdish' => ['kurdish', 'الكردية', 'كردي'],
+            'armenian' => ['armenian', 'الأرمنية', 'أرمني'],
+        ],
+
+        // A date range on a line with one of these words is schooling, not work.
+        'education_line_words' => [
+            'university', 'college', 'school', 'bachelor', 'master', 'diploma', 'degree', 'faculty', 'institute',
+            'جامعة', 'كلية', 'مدرسة', 'ثانوية', 'بكالوريوس', 'إجازة', 'ماجستير', 'دبلوم', 'معهد', 'شهادة',
+        ],
+    ],
+
     'tags' => [
         'scope_key' => 'organization',
         'min_length' => 2,

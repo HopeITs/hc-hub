@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\RecruitmentFileScanStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -34,6 +35,11 @@ class RecruitmentApplicantFile extends Model implements HasMedia
     public function archiveNote(): BelongsTo
     {
         return $this->belongsTo(RecruitmentApplicantNote::class, 'archive_note_id')->withTrashed();
+    }
+
+    public function cvAnalysis(): HasOne
+    {
+        return $this->hasOne(RecruitmentCvAnalysis::class, 'file_id');
     }
 
     public function registerMediaCollections(): void

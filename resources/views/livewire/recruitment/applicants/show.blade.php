@@ -1,6 +1,7 @@
 @php
     use App\Enums\HiringCampaignStatus;
     use App\Enums\RecruitmentApplicationStatus as ApplicationStatus;
+    use Illuminate\Support\Facades\Gate;
     use Illuminate\Support\Facades\Lang;
     use App\Enums\RecruitmentCvAvailability;
     use App\Models\RecruitmentApplicant;
@@ -113,6 +114,13 @@
                         'snapshot' => $application->indicatorSnapshot,
                     ])
                 @endif
+
+                {{-- Automatic CV reading: only for a cleared CV this user may download. --}}
+                @foreach ($cvFiles as $cvFile)
+                    @if ($cvFile->cvAnalysis && Gate::allows('download', $cvFile))
+                        @include('livewire.recruitment.applicants.partials.cv-analysis', ['analysis' => $cvFile->cvAnalysis])
+                    @endif
+                @endforeach
 
                 <livewire:recruitment.applicants.application-tags :application-id="$application->id" :key="'tags-'.$application->id" />
 
