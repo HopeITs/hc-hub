@@ -34,8 +34,6 @@ return [
         'missing_name' => 'Enter your full name.',
         'invalid_email' => 'Enter a valid email address.',
         'invalid_phone' => 'Enter a valid mobile number containing digits.',
-        'duplicate_email' => 'An application with this email address has already been submitted for this vacancy.',
-        'not_invited' => 'This vacancy is by invitation only, and this email address has no open invitation. Use the email address the invitation was sent to.',
         'link_expired' => 'This application link has expired or was replaced. Ask the recruitment team for the current link.',
         'link_changed' => 'This application link was replaced while you were filling in the form. Ask the recruitment team for the current link.',
         'campaign_closed' => 'This vacancy is no longer accepting applications.',

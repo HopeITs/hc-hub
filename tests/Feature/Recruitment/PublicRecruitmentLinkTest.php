@@ -319,7 +319,7 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->post(
             route('careers.submit', $result['token']),
             $this->validSubmission(' APPLICANT@example.com ', 'Duplicate Applicant'),
-        )->assertUnprocessable()->assertSee(__('careers.errors.duplicate_email'));
+        )->assertUnprocessable()->assertSee(__('careers.errors.generic'));
 
         $this->assertDatabaseCount('recruitment_applicants', 1);
         $this->assertDatabaseCount('recruitment_applications', 1);
@@ -386,7 +386,7 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->post(
             route('careers.submit', $result['token']),
             $this->validSubmission('unknown@example.com', 'Unknown'),
-        )->assertUnprocessable()->assertSee(__('careers.errors.not_invited'));
+        )->assertUnprocessable()->assertSee(__('careers.errors.generic'));
 
         $this->assertSame(1, RecruitmentApplication::query()->count());
         $this->assertSame('used', $invite->fresh()->status);

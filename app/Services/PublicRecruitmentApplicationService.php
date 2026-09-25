@@ -137,7 +137,9 @@ class PublicRecruitmentApplicationService
                     ->where('campaign_id', $campaign->getKey())
                     ->where('email_normalized', $email)
                     ->exists()) {
-                    throw PublicRecruitmentSubmissionException::because('duplicate_email');
+                    // Generic on purpose: a specific reason would tell anyone
+                    // holding the link which emails have already applied.
+                    throw PublicRecruitmentSubmissionException::because('generic');
                 }
 
                 $invite = $this->resolveInvite($campaign, $email);
@@ -272,7 +274,9 @@ class PublicRecruitmentApplicationService
             ->first();
 
         if (! $invite) {
-            throw PublicRecruitmentSubmissionException::because('not_invited');
+            // Generic for the same reason as a duplicate email: it must not
+            // reveal who holds an invitation, or whether it was used.
+            throw PublicRecruitmentSubmissionException::because('generic');
         }
 
         return $invite;

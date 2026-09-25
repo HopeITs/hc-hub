@@ -6,6 +6,7 @@ use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
 use App\Livewire\Recruitment\Approvals\Pending;
 use App\Livewire\Recruitment\Campaigns\Create as CampaignCreate;
 use App\Livewire\Recruitment\Campaigns\Index as CampaignIndex;
+use App\Livewire\Recruitment\Campaigns\Invites;
 use App\Livewire\Recruitment\Campaigns\Show as CampaignShow;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
@@ -54,3 +55,10 @@ Route::get('recruitment/applicant-files/{file}/download', [RecruitmentApplicantF
     ->whereNumber('file')
     ->middleware('throttle:60,1')
     ->name('recruitment.applicant-files.download');
+
+// Team 2 (Phase 2 Task 1): stand-alone page for a campaign's invite list.
+// The same InviteTable is also embedded in Team 1's publishing page.
+Route::get('recruitment/campaigns/{campaignId}/invites', Invites::class)
+    ->whereNumber('campaignId')
+    ->middleware('active_permission:recruitment-applicants.manage')
+    ->name('recruitment.campaigns.invites');

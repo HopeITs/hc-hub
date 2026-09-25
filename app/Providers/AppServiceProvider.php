@@ -18,6 +18,7 @@ use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplicantNote;
 use App\Models\RecruitmentApplication;
+use App\Models\RecruitmentCampaignInvite;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentRequestEvent;
 use App\Models\RecruitmentTag;
@@ -25,6 +26,9 @@ use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\Vacancy;
 use App\Observers\ContractObserver;
 use App\Observers\EmployeeObserver;
+use App\Observers\RecruitmentApplicantObserver;
+use App\Observers\RecruitmentApplicationObserver;
+use App\Observers\RecruitmentCampaignInviteObserver;
 use App\Policies\ApplicationFormPolicy;
 use App\Policies\BadgePolicy;
 use App\Policies\CenterPolicy;
@@ -40,6 +44,7 @@ use App\Policies\RecruitmentApplicantFilePolicy;
 use App\Policies\RecruitmentApplicantNotePolicy;
 use App\Policies\RecruitmentApplicantPolicy;
 use App\Policies\RecruitmentApplicationPolicy;
+use App\Policies\RecruitmentCampaignInvitePolicy;
 use App\Policies\RecruitmentRequestEventPolicy;
 use App\Policies\RecruitmentRequestPolicy;
 use App\Policies\RecruitmentTagPolicy;
@@ -125,6 +130,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ApplicationForm::class, ApplicationFormPolicy::class);
         Gate::policy(PublicRecruitmentLink::class, PublicRecruitmentLinkPolicy::class);
         Gate::policy(RecruitmentRequestEvent::class, RecruitmentRequestEventPolicy::class);
+        Gate::policy(RecruitmentCampaignInvite::class, RecruitmentCampaignInvitePolicy::class);
 
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle)
@@ -196,5 +202,13 @@ class AppServiceProvider extends ServiceProvider
 
         Contract::observe(ContractObserver::class);
         Employee::observe(EmployeeObserver::class);
+
+        // Team 2 (Phase 2): rules that must hold for every path that writes
+        // these records — Team 1's public form included — without that code
+        // being modified. Phone-duplicate hint; submission audit; a used
+        // invite is final.
+        RecruitmentApplicant::observe(RecruitmentApplicantObserver::class);
+        RecruitmentApplication::observe(RecruitmentApplicationObserver::class);
+        RecruitmentCampaignInvite::observe(RecruitmentCampaignInviteObserver::class);
     }
 }

@@ -129,10 +129,11 @@ return [
          * one record, tagging many at once, and editing the tag list itself
          * are separate for the same reason. Accepting is a hiring decision
          * layered on top of change-status, and rejecting many at once (which
-         * emails every one of them) is a grant of its own.
+         * emails every one of them) is a grant of its own. 'manage' covers
+         * campaign invites.
          */
         'recruitment-applicants' => [
-            'view', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status',
+            'view', 'manage', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status',
             'tag', 'bulk-tag', 'manage-tags', 'accept', 'bulk-reject',
         ],
     ],
@@ -288,6 +289,10 @@ return [
             'addInvite' => 'recruitment-links.manage',
             'cancelInvite' => 'recruitment-links.manage',
         ],
+        // Team 2's invite screen (also embedded in the publishing page). Each
+        // action also runs RecruitmentCampaignInvitePolicy (campaign scope).
+        'recruitment.campaigns.invites' => ['add' => 'recruitment-applicants.manage'],
+        'recruitment.campaigns.invite-table' => ['cancelInvite' => 'recruitment-applicants.manage'],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
             'create' => 'leaves.create', 'delete' => 'leaves.delete',
@@ -448,11 +453,19 @@ return [
         'auth.role-switcher' => ['switchTo', 'refreshRoles'],
         'settings.password' => ['updatePassword'],
 
+        // --- Public recruitment (Team 2 test form, non-production only) -----
+        // The applicant has no account, so there is no role to check. The
+        // opaque link token is the credential; the submission service
+        // re-checks link, campaign state and window, and invitation, under a
+        // lock. The route is throttled and not registered in production.
+        'recruitment.public-site.apply' => ['submit'],
+
         // --- Confirmation dialogs -------------------------------------------
         // These only render a "are you sure?" prompt. The action it confirms
         // is the mapped one (delete / toggleItemStatusConfirmed), and that is
         // where the permission and the policy check live.
         'badges.badges-table' => ['confirmDelete'],
+        'recruitment.campaigns.invite-table' => ['confirmCancel'],
         'basics.annual-leave-rule-table' => ['confirmDelete'],
         'basics.checklist-item-table' => ['confirmDelete'],
         'basics.city-table' => ['confirmToggleItemStatus'],

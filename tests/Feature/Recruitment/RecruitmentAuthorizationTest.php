@@ -64,7 +64,7 @@ class RecruitmentAuthorizationTest extends TestCase
         $recruitment = collect(AccessPermissionCatalog::names())
             ->filter(fn (string $name): bool => str_starts_with($name, 'recruitment-'));
 
-        $this->assertCount(32, $recruitment);
+        $this->assertCount(33, $recruitment);
         $this->assertSame(
             $recruitment->sort()->values()->all(),
             Permission::query()
@@ -76,8 +76,8 @@ class RecruitmentAuthorizationTest extends TestCase
         );
 
         $counts = [
-            'super-admin' => 30,
-            'HR-SYR' => 30,
+            'super-admin' => 31,
+            'HR-SYR' => 31,
             'general-manager' => 13,
             'manager' => 8,
             'employee' => 0,
@@ -122,7 +122,7 @@ class RecruitmentAuthorizationTest extends TestCase
     {
         $role = Role::findOrCreate('HR-TAR', 'web');
 
-        $this->assertSame(30, $role->permissions()->where('name', 'like', 'recruitment-%')->count());
+        $this->assertSame(31, $role->permissions()->where('name', 'like', 'recruitment-%')->count());
         $this->assertFalse($role->hasPermissionTo('recruitment-requests.approve-finance'));
         $this->assertFalse($role->hasPermissionTo('recruitment-requests.submit-without-manager'));
 
