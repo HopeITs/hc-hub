@@ -9,6 +9,8 @@ use App\Enums\RecruitmentRequestType;
 use App\Enums\RecruitmentScopeType;
 use App\Enums\WorkflowStepKey;
 use App\Livewire\Layout\Sidebar;
+use App\Livewire\Recruitment\Approvals\Pending;
+use App\Livewire\Recruitment\Approvals\PendingApprovalTable;
 use App\Models\City;
 use App\Models\Contract;
 use App\Models\ContractType;
@@ -31,6 +33,7 @@ use App\Services\RecruitmentScopeResolver;
 use App\Services\RecruitmentWorkflowInstanceService;
 use Database\Seeders\RecruitmentWorkflowSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
@@ -287,12 +290,12 @@ class RecruitmentWorkflowInstanceTest extends TestCase
         app(RecruitmentWorkflowInstanceService::class)->start($fixtures['request'], $fixtures['version']);
 
         Livewire::actingAs($fixtures['manager'])
-            ->test(\App\Livewire\Recruitment\Approvals\Pending::class)
+            ->test(PendingApprovalTable::class)
             ->assertOk()
             ->assertSee($fixtures['request']->request_number);
 
         Livewire::actingAs($fixtures['finance'])
-            ->test(\App\Livewire\Recruitment\Approvals\Pending::class)
+            ->test(PendingApprovalTable::class)
             ->assertOk()
             ->assertDontSee($fixtures['request']->request_number);
     }
@@ -324,6 +327,72 @@ class RecruitmentWorkflowInstanceTest extends TestCase
         $this->actingAs($fixtures['manager'])
             ->get(route('recruitment.approvals.pending'))
             ->assertOk();
+    }
+
+    public function test_the_queue_page_summarises_the_wait_and_shows_a_calm_empty_state(): void
+    {
+        $fixtures = $this->normalWorkflowFixtures();
+        app(RecruitmentWorkflowInstanceService::class)->start($fixtures['request'], $fixtures['version']);
+
+        Livewire::actingAs($fixtures['manager'])
+            ->test(Pending::class)
+            ->assertOk()
+            ->assertViewHas('waiting', 1)
+            ->assertSee(__('recruitment-workflow.summary_waiting'))
+            ->assertDontSee('data-pending-empty', false);
+
+        // The finance approver is eligible but nothing has reached him yet.
+        Livewire::actingAs($fixtures['finance'])
+            ->test(Pending::class)
+            ->assertOk()
+            ->assertViewHas('waiting', 0)
+            ->assertSee(__('recruitment-workflow.empty_title'));
+    }
+
+    public function test_waiting_is_counted_from_when_the_step_became_yours(): void
+    {
+        $fixtures = $this->normalWorkflowFixtures();
+        $instance = app(RecruitmentWorkflowInstanceService::class)->start($fixtures['request'], $fixtures['version']);
+        $instance->forceFill(['started_at' => now()->subDays(10)])->save();
+
+        Livewire::actingAs($fixtures['manager'])
+            ->test(PendingApprovalTable::class)
+            ->assertSee(trans_choice('recruitment-workflow.waiting_days', 10, ['count' => 10]));
+
+        // The manager signs two days ago: finance has waited two days, not ten.
+        $instance->steps()
+            ->whereHas('workflowStep', fn ($steps) => $steps->where('step_order', 1))
+            ->update(['decision' => 1, 'acted_at' => now()->subDays(2), 'acted_by_user_id' => $fixtures['manager']->id]);
+        $instance->forceFill(['current_step_order' => 2])->save();
+
+        Livewire::actingAs($fixtures['finance'])
+            ->test(PendingApprovalTable::class)
+            ->assertSee($fixtures['request']->request_number)
+            ->assertSee(trans_choice('recruitment-workflow.waiting_days', 2, ['count' => 2]))
+            ->assertDontSee(trans_choice('recruitment-workflow.waiting_days', 10, ['count' => 10]));
+    }
+
+    /** Production runs with a table prefix; the raw part of the query must carry it too. */
+    public function test_the_waiting_time_query_respects_a_table_prefix(): void
+    {
+        $default = config('database.default');
+        config(['database.connections.prefixed' => [...config("database.connections.{$default}"), 'prefix' => 'hchr_']]);
+        DB::setDefaultConnection('prefixed');
+
+        try {
+            $pending = app(RecruitmentPendingApprovalQuery::class);
+            $sql = $pending->forUser((new User)->forceFill(['id' => 1]))
+                ->reorder()
+                ->addSelect(['waiting_since' => $pending->waitingSince()])
+                ->toSql();
+        } finally {
+            DB::setDefaultConnection($default);
+            DB::purge('prefixed');
+        }
+
+        $this->assertStringContainsString('MAX("hchr_previous_steps"."acted_at")', $sql);
+        $this->assertStringContainsString('"hchr_pending_instances"."started_at"', $sql);
+        $this->assertStringNotContainsString('MAX(previous_steps', $sql);
     }
 
     public function test_managing_staff_who_cannot_raise_requests_does_not_make_an_approver(): void
@@ -373,7 +442,7 @@ class RecruitmentWorkflowInstanceTest extends TestCase
 
         $this->assertTrue(app(RecruitmentApproverEligibility::class)->mayReceiveApprovals($fixtures['requester']));
         Livewire::actingAs($fixtures['requester'])
-            ->test(\App\Livewire\Recruitment\Approvals\Pending::class)
+            ->test(PendingApprovalTable::class)
             ->assertOk()
             ->assertSee($fixtures['request']->request_number);
     }

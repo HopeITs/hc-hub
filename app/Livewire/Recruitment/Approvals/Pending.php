@@ -5,13 +5,12 @@ namespace App\Livewire\Recruitment\Approvals;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Services\RecruitmentApproverEligibility;
 use App\Services\RecruitmentPendingApprovalQuery;
+use Carbon\CarbonImmutable;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class Pending extends Component
 {
     use AuthorizesActivePermissions;
-    use WithPagination;
 
     public function mount(): void
     {
@@ -24,10 +23,14 @@ class Pending extends Component
 
     public function render()
     {
-        $items = app(RecruitmentPendingApprovalQuery::class)
-            ->forUser(auth()->user())
-            ->paginate(15);
+        $pending = app(RecruitmentPendingApprovalQuery::class);
+        $queue = $pending->forUser(auth()->user())->setEagerLoads([])->reorder();
+        $oldest = (clone $queue)->select([])->addSelect(['waiting_since' => $pending->waitingSince()])
+            ->pluck('waiting_since')->filter()->min();
 
-        return view('livewire.recruitment.approvals.pending', compact('items'));
+        return view('livewire.recruitment.approvals.pending', [
+            'waiting' => (clone $queue)->count(),
+            'longest' => $oldest ? (int) CarbonImmutable::parse($oldest)->diffInDays(now()) : null,
+        ]);
     }
 }

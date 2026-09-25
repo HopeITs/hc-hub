@@ -1,57 +1,37 @@
 <x-slot:title>{{ __('recruitment-workflow.pending_approvals') }}</x-slot:title>
 
 <div class="space-y-6">
-    <div>
-        <h1 class="text-h2 font-semibold text-neutral-900">
-            {{ __('recruitment-workflow.pending_approvals') }}
-        </h1>
-        <p class="mt-2 text-secondary-medium">
-            {{ __('recruitment-workflow.pending_approvals_description') }}
-        </p>
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <livewire:layout.breadcrumbs :title="__('recruitment.navigation_pending_approvals')" :crumbs="[
+            ['label' => __('recruitment.navigation_section')],
+            ['label' => __('recruitment.navigation_pending_approvals'), 'route' => 'recruitment.approvals.pending'],
+        ]" />
+
+        <div class="flex flex-wrap gap-3" data-pending-summary>
+            <div class="min-w-36 rounded-surface border border-neutral-200 bg-white px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-wide text-secondary-medium">{{ __('recruitment-workflow.summary_waiting') }}</p>
+                <p class="mt-1 text-h3 font-bold {{ $waiting > 0 ? 'text-primary' : 'text-neutral-900' }}">{{ $waiting }}</p>
+            </div>
+            @if ($waiting > 0 && $longest !== null)
+                <div class="min-w-36 rounded-surface border border-neutral-200 bg-white px-4 py-3">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-secondary-medium">{{ __('recruitment-workflow.summary_longest') }}</p>
+                    <p class="mt-1 text-h3 font-bold text-neutral-900">
+                        {{ $longest === 0 ? __('recruitment-workflow.waiting_today') : trans_choice('recruitment-workflow.waiting_days', $longest, ['count' => $longest]) }}
+                    </p>
+                </div>
+            @endif
+        </div>
     </div>
 
-    <x-table>
-        <x-slot name="headings">
-            <x-table.heading>{{ __('recruitment-workflow.request_number') }}</x-table.heading>
-            <x-table.heading>{{ __('recruitment-workflow.requester') }}</x-table.heading>
-            <x-table.heading>{{ __('recruitment-workflow.request_type') }}</x-table.heading>
-            <x-table.heading>{{ __('recruitment-workflow.governorate') }}</x-table.heading>
-            <x-table.heading>{{ __('recruitment-workflow.current_step') }}</x-table.heading>
-            <x-table.heading>{{ __('recruitment-workflow.waiting_since') }}</x-table.heading>
-            <x-table.heading />
-        </x-slot>
-
-        <x-slot name="body">
-            @forelse($items as $item)
-                @php
-                    $request = $item->workflowInstance->request;
-                    $type = \App\Enums\RecruitmentRequestType::getLocalizedName((int) $request->request_type);
-                    $step = \App\Enums\WorkflowStepKey::getLocalizedName((int) $item->workflowStep->step_key);
-                @endphp
-                <tr wire:key="pending-recruitment-approval-{{ $item->id }}">
-                    <x-table.cell>{{ $request->request_number }}</x-table.cell>
-                    <x-table.cell>{{ $request->requester?->profile?->name ?? '—' }}</x-table.cell>
-                    <x-table.cell>{{ $type['value'] }}</x-table.cell>
-                    <x-table.cell>{{ $request->scopeCity?->name ?? '—' }}</x-table.cell>
-                    <x-table.cell>
-                        <span class="rounded-md bg-primary-100 px-2 py-1 text-xs font-semibold text-primary-800">
-                            {{ $step['value'] }}
-                        </span>
-                    </x-table.cell>
-                    <x-table.cell>{{ $item->workflowInstance->started_at?->format('d-m-Y H:i') ?? '—' }}</x-table.cell>
-                    <x-table.cell>
-                        @if(\Illuminate\Support\Facades\Route::has('recruitment.requests.show'))
-                            <x-table.show-btn :href="route('recruitment.requests.show', $request->id)" />
-                        @endif
-                    </x-table.cell>
-                </tr>
-            @empty
-                <x-table.no-data :colspan="7" />
-            @endforelse
-        </x-slot>
-
-        <x-slot name="pagination">
-            {{ $items->links() }}
-        </x-slot>
-    </x-table>
+    @if ($waiting === 0)
+        <div class="rounded-surface border border-neutral-200 bg-white px-6 py-12 text-center" data-pending-empty>
+            <span class="mx-auto flex size-12 items-center justify-center rounded-full border border-primary text-primary" aria-hidden="true">
+                <x-icons.check class="size-6" />
+            </span>
+            <h2 class="mt-4 text-subtitle font-bold text-neutral-900">{{ __('recruitment-workflow.empty_title') }}</h2>
+            <p class="mx-auto mt-2 max-w-md text-body text-secondary-medium">{{ __('recruitment-workflow.empty_message') }}</p>
+        </div>
+    @else
+        <livewire:recruitment.approvals.pending-approval-table />
+    @endif
 </div>
