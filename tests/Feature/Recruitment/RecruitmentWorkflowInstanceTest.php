@@ -8,6 +8,7 @@ use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
 use App\Enums\RecruitmentScopeType;
 use App\Enums\WorkflowStepKey;
+use App\Livewire\Layout\Sidebar;
 use App\Models\City;
 use App\Models\Contract;
 use App\Models\ContractType;
@@ -24,6 +25,7 @@ use App\Models\RecruitmentWorkflowInstance;
 use App\Models\User;
 use App\Notifications\MissingRecruitmentApprover;
 use App\Policies\RecruitmentWorkflowInstanceStepPolicy;
+use App\Services\RecruitmentApproverEligibility;
 use App\Services\RecruitmentPendingApprovalQuery;
 use App\Services\RecruitmentScopeResolver;
 use App\Services\RecruitmentWorkflowInstanceService;
@@ -293,6 +295,87 @@ class RecruitmentWorkflowInstanceTest extends TestCase
             ->test(\App\Livewire\Recruitment\Approvals\Pending::class)
             ->assertOk()
             ->assertDontSee($fixtures['request']->request_number);
+    }
+
+    public function test_pending_approvals_is_shown_only_to_people_an_approval_can_reach(): void
+    {
+        $fixtures = $this->normalWorkflowFixtures();
+        $eligibility = app(RecruitmentApproverEligibility::class);
+
+        // The requester's manager, the Senior Financial Manager and HR can
+        // all be handed a step; the requester, who manages nobody who can
+        // raise a request, never can.
+        $this->assertTrue($eligibility->mayReceiveApprovals($fixtures['manager']));
+        $this->assertTrue($eligibility->mayReceiveApprovals($fixtures['finance']));
+        $this->assertTrue($eligibility->mayReceiveApprovals($fixtures['hr']));
+        $this->assertFalse($eligibility->mayReceiveApprovals($fixtures['requester']));
+
+        Livewire::actingAs($fixtures['requester'])
+            ->test(Sidebar::class)
+            ->assertDontSee(__('recruitment.navigation_pending_approvals'));
+        $this->actingAs($fixtures['requester'])
+            ->get(route('recruitment.approvals.pending'))
+            ->assertForbidden();
+
+        // Eligibility, not queue size: visible before anything is waiting.
+        Livewire::actingAs($fixtures['manager'])
+            ->test(Sidebar::class)
+            ->assertSee(__('recruitment.navigation_pending_approvals'));
+        $this->actingAs($fixtures['manager'])
+            ->get(route('recruitment.approvals.pending'))
+            ->assertOk();
+    }
+
+    public function test_managing_staff_who_cannot_raise_requests_does_not_make_an_approver(): void
+    {
+        $fixtures = $this->normalWorkflowFixtures();
+        [$department, , $contractType, $program] = $this->positionPrerequisites();
+        $city = $this->makeCity('HMS', (string) random_int(900, 989));
+        $coordinatorLevel = JobLevel::query()->forceCreate(['name_en' => 'Coordinator', 'name_ar' => 'منسق', 'grade' => 7]);
+
+        // A project manager with a coordinator under him: he has a team, but
+        // nobody in it can raise a request for him to approve.
+        $projectManager = $this->makeUser($city, 'manager');
+        $coordinator = $this->makeUser($city, 'employee');
+        $managerPosition = $this->assignPosition($projectManager, $city, $program, $department, JobLevel::query()->where('grade', 3)->firstOrFail(), $contractType, null, 'project manager');
+        $this->assignPosition($coordinator, $city, $program, $department, $coordinatorLevel, $contractType, $managerPosition, 'coordinator');
+
+        $this->assertFalse(app(RecruitmentApproverEligibility::class)->mayReceiveApprovals($projectManager->fresh()));
+        Livewire::actingAs($projectManager->fresh())
+            ->test(Sidebar::class)
+            ->assertDontSee(__('recruitment.navigation_pending_approvals'));
+    }
+
+    public function test_finance_approval_belongs_to_the_person_not_to_a_role(): void
+    {
+        $fixtures = $this->normalWorkflowFixtures();
+        $city = $this->makeCity('LAT', (string) random_int(900, 989));
+        $colleague = $this->makeUser($city, 'manager');
+
+        // Put the permission on the role the Senior Financial Manager holds:
+        // it still makes nobody else an approver.
+        $colleague->roles()->firstOrFail()->givePermissionTo(Permission::findByName('recruitment-requests.approve-finance'));
+
+        $this->assertFalse(app(RecruitmentApproverEligibility::class)->mayReceiveApprovals($colleague->fresh()));
+        $this->assertTrue(app(RecruitmentApproverEligibility::class)->mayReceiveApprovals($fixtures['finance']));
+    }
+
+    public function test_anything_already_waiting_keeps_the_page_visible(): void
+    {
+        $fixtures = $this->normalWorkflowFixtures();
+        $instance = app(RecruitmentWorkflowInstanceService::class)->start($fixtures['request'], $fixtures['version']);
+
+        // An escalation can hand a step to someone the org-chart rules do
+        // not name; that item must never become unreachable.
+        $instance->steps()
+            ->whereHas('workflowStep', fn ($steps) => $steps->where('step_order', 1))
+            ->update(['assigned_user_id' => $fixtures['requester']->id]);
+
+        $this->assertTrue(app(RecruitmentApproverEligibility::class)->mayReceiveApprovals($fixtures['requester']));
+        Livewire::actingAs($fixtures['requester'])
+            ->test(\App\Livewire\Recruitment\Approvals\Pending::class)
+            ->assertOk()
+            ->assertSee($fixtures['request']->request_number);
     }
 
     /** @return array{request: RecruitmentRequest, version: RecruitmentRequestVersion, requester: User, manager: ?User, finance: ?User, hr: User} */
