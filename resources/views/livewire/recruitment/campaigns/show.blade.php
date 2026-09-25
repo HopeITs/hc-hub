@@ -35,6 +35,7 @@
         ]"
     />
 
+    <div class="mx-auto w-full max-w-5xl space-y-6">
     {{-- Header: what this is, and the one-line state. --}}
     <section class="rounded-surface border border-neutral-200 bg-white p-5 shadow-e1 sm:p-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
@@ -69,9 +70,9 @@
                             @endif
                         </dd>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 [&>svg]:size-4">
                         <dt class="sr-only">{{ __('recruitment-campaign.page.applications') }}</dt>
-                        <svg class="size-4 text-secondary-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/></svg>
+                        <svg class="size-5 text-secondary-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/></svg>
                         <dd>{{ trans_choice('recruitment-campaign.page.applications_count', $applicationsCount, ['count' => $applicationsCount]) }}</dd>
                     </div>
                 </dl>
@@ -83,7 +84,7 @@
 
     <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         {{-- Preparation checklist --}}
-        <ol class="space-y-4" aria-label="{{ __('recruitment-campaign.page.checklist') }}">
+        <ol class="mx-auto w-full max-w-5xl space-y-4" aria-label="{{ __('recruitment-campaign.page.checklist') }}">
 
             {{-- 1. Details --}}
             <x-recruitment.campaign-step number="1" id="step-details" :done="true"
@@ -349,5 +350,6 @@
         </aside>
     </div>
 
-    <x-recruitment.confirmation-modal scope="campaign-actions" />
+        <x-recruitment.confirmation-modal scope="campaign-actions" />
+    </div>
 </div>
