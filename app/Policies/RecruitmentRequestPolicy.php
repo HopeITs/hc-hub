@@ -124,7 +124,8 @@ class RecruitmentRequestPolicy
      */
     public function directOpen(User $user): bool
     {
-        return $user->hasActivePermission('recruitment-requests.direct-open');
+        return $user->activeRoleIs('HR')
+            && $user->hasActivePermission('recruitment-requests.direct-open');
     }
 
     /**

@@ -5,13 +5,11 @@ namespace App\Livewire\Recruitment\Requests;
 use App\Enums\ExternalConfirmationDecision;
 use App\Enums\ExternalConfirmationMethod;
 use App\Enums\RecruitmentRequestType;
-use App\Enums\RecruitmentScopeType;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\ContractType;
 use App\Models\Department;
 use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use App\Models\RecruitmentRequest;
 use App\Models\Vacancy;
@@ -42,8 +40,7 @@ class DirectOpen extends Component
 
     /** @var array<string, mixed> */
     public array $documentation = [
-        'actual_requester_name' => '',
-        'actual_requester_position_id' => null,
+        'actual_requester_user_id' => null,
         'direct_open_reason' => '',
         'confirmations' => [],
     ];
@@ -62,11 +59,19 @@ class DirectOpen extends Component
     public function updatedDataPositionId(): void
     {
         unset($this->data['vacancy_id']);
+        $this->resetConfirmationPeople();
     }
 
     public function updatedDataCityId(): void
     {
         unset($this->data['center_id']);
+        $this->resetConfirmationPeople();
+    }
+
+    public function updatedDocumentationActualRequesterUserId(): void
+    {
+        unset($this->data['position_id'], $this->data['direct_manager_id'], $this->data['vacancy_id']);
+        $this->resetConfirmationPeople();
     }
 
     public function save(RecruitmentDirectOpenService $directOpen)
@@ -94,14 +99,27 @@ class DirectOpen extends Component
 
         $user = auth()->user();
         $scopes = app(RecruitmentScopeResolver::class);
+        $directOpen = app(RecruitmentDirectOpenService::class);
         $type = (int) ($this->data['request_type'] ?? 0);
         $newPosition = $type === RecruitmentRequestType::CreatePosition;
 
-        $positions = $this->positionsInScope($scopes, $user);
+        $requesters = $directOpen->requesterCandidates($user);
+        $requester = $requesters->first(
+            fn ($candidate): bool => (int) $candidate->getKey() === (int) ($this->documentation['actual_requester_user_id'] ?? 0),
+        );
+        $positions = $directOpen->positionsForRequester($user, $requester, $type);
         $vacancies = $this->vacanciesFor($type);
+        $cityId = $this->targetCityId($positions);
+        $confirmationCandidates = [];
+        if ($requester !== null) {
+            foreach ($directOpen->confirmableSteps() as $stepKey) {
+                $confirmationCandidates[$stepKey] = $directOpen->confirmationCandidates($requester, $stepKey, $cityId);
+            }
+        }
 
         return view('livewire.recruitment.requests.direct-open', [
             'positions' => $positions->with(['program', 'city'])->orderBy(transColumn('title'))->get(),
+            'requesters' => $requesters,
             'vacancies' => $vacancies,
             // cities, centres and contract types name themselves per locale;
             // programmes and departments have one name column between them.
@@ -115,34 +133,13 @@ class DirectOpen extends Component
             'contractTypes' => ContractType::query()->orderBy(transColumn('name'))->get(),
             'centerRequired' => ! $newPosition || $this->centerIsRequired(),
             'steps' => app(RecruitmentDirectOpenService::class)->confirmableSteps(),
+            'confirmationCandidates' => $confirmationCandidates,
             'decisions' => [ExternalConfirmationDecision::Approved, ExternalConfirmationDecision::NotApplicable],
             'methods' => [
                 ExternalConfirmationMethod::Phone, ExternalConfirmationMethod::Email,
                 ExternalConfirmationMethod::Meeting, ExternalConfirmationMethod::Other,
             ],
         ]);
-    }
-
-    /**
-     * Every post in the governorate this HR opens for; everything, for HR Syria.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder<Position>
-     */
-    private function positionsInScope(RecruitmentScopeResolver $scopes, $user)
-    {
-        $positions = Position::query()->where('is_active', true);
-
-        if ($scopes->scopeType($user) === RecruitmentScopeType::Organization) {
-            return $positions;
-        }
-
-        $cityIds = $scopes->governorateCityIds($user);
-
-        return $positions->where(function ($query) use ($cityIds): void {
-            foreach ($cityIds as $cityId) {
-                $query->orWhere(fn ($inner) => $inner->inCity((int) $cityId));
-            }
-        });
     }
 
     /** @return \Illuminate\Support\Collection<int, Vacancy> */
@@ -172,6 +169,29 @@ class DirectOpen extends Component
     private function authorizeScreen(): void
     {
         Gate::authorize('directOpen', RecruitmentRequest::class);
+    }
+
+    private function targetCityId($positions): ?int
+    {
+        if ($this->data['request_type'] === RecruitmentRequestType::CreatePosition) {
+            return filter_var($this->data['city_id'] ?? null, FILTER_VALIDATE_INT) ?: null;
+        }
+
+        $positionId = filter_var($this->data['position_id'] ?? null, FILTER_VALIDATE_INT);
+        if (! $positionId) {
+            return null;
+        }
+
+        $position = $positions->whereKey($positionId)->with('center')->first();
+
+        return $position?->city_id ?? $position?->center?->city_id;
+    }
+
+    private function resetConfirmationPeople(): void
+    {
+        foreach (app(RecruitmentDirectOpenService::class)->confirmableSteps() as $stepKey) {
+            unset($this->documentation['confirmations'][$stepKey]['confirmer_user_id']);
+        }
     }
 
     /**
