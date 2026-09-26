@@ -333,9 +333,10 @@ class RecruitmentCreateOptionsTest extends TestCase
     {
         $occupied = $this->child($this->root, ['title_en' => 'Occupied position', 'exist_emp' => 1]);
         $empty = $this->child($this->root, ['title_en' => 'Empty position', 'exist_emp' => 0]);
+        $occupant = $this->makeUser($this->root->city, 'employee');
 
         Contract::query()->create([
-            'employee_id' => $this->manager->employee_id,
+            'employee_id' => $occupant->employee_id,
             'position_id' => $occupied->id,
             'contract_type_id' => $this->recruitmentContractTypeId(),
             'start_date' => now()->subMonth(),
