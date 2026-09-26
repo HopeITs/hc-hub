@@ -462,6 +462,39 @@ class RecruitmentScopeResolver
         return $query->whereIn($query->qualifyColumn('id'), $this->manageablePositionIds($user, $includeSelf));
     }
 
+    /**
+     * Every active position in the governorate this user recruits for — the
+     * whole organisation for HR Syria.
+     *
+     * This is the direct-opening boundary, a different question from the
+     * management subtree a manager's own request is scoped by: HR does not
+     * manage the posts they recruit for. A non-organisation user with no
+     * governorate reaches nothing, which fails closed.
+     *
+     * @param  Builder<Position>  $query
+     * @return Builder<Position>
+     */
+    public function scopeGovernoratePositions(Builder $query, User $user): Builder
+    {
+        $query->where($query->qualifyColumn('is_active'), true);
+
+        if ($this->scopeType($user) === RecruitmentScopeType::Organization) {
+            return $query;
+        }
+
+        $cityIds = $this->governorateCityIds($user);
+
+        if ($cityIds === []) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where(function (Builder $inner) use ($cityIds): void {
+            foreach ($cityIds as $cityId) {
+                $inner->orWhere(fn (Builder $city) => $city->inCity((int) $cityId));
+            }
+        });
+    }
+
     public function scopeProposedManagers(Builder $query, User $user): Builder
     {
         return $this->scopeManageablePositions($query, $user, true)

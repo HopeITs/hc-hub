@@ -5,7 +5,6 @@ namespace App\Livewire\Recruitment\Requests;
 use App\Enums\ExternalConfirmationDecision;
 use App\Enums\ExternalConfirmationMethod;
 use App\Enums\RecruitmentRequestType;
-use App\Enums\RecruitmentScopeType;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\ContractType;
@@ -129,19 +128,7 @@ class DirectOpen extends Component
      */
     private function positionsInScope(RecruitmentScopeResolver $scopes, $user)
     {
-        $positions = Position::query()->where('is_active', true);
-
-        if ($scopes->scopeType($user) === RecruitmentScopeType::Organization) {
-            return $positions;
-        }
-
-        $cityIds = $scopes->governorateCityIds($user);
-
-        return $positions->where(function ($query) use ($cityIds): void {
-            foreach ($cityIds as $cityId) {
-                $query->orWhere(fn ($inner) => $inner->inCity((int) $cityId));
-            }
-        });
+        return $scopes->scopeGovernoratePositions(Position::query(), $user);
     }
 
     /** @return \Illuminate\Support\Collection<int, Vacancy> */

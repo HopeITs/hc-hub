@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\RecruitmentEventType;
+use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus as Status;
 use App\Models\RecruitmentRequest;
 
@@ -41,6 +42,15 @@ class RecruitmentEditableFields
     {
         // Never submitted: still the requester's own document.
         if ($request->submitted_at === null && ! $request->versions()->exists()) {
+            return self::ALL;
+        }
+
+        // A direct opening that is still waiting for HR Syria is the same as a
+        // draft: the opener may freely correct anything before the single step
+        // is decided. Once the step is acted on, the request is frozen.
+        if ((int) $request->mode === RecruitmentRequestMode::DirectHr
+            && (int) $request->status === Status::UnderReview
+            && $this->directOpenStepIsUndecided($request)) {
             return self::ALL;
         }
 
@@ -85,6 +95,23 @@ class RecruitmentEditableFields
             ?? []);
 
         return array_values(array_diff(array_keys($payload), ['request_type']));
+    }
+
+    /**
+     * A direct opening's single workflow step has not been decided yet.
+     *
+     * Governorate HR's direct openings get a one-step workflow (HR Syria
+     * approval). Until that step is acted on the opener may still edit.
+     */
+    private function directOpenStepIsUndecided(RecruitmentRequest $request): bool
+    {
+        $instance = $request->workflowInstances()->latest('id')->first();
+
+        if (! $instance) {
+            return true; // no workflow yet — still editable
+        }
+
+        return $instance->steps()->whereNull('decision')->exists();
     }
 
     /**

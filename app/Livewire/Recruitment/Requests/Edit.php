@@ -2,8 +2,13 @@
 
 namespace App\Livewire\Recruitment\Requests;
 
+use App\Enums\RecruitmentRequestMode;
+use App\Models\Position;
 use App\Models\RecruitmentRequest;
+use App\Models\User;
 use App\Services\RecruitmentRequestDraftService;
+use App\Services\RecruitmentScopeResolver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 
@@ -64,6 +69,38 @@ class Edit extends Create
         if (isset($this->requestId)) {
             $this->request();
         }
+    }
+
+    /**
+     * A request HR opened directly is scoped to their governorate, the same
+     * boundary the direct-opening screen offered — HR does not manage the
+     * posts they recruit for, so the requester's (empty) management subtree
+     * would leave the position picker blank.
+     *
+     * @return Builder<Position>
+     */
+    protected function targetablePositions(User $user): Builder
+    {
+        if ($this->isDirectOpen()) {
+            return app(RecruitmentScopeResolver::class)->scopeGovernoratePositions(Position::query(), $user);
+        }
+
+        return parent::targetablePositions($user);
+    }
+
+    /** @return Builder<Position> */
+    protected function proposableManagerPositions(User $user): Builder
+    {
+        if ($this->isDirectOpen()) {
+            return app(RecruitmentScopeResolver::class)->scopeGovernoratePositions(Position::query(), $user);
+        }
+
+        return parent::proposableManagerPositions($user);
+    }
+
+    private function isDirectOpen(): bool
+    {
+        return (int) $this->request()->mode === RecruitmentRequestMode::DirectHr;
     }
 
     /** Resolved through the visibility boundary on every request, never cached. */
