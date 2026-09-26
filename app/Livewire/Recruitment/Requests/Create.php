@@ -23,9 +23,12 @@ class Create extends Component
 {
     public array $data = ['request_type' => RecruitmentRequestType::FillVacancy];
 
+    public bool $queryPrefilled = false;
+
     public function boot(): void
     {
         $this->authorizeScreen();
+        $this->prefillFromQuery();
     }
 
     public function updatedDataRequestType(): void
@@ -139,6 +142,31 @@ class Create extends Component
     protected function proposableManagerPositions(User $user): Builder
     {
         return app(RecruitmentScopeResolver::class)->scopeProposedManagers(Position::query(), $user);
+    }
+
+    private function prefillFromQuery(): void
+    {
+        if ($this->queryPrefilled) {
+            return;
+        }
+
+        $this->queryPrefilled = true;
+        $type = filter_var(request()->query('type'), FILTER_VALIDATE_INT);
+        $positionId = filter_var(request()->query('position_id'), FILTER_VALIDATE_INT);
+        $parentPositionId = filter_var(request()->query('direct_manager_id'), FILTER_VALIDATE_INT);
+        $types = array_values(array_diff(RecruitmentRequestType::getValues(), [RecruitmentRequestType::Unknown]));
+
+        if ($type !== false && in_array((int) $type, $types, true)) {
+            $this->data['request_type'] = (int) $type;
+        }
+
+        if ($positionId !== false && (int) $positionId > 0) {
+            $this->data['position_id'] = (int) $positionId;
+        }
+
+        if ($parentPositionId !== false && (int) $parentPositionId > 0) {
+            $this->data['direct_manager_id'] = (int) $parentPositionId;
+        }
     }
 
     private function selectOnlyProgram(): void

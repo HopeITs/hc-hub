@@ -19,12 +19,15 @@ use App\Livewire\Recruitment\Requests\Details;
 use App\Livewire\Recruitment\Requests\DirectOpen;
 use App\Livewire\Recruitment\Requests\Edit;
 use App\Livewire\Recruitment\Requests\Index;
+use App\Livewire\Recruitment\Requests\TeamStaffing;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('recruitment/requests')->name('recruitment.requests.')
     ->middleware('active_permission:recruitment-requests.view')
     ->group(function () {
         Route::get('/', Index::class)->name('index');
+        Route::get('/team', TeamStaffing::class)
+            ->middleware('active_permission:recruitment-requests.manage')->name('team');
         Route::get('/create', Create::class)->middleware('active_permission:recruitment-requests.manage')->name('create');
         // The shortcut is behind its own permission, never implied by manage.
         Route::get('/direct-open', DirectOpen::class)

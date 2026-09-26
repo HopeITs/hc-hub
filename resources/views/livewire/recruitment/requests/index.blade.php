@@ -19,5 +19,19 @@
             @endcan
         </div>
     </div>
+
+    <nav class="flex gap-1 border-b border-neutral-200" aria-label="{{ __('recruitment.requests') }}">
+        <a href="{{ route('recruitment.requests.index') }}" wire:navigate
+           class="border-b-2 border-primary px-4 py-3 text-sm font-semibold text-primary">
+            {{ __('recruitment.navigation_requests') }}
+        </a>
+        @can('create', \App\Models\RecruitmentRequest::class)
+            <a href="{{ route('recruitment.requests.team') }}" wire:navigate
+               class="border-b-2 border-transparent px-4 py-3 text-sm font-semibold text-secondary-medium transition hover:border-primary hover:text-primary">
+                {{ __('recruitment.team_staffing.tab') }}
+            </a>
+        @endcan
+    </nav>
+
     <livewire:recruitment.requests.request-table />
 </div>
