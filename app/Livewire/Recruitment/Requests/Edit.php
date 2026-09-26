@@ -35,10 +35,10 @@ class Edit extends Create
 
         // The draft payload is what the requester last typed, so the form comes
         // back exactly as it was left rather than re-derived from the columns.
-        $this->data = array_merge(
+        $this->data = $this->withInitializedRequestSelects(array_merge(
             ['request_type' => (int) $request->request_type],
             (array) ($request->draft_payload_json ?? []),
-        );
+        ));
     }
 
     /** The type is fixed once the request exists, so it cannot be swapped here. */

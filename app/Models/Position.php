@@ -37,6 +37,11 @@ class Position extends Model
         return $this->hasMany(Vacancy::class);
     }
 
+    public function recruitmentRequests(): HasMany
+    {
+        return $this->hasMany(RecruitmentRequest::class, 'target_position_id');
+    }
+
     /**
      * Active contracts on this position. Employees may hold multiple positions
      * simultaneously; each position lists every active contract here. For the

@@ -5,6 +5,7 @@ namespace App\Livewire\Recruitment\Requests;
 use App\Enums\ExternalConfirmationDecision;
 use App\Enums\ExternalConfirmationMethod;
 use App\Enums\RecruitmentRequestType;
+use App\Livewire\Concerns\InitializesRecruitmentRequestSelects;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\ContractType;
@@ -26,7 +27,8 @@ use Livewire\Component;
  * The request half of this form is the ordinary one — a direct opening may
  * shorten the approvals, never the facts. What is added is the documentation
  * that makes it honest: who actually asked, why the workflow was bypassed, and
- * three lines saying how each approval was really given.
+ * lines saying how the manager and finance approvals were really given. The
+ * HR action is recorded automatically through the signed-in opener.
  *
  * The lists here are narrowed to the governorate this HR answers for, which is
  * a different boundary from the management tree a manager's own request is
@@ -35,6 +37,8 @@ use Livewire\Component;
  */
 class DirectOpen extends Component
 {
+    use InitializesRecruitmentRequestSelects;
+
     /** @var array<string, mixed> */
     public array $data = ['request_type' => RecruitmentRequestType::FillVacancy];
 
@@ -45,6 +49,22 @@ class DirectOpen extends Component
         'confirmations' => [],
     ];
 
+    public function mount(RecruitmentDirectOpenService $directOpen): void
+    {
+        $this->data = $this->withInitializedRequestSelects($this->data);
+
+        foreach ($directOpen->confirmableSteps() as $stepKey) {
+            $this->documentation['confirmations'][$stepKey] = [
+                'decision' => null,
+                'confirmer_user_id' => null,
+                'method' => null,
+                'confirmed_at' => null,
+                'not_applicable_reason' => '',
+                'notes' => '',
+            ];
+        }
+    }
+
     public function boot(): void
     {
         $this->authorizeScreen();
@@ -52,25 +72,29 @@ class DirectOpen extends Component
 
     public function updatedDataRequestType(): void
     {
-        $this->data = ['request_type' => (int) $this->data['request_type']];
+        $this->data = $this->withInitializedRequestSelects([
+            'request_type' => (int) $this->data['request_type'],
+        ]);
         $this->resetValidation();
     }
 
     public function updatedDataPositionId(): void
     {
-        unset($this->data['vacancy_id']);
+        $this->data['vacancy_id'] = null;
         $this->resetConfirmationPeople();
     }
 
     public function updatedDataCityId(): void
     {
-        unset($this->data['center_id']);
+        $this->data['center_id'] = null;
         $this->resetConfirmationPeople();
     }
 
     public function updatedDocumentationActualRequesterUserId(): void
     {
-        unset($this->data['position_id'], $this->data['direct_manager_id'], $this->data['vacancy_id']);
+        $this->data['position_id'] = null;
+        $this->data['direct_manager_id'] = null;
+        $this->data['vacancy_id'] = null;
         $this->resetConfirmationPeople();
     }
 
@@ -190,7 +214,7 @@ class DirectOpen extends Component
     private function resetConfirmationPeople(): void
     {
         foreach (app(RecruitmentDirectOpenService::class)->confirmableSteps() as $stepKey) {
-            unset($this->documentation['confirmations'][$stepKey]['confirmer_user_id']);
+            $this->documentation['confirmations'][$stepKey]['confirmer_user_id'] = null;
         }
     }
 

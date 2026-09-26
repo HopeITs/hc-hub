@@ -72,14 +72,11 @@ class Details extends Component
     public function submit(RecruitmentRequestSubmissionService $submissions): void
     {
         $request = $this->resolve();
-        $before = (int) $request->status;
+        Gate::authorize('submit', $request);
 
-        $request = $submissions->submit(auth()->user(), $request);
+        $submissions->submit(auth()->user(), $request);
 
-        // A second click finds the work already done and says so plainly.
-        $this->toast(__(
-            $before === (int) $request->status ? 'recruitment.already_submitted' : 'recruitment.submitted',
-        ));
+        $this->toast(__('recruitment.submitted'));
     }
 
     /** Cancel while the request is still the requester's to withdraw. */

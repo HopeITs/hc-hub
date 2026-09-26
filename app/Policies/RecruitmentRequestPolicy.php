@@ -61,7 +61,8 @@ class RecruitmentRequestPolicy
     {
         return $user->hasActivePermission('recruitment-requests.submit')
             && $this->scopes->canAccessRequest($user, $request)
-            && ($request->mode !== RecruitmentRequestMode::Normal || $this->ownsEditableNormalRequest($user, $request));
+            && (int) $request->mode === RecruitmentRequestMode::Normal
+            && $this->ownsEditableNormalRequest($user, $request);
     }
 
     public function review(User $user, RecruitmentRequest $request): bool

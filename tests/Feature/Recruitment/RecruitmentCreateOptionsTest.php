@@ -50,6 +50,25 @@ class RecruitmentCreateOptionsTest extends TestCase
         ]);
     }
 
+    public function test_searchable_selects_keep_livewire_state_when_the_request_type_changes(): void
+    {
+        $screen = Livewire::actingAs($this->manager)->test(Create::class);
+
+        $initialData = $screen->get('data');
+        $screen->set('data.request_type', RecruitmentRequestType::CreatePosition);
+        $newPositionData = $screen->get('data');
+
+        foreach ([
+            'position_id', 'direct_manager_id', 'vacancy_id', 'city_id',
+            'program_id', 'center_id', 'department_id', 'job_level_id',
+            'recruitment_reason', 'priority', 'volunteer_type', 'currency',
+            'salary_per', 'contract_type_id',
+        ] as $field) {
+            $this->assertArrayHasKey($field, $initialData);
+            $this->assertArrayHasKey($field, $newPositionData);
+        }
+    }
+
     public function test_fill_filters_unavailable_positions_and_auto_selects_the_only_vacancy(): void
     {
         foreach ([1, 3] as $grade) {

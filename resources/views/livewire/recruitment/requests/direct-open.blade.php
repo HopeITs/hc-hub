@@ -53,9 +53,9 @@
                 <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.direct_open.confirmations_hint') }}</p>
             </div>
 
-            {{-- Three lines for the three steps a normal request would have
-                 taken. These are external confirmations, never approvals: the
-                 timeline must not show a click that never happened. --}}
+            {{-- Only decisions made outside the system belong here. The HR
+                 action is already recorded by the signed-in user who creates
+                 the direct opening. --}}
             @foreach ($steps as $stepKey)
                 @php $decision = (int) ($documentation['confirmations'][$stepKey]['decision'] ?? 0); @endphp
                 <fieldset class="rounded-control border border-neutral-200 p-4" wire:key="confirm-{{ $stepKey }}">
@@ -105,14 +105,13 @@
                                 @endif
                                 <p class="mt-1 text-sm text-red-600">
                                     @error('confirmations.'.$stepKey.'.confirmer_user_id'){{ $message }}@enderror
-                                    @error('confirmations.'.$stepKey.'.confirmer_name'){{ $message }}@enderror
                                 </p>
                             </div>
                             <div>
                                 <x-forms.input-label for="how-{{ $stepKey }}" required>{{ __('recruitment.direct_open.method') }}</x-forms.input-label>
                                 <select id="how-{{ $stepKey }}"
                                     wire:model="documentation.confirmations.{{ $stepKey }}.method"
-                                    class="mt-1 w-full rounded-control border-neutral-300">
+                                    class="h-[37.6px] w-full rounded-control border-neutral-300">
                                     <option value="">—</option>
                                     @foreach ($methods as $method)
                                         <option value="{{ $method }}">{{ __('recruitment.direct_open.methods.'.$method) }}</option>
@@ -124,7 +123,7 @@
                                 <x-forms.input-label for="when-{{ $stepKey }}" required>{{ __('recruitment.direct_open.confirmed_at') }}</x-forms.input-label>
                                 <input id="when-{{ $stepKey }}" type="datetime-local"
                                     wire:model="documentation.confirmations.{{ $stepKey }}.confirmed_at"
-                                    class="mt-1 w-full rounded-control border-neutral-300">
+                                    class="h-[37.6px] w-full rounded-control border-neutral-300">
                                 <p class="mt-1 text-sm text-red-600">@error('confirmations.'.$stepKey.'.confirmed_at'){{ $message }}@enderror</p>
                             </div>
                         </div>

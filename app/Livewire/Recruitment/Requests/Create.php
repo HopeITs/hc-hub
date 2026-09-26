@@ -3,6 +3,7 @@
 namespace App\Livewire\Recruitment\Requests;
 
 use App\Enums\RecruitmentRequestType;
+use App\Livewire\Concerns\InitializesRecruitmentRequestSelects;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\ContractType;
@@ -22,7 +23,25 @@ use Livewire\Component;
 
 class Create extends Component
 {
-    public array $data = ['request_type' => RecruitmentRequestType::FillVacancy];
+    use InitializesRecruitmentRequestSelects;
+
+    public array $data = [
+        'request_type' => RecruitmentRequestType::FillVacancy,
+        'position_id' => null,
+        'direct_manager_id' => null,
+        'vacancy_id' => null,
+        'city_id' => null,
+        'program_id' => null,
+        'center_id' => null,
+        'department_id' => null,
+        'job_level_id' => null,
+        'recruitment_reason' => null,
+        'priority' => null,
+        'volunteer_type' => null,
+        'currency' => null,
+        'salary_per' => null,
+        'contract_type_id' => null,
+    ];
 
     public function boot(): void
     {
@@ -31,14 +50,16 @@ class Create extends Component
 
     public function updatedDataRequestType(): void
     {
-        $this->data = ['request_type' => (int) $this->data['request_type']];
+        $this->data = $this->withInitializedRequestSelects([
+            'request_type' => (int) $this->data['request_type'],
+        ]);
         $this->selectOnlyProgram();
         $this->resetValidation();
     }
 
     public function updatedDataPositionId(): void
     {
-        unset($this->data['vacancy_id']);
+        $this->data['vacancy_id'] = null;
         if ((int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::FillVacancy) {
             $vacancies = $this->availableVacancies()->limit(2)->get();
             if ($vacancies->count() === 1) {
@@ -49,7 +70,7 @@ class Create extends Component
 
     public function updatedDataCityId(): void
     {
-        unset($this->data['center_id']);
+        $this->data['center_id'] = null;
     }
 
     public function save(RecruitmentRequestDraftService $drafts)
