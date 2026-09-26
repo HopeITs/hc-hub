@@ -69,7 +69,7 @@ class RecruitmentScopeResolver
     public function isOrganizationWide(User $user): bool
     {
         return $user->activeRoleIs(...config('recruitment.organization_wide_roles', []))
-            || $user->hasActivePermission(config('recruitment.user_level_permissions.finance_approver'));
+            || $this->isFinanceApprover($user);
     }
 
     /**
@@ -558,9 +558,9 @@ class RecruitmentScopeResolver
      * Users who may decide the financial step.
      *
      * The financial approver is a person, not a role: today whoever holds the
-     * Senior Financial Manager position. Holding this permission *is* the
-     * authorization for that step, which is why it is read from direct grants
-     * only — a role carrying it would turn all its holders into approvers.
+     * Senior Financial Manager position. A direct user grant remains the
+     * fallback for installations whose position data is not seeded yet; a role
+     * carrying it never turns all its holders into approvers.
      *
      * @return array<int, int>
      */
@@ -579,6 +579,29 @@ class RecruitmentScopeResolver
 
     public function financeApproverUserIds(): array
     {
+        $positionTitle = (string) config('recruitment.finance_approver_position_title', '');
+
+        if ($positionTitle !== '') {
+            $positionIds = Position::query()
+                ->where('is_active', true)
+                ->where('title_en', $positionTitle)
+                ->pluck('id');
+
+            $positionHolders = User::query()
+                ->whereHas('profile', fn (Builder $profile): Builder => $profile->where('is_active', true))
+                ->whereIn('employee_id', Contract::query()
+                    ->activeNow()
+                    ->whereIn('position_id', $positionIds)
+                    ->select('employee_id'))
+                ->pluck('id')
+                ->map(fn ($id): int => (int) $id)
+                ->all();
+
+            if ($positionHolders !== []) {
+                return array_values(array_unique($positionHolders));
+            }
+        }
+
         return $this->userIdsWithDirectPermission(
             config('recruitment.user_level_permissions.finance_approver'),
         );

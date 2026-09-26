@@ -69,16 +69,18 @@ return [
     | Permissions that belong to a person, never to a role
     |--------------------------------------------------------------------------
     |
-    | Both of these answer "is this specific human the one?", so attaching
-    | either to a role would be a security hole rather than a convenience:
-    | every holder of that role would become the financial approver, or would
-    | be able to skip manager approval entirely.
+    | The fallback finance grant and the top-level grant answer "is this
+    | specific human the one?", so attaching either to a role would be a
+    | security hole rather than a convenience. When position data is present,
+    | the active Senior Financial Manager is the source of truth for finance.
     |
-    | They are resolved from direct grants only (model_has_permissions), so a
-    | role that somehow carries one of them still grants nobody anything.
-    | Access Management is where they are handed out.
+    | The fallback grant is resolved from direct grants only
+    | (model_has_permissions), so a role that somehow carries it still grants
+    | nobody anything. Access Management is where it is handed out.
     |
     */
+
+    'finance_approver_position_title' => 'Senior Financial Manager',
 
     'user_level_permissions' => [
         // The organization's single financial approver — today the holder of

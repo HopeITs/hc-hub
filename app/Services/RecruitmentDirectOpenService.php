@@ -236,6 +236,13 @@ class RecruitmentDirectOpenService
      */
     public function confirmationCandidates(User $requester, int $stepKey, ?int $cityId): Collection
     {
+        if ($cityId === null && $stepKey === WorkflowStepKey::GovernorateHrApproval) {
+            $requesterPosition = $this->scopes->position($requester);
+
+            $cityId = $requesterPosition?->city_id
+                ?? $requesterPosition?->center?->city_id;
+        }
+
         return app(RecruitmentApproverResolver::class)
             ->confirmationCandidates($requester, $stepKey, $cityId);
     }
