@@ -8,6 +8,7 @@ use App\Livewire\Recruitment\Requests\Index;
 use App\Livewire\Recruitment\Requests\RequestTable;
 use App\Models\RecruitmentRequest;
 use App\Models\User;
+use App\Services\RecruitmentRequestListQuery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\Concerns\AssertsOrderedColumnsExist;
@@ -18,10 +19,10 @@ use Tests\TestCase;
 /**
  * Finding one request among many.
  *
- * The tabs and the filters are two ways of narrowing the same scoped query,
- * and the thing that matters about both is that neither widens it: a count
- * that promises rows the viewer cannot open, or a filter option naming a
- * person outside their scope, leaks more than it helps.
+ * The relationship tabs and the table filters narrow the same scoped query.
+ * Neither may widen it: a count that promises rows the viewer cannot open,
+ * or a filter option naming a person outside their scope, leaks more than it
+ * helps.
  */
 class RecruitmentRequestListTest extends TestCase
 {
@@ -33,31 +34,6 @@ class RecruitmentRequestListTest extends TestCase
         app()->setLocale('en');
     }
 
-    /**
-     * Each tab narrows the list; "all" is every one of them together.
-     *
-     * Asserted on the query the table builds rather than on the HTML it
-     * renders. The rows arrive through the package's own lazy loading, and a
-     * test that reads its markup would be testing the package rather than the
-     * scoping this file is about.
-     */
-    public function test_the_tabs_filter_the_list_by_status(): void
-    {
-        [$hr, $request] = $this->seeded();
-
-        $approved = $this->copy($request, Status::Approved);
-
-        $this->assertSame(
-            [$approved->id],
-            $this->rows($hr, (string) Status::Approved),
-        );
-
-        $this->assertEqualsCanonicalizing(
-            [$approved->id, $request->id],
-            $this->rows($hr, 'all'),
-        );
-    }
-
     /** The counts are read through the same boundary as the rows. */
     public function test_the_counts_match_what_the_viewer_can_open(): void
     {
@@ -65,14 +41,104 @@ class RecruitmentRequestListTest extends TestCase
         $this->copy($request, Status::Approved);
         $this->copy($request, Status::Approved);
 
-        $counts = Livewire::actingAs($hr)->test(Index::class)->viewData('counts');
+        $counts = Livewire::actingAs($hr)->test(Index::class)->viewData('viewCounts');
 
-        $this->assertSame(count($this->rows($hr, 'all')), $counts['all']);
-        $this->assertSame(2, $counts[(string) Status::Approved]);
+        $this->assertSame(count($this->rows($hr)), $counts[RecruitmentRequestListQuery::ALL]);
+        $this->assertSame(3, $counts[RecruitmentRequestListQuery::TEAM]);
     }
 
-    /** A tab is a filter, not a second list: it cannot show what "all" hides. */
-    public function test_a_tab_never_widens_the_scope(): void
+    public function test_request_views_separate_mine_team_and_requests_needing_my_review(): void
+    {
+        $workflow = $this->workflow();
+        $manager = $workflow['manager']->fresh();
+        $teamRequest = $workflow['request'];
+        $mine = $this->copy($teamRequest, Status::Approved);
+        $mine->forceFill(['requester_user_id' => $manager->id])->save();
+
+        $this->assertSame(
+            [$mine->id],
+            $this->rows($manager, RecruitmentRequestListQuery::MINE),
+        );
+        $this->assertSame(
+            [$teamRequest->id],
+            $this->rows($manager, RecruitmentRequestListQuery::TEAM),
+        );
+        $this->assertSame(
+            [$teamRequest->id],
+            $this->rows($manager, RecruitmentRequestListQuery::NEEDS_REVIEW),
+        );
+        $this->assertSame(
+            [$teamRequest->id],
+            app(RecruitmentRequestListQuery::class)->pendingRequestIds($manager),
+        );
+        $this->assertEqualsCanonicalizing(
+            [$mine->id, $teamRequest->id],
+            $this->rows($manager),
+        );
+    }
+
+    public function test_the_page_exposes_only_the_useful_relationship_tabs(): void
+    {
+        $workflow = $this->workflow();
+        $manager = $workflow['manager']->fresh();
+        $mine = $this->copy($workflow['request'], Status::Approved);
+        $mine->forceFill(['requester_user_id' => $manager->id])->save();
+
+        $screen = Livewire::actingAs($manager)
+            ->test(Index::class)
+            ->assertSee(__('recruitment.request_views.mine'))
+            ->assertSee(__('recruitment.request_views.team'))
+            ->assertSee(__('recruitment.request_views.needs_review'))
+            ->assertSee('cursor-pointer', false)
+            ->call('setRequestView', RecruitmentRequestListQuery::MINE)
+            ->assertSet('viewFilter', RecruitmentRequestListQuery::MINE);
+
+        $this->assertSame([
+            RecruitmentRequestListQuery::NEEDS_REVIEW,
+            RecruitmentRequestListQuery::MINE,
+            RecruitmentRequestListQuery::TEAM,
+            RecruitmentRequestListQuery::ALL,
+        ], $screen->viewData('views'));
+    }
+
+    public function test_an_approver_keeps_the_review_tab_when_nothing_is_waiting(): void
+    {
+        $workflow = $this->workflow();
+        $finance = $workflow['finance']->fresh();
+
+        $screen = Livewire::actingAs($finance)
+            ->test(Index::class)
+            ->assertSee(__('recruitment.request_views.needs_review'));
+
+        $this->assertContains(
+            RecruitmentRequestListQuery::NEEDS_REVIEW,
+            $screen->viewData('views'),
+        );
+        $this->assertSame(
+            0,
+            $screen->viewData('viewCounts')[RecruitmentRequestListQuery::NEEDS_REVIEW],
+        );
+    }
+
+    public function test_the_relationship_tabs_are_hidden_when_only_my_requests_can_apply(): void
+    {
+        $workflow = $this->workflow();
+        $requester = $workflow['requester']->fresh();
+
+        $screen = Livewire::actingAs($requester)
+            ->test(Index::class)
+            ->assertDontSee(__('recruitment.request_views.mine'))
+            ->assertDontSee(__('recruitment.request_views.team'))
+            ->assertDontSee(__('recruitment.request_views.needs_review'));
+
+        $this->assertSame(
+            [RecruitmentRequestListQuery::MINE],
+            $screen->viewData('views'),
+        );
+    }
+
+    /** A relationship tab cannot show what the viewer's full scope hides. */
+    public function test_a_relationship_tab_never_widens_the_scope(): void
     {
         [$hr, $request] = $this->seeded();
 
@@ -82,8 +148,11 @@ class RecruitmentRequestListTest extends TestCase
         $stranger = $this->copy($request, Status::UnderReview);
         $stranger->forceFill(['scope_city_id' => $elsewhere->id])->save();
 
-        $this->assertNotContains($stranger->id, $this->rows($hr, 'all'));
-        $this->assertNotContains($stranger->id, $this->rows($hr, (string) Status::UnderReview));
+        $this->assertNotContains($stranger->id, $this->rows($hr));
+        $this->assertNotContains(
+            $stranger->id,
+            $this->rows($hr, RecruitmentRequestListQuery::TEAM),
+        );
     }
 
     /**
@@ -146,16 +215,18 @@ class RecruitmentRequestListTest extends TestCase
     }
 
     /**
-     * The request ids the table would list under a given tab.
+     * The request ids the table would list under a relationship tab.
      *
      * @return array<int, int>
      */
-    private function rows(User $viewer, string $statusFilter): array
-    {
+    private function rows(
+        User $viewer,
+        string $viewFilter = RecruitmentRequestListQuery::ALL,
+    ): array {
         $this->actingAs($viewer);
 
         $table = new RequestTable;
-        $table->statusFilter = $statusFilter;
+        $table->viewFilter = $viewFilter;
 
         return (fn () => $this->query())->call($table)->pluck('id')
             ->map(fn ($id): int => (int) $id)->all();

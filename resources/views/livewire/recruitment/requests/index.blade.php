@@ -3,8 +3,8 @@
 <div class="space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-        <h1 class="text-h2 font-semibold text-neutral-900">{{ __('recruitment.requests') }}</h1>
-        <p class="mt-2 text-secondary-medium">{{ __('recruitment.list_description') }}</p>
+            <h1 class="text-h2 font-semibold text-neutral-900">{{ __('recruitment.requests') }}</h1>
+            <p class="mt-2 text-secondary-medium">{{ __('recruitment.list_description') }}</p>
         </div>
         <div class="flex flex-wrap gap-3">
             @can('create', \App\Models\RecruitmentRequest::class)
@@ -19,25 +19,25 @@
             @endcan
         </div>
     </div>
-    {{-- A filter over one list, not several lists: every tab narrows the same
-         scoped query, so nothing appears here that "all" would hide. --}}
-    <x-tabs-list>
-        <x-tabs-list-item :active="$statusFilter === 'all'" active-tab="all">
-            {{ __('general.all') }} ({{ $counts['all'] ?? 0 }})
-        </x-tabs-list-item>
 
-        @foreach ($tabs as $status)
-            <x-tabs-list-item
-                :active="$statusFilter === (string) $status"
-                :active-tab="$status"
-                wire:key="status-tab-{{ $status }}">
-                {{ \App\Enums\RecruitmentRequestStatus::getLocalizedName($status)['value'] }}
-                ({{ $counts[(string) $status] ?? 0 }})
-            </x-tabs-list-item>
-        @endforeach
-    </x-tabs-list>
+    @if (count($views) > 1)
+        <nav aria-label="{{ __('recruitment.request_view') }}">
+            <x-tabs-list>
+                @foreach ($views as $view)
+                    <x-tabs-list-item
+                        wire:key="request-view-{{ $view }}"
+                        action="setRequestView"
+                        :active="$viewFilter === $view"
+                        :active-tab="$view">
+                        {{ __('recruitment.request_views.'.$view) }}
+                        ({{ $viewCounts[$view] ?? 0 }})
+                    </x-tabs-list-item>
+                @endforeach
+            </x-tabs-list>
+        </nav>
+    @endif
 
     <livewire:recruitment.requests.request-table
-        :statusFilter="$statusFilter"
-        :key="'requests-'.$statusFilter" />
+        :viewFilter="$viewFilter"
+        :key="'requests-'.$viewFilter" />
 </div>

@@ -9,6 +9,7 @@ use App\Models\City;
 use App\Models\RecruitmentRequest;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Services\RecruitmentRequestListQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
@@ -23,16 +24,12 @@ class RequestTable extends LivewireTable
 
     public string $sortDirection = 'desc';
 
-    /**
-     * The status tab chosen above the table.
-     *
-     * A filter like any other, applied to the same scoped query. It arrives
-     * from the page rather than being chosen here so the counts beside each
-     * tab and the rows under it cannot disagree.
-     */
-    public string $statusFilter = 'all';
+    public string $viewFilter = RecruitmentRequestListQuery::ALL;
 
     protected string $model = RecruitmentRequest::class;
+
+    /** @var array<int, true>|null */
+    private ?array $pendingReviewLookup = null;
 
     public function boot(): void
     {
@@ -43,14 +40,9 @@ class RequestTable extends LivewireTable
     {
         Gate::authorize('viewAny', RecruitmentRequest::class);
 
-        $query = RecruitmentRequest::query()->visibleTo(auth()->user())
+        return app(RecruitmentRequestListQuery::class)
+            ->forUser(auth()->user(), $this->viewFilter)
             ->with(['requester.profile', 'scopeCity', 'targetPosition']);
-
-        if ($this->statusFilter !== 'all') {
-            $query->where('status', (int) $this->statusFilter);
-        }
-
-        return $query;
     }
 
     protected function link(Model $model): ?string
@@ -98,7 +90,8 @@ class RequestTable extends LivewireTable
 
             SelectColumn::make(__('recruitment.requester'), 'requester_user_id')
                 ->options($this->requesterOptions())
-                ->displayUsing(fn ($value, Model $request) => $request->requester?->profile?->name ?? $request->requester?->name ?? '—')
+                ->displayUsing(fn ($value, Model $request): string => $this->requesterCell($request))
+                ->asHtml()
                 ->searchable(),
 
             SelectColumn::make(__('recruitment.city'), 'scope_city_id')
@@ -153,6 +146,47 @@ class RequestTable extends LivewireTable
             ->with('profile')->get()
             ->mapWithKeys(fn (User $user): array => [$user->id => $user->profile?->name ?? $user->name ?? '—'])
             ->all();
+    }
+
+    private function requesterCell(Model $request): string
+    {
+        $mine = (int) $request->requester_user_id === (int) auth()->id();
+
+        return Blade::render(
+            <<<'BLADE'
+                <div class="space-y-1.5">
+                    <div>{{ $name }}</div>
+                    <div class="flex flex-wrap gap-1.5">
+                        <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold {{ $mine ? 'border border-primary text-primary' : 'bg-neutral-100 text-secondary-medium' }}">
+                            {{ __($mine ? 'recruitment.my_request' : 'recruitment.team_request') }}
+                        </span>
+                        @if ($needsReview)
+                            <span class="inline-flex rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
+                                {{ __('recruitment.needs_my_review') }}
+                            </span>
+                        @endif
+                    </div>
+                </div>
+                BLADE,
+            [
+                'name' => $request->requester?->profile?->name ?? $request->requester?->name ?? '—',
+                'mine' => $mine,
+                'needsReview' => isset($this->pendingReviewLookup()[(int) $request->getKey()]),
+            ],
+        );
+    }
+
+    /** @return array<int, true> */
+    private function pendingReviewLookup(): array
+    {
+        if ($this->pendingReviewLookup === null) {
+            $this->pendingReviewLookup = array_fill_keys(
+                app(RecruitmentRequestListQuery::class)->pendingRequestIds(auth()->user()),
+                true,
+            );
+        }
+
+        return $this->pendingReviewLookup;
     }
 
     /** @return array<int, string> */

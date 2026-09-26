@@ -2,76 +2,84 @@
 
 namespace App\Livewire\Recruitment\Requests;
 
-use App\Enums\RecruitmentRequestStatus;
 use App\Models\RecruitmentRequest;
+use App\Services\RecruitmentApproverEligibility;
+use App\Services\RecruitmentRequestListQuery;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 /**
- * The requests a person may see, with the statuses they care about on top.
- *
- * The tabs are a filter, not a different list: each one narrows the same
- * scoped query rather than reading from somewhere else, so a request cannot
- * appear under a tab it would not appear under in "all".
+ * The requests a person may see, grouped by their relationship to the viewer.
  */
 class Index extends Component
 {
-    public string $statusFilter = 'all';
+    public string $viewFilter = RecruitmentRequestListQuery::ALL;
 
-    public function setActiveTab(string $status): void
+    public function setRequestView(string $view): void
     {
-        $this->statusFilter = $status;
+        $viewCounts = $this->viewCounts();
+
+        if (! in_array($view, $this->availableViews($viewCounts), true)) {
+            return;
+        }
+
+        $this->viewFilter = $view;
     }
 
-    public function render()
+    public function render(): View
     {
         Gate::authorize('viewAny', RecruitmentRequest::class);
 
+        $viewCounts = $this->viewCounts();
+
         return view('livewire.recruitment.requests.index', [
-            'counts' => $this->counts(),
-            'tabs' => $this->tabs(),
+            'viewCounts' => $viewCounts,
+            'views' => $this->availableViews($viewCounts),
         ]);
     }
 
-    /**
-     * The statuses worth a tab of their own.
-     *
-     * Not all ten: a tab per status would be a row of mostly-empty buttons.
-     * These are the ones somebody actually goes looking for — what is still
-     * mine to finish, what is waiting on other people, and what is done.
-     *
-     * @return array<int, int>
-     */
-    private function tabs(): array
+    /** @return array<string, int> */
+    private function viewCounts(): array
     {
-        return [
-            RecruitmentRequestStatus::Draft,
-            RecruitmentRequestStatus::UnderReview,
-            RecruitmentRequestStatus::ChangesRequested,
-            RecruitmentRequestStatus::Approved,
-            RecruitmentRequestStatus::Applied,
-            RecruitmentRequestStatus::Rejected,
-        ];
-    }
+        $lists = app(RecruitmentRequestListQuery::class);
+        $counts = [];
 
-    /**
-     * How many requests sit behind each tab.
-     *
-     * Counted through the same visibility boundary as the table, so a number
-     * never promises rows the viewer cannot open.
-     *
-     * @return array<string, int>
-     */
-    private function counts(): array
-    {
-        $visible = RecruitmentRequest::query()->visibleTo(auth()->user());
-
-        $counts = ['all' => (clone $visible)->count()];
-
-        foreach ($this->tabs() as $status) {
-            $counts[(string) $status] = (clone $visible)->where('status', $status)->count();
+        foreach ($lists->filters() as $view) {
+            $counts[$view] = $lists->forUser(auth()->user(), $view)->count();
         }
 
         return $counts;
+    }
+
+    /**
+     * Only show relationship choices that can be useful to this person.
+     *
+     * Approvers keep their review queue even when it is empty. Team requests
+     * appear once the viewer has a team request in scope. When neither can
+     * apply, the page is already their own list and needs no tabs at all.
+     *
+     * @param  array<string, int>  $viewCounts
+     * @return array<int, string>
+     */
+    private function availableViews(array $viewCounts): array
+    {
+        $views = [];
+
+        if (app(RecruitmentApproverEligibility::class)->mayReceiveApprovals(auth()->user())) {
+            $views[] = RecruitmentRequestListQuery::NEEDS_REVIEW;
+        }
+
+        $views[] = RecruitmentRequestListQuery::MINE;
+
+        if (($viewCounts[RecruitmentRequestListQuery::TEAM] ?? 0) > 0) {
+            $views[] = RecruitmentRequestListQuery::TEAM;
+        }
+
+        if (count($views) > 1) {
+            $views[] = RecruitmentRequestListQuery::ALL;
+        }
+
+        return $views;
     }
 }
