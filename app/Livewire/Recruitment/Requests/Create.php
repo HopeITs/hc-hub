@@ -76,7 +76,13 @@ class Create extends Component
 
         $positions = $isNewPosition
             ? $scopes->scopeProposedManagers(Position::query(), $user)
-            : $scopes->scopeManageablePositions(Position::query(), $user);
+            : $scopes->scopeRequestablePositions(Position::query(), $user);
+        $type = (int) ($this->data['request_type'] ?? 0);
+        if ($type === RecruitmentRequestType::ClosePosition) {
+            $positions
+                ->where('exist_emp', 0)
+                ->whereDoesntHave('activeContracts');
+        }
         $isFill = (int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::FillVacancy;
         if ($isFill) {
             // Room in the establishment, not an existing vacancies row: until a
@@ -90,8 +96,13 @@ class Create extends Component
 
         $centers = $scopes->scopeCreatableCenters(Center::query(), $user, $cityId)
             ->orderBy(transColumn('name'))->get();
-        $vacancies = $isFill ? $this->availableVacancies()->orderBy('id')->get()
-            : Vacancy::query()->visibleTo($user)->where('position_id', $this->data['position_id'] ?? 0)->get();
+        $vacancies = $isFill
+            ? $this->availableVacancies()->orderBy('id')->get()
+            : Vacancy::query()
+                ->visibleTo($user)
+                ->when($type === RecruitmentRequestType::CloseVacancy, fn ($query) => $query->available())
+                ->where('position_id', $this->data['position_id'] ?? 0)
+                ->get();
 
         return view('livewire.recruitment.requests.create', [
             'positions' => $positions, 'centers' => $centers, 'vacancies' => $vacancies,
@@ -163,7 +174,7 @@ class Create extends Component
     private function availableVacancies()
     {
         $positions = app(RecruitmentScopeResolver::class)
-            ->scopeManageablePositions(Position::query(), auth()->user())
+            ->scopeRequestablePositions(Position::query(), auth()->user())
             ->where('is_active', true)->whereColumn('exist_emp', '<', 'max_emp');
 
         // May legitimately be empty; the vacancy picker only appears when more

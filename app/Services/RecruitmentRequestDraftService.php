@@ -240,7 +240,7 @@ class RecruitmentRequestDraftService
 
         $targets = $isNewPosition
             ? $this->scopes->scopeProposedManagers(Position::query(), $actor)
-            : $this->scopes->scopeManageablePositions(Position::query(), $actor);
+            : $this->scopes->scopeRequestablePositions(Position::query(), $actor);
         $target = $targets
             ->whereKey($targetId)->lockForUpdate()->first();
 
@@ -272,6 +272,20 @@ class RecruitmentRequestDraftService
             }
         }
 
+        if ($data['request_type'] === Type::DecreaseHeadcount
+            && (int) $target->max_emp - (int) ($data['reduce_by'] ?? 0) < (int) $target->exist_emp) {
+            throw ValidationException::withMessages([
+                'data.reduce_by' => __('recruitment.below_existing_employees'),
+            ]);
+        }
+
+        if ($data['request_type'] === Type::ClosePosition
+            && ((int) $target->exist_emp > 0 || $target->activeContracts()->exists())) {
+            throw ValidationException::withMessages([
+                'data.position_id' => __('recruitment.position_has_active_contracts'),
+            ]);
+        }
+
         if ($data['request_type'] === Type::FillVacancy) {
             // Room in the establishment is what makes the request legitimate.
             // A vacancies row is not required: nothing creates one until a
@@ -296,7 +310,9 @@ class RecruitmentRequestDraftService
             }
         } elseif (! empty($data['vacancy_id'])) {
             // Vacancy visibility is still D30/D42, independent of D49's position selector.
-            $vacancy = Vacancy::query()->visibleTo($actor)->where('position_id', $target->id)
+            $vacancy = Vacancy::query()->visibleTo($actor)
+                ->when($data['request_type'] === Type::CloseVacancy, fn ($query) => $query->available())
+                ->where('position_id', $target->id)
                 ->whereKey($data['vacancy_id'])->lockForUpdate()->first();
 
             if (! $vacancy) {

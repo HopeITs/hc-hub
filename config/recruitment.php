@@ -22,9 +22,17 @@ return [
 
     'requester_job_level_grades' => [1, 3, 5],
 
-    // D1: Project is Program; these are job-level grades, not role names.
+    // These are job-level grades, not role names. The active "manager" role
+    // is shared by all three management levels.
     'program_scoped_creation_grades' => [1, 3],
+    // Project managers stay within their own governorate; program managers
+    // may reach every governorate in their programme.
+    'governorate_scoped_creation_grades' => [3],
     'department_manager_grade' => 5,
+
+    // General management may raise a request anywhere in the organization.
+    // HR remains on the separate direct-opening path.
+    'organization_wide_creation_roles' => ['general-manager'],
 
     /*
     |--------------------------------------------------------------------------

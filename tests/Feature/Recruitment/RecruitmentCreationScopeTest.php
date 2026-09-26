@@ -104,7 +104,7 @@ class RecruitmentCreationScopeTest extends TestCase
         $this->assertEqualsCanonicalizing([$child->id, $leaf->id], app(RecruitmentScopeResolver::class)->manageablePositionIds($this->manager));
     }
 
-    public function test_organization_wide_visibility_does_not_bypass_creation_tree(): void
+    public function test_general_manager_can_create_across_the_organization(): void
     {
         $this->manager->syncRoles('general-manager');
         $this->manager->roles()->updateExistingPivot($this->manager->roles()->first()->id, ['is_active' => true]);
@@ -112,7 +112,7 @@ class RecruitmentCreationScopeTest extends TestCase
         $outside = $this->child($this->root, ['direct_manager_id' => null]);
 
         $this->assertTrue(app(RecruitmentScopeResolver::class)->isOrganizationWide($this->manager));
-        $this->assertFalse(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $outside]));
+        $this->assertTrue(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $outside]));
     }
 
     public function test_hr_with_any_eligible_grade_cannot_create_edit_or_submit_normal_requests(): void

@@ -59,7 +59,8 @@ class RecruitmentRequestRevalidator
         }
 
         // RV-5 — a post with somebody in it is not closed out from under them.
-        if ($type === Type::ClosePosition && $position !== null && (int) $position->exist_emp > 0) {
+        if ($type === Type::ClosePosition && $position !== null
+            && ((int) $position->exist_emp > 0 || $position->activeContracts()->exists())) {
             $this->refuse('data.position_id', 'recruitment.position_has_contracts');
         }
 

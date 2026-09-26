@@ -34,7 +34,7 @@ class RecruitmentRequestPolicy
     public function createForPosition(User $user, Position $position): bool
     {
         return $this->create($user)
-            && $this->scopes->scopeManageablePositions(Position::query(), $user)
+            && $this->scopes->scopeRequestablePositions(Position::query(), $user)
                 ->whereKey($position->getKey())->exists();
     }
 

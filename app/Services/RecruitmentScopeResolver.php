@@ -326,6 +326,10 @@ class RecruitmentScopeResolver
             return [];
         }
 
+        if ($this->hasOrganizationWideCreationScope($user)) {
+            return Position::query()->visible()->pluck('id')->map(fn ($id): int => (int) $id)->all();
+        }
+
         $rootId = (int) $this->position($user)->getKey();
         $seen = [$rootId => true];
         $frontier = [$rootId];
@@ -354,12 +358,36 @@ class RecruitmentScopeResolver
         return $query->whereIn($query->qualifyColumn('id'), $this->manageablePositionIds($user, $includeSelf));
     }
 
+    /**
+     * Positions this requester may actually target from the normal request
+     * form. The reporting tree remains the boundary for managers; programme
+     * and governorate rules then narrow that tree where the job level requires
+     * it. General management is the explicit organization-wide exception.
+     */
+    public function scopeRequestablePositions(Builder $query, User $user, bool $includeSelf = false): Builder
+    {
+        $query = $this->scopeManageablePositions($query, $user, $includeSelf)->visible();
+
+        if ($this->hasProgramCreationScope($user)) {
+            $query->where('program_id', $this->position($user)?->program_id ?? 0);
+        }
+
+        if ($this->hasGovernorateCreationScope($user)) {
+            $cityId = $this->positionCityId($user);
+
+            if ($cityId === null || City::isNational($cityId)) {
+                return $query;
+            }
+
+            $query->inCity($cityId);
+        }
+
+        return $query;
+    }
+
     public function scopeProposedManagers(Builder $query, User $user): Builder
     {
-        return $this->scopeManageablePositions($query, $user, true)
-            ->visible()
-            ->when($this->hasProgramCreationScope($user), fn (Builder $positions) => $positions
-                ->where('program_id', $this->position($user)?->program_id ?? 0))
+        return $this->scopeRequestablePositions($query, $user, true)
             ->where(fn (Builder $positions) => $positions
                 ->whereHas('jobLevel', fn (Builder $levels) => $levels
                     ->whereIn('grade', config('recruitment.requester_job_level_grades')))
@@ -371,6 +399,13 @@ class RecruitmentScopeResolver
         return ! $this->isOrganizationWide($user)
             && in_array((int) $this->position($user)?->jobLevel?->grade,
                 config('recruitment.program_scoped_creation_grades'), true);
+    }
+
+    public function hasGovernorateCreationScope(User $user): bool
+    {
+        return ! $this->isOrganizationWide($user)
+            && in_array((int) $this->position($user)?->jobLevel?->grade,
+                config('recruitment.governorate_scoped_creation_grades'), true);
     }
 
     public function scopeCreatablePrograms(Builder $query, User $user): Builder
@@ -387,13 +422,16 @@ class RecruitmentScopeResolver
             return $query;
         }
 
-        $positions = Position::query()->visible()
-            ->where('program_id', $this->position($user)?->program_id ?? 0);
+        if ($this->hasGovernorateCreationScope($user)) {
+            $cityId = $this->positionCityId($user);
 
-        return $query->where(fn (Builder $cities) => $cities
-            ->whereIn('id', (clone $positions)->select('city_id'))
-            ->orWhereIn('id', \App\Models\Center::query()->where('is_active', true)
-                ->whereIn('id', (clone $positions)->select('center_id'))->select('city_id')));
+            return $cityId === null ? $query->whereRaw('0 = 1') : $query->whereKey($cityId);
+        }
+
+        // Program managers may establish a position in any active governorate
+        // for their programme, including one where the programme has no seat
+        // yet. The selected programme remains locked by scopeCreatablePrograms.
+        return $query;
     }
 
     /**
@@ -594,6 +632,24 @@ class RecruitmentScopeResolver
 
             default => false,
         };
+    }
+
+    private function hasOrganizationWideCreationScope(User $user): bool
+    {
+        return $user->activeRoleIs(...config('recruitment.organization_wide_creation_roles', []));
+    }
+
+    private function positionCityId(User $user): ?int
+    {
+        $position = $this->position($user);
+
+        if ($position === null) {
+            return null;
+        }
+
+        return $position->city_id !== null
+            ? (int) $position->city_id
+            : ($position->center?->city_id !== null ? (int) $position->center->city_id : null);
     }
 
     // --------------------------------------------
