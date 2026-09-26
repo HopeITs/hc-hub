@@ -16,7 +16,7 @@ class PublicRecruitmentLink extends Model
 
     protected $guarded = ['id'];
 
-    protected $hidden = ['token_hash'];
+    protected $hidden = ['token_hash', 'url_encrypted'];
 
     public function campaign(): BelongsTo
     {

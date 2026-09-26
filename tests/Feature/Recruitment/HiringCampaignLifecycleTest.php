@@ -8,6 +8,7 @@ use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
+use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Livewire\Recruitment\Campaigns\CampaignTable;
 use App\Livewire\Recruitment\Campaigns\Create as CampaignCreate;
 use App\Livewire\Recruitment\Campaigns\Show as CampaignShow;
@@ -138,7 +139,7 @@ class HiringCampaignLifecycleTest extends TestCase
                 'answers' => ['full_name' => 'Applicant One', 'email' => 'applicant@example.com'],
             ]);
             $this->fail('A closed campaign accepted a submission.');
-        } catch (\App\Exceptions\PublicRecruitmentSubmissionException) {
+        } catch (PublicRecruitmentSubmissionException) {
             $this->assertSame(PublicRecruitmentLink::STATUS_ACTIVE, $link->fresh()->status);
         }
 
@@ -321,7 +322,7 @@ class HiringCampaignLifecycleTest extends TestCase
         Livewire::actingAs($viewer)
             ->test(CampaignShow::class, ['campaignId' => $campaign->id])
             ->assertSee($campaign->vacancy->position->title)
-            ->assertDontSee(__('recruitment-campaign.save_window'))
+            ->assertDontSee(__('recruitment-campaign.page.save_details'))
             ->call('act', 'disable')
             ->assertForbidden();
     }

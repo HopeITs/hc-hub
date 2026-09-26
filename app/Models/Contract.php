@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\EncryptedSalary;
 use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
 use Closure;
@@ -99,7 +100,7 @@ class Contract extends Model
         'pay_mode' => 'integer',
         'session_duration' => 'integer',
         'currency' => 'integer',
-        'salary' => 'decimal:2',
+        'salary' => EncryptedSalary::class,
         'auto_renew' => 'boolean',
     ];
 

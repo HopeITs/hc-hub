@@ -34,11 +34,14 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 Route::get('/careers/{token}', [PublicCareerController::class, 'show'])
     ->middleware('throttle:careers-view')
     ->name('careers.show');
+Route::get('/careers/{token}/sign-in', [PublicCareerController::class, 'signIn'])
+    ->middleware('throttle:careers-view')
+    ->name('careers.sign-in');
 Route::post('/careers/{token}/applications', [PublicCareerController::class, 'store'])
     ->middleware('throttle:careers-submit')
     ->name('careers.submit');
 
-Route::get('/ID/{token}', ShowDigitalId::class)
+Route::get('/ID/{username}', ShowDigitalId::class)
     ->where('token', '[A-Za-z0-9]{64}')
     ->middleware('throttle:30,1')
     ->name('digital-id.show');
@@ -50,6 +53,10 @@ Route::get('/ID/{token}', ShowDigitalId::class)
 Route::get('/ID/{employee}/photo', [EmployeeAvatarController::class, 'digitalId'])
     ->middleware(['signed', 'throttle:60,1'])
     ->name('digital-id.avatar');
+
+// Public (unauthenticated) recruitment routes — see the file itself for why
+// this can't simply live in routes/recruitment.php.
+require __DIR__.'/recruitment-public.php';
 
 Route::group(
     [

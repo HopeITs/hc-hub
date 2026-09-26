@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Models\Checklist;
+use App\Models\DefaultDeliverable;
 use App\Models\Employee;
+use App\Models\User;
+use App\Notifications\ChecklistAssigned;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -86,7 +89,13 @@ class ChecklistWorkflow
             fn (Builder $query) => $query
                 ->where('employee_id', $employee->id)
                 ->where('delivered_status', 'delivered')
-                ->whereNot('returned_status', 'received'),
+                // Not "whereNot('returned_status', 'received')" — that compiles
+                // to "NOT (returned_status = 'received')", which SQL evaluates
+                // to NULL (excluded) for a row that has never been through a
+                // return cycle yet, i.e. every freshly delivered item.
+                ->where(fn (Builder $q) => $q
+                    ->whereNull('returned_status')
+                    ->orWhere('returned_status', '!=', 'received')),
             $checklistId,
             [
                 'receiver_id' => $receiverId,
@@ -96,6 +105,49 @@ class ChecklistWorkflow
             'returned_status',
             'checklist_return_initiated',
         );
+    }
+
+    /**
+     * A volunteer's contract just stopped auto-renewing: start the return
+     * cycle for whatever of their equipment is still out, and remind whoever
+     * is meant to collect it.
+     *
+     * Only items already handed over (`delivered_status = 'delivered'`) that
+     * have no return cycle running yet are touched — an item still pending
+     * delivery, or already being returned, is left to whatever workflow
+     * already owns it. The receiver comes from the city's DefaultDeliverable
+     * for that item; an item with none configured is skipped rather than
+     * guessed at, and stays visible for HR to assign by hand from the
+     * employee's checklist tab.
+     */
+    public function requestBelongingsReturn(Employee $employee): void
+    {
+        $checklists = Checklist::query()
+            ->where('employee_id', $employee->id)
+            ->where('delivered_status', 'delivered')
+            ->whereNull('returned_status')
+            ->get();
+
+        if ($checklists->isEmpty()) {
+            return;
+        }
+
+        $defaultReceivers = DefaultDeliverable::query()
+            ->where('city_id', $employee->city_id)
+            ->pluck('employee_id', 'item_id');
+
+        foreach ($checklists as $checklist) {
+            $receiverId = $defaultReceivers->get($checklist->item_id);
+
+            if (! $receiverId) {
+                continue;
+            }
+
+            $updated = $this->initiateReturn($checklist->id, $employee, (int) $receiverId);
+
+            $receiver = User::whereHas('profile', fn ($q) => $q->where('id', $receiverId))->first();
+            $receiver?->notify(new ChecklistAssigned($updated, 'receive'));
+        }
     }
 
     /**

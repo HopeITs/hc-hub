@@ -219,6 +219,13 @@ document.addEventListener('alpine:init', () => {
         cities: config.cities ?? [],
         terminationReasons: config.terminationReasons ?? [],
         canManageAutoRenew: Boolean(config.canManageAutoRenew),
+        // True when the signed-in role may not see pay figures. The section is
+        // rendered as a read-only notice in that case, the figures were never
+        // sent down with the seed, and the server refuses to write them — so
+        // the client-side pay rules below have to stand down too, or the
+        // Save button would sit dead over an empty box nobody is allowed to
+        // fill. See ContractForm::payIsHidden().
+        payHidden: Boolean(config.payHidden),
         // Create renders four sections; edit adds `termination` on the end.
         sections: config.sections ?? ['assignment', 'contract', 'schedule', 'pay'],
         // Sunday(0)..Saturday(6), localized — built from the day range picker's
@@ -440,6 +447,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         get payValid() {
+            if (this.payHidden) {
+                return true;
+            }
+
             if (this.payMode === '2') {
                 return this.payTiers.length >= 1 && this.payTiers.every((tier) => (
                     tier.conditionEn.trim() !== ''
@@ -1430,6 +1441,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         get paySummary() {
+            if (this.payHidden) {
+                return this.labels.salaryHidden;
+            }
+
             if (this.payMode === '2') {
                 return this.payTiers.length > 0
                     ? this.fill(this.labels.tiersCount, { count: this.payTiers.length })
@@ -1483,6 +1498,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         get cardSalary() {
+            if (this.payHidden) {
+                return this.labels.salaryHidden;
+            }
+
             if (this.payMode === '2') {
                 return this.payTiers.length > 0
                     ? this.fill(this.labels.tiersCount, { count: this.payTiers.length })

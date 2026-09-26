@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Exceptions\PublicRecruitmentUnavailableException;
+use App\Services\InternalRecruitmentApplicantService;
 use App\Services\PublicRecruitmentApplicationService;
 use App\Services\PublicRecruitmentLinkService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Str;
+use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 class PublicCareerController extends Controller
 {
@@ -25,9 +28,35 @@ class PublicCareerController extends Controller
         return response()->view('recruitment.careers.show', [
             ...$page,
             'locale' => $locale,
+            'internal' => $this->internalState($request, $token, $service, $locale),
             'submissionError' => null,
+            'submissionErrors' => [],
             'submissionKey' => bin2hex(random_bytes(32)),
         ]);
+    }
+
+    /**
+     * "Sign in to apply" on an internal campaign: HC-HR's own login, then
+     * straight back to the vacancy, which now opens with their details.
+     */
+    public function signIn(Request $request, string $token, PublicRecruitmentLinkService $service): RedirectResponse|Response
+    {
+        $locale = $this->setLocale($request);
+
+        try {
+            $service->publicPage($token);
+        } catch (PublicRecruitmentUnavailableException) {
+            return $this->unavailable();
+        }
+
+        $back = route('careers.show', ['token' => $token, 'lang' => $locale]);
+
+        if ($request->user()) {
+            return redirect()->to($back);
+        }
+
+        return redirect()->setIntendedUrl($back)
+            ->to(LaravelLocalization::getLocalizedURL($locale, route('login')));
     }
 
     public function store(
@@ -44,20 +73,29 @@ class PublicCareerController extends Controller
                 $request->all(),
                 $request->ip(),
                 $request->userAgent(),
+                $request->user(),
             );
-        } catch (PublicRecruitmentUnavailableException|PublicRecruitmentSubmissionException) {
+        } catch (PublicRecruitmentUnavailableException|PublicRecruitmentSubmissionException $exception) {
+            $reason = $exception instanceof PublicRecruitmentSubmissionException ? $exception->reason : 'link_expired';
+            $message = __("careers.errors.{$reason}");
+
             try {
                 $page = $links->publicPage($token);
             } catch (PublicRecruitmentUnavailableException) {
                 return response()->view('recruitment.careers.submission-error', [
                     'locale' => $locale,
+                    'submissionError' => $message,
                 ], 422);
             }
 
             return response()->view('recruitment.careers.show', [
                 ...$page,
                 'locale' => $locale,
-                'submissionError' => __('careers.generic_submission_error'),
+                'internal' => $this->internalState($request, $token, $links, $locale),
+                'submissionError' => $message,
+                'submissionErrors' => $exception instanceof PublicRecruitmentSubmissionException
+                    ? collect($exception->errors)->flatten()->unique()->values()->all()
+                    : [],
                 'submissionKey' => preg_match('/^[a-f0-9]{64}$/', (string) $request->input('submission_key')) === 1
                     ? Str::lower((string) $request->input('submission_key'))
                     : bin2hex(random_bytes(32)),
@@ -68,6 +106,41 @@ class PublicCareerController extends Controller
             'locale' => $locale,
             'idempotent' => $result['idempotent'],
         ], 202);
+    }
+
+    /**
+     * What an internal campaign's page shows the visitor: a sign-in prompt,
+     * a staff-only notice, "already applied", or the form with their details.
+     * Null for any other campaign.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function internalState(Request $request, string $token, PublicRecruitmentLinkService $links, string $locale): ?array
+    {
+        $campaign = $links->campaignForPage($token);
+        if (! $campaign->isInternal()) {
+            return null;
+        }
+
+        $user = $request->user();
+        if (! $user) {
+            return [
+                'state' => 'sign_in',
+                'sign_in_url' => route('careers.sign-in', ['token' => $token, 'lang' => $locale]),
+            ];
+        }
+
+        $staff = app(InternalRecruitmentApplicantService::class);
+        $employee = $staff->employeeFor($user);
+        if (! $employee) {
+            return ['state' => 'not_staff'];
+        }
+
+        return [
+            'state' => $staff->hasApplied($campaign, $user) ? 'applied' : 'ready',
+            'profile' => $staff->profile($user, $employee, $locale),
+            'prefill' => $staff->prefill($user, $employee, $locale),
+        ];
     }
 
     private function setLocale(Request $request): string

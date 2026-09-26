@@ -190,6 +190,7 @@ return [
     'deliver-by' => 'Deliver By',
     'centers' => 'Centers',
     'center-name' => 'Center Name',
+    'center-manager' => 'Center Manager',
     'center-city' => 'City',
     'logo' => 'Logo',
     'search' => 'Search',
@@ -198,6 +199,11 @@ return [
     'reason-of-termination' => 'Reason of Termination',
     'optional' => 'Optional',
     'salary' => 'Salary',
+
+    // Shown in place of a pay figure to a role that may not see one.
+    'salary-hidden' => 'Hidden from your role',
+    'salary-hidden-title' => 'Pay details are hidden',
+    'salary-hidden-body' => 'Your active role does not have access to pay figures. This section is read-only: the contract keeps whatever pay clause it already has, and saving this form will not change it. Switch to an HR role for this city to edit pay.',
 
     'note-text1' => 'Choose a City First',
     'note-text2' => 'Employees, programs, centers, and jobs related to the selected city will be loaded',
@@ -555,6 +561,7 @@ return [
     'trial' => 'Trial',
     'total' => 'Total',
     'online' => 'Online',
+    'flexible' => 'Flexible',
     'reset' => 'Reset',
     'statistics' => 'Statistics',
     'leaves-management' => 'Leaves Management',

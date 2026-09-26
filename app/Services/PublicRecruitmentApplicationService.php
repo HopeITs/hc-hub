@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Enums\RecruitmentApplicationStatus;
-use App\Enums\RecruitmentCampaignLinkMode;
 use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Exceptions\UnsafeRecruitmentFileException;
 use App\Models\HiringCampaign;
@@ -12,7 +11,7 @@ use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
-use Illuminate\Database\QueryException;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -25,9 +24,14 @@ class PublicRecruitmentApplicationService
         private readonly PublicRecruitmentLinkService $links,
         private readonly RecruitmentApplicationFormService $forms,
         private readonly RecruitmentApplicantFileService $files,
+        private readonly InternalRecruitmentApplicantService $internal,
     ) {}
 
     /**
+     * `$actor` is whoever is signed in. It only matters for an internal
+     * campaign, which accepts staff alone and files the application under
+     * their work account whatever email was posted.
+     *
      * @param  array<string, mixed>  $input
      * @return array{application: RecruitmentApplication, idempotent: bool}
      */
@@ -36,12 +40,13 @@ class PublicRecruitmentApplicationService
         array $input,
         ?string $ipAddress = null,
         ?string $userAgent = null,
+        ?User $actor = null,
     ): array {
         $this->assertAllowedEnvelope($input);
 
         $submissionKey = Str::lower(trim((string) ($input['submission_key'] ?? '')));
         if (preg_match('/^[a-f0-9]{64}$/', $submissionKey) !== 1) {
-            throw new PublicRecruitmentSubmissionException;
+            throw PublicRecruitmentSubmissionException::because('invalid_request');
         }
 
         $submissionHash = hash('sha256', $submissionKey);
@@ -53,7 +58,7 @@ class PublicRecruitmentApplicationService
         if ($existing) {
             if ((int) $existing->campaign_id !== (int) $resolvedLink->campaign_id
                 || (int) $existing->public_link_id !== (int) $resolvedLink->getKey()) {
-                throw new PublicRecruitmentSubmissionException;
+                throw PublicRecruitmentSubmissionException::because('invalid_request');
             }
 
             return ['application' => $existing, 'idempotent' => true];
@@ -61,13 +66,23 @@ class PublicRecruitmentApplicationService
 
         $answers = $input['answers'] ?? null;
         if (! is_array($answers)) {
-            throw new PublicRecruitmentSubmissionException;
+            throw PublicRecruitmentSubmissionException::because('invalid_request');
+        }
+
+        $employee = null;
+        if ($resolvedLink->campaign->isInternal()) {
+            $employee = $this->internal->employeeFor($actor);
+            if (! $employee) {
+                throw new PublicRecruitmentSubmissionException;
+            }
+
+            $answers['email'] = $this->internal->email($actor);
         }
 
         try {
             $validated = $this->forms->validateSubmission($resolvedLink->formVersion, $answers);
-        } catch (ValidationException) {
-            throw new PublicRecruitmentSubmissionException;
+        } catch (ValidationException $exception) {
+            throw PublicRecruitmentSubmissionException::because('validation', $exception->errors());
         }
 
         $fields = $this->forms->normalizeFields($resolvedLink->formVersion->fields_json);
@@ -76,8 +91,14 @@ class PublicRecruitmentApplicationService
         $fullName = trim((string) ($validated['full_name'] ?? ''));
         $phone = $this->normalizePhone((string) ($validated['phone'] ?? ''));
 
-        if (! filter_var($email, FILTER_VALIDATE_EMAIL) || $fullName === '' || $phone === '') {
-            throw new PublicRecruitmentSubmissionException;
+        if ($fullName === '') {
+            throw PublicRecruitmentSubmissionException::because('missing_name');
+        }
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw PublicRecruitmentSubmissionException::because('invalid_email');
+        }
+        if ($phone === '') {
+            throw PublicRecruitmentSubmissionException::because('invalid_phone');
         }
 
         try {
@@ -93,6 +114,7 @@ class PublicRecruitmentApplicationService
                 $input,
                 $ipAddress,
                 $userAgent,
+                $employee,
             ): array {
                 $campaign = HiringCampaign::query()
                     ->lockForUpdate()
@@ -110,7 +132,7 @@ class PublicRecruitmentApplicationService
                     ->first();
 
                 if (! $link || (int) $link->campaign_id !== (int) $campaign->getKey()) {
-                    throw new PublicRecruitmentSubmissionException;
+                    throw PublicRecruitmentSubmissionException::because('link_changed');
                 }
 
                 $this->links->assertSubmissionLink($link);
@@ -122,7 +144,7 @@ class PublicRecruitmentApplicationService
                 if ($existingByKey) {
                     if ((int) $existingByKey->campaign_id !== (int) $campaign->getKey()
                         || (int) $existingByKey->public_link_id !== (int) $link->getKey()) {
-                        throw new PublicRecruitmentSubmissionException;
+                        throw PublicRecruitmentSubmissionException::because('invalid_request');
                     }
 
                     return ['application' => $existingByKey, 'idempotent' => true];
@@ -132,7 +154,9 @@ class PublicRecruitmentApplicationService
                     ->where('campaign_id', $campaign->getKey())
                     ->where('email_normalized', $email)
                     ->exists()) {
-                    throw new PublicRecruitmentSubmissionException;
+                    // Generic on purpose: a specific reason would tell anyone
+                    // holding the link which emails have already applied.
+                    throw PublicRecruitmentSubmissionException::because('generic');
                 }
 
                 $invite = $this->resolveInvite($campaign, $email);
@@ -142,7 +166,7 @@ class PublicRecruitmentApplicationService
                     'email_normalized' => $email,
                     'phone_normalized' => $phone,
                     'identity_key_hash' => $identityHash,
-                    'source' => 'public_link',
+                    'source' => $employee ? 'internal' : 'public_link',
                     'last_seen_at' => now(),
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -156,6 +180,11 @@ class PublicRecruitmentApplicationService
                     'email_normalized' => $email,
                     'phone_normalized' => $phone,
                     'last_seen_at' => now(),
+                    // Signing in proved who they are; keep the link to their record.
+                    ...($employee ? [
+                        'employee_id' => $employee->getKey(),
+                        'identity_verified_at' => $applicant->identity_verified_at ?? now(),
+                    ] : []),
                 ])->save();
 
                 $application = RecruitmentApplication::query()->create([
@@ -204,7 +233,7 @@ class PublicRecruitmentApplicationService
                         $uploads = is_array($answer) ? $answer : [$answer];
                         foreach ($uploads as $upload) {
                             if (! $upload instanceof UploadedFile) {
-                                throw new PublicRecruitmentSubmissionException;
+                                throw PublicRecruitmentSubmissionException::because('invalid_file');
                             }
                             $storedFiles[] = $this->files->store($application, $upload, $key, [
                                 'extensions' => $field['accept'],
@@ -233,12 +262,14 @@ class PublicRecruitmentApplicationService
             }, 3);
         } catch (PublicRecruitmentSubmissionException $exception) {
             throw $exception;
-        } catch (ValidationException|UnsafeRecruitmentFileException|QueryException) {
-            throw new PublicRecruitmentSubmissionException;
+        } catch (ValidationException $exception) {
+            throw PublicRecruitmentSubmissionException::because('validation', $exception->errors());
+        } catch (UnsafeRecruitmentFileException $exception) {
+            throw PublicRecruitmentSubmissionException::because('file_rejected', ['file' => [$exception->getMessage()]]);
         } catch (Throwable $exception) {
             report($exception);
 
-            throw new PublicRecruitmentSubmissionException;
+            throw PublicRecruitmentSubmissionException::because('server_error');
         }
     }
 
@@ -247,13 +278,13 @@ class PublicRecruitmentApplicationService
     {
         $allowed = ['_token', 'answers', 'locale', 'website', 'submission_key'];
         if (array_diff(array_keys($input), $allowed) !== [] || ! empty($input['website'])) {
-            throw new PublicRecruitmentSubmissionException;
+            throw PublicRecruitmentSubmissionException::because('invalid_request');
         }
     }
 
     private function resolveInvite(HiringCampaign $campaign, string $email): ?RecruitmentCampaignInvite
     {
-        if ($campaign->link_mode !== RecruitmentCampaignLinkMode::InvitationOnly) {
+        if (! $campaign->isInvitationOnly()) {
             return null;
         }
 
@@ -265,7 +296,9 @@ class PublicRecruitmentApplicationService
             ->first();
 
         if (! $invite) {
-            throw new PublicRecruitmentSubmissionException;
+            // Generic for the same reason as a duplicate email: it must not
+            // reveal who holds an invitation, or whether it was used.
+            throw PublicRecruitmentSubmissionException::because('generic');
         }
 
         return $invite;

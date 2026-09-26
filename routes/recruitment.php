@@ -1,10 +1,19 @@
 <?php
 
 use App\Http\Controllers\RecruitmentApplicantFileController;
+use App\Livewire\Recruitment\Applicants\Index as ApplicantIndex;
+use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
 use App\Livewire\Recruitment\Approvals\Pending;
 use App\Livewire\Recruitment\Campaigns\Create as CampaignCreate;
 use App\Livewire\Recruitment\Campaigns\Index as CampaignIndex;
+use App\Livewire\Recruitment\Campaigns\Invites;
 use App\Livewire\Recruitment\Campaigns\Show as CampaignShow;
+use App\Livewire\Recruitment\Interviews\Form as InterviewForm;
+use App\Livewire\Recruitment\Interviews\Index as InterviewIndex;
+use App\Livewire\Recruitment\Interviews\Show as InterviewShow;
+use App\Livewire\Recruitment\Offers\Form as OfferForm;
+use App\Livewire\Recruitment\Offers\Index as OfferIndex;
+use App\Livewire\Recruitment\Offers\Show as OfferShow;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
 use App\Livewire\Recruitment\Requests\DirectOpen;
@@ -40,6 +49,62 @@ Route::prefix('recruitment/campaigns')->name('recruitment.campaigns.')
         Route::get('/{campaignId}', CampaignShow::class)->whereNumber('campaignId')->name('show');
     });
 
+// The permission is the outer wall; each applicant is re-resolved through the
+// recruitment scope inside the component, so a guessed id is a 404.
+Route::prefix('recruitment/applicants')->name('recruitment.applicants.')
+    ->middleware('active_permission:recruitment-applicants.view')
+    ->group(function () {
+        Route::get('/', ApplicantIndex::class)->name('index');
+        Route::get('/{applicantId}', ApplicantShow::class)->whereNumber('applicantId')->name('show');
+    });
+
+// Phase 2 Task 7 (Team 2): interviews. The list, calendar and a single
+// interview have no permission middleware on purpose: participants see the
+// interviews they are on without holding any applicant permission, and the
+// components resolve every interview through RecruitmentInterview::visibleTo()
+// and the policy (out of reach is a 404). Scheduling and editing are HR's.
+Route::prefix('recruitment/interviews')->name('recruitment.interviews.')
+    ->group(function () {
+        Route::get('/', InterviewIndex::class)->name('index');
+        Route::get('/{interviewId}', InterviewShow::class)->whereNumber('interviewId')->name('show');
+        Route::get('/{interviewId}/edit', InterviewForm::class)->whereNumber('interviewId')
+            ->middleware('active_permission:recruitment-applicants.schedule-interviews')->name('edit');
+    });
+
+Route::get('recruitment/applications/{applicationId}/interviews/create', InterviewForm::class)
+    ->whereNumber('applicationId')
+    ->middleware('active_permission:recruitment-applicants.schedule-interviews')
+    ->name('recruitment.interviews.create');
+
+// Phase 2 Task 9 (Team 2): job offers. The permission is the outer wall; each
+// component re-resolves the offer through RecruitmentJobOffer::visibleTo() and
+// the policy (which also requires canViewSalary() to write one).
+Route::prefix('recruitment/offers')->name('recruitment.offers.')
+    ->middleware('active_permission:recruitment-applicants.view-offers')
+    ->group(function () {
+        Route::get('/', OfferIndex::class)->name('index');
+        Route::get('/{offerId}', OfferShow::class)->whereNumber('offerId')->name('show');
+        Route::get('/{offerId}/edit', OfferForm::class)->whereNumber('offerId')
+            ->middleware('active_permission:recruitment-applicants.manage-offers')->name('edit');
+        Route::get('/{offerId}/revise', OfferForm::class)->whereNumber('offerId')->defaults('mode', 'revise')
+            ->middleware('active_permission:recruitment-applicants.manage-offers')->name('revise');
+    });
+
+Route::get('recruitment/applications/{applicationId}/offer/create', OfferForm::class)
+    ->whereNumber('applicationId')
+    ->middleware('active_permission:recruitment-applicants.manage-offers')
+    ->name('recruitment.offers.create');
+
+// No permission middleware on purpose: the policy enforces it, so a refused
+// attempt still reaches the controller and lands in the download audit.
 Route::get('recruitment/applicant-files/{file}/download', [RecruitmentApplicantFileController::class, 'download'])
-    ->middleware(['active_permission:recruitment-campaigns.manage', 'throttle:60,1'])
+    ->whereNumber('file')
+    ->middleware('throttle:60,1')
     ->name('recruitment.applicant-files.download');
+
+// Team 2 (Phase 2 Task 1): stand-alone page for a campaign's invite list.
+// The same InviteTable is also embedded in Team 1's publishing page.
+Route::get('recruitment/campaigns/{campaignId}/invites', Invites::class)
+    ->whereNumber('campaignId')
+    ->middleware('active_permission:recruitment-applicants.manage')
+    ->name('recruitment.campaigns.invites');

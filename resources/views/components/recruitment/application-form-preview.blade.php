@@ -123,7 +123,7 @@
                         </div>
                         @break
                     @case('file')
-                        <button type="button" disabled class="mt-4 inline-flex items-center gap-2 rounded border border-neutral-300 bg-white px-3 py-2 text-small font-semibold text-blue-700">
+                        <button type="button" disabled class="mt-4 inline-flex items-center gap-2 rounded border border-neutral-300 bg-white px-3 py-2 text-small font-semibold text-primary">
                             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
                             {{ __('recruitment.application_form.add_file') }}
                         </button>

@@ -11,9 +11,11 @@ use App\Models\JobLevel;
 use App\Models\Position;
 use App\Models\Program;
 use App\Models\RecruitmentRequest;
+use App\Models\User;
 use App\Models\Vacancy;
 use App\Services\RecruitmentRequestDraftService;
 use App\Services\RecruitmentScopeResolver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
@@ -75,8 +77,8 @@ class Create extends Component
         $isNewPosition = (int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::CreatePosition;
 
         $positions = $isNewPosition
-            ? $scopes->scopeProposedManagers(Position::query(), $user)
-            : $scopes->scopeRequestablePositions(Position::query(), $user);
+            ? $this->proposableManagerPositions($user)
+            : $this->targetablePositions($user);
         $type = (int) ($this->data['request_type'] ?? 0);
         if ($type === RecruitmentRequestType::ClosePosition) {
             $positions
@@ -145,6 +147,30 @@ class Create extends Component
         return [];
     }
 
+    /**
+     * Positions this requester may target for a fill or a close.
+     *
+     * The narrowed management subtree here — a manager reaches only the posts
+     * below their own. Edit widens it to the whole governorate for a request
+     * HR opened directly, since HR does not manage the posts they recruit for.
+     *
+     * @return Builder<Position>
+     */
+    protected function targetablePositions(User $user): Builder
+    {
+        return app(RecruitmentScopeResolver::class)->scopeRequestablePositions(Position::query(), $user);
+    }
+
+    /**
+     * Positions a brand-new post may be proposed to report to.
+     *
+     * @return Builder<Position>
+     */
+    protected function proposableManagerPositions(User $user): Builder
+    {
+        return app(RecruitmentScopeResolver::class)->scopeProposedManagers(Position::query(), $user);
+    }
+
     private function selectOnlyProgram(): void
     {
         if ((int) ($this->data['request_type'] ?? 0) !== RecruitmentRequestType::CreatePosition) {
@@ -173,8 +199,7 @@ class Create extends Component
 
     private function availableVacancies()
     {
-        $positions = app(RecruitmentScopeResolver::class)
-            ->scopeRequestablePositions(Position::query(), auth()->user())
+        $positions = $this->targetablePositions(auth()->user())
             ->where('is_active', true)->whereColumn('exist_emp', '<', 'max_emp');
 
         // May legitimately be empty; the vacancy picker only appears when more

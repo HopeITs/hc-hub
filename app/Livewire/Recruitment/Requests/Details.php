@@ -7,17 +7,20 @@ use App\Enums\RecruitmentRequestStatus;
 use App\Models\Center;
 use App\Models\ContractType;
 use App\Models\Department;
+use App\Models\HiringCampaign;
 use App\Models\JobLevel;
 use App\Models\Position;
 use App\Models\Program;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowInstanceStep;
+use App\Models\Vacancy;
 use App\Services\RecruitmentApprovalService;
 use App\Services\RecruitmentApprovalTrack;
 use App\Services\RecruitmentEditableFields;
 use App\Services\RecruitmentPendingApprovalQuery;
 use App\Services\RecruitmentRequestApplicationService;
 use App\Services\RecruitmentRequestSubmissionService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
 use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
@@ -92,7 +95,7 @@ class Details extends Component
         Gate::authorize('viewAny', RecruitmentRequest::class);
         // Resolve through the same visibility boundary on every Livewire update.
         $request = RecruitmentRequest::query()->visibleTo(auth()->user())
-            ->with(['requester.profile', 'scopeCity', 'targetPosition',
+            ->with(['requester.profile', 'scopeCity', 'targetPosition', 'vacancy.position',
                 'versions' => fn ($query) => $query->orderByDesc('version_no'),
                 'events' => fn ($query) => $query->with(['actor.profile', 'requestVersion'])->orderBy('created_at')->orderBy('id'),
                 'comments' => fn ($query) => $query->with('user.profile')->orderBy('created_at')->orderBy('id'),
@@ -141,6 +144,13 @@ class Details extends Component
             ? $editable->selectable($request, (int) $pendingStep->workflowStep?->step_key)
             : [];
         $unlockedFields = $editable->requestedByApprover($request);
+        $canCreateCampaign = $request->status === RecruitmentRequestStatus::Applied
+            && $request->vacancy !== null
+            && $request->vacancy->status === Vacancy::OPEN
+            && $request->vacancy->closed_at === null
+            && $request->vacancy->open_at?->isPast()
+            && $request->vacancy->filled_count < $request->vacancy->needed_count
+            && Gate::allows('create', [HiringCampaign::class, $request->vacancy]);
 
         // The road this request travels, shortened by whatever its own
         // workflow actually skips rather than by a style.
@@ -149,7 +159,7 @@ class Details extends Component
         return view('livewire.recruitment.requests.details', compact(
             'request', 'version', 'draftContext', 'previousRejections', 'pendingStep',
             'awaitingExecution', 'effectiveDate', 'mayExecuteNow',
-            'selectableFields', 'unlockedFields', 'track',
+            'selectableFields', 'unlockedFields', 'track', 'canCreateCampaign',
         ));
     }
 
@@ -239,7 +249,7 @@ class Details extends Component
      * Read through the visibility boundary like everything else, so it cannot
      * become a window onto requests the viewer may not see.
      *
-     * @return \Illuminate\Support\Collection<int, RecruitmentRequest>
+     * @return Collection<int, RecruitmentRequest>
      */
     private function previousRejections(RecruitmentRequest $request)
     {

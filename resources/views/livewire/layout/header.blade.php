@@ -46,6 +46,8 @@
 
             {{-- Island 2: utility icons grouped in one capsule --}}
             <div class="flex items-center shrink-0 gap-0.5 rounded-[18px] bg-[#f6f6f6] p-0.5 sm:p-1">
+                <x-tour.button/>
+
                 <a href="https://docs.google.com/document/d/1AcrvWNBzoD-bTem3Gy_35EtDgwD-SXST/edit?usp=sharing&ouid=105248334092459549739&rtpof=true&sd=true"
                     target="_blank" rel="noopener"
                     class="inline-flex items-center justify-center transition rounded-[14px] size-8 sm:size-9 text-secondary-light hover:bg-white hover:text-secondary-dark hover:shadow-e1 focus:outline-none focus:ring-2 focus:ring-neutral-200"

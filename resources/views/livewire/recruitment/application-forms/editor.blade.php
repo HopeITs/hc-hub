@@ -4,37 +4,25 @@
     <livewire:layout.breadcrumbs
         :title="__('recruitment.application_form.title')"
         :crumbs="[
-            ['label' => __('recruitment.job_post.campaign').' #'.$campaign->id],
+            ['label' => __('recruitment-campaign.campaigns'), 'url' => route('recruitment.campaigns.index')],
+            ['label' => __('recruitment-campaign.page.campaign_number', ['id' => $campaign->id]), 'url' => route('recruitment.campaigns.show', ['campaignId' => $campaign->id])],
             ['label' => __('recruitment.application_form.title')],
         ]"
     />
 
-    <div class="mb-5 flex flex-wrap items-start justify-between gap-4">
-        <div>
-            <p class="text-body text-secondary-medium">{{ __('recruitment.application_form.subtitle') }}</p>
-            <p class="mt-1 text-small text-neutral-500">
-                {{ __('recruitment.job_post.approved_request') }}:
-                <span class="font-semibold text-neutral-800">{{ $campaign->vacancy->createdFromRequest->request_number }}</span>
-            </p>
-            <a href="{{ route('recruitment.campaigns.publishing', $campaign) }}" wire:navigate class="mt-2 inline-flex text-small font-semibold text-primary hover:underline">
-                {{ __('recruitment.publishing.back') }}
-            </a>
-        </div>
+    <x-recruitment.editor-context
+        :campaign="$campaign"
+        :subtitle="__('recruitment.application_form.subtitle')"
+        :version-number="$versionNumber"
+        :version-status="$versionStatus"
+        :published-version-number="$publishedVersionNumber"
+        :just-published="$justPublished"
+        :next="$nextStep"
+    />
 
-        <div class="flex flex-wrap items-center justify-end gap-2 text-small">
-            <span class="rounded-full bg-neutral-100 px-3 py-1 font-semibold text-neutral-700">{{ __('recruitment.job_post.version') }} #{{ $versionNumber }}</span>
-            <span class="rounded-full px-3 py-1 font-semibold {{ $versionStatus === 'published' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
-                {{ $versionStatus === 'published' ? __('recruitment.job_post.status_published') : __('recruitment.job_post.status_draft') }}
-            </span>
-            @if ($publishedVersionNumber)
-                <span class="rounded-full bg-primary/10 px-3 py-1 font-semibold text-primary">{{ __('recruitment.job_post.published_version') }} #{{ $publishedVersionNumber }}</span>
-            @endif
-        </div>
-    </div>
-
-    <div class="sticky top-0 z-20 mb-5 flex flex-wrap items-center justify-between gap-3 rounded-card border border-neutral-200 bg-white/95 p-3 shadow-e2 backdrop-blur">
+    <div class="sticky top-0 z-20 mb-5 flex flex-wrap items-center justify-between gap-3 rounded-surface border border-neutral-200 bg-white/95 p-3 shadow-e2 backdrop-blur">
         <div class="flex flex-wrap gap-2">
-            <button type="button" x-on:click="addPanel = !addPanel" class="inline-flex items-center gap-2 rounded-control bg-primary px-4 py-2 text-body font-semibold text-white transition hover:bg-primary/90">
+            <button type="button" x-on:click="addPanel = !addPanel" class="inline-flex cursor-pointer items-center gap-2 rounded-control bg-primary px-4 py-2 text-body font-semibold text-white transition hover:bg-primary-hover">
                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
                 {{ __('recruitment.application_form.add_question') }}
             </button>
@@ -44,7 +32,7 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
-            <button type="button" wire:click="saveDraft" wire:target="saveDraft" class="rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary hover:bg-primary/5">
+            <button type="button" wire:click="saveDraft" wire:target="saveDraft" wire:loading.attr="disabled" class="cursor-pointer rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary hover:bg-neutral-50 disabled:opacity-60">
                 {{ __('recruitment.job_post.save_draft') }}
             </button>
             <button type="button" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'application-form-editor', action: 'publish', message: @js(__('recruitment.application_form.publish_confirm')), confirmLabel: @js(__('recruitment.job_post.publish')) })" class="cursor-pointer rounded-control bg-neutral-900 px-4 py-2 text-body font-semibold text-white hover:bg-neutral-700">
@@ -53,51 +41,52 @@
         </div>
     </div>
 
-    @if ($notice)
-        <div class="mb-5 rounded-control px-4 py-3 text-body {{ $noticeType === 'error' ? 'bg-red-50 text-red-800' : ($noticeType === 'info' ? 'bg-blue-50 text-blue-800' : 'bg-green-50 text-green-800') }}" role="status" aria-live="polite">
-            {{ $notice }}
-            @if ($hasConflict)
-                <button type="button" wire:click="reloadLatest" class="ms-2 font-semibold underline">{{ __('recruitment.job_post.reload_latest') }}</button>
-            @endif
-        </div>
+    @if ($hasConflict)
+        <button type="button" wire:click="reloadLatest" class="mb-5 cursor-pointer text-body font-semibold text-primary underline">
+            {{ __('recruitment.job_post.reload_latest') }}
+        </button>
     @endif
 
-    <section class="mb-5 rounded-card border border-neutral-200 bg-white p-5 shadow-e1">
-        <div class="grid items-end gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.8fr)_auto]">
+    <section class="mb-5 rounded-surface border border-neutral-200 bg-white p-5 shadow-e1">
+        <div class="grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(420px,1.1fr)]">
             <div>
                 <h2 class="font-bold text-neutral-900">{{ __('recruitment.application_form.reuse_form') }}</h2>
                 <p class="mt-1 text-small leading-6 text-neutral-500">{{ __('recruitment.application_form.reuse_form_help') }}</p>
             </div>
 
             @if ($availableTemplates !== [])
+                {{-- Select and button share one row, so they always line up;
+                     the label sits above the row and the error below it. --}}
                 <div>
                     <label for="published-form-template" class="mb-1 block text-small font-medium text-neutral-700">{{ __('recruitment.application_form.choose_form_template') }}</label>
-                    <select id="published-form-template" wire:model="selectedTemplateVersionId" class="w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
-                        <option value="">{{ __('recruitment.application_form.choose_form_template') }}</option>
-                        @foreach ($availableTemplates as $template)
-                            @php
-                                $templateTitle = $template['title'][app()->getLocale()] ?: $template['title']['en'];
-                                $templateCity = $template['city'][app()->getLocale()] ?: $template['city']['en'];
-                            @endphp
-                            <option value="{{ $template['id'] }}">
-                                {{ $templateTitle }} — {{ $templateCity }} — {{ __('recruitment.application_form.template_version', ['version' => $template['version']]) }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                        <select id="published-form-template" wire:model="selectedTemplateVersionId" class="min-w-0 flex-1 rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
+                            <option value="">{{ __('recruitment.application_form.choose_form_template') }}</option>
+                            @foreach ($availableTemplates as $template)
+                                @php
+                                    $templateTitle = $template['title'][app()->getLocale()] ?: $template['title']['en'];
+                                    $templateCity = $template['city'][app()->getLocale()] ?: $template['city']['en'];
+                                @endphp
+                                <option value="{{ $template['id'] }}">
+                                    {{ $templateTitle }} — {{ $templateCity }} — {{ __('recruitment.application_form.template_version', ['version' => $template['version']]) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <button
+                            type="button"
+                            x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'application-form-editor', action: 'applyPublishedTemplate', message: @js(__('recruitment.application_form.reuse_confirm')), confirmLabel: @js(__('recruitment.application_form.use_template')) })"
+                            class="shrink-0 cursor-pointer whitespace-nowrap rounded-control bg-neutral-900 px-5 py-2.5 text-body sm:py-0 font-semibold text-white hover:bg-neutral-700 disabled:cursor-wait disabled:opacity-50"
+                        >{{ __('recruitment.application_form.use_template') }}</button>
+                    </div>
                     <x-error-span>{{ $errors->first('selectedTemplateVersionId') }}</x-error-span>
                 </div>
-                <button
-                    type="button"
-                    x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'application-form-editor', action: 'applyPublishedTemplate', message: @js(__('recruitment.application_form.reuse_confirm')), confirmLabel: @js(__('recruitment.application_form.use_template')) })"
-                    class="rounded-control bg-neutral-900 px-4 py-2.5 text-body font-semibold text-white hover:bg-neutral-700 disabled:cursor-wait disabled:opacity-50"
-                >{{ __('recruitment.application_form.use_template') }}</button>
             @else
-                <p class="lg:col-span-2 rounded-control bg-neutral-50 px-4 py-3 text-small text-neutral-500">{{ __('recruitment.application_form.no_reusable_forms') }}</p>
+                <p class="rounded-control bg-neutral-50 px-4 py-3 text-small text-neutral-500">{{ __('recruitment.application_form.no_reusable_forms') }}</p>
             @endif
         </div>
     </section>
 
-    <section x-show="addPanel" x-collapse x-cloak class="mb-5 overflow-hidden rounded-card border border-neutral-200 bg-white shadow-e1">
+    <section x-show="addPanel" x-collapse x-cloak class="mb-5 overflow-hidden rounded-surface border border-neutral-200 bg-white shadow-e1">
         <div class="border-b border-neutral-200 bg-neutral-50 px-5 py-4">
             <div class="flex items-center justify-between gap-3">
                 <div>
@@ -207,7 +196,7 @@
         <section class="min-w-0 space-y-4">
             @foreach ($sections as $sectionKey => $section)
                 @php $sectionFields = collect($fields)->filter(fn ($field) => $field['section'] === $sectionKey); @endphp
-                <details wire:key="application-form-section-{{ $sectionKey }}" class="group rounded-card border border-neutral-200 bg-white shadow-e1" @if ($expandedSection === $sectionKey) open @endif>
+                <details wire:key="application-form-section-{{ $sectionKey }}" class="group rounded-surface border border-neutral-200 bg-white shadow-e1" @if ($expandedSection === $sectionKey) open @endif>
                     <summary wire:click.prevent="toggleSection('{{ $sectionKey }}')" class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4">
                         <div>
                             <h3 class="font-bold text-neutral-900">{{ $section['label'][app()->getLocale()] ?? $section['label']['en'] }}</h3>
@@ -241,7 +230,7 @@
                                             <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 17a.75.75 0 0 1-.53-.22l-4-4a.75.75 0 1 1 1.06-1.06l2.72 2.72V4a.75.75 0 0 1 1.5 0v10.44l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4A.75.75 0 0 1 10 17Z" clip-rule="evenodd"/></svg>
                                         </button>
                                         @unless ($field['locked'])
-                                            <button type="button" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'application-form-editor', action: 'removeField', args: [{{ $index }}], message: @js(__('recruitment.application_form.remove_confirm')), confirmLabel: @js(__('recruitment.application_form.remove')), tone: 'danger' })" class="cursor-pointer rounded p-2 text-neutral-500 hover:bg-red-50 hover:text-red-700" aria-label="{{ __('recruitment.application_form.remove') }}">
+                                            <button type="button" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'application-form-editor', action: 'removeField', args: [{{ $index }}], message: @js(__('recruitment.application_form.remove_confirm')), confirmLabel: @js(__('recruitment.application_form.remove')), tone: 'danger' })" class="cursor-pointer rounded p-2 text-neutral-500 hover:bg-neutral-100 hover:text-primary" aria-label="{{ __('recruitment.application_form.remove') }}">
                                                 <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V4h6v3m-9 0 1 13h10l1-13M10 11v5m4-5v5"/></svg>
                                             </button>
                                         @endunless
@@ -288,7 +277,7 @@
                                                 <div wire:key="field-{{ $field['key'] }}-option-{{ $optionIndex }}" class="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
                                                     <input type="text" wire:model.blur="fields.{{ $index }}.options.{{ $optionIndex }}.label.en" dir="ltr" class="min-w-0 rounded-control border-neutral-300 text-small focus:border-primary focus:ring-primary" aria-label="{{ __('recruitment.application_form.option_en') }}">
                                                     <input type="text" wire:model.blur="fields.{{ $index }}.options.{{ $optionIndex }}.label.ar" dir="rtl" class="min-w-0 rounded-control border-neutral-300 text-small focus:border-primary focus:ring-primary" aria-label="{{ __('recruitment.application_form.option_ar') }}">
-                                                    <button type="button" wire:click="removeOption({{ $index }}, {{ $optionIndex }})" class="rounded p-2 text-neutral-400 hover:bg-red-50 hover:text-red-700" aria-label="{{ __('recruitment.application_form.remove') }}">
+                                                    <button type="button" wire:click="removeOption({{ $index }}, {{ $optionIndex }})" class="cursor-pointer rounded p-2 text-neutral-400 hover:bg-neutral-100 hover:text-primary" aria-label="{{ __('recruitment.application_form.remove') }}">
                                                         <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg>
                                                     </button>
                                                 </div>
@@ -313,7 +302,7 @@
                 </details>
             @endforeach
 
-            <div class="rounded-card border border-neutral-200 bg-white p-5 shadow-e1">
+            <div class="rounded-surface border border-neutral-200 bg-white p-5 shadow-e1">
                 <x-forms.input-label for="privacy-version" required>{{ __('recruitment.application_form.privacy_version') }}</x-forms.input-label>
                 <x-forms.input id="privacy-version" model="privacyNoticeVersion" dir="ltr" required />
                 <x-error-span>{{ $errors->first('privacyNoticeVersion') }}</x-error-span>
@@ -322,7 +311,7 @@
         </section>
 
         <aside class="min-w-0 xl:sticky xl:top-24">
-            <div class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-card border border-neutral-200 bg-white p-3 shadow-e1">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-surface border border-neutral-200 bg-white p-3 shadow-e1">
                 <div>
                     <p class="font-semibold text-neutral-900">{{ __('recruitment.application_form.live_preview') }}</p>
                     <p class="text-small text-neutral-500">{{ __('recruitment.application_form.live_preview_help') }}</p>
@@ -336,7 +325,7 @@
             <div
                 id="application-form-preview-scroll"
                 data-csb-exclude
-                class="max-h-[calc(100vh-8rem)] touch-pan-y overflow-y-auto overscroll-contain rounded-card border border-neutral-200 bg-[#f3f3f3] p-3 shadow-inner [scrollbar-color:#9ca3af_transparent] [scrollbar-width:thin] sm:p-5"
+                class="max-h-[calc(100vh-8rem)] touch-pan-y overflow-y-auto overscroll-contain rounded-surface border border-neutral-200 bg-neutral-50 p-3 shadow-inner [scrollbar-color:#939598_transparent] [scrollbar-width:thin] sm:p-5"
             >
                 <x-recruitment.application-form-preview
                     :campaign="$campaign"

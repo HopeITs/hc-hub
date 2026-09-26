@@ -121,6 +121,32 @@ return [
         'recruitment-job-posts' => ['view', 'manage'],
         'recruitment-forms' => ['view', 'manage'],
         'recruitment-links' => ['view', 'manage'],
+
+        /*
+         * Applicant records. Each sensitive act is its own permission rather
+         * than riding on 'view': seeing a list must never imply reading a CV,
+         * and writing a note must never imply moving an application. Tagging
+         * one record, tagging many at once, and editing the tag list itself
+         * are separate for the same reason. Accepting is a hiring decision
+         * layered on top of change-status, and rejecting many at once (which
+         * emails every one of them) is a grant of its own. 'manage' covers
+         * campaign invites.
+         */
+        'recruitment-applicants' => [
+            'view', 'manage', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status',
+            'tag', 'bulk-tag', 'manage-tags', 'accept', 'bulk-reject',
+            // Phase 2 Task 7: create / edit / reschedule / cancel interviews
+            // and record their outcome. Participants need no permission.
+            'schedule-interviews',
+            // Phase 2 Task 8: the aggregated view of every reviewer's
+            // evaluation, and correcting / withdrawing someone else's.
+            // Writing one's own evaluation needs none: it comes from being on
+            // the interview.
+            'view-evaluations', 'correct-evaluations',
+            // Phase 2 Task 9: follow job offers / write them. Writing also
+            // needs User::canViewSalary(), checked by the policy.
+            'view-offers', 'manage-offers',
+        ],
     ],
 
     /*
@@ -274,6 +300,10 @@ return [
             'addInvite' => 'recruitment-links.manage',
             'cancelInvite' => 'recruitment-links.manage',
         ],
+        // Team 2's invite screen (also embedded in the publishing page). Each
+        // action also runs RecruitmentCampaignInvitePolicy (campaign scope).
+        'recruitment.campaigns.invites' => ['add' => 'recruitment-applicants.manage'],
+        'recruitment.campaigns.invite-table' => ['cancelInvite' => 'recruitment-applicants.manage'],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
             'create' => 'leaves.create', 'delete' => 'leaves.delete',
@@ -339,6 +369,74 @@ return [
         ],
         // Streams the whole org directory to CSV; had no check of its own.
         'position.directory' => ['exportCsv' => 'positions.export'],
+
+        // Each method re-resolves its record through the applicant scope and
+        // asks the policy again; the permission here is only the outer wall.
+        'recruitment.applicants.show' => [
+            'beginStatusChange' => 'recruitment-applicants.change-status',
+            'changeStatus' => 'recruitment-applicants.change-status',
+            'beginArchive' => 'recruitment-applicants.archive-cv',
+            'archiveCv' => 'recruitment-applicants.archive-cv',
+        ],
+        'recruitment.applicants.bulk-tags' => [
+            'open' => 'recruitment-applicants.bulk-tag',
+            'apply' => 'recruitment-applicants.bulk-tag',
+        ],
+        // The selection is re-scoped in RecruitmentApplicationStatusService,
+        // which also asks the bulkReject policy itself.
+        'recruitment.applicants.bulk-reject' => [
+            'open' => 'recruitment-applicants.bulk-reject',
+            'apply' => 'recruitment-applicants.bulk-reject',
+        ],
+        'recruitment.applicants.application-tags' => [
+            'attach' => 'recruitment-applicants.tag',
+            'detach' => 'recruitment-applicants.tag',
+            'createAndAttach' => 'recruitment-applicants.manage-tags',
+        ],
+        'recruitment.applicants.tag-manager' => [
+            'create' => 'recruitment-applicants.manage-tags',
+            'beginRename' => 'recruitment-applicants.manage-tags',
+            'rename' => 'recruitment-applicants.manage-tags',
+            'delete' => 'recruitment-applicants.manage-tags',
+            'restore' => 'recruitment-applicants.manage-tags',
+        ],
+        'recruitment.applicants.notes' => [
+            'addNote' => 'recruitment-applicants.add-notes',
+            'confirmDelete' => 'recruitment-applicants.delete-notes',
+            'deleteNote' => 'recruitment-applicants.delete-notes',
+        ],
+        // Phase 2 Task 7. Each method re-resolves the interview through
+        // RecruitmentInterview::visibleTo() and asks the policy (manage /
+        // schedule, scope included) again; the service authorizes a third time.
+        'recruitment.interviews.form' => ['save' => 'recruitment-applicants.schedule-interviews'],
+        'recruitment.interviews.show' => [
+            'beginCancel' => 'recruitment-applicants.schedule-interviews',
+            'cancelInterview' => 'recruitment-applicants.schedule-interviews',
+            'beginOutcome' => 'recruitment-applicants.schedule-interviews',
+            'recordOutcome' => 'recruitment-applicants.schedule-interviews',
+        ],
+        // Phase 2 Task 8. Each method re-resolves the interview and the
+        // evaluation through the scoped query and asks the policy again; the
+        // service authorizes a third time.
+        'recruitment.interviews.evaluation-summary' => [
+            'beginCorrect' => 'recruitment-applicants.correct-evaluations',
+            'saveCorrection' => 'recruitment-applicants.correct-evaluations',
+            'beginWithdraw' => 'recruitment-applicants.correct-evaluations',
+            'withdraw' => 'recruitment-applicants.correct-evaluations',
+            'closeEvaluations' => 'recruitment-applicants.schedule-interviews',
+        ],
+        // Phase 2 Task 9. Each method re-resolves the offer through the scoped
+        // query and asks the policy (manage: permission + scope +
+        // canViewSalary) again; the service authorizes a third time.
+        'recruitment.offers.form' => ['save' => 'recruitment-applicants.manage-offers'],
+        'recruitment.offers.show' => [
+            'beginSend' => 'recruitment-applicants.manage-offers',
+            'send' => 'recruitment-applicants.manage-offers',
+            'beginResponse' => 'recruitment-applicants.manage-offers',
+            'recordResponse' => 'recruitment-applicants.manage-offers',
+            'beginCancel' => 'recruitment-applicants.manage-offers',
+            'cancelOffer' => 'recruitment-applicants.manage-offers',
+        ],
     ],
 
     /*
@@ -366,6 +464,40 @@ return [
     'livewire_exempt' => [
         // Form-only resets. Persistence rechecks role, grade and subtree in the draft service.
         'recruitment.requests.create' => ['updatedDataRequestType', 'updatedDataPositionId', 'updatedDataCityId'],
+        // Close an open panel; they clear component state and touch no record.
+        'recruitment.applicants.show' => ['cancelStatusChange', 'cancelArchive'],
+        // refreshNotes only re-renders, through the same scoped query as the first render.
+        'recruitment.applicants.notes' => ['cancelDelete', 'refreshNotes'],
+        // Re-render through the same scoped query; they write nothing.
+        // selectTable() reads ids through the same scoped, filtered query.
+        // executeAction/executeItemAction carry two actions (bulk tag, bulk
+        // reject) with different permissions, so one name here would be wrong
+        // for one of them; each authorizes its own action code by policy.
+        'recruitment.applicants.application-table' => [
+            'refreshTags', 'refreshDecisions', 'selectTable', 'executeAction', 'executeItemAction',
+        ],
+        'recruitment.applicants.bulk-tags' => ['cancel'],
+        'recruitment.applicants.bulk-reject' => ['cancel'],
+        'recruitment.applicants.application-tags' => ['refreshTags'],
+        'recruitment.applicants.tag-manager' => ['cancelRename'],
+        // Phase 2 Task 7. Form-only state: the participant list is validated
+        // user by user (exists, active) by the scheduling service on save,
+        // which is the mapped action. closePanel clears component state only.
+        'recruitment.interviews.form' => ['addParticipant', 'removeParticipant'],
+        'recruitment.interviews.show' => ['closePanel'],
+        // Month navigation; re-renders through the same visibleTo() query.
+        'recruitment.interviews.calendar' => ['previousMonth', 'nextMonth', 'thisMonth'],
+        // Phase 2 Task 8. save() writes the caller's OWN evaluation, which
+        // needs no permission — the grant is being a current participant in a
+        // reviewer role, checked by the evaluate policy in the component and
+        // again, under a row lock, in RecruitmentInterviewEvaluationService.
+        // reload() only re-reads the caller's own row.
+        'recruitment.interviews.evaluation-form' => ['save', 'reload'],
+        // Clears panel state; refreshEvaluations re-renders through the same
+        // scoped query and writes nothing.
+        'recruitment.interviews.evaluation-summary' => ['cancelPanel', 'refreshEvaluations'],
+        // Phase 2 Task 9. Clears panel state only.
+        'recruitment.offers.show' => ['closePanel'],
 
         // --- Authentication -------------------------------------------------
         // Reached before a session exists, or acting only on the caller's own
@@ -382,11 +514,19 @@ return [
         'auth.role-switcher' => ['switchTo', 'refreshRoles'],
         'settings.password' => ['updatePassword'],
 
+        // --- Public recruitment (Team 2 test form, non-production only) -----
+        // The applicant has no account, so there is no role to check. The
+        // opaque link token is the credential; the submission service
+        // re-checks link, campaign state and window, and invitation, under a
+        // lock. The route is throttled and not registered in production.
+        'recruitment.public-site.apply' => ['submit'],
+
         // --- Confirmation dialogs -------------------------------------------
         // These only render a "are you sure?" prompt. The action it confirms
         // is the mapped one (delete / toggleItemStatusConfirmed), and that is
         // where the permission and the policy check live.
         'badges.badges-table' => ['confirmDelete'],
+        'recruitment.campaigns.invite-table' => ['confirmCancel'],
         'basics.annual-leave-rule-table' => ['confirmDelete'],
         'basics.checklist-item-table' => ['confirmDelete'],
         'basics.city-table' => ['confirmToggleItemStatus'],

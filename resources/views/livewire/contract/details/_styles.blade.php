@@ -171,9 +171,9 @@
         background-color:#fff;
         background-image:url('{{ $imgSrc("assets/img/Header.svg") }}'), url('{{ $imgSrc("assets/img/Footer.png") }}');
         background-repeat:no-repeat, no-repeat;
-        background-position:center 16mm, center calc(100% - 16mm);
+        background-position:center 12mm, center calc(100% - 12mm);
         background-size:93% auto, 93% auto;
-        padding: 45mm 10mm 22mm 10mm;
+        padding: 41mm 10mm 20mm 10mm;
         box-shadow:0 8px 24px rgba(0,0,0,.06);
         border-radius:16px;
         position:relative;
@@ -196,7 +196,7 @@
     .contract-footer{
         position:absolute;
         right:18mm;
-        bottom:30mm;
+        bottom:20mm;
         font-family:'Somar Sans';
         font-weight:700;
         font-size:7pt;
@@ -419,6 +419,8 @@
 
     .signature-caption{
         margin-bottom:15px;
+        font-family: 'somar-regular';
+        font-size: 14px;
     }
 
     .signature-name{
@@ -428,6 +430,8 @@
 
     .signature-date{
         font-size:14px;
+        font-family: 'somar-regular';
+        margin-top: 25%;
     }
 
     /* ==========================================

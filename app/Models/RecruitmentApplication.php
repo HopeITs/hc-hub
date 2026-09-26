@@ -2,17 +2,37 @@
 
 namespace App\Models;
 
+use App\Services\RecruitmentScopeResolver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use LogicException;
 
 class RecruitmentApplication extends Model
 {
     protected $guarded = ['id'];
 
     protected $hidden = ['submission_key_hash'];
+
+    private static bool $applyingDecision = false;
+
+    /**
+     * @internal RecruitmentApplicationStatusService only, inside its
+     *           transaction and after it has validated the transition.
+     */
+    public static function applyDecision(self $application, string $status): void
+    {
+        self::$applyingDecision = true;
+
+        try {
+            $application->forceFill(['status' => $status])->save();
+        } finally {
+            self::$applyingDecision = false;
+        }
+    }
 
     public function applicant(): BelongsTo
     {
@@ -54,6 +74,11 @@ class RecruitmentApplication extends Model
         return $this->hasMany(RecruitmentApplicantFile::class, 'application_id');
     }
 
+    public function cvFiles(): HasMany
+    {
+        return $this->files()->where('file_type', RecruitmentApplicantFile::TYPE_CV);
+    }
+
     public function tagAssignments(): HasMany
     {
         return $this->hasMany(RecruitmentApplicationTag::class, 'application_id');
@@ -71,6 +96,11 @@ class RecruitmentApplication extends Model
             ->withTimestamps();
     }
 
+    public function indicatorSnapshot(): HasOne
+    {
+        return $this->hasOne(RecruitmentApplicationIndicatorSnapshot::class, 'application_id');
+    }
+
     public function notes(): HasMany
     {
         return $this->hasMany(RecruitmentApplicantNote::class, 'application_id');
@@ -81,6 +111,11 @@ class RecruitmentApplication extends Model
         return $this->hasMany(RecruitmentApplicationDecision::class, 'application_id');
     }
 
+    public function rejectionNotice(): HasOne
+    {
+        return $this->hasOne(RecruitmentRejectionNotice::class, 'application_id');
+    }
+
     public function interviews(): HasMany
     {
         return $this->hasMany(RecruitmentInterview::class, 'application_id');
@@ -89,6 +124,25 @@ class RecruitmentApplication extends Model
     public function jobOffer(): HasOne
     {
         return $this->hasOne(RecruitmentJobOffer::class, 'application_id');
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return app(RecruitmentScopeResolver::class)->scopeApplications($query, $user);
+    }
+
+    /**
+     * Status is written in exactly one place. Any other save that changes it —
+     * a mass assignment from request data, a stray forceFill — is refused
+     * here, so a decision can never happen without its history row.
+     */
+    protected static function booted(): void
+    {
+        static::updating(function (self $application): void {
+            if ($application->isDirty('status') && ! self::$applyingDecision) {
+                throw new LogicException('An application status changes only through RecruitmentApplicationStatusService.');
+            }
+        });
     }
 
     protected function casts(): array

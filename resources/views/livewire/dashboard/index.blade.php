@@ -34,11 +34,11 @@
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="flex h-full min-h-0 flex-col gap-6 lg:col-span-2">
             @if($hasLeaves)
-                <div class="flex items-center justify-start font-semibold text-white rounded-surface">
+                <div data-tour="dashboard.my-leaves" class="flex items-center justify-start font-semibold text-white rounded-surface">
                     <livewire:dashboard.my-leaves-card/>
                 </div>
             @endif
-            <div class="flex min-h-68 flex-1 items-stretch justify-start rounded-surface font-semibold text-white">
+            <div data-tour="dashboard.notes" class="flex min-h-68 flex-1 items-stretch justify-start rounded-surface font-semibold text-white">
                 {{-- No identifier is passed: the card derives its owner from
                      the session. Passing auth()->id() here supplied a User id
                      where an Employee id was expected. --}}
@@ -46,12 +46,12 @@
             </div>
         </div>
 
-        <div class="w-full rounded-surface text-white font-semibold  {{$hasLeaves ? 'h-full' : 'h-68'}}">
+        <div data-tour="dashboard.team" class="w-full rounded-surface text-white font-semibold  {{$hasLeaves ? 'h-full' : 'h-68'}}">
             <x-dashboard-cards.team-members-card/>
         </div>
 
 
-        <div class="flex items-center justify-center h-full row-span-2 font-semibold text-white rounded-surface">
+        <div data-tour="dashboard.news" class="flex items-center justify-center h-full row-span-2 font-semibold text-white rounded-surface">
             <x-dashboard-cards.news-card/>
         </div>
 
@@ -60,7 +60,7 @@
             <livewire:dashboard.calendar-card/>
         </div>
 
-        <div class="flex items-center justify-center font-semibold text-white h-70">
+        <div data-tour="dashboard.upcoming-leaves" class="flex items-center justify-center font-semibold text-white h-70">
             <livewire:dashboard.upcoming-leaves-card/>
 
         </div>
@@ -73,7 +73,7 @@
             <x-dashboard-cards.upcoming-events-card :upcoming-events="$upcomingEvents"/>
         </div>
 
-        <div class="flex items-center justify-center font-semibold text-white h-70">
+        <div data-tour="dashboard.pending-requests" class="flex items-center justify-center font-semibold text-white h-70">
             <x-dashboard-cards.pending-requests-card :pending-requests="$pendingRequests"/>
         </div>
 

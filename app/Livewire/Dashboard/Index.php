@@ -295,32 +295,9 @@ class Index extends Component
             $members->push($directManager);
         }
 
-        $techManager = null;
-        if ($position?->tech_manager_id) {
-            $techManagerPosition = Position::with(['jobLevel', 'activeContracts.employee.media'])->find($position->tech_manager_id);
-
-            if ($techManagerPosition) {
-                $activeContract = $techManagerPosition
-                    ->activeContracts()
-                    ->with(['employee.contracts.position.jobLevel'])
-                    ->latest('start_date')
-                    ->first();
-
-                $techManager = $activeContract?->employee;
-
-                if ($techManager) {
-                    $techManager->positionTitle = $activeContract?->position?->$titleCol ?? '—';
-                }
-            }
-        }
-
-        if ($techManager && ! $members->contains('id', $techManager->id)) {
-            $members->push($techManager);
-        }
-
         $nameCol = "name_{$locale}";
 
-        $excludeIds = collect([$this->employee?->id, $ceo?->id, $directManager?->id, $techManager?->id])
+        $excludeIds = collect([$this->employee?->id, $ceo?->id, $directManager?->id])
             ->filter()
             ->unique()
             ->all();

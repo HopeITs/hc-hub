@@ -30,7 +30,7 @@
     // Arabic-Indic digits into the LTR-styled English column previously
     // rendered as blank glyphs in the PDF (no visible number at all).
     $digitsAr = fn (int|float|string $n): string => $forPdf ? ar_digits((string) $n) : (string) $n;
-    $wrapLtr = fn (string $v): string => '<span dir="ltr">'.$v.'</span>';
+    $wrapLtr = fn (string $v): string => '<span >'.$v.'</span>';
 
     // Sunday(0)..Saturday(6) — Carbon's own day-of-week numbering, matching
     // work_day_from/to and the composer's own bilingual preview

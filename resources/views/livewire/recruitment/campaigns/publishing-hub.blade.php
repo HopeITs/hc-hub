@@ -11,7 +11,7 @@
     />
 
     @if (session('campaign_notice'))
-        <div class="mb-5 rounded-control border border-green-200 bg-green-50 p-4 text-body text-green-800" role="status">{{ session('campaign_notice') }}</div>
+        <div class="mb-5 rounded-control border border-neutral-200 bg-neutral-50 p-4 text-body text-neutral-800" role="status">{{ session('campaign_notice') }}</div>
     @endif
 
     <section class="mb-5 rounded-card border border-neutral-200 bg-white p-5 shadow-e1">
@@ -25,7 +25,7 @@
         </div>
     </section>
 
-    <div class="mb-5 rounded-control bg-blue-50 p-4 text-body text-blue-900">
+    <div class="mb-5 rounded-control border border-neutral-200 bg-neutral-50 p-4 text-body text-neutral-700">
         {{ __('recruitment.publishing.help') }}
     </div>
 

@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Statistics;
 
+use App\Enums\ContractPlace;
+use App\Enums\ContractType as ContractTypeEnum;
 use App\Livewire\Concerns\ScopesToAuthorizedCity;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\Contract;
+use App\Models\ContractType;
 use App\Models\Position;
 use App\Models\Program;
 use Illuminate\Contracts\View\View;
@@ -179,14 +182,24 @@ class ContractStatistics extends Component
         }
     }
 
-    private function countByTypeTokens(Builder $query, array $tokens): int
+    /**
+     * Contract type ids whose category (config('contracts.map_by_id'), via
+     * ContractType::category) is $category — the same classification used
+     * for leave accrual, PDF export, and renewal eligibility elsewhere.
+     */
+    private function contractTypeIdsForCategory(string $category): array
+    {
+        return ContractType::all()
+            ->filter(fn (ContractType $type): bool => $type->category === $category)
+            ->pluck('id')
+            ->all();
+    }
+
+    private function countByCategory(Builder $query, string $category, ?string $column = null, ?int $value = null): int
     {
         return (clone $query)
-            ->whereHas('contractType', function ($q) use ($tokens) {
-                foreach ($tokens as $t) {
-                    $q->where(transColumn('name'), 'like', "%{$t}%");
-                }
-            })
+            ->whereIn('contract_type_id', $this->contractTypeIdsForCategory($category))
+            ->when($column !== null, fn ($q) => $q->where($column, $value))
             ->count();
     }
 
@@ -198,16 +211,16 @@ class ContractStatistics extends Component
             'employees' => (clone $q)->distinct('employee_id')->count('employee_id'),
 
             'annual' => [
-                'full' => $this->countByTypeTokens($q, ['Annual', 'Full']),
-                'part' => $this->countByTypeTokens($q, ['Annual', 'Partial']),
+                'full' => $this->countByCategory($q, 'annual', 'type', ContractTypeEnum::FullTime),
+                'part' => $this->countByCategory($q, 'annual', 'type', ContractTypeEnum::PartTime),
             ],
             'service' => [
-                'online' => $this->countByTypeTokens($q, ['Agreement', 'Online']),
-                'onsite' => $this->countByTypeTokens($q, ['Agreement', 'Onsite']),
+                'online' => $this->countByCategory($q, 'service', 'place', ContractPlace::Online),
+                'onsite' => $this->countByCategory($q, 'service', 'place', ContractPlace::Onsite),
             ],
             'trial' => [
-                'full' => $this->countByTypeTokens($q, ['Trial', 'Full']),
-                'part' => $this->countByTypeTokens($q, ['Trial', 'Partial']),
+                'full' => $this->countByCategory($q, 'trial', 'type', ContractTypeEnum::FullTime),
+                'part' => $this->countByCategory($q, 'trial', 'type', ContractTypeEnum::PartTime),
             ],
         ];
     }

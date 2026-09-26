@@ -43,9 +43,20 @@ class ContractPolicy
         return $user->hasActivePermission('contracts.delete') && $this->isInActiveCity($user, $contract);
     }
 
+    /**
+     * The exported PDF *is* the contract, pay clause and all, so there is no
+     * version of it to hand someone who may not see the figures: a copy with
+     * the stipend blanked out is not the document, and one with the stipend in
+     * it defeats the restriction. A role barred from pay figures is therefore
+     * barred from the export, whatever permissions it otherwise carries.
+     *
+     * @see User::canViewSalary()
+     */
     public function export(User $user, Contract $contract): bool
     {
-        return $user->hasActivePermission('contracts.export') && $this->isInActiveCity($user, $contract);
+        return $user->hasActivePermission('contracts.export')
+            && $user->canViewSalary()
+            && $this->isInActiveCity($user, $contract);
     }
 
     private function isInActiveCity(User $user, Contract $contract): bool

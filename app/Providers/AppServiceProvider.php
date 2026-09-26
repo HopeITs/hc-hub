@@ -14,13 +14,24 @@ use App\Models\JobPost;
 use App\Models\LeaveRequest;
 use App\Models\Position;
 use App\Models\PublicRecruitmentLink;
+use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplicantFile;
+use App\Models\RecruitmentApplicantNote;
+use App\Models\RecruitmentApplication;
+use App\Models\RecruitmentCampaignInvite;
+use App\Models\RecruitmentInterview;
+use App\Models\RecruitmentInterviewEvaluation;
+use App\Models\RecruitmentJobOffer;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentRequestEvent;
+use App\Models\RecruitmentTag;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\Vacancy;
 use App\Observers\ContractObserver;
 use App\Observers\EmployeeObserver;
+use App\Observers\RecruitmentApplicantObserver;
+use App\Observers\RecruitmentApplicationObserver;
+use App\Observers\RecruitmentCampaignInviteObserver;
 use App\Policies\ApplicationFormPolicy;
 use App\Policies\BadgePolicy;
 use App\Policies\CenterPolicy;
@@ -33,11 +44,23 @@ use App\Policies\LeaveRequestPolicy;
 use App\Policies\PositionPolicy;
 use App\Policies\PublicRecruitmentLinkPolicy;
 use App\Policies\RecruitmentApplicantFilePolicy;
+use App\Policies\RecruitmentApplicantNotePolicy;
+use App\Policies\RecruitmentApplicantPolicy;
+use App\Policies\RecruitmentApplicationPolicy;
+use App\Policies\RecruitmentCampaignInvitePolicy;
+use App\Policies\RecruitmentInterviewEvaluationPolicy;
+use App\Policies\RecruitmentInterviewPolicy;
+use App\Policies\RecruitmentJobOfferPolicy;
 use App\Policies\RecruitmentRequestEventPolicy;
 use App\Policies\RecruitmentRequestPolicy;
+use App\Policies\RecruitmentTagPolicy;
 use App\Policies\RecruitmentWorkflowInstanceStepPolicy;
 use App\Policies\VacancyPolicy;
 use App\Services\ActivityLogger;
+use App\Services\Recruitment\Scanning\ClamdScanner;
+use App\Services\Recruitment\Scanning\DisabledScanner;
+use App\Services\Recruitment\Scanning\RecruitmentFileScanner;
+use App\Services\SalaryCipher;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
@@ -58,6 +81,17 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ActivityLogger::class, function ($app) {
             return new ActivityLogger;
         });
+
+        // Singleton so the Encrypter - and the "this host cannot read the
+        // figures" warning that goes with it - is built once per request
+        // rather than once per contract row rendered.
+        $this->app->singleton(SalaryCipher::class);
+
+        // Anything but "clamd" leaves every upload in quarantine; there is no
+        // driver that clears a file without scanning it.
+        $this->app->bind(RecruitmentFileScanner::class, fn () => config('recruitment-uploads.scanner.driver') === 'clamd'
+            ? new ClamdScanner
+            : new DisabledScanner);
     }
 
     public function boot(): void
@@ -91,6 +125,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Position::class, PositionPolicy::class);
         Gate::policy(RecruitmentRequest::class, RecruitmentRequestPolicy::class);
         Gate::policy(RecruitmentApplicantFile::class, RecruitmentApplicantFilePolicy::class);
+        Gate::policy(RecruitmentApplicant::class, RecruitmentApplicantPolicy::class);
+        Gate::policy(RecruitmentApplication::class, RecruitmentApplicationPolicy::class);
+        Gate::policy(RecruitmentTag::class, RecruitmentTagPolicy::class);
+        Gate::policy(RecruitmentApplicantNote::class, RecruitmentApplicantNotePolicy::class);
         Gate::policy(RecruitmentWorkflowInstanceStep::class, RecruitmentWorkflowInstanceStepPolicy::class);
         Gate::policy(Vacancy::class, VacancyPolicy::class);
         Gate::policy(HiringCampaign::class, HiringCampaignPolicy::class);
@@ -98,6 +136,13 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ApplicationForm::class, ApplicationFormPolicy::class);
         Gate::policy(PublicRecruitmentLink::class, PublicRecruitmentLinkPolicy::class);
         Gate::policy(RecruitmentRequestEvent::class, RecruitmentRequestEventPolicy::class);
+        Gate::policy(RecruitmentCampaignInvite::class, RecruitmentCampaignInvitePolicy::class);
+        // Team 2 (Phase 2 Task 7)
+        Gate::policy(RecruitmentInterview::class, RecruitmentInterviewPolicy::class);
+        // Team 2 (Phase 2 Task 8)
+        Gate::policy(RecruitmentInterviewEvaluation::class, RecruitmentInterviewEvaluationPolicy::class);
+        // Team 2 (Phase 2 Task 9)
+        Gate::policy(RecruitmentJobOffer::class, RecruitmentJobOfferPolicy::class);
 
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle)
@@ -169,5 +214,13 @@ class AppServiceProvider extends ServiceProvider
 
         Contract::observe(ContractObserver::class);
         Employee::observe(EmployeeObserver::class);
+
+        // Team 2 (Phase 2): rules that must hold for every path that writes
+        // these records — Team 1's public form included — without that code
+        // being modified. Phone-duplicate hint; submission audit; a used
+        // invite is final.
+        RecruitmentApplicant::observe(RecruitmentApplicantObserver::class);
+        RecruitmentApplication::observe(RecruitmentApplicationObserver::class);
+        RecruitmentCampaignInvite::observe(RecruitmentCampaignInviteObserver::class);
     }
 }

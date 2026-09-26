@@ -20,6 +20,12 @@
                      service is idempotent regardless, which is what actually protects it. --}}
                 <x-primary-button type="button" wire:click="submit" wire:loading.attr="disabled" wire:target="submit">{{ __('recruitment.submit') }}</x-primary-button>
             @endcan
+            @if ($canCreateCampaign)
+                <a href="{{ route('recruitment.campaigns.create', ['vacancyId' => $request->vacancy->id]) }}" wire:navigate
+                    class="cursor-pointer rounded-control bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">
+                    {{ __('recruitment.campaign.create') }}
+                </a>
+            @endif
         </div>
     </header>
     @include('livewire.recruitment.requests.partials.approval-track')

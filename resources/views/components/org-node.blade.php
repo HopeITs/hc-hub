@@ -8,10 +8,6 @@
     $city = $position->city?->slug ?? $position->center?->city?->slug;
     $cityName = $position->city?->name ?? $position->center?->city?->name;
 
-    $crossRelation = $managerType === 'direct' ? 'techManager' : 'directManager';
-    $crossLabel = $managerType === 'direct' ? __('general.tech-manager') : __('general.direct-manager');
-    $crossEmployee = $position->{$crossRelation}?->activeContracts?->first()?->employee;
-
     $modifiers = collect([
         'org-id-card',
         $org['modifier'],
@@ -28,6 +24,7 @@
 @endphp
 
 <button type="button" wire:click="$dispatch('open-profile', { employeeId: {{ $employee->id }} })"
+    data-tour="org.node"
     aria-label="{{ __('general.view-profile-of', ['name' => $employee->name]) }}"
     {{ $attributes->merge(['class' => $modifiers]) }}>
 
