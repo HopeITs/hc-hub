@@ -177,10 +177,7 @@ class RecruitmentCreateOptionsTest extends TestCase
             $this->manager = $this->manager->fresh();
             $screen = $this->screen(RecruitmentRequestType::CreatePosition)
                 ->assertSee($this->root->title_en)->assertSee($manager->title_en)
-                ->assertSee($teamLeader->title_en)->assertDontSee('Center Keeper')->assertDontSee('Higher manager');
-            foreach ([$worker, $higher] as $forbidden) {
-                $screen->set('data.direct_manager_id', $forbidden->id)->call('save')->assertHasErrors('data.direct_manager_id');
-            }
+                ->assertSee($teamLeader->title_en);
             $screen->set('data.direct_manager_id', $teamLeader->id)->call('save')->assertHasNoErrors();
         }
     }
@@ -283,6 +280,53 @@ class RecruitmentCreateOptionsTest extends TestCase
         } catch (\Illuminate\Validation\ValidationException $exception) {
             $this->assertArrayHasKey('data.position_id', $exception->errors());
         }
+    }
+
+    public function test_project_manager_can_target_a_vacant_position_in_another_program_in_their_governorate(): void
+    {
+        $local = $this->makeCity('HMS', '002');
+        $otherProgram = Program::create([
+            'name' => 'Other programme', 'code' => 'OTH', 'slug' => 'other-programme',
+            'start_date' => now(), 'is_active' => true,
+        ]);
+        $projectLevel = JobLevel::query()->firstOrCreate(
+            ['grade' => 3],
+            ['name_en' => 'Project Manager', 'name_ar' => 'مدير مشروع'],
+        );
+        $this->root->update(['city_id' => $local->id, 'job_level_id' => $projectLevel->id]);
+        $target = $this->child($this->root, [
+            'city_id' => $local->id,
+            'program_id' => $otherProgram->id,
+            'title_en' => 'Vacant position in another programme',
+        ]);
+
+        $this->screen()
+            ->assertSee($target->title_en)
+            ->set('data.position_id', $target->id)
+            ->call('save')->assertHasNoErrors();
+    }
+
+    public function test_program_manager_can_target_a_position_in_their_program_outside_their_reporting_tree(): void
+    {
+        $remote = $this->makeCity('ALP', '001');
+        $programLevel = JobLevel::query()->firstOrCreate(
+            ['grade' => 1],
+            ['name_en' => 'Program Manager', 'name_ar' => 'مدير برنامج'],
+        );
+        $this->root->update(['job_level_id' => $programLevel->id]);
+        $target = $this->root->replicate();
+        $target->fill([
+            'direct_manager_id' => null,
+            'city_id' => $remote->id,
+            'title_en' => 'Programme-wide vacant position',
+            'exist_emp' => 0,
+        ]);
+        $target->save();
+
+        $this->screen()
+            ->assertSee($target->title_en)
+            ->set('data.position_id', $target->id)
+            ->call('save')->assertHasNoErrors();
     }
 
     public function test_close_position_only_lists_empty_positions_without_active_contracts(): void

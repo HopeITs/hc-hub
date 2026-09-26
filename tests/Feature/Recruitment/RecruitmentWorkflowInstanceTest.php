@@ -99,6 +99,39 @@ class RecruitmentWorkflowInstanceTest extends TestCase
         ]);
     }
 
+    public function test_program_manager_request_uses_direct_manager_finance_and_governorate_hr_steps(): void
+    {
+        $city = $this->makeCity('ALP', '904');
+        $requester = $this->makeUser($city, 'manager');
+        $manager = $this->makeUser($city, 'manager');
+        $finance = $this->makeUser($city, 'manager');
+        $hr = $this->makeUser($city, 'HR-SYR');
+        [$department, $managerLevel, $contractType, $program] = $this->positionPrerequisites();
+        $programLevel = JobLevel::query()->forceCreate([
+            'name_en' => 'Program Manager', 'name_ar' => 'مدير برنامج', 'grade' => 1,
+        ]);
+
+        $managerPosition = $this->assignPosition(
+            $manager, $city, $program, $department, $managerLevel, $contractType, null, 'manager',
+        );
+        $requesterPosition = $this->assignPosition(
+            $requester, $city, $program, $department, $programLevel, $contractType, $managerPosition, 'program-manager',
+        );
+        $finance->givePermissionTo(Permission::findByName('recruitment-requests.approve-finance'));
+        $this->makeDefinition($requester);
+        [$request, $version] = $this->makeRequest(
+            $requester->fresh(), $city, RecruitmentRequestMode::Normal, $requesterPosition,
+        );
+
+        $instance = app(RecruitmentWorkflowInstanceService::class)->start($request, $version);
+
+        $this->assertSame(
+            [$manager->id, $finance->id, $hr->id],
+            $instance->steps()->with('workflowStep')->orderBy('id')->pluck('assigned_user_id')->all(),
+        );
+        $this->assertSame(RecruitmentRequestStatus::UnderReview, (int) $request->fresh()->status);
+    }
+
     public function test_start_is_idempotent_for_the_same_request_version(): void
     {
         $fixtures = $this->normalWorkflowFixtures();

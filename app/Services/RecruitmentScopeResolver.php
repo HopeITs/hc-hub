@@ -360,16 +360,29 @@ class RecruitmentScopeResolver
 
     /**
      * Positions this requester may actually target from the normal request
-     * form. The reporting tree remains the boundary for managers; programme
-     * and governorate rules then narrow that tree where the job level requires
-     * it. General management is the explicit organization-wide exception.
+     * form.
+     *
+     * Project managers are limited to their reporting tree and governorate.
+     * Program managers use their programme as the boundary for existing
+     * positions, because a programme can span governorates. General management
+     * remains the explicit organisation-wide exception.
      */
     public function scopeRequestablePositions(Builder $query, User $user, bool $includeSelf = false): Builder
     {
-        $query = $this->scopeManageablePositions($query, $user, $includeSelf)->visible();
+        $position = $this->position($user);
 
-        if ($this->hasProgramCreationScope($user)) {
-            $query->where('program_id', $this->position($user)?->program_id ?? 0);
+        if ($position === null) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        if ($this->hasProgramTargetScope($user)) {
+            $query->visible()->where('program_id', $position->program_id ?? 0);
+        } else {
+            $query = $this->scopeManageablePositions($query, $user, $includeSelf)->visible();
+        }
+
+        if (! $includeSelf) {
+            $query->where($query->qualifyColumn('id'), '!=', $position->getKey());
         }
 
         if ($this->hasGovernorateCreationScope($user)) {
@@ -387,11 +400,38 @@ class RecruitmentScopeResolver
 
     public function scopeProposedManagers(Builder $query, User $user): Builder
     {
-        return $this->scopeRequestablePositions($query, $user, true)
+        // A new position still needs an administrative parent in the
+        // requester's tree. Programme breadth applies to existing targets;
+        // it must not let a requester attach a new branch to an unrelated
+        // tree.
+        $query = $this->scopeManageablePositions($query, $user, true)->visible();
+        $position = $this->position($user);
+
+        if ($position === null) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        if ($this->hasProgramCreationScope($user)) {
+            $query->where('program_id', $position->program_id ?? 0);
+        }
+
+        if ($this->hasGovernorateCreationScope($user)) {
+            $cityId = $this->positionCityId($user);
+
+            if ($cityId === null || City::isNational($cityId)) {
+                return $query;
+            }
+
+            $query->inCity($cityId);
+        }
+
+        $query = $query
             ->where(fn (Builder $positions) => $positions
                 ->whereHas('jobLevel', fn (Builder $levels) => $levels
                     ->whereIn('grade', config('recruitment.requester_job_level_grades')))
                 ->orWhereHas('directTeam', fn (Builder $team) => $team->where('is_active', true)));
+
+        return $query;
     }
 
     public function hasProgramCreationScope(User $user): bool
@@ -408,6 +448,13 @@ class RecruitmentScopeResolver
                 config('recruitment.governorate_scoped_creation_grades'), true);
     }
 
+    public function hasProgramTargetScope(User $user): bool
+    {
+        return ! $this->isOrganizationWide($user)
+            && in_array((int) $this->position($user)?->jobLevel?->grade,
+                config('recruitment.program_wide_target_grades'), true);
+    }
+
     public function scopeCreatablePrograms(Builder $query, User $user): Builder
     {
         return $query->where('is_active', true)
@@ -418,10 +465,6 @@ class RecruitmentScopeResolver
     public function scopeCreatableCities(Builder $query, User $user): Builder
     {
         $query->where('is_active', true);
-        if (! $this->hasProgramCreationScope($user)) {
-            return $query;
-        }
-
         if ($this->hasGovernorateCreationScope($user)) {
             $cityId = $this->positionCityId($user);
 

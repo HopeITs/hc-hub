@@ -24,9 +24,14 @@ return [
 
     // These are job-level grades, not role names. The active "manager" role
     // is shared by all three management levels.
+    // CreatePosition keeps programme managers and project managers within the
+    // programme of the position they are proposing.
     'program_scoped_creation_grades' => [1, 3],
-    // Project managers stay within their own governorate; program managers
-    // may reach every governorate in their programme.
+    // Existing-position requests are broader for programme managers: their
+    // programme can span governorates, so direct-report scope is not enough.
+    'program_wide_target_grades' => [1],
+    // Project managers stay within their own governorate, but may target any
+    // programme represented there.
     'governorate_scoped_creation_grades' => [3],
     'department_manager_grade' => 5,
 
