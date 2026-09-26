@@ -11,6 +11,9 @@ use App\Livewire\Recruitment\Campaigns\Show as CampaignShow;
 use App\Livewire\Recruitment\Interviews\Form as InterviewForm;
 use App\Livewire\Recruitment\Interviews\Index as InterviewIndex;
 use App\Livewire\Recruitment\Interviews\Show as InterviewShow;
+use App\Livewire\Recruitment\Offers\Form as OfferForm;
+use App\Livewire\Recruitment\Offers\Index as OfferIndex;
+use App\Livewire\Recruitment\Offers\Show as OfferShow;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
 use App\Livewire\Recruitment\Requests\DirectOpen;
@@ -69,6 +72,25 @@ Route::get('recruitment/applications/{applicationId}/interviews/create', Intervi
     ->whereNumber('applicationId')
     ->middleware('active_permission:recruitment-applicants.schedule-interviews')
     ->name('recruitment.interviews.create');
+
+// Phase 2 Task 9 (Team 2): job offers. The permission is the outer wall; each
+// component re-resolves the offer through RecruitmentJobOffer::visibleTo() and
+// the policy (which also requires canViewSalary() to write one).
+Route::prefix('recruitment/offers')->name('recruitment.offers.')
+    ->middleware('active_permission:recruitment-applicants.view-offers')
+    ->group(function () {
+        Route::get('/', OfferIndex::class)->name('index');
+        Route::get('/{offerId}', OfferShow::class)->whereNumber('offerId')->name('show');
+        Route::get('/{offerId}/edit', OfferForm::class)->whereNumber('offerId')
+            ->middleware('active_permission:recruitment-applicants.manage-offers')->name('edit');
+        Route::get('/{offerId}/revise', OfferForm::class)->whereNumber('offerId')->defaults('mode', 'revise')
+            ->middleware('active_permission:recruitment-applicants.manage-offers')->name('revise');
+    });
+
+Route::get('recruitment/applications/{applicationId}/offer/create', OfferForm::class)
+    ->whereNumber('applicationId')
+    ->middleware('active_permission:recruitment-applicants.manage-offers')
+    ->name('recruitment.offers.create');
 
 // No permission middleware on purpose: the policy enforces it, so a refused
 // attempt still reaches the controller and lands in the download audit.

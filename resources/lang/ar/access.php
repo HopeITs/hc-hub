@@ -87,5 +87,7 @@ return [
         'schedule-interviews' => 'جدولة المقابلات وإدارتها',
         'view-evaluations' => 'عرض كل تقييمات المقابلات',
         'correct-evaluations' => 'تصحيح تقييمات المقابلات أو سحبها',
+        'view-offers' => 'عرض عروض العمل',
+        'manage-offers' => 'إنشاء عروض العمل وإدارتها',
     ],
 ];

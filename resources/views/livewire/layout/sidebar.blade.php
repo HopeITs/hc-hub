@@ -124,6 +124,14 @@
                                 {{ __('recruitment-applicant.interviews.title') }}
                             </x-layouts.app.sidebar.single-item>
                         @endif
+
+                        {{-- Task 9 (Team 2) --}}
+                        @activepermission('recruitment-applicants.view-offers')
+                            <x-layouts.app.sidebar.single-item :href="route('recruitment.offers.index')" :active="request()->routeIs('recruitment.offers.*')">
+                                <x-slot name="icon"><x-icons.clipboard-list class="size-5" /></x-slot>
+                                {{ __('recruitment-applicant.offers.title') }}
+                            </x-layouts.app.sidebar.single-item>
+                        @endactivepermission
                     @endif
 
                     {{-- Group: Management --}}
