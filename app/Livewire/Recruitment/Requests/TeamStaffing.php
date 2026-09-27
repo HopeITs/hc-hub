@@ -3,6 +3,7 @@
 namespace App\Livewire\Recruitment\Requests;
 
 use App\Enums\HiringCampaignStatus;
+use App\Enums\RecruitmentRequestType;
 use App\Models\HiringCampaign;
 use App\Models\Position;
 use App\Models\RecruitmentRequest;
@@ -12,12 +13,35 @@ use App\Services\RecruitmentPositionActionService;
 use App\Services\RecruitmentScopeResolver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
+/**
+ * The manager's own slice of the org chart, drawn as a chart rather than a list.
+ *
+ * It is the same tree the organisation chart draws, re-rooted on the signed-in
+ * manager's position and read through a staffing lens: every card carries the
+ * seats it holds, the seats standing open, and the one request that can be
+ * started from it. The chart is where a manager already pictures their team, so
+ * starting the request there costs two clicks instead of a form that asks which
+ * position they meant.
+ */
 class TeamStaffing extends Component
 {
     /** @var array<int, bool> */
     public array $collapsed = [];
+
+    /**
+     * Prune the chart to the branches that lead somewhere actionable — a seat
+     * standing open, or a request already moving. A manager of forty positions
+     * opens this page to find the few that need them, not to read the roster.
+     */
+    #[Url(as: 'needs', except: false)]
+    public bool $needsActionOnly = false;
+
+    public string $density = 'comfortable';
+
+    public float $scale = 1.0;
 
     public function boot(): void
     {
@@ -43,17 +67,42 @@ class TeamStaffing extends Component
         }
     }
 
+    public function toggleNeedsAction(): void
+    {
+        $this->needsActionOnly = ! $this->needsActionOnly;
+        $this->collapsed = [];
+    }
+
+    public function toggleDensity(): void
+    {
+        $this->density = $this->density === 'compact' ? 'comfortable' : 'compact';
+    }
+
+    public function zoomIn(): void
+    {
+        $this->scale = min(1.6, round($this->scale + 0.1, 2));
+    }
+
+    public function zoomOut(): void
+    {
+        $this->scale = max(0.4, round($this->scale - 0.1, 2));
+    }
+
+    public function fitToScreen(): void
+    {
+        $this->scale = 1.0;
+        $this->dispatch('reset-pan');
+    }
+
     public function render(): View
     {
         Gate::authorize('create', RecruitmentRequest::class);
 
-        $data = $this->teamData(auth()->user());
-
-        return view('livewire.recruitment.requests.team-staffing', $data);
+        return view('livewire.recruitment.requests.team-staffing', $this->teamData(auth()->user()));
     }
 
     /**
-     * @return array{root: ?array<string, mixed>, summary: array<string, int>, hasTeam: bool}
+     * @return array{root: ?array<string, mixed>, summary: array<string, int>, hasTeam: bool, hidden: int}
      */
     private function teamData(User $user): array
     {
@@ -61,7 +110,7 @@ class TeamStaffing extends Component
         $managerPosition = $scopes->position($user);
 
         if ($managerPosition === null) {
-            return ['root' => null, 'summary' => $this->emptySummary(), 'hasTeam' => false];
+            return $this->emptyState();
         }
 
         $root = Position::query()
@@ -70,7 +119,7 @@ class TeamStaffing extends Component
             ->first();
 
         if ($root === null) {
-            return ['root' => null, 'summary' => $this->emptySummary(), 'hasTeam' => false];
+            return $this->emptyState();
         }
 
         $positions = collect();
@@ -121,42 +170,61 @@ class TeamStaffing extends Component
 
         $build = function (Position $position, int $depth) use (&$build, $activeRequests, $visibleRequests, $openVacancies, $activeCampaignVacancyIds, $proposedManagerIds, $actions, $root): array {
             $positionId = (int) $position->getKey();
+            $isRoot = $positionId === (int) $root->getKey();
             $children = $position->getRelation('directTeamRecursive')
                 ->filter(fn (Position $child): bool => $child->is_active)
-                ->values();
+                ->values()
+                ->map(fn (Position $child): array => $build($child, $depth + 1))
+                ->all();
+
             $availability = $actions->actionsFor(
                 $position,
                 $activeRequests->get($positionId, collect()),
                 $openVacancies->get($positionId, collect()),
                 $activeCampaignVacancyIds,
-                $positionId === (int) $root->getKey(),
+                $isRoot,
                 in_array($positionId, $proposedManagerIds, true),
             );
 
             $actionItems = [];
             foreach ($availability as $type => $item) {
+                $isCreate = $type === 'create_position';
                 $actionItems[$type] = [
                     ...$item,
-                    'label' => $type === 'create_position'
+                    'label' => $isCreate
                         ? __('recruitment.team_staffing.create_position')
-                        : \App\Enums\RecruitmentRequestType::getLocalizedName((int) $type)['value'],
-                    'url' => $type === 'create_position'
-                        ? route('recruitment.requests.create', ['type' => \App\Enums\RecruitmentRequestType::CreatePosition, 'direct_manager_id' => $positionId])
+                        : RecruitmentRequestType::getLocalizedName((int) $type)['value'],
+                    'url' => $isCreate
+                        ? route('recruitment.requests.create', ['type' => RecruitmentRequestType::CreatePosition, 'direct_manager_id' => $positionId])
                         : route('recruitment.requests.create', ['type' => $type, 'position_id' => $positionId]),
                 ];
             }
 
+            $requests = $visibleRequests->get($positionId, collect());
+            $openSeats = max(0, (int) $position->max_emp - (int) $position->exist_emp);
+
             return [
                 'position' => $position,
+                'id' => $positionId,
                 'depth' => $depth,
-                'children' => $children->map(fn (Position $child): array => $build($child, $depth + 1))->all(),
-                'requests' => $visibleRequests->get($positionId, collect()),
+                'isRoot' => $isRoot,
+                'children' => $children,
+                'requests' => $requests,
                 'openVacancies' => $openVacancies->get($positionId, collect()),
                 'actions' => $actionItems,
+                'openSeats' => $openSeats,
+                // What draws the manager's eye: a seat standing open, or a
+                // request already in flight that they may need to chase.
+                'needsAction' => $openSeats > 0 || $requests->isNotEmpty(),
+                // Filled in by the prune pass below, which can see the subtree.
+                'subtreeOpenSeats' => 0,
+                'passthrough' => false,
             ];
         };
 
-        $tree = $build($root, 0);
+        $tree = $this->summarise($build($root, 0));
+        $visible = $this->needsActionOnly ? $this->prune($tree) : $tree;
+
         $summary = [
             'positions' => $positions->count(),
             'filled' => (int) $positions->sum('exist_emp'),
@@ -164,7 +232,65 @@ class TeamStaffing extends Component
             'vacancies' => (int) $positions->sum(fn (Position $position): int => max(0, (int) $position->max_emp - (int) $position->exist_emp)),
         ];
 
-        return ['root' => $tree, 'summary' => $summary, 'hasTeam' => $positions->count() > 1];
+        return [
+            'root' => $visible,
+            'summary' => $summary,
+            'hasTeam' => $positions->count() > 1,
+            'hidden' => $positions->count() - $this->countNodes($visible),
+        ];
+    }
+
+    /**
+     * Roll the open seats of every descendant up into each node, so a collapsed
+     * branch can still say how much is waiting inside it.
+     *
+     * @param  array<string, mixed>  $node
+     * @return array<string, mixed>
+     */
+    private function summarise(array $node): array
+    {
+        $children = array_map(fn (array $child): array => $this->summarise($child), $node['children']);
+        $node['children'] = $children;
+        $node['subtreeOpenSeats'] = $node['openSeats']
+            + array_sum(array_column($children, 'subtreeOpenSeats'));
+        $node['subtreeNeedsAction'] = $node['needsAction']
+            || collect($children)->contains(fn (array $child): bool => $child['subtreeNeedsAction']);
+
+        return $node;
+    }
+
+    /**
+     * Drop every branch that leads nowhere actionable. A node that needs nothing
+     * itself but carries an actionable descendant is kept as a passthrough, so
+     * the reporting line stays readable instead of the chart re-parenting itself.
+     *
+     * @param  array<string, mixed>  $node
+     * @return array<string, mixed>|null
+     */
+    private function prune(array $node): ?array
+    {
+        if (! ($node['subtreeNeedsAction'] ?? false) && ! $node['isRoot']) {
+            return null;
+        }
+
+        $node['children'] = collect($node['children'])
+            ->map(fn (array $child): ?array => $this->prune($child))
+            ->filter()
+            ->values()
+            ->all();
+        $node['passthrough'] = ! $node['needsAction'] && ! $node['isRoot'];
+
+        return $node;
+    }
+
+    /** @param  array<string, mixed>|null  $node */
+    private function countNodes(?array $node): int
+    {
+        if ($node === null) {
+            return 0;
+        }
+
+        return 1 + array_sum(array_map(fn (array $child): int => $this->countNodes($child), $node['children']));
     }
 
     /** @return list<int> */
@@ -180,9 +306,14 @@ class TeamStaffing extends Component
             ->manageablePositionIds(auth()->user(), true);
     }
 
-    /** @return array{positions: int, filled: int, capacity: int, vacancies: int} */
-    private function emptySummary(): array
+    /** @return array{root: null, summary: array<string, int>, hasTeam: false, hidden: int} */
+    private function emptyState(): array
     {
-        return ['positions' => 0, 'filled' => 0, 'capacity' => 0, 'vacancies' => 0];
+        return [
+            'root' => null,
+            'summary' => ['positions' => 0, 'filled' => 0, 'capacity' => 0, 'vacancies' => 0],
+            'hasTeam' => false,
+            'hidden' => 0,
+        ];
     }
 }

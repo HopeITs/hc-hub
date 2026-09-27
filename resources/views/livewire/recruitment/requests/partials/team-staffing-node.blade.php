@@ -1,112 +1,78 @@
 @php
-    $position = $node['position'];
     $children = $node['children'];
-    $isCollapsed = $this->collapsed[$position->id] ?? false;
-    $employeeNames = $position->activeContracts
-        ->map(fn ($contract) => $contract->employee?->name)
-        ->filter()
-        ->values();
+    $positionId = $node['id'];
+    $hasChildren = count($children) > 0;
+    $startsOpen = ! ($this->collapsed[$positionId] ?? false);
+    // A subtree can be worth opening even when its own card is quiet, so the
+    // chip carries the open seats waiting below it rather than just a count.
+    $waiting = $node['subtreeOpenSeats'] - $node['openSeats'];
+
+    $isFirst = $isFirst ?? true;
+    $isLast = $isLast ?? true;
+    $isRootLevel = $isRootLevel ?? false;
+    $line = 'bg-neutral-300';
+    $stem = $compact ? 'h-5' : 'h-7';
+    $pad = $compact ? 'px-1.5' : 'px-3';
 @endphp
 
-<article wire:key="team-position-{{ $position->id }}" class="space-y-3">
-    <div class="rounded-surface border border-neutral-200 bg-white p-4 shadow-e1">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div class="min-w-0">
-                <div class="flex flex-wrap items-center gap-2">
-                    <h3 class="truncate text-lg font-semibold text-secondary-dark">{{ $position->title }}</h3>
-                    @if ($node['depth'] === 0)
-                        <span class="rounded-full bg-secondary-soft px-2.5 py-1 text-xs font-semibold text-secondary-medium">
-                            {{ __('recruitment.team_staffing.you') }}
-                        </span>
-                    @endif
-                </div>
-                <p class="mt-1 text-sm text-secondary-medium">
-                    {{ $position->program?->name ?? '—' }}
-                    <span class="px-1 text-secondary-light">·</span>
-                    {{ $position->department?->name ?? '—' }}
-                    @if ($position->city?->name || $position->center?->name)
-                        <span class="px-1 text-secondary-light">·</span>
-                        {{ $position->city?->name ?? $position->center?->name }}
-                    @endif
-                </p>
-                <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
-                    <span class="rounded-full bg-secondary-soft px-2.5 py-1 font-semibold text-secondary-dark">
-                        {{ __('recruitment.team_staffing.capacity') }}:
-                        {{ $position->exist_emp }} / {{ $position->max_emp }}
-                    </span>
-                    <span class="rounded-full bg-primary/10 px-2.5 py-1 font-semibold text-primary">
-                        {{ __('recruitment.team_staffing.open_capacity_count', ['count' => max(0, $position->max_emp - $position->exist_emp)]) }}
-                    </span>
-                    @if ($node['openVacancies']->isNotEmpty())
-                        <span class="rounded-full bg-primary/10 px-2.5 py-1 font-semibold text-primary">
-                            {{ __('recruitment.team_staffing.open_vacancies', ['count' => $node['openVacancies']->count()]) }}
-                        </span>
-                    @endif
-                </div>
-                @if ($employeeNames->isNotEmpty())
-                    <p class="mt-3 text-sm text-secondary-medium">
-                        <span class="font-semibold text-secondary-dark">{{ __('recruitment.team_staffing.current_holders') }}:</span>
-                        {{ $employeeNames->join(', ') }}
-                    </p>
-                @else
-                    <p class="mt-3 text-sm font-medium text-primary">{{ __('recruitment.team_staffing.no_current_holder') }}</p>
-                @endif
-            </div>
+<div wire:key="staffing-node-{{ $positionId }}"
+     class="relative flex flex-col items-center {{ $pad }} {{ $isRootLevel ? '' : ($compact ? 'pt-5' : 'pt-7') }}">
 
-            <div class="flex shrink-0 flex-wrap items-center gap-2 lg:max-w-sm lg:justify-end">
-                @if ($children)
-                    <button type="button" wire:click="toggle({{ $position->id }})"
-                            class="rounded-control border border-neutral-300 px-3 py-2 text-sm font-semibold text-secondary-dark transition hover:border-secondary-light hover:bg-neutral-50"
-                            aria-expanded="{{ $isCollapsed ? 'false' : 'true' }}">
-                        {{ $isCollapsed ? __('recruitment.team_staffing.show_team') : __('recruitment.team_staffing.hide_team') }}
-                    </button>
-                @endif
-                <div class="flex flex-wrap gap-2">
-                    @foreach ($node['actions'] as $type => $action)
-                        @if ($action['available'])
-                            <a href="{{ $action['url'] }}" wire:navigate
-                               class="rounded-control bg-primary px-3 py-2 text-sm font-semibold text-white transition hover:opacity-90">
-                                {{ $action['label'] }}
-                            </a>
-                        @endif
-                    @endforeach
-                </div>
-            </div>
-        </div>
+    {{-- Incoming connectors: two half-bars meeting across the column padding,
+         plus the stem that drops onto this card. Drawn per column so the
+         horizontal run always ends on the first and last card's centre. --}}
+    @unless ($isRootLevel)
+        @unless ($isFirst)
+            <span class="absolute top-0 start-0 end-1/2 h-px {{ $line }}" aria-hidden="true"></span>
+        @endunless
+        @unless ($isLast)
+            <span class="absolute top-0 start-1/2 end-0 h-px {{ $line }}" aria-hidden="true"></span>
+        @endunless
+        <span class="absolute top-0 start-1/2 w-px {{ $stem }} {{ $line }}" aria-hidden="true"></span>
+    @endunless
 
-        @php($blockedActions = collect($node['actions'])->filter(fn (array $action): bool => ! $action['available'] && $action['reason'] !== null))
-        @if ($blockedActions->isNotEmpty())
-            <details class="mt-4 border-t border-neutral-100 pt-3 text-sm text-secondary-medium">
-                <summary class="cursor-pointer font-semibold text-secondary-dark">{{ __('recruitment.team_staffing.unavailable_actions') }}</summary>
-                <ul class="mt-2 grid gap-1 ps-4 sm:grid-cols-2">
-                    @foreach ($blockedActions as $blockedAction)
-                        <li class="list-disc">
-                            <span class="font-semibold">{{ $blockedAction['label'] }}:</span>
-                            {{ $blockedAction['reason'] }}
-                        </li>
-                    @endforeach
-                </ul>
-            </details>
+    <div x-data="{ open: @js($startsOpen) }"
+         x-on:staffing-expand-all.window="open = true"
+         x-on:staffing-collapse-all.window="open = false"
+         class="flex flex-col items-center">
+
+        <x-staffing-card :node="$node" :compact="$compact" />
+
+        {{-- ---------- Branch toggle ---------- --}}
+        @if ($hasChildren)
+            <button type="button" wire:click="toggle({{ $positionId }})" x-on:click="open = ! open"
+                    :aria-expanded="open"
+                    class="relative z-10 mt-1.5 flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-caption font-bold text-secondary-medium shadow-e1 transition hover:border-secondary-light hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
+                <span>{{ trans_choice('recruitment.team_staffing.reports_count', count($children), ['count' => count($children)]) }}</span>
+                @if ($waiting > 0)
+                    <span class="flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-caption font-bold text-white"
+                          title="{{ __('recruitment.team_staffing.open_seats_below', ['count' => $waiting]) }}">
+                        {{ $waiting }}
+                    </span>
+                @endif
+                <svg class="size-3 shrink-0 transition-transform" :class="open ? 'rotate-180' : ''"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
+                </svg>
+            </button>
         @endif
 
-        @if ($node['requests']->isNotEmpty())
-            <div class="mt-4 flex flex-wrap gap-2 border-t border-neutral-100 pt-3">
-                @foreach ($node['requests'] as $request)
-                    <a href="{{ route('recruitment.requests.show', ['requestId' => $request->id]) }}" wire:navigate
-                       class="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-secondary-dark transition hover:border-primary hover:text-primary">
-                        {{ \App\Enums\RecruitmentRequestType::getLocalizedName((int) $request->request_type)['value'] }}
-                        · {{ \App\Enums\RecruitmentRequestStatus::getLocalizedName((int) $request->status)['value'] }}
-                    </a>
-                @endforeach
+        {{-- ---------- Children ---------- --}}
+        @if ($hasChildren)
+            <div x-show="open" x-cloak x-collapse class="flex flex-col items-center">
+                <span class="{{ $stem }} w-px {{ $line }}" aria-hidden="true"></span>
+                <div class="flex items-start justify-center">
+                    @foreach ($children as $index => $child)
+                        @include('livewire.recruitment.requests.partials.team-staffing-node', [
+                            'node' => $child,
+                            'compact' => $compact,
+                            'isFirst' => $index === 0,
+                            'isLast' => $index === count($children) - 1,
+                            'isRootLevel' => false,
+                        ])
+                    @endforeach
+                </div>
             </div>
         @endif
     </div>
-
-    @if ($children && ! $isCollapsed)
-        <div class="ms-4 space-y-3 border-s-2 border-neutral-200 ps-4 sm:ms-8 sm:ps-6">
-            @foreach ($children as $child)
-                @include('livewire.recruitment.requests.partials.team-staffing-node', ['node' => $child])
-            @endforeach
-        </div>
-    @endif
-</article>
+</div>
