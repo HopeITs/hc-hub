@@ -13,9 +13,10 @@ use App\Enums\WorkflowStepKey;
 use App\Models\Position;
 use App\Models\RecruitmentRequest;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -25,14 +26,16 @@ use Illuminate\Validation\ValidationException;
  * a meeting or over the phone before anybody opened a screen. Making them
  * repeat those decisions as electronic approvals would be theatre; leaving the
  * hire undocumented would be worse. This is the third way: the request is
- * recorded as already decided, and *how* it was decided is written down.
+ * recorded as already decided, and the external manager and finance decisions
+ * are written down. HR's own action is recorded by the request itself.
  *
  * Two rules keep this from becoming a hole in the workflow.
  *
  *   The confirmations are recorded as external, never as approvals. The
  *   timeline must never show that somebody pressed a button they did not
- *   press. Each of the three normal steps gets a line saying who confirmed it,
- *   by what means and when — or that it did not apply.
+ *   press. The manager and finance steps say who confirmed them, by what means
+ *   and when — or that they did not apply. The HR step is the direct-opening
+ *   action and is never entered a second time.
  *
  *   Who opens it decides whether it still needs a decision. HR Syria's own
  *   direct opening is final, because there is nobody above them to ask. A
@@ -41,11 +44,20 @@ use Illuminate\Validation\ValidationException;
  */
 class RecruitmentDirectOpenService
 {
-    /** The three steps a normal request would have gone through. */
+    /** The decisions made outside the system before HR records the opening. */
     private const CONFIRMABLE = [
         WorkflowStepKey::ManagerApproval,
         WorkflowStepKey::FinanceApproval,
-        WorkflowStepKey::GovernorateHrApproval,
+    ];
+
+    /** Requests that still reserve their position for a fill-vacancy decision. */
+    private const BLOCKING_FILL_STATUSES = [
+        Status::Submitted,
+        Status::UnderReview,
+        Status::ChangesRequested,
+        Status::Resubmitted,
+        Status::Approved,
+        Status::FailedApplication,
     ];
 
     public function __construct(
@@ -63,7 +75,7 @@ class RecruitmentDirectOpenService
      *
      * The payload is the ordinary request form; `$documentation` is what makes
      * this a direct opening rather than a submission — who really asked for it,
-     * why it bypassed the workflow, and the three confirmations.
+     * why it bypassed the workflow, and the external confirmations.
      *
      * @param  array<string, mixed>  $payload  the request form
      * @param  array<string, mixed>  $documentation  actual requester, reason, confirmations
@@ -75,21 +87,29 @@ class RecruitmentDirectOpenService
         $this->assertDocumented($documentation);
 
         $data = $this->drafts->validate($payload);
+        $documentation = $this->normaliseDocumentation($actor, $data, $documentation);
 
         $request = DB::transaction(function () use ($actor, $data, $documentation): RecruitmentRequest {
             $position = $this->targetWithinScope($actor, $data);
 
+            $numbers = app(RecruitmentRequestNumber::class);
+            $cityId = $this->cityOf($position, $data);
+
             $request = RecruitmentRequest::query()->create([
-                'request_number' => 'RR-'.Str::ulid(),
+                'request_number' => $numbers->next(
+                    $cityId,
+                    $numbers->programIdFor($data, $position->getKey()),
+                ),
                 'requester_user_id' => $actor->getKey(),
                 'request_type' => $data['request_type'],
                 'mode' => RecruitmentRequestMode::DirectHr,
                 'status' => Status::Submitted,
-                'scope_city_id' => $this->cityOf($position, $data),
+                'scope_city_id' => $cityId,
                 'target_position_id' => $data['request_type'] === Type::CreatePosition ? null : $position->getKey(),
                 'target_vacancy_id' => $data['vacancy_id'] ?? null,
                 'draft_payload_json' => $data,
                 'actual_requester_name' => $documentation['actual_requester_name'],
+                'actual_requester_user_id' => $documentation['actual_requester_user_id'] ?? null,
                 'actual_requester_position_id' => $documentation['actual_requester_position_id'] ?? null,
                 'direct_open_reason' => $documentation['direct_open_reason'],
                 'direct_opened_by_user_id' => $actor->getKey(),
@@ -136,15 +156,121 @@ class RecruitmentDirectOpenService
     /**
      * The generated lines an opener is asked to fill in.
      *
-     * Three, reflecting the path the request would otherwise have taken. HR
-     * may mark any of them as not applicable — a closure has no financial
-     * review to confirm — but may not leave one unanswered.
+     * Manager and finance, reflecting the decisions made before HR records the
+     * opening. HR may mark either as not applicable — a closure has no
+     * financial review to confirm — but may not leave one unanswered.
      *
      * @return array<int, int> step keys
      */
     public function confirmableSteps(): array
     {
         return self::CONFIRMABLE;
+    }
+
+    /**
+     * Managers HR may name as the person who actually requested the opening.
+     *
+     * The list is deliberately based on active management positions rather
+     * than role labels: the application currently uses one shared manager role
+     * for programme, project and department managers.
+     *
+     * @return Collection<int, User>
+     */
+    public function requesterCandidates(User $actor): Collection
+    {
+        $cityIds = $this->scopes->governorateCityIds($actor);
+
+        return User::query()
+            ->with([
+                'profile.contracts.position',
+                'profile.contracts.position.city',
+                'profile.contracts.position.center.city',
+            ])
+            ->whereHas('profile', fn (Builder $profile): Builder => $profile->where('is_active', true))
+            ->whereHas('profile.contracts', function (Builder $contracts) use ($cityIds): Builder {
+                return $contracts->activeNow()->whereHas('position', function (Builder $positions) use ($cityIds): Builder {
+                    return $positions
+                        ->where('is_active', true)
+                        ->whereHas('jobLevel', fn (Builder $levels): Builder => $levels
+                            ->whereIn('grade', config('recruitment.requester_job_level_grades')))
+                        ->when($cityIds !== [], function (Builder $positions) use ($cityIds): Builder {
+                            return $positions->where(function (Builder $scoped) use ($cityIds): void {
+                                foreach ($cityIds as $cityId) {
+                                    $scoped->orWhere(fn (Builder $city): Builder => $city->inCity((int) $cityId));
+                                }
+                            });
+                        });
+                });
+            })
+            ->orderBy('email')
+            ->get()
+            ->filter(fn (User $user): bool => $this->scopes->position($user) !== null)
+            ->sortBy(fn (User $user): string => mb_strtolower((string) ($user->profile?->name ?? $user->email)))
+            ->values();
+    }
+
+    /**
+     * Positions the selected requester could target, intersected with the HR
+     * opener's governorate boundary.
+     *
+     * @return Builder<Position>
+     */
+    public function positionsForRequester(User $actor, ?User $requester, int $requestType): Builder
+    {
+        $positions = Position::query();
+
+        if ($requester === null) {
+            return $positions->whereRaw('0 = 1');
+        }
+
+        $positions = $requestType === Type::CreatePosition
+            ? $this->scopes->scopeProposedManagers($positions, $requester)
+            : $this->scopes->scopeRequestablePositions($positions, $requester);
+
+        if ($requestType === Type::FillVacancy) {
+            $positions
+                ->where('is_active', true)
+                ->whereColumn('exist_emp', '<', 'max_emp')
+                ->whereDoesntHave('recruitmentRequests', function (Builder $requests): void {
+                    $this->constrainBlockingFillRequests($requests);
+                });
+        }
+
+        if ($requestType === Type::ClosePosition) {
+            $positions
+                ->where('exist_emp', 0)
+                ->whereDoesntHave('activeContracts');
+        }
+
+        $cityIds = $this->scopes->governorateCityIds($actor);
+
+        if ($cityIds === []) {
+            return $positions;
+        }
+
+        return $positions->where(function (Builder $scoped) use ($cityIds): void {
+            foreach ($cityIds as $cityId) {
+                $scoped->orWhere(fn (Builder $city): Builder => $city->inCity((int) $cityId));
+            }
+        });
+    }
+
+    /**
+     * Candidates shown in each “Who confirmed it” picker.
+     *
+     * @return Collection<int, User>
+     */
+    public function confirmationCandidates(User $requester, int $stepKey, ?int $cityId): Collection
+    {
+        if ($cityId === null && $stepKey === WorkflowStepKey::GovernorateHrApproval) {
+            $requesterPosition = $this->scopes->position($requester);
+
+            $cityId = $requesterPosition?->city_id
+                ?? $requesterPosition?->center?->city_id;
+        }
+
+        return app(RecruitmentApproverResolver::class)
+            ->confirmationCandidates($requester, $stepKey, $cityId);
     }
 
     /**
@@ -187,7 +313,37 @@ class RecruitmentDirectOpenService
             ]);
         }
 
+        if ((int) $data['request_type'] === Type::FillVacancy
+            && $this->hasBlockingFillRequest($position)) {
+            throw ValidationException::withMessages([
+                'data.position_id' => __('recruitment.direct_open.position_already_open'),
+            ]);
+        }
+
         return $position;
+    }
+
+    private function hasBlockingFillRequest(Position $position): bool
+    {
+        $requests = $position->recruitmentRequests()->getQuery();
+        $this->constrainBlockingFillRequests($requests);
+
+        return $requests->exists();
+    }
+
+    private function constrainBlockingFillRequests(Builder $requests): void
+    {
+        $requests
+            ->where('request_type', Type::FillVacancy)
+            ->where(function (Builder $statuses): void {
+                $statuses
+                    ->whereIn('status', self::BLOCKING_FILL_STATUSES)
+                    ->orWhere(function (Builder $applied): void {
+                        $applied
+                            ->where('status', Status::Applied)
+                            ->whereHas('targetVacancy', fn (Builder $vacancies): Builder => $vacancies->available());
+                    });
+            });
     }
 
     /**
@@ -214,7 +370,11 @@ class RecruitmentDirectOpenService
     {
         $errors = [];
 
-        if (blank($documentation['actual_requester_name'] ?? null)) {
+        if (blank($documentation['actual_requester_user_id'] ?? null)
+            && blank($documentation['actual_requester_name'] ?? null)) {
+            $errors['actual_requester_user_id'] = __('recruitment.direct_open.requester_required');
+            // Keep the old key for API callers that still send the original
+            // free-text payload; the screen now points at the select control.
             $errors['actual_requester_name'] = __('recruitment.direct_open.requester_required');
         }
 
@@ -244,7 +404,9 @@ class RecruitmentDirectOpenService
                 continue;
             }
 
-            if (blank($line['confirmer_name'] ?? null)) {
+            if (blank($line['confirmer_user_id'] ?? null) && blank($line['confirmer_name'] ?? null)) {
+                $errors["confirmations.{$stepKey}.confirmer_user_id"] = __('recruitment.direct_open.confirmer_required');
+                // Backwards-compatible error key for older integrations.
                 $errors["confirmations.{$stepKey}.confirmer_name"] = __('recruitment.direct_open.confirmer_required');
             }
 
@@ -266,9 +428,108 @@ class RecruitmentDirectOpenService
     }
 
     /**
-     * Write the three lines, and say plainly what they are.
+     * Replace labels from the browser with snapshots of the selected people,
+     * and enforce the same requester/position boundary used by normal drafts.
      *
-     * `is_generated` marks them as the system's own three rather than
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $documentation
+     * @return array<string, mixed>
+     */
+    private function normaliseDocumentation(User $actor, array $data, array $documentation): array
+    {
+        $requesterId = filter_var(
+            $documentation['actual_requester_user_id'] ?? null,
+            FILTER_VALIDATE_INT,
+        );
+
+        if (! $requesterId) {
+            return $documentation;
+        }
+
+        $requester = $this->requesterCandidates($actor)
+            ->first(fn (User $candidate): bool => (int) $candidate->getKey() === (int) $requesterId);
+
+        if ($requester === null) {
+            throw ValidationException::withMessages([
+                'actual_requester_user_id' => __('recruitment.direct_open.requester_outside_scope'),
+            ]);
+        }
+
+        $requesterPosition = $this->scopes->position($requester);
+
+        if ($requesterPosition === null) {
+            throw ValidationException::withMessages([
+                'actual_requester_user_id' => __('recruitment.direct_open.requester_without_position'),
+            ]);
+        }
+
+        $targetField = $data['request_type'] === Type::CreatePosition ? 'direct_manager_id' : 'position_id';
+        $targetId = (int) ($data[$targetField] ?? 0);
+        $target = Position::query()->with('center')->find($targetId);
+
+        if ((int) $data['request_type'] === Type::FillVacancy
+            && $target !== null
+            && $this->hasBlockingFillRequest($target)) {
+            throw ValidationException::withMessages([
+                'data.position_id' => __('recruitment.direct_open.position_already_open'),
+            ]);
+        }
+
+        $allowedTarget = $this->positionsForRequester($actor, $requester, (int) $data['request_type'])
+            ->whereKey($targetId)
+            ->exists();
+
+        if (! $allowedTarget) {
+            throw ValidationException::withMessages([
+                'data.'.$targetField => __('recruitment.direct_open.position_outside_requester_scope'),
+            ]);
+        }
+
+        $documentation['actual_requester_user_id'] = (int) $requester->getKey();
+        $documentation['actual_requester_name'] = $requester->profile?->name ?? $requester->email;
+        $documentation['actual_requester_position_id'] = $requesterPosition->getKey();
+
+        $cityId = $data['request_type'] === Type::CreatePosition
+            ? (int) ($data['city_id'] ?? 0)
+            : (int) ($target?->city_id ?? $target?->center?->city_id ?? 0);
+
+        $errors = [];
+
+        foreach (self::CONFIRMABLE as $stepKey) {
+            $line = $documentation['confirmations'][$stepKey] ?? [];
+            if ((int) ($line['decision'] ?? 0) !== ExternalConfirmationDecision::Approved
+                || blank($line['confirmer_user_id'] ?? null)) {
+                continue;
+            }
+
+            $confirmerId = filter_var($line['confirmer_user_id'], FILTER_VALIDATE_INT);
+            $confirmer = $confirmerId
+                ? $this->confirmationCandidates($requester, $stepKey, $cityId)
+                    ->first(fn (User $candidate): bool => (int) $candidate->getKey() === (int) $confirmerId)
+                : null;
+
+            if ($confirmer === null) {
+                $errors["confirmations.{$stepKey}.confirmer_user_id"] = __('recruitment.direct_open.confirmer_outside_flow');
+
+                continue;
+            }
+
+            $documentation['confirmations'][$stepKey]['confirmer_user_id'] = (int) $confirmer->getKey();
+            $documentation['confirmations'][$stepKey]['confirmer_name'] = $confirmer->profile?->name ?? $confirmer->email;
+            $documentation['confirmations'][$stepKey]['confirmer_position_id'] = $this->scopes->position($confirmer)?->getKey();
+        }
+
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
+        }
+
+        return $documentation;
+    }
+
+    /**
+     * Write the external lines, and say plainly what they are.
+     *
+     * `is_generated` marks them as the system's standard lines rather than
      * something HR added, and the event they raise is
      * ExternalConfirmationRecorded — never StepApproved. A reader of the
      * timeline must be able to tell a phone call from a click.
@@ -286,6 +547,7 @@ class RecruitmentDirectOpenService
                 'step_key' => $stepKey,
                 'is_generated' => true,
                 'confirmer_name' => $notApplicable ? null : $line['confirmer_name'],
+                'confirmer_user_id' => $notApplicable ? null : ($line['confirmer_user_id'] ?? null),
                 'confirmer_position_id' => $line['confirmer_position_id'] ?? null,
                 'decision' => $decision,
                 'method' => $notApplicable ? null : (int) $line['method'],
@@ -305,6 +567,7 @@ class RecruitmentDirectOpenService
                     'step_key' => $stepKey,
                     'decision' => $decision,
                     'confirmer_name' => $notApplicable ? null : $line['confirmer_name'],
+                    'confirmer_user_id' => $notApplicable ? null : ($line['confirmer_user_id'] ?? null),
                     'method' => $notApplicable ? null : (int) $line['method'],
                     'confirmed_at' => $notApplicable ? null : $line['confirmed_at'],
                     'not_applicable_reason' => $notApplicable ? $line['not_applicable_reason'] : null,

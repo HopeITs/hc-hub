@@ -17,6 +17,9 @@ final class WorkflowSkipReason extends Enum
 
     const TopLevelRequester = 2;
 
+    /** The requester is the only person who could have decided this step. */
+    const RequesterIsApprover = 3;
+
     public static function getLocalizedName(int $value): array
     {
         $val = match ($value) {

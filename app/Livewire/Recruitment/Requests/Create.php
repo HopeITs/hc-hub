@@ -3,6 +3,7 @@
 namespace App\Livewire\Recruitment\Requests;
 
 use App\Enums\RecruitmentRequestType;
+use App\Livewire\Concerns\InitializesRecruitmentRequestSelects;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\ContractType;
@@ -17,11 +18,30 @@ use App\Services\RecruitmentRequestDraftService;
 use App\Services\RecruitmentScopeResolver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 class Create extends Component
 {
-    public array $data = ['request_type' => RecruitmentRequestType::FillVacancy];
+    use InitializesRecruitmentRequestSelects;
+
+    public array $data = [
+        'request_type' => RecruitmentRequestType::FillVacancy,
+        'position_id' => null,
+        'direct_manager_id' => null,
+        'vacancy_id' => null,
+        'city_id' => null,
+        'program_id' => null,
+        'center_id' => null,
+        'department_id' => null,
+        'job_level_id' => null,
+        'recruitment_reason' => null,
+        'priority' => null,
+        'volunteer_type' => null,
+        'currency' => null,
+        'salary_per' => null,
+        'contract_type_id' => null,
+    ];
 
     public bool $queryPrefilled = false;
 
@@ -33,14 +53,16 @@ class Create extends Component
 
     public function updatedDataRequestType(): void
     {
-        $this->data = ['request_type' => (int) $this->data['request_type']];
+        $this->data = $this->withInitializedRequestSelects([
+            'request_type' => (int) $this->data['request_type'],
+        ]);
         $this->selectOnlyProgram();
         $this->resetValidation();
     }
 
     public function updatedDataPositionId(): void
     {
-        unset($this->data['vacancy_id']);
+        $this->data['vacancy_id'] = null;
         if ((int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::FillVacancy) {
             $vacancies = $this->availableVacancies()->limit(2)->get();
             if ($vacancies->count() === 1) {
@@ -51,14 +73,14 @@ class Create extends Component
 
     public function updatedDataCityId(): void
     {
-        unset($this->data['center_id']);
+        $this->data['center_id'] = null;
     }
 
     public function save(RecruitmentRequestDraftService $drafts)
     {
         $this->resetValidation();
         $request = $drafts->create(auth()->user(), $this->data);
-        session()->flash('recruitment_saved', __('recruitment.draft_saved'));
+        $this->toast(__('recruitment.draft_saved'));
 
         return $this->redirectRoute('recruitment.requests.show', ['requestId' => $request->id]);
     }
@@ -81,6 +103,12 @@ class Create extends Component
         $positions = $isNewPosition
             ? $this->proposableManagerPositions($user)
             : $this->targetablePositions($user);
+        $type = (int) ($this->data['request_type'] ?? 0);
+        if ($type === RecruitmentRequestType::ClosePosition) {
+            $positions
+                ->where('exist_emp', 0)
+                ->whereDoesntHave('activeContracts');
+        }
         $isFill = (int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::FillVacancy;
         if ($isFill) {
             // Room in the establishment, not an existing vacancies row: until a
@@ -94,8 +122,13 @@ class Create extends Component
 
         $centers = $scopes->scopeCreatableCenters(Center::query(), $user, $cityId)
             ->orderBy(transColumn('name'))->get();
-        $vacancies = $isFill ? $this->availableVacancies()->orderBy('id')->get()
-            : Vacancy::query()->visibleTo($user)->where('position_id', $this->data['position_id'] ?? 0)->get();
+        $vacancies = $isFill
+            ? $this->availableVacancies()->orderBy('id')->get()
+            : Vacancy::query()
+                ->visibleTo($user)
+                ->when($type === RecruitmentRequestType::CloseVacancy, fn ($query) => $query->available())
+                ->where('position_id', $this->data['position_id'] ?? 0)
+                ->get();
 
         return view('livewire.recruitment.requests.create', [
             'positions' => $positions, 'centers' => $centers, 'vacancies' => $vacancies,
@@ -111,6 +144,9 @@ class Create extends Component
                 ->whereIn('id', $scopes->creatableJobLevelIds($user))
                 ->orderBy('grade')->get(),
             'contractTypes' => ContractType::query()->orderBy(transColumn('name'))->get(),
+            // Nothing is locked while a request is being written; Edit says
+            // otherwise once an approver has named what may change.
+            'lockedFields' => $this->lockedFields(),
         ]);
     }
 
@@ -118,6 +154,21 @@ class Create extends Component
     protected function authorizeScreen(): void
     {
         Gate::authorize('create', RecruitmentRequest::class);
+    }
+
+    /**
+     * Fields this screen must show but refuse to let anybody type into.
+     *
+     * None, on a new request. Edit overrides this once the request has been
+     * submitted, because from then on only what an approver asked for may
+     * change — and a field that will be refused on save should look refused
+     * before anybody types into it.
+     *
+     * @return array<int, string>
+     */
+    protected function lockedFields(): array
+    {
+        return [];
     }
 
     /**
@@ -131,7 +182,7 @@ class Create extends Component
      */
     protected function targetablePositions(User $user): Builder
     {
-        return app(RecruitmentScopeResolver::class)->scopeManageablePositions(Position::query(), $user);
+        return app(RecruitmentScopeResolver::class)->scopeRequestablePositions(Position::query(), $user);
     }
 
     /**
@@ -205,5 +256,21 @@ class Create extends Component
         return Vacancy::query()->available()
             ->whereIn('position_id', $positions->select('id'))
             ->where('position_id', $this->data['position_id'] ?? 0);
+    }
+
+    /**
+     * Say what happened, the way the rest of the application says it.
+     *
+     * A toast rather than a coloured panel: a red or green block across a form
+     * reads as part of the form rather than as a remark about it.
+     */
+    private function toast(string $message, bool $success = true): void
+    {
+        $alert = LivewireAlert::title($message);
+
+        ($success ? $alert->success() : $alert->error())
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 }

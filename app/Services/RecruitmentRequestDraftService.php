@@ -19,7 +19,6 @@ use App\Models\Vacancy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -54,8 +53,13 @@ class RecruitmentRequestDraftService
             $isNewPosition = $data['request_type'] === Type::CreatePosition;
             [$target, $cityId] = $this->resolveTarget($actor, $data);
 
+            $numbers = app(RecruitmentRequestNumber::class);
+
             $request = RecruitmentRequest::query()->create([
-                'request_number' => 'RR-'.Str::ulid(),
+                'request_number' => $numbers->next(
+                    $cityId,
+                    $numbers->programIdFor($data, $isNewPosition ? null : $target->id),
+                ),
                 'requester_user_id' => $actor->id,
                 'request_type' => $data['request_type'],
                 'mode' => RecruitmentRequestMode::Normal,
@@ -175,8 +179,11 @@ class RecruitmentRequestDraftService
                 'center_id' => [$this->centerRule($input), 'integer', 'exists:centers,id'],
                 'department_id' => ['required', 'integer', 'exists:departments,id'],
                 'job_level_id' => ['required', 'integer', 'exists:job_levels,id'],
-                'title_en' => ['required', 'string', 'max:255'],
-                'title_ar' => ['required', 'string', 'max:255'],
+                // One alphabet each. The Unicode ranges are named rather
+                // than \p{Arabic}, which also matches Persian and Urdu letters
+                // nobody would be typing here.
+                'title_en' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s]+$/u'],
+                'title_ar' => ['required', 'string', 'max:255', 'regex:/^[\x{0621}-\x{064A}\s]+$/u'],
                 'qualifications' => ['required', 'string'],
                 'responsibilities' => ['required', 'string'],
                 'max_emp' => ['required', 'integer', 'min:1'],
@@ -195,9 +202,11 @@ class RecruitmentRequestDraftService
                 'priority' => ['required', 'string', Rule::in($form['priorities'])],
                 'volunteer_type' => ['required', 'string', Rule::in($form['volunteer_types'])],
                 'weekly_hours' => ['required', 'integer', 'min:1', 'max:168'],
-                'volunteer_period_start_date' => ['required', 'date_format:Y-m-d'],
+                // Strictly future: a post needed by yesterday is a post
+                // nobody can still be recruited for.
+                'needed_by_date' => ['required', 'date_format:Y-m-d', 'after:today'],
+                'volunteer_period_start_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:data.needed_by_date'],
                 'volunteer_period_end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:data.volunteer_period_start_date'],
-                'needed_by_date' => ['required', 'date_format:Y-m-d'],
                 'salary_amount' => ['required', 'integer', 'min:0'],
                 'currency' => ['required', 'integer', Rule::in([Currency::SYP, Currency::USD, Currency::EUR])],
                 'salary_per' => ['required', 'integer', Rule::in([SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session])],
@@ -254,7 +263,7 @@ class RecruitmentRequestDraftService
         } else {
             $targets = $isNewPosition
                 ? $this->scopes->scopeProposedManagers(Position::query(), $actor)
-                : $this->scopes->scopeManageablePositions(Position::query(), $actor);
+                : $this->scopes->scopeRequestablePositions(Position::query(), $actor);
         }
         $target = $targets
             ->whereKey($targetId)->lockForUpdate()->first();
@@ -291,6 +300,20 @@ class RecruitmentRequestDraftService
             }
         }
 
+        if ($data['request_type'] === Type::DecreaseHeadcount
+            && (int) $target->max_emp - (int) ($data['reduce_by'] ?? 0) < (int) $target->exist_emp) {
+            throw ValidationException::withMessages([
+                'data.reduce_by' => __('recruitment.below_existing_employees'),
+            ]);
+        }
+
+        if ($data['request_type'] === Type::ClosePosition
+            && ((int) $target->exist_emp > 0 || $target->activeContracts()->exists())) {
+            throw ValidationException::withMessages([
+                'data.position_id' => __('recruitment.position_has_active_contracts'),
+            ]);
+        }
+
         if ($data['request_type'] === Type::FillVacancy) {
             // Room in the establishment is what makes the request legitimate.
             // A vacancies row is not required: nothing creates one until a
@@ -315,7 +338,9 @@ class RecruitmentRequestDraftService
             }
         } elseif (! empty($data['vacancy_id'])) {
             // Vacancy visibility is still D30/D42, independent of D49's position selector.
-            $vacancy = Vacancy::query()->visibleTo($actor)->where('position_id', $target->id)
+            $vacancy = Vacancy::query()->visibleTo($actor)
+                ->when($data['request_type'] === Type::CloseVacancy, fn ($query) => $query->available())
+                ->where('position_id', $target->id)
                 ->whereKey($data['vacancy_id'])->lockForUpdate()->first();
 
             if (! $vacancy) {

@@ -130,6 +130,39 @@ class RecruitmentCreationScopeTest extends TestCase
             ->assertSet('data.position_id', $child->id);
     }
 
+    public function test_an_imported_older_contract_does_not_replace_the_current_assignment(): void
+    {
+        $inactivePosition = $this->root->replicate();
+        $inactivePosition->fill([
+            'title_en' => 'Inactive historical position',
+            'is_active' => false,
+        ])->save();
+
+        Contract::query()->create([
+            'employee_id' => $this->manager->employee_id,
+            'position_id' => $inactivePosition->id,
+            'contract_type_id' => ContractType::query()->value('id'),
+            'start_date' => now()->subYear(),
+            'end_date' => now()->addYear(),
+            'currency' => 2,
+            'salary_per' => 1,
+            'weekly_hours' => 40,
+            'is_active' => true,
+        ]);
+
+        $resolver = app(RecruitmentScopeResolver::class);
+
+        $this->assertSame($this->root->id, $resolver->position($this->manager)?->id);
+        $eagerLoadedManager = User::query()
+            ->with('profile.contracts.position')
+            ->findOrFail($this->manager->id);
+        $this->assertSame($this->root->id, $resolver->position($eagerLoadedManager)?->id);
+        $this->assertTrue(Gate::forUser($this->manager)->allows('create', RecruitmentRequest::class));
+        Livewire::actingAs($this->manager)
+            ->test(Index::class)
+            ->assertSee(route('recruitment.requests.create'), false);
+    }
+
     public function test_cycles_terminate_without_making_the_root_an_existing_target(): void
     {
         $child = $this->child($this->root);
@@ -139,7 +172,7 @@ class RecruitmentCreationScopeTest extends TestCase
         $this->assertEqualsCanonicalizing([$child->id, $leaf->id], app(RecruitmentScopeResolver::class)->manageablePositionIds($this->manager));
     }
 
-    public function test_organization_wide_visibility_does_not_bypass_creation_tree(): void
+    public function test_general_manager_can_create_across_the_organization(): void
     {
         $this->manager->syncRoles('general-manager');
         $this->manager->roles()->updateExistingPivot($this->manager->roles()->first()->id, ['is_active' => true]);
@@ -147,7 +180,7 @@ class RecruitmentCreationScopeTest extends TestCase
         $outside = $this->child($this->root, ['direct_manager_id' => null]);
 
         $this->assertTrue(app(RecruitmentScopeResolver::class)->isOrganizationWide($this->manager));
-        $this->assertFalse(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $outside]));
+        $this->assertTrue(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $outside]));
     }
 
     public function test_hr_with_any_eligible_grade_cannot_create_edit_or_submit_normal_requests(): void

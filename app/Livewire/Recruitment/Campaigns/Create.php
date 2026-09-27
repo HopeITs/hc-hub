@@ -7,6 +7,7 @@ use App\Models\Vacancy;
 use App\Services\HiringCampaignService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -19,6 +20,9 @@ use Livewire\Component;
  */
 class Create extends Component
 {
+    #[Locked]
+    public ?int $sourceVacancyId = null;
+
     /**
      * Chosen from the list, so not locked.
      *
@@ -36,7 +40,8 @@ class Create extends Component
 
     public function mount(?int $vacancyId = null): void
     {
-        $this->vacancyId = $vacancyId ?? request()->integer('vacancyId') ?: null;
+        $this->sourceVacancyId = $vacancyId ?? request()->integer('vacancyId') ?: null;
+        $this->vacancyId = $this->sourceVacancyId;
 
         // With only one seat to choose from there is nothing to choose.
         if ($this->vacancyId === null) {
@@ -93,6 +98,7 @@ class Create extends Component
     {
         return Vacancy::query()->available()
             ->visibleTo(auth()->user())
+            ->when($this->sourceVacancyId !== null, fn ($query) => $query->whereKey($this->sourceVacancyId))
             ->with(['position.city', 'position.program', 'createdFromRequest'])
             ->withCount('campaigns')
             ->orderByDesc('id');
@@ -104,8 +110,7 @@ class Create extends Component
             return null;
         }
 
-        return Vacancy::query()->available()
-            ->visibleTo(auth()->user())
+        return $this->availableVacancies()
             ->whereKey($this->vacancyId)
             ->first();
     }

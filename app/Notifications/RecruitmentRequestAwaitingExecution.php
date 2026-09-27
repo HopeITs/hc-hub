@@ -13,6 +13,14 @@ use Illuminate\Notifications\Notification;
  * A reduction or a closure dated in the future stays approved and waits. HR
  * needs to know that, and needs to know the date, because the alternative is a
  * post that still looks open with nothing on any screen saying why.
+ *
+ * Delivered as it happens rather than queued. The database row is what the
+ * bell in the application reads, and a queued notification is written only
+ * when a worker runs — this deployment has none, so a queued notice is a
+ * notice nobody receives. Five hundred jobs had piled up unprocessed before
+ * anybody noticed. The rest of the application sends database and mail
+ * synchronously for the same reason. Nothing here can cost an approval:
+ * every dispatch goes through RecruitmentNotifier, which catches and logs.
  */
 class RecruitmentRequestAwaitingExecution extends Notification
 {

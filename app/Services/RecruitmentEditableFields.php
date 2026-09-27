@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus as Status;
+use App\Enums\WorkflowStepKey;
 use App\Models\RecruitmentRequest;
 
 /**
@@ -88,30 +89,15 @@ class RecruitmentEditableFields
      *
      * @return array<int, string>
      */
-    public function selectable(RecruitmentRequest $request): array
+    public function selectable(RecruitmentRequest $request, ?int $stepKey = null): array
     {
         $payload = (array) ($request->draft_payload_json
             ?? $request->versions()->orderByDesc('version_no')->first()?->snapshot_json
             ?? []);
 
-        return array_values(array_diff(array_keys($payload), ['request_type']));
-    }
+        $fields = array_values(array_diff(array_keys($payload), ['request_type']));
 
-    /**
-     * A direct opening's single workflow step has not been decided yet.
-     *
-     * Governorate HR's direct openings get a one-step workflow (HR Syria
-     * approval). Until that step is acted on the opener may still edit.
-     */
-    private function directOpenStepIsUndecided(RecruitmentRequest $request): bool
-    {
-        $instance = $request->workflowInstances()->latest('id')->first();
-
-        if (! $instance) {
-            return true; // no workflow yet — still editable
-        }
-
-        return $instance->steps()->whereNull('decision')->exists();
+        return array_values(array_intersect($fields, $this->withinStep($stepKey)));
     }
 
     /**
@@ -136,5 +122,72 @@ class RecruitmentEditableFields
             is_array($fields) ? $fields : [],
             fn ($field): bool => is_string($field) && $field !== '',
         ));
+    }
+
+    /**
+     * A direct opening's single workflow step has not been decided yet.
+     *
+     * Governorate HR's direct openings get a one-step workflow (HR Syria
+     * approval). Until that step is acted on the opener may still edit.
+     */
+    private function directOpenStepIsUndecided(RecruitmentRequest $request): bool
+    {
+        $instance = $request->workflowInstances()->latest('id')->first();
+
+        if (! $instance) {
+            return true; // no workflow yet — still editable
+        }
+
+        return $instance->steps()->whereNull('decision')->exists();
+    }
+
+    /**
+     * What an approver at this step may send a request back for.
+     *
+     * An approver reviews one thing and should be able to send back that one
+     * thing. The financial approver is asked whether the organisation can
+     * afford this, so money is what they may query; asking them to adjudicate
+     * the duties would be asking a question nobody put to them. HR reviews the
+     * establishment and the paperwork, so everything except the money.
+     *
+     * The manager approves the request as a whole and may query any of it —
+     * they are the one person who knows both why it is being asked for and
+     * what it will cost.
+     *
+     * The lists come from the change classifier rather than being written out
+     * again here, so a field added to the form lands in one of them by virtue
+     * of being classified at all.
+     *
+     * @return array<int, string>
+     */
+    private function withinStep(?int $stepKey): array
+    {
+        $classifier = app(RecruitmentRequestChangeClassifier::class);
+
+        // The contract type is financial for the purpose of invalidating an
+        // approval — changing it changes what the post costs — but it is not
+        // the financial approver's to query. Which contract somebody is on is
+        // an HR matter, so it is carved out here rather than reclassified,
+        // leaving RV-1 saying what it has always said.
+        $theirs = array_values(array_diff(
+            $classifier->fieldsInCategory(RecruitmentRequestChangeClassifier::FINANCIAL),
+            ['contract_type_id'],
+        ));
+
+        $financial = $classifier->fieldsInCategory(RecruitmentRequestChangeClassifier::FINANCIAL);
+        $everything = array_merge(
+            $classifier->fieldsInCategory(RecruitmentRequestChangeClassifier::SUBSTANTIVE),
+            $financial,
+            $classifier->fieldsInCategory(RecruitmentRequestChangeClassifier::DESCRIPTIVE),
+        );
+
+        return match ($stepKey) {
+            WorkflowStepKey::FinanceApproval => $theirs,
+            WorkflowStepKey::GovernorateHrApproval => array_values(array_diff($everything, $theirs)),
+            // The manager, HR Syria on a direct opening, and anything not named
+            // here: the whole request. Narrowing a step nobody has thought about
+            // would hide fields without anybody deciding to.
+            default => $everything,
+        };
     }
 }

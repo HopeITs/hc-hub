@@ -34,7 +34,7 @@ class RecruitmentRequestPolicy
     public function createForPosition(User $user, Position $position): bool
     {
         return $this->create($user)
-            && $this->scopes->scopeManageablePositions(Position::query(), $user)
+            && $this->scopes->scopeRequestablePositions(Position::query(), $user)
                 ->whereKey($position->getKey())->exists();
     }
 
@@ -61,7 +61,8 @@ class RecruitmentRequestPolicy
     {
         return $user->hasActivePermission('recruitment-requests.submit')
             && $this->scopes->canAccessRequest($user, $request)
-            && ($request->mode !== RecruitmentRequestMode::Normal || $this->ownsEditableNormalRequest($user, $request));
+            && (int) $request->mode === RecruitmentRequestMode::Normal
+            && $this->ownsEditableNormalRequest($user, $request);
     }
 
     public function review(User $user, RecruitmentRequest $request): bool
@@ -124,7 +125,8 @@ class RecruitmentRequestPolicy
      */
     public function directOpen(User $user): bool
     {
-        return $user->hasActivePermission('recruitment-requests.direct-open');
+        return $user->activeRoleIs('HR')
+            && $user->hasActivePermission('recruitment-requests.direct-open');
     }
 
     /**

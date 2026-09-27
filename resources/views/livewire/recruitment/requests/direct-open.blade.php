@@ -8,39 +8,31 @@
     </header>
 
     <form wire:submit="save" class="space-y-6">
-        @if ($errors->any())
-            <div role="alert" class="rounded-control border border-red-200 bg-red-50 p-4 text-red-800">
-                <ul class="list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
-            </div>
-        @endif
-
-        {{-- The same request form a manager fills in: a direct opening shortens
-             the approvals, never the facts. --}}
-        @include('livewire.recruitment.requests.partials.request-fields')
-
-        <section class="space-y-5 rounded-surface border border-amber-200 bg-amber-50 p-6">
+        <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
             <div>
-                <h2 class="text-h4 font-semibold text-amber-900">{{ __('recruitment.direct_open.title') }}</h2>
-                <p class="mt-1 text-sm text-amber-800">{{ __('recruitment.direct_open.hint') }}</p>
+                <h2 class="text-h4 font-semibold">{{ __('recruitment.direct_open.title') }}</h2>
+                <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.direct_open.hint') }}</p>
             </div>
 
-            <div class="grid gap-5 sm:grid-cols-2">
-                <div>
-                    <x-forms.input-label for="actualRequester" required>{{ __('recruitment.direct_open.actual_requester_name') }}</x-forms.input-label>
-                    <input id="actualRequester" type="text" wire:model="documentation.actual_requester_name"
-                        class="mt-1 w-full rounded-control border-neutral-300" dir="auto">
-                    <p class="mt-1 text-sm text-red-600">@error('actual_requester_name'){{ $message }}@enderror</p>
-                </div>
-                <div>
-                    <x-forms.input-label for="actualRequesterPosition">{{ __('recruitment.direct_open.actual_requester_position') }}</x-forms.input-label>
-                    <select id="actualRequesterPosition" wire:model="documentation.actual_requester_position_id"
-                        class="mt-1 w-full rounded-control border-neutral-300">
-                        <option value="">—</option>
-                        @foreach ($positions as $position)
-                            <option value="{{ $position->id }}">{{ $position->title }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            <div>
+                <x-forms.input-label for="actualRequester" required>{{ __('recruitment.direct_open.actual_requester_name') }}</x-forms.input-label>
+                <x-forms.select2-input id="actualRequester" wire:model.live="documentation.actual_requester_user_id"
+                    aria-invalid="{{ $errors->has('actual_requester_user_id') ? 'true' : 'false' }}">
+                    <option value="">{{ __('recruitment.choose') }}</option>
+                    @foreach ($requesters as $requester)
+                        @php
+                            $requesterPosition = $requester->profile?->latestActiveContract()?->position;
+                            $requesterLabel = ($requester->profile?->name ?? $requester->email)
+                                .' · '.($requesterPosition?->title ?? __('recruitment.direct_open.position_unknown'));
+                        @endphp
+                        <option value="{{ $requester->id }}">{{ $requesterLabel }}</option>
+                    @endforeach
+                </x-forms.select2-input>
+                <p class="mt-1 text-sm text-red-600">
+                    @error('actual_requester_user_id'){{ $message }}@enderror
+                    @error('actual_requester_name'){{ $message }}@enderror
+                </p>
+                <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.direct_open.requester_help') }}</p>
             </div>
 
             <div>
@@ -51,15 +43,19 @@
             </div>
         </section>
 
+        {{-- The same request form a manager fills in: a direct opening shortens
+             the approvals, never the facts. --}}
+        @include('livewire.recruitment.requests.partials.request-fields')
+
         <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
             <div>
                 <h2 class="text-h4 font-semibold">{{ __('recruitment.direct_open.confirmations') }}</h2>
                 <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.direct_open.confirmations_hint') }}</p>
             </div>
 
-            {{-- Three lines for the three steps a normal request would have
-                 taken. These are external confirmations, never approvals: the
-                 timeline must not show a click that never happened. --}}
+            {{-- Only decisions made outside the system belong here. The HR
+                 action is already recorded by the signed-in user who creates
+                 the direct opening. --}}
             @foreach ($steps as $stepKey)
                 @php $decision = (int) ($documentation['confirmations'][$stepKey]['decision'] ?? 0); @endphp
                 <fieldset class="rounded-control border border-neutral-200 p-4" wire:key="confirm-{{ $stepKey }}">
@@ -89,18 +85,33 @@
                         </div>
                     @elseif ($decision === \App\Enums\ExternalConfirmationDecision::Approved)
                         <div class="mt-4 grid gap-4 sm:grid-cols-3">
-                            <div>
+                            <div wire:key="confirm-person-{{ $stepKey }}-{{ md5(json_encode(($confirmationCandidates[$stepKey] ?? collect())->pluck('id')->all())) }}">
                                 <x-forms.input-label for="who-{{ $stepKey }}" required>{{ __('recruitment.direct_open.confirmer_name') }}</x-forms.input-label>
-                                <input id="who-{{ $stepKey }}" type="text"
-                                    wire:model="documentation.confirmations.{{ $stepKey }}.confirmer_name"
-                                    class="mt-1 w-full rounded-control border-neutral-300" dir="auto">
-                                <p class="mt-1 text-sm text-red-600">@error('confirmations.'.$stepKey.'.confirmer_name'){{ $message }}@enderror</p>
+                                <x-forms.select2-input id="who-{{ $stepKey }}"
+                                    wire:model.live="documentation.confirmations.{{ $stepKey }}.confirmer_user_id"
+                                    aria-invalid="{{ $errors->has('confirmations.'.$stepKey.'.confirmer_user_id') ? 'true' : 'false' }}">
+                                    <option value="">{{ __('recruitment.choose') }}</option>
+                                    @foreach (($confirmationCandidates[$stepKey] ?? collect()) as $candidate)
+                                        @php
+                                            $candidatePosition = $candidate->profile?->latestActiveContract()?->position;
+                                            $candidateLabel = ($candidate->profile?->name ?? $candidate->email)
+                                                .' · '.($candidatePosition?->title ?? __('recruitment.direct_open.position_unknown'));
+                                        @endphp
+                                        <option value="{{ $candidate->id }}">{{ $candidateLabel }}</option>
+                                    @endforeach
+                                </x-forms.select2-input>
+                                @if (($confirmationCandidates[$stepKey] ?? collect())->isEmpty())
+                                    <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment.direct_open.no_confirmer_candidates') }}</p>
+                                @endif
+                                <p class="mt-1 text-sm text-red-600">
+                                    @error('confirmations.'.$stepKey.'.confirmer_user_id'){{ $message }}@enderror
+                                </p>
                             </div>
                             <div>
                                 <x-forms.input-label for="how-{{ $stepKey }}" required>{{ __('recruitment.direct_open.method') }}</x-forms.input-label>
                                 <select id="how-{{ $stepKey }}"
                                     wire:model="documentation.confirmations.{{ $stepKey }}.method"
-                                    class="mt-1 w-full rounded-control border-neutral-300">
+                                    class="h-[37.6px] w-full rounded-control border-neutral-300">
                                     <option value="">—</option>
                                     @foreach ($methods as $method)
                                         <option value="{{ $method }}">{{ __('recruitment.direct_open.methods.'.$method) }}</option>
@@ -112,7 +123,7 @@
                                 <x-forms.input-label for="when-{{ $stepKey }}" required>{{ __('recruitment.direct_open.confirmed_at') }}</x-forms.input-label>
                                 <input id="when-{{ $stepKey }}" type="datetime-local"
                                     wire:model="documentation.confirmations.{{ $stepKey }}.confirmed_at"
-                                    class="mt-1 w-full rounded-control border-neutral-300">
+                                    class="h-[37.6px] w-full rounded-control border-neutral-300">
                                 <p class="mt-1 text-sm text-red-600">@error('confirmations.'.$stepKey.'.confirmed_at'){{ $message }}@enderror</p>
                             </div>
                         </div>

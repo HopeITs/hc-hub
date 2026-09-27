@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\RecruitmentRequest;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -16,8 +15,16 @@ use Illuminate\Notifications\Notification;
  * execution date gets watched. The deferred case has its own notice
  * (RecruitmentRequestAwaitingExecution) because it asks HR to decide whether
  * to bring the effect forward; this one only says the decision is final.
+ *
+ * Delivered as it happens rather than queued. The database row is what the
+ * bell in the application reads, and a queued notification is written only
+ * when a worker runs — this deployment has none, so a queued notice is a
+ * notice nobody receives. Five hundred jobs had piled up unprocessed before
+ * anybody noticed. The rest of the application sends database and mail
+ * synchronously for the same reason. Nothing here can cost an approval:
+ * every dispatch goes through RecruitmentNotifier, which catches and logs.
  */
-class RecruitmentRequestApprovedForHr extends Notification implements ShouldQueue
+class RecruitmentRequestApprovedForHr extends Notification
 {
     use Queueable;
 

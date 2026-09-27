@@ -32,6 +32,7 @@ class InviteTable extends LivewireTable
     public int $campaignId;
 
     protected string $model = RecruitmentCampaignInvite::class;
+
     public function mount(int $campaignId): void
     {
         $this->campaignId = $campaignId;

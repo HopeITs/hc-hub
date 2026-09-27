@@ -40,7 +40,13 @@ $check = function (string $label, bool $ok, string $detail = '') use (&$pass, &$
     echo ($ok ? 'PASS ' : 'FAIL ').$label.($detail !== '' ? "  [$detail]" : '').PHP_EOL;
 };
 $throws = function (callable $fn, string $class): bool {
-    try { $fn(); return false; } catch (Throwable $e) { return $e instanceof $class; }
+    try {
+        $fn();
+
+        return false;
+    } catch (Throwable $e) {
+        return $e instanceof $class;
+    }
 };
 
 $forms = app(RecruitmentApplicationFormService::class);
@@ -97,7 +103,7 @@ $answersFor = function (array $fields, string $email, string $phone = '094400011
 
 $public = app(PublicRecruitmentApplicationService::class);
 $submit = fn (string $token, array $answers, ?string $key = null, array $extra = []) => $public->submit(
-    $token, ['answers' => $answers, 'submission_key' => $key ?? bin2hex(random_bytes(32)), 'locale' => 'en'] + $extra, '127.0.0.1', 'tests'
+    $token, ['answers' => $answers, 'submission_key' => $key ?? bin2hex(random_bytes(32)), 'locale' => 'en'] + $extra, '127.0.0.1', 'tests',
 );
 
 // Stored uploads outlive the DB rollback; remember what was there before.
@@ -109,13 +115,13 @@ $filesBefore = $listFiles();
 
 DB::beginTransaction();
 try {
-    echo PHP_EOL."== Integration: registrations and routes survived the merge ==".PHP_EOL;
+    echo PHP_EOL.'== Integration: registrations and routes survived the merge =='.PHP_EOL;
     $check('Applicant policy registered', Gate::getPolicyFor(RecruitmentApplicant::class) instanceof App\Policies\RecruitmentApplicantPolicy);
     $check('Application policy registered', Gate::getPolicyFor(RecruitmentApplication::class) instanceof App\Policies\RecruitmentApplicationPolicy);
     $check('Invite policy registered', Gate::getPolicyFor(RecruitmentCampaignInvite::class) instanceof App\Policies\RecruitmentCampaignInvitePolicy);
     $check('Status column is VARCHAR (string enum)', str_starts_with(DB::select('SHOW COLUMNS FROM hchr_recruitment_applications LIKE "status"')[0]->Type, 'varchar'));
 
-    echo PHP_EOL."== Task 2 (Team 1 real flow): public submit ==".PHP_EOL;
+    echo PHP_EOL.'== Task 2 (Team 1 real flow): public submit =='.PHP_EOL;
     [$c, $l, $tok, $fields] = $makeCampaign(Mode::PublicOpen);
     $key = bin2hex(random_bytes(32));
     $r1 = $submit($tok, $answersFor($fields, 'Real.Person@Example.COM'), $key);
@@ -142,7 +148,7 @@ try {
     $check('T2-9 campaign closed -> rejected', $throws(fn () => $submit($tok, $answersFor($fields, 'x8@example.com')), PublicRecruitmentSubmissionException::class));
     $check('T2-10 no partial application left by failed submits', RecruitmentApplication::where('campaign_id', $c->id)->count() === 1);
 
-    echo PHP_EOL."== Task 2: invitation-only ==".PHP_EOL;
+    echo PHP_EOL.'== Task 2: invitation-only =='.PHP_EOL;
     [$ic, $il, $itok, $ifields] = $makeCampaign(Mode::InvitationOnly);
     $invites = app(RecruitmentCampaignInviteService::class);
     $inv = $invites->add($hr, $ic, 'Invited Person', '  Invited.Person@Example.com ');
@@ -156,13 +162,18 @@ try {
     $check('I-5 cancelled invite rejected', $throws(fn () => $submit($itok, $answersFor($ifields, 'cancelled@example.com')), PublicRecruitmentSubmissionException::class));
     $check('I-6 generic error: uninvited and cancelled look identical', true, 'both raise the same PublicRecruitmentSubmissionException, no message');
 
-    echo PHP_EOL."== Invite rules shared by both screens (Team 1 Manager now delegates) ==".PHP_EOL;
+    echo PHP_EOL.'== Invite rules shared by both screens (Team 1 Manager now delegates) =='.PHP_EOL;
     $links = app(PublicRecruitmentLinkService::class);
     $check('S-1 Team 1 addInvite cannot revive a USED invite (model observer)', $throws(fn () => $links->addInvite($ic, $hr, 'Invited Person', 'invited.person@example.com'), ValidationException::class));
     $check('S-1 ...and used_at is preserved', $inv->fresh()->used_at !== null);
     $check('S-2 Team 1 cancelInvite refuses a USED invite (model observer)', $throws(fn () => $links->cancelInvite($inv->fresh(), $hr), ValidationException::class));
     // Team 1's design, kept: re-adding a pending email edits the invite (how HR corrects a name).
-    $check('S-3 re-adding a pending invite edits its name (same row)', (function () use ($links, $ic, $hr) { $a = $links->addInvite($ic, $hr, 'Wrong', 'dup@example.com'); $b = $links->addInvite($ic, $hr, 'Right', ' DUP@example.com '); return $a->id === $b->id && $b->full_name === 'Right'; })());
+    $check('S-3 re-adding a pending invite edits its name (same row)', (function () use ($links, $ic, $hr) {
+        $a = $links->addInvite($ic, $hr, 'Wrong', 'dup@example.com');
+        $b = $links->addInvite($ic, $hr, 'Right', ' DUP@example.com ');
+
+        return $a->id === $b->id && $b->full_name === 'Right';
+    })());
     $check('S-4 Team 1 addInvite re-activates a cancelled invite', $links->addInvite($ic, $hr, 'Back', 'cancelled@example.com')->status === RecruitmentCampaignInvite::STATUS_PENDING);
     $check('S-5 invite on a public campaign refused', $throws(fn () => $invites->add($hr, $c, 'N', 'n@example.com'), ValidationException::class));
     $check('S-6 activity log written for invite save/cancel', DB::table('activity_log')->where('description', 'recruitment_campaign_invite_cancelled')->where('subject_id', $inv2->id)->exists());
@@ -176,14 +187,22 @@ try {
     $d = $submit($tok = $makeCampaign(Mode::PublicOpen)[2], $answersFor($fields, 'other-person@example.com', '+963 950 018 480'));
     $check('P-1 different email, same phone -> flagged to anchor 4', $d['application']->applicant->fresh()->possible_duplicate_of_applicant_id === 4);
 
-    echo PHP_EOL."== Team 2 screens after the merge ==".PHP_EOL;
+    echo PHP_EOL.'== Team 2 screens after the merge =='.PHP_EOL;
     $t = Livewire::test(InviteTable::class, ['campaignId' => $ic->id]);
     $check('U-1 InviteTable renders for HR', str_contains($t->html(), 'invited.person@example.com'));
     $check('U-2 used invite has no Cancel button', ! str_contains($t->html(), 'confirmCancel('.$inv->id.')'));
     Livewire::actingAs(User::find(1));
-    $check('U-3 non-HR user forbidden', (function () use ($ic) { try { Livewire::test(InviteTable::class, ['campaignId' => $ic->id])->assertForbidden(); return true; } catch (Throwable) { return false; } })());
+    $check('U-3 non-HR user forbidden', (function () use ($ic) {
+        try {
+            Livewire::test(InviteTable::class, ['campaignId' => $ic->id])->assertForbidden();
 
-    echo PHP_EOL."== Public pages over HTTP ==".PHP_EOL;
+            return true;
+        } catch (Throwable) {
+            return false;
+        }
+    })());
+
+    echo PHP_EOL.'== Public pages over HTTP =='.PHP_EOL;
     [, , $htok] = $makeCampaign(Mode::PublicOpen);
     $check('H-1 GET /careers/{token} -> Team 1 real form 200', app()->handle(Request::create("/careers/$htok", 'GET'))->getStatusCode() === 200);
     $check('H-2 GET /careers/{bad} -> unavailable 404', app()->handle(Request::create('/careers/'.str_repeat('a', 64), 'GET'))->getStatusCode() === 404);
@@ -197,7 +216,15 @@ try {
         array_diff_key($answersFor($fields, 'tf@example.com'), array_flip(['full_name', 'email', 'phone', 'privacy_consent'])),
         fn ($v) => ! $v instanceof Illuminate\Http\UploadedFile,
     );
-    $errorsOf = function (callable $fn): array { try { $fn(); return []; } catch (ValidationException $e) { return $e->errors(); } };
+    $errorsOf = function (callable $fn): array {
+        try {
+            $fn();
+
+            return [];
+        } catch (ValidationException $e) {
+            return $e->errors();
+        }
+    };
     $errs = $errorsOf(fn () => $svc->submit($fl, ['full_name' => 'T', 'email' => 'tf@example.com', 'privacy_accepted_at' => true, 'answers' => $answers]));
     $check('F-1 test form without a CV: refused under answers.cv', isset($errs['answers.cv']));
     $check('F-1 ...and no application was created', ! RecruitmentApplication::where('email_normalized', 'tf@example.com')->exists());

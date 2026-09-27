@@ -90,7 +90,7 @@ foreach ($plans as $applicationId => $interviews) {
             ."    {$base}/recruitment/interviews/{$interview->id}".PHP_EOL;
     }
 
-    echo "  Application status now: ".$application->fresh()->status.PHP_EOL
+    echo '  Application status now: '.$application->fresh()->status.PHP_EOL
         ."  Applicant profile: {$base}/recruitment/applicants/{$application->applicant_id}".PHP_EOL;
 }
 

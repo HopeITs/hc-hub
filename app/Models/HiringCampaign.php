@@ -88,14 +88,6 @@ class HiringCampaign extends Model
         return app(RecruitmentScopeResolver::class)->scopeCampaigns($query, $user);
     }
 
-    /** Reads the legacy spelling as the canonical one; see INVITE_ONLY. */
-    protected function linkMode(): Attribute
-    {
-        return Attribute::get(fn (?string $value): ?string => $value === self::LEGACY_INVITE_ONLY
-            ? self::INVITE_ONLY
-            : $value);
-    }
-
     /** Only a named list may apply; everybody else is turned away. */
     public function isInvitationOnly(): bool
     {
@@ -106,6 +98,14 @@ class HiringCampaign extends Model
     public function isInternal(): bool
     {
         return $this->link_mode === self::INTERNAL;
+    }
+
+    /** Reads the legacy spelling as the canonical one; see INVITE_ONLY. */
+    protected function linkMode(): Attribute
+    {
+        return Attribute::get(fn (?string $value): ?string => $value === self::LEGACY_INVITE_ONLY
+            ? self::INVITE_ONLY
+            : $value);
     }
 
     protected function casts(): array

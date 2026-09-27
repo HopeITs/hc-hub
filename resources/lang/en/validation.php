@@ -118,6 +118,15 @@ return [
     'captcha' => 'CAPTCHA verification failed. Please try again.',
 
     'custom' => [
+        // The generic "format is invalid" says nothing about what to type.
+        // These two fields reject the other alphabet, so they say so.
+        'data.title_en' => [
+            'regex' => 'The English title takes English letters and spaces only.',
+        ],
+        'data.title_ar' => [
+            'regex' => 'The Arabic title takes Arabic letters and spaces only.',
+        ],
+
         'image' => [
             'width' => 'Image width must be :val px',
             'height' => 'Image height must be :val px',

@@ -5,7 +5,6 @@ namespace App\Notifications;
 use App\Enums\ApprovalDecision;
 use App\Models\RecruitmentRequest;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -17,8 +16,16 @@ use Illuminate\Notifications\Notification;
  * requester reads while signed in carries it, and the mail that travels
  * through somebody else's server does not. The mail says only that a decision
  * was made and where to read it.
+ *
+ * Delivered as it happens rather than queued. The database row is what the
+ * bell in the application reads, and a queued notification is written only
+ * when a worker runs — this deployment has none, so a queued notice is a
+ * notice nobody receives. Five hundred jobs had piled up unprocessed before
+ * anybody noticed. The rest of the application sends database and mail
+ * synchronously for the same reason. Nothing here can cost an approval:
+ * every dispatch goes through RecruitmentNotifier, which catches and logs.
  */
-class RecruitmentRequestDecided extends Notification implements ShouldQueue
+class RecruitmentRequestDecided extends Notification
 {
     use Queueable;
 

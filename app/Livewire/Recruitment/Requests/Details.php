@@ -15,6 +15,7 @@ use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\Vacancy;
 use App\Services\RecruitmentApprovalService;
+use App\Services\RecruitmentApprovalTrack;
 use App\Services\RecruitmentEditableFields;
 use App\Services\RecruitmentPendingApprovalQuery;
 use App\Services\RecruitmentRequestApplicationService;
@@ -22,6 +23,7 @@ use App\Services\RecruitmentRequestSubmissionService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use InvalidArgumentException;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -45,6 +47,16 @@ class Details extends Component
      */
     public array $requestedFields = [];
 
+    /**
+     * Whether the approver is part-way through asking for changes.
+     *
+     * Approving and rejecting are one click; asking for changes is a sentence
+     * and a list of fields. Keeping those out of sight until the approver has
+     * chosen that path stops the panel from asking for things three of its
+     * buttons will never read.
+     */
+    public bool $askingForChanges = false;
+
     public function mount(int $requestId): void
     {
         $this->requestId = $requestId;
@@ -60,14 +72,11 @@ class Details extends Component
     public function submit(RecruitmentRequestSubmissionService $submissions): void
     {
         $request = $this->resolve();
-        $before = (int) $request->status;
+        Gate::authorize('submit', $request);
 
-        $request = $submissions->submit(auth()->user(), $request);
+        $submissions->submit(auth()->user(), $request);
 
-        // A second click finds the work already done and says so plainly.
-        session()->flash('recruitment_saved', __(
-            $before === (int) $request->status ? 'recruitment.already_submitted' : 'recruitment.submitted',
-        ));
+        $this->toast(__('recruitment.submitted'));
     }
 
     /** Cancel while the request is still the requester's to withdraw. */
@@ -75,7 +84,7 @@ class Details extends Component
     {
         $submissions->cancel(auth()->user(), $this->resolve());
 
-        session()->flash('recruitment_saved', __('recruitment.cancelled'));
+        $this->toast(__('recruitment.cancelled'));
     }
 
     public function render()
@@ -128,7 +137,9 @@ class Details extends Component
         // What the approver may unlock, and what the requester currently may
         // touch. Both come from the same authority the write path uses.
         $editable = app(RecruitmentEditableFields::class);
-        $selectableFields = $pendingStep ? $editable->selectable($request) : [];
+        $selectableFields = $pendingStep
+            ? $editable->selectable($request, (int) $pendingStep->workflowStep?->step_key)
+            : [];
         $unlockedFields = $editable->requestedByApprover($request);
         $canCreateCampaign = $request->status === RecruitmentRequestStatus::Applied
             && $request->vacancy !== null
@@ -138,10 +149,14 @@ class Details extends Component
             && $request->vacancy->filled_count < $request->vacancy->needed_count
             && Gate::allows('create', [HiringCampaign::class, $request->vacancy]);
 
+        // The road this request travels, shortened by whatever its own
+        // workflow actually skips rather than by a style.
+        $track = app(RecruitmentApprovalTrack::class)->for($request);
+
         return view('livewire.recruitment.requests.details', compact(
             'request', 'version', 'draftContext', 'previousRejections', 'pendingStep',
             'awaitingExecution', 'effectiveDate', 'mayExecuteNow',
-            'selectableFields', 'unlockedFields', 'canCreateCampaign',
+            'selectableFields', 'unlockedFields', 'track', 'canCreateCampaign',
         ));
     }
 
@@ -159,11 +174,28 @@ class Details extends Component
 
         $request = $applications->apply($request, auth()->user(), force: true);
 
-        session()->flash('recruitment_saved', __(
-            (int) $request->status === RecruitmentRequestStatus::Applied
-                ? 'recruitment.executed'
-                : 'recruitment.execution_failed',
-        ));
+        $applied = (int) $request->status === RecruitmentRequestStatus::Applied;
+
+        $this->toast(
+            __($applied ? 'recruitment.executed' : 'recruitment.execution_failed'),
+            success: $applied,
+        );
+    }
+
+    /** Open the second step: which fields, and why. */
+    public function askForChanges(): void
+    {
+        $this->resetErrorBag();
+        $this->askingForChanges = true;
+    }
+
+    /** Step back to the three decisions, keeping nothing half-typed. */
+    public function cancelChangeRequest(): void
+    {
+        $this->resetErrorBag();
+        $this->askingForChanges = false;
+        $this->requestedFields = [];
+        $this->decisionComment = '';
     }
 
     /**
@@ -199,7 +231,8 @@ class Details extends Component
 
         $this->decisionComment = '';
         $this->requestedFields = [];
-        session()->flash('recruitment_saved', __('recruitment.decided'));
+        $this->askingForChanges = false;
+        $this->toast(__('recruitment.decided'));
     }
 
     /**
@@ -254,5 +287,22 @@ class Details extends Component
         Gate::authorize('view', $request);
 
         return $request;
+    }
+
+    /**
+     * Say what happened, the way the rest of the application says it.
+     *
+     * A toast rather than a coloured panel: the panel pushed the page down on
+     * every save, and a red or green block across a form reads as part of the
+     * form rather than as a remark about it.
+     */
+    private function toast(string $message, bool $success = true): void
+    {
+        $alert = LivewireAlert::title($message);
+
+        ($success ? $alert->success() : $alert->error())
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 }

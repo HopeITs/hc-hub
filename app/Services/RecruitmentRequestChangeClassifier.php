@@ -113,6 +113,20 @@ class RecruitmentRequestChangeClassifier
     ];
 
     /**
+     * The draft keys that belong to a category.
+     *
+     * Exposed so the approval panel can offer each approver the fields their
+     * own step is about: the financial approver reviews money, so money is
+     * what they may send back for.
+     *
+     * @return array<int, string>
+     */
+    public function fieldsInCategory(int $category): array
+    {
+        return self::PAYLOAD_FIELDS[$category] ?? [];
+    }
+
+    /**
      * Every draft field that changed, with its old and new value (RV-1b).
      *
      * The edit screen writes the whole payload back whether or not anything

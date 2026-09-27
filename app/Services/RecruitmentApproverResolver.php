@@ -9,6 +9,7 @@ use App\Models\Position;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentWorkflowStep;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -39,6 +40,44 @@ class RecruitmentApproverResolver
                 ['reason' => 'unknown_step'],
             ),
         };
+    }
+
+    /**
+     * People the ordinary workflow would resolve for an external confirmation.
+     *
+     * Direct openings are documented rather than electronically approved, but
+     * their recorded people still come from the same live approval resolver.
+     * Multiple candidates are returned so HR can record the person who really
+     * confirmed the decision; the electronic workflow itself still fails closed
+     * when it cannot choose exactly one.
+     *
+     * @return Collection<int, User>
+     */
+    public function confirmationCandidates(
+        User $requester,
+        int $stepKey,
+        ?int $scopeCityId = null,
+    ): Collection {
+        $ids = match ($stepKey) {
+            WorkflowStepKey::ManagerApproval => $this->managerCandidateIds($requester),
+            WorkflowStepKey::FinanceApproval => $this->financeCandidateIds(),
+            WorkflowStepKey::GovernorateHrApproval => $scopeCityId === null
+                ? []
+                : $this->activeUserIdsForRole($this->scopes->governorateHrRole($scopeCityId)),
+            WorkflowStepKey::HrSyriaDirectOpenApproval => $this->activeUserIdsForRole('HR-SYR'),
+            default => [],
+        };
+
+        return User::query()
+            ->with([
+                'profile.contracts.position',
+                'profile.contracts.position.city',
+                'profile.contracts.position.center.city',
+            ])
+            ->whereIn('id', $ids)
+            ->get()
+            ->sortBy(fn (User $user): string => mb_strtolower((string) ($user->profile?->name ?? $user->email)))
+            ->values();
     }
 
     private function manager(RecruitmentRequest $request): RecruitmentApproverAssignment
@@ -89,14 +128,33 @@ class RecruitmentApproverResolver
         );
     }
 
+    /** @return array<int, int> */
+    private function managerCandidateIds(User $requester): array
+    {
+        $managerPosition = $this->scopes->approvingManagerPosition($requester);
+        $visited = [];
+
+        while ($managerPosition !== null && ! isset($visited[$managerPosition->getKey()])) {
+            $visited[$managerPosition->getKey()] = true;
+            $candidateIds = $this->activeUserIdsForPosition($managerPosition);
+
+            if ($candidateIds === []) {
+                return [];
+            }
+
+            if (count($candidateIds) > 1 || $candidateIds[0] !== (int) $requester->getKey()) {
+                return $candidateIds;
+            }
+
+            $managerPosition = $managerPosition->directManager()->first();
+        }
+
+        return [];
+    }
+
     private function finance(): RecruitmentApproverAssignment
     {
-        $ids = User::query()
-            ->whereIn('id', $this->scopes->financeApproverUserIds())
-            ->whereHas('profile', fn ($query) => $query->where('is_active', true))
-            ->pluck('id')
-            ->map(fn ($id): int => (int) $id)
-            ->all();
+        $ids = $this->financeCandidateIds();
 
         return new RecruitmentApproverAssignment(
             'finance-approver',
@@ -105,6 +163,17 @@ class RecruitmentApproverResolver
             count($ids) === 1 ? $ids[0] : null,
             count($ids) === 1 ? [] : ['reason' => $ids === [] ? 'no_active_holder' : 'multiple_active_holders'],
         );
+    }
+
+    /** @return array<int, int> */
+    private function financeCandidateIds(): array
+    {
+        return User::query()
+            ->whereIn('id', $this->scopes->financeApproverUserIds())
+            ->whereHas('profile', fn ($query) => $query->where('is_active', true))
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
     }
 
     private function governorateHr(RecruitmentRequest $request): RecruitmentApproverAssignment

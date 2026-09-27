@@ -55,6 +55,20 @@ class RecruitmentPendingApprovalQuery
     }
 
     /**
+     * Request ids currently waiting on this user, suitable for a subquery.
+     *
+     * This starts from the exact pending-step query above so list filters and
+     * the Pending approvals screen cannot disagree about what needs action.
+     */
+    public function requestIdsForUser(User $user): Builder
+    {
+        return $this->forUser($user)
+            ->withoutEagerLoads()
+            ->reorder()
+            ->select('pending_requests.id');
+    }
+
+    /**
      * When the pending step became the current one: the moment the step
      * before it was decided, or the start of the workflow for the first.
      * A subquery against forUser()'s aliases, for addSelect() or min().
