@@ -12,7 +12,6 @@ use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
 use App\Models\User;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;

@@ -150,6 +150,36 @@ class RecruitmentAuthorizationTest extends TestCase
         $this->assertContains($directly->id, $resolver->financeApproverUserIds());
     }
 
+    /** The active Senior Financial Manager remains the finance confirmer. */
+    public function test_the_finance_approver_follows_the_active_senior_financial_position(): void
+    {
+        $city = $this->makeCity('SYR-'.uniqid(), (string) random_int(100, 999));
+        [$department, $jobLevel, $contractType] = $this->positionPrerequisites();
+        $program = $this->makeProgram('finance');
+        $seniorFinancial = $this->makeUser($city, 'manager');
+        $staleGrant = $this->makeUser($city, 'manager');
+        $staleGrant->givePermissionTo(Permission::findByName('recruitment-requests.approve-finance'));
+
+        $position = $this->makePosition($city, $program, $department, $jobLevel, 'senior-financial');
+        $position->update(['title_en' => 'Senior Financial Manager']);
+        Contract::query()->forceCreate([
+            'employee_id' => $seniorFinancial->employee_id,
+            'position_id' => $position->id,
+            'contract_type_id' => $contractType->id,
+            'start_date' => now()->subMonth(),
+            'end_date' => now()->addYear(),
+            'currency' => 2,
+            'salary_per' => 1,
+            'weekly_hours' => 40,
+            'is_active' => true,
+        ]);
+
+        $this->assertSame(
+            [$seniorFinancial->id],
+            app(RecruitmentScopeResolver::class)->financeApproverUserIds(),
+        );
+    }
+
     /**
      * Eligibility is the grade of the position held, never a role (D26). A
      * promotion qualifies someone the same day; moving off a management

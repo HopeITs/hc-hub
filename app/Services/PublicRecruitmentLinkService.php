@@ -15,6 +15,7 @@ use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use DomainException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -99,10 +100,14 @@ class PublicRecruitmentLinkService
                 ->update(['status' => PublicRecruitmentLink::STATUS_DISABLED, 'updated_at' => now()]);
 
             $token = bin2hex(random_bytes(32));
+            $url = route('careers.show', ['token' => $token]);
             $link = $lockedCampaign->publicLinks()->create([
                 'job_post_version_id' => $jobVersion->getKey(),
                 'form_version_id' => $formVersion->getKey(),
                 'token_hash' => hash('sha256', $token),
+                // The URL is stored encrypted so HR can copy it again after
+                // logging out, without us ever storing the plain token.
+                'url_encrypted' => Crypt::encryptString($url),
                 'status' => PublicRecruitmentLink::STATUS_ACTIVE,
                 'expires_at' => $effectiveExpiry,
                 'created_by_user_id' => $actor->getKey(),
@@ -125,7 +130,7 @@ class PublicRecruitmentLinkService
             return [
                 'link' => $link->fresh(),
                 'token' => $token,
-                'url' => route('careers.show', ['token' => $token]),
+                'url' => $url,
                 // A link is preparation, not publication. The campaign page
                 // records publication as its own deliberate action.
                 'campaign_published' => false,

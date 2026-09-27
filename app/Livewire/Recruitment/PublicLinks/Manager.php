@@ -214,14 +214,28 @@ class Manager extends Component
 
     private function recalledUrl(PublicRecruitmentLink $link): string
     {
+        // First try the session — it was written at generation time and is
+        // faster than decrypting a database value on every render.
         $stored = session()->get($this->sessionKey($link));
 
-        if (! is_string($stored)) {
+        if (is_string($stored)) {
+            try {
+                return Crypt::decryptString($stored);
+            } catch (DecryptException) {
+                // fall through to the database copy below
+            }
+        }
+
+        // The session is gone (e.g. HR logged out and back in). Recover the
+        // URL from the encrypted copy stored on the link row. This lets HR
+        // copy the link again without having to regenerate — which would break
+        // every copy already shared on social media.
+        if (! is_string($link->url_encrypted) || $link->url_encrypted === '') {
             return '';
         }
 
         try {
-            return Crypt::decryptString($stored);
+            return Crypt::decryptString($link->url_encrypted);
         } catch (DecryptException) {
             return '';
         }

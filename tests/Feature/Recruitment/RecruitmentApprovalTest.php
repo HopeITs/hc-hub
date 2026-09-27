@@ -6,12 +6,14 @@ use App\Enums\ApprovalDecision;
 use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestStatus as Status;
 use App\Enums\WorkflowInstanceStatus;
+use App\Livewire\Recruitment\Requests\Details;
 use App\Models\RecruitmentWorkflowInstance;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Services\RecruitmentApprovalService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
+use Livewire\Livewire;
 use Tests\Concerns\BuildsWorkflowFixtures;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
@@ -231,6 +233,41 @@ class RecruitmentApprovalTest extends TestCase
         // who can fix it.
         $this->assertSame(Status::ChangesRequested, (int) $request->status);
         $this->assertNotSame(Status::Approved, (int) $request->status);
+    }
+
+    /**
+     * Asking for changes is two steps on the screen, one decision underneath.
+     *
+     * Approving and rejecting are a click; asking for changes is a sentence and
+     * a list of fields. The panel shows the three decisions first and only
+     * opens the rest once that path is chosen, so it never asks for things the
+     * other two buttons will not read.
+     */
+    public function test_the_change_request_fields_appear_only_after_choosing_that_path(): void
+    {
+        ['request' => $request, 'manager' => $manager] = $this->workflow();
+
+        $component = Livewire::actingAs($manager)
+            ->test(Details::class, ['requestId' => $request->getKey()]);
+
+        // Step one: the decisions, and none of what only one of them needs.
+        $component->assertSee(__('recruitment.request_changes'))
+            ->assertDontSee(__('recruitment.fields_to_unlock'))
+            ->assertDontSee(__('recruitment.send_change_request'));
+
+        // Step two, once that path is chosen.
+        $component->call('askForChanges')
+            ->assertSet('askingForChanges', true)
+            ->assertSee(__('recruitment.fields_to_unlock'))
+            ->assertSee(__('recruitment.send_change_request'));
+
+        // And back again, leaving nothing half-typed behind.
+        $component->set('decisionComment', 'Half a thought')
+            ->call('cancelChangeRequest')
+            ->assertSet('askingForChanges', false)
+            ->assertSet('decisionComment', '')
+            ->assertSet('requestedFields', [])
+            ->assertDontSee(__('recruitment.fields_to_unlock'));
     }
 
     private function stepAt(RecruitmentWorkflowInstance $instance, int $order): RecruitmentWorkflowInstanceStep

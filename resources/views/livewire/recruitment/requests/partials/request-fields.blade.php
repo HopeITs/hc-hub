@@ -55,6 +55,7 @@
                         ->mapWithKeys(fn ($value) => [$value => __('recruitment.'.$prefix.$value)])->all();
                 @endphp
                 @include('livewire.recruitment.requests.partials.select', ['field' => 'recruitment_reason', 'label' => 'recruitment_reason', 'options' => $options('recruitment_reasons', 'reason_'), 'required' => true])
+                <p class="-mt-3 text-sm text-secondary-medium">{{ __('recruitment.recruitment_reason_help') }}</p>
                 @if (($data['recruitment_reason'] ?? null) === 'other')
                     @include('livewire.recruitment.requests.partials.textarea', ['field' => 'other_reason'])
                 @endif
@@ -86,5 +87,6 @@
                     @include('livewire.recruitment.requests.partials.select', ['field' => 'contract_type_id', 'label' => 'contract_type', 'options' => $contractTypes->pluck('name', 'id')->all(), 'required' => true])
                 </div>
                 @include('livewire.recruitment.requests.partials.textarea', ['field' => 'detailed_explanation'])
+                <p class="-mt-3 text-sm text-secondary-medium">{{ __('recruitment.detailed_explanation_help') }}</p>
             @endif
         </section>

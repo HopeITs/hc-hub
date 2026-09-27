@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\RecruitmentRequest;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -20,8 +19,16 @@ use Illuminate\Notifications\Notification;
  *
  * The mail carries a request number and a link and nothing else. What is being
  * recruited for, at what salary, and why, stays inside the system.
+ *
+ * Delivered as it happens rather than queued. The database row is what the
+ * bell in the application reads, and a queued notification is written only
+ * when a worker runs — this deployment has none, so a queued notice is a
+ * notice nobody receives. Five hundred jobs had piled up unprocessed before
+ * anybody noticed. The rest of the application sends database and mail
+ * synchronously for the same reason. Nothing here can cost an approval:
+ * every dispatch goes through RecruitmentNotifier, which catches and logs.
  */
-class RecruitmentApprovalAwaiting extends Notification implements ShouldQueue
+class RecruitmentApprovalAwaiting extends Notification
 {
     use Queueable;
 

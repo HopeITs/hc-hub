@@ -38,6 +38,11 @@ class RecruitmentRequest extends Model
         return $this->belongsTo(Position::class, 'actual_requester_position_id');
     }
 
+    public function actualRequester(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'actual_requester_user_id');
+    }
+
     public function directOpenedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'direct_opened_by_user_id');

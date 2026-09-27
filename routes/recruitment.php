@@ -41,7 +41,10 @@ Route::prefix('recruitment/campaigns')->name('recruitment.campaigns.')
     ->middleware('active_permission:recruitment-campaigns.view')
     ->group(function () {
         Route::get('/', CampaignIndex::class)->name('index');
-        Route::get('/create', CampaignCreate::class)
+        // The optional vacancy lets an approved request hand the seat
+        // straight over rather than making HR find it again in a list.
+        Route::get('/create/{vacancyId?}', CampaignCreate::class)
+            ->whereNumber('vacancyId')
             ->middleware('active_permission:recruitment-campaigns.manage')->name('create');
         Route::get('/{campaignId}', CampaignShow::class)->whereNumber('campaignId')->name('show');
     });

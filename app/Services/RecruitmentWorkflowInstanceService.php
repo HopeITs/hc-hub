@@ -103,6 +103,13 @@ class RecruitmentWorkflowInstanceService
             $skipManager = (int) $request->mode === RecruitmentRequestMode::Normal
                 && $this->scopes->mayRequestWithoutManagerApproval($requester);
 
+            // The organisation has one financial approver. When they are the
+            // one asking, there is nobody else to ask, so the step is skipped
+            // and said to be skipped rather than waiting on a self-approval
+            // the module refuses anyway.
+            $skipFinance = (int) $request->mode === RecruitmentRequestMode::Normal
+                && $this->scopes->isFinanceApprover($requester);
+
             if ((int) $request->mode === RecruitmentRequestMode::Normal
                 && ! $skipManager
                 && $this->scopes->approvingManagerPosition($requester) === null) {
@@ -111,12 +118,14 @@ class RecruitmentWorkflowInstanceService
                 ]);
             }
 
-            $currentOrder = (int) $steps->first()->step_order;
-            if ($skipManager) {
-                $currentOrder = (int) ($steps
-                    ->first(fn (RecruitmentWorkflowStep $step): bool => (int) $step->step_key !== WorkflowStepKey::ManagerApproval)
-                    ?->step_order ?? $currentOrder);
-            }
+            $skipped = array_values(array_filter([
+                $skipManager ? WorkflowStepKey::ManagerApproval : null,
+                $skipFinance ? WorkflowStepKey::FinanceApproval : null,
+            ], fn (?int $key): bool => $key !== null));
+
+            $currentOrder = (int) ($steps
+                ->first(fn (RecruitmentWorkflowStep $step): bool => ! in_array((int) $step->step_key, $skipped, true))
+                ?->step_order ?? (int) $steps->first()->step_order);
 
             $instance = RecruitmentWorkflowInstance::query()->create([
                 'request_id' => $request->getKey(),
@@ -131,10 +140,20 @@ class RecruitmentWorkflowInstanceService
             $missingApprovals = [];
 
             foreach ($steps as $step) {
-                if ($skipManager && (int) $step->step_key === WorkflowStepKey::ManagerApproval) {
-                    $this->createSkippedManagerStep($instance, $step);
-                    $this->recordSkippedManagerEvent($request, $requestVersion, $instance, $step);
-                    $resolutionMeta[(string) $step->step_key] = ['skipped' => true, 'reason' => 'top_level_requester'];
+                if (in_array((int) $step->step_key, $skipped, true)) {
+                    $isManager = (int) $step->step_key === WorkflowStepKey::ManagerApproval;
+                    $reason = $isManager
+                        ? WorkflowSkipReason::TopLevelRequester
+                        : WorkflowSkipReason::RequesterIsApprover;
+
+                    $this->createSkippedStep($instance, $step, $reason, $isManager ? 'manager' : 'finance-approver',
+                        $isManager ? RecruitmentScopeType::DirectReports : RecruitmentScopeType::Organization);
+                    $this->recordSkippedStepEvent($request, $requestVersion, $instance, $step, $reason);
+
+                    $resolutionMeta[(string) $step->step_key] = [
+                        'skipped' => true,
+                        'reason' => $isManager ? 'top_level_requester' : 'requester_is_approver',
+                    ];
 
                     continue;
                 }
@@ -266,24 +285,35 @@ class RecruitmentWorkflowInstanceService
             ->values();
     }
 
-    private function createSkippedManagerStep(
+    /**
+     * A step nobody can decide, written down as skipped rather than left open.
+     *
+     * D57: there is no column for a skip, so the marker lives in
+     * `decision_reason` and `decision` stays null. `acted_at` is set because
+     * the step is finished with, even though nobody decided it.
+     */
+    private function createSkippedStep(
         RecruitmentWorkflowInstance $instance,
         RecruitmentWorkflowStep $step,
+        int $reason,
+        string $role,
+        int $scopeType,
     ): void {
         $instance->steps()->create([
             'workflow_step_id' => $step->getKey(),
-            'assigned_role' => 'manager',
-            'assigned_scope_type' => RecruitmentScopeType::DirectReports,
-            'decision_reason' => 'skip:'.WorkflowSkipReason::TopLevelRequester,
+            'assigned_role' => $role,
+            'assigned_scope_type' => $scopeType,
+            'decision_reason' => 'skip:'.$reason,
             'acted_at' => now(),
         ]);
     }
 
-    private function recordSkippedManagerEvent(
+    private function recordSkippedStepEvent(
         RecruitmentRequest $request,
         RecruitmentRequestVersion $version,
         RecruitmentWorkflowInstance $instance,
         RecruitmentWorkflowStep $step,
+        int $reason,
     ): void {
         $request->events()->create([
             'request_version_id' => $version->getKey(),
@@ -291,8 +321,10 @@ class RecruitmentWorkflowInstanceService
             'workflow_instance_id' => $instance->getKey(),
             'workflow_step_id' => $step->getKey(),
             'actor_role' => 'system',
-            'comment' => __('recruitment-workflow.top_level_manager_skipped'),
-            'meta' => ['skip_reason' => WorkflowSkipReason::TopLevelRequester],
+            'comment' => __($reason === WorkflowSkipReason::TopLevelRequester
+                ? 'recruitment-workflow.top_level_manager_skipped'
+                : 'recruitment-workflow.requester_is_approver_skipped'),
+            'meta' => ['skip_reason' => $reason],
         ]);
     }
 

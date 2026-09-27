@@ -5,13 +5,12 @@ namespace App\Livewire\Recruitment\Requests;
 use App\Enums\ExternalConfirmationDecision;
 use App\Enums\ExternalConfirmationMethod;
 use App\Enums\RecruitmentRequestType;
-use App\Enums\RecruitmentScopeType;
+use App\Livewire\Concerns\InitializesRecruitmentRequestSelects;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\ContractType;
 use App\Models\Department;
 use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use App\Models\RecruitmentRequest;
 use App\Models\Vacancy;
@@ -19,6 +18,7 @@ use App\Services\RecruitmentDirectOpenService;
 use App\Services\RecruitmentScopeResolver;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 /**
@@ -27,7 +27,8 @@ use Livewire\Component;
  * The request half of this form is the ordinary one — a direct opening may
  * shorten the approvals, never the facts. What is added is the documentation
  * that makes it honest: who actually asked, why the workflow was bypassed, and
- * three lines saying how each approval was really given.
+ * lines saying how the manager and finance approvals were really given. The
+ * HR action is recorded automatically through the signed-in opener.
  *
  * The lists here are narrowed to the governorate this HR answers for, which is
  * a different boundary from the management tree a manager's own request is
@@ -36,16 +37,33 @@ use Livewire\Component;
  */
 class DirectOpen extends Component
 {
+    use InitializesRecruitmentRequestSelects;
+
     /** @var array<string, mixed> */
     public array $data = ['request_type' => RecruitmentRequestType::FillVacancy];
 
     /** @var array<string, mixed> */
     public array $documentation = [
-        'actual_requester_name' => '',
-        'actual_requester_position_id' => null,
+        'actual_requester_user_id' => null,
         'direct_open_reason' => '',
         'confirmations' => [],
     ];
+
+    public function mount(RecruitmentDirectOpenService $directOpen): void
+    {
+        $this->data = $this->withInitializedRequestSelects($this->data);
+
+        foreach ($directOpen->confirmableSteps() as $stepKey) {
+            $this->documentation['confirmations'][$stepKey] = [
+                'decision' => null,
+                'confirmer_user_id' => null,
+                'method' => null,
+                'confirmed_at' => null,
+                'not_applicable_reason' => '',
+                'notes' => '',
+            ];
+        }
+    }
 
     public function boot(): void
     {
@@ -54,18 +72,30 @@ class DirectOpen extends Component
 
     public function updatedDataRequestType(): void
     {
-        $this->data = ['request_type' => (int) $this->data['request_type']];
+        $this->data = $this->withInitializedRequestSelects([
+            'request_type' => (int) $this->data['request_type'],
+        ]);
         $this->resetValidation();
     }
 
     public function updatedDataPositionId(): void
     {
-        unset($this->data['vacancy_id']);
+        $this->data['vacancy_id'] = null;
+        $this->resetConfirmationPeople();
     }
 
     public function updatedDataCityId(): void
     {
-        unset($this->data['center_id']);
+        $this->data['center_id'] = null;
+        $this->resetConfirmationPeople();
+    }
+
+    public function updatedDocumentationActualRequesterUserId(): void
+    {
+        $this->data['position_id'] = null;
+        $this->data['direct_manager_id'] = null;
+        $this->data['vacancy_id'] = null;
+        $this->resetConfirmationPeople();
     }
 
     public function save(RecruitmentDirectOpenService $directOpen)
@@ -82,7 +112,7 @@ class DirectOpen extends Component
             return null;
         }
 
-        session()->flash('recruitment_saved', __('recruitment.direct_open.opened'));
+        $this->toast(__('recruitment.direct_open.opened'));
 
         return $this->redirectRoute('recruitment.requests.show', ['requestId' => $request->id]);
     }
@@ -93,14 +123,27 @@ class DirectOpen extends Component
 
         $user = auth()->user();
         $scopes = app(RecruitmentScopeResolver::class);
+        $directOpen = app(RecruitmentDirectOpenService::class);
         $type = (int) ($this->data['request_type'] ?? 0);
         $newPosition = $type === RecruitmentRequestType::CreatePosition;
 
-        $positions = $this->positionsInScope($scopes, $user);
+        $requesters = $directOpen->requesterCandidates($user);
+        $requester = $requesters->first(
+            fn ($candidate): bool => (int) $candidate->getKey() === (int) ($this->documentation['actual_requester_user_id'] ?? 0),
+        );
+        $positions = $directOpen->positionsForRequester($user, $requester, $type);
         $vacancies = $this->vacanciesFor($type);
+        $cityId = $this->targetCityId($positions);
+        $confirmationCandidates = [];
+        if ($requester !== null) {
+            foreach ($directOpen->confirmableSteps() as $stepKey) {
+                $confirmationCandidates[$stepKey] = $directOpen->confirmationCandidates($requester, $stepKey, $cityId);
+            }
+        }
 
         return view('livewire.recruitment.requests.direct-open', [
             'positions' => $positions->with(['program', 'city'])->orderBy(transColumn('title'))->get(),
+            'requesters' => $requesters,
             'vacancies' => $vacancies,
             // cities, centres and contract types name themselves per locale;
             // programmes and departments have one name column between them.
@@ -114,34 +157,13 @@ class DirectOpen extends Component
             'contractTypes' => ContractType::query()->orderBy(transColumn('name'))->get(),
             'centerRequired' => ! $newPosition || $this->centerIsRequired(),
             'steps' => app(RecruitmentDirectOpenService::class)->confirmableSteps(),
+            'confirmationCandidates' => $confirmationCandidates,
             'decisions' => [ExternalConfirmationDecision::Approved, ExternalConfirmationDecision::NotApplicable],
             'methods' => [
                 ExternalConfirmationMethod::Phone, ExternalConfirmationMethod::Email,
                 ExternalConfirmationMethod::Meeting, ExternalConfirmationMethod::Other,
             ],
         ]);
-    }
-
-    /**
-     * Every post in the governorate this HR opens for; everything, for HR Syria.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder<Position>
-     */
-    private function positionsInScope(RecruitmentScopeResolver $scopes, $user)
-    {
-        $positions = Position::query()->where('is_active', true);
-
-        if ($scopes->scopeType($user) === RecruitmentScopeType::Organization) {
-            return $positions;
-        }
-
-        $cityIds = $scopes->governorateCityIds($user);
-
-        return $positions->where(function ($query) use ($cityIds): void {
-            foreach ($cityIds as $cityId) {
-                $query->orWhere(fn ($inner) => $inner->inCity((int) $cityId));
-            }
-        });
     }
 
     /** @return \Illuminate\Support\Collection<int, Vacancy> */
@@ -171,5 +193,45 @@ class DirectOpen extends Component
     private function authorizeScreen(): void
     {
         Gate::authorize('directOpen', RecruitmentRequest::class);
+    }
+
+    private function targetCityId($positions): ?int
+    {
+        if ($this->data['request_type'] === RecruitmentRequestType::CreatePosition) {
+            return filter_var($this->data['city_id'] ?? null, FILTER_VALIDATE_INT) ?: null;
+        }
+
+        $positionId = filter_var($this->data['position_id'] ?? null, FILTER_VALIDATE_INT);
+        if (! $positionId) {
+            return null;
+        }
+
+        $position = $positions->whereKey($positionId)->with('center')->first();
+
+        return $position?->city_id ?? $position?->center?->city_id;
+    }
+
+    private function resetConfirmationPeople(): void
+    {
+        foreach (app(RecruitmentDirectOpenService::class)->confirmableSteps() as $stepKey) {
+            $this->documentation['confirmations'][$stepKey]['confirmer_user_id'] = null;
+        }
+    }
+
+    /**
+     * Say what happened, the way the rest of the application says it.
+     *
+     * A toast rather than a coloured panel: the panel pushed the page down on
+     * every save, and a red or green block across a form reads as part of the
+     * form rather than as a remark about it.
+     */
+    private function toast(string $message, bool $success = true): void
+    {
+        $alert = LivewireAlert::title($message);
+
+        ($success ? $alert->success() : $alert->error())
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 }

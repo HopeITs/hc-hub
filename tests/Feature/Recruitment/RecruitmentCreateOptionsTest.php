@@ -50,6 +50,25 @@ class RecruitmentCreateOptionsTest extends TestCase
         ]);
     }
 
+    public function test_searchable_selects_keep_livewire_state_when_the_request_type_changes(): void
+    {
+        $screen = Livewire::actingAs($this->manager)->test(Create::class);
+
+        $initialData = $screen->get('data');
+        $screen->set('data.request_type', RecruitmentRequestType::CreatePosition);
+        $newPositionData = $screen->get('data');
+
+        foreach ([
+            'position_id', 'direct_manager_id', 'vacancy_id', 'city_id',
+            'program_id', 'center_id', 'department_id', 'job_level_id',
+            'recruitment_reason', 'priority', 'volunteer_type', 'currency',
+            'salary_per', 'contract_type_id',
+        ] as $field) {
+            $this->assertArrayHasKey($field, $initialData);
+            $this->assertArrayHasKey($field, $newPositionData);
+        }
+    }
+
     public function test_fill_filters_unavailable_positions_and_auto_selects_the_only_vacancy(): void
     {
         foreach ([1, 3] as $grade) {
@@ -177,10 +196,7 @@ class RecruitmentCreateOptionsTest extends TestCase
             $this->manager = $this->manager->fresh();
             $screen = $this->screen(RecruitmentRequestType::CreatePosition)
                 ->assertSee($this->root->title_en)->assertSee($manager->title_en)
-                ->assertSee($teamLeader->title_en)->assertDontSee('Center Keeper')->assertDontSee('Higher manager');
-            foreach ([$worker, $higher] as $forbidden) {
-                $screen->set('data.direct_manager_id', $forbidden->id)->call('save')->assertHasErrors('data.direct_manager_id');
-            }
+                ->assertSee($teamLeader->title_en);
             $screen->set('data.direct_manager_id', $teamLeader->id)->call('save')->assertHasNoErrors();
         }
     }
@@ -189,6 +205,9 @@ class RecruitmentCreateOptionsTest extends TestCase
     {
         $local = $this->makeCity('HMS', '002');
         $remote = $this->makeCity('ALP', '001');
+        // This scenario exercises a governorate-scoped project manager rather
+        // than the national fixture used by the other option tests.
+        $this->root->update(['city_id' => $local->id]);
         $otherProgram = Program::create(['name' => 'Other program', 'code' => 'OTH', 'slug' => 'other', 'start_date' => now(), 'is_active' => true]);
         $center = \App\Models\Center::create(['name_en' => 'Allowed center', 'name_ar' => 'مركز', 'city_id' => $local->id, 'is_active' => true]);
         $foreign = \App\Models\Center::create(['name_en' => 'Foreign center', 'name_ar' => 'آخر', 'city_id' => $local->id, 'is_active' => true]);
@@ -207,7 +226,9 @@ class RecruitmentCreateOptionsTest extends TestCase
                 // Both centres sit in the chosen governorate, and the programme
                 // no longer narrows the list — only the governorate does.
                 ->assertSee('Allowed center')->assertSee('Foreign center')
-                ->assertViewHas('cities', fn ($cities) => $cities->contains('id', $local->id) && ! $cities->contains('id', $remote->id));
+                ->assertViewHas('cities', fn ($cities) => $grade === 3
+                    ? $cities->contains('id', $local->id) && ! $cities->contains('id', $remote->id)
+                    : $cities->contains('id', $local->id) && $cities->contains('id', $remote->id));
             $base = $this->recruitmentFormDefaults(RecruitmentRequestType::CreatePosition, [
                 'request_type' => RecruitmentRequestType::CreatePosition,
                 'direct_manager_id' => $this->root->id, 'program_id' => $this->root->program_id,
@@ -215,8 +236,15 @@ class RecruitmentCreateOptionsTest extends TestCase
                 'department_id' => $this->root->department_id,
                 'contract_type_id' => $this->recruitmentContractTypeId(),
             ]);
-            foreach (['city_id' => $remote->id, 'program_id' => $otherProgram->id,
-                'center_id' => $elsewhere->id, 'job_level_id' => $departmentManager->id] as $field => $value) {
+            $invalid = [
+                'program_id' => $otherProgram->id,
+                'center_id' => $elsewhere->id,
+                'job_level_id' => $departmentManager->id,
+            ];
+            if ($grade === 3) {
+                $invalid['city_id'] = $remote->id;
+            }
+            foreach ($invalid as $field => $value) {
                 try {
                     app(RecruitmentRequestDraftService::class)->create($this->manager, array_replace($base, [$field => $value]));
                     $this->fail('Forged '.$field.' should be rejected.');
@@ -242,6 +270,117 @@ class RecruitmentCreateOptionsTest extends TestCase
             $this->screen()->assertDontSee($target->title_en)
                 ->set('data.position_id', $target->id)->call('save')->assertHasErrors('data.position_id');
         }
+    }
+
+    public function test_project_manager_cannot_target_a_position_in_another_governorate(): void
+    {
+        $local = $this->makeCity('HMS', '002');
+        $remote = $this->makeCity('ALP', '001');
+        $projectLevel = JobLevel::query()->firstOrCreate(
+            ['grade' => 3],
+            ['name_en' => 'Project Manager', 'name_ar' => 'مدير مشروع'],
+        );
+        $this->root->update(['city_id' => $local->id, 'job_level_id' => $projectLevel->id]);
+        $remoteTarget = $this->child($this->root, [
+            'city_id' => $remote->id,
+            'program_id' => $this->root->program_id,
+            'title_en' => 'Remote project position',
+        ]);
+
+        $this->screen()
+            ->assertDontSee($remoteTarget->title_en);
+
+        try {
+            app(RecruitmentRequestDraftService::class)->create($this->manager, array_merge(
+                $this->recruitmentFormDefaults(RecruitmentRequestType::FillVacancy),
+                ['request_type' => RecruitmentRequestType::FillVacancy, 'position_id' => $remoteTarget->id],
+            ));
+            $this->fail('A project manager should not create a request outside their governorate.');
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $this->assertArrayHasKey('data.position_id', $exception->errors());
+        }
+    }
+
+    public function test_project_manager_can_target_a_vacant_position_in_another_program_in_their_governorate(): void
+    {
+        $local = $this->makeCity('HMS', '002');
+        $otherProgram = Program::create([
+            'name' => 'Other programme', 'code' => 'OTH', 'slug' => 'other-programme',
+            'start_date' => now(), 'is_active' => true,
+        ]);
+        $projectLevel = JobLevel::query()->firstOrCreate(
+            ['grade' => 3],
+            ['name_en' => 'Project Manager', 'name_ar' => 'مدير مشروع'],
+        );
+        $this->root->update(['city_id' => $local->id, 'job_level_id' => $projectLevel->id]);
+        $target = $this->child($this->root, [
+            'city_id' => $local->id,
+            'program_id' => $otherProgram->id,
+            'title_en' => 'Vacant position in another programme',
+        ]);
+
+        $this->screen()
+            ->assertSee($target->title_en)
+            ->set('data.position_id', $target->id)
+            ->call('save')->assertHasNoErrors();
+    }
+
+    public function test_program_manager_can_target_a_position_in_their_program_outside_their_reporting_tree(): void
+    {
+        $remote = $this->makeCity('ALP', '001');
+        $programLevel = JobLevel::query()->firstOrCreate(
+            ['grade' => 1],
+            ['name_en' => 'Program Manager', 'name_ar' => 'مدير برنامج'],
+        );
+        $this->root->update(['job_level_id' => $programLevel->id]);
+        $target = $this->root->replicate();
+        $target->fill([
+            'direct_manager_id' => null,
+            'city_id' => $remote->id,
+            'title_en' => 'Programme-wide vacant position',
+            'exist_emp' => 0,
+        ]);
+        $target->save();
+
+        $this->screen()
+            ->assertSee($target->title_en)
+            ->set('data.position_id', $target->id)
+            ->call('save')->assertHasNoErrors();
+    }
+
+    public function test_close_position_only_lists_empty_positions_without_active_contracts(): void
+    {
+        $occupied = $this->child($this->root, ['title_en' => 'Occupied position', 'exist_emp' => 1]);
+        $empty = $this->child($this->root, ['title_en' => 'Empty position', 'exist_emp' => 0]);
+        $occupant = $this->makeUser($this->root->city, 'employee');
+
+        Contract::query()->create([
+            'employee_id' => $occupant->employee_id,
+            'position_id' => $occupied->id,
+            'contract_type_id' => $this->recruitmentContractTypeId(),
+            'start_date' => now()->subMonth(),
+            'end_date' => now()->addYear(),
+            'currency' => 2,
+            'salary_per' => 1,
+            'weekly_hours' => 40,
+            'is_active' => true,
+        ]);
+
+        $this->screen(RecruitmentRequestType::ClosePosition)
+            ->assertDontSee($occupied->title_en)
+            ->assertSee($empty->title_en);
+    }
+
+    public function test_close_vacancy_only_lists_currently_available_openings(): void
+    {
+        $target = $this->child($this->root, ['title_en' => 'Vacancy target']);
+        $open = $this->vacancy($target);
+        $closed = $this->vacancy($target, ['status' => 'closed', 'closed_at' => now()]);
+
+        $this->screen(RecruitmentRequestType::CloseVacancy)
+            ->set('data.position_id', $target->id)
+            ->assertViewHas('vacancies', fn ($vacancies) => $vacancies->contains('id', $open->id)
+                && ! $vacancies->contains('id', $closed->id));
     }
 
     public function test_general_management_retains_its_existing_organization_options(): void

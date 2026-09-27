@@ -79,6 +79,36 @@ class HiringCampaignScreensTest extends TestCase
             ->assertSet('vacancyId', $vacancy->id);
     }
 
+    public function test_request_context_limits_campaign_creation_to_that_requests_vacancy(): void
+    {
+        [$hr, $vacancy] = $this->seat();
+        $otherRequest = $vacancy->createdFromRequest->replicate();
+        $otherRequest->request_number = 'RR-OTHER-'.uniqid();
+        $otherRequest->save();
+        $otherVacancy = Vacancy::query()->create([
+            'position_id' => $vacancy->position_id,
+            'created_from_request_id' => $otherRequest->id,
+            'status' => Vacancy::OPEN,
+            'needed_count' => 1,
+            'filled_count' => 0,
+            'open_at' => now()->subDay(),
+        ]);
+
+        Livewire::actingAs($hr)
+            ->test(Create::class, ['vacancyId' => $vacancy->id])
+            ->assertSet('vacancyId', $vacancy->id)
+            ->assertViewHas('vacancies', function ($vacancies) use ($vacancy, $otherVacancy): bool {
+                return $vacancies->contains('id', $vacancy->id)
+                    && ! $vacancies->contains('id', $otherVacancy->id)
+                    && $vacancies->count() === 1;
+            })
+            ->set('vacancyId', $otherVacancy->id)
+            ->call('save')
+            ->assertHasErrors(['vacancyId']);
+
+        $this->assertDatabaseMissing('hiring_campaigns', ['vacancy_id' => $otherVacancy->id]);
+    }
+
     /** A window that makes no sense is refused on the way in, not stored. */
     public function test_the_create_screen_reports_a_window_that_ends_before_it_starts(): void
     {

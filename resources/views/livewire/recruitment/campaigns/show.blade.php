@@ -94,23 +94,30 @@
                     <form wire:submit="saveDetails" class="space-y-5">
                         <fieldset>
                             <legend class="text-body font-semibold text-neutral-800">{{ __('recruitment-campaign.link_mode') }}</legend>
-                            @unless ($canChangeAudience)
-                                <p class="mt-1 text-small text-secondary-medium">{{ __('recruitment-campaign.page.audience_locked_hint') }}</p>
-                            @endunless
-                            <div class="mt-3 grid gap-2 sm:grid-cols-3">
-                                @foreach ($linkModes as $mode)
-                                    <label wire:key="details-mode-{{ $mode }}"
-                                        class="flex cursor-pointer items-start gap-3 rounded-control border p-3 transition has-[:checked]:border-primary has-[:checked]:bg-neutral-50 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 border-neutral-300">
-                                        <input type="radio" value="{{ $mode }}" wire:model="linkMode" @disabled(! $canChangeAudience)
-                                            class="mt-1 border-neutral-400 text-primary focus:ring-primary">
-                                        <span>
-                                            <span class="block text-body font-semibold text-neutral-800">{{ __('recruitment-campaign.modes.'.$mode) }}</span>
-                                            <span class="block text-small text-secondary-medium">{{ __('recruitment-campaign.mode_hints.'.$mode) }}</span>
-                                        </span>
-                                    </label>
-                                @endforeach
-                            </div>
-                            <x-error-span>{{ $errors->first('linkMode') }}</x-error-span>
+                            @if ($canChangeAudience)
+                                <div class="mt-3 grid gap-2 sm:grid-cols-3">
+                                    @foreach ($linkModes as $mode)
+                                        <label wire:key="details-mode-{{ $mode }}"
+                                            class="flex cursor-pointer items-start gap-3 rounded-control border p-3 transition has-[:checked]:border-primary has-[:checked]:bg-neutral-50 border-neutral-300">
+                                            <input type="radio" value="{{ $mode }}" wire:model="linkMode"
+                                                class="mt-1 border-neutral-400 text-primary focus:ring-primary">
+                                            <span>
+                                                <span class="block text-body font-semibold text-neutral-800">{{ __('recruitment-campaign.modes.'.$mode) }}</span>
+                                                <span class="block text-small text-secondary-medium">{{ __('recruitment-campaign.mode_hints.'.$mode) }}</span>
+                                            </span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <x-error-span>{{ $errors->first('linkMode') }}</x-error-span>
+                            @else
+                                {{-- Locked after publish: a read-only value, not dead radios that
+                                     invite a click and do nothing. --}}
+                                <div class="mt-2 rounded-control border border-neutral-200 bg-neutral-50 p-3">
+                                    <span class="block text-body font-semibold text-neutral-800">{{ __('recruitment-campaign.modes.'.$campaign->link_mode) }}</span>
+                                    <span class="block text-small text-secondary-medium">{{ __('recruitment-campaign.mode_hints.'.$campaign->link_mode) }}</span>
+                                </div>
+                                <p class="mt-2 text-small text-secondary-medium">{{ __('recruitment-campaign.page.audience_locked_hint') }}</p>
+                            @endif
                         </fieldset>
 
                         <div class="grid gap-4 sm:grid-cols-2">

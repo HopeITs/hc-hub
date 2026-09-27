@@ -126,6 +126,21 @@ class RecruitmentSubmissionTest extends TestCase
         $this->assertSame(5, (int) $detail->current_headcount);
     }
 
+    public function test_the_submit_button_disappears_after_a_draft_is_submitted(): void
+    {
+        $request = $this->draft($this->complete());
+
+        \Livewire\Livewire::actingAs($this->manager)
+            ->test(\App\Livewire\Recruitment\Requests\Details::class, ['requestId' => $request->id])
+            ->assertSee('wire:click="submit"', false)
+            ->call('submit')
+            ->assertDontSee('wire:click="submit"', false)
+            ->call('submit')
+            ->assertForbidden();
+
+        $this->assertNotSame(Status::Draft, (int) $request->fresh()->status);
+    }
+
     /**
      * Idempotent without a stored key: the row is locked and the status read
      * again, so a second click returns the same request rather than a version 2.

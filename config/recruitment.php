@@ -22,9 +22,22 @@ return [
 
     'requester_job_level_grades' => [1, 3, 5],
 
-    // D1: Project is Program; these are job-level grades, not role names.
+    // These are job-level grades, not role names. The active "manager" role
+    // is shared by all three management levels.
+    // CreatePosition keeps programme managers and project managers within the
+    // programme of the position they are proposing.
     'program_scoped_creation_grades' => [1, 3],
+    // Existing-position requests are broader for programme managers: their
+    // programme can span governorates, so direct-report scope is not enough.
+    'program_wide_target_grades' => [1],
+    // Project managers stay within their own governorate, but may target any
+    // programme represented there.
+    'governorate_scoped_creation_grades' => [3],
     'department_manager_grade' => 5,
+
+    // General management may raise a request anywhere in the organization.
+    // HR remains on the separate direct-opening path.
+    'organization_wide_creation_roles' => ['general-manager'],
 
     /*
     |--------------------------------------------------------------------------
@@ -43,6 +56,9 @@ return [
         'map' => [
             'ALP' => 'HR-SYR',
             'TAR' => 'HR-LAT',
+            // Homs Rural is reviewed by the Homs governorate HR: it is the
+            // countryside of that governorate, not a governorate of its own.
+            'RHO' => 'HR-HMS',
         ],
 
         'default' => 'HR-SYR',
@@ -53,16 +69,18 @@ return [
     | Permissions that belong to a person, never to a role
     |--------------------------------------------------------------------------
     |
-    | Both of these answer "is this specific human the one?", so attaching
-    | either to a role would be a security hole rather than a convenience:
-    | every holder of that role would become the financial approver, or would
-    | be able to skip manager approval entirely.
+    | The fallback finance grant and the top-level grant answer "is this
+    | specific human the one?", so attaching either to a role would be a
+    | security hole rather than a convenience. When position data is present,
+    | the active Senior Financial Manager is the source of truth for finance.
     |
-    | They are resolved from direct grants only (model_has_permissions), so a
-    | role that somehow carries one of them still grants nobody anything.
-    | Access Management is where they are handed out.
+    | The fallback grant is resolved from direct grants only
+    | (model_has_permissions), so a role that somehow carries it still grants
+    | nobody anything. Access Management is where it is handed out.
     |
     */
+
+    'finance_approver_position_title' => 'Senior Financial Manager',
 
     'user_level_permissions' => [
         // The organization's single financial approver — today the holder of

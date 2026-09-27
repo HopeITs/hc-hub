@@ -221,6 +221,7 @@ class RecruitmentApprovalService
             RecruitmentWorkflowInstance::query()->find($step->workflow_instance_id) ?? $step->workflowInstance,
             $decision,
             $comment,
+            $actor,
         );
 
         return $applied;

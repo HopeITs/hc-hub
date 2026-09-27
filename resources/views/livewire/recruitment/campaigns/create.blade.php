@@ -17,7 +17,6 @@
             <h2 id="create-vacancy-heading" class="text-subtitle font-bold text-neutral-800">
                 {{ __('recruitment-campaign.vacancy') }} <span class="text-primary" aria-hidden="true">*</span>
             </h2>
-
             @if ($vacancies->isEmpty())
                 <div class="mt-4 flex items-start gap-3 rounded-control border border-neutral-200 bg-neutral-50 p-4 text-body text-neutral-700">
                     <svg class="mt-0.5 size-5 shrink-0 text-secondary-medium" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v5m0 3h.01"/></svg>

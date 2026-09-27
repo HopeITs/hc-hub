@@ -6,6 +6,9 @@ use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestStatus as Status;
 use App\Enums\RecruitmentRequestType as Type;
 use App\Livewire\Recruitment\Requests\Details;
+use App\Models\RecruitmentRequest;
+use App\Models\RecruitmentWorkflowInstanceStep;
+use App\Services\RecruitmentApprovalService;
 use App\Services\RecruitmentRequestChangeClassifier as Classifier;
 use App\Services\RecruitmentRequestDraftService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -95,23 +98,28 @@ class RecruitmentTimelineTest extends TestCase
      * The role is stored on the row, not derived when the row is read.
      *
      * Deriving it would let a change of role today rewrite who decided what
-     * last month, which is the whole reason the column exists.
+     * last month, which is the whole reason the column exists. So the decision
+     * is made for real, and then the stored role is overwritten with one the
+     * actor has never held: if the screen still shows it, the screen is reading
+     * the record rather than looking the person up.
      */
     public function test_the_timeline_shows_the_role_recorded_on_the_event(): void
     {
-        ['request' => $request, 'requester' => $requester] = $this->workflow();
+        ['request' => $request, 'requester' => $requester, 'manager' => $manager] = $this->workflow();
 
-        $request->events()->create([
-            'event_type' => RecruitmentEventType::StepApproved,
-            'from_status' => Status::UnderReview,
-            'to_status' => Status::UnderReview,
-            'actor_user_id' => $requester->getKey(),
-            'actor_role' => 'program-manager',
-            'comment' => 'Agreed.',
-        ]);
+        app(RecruitmentApprovalService::class)->approve(
+            $manager, $this->currentStep($request), 1, 'Agreed.',
+        );
+
+        $event = $request->events()
+            ->where('event_type', RecruitmentEventType::StepApproved)
+            ->latest('id')->firstOrFail();
+
+        $this->assertNotNull($event->actor_role);
+        $event->forceFill(['actor_role' => 'program-manager'])->save();
 
         // The role on the user is something else entirely.
-        $this->assertNotSame('program-manager', $requester->myRole());
+        $this->assertNotSame('program-manager', $manager->myRole());
 
         Livewire::actingAs($requester)
             ->test(Details::class, ['requestId' => $request->getKey()])
@@ -119,24 +127,26 @@ class RecruitmentTimelineTest extends TestCase
             ->assertSee('Agreed.');
     }
 
-    /** The status move is shown, so a reader sees what the event did. */
+    /**
+     * Where a version ended is shown, so a reader sees what the decision did.
+     *
+     * The track tells the story one version at a time (D58), so a version sent
+     * back says so at its end, with who asked, why, and which fields they
+     * opened — that last part being the reason the next version exists.
+     */
     public function test_the_timeline_shows_the_status_the_event_moved_the_request_to(): void
     {
-        ['request' => $request, 'requester' => $requester] = $this->workflow();
+        ['request' => $request, 'requester' => $requester, 'manager' => $manager] = $this->workflow();
 
-        $request->events()->create([
-            'event_type' => RecruitmentEventType::ChangesRequested,
-            'from_status' => Status::UnderReview,
-            'to_status' => Status::ChangesRequested,
-            'actor_user_id' => $requester->getKey(),
-            'actor_role' => 'manager',
-        ]);
-
-        $changesRequested = Status::getLocalizedName(Status::ChangesRequested)['value'];
+        app(RecruitmentApprovalService::class)->requestChanges(
+            $manager, $this->currentStep($request), 1, 'The salary needs revisiting.', ['salary_amount'],
+        );
 
         Livewire::actingAs($requester)
             ->test(Details::class, ['requestId' => $request->getKey()])
-            ->assertSee($changesRequested);
+            ->assertSee(__('recruitment.track.changes_requested'))
+            ->assertSee('The salary needs revisiting.')
+            ->assertSee(__('recruitment.fields.salary_amount'));
     }
 
     /** The change list reaches the screen with the field named, not its key. */
@@ -158,6 +168,16 @@ class RecruitmentTimelineTest extends TestCase
             ->test(Details::class, ['requestId' => $request->getKey()])
             ->assertSee(__('recruitment.fields.salary_amount'))
             ->assertSee('250');
+    }
+
+    /** The step the workflow is waiting on right now. */
+    private function currentStep(RecruitmentRequest $request): RecruitmentWorkflowInstanceStep
+    {
+        $instance = $request->workflowInstances()->latest('id')->firstOrFail();
+
+        return $instance->steps()
+            ->whereHas('workflowStep', fn ($query) => $query->where('step_order', $instance->current_step_order))
+            ->firstOrFail();
     }
 
     /**

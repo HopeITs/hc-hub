@@ -19,14 +19,16 @@ use App\Models\Vacancy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class RecruitmentRequestDraftService
 {
-    public function __construct(private readonly RecruitmentScopeResolver $scopes) {}
+    public function __construct(
+        private readonly RecruitmentScopeResolver $scopes,
+        private readonly RecruitmentRequestSubmissionService $submissions,
+    ) {}
 
     /** Recheck mutable organizational assignments and vacancy availability at submit time. */
     public function assertCurrentScope(User $actor, RecruitmentRequest $request): void
@@ -51,8 +53,13 @@ class RecruitmentRequestDraftService
             $isNewPosition = $data['request_type'] === Type::CreatePosition;
             [$target, $cityId] = $this->resolveTarget($actor, $data);
 
+            $numbers = app(RecruitmentRequestNumber::class);
+
             $request = RecruitmentRequest::query()->create([
-                'request_number' => 'RR-'.Str::ulid(),
+                'request_number' => $numbers->next(
+                    $cityId,
+                    $numbers->programIdFor($data, $isNewPosition ? null : $target->id),
+                ),
                 'requester_user_id' => $actor->id,
                 'request_type' => $data['request_type'],
                 'mode' => RecruitmentRequestMode::Normal,
@@ -89,11 +96,19 @@ class RecruitmentRequestDraftService
         return DB::transaction(function () use ($actor, $request, $data) {
             $fresh = RecruitmentRequest::query()->whereKey($request->getKey())->lockForUpdate()->firstOrFail();
 
-            if (! in_array((int) $fresh->status, [RecruitmentRequestStatus::Draft, RecruitmentRequestStatus::ChangesRequested], true)) {
+            $isDirectOpen = (int) $fresh->mode === RecruitmentRequestMode::DirectHr;
+            $editableDirectOpen = $isDirectOpen
+                && (int) $fresh->status === RecruitmentRequestStatus::UnderReview
+                && app(RecruitmentEditableFields::class)->anyEditable($fresh);
+
+            if (! in_array((int) $fresh->status, [RecruitmentRequestStatus::Draft, RecruitmentRequestStatus::ChangesRequested], true)
+                && ! $editableDirectOpen) {
                 throw ValidationException::withMessages(['request' => __('recruitment.not_editable')]);
             }
 
-            if ((int) $fresh->requester_user_id !== (int) $actor->getKey()) {
+            // Normal requests are owned by the requester; direct openings are
+            // owned by whoever HR opened them, already checked by the policy.
+            if (! $isDirectOpen && (int) $fresh->requester_user_id !== (int) $actor->getKey()) {
                 throw ValidationException::withMessages(['request' => __('recruitment.not_your_request')]);
             }
 
@@ -103,7 +118,8 @@ class RecruitmentRequestDraftService
                 throw ValidationException::withMessages(['data.request_type' => __('recruitment.type_is_fixed')]);
             }
 
-            [$target, $cityId] = $this->resolveTarget($actor, $data);
+            $mode = $isDirectOpen ? RecruitmentRequestMode::DirectHr : null;
+            [$target, $cityId] = $this->resolveTarget($actor, $data, $mode);
 
             // Read before the write, so the event can say what moved. RV-1b:
             // "the request was edited" without naming the fields is explicitly
@@ -119,6 +135,12 @@ class RecruitmentRequestDraftService
                 'target_vacancy_id' => $data['vacancy_id'] ?? null,
                 'draft_payload_json' => $data,
             ])->save();
+
+            // A direct opening's frozen version must stay current: the
+            // approver sees the version, not the draft payload.
+            if ($editableDirectOpen) {
+                $this->submissions->freezeVersion($fresh, $actor, $data);
+            }
 
             $changes = app(RecruitmentRequestChangeClassifier::class)->payloadChanges($before, $data);
 
@@ -157,8 +179,11 @@ class RecruitmentRequestDraftService
                 'center_id' => [$this->centerRule($input), 'integer', 'exists:centers,id'],
                 'department_id' => ['required', 'integer', 'exists:departments,id'],
                 'job_level_id' => ['required', 'integer', 'exists:job_levels,id'],
-                'title_en' => ['required', 'string', 'max:255'],
-                'title_ar' => ['required', 'string', 'max:255'],
+                // One alphabet each. The Unicode ranges are named rather
+                // than \p{Arabic}, which also matches Persian and Urdu letters
+                // nobody would be typing here.
+                'title_en' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z\s]+$/u'],
+                'title_ar' => ['required', 'string', 'max:255', 'regex:/^[\x{0621}-\x{064A}\s]+$/u'],
                 'qualifications' => ['required', 'string'],
                 'responsibilities' => ['required', 'string'],
                 'max_emp' => ['required', 'integer', 'min:1'],
@@ -177,9 +202,11 @@ class RecruitmentRequestDraftService
                 'priority' => ['required', 'string', Rule::in($form['priorities'])],
                 'volunteer_type' => ['required', 'string', Rule::in($form['volunteer_types'])],
                 'weekly_hours' => ['required', 'integer', 'min:1', 'max:168'],
-                'volunteer_period_start_date' => ['required', 'date_format:Y-m-d'],
+                // Strictly future: a post needed by yesterday is a post
+                // nobody can still be recruited for.
+                'needed_by_date' => ['required', 'date_format:Y-m-d', 'after:today'],
+                'volunteer_period_start_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:data.needed_by_date'],
                 'volunteer_period_end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:data.volunteer_period_start_date'],
-                'needed_by_date' => ['required', 'date_format:Y-m-d'],
                 'salary_amount' => ['required', 'integer', 'min:0'],
                 'currency' => ['required', 'integer', Rule::in([Currency::SYP, Currency::USD, Currency::EUR])],
                 'salary_per' => ['required', 'integer', Rule::in([SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session])],
@@ -224,14 +251,20 @@ class RecruitmentRequestDraftService
      *
      * @return array{0: Position, 1: int}
      */
-    private function resolveTarget(User $actor, array &$data): array
+    private function resolveTarget(User $actor, array &$data, ?int $mode = null): array
     {
         $isNewPosition = $data['request_type'] === Type::CreatePosition;
         $targetId = $isNewPosition ? $data['direct_manager_id'] : $data['position_id'];
 
-        $targets = $isNewPosition
-            ? $this->scopes->scopeProposedManagers(Position::query(), $actor)
-            : $this->scopes->scopeManageablePositions(Position::query(), $actor);
+        // A direct opening is scoped to the governorate, not the requester's
+        // management subtree — HR does not manage the posts they recruit for.
+        if ($mode === RecruitmentRequestMode::DirectHr) {
+            $targets = $this->scopes->scopeGovernoratePositions(Position::query(), $actor);
+        } else {
+            $targets = $isNewPosition
+                ? $this->scopes->scopeProposedManagers(Position::query(), $actor)
+                : $this->scopes->scopeRequestablePositions(Position::query(), $actor);
+        }
         $target = $targets
             ->whereKey($targetId)->lockForUpdate()->first();
 
@@ -241,10 +274,14 @@ class RecruitmentRequestDraftService
             ]);
         }
 
-        Gate::forUser($actor)->authorize(
-            $isNewPosition ? 'createUnderPosition' : 'createForPosition',
-            [RecruitmentRequest::class, $target],
-        );
+        // Direct openings are authorized by governorate scope above; the
+        // per-position gate checks the management tree which HR is not in.
+        if ($mode !== RecruitmentRequestMode::DirectHr) {
+            Gate::forUser($actor)->authorize(
+                $isNewPosition ? 'createUnderPosition' : 'createForPosition',
+                [RecruitmentRequest::class, $target],
+            );
+        }
 
         $cityId = $isNewPosition ? $data['city_id'] : ($target->city_id ?? $target->center?->city_id);
 
@@ -261,6 +298,20 @@ class RecruitmentRequestDraftService
                     throw ValidationException::withMessages(['data.center_id' => __('recruitment.center_city_mismatch')]);
                 }
             }
+        }
+
+        if ($data['request_type'] === Type::DecreaseHeadcount
+            && (int) $target->max_emp - (int) ($data['reduce_by'] ?? 0) < (int) $target->exist_emp) {
+            throw ValidationException::withMessages([
+                'data.reduce_by' => __('recruitment.below_existing_employees'),
+            ]);
+        }
+
+        if ($data['request_type'] === Type::ClosePosition
+            && ((int) $target->exist_emp > 0 || $target->activeContracts()->exists())) {
+            throw ValidationException::withMessages([
+                'data.position_id' => __('recruitment.position_has_active_contracts'),
+            ]);
         }
 
         if ($data['request_type'] === Type::FillVacancy) {
@@ -287,7 +338,9 @@ class RecruitmentRequestDraftService
             }
         } elseif (! empty($data['vacancy_id'])) {
             // Vacancy visibility is still D30/D42, independent of D49's position selector.
-            $vacancy = Vacancy::query()->visibleTo($actor)->where('position_id', $target->id)
+            $vacancy = Vacancy::query()->visibleTo($actor)
+                ->when($data['request_type'] === Type::CloseVacancy, fn ($query) => $query->available())
+                ->where('position_id', $target->id)
                 ->whereKey($data['vacancy_id'])->lockForUpdate()->first();
 
             if (! $vacancy) {

@@ -71,7 +71,7 @@ class RecruitmentScopeResolver
     public function isOrganizationWide(User $user): bool
     {
         return $user->activeRoleIs(...config('recruitment.organization_wide_roles', []))
-            || $user->hasActivePermission(config('recruitment.user_level_permissions.finance_approver'));
+            || $this->isFinanceApprover($user);
     }
 
     /**
@@ -434,6 +434,10 @@ class RecruitmentScopeResolver
             return [];
         }
 
+        if ($this->hasOrganizationWideCreationScope($user)) {
+            return Position::query()->visible()->pluck('id')->map(fn ($id): int => (int) $id)->all();
+        }
+
         $rootId = (int) $this->position($user)->getKey();
         $seen = [$rootId => true];
         $frontier = [$rootId];
@@ -462,16 +466,113 @@ class RecruitmentScopeResolver
         return $query->whereIn($query->qualifyColumn('id'), $this->manageablePositionIds($user, $includeSelf));
     }
 
+    /**
+     * Positions this requester may actually target from the normal request
+     * form.
+     *
+     * Project managers are limited to their reporting tree and governorate.
+     * Program managers use their programme as the boundary for existing
+     * positions, because a programme can span governorates. General management
+     * remains the explicit organisation-wide exception.
+     */
+    public function scopeRequestablePositions(Builder $query, User $user, bool $includeSelf = false): Builder
+    {
+        $position = $this->position($user);
+
+        if ($position === null) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        if ($this->hasProgramTargetScope($user)) {
+            $query->visible()->where('program_id', $position->program_id ?? 0);
+        } else {
+            $query = $this->scopeManageablePositions($query, $user, $includeSelf)->visible();
+        }
+
+        if (! $includeSelf) {
+            $query->where($query->qualifyColumn('id'), '!=', $position->getKey());
+        }
+
+        if ($this->hasGovernorateCreationScope($user)) {
+            $cityId = $this->positionCityId($user);
+
+            if ($cityId === null || City::isNational($cityId)) {
+                return $query;
+            }
+
+            $query->inCity($cityId);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Every active position in the governorate this user recruits for — the
+     * whole organisation for HR Syria.
+     *
+     * This is the direct-opening boundary, a different question from the
+     * management subtree a manager's own request is scoped by: HR does not
+     * manage the posts they recruit for. A non-organisation user with no
+     * governorate reaches nothing, which fails closed.
+     *
+     * @param  Builder<Position>  $query
+     * @return Builder<Position>
+     */
+    public function scopeGovernoratePositions(Builder $query, User $user): Builder
+    {
+        $query->where($query->qualifyColumn('is_active'), true);
+
+        if ($this->scopeType($user) === RecruitmentScopeType::Organization) {
+            return $query;
+        }
+
+        $cityIds = $this->governorateCityIds($user);
+
+        if ($cityIds === []) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->where(function (Builder $inner) use ($cityIds): void {
+            foreach ($cityIds as $cityId) {
+                $inner->orWhere(fn (Builder $city) => $city->inCity((int) $cityId));
+            }
+        });
+    }
+
     public function scopeProposedManagers(Builder $query, User $user): Builder
     {
-        return $this->scopeManageablePositions($query, $user, true)
-            ->visible()
-            ->when($this->hasProgramCreationScope($user), fn (Builder $positions) => $positions
-                ->where('program_id', $this->position($user)?->program_id ?? 0))
+        // A new position still needs an administrative parent in the
+        // requester's tree. Programme breadth applies to existing targets;
+        // it must not let a requester attach a new branch to an unrelated
+        // tree.
+        $query = $this->scopeManageablePositions($query, $user, true)->visible();
+        $position = $this->position($user);
+
+        if ($position === null) {
+            return $query->whereRaw('0 = 1');
+        }
+
+        if ($this->hasProgramCreationScope($user)) {
+            $query->where('program_id', $position->program_id ?? 0);
+        }
+
+        if ($this->hasGovernorateCreationScope($user)) {
+            $cityId = $this->positionCityId($user);
+
+            if ($cityId === null || City::isNational($cityId)) {
+                return $query;
+            }
+
+            $query->inCity($cityId);
+        }
+
+        $query = $query
             ->where(fn (Builder $positions) => $positions
                 ->whereHas('jobLevel', fn (Builder $levels) => $levels
                     ->whereIn('grade', config('recruitment.requester_job_level_grades')))
                 ->orWhereHas('directTeam', fn (Builder $team) => $team->where('is_active', true)));
+
+        return $query;
     }
 
     public function hasProgramCreationScope(User $user): bool
@@ -479,6 +580,20 @@ class RecruitmentScopeResolver
         return ! $this->isOrganizationWide($user)
             && in_array((int) $this->position($user)?->jobLevel?->grade,
                 config('recruitment.program_scoped_creation_grades'), true);
+    }
+
+    public function hasGovernorateCreationScope(User $user): bool
+    {
+        return ! $this->isOrganizationWide($user)
+            && in_array((int) $this->position($user)?->jobLevel?->grade,
+                config('recruitment.governorate_scoped_creation_grades'), true);
+    }
+
+    public function hasProgramTargetScope(User $user): bool
+    {
+        return ! $this->isOrganizationWide($user)
+            && in_array((int) $this->position($user)?->jobLevel?->grade,
+                config('recruitment.program_wide_target_grades'), true);
     }
 
     public function scopeCreatablePrograms(Builder $query, User $user): Builder
@@ -491,17 +606,16 @@ class RecruitmentScopeResolver
     public function scopeCreatableCities(Builder $query, User $user): Builder
     {
         $query->where('is_active', true);
-        if (! $this->hasProgramCreationScope($user)) {
-            return $query;
+        if ($this->hasGovernorateCreationScope($user)) {
+            $cityId = $this->positionCityId($user);
+
+            return $cityId === null ? $query->whereRaw('0 = 1') : $query->whereKey($cityId);
         }
 
-        $positions = Position::query()->visible()
-            ->where('program_id', $this->position($user)?->program_id ?? 0);
-
-        return $query->where(fn (Builder $cities) => $cities
-            ->whereIn('id', (clone $positions)->select('city_id'))
-            ->orWhereIn('id', \App\Models\Center::query()->where('is_active', true)
-                ->whereIn('id', (clone $positions)->select('center_id'))->select('city_id')));
+        // Program managers may establish a position in any active governorate
+        // for their programme, including one where the programme has no seat
+        // yet. The selected programme remains locked by scopeCreatablePrograms.
+        return $query;
     }
 
     /**
@@ -585,14 +699,50 @@ class RecruitmentScopeResolver
      * Users who may decide the financial step.
      *
      * The financial approver is a person, not a role: today whoever holds the
-     * Senior Financial Manager position. Holding this permission *is* the
-     * authorization for that step, which is why it is read from direct grants
-     * only — a role carrying it would turn all its holders into approvers.
+     * Senior Financial Manager position. A direct user grant remains the
+     * fallback for installations whose position data is not seeded yet; a role
+     * carrying it never turns all its holders into approvers.
      *
      * @return array<int, int>
      */
+    /**
+     * Is this person the financial approver themselves?
+     *
+     * The organisation has one, and when they raise a request there is nobody
+     * else to ask. Sending it to their own step would either stall until they
+     * approved their own request or force a self-approval the module refuses
+     * on principle, so the step is skipped and recorded as skipped.
+     */
+    public function isFinanceApprover(User $user): bool
+    {
+        return in_array((int) $user->getKey(), array_map('intval', $this->financeApproverUserIds()), true);
+    }
+
     public function financeApproverUserIds(): array
     {
+        $positionTitle = (string) config('recruitment.finance_approver_position_title', '');
+
+        if ($positionTitle !== '') {
+            $positionIds = Position::query()
+                ->where('is_active', true)
+                ->where('title_en', $positionTitle)
+                ->pluck('id');
+
+            $positionHolders = User::query()
+                ->whereHas('profile', fn (Builder $profile): Builder => $profile->where('is_active', true))
+                ->whereIn('employee_id', Contract::query()
+                    ->activeNow()
+                    ->whereIn('position_id', $positionIds)
+                    ->select('employee_id'))
+                ->pluck('id')
+                ->map(fn ($id): int => (int) $id)
+                ->all();
+
+            if ($positionHolders !== []) {
+                return array_values(array_unique($positionHolders));
+            }
+        }
+
         return $this->userIdsWithDirectPermission(
             config('recruitment.user_level_permissions.finance_approver'),
         );
@@ -689,6 +839,24 @@ class RecruitmentScopeResolver
 
             default => false,
         };
+    }
+
+    private function hasOrganizationWideCreationScope(User $user): bool
+    {
+        return $user->activeRoleIs(...config('recruitment.organization_wide_creation_roles', []));
+    }
+
+    private function positionCityId(User $user): ?int
+    {
+        $position = $this->position($user);
+
+        if ($position === null) {
+            return null;
+        }
+
+        return $position->city_id !== null
+            ? (int) $position->city_id
+            : ($position->center?->city_id !== null ? (int) $position->center->city_id : null);
     }
 
     // --------------------------------------------

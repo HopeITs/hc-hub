@@ -32,7 +32,6 @@
                         <svg class="size-4 rtl:-scale-x-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5h5v5m0-5-9 9M19 14v5H5V5h5"/></svg>
                     </a>
                 </div>
-                <p class="mt-2 text-small text-secondary-medium">{{ __('recruitment.public_link.session_notice') }}</p>
             @else
                 <p class="mt-2 text-small text-secondary-medium">{{ __('recruitment.public_link.hash_only_notice') }}</p>
             @endif
