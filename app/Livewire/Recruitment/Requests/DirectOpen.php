@@ -136,7 +136,7 @@ class DirectOpen extends Component
         $cityId = $this->targetCityId($positions);
         $confirmationCandidates = [];
         if ($requester !== null) {
-            foreach ($directOpen->confirmableSteps() as $stepKey) {
+            foreach ($directOpen->confirmableSteps($type) as $stepKey) {
                 $confirmationCandidates[$stepKey] = $directOpen->confirmationCandidates($requester, $stepKey, $cityId);
             }
         }
@@ -154,9 +154,12 @@ class DirectOpen extends Component
                 ->orderBy(transColumn('name'))->get(),
             'departments' => Department::query()->orderBy('name')->get(),
             'jobLevels' => JobLevel::query()->orderBy('grade')->get(),
-            'contractTypes' => ContractType::query()->orderBy(transColumn('name'))->get(),
+            'contractTypes' => ContractType::query()
+                ->recruitmentOptions()
+                ->orderBy(transColumn('name'))
+                ->get(),
             'centerRequired' => ! $newPosition || $this->centerIsRequired(),
-            'steps' => app(RecruitmentDirectOpenService::class)->confirmableSteps(),
+            'steps' => $directOpen->confirmableSteps($type),
             'confirmationCandidates' => $confirmationCandidates,
             'decisions' => [ExternalConfirmationDecision::Approved, ExternalConfirmationDecision::NotApplicable],
             'methods' => [
@@ -169,13 +172,13 @@ class DirectOpen extends Component
     /** @return \Illuminate\Support\Collection<int, Vacancy> */
     private function vacanciesFor(int $type)
     {
-        if (! in_array($type, [RecruitmentRequestType::FillVacancy, RecruitmentRequestType::CloseVacancy], true)
+        if ($type !== RecruitmentRequestType::FillVacancy
             || empty($this->data['position_id'])) {
             return collect();
         }
 
         return Vacancy::query()
-            ->when($type === RecruitmentRequestType::FillVacancy, fn ($query) => $query->available())
+            ->available()
             ->where('position_id', $this->data['position_id'])
             ->orderBy('id')
             ->get();

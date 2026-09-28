@@ -34,7 +34,7 @@ final class RecruitmentRequestType extends Enum
             self::DecreaseHeadcount => ['text' => ['en' => 'Reduce approved headcount', 'ar' => 'تخفيض الملاك المعتمد'], 'color' => 'secondary-medium'],
             self::CreatePosition => ['text' => ['en' => 'Create position', 'ar' => 'إنشاء منصب'], 'color' => 'primary'],
             self::ClosePosition => ['text' => ['en' => 'Close position', 'ar' => 'إغلاق منصب'], 'color' => 'secondary-medium'],
-            self::CloseVacancy => ['text' => ['en' => 'Close recruitment opening', 'ar' => 'إغلاق فرصة التوظيف'], 'color' => 'secondary-medium'],
+            self::CloseVacancy => ['text' => ['en' => 'Close vacancy', 'ar' => 'إغلاق شاغر'], 'color' => 'secondary-medium'],
             default => ['text' => ['en' => 'Unknown', 'ar' => 'غير محدد'], 'color' => 'secondary-light'],
         };
 

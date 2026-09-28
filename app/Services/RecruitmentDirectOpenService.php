@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -25,9 +26,9 @@ use Illuminate\Validation\ValidationException;
  * Sometimes the manager, the financial approver and HR have settled a hire in
  * a meeting or over the phone before anybody opened a screen. Making them
  * repeat those decisions as electronic approvals would be theatre; leaving the
- * hire undocumented would be worse. This is the third way: the request is
- * recorded as already decided, and the external manager and finance decisions
- * are written down. HR's own action is recorded by the request itself.
+ * action undocumented would be worse. This is the third way: the request is
+ * recorded as already decided, and its applicable external decisions are
+ * written down. HR's own action is recorded by the request itself.
  *
  * Two rules keep this from becoming a hole in the workflow.
  *
@@ -84,9 +85,8 @@ class RecruitmentDirectOpenService
     {
         Gate::forUser($actor)->authorize('directOpen', RecruitmentRequest::class);
 
-        $this->assertDocumented($documentation);
-
         $data = $this->drafts->validate($payload);
+        $this->assertDocumented($documentation, (int) $data['request_type']);
         $documentation = $this->normaliseDocumentation($actor, $data, $documentation);
 
         $request = DB::transaction(function () use ($actor, $data, $documentation): RecruitmentRequest {
@@ -134,7 +134,12 @@ class RecruitmentDirectOpenService
             // direct opening must not create a snapshot-only version.
             $version = $this->submissions->freezeVersion($request, $actor, $data);
 
-            $this->recordConfirmations($actor, $request, $documentation['confirmations'] ?? []);
+            $this->recordConfirmations(
+                $actor,
+                $request,
+                $documentation['confirmations'] ?? [],
+                (int) $data['request_type'],
+            );
 
             // HR Syria's own opening completes here; a governorate's gets a
             // one-step workflow instance and waits on HR Syria (T19 · T20).
@@ -156,14 +161,18 @@ class RecruitmentDirectOpenService
     /**
      * The generated lines an opener is asked to fill in.
      *
-     * Manager and finance, reflecting the decisions made before HR records the
-     * opening. HR may mark either as not applicable — a closure has no
-     * financial review to confirm — but may not leave one unanswered.
+     * Manager and, for requests that spend money, finance, reflecting the
+     * decisions made before HR records the opening. Closing an empty approved
+     * seat has no finance line because finance is not part of that flow.
      *
      * @return array<int, int> step keys
      */
-    public function confirmableSteps(): array
+    public function confirmableSteps(?int $requestType = null): array
     {
+        if ($requestType === Type::CloseVacancy) {
+            return [WorkflowStepKey::ManagerApproval];
+        }
+
         return self::CONFIRMABLE;
     }
 
@@ -240,6 +249,12 @@ class RecruitmentDirectOpenService
             $positions
                 ->where('exist_emp', 0)
                 ->whereDoesntHave('activeContracts');
+        }
+
+        if ($requestType === Type::CloseVacancy) {
+            $positions
+                ->where('is_active', true)
+                ->whereColumn('exist_emp', '<', 'max_emp');
         }
 
         $cityIds = $this->scopes->governorateCityIds($actor);
@@ -366,7 +381,7 @@ class RecruitmentDirectOpenService
      *
      * @param  array<string, mixed>  $documentation
      */
-    private function assertDocumented(array $documentation): void
+    private function assertDocumented(array $documentation, int $requestType): void
     {
         $errors = [];
 
@@ -384,7 +399,7 @@ class RecruitmentDirectOpenService
 
         $confirmations = $documentation['confirmations'] ?? [];
 
-        foreach (self::CONFIRMABLE as $stepKey) {
+        foreach ($this->confirmableSteps($requestType) as $stepKey) {
             $line = $confirmations[$stepKey] ?? [];
             $decision = (int) ($line['decision'] ?? 0);
 
@@ -419,6 +434,14 @@ class RecruitmentDirectOpenService
 
             if (blank($line['confirmed_at'] ?? null)) {
                 $errors["confirmations.{$stepKey}.confirmed_at"] = __('recruitment.direct_open.date_required');
+            } elseif (Validator::make(
+                ['confirmed_at' => $line['confirmed_at']],
+                ['confirmed_at' => ['date_format:Y-m-d']],
+            )->fails()) {
+                $errors["confirmations.{$stepKey}.confirmed_at"] = __('validation.date_format', [
+                    'attribute' => __('recruitment.direct_open.confirmed_at'),
+                    'format' => 'YYYY-MM-DD',
+                ]);
             }
         }
 
@@ -495,7 +518,7 @@ class RecruitmentDirectOpenService
 
         $errors = [];
 
-        foreach (self::CONFIRMABLE as $stepKey) {
+        foreach ($this->confirmableSteps((int) $data['request_type']) as $stepKey) {
             $line = $documentation['confirmations'][$stepKey] ?? [];
             if ((int) ($line['decision'] ?? 0) !== ExternalConfirmationDecision::Approved
                 || blank($line['confirmer_user_id'] ?? null)) {
@@ -536,9 +559,13 @@ class RecruitmentDirectOpenService
      *
      * @param  array<int, array<string, mixed>>  $confirmations
      */
-    private function recordConfirmations(User $actor, RecruitmentRequest $request, array $confirmations): void
-    {
-        foreach (self::CONFIRMABLE as $stepKey) {
+    private function recordConfirmations(
+        User $actor,
+        RecruitmentRequest $request,
+        array $confirmations,
+        int $requestType,
+    ): void {
+        foreach ($this->confirmableSteps($requestType) as $stepKey) {
             $line = $confirmations[$stepKey] ?? [];
             $decision = (int) ($line['decision'] ?? 0);
             $notApplicable = $decision === ExternalConfirmationDecision::NotApplicable;

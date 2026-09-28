@@ -427,6 +427,7 @@ return [
     'headcount_reduced' => 'خُفّض الملاك.',
     'position_closed' => 'أُغلق المنصب.',
     'vacancy_closed' => 'أُغلق الشاغر.',
+    'no_vacant_position' => 'لم يعد في هذا المنصب مقعد شاغر معتمد يمكن إغلاقه.',
     'awaiting_execution' => 'معتمد — بانتظار التنفيذ',
     'effective_on' => 'يُنفّذ بتاريخ :date',
     'execute_now' => 'نفّذ الآن',

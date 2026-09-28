@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
+use RamonRietdijk\LivewireTables\Enums\SearchScope;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 class RequestTable extends LivewireTable
@@ -42,7 +43,7 @@ class RequestTable extends LivewireTable
 
         return app(RecruitmentRequestListQuery::class)
             ->forUser(auth()->user(), $this->viewFilter)
-            ->with(['requester.profile', 'scopeCity', 'targetPosition']);
+            ->with(['requester.profile', 'scopeCity', 'targetPosition', 'latestVersion.positionDetail']);
     }
 
     protected function link(Model $model): ?string
@@ -87,6 +88,18 @@ class RequestTable extends LivewireTable
                 ->options($this->enumOptions(RecruitmentRequestMode::class, 'mode'))
                 ->displayUsing(fn ($value) => RecruitmentRequestMode::getLocalizedName((int) $value)['value'])
                 ->searchable(),
+
+            SelectColumn::make(
+                __('recruitment.priority'),
+                'latestVersion.positionDetail.priority',
+                'priority',
+            )
+                ->options($this->priorityOptions())
+                ->displayUsing(fn ($value, Model $request): string => $this->priorityLabel(
+                    $this->requestPriority($request),
+                ))
+                ->searchable(fn (Builder $query, mixed $search, SearchScope $scope) => $this
+                    ->applyPrioritySearch($query, $search, $scope)),
 
             SelectColumn::make(__('recruitment.requester'), 'requester_user_id')
                 ->options($this->requesterOptions())
@@ -146,6 +159,66 @@ class RequestTable extends LivewireTable
             ->with('profile')->get()
             ->mapWithKeys(fn (User $user): array => [$user->id => $user->profile?->name ?? $user->name ?? '—'])
             ->all();
+    }
+
+    /** @return array<string, string> */
+    private function priorityOptions(): array
+    {
+        return $this->visible()
+            ->with('latestVersion.positionDetail')
+            ->get()
+            ->map(fn (RecruitmentRequest $request): ?string => $this->requestPriority($request))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->mapWithKeys(fn (string $priority): array => [
+                $priority => $this->priorityLabel($priority),
+            ])
+            ->all();
+    }
+
+    private function requestPriority(Model $request): ?string
+    {
+        return $request->latestVersion?->positionDetail?->priority
+            ?? data_get($request->draft_payload_json, 'priority');
+    }
+
+    private function priorityLabel(?string $priority): string
+    {
+        return $priority === null ? '—' : __('recruitment.priority_'.$priority);
+    }
+
+    private function applyPrioritySearch(
+        Builder $query,
+        mixed $search,
+        SearchScope $scope,
+    ): void {
+        $priorities = collect(config('recruitment.request_form.priorities', []));
+
+        if ($scope === SearchScope::Column) {
+            $priorities = $priorities->filter(
+                fn (string $priority): bool => $priority === (string) $search,
+            );
+        } else {
+            $needle = mb_strtolower((string) $search);
+            $priorities = $priorities->filter(fn (string $priority): bool => str_contains(
+                mb_strtolower($this->priorityLabel($priority)),
+                $needle,
+            ));
+        }
+
+        if ($priorities->isEmpty()) {
+            $query->whereRaw('0 = 1');
+
+            return;
+        }
+
+        $query->where(function (Builder $prioritized) use ($priorities): void {
+            $prioritized
+                ->whereIn('draft_payload_json->priority', $priorities->all())
+                ->orWhereHas('latestVersion.positionDetail', fn (Builder $details): Builder => $details
+                    ->whereIn('priority', $priorities->all()));
+        });
     }
 
     private function requesterCell(Model $request): string

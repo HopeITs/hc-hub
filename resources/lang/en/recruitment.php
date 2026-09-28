@@ -427,6 +427,7 @@ return [
     'headcount_reduced' => 'The establishment was reduced.',
     'position_closed' => 'The position was closed.',
     'vacancy_closed' => 'The vacancy was closed.',
+    'no_vacant_position' => 'This position no longer has an empty approved seat to close.',
     'awaiting_execution' => 'Approved — awaiting execution',
     'effective_on' => 'Takes effect on :date',
     'execute_now' => 'Execute now',

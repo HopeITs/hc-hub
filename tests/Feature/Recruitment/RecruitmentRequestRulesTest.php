@@ -5,6 +5,7 @@ namespace Tests\Feature\Recruitment;
 use App\Enums\RecruitmentRequestType as Type;
 use App\Models\City;
 use App\Models\Contract;
+use App\Models\ContractType;
 use App\Models\Department;
 use App\Models\JobLevel;
 use App\Models\Position;
@@ -116,6 +117,22 @@ class RecruitmentRequestRulesTest extends TestCase
         $this->expectException(ValidationException::class);
 
         $this->draft($user, ['title_en' => 'Field Officer 2'] + $payload, Type::CreatePosition);
+    }
+
+    public function test_the_generic_volunteer_contract_cannot_be_selected_for_recruitment(): void
+    {
+        [$user, $payload] = $this->requester();
+        $generic = ContractType::query()->create([
+            'name_en' => 'Volunteer Contract',
+            'name_ar' => 'عقد تطوّع',
+        ]);
+
+        try {
+            $this->draft($user, ['contract_type_id' => $generic->id] + $payload);
+            $this->fail('The generic volunteer contract should not be accepted.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('data.contract_type_id', $exception->errors());
+        }
     }
 
     /**

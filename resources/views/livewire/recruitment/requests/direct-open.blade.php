@@ -121,7 +121,7 @@
                             </div>
                             <div>
                                 <x-forms.input-label for="when-{{ $stepKey }}" required>{{ __('recruitment.direct_open.confirmed_at') }}</x-forms.input-label>
-                                <input id="when-{{ $stepKey }}" type="datetime-local"
+                                <input id="when-{{ $stepKey }}" type="date"
                                     wire:model="documentation.confirmations.{{ $stepKey }}.confirmed_at"
                                     class="h-[37.6px] w-full rounded-control border-neutral-300">
                                 <p class="mt-1 text-sm text-red-600">@error('confirmations.'.$stepKey.'.confirmed_at'){{ $message }}@enderror</p>
