@@ -12,6 +12,7 @@ use App\Livewire\Recruitment\Applicants\ApplicationOffer;
 use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
 use App\Livewire\Recruitment\Offers\Form;
 use App\Livewire\Recruitment\Offers\OfferTable;
+use App\Livewire\Recruitment\Offers\Revise;
 use App\Livewire\Recruitment\Offers\Show;
 use App\Models\City;
 use App\Models\ContractType;
@@ -310,7 +311,7 @@ class RecruitmentJobOfferTest extends TestCase
         $this->actingAs($this->hr);
         Livewire::test(Show::class, ['offerId' => $draft->id])
             ->assertDontSee(route('recruitment.offers.revise', ['offerId' => $draft->id]));
-        Livewire::test(Form::class, ['offerId' => $draft->id, 'mode' => 'revise'])->assertNotFound();
+        Livewire::test(Revise::class, ['offerId' => $draft->id])->assertNotFound();
 
         $backToShortlist = $this->selected('Back To Shortlist');
         $second = $this->create($backToShortlist);
@@ -608,7 +609,7 @@ class RecruitmentJobOfferTest extends TestCase
             ->assertHasNoErrors();
         $this->assertSame(Status::Cancelled, $other->fresh()->status);
 
-        Livewire::test(Form::class, ['offerId' => $other->id, 'mode' => 'revise'])
+        Livewire::test(Revise::class, ['offerId' => $other->id])
             ->assertSet('salary', '1500.00')
             ->set('salary', '1650')
             ->call('save')
@@ -617,6 +618,30 @@ class RecruitmentJobOfferTest extends TestCase
             ->call('save')
             ->assertHasNoErrors();
         $this->assertSame([Status::Revised, '1650.00'], [$other->fresh()->status, $other->fresh()->currentVersion->salary_amount]);
+    }
+
+    /**
+     * scope: the real URLs HR uses — create, edit a draft, revise — open
+     * through the router, not only through Livewire::test(). Regression: the
+     * revise route passed its parameters to mount() in the wrong places.
+     */
+    public function test_hr_opens_the_create_edit_and_revise_pages_by_url(): void
+    {
+        $application = $this->selected();
+        $this->actingAs($this->hr);
+
+        $this->get(route('recruitment.offers.create', ['applicationId' => $application->id]))
+            ->assertOk()->assertSee(__('recruitment-applicant.offers.form_title.create'));
+
+        $draft = $this->create($application);
+        $this->get(route('recruitment.offers.edit', ['offerId' => $draft->id]))
+            ->assertOk()->assertSee(__('recruitment-applicant.offers.form_title.edit'));
+
+        $sent = $this->send($draft);
+        $this->get(route('recruitment.offers.revise', ['offerId' => $sent->id]))
+            ->assertOk()->assertSee(__('recruitment-applicant.offers.form_title.revise'))->assertSee('1500.00');
+        $this->get(route('recruitment.offers.edit', ['offerId' => $sent->id]))->assertNotFound();
+        $this->get(route('recruitment.offers.show', ['offerId' => $sent->id]))->assertOk();
     }
 
     // ------------------------------------------------------------------
