@@ -102,12 +102,15 @@ class RecruitmentJobOfferService
                     throw $this->error('offer', 'application_rejected');
                 }
 
-                if ($locked->status !== AppStatus::Selected) {
-                    throw $this->error('offer', 'not_selected');
-                }
-
+                // Before the status check: an application whose offer is out
+                // (offer_sent, offer_rejected…) is "not selected" too, but the
+                // useful answer is that it already has an offer to revise.
                 if (Offer::query()->where('application_id', $locked->getKey())->exists()) {
                     throw $this->error('offer', 'already_exists');
+                }
+
+                if ($locked->status !== AppStatus::Selected) {
+                    throw $this->error('offer', 'not_selected');
                 }
 
                 $vacancy = $locked->vacancy()->first() ?? $locked->campaign?->vacancy;
@@ -489,6 +492,10 @@ class RecruitmentJobOfferService
             $endDate = $this->parseDate($input['endDate']);
             if ($endDate === null || ($startDate !== null && ! $endDate->gt($startDate))) {
                 $errors['endDate'] = __('recruitment-applicant.offers.errors.end_date');
+            } elseif ($startDate !== null && $endDate->gt($startDate->copy()->addYear())) {
+                // Task 10: the contract this becomes is at most a year long
+                // (ContractForm), and an accepted offer cannot be changed.
+                $errors['endDate'] = __('recruitment-applicant.offers.errors.end_date_too_far');
             }
         }
 
@@ -508,6 +515,13 @@ class RecruitmentJobOfferService
         $employmentType = filled($input['employmentType'] ?? null) ? $int('employmentType') : null;
         if ($employmentType !== null && ! in_array($employmentType, [EmploymentType::FullTime, EmploymentType::PartTime, EmploymentType::Freelance], true)) {
             $errors['employmentType'] = __('recruitment-applicant.offers.errors.invalid');
+        } elseif ($employmentType !== null && ! isset($errors['contractTypeId'])) {
+            // Task 10: freelance for a service contract and only for one, as
+            // ContractForm::typeMatchesCategoryRule() requires of the contract.
+            $category = ContractType::query()->find($contractTypeId)?->category;
+            if ($category !== null && ($category === 'service') !== ($employmentType === EmploymentType::Freelance)) {
+                $errors['employmentType'] = __('recruitment-applicant.offers.errors.employment_type_mismatch');
+            }
         }
 
         $place = filled($input['place'] ?? null) ? $int('place') : null;

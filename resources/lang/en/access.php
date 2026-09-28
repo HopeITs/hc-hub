@@ -110,5 +110,6 @@ return [
         'correct-evaluations' => 'Correct or withdraw interview evaluations',
         'view-offers' => 'View job offers',
         'manage-offers' => 'Create and manage job offers',
+        'convert-hires' => 'Hire accepted candidates (create the employee and contract)',
     ],
 ];
