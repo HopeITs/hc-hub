@@ -43,10 +43,10 @@ class PublicRecruitmentLinkService
         // Without an explicit expiry the link lives exactly as long as the
         // campaign window, which is what HR means almost every time.
         $expiresAt = match (true) {
-            $expiresAt instanceof CarbonInterface => CarbonImmutable::instance($expiresAt),
-            filled($expiresAt) => CarbonImmutable::parse($expiresAt),
-            $campaign->ends_at !== null && $campaign->ends_at->isFuture() => CarbonImmutable::instance($campaign->ends_at),
-            default => CarbonImmutable::now()->addDays((int) config('recruitment.public_link_default_days', 30)),
+            $expiresAt instanceof CarbonInterface => CarbonImmutable::instance($expiresAt)->endOfDay(),
+            filled($expiresAt) => CarbonImmutable::parse($expiresAt)->endOfDay(),
+            $campaign->ends_at !== null && $campaign->ends_at->isFuture() => CarbonImmutable::instance($campaign->ends_at)->endOfDay(),
+            default => CarbonImmutable::now()->addDays((int) config('recruitment.public_link_default_days', 30))->endOfDay(),
         };
 
         if ($expiresAt->lessThanOrEqualTo(now())) {

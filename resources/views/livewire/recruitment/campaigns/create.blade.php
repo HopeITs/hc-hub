@@ -80,13 +80,13 @@
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
                 <div>
                     <x-forms.input-label for="startsAt">{{ __('recruitment-campaign.starts_at') }}</x-forms.input-label>
-                    <input id="startsAt" type="datetime-local" wire:model="startsAt"
+                    <input id="startsAt" type="date" wire:model="startsAt"
                         class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
                     <x-error-span>{{ $errors->first('starts_at') }}</x-error-span>
                 </div>
                 <div>
                     <x-forms.input-label for="endsAt">{{ __('recruitment-campaign.ends_at') }}</x-forms.input-label>
-                    <input id="endsAt" type="datetime-local" wire:model="endsAt"
+                    <input id="endsAt" type="date" wire:model="endsAt"
                         class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
                     <x-error-span>{{ $errors->first('ends_at') }}</x-error-span>
                 </div>

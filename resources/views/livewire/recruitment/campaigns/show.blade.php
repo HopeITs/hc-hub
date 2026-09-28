@@ -3,7 +3,7 @@
 
     $title = $campaign->vacancy?->position?->title ?? '—';
     $request = $campaign->vacancy?->createdFromRequest;
-    $fmt = fn ($date) => $date?->translatedFormat('j M Y, H:i');
+    $fmt = fn ($date) => $date?->translatedFormat('j M Y');
 
     // The first unfinished step is the one to look at; the rest wait for it.
     $steps = [
@@ -123,13 +123,13 @@
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <x-forms.input-label for="startsAt">{{ __('recruitment-campaign.starts_at') }}</x-forms.input-label>
-                                <input id="startsAt" type="datetime-local" wire:model="startsAt"
+                                <input id="startsAt" type="date" wire:model="startsAt"
                                     class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
                                 <x-error-span>{{ $errors->first('startsAt') }}</x-error-span>
                             </div>
                             <div>
                                 <x-forms.input-label for="endsAt">{{ __('recruitment-campaign.ends_at') }}</x-forms.input-label>
-                                <input id="endsAt" type="datetime-local" wire:model="endsAt"
+                                <input id="endsAt" type="date" wire:model="endsAt"
                                     class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
                                 <x-error-span>{{ $errors->first('endsAt') }}</x-error-span>
                             </div>

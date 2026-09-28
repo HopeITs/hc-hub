@@ -1,4 +1,4 @@
-@php $fmt = fn ($date) => $date?->translatedFormat('j M Y, H:i'); @endphp
+@php $fmt = fn ($date) => $date?->translatedFormat('j M Y'); @endphp
 
 <div class="space-y-4" data-public-link-manager>
     @if ($activeLink)
@@ -68,7 +68,7 @@
         <div x-data="{ custom: $wire.entangle('customExpiry') }" class="space-y-3">
             <div x-cloak x-show="custom" class="max-w-sm">
                 <x-forms.input-label for="public-link-expiry">{{ __('recruitment.public_link.expires_at') }}</x-forms.input-label>
-                <input id="public-link-expiry" type="datetime-local" wire:model="expiresAt"
+                <input id="public-link-expiry" type="date" wire:model="expiresAt"
                     class="mt-1 w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body focus:border-primary focus:ring-primary">
                 <x-error-span>{{ $errors->first('expiresAt') }}</x-error-span>
                 <button type="button" wire:click="useCampaignExpiry" class="mt-1 cursor-pointer text-small font-semibold text-primary underline-offset-4 hover:underline">

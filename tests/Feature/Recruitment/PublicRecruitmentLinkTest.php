@@ -470,6 +470,8 @@ class PublicRecruitmentLinkTest extends TestCase
             ->set('customExpiry', true)
             ->set('customExpiry', true)
             ->set('expiresAt', now()->addDays(5)->format('Y-m-d\TH:i'))
+            ->assertSee('id="public-link-expiry" type="date"', false)
+            ->assertDontSee('datetime-local', false)
             ->call('generate')
             ->assertSet('notice', __('recruitment.public_link.generated'))
             ->assertSet('generatedUrl', fn ($url) => str_contains($url, '/careers/'))

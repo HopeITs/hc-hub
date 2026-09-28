@@ -76,7 +76,7 @@ class Manager extends Component
         Gate::authorize('create', [PublicRecruitmentLink::class, $this->campaign]);
 
         if ($this->customExpiry) {
-            $this->validate(['expiresAt' => ['required', 'date', 'after:now']]);
+            $this->validate(['expiresAt' => ['required', 'date', 'after_or_equal:today']]);
         }
 
         try {
@@ -199,7 +199,7 @@ class Manager extends Component
     private function resetExpiry(): void
     {
         $expiry = $this->campaign->ends_at?->isFuture() ? $this->campaign->ends_at : now()->addDays(30);
-        $this->expiresAt = $expiry->format('Y-m-d\TH:i');
+        $this->expiresAt = $expiry->format('Y-m-d');
     }
 
     private function sessionKey(PublicRecruitmentLink $link): string

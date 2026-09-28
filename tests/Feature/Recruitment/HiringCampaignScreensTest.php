@@ -66,7 +66,10 @@ class HiringCampaignScreensTest extends TestCase
             ->test(Create::class)
             ->assertSee(__('recruitment-campaign.modes.internal'))
             ->assertSee(__('recruitment-campaign.modes.public_open'))
-            ->assertSee(__('recruitment-campaign.modes.invitation_only'));
+            ->assertSee(__('recruitment-campaign.modes.invitation_only'))
+            ->assertSee('id="startsAt" type="date"', false)
+            ->assertSee('id="endsAt" type="date"', false)
+            ->assertDontSee('datetime-local', false);
     }
 
     /** With a single seat on offer there is nothing to choose, so it is chosen. */

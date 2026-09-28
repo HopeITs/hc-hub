@@ -65,7 +65,7 @@ class Show extends Component
             $this->successToast((int) $campaign->status === Status::Open
                 ? __('recruitment-campaign.launched_open')
                 : __('recruitment-campaign.launched_scheduled', [
-                    'date' => $campaign->starts_at?->translatedFormat('j M Y, H:i'),
+                    'date' => $campaign->starts_at?->translatedFormat('j M Y'),
                 ]));
         });
     }
@@ -252,8 +252,8 @@ class Show extends Component
 
     private function fillDetails(HiringCampaign $campaign): void
     {
-        $this->startsAt = $campaign->starts_at?->format('Y-m-d\TH:i') ?? '';
-        $this->endsAt = $campaign->ends_at?->format('Y-m-d\TH:i') ?? '';
+        $this->startsAt = $campaign->starts_at?->format('Y-m-d') ?? '';
+        $this->endsAt = $campaign->ends_at?->format('Y-m-d') ?? '';
         $this->linkMode = $campaign->link_mode ?: HiringCampaign::PUBLIC_OPEN;
     }
 

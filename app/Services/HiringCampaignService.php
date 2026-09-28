@@ -463,7 +463,7 @@ class HiringCampaignService
             : ($current?->starts_at === null ? null : Carbon::parse($current->starts_at));
 
         $endsAt = array_key_exists('ends_at', $attributes)
-            ? $this->toDate($attributes['ends_at'])
+            ? $this->toDate($attributes['ends_at'], endOfDay: true)
             : ($current?->ends_at === null ? null : Carbon::parse($current->ends_at));
 
         if ($startsAt !== null && $endsAt !== null && $endsAt->lessThanOrEqualTo($startsAt)) {
@@ -508,9 +508,15 @@ class HiringCampaignService
         return $requested;
     }
 
-    private function toDate(mixed $value): ?Carbon
+    private function toDate(mixed $value, bool $endOfDay = false): ?Carbon
     {
-        return blank($value) ? null : Carbon::parse($value);
+        if (blank($value)) {
+            return null;
+        }
+
+        $date = Carbon::parse($value);
+
+        return $endOfDay ? $date->endOfDay() : $date->startOfDay();
     }
 
     /**
