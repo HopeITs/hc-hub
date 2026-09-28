@@ -301,6 +301,29 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->assertSame(0, RecruitmentApplication::query()->count());
     }
 
+    public function test_language_switch_after_a_rejected_submission_returns_to_the_public_page(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+        $payload = $this->validSubmission('not-an-email');
+
+        $response = $this->post(route('careers.submit', $result['token']), $payload);
+
+        $arabicPage = route('careers.show', ['token' => $result['token'], 'lang' => 'ar']);
+        $wrongPostUrl = route('careers.submit', ['token' => $result['token'], 'lang' => 'ar']);
+        $response->assertUnprocessable()
+            ->assertSee('href="'.$arabicPage.'"', false)
+            ->assertDontSee('href="'.$wrongPostUrl.'"', false);
+        $this->get($arabicPage)
+            ->assertOk()
+            ->assertSee('dir="rtl"', false);
+    }
+
     public function test_same_email_cannot_submit_twice_with_a_different_idempotency_key(): void
     {
         [$campaign, $hr] = $this->makePublishedCampaign();

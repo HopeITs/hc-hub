@@ -15,12 +15,16 @@
     $internal ??= null;
     $showForm = $internal === null || $internal['state'] === 'ready';
     $prefill = $internal['prefill'] ?? [];
+    $careerUrl = fn (string $language): string => route('careers.show', [
+        'token' => request()->route('token'),
+        'lang' => $language,
+    ]);
 @endphp
 
 <main dir="{{ $direction }}" class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
     <div class="mb-4 flex justify-end gap-2 text-small font-semibold">
-        <a href="{{ request()->url() }}?lang=en" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'en' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">EN</a>
-        <a href="{{ request()->url() }}?lang=ar" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'ar' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">AR</a>
+        <a href="{{ $careerUrl('en') }}" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'en' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">EN</a>
+        <a href="{{ $careerUrl('ar') }}" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'ar' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">AR</a>
     </div>
 
     <x-recruitment.public-brand-banner />
